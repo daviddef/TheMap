@@ -226,12 +226,14 @@ def main():
     # questions and a reader should be able to ask one at a time.
     feats = {}
     for name in ("cemeteries", "churches", "libraries"):
-        try:
-            feats[name] = json.load(open(f"data/{name}-wikidata.json"))
-        except FileNotFoundError:
-            continue
-        json.dump(feats[name], open(os.path.join(OUT, f"{name}-wikidata.json"), "w"),
-                  ensure_ascii=False, separators=(",", ":"))
+        for suffix in ("wikidata", "osm"):
+            try:
+                v = json.load(open(f"data/{name}-{suffix}.json"))
+            except FileNotFoundError:
+                continue
+            json.dump(v, open(os.path.join(OUT, f"{name}-{suffix}.json"), "w"),
+                      ensure_ascii=False, separators=(",", ":"))
+            feats[f"{name}-{suffix}"] = v
 
     # One file the PAGE TEMPLATES read at build time, holding every place in
     # full. It lands in src/, not public/, because it must never be served: the

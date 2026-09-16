@@ -67,3 +67,25 @@ def in_ring_latlon(lat, lon, ring):
     """Same test for the record regions, whose rings are written [lat, lon]
     because that is the order Leaflet wants and they are drawn by hand."""
     return in_ring(lat, lon, [[p[1], p[0]] for p in ring])
+
+
+def km_to(lat, lon, cc):
+    """Roughly how far a point is from the nearest edge of a country, in km.
+
+    This exists to tell two very different disagreements apart. When a source
+    says a place is in one country and the outline says another, it is either
+    the OUTLINE being coarse — El Paso sits half a kilometre from Mexico and a
+    110 m-rounded border puts it on the wrong side — or the SOURCE filing by a
+    polity that no longer exists, which is FamilySearch calling Posen German
+    when the ground has been Polish since 1945. One is noise. The other is the
+    single most useful thing this map has to say, and they must not be treated
+    alike."""
+    best = None
+    for iso, x0, y0, x1, y1, ring in _countries():
+        if iso != cc:
+            continue
+        for px, py in ring:
+            d = ((px - lon) * 0.71) ** 2 + (py - lat) ** 2   # crude, and plenty
+            if best is None or d < best:
+                best = d
+    return None if best is None else (best ** 0.5) * 111.0

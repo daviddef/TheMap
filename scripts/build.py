@@ -238,6 +238,52 @@ def main():
         gbytes += len(blob.encode())
         open(os.path.join(gz, key + ".json"), "w").write(blob)
 
+    # ---- surnames, sharded like the gazetteer -----------------------------
+    # Same trick and the same reason: a search corpus is fetched three letters
+    # at a time and never rides in the index that draws the map.
+    sn = os.path.join(OUT, "s")
+    shutil.rmtree(sn, ignore_errors=True)
+    os.makedirs(sn)
+    try:
+        surn = json.load(open("data/surnames.json"))
+    except FileNotFoundError:
+        surn = {"surnames": []}
+    sshards, sbytes = {}, 0
+    for r in surn["surnames"]:
+        keys = {r["q"]}
+        keys.update(fold(v["n"]) for v in r["variants"])
+        for form in keys:
+            k = "".join(c for c in form[:3] if c.isalnum())
+            if len(k) == 3:
+                sshards.setdefault(k, []).append(r)
+    for k, rows in sshards.items():
+        seen, uniq = set(), []
+        for r in rows:
+            if r["q"] not in seen:
+                seen.add(r["q"])
+                uniq.append(r)
+        blob = json.dumps(uniq, ensure_ascii=False, separators=(",", ":"))
+        sbytes += len(blob.encode())
+        open(os.path.join(sn, k + ".json"), "w").write(blob)
+
+    # The dataset as a thing you can take away, not only as something the map
+    # uses: one JSON and one CSV at a stable address, CC0, so another project
+    # can consume it without reading any of this code.
+    json.dump(surn, open(os.path.join(OUT, "surnames.json"), "w"),
+              ensure_ascii=False, separators=(",", ":"))
+    import csv
+    with open(os.path.join(OUT, "surnames.csv"), "w", newline="", encoding="utf-8") as fh:
+        w = csv.writer(fh)
+        w.writerow(["surname", "variant", "variant_source", "country", "country_source",
+                    "attested_by", "phonetic_skeleton"])
+        for r in surn["surnames"]:
+            ccs = r["countries"] or [{"cc": "", "how": "", "by": []}]
+            vars_ = r["variants"] or [{"n": "", "how": ""}]
+            for v in vars_:
+                for c in ccs:
+                    w.writerow([r["n"], v["n"], v["how"], c["cc"], c["how"],
+                                "; ".join(c.get("by", [])), r["skel"]])
+
     sz = lambda f: os.path.getsize(os.path.join(OUT, f))
     print(f"index.json      {sz('index.json')/1024:8.1f} KB  {len(index)} places")
     print(f"p/*.json        {nbytes/1024:8.1f} KB  {len(index)} files, "
@@ -248,6 +294,12 @@ def main():
           f"  build-time only, never served")
     if FS:
         print(f"collections     {len(FS)} FamilySearch collections attached")
+    if surn["surnames"]:
+        print(f"surnames.json   {sz('surnames.json')/1024:8.1f} KB  "
+              f"surnames.csv {sz('surnames.csv')/1024:.0f} KB — the shareable dataset")
+    if sshards:
+        print(f"s/*.json        {sbytes/1024:8.1f} KB  {len(sshards)} shards, "
+              f"{len(surn['surnames'])} surnames")
     if shards:
         sizes = sorted((len(json.dumps(v, ensure_ascii=False).encode()), k)
                        for k, v in shards.items())

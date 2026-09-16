@@ -26,7 +26,7 @@
    Everything else — the find box, the filter pills, that every view is a link
    — is the family Atlas's and is kept deliberately, because a reader who knows
    one of these maps should know all of them. */
-const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, base } = Astro.props;
+const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, base } = Astro.props;
 ---
 
 <div class="ra-top">
@@ -55,8 +55,8 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, base } = Astro.
 
 <div class="at-tools">
   <label class="at-find">
-    <span class="lab">Find a place — by any name it has ever had</span>
-    <input id="ra-q" type="search" placeholder="Gallignana · Fiume · Pola · Gračišće" autocomplete="off" />
+    <span class="lab">Find a place, or a surname — by any name it has ever had</span>
+    <input id="ra-q" type="search" placeholder="A place or a surname — Gallignana · Žubrinić · Lerena" autocomplete="off" />
   </label>
   <div class="atlas-key" id="ra-cats"></div>
 </div>
@@ -67,7 +67,7 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, base } = Astro.
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 
-<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, BASE: base }}>
+<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, BASE: base }}>
 window.addEventListener("load", async function () {
   var el = document.getElementById("ra-map");
   if (!el || typeof L === "undefined") return;
@@ -508,6 +508,83 @@ window.addEventListener("load", async function () {
     if (!shown) elsewhere(qbox.value.trim());
   }
 
+  /* SURNAMES. A place is not the only thing somebody arrives holding: very
+     often all they have is a name on a certificate and no idea which country
+     to start in. This answers that — the spellings the name also takes, the
+     countries it is attested in, and from there the collections and archives
+     that reach those countries.
+
+     «Attested in» means the name appears in a dataset held here. It never
+     means the name exists there and nowhere else, and the panel says so. */
+  var scache = {};
+  async function surnames(term) {
+    var f = fold(term);
+    var key = "";
+    for (var i = 0; i < f.length && key.length < 3; i++)
+      if (/[a-z0-9]/.test(f[i])) key += f[i];
+    if (key.length < 3) return [];
+    if (!(key in scache)) {
+      try { scache[key] = await (await fetch(SURN + key + ".json")).json(); }
+      catch (e) { scache[key] = []; }
+    }
+    var hit = [];
+    scache[key].forEach(function (r) {
+      var q = fold(r.n);
+      var m = q === f ? 0 : q.indexOf(f) === 0 ? 1 : null;
+      if (m === null) {
+        for (var i = 0; i < r.variants.length; i++) {
+          var fv = fold(r.variants[i].n);
+          if (fv === f) { m = 2; break; }
+          if (fv.indexOf(f) === 0 && m === null) m = 3;
+        }
+      }
+      if (m !== null) hit.push([m, r]);
+    });
+    hit.sort(function (a, b) {
+      return a[0] - b[0] || (b[1].countries.length - a[1].countries.length);
+    });
+    return hit.slice(0, 5).map(function (x) { return x[1]; });
+  }
+
+  var HOWLAB = {
+    curated: "a person linked these",
+    archive: "appears in a family archive",
+    sounds:  "only sounds alike"
+  };
+
+  function renderSurnames(list, term) {
+    var h = [];
+    list.forEach(function (r) {
+      h.push('<div class="ra-surn"><div class="lab">The name</div>');
+      h.push("<p><b>" + esc(r.n) + "</b></p>");
+
+      var cur = r.variants.filter(function (v) { return v.how !== "sounds"; });
+      var snd = r.variants.filter(function (v) { return v.how === "sounds"; });
+      if (cur.length)
+        h.push('<p class="ra-vars"><span class="ra-tag">also written</span> ' +
+               cur.map(function (v) { return "<em>" + esc(v.n) + "</em>"; }).join(" · ") + "</p>");
+      if (snd.length)
+        h.push('<p class="ra-vars ra-weak"><span class="ra-tag">only sounds alike</span> ' +
+               snd.slice(0, 8).map(function (v) { return esc(v.n); }).join(" · ") + "</p>");
+
+      if (r.countries.length) {
+        h.push('<p class="ra-filed">Attested in ' +
+          r.countries.map(function (c) {
+            return '<a href="' + BASE + "country/" + c.cc.toLowerCase() + '/">' +
+                   esc(CNAME[c.cc] || c.cc) + "</a>";
+          }).join(" · ") + ".</p>");
+        h.push('<p class="ra-note">That means the name appears in a dataset held here — ' +
+               "not that it exists in those countries and nowhere else. The " +
+               "blanks on this map are gaps in it, as always.</p>");
+      } else {
+        h.push('<p class="ra-note">No country attested yet. The name is known; where it ' +
+               "is found is not, which is a gap in this map rather than in the world.</p>");
+      }
+      h.push("</div>");
+    });
+    return h.join("");
+  }
+
   /* The worldwide gazetteer, fetched three letters at a time and kept.
      48,906 places and 212,101 names they have been written under — enough to
      answer "the name changed" for the whole earth, which is the one of the
@@ -559,11 +636,13 @@ window.addEventListener("load", async function () {
       return fold(p.name).indexOf(f) > -1;
     });
     var hits = await gazetteer(term);
+    var names = await surnames(term);
     /* If the typed word is an OLD name, say which one it matched and what the
        place is called now. "Pressburg → Bratislava" is the whole answer to the
        first of the three problems, and it works in any country on earth. */
     empty.hidden = true; panel.hidden = false;
     var h = ['<div class="at-h"><h3>' + esc(term) + "</h3></div>"];
+    if (names.length) h.push(renderSurnames(names, term));
     if (hits.length) {
       if (gmark) { map.removeLayer(gmark); gmark = null; }
       var top = hits[0];
@@ -595,7 +674,10 @@ window.addEventListener("load", async function () {
     /* Widen the provider list to the country the gazetteer just landed in —
        somebody who typed Pressburg wants Slovakia's sources, and has not said
        the word "Slovakia" at any point. */
-    if (hits.length) {
+    names.forEach(function (r) {
+      r.countries.forEach(function (c) { if (iso.indexOf(c.cc) < 0) iso.push(c.cc); });
+    });
+    if (hits.length || names.length) {
       hits.slice(0, 3).forEach(function (r) { if (iso.indexOf(r[3]) < 0) iso.push(r[3]); });
       cover = provs.providers.filter(function (p) {
         if (iso.some(function (k) { return (p.countries || []).indexOf(k) > -1; })) return true;
@@ -603,7 +685,7 @@ window.addEventListener("load", async function () {
         return fold(p.name).indexOf(f) > -1;
       });
     }
-    h.push('<p class="at-what"><b>No places here yet.</b> The shelf — the volume-by-volume ' +
+    h.push('<p class="at-what"><b>No places of that name here yet.</b> The shelf — the volume-by-volume ' +
            "layer — is deep for Croatia, Istria and Carnia and has not been walked anywhere " +
            "else. <b>That is a gap in this map, not a gap in the record.</b></p>");
     if (cover.length) {
@@ -754,6 +836,14 @@ window.addEventListener("load", async function () {
                      margin: 12px 0 0; }
   :global(.at-what) { font-size: 13.5px; line-height: 1.65; margin: 12px 0 0; }
   :global(.at-go) { margin: 14px 0 0; font-size: 13px; }
+  :global(.ra-surn) { margin-top: 14px; padding: 12px 14px; border-radius: 3px;
+                      background: var(--accent-wash); border-left: 2px solid #7A5CA8; }
+  :global(.ra-surn p) { font-size: 13px; line-height: 1.6; margin: 6px 0 0; }
+  :global(.ra-surn b) { font-family: var(--serif); font-size: 18px; }
+  :global(.ra-vars) { font-size: 12.5px !important; }
+  :global(.ra-vars.ra-weak) { color: var(--ink-3); }
+  :global(.ra-tag) { font-family: var(--sans); font-size: 10px; text-transform: uppercase;
+                     letter-spacing: .08em; color: var(--ink-3); margin-right: 6px; }
   :global(.ra-dead) { padding: 24px; font-family: var(--sans); font-size: 13px; color: var(--ink-3); }
 
   .at-tools { display: flex; flex-wrap: wrap; gap: 16px 26px; align-items: flex-end; margin-top: 16px; }

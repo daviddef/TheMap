@@ -172,6 +172,25 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
     <p class="cap" style="margin-top:30px">No volumes recorded here yet.</p>
   )}
 
+  {(place.parishes || []).length > 0 && (
+    <section style="margin-top:34px">
+      <h2>The nearest parishes</h2>
+      <p class="cap">A church is a parish and a parish is where a register is kept — the
+      register of a hamlet with no church of its own is kept at the church it walked to, so
+      the distance is the useful part. <b>Wikidata's coverage is very uneven</b>: 34,612
+      churches in England against 105 in central Istria, so a short list here means thin
+      data and not an empty landscape. Unchecked, and only inside a mapped record region.</p>
+      <ul class="vols">
+        {place.parishes.map((c) => (
+          <li>
+            <a href={`https://www.wikidata.org/wiki/${c.q}`} target="_blank" rel="noopener">{c.n} ↗</a>
+            <span class="y">{c.km} km</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
   {fs.length > 0 && (
     <section style="margin-top:38px">
       <h2>FamilySearch collections that reach here</h2>

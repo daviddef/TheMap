@@ -162,6 +162,7 @@ window.addEventListener("load", async function () {
     });
   }
   var REGION = {}; regions.regions.forEach(function (r) { REGION[r.id] = r; });
+  var REGIONS_N = regions.regions.length;
 
   /* ---- the markers -------------------------------------------------------
      Radius by how many volumes stand at a place, which is the one piece of
@@ -171,10 +172,22 @@ window.addEventListener("load", async function () {
   var shelfLayer = L.layerGroup();
   var markers = idx.places.map(function (p) {
     var n = p.c || 0;
-    var m = L.circleMarker([p.y, p.x], {
+    /* `b` means the colour is BORROWED: nobody walked this place, and what it
+       is coloured for is a collection catalogued under it or under the
+       district it sits in. 1,653 of the 4,106 dots are like this, and if they
+       looked identical to a walked parish the map would be claiming 1,653
+       walks that never happened. So they are hollow — the colour on the rim,
+       the middle left empty — which reads at a glance as «there is something
+       here, and nobody has been through it». */
+    var col = (ACC[p.a] || ["#7C8A91"])[0];
+    var m = L.circleMarker([p.y, p.x], p.b ? {
+      radius: Math.min(3.5 + Math.sqrt(p.b) * 0.5, 8),
+      color: col, weight: 1.4, opacity: .85,
+      fillColor: col, fillOpacity: .12
+    } : {
       radius: Math.min(3 + Math.sqrt(n) * 0.9, 13),
       color: "#fff", weight: 0.8, opacity: .9,
-      fillColor: (ACC[p.a] || ["#7C8A91"])[0], fillOpacity: .85
+      fillColor: col, fillOpacity: .85
     });
     m._p = p;
     m.bindTooltip(p.n, { sticky: true });
@@ -429,6 +442,7 @@ window.addEventListener("load", async function () {
       h.push('<p class="at-sub">A ' + esc(d.level) + ", not a town — the marker is at its " +
              "centre, not at a building.</p>");
     }
+    if (d.note) h.push('<p class="at-sub">' + esc(d.note) + "</p>");
 
     /* THE LINE THIS SITE EXISTS FOR. */
     var reg = d.region && REGION[d.region];
@@ -458,8 +472,10 @@ window.addEventListener("load", async function () {
       }
     } else {
       h.push('<div class="ra-juris ra-unmapped"><div class="lab">Whose ground this was</div>' +
-             "<p>Not yet mapped. The record regions cover Istria, the Kvarner, Carnia and " +
-             "Dalmatia so far — this place is outside them, and that is a gap in this map " +
+             "<p>Not yet mapped. " + REGIONS_N + " record regions carry an era " +
+             "table so far — Istria, the Kvarner, Carnia, Dalmatia, Galicia, Bukovina, " +
+             "Bohemia, Moravia, Hungary, Transylvania, East Prussia, Pomerania and the " +
+             "rest — and this place is outside all of them. That is a gap in this map " +
              "rather than a gap in the record.</p></div>");
     }
 
@@ -472,11 +488,11 @@ window.addEventListener("load", async function () {
     /* The collections that reach this ground. The panel shows the nearest few
        and the page shows them all — a marker is a glance, not a catalogue. */
     if (d.nfs) {
-      var near = (d.fs || []).filter(function (c) { return c.rank <= 1; });
+      var near = (d.fs || []).filter(function (c) { return c.rank <= 2; });
       h.push('<div class="at-sec"><div class="lab">FamilySearch reaches here</div>');
       h.push('<p class="at-sub">' + d.nfs + " collection" + (d.nfs === 1 ? "" : "s") +
-             " cover this ground" + (near.length ? ", " + near.length + " of them by name or "
-             + "within 75 km" : "") + ".</p>");
+             " cover this ground" + (near.length ? ", " + near.length +
+             " of them catalogued under this place or the district it sits in" : "") + ".</p>");
       h.push('<ul class="at-films">');
       (near.length ? near : (d.fs || [])).slice(0, 5).forEach(function (c) {
         h.push('<li><a href="' + esc(c.url) + '" target="_blank" rel="noopener">' +
@@ -491,8 +507,12 @@ window.addEventListener("load", async function () {
     if (year) cs = cs.filter(function (c) { return covers(c, year); });
     if (!cs.length) {
       h.push('<p class="at-sub" style="margin-top:16px">' + (year
-        ? "Nothing here covers " + year + "."
-        : "No volumes recorded here yet.") + "</p>");
+        ? "Nothing walked here covers " + year + "."
+        : (d.nfs ? "Nobody has walked this place volume by volume. The " + d.nfs +
+                   " collection" + (d.nfs === 1 ? "" : "s") + " above " +
+                   (d.nfs === 1 ? "is" : "are") + " what reaches it, and " +
+                   (d.nfs === 1 ? "it is" : "they are") + " where to start."
+                 : "No volumes recorded here yet.")) + "</p>");
       return h.join("");
     }
 
@@ -569,7 +589,10 @@ window.addEventListener("load", async function () {
   document.getElementById("ra-cats").innerHTML = RANK.map(function (a) {
     return '<button class="at-cat' + (off[a] ? "" : " on") + '" data-cat="' + a + '">' +
       '<i style="background:' + ACC[a][0] + '"></i>' + esc(ACC[a][1]) + "</button>";
-  }).join("");
+  }).join("") +
+    /* The one thing on this map that the colours alone cannot say. */
+    '<span class="at-cat at-hollow-key"><i></i>Hollow: nobody walked it — the ' +
+    'colour is borrowed from a collection catalogued under it</span>';
   document.getElementById("ra-cats").addEventListener("click", function (ev) {
     var b = ev.target.closest(".at-cat"); if (!b) return;
     var c = b.getAttribute("data-cat");
@@ -1063,6 +1086,10 @@ window.addEventListener("load", async function () {
               border-radius: 3px; background: var(--panel); padding: 18px 18px 24px; }
   .at-empty p { font-size: 13px; line-height: 1.6; color: var(--ink-2); margin: 8px 0 0; }
   .at-hint { color: var(--ink-3) !important; font-size: 12px !important; }
+  /* Matches the hollow marker: rim only, middle empty. */
+  :global(.at-hollow-key) { cursor: default; opacity: .75; }
+  :global(.at-hollow-key i) { background: transparent !important;
+    border: 1.5px solid var(--ink-3); }
 
   :global(.at-h) { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
   :global(.at-h h3) { font-family: var(--serif); font-size: 22px; margin: 0; line-height: 1.25; }

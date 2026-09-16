@@ -98,7 +98,8 @@ window.addEventListener("load", async function () {
     mixed:     ["#E8792B", "Partly free, partly paid"],
     paid:      ["#C0392B", "Images, behind a paywall"],
     catalogue: ["#8E6FA8", "A catalogue entry — not photographed"],
-    onsite:    ["#7C8A91", "On paper, in the building"]
+    onsite:    ["#7C8A91", "On paper, in the building"],
+    unsurveyed:["#B6B2A6", "Nobody has walked this one yet"]
   };
   var RANK = idx.rank || Object.keys(ACC);
 
@@ -638,7 +639,8 @@ window.addEventListener("load", async function () {
   /* Two home views, because the map is two maps. The shelf is Croatian ground
      and opens on it; the archives are worldwide and opening on Istria would
      hide forty of the forty-one. */
-  var HOME = on.archives ? [[-42, -125], [62, 175]] : [[42.2, 12.4], [46.9, 19.6]];
+  var HOME = (on.archives || on.jurisdiction) ? [[-42, -125], [62, 175]]
+                                             : [[42.2, 12.4], [46.9, 19.6]];
   var v = (Q.get("view") || "").split(",").map(Number);
   if (v.length === 3 && v.every(function (n) { return !isNaN(n); })) map.setView([v[0], v[1]], v[2]);
   else map.fitBounds(L.latLngBounds(HOME), { padding: [24, 24] });

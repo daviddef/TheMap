@@ -2,7 +2,7 @@
 import { u } from "../lib/url.js";
 import site from "../data/site.json";
 
-const { title, dek, eyebrow, bare, jsonld } = Astro.props;
+const { title, dek, eyebrow, bare, jsonld, og = "default" } = Astro.props;
 const nav = [
   ["/", "The map"],
   ["/start/", "Start here"],
@@ -35,7 +35,14 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
 <link rel="canonical" href={canon} />
 <meta property="og:url" content={canon} />
 <meta property="og:site_name" content={site.name} />
-<meta name="twitter:card" content="summary" />
+{/* A shared link with no og:image renders as a blank grey rectangle. One card
+    per page TYPE, not per page — 5,924 images would be a gigabyte of pictures
+    nobody looks at twice, and the type is what actually differs. */}
+<meta property="og:image" content={new URL(u(`/og/${og}.png`), Astro.site || "https://daviddef.github.io").href} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={title} />
+<meta name="twitter:card" content="summary_large_image" />
 {/* Structured data. 5,924 pages emitted none, which is the cheapest remaining
     thing a search engine could be told: that /place/gracisce/ is a PLACE with
     coordinates, that /archive/dapa/ is an ARCHIVE, and that the whole thing is

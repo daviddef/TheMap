@@ -172,16 +172,18 @@ window.addEventListener("load", async function () {
   var shelfLayer = L.layerGroup();
   var markers = idx.places.map(function (p) {
     var n = p.c || 0;
-    /* `b` means the colour is BORROWED: nobody walked this place, and what it
-       is coloured for is a collection catalogued under it or under the
-       district it sits in. 1,653 of the 4,106 dots are like this, and if they
-       looked identical to a walked parish the map would be claiming 1,653
-       walks that never happened. So they are hollow — the colour on the rim,
-       the middle left empty — which reads at a glance as «there is something
-       here, and nobody has been through it». */
+    /* HOLLOW MEANS NOBODY WALKED IT. 2,199 of the 4,106 dots carry no volume of
+       their own — mostly the administrative divisions, which are real ground,
+       correctly placed, and completely unread. 319 of them still have a colour,
+       borrowed (`b`) from a collection catalogued under the place or the
+       district it sits in; the rest are grey. Either way, drawing them like a
+       parish somebody went through would be the map claiming 2,199 walks that
+       never happened. So: the colour on the rim, the middle left empty, which
+       reads at a glance as «there is something here, and nobody has been
+       through it». */
     var col = (ACC[p.a] || ["#7C8A91"])[0];
-    var m = L.circleMarker([p.y, p.x], p.b ? {
-      radius: Math.min(3.5 + Math.sqrt(p.b) * 0.5, 8),
+    var m = L.circleMarker([p.y, p.x], !n ? {
+      radius: Math.min(3.5 + Math.sqrt(p.b || 1) * 0.5, 8),
       color: col, weight: 1.4, opacity: .85,
       fillColor: col, fillOpacity: .12
     } : {
@@ -591,8 +593,8 @@ window.addEventListener("load", async function () {
       '<i style="background:' + ACC[a][0] + '"></i>' + esc(ACC[a][1]) + "</button>";
   }).join("") +
     /* The one thing on this map that the colours alone cannot say. */
-    '<span class="at-cat at-hollow-key"><i></i>Hollow: nobody walked it — the ' +
-    'colour is borrowed from a collection catalogued under it</span>';
+    '<span class="at-cat at-hollow-key"><i></i>Hollow: no volumes recorded here — ' +
+    'any colour is borrowed from a collection catalogued under it</span>';
   document.getElementById("ra-cats").addEventListener("click", function (ev) {
     var b = ev.target.closest(".at-cat"); if (!b) return;
     var c = b.getAttribute("data-cat");
@@ -1013,11 +1015,13 @@ window.addEventListener("load", async function () {
   };
   bctl.addTo(map);
 
-  /* Two home views, because the map is two maps. The shelf is Croatian ground
-     and opens on it; the archives are worldwide and opening on Istria would
-     hide forty of the forty-one. */
-  var HOME = (on.archives || on.jurisdiction) ? [[-42, -125], [62, 175]]
-                                             : [[42.2, 12.4], [46.9, 19.6]];
+  /* ONE HOME VIEW NOW, AND IT IS THE WORLD. There used to be two, because the
+     shelf was Croatian ground and opening on the world would have shown a
+     stripe of green in the Adriatic and nothing else. That has stopped being
+     true: the shelf stands in 95 countries, and opening on Istria would now
+     hide 94 of them. A worldwide atlas that opens on one county is asking to
+     be judged as a county map. */
+  var HOME = [[-42, -125], [62, 175]];
   var v = (Q.get("view") || "").split(",").map(Number);
   if (v.length === 3 && v.every(function (n) { return !isNaN(n); })) map.setView([v[0], v[1]], v[2]);
   else map.fitBounds(L.latLngBounds(HOME), { padding: [24, 24] });

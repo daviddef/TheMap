@@ -26,11 +26,11 @@
    Everything else — the find box, the filter pills, that every view is a link
    — is the family Atlas's and is kept deliberately, because a reader who knows
    one of these maps should know all of them. */
-const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wikidataUrl, osmUrl, base } = Astro.props;
+const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wikidataUrl, osmUrl, featureBase, base } = Astro.props;
 ---
 
 <div class="ra-top">
-  <div class="lab">Four layers — switch any of them on or off</div>
+  <div class="lab">The layers — switch any of them on or off</div>
   <div class="ra-layers" id="ra-layers"></div>
 </div>
 
@@ -67,7 +67,7 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wi
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 
-<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, WDA: wikidataUrl, OSMA: osmUrl, BASE: base }}>
+<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, WDA: wikidataUrl, OSMA: osmUrl, FEAT: featureBase, BASE: base }}>
 window.addEventListener("load", async function () {
   var el = document.getElementById("ra-map");
   if (!el || typeof L === "undefined") return;
@@ -278,6 +278,50 @@ window.addEventListener("load", async function () {
     if (on.wikidata) wikiLayer.addTo(map);
   })();
 
+  /* THE GROUND ITSELF — cemeteries, churches, libraries, inside the record
+     regions only. Wikidata knows 295,702 cemeteries and 273,894 churches
+     worldwide; drawing them all would be a map of Wikidata rather than of
+     where records are, and would bury 2,130 walked places under half a
+     million dots. The regions are the ground this project has worked out. */
+  var FEATS = [
+    ["cemeteries", "Cemeteries", "#6C5CE0", 2.8],
+    ["churches",   "Churches and parishes", "#B07CD9", 2.6],
+    ["libraries",  "Libraries", "#2E86C1", 3.0]
+  ];
+  var featLayers = {};
+  FEATS.forEach(function (F) {
+    var key = F[0], layer = L.layerGroup();
+    featLayers[key] = layer;
+    (async function () {
+      var d;
+      try { d = await (await fetch(FEAT + key + "-wikidata.json")).json(); }
+      catch (e) { return; }
+      d.features.forEach(function (f) {
+        var m = L.circleMarker([f.y, f.x], {
+          radius: F[3], color: F[2], weight: 1, opacity: .7,
+          fillColor: F[2], fillOpacity: .35
+        });
+        m.bindTooltip(f.n, { sticky: true });
+        m.on("click", function () {
+          empty.hidden = true; panel.hidden = false;
+          panel.innerHTML =
+            '<div class="at-h"><h3>' + esc(f.n) + "</h3></div>" +
+            '<p class="at-also">' + esc(F[1]) + "</p>" +
+            '<div class="ra-juris ra-unmapped"><div class="lab">From Wikidata, unchecked' +
+            "</div><p>Wikidata records this here, inside the <b>" + esc(f.r) +
+            "</b> record region. Nobody on this project has been. It is drawn because the " +
+            "ground a family stood on is part of where its records are.</p></div>" +
+            '<p class="at-sub"><a href="https://www.wikidata.org/wiki/' + esc(f.q) +
+            '" target="_blank" rel="noopener">' + esc(f.q) + " on Wikidata &#8599;</a></p>";
+        });
+        m.addTo(layer);
+      });
+      var lab = document.querySelector('.ra-layer[data-l="' + key + '"] span');
+      if (lab) lab.textContent = d.features.length + " in the record regions · from Wikidata, unchecked";
+      if (on[key]) layer.addTo(map);
+    })();
+  });
+
   /* Which record regions name this archive as the holder of their records, and
      for how many eras. An archive that four regions cite for twenty eras is a
      different proposition from one nobody has connected to any ground yet. */
@@ -458,7 +502,10 @@ window.addEventListener("load", async function () {
     ["shelf", "The shelf", idx.places.length + " places · every volume that covers them", shelfLayer],
     ["archives", "The archives", archives.length + " institutions · where the paper actually is", archiveLayer],
     ["jurisdiction", "The jurisdiction", regions.regions.length + " record regions · whose archive this ground was", regionLayer],
-    ["wikidata", "Mapped by others", "loading · unchecked, and not all genealogical", wikiLayer]
+    ["wikidata", "Mapped by others", "loading · unchecked, and not all genealogical", wikiLayer],
+    ["cemeteries", "Cemeteries", "loading", featLayers.cemeteries],
+    ["churches", "Churches and parishes", "loading", featLayers.churches],
+    ["libraries", "Libraries", "loading", featLayers.libraries]
   ];
   var on = {};
   (Q.get("layers") !== null ? Q.get("layers").split(",").filter(Boolean) : ["shelf"])

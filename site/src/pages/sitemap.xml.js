@@ -12,7 +12,7 @@ export async function GET({ site }) {
 
   const pages = [
     ["", "1.0"], ["about/", "0.6"], ["providers/", "0.9"], ["jurisdictions/", "0.9"],
-    ["places/", "0.9"], ["countries/", "0.9"], ["surnames/", "0.9"], ["add/", "0.5"], ["privacy/", "0.3"],
+    ["places/", "0.9"], ["countries/", "0.9"], ["surnames/", "0.9"], ["coverage/", "0.8"], ["add/", "0.5"], ["privacy/", "0.3"],
     ...[...new Set([
       ...cols.collections.flatMap((c) => c.countries),
       ...full.places.map((p) => p.country).filter(Boolean),

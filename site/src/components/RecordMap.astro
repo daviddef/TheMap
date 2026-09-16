@@ -293,9 +293,17 @@ window.addEventListener("load", async function () {
     var key = F[0], layer = L.layerGroup();
     featLayers[key] = layer;
     (async function () {
-      var d;
-      try { d = await (await fetch(FEAT + key + "-wikidata.json")).json(); }
-      catch (e) { return; }
+      /* Two sources per layer, and neither is checked: Wikidata's CC0 set and
+         OpenStreetMap's ODbL one, which live in separate files because
+         share-alike must not leak into the rest but are the same claim to a
+         reader — somebody mapped this and nobody here has been. */
+      var d = { features: [] };
+      for (var si = 0; si < 2; si++) {
+        try {
+          var part = await (await fetch(FEAT + key + "-" + ["wikidata", "osm"][si] + ".json")).json();
+          d.features = d.features.concat(part.features || []);
+        } catch (e) {}
+      }
       d.features.forEach(function (f) {
         var m = L.circleMarker([f.y, f.x], {
           radius: F[3], color: F[2], weight: 1, opacity: .7,

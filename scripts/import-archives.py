@@ -232,7 +232,9 @@ def main():
             elif loose:
                 loosely.append(f"{label}: {rec['name']}  <- {rec.get('geo')}")
 
-            cc = ovr.get(pid, {}).get("country") or country_of(lat, lon)
+            cc = (PIN.get(pid, {}).get("country")
+                  or ovr.get(pid, {}).get("country")
+                  or country_of(lat, lon))
             reg = None
             for r in regions:
                 if in_ring_latlon(lat, lon, r["ring"]):
@@ -246,6 +248,8 @@ def main():
                 # exactly what happened to Arienzo, pinned and still 44 km out.
                 if pin:
                     p["lat"], p["lon"] = round(pin["lat"], 5), round(pin["lon"], 5)
+                    if pin.get("country"):
+                        p["country"] = pin["country"]
                 have = {n["n"] for n in p.get("names", [])} | {p["name"]}
                 for n in rec.get("names", []):
                     if n and n not in have:

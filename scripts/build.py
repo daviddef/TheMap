@@ -195,6 +195,15 @@ def main():
               ensure_ascii=False, separators=(",", ":"))
     json.dump(providers, open(os.path.join(OUT, "providers.json"), "w"),
               ensure_ascii=False, separators=(",", ":"))
+    # Wikidata's archives, served separately and drawn differently, because
+    # 4,929 unchecked rows beside 178 checked ones would make the checked ones
+    # mean nothing.
+    try:
+        wda = json.load(open("data/archives-wikidata.json"))
+    except FileNotFoundError:
+        wda = {"archives": []}
+    json.dump(wda, open(os.path.join(OUT, "archives-wikidata.json"), "w"),
+              ensure_ascii=False, separators=(",", ":"))
 
     # One file the PAGE TEMPLATES read at build time, holding every place in
     # full. It lands in src/, not public/, because it must never be served: the
@@ -326,6 +335,8 @@ def main():
           f"  build-time only, never served")
     if FS:
         print(f"collections     {len(FS)} FamilySearch collections attached")
+    if wda["archives"]:
+        print(f"wikidata-arch   {len(wda['archives'])} archives, unchecked, drawn apart")
     if surn["surnames"]:
         print(f"surnames.json   {sz('surnames.json')/1024:8.1f} KB  "
               f"surnames.csv {sz('surnames.csv')/1024:.0f} KB — the shareable dataset")

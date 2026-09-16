@@ -26,11 +26,11 @@
    Everything else — the find box, the filter pills, that every view is a link
    — is the family Atlas's and is kept deliberately, because a reader who knows
    one of these maps should know all of them. */
-const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, base } = Astro.props;
+const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wikidataUrl, base } = Astro.props;
 ---
 
 <div class="ra-top">
-  <div class="lab">Three layers — switch any of them on or off</div>
+  <div class="lab">Four layers — switch any of them on or off</div>
   <div class="ra-layers" id="ra-layers"></div>
 </div>
 
@@ -67,7 +67,7 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, ba
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 
-<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, BASE: base }}>
+<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, WDA: wikidataUrl, BASE: base }}>
 window.addEventListener("load", async function () {
   var el = document.getElementById("ra-map");
   if (!el || typeof L === "undefined") return;
@@ -209,6 +209,47 @@ window.addEventListener("load", async function () {
     m._p = p;
     return m;
   });
+
+  /* WIKIDATA'S ARCHIVES — everything it knows the location of, and nobody
+     here has opened one. Drawn as a small hollow ring rather than the filled
+     diamond a checked provider gets, because the difference between «we have
+     read this and it is free» and «Wikidata says there is an archive here» is
+     the whole editorial value of the other 178. */
+  var wikiLayer = L.layerGroup();
+  var wikiMarkers = [];
+  (async function () {
+    var wd;
+    try { wd = await (await fetch(WDA)).json(); } catch (e) { return; }
+    wd.archives.forEach(function (a) {
+      var m = L.circleMarker([a.y, a.x], {
+        radius: 3.4, color: "#8E6FA8", weight: 1.2, opacity: .75,
+        fillColor: "#8E6FA8", fillOpacity: .18
+      });
+      m.bindTooltip(a.n, { sticky: true });
+      m.on("click", function () {
+        empty.hidden = true; panel.hidden = false;
+        var h = ['<div class="at-h"><h3>' + esc(a.n) + "</h3></div>"];
+        h.push('<p class="at-also">' + esc(CNAME[a.cc] || a.cc || "") + "</p>");
+        h.push('<div class="ra-juris ra-unmapped"><div class="lab">From Wikidata, unchecked' +
+               "</div><p>Wikidata records an archive here. <b>Nobody on this project has " +
+               "opened it</b>, and it may hold nothing genealogical — corporate, film and " +
+               "museum archives are archives too. The " + provs.providers.length +
+               " institutions drawn as diamonds have been looked at; this has not.</p></div>");
+        if (a.sites && a.sites.length)
+          h.push('<p class="at-go"><a href="' + esc(a.sites[0]) +
+                 '" target="_blank" rel="noopener">' + esc(a.sites[0]) + " &#8599;</a></p>");
+        h.push('<p class="at-sub"><a href="https://www.wikidata.org/wiki/' + esc(a.q) +
+               '" target="_blank" rel="noopener">' + esc(a.q) + " on Wikidata &#8599;</a></p>");
+        panel.innerHTML = h.join("");
+      });
+      m.addTo(wikiLayer);
+      wikiMarkers.push(m);
+    });
+    var lab = document.querySelector('.ra-layer[data-l="wikidata"] span');
+    if (lab) lab.textContent = wd.archives.length +
+      " more on Wikidata · unchecked, and not all genealogical";
+    if (on.wikidata) wikiLayer.addTo(map);
+  })();
 
   /* Which record regions name this archive as the holder of their records, and
      for how many eras. An archive that four regions cite for twenty eras is a
@@ -389,7 +430,8 @@ window.addEventListener("load", async function () {
   var LAYERS = [
     ["shelf", "The shelf", idx.places.length + " places · every volume that covers them", shelfLayer],
     ["archives", "The archives", archives.length + " institutions · where the paper actually is", archiveLayer],
-    ["jurisdiction", "The jurisdiction", regions.regions.length + " record regions · whose archive this ground was", regionLayer]
+    ["jurisdiction", "The jurisdiction", regions.regions.length + " record regions · whose archive this ground was", regionLayer],
+    ["wikidata", "Wikidata's archives", "loading · unchecked, and not all genealogical", wikiLayer]
   ];
   var on = {};
   (Q.get("layers") !== null ? Q.get("layers").split(",").filter(Boolean) : ["shelf"])

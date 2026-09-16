@@ -212,6 +212,17 @@ def main():
         osm = {"archives": []}
     json.dump(osm, open(os.path.join(OUT, "archives-osm.json"), "w"),
               ensure_ascii=False, separators=(",", ":"))
+    # Region-scoped Wikidata features — cemeteries, churches, libraries. Each
+    # is its own file and its own toggle, because they answer different
+    # questions and a reader should be able to ask one at a time.
+    feats = {}
+    for name in ("cemeteries", "churches", "libraries"):
+        try:
+            feats[name] = json.load(open(f"data/{name}-wikidata.json"))
+        except FileNotFoundError:
+            continue
+        json.dump(feats[name], open(os.path.join(OUT, f"{name}-wikidata.json"), "w"),
+                  ensure_ascii=False, separators=(",", ":"))
 
     # One file the PAGE TEMPLATES read at build time, holding every place in
     # full. It lands in src/, not public/, because it must never be served: the
@@ -347,6 +358,8 @@ def main():
         print(f"wikidata-arch   {len(wda['archives'])} archives, unchecked, drawn apart")
     if osm["archives"]:
         print(f"osm-archives    {len(osm['archives'])} archives, ODbL, kept separate")
+    for name, v in feats.items():
+        print(f"{name:15} {len(v['features'])} in the record regions")
     if surn["surnames"]:
         print(f"surnames.json   {sz('surnames.json')/1024:8.1f} KB  "
               f"surnames.csv {sz('surnames.csv')/1024:.0f} KB — the shareable dataset")

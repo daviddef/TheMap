@@ -112,7 +112,7 @@ def census_key():
              "~/.config/record-atlas/census.key — never in this repository.")
 
 
-def census_rows():
+def census_rows(year="2010"):
     """All 162,253 surnames, a block of ranks at a time.
 
     The API takes a rank range, which is a far better paging handle than an
@@ -122,10 +122,10 @@ def census_rows():
     lo = 1
     while True:
         hi = lo + step - 1
-        url = ("https://api.census.gov/data/2010/surname?"
+        url = (f"https://api.census.gov/data/{year}/surname?"
                + urllib.parse.urlencode({"get": "NAME,COUNT,RANK",
                                          "RANK": f"{lo}:{hi}", "key": key}))
-        body = fetch(url, f"us-{lo}.json")
+        body = fetch(url, f"us{year}-{lo}.json")
         # Past the last rank the API answers with an empty body rather than an
         # empty array, which is not JSON and is not an error either.
         if not (body or "").strip():
@@ -175,6 +175,17 @@ SOURCES = {
                 "1 January 2025.",
         "xls": ("apellidos_frecuencia.xls",
                 "https://www.ine.es/daco/daco42/nombyapel/apellidos_frecuencia.xls"),
+    },
+    "us2000": {
+        "country": "US",
+        "name": "Frequently Occurring Surnames from the 2000 Census",
+        "url": "https://www.census.gov/topics/population/genealogy/data/2000_surnames.html",
+        "licence": "Public domain (work of the United States Government)",
+        "note": "The 2000 file, alongside the 2010 one. A decade apart matters more for "
+                "genealogy than it sounds: a surname borne by a hundred people in 2000 and "
+                "ninety-nine in 2010 drops out of the later list entirely, and those "
+                "vanishing names are exactly the ones a researcher is chasing.",
+        "rows": lambda: census_rows("2000"),
     },
     "us": {
         "country": "US",

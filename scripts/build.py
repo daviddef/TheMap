@@ -259,9 +259,14 @@ def main():
     for k, rows in sshards.items():
         seen, uniq = set(), []
         for r in rows:
-            if r["q"] not in seen:
-                seen.add(r["q"])
-                uniq.append(r)
+            if r["q"] in seen:
+                continue
+            seen.add(r["q"])
+            # `skel` and `q` are build-time working and the client folds names
+            # itself, so shipping them is 440,000 copies of something already
+            # known. The full record stays in surnames.json for anyone who
+            # wants it; this is a search corpus, not the dataset.
+            uniq.append({kk: vv for kk, vv in r.items() if kk not in ("skel", "q")})
         blob = json.dumps(uniq, ensure_ascii=False, separators=(",", ":"))
         sbytes += len(blob.encode())
         open(os.path.join(sn, k + ".json"), "w").write(blob)

@@ -597,7 +597,9 @@ window.addEventListener("load", async function () {
   function keep(p) {
     if (off[p.a]) return false;
     var t = fold(qbox.value.trim());
-    if (t && p.q.indexOf(t) < 0) return false;
+    /* `q` now holds only the forms that are NOT the place's own name, so the
+       name itself is folded here rather than shipped 2,128 times. */
+    if (t && fold(p.n).indexOf(t) < 0 && !(p.q && p.q.indexOf(t) > -1)) return false;
     if (year && p.s && (year < p.s[0] || year > p.s[1])) return false;
     return true;
   }

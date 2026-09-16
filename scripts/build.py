@@ -141,18 +141,27 @@ def main():
 
         hits = reach(p) if p.get("country") else []
 
+        # EVERY BYTE HERE IS FETCHED BY EVERY VISITOR, so the index carries
+        # only what the map cannot work out for itself.
+        #
+        #   `r` and `k` — region and country — were in every row and read by
+        #   nothing. 22 KB of dead weight on first paint.
+        #
+        #   `q` held every folded name form INCLUDING the place's own, which
+        #   the client can fold from `n` in a microsecond. It now carries only
+        #   the forms that are not derivable — the former names, which are the
+        #   whole reason it exists.
+        extra = sorted(f for f in q.split(" ") if f and f != fold(p["name"]))
         row = {"i": p["id"], "n": p["name"], "y": p["lat"], "x": p["lon"],
-               "c": len(cs), "q": q}
+               "c": len(cs)}
+        if extra:
+            row["q"] = " ".join(extra)
         if acc:
             row["a"] = acc
         if span:
             row["s"] = span
         if hits:
             row["f"] = len(hits)
-        if p.get("region"):
-            row["r"] = p["region"]
-        if p.get("country"):
-            row["k"] = p["country"]
         index.append(row)
 
         detail = dict(p)

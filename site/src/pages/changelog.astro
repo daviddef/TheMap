@@ -1,0 +1,41 @@
+---
+/* What this map learned and when — and what it got wrong, which is the same
+   list. Generated from the git history rather than kept by hand, so it records
+   what happened rather than what somebody remembered to write down. */
+import Base from "../layouts/Base.astro";
+import { u } from "../lib/url.js";
+import log from "../data/changelog.json";
+import site from "../data/site.json";
+
+const byDay = {};
+for (const c of log.commits) (byDay[c.date] = byDay[c.date] || []).push(c);
+const days = Object.entries(byDay).sort((a, b) => b[0].localeCompare(a[0]));
+---
+<Base
+  title="What changed"
+  eyebrow={`${log.commits.length} commits · ${days.length} days`}
+  dek="Generated from the git history, not kept by hand — so it records what happened rather than what somebody remembered to write down. Every entry that names a bug names one of mine.">
+
+  {days.map(([day, cs]) => (
+    <section style="margin-top:26px">
+      <h2>{day}</h2>
+      <ul class="log">
+        {cs.map((c) => (
+          <li>
+            <a href={`${site.repo}/commit/${c.sha}`}><b>{c.subject}</b></a>
+            {c.lead && <p>{c.lead}</p>}
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+</Base>
+
+<style>
+  h2 { font-family: var(--mono); font-size: 13px; color: var(--ink-3); margin: 0;
+       border-bottom: 1px solid var(--rule); padding-bottom: 5px; }
+  .log { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 14px; }
+  .log > li > a { font-family: var(--serif); font-size: 17px; text-decoration: none; }
+  .log p { font-family: var(--sans); font-size: 12.5px; line-height: 1.6;
+           color: var(--ink-2); margin: 4px 0 0; max-width: 84ch; }
+</style>

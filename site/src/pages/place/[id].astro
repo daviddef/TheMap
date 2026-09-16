@@ -58,10 +58,13 @@ const dek = older.length
     (span ? `covering ${span[0]}–${span[1]}, ` : "") + "and who holds them.";
 /* The FamilySearch collections that cover this ground, and how nearly. */
 const fs = place.fs || [];
+const adm = place.admin || {};
 const RANKS = [
-  [0, "Named for this place", "The collection is catalogued under this town by name — the closest thing to a direct hit."],
-  [1, "Within 75 kilometres", "Catalogued under a neighbouring place. For a parish register that is often the same book."],
-  [2, "This province or state", "Wider than the town, narrower than the country."],
+  [0, "Named for this place", "Catalogued under this place by name — the closest thing to a direct hit."],
+  [1, adm.adm2 ? `Catalogued under ${adm.adm2}` : "This county or province",
+      "The administrative unit this place sits in. For a parish register or a probate file that is usually the same archive."],
+  [2, adm.adm1 ? `Elsewhere in ${adm.adm1}` : "This state or region",
+      "Wider than the county, narrower than the country."],
   [3, "The whole country", "Worth searching, and worth knowing it is a national index rather than a local one."],
 ];
 const filedName = place.filedUnder
@@ -70,7 +73,9 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
 ---
 <Base
   title={place.name}
-  eyebrow={`${where} · ${cs.length} volume${cs.length === 1 ? "" : "s"}${span ? ` · ${span[0]}–${span[1]}` : ""}`}
+  eyebrow={[adm.adm2, adm.adm1, where,
+            `${cs.length} volume${cs.length === 1 ? "" : "s"}`,
+            span ? `${span[0]}–${span[1]}` : null].filter(Boolean).join(" · ")}
   dek={dek}>
 
   {place.filedUnder && (
@@ -176,7 +181,7 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
                   {c.from && <span class="y">{c.from}–{c.to}</span>}
                   <span class="who">{c.n.toLocaleString()} records</span>
                   {c.where && <span class="who">covers {c.where}</span>}
-                  {c.km != null && c.km > 0 && <span class="who">{c.km} km away</span>}
+                  {c.km != null && c.km > 0 && <span class="who">{c.km} km</span>}
                 </li>
               ))}
             </ul>

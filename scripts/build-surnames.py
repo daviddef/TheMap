@@ -177,7 +177,12 @@ def main():
     # only one whose geography is a fact about the country rather than about
     # one family's research.
     import glob as _g
+    # Files beginning with an underscore are notes about the directory rather
+    # than countries in it — _refused.json records the four that said no, and
+    # feeding it to this loop broke every build until it was noticed.
     for p in sorted(_g.glob("data/frequencies/*.json")):
+        if os.path.basename(p).startswith("_"):
+            continue
         fq = json.load(open(p))
         cc = fq["country"]
         # Intern the source name. Written out in full it is seventy bytes

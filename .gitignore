@@ -20,3 +20,14 @@ site/public/s/
 data/surnames.json
 site/public/surnames.json
 site/public/surnames.csv
+
+# Everything under site/public that the build writes. `site/public` is Astro's
+# static root, so generated artefacts land beside the one file that is real
+# (styles.css) and get swept up by `git add -A`. Adding an ignore rule does not
+# untrack what is already tracked — that mistake shipped a 64 MB surnames.json
+# twice, once into data/ and once into here.
+site/public/archives-wikidata.json
+site/public/archives-osm.json
+site/public/cemeteries-wikidata.json
+site/public/churches-wikidata.json
+site/public/libraries-wikidata.json

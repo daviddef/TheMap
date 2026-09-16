@@ -9,6 +9,10 @@ import regions from "../../public/regions.json";
 import provs from "../../public/providers.json";
 import idx from "../../public/index.json";
 import surn from "../../public/surnames.json";
+import cem from "../../public/cemeteries-wikidata.json";
+import cemOsm from "../../public/cemeteries-osm.json";
+import chu from "../../public/churches-wikidata.json";
+import setts from "../../data/region-settlements.json";
 
 const CN = idx.countries || {};
 const LOCAL = new Set(["CITY","TOWN","COMMUNE","HAMLET","VILLAGE","PARISH","MUNICIPALITY",
@@ -60,6 +64,26 @@ const mapped = list.filter((r) => r.regions > 0).length;
         rest are country-level: real, searchable, and no substitute for knowing the parish.</li>
     </ul>
   </div>
+
+  <section style="margin-top:30px">
+    <h2>The ground itself</h2>
+    <p class="cap">Inside the {regions.regions.length} record regions, mapped by other people
+    and drawn as such — nobody here has visited any of them. A church is a <b>parish</b>, and
+    a parish is the unit a register is kept in, which makes it the most useful of these.</p>
+    <table style="margin-top:12px">
+      <thead><tr><th>Layer</th><th class="m">Count</th><th>Source</th></tr></thead>
+      <tbody>
+        <tr><td>Churches and parishes</td><td class="m">{chu.features.length.toLocaleString()}</td><td>Wikidata, CC0</td></tr>
+        <tr><td>Cemeteries</td><td class="m">{cem.features.length.toLocaleString()}</td><td>Wikidata, CC0</td></tr>
+        <tr><td>Cemeteries, named</td><td class="m">{cemOsm.features.length.toLocaleString()}</td><td>OpenStreetMap, ODbL</td></tr>
+        <tr><td>Settlements, findable but not drawn</td><td class="m">{setts.settlements.length.toLocaleString()}</td><td>GeoNames, CC BY</td></tr>
+      </tbody>
+    </table>
+    <p class="cap" style="margin-top:10px">The settlements are searchable and deliberately
+    invisible: 8,352 grey dots meaning «nobody has looked here» would bury the
+    {T.places.toLocaleString()} that hold something. Type one and it still tells you which
+    region it is in, and the region knows whose archive held that ground.</p>
+  </section>
 
   <p class="cap" style="margin-top:20px"><b>Reach</b> is the share of a country's collections
   catalogued under a town, county or province rather than under the country as a whole. A low

@@ -80,17 +80,68 @@ def skeleton(name):
     return (head + rest)[:8]
 
 
+# ---- what a surname is allowed to look like -----------------------------
+# Registers publish artefacts as well as names. The Polish, Spanish and
+# American files between them carry «[BRIGIDO?]», «[S», «A/GADIR» and a
+# scattering of one-letter rows — a transcriber's doubt, a truncation and a
+# separator, none of them a surname. A shareable dataset that ships them is a
+# dataset somebody else has to clean.
+JUNK = re.compile(r"[\[\]?*/\\|<>{}()\d]|^.$|^\W")
+
+# 448,364 of 647,425 names arrived SHOUTING, because three of the six national
+# registers publish in capitals and three do not. The same family reads
+# «KOWALSKI» from Poland and «Kowalski» from France, which is one name printed
+# two ways and looks like two facts.
+#
+# So the display form is normalised — and carefully, because the casing of a
+# surname is not merely cosmetic. McDonald is not Mcdonald, d'Arcy is not
+# D'arcy, and van der Berg is not Van Der Berg. The source spelling is never
+# lost: every register keeps its own file under data/frequencies/.
+PARTICLE = {"de", "del", "della", "dei", "di", "da", "das", "dos", "du", "des",
+            "van", "von", "der", "den", "ter", "te", "op", "af", "al", "el",
+            "la", "le", "lo", "y", "e", "i", "zu", "bin", "ibn", "abu"}
+
+
+def display(name):
+    """The form to print. Leaves anything already mixed-case alone."""
+    name = " ".join((name or "").split())
+    if not name or not name.isupper():
+        return name                      # already cased by whoever wrote it
+    out = []
+    for i, word in enumerate(name.split(" ")):
+        low = word.lower()
+        if i and low in PARTICLE:
+            out.append(low)              # Ferrer i Guàrdia, van der Berg
+            continue
+        # Split on the marks that start a new capital inside a word, and keep
+        # them: O'Brien, Martin-Dupont, D'Angelo.
+        part = re.split(r"([-'\u2019])", low)
+        w = "".join(p if p in "-'\u2019" else p.capitalize() for p in part)
+        # Mc and Mac take a capital on the stem. «Mace» and «Macey» do not,
+        # which is why this needs the length test and not just the prefix.
+        m = re.match(r"^(Mc|Mac)(.{3,})$", w)
+        if m and low not in ("mackay", "mackie", "mackin", "macey", "macedo"):
+            w = m.group(1) + m.group(2).capitalize()
+        out.append(w)
+    return " ".join(out)
+
+
 def main():
     rec = {}          # folded name -> record
     SRC = {}          # short key -> the source it stands for
+    dropped = [0]
 
     def touch(name):
         k = fold(name)
-        if not k:
+        if not k or JUNK.search(name or ""):
+            dropped[0] += 1
             return None
         r = rec.get(k)
         if not r:
-            r = rec[k] = {"n": name, "variants": [], "countries": []}
+            r = rec[k] = {"n": display(name), "variants": [], "countries": []}
+        elif r["n"].isupper() and not display(name).isupper():
+            # A later, better-cased sighting of a name first seen shouting.
+            r["n"] = display(name)
         elif len(name) > len(r["n"]) and name[:1].isupper():
             pass      # keep the first spelling seen as canonical
         return r
@@ -288,6 +339,8 @@ def main():
     json.dump(doc, open("data/surnames.json", "w"), ensure_ascii=False,
               separators=(",", ":"))
     print(f"\n{len(out)} surnames -> data/surnames.json")
+    print(f"  {dropped[0]} rows refused as not-a-surname — brackets, slashes, "
+          f"digits or a single character")
     print("  " + " · ".join(f"{k}: {v}" for k, v in doc["counts"].items()))
 
 

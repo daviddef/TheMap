@@ -63,9 +63,11 @@ const RANKS = [
   [0, "Named for this place", "Catalogued under this place by name — the closest thing to a direct hit."],
   [1, adm.adm2 ? `Catalogued under ${adm.adm2}` : "This county or province",
       "The administrative unit this place sits in. For a parish register or a probate file that is usually the same archive."],
-  [2, adm.adm1 ? `Elsewhere in ${adm.adm1}` : "This state or region",
-      "Wider than the county, narrower than the country."],
-  [3, "The whole country", "Worth searching, and worth knowing it is a national index rather than a local one."],
+  [2, adm.adm1 ? `Catalogued under ${adm.adm1}` : "This state or region",
+      "Wider than the county, narrower than the country, and filed under the unit this place belongs to."],
+  [3, "Elsewhere in the same country",
+      "Narrower than the country but catalogued under some other district. Listed because a collection's title is not always where its records end, and never because it covers this ground."],
+  [4, "The whole country", "Worth searching, and worth knowing it is a national index rather than a local one."],
 ];
 const filedName = place.filedUnder
   ? ((idx.countries || {})[place.filedUnder] || place.filedUnder) : null;

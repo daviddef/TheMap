@@ -107,7 +107,17 @@ def main():
           0  it is catalogued under this place by name
           1  it is catalogued under this place's COUNTY or province
           2  under its state or region
-          3  under the country, and no narrower
+          3  somewhere else in the same country, narrower than the country
+          4  under the country, and no narrower
+
+        RANK 3 USED TO BE FOLDED INTO RANK 2 and that was a real error, caught
+        by Aargau. «Switzerland, Bern, Civil Registration» is narrower than
+        Switzerland, so it scored a 2 against Aargau — the same score a
+        collection actually covering Aargau's own canton would get — and Aargau
+        was then coloured for it. Bern is a different canton with a different
+        registry. Being narrower than a country is not the same as being about
+        this place, and conflating the two let the map borrow a colour from a
+        collection that says nothing about the ground under the dot.
 
         THE MIDDLE TWO USED TO BE DISTANCE, and distance is the wrong tool for
         an administrative question. «Within 75 km» is wrong in both directions:
@@ -126,7 +136,7 @@ def main():
         f1 = fold(adm.get("adm1") or "") or None
         f2 = fold(adm.get("adm2") or "") or None
         for c in fs_by_cc.get(place.get("country"), []):
-            rank, where, dist = 3, None, None
+            rank, where, dist = 4, None, None
             for p in c["places"]:
                 d = (km(place["lat"], place["lon"], p["lat"], p["lon"])
                      if p.get("lat") is not None else None)
@@ -139,10 +149,10 @@ def main():
                     rank, where, dist = 1, p["name"], d
                 elif f1 and rank > 2 and (f1 in chain or f1 == short):
                     rank, where, dist = 2, p["name"], d
-                elif p.get("type") and p["type"] != "COUNTRY" and rank > 2:
+                elif p.get("type") and p["type"] != "COUNTRY" and rank > 3:
                     # Narrower than a country but not on this place's own
-                    # chain: still worth listing, still not local.
-                    rank, where, dist = 2, p["name"], d
+                    # chain: still worth listing, still not this place.
+                    rank, where, dist = 3, p["name"], d
                 if dist is None:
                     dist = d
             out.append((rank, dist if dist is not None else 1e9,
@@ -179,6 +189,28 @@ def main():
         hits = reach(p) if p.get("country") else []
         near_ch = parishes(p) if p.get("region") else []
 
+        # A DIVISION IS NOT UNSURVEYED BECAUSE NOBODY WALKED IT. 1,978 of the
+        # places on this shelf are administrative divisions, and none of them
+        # carries a walked volume, because nobody has walked the world district
+        # by district and nobody is going to. Left alone they all came out the
+        # grey of «nobody has walked this one yet», which would have been the
+        # map's largest single untruth: 1,920 of them are named, by name or by
+        # the division above them, in a collection that exists and can be
+        # opened today.
+        #
+        # So when a place has walked nothing, the colour falls back to the best
+        # access among the collections that REACH it — but only from rank 2 up.
+        # Rank 3 is «somewhere else in this country» and rank 4 is «the country
+        # has a collection», and neither says anything about the ground under
+        # this dot; those stay grey, and grey is the honest answer for them.
+        by_reach = None
+        if not cs:
+            near = [c for rank, _, _, c, _, _ in hits if rank <= 2]  # on this place's own chain
+            if near:
+                acc = min((c.get("access") or "account" for c in near),
+                          key=lambda a: RANK.index(a) if a in RANK else 99)
+                by_reach = len(near)
+
         # EVERY BYTE HERE IS FETCHED BY EVERY VISITOR, so the index carries
         # only what the map cannot work out for itself.
         #
@@ -192,6 +224,10 @@ def main():
         extra = sorted(f for f in q.split(" ") if f and f != fold(p["name"]))
         row = {"i": p["id"], "n": p["name"], "y": p["lat"], "x": p["lon"],
                "c": len(cs)}
+        if by_reach:
+            # The colour is borrowed, and the map has to say so or it is
+            # claiming a walk that never happened.
+            row["b"] = by_reach
         if extra:
             row["q"] = " ".join(extra)
         if acc:
@@ -233,7 +269,9 @@ def main():
 
     idx = {"countries": cmap,
            "note": "One row per place. i=id n=name y=lat x=lon a=access c=collections "
-                   "q=folded name variants s=[first year, last year] r=region k=country. "
+                   "q=folded name variants s=[first year, last year] b=colour borrowed "
+                   "from this many collections that reach the place rather than "
+                   "from volumes walked in it. "
                    "Detail is fetched per place from p/<id>.json when a marker is clicked.",
            "access": providers["access"],
            "rank": RANK,

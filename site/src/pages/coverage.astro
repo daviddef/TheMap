@@ -19,14 +19,23 @@ const LOCAL = new Set(["CITY","TOWN","COMMUNE","HAMLET","VILLAGE","PARISH","MUNI
                        "BOROUGH","SUBURB","CIVIL_PARISH","TOWNSHIP","COUNTY","BR_COUNTY",
                        "PROVINCE","DEPARTMENT","DISTRICT","SHIRE","CANTON"]);
 const row = {};
-const get = (cc) => (row[cc] = row[cc] || { cc, cols: 0, local: 0, places: 0, vols: 0,
-                                            arch: 0, regions: 0, names: 0 });
+const get = (cc) => (row[cc] = row[cc] || { cc, cols: 0, local: 0, places: 0, walked: 0,
+                                            divs: 0, vols: 0, arch: 0, regions: 0, names: 0 });
 for (const c of cols.collections) {
   const isLocal = c.places.some((p) => LOCAL.has(p.type));
   for (const k of c.countries) { get(k).cols++; if (isLocal) get(k).local++; }
 }
+/* A DRAWN DOT IS NOT A WALKED PLACE, and this page of all pages must not blur
+   the two. 1,978 of the 4,106 dots are administrative divisions imported from
+   GeoNames — real ground, correctly placed, and nobody has been through a
+   single volume in any of them. Counting them under «Places walked» would have
+   turned the page that measures honesty into the page that inflates it. */
 for (const p of full.places) if (p.country) {
-  const r = get(p.country); r.places++; r.vols += (p.collections || []).length;
+  const r = get(p.country);
+  r.places++;
+  r.vols += (p.collections || []).length;
+  if (p.via === "geonames-admin") r.divs++;
+  else if ((p.collections || []).length) r.walked++;
 }
 for (const p of provs.providers) for (const k of p.countries) if (k !== "*") get(k).arch++;
 /* A REGION'S COUNTRIES COME FROM ITS GROUND, NOT FROM ITS PLACES. This counted
@@ -44,21 +53,30 @@ const list = Object.values(row).map((r) => ({
 
 const T = list.reduce((a, r) => ({
   cols: a.cols + r.cols, local: a.local + r.local, places: a.places + r.places,
-  vols: a.vols + r.vols }), { cols: 0, local: 0, places: 0, vols: 0 });
-const walked = list.filter((r) => r.places > 0).length;
+  walked: a.walked + r.walked, divs: a.divs + r.divs,
+  vols: a.vols + r.vols }), { cols: 0, local: 0, places: 0, walked: 0, divs: 0, vols: 0 });
+const walked = list.filter((r) => r.walked > 0).length;
+const drawn = list.filter((r) => r.places > 0).length;
 const mapped = list.filter((r) => r.regions > 0).length;
 ---
 <Base
   og="dataset"
   title="What this map does not know"
-  eyebrow={`${list.length} countries measured · ${T.places} places walked · ${Math.round(100*T.local/T.cols)}% of collections reach a named place`}
+  eyebrow={`${list.length} countries measured · ${T.walked} places walked, ${T.divs} districts drawn · ${Math.round(100*T.local/T.cols)}% of collections reach a named place`}
   dek="Every other page here says what is present. This one measures what is missing, country by country, because a map that only advertises its coverage is quietly claiming the rest.">
 
   <div class="one" style="border-left-color:#C0392B">
     <div class="lab">The three honest numbers</div>
     <ul class="big">
-      <li><b>{walked}</b> of {list.length} countries have a single place walked. The other
-        {list.length - walked} have collections and archives and no shelf at all.</li>
+      <li><b>{walked}</b> of {list.length} countries have a single place walked — that is,
+        somebody went through a catalogue and wrote down what stands there. {drawn} have a
+        dot of some kind; the difference, {drawn - walked} countries, is ground that is
+        correctly placed and completely unread.</li>
+      <li><b>{T.divs.toLocaleString()}</b> of the {T.places.toLocaleString()} dots are
+        administrative divisions rather than walked places. They are the units records are
+        filed in. They, and every other dot with no volume recorded on it, are drawn hollow
+        for exactly this reason: a district that a catalogue merely reaches must not look
+        like a parish somebody read.</li>
       <li><b>{mapped}</b> have a record region — which empire held the ground, and therefore
         whose archive holds the paper. That is the thing this map is for and it covers
         {Math.round(100*mapped/list.length)}% of the countries it names.</li>
@@ -82,8 +100,8 @@ const mapped = list.filter((r) => r.regions > 0).length;
       </tbody>
     </table>
     <p class="cap" style="margin-top:10px">The settlements are searchable and deliberately
-    invisible: 8,352 grey dots meaning «nobody has looked here» would bury the
-    {T.places.toLocaleString()} that hold something. Type one and it still tells you which
+    invisible: tens of thousands of grey dots meaning «nobody has looked here» would bury the
+    {T.walked.toLocaleString()} that hold something. Type one and it still tells you which
     region it is in, and the region knows whose archive held that ground.</p>
   </section>
 
@@ -94,7 +112,7 @@ const mapped = list.filter((r) => r.regions > 0).length;
   <table style="margin-top:14px">
     <thead><tr>
       <th>Country</th><th class="m">Collections</th><th class="m">Reach</th>
-      <th class="m">Places</th><th class="m">Volumes</th><th class="m">Archives</th>
+      <th class="m">Walked</th><th class="m">Districts</th><th class="m">Volumes</th><th class="m">Archives</th>
       <th class="m">Regions</th><th class="m">Surnames</th>
     </tr></thead>
     <tbody>
@@ -103,7 +121,8 @@ const mapped = list.filter((r) => r.regions > 0).length;
           <td><a href={u(`/country/${r.cc.toLowerCase()}/`)}>{r.name}</a></td>
           <td class="m">{r.cols || "—"}</td>
           <td class="m">{r.cols ? `${r.pct}%` : "—"}</td>
-          <td class={"m" + (r.places ? "" : " nil")}>{r.places || "—"}</td>
+          <td class={"m" + (r.walked ? "" : " nil")}>{r.walked || "—"}</td>
+          <td class={"m" + (r.divs ? "" : " nil")}>{r.divs || "—"}</td>
           <td class={"m" + (r.vols ? "" : " nil")}>{r.vols || "—"}</td>
           <td class="m">{r.arch || "—"}</td>
           <td class={"m" + (r.regions ? " yes" : " nil")}>{r.regions || "—"}</td>
@@ -115,7 +134,7 @@ const mapped = list.filter((r) => r.regions > 0).length;
 
   <div class="one" style="margin-top:26px;border-left-color:var(--rule-strong)">
     <div class="lab">Why this page exists</div>
-    <p class="cap">Croatia has {list.find(r=>r.cc==="HR")?.places ?? 0} places and
+    <p class="cap">Croatia has {list.find(r=>r.cc==="HR")?.walked ?? 0} walked places and
     {" "}{list.find(r=>r.cc==="HR")?.vols ?? 0} volumes because somebody walked a catalogue
     parish by parish over months. No other ground has had that done, and no amount of
     harvesting collection lists substitutes for it — breadth at country level is not depth at

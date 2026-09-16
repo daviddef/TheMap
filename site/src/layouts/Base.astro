@@ -1,6 +1,9 @@
 ---
 import { u } from "../lib/url.js";
 import site from "../data/site.json";
+/* Counted, not typed. This line is on all 6,000 pages and it is a licence
+   attribution — the one kind of number that must not quietly go stale. */
+import osm from "../../public/archives-osm.json";
 
 const { title, dek, eyebrow, bare, jsonld, og = "default" } = Astro.props;
 const nav = [
@@ -98,7 +101,7 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
     </p>
     <p class="foot-note foot-thin">
       <a href={u("/about/")}>About</a> · <a href={u("/add/")}>Add or correct a source</a> ·
-      <a href={u("/privacy/")}>Privacy</a> · Maps and 726 archives &copy; OpenStreetMap
+      <a href={u("/privacy/")}>Privacy</a> · Maps and {osm.archives.length} archives &copy; OpenStreetMap
       contributors, <a href="https://opendatacommons.org/licenses/odbl/">ODbL</a> ·
       Country outlines from Natural Earth, public domain · Archives and surnames from
       Wikidata, CC0

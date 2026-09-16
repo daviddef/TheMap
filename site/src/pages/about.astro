@@ -2,8 +2,22 @@
 import Base from "../layouts/Base.astro";
 import { u } from "../lib/url.js";
 import idx from "../../public/index.json";
-const places = idx.places.length;
-const volumes = idx.places.reduce((a, p) => a + (p.c || 0), 0);
+import full from "../data/places-full.json";
+import regions from "../../public/regions.json";
+/* EVERY NUMBER ON THIS PAGE IS COUNTED, not typed. The page says what the map
+   does not know, and a hand-written figure on it goes stale the first time a
+   harvest runs — which is exactly the failure this page exists to catch. */
+const dots = idx.places.length;
+const hr = full.places.filter((p) => p.country === "HR");
+const places = hr.length;
+const volumes = hr.reduce((a, p) => a + (p.collections || []).length, 0);
+const walked = full.places.filter((p) => p.via !== "geonames-admin"
+                                      && (p.collections || []).length).length;
+const countries = new Set(full.places.map((p) => p.country).filter(Boolean)).size;
+const walkedCC = new Set(full.places.filter((p) => p.via !== "geonames-admin"
+                                      && (p.collections || []).length)
+                                    .map((p) => p.country)).size;
+const regionList = regions.regions.map((r) => r.label).join(", ");
 ---
 <Base
   title="About Record Atlas"
@@ -43,22 +57,24 @@ const volumes = idx.places.reduce((a, p) => a + (p.c || 0), 0);
     record books are, where a named person can be put, and where the family is buried. Two of
     those are family facts and cannot generalise. The first one can, and this is it, taken out
     and pointed at the world.</p>
-    <p>The Croatian depth here — {places} places and {volumes} volumes — is that archive's work,
+    <p>The Croatian depth here — {places} places and {volumes.toLocaleString()} volumes, of
+    {dots.toLocaleString()} dots in all — is that archive's work,
     imported once as a snapshot. Everything family-specific was dropped on the way in, including
     the thing its map is coloured by: how far one researcher had got. That is a true and useful
     fact if you are that researcher. To a stranger it means nothing, so the colour here answers
     a stranger's question instead.</p>
 
     <h3>What it does not know</h3>
-    <p>It is early and it says so. The shelf is deep for Croatia, Istria and Carnia, thin
-    across southern Italy, the Cape, Queensland, the Río de la Plata and Prussian Poland, and
-    absent everywhere else. A place outside a mapped region <b>says so in its own panel</b>
-    rather than guessing.</p>
+    <p>It is early and it says so. There are {dots.toLocaleString()} dots on this map standing
+    in {countries} countries, and only {walked.toLocaleString()} of them, across {walkedCC}
+    countries, are places somebody has actually walked volume by volume. The rest are
+    administrative districts — the units records are filed in, correctly placed and completely
+    unread — and they are drawn hollow so that the difference cannot be mistaken. A place
+    outside a mapped region <b>says so in its own panel</b> rather than guessing.</p>
     <p><b>The regions were chosen by where research is actually being done</b>, not by what
     would look impressive on a map. Each one was written because somebody was stuck on that
-    ground and needed to know whose archive to write to — which is why the list runs Campania,
-    eastern Sicily, Calabria, Prussian Posen, the eastern Cape, England, Queensland and Santa
-    Fe rather than the tidy sweep of Europe you might expect.</p>
+    ground and needed to know whose archive to write to — which is why the list runs
+    {regionList} rather than the tidy sweep of Europe you might expect.</p>
     <p><b>A grey dot means nobody has surveyed it. It does not mean nothing is there.</b> Keeping
     those two apart is worth more than coverage, because a map that quietly implies completeness
     sends people home when they should keep looking.</p>

@@ -1,0 +1,543 @@
+---
+/* The map. Three layers, a year, and a panel that fetches.
+
+   Descended from the Atlas in the family archives, and different from it in
+   three ways that matter.
+
+   ONE — THE COLOUR ANSWERS A STRANGER'S QUESTION. The archive it came from
+   coloured a parish by how far one researcher had got with it, which is a true
+   and useful thing to know if you are that researcher and meaningless if you
+   are not. Here the colour says what you can actually OPEN: free images,
+   images behind a login, an index, a paywall, a catalogue card, or paper in a
+   building. A place takes the colour of the MOST OPEN thing it has, because
+   the question is "can I see anything tonight", and the panel tells the rest.
+
+   TWO — THE YEAR IS A FILTER, NOT A DECORATION. Set it to 1863 and the map
+   does not merely shade the borders of 1863: it drops every place that cannot
+   answer for that year, and every panel gains the line that is the whole
+   reason this site exists — which empire's filing system this ground fell
+   under, and therefore whose archive to write to.
+
+   THREE — THE PANEL FETCHES. The index carries only what a marker needs to be
+   drawn and found. Everything else arrives per place, on click, from
+   p/<id>.json. 1,239 places is 145 KB rather than 2.5 MB, and the number that
+   grows with the world is the one that compresses.
+
+   Everything else — the find box, the filter pills, that every view is a link
+   — is the family Atlas's and is kept deliberately, because a reader who knows
+   one of these maps should know all of them. */
+const { indexUrl, detailBase, regionsUrl, providersUrl } = Astro.props;
+---
+
+<div class="ra-top">
+  <div class="lab">Three layers — switch any of them on or off</div>
+  <div class="ra-layers" id="ra-layers"></div>
+</div>
+
+<div class="ra-yearbar">
+  <label class="ra-ylab"><input type="checkbox" id="ra-yon" /> <span>Search a year</span></label>
+  <input type="range" id="ra-year" min="1500" max="2026" value="1863" step="1" disabled />
+  <output id="ra-yout" class="mono">any year</output>
+  <p class="ra-yhint" id="ra-yhint">Turn this on and the map keeps only the places that can answer for that year — and every panel says whose archive that year belonged to.</p>
+</div>
+
+<div class="at-wrap">
+  <div class="at-map" id="ra-map"></div>
+  <aside class="at-panel">
+    <div class="at-empty" id="ra-empty">
+      <div class="lab">Pick a place</div>
+      <p>Click any marker. Bigger markers hold more record volumes.</p>
+      <p class="at-hint" id="ra-hint"></p>
+    </div>
+    <div class="at-body" id="ra-body" hidden></div>
+  </aside>
+</div>
+
+<div class="at-tools">
+  <label class="at-find">
+    <span class="lab">Find a place — by any name it has ever had</span>
+    <input id="ra-q" type="search" placeholder="Gallignana · Fiume · Pola · Gračišće" autocomplete="off" />
+  </label>
+  <div class="atlas-key" id="ra-cats"></div>
+</div>
+<p class="cap" id="ra-count"></p>
+<p class="cap"><button class="ra-copy" id="ra-copy" type="button">Copy link to this view</button>
+  <span class="ra-copied" id="ra-copied" hidden>copied</span></p>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
+
+<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl }}>
+window.addEventListener("load", async function () {
+  var el = document.getElementById("ra-map");
+  if (!el || typeof L === "undefined") return;
+
+  var idx, regions, provs;
+  try {
+    var r = await Promise.all([fetch(INDEX), fetch(REGIONS), fetch(PROVIDERS)]);
+    idx = await r[0].json(); regions = await r[1].json(); provs = await r[2].json();
+  } catch (e) { el.innerHTML = '<p class="ra-dead">The map data could not be loaded.</p>'; return; }
+
+  var PROV = {}; provs.providers.forEach(function (p) { PROV[p.id] = p; });
+  var esc = function (x) { return String(x == null ? "" : x)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); };
+
+  /* ---- access, which is what the colour means ---------------------------
+     Read off the stylesheet so the two themes stay in one place. */
+  var css = getComputedStyle(document.documentElement);
+  var ACC = {
+    free:      ["#1E8449", "Images, free, no account"],
+    account:   ["#6FA82E", "Images, free, account needed"],
+    index:     ["#EFC03B", "An index only — no images"],
+    mixed:     ["#E8792B", "Partly free, partly paid"],
+    paid:      ["#C0392B", "Images, behind a paywall"],
+    catalogue: ["#8E6FA8", "A catalogue entry — not photographed"],
+    onsite:    ["#7C8A91", "On paper, in the building"]
+  };
+  var RANK = idx.rank || Object.keys(ACC);
+
+  /* ---- URL as state ------------------------------------------------------
+     Every view of this map is a link: the layers, the basemap, the year, what
+     is typed in the find box, which filters are off, and where the map is
+     looking. A view can be sent to somebody rather than only remembered. */
+  var Q; try { Q = new URLSearchParams(location.search); } catch (e) { Q = new URLSearchParams(); }
+  var writing = false;
+  function push() {
+    if (writing) return;
+    writing = true;
+    requestAnimationFrame(function () {
+      writing = false;
+      var s = Q.toString();
+      history.replaceState(null, "", location.pathname + (s ? "?" + s : "") + location.hash);
+    });
+  }
+  function setQ(k, v) { if (v === "" || v == null) Q.delete(k); else Q.set(k, v); push(); }
+
+  var map = L.map(el, { scrollWheelZoom: true, worldCopyJump: true });
+  var BASES = {
+    map: L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+      { attribution: "&copy; OpenStreetMap contributors", maxZoom: 18 }),
+    terrain: L.tileLayer("https://tile.opentopomap.org/{z}/{x}/{y}.png",
+      { attribution: "&copy; OpenStreetMap contributors, SRTM · OpenTopoMap (CC-BY-SA)", maxZoom: 17 }),
+    satellite: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      { attribution: "Esri, Maxar, Earthstar Geographics", maxZoom: 18 })
+  };
+  var baseNow = Q.get("base") && BASES[Q.get("base")] ? Q.get("base") : "map";
+  BASES[baseNow].addTo(map);
+
+  /* ---- the jurisdiction layer -------------------------------------------
+     Regions are shaded by whichever regime held them in the chosen year. With
+     no year chosen there is nothing honest to shade, so the layer draws its
+     outlines only and says so. */
+  var regionLayer = L.layerGroup();
+  var regionShapes = regions.regions.map(function (reg) {
+    var poly = L.polygon(reg.ring, { color: "#7C8A91", weight: 1.2, opacity: .65,
+                                     fillColor: "#7C8A91", fillOpacity: .07 });
+    poly.bindTooltip(reg.label, { sticky: true });
+    poly.addTo(regionLayer);
+    return { reg: reg, poly: poly };
+  });
+  function eraAt(reg, y) {
+    for (var i = 0; i < reg.eras.length; i++) {
+      var e = reg.eras[i];
+      if (y >= e.from && y <= e.to) return e;
+    }
+    return null;
+  }
+  function paintRegions() {
+    regionShapes.forEach(function (rs) {
+      var e = year && eraAt(rs.reg, year);
+      var c = e ? (css.getPropertyValue(regions.regimes[e.regime].var).trim() || "#7C8A91") : "#7C8A91";
+      rs.poly.setStyle({ color: c, fillColor: c, fillOpacity: e ? .20 : .07, weight: e ? 1.8 : 1.2 });
+      rs.poly.setTooltipContent(e
+        ? "<b>" + esc(rs.reg.label) + "</b><br>" + esc(e.polity) + " in " + year
+        : esc(rs.reg.label));
+    });
+  }
+  var REGION = {}; regions.regions.forEach(function (r) { REGION[r.id] = r; });
+
+  /* ---- the markers -------------------------------------------------------
+     Radius by how many volumes stand at a place, which is the one piece of
+     editorial here and worth saying out loud: weight on this map is not
+     importance. A parish with ninety volumes nobody has read and a parish with
+     two are both on it, and the big one is not the better lead. */
+  var shelfLayer = L.layerGroup();
+  var markers = idx.places.map(function (p) {
+    var n = p.c || 0;
+    var m = L.circleMarker([p.y, p.x], {
+      radius: Math.min(3 + Math.sqrt(n) * 0.9, 13),
+      color: "#fff", weight: 0.8, opacity: .9,
+      fillColor: (ACC[p.a] || ["#7C8A91"])[0], fillOpacity: .85
+    });
+    m._p = p;
+    m.bindTooltip(p.n, { sticky: true });
+    m.on("click", function () { open(p); });
+    return m;
+  });
+
+  /* ---- the panel, fetched per place --------------------------------------
+     The index cannot carry this and should not try. */
+  var panel = document.getElementById("ra-body"), empty = document.getElementById("ra-empty");
+  var cache = {};
+  async function open(p) {
+    empty.hidden = true; panel.hidden = false;
+    panel.innerHTML = '<p class="at-sub">Fetching ' + esc(p.n) + "…</p>";
+    var d = cache[p.i];
+    if (!d) {
+      try { d = cache[p.i] = await (await fetch(DETAIL + p.i + ".json")).json(); }
+      catch (e) { panel.innerHTML = '<p class="at-sub">Could not load this place.</p>'; return; }
+    }
+    setQ("at", p.i);
+    panel.innerHTML = render(d);
+  }
+
+  function render(d) {
+    var h = [];
+    h.push('<div class="at-h"><h3>' + esc(d.name) + "</h3>");
+    if (d.collections.length)
+      h.push('<span class="at-n">' + d.collections.length + " volume" +
+             (d.collections.length === 1 ? "" : "s") + "</span>");
+    h.push("</div>");
+
+    var alsoNames = (d.names || []).map(function (n) { return n.n; });
+    if (alsoNames.length)
+      h.push('<p class="at-also">also written ' + alsoNames.map(function (x) {
+        return "<em>" + esc(x) + "</em>"; }).join(" · ") + "</p>");
+
+    /* THE LINE THIS SITE EXISTS FOR. */
+    var reg = d.region && REGION[d.region];
+    if (reg) {
+      if (year) {
+        var e = eraAt(reg, year);
+        if (e) {
+          h.push('<div class="ra-juris"><div class="lab">In ' + year + ', this was</div>');
+          h.push("<p><b>" + esc(e.polity) + "</b></p>");
+          if (e.filedUnder.length) {
+            h.push('<p class="ra-filed">Records of this period are filed under ' +
+              e.filedUnder.map(function (f) {
+                var pv = PROV[f];
+                return pv ? '<a href="' + esc(pv.url) + '" target="_blank" rel="noopener">' +
+                            esc(pv.name) + "</a>" : esc(f);
+              }).join(" · ") + ".</p>");
+          } else {
+            h.push('<p class="ra-filed">No registers survive for this period anywhere.</p>');
+          }
+          if (e.note) h.push('<p class="ra-note">' + esc(e.note) + "</p>");
+          h.push("</div>");
+        }
+      } else {
+        h.push('<div class="ra-juris"><div class="lab">Whose ground this was</div>' +
+               "<p>" + esc(reg.label) + " — <a href=\"#\" class=\"ra-setyear\">set a year</a> " +
+               "to see which empire held it, and whose archive that means.</p></div>");
+      }
+    } else {
+      h.push('<div class="ra-juris ra-unmapped"><div class="lab">Whose ground this was</div>' +
+             "<p>Not yet mapped. The record regions cover Istria, the Kvarner, Carnia and " +
+             "Dalmatia so far — this place is outside them, and that is a gap in this map " +
+             "rather than a gap in the record.</p></div>");
+    }
+
+    var cs = d.collections.slice();
+    if (year) cs = cs.filter(function (c) { return covers(c, year); });
+    if (!cs.length) {
+      h.push('<p class="at-sub" style="margin-top:16px">' + (year
+        ? "Nothing here covers " + year + "."
+        : "No volumes recorded here yet.") + "</p>");
+      return h.join("");
+    }
+
+    /* Grouped by what it costs to look, most open first, because that is the
+       order a reader actually wants to try them in. */
+    var by = {};
+    cs.forEach(function (c) { (by[c.access] = by[c.access] || []).push(c); });
+    RANK.forEach(function (a) {
+      if (!by[a]) return;
+      h.push('<div class="at-sec"><div class="lab"><i class="ra-dot" style="background:' +
+             ACC[a][0] + '"></i>' + esc(ACC[a][1]) + "</div>");
+      h.push('<ul class="at-films">');
+      by[a].forEach(function (c) {
+        var span = c.from ? " <span class=\"at-y\">" +
+          (c.to && c.to !== c.from ? c.from + "–" + c.to : c.from) + "</span>" : "";
+        var who = PROV[c.provider] ? PROV[c.provider].name : c.provider;
+        var t = esc(c.title || "Untitled volume");
+        h.push("<li>" + (c.url
+          ? '<a href="' + esc(c.url) + '" target="_blank" rel="noopener">' + t + " &#8599;</a>"
+          : t) + span + ' <span class="ra-who">' + esc(who) + "</span>" +
+          (c.held ? ' <span class="ra-who">held at ' + esc(c.held) + "</span>" : "") + "</li>");
+      });
+      h.push("</ul></div>");
+    });
+    return h.join("");
+  }
+
+  function covers(c, y) {
+    if (!c.from) return false;
+    return y >= c.from && y <= (c.to || c.from);
+  }
+
+  /* ---- layers ------------------------------------------------------------ */
+  var LAYERS = [
+    ["shelf", "The shelf", idx.places.length + " places · every volume that covers them", shelfLayer],
+    ["jurisdiction", "The jurisdiction", regions.regions.length + " record regions · whose archive this ground was", regionLayer]
+  ];
+  var on = {};
+  (Q.get("layers") !== null ? Q.get("layers").split(",").filter(Boolean) : ["shelf"])
+    .forEach(function (k) { on[k] = true; });
+  if (!Object.keys(on).length) on.shelf = true;
+
+  var lbox = document.getElementById("ra-layers");
+  lbox.innerHTML = LAYERS.map(function (l) {
+    return '<label class="ra-layer' + (on[l[0]] ? " on" : "") + '" data-l="' + l[0] + '">' +
+      '<input type="checkbox"' + (on[l[0]] ? " checked" : "") + ' />' +
+      "<b>" + esc(l[1]) + "</b><span>" + esc(l[2]) + "</span></label>";
+  }).join("");
+  function syncLayers() {
+    LAYERS.forEach(function (l) {
+      var has = map.hasLayer(l[3]);
+      if (on[l[0]] && !has) l[3].addTo(map);
+      if (!on[l[0]] && has) map.removeLayer(l[3]);
+    });
+    var live = LAYERS.filter(function (l) { return on[l[0]]; }).map(function (l) { return l[0]; });
+    setQ("layers", live.join(","));
+  }
+  lbox.addEventListener("change", function (ev) {
+    var lab = ev.target.closest(".ra-layer"); if (!lab) return;
+    var k = lab.getAttribute("data-l");
+    on[k] = ev.target.checked;
+    lab.classList.toggle("on", !!on[k]);
+    syncLayers();
+  });
+
+  /* ---- the access filter pills ------------------------------------------- */
+  var off = {};
+  (Q.get("off") || "").split(",").filter(Boolean).forEach(function (k) { off[k] = true; });
+  document.getElementById("ra-cats").innerHTML = RANK.map(function (a) {
+    return '<button class="at-cat' + (off[a] ? "" : " on") + '" data-cat="' + a + '">' +
+      '<i style="background:' + ACC[a][0] + '"></i>' + esc(ACC[a][1]) + "</button>";
+  }).join("");
+  document.getElementById("ra-cats").addEventListener("click", function (ev) {
+    var b = ev.target.closest(".at-cat"); if (!b) return;
+    var c = b.getAttribute("data-cat");
+    off[c] = !off[c];
+    b.classList.toggle("on", !off[c]);
+    setQ("off", Object.keys(off).filter(function (k) { return off[k]; }).join(","));
+    apply();
+  });
+
+  /* ---- the year ---------------------------------------------------------- */
+  var year = null;
+  var yon = document.getElementById("ra-yon"), yin = document.getElementById("ra-year"),
+      yout = document.getElementById("ra-yout");
+  var qy = parseInt(Q.get("year"), 10);
+  if (qy >= 1500 && qy <= 2026) { year = qy; yon.checked = true; yin.value = qy; }
+  function yearUI() {
+    yin.disabled = !year;
+    yout.textContent = year ? String(year) : "any year";
+    document.getElementById("ra-yhint").textContent = year
+      ? "Showing only what can answer for " + year + ". Every panel now says whose archive that year belonged to."
+      : "Turn this on and the map keeps only the places that can answer for that year — and every panel says whose archive that year belonged to.";
+    setQ("year", year || "");
+    paintRegions();
+    apply();
+    var at = Q.get("at");
+    if (at && cache[at]) { panel.innerHTML = render(cache[at]); }
+  }
+  yon.addEventListener("change", function () {
+    year = yon.checked ? parseInt(yin.value, 10) : null;
+    yearUI();
+  });
+  yin.addEventListener("input", function () {
+    if (!yon.checked) return;
+    year = parseInt(yin.value, 10);
+    yout.textContent = String(year);
+    clearTimeout(yin._t);
+    yin._t = setTimeout(yearUI, 120);
+  });
+  document.addEventListener("click", function (ev) {
+    if (!ev.target.classList || !ev.target.classList.contains("ra-setyear")) return;
+    ev.preventDefault();
+    yon.checked = true; year = parseInt(yin.value, 10); yearUI();
+    yin.scrollIntoView({ block: "center", behavior: "smooth" });
+  });
+
+  /* ---- find, filter, count ----------------------------------------------- */
+  var qbox = document.getElementById("ra-q"), count = document.getElementById("ra-count");
+  qbox.value = Q.get("q") || "";
+  var XL = { "đ": "d", "ł": "l", "ø": "o", "ß": "ss", "æ": "ae", "œ": "oe" };
+  function fold(s) {
+    return (s || "").toLowerCase().replace(/[đłøßæœ]/g, function (c) { return XL[c]; })
+      .normalize("NFKD").replace(/[̀-ͯ]/g, "");
+  }
+  /* A year the place cannot answer for is a place that is not an answer. The
+     index carries no spans, so this uses the volume count as a cheap proxy and
+     the panel does the exact test — except that the exact test is the one that
+     matters, so spans ride in the index after all. See build.py. */
+  function keep(p) {
+    if (off[p.a]) return false;
+    var t = fold(qbox.value.trim());
+    if (t && p.q.indexOf(t) < 0) return false;
+    if (year && p.s && (year < p.s[0] || year > p.s[1])) return false;
+    return true;
+  }
+  function apply() {
+    var shown = 0;
+    markers.forEach(function (m) {
+      var ok = keep(m._p);
+      if (ok) { if (!shelfLayer.hasLayer(m)) m.addTo(shelfLayer); shown++; }
+      else if (shelfLayer.hasLayer(m)) shelfLayer.removeLayer(m);
+    });
+    count.textContent = shown + " of " + markers.length + " places shown" +
+      (year ? ", able to answer for " + year : "");
+    var t = qbox.value.trim();
+    if (t && shown) {
+      var vis = markers.filter(function (m) { return shelfLayer.hasLayer(m); });
+      map.fitBounds(L.latLngBounds(vis.map(function (m) { return m.getLatLng(); })),
+                    { padding: [40, 40], maxZoom: 11 });
+      if (vis.length === 1) open(vis[0]._p);
+    }
+  }
+  qbox.addEventListener("input", function () {
+    setQ("q", qbox.value.trim());
+    clearTimeout(qbox._t);
+    qbox._t = setTimeout(apply, 140);
+  });
+
+  /* ---- basemap switch, home, and the view in the address bar -------------- */
+  var bctl = L.control({ position: "topright" });
+  bctl.onAdd = function () {
+    var b = L.DomUtil.create("div", "leaflet-bar ra-base");
+    b.innerHTML = ["map", "terrain", "satellite"].map(function (k) {
+      return '<a href="#" data-b="' + k + '"' + (k === baseNow ? ' class="on"' : "") + ">" + k + "</a>";
+    }).join("");
+    L.DomEvent.disableClickPropagation(b);
+    L.DomEvent.on(b, "click", function (e) {
+      var a = e.target.closest("a[data-b]"); if (!a) return;
+      L.DomEvent.stop(e);
+      var k = a.getAttribute("data-b");
+      if (k === baseNow) return;
+      map.removeLayer(BASES[baseNow]);
+      baseNow = k; BASES[k].addTo(map); BASES[k].bringToBack();
+      b.querySelectorAll("a").forEach(function (x) {
+        x.classList.toggle("on", x.getAttribute("data-b") === k); });
+      setQ("base", k === "map" ? "" : k);
+    });
+    return b;
+  };
+  bctl.addTo(map);
+
+  var HOME = [[42.2, 12.4], [46.9, 19.6]];
+  var v = (Q.get("view") || "").split(",").map(Number);
+  if (v.length === 3 && v.every(function (n) { return !isNaN(n); })) map.setView([v[0], v[1]], v[2]);
+  else map.fitBounds(L.latLngBounds(HOME), { padding: [24, 24] });
+  map.on("moveend", function () {
+    var c = map.getCenter();
+    setQ("view", c.lat.toFixed(4) + "," + c.lng.toFixed(4) + "," + map.getZoom());
+  });
+
+  document.getElementById("ra-copy").addEventListener("click", function () {
+    navigator.clipboard.writeText(location.href).then(function () {
+      var t = document.getElementById("ra-copied");
+      t.hidden = false; setTimeout(function () { t.hidden = true; }, 1600);
+    });
+  });
+
+  document.getElementById("ra-hint").textContent =
+    idx.places.length + " places, " +
+    idx.places.reduce(function (a, p) { return a + (p.c || 0); }, 0) +
+    " record volumes. Search by any name a place has ever had — Gallignana finds Gračišće.";
+
+  syncLayers();
+  paintRegions();
+  yearUI();
+
+  var openAt = Q.get("at");
+  if (openAt) {
+    var hit = idx.places.filter(function (p) { return p.i === openAt; })[0];
+    if (hit) open(hit);
+  }
+});
+</script>
+
+<style>
+  .ra-top { margin-top: 10px; }
+  /* The layer switches and the filter pills are written by the script with
+     innerHTML, so they never carry Astro's scope attribute — which means every
+     rule that styles them matches nothing at all unless it is :global. The
+     component this descends from learned that the expensive way. */
+  .ra-layers { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+  :global(.ra-layer) {
+    flex: 1 1 240px; display: block; cursor: pointer; padding: 10px 12px;
+    border: 1px solid var(--rule); border-radius: 3px; background: var(--panel);
+    opacity: .55;
+  }
+  :global(.ra-layer.on) { opacity: 1; border-color: var(--accent); }
+  :global(.ra-layer input) { margin-right: 8px; accent-color: var(--accent); }
+  :global(.ra-layer b) { font-family: var(--sans); font-size: 13.5px; font-weight: 600; }
+  :global(.ra-layer span) { display: block; margin-left: 24px; font-family: var(--sans);
+                   font-size: 11.5px; color: var(--ink-3); line-height: 1.45; }
+
+  .ra-yearbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+                margin: 18px 0 6px; padding: 12px 14px; border: 1px solid var(--rule);
+                border-left: 2px solid var(--accent); border-radius: 3px; background: var(--panel); }
+  .ra-ylab { display: inline-flex; align-items: center; gap: 7px; font-family: var(--sans);
+             font-size: 12.5px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+  .ra-ylab input { accent-color: var(--accent); }
+  #ra-year { flex: 1 1 240px; accent-color: var(--accent); }
+  #ra-year:disabled { opacity: .4; }
+  #ra-yout { font-size: 15px; font-weight: 500; color: var(--accent); min-width: 5ch; }
+  .ra-yhint { flex: 1 0 100%; margin: 2px 0 0; font-family: var(--sans);
+              font-size: 11.5px; line-height: 1.5; color: var(--ink-3); }
+
+  .at-wrap { display: grid; grid-template-columns: 1fr 360px; gap: 18px; margin-top: 12px; }
+  .at-map { height: 600px; border: 1px solid var(--rule); border-radius: 3px; }
+  .at-panel { height: 600px; overflow-y: auto; border: 1px solid var(--rule);
+              border-radius: 3px; background: var(--panel); padding: 18px 18px 24px; }
+  .at-empty p { font-size: 13px; line-height: 1.6; color: var(--ink-2); margin: 8px 0 0; }
+  .at-hint { color: var(--ink-3) !important; font-size: 12px !important; }
+
+  :global(.at-h) { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  :global(.at-h h3) { font-family: var(--serif); font-size: 22px; margin: 0; line-height: 1.25; }
+  :global(.at-n) { font: 400 11px/1 var(--mono); color: var(--accent); white-space: nowrap; }
+  :global(.at-also) { font: 400 11.5px/1.5 var(--mono); color: var(--ink-3); margin: 8px 0 0; }
+  :global(.at-sub) { font: 400 11.5px/1.5 var(--mono); color: var(--ink-3); margin: 6px 0 8px; }
+  :global(.at-sec) { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--rule); }
+  :global(.at-films) { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 5px; }
+  :global(.at-films li) { font-size: 12.5px; line-height: 1.5; }
+  :global(.at-y) { font: 400 11px/1 var(--mono); color: var(--ink-3); }
+  :global(.ra-who) { font: 400 10.5px/1 var(--sans); color: var(--ink-3); }
+  :global(.ra-dot) { width: 9px; height: 9px; border-radius: 50%; display: inline-block;
+                     margin-right: 7px; vertical-align: baseline; }
+  :global(.ra-juris) { margin-top: 16px; padding: 12px 14px; border-radius: 3px;
+                       background: var(--accent-wash); border-left: 2px solid var(--accent); }
+  :global(.ra-juris p) { font-size: 13px; line-height: 1.6; margin: 6px 0 0; }
+  :global(.ra-juris.ra-unmapped) { background: transparent; border-left-color: var(--rule-strong); }
+  :global(.ra-filed) { font-size: 12.5px !important; }
+  :global(.ra-note) { font-family: var(--sans); font-size: 11.5px !important;
+                      line-height: 1.55 !important; color: var(--ink-2); margin-top: 8px !important; }
+  :global(.ra-dead) { padding: 24px; font-family: var(--sans); font-size: 13px; color: var(--ink-3); }
+
+  .at-tools { display: flex; flex-wrap: wrap; gap: 16px 26px; align-items: flex-end; margin-top: 16px; }
+  .at-find { flex: 1 1 280px; }
+  #ra-q { width: 100%; box-sizing: border-box; margin-top: 6px; padding: 9px 12px;
+          font: 400 15px/1.3 var(--serif); color: var(--ink);
+          background: var(--panel); border: 1px solid var(--rule); border-radius: 3px; }
+  #ra-q:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .atlas-key { display: flex; flex-wrap: wrap; gap: 7px; }
+  :global(.at-cat) { font: 400 12px/1 var(--sans); color: var(--ink-3); cursor: pointer;
+            background: none; border: 1px solid var(--rule); border-radius: 999px;
+            padding: 6px 11px; display: inline-flex; align-items: center; gap: 6px; opacity: .45; }
+  :global(.at-cat.on) { opacity: 1; color: var(--ink-2); border-color: var(--ink-3); }
+  :global(.at-cat i) { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+
+  .ra-copy { font: 400 12px/1 var(--sans); color: var(--accent); cursor: pointer;
+             background: none; border: 1px solid var(--rule); border-radius: 3px; padding: 6px 10px; }
+  .ra-copied { font-family: var(--mono); font-size: 11px; color: var(--ink-3); margin-left: 8px; }
+  :global(.ra-base a) { width: auto !important; padding: 0 9px; font: 500 11px/26px var(--sans);
+                        text-transform: capitalize; }
+  :global(.ra-base a.on) { background: var(--accent-wash); color: var(--accent); font-weight: 600; }
+
+  @media (max-width: 900px) {
+    .at-wrap { grid-template-columns: 1fr; }
+    .at-map { height: 420px; } .at-panel { height: auto; max-height: 480px; }
+  }
+</style>

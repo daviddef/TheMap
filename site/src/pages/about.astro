@@ -1,0 +1,71 @@
+---
+import Base from "../layouts/Base.astro";
+import { u } from "../lib/url.js";
+import idx from "../../public/index.json";
+const places = idx.places.length;
+const volumes = idx.places.reduce((a, p) => a + (p.c || 0), 0);
+---
+<Base
+  title="About Record Atlas"
+  eyebrow="What this is, where it came from, and what it does not know"
+  dek="A map of where genealogical records are, who holds them, and what it costs to look — searchable by every name a place has ever had.">
+
+  <div class="prose" style="max-width:74ch">
+    <h3>The problem</h3>
+    <p>Genealogy is not short of websites. Cyndi's List has three hundred thousand links. The
+    FamilySearch Wiki has a page for every country on earth. Almost nobody uses either, because
+    a list answers <em>what exists</em> and the question a researcher actually has is
+    <b>my great-grandfather was born in Gallignana in 1863 — where is that record, and can I
+    see it tonight?</b></p>
+
+    <p>Three things stand between those two questions, and all three are geographic.</p>
+
+    <p><b>The name changed.</b> Gallignana is Gračišće. Fiume is Rijeka. Pressburg is
+    Bratislava. You cannot search for a place whose name you do not know, so the find box here
+    matches every name a place has ever had.</p>
+
+    <p><b>The jurisdiction changed.</b> That 1863 baptism is in a Croatian archive. A 1930 one
+    from the same village is filed under <em>Italy</em>, because between the wars the village
+    was Italian. This is not a curiosity — it is the single commonest reason a record that
+    exists cannot be found, and <a href={u("/jurisdictions/")}>this map has a table for it</a>.</p>
+
+    <p><b>"Online" is four different things.</b> Free images; images behind a free login;
+    an index with no images at all; and a catalogue card for paper nobody has photographed.
+    Most directories flatten all four into a link. Here they are the colour of the dot.</p>
+
+    <h3>Where it came from</h3>
+    <p>Out of a one-family archive. <a href="https://daviddef.github.io/TheDefranceski/map/">The
+    Defranceschi Archive's map</a> answers three questions about one family's ground: where the
+    record books are, where a named person can be put, and where the family is buried. Two of
+    those are family facts and cannot generalise. The first one can, and this is it, taken out
+    and pointed at the world.</p>
+    <p>The Croatian depth here — {places} places and {volumes} volumes — is that archive's work,
+    imported once as a snapshot. Everything family-specific was dropped on the way in, including
+    the thing its map is coloured by: how far one researcher had got. That is a true and useful
+    fact if you are that researcher. To a stranger it means nothing, so the colour here answers
+    a stranger's question instead.</p>
+
+    <h3>What it does not know</h3>
+    <p>It is early and it says so. The shelf is deep for Croatia, Istria and Carnia and thin
+    everywhere else. The record regions cover six pieces of ground, not the planet. A place
+    outside them <b>says so in its own panel</b> rather than guessing.</p>
+    <p><b>A grey dot means nobody has surveyed it. It does not mean nothing is there.</b> Keeping
+    those two apart is worth more than coverage, because a map that quietly implies completeness
+    sends people home when they should keep looking.</p>
+
+    <h3>How it is built</h3>
+    <p>A static site — no server, no database, no account. The data is plain JSON
+    <a href={idx.repo || "https://github.com/daviddef/TheMap"}>in a public repository</a>, and a
+    build gate refuses to publish it if a source has no date on it, if a provider does not
+    resolve, or if a place's coordinates fall in a different country from the one it claims.
+    That last rule caught this project filing the Italian comuni of Carnia as Croatian on its
+    first import.</p>
+    <p>Country outlines are Natural Earth, public domain. Maps are OpenStreetMap. The historical
+    regions are drawn by hand, deliberately roughly, because they exist to say which filing
+    system a place fell under rather than to adjudicate a border.</p>
+  </div>
+</Base>
+
+<style>
+  .prose h3 { margin-top: 30px; }
+</style>

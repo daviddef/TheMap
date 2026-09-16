@@ -1,0 +1,66 @@
+---
+import Base from "../layouts/Base.astro";
+import RecordMap from "../components/RecordMap.astro";
+import { u } from "../lib/url.js";
+import idx from "../../public/index.json";
+import regions from "../../public/regions.json";
+
+const places = idx.places.length;
+const volumes = idx.places.reduce((a, p) => a + (p.c || 0), 0);
+const countries = new Set(idx.places.map(p => p.k).filter(Boolean)).size;
+---
+<Base
+  bare
+  title="Record Atlas"
+  dek="Every place your people came from, and who holds the paper.">
+
+  <div class="pagehead">
+    <div class="lab">{places} places · {volumes} record volumes · {countries} countries · {regions.regions.length} record regions</div>
+    <h1>Where the records are</h1>
+    <p class="dek">
+      Genealogy is not short of websites. It is short of an answer to one question:
+      <em>my people came from here — who holds the paper, and can I see it tonight?</em>
+      This map answers that geographically. Click a place and it lists every collection
+      that covers it, coloured by what it actually costs to look. Set a year and it also
+      tells you whose empire that ground belonged to, and therefore whose archive to write to.
+    </p>
+  </div>
+
+  <RecordMap
+    indexUrl={u("/index.json")}
+    detailBase={u("/p/")}
+    regionsUrl={u("/regions.json")}
+    providersUrl={u("/providers.json")} />
+
+  <div class="one" style="margin-top:34px">
+    <div class="lab">Why a map, and not another list</div>
+    <div class="prose">
+      <p><b>Three things stand between a researcher and a record, and all three are geographic.</b></p>
+      <p><b>The name changed.</b> Gallignana is Gračišće. Fiume is Rijeka. Pola is Pula.
+      You cannot search for a place whose name you do not know, so the find box here matches
+      every name a place has ever had — type <em>Gallignana</em> and the map goes to Gračišće.</p>
+      <p><b>The jurisdiction changed.</b> An 1863 baptism from a Croatian village sits in a
+      Croatian archive. A 1930 one, from the same village, is filed under <em>Italy</em> —
+      because between the wars that village was Italian. Searching the Croatian collection
+      alone finds nothing, and nothing is not the same as not existing. Set the year and this
+      map tells you which it is.</p>
+      <p><b>"Online" is four different things.</b> Free images, images behind a login, an index
+      with no images at all, and a catalogue card for paper nobody has photographed. Most
+      directories flatten these into a link. Here they are the colour of the dot.</p>
+    </div>
+  </div>
+
+  <div class="one" style="margin-top:26px;border-left-color:var(--rule-strong)">
+    <div class="lab">What this map does not know yet</div>
+    <div class="prose">
+      <p>It is honest about being early. The shelf is deep for <b>Croatia, Istria and Carnia</b>
+      — {places} places and {volumes} volumes — and the record regions cover the ground those
+      places sit on. <b>Everywhere else is a provider list, not a shelf</b>, and a place outside
+      a drawn region says so in its own panel rather than pretending.</p>
+      <p><b>A grey dot means nobody has surveyed it. It does not mean nothing is there.</b>
+      That distinction is the difference between a map and a claim, and it is worth more
+      than coverage.</p>
+      <p><a href={u("/add/")}>Add a source, or correct one →</a></p>
+    </div>
+  </div>
+</Base>

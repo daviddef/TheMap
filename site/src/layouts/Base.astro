@@ -1,0 +1,107 @@
+---
+import { u } from "../lib/url.js";
+import site from "../data/site.json";
+
+const { title, dek, eyebrow, bare } = Astro.props;
+const nav = [
+  ["/", "The map"],
+  ["/providers/", "The sources"],
+  ["/jurisdictions/", "Whose archive"],
+  ["/about/", "About"],
+  ["/add/", "Add a source"],
+];
+const here = Astro.url.pathname;
+---
+<html lang="en" data-base={u("")}>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>{title === site.name ? `${site.name} — ${site.tagline}` : `${title} — ${site.name}`}</title>
+<meta name="description" content={dek || site.tagline} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={dek || site.tagline} />
+<meta property="og:type" content="website" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Libre+Franklin:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" />
+<link rel="stylesheet" href={u("/styles.css")} />
+</head>
+<body>
+<a class="skip" href="#main">Skip to the map</a>
+<header class="site">
+  <div class="wrap sitein">
+    <a class="brand" href={u("/")}>Record <em>Atlas</em></a>
+    <nav class="topnav" aria-label="Main">
+      {nav.map(([h, l]) => <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}
+    </nav>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+  <div class="wrap">
+    {!bare && (
+      <div class="pagehead">
+        {eyebrow && <div class="lab">{eyebrow}</div>}
+        <h1>{title}</h1>
+        {dek && <p class="dek">{dek}</p>}
+      </div>
+    )}
+    <slot />
+  </div>
+</main>
+
+<footer class="site-foot">
+  <div class="wrap">
+    {/* The ad slot. Reserved at a fixed height so that turning it on can never
+        shove the page around, kept well below the map so nothing here is ever
+        clicked by somebody reaching for a control, and gated on consent —
+        the script does not load until a visitor has agreed to it. Off until
+        an ad unit exists; see site/src/data/site.json. */}
+    {site.ads.enabled && site.ads.slot && (
+      <div class="adslot" aria-label="Advertisement">
+        <ins class="adsbygoogle" style="display:block" data-ad-client={site.ads.client}
+             data-ad-slot={site.ads.slot} data-ad-format="horizontal"
+             data-full-width-responsive="true"></ins>
+      </div>
+    )}
+    <p class="foot-note">
+      <b>Record Atlas</b> — {site.tagline}. Built in the open:
+      <a href={site.repo}>the data and the code are on GitHub</a>, and every source row
+      says when it was last checked. A directory that lies is worse than no directory.
+    </p>
+    <p class="foot-note foot-thin">
+      <a href={u("/about/")}>About</a> · <a href={u("/add/")}>Add or correct a source</a> ·
+      <a href={u("/privacy/")}>Privacy</a> · Maps &copy; OpenStreetMap contributors ·
+      Country outlines from Natural Earth, public domain
+    </p>
+  </div>
+</footer>
+</body>
+</html>
+
+<style is:global>
+  .skip { position: absolute; left: -9999px; }
+  .skip:focus { left: 12px; top: 12px; z-index: 999; background: var(--panel);
+                padding: 10px 14px; border: 1px solid var(--accent); }
+  header.site { border-bottom: 1px solid var(--rule); background: var(--panel); }
+  .sitein { display: flex; align-items: baseline; gap: 28px; flex-wrap: wrap;
+            padding: 14px 0; }
+  .brand { font-family: var(--serif); font-size: 21px; font-weight: 600;
+           color: var(--ink); text-decoration: none; letter-spacing: .01em; }
+  .brand em { font-style: italic; font-weight: 400; color: var(--accent); }
+  .topnav { display: flex; gap: 18px; flex-wrap: wrap; }
+  .topnav a { font-family: var(--sans); font-size: 13px; color: var(--ink-2);
+              text-decoration: none; padding-bottom: 2px; }
+  .topnav a:hover { color: var(--accent); }
+  .topnav a.on { color: var(--accent); border-bottom: 2px solid var(--accent); }
+  .pagehead { margin: 30px 0 18px; }
+  .pagehead h1 { font-family: var(--serif); font-size: 38px; line-height: 1.12;
+                 margin: 8px 0 12px; font-weight: 500; }
+  footer.site-foot { margin-top: 60px; padding: 26px 0 40px;
+                     border-top: 1px solid var(--rule); background: var(--panel); }
+  .foot-note { font-family: var(--sans); font-size: 12.5px; line-height: 1.6;
+               color: var(--ink-3); max-width: 80ch; margin: 0 0 8px; }
+  .foot-thin { font-size: 11.5px; }
+  .adslot { min-height: 90px; margin: 0 0 24px; display: flex;
+            align-items: center; justify-content: center; }
+</style>

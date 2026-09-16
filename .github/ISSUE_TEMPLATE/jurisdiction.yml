@@ -1,0 +1,33 @@
+name: A region's filing history
+description: Which archive holds a piece of ground's records, and for which years
+title: "Jurisdiction: "
+labels: ["jurisdiction"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **This is the most valuable thing you can contribute.** Which empire ruled where is
+        in every history book. Which archive that means is in almost none of them.
+  - type: input
+    id: region
+    attributes: { label: Which ground, placeholder: "Bukovina · Galicia · the Banat" }
+    validations: { required: true }
+  - type: textarea
+    id: eras
+    attributes:
+      label: The eras
+      description: One line per stretch of years. Years, who held it, and whose archive holds the records of those years.
+      placeholder: |
+        1775–1918  Austria (Duchy of Bukovina)  — registers to the Czernowitz state archive; FamilySearch filmed them
+        1918–1940  Romania                      — filed under Romania, NOT Ukraine
+        1944–1991  Soviet Union                 — Chernivtsi oblast archive
+    validations: { required: true }
+  - type: textarea
+    id: trap
+    attributes:
+      label: Is there a trap?
+      description: A period whose records are filed somewhere nobody would think to look. This is the field that matters most.
+  - type: textarea
+    id: sources
+    attributes: { label: How do you know? }
+    validations: { required: true }

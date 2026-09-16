@@ -1,0 +1,83 @@
+---
+import Base from "../layouts/Base.astro";
+import { u } from "../lib/url.js";
+import provs from "../../public/providers.json";
+
+const P = provs.providers;
+const byKind = {};
+for (const p of P) (byKind[p.kind] = byKind[p.kind] || []).push(p);
+const KIND = {
+  "aggregator": "The aggregators — many countries at once",
+  "national-archive": "National archives and state portals",
+  "regional-archive": "Regional and state archives",
+  "diocesan": "Church and diocesan archives",
+  "volunteer": "Volunteer transcriptions and indexes",
+  "library": "Libraries, newspapers and full-text",
+  "commercial": "Commercial subscriptions",
+};
+const order = ["aggregator", "national-archive", "regional-archive", "diocesan",
+               "volunteer", "library", "commercial"];
+const free = P.filter(p => p.access === "free").length;
+---
+<Base
+  title="The sources"
+  eyebrow={`${P.length} providers · ${free} of them free without an account`}
+  dek="Every provider this map can point at, and what it actually costs to look. The access class is the ordinary visitor's experience, not the best case — FamilySearch is filed as needing an account because it does, and because a directory that flatters its sources is no use to anyone.">
+
+  <div class="one" style="margin-top:20px">
+    <div class="lab">What the access classes mean</div>
+    <ul class="acc-key">
+      {Object.entries(provs.access).map(([k, v]) => (
+        <li><b>{k}</b> — {v}</li>
+      ))}
+    </ul>
+  </div>
+
+  {order.filter(k => byKind[k]).map(k => (
+    <section style="margin-top:34px">
+      <h2>{KIND[k]}</h2>
+      <table>
+        <thead><tr>
+          <th>Provider</th><th>What it is</th><th class="m">Access</th><th class="m">Where</th><th class="m">Checked</th>
+        </tr></thead>
+        <tbody>
+          {byKind[k].sort((a, b) => a.name.localeCompare(b.name)).map(p => (
+            <tr>
+              <td><a href={p.url} target="_blank" rel="noopener">{p.name}</a></td>
+              <td>{p.what}</td>
+              <td class="m"><span class={"chip acc-" + p.access}>{p.access}</span></td>
+              <td class="m">{p.countries.includes("*") ? "worldwide" : p.countries.join(" ")}</td>
+              <td class="m">{p.checked}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  ))}
+
+  <div class="one" style="margin-top:34px;border-left-color:var(--rule-strong)">
+    <div class="lab">Why every row carries a date</div>
+    <div class="prose">
+      <p>Links rot, portals move, and free things become paid. A directory that cannot say
+      <em>when</em> it last looked is making a claim about the present out of a memory of the
+      past. Every row here says when a human last checked it, and the build refuses any row
+      that does not.</p>
+      <p><a href={u("/add/")}>Found one that has changed? Say so →</a></p>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .acc-key { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 5px; }
+  .acc-key li { font-family: var(--sans); font-size: 12.5px; color: var(--ink-2); }
+  .acc-key b { font-family: var(--mono); font-size: 11.5px; color: var(--accent); }
+  h2 { font-family: var(--serif); font-size: 24px; font-weight: 500; margin: 0 0 12px; }
+  td { vertical-align: top; }
+  .chip.acc-free { background: #1E844922; color: #1E8449; }
+  .chip.acc-account { background: #6FA82E22; color: #5C8C26; }
+  .chip.acc-index { background: #EFC03B33; color: #8A6B10; }
+  .chip.acc-mixed { background: #E8792B22; color: #B45A17; }
+  .chip.acc-paid { background: #C0392B22; color: #C0392B; }
+  .chip.acc-catalogue { background: #8E6FA822; color: #7A5CA8; }
+  .chip.acc-onsite { background: #7C8A9122; color: #5E6C73; }
+</style>

@@ -1,0 +1,17 @@
+{
+  "name": "record-atlas",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "data": "python3 ../scripts/build.py",
+    "check": "python3 ../scripts/check-data.py",
+    "dev": "npm run data && astro dev --port 4330",
+    "build": "npm run data && npm run check && astro build",
+    "preview": "astro preview --port 4330"
+  },
+  "dependencies": {
+    "@daviddef/archive-kit": "github:daviddef/TheArchiveKit#81746764e2f89d84bed9c44853bf7f9b2ec6a8f3",
+    "astro": "^5.18.2"
+  }
+}

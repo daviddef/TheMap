@@ -1,0 +1,23 @@
+name: Something has changed
+description: A dead link, a moved portal, or a collection that is no longer free
+title: "Changed: "
+labels: ["rot"]
+body:
+  - type: input
+    id: which
+    attributes: { label: Which source, placeholder: "Its name, or the place it appears on the map" }
+    validations: { required: true }
+  - type: dropdown
+    id: what
+    attributes:
+      label: What happened
+      options:
+        - "The link is dead"
+        - "It moved to a new address"
+        - "It used to be free and now costs money"
+        - "It used to cost money and is now free"
+        - "The description is wrong"
+    validations: { required: true }
+  - type: textarea
+    id: detail
+    attributes: { label: Detail, description: "The new address, if you have it." }

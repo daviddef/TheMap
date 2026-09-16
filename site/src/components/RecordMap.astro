@@ -79,6 +79,12 @@ window.addEventListener("load", async function () {
   } catch (e) { el.innerHTML = '<p class="ra-dead">The map data could not be loaded.</p>'; return; }
 
   var PROV = {}; provs.providers.forEach(function (p) { PROV[p.id] = p; });
+  var CNAME = idx.countries || {};
+  var XL = { "đ": "d", "ł": "l", "ø": "o", "ß": "ss", "æ": "ae", "œ": "oe" };
+  function fold(s) {
+    return (s || "").toLowerCase().replace(/[đłøßæœ]/g, function (c) { return XL[c]; })
+      .normalize("NFKD").replace(/[̀-ͯ]/g, "");
+  }
   var esc = function (x) { return String(x == null ? "" : x)
     .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); };
 
@@ -185,7 +191,7 @@ window.addEventListener("load", async function () {
      is what stops the map claiming to cover the earth while showing Croatia. */
   var archiveLayer = L.layerGroup();
   var archives = provs.providers.filter(function (p) { return p.at; });
-  archives.forEach(function (p) {
+  var archMarkers = archives.map(function (p) {
     var m = L.marker([p.at.lat, p.at.lon], {
       icon: L.divIcon({ className: "ra-arch", iconSize: [13, 13],
                         html: '<i style="border-color:' + (ACC[p.access] || ["#7C8A91"])[0] + '"></i>' })
@@ -193,6 +199,14 @@ window.addEventListener("load", async function () {
     m.bindTooltip(p.name, { sticky: true });
     m.on("click", function () { openArchive(p); });
     m.addTo(archiveLayer);
+    /* Searchable by its name, its city, and every country it covers — so
+       "Ireland" finds the Dublin archives AND the aggregators that reach
+       Ireland from somewhere else entirely. */
+    m._q = fold([p.name, p.at.place,
+                 (p.countries || []).map(function (c) { return CNAME[c] || c; }).join(" ")
+                ].join(" "));
+    m._p = p;
+    return m;
   });
 
   /* Which record regions name this archive as the holder of their records, and
@@ -421,11 +435,6 @@ window.addEventListener("load", async function () {
   /* ---- find, filter, count ----------------------------------------------- */
   var qbox = document.getElementById("ra-q"), count = document.getElementById("ra-count");
   qbox.value = Q.get("q") || "";
-  var XL = { "đ": "d", "ł": "l", "ø": "o", "ß": "ss", "æ": "ae", "œ": "oe" };
-  function fold(s) {
-    return (s || "").toLowerCase().replace(/[đłøßæœ]/g, function (c) { return XL[c]; })
-      .normalize("NFKD").replace(/[̀-ͯ]/g, "");
-  }
   /* A year the place cannot answer for is a place that is not an answer. The
      index carries no spans, so this uses the volume count as a cheap proxy and
      the panel does the exact test — except that the exact test is the one that
@@ -438,22 +447,80 @@ window.addEventListener("load", async function () {
     return true;
   }
   function apply() {
+    var t = fold(qbox.value.trim());
     var shown = 0;
     markers.forEach(function (m) {
       var ok = keep(m._p);
       if (ok) { if (!shelfLayer.hasLayer(m)) m.addTo(shelfLayer); shown++; }
       else if (shelfLayer.hasLayer(m)) shelfLayer.removeLayer(m);
     });
+    var aShown = 0;
+    archMarkers.forEach(function (m) {
+      var ok = !t || m._q.indexOf(t) > -1;
+      if (ok) { if (!archiveLayer.hasLayer(m)) m.addTo(archiveLayer); aShown++; }
+      else if (archiveLayer.hasLayer(m)) archiveLayer.removeLayer(m);
+    });
     count.textContent = shown + " of " + markers.length + " places shown" +
       (year ? ", able to answer for " + year : "") +
-      (on.archives ? ", and " + archives.length + " archives" : "");
-    var t = qbox.value.trim();
-    if (t && shown) {
-      var vis = markers.filter(function (m) { return shelfLayer.hasLayer(m); });
-      map.fitBounds(L.latLngBounds(vis.map(function (m) { return m.getLatLng(); })),
+      (on.archives ? ", and " + aShown + " of " + archives.length + " archives" : "");
+
+    if (!t) return;
+    var vis = markers.filter(function (m) { return shelfLayer.hasLayer(m); });
+    var avis = archMarkers.filter(function (m) { return archiveLayer.hasLayer(m); });
+    var frame = vis.concat(on.archives ? avis : []);
+    if (frame.length) {
+      map.fitBounds(L.latLngBounds(frame.map(function (m) { return m.getLatLng(); })),
                     { padding: [40, 40], maxZoom: 11 });
-      if (vis.length === 1) open(vis[0]._p);
+      if (vis.length === 1) { open(vis[0]._p); return; }
     }
+    /* THE HONEST EMPTY RESULT. Somebody typing "Ireland" has asked a real
+       question, and a blank map answers it with a falsehood. There is no Irish
+       shelf here YET — but there are providers that cover Ireland and archives
+       standing in Dublin, and the difference between "we have not walked this"
+       and "there is nothing here" has to be said out loud every single time or
+       the map quietly implies a completeness it does not have. */
+    if (!shown) elsewhere(qbox.value.trim());
+  }
+
+  function elsewhere(term) {
+    var f = fold(term);
+    var iso = Object.keys(CNAME).filter(function (k) {
+      return fold(CNAME[k]).indexOf(f) > -1 || k.toLowerCase() === f;
+    });
+    var cover = provs.providers.filter(function (p) {
+      if (iso.some(function (k) { return (p.countries || []).indexOf(k) > -1; })) return true;
+      if (p.at && fold(p.at.place).indexOf(f) > -1) return true;
+      return fold(p.name).indexOf(f) > -1;
+    });
+    empty.hidden = true; panel.hidden = false;
+    var h = ['<div class="at-h"><h3>' + esc(term) + "</h3></div>"];
+    /* Only worth printing when it adds something. Typing "Ireland" and being
+       told "Ireland" is noise; typing "HR" and being told "Croatia" is not. */
+    var named = iso.map(function (k) { return CNAME[k]; })
+                   .filter(function (n) { return fold(n) !== f; });
+    if (named.length)
+      h.push('<p class="at-also">' + named.map(esc).join(" · ") + "</p>");
+    h.push('<p class="at-what"><b>No places here yet.</b> The shelf — the volume-by-volume ' +
+           "layer — is deep for Croatia, Istria and Carnia and has not been walked anywhere " +
+           "else. <b>That is a gap in this map, not a gap in the record.</b></p>");
+    if (cover.length) {
+      h.push('<div class="at-sec"><div class="lab">But these reach it</div><ul class="at-films">');
+      cover.slice(0, 14).forEach(function (p) {
+        h.push('<li><a href="' + esc(p.url) + '" target="_blank" rel="noopener">' +
+               esc(p.name) + " &#8599;</a> <span class=\"ra-who\">" +
+               esc((ACC[p.access] || [0, p.access])[1]) + "</span>" +
+               (p.at ? ' <span class="ra-who">' + esc(p.at.place) + "</span>" : "") + "</li>");
+      });
+      h.push("</ul>");
+      if (cover.length > 14) h.push('<p class="at-sub">and ' + (cover.length - 14) + " more.</p>");
+      h.push("</div>");
+      h.push('<p class="at-sub">Switch on <b>The archives</b> above to see the ones that have ' +
+             "a building.</p>");
+    } else {
+      h.push('<p class="at-sub">Nothing in this map reaches it either — which is exactly the ' +
+             "kind of gap worth telling us about.</p>");
+    }
+    panel.innerHTML = h.join("");
   }
   qbox.addEventListener("input", function () {
     setQ("q", qbox.value.trim());

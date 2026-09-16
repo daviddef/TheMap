@@ -295,6 +295,32 @@ def main():
         gbytes += len(blob.encode())
         open(os.path.join(gz, key + ".json"), "w").write(blob)
 
+    # ---- settlements inside a region: findable, never drawn ---------------
+    rs = os.path.join(OUT, "rs")
+    shutil.rmtree(rs, ignore_errors=True)
+    os.makedirs(rs)
+    try:
+        sett = json.load(open("data/region-settlements.json"))["settlements"]
+    except FileNotFoundError:
+        sett = []
+    rshards, rsbytes = {}, 0
+    for r in sett:
+        rec = {"n": r["n"], "y": r["y"], "x": r["x"], "k": r["k"], "r": r["r"]}
+        for form in set(r["q"].split(" ")):
+            k = "".join(c for c in form[:3] if c.isalnum())
+            if len(k) == 3:
+                rshards.setdefault(k, []).append(rec)
+    for k, rows in rshards.items():
+        seen, uniq = set(), []
+        for r in rows:
+            key = (r["n"], r["y"])
+            if key not in seen:
+                seen.add(key)
+                uniq.append(r)
+        blob = json.dumps(uniq, ensure_ascii=False, separators=(",", ":"))
+        rsbytes += len(blob.encode())
+        open(os.path.join(rs, k + ".json"), "w").write(blob)
+
     # ---- surnames, sharded like the gazetteer -----------------------------
     # Same trick and the same reason: a search corpus is fetched three letters
     # at a time and never rides in the index that draws the map.
@@ -372,6 +398,9 @@ def main():
     if surn["surnames"]:
         print(f"surnames.json   {sz('surnames.json')/1024:8.1f} KB  "
               f"surnames.csv {sz('surnames.csv')/1024:.0f} KB — the shareable dataset")
+    if rshards:
+        print(f"rs/*.json       {rsbytes/1024:8.1f} KB  {len(rshards)} shards, "
+              f"{len(sett)} settlements in regions — findable, not drawn")
     if sshards:
         print(f"s/*.json        {sbytes/1024:8.1f} KB  {len(sshards)} shards, "
               f"{len(surn['surnames'])} surnames")

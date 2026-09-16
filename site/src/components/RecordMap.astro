@@ -26,7 +26,7 @@
    Everything else — the find box, the filter pills, that every view is a link
    — is the family Atlas's and is kept deliberately, because a reader who knows
    one of these maps should know all of them. */
-const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wikidataUrl, osmUrl, featureBase, base } = Astro.props;
+const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wikidataUrl, osmUrl, featureBase, settlementBase, base } = Astro.props;
 ---
 
 <div class="ra-top">
@@ -67,7 +67,7 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wi
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 
-<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, WDA: wikidataUrl, OSMA: osmUrl, FEAT: featureBase, BASE: base }}>
+<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, WDA: wikidataUrl, OSMA: osmUrl, FEAT: featureBase, SETT: settlementBase, BASE: base }}>
 window.addEventListener("load", async function () {
   var el = document.getElementById("ra-map");
   if (!el || typeof L === "undefined") return;
@@ -769,6 +769,26 @@ window.addEventListener("load", async function () {
     return hit.slice(0, 8).map(function (x) { return x[1]; });
   }
 
+  /* Settlements inside a record region that hold no volumes here. They are
+     not drawn — 8,352 grey dots would bury the 2,128 that carry something —
+     but a reader holding a village name still gets the answer they came for,
+     because the region knows whose archive held that ground. */
+  var setcache = {};
+  async function settlements(term) {
+    var f = fold(term);
+    var key = "";
+    for (var i = 0; i < f.length && key.length < 3; i++)
+      if (/[a-z0-9]/.test(f[i])) key += f[i];
+    if (key.length < 3) return [];
+    if (!(key in setcache)) {
+      try { setcache[key] = await (await fetch(SETT + key + ".json")).json(); }
+      catch (e) { setcache[key] = []; }
+    }
+    return setcache[key].filter(function (r) {
+      return fold(r.n).indexOf(f) > -1;
+    }).slice(0, 4);
+  }
+
   async function elsewhere(term) {
     var f = fold(term);
     var iso = Object.keys(CNAME).filter(function (k) {
@@ -781,12 +801,35 @@ window.addEventListener("load", async function () {
     });
     var hits = await gazetteer(term);
     var names = await surnames(term);
+    var setts = await settlements(term);
     /* If the typed word is an OLD name, say which one it matched and what the
        place is called now. "Pressburg → Bratislava" is the whole answer to the
        first of the three problems, and it works in any country on earth. */
     empty.hidden = true; panel.hidden = false;
     var h = ['<div class="at-h"><h3>' + esc(term) + "</h3></div>"];
     if (names.length) h.push(renderSurnames(names, term));
+    /* A village inside a mapped region: no shelf, but a jurisdiction answer,
+       which is the thing this map is actually for. */
+    setts.forEach(function (r) {
+      var reg = REGION[r.r];
+      if (!reg) return;
+      var e = year ? eraAt(reg, year) : null;
+      h.push('<div class="ra-juris"><div class="lab">A place in a mapped region</div>');
+      h.push("<p><b>" + esc(r.n) + "</b> — " + esc(CNAME[r.k] || r.k) +
+             ', in <a href="' + BASE + "region/" + esc(r.r) + '/">' +
+             esc(reg.label) + "</a>.</p>");
+      if (e) {
+        h.push('<p class="ra-filed">In ' + year + " this was <b>" + esc(e.polity) +
+               "</b>" + (e.filedUnder.length ? ", and records of that period are filed under " +
+               e.filedUnder.map(function (x) {
+                 return PROV[x] ? esc(PROV[x].name) : esc(x); }).join(" · ") : "") + ".</p>");
+      } else {
+        h.push('<p class="ra-filed">No volumes here yet — but the ground is mapped. ' +
+               '<a href="#" class="ra-setyear">Set a year</a> and this will say whose ' +
+               "empire held it, and therefore whose archive holds the paper.</p>");
+      }
+      h.push("</div>");
+    });
     if (hits.length) {
       if (gmark) { map.removeLayer(gmark); gmark = null; }
       var top = hits[0];

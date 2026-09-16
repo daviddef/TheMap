@@ -204,6 +204,14 @@ def main():
         wda = {"archives": []}
     json.dump(wda, open(os.path.join(OUT, "archives-wikidata.json"), "w"),
               ensure_ascii=False, separators=(",", ":"))
+    # OpenStreetMap's, in their own file because ODbL is share-alike and
+    # everything else here is CC0.
+    try:
+        osm = json.load(open("data/archives-osm.json"))
+    except FileNotFoundError:
+        osm = {"archives": []}
+    json.dump(osm, open(os.path.join(OUT, "archives-osm.json"), "w"),
+              ensure_ascii=False, separators=(",", ":"))
 
     # One file the PAGE TEMPLATES read at build time, holding every place in
     # full. It lands in src/, not public/, because it must never be served: the
@@ -337,6 +345,8 @@ def main():
         print(f"collections     {len(FS)} FamilySearch collections attached")
     if wda["archives"]:
         print(f"wikidata-arch   {len(wda['archives'])} archives, unchecked, drawn apart")
+    if osm["archives"]:
+        print(f"osm-archives    {len(osm['archives'])} archives, ODbL, kept separate")
     if surn["surnames"]:
         print(f"surnames.json   {sz('surnames.json')/1024:8.1f} KB  "
               f"surnames.csv {sz('surnames.csv')/1024:.0f} KB — the shareable dataset")

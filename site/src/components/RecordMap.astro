@@ -26,7 +26,7 @@
    Everything else — the find box, the filter pills, that every view is a link
    — is the family Atlas's and is kept deliberately, because a reader who knows
    one of these maps should know all of them. */
-const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wikidataUrl, base } = Astro.props;
+const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wikidataUrl, osmUrl, base } = Astro.props;
 ---
 
 <div class="ra-top">
@@ -67,7 +67,7 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wi
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 
-<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, WDA: wikidataUrl, BASE: base }}>
+<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, WDA: wikidataUrl, OSMA: osmUrl, BASE: base }}>
 window.addEventListener("load", async function () {
   var el = document.getElementById("ra-map");
   if (!el || typeof L === "undefined") return;
@@ -245,9 +245,36 @@ window.addEventListener("load", async function () {
       m.addTo(wikiLayer);
       wikiMarkers.push(m);
     });
+    var n = wd.archives.length;
+    /* OpenStreetMap's archives share this layer and this caveat. They are a
+       separate FILE because ODbL is share-alike and everything else here is
+       CC0 — but to a reader they are the same kind of claim: somebody mapped
+       an archive here and nobody on this project has opened it. */
+    try {
+      var om = await (await fetch(OSMA)).json();
+      om.archives.forEach(function (a) {
+        var m = L.circleMarker([a.y, a.x], {
+          radius: 3.4, color: "#4E7A55", weight: 1.2, opacity: .75,
+          fillColor: "#4E7A55", fillOpacity: .18
+        });
+        m.bindTooltip(a.n, { sticky: true });
+        m.on("click", function () {
+          empty.hidden = true; panel.hidden = false;
+          var h = ['<div class="at-h"><h3>' + esc(a.n) + "</h3></div>"];
+          if (a.by) h.push('<p class="at-also">' + esc(a.by) + "</p>");
+          h.push('<div class="ra-juris ra-unmapped"><div class="lab">From OpenStreetMap, ' +
+                 "unchecked</div><p>Somebody mapped an archive at this spot. Nobody here " +
+                 "has opened it. &copy; OpenStreetMap contributors, ODbL.</p></div>");
+          if (a.site) h.push('<p class="at-go"><a href="' + esc(a.site) +
+                             '" target="_blank" rel="noopener">' + esc(a.site) + " &#8599;</a></p>");
+          panel.innerHTML = h.join("");
+        });
+        m.addTo(wikiLayer);
+      });
+      n += om.archives.length;
+    } catch (e) {}
     var lab = document.querySelector('.ra-layer[data-l="wikidata"] span');
-    if (lab) lab.textContent = wd.archives.length +
-      " more on Wikidata · unchecked, and not all genealogical";
+    if (lab) lab.textContent = n + " mapped by others · unchecked, and not all genealogical";
     if (on.wikidata) wikiLayer.addTo(map);
   })();
 
@@ -431,7 +458,7 @@ window.addEventListener("load", async function () {
     ["shelf", "The shelf", idx.places.length + " places · every volume that covers them", shelfLayer],
     ["archives", "The archives", archives.length + " institutions · where the paper actually is", archiveLayer],
     ["jurisdiction", "The jurisdiction", regions.regions.length + " record regions · whose archive this ground was", regionLayer],
-    ["wikidata", "Wikidata's archives", "loading · unchecked, and not all genealogical", wikiLayer]
+    ["wikidata", "Mapped by others", "loading · unchecked, and not all genealogical", wikiLayer]
   ];
   var on = {};
   (Q.get("layers") !== null ? Q.get("layers").split(",").filter(Boolean) : ["shelf"])

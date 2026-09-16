@@ -64,6 +64,8 @@ const RANKS = [
   [2, "This province or state", "Wider than the town, narrower than the country."],
   [3, "The whole country", "Worth searching, and worth knowing it is a national index rather than a local one."],
 ];
+const filedName = place.filedUnder
+  ? ((idx.countries || {})[place.filedUnder] || place.filedUnder) : null;
 const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${place.lat},${place.lon},12`);
 ---
 <Base
@@ -74,11 +76,10 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
   {place.filedUnder && (
     <div class="one" style="border-left-color:#C0392B">
       <div class="lab">Filed under a country that no longer holds it</div>
-      <p class="cap"><b>{place.name} is in {where} today.</b> FamilySearch catalogues it under
-      <b>{(idx.countries||{})[place.filedUnder] || place.filedUnder}</b>, because that is who held
-      the ground when the records were made. Searching {where} alone will not find them —
-      look under <a href={u(`/country/${place.filedUnder.toLowerCase()}/`)}>
-      {(idx.countries||{})[place.filedUnder] || place.filedUnder}</a> as well.</p>
+      <p class="cap"><b>{place.name} is in {where} today.</b>{" "}
+      FamilySearch catalogues it under <b>{filedName}</b>, because that is who held the ground
+      when the records were made. Searching {where} alone will not find them — look under{" "}
+      <a href={u(`/country/${(place.filedUnder||"").toLowerCase()}/`)}>{filedName}</a> as well.</p>
     </div>
   )}
 

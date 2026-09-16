@@ -99,7 +99,7 @@ def main():
             continue
         if not p.get("country"):
             err(f"place {pid}: no country")
-        elif pid not in OVR and not p.get("filedUnder"):
+        elif pid not in OVR and pid not in PIN and not p.get("filedUnder"):
             # A place carrying `filedUnder` has already had this argument
             # settled and recorded: it says where the ground is AND which
             # country a source files it under. Flagging it again would be the

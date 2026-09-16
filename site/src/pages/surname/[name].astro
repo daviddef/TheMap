@@ -1,0 +1,82 @@
+---
+/* One page per surname that has something real to say.
+
+   NOT ONE PER SURNAME. There are 480,635 of them and 449,216 are a row in a
+   national register and nothing else — a name and a number. A page each for
+   those would be 450,000 pages of thin content, which is the definition of a
+   doorway page and is rightly punished for it.
+
+   These are the 3,497 that carry BOTH a human-made variant link and a country:
+   the ones where this dataset knows something a reader could not get from a
+   phone book. */
+import Base from "../../layouts/Base.astro";
+import { u } from "../../lib/url.js";
+import idx from "../../../public/index.json";
+
+export async function getStaticPaths() {
+  const surn = (await import("../../../public/surnames.json")).default;
+  const slug = (s) => s.toLowerCase().normalize("NFKD")
+    .replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const seen = new Set();
+  return (surn.surnames || [])
+    .filter((r) => r.countries.length && r.variants.some((v) => v.how === "curated"))
+    .map((r) => ({ r, s: slug(r.n) }))
+    .filter(({ s }) => s && !seen.has(s) && seen.add(s))
+    .map(({ r, s }) => ({ params: { name: s }, props: { r, attestedBy: surn.attestedBy || {} } }));
+}
+
+const { r, attestedBy } = Astro.props;
+const CN = idx.countries || {};
+const TIER = {
+  curated: ["Also written", "A person linked these — Wikidata's «said to be the same as», or a family archive that worked it out from documents."],
+  grammar: ["The same name, inflected", "A rule of the language rather than an opinion. Polish makes Kowalski and Kowalska of one surname."],
+  sounds:  ["Only sounds alike", "An algorithm's guess. Useful for casting a net, and not evidence."],
+};
+const by = {};
+for (const v of r.variants) (by[v.how] = by[v.how] || []).push(v.n);
+const ccs = r.countries.slice().sort((a, b) => (b.n || 0) - (a.n || 0));
+const total = ccs.reduce((a, c) => a + (c.n || 0), 0);
+const dek = `${r.n}${by.curated ? `, also written ${by.curated.slice(0,4).join(", ")}` : ""}. `
+  + `Attested in ${ccs.map((c) => CN[c.cc] || c.cc).join(", ")}`
+  + (total ? `, borne by about ${total.toLocaleString()} people in the registers this map holds.` : ".");
+---
+<Base title={r.n} eyebrow={ccs.map((c) => CN[c.cc] || c.cc).join(" · ")} dek={dek}>
+
+  {["curated", "grammar", "sounds"].map((how) => by[how] && (
+    <section style="margin-top:24px">
+      <h2>{TIER[how][0]}</h2>
+      <p class="cap">{TIER[how][1]}</p>
+      <p class="vars">{by[how].slice(0, 40).map((n) => <b>{n}</b>)}</p>
+    </section>
+  ))}
+
+  <section style="margin-top:30px">
+    <h2>Where it is attested</h2>
+    <p class="cap"><b>«Attested» means the name appears in a dataset held here</b> — never that
+    it exists in that country and nowhere else, and never that it exists only there.</p>
+    <table style="margin-top:12px">
+      <thead><tr><th>Country</th><th class="m">People</th><th>How we know</th></tr></thead>
+      <tbody>
+        {ccs.map((c) => (
+          <tr>
+            <td><a href={u(`/country/${c.cc.toLowerCase()}/`)}>{CN[c.cc] || c.cc}</a></td>
+            <td class="m">{c.n ? c.n.toLocaleString() : "—"}</td>
+            <td>{(c.by || []).map((b) => attestedBy[b]?.name || b).join("; ") || c.how}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </section>
+
+  <p style="margin-top:28px"><a class="bigl" href={u(`/?q=${encodeURIComponent(r.n)}`)}>
+    Find {r.n} on the map →</a></p>
+  <p class="cap"><a href={u("/surnames/")}>The surname dataset</a> · CC0, and downloadable</p>
+</Base>
+
+<style>
+  h2 { font-family: var(--serif); font-size: 24px; font-weight: 500; margin: 0 0 4px; }
+  .vars { font-family: var(--serif); font-size: 18px; line-height: 1.9; margin: 8px 0 0; }
+  .vars b { font-weight: 500; margin-right: 16px; white-space: nowrap; }
+  .bigl { font-family: var(--serif); font-size: 19px; }
+  td { vertical-align: top; }
+</style>

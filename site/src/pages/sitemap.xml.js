@@ -4,6 +4,7 @@ import full from "../data/places-full.json";
 import regions from "../../public/regions.json";
 import provs from "../../public/providers.json";
 import cols from "../data/collections-full.json";
+import surn from "../../public/surnames.json";
 
 export async function GET({ site }) {
   const base = new URL(import.meta.env.BASE_URL, site || "https://daviddef.github.io");
@@ -21,6 +22,15 @@ export async function GET({ site }) {
     ...regions.regions.map((r) => [`region/${r.id}/`, "0.8"]),
     ...provs.providers.map((p) => [`archive/${p.id}/`, "0.7"]),
     ...full.places.map((p) => [`place/${p.id}/`, "0.6"]),
+    ...(() => {
+      const slug = (x) => x.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      const seen = new Set();
+      return (surn.surnames || [])
+        .filter((r) => r.countries.length && r.variants.some((v) => v.how === "curated"))
+        .map((r) => slug(r.n)).filter((s) => s && !seen.has(s) && seen.add(s))
+        .map((s) => [`surname/${s}/`, "0.5"]);
+    })(),
   ];
 
   const body = `<?xml version="1.0" encoding="UTF-8"?>

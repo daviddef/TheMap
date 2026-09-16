@@ -85,7 +85,24 @@ def main():
         nbytes += len(blob.encode())
         open(os.path.join(pdir, p["id"] + ".json"), "w").write(blob)
 
-    idx = {"note": "One row per place. i=id n=name y=lat x=lon a=access c=collections "
+    # Country names, for the find box. A visitor who types "Ireland" is asking a
+    # real question, and answering it with an empty map is a lie by omission:
+    # there are no PLACES in the Irish shelf yet, but there are providers that
+    # cover Ireland and archives standing in Dublin. Only the countries this
+    # map actually mentions are emitted.
+    names = json.load(open("data/countries.json"))["countries"]
+    used = {p.get("country") for p in places if p.get("country")}
+    for pr in providers["providers"]:
+        used.update(c for c in pr.get("countries", []) if c != "*")
+        if pr.get("at"):
+            used.add(pr["at"]["place"].split(", ")[-1])
+    cmap = {}
+    for iso in sorted(used):
+        if iso in names:
+            cmap[iso] = names[iso]["name"]
+
+    idx = {"countries": cmap,
+           "note": "One row per place. i=id n=name y=lat x=lon a=access c=collections "
                    "q=folded name variants s=[first year, last year] r=region k=country. "
                    "Detail is fetched per place from p/<id>.json when a marker is clicked.",
            "access": providers["access"],

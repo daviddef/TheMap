@@ -10,7 +10,7 @@ import surn from "../../public/surnames.json";
 import idx from "../../public/index.json";
 
 const CN = idx.countries || {};
-const c = surn.counts;
+const c = surn.counts || {surnames: 0, withVariants: 0, withCountries: 0, curatedLinks: 0};
 const withCc = surn.surnames.filter((r) => r.countries.length);
 const byCc = {};
 for (const r of withCc) for (const x of r.countries) byCc[x.cc] = (byCc[x.cc] || 0) + 1;

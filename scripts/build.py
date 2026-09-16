@@ -247,7 +247,14 @@ def main():
     try:
         surn = json.load(open("data/surnames.json"))
     except FileNotFoundError:
-        surn = {"surnames": []}
+        # A shape the pages can still render. The old fallback had no `counts`,
+        # so a missing file did not fail here — it failed four steps later in
+        # surnames.astro with «cannot read properties of undefined», on CI
+        # only, because locally the file was always sitting there.
+        surn = {"surnames": [], "counts": {"surnames": 0, "withVariants": 0,
+                                           "withCountries": 0, "curatedLinks": 0,
+                                           "withRegisterCount": 0},
+                "sources": [], "attestedBy": {}, "licence": "CC0-1.0"}
     sshards, sbytes = {}, 0
     for r in surn["surnames"]:
         keys = {r["q"]}

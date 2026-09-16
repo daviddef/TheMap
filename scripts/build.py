@@ -110,6 +110,20 @@ def main():
     json.dump(providers, open(os.path.join(OUT, "providers.json"), "w"),
               ensure_ascii=False, separators=(",", ":"))
 
+    # One file the PAGE TEMPLATES read at build time, holding every place in
+    # full. It lands in src/, not public/, because it must never be served: the
+    # browser fetches p/<id>.json one place at a time and has no use for two
+    # and a half megabytes of the other 1,238.
+    #
+    # This exists because the map was invisible. Every place lived only inside
+    # a JSON file that JavaScript fetched, so a crawler — and a reader with no
+    # JavaScript, and anyone who wanted to LINK to a place — saw six pages
+    # where there are more than a thousand things to say.
+    src = os.path.join("site", "src", "data")
+    os.makedirs(src, exist_ok=True)
+    json.dump({"places": places}, open(os.path.join(src, "places-full.json"), "w"),
+              ensure_ascii=False, separators=(",", ":"))
+
     # ---- the gazetteer, sharded on three letters -------------------------
     # 48,906 places and 212,101 former names will not ride in the index that
     # draws the map, and must not: this is a search corpus, touched only when
@@ -162,6 +176,8 @@ def main():
           f"{nbytes/max(len(index),1):.0f} B each on average")
     print(f"regions.json    {sz('regions.json')/1024:8.1f} KB")
     print(f"providers.json  {sz('providers.json')/1024:8.1f} KB")
+    print(f"places-full     {os.path.getsize(os.path.join(src,'places-full.json'))/1024:8.1f} KB"
+          f"  build-time only, never served")
     if shards:
         sizes = sorted((len(json.dumps(v, ensure_ascii=False).encode()), k)
                        for k, v in shards.items())

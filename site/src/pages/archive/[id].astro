@@ -1,0 +1,103 @@
+---
+/* One page per provider — the institution's own page.
+
+   A researcher who starts from a building rather than from a village needs
+   this direction of the same facts: what this archive holds, what ground it
+   covers, what it costs to look, and which of our places carry its volumes. */
+import Base from "../../layouts/Base.astro";
+import { u } from "../../lib/url.js";
+import full from "../../data/places-full.json";
+import regions from "../../../public/regions.json";
+import provs from "../../../public/providers.json";
+
+export async function getStaticPaths() {
+  const provs = (await import("../../../public/providers.json")).default;
+  return provs.providers.map((p) => ({ params: { id: p.id }, props: { prov: p } }));
+}
+
+const { prov } = Astro.props;
+const ACC = {
+  free: "Images, free, no account", account: "Images, free, account needed",
+  index: "An index only — no images", mixed: "Partly free, partly paid",
+  paid: "Images, behind a paywall", catalogue: "A catalogue entry — not photographed",
+  onsite: "On paper, in the building",
+};
+/* Which of our places carry a volume from this provider, and how many. */
+const holds = full.places
+  .map((p) => ({ p, n: (p.collections || []).filter((c) => c.provider === prov.id).length }))
+  .filter((x) => x.n > 0)
+  .sort((a, b) => b.n - a.n || a.p.name.localeCompare(b.p.name));
+const vols = holds.reduce((a, x) => a + x.n, 0);
+/* And which record regions name it as the holder of their records. */
+const cited = regions.regions
+  .map((r) => ({ r, eras: r.eras.filter((e) => e.filedUnder.includes(prov.id)) }))
+  .filter((x) => x.eras.length);
+const KIND = {
+  "aggregator": "An aggregator", "national-archive": "A national archive or state portal",
+  "regional-archive": "A regional archive", "diocesan": "A church archive",
+  "volunteer": "A volunteer index", "library": "A library or newspaper archive",
+  "commercial": "A commercial subscription",
+};
+---
+<Base
+  title={prov.name}
+  eyebrow={[KIND[prov.kind], prov.at?.place, ACC[prov.access]].filter(Boolean).join(" · ")}
+  dek={prov.what}>
+
+  <p style="margin-top:6px"><a class="bigl" href={prov.url} target="_blank" rel="noopener">{prov.url} ↗</a></p>
+  <p class="cap">Last checked {prov.checked}. <a href={u("/add/")}>Tell us if this has changed.</a></p>
+
+  {cited.length > 0 && (
+    <section style="margin-top:32px">
+      <h2>The ground it holds</h2>
+      <p class="cap">Record regions whose registers are filed here, and for which years.</p>
+      {cited.map(({ r, eras }) => (
+        <div style="margin-top:16px">
+          <div class="lab"><a href={u(`/region/${r.id}/`)}>{r.label}</a></div>
+          <ul class="eras">
+            {eras.map((e) => (
+              <li><span class="y">{e.from}–{e.to}</span> {e.polity}
+                {e.note && e.note.startsWith("THE ") && <em class="trap"> — {e.note}</em>}</li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </section>
+  )}
+
+  {holds.length > 0 ? (
+    <section style="margin-top:34px">
+      <h2>{vols} volumes across {holds.length} places</h2>
+      <p class="cap">Places in this map that carry at least one volume from {prov.name}.</p>
+      <ul class="places">
+        {holds.slice(0, 400).map(({ p, n }) => (
+          <li><a href={u(`/place/${p.id}/`)}>{p.name}</a> <span class="y">{n}</span></li>
+        ))}
+      </ul>
+      {holds.length > 400 && <p class="cap">…and {holds.length - 400} more.</p>}
+    </section>
+  ) : (
+    <div class="one" style="margin-top:32px;border-left-color:var(--rule-strong)">
+      <div class="lab">No places here yet</div>
+      <p class="cap">This map knows {prov.name} covers
+      {" " + (prov.countries.includes("*") ? "the world" : prov.countries.join(", "))},
+      but nobody has walked its catalogue into the shelf. <b>That is a gap in this map, not a
+      gap in the record.</b> <a href={u("/add/")}>Help fill it →</a></p>
+    </div>
+  )}
+
+  <p class="cap" style="margin-top:30px"><a href={u("/providers/")}>All sources</a> ·
+    <a href={u("/")}>The map</a></p>
+</Base>
+
+<style>
+  h2 { font-family: var(--serif); font-size: 26px; font-weight: 500; margin: 0 0 6px; }
+  .bigl { font-family: var(--mono); font-size: 14px; word-break: break-all; }
+  .eras { list-style: none; padding: 0; margin: 6px 0 0; display: grid; gap: 4px; }
+  .eras li { font-family: var(--sans); font-size: 12.5px; color: var(--ink-2); }
+  .y { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); }
+  .trap { color: #C0392B; font-style: normal; font-size: 11.5px; }
+  .places { list-style: none; padding: 0; margin: 12px 0 0;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 3px; }
+  .places li { font-family: var(--sans); font-size: 13px; }
+</style>

@@ -1,0 +1,50 @@
+---
+/* The crawl path. A sitemap tells a search engine a page exists; a page that
+   nothing links to still reads as an orphan. This is the index that makes the
+   other 1,239 reachable by walking, which is how they get read. */
+import Base from "../layouts/Base.astro";
+import { u } from "../lib/url.js";
+import full from "../data/places-full.json";
+import idx from "../../public/index.json";
+
+const CN = idx.countries || {};
+const by = {};
+for (const p of full.places) (by[p.country || "??"] = by[p.country || "??"] || []).push(p);
+const groups = Object.entries(by)
+  .map(([k, v]) => [k, v.sort((a, b) => a.name.localeCompare(b.name))])
+  .sort((a, b) => b[1].length - a[1].length);
+const vols = full.places.reduce((a, p) => a + (p.collections || []).length, 0);
+---
+<Base
+  title="Every place"
+  eyebrow={`${full.places.length} places · ${vols} volumes · ${groups.length} countries`}
+  dek="Every place the shelf has walked, with the number of record volumes standing at each. Deep for Croatia, Istria and Carnia; not yet walked anywhere else.">
+
+  {groups.map(([cc, list]) => (
+    <section style="margin-top:30px">
+      <h2>{CN[cc] || cc} <span class="n">{list.length}</span></h2>
+      <ul class="places">
+        {list.map((p) => (
+          <li>
+            <a href={u(`/place/${p.id}/`)}>{p.name}</a>
+            <span class="y">{(p.collections || []).length}</span>
+            {(p.names || []).length > 0 && (
+              <span class="alt">{p.names.map((n) => n.n).slice(0, 2).join(" · ")}</span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+</Base>
+
+<style>
+  h2 { font-family: var(--serif); font-size: 24px; font-weight: 500; margin: 0 0 4px;
+       border-bottom: 1px solid var(--rule); padding-bottom: 6px; }
+  h2 .n { font-family: var(--mono); font-size: 12px; color: var(--ink-3); }
+  .places { list-style: none; padding: 0; margin: 10px 0 0;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 4px 18px; }
+  .places li { font-family: var(--sans); font-size: 13px; line-height: 1.4; }
+  .y { font-family: var(--mono); font-size: 11px; color: var(--ink-3); margin-left: 6px; }
+  .alt { display: block; font-size: 11px; color: var(--ink-3); font-style: italic; }
+</style>

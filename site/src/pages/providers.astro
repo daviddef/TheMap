@@ -43,7 +43,7 @@ const free = P.filter(p => p.access === "free").length;
         <tbody>
           {byKind[k].sort((a, b) => a.name.localeCompare(b.name)).map(p => (
             <tr>
-              <td><a href={p.url} target="_blank" rel="noopener">{p.name}</a></td>
+              <td><a href={u(`/archive/${p.id}/`)}>{p.name}</a></td>
               <td>{p.what}</td>
               <td class="m"><span class={"chip acc-" + p.access}>{p.access}</span></td>
               <td class="m">{p.countries.includes("*") ? "worldwide" : p.countries.join(" ")}</td>

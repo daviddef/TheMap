@@ -5,12 +5,15 @@ import site from "../data/site.json";
 const { title, dek, eyebrow, bare } = Astro.props;
 const nav = [
   ["/", "The map"],
+  ["/places/", "Every place"],
   ["/providers/", "The sources"],
   ["/jurisdictions/", "Whose archive"],
   ["/about/", "About"],
   ["/add/", "Add a source"],
 ];
 const here = Astro.url.pathname;
+/* Strip the query string: /?q=Breslau and / are the same page. */
+const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
 ---
 <html lang="en" data-base={u("")}>
 <head>
@@ -21,6 +24,13 @@ const here = Astro.url.pathname;
 <meta property="og:title" content={title} />
 <meta property="og:description" content={dek || site.tagline} />
 <meta property="og:type" content="website" />
+{/* One canonical address per page. With 1,304 pages and a map whose every
+    view is a query string, a crawler will otherwise find the same page under
+    a dozen addresses and split its credit between them. */}
+<link rel="canonical" href={canon} />
+<meta property="og:url" content={canon} />
+<meta property="og:site_name" content={site.name} />
+<meta name="twitter:card" content="summary" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Libre+Franklin:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" />

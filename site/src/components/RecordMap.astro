@@ -222,6 +222,7 @@ window.addEventListener("load", async function () {
     try { wd = await (await fetch(WDA)).json(); } catch (e) { return; }
     wd.archives.forEach(function (a) {
       var m = L.circleMarker([a.y, a.x], {
+        renderer: featCanvas,
         radius: 3.4, color: "#8E6FA8", weight: 1.2, opacity: .75,
         fillColor: "#8E6FA8", fillOpacity: .18
       });
@@ -254,6 +255,7 @@ window.addEventListener("load", async function () {
       var om = await (await fetch(OSMA)).json();
       om.archives.forEach(function (a) {
         var m = L.circleMarker([a.y, a.x], {
+          renderer: featCanvas,
           radius: 3.4, color: "#4E7A55", weight: 1.2, opacity: .75,
           fillColor: "#4E7A55", fillOpacity: .18
         });
@@ -283,6 +285,13 @@ window.addEventListener("load", async function () {
      worldwide; drawing them all would be a map of Wikidata rather than of
      where records are, and would bury 2,130 walked places under half a
      million dots. The regions are the ground this project has worked out. */
+  /* ONE CANVAS, NOT 46,909 DOM NODES. The church layer drew a separate SVG
+     path per parish and put every one of them in the document whether it was
+     on screen or not, which is a browser brought to its knees by a layer
+     nobody asked to be slow. Leaflet will rasterise a layer to a single canvas
+     instead, and for tens of thousands of small circles that is the difference
+     between a map and a slideshow. */
+  var featCanvas = L.canvas({ padding: 0.3 });
   var FEATS = [
     ["cemeteries", "Cemeteries", "#6C5CE0", 2.8],
     ["churches",   "Churches and parishes", "#B07CD9", 2.6],
@@ -297,15 +306,21 @@ window.addEventListener("load", async function () {
          OpenStreetMap's ODbL one, which live in separate files because
          share-alike must not leak into the rest but are the same claim to a
          reader — somebody mapped this and nobody here has been. */
-      var d = { features: [] };
+      var d = { features: [], srcs: [] };
       for (var si = 0; si < 2; si++) {
+        var which = ["wikidata", "osm"][si];
         try {
-          var part = await (await fetch(FEAT + key + "-" + ["wikidata", "osm"][si] + ".json")).json();
-          d.features = d.features.concat(part.features || []);
+          var part = await (await fetch(FEAT + key + "-" + which + ".json")).json();
+          if (part.features && part.features.length) {
+            d.features = d.features.concat(part.features);
+            d.srcs.push(which === "osm" ? "OpenStreetMap" : "Wikidata");
+          }
         } catch (e) {}
       }
+      if (!d.srcs.length) d.srcs = ["Wikidata"];
       d.features.forEach(function (f) {
         var m = L.circleMarker([f.y, f.x], {
+          renderer: featCanvas,
           radius: F[3], color: F[2], weight: 1, opacity: .7,
           fillColor: F[2], fillOpacity: .35
         });
@@ -324,8 +339,13 @@ window.addEventListener("load", async function () {
         });
         m.addTo(layer);
       });
+      /* NAME BOTH SOURCES. The cemetery layer merges 11,698 CC0 rows from
+         Wikidata with 5,443 ODbL ones from OpenStreetMap, and a label saying
+         only «from Wikidata» is both wrong and, for the ODbL half, an
+         attribution this project owes. */
       var lab = document.querySelector('.ra-layer[data-l="' + key + '"] span');
-      if (lab) lab.textContent = d.features.length + " in the record regions · from Wikidata, unchecked";
+      if (lab) lab.textContent = d.features.length + " in the record regions · " +
+        d.srcs.join(" and ") + ", unchecked";
       if (on[key]) layer.addTo(map);
     })();
   });

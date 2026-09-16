@@ -90,16 +90,11 @@ def main():
     # there are no PLACES in the Irish shelf yet, but there are providers that
     # cover Ireland and archives standing in Dublin. Only the countries this
     # map actually mentions are emitted.
+    # EVERY country, not only the ones the shelf reaches. The gazetteer answers
+    # for the whole world, and a hit that reads "Kaliningrad — RU" has stopped
+    # short of the answer. 245 names is five kilobytes.
     names = json.load(open("data/countries.json"))["countries"]
-    used = {p.get("country") for p in places if p.get("country")}
-    for pr in providers["providers"]:
-        used.update(c for c in pr.get("countries", []) if c != "*")
-        if pr.get("at"):
-            used.add(pr["at"]["place"].split(", ")[-1])
-    cmap = {}
-    for iso in sorted(used):
-        if iso in names:
-            cmap[iso] = names[iso]["name"]
+    cmap = {iso: v["name"] for iso, v in sorted(names.items())}
 
     idx = {"countries": cmap,
            "note": "One row per place. i=id n=name y=lat x=lon a=access c=collections "
@@ -115,12 +110,66 @@ def main():
     json.dump(providers, open(os.path.join(OUT, "providers.json"), "w"),
               ensure_ascii=False, separators=(",", ":"))
 
+    # ---- the gazetteer, sharded on three letters -------------------------
+    # 48,906 places and 212,101 former names will not ride in the index that
+    # draws the map, and must not: this is a search corpus, touched only when
+    # somebody types something the shelf cannot answer.
+    #
+    # TWO LETTERS WAS THE OBVIOUS SHARD AND IT WAS WRONG — 44 MB in 824 files,
+    # the biggest of them 1.4 MB, which is not a search-as-you-type, it is a
+    # download. Three letters, and a place stored ONCE per shard rather than
+    # once per name form, is the same corpus in a fraction of the bytes.
+    #
+    # A place lands in every shard one of its names begins in: Bratislava is in
+    # `bra`, `pre`, `poz` and `pos`, which is precisely the point — somebody
+    # holding a document that says Pressburg types P-R-E.
+    gz = os.path.join(OUT, "g")
+    shutil.rmtree(gz, ignore_errors=True)
+    os.makedirs(gz)
+    try:
+        gaz = json.load(open("data/gazetteer.json"))["places"]
+    except FileNotFoundError:
+        gaz = []
+    shards = {}
+    for r in gaz:
+        # TWO LISTS, BECAUSE THEY ARE TWO DIFFERENT JOBS, and conflating them
+        # caused this bug twice running. `a` is what a reader SEES: a curated
+        # dozen, de-duplicated so that six spellings of Breslavia do not crowd
+        # out Boroszlo. `q` is what the search MATCHES: every form GeoNames
+        # knows, all seventy-five of Wrocław's, folded.
+        #
+        # Curating the match list is what lost Breslau and Pressburg — the
+        # cluster representative is the shortest form, which is usually right
+        # for display and catastrophic for matching, because "Breslu" is not
+        # the word on anybody's certificate and "Breslau" is.
+        rec = [r["n"], r["y"], r["x"], r["k"], r["a"], r["q"]]
+        keys = set()
+        for form in r["q"].split(" "):
+            key = "".join(c for c in form[:3] if c.isalnum())
+            if len(key) == 3:
+                keys.add(key)
+        for key in keys:
+            shards.setdefault(key, []).append(rec)
+    gbytes = 0
+    for key, rows in shards.items():
+        blob = json.dumps(rows, ensure_ascii=False, separators=(",", ":"))
+        gbytes += len(blob.encode())
+        open(os.path.join(gz, key + ".json"), "w").write(blob)
+
     sz = lambda f: os.path.getsize(os.path.join(OUT, f))
     print(f"index.json      {sz('index.json')/1024:8.1f} KB  {len(index)} places")
     print(f"p/*.json        {nbytes/1024:8.1f} KB  {len(index)} files, "
           f"{nbytes/max(len(index),1):.0f} B each on average")
     print(f"regions.json    {sz('regions.json')/1024:8.1f} KB")
     print(f"providers.json  {sz('providers.json')/1024:8.1f} KB")
+    if shards:
+        sizes = sorted((len(json.dumps(v, ensure_ascii=False).encode()), k)
+                       for k, v in shards.items())
+        big = sizes[-1]
+        p95 = sizes[int(len(sizes) * 0.95)][0]
+        print(f"g/*.json        {gbytes/1024/1024:8.1f} MB  {len(shards)} shards; "
+              f"biggest '{big[1]}' {big[0]/1024:.0f} KB, 95th pct {p95/1024:.0f} KB, "
+              f"median {sizes[len(sizes)//2][0]/1024:.1f} KB")
 
 
 if __name__ == "__main__":

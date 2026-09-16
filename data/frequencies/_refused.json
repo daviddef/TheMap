@@ -1,7 +1,26 @@
 {
   "note": "Countries whose surname data was sought and not obtained, with what was actually tried. A gap somebody can see is worth more than a gap they cannot, and without this file the next person spends the same afternoon finding the same three walls. A «not found» verdict is weaker than a «refused» one: it means this project looked and did not find, not that the data is absent. Both are worth writing down and they are not the same claim.",
-  "checked": "2026-09-16",
+  "checked": "2026-09-17",
   "refused": [
+    {
+      "country": "BE",
+      "name": "Belgium",
+      "tried": [
+        "statbel.fgov.be/en/open-data — the full open-data catalogue searched for name/nom/naam"
+      ],
+      "verdict": "first names only",
+      "why": "Statbel publishes first names in detail — by year, region and sex — and no surname dataset at all. The gap is in what Belgium chooses to publish, not in what it holds."
+    },
+    {
+      "country": "CZ",
+      "name": "Czechia",
+      "tried": [
+        "mvcr.cz/clanek/cetnost-jmen-a-prijmeni.aspx — the page loads and is headed «Archiv», with no file of any kind left on it",
+        "no surname table in the Czech Statistical Office's own catalogue"
+      ],
+      "verdict": "withdrawn",
+      "why": "The Ministry of the Interior used to publish surname frequencies and the page is now an empty archive stub. This is not a refusal and not an absence: the data existed, was public, and has been taken down. Worth asking the ministry for the last edition."
+    },
     {
       "country": "DK",
       "name": "Denmark",
@@ -23,23 +42,13 @@
       "why": "Finnish name data belongs to the DVV (Digital and Population Data Services Agency) rather than Statistics Finland, and DVV publishes through avoindata.fi, which refused every request. Worth asking DVV directly."
     },
     {
-      "country": "SE",
-      "name": "Sweden",
+      "country": "HR",
+      "name": "Croatia",
       "tried": [
-        "api.scb.se BE0001 «Namnstatistik» — the folder is listed and its two sub-folders, BE0001D and BE0001G, both answer 400 Bad Request"
+        "podaci.dzs.hr CKAN package_search for «prezimena» — no parseable response"
       ],
-      "verdict": "listed but not served",
-      "why": "SCB still advertises its name statistics in the API's table tree and both sub-folders are marked «Äldre tabeller som inte längre uppdateras» — older tables no longer updated. The API lists them and will not serve them."
-    },
-    {
-      "country": "NL",
-      "name": "Netherlands",
-      "tried": [
-        "opendata.cbs.nl catalogue search — no surname table",
-        "cbgfamilienamen.nl (Meertens familienamenbank) — HTTP 403"
-      ],
-      "verdict": "research database, not open data",
-      "why": "CBS publishes no surname frequencies. The real Dutch source is the Meertens Nederlandse Familienamenbank, which is a research database rather than open government data. This one should be asked for rather than taken."
+      "verdict": "not found",
+      "why": "The Croatian statistics office's open data portal responds but not to a CKAN search. Croatia is this map's deepest ground and has no surname frequencies at all, which is the sharpest gap in the dataset."
     },
     {
       "country": "IT",
@@ -52,13 +61,23 @@
       "why": "ISTAT does not appear to publish surname frequencies. What circulates for Italy is derived from telephone directories by commercial sites, which is neither open nor redistributable. Recorded as NOT FOUND rather than as absent — a human who knows ISTAT may know better, and this is three archives' core ground."
     },
     {
-      "country": "HR",
-      "name": "Croatia",
+      "country": "NL",
+      "name": "Netherlands",
       "tried": [
-        "podaci.dzs.hr CKAN package_search for «prezimena» — no parseable response"
+        "opendata.cbs.nl catalogue search — no surname table",
+        "cbgfamilienamen.nl (Meertens familienamenbank) — HTTP 403"
       ],
-      "verdict": "not found",
-      "why": "The Croatian statistics office's open data portal responds but not to a CKAN search. Croatia is this map's deepest ground and has no surname frequencies at all, which is the sharpest gap in the dataset."
+      "verdict": "research database, not open data",
+      "why": "CBS publishes no surname frequencies. The real Dutch source is the Meertens Nederlandse Familienamenbank, which is a research database rather than open government data. This one should be asked for rather than taken."
+    },
+    {
+      "country": "SE",
+      "name": "Sweden",
+      "tried": [
+        "api.scb.se BE0001 «Namnstatistik» — the folder is listed and its two sub-folders, BE0001D and BE0001G, both answer 400 Bad Request"
+      ],
+      "verdict": "listed but not served",
+      "why": "SCB still advertises its name statistics in the API's table tree and both sub-folders are marked «Äldre tabeller som inte längre uppdateras» — older tables no longer updated. The API lists them and will not serve them."
     }
   ]
 }

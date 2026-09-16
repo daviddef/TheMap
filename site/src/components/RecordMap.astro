@@ -556,7 +556,20 @@ window.addEventListener("load", async function () {
     hit.sort(function (a, b) {
       return a[0] - b[0] || (b[1].countries.length - a[1].countries.length);
     });
-    return hit.slice(0, 5).map(function (x) { return x[1]; });
+    /* ONE CARD PER CLUSTER. Searching «Llerena» returned LLERENA, LARENA and
+       LERENA as three separate panels saying much the same thing, because
+       each is a hit in its own right. They are one family of spellings: if a
+       name is already listed as a variant of something shown above it, it is
+       not news. The best-ranked one wins and carries the rest. */
+    var shown = [], claimed = {};
+    hit.forEach(function (x) {
+      var r = x[1];
+      if (claimed[fold(r.n)]) return;
+      shown.push(r);
+      claimed[fold(r.n)] = true;
+      r.variants.forEach(function (v) { claimed[fold(v.n)] = true; });
+    });
+    return shown.slice(0, 4);
   }
 
   var HOWLAB = {

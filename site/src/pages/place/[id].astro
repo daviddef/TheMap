@@ -16,6 +16,7 @@ import { u } from "../../lib/url.js";
 import full from "../../data/places-full.json";
 import regions from "../../../public/regions.json";
 import provs from "../../../public/providers.json";
+import idx from "../../../public/index.json";
 
 export async function getStaticPaths() {
   const full = (await import("../../data/places-full.json")).default;
@@ -42,10 +43,10 @@ const span = years.length
   ? [Math.min(...years.map((y) => y[0])), Math.max(...years.map((y) => y[1]))]
   : null;
 const older = (place.names || []).map((n) => n.n);
-const countries = { HR: "Croatia", IT: "Italy", SI: "Slovenia", AT: "Austria",
-                    HU: "Hungary", BA: "Bosnia and Herzegovina", RS: "Serbia",
-                    ME: "Montenegro" };
-const where = countries[place.country] || place.country;
+/* All 234 of them, from the index, rather than the eight European ones this
+   page was born with — which printed "Graaff-Reinet in ZA" the moment the
+   map reached the Cape. */
+const where = (idx.countries || {})[place.country] || place.country;
 
 /* The sentence a search engine gets, and the one a human reads first. It has
    to carry the former names, because that is what people type. */

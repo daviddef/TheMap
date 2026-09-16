@@ -12,11 +12,13 @@ for the world. Here the map fetches an index that carries only what a marker
 needs to be DRAWN and FOUND, and the panel fetches one small file when somebody
 actually clicks. Worldwide, the index grows linearly and the panel never does.
 """
-import json, os, re, shutil, unicodedata
+import json, os, re, shutil, sys, unicodedata
 
 import os as _os
 _ROOT = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
+sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
 _os.chdir(_ROOT)
+from geo import in_ring_latlon
 
 OUT = "site/public"
 
@@ -43,6 +45,38 @@ def fold(s):
 
 def main():
     places = json.load(open("data/places.json"))["places"]
+
+    # ---- which region a place stands in, decided HERE and not remembered -----
+    # This used to be written into data/places.json by whichever importer drew
+    # the place, which meant a region could only ever catch the ground that was
+    # imported after it. Eleven regions were authored this afternoon — Ireland,
+    # Scotland, Alsace-Lorraine, Silesia, the Baltic governorates, Congress
+    # Poland, Carniola, Bosnia, Vojvodina, Quebec, Acadia — and every one of
+    # them came up empty, because all 4,106 places already existed. The stored
+    # field was not wrong; it was stale, which on a map that adds regions is
+    # the same thing.
+    #
+    # The rings are the only source of truth about what is inside them, so the
+    # question is asked of the rings, on every build. 4,106 places against 33
+    # rings is a few hundred thousand point-in-polygon tests and costs under a
+    # second.
+    _regions = json.load(open("data/regions.json"))["regions"]
+    _moved = 0
+    for _p in places:
+        _was = _p.get("region")
+        _now = None
+        for _r in _regions:
+            if in_ring_latlon(_p["lat"], _p["lon"], _r["ring"]):
+                _now = _r["id"]
+                break
+        if _now:
+            _p["region"] = _now
+        elif _was:
+            _p.pop("region")
+        if _now != _was:
+            _moved += 1
+    print(f"{sum(1 for p in places if p.get('region'))} of {len(places)} places "
+          f"stand inside a record region ({_moved} changed hands this build)")
 
     # ---- FamilySearch collections, attached by how specifically they reach ---
     # A collection is a COVERAGE CLAIM over an area, not a volume standing in a

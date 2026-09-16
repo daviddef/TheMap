@@ -1,0 +1,56 @@
+---
+/* Every country the catalogue reaches, which since the harvest widened is
+   ninety-three of them. The crawl path for the country pages, and the honest
+   overview of how uneven this map is. */
+import Base from "../layouts/Base.astro";
+import { u } from "../lib/url.js";
+import cols from "../data/collections-full.json";
+import full from "../data/places-full.json";
+import provs from "../../public/providers.json";
+import idx from "../../public/index.json";
+
+const CN = idx.countries || {};
+const rows = {};
+const bump = (cc, k) => { (rows[cc] = rows[cc] || { cc, cols: 0, places: 0, arch: 0 })[k]++; };
+for (const c of cols.collections) for (const k of c.countries) bump(k, "cols");
+for (const p of full.places) if (p.country) bump(p.country, "places");
+for (const p of provs.providers) for (const k of p.countries) if (k !== "*") bump(k, "arch");
+const list = Object.values(rows)
+  .map((r) => ({ ...r, name: CN[r.cc] || r.cc }))
+  .sort((a, b) => b.cols - a.cols || a.name.localeCompare(b.name));
+const totalCols = cols.collections.length;
+const records = cols.collections.reduce((a, c) => a + (c.records || 0), 0);
+const walked = list.filter((r) => r.places > 0).length;
+---
+<Base
+  title="Every country"
+  eyebrow={`${list.length} countries · ${totalCols} FamilySearch collections · ${records.toLocaleString()} records`}
+  dek="Where this map reaches, and how unevenly. A country with collections but no places is one where the sources are known and nobody has walked the shelf — which is a gap in this map rather than a gap in the record.">
+
+  <div class="one" style="border-left-color:var(--rule-strong)">
+    <div class="lab">How to read this</div>
+    <p class="cap"><b>Collections</b> are FamilySearch's, reaching that country.
+    <b>Archives</b> are institutions this map names for it. <b>Places</b> are towns whose
+    volumes have actually been walked — and {walked} countries of {list.length} have any at
+    all. The other {list.length - walked} are honest blanks.</p>
+  </div>
+
+  <table style="margin-top:22px">
+    <thead><tr><th>Country</th><th class="m">Collections</th><th class="m">Archives</th><th class="m">Places</th></tr></thead>
+    <tbody>
+      {list.map((r) => (
+        <tr>
+          <td><a href={u(`/country/${r.cc.toLowerCase()}/`)}>{r.name}</a></td>
+          <td class="m">{r.cols || ""}</td>
+          <td class="m">{r.arch || ""}</td>
+          <td class={"m" + (r.places ? "" : " none")}>{r.places || "—"}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</Base>
+
+<style>
+  td.none { color: var(--ink-3); }
+  td { vertical-align: top; }
+</style>

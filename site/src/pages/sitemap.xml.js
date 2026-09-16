@@ -3,6 +3,7 @@
 import full from "../data/places-full.json";
 import regions from "../../public/regions.json";
 import provs from "../../public/providers.json";
+import cols from "../data/collections-full.json";
 
 export async function GET({ site }) {
   const base = new URL(import.meta.env.BASE_URL, site || "https://daviddef.github.io");
@@ -11,7 +12,12 @@ export async function GET({ site }) {
 
   const pages = [
     ["", "1.0"], ["about/", "0.6"], ["providers/", "0.9"], ["jurisdictions/", "0.9"],
-    ["places/", "0.9"], ["add/", "0.5"], ["privacy/", "0.3"],
+    ["places/", "0.9"], ["countries/", "0.9"], ["add/", "0.5"], ["privacy/", "0.3"],
+    ...[...new Set([
+      ...cols.collections.flatMap((c) => c.countries),
+      ...full.places.map((p) => p.country).filter(Boolean),
+      ...provs.providers.flatMap((p) => p.countries).filter((k) => k !== "*"),
+    ])].map((cc) => [`country/${cc.toLowerCase()}/`, "0.8"]),
     ...regions.regions.map((r) => [`region/${r.id}/`, "0.8"]),
     ...provs.providers.map((p) => [`archive/${p.id}/`, "0.7"]),
     ...full.places.map((p) => [`place/${p.id}/`, "0.6"]),

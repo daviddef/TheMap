@@ -1,0 +1,142 @@
+---
+/* One page per country the catalogue reaches — 93 of them.
+
+   The harvest went worldwide and the map had nowhere to put it. A country is
+   the right unit for that: big enough that there are only ninety-three, small
+   enough that each one is a real answer to "where do I start with Portugal".
+   It gathers everything this map knows about one country in one place — the
+   collections, the institutions, the record regions and the places — which is
+   more than any single layer of the map can show at once. */
+import Base from "../../layouts/Base.astro";
+import { u } from "../../lib/url.js";
+import full from "../../data/places-full.json";
+import cols from "../../data/collections-full.json";
+import regions from "../../../public/regions.json";
+import provs from "../../../public/providers.json";
+import idx from "../../../public/index.json";
+
+export async function getStaticPaths() {
+  const cols = (await import("../../data/collections-full.json")).default;
+  const full = (await import("../../data/places-full.json")).default;
+  const provs = (await import("../../../public/providers.json")).default;
+  const ccs = new Set();
+  for (const c of cols.collections) for (const k of c.countries) ccs.add(k);
+  for (const p of full.places) if (p.country) ccs.add(p.country);
+  for (const p of provs.providers) for (const k of p.countries) if (k !== "*") ccs.add(k);
+  return [...ccs].map((cc) => ({ params: { cc: cc.toLowerCase() }, props: { cc } }));
+}
+
+const { cc } = Astro.props;
+const NAME = (idx.countries || {})[cc] || cc;
+const here = full.places.filter((p) => p.country === cc)
+                        .sort((a, b) => a.name.localeCompare(b.name));
+const mine = cols.collections.filter((c) => c.countries.includes(cc))
+  .map((c) => ({ c, local: c.places.some((p) => p.type && p.type !== "COUNTRY") }))
+  .sort((a, b) => (a.local === b.local ? (b.c.records || 0) - (a.c.records || 0)
+                                       : a.local ? -1 : 1));
+const who = provs.providers.filter((p) => p.countries.includes(cc));
+const world = provs.providers.filter((p) => p.countries.includes("*"));
+const regs = regions.regions.filter((r) => here.some((p) => p.region === r.id));
+const records = mine.reduce((a, x) => a + (x.c.records || 0), 0);
+const vols = here.reduce((a, p) => a + (p.collections || []).length, 0);
+const span = mine.filter(x => x.c.from).length
+  ? [Math.min(...mine.filter(x => x.c.from).map(x => x.c.from)),
+     Math.max(...mine.filter(x => x.c.to).map(x => x.c.to))] : null;
+---
+<Base
+  title={NAME}
+  eyebrow={[`${mine.length} FamilySearch collection${mine.length === 1 ? "" : "s"}`,
+            who.length ? `${who.length} archive${who.length === 1 ? "" : "s"}` : null,
+            here.length ? `${here.length} place${here.length === 1 ? "" : "s"}` : null,
+            span ? `${span[0]}–${span[1]}` : null].filter(Boolean).join(" · ")}
+  dek={`Where the records of ${NAME} are, who holds them, and what it costs to look. ${records.toLocaleString()} indexed records reachable through FamilySearch alone.`}>
+
+  {regs.length > 0 && (
+    <section style="margin-top:26px">
+      <h2>Whose archive this ground was</h2>
+      <p class="cap">Record regions mapped in {NAME} — which empire held the ground, and
+      therefore which archive holds its paper.</p>
+      <ul class="regs">
+        {regs.map((r) => (
+          <li><a href={u(`/region/${r.id}/`)}>{r.label}</a>
+            <span class="y">{r.eras.length} eras</span>
+            <span class="sub">{r.sub}</span></li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  {who.length > 0 && (
+    <section style="margin-top:30px">
+      <h2>The archives</h2>
+      <ul class="rows">
+        {who.map((p) => (
+          <li><a href={u(`/archive/${p.id}/`)}>{p.name}</a>
+            <span class={"chip acc-" + p.access}>{p.access}</span>
+            {p.at && <span class="y">{p.at.place}</span>}
+            <p class="what">{p.what}</p></li>
+        ))}
+      </ul>
+      <p class="cap" style="margin-top:10px">And {world.length} worldwide providers
+      reach {NAME} too — <a href={u("/providers/")}>the full list</a>.</p>
+    </section>
+  )}
+
+  {mine.length > 0 && (
+    <section style="margin-top:34px">
+      <h2>{mine.length} FamilySearch collections</h2>
+      <p class="cap">Regional collections first, then national indexes. A free account opens
+      the images; some are restricted to a Family History Centre.</p>
+      <ul class="rows">
+        {mine.slice(0, 250).map(({ c, local }) => (
+          <li>
+            <a href={c.url} target="_blank" rel="noopener">{c.title} ↗</a>
+            {c.from && <span class="y">{c.from}–{c.to}</span>}
+            <span class="y">{(c.records || 0).toLocaleString()} records</span>
+            {local && <span class="loc">regional</span>}
+          </li>
+        ))}
+      </ul>
+      {mine.length > 250 && <p class="cap">…and {mine.length - 250} more.</p>}
+    </section>
+  )}
+
+  {here.length > 0 ? (
+    <section style="margin-top:34px">
+      <h2>{here.length} places, {vols} volumes</h2>
+      <ul class="places">
+        {here.map((p) => <li><a href={u(`/place/${p.id}/`)}>{p.name}</a>
+          <span class="y">{(p.collections || []).length}</span></li>)}
+      </ul>
+    </section>
+  ) : (
+    <div class="one" style="margin-top:34px;border-left-color:var(--rule-strong)">
+      <div class="lab">No places walked here yet</div>
+      <p class="cap">The shelf — the volume-by-volume layer — has not been walked in {NAME}.
+      <b>That is a gap in this map, not a gap in the record</b>: the collections above reach
+      this ground and are worth opening. <a href={u("/add/")}>Help fill it →</a></p>
+    </div>
+  )}
+
+  <p class="cap" style="margin-top:30px"><a href={u("/countries/")}>Every country</a> ·
+    <a href={u("/")}>The map</a></p>
+</Base>
+
+<style>
+  h2 { font-family: var(--serif); font-size: 26px; font-weight: 500; margin: 0 0 6px; }
+  .rows, .regs { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 7px; }
+  .rows li, .regs li { font-family: var(--sans); font-size: 13px; line-height: 1.5; }
+  .what { font-size: 11.5px; color: var(--ink-3); margin: 3px 0 0; max-width: 78ch; }
+  .sub { display: block; font-size: 11.5px; color: var(--ink-3); }
+  .y { font-family: var(--mono); font-size: 11px; color: var(--ink-3); margin-left: 8px; }
+  .loc { font-family: var(--sans); font-size: 10px; color: var(--accent);
+         border: 1px solid var(--accent); border-radius: 999px; padding: 1px 6px; margin-left: 8px; }
+  .places { list-style: none; padding: 0; margin: 12px 0 0;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 3px; }
+  .places li { font-family: var(--sans); font-size: 13px; }
+  .chip { margin-left: 8px; }
+  .chip.acc-free { background:#1E844922; color:#1E8449 } .chip.acc-account { background:#6FA82E22; color:#5C8C26 }
+  .chip.acc-index { background:#EFC03B33; color:#8A6B10 } .chip.acc-mixed { background:#E8792B22; color:#B45A17 }
+  .chip.acc-paid { background:#C0392B22; color:#C0392B } .chip.acc-catalogue { background:#8E6FA822; color:#7A5CA8 }
+  .chip.acc-onsite { background:#7C8A9122; color:#5E6C73 }
+</style>

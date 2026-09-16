@@ -170,7 +170,8 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
   )}
 
   <p style="margin-top:34px"><a class="bigl" href={mapLink}>See {place.name} on the map →</a></p>
-  <p class="cap"><a href={u("/places/")}>All {full.places.length} places</a> ·
+  <p class="cap"><a href={u(`/country/${(place.country||"").toLowerCase()}/`)}>Everything in {where}</a> ·
+    <a href={u("/places/")}>All {full.places.length} places</a> ·
     <a href={u("/add/")}>Correct something on this page</a></p>
 </Base>
 

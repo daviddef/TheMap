@@ -85,6 +85,21 @@ ISO = {
     "Philippines": ["PH"], "India": ["IN"], "Ghana": ["GH"], "Mozambique": ["MZ"],
     "Madagascar": ["MG"], "Albania": ["AL"], "Jamaica": ["JM"], "Iceland": ["IS"],
     "Japan": ["JP"], "China": ["CN"], "Israel": ["IL"], "Turkey": ["TR"],
+    "Barbados": ["BB"], "Jamaica ": ["JM"], "Trinidad and Tobago": ["TT"],
+    "Dominican Republic": ["DO"], "Costa Rica": ["CR"], "Nicaragua": ["NI"],
+    "Honduras": ["HN"], "El Salvador": ["SV"], "Haiti": ["HT"], "Panama": ["PA"],
+    "Belize": ["BZ"], "Guyana": ["GY"], "Suriname": ["SR"], "Grenada": ["GD"],
+    "Saint Lucia": ["LC"], "Bahamas": ["BS"], "Bermuda": ["BM"],
+    "Sierra Leone": ["SL"], "Liberia": ["LR"], "Nigeria": ["NG"], "Kenya": ["KE"],
+    "Zimbabwe": ["ZW"], "Zambia": ["ZM"], "Botswana": ["BW"], "Namibia": ["NA"],
+    "Fiji": ["FJ"], "Papua New Guinea": ["PG"], "Samoa": ["WS"], "Tonga": ["TO"],
+    "Vanuatu": ["VU"], "Solomon Islands": ["SB"], "Kiribati": ["KI"],
+    "Gibraltar": ["GI"], "Malta": ["MT"], "Cyprus": ["CY"], "Bulgaria": ["BG"],
+    "Croatia ": ["HR"], "North Macedonia": ["MK"], "Indonesia": ["ID"],
+    "Thailand": ["TH"], "Vietnam": ["VN"], "Korea": ["KR"], "Taiwan": ["TW"],
+    "Sri Lanka": ["LK"], "Pakistan": ["PK"], "Bangladesh": ["BD"],
+    "Cabo Verde": ["CV"], "Cape Verde": ["CV"], "Angola": ["AO"],
+    "Saint Helena": ["SH"], "Falkland Islands": ["FK"],
 
     # Polities that no longer exist, mapped onto the ground they held.
     "Prussia":                  ["DE", "PL"],
@@ -100,6 +115,34 @@ ISO = {
     "Ottoman Empire":           ["TR", "GR", "RS", "BA", "BG", "RO", "AL", "MK"],
 }
 
+# A title often leads with a SUBDIVISION rather than a country — "New York,
+# Births and Christenings" or "Queensland, Cemetery Records" — and until these
+# were listed the mismatch guard had nothing to compare against, so it let the
+# junk through. Eleven New York collections carry place id 22, which resolves
+# to MOROCCO, and Vermont's carry 47, which is PAKISTAN. Low place ids in this
+# catalogue are legacy rubbish and cannot be trusted at all.
+SUBDIVISION = {}
+for _st in ("Alabama Alaska Arizona Arkansas California Colorado Connecticut Delaware "
+            "Florida Georgia Hawaii Idaho Illinois Indiana Iowa Kansas Kentucky Louisiana "
+            "Maine Maryland Massachusetts Michigan Minnesota Mississippi Missouri Montana "
+            "Nebraska Nevada Ohio Oklahoma Oregon Pennsylvania Tennessee Texas Utah "
+            "Vermont Virginia Washington Wisconsin Wyoming").split():
+    SUBDIVISION[_st] = ["US"]
+for _st in ("New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina",
+            "North Dakota", "Rhode Island", "South Carolina", "South Dakota",
+            "West Virginia", "District of Columbia", "Puerto Rico", "Guam",
+            "American Samoa", "Virgin Islands", "Northern Mariana Islands"):
+    SUBDIVISION[_st] = ["US"]
+for _st in ("Ontario", "Quebec", "Québec", "Nova Scotia", "New Brunswick", "Manitoba",
+            "British Columbia", "Saskatchewan", "Alberta", "Newfoundland",
+            "Prince Edward Island", "Yukon", "Northwest Territories", "Nunavut"):
+    SUBDIVISION[_st] = ["CA"]
+for _st in ("Queensland", "New South Wales", "Victoria", "Tasmania",
+            "Western Australia", "South Australia", "Northern Territory",
+            "Australian Capital Territory"):
+    SUBDIVISION[_st] = ["AU"]
+
+
 # The catalogue's own title is a better country signal than its place id, and
 # this is not a theory: twenty «Germany, Prussia, Brandenburg …» collections
 # carry a place id that resolves to MINTO, NEW SOUTH WALES. That is
@@ -107,7 +150,7 @@ ISO = {
 # church books in Australia. Where the two disagree, the title wins.
 def from_title(title):
     head = title.split(",")[0].strip()
-    return ISO.get(head)
+    return ISO.get(head) or SUBDIVISION.get(head)
 
 
 def resolve(pid):

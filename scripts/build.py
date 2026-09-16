@@ -64,6 +64,43 @@ def main():
         return 12742 * asin(sqrt(sin((c - a) / 2) ** 2
                                  + cos(a) * cos(c) * sin((d - b) / 2) ** 2))
 
+    # ---- the parishes round a place ---------------------------------------
+    # A church is a parish and a parish is where a register is kept, so the
+    # nearest ones are a real answer rather than decoration: the register of a
+    # hamlet with no church of its own is kept at the church it walked to.
+    # Only the mapped regions have churches harvested, so only places inside
+    # one get this — which the page has to say, or a blank reads as «none».
+    try:
+        CHURCH = json.load(open("data/churches-wikidata.json"))["features"]
+    except FileNotFoundError:
+        CHURCH = []
+    ch_by_region = {}
+    for c in CHURCH:
+        ch_by_region.setdefault(c["r"], []).append(c)
+
+    def parishes(place, within=15.0, most=6):
+        """The nearest parishes, with the distance shown rather than hidden.
+
+        A six-kilometre cut-off returned nothing for Gračišće, and the reason
+        was not that there is no church there — there is, and it is the parish
+        the registers were kept in. It is not on Wikidata. Central Istria has
+        105 churches on Wikidata and England has 34,612, and a fixed radius
+        reads that difference as «no parishes here».
+
+        So: the nearest few, out to fifteen kilometres, each carrying how far
+        it is. Eight kilometres to Pazin is a useful fact about Gračišće —
+        that is where its registers went — and a reader can weigh it. Silence
+        cannot be weighed."""
+        near = []
+        for c in ch_by_region.get(place.get("region") or "", []):
+            if abs(c["y"] - place["lat"]) > 0.2 or abs(c["x"] - place["lon"]) > 0.28:
+                continue                      # cheap box before the real sum
+            d = km(place["lat"], place["lon"], c["y"], c["x"])
+            if d <= within:
+                near.append({"n": c["n"], "q": c["q"], "km": round(d, 1)})
+        near.sort(key=lambda z: z["km"])
+        return near[:most]
+
     def reach(place):
         """How nearly a collection reaches a place.
 
@@ -140,6 +177,7 @@ def main():
         span = [min(a for a, _ in yrs), max((b or a) for a, b in yrs)] if yrs else None
 
         hits = reach(p) if p.get("country") else []
+        near_ch = parishes(p) if p.get("region") else []
 
         # EVERY BYTE HERE IS FETCHED BY EVERY VISITOR, so the index carries
         # only what the map cannot work out for itself.
@@ -167,6 +205,8 @@ def main():
         detail = dict(p)
         if span:
             detail["span"] = span
+        if near_ch:
+            detail["parishes"] = near_ch
         if hits:
             detail["fs"] = [{"cc": c["cc"], "t": c["title"], "from": c.get("from"),
                              "to": c.get("to"), "n": c.get("records") or 0,

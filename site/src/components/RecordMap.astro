@@ -26,7 +26,7 @@
    Everything else — the find box, the filter pills, that every view is a link
    — is the family Atlas's and is kept deliberately, because a reader who knows
    one of these maps should know all of them. */
-const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wikidataUrl, osmUrl, featureBase, settlementBase, base } = Astro.props;
+const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wikidataUrl, osmUrl, featureBase, settlementBase, districtBase, base } = Astro.props;
 ---
 
 <div class="ra-top">
@@ -67,7 +67,7 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wi
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 
-<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, WDA: wikidataUrl, OSMA: osmUrl, FEAT: featureBase, SETT: settlementBase, BASE: base }}>
+<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, WDA: wikidataUrl, OSMA: osmUrl, FEAT: featureBase, SETT: settlementBase, DIST: districtBase, BASE: base }}>
 window.addEventListener("load", async function () {
   var el = document.getElementById("ra-map");
   if (!el || typeof L === "undefined") return;
@@ -817,6 +817,30 @@ window.addEventListener("load", async function () {
     }).slice(0, 4);
   }
 
+  /* Districts — the rung records are filed at, for the 17,320 of them no
+     collection names. Undrawn on purpose; still the answer to "where is Kreis
+     Bomst", which is a question this atlas should never have to refuse. */
+  var dcache = {};
+  async function districts(term) {
+    var f = fold(term);
+    var key = "";
+    for (var i = 0; i < f.length && key.length < 3; i++)
+      if (/[a-z0-9]/.test(f[i])) key += f[i];
+    if (key.length < 3) return [];
+    if (!(key in dcache)) {
+      try { dcache[key] = await (await fetch(DIST + key + ".json")).json(); }
+      catch (e) { dcache[key] = []; }
+    }
+    var hit = [];
+    dcache[key].forEach(function (r) {
+      var fn = fold(r.n);
+      var m = fn === f ? 0 : fn.indexOf(f) === 0 ? 1 : fn.indexOf(f) > -1 ? 2 : null;
+      if (m !== null) hit.push([m, r]);
+    });
+    hit.sort(function (a, b) { return a[0] - b[0]; });
+    return hit.slice(0, 4).map(function (x) { return x[1]; });
+  }
+
   async function elsewhere(term) {
     var f = fold(term);
     var iso = Object.keys(CNAME).filter(function (k) {
@@ -830,6 +854,7 @@ window.addEventListener("load", async function () {
     var hits = await gazetteer(term);
     var names = await surnames(term);
     var setts = await settlements(term);
+    var dists = await districts(term);
     /* If the typed word is an OLD name, say which one it matched and what the
        place is called now. "Pressburg → Bratislava" is the whole answer to the
        first of the three problems, and it works in any country on earth. */
@@ -858,6 +883,20 @@ window.addEventListener("load", async function () {
       }
       h.push("</div>");
     });
+    /* A district with nothing of its own. Saying which first-level division
+       it sits in is not a consolation prize: adm1 is the rung a collection is
+       filed at, so it is the word to search next. */
+    if (dists.length) {
+      h.push('<div class="ra-juris"><div class="lab">An administrative district</div>');
+      dists.forEach(function (r) {
+        h.push("<p><b>" + esc(r.n) + "</b> — " + esc(CNAME[r.k] || r.k) +
+               (r.p ? ", in " + esc(r.p) : "") +
+               '<br><span class="ra-who">No collection here names this district. ' +
+               (r.p ? "Try " + esc(r.p) + ", which is the level they are filed at."
+                    : "Try the country.") + "</span></p>");
+      });
+      h.push("</div>");
+    }
     if (hits.length) {
       if (gmark) { map.removeLayer(gmark); gmark = null; }
       var top = hits[0];

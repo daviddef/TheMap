@@ -29,10 +29,12 @@ for (const p of full.places) if (p.country) {
   const r = get(p.country); r.places++; r.vols += (p.collections || []).length;
 }
 for (const p of provs.providers) for (const k of p.countries) if (k !== "*") get(k).arch++;
-for (const r of regions.regions) {
-  const ccs = new Set(full.places.filter((p) => p.region === r.id).map((p) => p.country));
-  for (const cc of ccs) if (cc) get(cc).regions++;
-}
+/* A REGION'S COUNTRIES COME FROM ITS GROUND, NOT FROM ITS PLACES. This counted
+   a region for a country only when a WALKED PLACE sat inside it — so the eight
+   regions added this morning, covering Poland, Ukraine, Czechia, Hungary,
+   Romania, Russia and Lithuania, counted for nothing at all, and the page that
+   exists to measure honestly was under-reporting itself. */
+for (const r of regions.regions) for (const cc of (r.countries || [])) get(cc).regions++;
 for (const s of surn.surnames || []) for (const c of s.countries || []) if (row[c.cc]) row[c.cc].names++;
 
 const list = Object.values(row).map((r) => ({

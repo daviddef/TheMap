@@ -36,7 +36,10 @@ const mine = cols.collections.filter((c) => c.countries.includes(cc))
                                        : a.local ? -1 : 1));
 const who = provs.providers.filter((p) => p.countries.includes(cc));
 const world = provs.providers.filter((p) => p.countries.includes("*"));
-const regs = regions.regions.filter((r) => here.some((p) => p.region === r.id));
+/* Same correction as /coverage/: a country's regions are the ones whose GROUND
+   lies in it, whether or not a place inside them has been walked. */
+const regs = regions.regions.filter(
+  (r) => (r.countries || []).includes(cc) || here.some((p) => p.region === r.id));
 const records = mine.reduce((a, x) => a + (x.c.records || 0), 0);
 const vols = here.reduce((a, p) => a + (p.collections || []).length, 0);
 const span = mine.filter(x => x.c.from).length

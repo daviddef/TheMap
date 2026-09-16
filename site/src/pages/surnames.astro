@@ -8,6 +8,7 @@ import Base from "../layouts/Base.astro";
 import { u } from "../lib/url.js";
 import surn from "../../public/surnames.json";
 import idx from "../../public/index.json";
+import refused from "../../data/frequencies/_refused.json";
 
 const CN = idx.countries || {};
 const c = surn.counts || {surnames: 0, withVariants: 0, withCountries: 0, curatedLinks: 0};
@@ -93,12 +94,21 @@ const examples = surn.surnames
     the deceased, which is what makes it genealogical rather than a directory — the United
     States' 162,253 from the 2010 Census, Spain's 86,512 from the population censuses, and
     Norway's 3,620, which is only names borne by two hundred people or more.</p>
-    <p class="cap">Others were tried and are not here. <b>Denmark</b> does not put names in
-    its statistics bank at all. <b>The Netherlands</b> has no surname table at CBS; the real
-    Dutch source is the Meertens familienamenbank, which is a research database rather than
-    open data. <b>Finland's</b> open-data portal refused every request. Each of those is a
-    door that has to be knocked on rather than opened, and this page will say so until they
-    are.</p>
+  </section>
+
+  <section style="margin-top:30px">
+    <h2>Four countries that are not here, and exactly why</h2>
+    <p class="cap">Sought and not obtained. Without this list the next person spends the same
+    afternoon finding the same walls.</p>
+    <ul class="refused">
+      {refused.refused.map((r) => (
+        <li>
+          <b>{r.name}</b> <span class="verdict">{r.verdict}</span>
+          <p>{r.why}</p>
+          <ul class="tried">{r.tried.map((t) => <li>{t}</li>)}</ul>
+        </li>
+      ))}
+    </ul>
   </div>
 </Base>
 
@@ -108,6 +118,15 @@ const examples = surn.surnames
   .kinds li { font-family: var(--sans); font-size: 13px; line-height: 1.55; color: var(--ink-2); }
   .kinds b { font-family: var(--mono); font-size: 12px; color: var(--accent); }
   .dl { font-family: var(--mono); font-size: 14px; line-height: 2; margin-top: 10px; }
+  .refused { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 16px; }
+  .refused > li > b { font-family: var(--serif); font-size: 18px; }
+  .refused p { font-family: var(--sans); font-size: 12.5px; line-height: 1.6;
+               color: var(--ink-2); margin: 5px 0 0; max-width: 78ch; }
+  .verdict { font-family: var(--sans); font-size: 10px; text-transform: uppercase;
+             letter-spacing: .07em; color: #C0392B; border: 1px solid #C0392B;
+             border-radius: 999px; padding: 1px 7px; margin-left: 8px; }
+  .tried { margin: 6px 0 0 0; padding-left: 18px; }
+  .tried li { font-family: var(--mono); font-size: 11px; color: var(--ink-3); line-height: 1.6; }
   code { font-family: var(--mono); font-size: 12.5px; background: var(--panel-2);
          padding: 1px 5px; border-radius: 2px; }
   .ccs { list-style: none; padding: 0; margin: 12px 0 0;

@@ -26,7 +26,7 @@
    Everything else — the find box, the filter pills, that every view is a link
    — is the family Atlas's and is kept deliberately, because a reader who knows
    one of these maps should know all of them. */
-const { indexUrl, detailBase, regionsUrl, providersUrl } = Astro.props;
+const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase } = Astro.props;
 ---
 
 <div class="ra-top">
@@ -67,7 +67,7 @@ const { indexUrl, detailBase, regionsUrl, providersUrl } = Astro.props;
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 
-<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl }}>
+<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase }}>
 window.addEventListener("load", async function () {
   var el = document.getElementById("ra-map");
   if (!el || typeof L === "undefined") return;
@@ -482,7 +482,47 @@ window.addEventListener("load", async function () {
     if (!shown) elsewhere(qbox.value.trim());
   }
 
-  function elsewhere(term) {
+  /* The worldwide gazetteer, fetched three letters at a time and kept.
+     48,906 places and 212,101 names they have been written under — enough to
+     answer "the name changed" for the whole earth, which is the one of the
+     three problems that does not need a shelf to solve. */
+  var gcache = {}, gmark = null;
+  async function gazetteer(term) {
+    var f = fold(term);
+    var key = "";
+    for (var i = 0; i < f.length && key.length < 3; i++)
+      if (/[a-z0-9]/.test(f[i])) key += f[i];
+    if (key.length < 3) return [];
+    if (!(key in gcache)) {
+      try { gcache[key] = await (await fetch(GAZ + key + ".json")).json(); }
+      catch (e) { gcache[key] = []; }
+    }
+    var hit = [];
+    gcache[key].forEach(function (r) {
+      var fn = fold(r[0]);
+      var m = fn === f ? 0 : fn.indexOf(f) === 0 ? 1 : fn.indexOf(f) > -1 ? 2 : null;
+      if (m === null) {
+        /* r[5] is every form the place has ever been written in, folded and
+           space-joined — not the curated display list, which is missing the
+           very names people type. */
+        var best = null;
+        (r[5] || "").split(" ").forEach(function (fa) {
+          var v = fa === f ? 3 : fa.indexOf(f) === 0 ? 4 : fa.indexOf(f) > -1 ? 5 : null;
+          if (v !== null && (best === null || v < best)) best = v;
+        });
+        m = best;
+      }
+      if (m !== null) hit.push([m, r]);
+    });
+    /* An exact hit on the current name first, then a prefix, then an exact hit
+       on a FORMER name — and the shard is already in population order, which
+       is the right tie-break: somebody typing Czernowitz means Chernivtsi, not
+       a suburb of Brno that kept the same name. */
+    hit.sort(function (a, b) { return a[0] - b[0]; });
+    return hit.slice(0, 8).map(function (x) { return x[1]; });
+  }
+
+  async function elsewhere(term) {
     var f = fold(term);
     var iso = Object.keys(CNAME).filter(function (k) {
       return fold(CNAME[k]).indexOf(f) > -1 || k.toLowerCase() === f;
@@ -492,14 +532,51 @@ window.addEventListener("load", async function () {
       if (p.at && fold(p.at.place).indexOf(f) > -1) return true;
       return fold(p.name).indexOf(f) > -1;
     });
+    var hits = await gazetteer(term);
+    /* If the typed word is an OLD name, say which one it matched and what the
+       place is called now. "Pressburg → Bratislava" is the whole answer to the
+       first of the three problems, and it works in any country on earth. */
     empty.hidden = true; panel.hidden = false;
     var h = ['<div class="at-h"><h3>' + esc(term) + "</h3></div>"];
+    if (hits.length) {
+      if (gmark) { map.removeLayer(gmark); gmark = null; }
+      var top = hits[0];
+      gmark = L.circleMarker([top[1], top[2]], {
+        radius: 9, color: "var(--accent)", weight: 2, opacity: .9,
+        fillColor: "#8E6FA8", fillOpacity: .35, dashArray: "3 3"
+      }).addTo(map);
+      map.setView([top[1], top[2]], Math.max(map.getZoom(), 8));
+      h.push('<div class="ra-juris"><div class="lab">That name is a place</div>');
+      hits.slice(0, 5).forEach(function (r) {
+        var older = r[4].filter(function (a) { return fold(a) !== fold(r[0]); });
+        /* If what they typed is a form the curated list left out, put it back
+           at the front — it is the one word on this panel they already trust. */
+        if (!older.some(function (a) { return fold(a).indexOf(f) > -1; }))
+          older.unshift(term);
+        older = older.slice(0, 5);
+        h.push("<p><b>" + esc(r[0]) + "</b> — " + esc(CNAME[r[3]] || r[3]) +
+               (older.length ? '<br><span class="ra-who">also written ' +
+                 older.map(esc).join(" · ") + "</span>" : "") + "</p>");
+      });
+      h.push("</div>");
+    }
     /* Only worth printing when it adds something. Typing "Ireland" and being
        told "Ireland" is noise; typing "HR" and being told "Croatia" is not. */
     var named = iso.map(function (k) { return CNAME[k]; })
                    .filter(function (n) { return fold(n) !== f; });
     if (named.length)
       h.push('<p class="at-also">' + named.map(esc).join(" · ") + "</p>");
+    /* Widen the provider list to the country the gazetteer just landed in —
+       somebody who typed Pressburg wants Slovakia's sources, and has not said
+       the word "Slovakia" at any point. */
+    if (hits.length) {
+      hits.slice(0, 3).forEach(function (r) { if (iso.indexOf(r[3]) < 0) iso.push(r[3]); });
+      cover = provs.providers.filter(function (p) {
+        if (iso.some(function (k) { return (p.countries || []).indexOf(k) > -1; })) return true;
+        if (p.at && fold(p.at.place).indexOf(f) > -1) return true;
+        return fold(p.name).indexOf(f) > -1;
+      });
+    }
     h.push('<p class="at-what"><b>No places here yet.</b> The shelf — the volume-by-volume ' +
            "layer — is deep for Croatia, Istria and Carnia and has not been walked anywhere " +
            "else. <b>That is a gap in this map, not a gap in the record.</b></p>");

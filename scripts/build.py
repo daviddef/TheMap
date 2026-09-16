@@ -65,15 +65,29 @@ def main():
                                  + cos(a) * cos(c) * sin((d - b) / 2) ** 2))
 
     def reach(place):
-        """Rank 0 names this place, 1 is within 75 km, 2 is elsewhere in the
-        same country but narrower than it, 3 is the whole country.
+        """How nearly a collection reaches a place.
 
-        WITHIN A RANK, DISTANCE BEATS SIZE. Sorting rank 2 by record count put
-        Torino, Trento and Genova at the top of Arienzo's page — three of the
-        largest collections in Italy and all of them four hundred miles away.
-        A big collection for the wrong province is not a lead."""
+          0  it is catalogued under this place by name
+          1  it is catalogued under this place's COUNTY or province
+          2  under its state or region
+          3  under the country, and no narrower
+
+        THE MIDDLE TWO USED TO BE DISTANCE, and distance is the wrong tool for
+        an administrative question. «Within 75 km» is wrong in both directions:
+        two towns forty kilometres apart can sit in different provinces with
+        different archives, and a long thin province can run three hundred
+        kilometres end to end while being exactly the filing unit that matters.
+        Places now carry their real adm1 and adm2 from GeoNames, and a
+        collection's own place chain — «Naples, Naples, Campania, Italy» —
+        carries the same names, so the rungs are matched rather than guessed.
+
+        Distance survives as the tie-break inside a rank, which is what it is
+        actually good for."""
         out = []
         fn = fold(place["name"])
+        adm = place.get("admin") or {}
+        f1 = fold(adm.get("adm1") or "") or None
+        f2 = fold(adm.get("adm2") or "") or None
         for c in fs_by_cc.get(place.get("country"), []):
             rank, where, dist = 3, None, None
             for p in c["places"]:
@@ -82,12 +96,18 @@ def main():
                 if p.get("short") and fold(p["short"]) == fn:
                     rank, where, dist = 0, p["name"], d
                     break
-                if d is not None and d <= 75 and rank > 1:
+                chain = [fold(x.strip()) for x in (p.get("name") or "").split(",")]
+                short = fold(p.get("short") or "")
+                if f2 and rank > 1 and (f2 in chain or f2 == short):
                     rank, where, dist = 1, p["name"], d
-                elif p.get("type") and p["type"] != "COUNTRY" and rank > 2:
+                elif f1 and rank > 2 and (f1 in chain or f1 == short):
                     rank, where, dist = 2, p["name"], d
-                    if dist is None:
-                        dist = d
+                elif p.get("type") and p["type"] != "COUNTRY" and rank > 2:
+                    # Narrower than a country but not on this place's own
+                    # chain: still worth listing, still not local.
+                    rank, where, dist = 2, p["name"], d
+                if dist is None:
+                    dist = d
             out.append((rank, dist if dist is not None else 1e9,
                         -(c.get("records") or 0), c, where, dist))
         out.sort(key=lambda x: (x[0], x[1], x[2]))

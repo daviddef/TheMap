@@ -1,0 +1,106 @@
+---
+/* How complete this map is, measured rather than asserted.
+   Every other page says what is here. This one says what is not. */
+import Base from "../layouts/Base.astro";
+import { u } from "../lib/url.js";
+import full from "../data/places-full.json";
+import cols from "../data/collections-full.json";
+import regions from "../../public/regions.json";
+import provs from "../../public/providers.json";
+import idx from "../../public/index.json";
+import surn from "../../public/surnames.json";
+
+const CN = idx.countries || {};
+const LOCAL = new Set(["CITY","TOWN","COMMUNE","HAMLET","VILLAGE","PARISH","MUNICIPALITY",
+                       "BOROUGH","SUBURB","CIVIL_PARISH","TOWNSHIP","COUNTY","BR_COUNTY",
+                       "PROVINCE","DEPARTMENT","DISTRICT","SHIRE","CANTON"]);
+const row = {};
+const get = (cc) => (row[cc] = row[cc] || { cc, cols: 0, local: 0, places: 0, vols: 0,
+                                            arch: 0, regions: 0, names: 0 });
+for (const c of cols.collections) {
+  const isLocal = c.places.some((p) => LOCAL.has(p.type));
+  for (const k of c.countries) { get(k).cols++; if (isLocal) get(k).local++; }
+}
+for (const p of full.places) if (p.country) {
+  const r = get(p.country); r.places++; r.vols += (p.collections || []).length;
+}
+for (const p of provs.providers) for (const k of p.countries) if (k !== "*") get(k).arch++;
+for (const r of regions.regions) {
+  const ccs = new Set(full.places.filter((p) => p.region === r.id).map((p) => p.country));
+  for (const cc of ccs) if (cc) get(cc).regions++;
+}
+for (const s of surn.surnames || []) for (const c of s.countries || []) if (row[c.cc]) row[c.cc].names++;
+
+const list = Object.values(row).map((r) => ({
+  ...r, name: CN[r.cc] || r.cc,
+  pct: r.cols ? Math.round((100 * r.local) / r.cols) : 0,
+})).sort((a, b) => b.cols - a.cols);
+
+const T = list.reduce((a, r) => ({
+  cols: a.cols + r.cols, local: a.local + r.local, places: a.places + r.places,
+  vols: a.vols + r.vols }), { cols: 0, local: 0, places: 0, vols: 0 });
+const walked = list.filter((r) => r.places > 0).length;
+const mapped = list.filter((r) => r.regions > 0).length;
+---
+<Base
+  title="What this map does not know"
+  eyebrow={`${list.length} countries measured · ${T.places} places walked · ${Math.round(100*T.local/T.cols)}% of collections reach a named place`}
+  dek="Every other page here says what is present. This one measures what is missing, country by country, because a map that only advertises its coverage is quietly claiming the rest.">
+
+  <div class="one" style="border-left-color:#C0392B">
+    <div class="lab">The three honest numbers</div>
+    <ul class="big">
+      <li><b>{walked}</b> of {list.length} countries have a single place walked. The other
+        {list.length - walked} have collections and archives and no shelf at all.</li>
+      <li><b>{mapped}</b> have a record region — which empire held the ground, and therefore
+        whose archive holds the paper. That is the thing this map is for and it covers
+        {Math.round(100*mapped/list.length)}% of the countries it names.</li>
+      <li><b>{Math.round(100*T.local/T.cols)}%</b> of collections reach a named place. The
+        rest are country-level: real, searchable, and no substitute for knowing the parish.</li>
+    </ul>
+  </div>
+
+  <p class="cap" style="margin-top:20px"><b>Reach</b> is the share of a country's collections
+  catalogued under a town, county or province rather than under the country as a whole. A low
+  figure is not a bad archive — it is a national index where a local one would serve better.</p>
+
+  <table style="margin-top:14px">
+    <thead><tr>
+      <th>Country</th><th class="m">Collections</th><th class="m">Reach</th>
+      <th class="m">Places</th><th class="m">Volumes</th><th class="m">Archives</th>
+      <th class="m">Regions</th><th class="m">Surnames</th>
+    </tr></thead>
+    <tbody>
+      {list.map((r) => (
+        <tr>
+          <td><a href={u(`/country/${r.cc.toLowerCase()}/`)}>{r.name}</a></td>
+          <td class="m">{r.cols || "—"}</td>
+          <td class="m">{r.cols ? `${r.pct}%` : "—"}</td>
+          <td class={"m" + (r.places ? "" : " nil")}>{r.places || "—"}</td>
+          <td class={"m" + (r.vols ? "" : " nil")}>{r.vols || "—"}</td>
+          <td class="m">{r.arch || "—"}</td>
+          <td class={"m" + (r.regions ? " yes" : " nil")}>{r.regions || "—"}</td>
+          <td class="m">{r.names || "—"}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+
+  <div class="one" style="margin-top:26px;border-left-color:var(--rule-strong)">
+    <div class="lab">Why this page exists</div>
+    <p class="cap">Croatia has {list.find(r=>r.cc==="HR")?.places ?? 0} places and
+    {" "}{list.find(r=>r.cc==="HR")?.vols ?? 0} volumes because somebody walked a catalogue
+    parish by parish over months. No other ground has had that done, and no amount of
+    harvesting collection lists substitutes for it — breadth at country level is not depth at
+    parish level, and this table is here so that the difference cannot be glossed over.</p>
+  </div>
+</Base>
+
+<style>
+  .big { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 9px; }
+  .big li { font-family: var(--sans); font-size: 13.5px; line-height: 1.6; color: var(--ink-2); }
+  .big b { font-family: var(--mono); font-size: 17px; color: var(--accent); }
+  td.nil { color: var(--ink-3); }
+  td.yes { color: var(--accent); font-weight: 600; }
+  td { vertical-align: top; }
+</style>

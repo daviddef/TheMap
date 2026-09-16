@@ -85,10 +85,40 @@ ORDER = ["dead", "server-error", "odd", "unverified", "challenged", "ok"]
 REAL_FAILURES = ("dead", "server-error", "odd")
 
 
+def collections_check():
+    """Are the 3,488 collection links still real?
+
+    NOT BY FETCHING 3,488 URLS. Every one of them is
+    familysearch.org/search/collection/<id>, and the id comes from
+    FamilySearch's own catalogue — so the question «do these still exist» is
+    answered by re-reading the catalogue ONCE and seeing which ids have gone.
+    One public request replaces three and a half thousand, against a service
+    that has already rate-limited this project for asking too often.
+    """
+    import urllib.request
+    try:
+        cols = json.load(open("data/collections.json"))["collections"]
+    except FileNotFoundError:
+        return None
+    req = urllib.request.Request(
+        "https://www.familysearch.org/search/orchestration/collectionListData",
+        headers={"User-Agent": UA, "Accept": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=120) as r:
+            live = {c["collectionId"] for c in json.loads(r.read().decode())["collectionList"]}
+    except Exception as e:
+        return {"error": f"{type(e).__name__}: {e}"}
+    ours = {c["cc"] for c in cols}
+    gone = sorted(ours - live)
+    return {"ours": len(ours), "live": len(live), "gone": gone,
+            "added": len(live - ours)}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--json", default="")
     ap.add_argument("--quiet", action="store_true")
+    ap.add_argument("--skip-collections", action="store_true")
     a = ap.parse_args()
 
     provs = json.load(open("data/providers.json"))["providers"]
@@ -114,9 +144,23 @@ def main():
         json.dump({"checked": time.strftime("%Y-%m-%d"), "counts": counts, "rows": rows},
                   open(a.json, "w"), ensure_ascii=False, indent=1)
 
+    col = None if a.skip_collections else collections_check()
+    if col and not col.get("error"):
+        print(f"\ncollections: {col['ours']} held, {len(col['gone'])} no longer in the "
+              f"FamilySearch catalogue, {col['added']} in the catalogue we do not hold")
+        for cc in col["gone"][:12]:
+            title = next((c["title"] for c in json.load(open("data/collections.json"))["collections"]
+                          if c["cc"] == cc), cc)
+            print(f"  GONE  {cc}  {title[:64]}")
+    elif col:
+        print(f"\ncollections: could not check — {col['error']}")
+
     broken = [r for r in rows if r["verdict"] in REAL_FAILURES]
     unver = [r for r in rows if r["verdict"] == "unverified"]
 
+    if col and col.get("gone"):
+        print(f"\n{len(col['gone'])} collection(s) have left the catalogue and their links "
+              f"on this map are now dead. Re-run scripts/harvest-familysearch.py.")
     if broken:
         print(f"\nBROKEN — the server answered and the page is not there ({len(broken)}):")
         for r in broken:

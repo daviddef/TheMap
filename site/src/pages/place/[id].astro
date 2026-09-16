@@ -56,6 +56,14 @@ const dek = older.length
     (span ? `${span[0]}–${span[1]}` : "no dated years") + `, and who holds them.`
   : `${place.name} in ${where}. ${cs.length} record volume${cs.length === 1 ? "" : "s"} ` +
     (span ? `covering ${span[0]}–${span[1]}, ` : "") + "and who holds them.";
+/* The FamilySearch collections that cover this ground, and how nearly. */
+const fs = place.fs || [];
+const RANKS = [
+  [0, "Named for this place", "The collection is catalogued under this town by name — the closest thing to a direct hit."],
+  [1, "Within 75 kilometres", "Catalogued under a neighbouring place. For a parish register that is often the same book."],
+  [2, "This province or state", "Wider than the town, narrower than the country."],
+  [3, "The whole country", "Worth searching, and worth knowing it is a national index rather than a local one."],
+];
 const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${place.lat},${place.lon},12`);
 ---
 <Base
@@ -129,6 +137,36 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
     </section>
   ) : (
     <p class="cap" style="margin-top:30px">No volumes recorded here yet.</p>
+  )}
+
+  {fs.length > 0 && (
+    <section style="margin-top:38px">
+      <h2>FamilySearch collections that reach here</h2>
+      <p class="cap">A collection is a claim over an area, not a book standing in this town —
+      so these are ranked by how specifically they reach {place.name}. A free account is
+      needed to open the images, and some are restricted to a Family History Centre.</p>
+      {RANKS.map(([r, head, sub]) => {
+        const rows = fs.filter((c) => c.rank === r);
+        return rows.length > 0 && (
+          <div style="margin-top:20px">
+            <div class="lab">{head} — {rows.length}</div>
+            <p class="cap" style="margin-top:2px">{sub}</p>
+            <ul class="vols">
+              {rows.slice(0, 25).map((c) => (
+                <li>
+                  <a href={c.url} target="_blank" rel="noopener">{c.t} ↗</a>
+                  {c.from && <span class="y">{c.from}–{c.to}</span>}
+                  <span class="who">{c.n.toLocaleString()} records</span>
+                  {c.where && <span class="who">covers {c.where}</span>}
+                  {c.km != null && c.km > 0 && <span class="who">{c.km} km away</span>}
+                </li>
+              ))}
+            </ul>
+            {rows.length > 25 && <p class="cap">…and {rows.length - 25} more.</p>}
+          </div>
+        );
+      })}
+    </section>
   )}
 
   <p style="margin-top:34px"><a class="bigl" href={mapLink}>See {place.name} on the map →</a></p>

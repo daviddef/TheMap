@@ -38,6 +38,15 @@ def main():
     for k, v in OVR.items():
         if not v.get("why"):
             err(f"country-override {k}: no reason given")
+    try:
+        PIN = json.load(open("data/place-overrides.json"))["overrides"]
+    except FileNotFoundError:
+        PIN = {}
+    for k, v in PIN.items():
+        if not v.get("why"):
+            err(f"place-override {k}: no reason given")
+        if v.get("lat") is None or v.get("lon") is None:
+            err(f"place-override {k}: no coordinates")
 
     legend = set(provs["access"])
     pids = set()

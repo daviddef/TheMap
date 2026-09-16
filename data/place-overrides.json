@@ -1,0 +1,16 @@
+{
+  "note": "Coordinates a human has pinned, because the geocoder found a different place of the same name. Every entry carries a reason; an override without one is indistinguishable from a typo. The check gate refuses those.",
+  "why": "The resolver walks a place phrase from longest to shortest — «Arienzo, Caserta», then «Arienzo» — and a miss on the full phrase followed by a hit on the bare name is exactly how you get the wrong town. Those are reported as `loose` by the importer so a human can look.",
+  "overrides": {
+    "arienzo": {
+      "lat": 41.0268,
+      "lon": 14.5021,
+      "why": "The comune of Arienzo in the province of Caserta. The geocoder matched a hamlet of the same name near Salerno, 44 km south — right country, wrong town, and nothing in the build gate could have seen it."
+    },
+    "benevento": {
+      "lat": 41.13,
+      "lon": 14.7786,
+      "why": "The city of Benevento. The geocoder returned a point 14 km north, which is the province rather than the town."
+    }
+  }
+}

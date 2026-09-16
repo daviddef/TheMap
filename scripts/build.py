@@ -43,6 +43,55 @@ def fold(s):
 
 def main():
     places = json.load(open("data/places.json"))["places"]
+
+    # ---- FamilySearch collections, attached by how specifically they reach ---
+    # A collection is a COVERAGE CLAIM over an area, not a volume standing in a
+    # town: «Italy, Napoli, Civil Registration, 1809-1936» reaches Arienzo, and
+    # so does «Italy, Births and Baptisms», and those are not the same news. So
+    # every attachment carries a rank, and the page says which kind it is.
+    try:
+        FS = json.load(open("data/collections.json"))["collections"]
+    except FileNotFoundError:
+        FS = []
+    fs_by_cc = {}
+    for c in FS:
+        for cc in c["countries"]:
+            fs_by_cc.setdefault(cc, []).append(c)
+
+    def km(a, b, c, d):
+        from math import radians, sin, cos, asin, sqrt
+        a, b, c, d = map(radians, (a, b, c, d))
+        return 12742 * asin(sqrt(sin((c - a) / 2) ** 2
+                                 + cos(a) * cos(c) * sin((d - b) / 2) ** 2))
+
+    def reach(place):
+        """Rank 0 names this place, 1 is within 75 km, 2 is elsewhere in the
+        same country but narrower than it, 3 is the whole country.
+
+        WITHIN A RANK, DISTANCE BEATS SIZE. Sorting rank 2 by record count put
+        Torino, Trento and Genova at the top of Arienzo's page — three of the
+        largest collections in Italy and all of them four hundred miles away.
+        A big collection for the wrong province is not a lead."""
+        out = []
+        fn = fold(place["name"])
+        for c in fs_by_cc.get(place.get("country"), []):
+            rank, where, dist = 3, None, None
+            for p in c["places"]:
+                d = (km(place["lat"], place["lon"], p["lat"], p["lon"])
+                     if p.get("lat") is not None else None)
+                if p.get("short") and fold(p["short"]) == fn:
+                    rank, where, dist = 0, p["name"], d
+                    break
+                if d is not None and d <= 75 and rank > 1:
+                    rank, where, dist = 1, p["name"], d
+                elif p.get("type") and p["type"] != "COUNTRY" and rank > 2:
+                    rank, where, dist = 2, p["name"], d
+                    if dist is None:
+                        dist = d
+            out.append((rank, dist if dist is not None else 1e9,
+                        -(c.get("records") or 0), c, where, dist))
+        out.sort(key=lambda x: (x[0], x[1], x[2]))
+        return out
     regions = json.load(open("data/regions.json"))
     providers = json.load(open("data/providers.json"))
     paccess = {p["id"]: p["access"] for p in providers["providers"]}
@@ -52,7 +101,7 @@ def main():
     shutil.rmtree(pdir, ignore_errors=True)
     os.makedirs(pdir)
 
-    index, nbytes = [], 0
+    index, nbytes, details = [], 0, []
     for p in places:
         cs = p.get("collections", [])
         acc = min((c["access"] for c in cs if c.get("access") in RANK),
@@ -70,12 +119,16 @@ def main():
         yrs = [(c.get("from"), c.get("to")) for c in cs if c.get("from")]
         span = [min(a for a, _ in yrs), max((b or a) for a, b in yrs)] if yrs else None
 
+        hits = reach(p) if p.get("country") else []
+
         row = {"i": p["id"], "n": p["name"], "y": p["lat"], "x": p["lon"],
                "c": len(cs), "q": q}
         if acc:
             row["a"] = acc
         if span:
             row["s"] = span
+        if hits:
+            row["f"] = len(hits)
         if p.get("region"):
             row["r"] = p["region"]
         if p.get("country"):
@@ -85,6 +138,15 @@ def main():
         detail = dict(p)
         if span:
             detail["span"] = span
+        if hits:
+            detail["fs"] = [{"cc": c["cc"], "t": c["title"], "from": c.get("from"),
+                             "to": c.get("to"), "n": c.get("records") or 0,
+                             "img": c.get("images") or 0, "url": c["url"],
+                             "rank": rank, "where": where,
+                             "km": round(dist) if dist is not None else None}
+                            for rank, _, _, c, where, dist in hits[:60]]
+            detail["nfs"] = len(hits)
+        details.append(detail)
         blob = json.dumps(detail, ensure_ascii=False, separators=(",", ":"))
         nbytes += len(blob.encode())
         open(os.path.join(pdir, p["id"] + ".json"), "w").write(blob)
@@ -125,7 +187,9 @@ def main():
     # where there are more than a thousand things to say.
     src = os.path.join("site", "src", "data")
     os.makedirs(src, exist_ok=True)
-    json.dump({"places": places}, open(os.path.join(src, "places-full.json"), "w"),
+    json.dump({"places": details}, open(os.path.join(src, "places-full.json"), "w"),
+              ensure_ascii=False, separators=(",", ":"))
+    json.dump({"collections": FS}, open(os.path.join(src, "collections-full.json"), "w"),
               ensure_ascii=False, separators=(",", ":"))
 
     # ---- the gazetteer, sharded on three letters -------------------------
@@ -182,6 +246,8 @@ def main():
     print(f"providers.json  {sz('providers.json')/1024:8.1f} KB")
     print(f"places-full     {os.path.getsize(os.path.join(src,'places-full.json'))/1024:8.1f} KB"
           f"  build-time only, never served")
+    if FS:
+        print(f"collections     {len(FS)} FamilySearch collections attached")
     if shards:
         sizes = sorted((len(json.dumps(v, ensure_ascii=False).encode()), k)
                        for k, v in shards.items())

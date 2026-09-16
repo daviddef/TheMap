@@ -6,6 +6,7 @@ import { u } from "../../lib/url.js";
 import full from "../../data/places-full.json";
 import regions from "../../../public/regions.json";
 import provs from "../../../public/providers.json";
+import collections from "../../data/collections-full.json";
 
 export async function getStaticPaths() {
   const regions = (await import("../../../public/regions.json")).default;
@@ -17,6 +18,16 @@ const PROV = Object.fromEntries(provs.providers.map((p) => [p.id, p]));
 const here = full.places.filter((p) => p.region === region.id)
                         .sort((a, b) => a.name.localeCompare(b.name));
 const traps = region.eras.filter((e) => (e.note || "").startsWith("THE "));
+
+/* The FamilySearch collections that reach this ground. A region's countries
+   are taken from the places standing on it — which is why a region with no
+   places yet shows none, honestly, rather than guessing from its outline. */
+const ccs = new Set(here.map((p) => p.country).filter(Boolean));
+const cols = collections.collections
+  .filter((c) => c.countries.some((k) => ccs.has(k)))
+  .map((c) => ({ c, local: c.places.some((p) => p.type && p.type !== "COUNTRY") }))
+  .sort((a, b) => (a.local === b.local ? (b.c.records || 0) - (a.c.records || 0)
+                                       : a.local ? -1 : 1));
 const span = [region.eras[0].from, region.eras[region.eras.length - 1].to];
 ---
 <Base
@@ -65,6 +76,26 @@ const span = [region.eras[0].from, region.eras[region.eras.length - 1].to];
     </section>
   )}
 
+  {cols.length > 0 && (
+    <section style="margin-top:38px">
+      <h2>{cols.length} FamilySearch collections reach this ground</h2>
+      <p class="cap">Ranked with the regional ones first — a collection for a province is
+      usually a better lead than a national index, though the national index is often where
+      a name is actually written down. A free account opens the images.</p>
+      <ul class="cols">
+        {cols.slice(0, 60).map(({ c, local }) => (
+          <li>
+            <a href={c.url} target="_blank" rel="noopener">{c.title} ↗</a>
+            {c.from && <span class="y">{c.from}–{c.to}</span>}
+            <span class="y">{(c.records || 0).toLocaleString()} records</span>
+            {local && <span class="loc">regional</span>}
+          </li>
+        ))}
+      </ul>
+      {cols.length > 60 && <p class="cap">…and {cols.length - 60} more.</p>}
+    </section>
+  )}
+
   <p class="cap" style="margin-top:30px"><a href={u("/jurisdictions/")}>All record regions</a> ·
     <a href={u("/")}>The map</a></p>
 </Base>
@@ -81,5 +112,9 @@ const span = [region.eras[0].from, region.eras[region.eras.length - 1].to];
   .places { list-style: none; padding: 0; margin: 12px 0 0;
             display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 3px; }
   .places li { font-family: var(--sans); font-size: 13px; }
-  .y { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+  .y { font-family: var(--mono); font-size: 11px; color: var(--ink-3); margin-left: 8px; }
+  .cols { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 5px; }
+  .cols li { font-family: var(--sans); font-size: 13px; line-height: 1.5; }
+  .loc { font-family: var(--sans); font-size: 10px; color: var(--accent);
+         border: 1px solid var(--accent); border-radius: 999px; padding: 1px 6px; margin-left: 8px; }
 </style>

@@ -1,0 +1,86 @@
+---
+import Base from "../layouts/Base.astro";
+import { u } from "../lib/url.js";
+import regions from "../../public/regions.json";
+import provs from "../../public/providers.json";
+
+const PROV = Object.fromEntries(provs.providers.map(p => [p.id, p]));
+const eras = regions.regions.reduce((a, r) => a + r.eras.length, 0);
+---
+<Base
+  title="Whose archive"
+  eyebrow={`${regions.regions.length} record regions · ${eras} eras`}
+  dek="A record region is a piece of ground whose records were filed the same way, and an era is a stretch of years over which that stayed true. This is the table the map reads when you set a year — and the reason it can tell you that a Croatian village's 1930 baptism is filed under Italy.">
+
+  <div class="one" style="margin-top:20px;border-left-color:var(--accent)">
+    <div class="prose">
+      <p><b>Knowing who ruled a place is trivia. Knowing whose archive that means is research.</b>
+      Every history of Istria will tell you it was Italian between the wars. What almost none of
+      them tell you is the consequence: that the parish registers of those years were filmed by
+      FamilySearch into a collection called <em>Italy, Pola and Trieste</em>, so a search of the
+      Croatian collection returns nothing at all — and nothing looks exactly like a record that
+      does not exist.</p>
+      <p>That is the column this table adds. <a href={u("/")}>Set a year on the map</a> and it
+      appears in every panel.</p>
+    </div>
+  </div>
+
+  <p class="cap" style="margin-top:20px">{regions.precision}</p>
+
+  {regions.regions.map(r => (
+    <section style="margin-top:38px">
+      <h2>{r.label}</h2>
+      <p class="cap" style="margin-top:2px">{r.sub}</p>
+      <table style="margin-top:12px">
+        <thead><tr>
+          <th class="m">Years</th><th>Who held it</th><th>Whose archive that means</th>
+        </tr></thead>
+        <tbody>
+          {r.eras.map(e => (
+            <tr>
+              <td class="m">{e.from}–{e.to}</td>
+              <td>
+                <span class="reg" style={`--c:var(${regions.regimes[e.regime].var})`}>
+                  <i></i>{e.polity || regions.regimes[e.regime].label}
+                </span>
+              </td>
+              <td>
+                {e.filedUnder.length ? (
+                  <span>{e.filedUnder.map((f, i) => (
+                    <>{i > 0 && " · "}<a href={PROV[f].url} target="_blank" rel="noopener">{PROV[f].name}</a></>
+                  ))}</span>
+                ) : <span class="none">no registers survive</span>}
+                {e.note && <p class={"enote" + (e.note.startsWith("THE ") ? " trap" : "")}>{e.note}</p>}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  ))}
+
+  <div class="one" style="margin-top:38px;border-left-color:var(--rule-strong)">
+    <div class="lab">Six regions is not the world</div>
+    <div class="prose">
+      <p>These are the regions whose filing this project has actually worked out, which is the
+      ground the Croatian shelf sits on. <b>A place outside them says so in its own panel</b>
+      rather than guessing, because a confident wrong answer about which archive to write to
+      costs somebody a month.</p>
+      <p><a href={u("/add/")}>Know a region's filing history? That is the most valuable thing
+      you could contribute →</a></p>
+    </div>
+  </div>
+</Base>
+
+<style>
+  h2 { font-family: var(--serif); font-size: 26px; font-weight: 500; margin: 0; }
+  td { vertical-align: top; }
+  .reg { display: inline-flex; align-items: baseline; gap: 7px; }
+  .reg i { width: 9px; height: 9px; border-radius: 2px; background: var(--c);
+           display: inline-block; flex: 0 0 auto; }
+  .none { color: var(--ink-3); font-style: italic; }
+  .enote { font-family: var(--sans); font-size: 11.5px; line-height: 1.55;
+           color: var(--ink-3); margin: 6px 0 0; max-width: 60ch; }
+  .enote.trap { color: var(--ink-2); border-left: 2px solid #C0392B;
+                padding-left: 9px; }
+</style>

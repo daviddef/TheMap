@@ -1,0 +1,59 @@
+---
+import Base from "../layouts/Base.astro";
+import site from "../data/site.json";
+---
+<Base
+  title="Privacy"
+  eyebrow="What this site collects, and what it does not"
+  dek="A static site with no account, no login and no database.">
+
+  <div class="prose" style="max-width:72ch">
+    <h3>What Record Atlas itself collects</h3>
+    <p><b>Nothing.</b> There is no account, no sign-in, no form and no database. The site is
+    static files served by GitHub Pages. What you type into the find box, which layers you
+    switch on and which year you set stay in your browser's address bar and are never sent
+    anywhere.</p>
+
+    <h3>What your browser fetches from elsewhere</h3>
+    <ul>
+      <li><b>Map tiles</b> from OpenStreetMap, OpenTopoMap or Esri, depending on which basemap
+      is showing. Those services see your IP address and which tiles you asked for, as any
+      map on the web does.</li>
+      <li><b>Leaflet</b>, the mapping library, from the Cloudflare CDN.</li>
+      <li><b>Fonts</b> from Google Fonts.</li>
+      <li><b>GitHub Pages</b> serves the site and keeps standard server logs.</li>
+    </ul>
+    <p>Following a link to a provider takes you to that provider's site, under their terms
+    and not these.</p>
+
+    <h3>Advertising</h3>
+    {site.ads.enabled ? (
+      <>
+        <p>This site carries a single advertisement in its footer, served by Google AdSense.
+        Google and its partners may use cookies to serve and measure ads. In the EEA, the UK
+        and Switzerland the ad script is not loaded at all until you have given consent
+        through the banner, and you can change that choice at any time.</p>
+        <p>You can review Google's practices at
+        <a href="https://policies.google.com/technologies/partner-sites" rel="noopener">
+        policies.google.com/technologies/partner-sites</a>.</p>
+      </>
+    ) : (
+      <p>This site carries no advertising at present. If that changes, a single unit will
+      appear in the footer, it will be served by Google AdSense, and in the EEA, the UK and
+      Switzerland nothing will load until you have consented through a banner. This page will
+      say so before it happens.</p>
+    )}
+
+    <h3>Living people</h3>
+    <p>This map is about <b>records and the institutions that hold them</b>, not about people.
+    It carries no names of individuals, living or dead. The one-family archive it grew out of
+    keeps a strict rule about living people; this site sidesteps the question by never holding
+    a person in the first place.</p>
+
+    <h3>Getting in touch</h3>
+    <p>Corrections, including anything you want removed, go through
+    <a href={site.repo + "/issues"}>the public issue tracker</a>.</p>
+  </div>
+</Base>
+
+<style>.prose h3 { margin-top: 28px; } .prose ul { font-size: 14px; line-height: 1.7; }</style>

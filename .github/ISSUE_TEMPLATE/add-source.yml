@@ -1,0 +1,43 @@
+name: Add a source
+description: A provider, archive or collection this map does not have yet
+title: "Add: "
+labels: ["source"]
+body:
+  - type: input
+    id: name
+    attributes: { label: What is it called, placeholder: "Državni arhiv u Zagrebu" }
+    validations: { required: true }
+  - type: input
+    id: url
+    attributes: { label: Its address, placeholder: "https://…" }
+    validations: { required: true }
+  - type: textarea
+    id: what
+    attributes:
+      label: What it holds
+      description: One or two sentences. What ground, what years, what kind of record.
+    validations: { required: true }
+  - type: dropdown
+    id: access
+    attributes:
+      label: What does it cost to look?
+      description: The ORDINARY visitor's experience, not the best case.
+      options:
+        - "free — images, no account"
+        - "account — images, free, but you must register"
+        - "index — an index only, no images"
+        - "mixed — partly free, partly paid"
+        - "paid — behind a paywall"
+        - "catalogue — a catalogue entry only, not photographed"
+        - "onsite — on paper, in the building"
+    validations: { required: true }
+  - type: input
+    id: countries
+    attributes: { label: Which countries, placeholder: "HR, BA — or 'worldwide'" }
+  - type: checkboxes
+    id: checked
+    attributes:
+      label: Have you opened it yourself?
+      options:
+        - label: "Yes — I have opened this today and it works as described"
+          required: true

@@ -1,0 +1,66 @@
+---
+import Base from "../layouts/Base.astro";
+import { u } from "../lib/url.js";
+import site from "../data/site.json";
+const iss = site.repo + "/issues/new";
+---
+<Base
+  title="Add or correct a source"
+  eyebrow="Everything here is a file in a public repository"
+  dek="There is no login and no moderation queue. The data is JSON on GitHub, and a change to it is an issue or a pull request.">
+
+  <div class="prose" style="max-width:74ch">
+    <p>Three things are worth more than anything else you could send:</p>
+  </div>
+
+  <div class="ways">
+    <a class="way" href={`${iss}?template=add-source.yml`}>
+      <div class="lab">Most useful</div>
+      <b>A provider this map does not have</b>
+      <span>Especially a national or regional archive outside western Europe. The spine is
+      thin wherever this project has not personally researched.</span>
+    </a>
+    <a class="way" href={`${iss}?template=jurisdiction.yml`}>
+      <div class="lab">Rarest</div>
+      <b>A region's filing history</b>
+      <span>Which archive holds a piece of ground's records, for which years, under which
+      regime. This is the hardest thing to find and the thing this map is for.</span>
+    </a>
+    <a class="way" href={`${iss}?template=dead-link.yml`}>
+      <div class="lab">Always welcome</div>
+      <b>Something that has changed</b>
+      <span>A dead link, a portal that moved, a collection that went from free to paid. A
+      directory that lies is worse than no directory.</span>
+    </a>
+  </div>
+
+  <div class="prose" style="max-width:74ch;margin-top:34px">
+    <h3>Or send a pull request</h3>
+    <p>The files are small and hand-editable:</p>
+    <ul>
+      <li><code>data/providers.json</code> — who holds records, and what access costs</li>
+      <li><code>data/regions.json</code> — record regions, their eras, and whose archive each means</li>
+      <li><code>data/places.json</code> — places and the volumes that cover them</li>
+    </ul>
+    <p><code>python3 scripts/check-data.py</code> will tell you whether your change is sound
+    before you send it, and the build runs the same check, so nothing lands that fails it.</p>
+    <p><b>Every source row must carry a <code>checked</code> date.</b> Not because dates are
+    tidy, but because a link with no date is a claim about the present made out of a memory
+    of the past.</p>
+  </div>
+</Base>
+
+<style>
+  .ways { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+          gap: 14px; margin-top: 22px; }
+  .way { display: block; padding: 16px 18px; border: 1px solid var(--rule);
+         border-left: 2px solid var(--accent); border-radius: 3px;
+         background: var(--panel); text-decoration: none; color: var(--ink); }
+  .way:hover { border-color: var(--accent); }
+  .way b { display: block; font-family: var(--serif); font-size: 18px;
+           font-weight: 500; margin: 6px 0 8px; }
+  .way span { font-family: var(--sans); font-size: 12.5px; line-height: 1.55;
+              color: var(--ink-3); }
+  code { font-family: var(--mono); font-size: 12.5px; background: var(--panel-2);
+         padding: 1px 5px; border-radius: 2px; }
+</style>

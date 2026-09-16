@@ -21,6 +21,18 @@ const examples = surn.surnames
   .slice(0, 14);
 ---
 <Base
+  jsonld={{
+    "@context": "https://schema.org", "@type": "Dataset",
+    name: "Record Atlas surname dataset",
+    description: "Every spelling a surname takes and the countries it is attested in, "
+      + "with the evidence tier on every claim.",
+    license: "https://creativecommons.org/publicdomain/zero/1.0/",
+    creator: { "@type": "Person", name: "David Defranceski" },
+    distribution: [
+      { "@type": "DataDownload", encodingFormat: "text/csv", contentUrl: u("/surnames.csv") },
+      { "@type": "DataDownload", encodingFormat: "application/json", contentUrl: u("/surnames.json") },
+    ],
+  }}
   title="Surnames"
   eyebrow={`${c.surnames} surnames · ${c.curatedLinks} curated variant links · ${c.withCountries} with a country`}
   dek="Every spelling a surname takes, and the countries it is attested in. Built to answer the other way in: not «where is this place» but «I have a name and nothing else».">

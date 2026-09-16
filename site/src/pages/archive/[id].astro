@@ -40,6 +40,13 @@ const KIND = {
 };
 ---
 <Base
+  jsonld={{
+    "@context": "https://schema.org", "@type": "ArchiveOrganization",
+    name: prov.name, url: prov.url, description: prov.what,
+    address: prov.at ? { "@type": "PostalAddress", addressLocality: prov.at.place } : undefined,
+    geo: prov.at ? { "@type": "GeoCoordinates", latitude: prov.at.lat,
+                     longitude: prov.at.lon } : undefined,
+  }}
   title={prov.name}
   eyebrow={[KIND[prov.kind], prov.at?.place, ACC[prov.access]].filter(Boolean).join(" · ")}
   dek={prov.what}>

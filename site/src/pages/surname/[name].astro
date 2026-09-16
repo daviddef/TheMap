@@ -40,7 +40,15 @@ const dek = `${r.n}${by.curated ? `, also written ${by.curated.slice(0,4).join("
   + `Attested in ${ccs.map((c) => CN[c.cc] || c.cc).join(", ")}`
   + (total ? `, borne by about ${total.toLocaleString()} people in the registers this map holds.` : ".");
 ---
-<Base title={r.n} eyebrow={ccs.map((c) => CN[c.cc] || c.cc).join(" · ")} dek={dek}>
+<Base
+  jsonld={{
+    "@context": "https://schema.org", "@type": "DefinedTerm",
+    name: r.n, description: dek,
+    alternateName: (by.curated || []).slice(0, 20),
+    inDefinedTermSet: { "@type": "DefinedTermSet", name: "Record Atlas surname dataset",
+                        license: "https://creativecommons.org/publicdomain/zero/1.0/" },
+  }}
+  title={r.n} eyebrow={ccs.map((c) => CN[c.cc] || c.cc).join(" · ")} dek={dek}>
 
   {["curated", "grammar", "sounds"].map((how) => by[how] && (
     <section style="margin-top:24px">

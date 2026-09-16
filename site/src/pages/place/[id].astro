@@ -72,6 +72,15 @@ const filedName = place.filedUnder
 const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${place.lat},${place.lon},12`);
 ---
 <Base
+  jsonld={{
+    "@context": "https://schema.org", "@type": "Place",
+    name: place.name,
+    alternateName: older.length ? older : undefined,
+    address: { "@type": "PostalAddress", addressCountry: place.country,
+               addressRegion: (place.admin || {}).adm1 },
+    geo: { "@type": "GeoCoordinates", latitude: place.lat, longitude: place.lon },
+    description: dek,
+  }}
   title={place.name}
   eyebrow={[adm.adm2, adm.adm1, where,
             `${cs.length} volume${cs.length === 1 ? "" : "s"}`,

@@ -2,7 +2,7 @@
 import { u } from "../lib/url.js";
 import site from "../data/site.json";
 
-const { title, dek, eyebrow, bare } = Astro.props;
+const { title, dek, eyebrow, bare, jsonld } = Astro.props;
 const nav = [
   ["/", "The map"],
   ["/places/", "Every place"],
@@ -34,6 +34,11 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
 <meta property="og:url" content={canon} />
 <meta property="og:site_name" content={site.name} />
 <meta name="twitter:card" content="summary" />
+{/* Structured data. 5,924 pages emitted none, which is the cheapest remaining
+    thing a search engine could be told: that /place/gracisce/ is a PLACE with
+    coordinates, that /archive/dapa/ is an ARCHIVE, and that the whole thing is
+    a dataset with a licence. */}
+{jsonld && <script type="application/ld+json" set:html={JSON.stringify(jsonld)} />}
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Libre+Franklin:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" />

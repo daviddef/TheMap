@@ -74,7 +74,21 @@ def main():
 
     suspect, checked, single = [], 0, 0
     for p in places:
-        if p.get("via") == "familysearch-catalogue" or p["id"] in PIN or p["id"] in SEEN:
+        # THE BLIND SPOT. FamilySearch-derived places were skipped because
+        # their coordinates are FamilySearch's own — which is precisely why
+        # they need checking, since that catalogue has already been caught
+        # putting eleven New York collections in Morocco and twenty Brandenburg
+        # ones in New South Wales. 660 places were being taken on trust from a
+        # source already known to be wrong about places.
+        # A COUNTY IS NOT A TOWN OF THE SAME NAME. Dropping the blind spot
+        # immediately flagged 23 places, and nineteen of them were American
+        # counties — Houston, Lincoln, Madison, Franklin — measured against
+        # the cities they are named after, hundreds of kilometres away and a
+        # hundred times larger. The comparison is not like for like: an area's
+        # centroid is not a settlement, and GeoNames' cities500 holds
+        # settlements. Places carrying a `level` are skipped for that reason
+        # and not because they are trusted.
+        if p["id"] in PIN or p["id"] in SEEN or p.get("level"):
             continue
         cands = [c for c in byname.get(key(p["name"]), [])
                  if c["cc"] == p.get("country")]
@@ -100,6 +114,9 @@ def main():
                 "candidates": len(cands)})
 
     suspect.sort(key=lambda x: -x["altPop"])
+    lvl = sum(1 for p in places if p.get("level"))
+    print(f"{lvl} places are counties or provinces and are not compared with "
+          f"settlements of the same name")
     print(f"{checked} places had a GeoNames match to check; "
           f"{single} had exactly one candidate and are not in doubt")
     print(f"{len(suspect)} sit on a smaller place when a much larger one of the "

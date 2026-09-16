@@ -241,6 +241,19 @@ def main():
                     reg = r["id"]
                     break
 
+            # SAME PLACE, DIFFERENT SLUG. import-defranceski keys a place by
+            # the archive's own key — «kriviput» — and this importer slugs the
+            # name to «krivi-put», so Krivi Put and Novi Vinodolski each ended
+            # up on the map twice, 239 m and 23 m apart, one copy holding all
+            # the volumes and the other holding none. Match on the ground
+            # rather than on the spelling of an id.
+            if pid not in by_id:
+                for q in by_id.values():
+                    if (q.get("country") == cc and fold(q["name"]) == fold(rec["name"])
+                            and abs(q["lat"] - lat) < 0.02 and abs(q["lon"] - lon) < 0.02):
+                        pid = q["id"]
+                        break
+
             if pid in by_id:
                 p = by_id[pid]                       # already here: only enrich
                 # A pin has to reach a place that is ALREADY on the map, or it
@@ -274,6 +287,41 @@ def main():
             added += 1
             got += 1
         print(f"  {label:10} {got} new")
+
+    # A final sweep for duplicates already on the map. Preventing new ones
+    # does nothing about the pairs an earlier run left behind, and merging is
+    # not deleting: the survivor takes the other's names and region before the
+    # empty twin goes.
+    merged_dupes = 0
+    ids = sorted(by_id)
+    for i, a_id in enumerate(ids):
+        a_p = by_id.get(a_id)
+        if not a_p:
+            continue
+        for b_id in ids[i + 1:]:
+            b_p = by_id.get(b_id)
+            if not b_p or b_p is a_p:
+                continue
+            if (a_p.get("country") != b_p.get("country")
+                    or fold(a_p["name"]) != fold(b_p["name"])
+                    or abs(a_p["lat"] - b_p["lat"]) > 0.02
+                    or abs(a_p["lon"] - b_p["lon"]) > 0.02):
+                continue
+            keep, drop = ((a_p, b_p) if len(a_p.get("collections", []))
+                          >= len(b_p.get("collections", [])) else (b_p, a_p))
+            have = {n["n"] for n in keep.get("names", [])} | {keep["name"]}
+            for n in drop.get("names", []):
+                if n["n"] not in have:
+                    keep.setdefault("names", []).append(n)
+                    have.add(n["n"])
+            if not keep.get("region") and drop.get("region"):
+                keep["region"] = drop["region"]
+            for c in drop.get("collections", []):
+                keep.setdefault("collections", []).append(c)
+            del by_id[drop["id"]]
+            merged_dupes += 1
+    if merged_dupes:
+        print(f"{merged_dupes} duplicate place(s) merged")
 
     doc["places"] = sorted(by_id.values(), key=lambda x: x["name"])
     doc["note"] = (doc["note"] + " Ground from the six sibling archives was added by "

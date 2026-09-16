@@ -1,0 +1,85 @@
+---
+/* One page per record region — the jurisdiction table, one region at a time,
+   with the places that sit on that ground. */
+import Base from "../../layouts/Base.astro";
+import { u } from "../../lib/url.js";
+import full from "../../data/places-full.json";
+import regions from "../../../public/regions.json";
+import provs from "../../../public/providers.json";
+
+export async function getStaticPaths() {
+  const regions = (await import("../../../public/regions.json")).default;
+  return regions.regions.map((r) => ({ params: { id: r.id }, props: { region: r } }));
+}
+
+const { region } = Astro.props;
+const PROV = Object.fromEntries(provs.providers.map((p) => [p.id, p]));
+const here = full.places.filter((p) => p.region === region.id)
+                        .sort((a, b) => a.name.localeCompare(b.name));
+const traps = region.eras.filter((e) => (e.note || "").startsWith("THE "));
+const span = [region.eras[0].from, region.eras[region.eras.length - 1].to];
+---
+<Base
+  title={region.label}
+  eyebrow={`${region.eras.length} eras · ${span[0]}–${span[1]} · ${here.length} places`}
+  dek={`${region.sub}. Which empire held this ground in which years — and, the part that matters, which archive that means.`}>
+
+  {traps.length > 0 && (
+    <div class="one" style="border-left-color:#C0392B">
+      <div class="lab">Where researchers lose records here</div>
+      {traps.map((e) => (
+        <p class="trap"><b>{e.from}–{e.to}</b> — {e.note.replace(/^THE (TRAP|HOLE|GOOD NEWS)\. /, "")}</p>
+      ))}
+    </div>
+  )}
+
+  <section style="margin-top:30px">
+    <h2>Whose archive this ground was</h2>
+    <table style="margin-top:12px">
+      <thead><tr><th class="m">Years</th><th>Who held it</th><th>Whose archive that means</th></tr></thead>
+      <tbody>
+        {region.eras.map((e) => (
+          <tr>
+            <td class="m">{e.from}–{e.to}</td>
+            <td><span class="reg" style={`--c:var(${regions.regimes[e.regime].var})`}><i></i>{e.polity || regions.regimes[e.regime].label}</span></td>
+            <td>
+              {e.filedUnder.length
+                ? e.filedUnder.map((f, i) => (<>{i > 0 && " · "}<a href={u(`/archive/${f}/`)}>{PROV[f].name}</a></>))
+                : <span class="none">no registers survive</span>}
+              {e.note && <p class={"enote" + (e.note.startsWith("THE ") ? " tr" : "")}>{e.note}</p>}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <p class="cap" style="margin-top:12px">{regions.precision}</p>
+  </section>
+
+  {here.length > 0 && (
+    <section style="margin-top:34px">
+      <h2>{here.length} places on this ground</h2>
+      <ul class="places">
+        {here.map((p) => <li><a href={u(`/place/${p.id}/`)}>{p.name}</a>
+          <span class="y">{(p.collections || []).length}</span></li>)}
+      </ul>
+    </section>
+  )}
+
+  <p class="cap" style="margin-top:30px"><a href={u("/jurisdictions/")}>All record regions</a> ·
+    <a href={u("/")}>The map</a></p>
+</Base>
+
+<style>
+  h2 { font-family: var(--serif); font-size: 26px; font-weight: 500; margin: 0 0 6px; }
+  .trap { font-family: var(--sans); font-size: 13px; line-height: 1.6; margin: 8px 0 0; }
+  .reg { display: inline-flex; align-items: baseline; gap: 7px; }
+  .reg i { width: 9px; height: 9px; border-radius: 2px; background: var(--c); display: inline-block; flex: 0 0 auto; }
+  .none { color: var(--ink-3); font-style: italic; }
+  .enote { font-family: var(--sans); font-size: 11.5px; line-height: 1.55; color: var(--ink-3); margin: 6px 0 0; max-width: 58ch; }
+  .enote.tr { color: var(--ink-2); border-left: 2px solid #C0392B; padding-left: 9px; }
+  td { vertical-align: top; }
+  .places { list-style: none; padding: 0; margin: 12px 0 0;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 3px; }
+  .places li { font-family: var(--sans); font-size: 13px; }
+  .y { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+</style>

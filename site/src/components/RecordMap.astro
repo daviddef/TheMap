@@ -26,7 +26,7 @@
    Everything else — the find box, the filter pills, that every view is a link
    — is the family Atlas's and is kept deliberately, because a reader who knows
    one of these maps should know all of them. */
-const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase } = Astro.props;
+const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, base } = Astro.props;
 ---
 
 <div class="ra-top">
@@ -67,7 +67,7 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase } = Astro.props;
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 
-<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase }}>
+<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, BASE: base }}>
 window.addEventListener("load", async function () {
   var el = document.getElementById("ra-map");
   if (!el || typeof L === "undefined") return;
@@ -240,8 +240,9 @@ window.addEventListener("load", async function () {
       });
       h.push("</ul></div>");
     }
-    h.push('<p class="at-go"><a href="' + esc(p.url) + '" target="_blank" rel="noopener">' +
-           "Open " + esc(p.name) + " &#8599;</a></p>");
+    h.push('<p class="at-go"><a href="' + BASE + "archive/" + esc(p.id) + '/">' +
+           "Everything about " + esc(p.name) + " &rarr;</a> · " +
+           '<a href="' + esc(p.url) + '" target="_blank" rel="noopener">the site &#8599;</a></p>');
     h.push('<p class="at-sub">Last checked ' + esc(p.checked) + ".</p>");
     panel.innerHTML = h.join("");
   }
@@ -307,6 +308,12 @@ window.addEventListener("load", async function () {
              "Dalmatia so far — this place is outside them, and that is a gap in this map " +
              "rather than a gap in the record.</p></div>");
     }
+
+    /* The page behind the panel. A marker is a view; a page is a thing you
+       can send somebody, bookmark, or find from a search engine — and until
+       these existed, 1,239 places had no address of their own. */
+    h.push('<p class="at-go"><a href="' + BASE + "place/" + esc(d.id) + '/">' +
+           "Everything about " + esc(d.name) + " &rarr;</a></p>");
 
     var cs = d.collections.slice();
     if (year) cs = cs.filter(function (c) { return covers(c, year); });

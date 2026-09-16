@@ -1,0 +1,159 @@
+---
+/* One page per place — 1,239 of them, and the reason they exist is that until
+   now there were six.
+
+   Every place lived inside a JSON file that JavaScript fetched, which meant a
+   search engine saw a map and nothing in it, a reader with JavaScript off saw
+   an empty box, and nobody could send anybody a link to Gračišće. A map that
+   cannot be linked into is a demo.
+
+   These are not doorway pages. Each one says something a searcher cannot get
+   in one place anywhere else: every name the place has been written under,
+   which empire held it in which years, WHICH ARCHIVE that means, and every
+   surviving volume with what it costs to open it. */
+import Base from "../../layouts/Base.astro";
+import { u } from "../../lib/url.js";
+import full from "../../data/places-full.json";
+import regions from "../../../public/regions.json";
+import provs from "../../../public/providers.json";
+
+export async function getStaticPaths() {
+  const full = (await import("../../data/places-full.json")).default;
+  return full.places.map((p) => ({ params: { id: p.id }, props: { place: p } }));
+}
+
+const { place } = Astro.props;
+const PROV = Object.fromEntries(provs.providers.map((p) => [p.id, p]));
+const region = regions.regions.find((r) => r.id === place.region);
+const ACC = {
+  free: "Images, free, no account",
+  account: "Images, free, account needed",
+  index: "An index only — no images",
+  mixed: "Partly free, partly paid",
+  paid: "Images, behind a paywall",
+  catalogue: "A catalogue entry — not photographed",
+  onsite: "On paper, in the building",
+};
+const RANK = ["free", "account", "index", "mixed", "paid", "catalogue", "onsite"];
+const cs = place.collections || [];
+const byAccess = RANK.map((a) => [a, cs.filter((c) => c.access === a)]).filter(([, v]) => v.length);
+const years = cs.filter((c) => c.from).map((c) => [c.from, c.to || c.from]);
+const span = years.length
+  ? [Math.min(...years.map((y) => y[0])), Math.max(...years.map((y) => y[1]))]
+  : null;
+const older = (place.names || []).map((n) => n.n);
+const countries = { HR: "Croatia", IT: "Italy", SI: "Slovenia", AT: "Austria",
+                    HU: "Hungary", BA: "Bosnia and Herzegovina", RS: "Serbia",
+                    ME: "Montenegro" };
+const where = countries[place.country] || place.country;
+
+/* The sentence a search engine gets, and the one a human reads first. It has
+   to carry the former names, because that is what people type. */
+const dek = older.length
+  ? `${place.name} in ${where}, also written ${older.join(", ")}. ` +
+    `${cs.length} record volume${cs.length === 1 ? "" : "s"} covering ` +
+    (span ? `${span[0]}–${span[1]}` : "no dated years") + `, and who holds them.`
+  : `${place.name} in ${where}. ${cs.length} record volume${cs.length === 1 ? "" : "s"} ` +
+    (span ? `covering ${span[0]}–${span[1]}, ` : "") + "and who holds them.";
+const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${place.lat},${place.lon},12`);
+---
+<Base
+  title={place.name}
+  eyebrow={`${where} · ${cs.length} volume${cs.length === 1 ? "" : "s"}${span ? ` · ${span[0]}–${span[1]}` : ""}`}
+  dek={dek}>
+
+  {older.length > 0 && (
+    <div class="one" style="border-left-color:var(--accent)">
+      <div class="lab">Also written</div>
+      <p class="names">{older.map((n) => <b>{n}</b>)}</p>
+      <p class="cap">If the document in your hand says one of these, this is the place it means.</p>
+    </div>
+  )}
+
+  {region ? (
+    <section style="margin-top:30px">
+      <h2>Whose archive this ground was</h2>
+      <p class="cap">{place.name} sits in <a href={u(`/region/${region.id}/`)}>{region.label}</a>.
+      Which empire held it decides which archive holds its records — and for some of these
+      years that is not the archive you would guess.</p>
+      <table style="margin-top:14px">
+        <thead><tr><th class="m">Years</th><th>Who held it</th><th>Whose archive that means</th></tr></thead>
+        <tbody>
+          {region.eras.map((e) => (
+            <tr>
+              <td class="m">{e.from}–{e.to}</td>
+              <td><span class="reg" style={`--c:var(${regions.regimes[e.regime].var})`}><i></i>{e.polity || regions.regimes[e.regime].label}</span></td>
+              <td>
+                {e.filedUnder.length
+                  ? e.filedUnder.map((f, i) => (<>{i > 0 && " · "}<a href={u(`/archive/${f}/`)}>{PROV[f].name}</a></>))
+                  : <span class="none">no registers survive</span>}
+                {e.note && <p class={"enote" + (e.note.startsWith("THE ") ? " trap" : "")}>{e.note}</p>}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  ) : (
+    <div class="one" style="margin-top:30px;border-left-color:var(--rule-strong)">
+      <div class="lab">Whose archive this ground was</div>
+      <p class="cap">Not yet mapped. The record regions cover Istria, the Kvarner, Carnia and
+      Dalmatia so far, and {place.name} is outside them. That is a gap in this map rather than
+      a gap in the record — <a href={u("/add/")}>and the most useful thing anyone could fill in</a>.</p>
+    </div>
+  )}
+
+  {cs.length > 0 ? (
+    <section style="margin-top:34px">
+      <h2>The volumes</h2>
+      <p class="cap">Grouped by what it costs to look, most open first — which is the order
+      worth trying them in.</p>
+      {byAccess.map(([a, list]) => (
+        <div style="margin-top:22px">
+          <div class="lab"><i class={"dot d-" + a}></i>{ACC[a]} — {list.length}</div>
+          <ul class="vols">
+            {list.map((c) => (
+              <li>
+                {c.url
+                  ? <a href={c.url} target="_blank" rel="noopener">{c.title || "Untitled volume"} ↗</a>
+                  : <span>{c.title || "Untitled volume"}</span>}
+                {c.from && <span class="y">{c.to && c.to !== c.from ? `${c.from}–${c.to}` : c.from}</span>}
+                <span class="who"><a href={u(`/archive/${c.provider}/`)}>{PROV[c.provider]?.name || c.provider}</a></span>
+                {c.held && <span class="who">held at {c.held}</span>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </section>
+  ) : (
+    <p class="cap" style="margin-top:30px">No volumes recorded here yet.</p>
+  )}
+
+  <p style="margin-top:34px"><a class="bigl" href={mapLink}>See {place.name} on the map →</a></p>
+  <p class="cap"><a href={u("/places/")}>All {full.places.length} places</a> ·
+    <a href={u("/add/")}>Correct something on this page</a></p>
+</Base>
+
+<style>
+  h2 { font-family: var(--serif); font-size: 26px; font-weight: 500; margin: 0 0 6px; }
+  .names { font-family: var(--serif); font-size: 21px; line-height: 1.5; margin: 8px 0 6px; }
+  .names b { font-weight: 500; margin-right: 14px; }
+  .vols { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 6px; }
+  .vols li { font-family: var(--sans); font-size: 13px; line-height: 1.5; }
+  .y { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); margin-left: 8px; }
+  .who { font-size: 11px; color: var(--ink-3); margin-left: 8px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 7px; }
+  .d-free { background: #1E8449 } .d-account { background: #6FA82E }
+  .d-index { background: #EFC03B } .d-mixed { background: #E8792B }
+  .d-paid { background: #C0392B } .d-catalogue { background: #8E6FA8 }
+  .d-onsite { background: #7C8A91 }
+  .reg { display: inline-flex; align-items: baseline; gap: 7px; }
+  .reg i { width: 9px; height: 9px; border-radius: 2px; background: var(--c); display: inline-block; flex: 0 0 auto; }
+  .none { color: var(--ink-3); font-style: italic; }
+  .enote { font-family: var(--sans); font-size: 11.5px; line-height: 1.55; color: var(--ink-3);
+           margin: 6px 0 0; max-width: 58ch; }
+  .enote.trap { color: var(--ink-2); border-left: 2px solid #C0392B; padding-left: 9px; }
+  td { vertical-align: top; }
+  .bigl { font-family: var(--serif); font-size: 19px; }
+</style>

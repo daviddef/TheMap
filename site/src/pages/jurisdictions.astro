@@ -29,7 +29,7 @@ const eras = regions.regions.reduce((a, r) => a + r.eras.length, 0);
 
   {regions.regions.map(r => (
     <section style="margin-top:38px">
-      <h2>{r.label}</h2>
+      <h2><a href={u(`/region/${r.id}/`)}>{r.label}</a></h2>
       <p class="cap" style="margin-top:2px">{r.sub}</p>
       <table style="margin-top:12px">
         <thead><tr>
@@ -47,7 +47,7 @@ const eras = regions.regions.reduce((a, r) => a + r.eras.length, 0);
               <td>
                 {e.filedUnder.length ? (
                   <span>{e.filedUnder.map((f, i) => (
-                    <>{i > 0 && " · "}<a href={PROV[f].url} target="_blank" rel="noopener">{PROV[f].name}</a></>
+                    <>{i > 0 && " · "}<a href={u(`/archive/${f}/`)}>{PROV[f].name}</a></>
                   ))}</span>
                 ) : <span class="none">no registers survive</span>}
                 {e.note && <p class={"enote" + (e.note.startsWith("THE ") ? " trap" : "")}>{e.note}</p>}

@@ -4,10 +4,13 @@ import RecordMap from "../components/RecordMap.astro";
 import { u } from "../lib/url.js";
 import idx from "../../public/index.json";
 import regions from "../../public/regions.json";
+import provs from "../../public/providers.json";
 
 const places = idx.places.length;
 const volumes = idx.places.reduce((a, p) => a + (p.c || 0), 0);
 const countries = new Set(idx.places.map(p => p.k).filter(Boolean)).size;
+const archives = provs.providers.filter(p => p.at);
+const archiveCountries = new Set(archives.map(p => p.at.place.split(", ").pop())).size;
 ---
 <Base
   bare
@@ -15,7 +18,7 @@ const countries = new Set(idx.places.map(p => p.k).filter(Boolean)).size;
   dek="Every place your people came from, and who holds the paper.">
 
   <div class="pagehead">
-    <div class="lab">{places} places · {volumes} record volumes · {countries} countries · {regions.regions.length} record regions</div>
+    <div class="lab">{places} places · {volumes} record volumes · {archives.length} archives in {archiveCountries} countries · {regions.regions.length} record regions</div>
     <h1>Where the records are</h1>
     <p class="dek">
       Genealogy is not short of websites. It is short of an answer to one question:
@@ -53,10 +56,14 @@ const countries = new Set(idx.places.map(p => p.k).filter(Boolean)).size;
   <div class="one" style="margin-top:26px;border-left-color:var(--rule-strong)">
     <div class="lab">What this map does not know yet</div>
     <div class="prose">
-      <p>It is honest about being early. The shelf is deep for <b>Croatia, Istria and Carnia</b>
-      — {places} places and {volumes} volumes — and the record regions cover the ground those
-      places sit on. <b>Everywhere else is a provider list, not a shelf</b>, and a place outside
-      a drawn region says so in its own panel rather than pretending.</p>
+      <p>It is honest about being early, and the three layers are at three different stages.
+      <b>The archives layer is worldwide</b> — {archives.length} institutions across
+      {archiveCountries} countries, each saying what it holds and what it costs to look.
+      <b>The shelf is deep in one corner</b>: {places} places and {volumes} volumes across
+      Croatia, Istria and Carnia, and thin to the point of empty everywhere else.
+      <b>The jurisdiction layer covers six pieces of ground</b>, not the planet — and a place
+      outside them says so in its own panel rather than guessing, because a confident wrong
+      answer about which archive to write to costs somebody a month.</p>
       <p><b>A grey dot means nobody has surveyed it. It does not mean nothing is there.</b>
       That distinction is the difference between a map and a claim, and it is worth more
       than coverage.</p>

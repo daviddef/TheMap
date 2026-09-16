@@ -316,6 +316,24 @@ window.addEventListener("load", async function () {
     h.push('<p class="at-go"><a href="' + BASE + "place/" + esc(d.id) + '/">' +
            "Everything about " + esc(d.name) + " &rarr;</a></p>");
 
+    /* The collections that reach this ground. The panel shows the nearest few
+       and the page shows them all — a marker is a glance, not a catalogue. */
+    if (d.nfs) {
+      var near = (d.fs || []).filter(function (c) { return c.rank <= 1; });
+      h.push('<div class="at-sec"><div class="lab">FamilySearch reaches here</div>');
+      h.push('<p class="at-sub">' + d.nfs + " collection" + (d.nfs === 1 ? "" : "s") +
+             " cover this ground" + (near.length ? ", " + near.length + " of them by name or "
+             + "within 75 km" : "") + ".</p>");
+      h.push('<ul class="at-films">');
+      (near.length ? near : (d.fs || [])).slice(0, 5).forEach(function (c) {
+        h.push('<li><a href="' + esc(c.url) + '" target="_blank" rel="noopener">' +
+               esc(c.t) + " &#8599;</a>" +
+               (c.from ? ' <span class="at-y">' + c.from + "\u2013" + c.to + "</span>" : "") +
+               "</li>");
+      });
+      h.push("</ul></div>");
+    }
+
     var cs = d.collections.slice();
     if (year) cs = cs.filter(function (c) { return covers(c, year); });
     if (!cs.length) {

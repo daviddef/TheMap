@@ -116,12 +116,18 @@ def load_gaz():
 def resolve(gaz, name):
     """Try the whole phrase, then progressively shorter leading parts of it —
     "Briatico, Vibo Valentia, Calabria" then "Briatico, Vibo Valentia" then
-    "Briatico" — because the cache was filled by whoever asked first."""
+    "Briatico" — because the cache was filled by whoever asked first.
+
+    Returns (lat, lon, loose). LOOSE MATTERS: falling back from «Arienzo,
+    Caserta» to bare «Arienzo» found a hamlet near Salerno, 44 km from the
+    comune of that name in Caserta. Right country, right spelling, wrong town,
+    and no build gate can see it. Loose hits are counted and reported so that a
+    human can pin the ones that matter in data/place-overrides.json."""
     parts = [p.strip() for p in name.split(",")]
     for i in range(len(parts), 0, -1):
         hit = gaz.get(key(", ".join(parts[:i])))
         if hit:
-            return hit
+            return hit[0], hit[1], i < len(parts) and len(parts) > 1
     return None
 
 
@@ -201,21 +207,30 @@ def main():
     doc = json.load(open("data/places.json"))
     by_id = {p["id"]: p for p in doc["places"]}
     ovr = json.load(open("data/country-overrides.json"))["overrides"]
+    try:
+        PIN = json.load(open("data/place-overrides.json"))["overrides"]
+    except FileNotFoundError:
+        PIN = {}
 
-    added, merged, unplaced = 0, 0, []
+    added, merged, unplaced, loosely = 0, 0, [], []
     for label, fn in ADAPTERS:
         got = 0
         for rec in fn(PROJ):
-            lat, lon = rec.get("lat"), rec.get("lon")
+            lat, lon, loose = rec.get("lat"), rec.get("lon"), False
             if lat is None:
                 hit = resolve(gaz, rec.get("geo") or rec["name"])
                 if not hit:
                     unplaced.append(f"{label}: {rec['name']}")
                     continue
-                lat, lon, _ = hit
+                lat, lon, loose = hit
             pid = slug(rec["name"])
             if not pid:
                 continue
+            pin = PIN.get(pid)
+            if pin:
+                lat, lon, loose = pin["lat"], pin["lon"], False
+            elif loose:
+                loosely.append(f"{label}: {rec['name']}  <- {rec.get('geo')}")
 
             cc = ovr.get(pid, {}).get("country") or country_of(lat, lon)
             reg = None
@@ -226,6 +241,11 @@ def main():
 
             if pid in by_id:
                 p = by_id[pid]                       # already here: only enrich
+                # A pin has to reach a place that is ALREADY on the map, or it
+                # silently does nothing on every run after the first — which is
+                # exactly what happened to Arienzo, pinned and still 44 km out.
+                if pin:
+                    p["lat"], p["lon"] = round(pin["lat"], 5), round(pin["lon"], 5)
                 have = {n["n"] for n in p.get("names", [])} | {p["name"]}
                 for n in rec.get("names", []):
                     if n and n not in have:
@@ -262,6 +282,11 @@ def main():
     if unplaced:
         print(f"{len(unplaced)} could not be geocoded from the shared cache:")
         for x in unplaced[:10]:
+            print("   ", x)
+    if loosely:
+        print(f"\n{len(loosely)} matched only on a shortened phrase — CHECK THESE, this is "
+              f"how Arienzo ended up 44 km from Arienzo:")
+        for x in loosely[:14]:
             print("   ", x)
     inreg = sum(1 for p in doc["places"] if p.get("region"))
     print(f"{len(doc['places'])} places total, {inreg} inside a record region")

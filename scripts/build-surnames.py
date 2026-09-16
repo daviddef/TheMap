@@ -187,7 +187,12 @@ def main():
         cc = fq["country"]
         # Intern the source name. Written out in full it is seventy bytes
         # repeated 260,000 times — eighteen megabytes of the same sentence.
-        key = "pesel" if cc == "PL" else cc.lower()
+        # KEY BY FILE, NOT BY COUNTRY. The United States now has two — the
+        # 2000 and 2010 census files — and keying on the country made the
+        # second overwrite the first, losing which of them a name came from
+        # just when that is the interesting part: 5,155 surnames are in the
+        # 2000 list and not the 2010 one.
+        key = os.path.basename(p)[:-5]
         SRC[key] = {"name": fq["source"], "url": fq.get("url"),
                     "licence": fq.get("licence"), "harvested": fq.get("harvested")}
         for row in fq["surnames"]:

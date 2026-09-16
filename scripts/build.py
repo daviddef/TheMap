@@ -435,6 +435,77 @@ def main():
         rsbytes += len(blob.encode())
         open(os.path.join(rs, k + ".json"), "w").write(blob)
 
+    # ---- Ireland's townlands: findable, and never drawn -------------------
+    # 60,883 of them, which is why they are not drawn — they would outnumber
+    # every other dot on this map by ten to one and turn Ireland into a solid
+    # block. But a townland is the unit an Irish family record actually names,
+    # so being unable to answer one would be a hole exactly where this atlas
+    # claims to be useful.
+    #
+    # The county and the civil parish ride with every row and they are the
+    # point, not decoration: «Glebe» is the name of 213 different townlands and
+    # «Newtown» of 157. A townland is not an address until you know which one.
+    td = os.path.join(OUT, "t")
+    shutil.rmtree(td, ignore_errors=True)
+    os.makedirs(td)
+    try:
+        irl = json.load(open("data/ireland-osm.json"))
+    except FileNotFoundError:
+        irl = {"townlands": []}
+    tshards, tbytes = {}, 0
+    for t in irl["townlands"]:
+        rec = {"n": t["n"], "y": t["y"], "x": t["x"]}
+        for k in ("co", "cp", "bar"):
+            if t.get(k):
+                rec[k] = t[k]
+        forms = {fold(t["n"])} | {fold(x) for x in t.get("a", [])}
+        for form in forms:
+            k = "".join(c for c in form[:3] if c.isalnum())
+            if len(k) == 3:
+                tshards.setdefault(k, []).append(rec)
+    for k, rowlist in tshards.items():
+        blob = json.dumps(rowlist, ensure_ascii=False, separators=(",", ":"))
+        tbytes += len(blob.encode())
+        open(os.path.join(td, k + ".json"), "w").write(blob)
+
+    # ---- one outline per country, fetched when a name needs it -------------
+    # A SURNAME SEARCH HAD NOTHING TO DRAW. «Lerena» would find the name,
+    # report it attested in Argentina, Spain, Uruguay and the United States,
+    # and leave the map showing wherever it happened to be — which, because of
+    # a second bug, was a village in Nigeria. The one thing a map can do that a
+    # list cannot is SHOW you the four countries at once, and it could not,
+    # because it had no country geometry on the client at all.
+    #
+    # data/countries.json is 1.6 MB of Natural Earth rings and must not ride in
+    # the index. Split one file per country: a search touches two to six of
+    # them and fetches exactly those.
+    cdir = os.path.join(OUT, "c")
+    shutil.rmtree(cdir, ignore_errors=True)
+    os.makedirs(cdir)
+    cbytes, cn = 0, 0
+    for iso, v in json.load(open("data/countries.json"))["countries"].items():
+        rings = v.get("rings") or []
+        if not rings:
+            continue
+        # Coarse enough to read at world zoom and small enough to fetch: every
+        # third point, and a ring that survives to fewer than four is a rock.
+        thin = []
+        for ring in rings:
+            r = [[round(p[0], 2), round(p[1], 2)] for p in ring[::3]]
+            if len(r) >= 4:
+                thin.append(r)
+        if not thin:
+            continue
+        lons = [p[0] for r in thin for p in r]
+        lats = [p[1] for r in thin for p in r]
+        blob = json.dumps({"n": v["name"], "rings": thin,
+                           "box": [round(min(lats), 3), round(min(lons), 3),
+                                   round(max(lats), 3), round(max(lons), 3)]},
+                          ensure_ascii=False, separators=(",", ":"))
+        cbytes += len(blob.encode())
+        cn += 1
+        open(os.path.join(cdir, iso.lower() + ".json"), "w").write(blob)
+
     # ---- districts nobody drew: findable, never drawn ---------------------
     # 17,320 second-level divisions no collection names. Undrawn for the reason
     # in promote-admin-divisions.py — one collection filed under a state would
@@ -550,6 +621,12 @@ def main():
     if surn["surnames"]:
         print(f"surnames.json   {sz('surnames.json')/1024:8.1f} KB  "
               f"surnames.csv {sz('surnames.csv')/1024:.0f} KB — the shareable dataset")
+    if tshards:
+        print(f"t/*.json        {tbytes/1024:8.1f} KB  {len(tshards)} shards, "
+              f"{len(irl['townlands'])} Irish townlands — findable, not drawn")
+    if cn:
+        print(f"c/*.json        {cbytes/1024:8.1f} KB  {cn} country outlines, "
+              f"fetched only when a surname names one")
     if ashards:
         print(f"a/*.json        {abytes/1024:8.1f} KB  {len(ashards)} shards, "
               f"{len(undrawn)} districts no collection names — findable, not drawn")

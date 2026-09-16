@@ -179,11 +179,8 @@ def main():
         added += 1
 
     doc["places"] = sorted(by_id.values(), key=lambda x: x["name"])
-    tail = (" The world's own filing units — every first-level division, and the "
-            "second-level ones a collection names — were drawn by "
-            "scripts/promote-admin-divisions.py from data/admin-divisions.json.")
-    if tail.strip() not in doc["note"]:
-        doc["note"] += tail
+    # The note is written by hand and not appended to here; see the sibling
+    # importer for why.
     json.dump(doc, open("data/places.json", "w"), ensure_ascii=False, indent=1)
 
     json.dump({

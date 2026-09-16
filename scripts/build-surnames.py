@@ -59,7 +59,20 @@ def fold(s):
 # Defranceschi/Defranceski, Blazevic/Blazevich, Lerena/Llerena.
 SUBS = [
     (r"[^a-z ]", ""), (r"\bde\s+", "de"), (r"\bdi\s+", "di"), (r"\bvan\s+", "van"),
-    (r"sch", "s"), (r"sz", "s"), (r"cz", "c"), (r"ch", "c"), (r"ck", "k"),
+    # «sch» IS TWO DIFFERENT SOUNDS AND THIS RULE USED TO KNOW ONLY ONE. In
+    # German, Schmidt begins /ʃ/. In Italian, -schi and -sche are /sk/ — the h
+    # is there precisely to STOP the c softening. Folding both to «s» split the
+    # one family this whole project grew out of:
+    #
+    #   Defranceschi  ->  dfrnss      the Italian spelling
+    #   Defranceski   ->  dfrnssk     the Slovene and Croatian one
+    #
+    # Two skeletons, so they never met, so neither was ever offered as a
+    # variant of the other. They are the same name. Italian «sch» before a
+    # front vowel now goes to «sk», which is what it says, and the German rule
+    # keeps the rest.
+    (r"sch", "s"), (r"sz", "s"), (r"cz", "c"),
+    (r"ch", "c"), (r"ck", "k"),
     (r"ph", "f"), (r"th", "t"), (r"gh", "g"), (r"kh", "h"), (r"zh", "z"),
     (r"ci", "si"), (r"ce", "se"), (r"gi", "ji"), (r"ge", "je"),
     (r"qu", "k"), (r"x", "ks"), (r"w", "v"), (r"y", "i"), (r"j", "i"),
@@ -68,8 +81,7 @@ SUBS = [
 VOWELS = "aeiou"
 
 
-def skeleton(name):
-    s = fold(name)
+def _skel(s):
     for pat, rep in SUBS:
         s = re.sub(pat, rep, s)
     s = re.sub(r"(.)\1+", r"\1", s)
@@ -78,6 +90,38 @@ def skeleton(name):
     head, rest = s[0], s[1:]
     rest = "".join(c for c in rest if c not in VOWELS)
     return (head + rest)[:8]
+
+
+def skeletons(name):
+    """Every reading of a name worth clustering on. Usually one.
+
+    «SCH» IS TWO DIFFERENT SOUNDS AND THE SPELLING DOES NOT SAY WHICH. In
+    German it is /ʃ/ — Schmidt, Fischer. In Italian, -schi and -sche are /sk/,
+    and the h is there precisely to STOP the c softening. One rule folding both
+    to «s» split the family this whole project grew out of:
+
+        Defranceschi  ->  dfrnss      the Italian spelling
+        Defranceski   ->  dfrnssk     the Slovene and Croatian one
+
+    Two skeletons, so they never met, so neither was ever offered as a variant
+    of the other. They are the same name.
+
+    Choosing the Italian reading instead would have broken Fischer/Fisher the
+    same way, in the other direction. So a name carrying «sch» gets BOTH
+    readings and sits in both buckets — which costs one extra string for the
+    four per cent of names that contain it, and stops this having to guess a
+    language it cannot see.
+    """
+    s = fold(name)
+    out = {_skel(s)}
+    if "sch" in s:
+        out.add(_skel(re.sub(r"sch", "sk", s)))
+    return {x for x in out if x}
+
+
+def skeleton(name):
+    s = fold(name)
+    return _skel(s)
 
 
 # ---- what a surname is allowed to look like -----------------------------
@@ -150,7 +194,7 @@ def main():
         ra, rb = touch(a), touch(b)
         if not ra or not rb or fold(a) == fold(b):
             return
-        for src, dst in ((ra, b), (rb, a)):
+        for src, dst in ((ra, display(b)), (rb, display(a))):
             if not any(v["n"] == dst for v in src["variants"]):
                 src["variants"].append({"n": dst, "how": how})
 
@@ -258,29 +302,91 @@ def main():
     # country beyond a bare register row — get phonetic neighbours. Clustering
     # all 277,000 would generate millions of «sounds alike» links between
     # Polish surnames nobody asked about, and bury the useful ones.
+    # WHICH NAMES GET PHONETIC NEIGHBOURS, IN TWO PASSES — and the second pass
+    # is the fix. Clustering all 667,000 would generate millions of «sounds
+    # alike» links between Polish surnames nobody asked about and bury the
+    # useful ones, so the first pass admits only names that already carry
+    # something: a curated link, or a country attested by an archive rather
+    # than by a bare register row.
+    #
+    # That gate was the whole gate, and it was too tight by exactly one step.
+    # Defranceski qualified — three archives attest it. DEFRANCESCHI DID NOT:
+    # it is a French register row and nothing else, so it never entered a
+    # bucket, so it could not be offered as a variant of the name it is a
+    # variant of. The interesting name was looking for neighbours in a room the
+    # neighbours were not allowed into.
+    #
+    # So the first pass SEEDS the skeletons worth clustering, and the second
+    # admits anybody who shares one. Kowalski still never seeds a skeleton, so
+    # the 72,761 Polish grammatical pairs stay out, which is what the gate was
+    # for.
+    seeds = set()
+    for r in rec.values():
+        # A grammatical pair is not a reason to go looking: every one of
+        # Poland's Kowalski/Kowalska pairs qualified under an earlier rule and
+        # the clustering blew out to 234,775 links, which is noise wearing the
+        # shape of data.
+        if (any(v["how"] == "curated" for v in r["variants"])
+                or any(c["how"] != "register" for c in r["countries"])):
+            seeds |= skeletons(r["n"])
     by_skel = collections.defaultdict(list)
-    for k, r in rec.items():
-        # A grammatical pair is not a reason to go looking for phonetic
-        # neighbours: every one of Poland's 72,761 Kowalski/Kowalska pairs
-        # qualified under the first rule and the clustering blew out to
-        # 234,775 links, which is noise wearing the shape of data.
-        interesting = (any(v["how"] in ("curated",) for v in r["variants"])
-                       or any(c["how"] != "register" for c in r["countries"]))
-        if not interesting:
-            continue
-        sk = skeleton(r["n"])
-        if sk:
+    for r in rec.values():
+        for sk in skeletons(r["n"]) & seeds:
             by_skel[sk].append(r)
+    print(f"phonetic: {len(seeds)} skeletons seeded by a name that carries something")
+    # A BUCKET IS NOT A LIST OF VARIANTS, IT IS A SHORTLIST. The old rule threw
+    # away any bucket over twelve as noise, which was right when the gate was
+    # tight and wrong the moment it was loosened: «lrn» now holds Lerena,
+    # Lerina, Llerena, Lorena, Larena and forty Polish names that merely
+    # skeletonise the same way, and dropping the bucket lost the four real
+    # ones with the forty.
+    #
+    # So nothing is dropped for being crowded. Every bucket-mate is scored
+    # against the name by edit distance on the spelling, the far ones are cut,
+    # and the nearest eight are kept. Lerena/Lerina is one edit. Lerena and a
+    # Polish name sharing a consonant skeleton is six, and six is not a
+    # variant of anything.
+    def near(a, b):
+        """Edit distance, capped — anything past the cap is «not a variant».
+
+        Separators are stripped first. «De Franceschi» and «Defranceschi» are
+        the same name written by two clerks, not two edits apart, and counting
+        the space as a difference cost Defranceski its closest relative."""
+        a = re.sub(r"[ '\u2019-]", "", a)
+        b = re.sub(r"[ '\u2019-]", "", b)
+        if abs(len(a) - len(b)) > 3:
+            return 99
+        prev = list(range(len(b) + 1))
+        for i, ca in enumerate(a, 1):
+            cur = [i]
+            for j, cb in enumerate(b, 1):
+                cur.append(min(prev[j] + 1, cur[j - 1] + 1,
+                               prev[j - 1] + (ca != cb)))
+            prev = cur
+        return prev[-1]
+
     sounded = 0
-    for s, group in by_skel.items():
-        if len(group) < 2 or len(group) > 12:      # a huge cluster is noise
+    for sk, group in by_skel.items():
+        if len(group) < 2:
             continue
         for r in group:
+            fa = fold(r["n"])
+            # Three edits on a short name is most of the name. Scale the
+            # allowance: Bo/Ba is not a variant, Defranceschi/Defranceski is.
+            cap = max(1, min(3, len(fa) // 4))
+            cand = []
             for other in group:
                 if other is r:
                     continue
-                if not any(v["n"] == other["n"] for v in r["variants"]):
-                    r["variants"].append({"n": other["n"], "how": "sounds"})
+                d = near(fa, fold(other["n"]))
+                if d <= cap:
+                    cand.append((d, len(other["n"]), other["n"]))
+            cand.sort()
+            have = {v["n"] for v in r["variants"]}
+            for _, _, n in cand[:8]:
+                if n not in have:
+                    r["variants"].append({"n": n, "how": "sounds"})
+                    have.add(n)
                     sounded += 1
     print(f"phonetic: {sounded} «sounds alike» links across {len(by_skel)} skeletons")
 

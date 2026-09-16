@@ -26,8 +26,18 @@
    Everything else — the find box, the filter pills, that every view is a link
    — is the family Atlas's and is kept deliberately, because a reader who knows
    one of these maps should know all of them. */
-const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wikidataUrl, osmUrl, featureBase, settlementBase, districtBase, base } = Astro.props;
+const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wikidataUrl, osmUrl, featureBase, settlementBase, districtBase, countryBase, townlandBase, base } = Astro.props;
 ---
+
+{/* SEARCHING IS THE FIRST ACTION, so it is the first thing on the page. It
+    used to sit under the map, below the legend, after the layer switches and
+    the year slider — three panels of apparatus in front of the one control
+    that answers the question somebody arrived with. A visitor holding a
+    surname had to scroll past the whole instrument to type it in. */}
+<label class="at-find ra-find-top">
+  <span class="lab">Start here — find a place, or a surname, by any name it has ever had</span>
+  <input id="ra-q" type="search" placeholder="A place or a surname — Gallignana · Žubrinić · Lerena" autocomplete="off" />
+</label>
 
 <div class="ra-top">
   <div class="lab">The layers — switch any of them on or off</div>
@@ -54,10 +64,6 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wi
 </div>
 
 <div class="at-tools">
-  <label class="at-find">
-    <span class="lab">Find a place, or a surname — by any name it has ever had</span>
-    <input id="ra-q" type="search" placeholder="A place or a surname — Gallignana · Žubrinić · Lerena" autocomplete="off" />
-  </label>
   <div class="atlas-key" id="ra-cats"></div>
 </div>
 <p class="cap" id="ra-count"></p>
@@ -67,7 +73,7 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wi
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 
-<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, WDA: wikidataUrl, OSMA: osmUrl, FEAT: featureBase, SETT: settlementBase, DIST: districtBase, BASE: base }}>
+<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, WDA: wikidataUrl, OSMA: osmUrl, FEAT: featureBase, SETT: settlementBase, DIST: districtBase, CTRY: countryBase, TOWN: townlandBase, BASE: base }}>
 window.addEventListener("load", async function () {
   var el = document.getElementById("ra-map");
   if (!el || typeof L === "undefined") return;
@@ -674,7 +680,13 @@ window.addEventListener("load", async function () {
       (year ? ", able to answer for " + year : "") +
       (on.archives ? ", and " + aShown + " of " + archives.length + " archives" : "");
 
-    if (!t) return;
+    if (!t) {
+      /* Clearing the box clears the map with it. Anything drawn to answer a
+         search is an answer to a question nobody is asking any more. */
+      if (gmark) { map.removeLayer(gmark); gmark = null; }
+      ctryLayer.clearLayers();
+      return;
+    }
     var vis = markers.filter(function (m) { return shelfLayer.hasLayer(m); });
     var avis = archMarkers.filter(function (m) { return archiveLayer.hasLayer(m); });
     var frame = vis.concat(on.archives ? avis : []);
@@ -761,7 +773,8 @@ window.addEventListener("load", async function () {
         h.push('<p class="ra-vars"><span class="ra-tag">also written</span> ' +
                cur.map(function (v) { return "<em>" + esc(v.n) + "</em>"; }).join(" · ") + "</p>");
       if (snd.length)
-        h.push('<p class="ra-vars ra-weak"><span class="ra-tag">only sounds alike</span> ' +
+        h.push('<p class="ra-vars ra-weak"><span class="ra-tag">the same name by sound, ' +
+               'not by a record</span> ' +
                snd.slice(0, 8).map(function (v) { return esc(v.n); }).join(" · ") + "</p>");
 
       if (r.countries.length) {
@@ -866,7 +879,76 @@ window.addEventListener("load", async function () {
     return hit.slice(0, 4).map(function (x) { return x[1]; });
   }
 
+  /* WHERE A NAME IS FOUND, DRAWN. A surname search used to produce a list of
+     country links and leave the map showing whatever it was showing — which
+     is the one thing a map is for and the one thing this did not do. Outlines
+     are fetched one country at a time from c/, so answering «Lerena» costs
+     four small files and nothing at all for anyone who never searches a name. */
+  var ccache = {}, ctryLayer = L.layerGroup();
+  async function outline(cc) {
+    var k = (cc || "").toLowerCase();
+    if (!k) return null;
+    if (!(k in ccache)) {
+      try { ccache[k] = await (await fetch(CTRY + k + ".json")).json(); }
+      catch (e) { ccache[k] = null; }
+    }
+    return ccache[k];
+  }
+  async function showCountries(list) {
+    ctryLayer.clearLayers();
+    if (!list.length) return;
+    var got = await Promise.all(list.slice(0, 10).map(outline));
+    var box = null;
+    got.forEach(function (c, i) {
+      if (!c) return;
+      L.polygon(c.rings.map(function (r) {
+        return r.map(function (p) { return [p[1], p[0]]; });
+      }), { color: "var(--accent)", weight: 1.6, opacity: .85,
+            fillColor: "#8E6FA8", fillOpacity: .13, interactive: false })
+        .addTo(ctryLayer);
+      var b = L.latLngBounds([c.box[0], c.box[1]], [c.box[2], c.box[3]]);
+      box = box ? box.extend(b) : b;
+    });
+    if (!map.hasLayer(ctryLayer)) ctryLayer.addTo(map);
+    if (box) map.fitBounds(box, { padding: [30, 30], maxZoom: 7 });
+  }
+
+  /* Irish townlands. Undrawn — 60,883 dots would bury Ireland — but a townland
+     is the unit an Irish record actually names, and the county and civil parish
+     that come back with it are the whole answer: «Glebe» is 213 different
+     places and is not an address until you know which. */
+  var tcache = {};
+  async function townlands(term) {
+    var f = fold(term);
+    var key = "";
+    for (var i = 0; i < f.length && key.length < 3; i++)
+      if (/[a-z0-9]/.test(f[i])) key += f[i];
+    if (key.length < 3) return [];
+    if (!(key in tcache)) {
+      try { tcache[key] = await (await fetch(TOWN + key + ".json")).json(); }
+      catch (e) { tcache[key] = []; }
+    }
+    var hit = [];
+    tcache[key].forEach(function (r) {
+      var fn = fold(r.n);
+      var m = fn === f ? 0 : fn.indexOf(f) === 0 ? 1 : fn.indexOf(f) > -1 ? 2 : null;
+      if (m !== null) hit.push([m, r]);
+    });
+    hit.sort(function (a, b) { return a[0] - b[0]; });
+    return { rows: hit.slice(0, 6).map(function (x) { return x[1]; }),
+             total: hit.length };
+  }
+
   async function elsewhere(term) {
+    /* EVERY SEARCH STARTS FROM A CLEAN MAP. The gazetteer marker used to be
+       removed only when a NEW gazetteer hit replaced it, so typing on past a
+       match left the old one behind: «Lere» found a village in Nigeria and
+       flew there, and «Lerena» — which matches no place at all — left the map
+       in Nigeria with a marker on a village that has nothing to do with the
+       name. The panel said «no places of that name here yet» while the map
+       said otherwise, and the map is louder. */
+    if (gmark) { map.removeLayer(gmark); gmark = null; }
+    ctryLayer.clearLayers();
     var f = fold(term);
     var iso = Object.keys(CNAME).filter(function (k) {
       return fold(CNAME[k]).indexOf(f) > -1 || k.toLowerCase() === f;
@@ -880,12 +962,22 @@ window.addEventListener("load", async function () {
     var names = await surnames(term);
     var setts = await settlements(term);
     var dists = await districts(term);
+    var tlands = await townlands(term);
     /* If the typed word is an OLD name, say which one it matched and what the
        place is called now. "Pressburg → Bratislava" is the whole answer to the
        first of the three problems, and it works in any country on earth. */
     empty.hidden = true; panel.hidden = false;
     var h = ['<div class="at-h"><h3>' + esc(term) + "</h3></div>"];
-    if (names.length) h.push(renderSurnames(names, term));
+    if (names.length) {
+      h.push(renderSurnames(names, term));
+      var lit = [];
+      names.forEach(function (r) {
+        (r.countries || []).forEach(function (c) {
+          if (lit.indexOf(c.cc) < 0) lit.push(c.cc);
+        });
+      });
+      showCountries(lit);
+    }
     /* A village inside a mapped region: no shelf, but a jurisdiction answer,
        which is the thing this map is actually for. */
     setts.forEach(function (r) {
@@ -908,6 +1000,25 @@ window.addEventListener("load", async function () {
       }
       h.push("</div>");
     });
+    /* A townland. The county and civil parish are the answer, not the trimming:
+       the civil parish is what Griffith's Valuation and the registration
+       districts are arranged by, so it is the word to search next. */
+    if (tlands.rows && tlands.rows.length) {
+      h.push('<div class="ra-juris"><div class="lab">An Irish townland</div>');
+      if (tlands.total > tlands.rows.length)
+        h.push('<p class="at-sub">' + tlands.total + " townlands carry this name. " +
+               "Which one it is depends on the county — that is what a townland " +
+               "name alone cannot tell you.</p>");
+      tlands.rows.forEach(function (r) {
+        h.push("<p><b>" + esc(r.n) + "</b>" +
+               (r.co ? " — County " + esc(r.co) : "") +
+               (r.cp ? '<br><span class="ra-who">in the civil parish of <b>' +
+                       esc(r.cp) + "</b>" + (r.bar ? ", barony of " + esc(r.bar) : "") +
+                       " — the unit Griffith's Valuation and the registration " +
+                       "districts are arranged by</span>" : "") + "</p>");
+      });
+      h.push("</div>");
+    }
     /* A district with nothing of its own. Saying which first-level division
        it sits in is not a consolation prize: adm1 is the rung a collection is
        filed at, so it is the word to search next. */
@@ -923,13 +1034,16 @@ window.addEventListener("load", async function () {
       h.push("</div>");
     }
     if (hits.length) {
-      if (gmark) { map.removeLayer(gmark); gmark = null; }
       var top = hits[0];
       gmark = L.circleMarker([top[1], top[2]], {
         radius: 9, color: "var(--accent)", weight: 2, opacity: .9,
         fillColor: "#8E6FA8", fillOpacity: .35, dashArray: "3 3"
       }).addTo(map);
-      map.setView([top[1], top[2]], Math.max(map.getZoom(), 8));
+      /* Only fly to a place when the place is what was asked for. A surname
+         that happens to begin with the letters of a village is not a request
+         to go to the village, and the map jumping there buries the answer. */
+      if (!names.length || fold(top[0]) === f)
+        map.setView([top[1], top[2]], Math.max(map.getZoom(), 8));
       h.push('<div class="ra-juris"><div class="lab">That name is a place</div>');
       hits.slice(0, 5).forEach(function (r) {
         var older = r[4].filter(function (a) { return fold(a) !== fold(r[0]); });
@@ -1091,6 +1205,10 @@ window.addEventListener("load", async function () {
               border-radius: 3px; background: var(--panel); padding: 18px 18px 24px; }
   .at-empty p { font-size: 13px; line-height: 1.6; color: var(--ink-2); margin: 8px 0 0; }
   .at-hint { color: var(--ink-3) !important; font-size: 12px !important; }
+  /* The search box now leads the page, so it is sized to look like the thing
+     to do rather than like one field among several. */
+  .ra-find-top { display: block; margin: 0 0 22px; }
+  .ra-find-top input { font-size: 17px; padding: 13px 15px; }
   /* Matches the hollow marker: rim only, middle empty. */
   :global(.at-hollow-key) { cursor: default; opacity: .75; }
   :global(.at-hollow-key i) { background: transparent !important;

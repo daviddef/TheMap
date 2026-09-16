@@ -154,10 +154,10 @@ def main():
         added += 1
 
     doc["places"] = sorted(by_id.values(), key=lambda x: x["name"])
-    doc["note"] = (doc["note"] + " Places named by a FamilySearch collection were promoted "
-                   "to the shelf by scripts/promote-collection-places.py — a collection "
-                   "catalogued under a town is a statement that registers for that town "
-                   "exist, which is what a shelf entry is.")
+    # The note is NOT appended to. Every importer used to add its sentence on
+    # every run, and after six runs data/places.json opened with the same three
+    # sentences seven times over. The note is written once, by hand, and says
+    # what all four importers do; see the top of data/places.json.
     json.dump(doc, open("data/places.json", "w"), ensure_ascii=False, indent=1)
 
     cnt = collections.Counter(p.get("country") for p in doc["places"])

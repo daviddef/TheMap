@@ -201,7 +201,17 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
     </section>
   )}
 
-  <p style="margin-top:34px"><a class="bigl" href={mapLink}>See {place.name} on the map →</a></p>
+  {region && (
+    <p style="margin-top:30px"><a class="bigl"
+      href={u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&year=1863&layers=shelf,jurisdiction&view=${place.lat},${place.lon},9`)}>
+      Set a year over {place.name} →</a><br />
+      <span class="cap">The jurisdiction answer — which empire held this ground, and therefore
+      whose archive — could only be got at from the map until now. This opens it there, on
+      1863; drag the year from any point between {region.eras[0].from} and
+      {region.eras[region.eras.length - 1].to}.</span></p>
+  )}
+
+  <p style="margin-top:22px"><a class="bigl" href={mapLink}>See {place.name} on the map →</a></p>
   <p class="cap"><a href={u(`/country/${(place.country||"").toLowerCase()}/`)}>Everything in {where}</a> ·
     <a href={u("/places/")}>All {full.places.length} places</a> ·
     <a href={u("/add/")}>Correct something on this page</a></p>

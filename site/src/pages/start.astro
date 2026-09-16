@@ -1,0 +1,79 @@
+---
+/* Onboarding, because a first-time visitor lands on a world map with seven
+   layers and no idea what to do with it. Written as three questions rather
+   than a feature list, because a feature list is what the site already is. */
+import Base from "../layouts/Base.astro";
+import { u } from "../lib/url.js";
+import idx from "../../public/index.json";
+import regions from "../../public/regions.json";
+const places = idx.places.length;
+---
+<Base
+  title="Start here"
+  eyebrow="Three ways in, depending on what you are holding"
+  dek="This map answers one question — my people came from here, who holds the paper — and there are three different things you might have in your hand when you ask it.">
+
+  <div class="ways">
+    <a class="way" href={u("/?q=Gallignana")}>
+      <div class="lab">You have a place name</div>
+      <b>Type it, even if it is the old name</b>
+      <span>Gallignana finds Gračišće. Fiume finds Rijeka. Breslau finds Wrocław. The find
+      box matches every name a place has ever been written under — 45,985 places worldwide,
+      not just the {places} with a shelf.</span>
+    </a>
+    <a class="way" href={u("/?q=Xubrinich")}>
+      <div class="lab">You have a surname and nothing else</div>
+      <b>Type that instead</b>
+      <span>It will tell you the other spellings and which countries the name is attested
+      in, then offer you the archives and collections for those countries. Xubrinich answers
+      Žubrinić. Kowalska answers Kowalski.</span>
+    </a>
+    <a class="way" href={u("/?layers=shelf,jurisdiction&year=1863&view=45.1,14.3,8")}>
+      <div class="lab">You have a place AND a year</div>
+      <b>Set the year — this is the part nobody else does</b>
+      <span>An 1863 baptism from a Croatian village is in a Croatian archive. A 1930 one from
+      the same village is filed under <em>Italy</em>. Set the year and every panel says whose
+      empire held that ground, and therefore whose archive to write to.</span>
+    </a>
+  </div>
+
+  <div class="one" style="margin-top:32px;border-left-color:#C0392B">
+    <div class="lab">The one thing to understand before you trust it</div>
+    <div class="prose">
+      <p><b>A blank on this map is a gap in the map, not a gap in the record.</b> The shelf is
+      deep for Croatia and thin everywhere else, because somebody walked a Croatian catalogue
+      parish by parish over months and nobody has done that anywhere else.</p>
+      <p>So a grey dot means «nobody has looked here», never «there is nothing here», and the
+      two are kept apart everywhere — including on
+      <a href={u("/coverage/")}>a page that measures exactly how incomplete this is</a>,
+      country by country.</p>
+    </div>
+  </div>
+
+  <div class="one" style="margin-top:22px">
+    <div class="lab">What the colours mean</div>
+    <p class="cap">Every dot is coloured by <b>what it would cost you to look right now</b> —
+    free images, images behind a free login, an index with no images, a paywall, a catalogue
+    card for paper nobody photographed, or paper in a building. That is the question a
+    researcher actually has, and it is the only thing the colour is ever used for.</p>
+  </div>
+
+  <p style="margin-top:26px"><a class="bigl" href={u("/")}>Open the map →</a></p>
+  <p class="cap"><a href={u("/jurisdictions/")}>{regions.regions.length} record regions</a> ·
+    <a href={u("/surnames/")}>the surname dataset</a> ·
+    <a href={u("/coverage/")}>what is missing</a></p>
+</Base>
+
+<style>
+  .ways { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 14px; margin-top: 24px; }
+  .way { display: block; padding: 16px 18px; border: 1px solid var(--rule);
+         border-left: 2px solid var(--accent); border-radius: 3px;
+         background: var(--panel); text-decoration: none; color: var(--ink); }
+  .way:hover { border-color: var(--accent); }
+  .way b { display: block; font-family: var(--serif); font-size: 18px;
+           font-weight: 500; margin: 6px 0 8px; }
+  .way span { font-family: var(--sans); font-size: 12.5px; line-height: 1.6;
+              color: var(--ink-3); }
+  .bigl { font-family: var(--serif); font-size: 20px; }
+</style>

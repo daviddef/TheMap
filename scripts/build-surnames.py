@@ -9,7 +9,13 @@ refusing to do.
   curated   Wikidata's «said to be the same as», and the variant clusters the
             seven family archives worked out from documents. A human looked at
             two spellings of one family and said they were the same family.
-  archive   The surname appears in one of those archives, whose ground is
+  register  A national register says the name is there, and how many people
+            carry it. The strongest geography this dataset has.
+  grammar   Two forms that a language makes of one name. Kowalski and Kowalska
+            are the same surname in Polish, and that is a rule rather than an
+            opinion — stronger than a phonetic guess, weaker than a human
+            looking at a specific family.
+  archive   The surname appears in one of the family archives, whose ground is
             known. «Attested in» means IT IS IN A DATASET WE HOLD — never that
             it exists in that country and nowhere else.
   sounds    An algorithm thinks they sound alike. Useful for casting a net,
@@ -76,6 +82,7 @@ def skeleton(name):
 
 def main():
     rec = {}          # folded name -> record
+    SRC = {}          # short key -> the source it stands for
 
     def touch(name):
         k = fold(name)
@@ -96,16 +103,21 @@ def main():
             if not any(v["n"] == dst for v in src["variants"]):
                 src["variants"].append({"n": dst, "how": how})
 
-    def attest(name, cc, how, who):
+    def attest(name, cc, how, who, n=None):
         r = touch(name)
         if not r:
             return
-        if not any(c["cc"] == cc and c["by"] == who for c in r["countries"]):
-            r["countries"].append({"cc": cc, "how": how, "by": who})
+        for c in r["countries"]:
+            if c["cc"] == cc and c["by"] == who:
+                return
+        rec = {"cc": cc, "how": how, "by": who}
+        if n is not None:
+            rec["n"] = n
+        r["countries"].append(rec)
 
     # ---- 1. Wikidata's curated «said to be the same as» -------------------
     try:
-        pairs = json.load(open("/tmp/wd-variant-pairs.json"))
+        pairs = json.load(open("data/wikidata-variants.json"))
     except FileNotFoundError:
         pairs = []
     for a, b in pairs:
@@ -160,12 +172,44 @@ def main():
         if names:
             print(f"{label:14} {len(names):5} surnames -> {','.join(ccs)}")
 
-    # ---- 3. What merely sounds alike --------------------------------------
+    # ---- 3. National registers --------------------------------------------
+    # The only source here that says how MANY people carry a name, and the
+    # only one whose geography is a fact about the country rather than about
+    # one family's research.
+    import glob as _g
+    for p in sorted(_g.glob("data/frequencies/*.json")):
+        fq = json.load(open(p))
+        cc = fq["country"]
+        # Intern the source name. Written out in full it is seventy bytes
+        # repeated 260,000 times — eighteen megabytes of the same sentence.
+        key = "pesel" if cc == "PL" else cc.lower()
+        SRC[key] = {"name": fq["source"], "url": fq.get("url"),
+                    "licence": fq.get("licence"), "harvested": fq.get("harvested")}
+        for row in fq["surnames"]:
+            attest(row["n"], cc, "register", key, row["c"])
+        for fem, masc in (fq.get("gendered") or {}).items():
+            link(fem, masc, "grammar")
+        print(f"{cc}: {len(fq['surnames'])} surnames from a national register, "
+              f"{len(fq.get('gendered') or {})} grammatical pairs")
+
+    # ---- 4. What merely sounds alike --------------------------------------
+    # Only names that already carry something — a curated link, an archive, a
+    # country beyond a bare register row — get phonetic neighbours. Clustering
+    # all 277,000 would generate millions of «sounds alike» links between
+    # Polish surnames nobody asked about, and bury the useful ones.
     by_skel = collections.defaultdict(list)
     for k, r in rec.items():
-        s = skeleton(r["n"])
-        if s:
-            by_skel[s].append(r)
+        # A grammatical pair is not a reason to go looking for phonetic
+        # neighbours: every one of Poland's 72,761 Kowalski/Kowalska pairs
+        # qualified under the first rule and the clustering blew out to
+        # 234,775 links, which is noise wearing the shape of data.
+        interesting = (any(v["how"] in ("curated",) for v in r["variants"])
+                       or any(c["how"] != "register" for c in r["countries"]))
+        if not interesting:
+            continue
+        sk = skeleton(r["n"])
+        if sk:
+            by_skel[sk].append(r)
     sounded = 0
     for s, group in by_skel.items():
         if len(group) < 2 or len(group) > 12:      # a huge cluster is noise
@@ -189,6 +233,12 @@ def main():
             m = merged.setdefault(c["cc"], {"cc": c["cc"], "how": c["how"], "by": []})
             if c["by"] not in m["by"]:
                 m["by"].append(c["by"])
+            # The count is the single most useful field a register gives and
+            # the first cut of this merge dropped every one of them.
+            if c.get("n") is not None:
+                m["n"] = max(m.get("n", 0), c["n"])
+            if c["how"] == "register":
+                m["how"] = "register"
         r["countries"] = sorted(merged.values(), key=lambda c: c["cc"])
         r["skel"] = skeleton(r["n"])
         r["q"] = k
@@ -204,20 +254,29 @@ def main():
                 "known, `sounds` means only that an algorithm thinks they sound alike. "
                 "«Attested in» means the name appears in a dataset held here — never "
                 "that it exists in that country, and never that it exists nowhere else.",
+        "attestedBy": SRC,
         "sources": [
             "Wikidata, instance of family name (Q101352), property P460. CC0.",
             "The seven Defranceski-family archives — David Defranceski's own research.",
+            "National surname registers — see data/frequencies/ for each one's "
+            "source, licence and date.",
             "Phonetic skeletons computed here; algorithmic, not evidence.",
         ],
         "counts": {
             "surnames": len(out),
+            "withRegisterCount": sum(1 for r in out
+                                     if any(c.get("n") for c in r["countries"])),
             "withVariants": sum(1 for r in out if r["variants"]),
             "withCountries": sum(1 for r in out if r["countries"]),
             "curatedLinks": sum(1 for r in out for v in r["variants"] if v["how"] == "curated"),
         },
         "surnames": out,
     }
-    json.dump(doc, open("data/surnames.json", "w"), ensure_ascii=False, indent=1)
+    # Compact, and NOT committed: 293,210 surnames is 84 MB pretty-printed and
+    # it is derived in full from data/frequencies/ and data/wikidata-variants.json,
+    # both of which are. Keep the sources in git and make the merge.
+    json.dump(doc, open("data/surnames.json", "w"), ensure_ascii=False,
+              separators=(",", ":"))
     print(f"\n{len(out)} surnames -> data/surnames.json")
     print("  " + " · ".join(f"{k}: {v}" for k, v in doc["counts"].items()))
 

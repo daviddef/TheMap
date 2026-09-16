@@ -44,9 +44,15 @@ const examples = surn.surnames
     Wikidata (CC0) and David Defranceski's own research, and nothing under CC BY was folded
     in so that this could stay true.</p>
     <p class="dl">
-      <a href={u("/surnames.json")}>surnames.json</a> — the full structured dataset<br />
-      <a href={u("/surnames.csv")}>surnames.csv</a> — one row per surname × variant × country
+      <a href={u("/surnames.csv")}>surnames.csv</a> — <b>13 MB</b>, one row per surname ×
+      variant × country. The practical one.<br />
+      <a href={u("/surnames.json")}>surnames.json</a> — <b>40 MB</b>, the same thing
+      structured, with the evidence tier on every claim.
     </p>
+    <p class="cap">Both are large because most of the rows are a national register. If you
+    want one country's raw frequencies, take it straight from the source instead — they are
+    in <code>data/frequencies/</code> in the repository, one file per country, each carrying
+    its own licence and harvest date.</p>
     <p class="cap">Sources: {surn.sources.map((s) => <span>{s}<br /></span>)}</p>
   </section>
 
@@ -79,11 +85,16 @@ const examples = surn.surnames
 
   <div class="one" style="margin-top:30px;border-left-color:var(--rule-strong)">
     <div class="lab">How thin this still is</div>
-    <p class="cap">{c.surnames} surnames is not every surname in the world, and there is no
-    open dataset that is — the one commercial database that claims twenty-seven million is
-    not redistributable and is not used here. What is open is Wikidata's curated variant
-    links and a handful of national frequency lists published by governments. The second of
-    those is not folded in yet; when it is, the country coverage stops being thin.</p>
+    <p class="cap">{c.surnames.toLocaleString()} surnames is not every surname in the world,
+    and there is no open dataset that is — the one commercial database claiming twenty-seven
+    million is not redistributable and is not used here.</p>
+    <p class="cap"><b>And it is lopsided.</b> Poland alone accounts for most of it, because
+    Poland publishes its national register — including the deceased — through an open data
+    API with no key at all. The United States publishes 162,253 surnames and puts a firewall
+    in front of the file; its documented API wants a key a human has to sign up for. Spain,
+    the Netherlands and the Nordic agencies publish too and are not folded in yet. So the
+    shape of this dataset is presently the shape of which governments make it easy, which is
+    not the same as the shape of the world.</p>
   </div>
 </Base>
 
@@ -93,6 +104,8 @@ const examples = surn.surnames
   .kinds li { font-family: var(--sans); font-size: 13px; line-height: 1.55; color: var(--ink-2); }
   .kinds b { font-family: var(--mono); font-size: 12px; color: var(--accent); }
   .dl { font-family: var(--mono); font-size: 14px; line-height: 2; margin-top: 10px; }
+  code { font-family: var(--mono); font-size: 12.5px; background: var(--panel-2);
+         padding: 1px 5px; border-radius: 2px; }
   .ccs { list-style: none; padding: 0; margin: 12px 0 0;
          display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 4px; }
   .ccs li { font-family: var(--sans); font-size: 13px; }

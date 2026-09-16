@@ -1,0 +1,73 @@
+name: Link rot
+
+# Every source row says when a human last checked it, and nothing in the world
+# will change that date by itself. This is the thing that notices.
+on:
+  schedule:
+    - cron: "17 6 * * 1"     # Monday morning, off the hour so as not to pile on
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+
+      - name: Re-test every source
+        id: check
+        run: |
+          set +e
+          python3 scripts/check-links.py --json linkcheck.json | tee report.txt
+          echo "failed=$?" >> "$GITHUB_OUTPUT"
+        continue-on-error: true
+
+      - name: Open or update the issue
+        if: steps.check.outputs.failed != '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('report.txt', 'utf8');
+            const body = [
+              'The weekly link check found sources that no longer answer.',
+              '',
+              'A **challenged** verdict is not a failure — several national archives sit',
+              'behind Cloudflare and refuse anything that is not a browser, while working',
+              'perfectly for a human. Only `dead`, `unreachable`, `server-error` and `odd`',
+              'need a person.',
+              '',
+              'Fix by correcting the row in `data/providers.json` and moving its `checked`',
+              'date forward. If a source has gone for good, say so in `what` rather than',
+              'deleting it — somebody will otherwise add it back next year.',
+              '',
+              '```', report.trim(), '```',
+            ].join('\n');
+            const title = 'Link rot: sources that stopped answering';
+            const open = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'rot',
+            });
+            const existing = open.data.find(i => i.title === title);
+            if (existing) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: existing.number, body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo,
+                title, body, labels: ['rot'],
+              });
+            }
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: linkcheck
+          path: linkcheck.json

@@ -363,6 +363,44 @@ def main():
         rsbytes += len(blob.encode())
         open(os.path.join(rs, k + ".json"), "w").write(blob)
 
+    # ---- districts nobody drew: findable, never drawn ---------------------
+    # 17,320 second-level divisions no collection names. Undrawn for the reason
+    # in promote-admin-divisions.py — one collection filed under a state would
+    # otherwise stamp an identical dot on every district inside it — but a
+    # reader holding «Kreis Bomst» or «partido de Chascomús» still gets told
+    # what it is, which country now holds it, and which first-level division it
+    # sits in, and that last one is the rung a collection is actually filed at.
+    ad = os.path.join(OUT, "a")
+    shutil.rmtree(ad, ignore_errors=True)
+    os.makedirs(ad)
+    try:
+        undrawn = json.load(open("data/admin-undrawn.json"))["divisions"]
+    except FileNotFoundError:
+        undrawn = []
+    ashards, abytes = {}, 0
+    for d in undrawn:
+        rec = {"n": d["name"], "y": d["lat"], "x": d["lon"], "k": d["cc"]}
+        if d.get("adm1"):
+            rec["p"] = d["adm1"]
+        forms = {fold(d["name"])}
+        if d.get("adm1"):
+            forms.add(fold(d["adm1"]))
+        for form in forms:
+            for word in form.split():
+                k = "".join(c for c in word[:3] if c.isalnum())
+                if len(k) == 3:
+                    ashards.setdefault(k, []).append(rec)
+    for k, rows in ashards.items():
+        seen, uniq = set(), []
+        for r in rows:
+            key = (r["n"], r["k"])
+            if key not in seen:
+                seen.add(key)
+                uniq.append(r)
+        blob = json.dumps(uniq, ensure_ascii=False, separators=(",", ":"))
+        abytes += len(blob.encode())
+        open(os.path.join(ad, k + ".json"), "w").write(blob)
+
     # ---- surnames, sharded like the gazetteer -----------------------------
     # Same trick and the same reason: a search corpus is fetched three letters
     # at a time and never rides in the index that draws the map.
@@ -440,6 +478,9 @@ def main():
     if surn["surnames"]:
         print(f"surnames.json   {sz('surnames.json')/1024:8.1f} KB  "
               f"surnames.csv {sz('surnames.csv')/1024:.0f} KB — the shareable dataset")
+    if ashards:
+        print(f"a/*.json        {abytes/1024:8.1f} KB  {len(ashards)} shards, "
+              f"{len(undrawn)} districts no collection names — findable, not drawn")
     if rshards:
         print(f"rs/*.json       {rsbytes/1024:8.1f} KB  {len(rshards)} shards, "
               f"{len(sett)} settlements in regions — findable, not drawn")

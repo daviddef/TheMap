@@ -277,6 +277,19 @@ window.addEventListener("load", async function () {
       h.push('<p class="at-also">also written ' + alsoNames.map(function (x) {
         return "<em>" + esc(x) + "</em>"; }).join(" · ") + "</p>");
 
+    if (d.filedUnder) {
+      h.push('<div class="ra-juris" style="border-left-color:#C0392B">' +
+             '<div class="lab">Filed under another country</div><p>' +
+             esc(d.name) + " is in " + esc(CNAME[d.country] || d.country) +
+             " today. FamilySearch catalogues it under <b>" +
+             esc(CNAME[d.filedUnder] || d.filedUnder) +
+             "</b>, because that is who held the ground when the records were made.</p></div>");
+    }
+    if (d.level) {
+      h.push('<p class="at-sub">A ' + esc(d.level) + ", not a town — the marker is at its " +
+             "centre, not at a building.</p>");
+    }
+
     /* THE LINE THIS SITE EXISTS FOR. */
     var reg = d.region && REGION[d.region];
     if (reg) {

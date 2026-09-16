@@ -7,7 +7,7 @@ the build rather than warning into a log nobody reads.
 """
 import json, os, re, sys, datetime
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from geo import country_of
+from geo import country_of, km_to
 
 import os as _os
 _ROOT = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
@@ -99,12 +99,22 @@ def main():
             continue
         if not p.get("country"):
             err(f"place {pid}: no country")
-        elif pid not in OVR:
+        elif pid not in OVR and not p.get("filedUnder"):
+            # A place carrying `filedUnder` has already had this argument
+            # settled and recorded: it says where the ground is AND which
+            # country a source files it under. Flagging it again would be the
+            # gate objecting to the answer it asked for.
             actual = country_of(p["lat"], p["lon"])
             if actual and actual != p["country"]:
-                err(f"place {pid}: filed as {p['country']} but {p['lat']},{p['lon']} "
-                    f"is in {actual} — fix the coordinates, or add a reasoned "
-                    f"entry to data/country-overrides.json")
+                # The same 25 km tolerance the importer uses, because a gate
+                # holding a stricter standard than the thing it gates just
+                # fails honest data. El Paso is half a kilometre from Mexico
+                # and a 110 m-rounded outline cannot see the river.
+                edge = km_to(p["lat"], p["lon"], p["country"])
+                if edge is None or edge >= 25:
+                    err(f"place {pid}: filed as {p['country']} but {p['lat']},{p['lon']} "
+                        f"is in {actual} — fix the coordinates, or add a reasoned "
+                        f"entry to data/country-overrides.json")
         if p.get("region") and p["region"] not in rids:
             err(f"place {pid}: unknown region '{p['region']}'")
 

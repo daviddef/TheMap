@@ -71,6 +71,23 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
   eyebrow={`${where} · ${cs.length} volume${cs.length === 1 ? "" : "s"}${span ? ` · ${span[0]}–${span[1]}` : ""}`}
   dek={dek}>
 
+  {place.filedUnder && (
+    <div class="one" style="border-left-color:#C0392B">
+      <div class="lab">Filed under a country that no longer holds it</div>
+      <p class="cap"><b>{place.name} is in {where} today.</b> FamilySearch catalogues it under
+      <b>{(idx.countries||{})[place.filedUnder] || place.filedUnder}</b>, because that is who held
+      the ground when the records were made. Searching {where} alone will not find them —
+      look under <a href={u(`/country/${place.filedUnder.toLowerCase()}/`)}>
+      {(idx.countries||{})[place.filedUnder] || place.filedUnder}</a> as well.</p>
+    </div>
+  )}
+
+  {place.level && (
+    <p class="cap" style="margin-top:14px">This is a <b>{place.level}</b>, not a town — the
+    marker sits at its centre, not at a building. Records filed at this level are usually held
+    for the whole {place.level}.</p>
+  )}
+
   {older.length > 0 && (
     <div class="one" style="border-left-color:var(--accent)">
       <div class="lab">Also written</div>

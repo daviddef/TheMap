@@ -130,7 +130,7 @@ def main():
             verdict, detail = judge(*probe(p["url"]))
         rows.append({"id": p["id"], "name": p["name"], "url": p["url"],
                      "verdict": verdict, "detail": detail, "checked": p["checked"]})
-        if not a.quiet:
+        if not a.quiet and verdict != "challenged":
             print(f"  {verdict:13} {p['id']:18} {detail}")
         time.sleep(1)                                        # one a second, no more
 
@@ -157,6 +157,28 @@ def main():
 
     broken = [r for r in rows if r["verdict"] in REAL_FAILURES]
     unver = [r for r in rows if r["verdict"] == "unverified"]
+
+    # A HUNDRED AND THIRTY IDENTICAL ROWS IS NOT A REPORT. Antenati's firewall
+    # refuses every non-browser, so all 119 of its archives come back
+    # «challenged» every single week — and a weekly report that is 130 lines of
+    # the same known fact is one nobody finishes reading. Grouped by host, with
+    # the ones carrying their own verification said once.
+    ch = [r for r in rows if r["verdict"] == "challenged"]
+    if ch:
+        import collections as _c
+        from urllib.parse import urlparse
+        hosts = _c.Counter(urlparse(r["url"]).netloc for r in ch)
+        print(f"\nchallenged by a firewall, which is not a fault ({len(ch)}):")
+        for h, n in hosts.most_common(8):
+            note = ""
+            if n > 5:
+                vp = [p for p in json.load(open("data/providers.json"))["providers"]
+                      if urlparse(p["url"]).netloc == h and p.get("verified")]
+                if vp:
+                    note = f" — all {len(vp)} verified against that site's own sitemap"
+            print(f"  {n:4}  {h}{note}")
+        if len(hosts) > 8:
+            print(f"  … and {len(hosts) - 8} more hosts")
 
     if col and col.get("gone"):
         print(f"\n{len(col['gone'])} collection(s) have left the catalogue and their links "

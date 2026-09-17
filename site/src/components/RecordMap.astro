@@ -168,6 +168,13 @@ window.addEventListener("load", async function () {
     });
   }
   var REGION = {}; regions.regions.forEach(function (r) { REGION[r.id] = r; });
+  /* Folded name -> place id, so a civil parish or a province named in a search
+     result can be turned into a link to the page this map already has for it. */
+  var byName = {};
+  idx.places.forEach(function (p) {
+    var k = fold(p.n);
+    if (!(k in byName)) byName[k] = p.i;
+  });
   var REGIONS_N = regions.regions.length;
 
   /* ---- the markers -------------------------------------------------------
@@ -493,6 +500,50 @@ window.addEventListener("load", async function () {
     h.push('<p class="at-go"><a href="' + BASE + "place/" + esc(d.id) + '/">' +
            "Everything about " + esc(d.name) + " &rarr;</a></p>");
 
+    /* THE NATIONAL SOURCES, WHICH NO PANEL HAS EVER SHOWN. David clicked an
+       Irish parish and asked where IrishGenealogy had gone. It had never been
+       there: a provider's `countries` list was read by the find box and by the
+       country pages and by nothing else, so the five free Irish national
+       sources — IrishGenealogy, the National Library's parish registers, the
+       National Archives, PRONI, Findmypast — were invisible on every Irish
+       place on this map.
+       That is backwards. A place with no volumes walked on it is exactly the
+       place where the national source IS the answer, and it is the one thing
+       this panel could always have said and never did.
+       The worldwide twelve — FamilySearch, Ancestry, MyHeritage and the rest —
+       are kept out of this list on purpose. They cover everywhere, so they say
+       nothing about here, and they would bury the five that do. */
+    if (d.country) {
+      var nat = provs.providers.filter(function (p) {
+        return (p.countries || []).indexOf(d.country) > -1;
+      }).sort(function (a, b) {
+        var K = ["national-archive", "diocesan", "regional-archive", "library",
+                 "volunteer", "aggregator", "commercial"];
+        var ka = K.indexOf(a.kind), kb = K.indexOf(b.kind);
+        if (ka !== kb) return (ka < 0 ? 99 : ka) - (kb < 0 ? 99 : kb);
+        return RANK.indexOf(a.access) - RANK.indexOf(b.access);
+      });
+      if (nat.length) {
+        h.push('<div class="at-sec"><div class="lab">The sources for ' +
+               esc(CNAME[d.country] || d.country) + "</div>");
+        h.push('<p class="at-sub">National and regional, and they cover this ground ' +
+               "whether or not anybody has walked it here.</p>");
+        h.push('<ul class="at-films">');
+        nat.slice(0, 10).forEach(function (p) {
+          h.push('<li><a href="' + esc(p.url) + '" target="_blank" rel="noopener">' +
+                 esc(p.name) + " &#8599;</a> " +
+                 '<span class="ra-who"><i class="at-dot" style="background:' +
+                 (ACC[p.access] || ["#7C8A91"])[0] + '"></i>' +
+                 esc((ACC[p.access] || [0, p.access])[1]) + "</span></li>");
+        });
+        if (nat.length > 10)
+          h.push('<li class="ra-who">…and ' + (nat.length - 10) + " more on the " +
+                 '<a href="' + BASE + "country/" + d.country.toLowerCase() +
+                 '/">' + esc(CNAME[d.country] || d.country) + " page</a>.</li>");
+        h.push("</ul></div>");
+      }
+    }
+
     /* The collections that reach this ground. The panel shows the nearest few
        and the page shows them all — a marker is a glance, not a catalogue. */
     if (d.nfs) {
@@ -639,6 +690,23 @@ window.addEventListener("load", async function () {
     clearTimeout(yin._t);
     yin._t = setTimeout(yearUI, 120);
   });
+  /* «Take me there.» A townland, a district or an undrawn settlement is a real
+     coordinate this map knows and could not previously be asked to show. */
+  document.addEventListener("click", function (ev) {
+    var g = ev.target.closest && ev.target.closest(".ra-goto");
+    if (!g) return;
+    ev.preventDefault();
+    var y = parseFloat(g.getAttribute("data-y")), x = parseFloat(g.getAttribute("data-x"));
+    if (isNaN(y) || isNaN(x)) return;
+    if (gmark) { map.removeLayer(gmark); gmark = null; }
+    gmark = L.circleMarker([y, x], {
+      radius: 9, color: "var(--accent)", weight: 2, opacity: .9,
+      fillColor: "#8E6FA8", fillOpacity: .35, dashArray: "3 3"
+    }).addTo(map).bindTooltip(g.getAttribute("data-n"), { permanent: false });
+    map.setView([y, x], Math.max(map.getZoom(), 11));
+    document.querySelector(".at-map").scrollIntoView({ block: "center", behavior: "smooth" });
+  });
+
   document.addEventListener("click", function (ev) {
     if (!ev.target.classList || !ev.target.classList.contains("ra-setyear")) return;
     ev.preventDefault();
@@ -778,11 +846,24 @@ window.addEventListener("load", async function () {
                snd.slice(0, 8).map(function (v) { return esc(v.n); }).join(" · ") + "</p>");
 
       if (r.countries.length) {
-        h.push('<p class="ra-filed">Attested in ' +
-          r.countries.map(function (c) {
-            return '<a href="' + BASE + "country/" + c.cc.toLowerCase() + '/">' +
-                   esc(CNAME[c.cc] || c.cc) + "</a>";
-          }).join(" · ") + ".</p>");
+        /* Grouped by HOW, because «Spain, because the state counted 1,575 of
+           them» and «Croatia, because somebody walked the parish» are two
+           different sentences and the flat list said neither. */
+        var byHow = {};
+        r.countries.forEach(function (c) {
+          (byHow[c.how] = byHow[c.how] || []).push(c);
+        });
+        ["register", "curated", "archive", "grammar", "sounds"].forEach(function (k) {
+          if (!byHow[k]) return;
+          var e = EVID[k] || EVID.register;
+          h.push('<p class="ra-filed"><i class="at-dot" style="background:' +
+            (e.dash ? "transparent;border:1.5px solid " + e.color : e.color) + '"></i>' +
+            byHow[k].map(function (c) {
+              return '<a href="' + BASE + "country/" + c.cc.toLowerCase() + '/">' +
+                     esc(CNAME[c.cc] || c.cc) + "</a>" +
+                     (c.n ? ' <span class="ra-who">' + c.n.toLocaleString() + "</span>" : "");
+            }).join(" · ") + ' <span class="ra-who">— ' + esc(e.say) + "</span></p>");
+        });
         h.push('<p class="ra-note">That means the name appears in a dataset held here — ' +
                "not that it exists in those countries and nowhere else. The " +
                "blanks on this map are gaps in it, as always.</p>");
@@ -894,17 +975,42 @@ window.addEventListener("load", async function () {
     }
     return ccache[k];
   }
-  async function showCountries(list) {
+  /* HOW THIS COUNTRY CAME TO BE LIT, drawn rather than merely listed. A name
+     found in a national register of 1,575 people and a name found because
+     somebody walked a parish archive are not the same claim, and the first cut
+     of this shaded them identically — Spain and Croatia the same colour, the
+     same weight, the same everything.
+     A register is a solid outline: a state counted these people. An archive is
+     a dashed one: one researcher found this name on this ground, which is a
+     narrower and more human kind of evidence, and the map should not dress it
+     up as a census. */
+  var EVID = {
+    register: { color: "#1E8449", dash: null,
+                say: "a national register counted it" },
+    archive:  { color: "#8E6FA8", dash: "5 4",
+                say: "a family archive found it on this ground" },
+    grammar:  { color: "#B08322", dash: "2 4",
+                say: "a grammatical form of the name" },
+    curated:  { color: "#3C5A8A", dash: null, say: "a curated link" },
+    sounds:   { color: "#7C8A91", dash: "1 5", say: "a phonetic neighbour" }
+  };
+
+  async function showCountries(list, stale) {
     ctryLayer.clearLayers();
     if (!list.length) return;
-    var got = await Promise.all(list.slice(0, 10).map(outline));
+    var got = await Promise.all(list.slice(0, 10).map(function (x) {
+      return outline(x.cc || x);
+    }));
+    if (stale && stale()) return;
     var box = null;
     got.forEach(function (c, i) {
       if (!c) return;
+      var e = EVID[(list[i] || {}).how] || EVID.register;
       L.polygon(c.rings.map(function (r) {
         return r.map(function (p) { return [p[1], p[0]]; });
-      }), { color: "var(--accent)", weight: 1.6, opacity: .85,
-            fillColor: "#8E6FA8", fillOpacity: .13, interactive: false })
+      }), { color: e.color, weight: e.dash ? 2.2 : 1.6, opacity: .9,
+            dashArray: e.dash, fillColor: e.color, fillOpacity: .10,
+            interactive: false })
         .addTo(ctryLayer);
       var b = L.latLngBounds([c.box[0], c.box[1]], [c.box[2], c.box[3]]);
       box = box ? box.extend(b) : b;
@@ -939,7 +1045,19 @@ window.addEventListener("load", async function () {
              total: hit.length };
   }
 
+  /* THE LAST SEARCH TYPED IS THE ONE THAT WINS. Every fetch in here is async
+     and a search runs on a 140 ms debounce, so «defranceski» and the earlier
+     «defrance» are in flight together and whichever finishes last writes the
+     panel. David's screenshot caught it exactly: the box read «defranceski»
+     and the panel was headed «defrance», listing Defrance and Defrances —
+     right answers to a question already superseded.
+     Each run takes a ticket. If a newer one has started by the time this one
+     has its data, it drops everything rather than painting over the answer. */
+  var searchTok = 0;
+
   async function elsewhere(term) {
+    var mine = ++searchTok;
+    var stale = function () { return mine !== searchTok; };
     /* EVERY SEARCH STARTS FROM A CLEAN MAP. The gazetteer marker used to be
        removed only when a NEW gazetteer hit replaced it, so typing on past a
        match left the old one behind: «Lere» found a village in Nigeria and
@@ -960,9 +1078,11 @@ window.addEventListener("load", async function () {
     });
     var hits = await gazetteer(term);
     var names = await surnames(term);
+    if (stale()) return;
     var setts = await settlements(term);
     var dists = await districts(term);
     var tlands = await townlands(term);
+    if (stale()) return;
     /* If the typed word is an OLD name, say which one it matched and what the
        place is called now. "Pressburg → Bratislava" is the whole answer to the
        first of the three problems, and it works in any country on earth. */
@@ -970,13 +1090,19 @@ window.addEventListener("load", async function () {
     var h = ['<div class="at-h"><h3>' + esc(term) + "</h3></div>"];
     if (names.length) {
       h.push(renderSurnames(names, term));
-      var lit = [];
+      /* The strongest evidence for a country wins its outline. A name in both
+         a register and an archive is drawn as a register — the stronger claim
+         is the true one, and the panel lists both anyway. */
+      var lit = [], seen = {};
+      var STRONG = ["register", "curated", "archive", "grammar", "sounds"];
       names.forEach(function (r) {
         (r.countries || []).forEach(function (c) {
-          if (lit.indexOf(c.cc) < 0) lit.push(c.cc);
+          var was = seen[c.cc];
+          if (was === undefined) { seen[c.cc] = lit.length; lit.push({cc: c.cc, how: c.how}); }
+          else if (STRONG.indexOf(c.how) < STRONG.indexOf(lit[was].how)) lit[was].how = c.how;
         });
       });
-      showCountries(lit);
+      showCountries(lit, stale);
     }
     /* A village inside a mapped region: no shelf, but a jurisdiction answer,
        which is the thing this map is actually for. */
@@ -985,7 +1111,9 @@ window.addEventListener("load", async function () {
       if (!reg) return;
       var e = year ? eraAt(reg, year) : null;
       h.push('<div class="ra-juris"><div class="lab">A place in a mapped region</div>');
-      h.push("<p><b>" + esc(r.n) + "</b> — " + esc(CNAME[r.k] || r.k) +
+      h.push('<p><a href="#" class="ra-goto" data-y="' + r.y + '" data-x="' + r.x +
+             '" data-n="' + esc(r.n) + '"><b>' + esc(r.n) + "</b></a> — " +
+             esc(CNAME[r.k] || r.k) +
              ', in <a href="' + BASE + "region/" + esc(r.r) + '/">' +
              esc(reg.label) + "</a>.</p>");
       if (e) {
@@ -1010,14 +1138,57 @@ window.addEventListener("load", async function () {
                "Which one it is depends on the county — that is what a townland " +
                "name alone cannot tell you.</p>");
       tlands.rows.forEach(function (r) {
-        h.push("<p><b>" + esc(r.n) + "</b>" +
+        /* The civil parish is usually a place this map draws. Offering the
+           name without the link made the reader search again for a word this
+           panel had just handed them. */
+        var cpp = r.cp ? byName[fold(r.cp)] : null;
+        h.push('<p><a href="#" class="ra-goto" data-y="' + r.y + '" data-x="' + r.x +
+               '" data-n="' + esc(r.n) + '"><b>' + esc(r.n) + "</b></a>" +
                (r.co ? " — County " + esc(r.co) : "") +
-               (r.cp ? '<br><span class="ra-who">in the civil parish of <b>' +
-                       esc(r.cp) + "</b>" + (r.bar ? ", barony of " + esc(r.bar) : "") +
+               (r.cp ? '<br><span class="ra-who">in the civil parish of ' +
+                       (cpp ? '<a href="' + BASE + "place/" + esc(cpp) + '/"><b>' +
+                              esc(r.cp) + "</b></a>" : "<b>" + esc(r.cp) + "</b>") +
+                       (r.bar ? ", barony of " + esc(r.bar) : "") +
                        " — the unit Griffith's Valuation and the registration " +
                        "districts are arranged by</span>" : "") + "</p>");
       });
       h.push("</div>");
+    }
+    /* THE YEAR CONTROL REACHED THE SHELF AND NOT THE NAMES. Somebody who has
+       typed a surname, lit four countries and then set 1863 is asking the
+       question this atlas exists for — whose archive held that ground in that
+       year — and the year control simply ignored them. Every record region
+       inside a lit country now answers for the year set. */
+    if (year && names.length) {
+      var ccLit = {};
+      names.forEach(function (r) {
+        (r.countries || []).forEach(function (c) { ccLit[c.cc] = true; });
+      });
+      var eraRows = [];
+      regions.regions.forEach(function (rg) {
+        if (!(rg.countries || []).some(function (k) { return ccLit[k]; })) return;
+        var e = eraAt(rg, year);
+        if (e) eraRows.push([rg, e]);
+      });
+      if (eraRows.length) {
+        h.push('<div class="ra-juris"><div class="lab">In ' + year +
+               ", the ground these names sit on</div>");
+        eraRows.slice(0, 8).forEach(function (pair) {
+          var rg = pair[0], e = pair[1];
+          h.push('<p><a href="' + BASE + "region/" + esc(rg.id) + '/">' +
+                 esc(rg.label) + "</a> — <b>" + esc(e.polity) + "</b>" +
+                 (e.filedUnder.length ? '<br><span class="ra-who">filed under ' +
+                   e.filedUnder.map(function (x) {
+                     return PROV[x] ? esc(PROV[x].name) : esc(x); }).join(" · ") +
+                   "</span>" : "") + "</p>");
+          if (e.note && e.note.indexOf("THE TRAP") === 0)
+            h.push('<p class="ra-note">' + esc(e.note) + "</p>");
+        });
+        if (eraRows.length > 8)
+          h.push('<p class="ra-who">…and ' + (eraRows.length - 8) +
+                 " more regions in those countries.</p>");
+        h.push("</div>");
+      }
     }
     /* A district with nothing of its own. Saying which first-level division
        it sits in is not a consolation prize: adm1 is the rung a collection is
@@ -1025,8 +1196,12 @@ window.addEventListener("load", async function () {
     if (dists.length) {
       h.push('<div class="ra-juris"><div class="lab">An administrative district</div>');
       dists.forEach(function (r) {
-        h.push("<p><b>" + esc(r.n) + "</b> — " + esc(CNAME[r.k] || r.k) +
-               (r.p ? ", in " + esc(r.p) : "") +
+        var pp = r.p ? byName[fold(r.p)] : null;
+        h.push('<p><a href="#" class="ra-goto" data-y="' + r.y + '" data-x="' + r.x +
+               '" data-n="' + esc(r.n) + '"><b>' + esc(r.n) + "</b></a> — " +
+               esc(CNAME[r.k] || r.k) +
+               (r.p ? ", in " + (pp ? '<a href="' + BASE + "place/" + esc(pp) +
+                                      '/">' + esc(r.p) + "</a>" : esc(r.p)) : "") +
                '<br><span class="ra-who">No collection here names this district. ' +
                (r.p ? "Try " + esc(r.p) + ", which is the level they are filed at."
                     : "Try the country.") + "</span></p>");
@@ -1205,6 +1380,8 @@ window.addEventListener("load", async function () {
               border-radius: 3px; background: var(--panel); padding: 18px 18px 24px; }
   .at-empty p { font-size: 13px; line-height: 1.6; color: var(--ink-2); margin: 8px 0 0; }
   .at-hint { color: var(--ink-3) !important; font-size: 12px !important; }
+  :global(.at-dot) { display: inline-block; width: 7px; height: 7px;
+    border-radius: 50%; margin-right: 5px; vertical-align: baseline; }
   /* The search box now leads the page, so it is sized to look like the thing
      to do rather than like one field among several. */
   .ra-find-top { display: block; margin: 0 0 22px; }

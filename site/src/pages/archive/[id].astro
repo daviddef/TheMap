@@ -55,6 +55,22 @@ const KIND = {
   <p style="margin-top:6px"><a class="bigl" href={prov.url} target="_blank" rel="noopener">{prov.url} ↗</a></p>
   <p class="cap">Last checked {prov.checked}. <a href={u("/add/")}>Tell us if this has changed.</a></p>
 
+  {prov.holdings && prov.holdings.length > 0 && (
+    <section style="margin-top:32px">
+      <h2>What it holds</h2>
+      {prov.holdingsNote && <p class="cap">{prov.holdingsNote}</p>}
+      <ul class="vols" style="margin-top:12px">
+        {prov.holdings.map((r) => (
+          <li>
+            {r.what}
+            {r.from && <span class="y">{r.from}{r.to ? `–${r.to}` : "–"}</span>}
+            {r.note && <><br /><span class="who">{r.note}</span></>}
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
   {cited.length > 0 && (
     <section style="margin-top:32px">
       <h2>The ground it holds</h2>

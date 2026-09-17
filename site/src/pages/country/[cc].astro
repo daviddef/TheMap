@@ -30,10 +30,43 @@ const { cc } = Astro.props;
 const NAME = (idx.countries || {})[cc] || cc;
 const here = full.places.filter((p) => p.country === cc)
                         .sort((a, b) => a.name.localeCompare(b.name));
+/* GROUPED BY THE GROUND THEY COVER, NOT BY HOW BIG THEY ARE. This was one
+   flat list, regional collections first and then by record count — so South
+   Africa's thirty-two ran Cape, Transvaal, Cape, Natal, Transvaal in an order
+   that looked like no order at all. A collection names its province in the
+   place it is filed under; that is the thing a researcher already knows about
+   their family, and the only sensible way to divide the list. */
+const province = (c) => {
+  const local = (c.places || []).filter((p) => p.type && p.type !== "COUNTRY");
+  if (!local.length) return null;
+  /* The place name is a chain narrowing outwards — "Johannesburg,
+     Witwatersrand, Transvaal, South Africa" — so the province is the segment
+     before the country, whatever depth the place itself sits at. A PROVINCE
+     row is already exactly that and survives the same rule. */
+  const parts = String(local[0].name || "").split(",").map((x) => x.trim()).filter(Boolean);
+  return parts.length >= 2 ? parts[parts.length - 2] : (local[0].short || null);
+};
 const mine = cols.collections.filter((c) => c.countries.includes(cc))
-  .map((c) => ({ c, local: c.places.some((p) => p.type && p.type !== "COUNTRY") }))
-  .sort((a, b) => (a.local === b.local ? (b.c.records || 0) - (a.c.records || 0)
-                                       : a.local ? -1 : 1));
+  .map((c) => ({ c, local: !!province(c), reg: province(c) }));
+const byRegion = [];
+{
+  const bag = new Map();
+  for (const row of mine) {
+    const k = row.reg || "\u0000national";
+    if (!bag.has(k)) bag.set(k, []);
+    bag.get(k).push(row);
+  }
+  for (const [k, rows] of bag) {
+    rows.sort((a, b) => a.c.title.localeCompare(b.c.title));
+    byRegion.push({ label: k === "\u0000national" ? `${NAME} — nationwide` : k,
+                    national: k === "\u0000national", rows });
+  }
+  /* Regions alphabetically, and the nationwide indexes last: they cover
+     everywhere, so they answer a narrower question than the province a family
+     actually came from. */
+  byRegion.sort((a, b) => (a.national === b.national
+    ? a.label.localeCompare(b.label) : a.national ? 1 : -1));
+}
 const who = provs.providers.filter((p) => p.countries.includes(cc));
 const world = provs.providers.filter((p) => p.countries.includes("*"));
 /* Same correction as /coverage/: a country's regions are the ones whose GROUND
@@ -88,19 +121,23 @@ const span = mine.filter(x => x.c.from).length
   {mine.length > 0 && (
     <section style="margin-top:34px">
       <h2>{mine.length} FamilySearch collections</h2>
-      <p class="cap">Regional collections first, then national indexes. A free account opens
-      the images; some are restricted to a Family History Centre.</p>
-      <ul class="rows">
-        {mine.slice(0, 250).map(({ c, local }) => (
-          <li>
-            <a href={c.url} target="_blank" rel="noopener">{c.title} ↗</a>
-            {c.from && <span class="y">{c.from}–{c.to}</span>}
-            <span class="y">{(c.records || 0).toLocaleString()} records</span>
-            {local && <span class="loc">regional</span>}
-          </li>
-        ))}
-      </ul>
-      {mine.length > 250 && <p class="cap">…and {mine.length - 250} more.</p>}
+      <p class="cap">Grouped by the ground each one covers, {byRegion.filter(g => !g.national).length > 0
+        ? "province by province, with the nationwide indexes last" : "nationwide"}.
+      A free account opens the images; some are restricted to a Family History Centre.</p>
+      {byRegion.map((g) => (
+        <div class="cgrp">
+          <div class="lab">{g.label} <span class="n">{g.rows.length}</span></div>
+          <ul class="rows">
+            {g.rows.map(({ c }) => (
+              <li>
+                <a href={c.url} target="_blank" rel="noopener">{c.title} ↗</a>
+                {c.from && <span class="y">{c.from}–{c.to}</span>}
+                <span class="y">{(c.records || 0).toLocaleString()} records</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
     </section>
   )}
 
@@ -134,6 +171,10 @@ const span = mine.filter(x => x.c.from).length
   .y { font-family: var(--mono); font-size: 11px; color: var(--ink-3); margin-left: 8px; }
   .loc { font-family: var(--sans); font-size: 10px; color: var(--accent);
          border: 1px solid var(--accent); border-radius: 999px; padding: 1px 6px; margin-left: 8px; }
+  .cgrp { margin-top: 18px; }
+  .cgrp .lab { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+  .cgrp .lab .n { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3);
+                  letter-spacing: 0; font-weight: 400; }
   .places { list-style: none; padding: 0; margin: 12px 0 0;
             display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 3px; }
   .places li { font-family: var(--sans); font-size: 13px; }

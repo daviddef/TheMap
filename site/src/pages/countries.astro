@@ -17,7 +17,12 @@ for (const p of full.places) if (p.country) bump(p.country, "places");
 for (const p of provs.providers) for (const k of p.countries) if (k !== "*") bump(k, "arch");
 const list = Object.values(rows)
   .map((r) => ({ ...r, name: CN[r.cc] || r.cc }))
-  .sort((a, b) => b.cols - a.cols || a.name.localeCompare(b.name));
+  /* ALPHABETICAL, BECAUSE THAT IS WHAT A LIST OF COUNTRIES IS FOR. It was
+     ordered by collection count, which answers «where is this map thickest» —
+     a question nobody arrives with. Somebody looking for Uruguay wants to run
+     their eye down a column, and could not. The counts are still sortable, by
+     clicking the heading, for when that IS the question. */
+  .sort((a, b) => a.name.localeCompare(b.name));
 const totalCols = cols.collections.length;
 const records = cols.collections.reduce((a, c) => a + (c.records || 0), 0);
 const walked = list.filter((r) => r.places > 0).length;
@@ -35,8 +40,13 @@ const walked = list.filter((r) => r.places > 0).length;
     all. The other {list.length - walked} are honest blanks.</p>
   </div>
 
-  <table style="margin-top:22px">
-    <thead><tr><th>Country</th><th class="m">Collections</th><th class="m">Archives</th><th class="m">Places</th></tr></thead>
+  <table style="margin-top:22px" data-sortable>
+    <thead><tr>
+      <th><button class="sortby" data-col="0" data-kind="text" aria-label="Sort by country">Country</button></th>
+      <th class="m"><button class="sortby" data-col="1" data-kind="num">Collections</button></th>
+      <th class="m"><button class="sortby" data-col="2" data-kind="num">Archives</button></th>
+      <th class="m"><button class="sortby" data-col="3" data-kind="num">Places</button></th>
+    </tr></thead>
     <tbody>
       {list.map((r) => (
         <tr>
@@ -50,7 +60,51 @@ const walked = list.filter((r) => r.places > 0).length;
   </table>
 </Base>
 
+<script is:inline>
+  /* Click a heading to reorder. Plain DOM, no dependency, and the rows are
+     already in the page — so it works on the markup the server sent and costs
+     nothing if the script never runs. */
+  (function () {
+    var t = document.querySelector("table[data-sortable]");
+    if (!t) return;
+    var body = t.tBodies[0];
+    t.querySelectorAll("button.sortby").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var col = +b.dataset.col, num = b.dataset.kind === "num";
+        /* A second click on the same heading reverses it. Numbers start
+           biggest-first because «most collections» is the useful end; names
+           start A–Z because the other end of an alphabet is not useful. */
+        var desc = b.getAttribute("aria-sort") === (num ? "descending" : "ascending")
+          ? !num : num;
+        t.querySelectorAll("button.sortby").forEach(function (o) {
+          o.removeAttribute("aria-sort"); o.classList.remove("on");
+        });
+        b.setAttribute("aria-sort", desc ? "descending" : "ascending");
+        b.classList.add("on");
+        var cell = function (tr) { return tr.children[col].textContent.trim(); };
+        var rows = [].slice.call(body.rows).sort(function (x, y) {
+          if (num) {
+            /* "—" and "" both mean none, and must not sort as text. */
+            var a = parseFloat(cell(x).replace(/[^0-9.]/g, "")) || 0;
+            var c = parseFloat(cell(y).replace(/[^0-9.]/g, "")) || 0;
+            return desc ? c - a : a - c;
+          }
+          return desc ? cell(y).localeCompare(cell(x)) : cell(x).localeCompare(cell(y));
+        });
+        rows.forEach(function (r) { body.appendChild(r); });
+      });
+    });
+  })();
+</script>
+
 <style>
   td.none { color: var(--ink-3); }
   td { vertical-align: top; }
+  button.sortby { background: none; border: 0; padding: 0; cursor: pointer;
+    font: inherit; color: inherit; letter-spacing: inherit; text-transform: inherit; }
+  button.sortby:hover { color: var(--accent); }
+  button.sortby::after { content: " \2195"; opacity: .35; font-size: .9em; }
+  button.sortby.on { color: var(--accent); }
+  button.sortby[aria-sort="ascending"]::after { content: " \25B4"; opacity: 1; }
+  button.sortby[aria-sort="descending"]::after { content: " \25BE"; opacity: 1; }
 </style>

@@ -1881,6 +1881,22 @@ window.addEventListener("load", async function () {
     document.body.classList.toggle("ra-fs-on", on2);
     fullBtn.title = on2 ? "Leave full screen (or press Escape)"
                         : "Full screen — the map and its panel fill the window";
+    /* A WAY OUT THAT CAN BE SEEN. Escape worked from the first day and the
+       button toggles, but full screen covers the page — including the button's
+       own row and every other landmark — so there was nothing on screen
+       saying so, and David asked how to get out. A control you have to already
+       know about is not a control. */
+    var esc = document.getElementById("ra-fs-esc");
+    if (on2 && !esc) {
+      esc = document.createElement("button");
+      esc.id = "ra-fs-esc";
+      esc.type = "button";
+      esc.innerHTML = "\u2715 Exit full screen <span>Esc</span>";
+      esc.addEventListener("click", function () { setFull(false); });
+      document.body.appendChild(esc);
+    } else if (!on2 && esc) {
+      esc.remove();
+    }
     setTimeout(function () { map.invalidateSize(); }, 60);
   }
   fullBtn.addEventListener("click", function () {
@@ -1974,7 +1990,24 @@ window.addEventListener("load", async function () {
   :global(.at-wrap.ra-fs) { position: fixed; inset: 0; z-index: 900;
     margin: 0; padding: 12px; background: var(--ground); gap: 12px; }
   :global(body.ra-fs-on) { overflow: hidden; }
+  :global(#ra-fs-esc) { position: fixed; top: 14px; right: 16px; z-index: 950;
+    display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+    font-family: var(--sans); font-size: 12.5px; color: var(--ink-2);
+    background: var(--panel); border: 1px solid var(--rule-strong);
+    border-radius: 999px; padding: 7px 13px;
+    box-shadow: 0 6px 20px rgba(10, 20, 26, .28); }
+  :global(#ra-fs-esc:hover) { color: var(--accent); border-color: var(--accent); }
+  :global(#ra-fs-esc span) { font-family: var(--mono); font-size: 10.5px;
+    color: var(--ink-3); border: 1px solid var(--rule); border-radius: 3px;
+    padding: 1px 5px; }
   :global(.at-wrap.ra-fs .at-map) { height: auto; }
+  /* AND THE PANEL WITH IT. The map was switched to auto so it fills the
+     window, but the panel kept the shared 600px and stopped a third of the way
+     down — so the deeper a country's list of sources, the more it scrolled
+     inside a box with empty screen beneath it. Both sides are grid items in a
+     container that is already the height of the window; auto lets the row
+     stretch them equally. */
+  :global(.at-wrap.ra-fs .at-panel) { height: auto; }
   .ra-cats-wrap { min-width: 240px; }
   .ra-cats-wrap summary { font: 400 12px/1.6 var(--sans); color: var(--ink-3);
     cursor: pointer; padding: 5px 9px; border: 1px solid var(--rule);
@@ -2039,6 +2072,15 @@ window.addEventListener("load", async function () {
   #ra-yout { white-space: nowrap; }
   #ra-yout { font-size: 15px; font-weight: 500; color: var(--accent); min-width: 5ch; }
 
+  /* See index.astro: the shared .pagehead is sized for reading, not for a
+     tool. Here the title sits closer to the top and the standfirst runs the
+     full column instead of stopping at 76ch. */
+  :global(.pagehead.ra-lede) { padding: 26px 0 18px; margin-bottom: 18px; }
+  :global(.pagehead.ra-lede h1) { font-size: clamp(30px, 3.6vw, 44px); margin-top: 8px; }
+  :global(.pagehead.ra-lede .dek) { max-width: none; }
+  @media (max-width: 760px) {
+    :global(.pagehead.ra-lede) { padding: 18px 0 14px; margin-bottom: 12px; }
+  }
   .at-wrap { display: grid; grid-template-columns: 1fr 360px; gap: 18px; margin-top: 12px; }
   .at-map { height: 600px; border: 1px solid var(--rule); border-radius: 3px; }
   .at-panel { height: 600px; overflow-y: auto; border: 1px solid var(--rule);

@@ -20,6 +20,64 @@
       "asked": "2026-09-17",
       "verdict": "declined by this project, not by the site",
       "why": "Behind a Cloudflare MANAGED CHALLENGE. It loads perfectly in a human's browser and answers 403 to everything else, and its own challenge page carries «noindex, nofollow» — that is a site saying plainly that it does not want to be read by a script. Working around a bot gate is not something this project will do, whatever the data is worth. IrishGenealogy stays what it already is here: a provider row with a link a human clicks, and it is the best free national source in these islands. The record-location question it was asked to answer is answered instead by Townlands.ie, which publishes the whole county–barony–civil parish–townland hierarchy as an open download. See scripts/harvest-ireland.py."
+    },
+    {
+      "id": "matricula",
+      "name": "Matricula Online — bulk harvest of its parish inventory",
+      "url": "https://data.matricula-online.eu/en/bestande/",
+      "asked": "2026-09-17",
+      "verdict": "licence forbids it here",
+      "why": "Matricula is one of the best things on this map — free scans of parish registers for Austria, Germany, Poland, Slovenia, Italy and Serbia — and its terms put the images AND THEIR DESCRIPTIVE METADATA under CC BY-NC-ND 2.0. Non-commercial. This site carries advertising, so republishing its parish inventory as part of an ad-supported dataset is exactly what that licence refuses, and the fact that the metadata would be useful is not an argument against the licence. It stays a provider row with a link, which the licence plainly permits and which is what a reader needs anyway. If the ad slot is ever turned off, this is worth asking them about directly."
+    },
+    {
+      "id": "nara",
+      "name": "National Archives Catalog (NARA) — API key",
+      "url": "https://catalog.archives.gov/",
+      "asked": "2026-09-17",
+      "verdict": "needs a human to register",
+      "why": "NARA's catalog API issues keys to a named person via a signup form. Nothing here can complete that, and nothing here should try. Listed so the gap is visible rather than mistaken for an absence of American records."
+    },
+    {
+      "id": "szukajwarchiwach",
+      "name": "Szukaj w Archiwach — bulk harvest of its fonds list",
+      "url": "https://www.szukajwarchiwach.gov.pl/",
+      "asked": "2026-09-17",
+      "verdict": "bot gate",
+      "why": "The Polish state archives' own portal, holding the fonds inventory for Poland and much of western Ukraine and Belarus. Behind Incapsula: /api answers with an Incapsula challenge page carrying «NOINDEX, NOFOLLOW». Same judgement as IrishGenealogy — that is a site saying it does not want to be read by a script, and this project will not work around a bot gate. It stays a provider row."
+    },
+    {
+      "id": "scotland-parishes",
+      "name": "Scotland's civil and old parishes, as boundaries or a list",
+      "url": "https://www.nrscotland.gov.uk/",
+      "asked": "2026-09-17",
+      "verdict": "FOUND — this entry stood for two hours",
+      "why": "KEPT AS A RECORD OF A PREMATURE GIVE-UP. The first search concluded Scotland's parishes were not openly available: nrscotland.gov.uk's civil-parishes page 404s, statistics.gov.scot did not answer at all, scotlandsplaces.gov.uk is a search box with no download, and the National Library of Scotland's boundary pages are behind a CAPTCHA. Four closed doors read as a closed building. They were not: data.gov.uk lists «Civil Parishes - Scotland», and behind it National Records of Scotland runs a live WFS that hands over the whole layer on request. 871 parishes, OGL v3.0, and 870 of them are now drawn. The lesson is the entry: «not found» is a statement about the search, and this file exists so the next search starts further along rather than repeating this one. See scripts/harvest-scotland-parishes.py.",
+      "resolved": "2026-09-17"
+    },
+    {
+      "id": "engwales-districts",
+      "name": "England and Wales registration districts",
+      "url": "https://www.ukbmd.org.uk/reg/",
+      "asked": "2026-09-17",
+      "verdict": "licence unclear",
+      "why": "UKBMD publishes the registration-district hierarchy and its sub-districts, which is what the GRO indexes are arranged by, and states no reuse licence. Vision of Britain holds the historic administrative units and has moved everything except the GB1900 gazetteer behind the UK Data Service, which needs a named academic registration. GB1900 itself is CC BY-SA and downloadable, but it is 2.5 million map labels — farms, hills and streams — rather than a list of filing units, so it is the wrong shape for this even though it is the right licence."
+    },
+    {
+      "id": "german-standesamt",
+      "name": "German Standesamt districts, 1874 onwards",
+      "url": "https://www.destatis.de/",
+      "asked": "2026-09-17",
+      "verdict": "not found openly",
+      "why": "Civil registration in Prussia from October 1874 is filed by Standesamt, and there is no open national list of the historical ones — the modern registry offices are a different and much smaller set after a century of amalgamation. The GenWiki community holds the best inventory and its licence is unclear. Recorded so the next attempt starts from here rather than from Destatis."
+    },
+    {
+      "id": "tna-discovery",
+      "name": "The National Archives, Discovery — the UK repositories directory",
+      "url": "https://discovery.nationalarchives.gov.uk/",
+      "asked": "2026-09-17",
+      "verdict": "open, and the sweep parameter is wrong",
+      "why": "THIS WAS LISTED AS «NEEDS A HUMAN TO REGISTER» AND THAT WAS WRONG. Discovery's API needs no key, no token and no account — David went looking for the key request page on my say-so and there is no such page. Verified anonymously: three endpoints, three 200s.\n\nThe harvester is written (scripts/harvest-tna-archives.py) and does not work yet, and the reason turned out not to be the rate limit it was first blamed on. It sweeps by `sps.titleFirstLetter`, which Discovery does not accept — the endpoint answers perfectly to `sps.searchQuery` and returns nothing at all for a parameter it does not know, which is the most expensive kind of silence. An empty answer was read as «blocked», the harvester backed off politely, and the real fault sat untouched for an hour. It needs a different sweep: searchQuery against a vocabulary of terms, or the county and repository-type facets the response already returns.\n\nWorth the wait: Discovery indexes roughly two and a half thousand British repositories with their addresses — the county record offices where English parish registers actually live.",
+      "pending": true
     }
   ]
 }

@@ -16,6 +16,7 @@ import { u } from "../../lib/url.js";
 import full from "../../data/places-full.json";
 import regions from "../../../public/regions.json";
 import provs from "../../../public/providers.json";
+import { sourcesFor, access as ACCESS } from "../../lib/sources-by-country.js";
 import idx from "../../../public/index.json";
 
 export async function getStaticPaths() {
@@ -30,16 +31,7 @@ const PROV = Object.fromEntries(provs.providers.map((p) => [p.id, p]));
    sources were invisible on all 2,130 Irish places. Ranked archive-first, then
    by how open it is. The worldwide dozen are excluded deliberately — covering
    everywhere is not a fact about here. */
-const KIND = ["national-archive", "diocesan", "regional-archive", "library",
-              "volunteer", "aggregator", "commercial"];
-const ACCESS = provs.access || {};
-const RANKA = idx.rank || [];
-const national = place.country
-  ? provs.providers
-      .filter((p) => (p.countries || []).includes(place.country))
-      .sort((a, b) => (KIND.indexOf(a.kind) + 1 || 99) - (KIND.indexOf(b.kind) + 1 || 99)
-                   || RANKA.indexOf(a.access) - RANKA.indexOf(b.access))
-  : [];
+const national = sourcesFor(place.country);
 const countryName = (idx.countries || {})[place.country] || place.country;
 const region = regions.regions.find((r) => r.id === place.region);
 const ACC = {

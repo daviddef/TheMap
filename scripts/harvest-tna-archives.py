@@ -31,9 +31,23 @@ API = "https://discovery.nationalarchives.gov.uk/API/search/archives"
 UA = "RecordAtlasHarvest/1.0 (+https://github.com/daviddef/TheMap)"
 
 
+# ONE REQUEST EVERY TWO SECONDS, AND THE FIRST RUN OF THIS EARNED THE RULE.
+# It swept the alphabet as fast as curl would go — thirty-six requests in a
+# couple of minutes — and Discovery stopped answering, for hours. The API has
+# no key, no quota page and no rate-limit header, which is not permission to
+# hammer it; it is a public service with no way to tell you to stop except by
+# stopping. An open API is a courtesy and this is what the courtesy costs.
+PAUSE = 2.0
+_last = [0.0]
+
+
 def get(url):
     """curl rather than urllib: several archive hosts refuse urllib's TLS, and
     a harvester that reports a live service as dead is worse than none."""
+    gap = time.time() - _last[0]
+    if gap < PAUSE:
+        time.sleep(PAUSE - gap)
+    _last[0] = time.time()
     for attempt in range(3):
         r = subprocess.run(["curl", "-sS", "-L", "--max-time", "60",
                             "-H", "Accept: application/json", "-A", UA, url],
@@ -42,8 +56,11 @@ def get(url):
             try:
                 return json.loads(r.stdout)
             except ValueError:
-                pass
-        time.sleep(2 + attempt * 3)
+                # Not JSON means a challenge or a block page, and retrying
+                # harder is exactly the wrong response to being asked to stop.
+                time.sleep(10 * (attempt + 1))
+                continue
+        time.sleep(5 * (attempt + 1))
     return None
 
 
@@ -51,7 +68,7 @@ def get(url):
 # alphabet by first letter of title is the documented way round it, and the
 # API returns titleFirstLetters itself, so the sweep is its own inventory.
 def main():
-    seen, pages = {}, 0
+    seen, pages, blocked = {}, 0, 0
     letters = list(string.ascii_uppercase) + list("0123456789")
     for ch in letters:
         mark = "*"
@@ -61,7 +78,10 @@ def main():
             d = get(url)
             pages += 1
             if not d:
-                print(f"  {ch}: no answer", flush=True)
+                blocked += 1
+                print(f"  {ch}: no answer — Discovery is not serving this request. "
+                      f"If this repeats for every letter, back off and come back "
+                      f"in an hour rather than retrying.", flush=True)
                 break
             rows = d.get("repositories") or []
             for r in rows:
@@ -109,6 +129,10 @@ def main():
                    "withPostcode": sum(1 for r in rows if r["postcode"])},
         "archives": rows,
     }, open(path, "w"), ensure_ascii=False, separators=(",", ":"))
+    if not rows:
+        sys.exit(f"nothing came back from {pages} requests ({blocked} refused). "
+                 f"Not writing an empty file over a good one. Discovery rate-limits "
+                 f"silently — wait an hour and run it again.")
     print(f"\n{len(rows):,} repositories from {pages} requests -> {path}")
     print("  " + " · ".join(f"{k}:{v}" for k, v in byplace.most_common(10)))
 

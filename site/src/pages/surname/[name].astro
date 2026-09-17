@@ -12,8 +12,8 @@
 import Base from "../../layouts/Base.astro";
 import { u } from "../../lib/url.js";
 import idx from "../../../public/index.json";
-import provs from "../../../public/providers.json";
-import fr from "../../../data/frequencies/fr.json";
+import { sourcesFor, access as PACCESS } from "../../lib/sources-by-country.js";
+import { curveFor } from "../../lib/fr-curve.js";
 
 export async function getStaticPaths() {
   const surn = (await import("../../../public/surnames.json")).default;
@@ -42,20 +42,15 @@ const slugify = (x) => x.toLowerCase().normalize("NFKD")
    reader who has just learnt their name is attested in Croatia wants the
    Croatian archives, and this atlas holds 195 of them. The worldwide services
    are left out: covering everywhere is not a fact about this name. */
-const KIND = ["national-archive", "diocesan", "regional-archive", "library",
-              "volunteer", "aggregator", "commercial"];
-const sourcesFor = (cc) => provs.providers
-  .filter((p) => (p.countries || []).includes(cc))
-  .sort((a, b) => (KIND.indexOf(a.kind) + 1 || 99) - (KIND.indexOf(b.kind) + 1 || 99))
-  .slice(0, 6);
+
 
 /* FRANCE DATES ITS NAMES and nothing else here does. INSEE counts births by
    surname and decade from 1891, so a name that starts at zero and climbs is an
    immigration signal with a date on it, and one that stops tells you the decade
    to stop searching. Worth saying out loud on the one page about this name. */
-const frRow = (fr.surnames || []).find((x) => slugify(x.n) === slugify(r.n));
-const frCurve = frRow && frRow.by ? frRow.by.map((v, i) => ({
-  decade: (fr.decades || [])[i], n: v })) : null;
+const frHit = curveFor(r.n);
+const frRow = frHit && frHit.row;
+const frCurve = frHit && frHit.curve;
 const frPeak = frCurve ? frCurve.reduce((a, b) => (b.n > a.n ? b : a), frCurve[0]) : null;
 const TIER = {
   curated: ["Also written", "A person linked these — Wikidata's «said to be the same as», or a family archive that worked it out from documents."],
@@ -64,6 +59,16 @@ const TIER = {
 };
 const by = {};
 for (const v of r.variants) (by[v.how] = by[v.how] || []).push(v.n);
+/* THREE QUESTIONS, NOT ONE. «Attested» was answering «where is it borne»,
+   «where does a record name it» and «where did it come from» all at once, and
+   therefore none of them clearly. They take different evidence. */
+const KIND_OF = {
+  register: "Borne — a state counted them",
+  archive: "Found in a record",
+  curated: "Found in a record",
+  grammar: "A grammatical form of the name",
+  sounds: "A phonetic neighbour only",
+};
 const ccs = r.countries.slice().sort((a, b) => (b.n || 0) - (a.n || 0));
 const total = ccs.reduce((a, c) => a + (c.n || 0), 0);
 const dek = `${r.n}${by.curated ? `, also written ${by.curated.slice(0,4).join(", ")}` : ""}. `
@@ -93,17 +98,50 @@ const dek = `${r.n}${by.curated ? `, also written ${by.curated.slice(0,4).join("
     </section>
   ))}
 
+  {r.places && r.places.length > 0 ? (
+    <section style="margin-top:30px">
+      <h2>It is also the name of a place</h2>
+      <p class="cap"><b>This is as close to an origin as this map will go.</b> A surname that
+      is also a place name often came from it — and often did not: plenty are occupations or
+      patronymics that happen to collide with a place, and plenty of places are named after a
+      family rather than the other way round. It is a fact with a source, which is more than
+      an etymology page offers.</p>
+      <ul class="vols" style="margin-top:12px">
+        {r.places.map((pl) => (
+          <li>
+            <b>{pl.n}</b>
+            {pl.cc && <span class="who">{CN[pl.cc] || pl.cc}</span>}
+            {pl.pop > 0 && <span class="who">pop. {pl.pop.toLocaleString()}</span>}
+            {pl.via === "variant" && <span class="who">a spelling of the name</span>}
+            {pl.via === "sounds" && <span class="who">only a phonetic neighbour, not a spelling</span>}
+          </li>
+        ))}
+      </ul>
+    </section>
+  ) : (
+    <section style="margin-top:30px">
+      <h2>Where it came from</h2>
+      <p class="cap">No place of this name is in the gazetteer, so <b>this map says nothing
+      about where the name came from</b>. Search a surname anywhere else and you will be told
+      an origin — that it is Latin, or Italian, or means «joyful». That is etymology, it is
+      usually unsourced, and it is a different question from the one answered here.</p>
+    </section>
+  )}
+
   <section style="margin-top:30px">
-    <h2>Where it is attested</h2>
-    <p class="cap"><b>«Attested» means the name appears in a dataset held here</b> — never that
-    it exists in that country and nowhere else, and never that it exists only there.</p>
-    <table style="margin-top:12px">
-      <thead><tr><th>Country</th><th class="m">People</th><th>How we know</th></tr></thead>
+    <h2>Where it is borne, and where a record names it</h2>
+    <p class="cap">Two different claims, and they used to be one word. A <b>register</b> is a
+    head-count — a state counted these people. A <b>record</b> is one document naming the
+    surname on that ground, which is narrower evidence and often very much older. Neither ever
+    means the name exists in that country and nowhere else.</p>
+      <thead><tr><th>Country</th><th class="m">People</th><th>Kind of claim</th>
+        <th>How we know</th></tr></thead>
       <tbody>
         {ccs.map((c) => (
           <tr>
             <td><a href={u(`/country/${c.cc.toLowerCase()}/`)}>{CN[c.cc] || c.cc}</a></td>
             <td class="m">{c.n ? c.n.toLocaleString() : "—"}</td>
+            <td>{KIND_OF[c.how] || c.how}</td>
             <td>{(c.by || []).map((b) => attestedBy[b]?.name || b).join("; ") || c.how}</td>
           </tr>
         ))}
@@ -145,10 +183,10 @@ const dek = `${r.n}${by.curated ? `, also written ${by.curated.slice(0,4).join("
         <div style="margin-top:16px">
           <div class="lab"><a href={u(`/country/${c.cc.toLowerCase()}/`)}>{CN[c.cc] || c.cc}</a></div>
           <ul class="vols">
-            {src.map((p) => (
+            {src.slice(0, 6).map((p) => (
               <li>
                 <a href={u(`/archive/${p.id}/`)}>{p.name}</a>
-                <span class="who">{(provs.access || {})[p.access] || p.access}</span>
+                <span class="who">{PACCESS[p.access] || p.access}</span>
                 {p.at && <span class="who">{p.at.place}</span>}
               </li>
             ))}

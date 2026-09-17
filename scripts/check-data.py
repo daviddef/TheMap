@@ -39,6 +39,47 @@ def main():
     for k, v in OVR.items():
         if not v.get("why"):
             err(f"country-override {k}: no reason given")
+    # -1 · THE INLINE SCRIPTS MUST PARSE.
+    # RecordMap.astro carries 1,600 lines of JavaScript inside `<script
+    # is:inline>`, which Astro copies into the page verbatim and never looks
+    # at. A stray brace in there builds perfectly, deploys perfectly, and
+    # produces a page with no map on it — the one failure mode that passes
+    # every check this project has and is invisible until somebody loads it.
+    import subprocess as _sp, tempfile as _tf
+    if _sp.run(["node", "--version"], capture_output=True).returncode == 0:
+        for _c in _g.glob("site/src/**/*.astro", recursive=True):
+            _src = open(_c, encoding="utf-8").read()
+            for _i, _m in enumerate(re.finditer(
+                    r"<script[^>]*\bis:inline\b[^>]*>(.*?)</script>", _src, re.S)):
+                with _tf.NamedTemporaryFile("w", suffix=".js", delete=False,
+                                            encoding="utf-8") as _fh:
+                    _fh.write(_m.group(1))
+                    _tmp = _fh.name
+                _r = _sp.run(["node", "--check", _tmp], capture_output=True, text=True)
+                os.unlink(_tmp)
+                if _r.returncode != 0:
+                    err(f"{_c}: inline script #{_i + 1} does not parse — "
+                        f"{_r.stderr.strip().splitlines()[-1] if _r.stderr else '?'}")
+
+    # 0 · EVERY IMPORT IN A PAGE MUST RESOLVE.
+    # The surname page imported ../../../data/frequencies/fr.json, which is one
+    # «..» short — [name].astro sits a directory deeper than the pages that use
+    # that pattern, so it pointed at site/data rather than the repository root.
+    # The data stage built perfectly, this gate said «data is sound», and then
+    # Astro failed on the import, so the deploy died AFTER every check passed
+    # and the site kept serving the previous build. David saw Lerena still
+    # missing Argentina and asked whether it had pushed. It had; it had not
+    # landed, and nothing between the two said so.
+    for _pg in _g.glob("site/src/**/*.astro", recursive=True) + \
+               _g.glob("site/src/**/*.js", recursive=True):
+        for _m in re.finditer(r'from\s+["\'](\.[^"\']+\.(?:json|js))["\']', open(_pg).read()):
+            _t = os.path.normpath(os.path.join(os.path.dirname(_pg), _m.group(1)))
+            # public/ artefacts are written by build.py earlier in this run.
+            if not os.path.exists(_t):
+                err(f"{_pg}: imports {_m.group(1)} which resolves to {_t} — "
+                    f"that file is not there, and Astro will fail on it AFTER "
+                    f"this gate has passed")
+
     # 2 · NOTHING MAY GET SMALLER WITHOUT SOMEBODY SAYING SO.
     # Presence was never the failure mode. Every bug this project has shipped
     # to the public site was a silent shrinkage: a file that was still there,
@@ -78,6 +119,7 @@ def main():
             count("surnames", sn["counts"]["surnames"])
             count("surnamesWithCountries", sn["counts"]["withCountries"])
             count("surnamesWithVariants", sn["counts"]["withVariants"])
+            count("alsoAPlace", sn["counts"].get("alsoAPlace", 0))
         except OSError:
             pass
         asn = json.load(open("data/archive-surnames.json"))["archives"]
@@ -93,6 +135,30 @@ def main():
         except OSError:
             pass
         count("adminDivisions", len(json.load(open("data/admin-divisions.json"))["divisions"]))
+        try:
+            count("scottishParishes", len(json.load(
+                open("data/scotland-parishes.json"))["parishes"]))
+        except OSError:
+            pass
+        try:
+            count("estonianParishes", len(json.load(
+                open("data/estonia-parishes.json"))["parishes"]))
+        except OSError:
+            pass
+        try:
+            count("italianComuni", len(json.load(
+                open("data/italy-comuni.json"))["comuni"]))
+        except OSError:
+            pass
+        # The negatives are a deliverable too. A search that ran and found
+        # nothing is worth more written down than repeated, and a file of them
+        # that quietly empties is a file nobody is keeping.
+        try:
+            _dec = json.load(open("data/_declined.json"))
+            _k = "declined" if "declined" in _dec else list(_dec)[-1]
+            count("declinedDocumented", len(_dec[_k]))
+        except OSError:
+            pass
         for name, f in (("churches", "churches-wikidata"), ("cemeteries", "cemeteries-wikidata"),
                         ("libraries", "libraries-wikidata")):
             try:

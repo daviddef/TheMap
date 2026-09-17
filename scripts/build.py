@@ -265,7 +265,12 @@ def main():
         if extra:
             row["q"] = " ".join(extra)
         if acc:
-            row["a"] = acc
+            # THE ACCESS CLASS AS AN INDEX, NOT A WORD. «unsurveyed» is ten
+            # bytes and it was written out 7,391 times — 116 KB of the 822 KB
+            # index was eight repeated strings. RANK already rides in the same
+            # file and the client already has it, so the word is recoverable
+            # for nothing.
+            row["a"] = RANK.index(acc)
         if span:
             row["s"] = span
         if hits:
@@ -303,6 +308,7 @@ def main():
 
     idx = {"countries": cmap,
            "note": "One row per place. i=id n=name y=lat x=lon a=access c=collections "
+                   "a is an index into `rank`, not a word. "
                    "q=folded name variants s=[first year, last year] b=colour borrowed "
                    "from this many collections that reach the place rather than "
                    "from volumes walked in it. "
@@ -434,6 +440,73 @@ def main():
         blob = json.dumps(uniq, ensure_ascii=False, separators=(",", ":"))
         rsbytes += len(blob.encode())
         open(os.path.join(rs, k + ".json"), "w").write(blob)
+
+    # ---- Estonia's kihelkonnad: findable, and never drawn -----------------
+    # 113 parishes and 11 historic counties, from the National Archives' own
+    # search vocabulary. They carry NO COORDINATES because the archive
+    # publishes none and inventing them would be worse than a flat list, so
+    # they are pure name-resolution: type «Apukalna» and be told it is a
+    # parish of Valmiera, which is a county of Livonia and is in LATVIA today.
+    # That last part is the whole value — the governorate boundary did not
+    # follow the modern one, and a researcher who assumes it did looks in the
+    # wrong national archive.
+    ee = os.path.join(OUT, "ee")
+    shutil.rmtree(ee, ignore_errors=True)
+    os.makedirs(ee)
+    try:
+        est = json.load(open("data/estonia-parishes.json"))
+    except FileNotFoundError:
+        est = {"parishes": [], "counties": []}
+    eshards, ebytes = {}, 0
+    for n in est["parishes"]:
+        rec = {"n": n, "k": "parish"}
+        k = "".join(c for c in fold(n)[:3] if c.isalnum())
+        if len(k) == 3:
+            eshards.setdefault(k, []).append(rec)
+    for n in est["counties"]:
+        rec = {"n": n, "k": "county"}
+        k = "".join(c for c in fold(n)[:3] if c.isalnum())
+        if len(k) == 3:
+            eshards.setdefault(k, []).append(rec)
+    for k, rowlist in eshards.items():
+        blob = json.dumps(rowlist, ensure_ascii=False, separators=(",", ":"))
+        ebytes += len(blob.encode())
+        open(os.path.join(ee, k + ".json"), "w").write(blob)
+
+    # ---- Italy's comuni: findable, and never drawn ------------------------
+    # 7,894 of them. NOT DRAWN, for two reasons that point the same way. The
+    # index is at 741 KB of an 800 KB budget and these would burst it; and the
+    # province is already on the map, which is the rung Antenati files by, so
+    # a dot per comune would be seven thousand markers restating what the
+    # province dot already says.
+    #
+    # What they are worth is the NAME. Istat records the official other
+    # language a comune answers to — Bolzano is Bozen, Sterzing is Vipiteno,
+    # and a strip around Trieste and Gorizia is Slovene — which is this atlas's
+    # founding problem happening inside a country nobody thinks of as having
+    # changed. And the historic province code, because an archive is filed
+    # under the province of its day rather than the province of now.
+    cd = os.path.join(OUT, "it")
+    shutil.rmtree(cd, ignore_errors=True)
+    os.makedirs(cd)
+    try:
+        ital = json.load(open("data/italy-comuni.json"))["comuni"]
+    except FileNotFoundError:
+        ital = []
+    ishards, ibytes = {}, 0
+    for c in ital:
+        rec = {"n": c["n"], "p": c.get("prov", ""), "r": c.get("reg", "")}
+        if c.get("a"):
+            rec["a"] = c["a"]
+        forms = {fold(c["n"])} | {fold(x) for x in c.get("a", [])}
+        for form in forms:
+            k = "".join(ch for ch in form[:3] if ch.isalnum())
+            if len(k) == 3:
+                ishards.setdefault(k, []).append(rec)
+    for k, rowlist in ishards.items():
+        blob = json.dumps(rowlist, ensure_ascii=False, separators=(",", ":"))
+        ibytes += len(blob.encode())
+        open(os.path.join(cd, k + ".json"), "w").write(blob)
 
     # ---- Ireland's townlands: findable, and never drawn -------------------
     # 60,883 of them, which is why they are not drawn — they would outnumber
@@ -621,6 +694,14 @@ def main():
     if surn["surnames"]:
         print(f"surnames.json   {sz('surnames.json')/1024:8.1f} KB  "
               f"surnames.csv {sz('surnames.csv')/1024:.0f} KB — the shareable dataset")
+    if eshards:
+        print(f"ee/*.json       {ebytes/1024:8.1f} KB  {len(eshards)} shards, "
+              f"{len(est['parishes'])} Estonian parishes and "
+              f"{len(est['counties'])} historic counties — names only")
+    if ishards:
+        print(f"it/*.json       {ibytes/1024:8.1f} KB  {len(ishards)} shards, "
+              f"{len(ital)} Italian comuni, "
+              f"{sum(1 for c in ital if c.get('a'))} with an official other name")
     if tshards:
         print(f"t/*.json        {tbytes/1024:8.1f} KB  {len(tshards)} shards, "
               f"{len(irl['townlands'])} Irish townlands — findable, not drawn")

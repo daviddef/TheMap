@@ -429,6 +429,74 @@ def main():
                     sounded += 1
     print(f"phonetic: {sounded} «sounds alike» links across {len(by_skel)} skeletons")
 
+    # ---- 5. The name that is also a place ---------------------------------
+    # DAVID ASKED FOR THREE THINGS AND THIS FILE COULD ANSWER ONE. «Attested in»
+    # was doing the work of all of them: where a name is BORNE, where a record
+    # NAMES it, and where it CAME FROM. The first two are already here under
+    # different evidence tiers and only needed telling apart. The third had no
+    # evidence at all, and the honest answer to «where did this name come from»
+    # is usually that nobody can cite it — every site that answers confidently
+    # is quoting an unsourced etymology.
+    #
+    # There is one piece of origin evidence that CAN be cited, and this project
+    # already holds it: a surname that is also the name of a place. Llerena is
+    # a town of 5,716 people in Extremadura and it is the nearest spelling to
+    # Lerena. That is not proof of origin — plenty of surnames are occupations
+    # or patronymics that happen to collide with a place name, and plenty of
+    # places are named after families rather than the other way round — but it
+    # is a FACT with a source, which is more than an etymology page offers.
+    #
+    # MATCHED ON PHONETIC NEIGHBOURS TOO, AND THE FIRST CUT DID NOT — which
+    # threw away the case that prompted the whole feature. Lerena has no place
+    # of its own; LLERENA is a town of 5,716 in Extremadura and is Lerena's
+    # nearest spelling, and excluding phonetic variants meant the one surname
+    # David asked about got nothing at all while the town sat in the gazetteer.
+    #
+    # So they are included and they are LABELLED. A match on the name itself is
+    # a different claim from a match on something that merely sounds like it,
+    # and the panel says which — «Llerena, a town in Spain, though that is a
+    # phonetic neighbour of your name rather than a spelling of it». Silently
+    # merging the two would be the coincidence generator; saying which is which
+    # is just the evidence tiering this file already does everywhere else.
+    gaz = collections.defaultdict(list)
+    try:
+        for g in json.load(open("data/gazetteer.json"))["places"]:
+            gaz[fold(g["n"])].append((g["n"], g.get("k"), g.get("p") or 0, "gazetteer"))
+    except OSError:
+        pass
+    try:
+        for c in json.load(open("data/italy-comuni.json"))["comuni"]:
+            for form in [c["n"]] + (c.get("a") or []):
+                gaz[fold(form)].append((form, "IT", 0, "comune"))
+    except OSError:
+        pass
+    toponym = 0
+    for r in rec.values():
+        # form -> how we got to it, strongest first so a form reached two ways
+        # keeps the stronger label.
+        forms = {}
+        for v in r["variants"]:
+            if v["how"] == "sounds":
+                forms.setdefault(fold(v["n"]), "sounds")
+        for v in r["variants"]:
+            if v["how"] != "sounds":
+                forms[fold(v["n"])] = "variant"
+        forms[fold(r["n"])] = "name"
+        hits, seen_p = [], set()
+        for f, via in forms.items():
+            for nm, cc, pop, kind in gaz.get(f, []):
+                key = (fold(nm), cc)
+                if key in seen_p:
+                    continue
+                seen_p.add(key)
+                hits.append({"n": nm, "cc": cc, "pop": pop, "kind": kind, "via": via})
+        if hits:
+            order = {"name": 0, "variant": 1, "sounds": 2}
+            hits.sort(key=lambda h: (order[h["via"]], -h["pop"]))
+            r["places"] = hits[:6]
+            toponym += 1
+    print(f"toponyms: {toponym} surnames are also the name of a place")
+
     out = []
     for k, r in sorted(rec.items()):
         # One row per country, carrying everyone who attests it. Falco and
@@ -475,6 +543,7 @@ def main():
             "withVariants": sum(1 for r in out if r["variants"]),
             "withCountries": sum(1 for r in out if r["countries"]),
             "curatedLinks": sum(1 for r in out for v in r["variants"] if v["how"] == "curated"),
+            "alsoAPlace": sum(1 for r in out if r.get("places")),
         },
         "surnames": out,
     }

@@ -26,30 +26,35 @@
    Everything else — the find box, the filter pills, that every view is a link
    — is the family Atlas's and is kept deliberately, because a reader who knows
    one of these maps should know all of them. */
-const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wikidataUrl, osmUrl, featureBase, settlementBase, districtBase, countryBase, townlandBase, base } = Astro.props;
+const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wikidataUrl, osmUrl, featureBase, settlementBase, districtBase, countryBase, townlandBase, comuneBase, estoniaBase, base } = Astro.props;
 ---
 
-{/* SEARCHING IS THE FIRST ACTION, so it is the first thing on the page. It
-    used to sit under the map, below the legend, after the layer switches and
-    the year slider — three panels of apparatus in front of the one control
-    that answers the question somebody arrived with. A visitor holding a
-    surname had to scroll past the whole instrument to type it in. */}
-<label class="at-find ra-find-top">
-  <span class="lab">Start here — find a place, or a surname, by any name it has ever had</span>
-  <input id="ra-q" type="search" placeholder="A place or a surname — Gallignana · Žubrinić · Lerena" autocomplete="off" />
-</label>
-
-<div class="ra-top">
-  <div class="lab">The layers — switch any of them on or off</div>
+{/* ONE BAR, NOT THREE PANELS. The search box, seven layer switches, the year
+    control and the copy button used to stack to roughly eight hundred pixels
+    of apparatus above a map — a visitor holding a surname had to scroll past
+    the entire instrument to reach the map it drives.
+    Everything is still here and nothing is hidden: the counts and the
+    explanations moved into `title`, which is a tooltip on a desktop and a long
+    press on a phone, and the ⓘ button opens the lot as plain text for anyone
+    who cannot hover. A control that explains itself on demand is not the same
+    as a control that explains itself at you. */}
+<div class="ra-bar">
+  <input id="ra-q" type="search" autocomplete="off"
+         aria-label="Find a place or a surname, by any name it has ever had"
+         placeholder="Find a place or a surname — Gallignana · Žubrinić · Lerena" />
   <div class="ra-layers" id="ra-layers"></div>
+  <label class="ra-ylab" id="ra-ylab"
+         title="Keep only the places that can answer for that year — and every panel will say whose archive that year belonged to.">
+    <input type="checkbox" id="ra-yon" />
+    <input type="range" id="ra-year" min="1500" max="2026" value="1863" step="1" disabled />
+    <output id="ra-yout" class="mono">any year</output>
+  </label>
+  <button class="ra-ico" id="ra-info" type="button" aria-expanded="false"
+          title="What these controls mean">&#9432;</button>
+  <button class="ra-ico" id="ra-copy" type="button" title="Copy a link to this exact view">&#128279;</button>
+  <span class="ra-copied" id="ra-copied" hidden>copied</span>
 </div>
-
-<div class="ra-yearbar">
-  <label class="ra-ylab"><input type="checkbox" id="ra-yon" /> <span>Search a year</span></label>
-  <input type="range" id="ra-year" min="1500" max="2026" value="1863" step="1" disabled />
-  <output id="ra-yout" class="mono">any year</output>
-  <p class="ra-yhint" id="ra-yhint">Turn this on and the map keeps only the places that can answer for that year — and every panel says whose archive that year belonged to.</p>
-</div>
+<div class="ra-help" id="ra-help" hidden></div>
 
 <div class="at-wrap">
   <div class="at-map" id="ra-map"></div>
@@ -63,17 +68,15 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wi
   </aside>
 </div>
 
-<div class="at-tools">
+<div class="ra-foot">
   <div class="atlas-key" id="ra-cats"></div>
+  <span class="cap" id="ra-count"></span>
 </div>
-<p class="cap" id="ra-count"></p>
-<p class="cap"><button class="ra-copy" id="ra-copy" type="button">Copy link to this view</button>
-  <span class="ra-copied" id="ra-copied" hidden>copied</span></p>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 
-<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, WDA: wikidataUrl, OSMA: osmUrl, FEAT: featureBase, SETT: settlementBase, DIST: districtBase, CTRY: countryBase, TOWN: townlandBase, BASE: base }}>
+<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, WDA: wikidataUrl, OSMA: osmUrl, FEAT: featureBase, SETT: settlementBase, DIST: districtBase, CTRY: countryBase, TOWN: townlandBase, COMU: comuneBase, ESTO: estoniaBase, BASE: base }}>
 window.addEventListener("load", async function () {
   var el = document.getElementById("ra-map");
   if (!el || typeof L === "undefined") return;
@@ -194,7 +197,9 @@ window.addEventListener("load", async function () {
        never happened. So: the colour on the rim, the middle left empty, which
        reads at a glance as «there is something here, and nobody has been
        through it». */
-    var col = (ACC[p.a] || ["#7C8A91"])[0];
+    /* `a` is an INDEX into RANK now, not the word itself — 116 KB of the index
+       was eight strings written out 7,391 times. */
+    var col = (ACC[RANK[p.a]] || ["#7C8A91"])[0];
     var m = L.circleMarker([p.y, p.x], !n ? {
       radius: Math.min(3.5 + Math.sqrt(p.b || 1) * 0.5, 8),
       color: col, weight: 1.4, opacity: .85,
@@ -303,8 +308,9 @@ window.addEventListener("load", async function () {
       });
       n += om.archives.length;
     } catch (e) {}
-    var lab = document.querySelector('.ra-layer[data-l="wikidata"] span');
-    if (lab) lab.textContent = n + " mapped by others · unchecked, and not all genealogical";
+    var lab = document.querySelector('.ra-layer[data-l="wikidata"]');
+    if (lab) lab.title = "Others — " + n.toLocaleString() +
+      " mapped by others · unchecked, and not all genealogical";
     if (on.wikidata) wikiLayer.addTo(map);
   })();
 
@@ -371,8 +377,9 @@ window.addEventListener("load", async function () {
          Wikidata with 5,443 ODbL ones from OpenStreetMap, and a label saying
          only «from Wikidata» is both wrong and, for the ODbL half, an
          attribution this project owes. */
-      var lab = document.querySelector('.ra-layer[data-l="' + key + '"] span');
-      if (lab) lab.textContent = d.features.length + " in the record regions · " +
+      var lab = document.querySelector('.ra-layer[data-l="' + key + '"]');
+      if (lab) lab.title = (lab.querySelector("b") || {}).textContent + " — " +
+        d.features.length.toLocaleString() + " in the record regions · " +
         d.srcs.join(" and ") + ", unchecked";
       if (on[key]) layer.addTo(map);
     })();
@@ -605,13 +612,16 @@ window.addEventListener("load", async function () {
   }
 
   /* ---- layers ------------------------------------------------------------ */
+  /* id, the word on the chip, the sentence behind it, the layer. The short
+     word is what fits in a row of seven; the sentence is the tooltip and the
+     ⓘ panel, so nothing this used to say has stopped being said. */
   var LAYERS = [
-    ["shelf", "The shelf", idx.places.length + " places · every volume that covers them", shelfLayer],
-    ["archives", "The archives", archives.length + " institutions · where the paper actually is", archiveLayer],
-    ["jurisdiction", "The jurisdiction", regions.regions.length + " record regions · whose archive this ground was", regionLayer],
-    ["wikidata", "Mapped by others", "loading · unchecked, and not all genealogical", wikiLayer],
+    ["shelf", "Shelf", idx.places.length.toLocaleString() + " places · every volume that covers them", shelfLayer],
+    ["archives", "Archives", archives.length + " institutions · where the paper actually is", archiveLayer],
+    ["jurisdiction", "Jurisdiction", regions.regions.length + " record regions · whose archive this ground was", regionLayer],
+    ["wikidata", "Others", "loading · unchecked, and not all genealogical", wikiLayer],
     ["cemeteries", "Cemeteries", "loading", featLayers.cemeteries],
-    ["churches", "Churches and parishes", "loading", featLayers.churches],
+    ["churches", "Churches", "loading", featLayers.churches],
     ["libraries", "Libraries", "loading", featLayers.libraries]
   ];
   var on = {};
@@ -620,11 +630,15 @@ window.addEventListener("load", async function () {
   if (!Object.keys(on).length) on.shelf = true;
 
   var lbox = document.getElementById("ra-layers");
-  lbox.innerHTML = LAYERS.map(function (l) {
-    return '<label class="ra-layer' + (on[l[0]] ? " on" : "") + '" data-l="' + l[0] + '">' +
-      '<input type="checkbox"' + (on[l[0]] ? " checked" : "") + ' />' +
-      "<b>" + esc(l[1]) + "</b><span>" + esc(l[2]) + "</span></label>";
-  }).join("");
+  function drawLayers() {
+    lbox.innerHTML = LAYERS.map(function (l) {
+      return '<label class="ra-layer' + (on[l[0]] ? " on" : "") + '" data-l="' + l[0] +
+        '" title="' + esc(l[1] + " — " + l[2]) + '">' +
+        '<input type="checkbox"' + (on[l[0]] ? " checked" : "") + ' />' +
+        "<b>" + esc(l[1]) + "</b></label>";
+    }).join("");
+  }
+  drawLayers();
   function syncLayers() {
     LAYERS.forEach(function (l) {
       var has = map.hasLayer(l[3]);
@@ -646,12 +660,16 @@ window.addEventListener("load", async function () {
   var off = {};
   (Q.get("off") || "").split(",").filter(Boolean).forEach(function (k) { off[k] = true; });
   document.getElementById("ra-cats").innerHTML = RANK.map(function (a) {
-    return '<button class="at-cat' + (off[a] ? "" : " on") + '" data-cat="' + a + '">' +
-      '<i style="background:' + ACC[a][0] + '"></i>' + esc(ACC[a][1]) + "</button>";
+    return '<button class="at-cat' + (off[a] ? "" : " on") + '" data-cat="' + a +
+      '" title="' + esc(ACC[a][1]) + '">' +
+      '<i style="background:' + ACC[a][0] + '"></i>' + esc(ACC[a][2] || ACC[a][1]) +
+      "</button>";
   }).join("") +
     /* The one thing on this map that the colours alone cannot say. */
-    '<span class="at-cat at-hollow-key"><i></i>Hollow: no volumes recorded here — ' +
-    'any colour is borrowed from a collection catalogued under it</span>';
+    '<span class="at-cat at-hollow-key" title="A hollow dot means no volumes are ' +
+    'recorded at that place. Any colour it has is borrowed from a collection ' +
+    'catalogued under it, or under the district it sits in.">' +
+    "<i></i>Hollow&nbsp;= unwalked</span>";
   document.getElementById("ra-cats").addEventListener("click", function (ev) {
     var b = ev.target.closest(".at-cat"); if (!b) return;
     var c = b.getAttribute("data-cat");
@@ -670,7 +688,10 @@ window.addEventListener("load", async function () {
   function yearUI() {
     yin.disabled = !year;
     yout.textContent = year ? String(year) : "any year";
-    document.getElementById("ra-yhint").textContent = year
+    /* The hint was a whole line of static prose under the slider. It is the
+       control's own tooltip now, which is where a sentence that only matters
+       once belongs. */
+    document.getElementById("ra-ylab").title = year
       ? "Showing only what can answer for " + year + ". Every panel now says whose archive that year belonged to."
       : "Turn this on and the map keeps only the places that can answer for that year — and every panel says whose archive that year belonged to.";
     setQ("year", year || "");
@@ -722,7 +743,7 @@ window.addEventListener("load", async function () {
      the panel does the exact test — except that the exact test is the one that
      matters, so spans ride in the index after all. See build.py. */
   function keep(p) {
-    if (off[p.a]) return false;
+    if (off[RANK[p.a]]) return false;
     var t = fold(qbox.value.trim());
     /* `q` now holds only the forms that are NOT the place's own name, so the
        name itself is folded here rather than shipped 2,128 times. */
@@ -845,28 +866,72 @@ window.addEventListener("load", async function () {
                'not by a record</span> ' +
                snd.slice(0, 8).map(function (v) { return esc(v.n); }).join(" · ") + "</p>");
 
+      /* THREE QUESTIONS, NOT ONE. «Attested in» was answering all of them at
+         once and therefore none of them clearly: where a name is BORNE today,
+         where a record NAMES it, and where it CAME FROM. They take different
+         evidence and deserve different sentences. */
+      var byHow = {};
+      r.countries.forEach(function (c) { (byHow[c.how] = byHow[c.how] || []).push(c); });
+      var linkCC = function (list, withN) {
+        return list.map(function (c) {
+          return '<a href="' + BASE + "country/" + c.cc.toLowerCase() + '/">' +
+                 esc(CNAME[c.cc] || c.cc) + "</a>" +
+                 (withN && c.n ? ' <span class="ra-who">' + c.n.toLocaleString() +
+                                 "</span>" : "");
+        }).join(" · ");
+      };
+
+      if (byHow.register) {
+        h.push('<p class="ra-filed"><span class="ra-tag">borne in</span> ' +
+               linkCC(byHow.register, true) + "</p>");
+        h.push('<p class="ra-note">A national register counted these people. It is ' +
+               "a head-count of the living, or of births — the closest thing here to " +
+               "«where the name is now».</p>");
+      }
+
+      var found = (byHow.archive || []).concat(byHow.curated || []);
+      if (found.length) {
+        h.push('<p class="ra-filed"><span class="ra-tag">found in a record</span> ' +
+               linkCC(found, false) + "</p>");
+        h.push('<p class="ra-note">A family archive or a catalogue names this surname ' +
+               "on that ground — one document, not a census. Narrower evidence than a " +
+               "register and often much older.</p>");
+      }
+      if (byHow.grammar || byHow.sounds) {
+        h.push('<p class="ra-filed ra-weak"><span class="ra-tag">a form of the name</span> ' +
+               linkCC((byHow.grammar || []).concat(byHow.sounds || []), false) + "</p>");
+      }
+
+      /* ORIGIN, and the only kind this map will assert. */
+      if (r.places && r.places.length) {
+        h.push('<p class="ra-filed"><span class="ra-tag">also a place</span> ' +
+               r.places.map(function (pl) {
+                 var how = pl.via === "name" ? ""
+                   : pl.via === "variant" ? " — a spelling of the name"
+                   : " — but only a phonetic neighbour, not a spelling";
+                 return "<b>" + esc(pl.n) + "</b>" +
+                        (pl.cc ? " <span class=\"ra-who\">" + esc(CNAME[pl.cc] || pl.cc) +
+                                 (pl.pop ? ", pop. " + pl.pop.toLocaleString() : "") +
+                                 esc(how) + "</span>" : "");
+               }).join(" · ") + "</p>");
+        h.push('<p class="ra-note"><b>This is as close to an origin as this map will ' +
+               "go.</b> A surname that is also a place name often came from it — and " +
+               "often did not: plenty are occupations or patronymics that happen to " +
+               "collide, and plenty of places are named after a family rather than " +
+               "the other way round. It is a fact with a source, which is more than " +
+               "an etymology page offers.</p>");
+      } else {
+        h.push('<p class="ra-note">No place of this name is in the gazetteer, so this ' +
+               "map says nothing about where the name came from. Search anywhere else " +
+               "and you will be told an ORIGIN — that it is Latin, or Italian, or " +
+               "means «joyful». That is etymology, it is usually unsourced, and it is " +
+               "a different question from the one this map answers.</p>");
+      }
+
       if (r.countries.length) {
-        /* Grouped by HOW, because «Spain, because the state counted 1,575 of
-           them» and «Croatia, because somebody walked the parish» are two
-           different sentences and the flat list said neither. */
-        var byHow = {};
-        r.countries.forEach(function (c) {
-          (byHow[c.how] = byHow[c.how] || []).push(c);
-        });
-        ["register", "curated", "archive", "grammar", "sounds"].forEach(function (k) {
-          if (!byHow[k]) return;
-          var e = EVID[k] || EVID.register;
-          h.push('<p class="ra-filed"><i class="at-dot" style="background:' +
-            (e.dash ? "transparent;border:1.5px solid " + e.color : e.color) + '"></i>' +
-            byHow[k].map(function (c) {
-              return '<a href="' + BASE + "country/" + c.cc.toLowerCase() + '/">' +
-                     esc(CNAME[c.cc] || c.cc) + "</a>" +
-                     (c.n ? ' <span class="ra-who">' + c.n.toLocaleString() + "</span>" : "");
-            }).join(" · ") + ' <span class="ra-who">— ' + esc(e.say) + "</span></p>");
-        });
-        h.push('<p class="ra-note">That means the name appears in a dataset held here — ' +
-               "not that it exists in those countries and nowhere else. The " +
-               "blanks on this map are gaps in it, as always.</p>");
+        h.push('<p class="ra-note">Every one of these means the name appears in a ' +
+               "dataset held here — never that it exists in those countries and " +
+               "nowhere else. The blanks on this map are gaps in it, as always.</p>");
       } else {
         h.push('<p class="ra-note">No country attested yet. The name is known; where it ' +
                "is found is not, which is a gap in this map rather than in the world.</p>");
@@ -1055,6 +1120,54 @@ window.addEventListener("load", async function () {
      has its data, it drops everything rather than painting over the answer. */
   var searchTok = 0;
 
+  /* Italian comuni. Undrawn — the province is already a dot and it is the rung
+     Antenati files by — but searchable under BOTH names, which is the whole
+     point: somebody holding a record that says «Bozen» is holding a record
+     about Bolzano and may not know it. */
+  var mcache = {};
+  async function comuni(term) {
+    var f = fold(term);
+    var key = "";
+    for (var i = 0; i < f.length && key.length < 3; i++)
+      if (/[a-z0-9]/.test(f[i])) key += f[i];
+    if (key.length < 3) return [];
+    if (!(key in mcache)) {
+      try { mcache[key] = await (await fetch(COMU + key + ".json")).json(); }
+      catch (e) { mcache[key] = []; }
+    }
+    var hit = [];
+    mcache[key].forEach(function (r) {
+      var forms = [r.n].concat(r.a || []);
+      var best = null;
+      forms.forEach(function (x) {
+        var fx = fold(x);
+        var m = fx === f ? 0 : fx.indexOf(f) === 0 ? 1 : fx.indexOf(f) > -1 ? 2 : null;
+        if (m !== null && (best === null || m < best)) best = m;
+      });
+      if (best !== null) hit.push([best, r]);
+    });
+    hit.sort(function (a, b) { return a[0] - b[0]; });
+    return hit.slice(0, 5).map(function (x) { return x[1]; });
+  }
+
+  /* Estonian parishes and historic counties. Names only — the archive
+     publishes no coordinates and this map will not invent any. */
+  var ecache = {};
+  async function estonia(term) {
+    var f = fold(term);
+    var key = "";
+    for (var i = 0; i < f.length && key.length < 3; i++)
+      if (/[a-z0-9]/.test(f[i])) key += f[i];
+    if (key.length < 3) return [];
+    if (!(key in ecache)) {
+      try { ecache[key] = await (await fetch(ESTO + key + ".json")).json(); }
+      catch (e) { ecache[key] = []; }
+    }
+    return ecache[key].filter(function (r) {
+      return fold(r.n).indexOf(f) > -1;
+    }).slice(0, 4);
+  }
+
   async function elsewhere(term) {
     var mine = ++searchTok;
     var stale = function () { return mine !== searchTok; };
@@ -1082,6 +1195,8 @@ window.addEventListener("load", async function () {
     var setts = await settlements(term);
     var dists = await districts(term);
     var tlands = await townlands(term);
+    var com = await comuni(term);
+    var est = await estonia(term);
     if (stale()) return;
     /* If the typed word is an OLD name, say which one it matched and what the
        place is called now. "Pressburg → Bratislava" is the whole answer to the
@@ -1128,6 +1243,38 @@ window.addEventListener("load", async function () {
       }
       h.push("</div>");
     });
+    /* An Estonian parish or historic county. */
+    if (est.length) {
+      h.push('<div class="ra-juris"><div class="lab">In the Estonian filing system</div>');
+      est.forEach(function (r) {
+        h.push("<p><b>" + esc(r.n) + "</b> — " +
+               (r.k === "parish"
+                 ? "a <b>kihelkond</b>, the parish Estonian church records are filed by"
+                 : "a historic county of the Baltic governorates") + "</p>");
+      });
+      h.push('<p class="ra-note">Before 1866 the civil administration filed by MANOR ' +
+             "rather than by parish, and the revision lists that name a whole household " +
+             "at once are arranged that way — so an Estonian line has two filing systems " +
+             "over it, and the first question about any record is which one it came out " +
+             "of. Some of these counties are in LATVIA today: the governorate boundary " +
+             "did not follow the modern one.</p>");
+      h.push("</div>");
+    }
+    /* An Italian comune, found under either of its names. */
+    if (com.length) {
+      h.push('<div class="ra-juris"><div class="lab">An Italian comune</div>');
+      com.forEach(function (r) {
+        var other = (r.a || []).filter(function (x) { return fold(x) !== fold(r.n); });
+        h.push("<p><b>" + esc(r.n) + "</b>" +
+               (other.length ? " — officially also <b>" + other.map(esc).join(" · ") +
+                               "</b>" : "") +
+               (r.p ? '<br><span class="ra-who">Provincia di ' + esc(r.p) +
+                      (r.r ? ", " + esc(r.r) : "") +
+                      " — the province is the rung the state archives and Antenati " +
+                      "file by</span>" : "") + "</p>");
+      });
+      h.push("</div>");
+    }
     /* A townland. The county and civil parish are the answer, not the trimming:
        the civil parish is what Griffith's Valuation and the registration
        districts are arranged by, so it is the word to search next. */
@@ -1320,6 +1467,39 @@ window.addEventListener("load", async function () {
     setQ("view", c.lat.toFixed(4) + "," + c.lng.toFixed(4) + "," + map.getZoom());
   });
 
+  /* HOVER IS NOT AN EXPLANATION ON A PHONE. Every sentence that moved into a
+     tooltip is also here, in full, one button away. */
+  var helpBox = document.getElementById("ra-help");
+  document.getElementById("ra-info").addEventListener("click", function () {
+    var open = helpBox.hidden;
+    this.setAttribute("aria-expanded", String(open));
+    if (!open) { helpBox.hidden = true; return; }
+    var h = ['<div class="ra-help-in">'];
+    h.push("<p><b>Search</b> finds a place by any name it has ever had — " +
+           "Gallignana finds Gračišće — and finds a surname, and says which " +
+           "records it is written in.</p>");
+    h.push("<p><b>The layers</b></p><ul>");
+    LAYERS.forEach(function (l) {
+      var el = document.querySelector('.ra-layer[data-l="' + l[0] + '"]');
+      h.push("<li>" + esc((el && el.title) || (l[1] + " — " + l[2])) + "</li>");
+    });
+    h.push("</ul>");
+    h.push("<p><b>The year</b> — turn it on and the map keeps only the places " +
+           "that can answer for that year, and every panel says whose archive " +
+           "that year belonged to. That is the thing this map is for.</p>");
+    h.push("<p><b>The colours</b> say what it costs to look:</p><ul>");
+    RANK.forEach(function (a) {
+      h.push('<li><i class="at-dot" style="background:' + ACC[a][0] + '"></i>' +
+             esc(ACC[a][1]) + "</li>");
+    });
+    h.push("</ul><p>A <b>hollow</b> dot means no volumes are recorded there. Any " +
+           "colour it has is borrowed from a collection catalogued under it, or " +
+           "under the district it sits in — so it is never a walk somebody did.</p>");
+    h.push("</div>");
+    helpBox.innerHTML = h.join("");
+    helpBox.hidden = false;
+  });
+
   document.getElementById("ra-copy").addEventListener("click", function () {
     navigator.clipboard.writeText(location.href).then(function () {
       var t = document.getElementById("ra-copied");
@@ -1345,34 +1525,55 @@ window.addEventListener("load", async function () {
 </script>
 
 <style>
+  /* ---- one bar ----------------------------------------------------------
+     Search, seven layers, the year and two icon buttons on a single line that
+     wraps only when it has to. It replaces roughly 800px of stacked panels
+     with about 100, and the map — the thing the page is for — starts near the
+     top of the screen instead of below the fold. */
+  .ra-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+            margin: 14px 0 10px; }
+  .ra-bar #ra-q { flex: 1 1 260px; min-width: 200px; font-size: 14px;
+                  padding: 9px 12px; }
+  .ra-ico { flex: 0 0 auto; width: 32px; height: 32px; border: 1px solid var(--rule);
+            border-radius: 3px; background: var(--panel); color: var(--ink-2);
+            font-size: 15px; line-height: 1; cursor: pointer; }
+  .ra-ico:hover { border-color: var(--accent); color: var(--accent); }
+  .ra-help { margin: 0 0 12px; border: 1px solid var(--rule);
+             border-left: 2px solid var(--accent); border-radius: 3px;
+             background: var(--panel); }
+  :global(.ra-help-in) { padding: 14px 16px; font-family: var(--sans);
+                         font-size: 12.5px; line-height: 1.6; color: var(--ink-2); }
+  :global(.ra-help-in p) { margin: 0 0 8px; max-width: 78ch; }
+  :global(.ra-help-in ul) { margin: 0 0 10px; padding-left: 0; list-style: none; }
+  :global(.ra-help-in li) { margin: 0 0 3px; color: var(--ink-3); }
+  .ra-foot { display: flex; align-items: center; gap: 10px 14px; flex-wrap: wrap;
+             margin-top: 10px; }
+  .ra-foot .cap { margin: 0; font-size: 11.5px; }
+
   .ra-top { margin-top: 10px; }
   /* The layer switches and the filter pills are written by the script with
      innerHTML, so they never carry Astro's scope attribute — which means every
      rule that styles them matches nothing at all unless it is :global. The
      component this descends from learned that the expensive way. */
-  .ra-layers { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+  .ra-layers { display: flex; gap: 5px; flex-wrap: wrap; }
   :global(.ra-layer) {
-    flex: 1 1 240px; display: block; cursor: pointer; padding: 10px 12px;
-    border: 1px solid var(--rule); border-radius: 3px; background: var(--panel);
-    opacity: .55;
+    display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
+    padding: 6px 9px; border: 1px solid var(--rule); border-radius: 999px;
+    background: var(--panel); opacity: .6; white-space: nowrap;
   }
   :global(.ra-layer.on) { opacity: 1; border-color: var(--accent); }
-  :global(.ra-layer input) { margin-right: 8px; accent-color: var(--accent); }
-  :global(.ra-layer b) { font-family: var(--sans); font-size: 13.5px; font-weight: 600; }
-  :global(.ra-layer span) { display: block; margin-left: 24px; font-family: var(--sans);
-                   font-size: 11.5px; color: var(--ink-3); line-height: 1.45; }
+  :global(.ra-layer input) { margin: 0; accent-color: var(--accent);
+                             width: 12px; height: 12px; }
+  :global(.ra-layer b) { font-family: var(--sans); font-size: 12px; font-weight: 500; }
 
-  .ra-yearbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-                margin: 18px 0 6px; padding: 12px 14px; border: 1px solid var(--rule);
-                border-left: 2px solid var(--accent); border-radius: 3px; background: var(--panel); }
-  .ra-ylab { display: inline-flex; align-items: center; gap: 7px; font-family: var(--sans);
-             font-size: 12.5px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+  .ra-ylab { display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+             padding: 5px 9px; border: 1px solid var(--rule); border-radius: 999px;
+             background: var(--panel); font-family: var(--sans); font-size: 12px;
+             white-space: nowrap; flex: 0 1 220px; }
   .ra-ylab input { accent-color: var(--accent); }
-  #ra-year { flex: 1 1 240px; accent-color: var(--accent); }
+  #ra-year { flex: 1 1 90px; min-width: 70px; accent-color: var(--accent); }
   #ra-year:disabled { opacity: .4; }
   #ra-yout { font-size: 15px; font-weight: 500; color: var(--accent); min-width: 5ch; }
-  .ra-yhint { flex: 1 0 100%; margin: 2px 0 0; font-family: var(--sans);
-              font-size: 11.5px; line-height: 1.5; color: var(--ink-3); }
 
   .at-wrap { display: grid; grid-template-columns: 1fr 360px; gap: 18px; margin-top: 12px; }
   .at-map { height: 600px; border: 1px solid var(--rule); border-radius: 3px; }
@@ -1382,10 +1583,6 @@ window.addEventListener("load", async function () {
   .at-hint { color: var(--ink-3) !important; font-size: 12px !important; }
   :global(.at-dot) { display: inline-block; width: 7px; height: 7px;
     border-radius: 50%; margin-right: 5px; vertical-align: baseline; }
-  /* The search box now leads the page, so it is sized to look like the thing
-     to do rather than like one field among several. */
-  .ra-find-top { display: block; margin: 0 0 22px; }
-  .ra-find-top input { font-size: 17px; padding: 13px 15px; }
   /* Matches the hollow marker: rim only, middle empty. */
   :global(.at-hollow-key) { cursor: default; opacity: .75; }
   :global(.at-hollow-key i) { background: transparent !important;

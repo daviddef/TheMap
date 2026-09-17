@@ -32,6 +32,16 @@ const PROV = Object.fromEntries(provs.providers.map((p) => [p.id, p]));
    by how open it is. The worldwide dozen are excluded deliberately — covering
    everywhere is not a fact about here. */
 const national = sourcesFor(place.country);
+/* Wikidata's national archive and library, where this atlas has nothing
+   curated for the country. Kept apart from `national` above because those
+   have been looked at and these have not. */
+let worldNat = [];
+try {
+  const wa = (await import("../../../../data/world-archives.json")).default;
+  worldNat = (wa.archives || []).filter((r) => r.cc === place.country)
+    .sort((a, b) => (a.kind !== "national-archive") - (b.kind !== "national-archive"))
+    .slice(0, 6);
+} catch (e) { worldNat = []; }
 const countryName = (idx.countries || {})[place.country] || place.country;
 const region = regions.regions.find((r) => r.id === place.region);
 const ACC = {
@@ -201,6 +211,30 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
     </section>
   )}
 
+  {worldNat.length > 0 && (
+    <section style="margin-top:38px">
+      <h2>National sources for {countryName}, unverified</h2>
+      <p class="cap">From Wikidata, CC0 — the national archive and the national library
+      where the country has one. <b>Nobody here has opened these.</b> The link answered when
+      it was asked and that is the whole of what this map knows about them. They are listed
+      because <b>a country with no named source at all is the worse answer</b>: 199 of the
+      237 countries here had nothing but the worldwide services, which cover everywhere and
+      therefore say nothing about anywhere.</p>
+      <ul class="vols" style="margin-top:12px">
+        {worldNat.map((r) => (
+          <li>
+            <a href={r.url} target="_blank" rel="noopener">{r.name} ↗</a>
+            <span class="who">{r.kind === "national-archive" ? "national archive" : "national library"}</span>
+            {r.status !== "ok" && <span class="who">{
+              r.status === "challenged" ? "behind a bot gate, but alive"
+              : r.status === "unreachable" ? "did not answer this checker"
+              : "answered with an error"}</span>}
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
   {national.length > 0 && (
     <section style="margin-top:38px">
       <h2>The sources for {countryName}</h2>
@@ -253,8 +287,8 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
 
   {region && (
     <p style="margin-top:30px"><a class="bigl"
-      href={u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&year=1863&layers=shelf,jurisdiction&view=${place.lat},${place.lon},9`)}>
-      Set a year over {place.name} →</a><br />
+      href={u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&years=1800,1920&layers=shelf,jurisdiction&view=${place.lat},${place.lon},9`)}>
+      See who held {place.name} between 1800 and 1920 →</a><br />
       <span class="cap">The jurisdiction answer — which empire held this ground, and therefore
       whose archive — could only be got at from the map until now. This opens it there, on
       1863; drag the year from any point between {region.eras[0].from} and

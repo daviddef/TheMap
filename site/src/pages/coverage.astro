@@ -56,6 +56,25 @@ const T = list.reduce((a, r) => ({
   cols: a.cols + r.cols, local: a.local + r.local, places: a.places + r.places,
   walked: a.walked + r.walked, divs: a.divs + r.divs,
   vols: a.vols + r.vols }), { cols: 0, local: 0, places: 0, walked: 0, divs: 0, vols: 0 });
+let worldCC = 0, worldGap = 0, worldBy = {}, afNat = 0;
+try {
+  const wa = (await import("../../../data/world-archives.json")).default;
+  for (const r of wa.archives || []) worldBy[r.cc] = (worldBy[r.cc] || 0) + 1;
+  worldCC = Object.keys(worldBy).length;
+  afNat = Object.keys(worldBy).filter((c) => AFRICA.has(c)).length;
+  worldGap = Object.keys(CN).length - worldCC;
+} catch (e) { worldCC = 0; }
+/* AFRICA, MEASURED RATHER THAN LEFT TO BE INFERRED FROM A GREY CONTINENT. */
+const AFRICA = new Set(["DZ","AO","BJ","BW","BF","BI","CM","CV","CF","TD","KM","CG","CD",
+  "CI","DJ","EG","GQ","ER","SZ","ET","GA","GM","GH","GN","GW","KE","LS","LR","LY","MG",
+  "MW","ML","MR","MU","MA","MZ","NA","NE","NG","RW","ST","SN","SC","SL","SO","ZA","SS",
+  "SD","TZ","TG","TN","UG","EH","ZM","ZW"]);
+const afCols = cols.collections.filter((c) => (c.countries || []).some((k) => AFRICA.has(k))).length;
+const totalCols = cols.collections.length;
+const afPct = Math.round(1000 * afCols / totalCols) / 10;
+const afPlacesArr = full.places.filter((p) => AFRICA.has(p.country));
+const afPlaces = afPlacesArr.length;
+const afWalked = afPlacesArr.filter((p) => (p.collections || []).length).length;
 const walked = list.filter((r) => r.walked > 0).length;
 const drawn = list.filter((r) => r.places > 0).length;
 const mapped = list.filter((r) => r.regions > 0).length;
@@ -78,12 +97,32 @@ const mapped = list.filter((r) => r.regions > 0).length;
         filed in. They, and every other dot with no volume recorded on it, are drawn hollow
         for exactly this reason: a district that a catalogue merely reaches must not look
         like a parish somebody read.</li>
+      <li><b>{worldCC}</b> of {list.length} now have a <b>named national source</b> — the
+        national archive or national library, from Wikidata. It was <b>38</b> until today:
+        the other 199 answered with FamilySearch and Ancestry, which cover everywhere and
+        therefore say nothing about anywhere. <b>Nobody here has opened these</b>; their
+        links answered when asked, and that is all this map claims. {worldGap} countries
+        still have none.</li>
       <li><b>{mapped}</b> have a record region — which empire held the ground, and therefore
         whose archive holds the paper. That is the thing this map is for and it covers
         {Math.round(100*mapped/list.length)}% of the countries it names.</li>
       <li><b>{Math.round(100*T.local/T.cols)}%</b> of collections reach a named place. The
         rest are country-level: real, searchable, and no substitute for knowing the parish.</li>
     </ul>
+  </div>
+
+  <div class="one" style="margin-top:26px;border-left-color:#C0392B">
+    <div class="lab">The continent this map is worst at</div>
+    <p class="cap">Africa reads as empty on the map and the reason is not that Africa has no
+    records. It is that <b>{afCols} of {totalCols.toLocaleString()} FamilySearch collections —
+    {afPct}% — cover any African country at all</b>, and no family archive imported here has
+    walked African ground. {afPlaces} African places are drawn; {afWalked} carry a single
+    walked volume.</p>
+    <p class="cap">What does exist: <b>{afNat} of 55 African countries have a named national
+    archive or library</b> on this map now. They are listed in the panel when you click a
+    place, and the marker is drawn with a <b>dotted rim</b> to say so — because a plain grey
+    dot said «there is nothing here» when what it meant was «nothing here has reached this
+    map yet». {55 - afNat} African countries still have neither.</p>
   </div>
 
   <section style="margin-top:30px">
@@ -139,7 +178,7 @@ const mapped = list.filter((r) => r.regions > 0).length;
 
   <table style="margin-top:14px">
     <thead><tr>
-      <th>Country</th><th class="m">Collections</th><th class="m">Reach</th>
+      <th>Country</th><th class="m">Collections</th><th class="m">Reach</th><th class="m">National</th>
       <th class="m">Walked</th><th class="m">Districts</th><th class="m">Volumes</th><th class="m">Archives</th>
       <th class="m">Regions</th><th class="m">Surnames</th>
     </tr></thead>
@@ -149,6 +188,7 @@ const mapped = list.filter((r) => r.regions > 0).length;
           <td><a href={u(`/country/${r.cc.toLowerCase()}/`)}>{r.name}</a></td>
           <td class="m">{r.cols || "—"}</td>
           <td class="m">{r.cols ? `${r.pct}%` : "—"}</td>
+          <td class={"m" + (worldBy[r.cc] ? " yes" : " nil")}>{worldBy[r.cc] || "—"}</td>
           <td class={"m" + (r.walked ? "" : " nil")}>{r.walked || "—"}</td>
           <td class={"m" + (r.divs ? "" : " nil")}>{r.divs || "—"}</td>
           <td class={"m" + (r.vols ? "" : " nil")}>{r.vols || "—"}</td>

@@ -6,6 +6,12 @@ import provs from "../../public/providers.json";
 
 const PROV = Object.fromEntries(provs.providers.map(p => [p.id, p]));
 const eras = regions.regions.reduce((a, r) => a + r.eras.length, 0);
+/* A region's own centre, so a map link lands on the ground being described
+   rather than wherever the reader happened to leave the map. */
+const mid = (r) => [
+  (Math.min(...r.ring.map(p => p[0])) + Math.max(...r.ring.map(p => p[0]))) / 2,
+  (Math.min(...r.ring.map(p => p[1])) + Math.max(...r.ring.map(p => p[1]))) / 2,
+].map(n => Math.round(n * 1000) / 1000);
 ---
 <Base
   title="Whose archive"
@@ -38,7 +44,11 @@ const eras = regions.regions.reduce((a, r) => a + r.eras.length, 0);
         <tbody>
           {r.eras.map(e => (
             <tr>
-              <td class="m">{e.from}–{e.to}</td>
+              {/* Every era row is a way into the map with that span set. The
+                  table is the answer; the map is what you do with it. */}
+              <td class="m"><a
+                href={u(`/?layers=shelf,jurisdiction&years=${e.from},${e.to}&view=${mid(r)[0]},${mid(r)[1]},8`)}
+                title={`See ${r.label} between ${e.from} and ${e.to}`}>{e.from}–{e.to}</a></td>
               <td>
                 <span class="reg" style={`--c:var(${regions.regimes[e.regime].var})`}>
                   <i></i>{e.polity || regions.regimes[e.regime].label}

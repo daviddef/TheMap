@@ -41,7 +41,9 @@ are, and the family layers are the one thing that cannot generalise.
 
     python3 scripts/harvest-archive-surnames.py
 """
-import json, glob, os, re, sys, time, collections
+import json, glob, os, re, sys, time, collections, unicodedata
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(_ROOT)
@@ -81,6 +83,206 @@ PARTICLE = {"de", "di", "da", "del", "della", "dei", "dal", "van", "von", "der",
             "den", "ter", "le", "la", "du", "des", "of", "y", "e", "af", "af."}
 # A GEDCOM writes the surname between slashes; a roster does not.
 SLASHED = re.compile(r"/([^/]+)/")
+
+
+# Ground that no longer exists under that name, which is most of what a family
+# archive writes down. A gazetteer of present-day cities cannot resolve «Cape
+# Colony» or «Transvaal», and those are exactly the words a death notice uses.
+HISTORICAL = {
+    "cape colony": "ZA", "cape province": "ZA", "transvaal": "ZA",
+    "orange free state": "ZA", "natal": "ZA", "south west africa": "NA",
+    "rhodesia": "ZW", "basutoland": "LS", "bechuanaland": "BW",
+    "austria-hungary": "AT", "austro-hungarian empire": "AT",
+    "kingdom of italy": "IT", "two sicilies": "IT", "papal states": "IT",
+    "prussia": "DE", "silesia": "PL", "posen": "PL", "pomerania": "PL",
+    "galicia": "PL", "bukovina": "RO", "bohemia": "CZ", "moravia": "CZ",
+    "dalmatia": "HR", "istria": "HR", "carniola": "SI", "styria": "AT",
+    "new france": "CA", "lower canada": "CA", "upper canada": "CA",
+    "acadia": "CA", "british north america": "CA",
+    "ceylon": "LK", "burma": "MM", "siam": "TH", "persia": "IR",
+    "ottoman empire": "TR", "constantinople": "TR", "smyrna": "TR",
+    "river plate": "AR", "rio de la plata": "AR", "banda oriental": "UY",
+}
+
+
+def _fold(s):
+    s = unicodedata.normalize("NFKD", s or "")
+    return "".join(c for c in s if not unicodedata.combining(c)).lower().strip()
+
+
+class Ground:
+    """Turns the place names an archive writes down into country codes.
+
+    THE COUNTRY LIST USED TO BE TYPED BY HAND, one line per archive, and it was
+    wrong the moment the research moved. David asked why Lerena showed no South
+    Africa when the archive holds FOURTEEN Lerenas across Cape Town,
+    Johannesburg, Transvaal, Cape Colony and Braamfontein — and the answer was
+    that somebody once wrote ["AR", "UY", "ES"] beside that archive's name and
+    nothing has re-read it since. The same file also contains a note reading
+    «THE SURNAME IS ITALIAN AS WELL AS SPANISH, AND THIS ARCHIVE DID NOT KNOW
+    THAT», which is the archive correcting itself in writing while this project
+    ignored it.
+
+    So the countries are READ OFF THE PLACES the archive names, in four passes,
+    strongest first: a coordinate, a present-day gazetteer name, a country
+    name, and a table of ground that has since been renamed."""
+
+    def __init__(self):
+        self.by_name, self.cc_names = {}, {}
+        try:
+            for g in json.load(open("data/gazetteer.json"))["places"]:
+                k = _fold(g["n"])
+                if k not in self.by_name or (g.get("p") or 0) > self.by_name[k][1]:
+                    self.by_name[k] = (g["k"], g.get("p") or 0)
+                for alt in g.get("a", []):
+                    self.by_name.setdefault(_fold(alt), (g["k"], 0))
+        except OSError:
+            pass
+        try:
+            for iso, v in json.load(open("data/countries.json"))["countries"].items():
+                self.cc_names[_fold(v["name"])] = iso
+        except OSError:
+            pass
+        try:
+            from geo import country_of
+            self.country_of = country_of
+        except Exception:
+            self.country_of = lambda a, b: None
+
+    def resolve(self, name, lat=None, lon=None):
+        """The country a place name belongs to, or None. Never a guess."""
+        if lat is not None and lon is not None:
+            try:
+                cc = self.country_of(float(lat), float(lon))
+                if cc:
+                    return cc
+            except (TypeError, ValueError):
+                pass
+        # «Braamfontein, Johannesburg» and «Rosario, Santa Fe» — try the whole
+        # string, then each comma-separated part, longest first, because the
+        # rightmost part is usually the widest and most resolvable.
+        parts = [name] + [p.strip() for p in re.split(r"[,/]", name or "")]
+        for raw in parts:
+            k = _fold(re.sub(r"\s*[—–-]\s*.*$", "", raw))
+            if not k or len(k) < 3:
+                continue
+            if k in self.cc_names:
+                return self.cc_names[k]
+            if k in HISTORICAL:
+                return HISTORICAL[k]
+            if k in self.by_name:
+                return self.by_name[k][0]
+        return None
+
+
+# A row is a PLACE if it looks like one. The first cut asked only for a `name`
+# and swept up half the Defranceski archive's PEOPLE — «Agostino Defranceschi»
+# went to the gazetteer, matched something, and put that archive in Chad,
+# Kyrgyzstan and Zambia. A person is not a place and a name is not evidence of
+# which.
+PLACEY = {"lat", "lon", "coords", "country", "cc", "people", "count", "cems",
+          "diocese", "prov", "region", "parish", "adm1", "adm2", "place"}
+
+
+# A MIGRATION PATH IS A LIST OF PLACES AND EVERY ONE OF THEM IS A COUNTRY THE
+# FAMILY WAS IN. These archives write a life as an arrow — «Senj →
+# Johannesburg → Brisbane», «Crikvenica → Pfullingen → Senj» — in a `place`
+# field on a person, and this harvester read only place FILES. David asked why
+# Defranceski showed no South Africa when his own direct line runs through
+# Johannesburg for three generations. It was written down, in the roster, as an
+# arrow, and nothing here was looking at arrows.
+ARROW = re.compile(r"\s*(?:→|->|—>|>|·|;)\s*")
+
+# Files that describe a family's spread rather than its places: a `place` field
+# naming a country outright, with no coordinate and no person attached.
+SPREAD = ("diaspora.json", "emigration.json", "arrivals.json", "america.json")
+
+
+def journeys(base, surnames=()):
+    """Every (surname, place) an archive's person rows imply.
+
+    A person row carries a name and a path. The name gives the surname — which
+    is the precise attribution this whole file exists for — and the path gives
+    every place that person is recorded in, not merely the last one."""
+    known = {_fold(n) for n in surnames}
+    out = []
+    for p in sorted(glob.glob(os.path.join(base, "site/src/data", "*.json"))):
+        try:
+            doc = json.load(open(p, encoding="utf-8"))
+        except Exception:
+            continue
+        spread = os.path.basename(p) in SPREAD
+        for pool in lists_in(doc):
+            shape = set()
+            for r in pool[:40]:
+                if isinstance(r, dict):
+                    shape |= set(r)
+            if "place" not in shape:
+                continue
+            for r in pool:
+                if not isinstance(r, dict):
+                    continue
+                path = r.get("place")
+                if not isinstance(path, str) or not path.strip():
+                    continue
+                who = r.get("name") or r.get("n") or ""
+                if not isinstance(who, str):
+                    who = ""          # a row keyed `n` for a number, not a name
+                sn = _fold(surname_of(who)) if who else ""
+                if known and sn and sn not in known:
+                    # A name this archive does not collect is somebody else's
+                    # family passing through; the place still counts for the
+                    # archive but not for that surname.
+                    sn = ""
+                for hop in ARROW.split(path):
+                    hop = re.sub(r"\*+|\(.*?\)", "", hop).strip(" .,")
+                    if len(hop) > 2:
+                        out.append((sn if not spread else "", hop))
+    return out
+
+
+def place_rows(base, surnames=()):
+    """Every {name, lat, lon, people} an archive's place files offer.
+
+    Only from files that are about places, only from rows carrying at least one
+    place-ish field, and never a row whose name ends in one of this archive's
+    own surnames."""
+    known = {_fold(n) for n in surnames}
+    out = []
+    for fn in ("places.json", "gravesmap.json", "atlas.json", "researchmap.json",
+               "map.json"):
+        p = os.path.join(base, "site/src/data", fn)
+        if not os.path.exists(p):
+            continue
+        try:
+            doc = json.load(open(p, encoding="utf-8"))
+        except Exception:
+            continue
+        for pool in lists_in(doc):
+            shape = set()
+            for r in pool[:40]:
+                if isinstance(r, dict):
+                    shape |= set(r)
+            if not (shape & PLACEY):
+                continue                      # a list of something else
+            for r in pool:
+                if not isinstance(r, dict):
+                    continue
+                nm = r.get("name") or r.get("n") or r.get("place")
+                if not isinstance(nm, str) or not nm.strip():
+                    continue
+                nm = nm.strip()
+                # «Agostino Defranceschi» is a person. So is anything whose last
+                # word is a surname this archive collects.
+                if known and _fold(nm.split()[-1]) in known:
+                    continue
+                co = r.get("coords") if isinstance(r.get("coords"), (list, tuple)) else None
+                out.append({"name": nm,
+                            "lat": r.get("lat", co[0] if co and len(co) > 1 else None),
+                            "lon": r.get("lon", co[1] if co and len(co) > 1 else None),
+                            "cc": r.get("country") or r.get("cc"),
+                            "people": r.get("people") if isinstance(r.get("people"), list) else []})
+    return out
 
 
 def surname_of(full):
@@ -129,6 +331,7 @@ def main():
     if not os.path.isdir(PROJ):
         sys.exit(f"the sibling archives are not here: {PROJ}")
 
+    ground = Ground()
     out, report, missing = {}, [], []
     for label, folder, ccs, specs in ARCHIVES:
         base = os.path.join(PROJ, folder)
@@ -163,6 +366,12 @@ def main():
                             # Booyzen's DNA clusters carry slugs, not spellings.
                             if field == "tree_surnames":
                                 n = " ".join(w.capitalize() for w in n.split("-"))
+                            # «*** GEORGINA BRAYLEY *** , aged 20» is a
+                            # sentence with emphasis markers, not a surname.
+                            # An archive's prose leaks into its data and a
+                            # surname list is not the place to discover that.
+                            if "*" in n or "," in n or len(n.split()) > 4:
+                                continue
                             if len(n) < 2 or len(n) > 60:
                                 continue
                             names[n] += 1
@@ -170,12 +379,120 @@ def main():
         if not names:
             missing.append((label, "no surnames found — check the field spec"))
             continue
-        out[label] = {"countries": ccs, "surnames": sorted(names),
-                      "from": dict(whence.most_common())}
-        report.append((label, len(names), ",".join(ccs)))
 
-    for label, n, ccs in report:
+        # ---- the countries, READ rather than declared ----------------------
+        found, unresolved, per = {}, [], collections.defaultdict(set)
+        hard, conflict = set(), []
+        # The arrows first — they carry the surname with them.
+        for sn, hop in journeys(base, names):
+            cc = ground.resolve(hop)
+            if not cc:
+                unresolved.append(hop)
+                continue
+            found[cc] = found.get(cc, 0) + 1
+            if _fold(hop) in ground.cc_names or _fold(hop) in HISTORICAL:
+                hard.add(cc)
+            if sn:
+                for n in names:
+                    if _fold(n) == sn:
+                        per[n].add(cc)
+                        hard.add(cc)   # a named person, in a named place
+                        break
+
+        for pr in place_rows(base, names):
+            cc = pr.get("cc") if isinstance(pr.get("cc"), str) and len(pr["cc"]) == 2 \
+                 else ground.resolve(pr["name"], pr.get("lat"), pr.get("lon"))
+            if not cc:
+                unresolved.append(pr["name"])
+                continue
+            # A COORDINATE IS NOT A FACT, IT IS SOMEBODY ELSE'S GEOCODE. The
+            # Defranceski archive holds «Rookwood, New South Wales, Australia»
+            # at latitude 22.5, which is Cuba, and «Dolo» — a comune in the
+            # Veneto — in Ethiopia. Trusting the number over the words put this
+            # archive in nine countries it has never researched.
+            #
+            # So where the row carries both, they must agree. When they
+            # disagree the row is thrown away rather than adjudicated: this
+            # cannot tell which half is wrong and guessing would be how the
+            # nine countries got there in the first place.
+            by_name = ground.resolve(pr["name"])
+            if by_name and cc and by_name != cc:
+                conflict.append((pr["name"], cc, by_name))
+                continue
+            # «Named outright» means the TEXT says so — «South Africa», «Cape
+            # Colony». A lone coordinate still needs a second place to
+            # corroborate it.
+            # A coordinate that has just been checked against its own name is
+            # evidence again. It was demoted wholesale after Rookwood, which
+            # was the wrong lesson: the cure for a bad geocode is the conflict
+            # check above, not distrusting every good one. Johannesburg at
+            # -26.2 is Johannesburg.
+            if pr.get("lat") is not None \
+                    or _fold(pr["name"]) in ground.cc_names \
+                    or _fold(pr["name"]) in HISTORICAL \
+                    or any(_fold(x.strip()) in ground.cc_names
+                           for x in re.split(r"[,/]", pr["name"])):
+                hard.add(cc)
+            found[cc] = found.get(cc, 0) + 1
+            # WHERE THE ARCHIVE LINKS PEOPLE TO A PLACE, the attribution can be
+            # per surname instead of per archive — «Lerena in South Africa»
+            # rather than «everything in the Lerena archive is in South
+            # Africa». A person slug ends in the surname, which is how these
+            # archives are built.
+            for slug in pr["people"]:
+                if not isinstance(slug, str):
+                    continue
+                tail = slug.rsplit("-", 1)[-1]
+                for n in names:
+                    if _fold(n).replace(" ", "") == tail:
+                        per[n].add(cc)
+                        break
+
+        # ONE LOOSE NAME MATCH IS NOT EVIDENCE. «Vis» is a Croatian island and
+        # also a village in three other countries; a single hit on a short name
+        # put archives in places they have never researched. A country is
+        # derived when two or more places resolve to it, or when one does by
+        # coordinate or by being named outright.
+        # THE FALLBACK LIST IS THE COARSE ANSWER AND IT MUST NOT BE THE NOISY
+        # ONE. Per-surname attribution is exact and is preferred wherever it
+        # exists; this list is only reached by a name the archive never places,
+        # so it should be the ground the archive plainly works on rather than
+        # every country a bad geocode ever pointed at. Two corroborating places
+        # AND either a country named outright or a person placed there by name.
+        derived = sorted(c for c, n in found.items() if n >= 2 and c in hard)
+        # The declared list is a FLOOR, not the answer: an archive may research
+        # a country it never names a place in, and dropping that would be a
+        # different kind of wrong.
+        allcc = sorted(set(derived) | set(ccs))
+        gained = [c for c in derived if c not in ccs]
+        lost = [c for c in ccs if c not in derived]
+
+        out[label] = {"countries": allcc, "declared": ccs, "derived": derived,
+                      "surnames": sorted(names),
+                      "bySurname": {n: sorted(v) for n, v in sorted(per.items()) if v},
+                      "placesResolved": sum(found.values()),
+                      "placesUnresolved": sorted(set(unresolved))[:40],
+                      "placesConflicting": [{"name": n, "byCoord": a, "byName": b}
+                                            for n, a, b in conflict[:40]],
+                      "from": dict(whence.most_common())}
+        report.append((label, len(names), ",".join(allcc), gained, lost,
+                       len(per), len(set(unresolved)), len(conflict)))
+
+    for label, n, ccs, gained, lost, per, unres, conf in report:
         print(f"  {label:14}{n:6} surnames -> {ccs}")
+        if gained:
+            print(f"                 + {','.join(gained)} — read off its own places "
+                  f"and never declared")
+        if lost:
+            print(f"                 declared {','.join(lost)} with no place to "
+                  f"show for it; kept")
+        if per:
+            print(f"                 {per} surnames placed country by country")
+        if unres:
+            print(f"                 {unres} place names this could not resolve")
+        if conf:
+            print(f"                 {conf} places whose coordinate and name "
+                  f"disagree — dropped, not adjudicated")
     for label, why in missing:
         print(f"  {label:14}  FAILED — {why}")
 
@@ -194,7 +511,9 @@ def main():
                     "is about where records are, not about who is in them."),
         "harvested": time.strftime("%Y-%m-%d"),
         "counts": {"archives": len(out),
-                   "surnames": len({n for a in out.values() for n in a["surnames"]})},
+                   "surnames": len({n for a in out.values() for n in a["surnames"]}),
+                   "placedBySurname": sum(len(a.get("bySurname") or {})
+                                          for a in out.values())},
         "archives": out,
     }, open(path, "w"), ensure_ascii=False, indent=1)
     total = len({n for a in out.values() for n in a["surnames"]})

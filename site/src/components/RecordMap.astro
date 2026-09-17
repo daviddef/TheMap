@@ -26,7 +26,7 @@
    Everything else — the find box, the filter pills, that every view is a link
    — is the family Atlas's and is kept deliberately, because a reader who knows
    one of these maps should know all of them. */
-const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wikidataUrl, osmUrl, featureBase, settlementBase, districtBase, countryBase, townlandBase, comuneBase, estoniaBase, base } = Astro.props;
+const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wikidataUrl, osmUrl, featureBase, settlementBase, districtBase, countryBase, townlandBase, comuneBase, estoniaBase, worldArchivesUrl, countryPointsUrl, base } = Astro.props;
 ---
 
 {/* ONE BAR, NOT THREE PANELS. The search box, seven layer switches, the year
@@ -43,10 +43,22 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wi
          aria-label="Find a place or a surname, by any name it has ever had"
          placeholder="Find a place or a surname — Gallignana · Žubrinić · Lerena" />
   <div class="ra-layers" id="ra-layers"></div>
+  {/* A RANGE, NOT A YEAR. «What covers 1880 to 1920» is the question a
+      researcher actually has; «what covers exactly 1904» is a question nobody
+      asks. A single handle also made the map look broken whenever it landed on
+      a recent year, because privacy windows close births for a century.
+      Two overlaid sliders, because the web has no two-handled range input and
+      a pair of them is honest about what it is. */}
   <label class="ra-ylab" id="ra-ylab"
-         title="Keep only the places that can answer for that year — and every panel will say whose archive that year belonged to.">
+         title="Keep only the places that can answer for any year in this range — and every panel will say whose archive those years belonged to.">
     <input type="checkbox" id="ra-yon" />
-    <input type="range" id="ra-year" min="1500" max="2026" value="1863" step="1" disabled />
+    <span class="ra-slider">
+      <span class="ra-track" id="ra-track"></span>
+      <input type="range" id="ra-year" min="1500" max="2026" value="1780" step="1" disabled
+             aria-label="Earliest year" />
+      <input type="range" id="ra-year2" min="1500" max="2026" value="1920" step="1" disabled
+             aria-label="Latest year" />
+    </span>
     <output id="ra-yout" class="mono">any year</output>
   </label>
   <button class="ra-ico" id="ra-info" type="button" aria-expanded="false"
@@ -76,7 +88,7 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wi
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 
-<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, WDA: wikidataUrl, OSMA: osmUrl, FEAT: featureBase, SETT: settlementBase, DIST: districtBase, CTRY: countryBase, TOWN: townlandBase, COMU: comuneBase, ESTO: estoniaBase, BASE: base }}>
+<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, WDA: wikidataUrl, OSMA: osmUrl, FEAT: featureBase, SETT: settlementBase, DIST: districtBase, CTRY: countryBase, TOWN: townlandBase, COMU: comuneBase, ESTO: estoniaBase, WARCH: worldArchivesUrl, CPTS: countryPointsUrl, BASE: base }}>
 window.addEventListener("load", async function () {
   var el = document.getElementById("ra-map");
   if (!el || typeof L === "undefined") return;
@@ -88,6 +100,13 @@ window.addEventListener("load", async function () {
   } catch (e) { el.innerHTML = '<p class="ra-dead">The map data could not be loaded.</p>'; return; }
 
   var PROV = {}; provs.providers.forEach(function (p) { PROV[p.id] = p; });
+  /* National archives and libraries by country, fetched once and kept for the
+     whole session — 40 KB that turns «no sources here» into a list in 164
+     countries. */
+  var warch = {};
+  var warchReady = fetch(WARCH).then(function (r) { return r.json(); })
+              .then(function (d) { warch = d.byCountry || {}; return warch; })
+              .catch(function () { return {}; });
   var CNAME = idx.countries || {};
   var XL = { "đ": "d", "ł": "l", "ø": "o", "ß": "ss", "æ": "ae", "œ": "oe" };
   function fold(s) {
@@ -160,8 +179,17 @@ window.addEventListener("load", async function () {
     }
     return null;
   }
+  /* EVERY ERA THE RANGE TOUCHES. 1880–1920 over Istria is Austria AND Italy,
+     and naming only one of them would hide the handover — which is the single
+     most useful thing this map has to say about that ground. */
+  function erasIn(reg, a, b) {
+    return reg.eras.filter(function (e) { return e.from <= b && e.to >= a; });
+  }
   function paintRegions() {
     regionShapes.forEach(function (rs) {
+      /* The shading takes the era the range OPENS in — a band cannot be two
+         colours, and the first is the one a researcher starts from. The panel
+         names all of them. */
       var e = year && eraAt(rs.reg, year);
       var c = e ? (css.getPropertyValue(regions.regimes[e.regime].var).trim() || "#7C8A91") : "#7C8A91";
       rs.poly.setStyle({ color: c, fillColor: c, fillOpacity: e ? .20 : .07, weight: e ? 1.8 : 1.2 });
@@ -200,9 +228,15 @@ window.addEventListener("load", async function () {
     /* `a` is an INDEX into RANK now, not the word itself — 116 KB of the index
        was eight strings written out 7,391 times. */
     var col = (ACC[RANK[p.a]] || ["#7C8A91"])[0];
+    /* A DOTTED RIM MEANS «NOTHING HERE, BUT THIS COUNTRY HAS AN ARCHIVE». Grey
+       hollow dots across the whole of Africa read as «there is nothing», and
+       what they actually mean is «nothing has reached here YET» — while 32
+       African countries have a named national archive sitting in the panel.
+       The marker could not say that and now does. */
     var m = L.circleMarker([p.y, p.x], !n ? {
       radius: Math.min(3.5 + Math.sqrt(p.b || 1) * 0.5, 8),
-      color: col, weight: 1.4, opacity: .85,
+      color: p.w && !p.b ? "#7C8A91" : col, weight: 1.4, opacity: .85,
+      dashArray: p.w && !p.b ? "2 2" : null,
       fillColor: col, fillOpacity: .12
     } : {
       radius: Math.min(3 + Math.sqrt(n) * 0.9, 13),
@@ -470,21 +504,32 @@ window.addEventListener("load", async function () {
     var reg = d.region && REGION[d.region];
     if (reg) {
       if (year) {
-        var e = eraAt(reg, year);
-        if (e) {
-          h.push('<div class="ra-juris"><div class="lab">In ' + year + ', this was</div>');
-          h.push("<p><b>" + esc(e.polity) + "</b></p>");
-          if (e.filedUnder.length) {
-            h.push('<p class="ra-filed">Records of this period are filed under ' +
-              e.filedUnder.map(function (f) {
-                var pv = PROV[f];
-                return pv ? '<a href="' + esc(pv.url) + '" target="_blank" rel="noopener">' +
-                            esc(pv.name) + "</a>" : esc(f);
-              }).join(" · ") + ".</p>");
-          } else {
-            h.push('<p class="ra-filed">No registers survive for this period anywhere.</p>');
-          }
-          if (e.note) h.push('<p class="ra-note">' + esc(e.note) + "</p>");
+        var es = erasIn(reg, year, year2);
+        if (es.length) {
+          h.push('<div class="ra-juris"><div class="lab">' +
+                 (year === year2 ? "In " + year + ", this was"
+                  : "Between " + year + " and " + year2 + ", this ground changed hands " +
+                    (es.length === 1 ? "not at all" : (es.length - 1) + " time" +
+                     (es.length === 2 ? "" : "s"))) + "</div>");
+          es.forEach(function (e) {
+            h.push("<p><span class=\"y\">" + Math.max(e.from, year) + "\u2013" +
+                   Math.min(e.to, year2) + "</span> <b>" + esc(e.polity) + "</b></p>");
+            if (e.filedUnder.length) {
+              h.push('<p class="ra-filed">Filed under ' +
+                e.filedUnder.map(function (f) {
+                  var pv = PROV[f];
+                  return pv ? '<a href="' + esc(pv.url) + '" target="_blank" rel="noopener">' +
+                              esc(pv.name) + "</a>" : esc(f);
+                }).join(" · ") + ".</p>");
+            } else {
+              h.push('<p class="ra-filed">No registers survive for this period anywhere.</p>');
+            }
+            if (e.note) h.push('<p class="ra-note">' + esc(e.note) + "</p>");
+          });
+          if (es.length > 1)
+            h.push('<p class="ra-note"><b>That handover is the trap.</b> A family that ' +
+                   "never moved has its records in two filing systems, and the second " +
+                   "archive will tell you it holds nothing.</p>");
           h.push("</div>");
         }
       } else {
@@ -520,6 +565,34 @@ window.addEventListener("load", async function () {
        The worldwide twelve — FamilySearch, Ancestry, MyHeritage and the rest —
        are kept out of this list on purpose. They cover everywhere, so they say
        nothing about here, and they would bury the five that do. */
+    /* AND WHERE THERE IS NOTHING CURATED, WHAT THERE IS. 199 countries had no
+       named source at all, so clicking a place in Bolivia answered with
+       FamilySearch — true of everywhere, and therefore a statement about
+       nothing. These are Wikidata's national archives and libraries, fetched
+       once and kept apart from the curated list because rattling a door is not
+       the same as having read what is behind it. */
+    if (d.country && warch[d.country]) {
+      h.push('<div class="at-sec"><div class="lab">National sources, unverified</div>');
+      h.push('<p class="at-sub">From Wikidata, CC0. Nobody here has opened these — ' +
+             "the link answered when it was asked and that is all this map knows " +
+             "about them. They are listed because <b>a country with no named " +
+             "source at all is the worse answer</b>.</p>");
+      h.push('<ul class="at-films">');
+      warch[d.country].slice(0, 6).forEach(function (r) {
+        h.push('<li><a href="' + esc(r.url) + '" target="_blank" rel="noopener">' +
+               esc(r.name) + " &#8599;</a> " +
+               '<span class="ra-who">' +
+               (r.kind === "national-archive" ? "national archive" : "national library") +
+               (r.status && r.status !== "ok"
+                 ? " · " + esc(r.status === "challenged"
+                     ? "behind a bot gate, but alive"
+                     : r.status === "unreachable"
+                       ? "did not answer this checker" : "answered with an error")
+                 : "") + "</span></li>");
+      });
+      h.push("</ul></div>");
+    }
+
     if (d.country) {
       var nat = provs.providers.filter(function (p) {
         return (p.countries || []).indexOf(d.country) > -1;
@@ -570,10 +643,10 @@ window.addEventListener("load", async function () {
     }
 
     var cs = d.collections.slice();
-    if (year) cs = cs.filter(function (c) { return covers(c, year); });
+    if (year) cs = cs.filter(function (c) { return covers(c, year, year2); });
     if (!cs.length) {
       h.push('<p class="at-sub" style="margin-top:16px">' + (year
-        ? "Nothing walked here covers " + year + "."
+        ? "Nothing walked here covers " + (year === year2 ? year : year + "\u2013" + year2) + "."
         : (d.nfs ? "Nobody has walked this place volume by volume. The " + d.nfs +
                    " collection" + (d.nfs === 1 ? "" : "s") + " above " +
                    (d.nfs === 1 ? "is" : "are") + " what reaches it, and " +
@@ -606,16 +679,108 @@ window.addEventListener("load", async function () {
     return h.join("");
   }
 
-  function covers(c, y) {
+  /* A VOLUME ANSWERS FOR A RANGE IF IT OVERLAPS IT AT ALL. A register running
+     1798–1858 is exactly what somebody searching 1840–1870 wants, and a rule
+     that demanded containment either way round would refuse it. */
+  function covers(c, a, b) {
     if (!c.from) return false;
-    return y >= c.from && y <= (c.to || c.from);
+    var to = c.to || c.from;
+    return c.from <= (b === undefined ? a : b) && to >= a;
   }
 
   /* ---- layers ------------------------------------------------------------ */
   /* id, the word on the chip, the sentence behind it, the layer. The short
      word is what fits in a row of seven; the sentence is the tooltip and the
      ⓘ panel, so nothing this used to say has stopped being said. */
+  /* ---- EVERY COUNTRY, so that nowhere answers with nothing ---------------
+     A marker has always meant «a place with volumes», so Libya — which has a
+     FamilySearch research guide, a national archive and a GenWeb project —
+     showed empty ground. A country is a place too, and the coarsest possible
+     answer is enormously better than a blank. */
+  var countryLayer = L.layerGroup(), cpts = [];
+  /* Held as a promise, not just a variable. A visitor types faster than a
+     fetch returns, and «libya» arriving before the country list did would
+     find nothing and say so — which is the bug this layer exists to fix,
+     reintroduced one line lower down. */
+  var cptsReady = fetch(CPTS).then(function (r) { return r.json(); }).then(function (d) {
+    cpts = d.countries || [];
+    cpts.forEach(function (c) {
+      var rich = c.p || c.v || c.c;
+      var m = L.circleMarker([c.y, c.x], {
+        radius: rich ? 7 : 5.5,
+        color: "var(--accent)", weight: rich ? 1.8 : 1.2,
+        opacity: rich ? .9 : .55,
+        fillColor: "var(--accent)", fillOpacity: rich ? .18 : .07,
+        dashArray: rich ? null : "2 3"
+      });
+      m.bindTooltip(c.n, { sticky: true });
+      m.on("click", function () { openCountry(c); });
+      m.addTo(countryLayer);
+    });
+    syncLayers();
+    return cpts;
+  }).catch(function () { return []; });
+
+  function openCountry(c) {
+    empty.hidden = true; panel.hidden = false;
+    var h = ['<div class="at-h"><h3>' + esc(c.n) + "</h3>" +
+             '<span class="at-n">the whole country</span></div>'];
+    h.push('<p class="at-sub">' +
+           (c.p ? c.p.toLocaleString() + " place" + (c.p === 1 ? "" : "s") + " drawn, " +
+                  c.v.toLocaleString() + " volume" + (c.v === 1 ? "" : "s") + " walked"
+                : "<b>No place in this country has been walked.</b>") +
+           (c.c ? " · " + c.c + " collection" + (c.c === 1 ? "" : "s") + " cover it" : "") +
+           "</p>");
+
+    if (c.fs) {
+      h.push('<div class="at-sec"><div class="lab">Where to start</div>');
+      h.push('<ul class="at-films"><li><a href="https://www.familysearch.org/en/wiki/' +
+             esc(c.fs) + '_Genealogy" target="_blank" rel="noopener">FamilySearch ' +
+             "Research Wiki — " + esc(c.n) + " &#8599;</a> " +
+             '<span class="ra-who">a research guide FamilySearch keeps for every ' +
+             "country: what records exist, from when, and who holds them</span></li></ul>");
+      h.push("</div>");
+    }
+    if (warch[c.cc]) {
+      h.push('<div class="at-sec"><div class="lab">National sources, unverified</div>');
+      h.push('<ul class="at-films">');
+      warch[c.cc].slice(0, 6).forEach(function (r) {
+        h.push('<li><a href="' + esc(r.url) + '" target="_blank" rel="noopener">' +
+               esc(r.name) + " &#8599;</a> " + '<span class="ra-who">' +
+               (r.kind === "national-archive" ? "national archive" : "national library") +
+               "</span></li>");
+      });
+      h.push("</ul></div>");
+    }
+    var nat = provs.providers.filter(function (p) {
+      return (p.countries || []).indexOf(c.cc) > -1;
+    });
+    if (nat.length) {
+      h.push('<div class="at-sec"><div class="lab">Checked sources for ' +
+             esc(c.n) + "</div><ul class=\"at-films\">");
+      nat.slice(0, 8).forEach(function (p) {
+        h.push('<li><a href="' + esc(p.url) + '" target="_blank" rel="noopener">' +
+               esc(p.name) + " &#8599;</a> " + '<span class="ra-who">' +
+               esc((ACC[p.access] || [0, p.access])[1]) + "</span></li>");
+      });
+      h.push("</ul></div>");
+    }
+    if (!c.fs && !warch[c.cc] && !nat.length) {
+      h.push('<p class="at-what"><b>This map holds nothing for ' + esc(c.n) +
+             " at all.</b> Not a collection, not an archive, not a research guide. " +
+             "<b>That is a gap in this map, not a gap in the record.</b></p>");
+    }
+    h.push('<p class="at-go"><a href="' + BASE + "country/" + c.cc.toLowerCase() +
+           '/">Everything this map holds for ' + esc(c.n) + " &rarr;</a></p>");
+    if (!c.p)
+      h.push('<p class="ra-note">No place inside ' + esc(c.n) + " is drawn on this " +
+             "map yet, so there is nothing here to click. Switch on <b>Countries</b> " +
+             "above and every country carries a marker like this one.</p>");
+    panel.innerHTML = h.join("");
+  }
+
   var LAYERS = [
+    ["countries", "Countries", "every country on earth · the coarsest answer, and better than a blank", countryLayer],
     ["shelf", "Shelf", idx.places.length.toLocaleString() + " places · every volume that covers them", shelfLayer],
     ["archives", "Archives", archives.length + " institutions · where the paper actually is", archiveLayer],
     ["jurisdiction", "Jurisdiction", regions.regions.length + " record regions · whose archive this ground was", regionLayer],
@@ -625,7 +790,8 @@ window.addEventListener("load", async function () {
     ["libraries", "Libraries", "loading", featLayers.libraries]
   ];
   var on = {};
-  (Q.get("layers") !== null ? Q.get("layers").split(",").filter(Boolean) : ["shelf"])
+  (Q.get("layers") !== null ? Q.get("layers").split(",").filter(Boolean)
+                           : ["shelf", "countries"])
     .forEach(function (k) { on[k] = true; });
   if (!Object.keys(on).length) on.shelf = true;
 
@@ -669,7 +835,11 @@ window.addEventListener("load", async function () {
     '<span class="at-cat at-hollow-key" title="A hollow dot means no volumes are ' +
     'recorded at that place. Any colour it has is borrowed from a collection ' +
     'catalogued under it, or under the district it sits in.">' +
-    "<i></i>Hollow&nbsp;= unwalked</span>";
+    "<i></i>Hollow&nbsp;= unwalked</span>" +
+    '<span class="at-cat at-hollow-key at-natl-key" title="Nothing in this atlas ' +
+    'reaches that place, but its country has a named national archive or ' +
+    'library — click the place and the panel lists it.">' +
+    "<i></i>Dotted&nbsp;= country has an archive</span>";
   document.getElementById("ra-cats").addEventListener("click", function (ev) {
     var b = ev.target.closest(".at-cat"); if (!b) return;
     var c = b.getAttribute("data-cat");
@@ -680,36 +850,71 @@ window.addEventListener("load", async function () {
   });
 
   /* ---- the year ---------------------------------------------------------- */
-  var year = null;
+  var year = null, year2 = null;
   var yon = document.getElementById("ra-yon"), yin = document.getElementById("ra-year"),
       yout = document.getElementById("ra-yout");
+  var yin2 = document.getElementById("ra-year2");
+  /* «years=1780,1920» is the new state. A bare «year=1863» from an older link
+     still works and becomes a range of one, because a link somebody sent
+     somebody else should not stop opening. */
+  var qr = (Q.get("years") || "").split(",").map(function (x) { return parseInt(x, 10); });
   var qy = parseInt(Q.get("year"), 10);
-  if (qy >= 1500 && qy <= 2026) { year = qy; yon.checked = true; yin.value = qy; }
+  if (qr.length === 2 && qr[0] >= 1500 && qr[1] <= 2026 && qr[0] <= qr[1]) {
+    year = qr[0]; year2 = qr[1]; yon.checked = true;
+    yin.value = year; yin2.value = year2;
+  } else if (qy >= 1500 && qy <= 2026) {
+    year = year2 = qy; yon.checked = true; yin.value = qy; yin2.value = qy;
+  }
+  function paintTrack() {
+    var lo = Math.min(+yin.value, +yin2.value), hi = Math.max(+yin.value, +yin2.value);
+    var a = (lo - 1500) / (2026 - 1500) * 100, b = (hi - 1500) / (2026 - 1500) * 100;
+    var t = document.getElementById("ra-track");
+    t.style.left = a + "%";
+    t.style.width = Math.max(b - a, 0.5) + "%";
+    t.style.opacity = year ? "1" : ".25";
+  }
   function yearUI() {
-    yin.disabled = !year;
-    yout.textContent = year ? String(year) : "any year";
+    yin.disabled = yin2.disabled = !year;
+    yout.textContent = year
+      ? (year === year2 ? String(year) : year + "\u2013" + year2)
+      : "any year";
+    paintTrack();
     /* The hint was a whole line of static prose under the slider. It is the
        control's own tooltip now, which is where a sentence that only matters
        once belongs. */
     document.getElementById("ra-ylab").title = year
-      ? "Showing only what can answer for " + year + ". Every panel now says whose archive that year belonged to."
-      : "Turn this on and the map keeps only the places that can answer for that year — and every panel says whose archive that year belonged to.";
-    setQ("year", year || "");
+      ? "Showing only what can answer for " + (year === year2 ? year : year + "–" + year2) +
+        ". Every panel now says whose archive those years belonged to."
+      : "Turn this on and the map keeps only the places that can answer for a range of years — and every panel says whose archive those years belonged to.";
+    setQ("years", year ? year + "," + year2 : "");
+    setQ("year", "");
     paintRegions();
     apply();
     var at = Q.get("at");
     if (at && cache[at]) { panel.innerHTML = render(cache[at]); }
   }
   yon.addEventListener("change", function () {
-    year = yon.checked ? parseInt(yin.value, 10) : null;
+    readRange();
     yearUI();
   });
-  yin.addEventListener("input", function () {
+  /* Either handle may be dragged past the other; the range is whichever way
+     round they end up. Forbidding it would mean a handle that sticks, which
+     is the more annoying of the two behaviours. */
+  function readRange() {
+    if (!yon.checked) { year = year2 = null; return; }
+    var a = parseInt(yin.value, 10), b = parseInt(yin2.value, 10);
+    year = Math.min(a, b); year2 = Math.max(a, b);
+  }
+
+  [yin, yin2].forEach(function (el) {
+  el.addEventListener("input", function () {
     if (!yon.checked) return;
-    year = parseInt(yin.value, 10);
-    yout.textContent = String(year);
+    readRange();
+    yout.textContent = year === year2 ? String(year) : year + "\u2013" + year2;
+    paintTrack();
     clearTimeout(yin._t);
     yin._t = setTimeout(yearUI, 120);
+  });
   });
   /* «Take me there.» A townland, a district or an undrawn settlement is a real
      coordinate this map knows and could not previously be asked to show. */
@@ -729,6 +934,12 @@ window.addEventListener("load", async function () {
   });
 
   document.addEventListener("click", function (ev) {
+    var cy = ev.target.closest && ev.target.closest(".ra-clearyear");
+    if (cy) {
+      ev.preventDefault();
+      yon.checked = false; year = 0; yearUI();
+      return;
+    }
     if (!ev.target.classList || !ev.target.classList.contains("ra-setyear")) return;
     ev.preventDefault();
     yon.checked = true; year = parseInt(yin.value, 10); yearUI();
@@ -748,7 +959,7 @@ window.addEventListener("load", async function () {
     /* `q` now holds only the forms that are NOT the place's own name, so the
        name itself is folded here rather than shipped 2,128 times. */
     if (t && fold(p.n).indexOf(t) < 0 && !(p.q && p.q.indexOf(t) > -1)) return false;
-    if (year && p.s && (year < p.s[0] || year > p.s[1])) return false;
+    if (year && p.s && (p.s[0] > year2 || p.s[1] < year)) return false;
     return true;
   }
   function apply() {
@@ -765,9 +976,20 @@ window.addEventListener("load", async function () {
       if (ok) { if (!archiveLayer.hasLayer(m)) m.addTo(archiveLayer); aShown++; }
       else if (archiveLayer.hasLayer(m)) archiveLayer.removeLayer(m);
     });
-    count.textContent = shown + " of " + markers.length + " places shown" +
-      (year ? ", able to answer for " + year : "") +
-      (on.archives ? ", and " + aShown + " of " + archives.length + " archives" : "");
+    /* A YEAR THAT EMPTIES THE MAP SHOULD SAY SO LOUDLY. Set to 2004 this hides
+       everything, because almost nothing is open for 2004 — privacy windows
+       close births for a century and deaths for fifty years. That is a correct
+       answer and it looks exactly like a broken map, which is why the count
+       line now says which it is and offers the way out. */
+    count.innerHTML = esc(shown + " of " + markers.length + " places shown") +
+      (year ? esc(", able to answer for " + year) : "") +
+      (on.archives ? esc(", and " + aShown + " of " + archives.length + " archives") : "");
+    if (year && !shown) {
+      count.innerHTML = '<b>Nothing on this map can answer for ' + (year === year2 ? year : year + '\u2013' + year2) + '.</b> ' +
+        "Records close for a lifetime — a century for births, fifty years for " +
+        'deaths — so a recent year empties it. <a href="#" class="ra-clearyear">' +
+        "Clear the year</a> to see all " + markers.length + " places.";
+    }
 
     if (!t) {
       /* Clearing the box clears the map with it. Anything drawn to answer a
@@ -783,6 +1005,44 @@ window.addEventListener("load", async function () {
       map.fitBounds(L.latLngBounds(frame.map(function (m) { return m.getLatLng(); })),
                     { padding: [40, 40], maxZoom: 11 });
       if (vis.length === 1) { open(vis[0]._p); return; }
+    }
+
+    /* «NO PLACES OF THAT NAME» WHEN THE YEAR IS WHAT HID IT. David searched
+       Crikvenica and was told this map had nothing, while his own archive
+       shows six volumes for it. It has all six. The year slider was on 2004
+       and Crikvenica's registers run 1798 to 1943, so the filter removed the
+       marker — correctly — and the search then reported the place as absent,
+       which is a different and untrue thing.
+       A filter hiding something is not the same as the something not being
+       there, and this panel is the only place that can say which. */
+    if (year) {
+      var hidden = markers.filter(function (m) {
+        var p = m._p;
+        if (shelfLayer.hasLayer(m)) return false;
+        var q = fold(p.n) + " " + (p.q || "");
+        return q.indexOf(t) > -1;
+      });
+      if (hidden.length) {
+        var one = hidden[0]._p;
+        empty.hidden = true; panel.hidden = false;
+        var hh = ['<div class="at-h"><h3>' + esc(one.n) + "</h3></div>"];
+        hh.push('<div class="ra-juris" style="border-left-color:#E8792B">' +
+                '<div class="lab">Hidden by the year, not missing</div>');
+        hh.push("<p><b>" + esc(one.n) + "</b> is on this map with <b>" +
+                (one.c || 0) + " volume" + (one.c === 1 ? "" : "s") + "</b>" +
+                (one.s ? ", covering " + one.s[0] + "–" + one.s[1] : "") +
+                " — and <b>nothing here covers " + (year === year2 ? year : year + "\u2013" + year2) + "</b>, so the year " +
+                "filter has taken it off the map.</p>");
+        hh.push('<p><a href="#" class="ra-clearyear"><b>Clear the year</b></a>' +
+                " and it comes back" +
+                (hidden.length > 1 ? ", with " + (hidden.length - 1) + " other " +
+                 (hidden.length === 2 ? "place" : "places") + " this is hiding" : "") +
+                '. Or go straight to <a href="' + BASE + "place/" + esc(one.i) +
+                '/">everything recorded at ' + esc(one.n) + "</a>.</p>");
+        hh.push("</div>");
+        panel.innerHTML = hh.join("");
+        return;
+      }
     }
     /* THE HONEST EMPTY RESULT. Somebody typing "Ireland" has asked a real
        question, and a blank map answers it with a falsehood. There is no Irish
@@ -1170,6 +1430,31 @@ window.addEventListener("load", async function () {
 
   async function elsewhere(term) {
     var mine = ++searchTok;
+    /* TYPING A COUNTRY'S NAME SHOULD OPEN THE COUNTRY. David typed «libya» and
+       got «Qaṣr Lībiyā», a village whose name happens to contain it, and
+       nothing at all about the country — while the country panel, with its
+       research guide and its national archive, was one marker click away and
+       unreachable by the one thing everybody does first, which is type.
+       This runs before everything else: an exact country name is not an
+       ambiguous query. */
+    var fterm = fold(term);
+    var hitCC = null;
+    var list = await cptsReady;
+    await warchReady;
+    if (mine !== searchTok) return;
+    for (var ci = 0; ci < list.length; ci++) {
+      var cp = list[ci];
+      if (fold(cp.n) === fterm || cp.cc.toLowerCase() === fterm) { hitCC = cp; break; }
+    }
+    if (hitCC) {
+      if (gmark) { map.removeLayer(gmark); gmark = null; }
+      ctryLayer.clearLayers();
+      openCountry(hitCC);
+      showCountries([{ cc: hitCC.cc, how: "register" }], function () {
+        return mine !== searchTok;
+      });
+      return;
+    }
     var stale = function () { return mine !== searchTok; };
     /* EVERY SEARCH STARTS FROM A CLEAN MAP. The gazetteer marker used to be
        removed only when a NEW gazetteer hit replaced it, so typing on past a
@@ -1314,11 +1599,12 @@ window.addEventListener("load", async function () {
       var eraRows = [];
       regions.regions.forEach(function (rg) {
         if (!(rg.countries || []).some(function (k) { return ccLit[k]; })) return;
-        var e = eraAt(rg, year);
+        var e = eraAt(rg, year) || erasIn(rg, year, year2)[0];
         if (e) eraRows.push([rg, e]);
       });
       if (eraRows.length) {
-        h.push('<div class="ra-juris"><div class="lab">In ' + year +
+        h.push('<div class="ra-juris"><div class="lab">In ' +
+               (year === year2 ? year : year + "\u2013" + year2) +
                ", the ground these names sit on</div>");
         eraRows.slice(0, 8).forEach(function (pair) {
           var rg = pair[0], e = pair[1];
@@ -1475,7 +1761,7 @@ window.addEventListener("load", async function () {
     this.setAttribute("aria-expanded", String(open));
     if (!open) { helpBox.hidden = true; return; }
     var h = ['<div class="ra-help-in">'];
-    h.push("<p><b>Search</b> finds a place by any name it has ever had — " +
+    h.push("<p><b>Search</b> finds a place by any name it has ever had \u2014 " +
            "Gallignana finds Gračišće — and finds a surname, and says which " +
            "records it is written in.</p>");
     h.push("<p><b>The layers</b></p><ul>");
@@ -1484,9 +1770,12 @@ window.addEventListener("load", async function () {
       h.push("<li>" + esc((el && el.title) || (l[1] + " — " + l[2])) + "</li>");
     });
     h.push("</ul>");
-    h.push("<p><b>The year</b> — turn it on and the map keeps only the places " +
-           "that can answer for that year, and every panel says whose archive " +
-           "that year belonged to. That is the thing this map is for.</p>");
+    h.push("<p><b>The years</b> — two handles, a range. Turn it on and the map " +
+           "keeps only the places that can answer for any year between them, and " +
+           "every panel names each polity that held the ground in that span. " +
+           "A range that crosses a handover — Istria in 1880–1920 is Austria and " +
+           "then Italy — is where records get lost, and that is the thing this " +
+           "map is for.</p>");
     h.push("<p><b>The colours</b> say what it costs to look:</p><ul>");
     RANK.forEach(function (a) {
       h.push('<li><i class="at-dot" style="background:' + ACC[a][0] + '"></i>' +
@@ -1571,8 +1860,34 @@ window.addEventListener("load", async function () {
              background: var(--panel); font-family: var(--sans); font-size: 12px;
              white-space: nowrap; flex: 0 1 220px; }
   .ra-ylab input { accent-color: var(--accent); }
-  #ra-year { flex: 1 1 90px; min-width: 70px; accent-color: var(--accent); }
-  #ra-year:disabled { opacity: .4; }
+  /* TWO SLIDERS STACKED, because the web has no two-handled range input. The
+     lower one is inert except for its thumb — pointer-events are off on the
+     track and back on for the thumb — so each handle stays grabbable wherever
+     the other one is. */
+  .ra-slider { position: relative; flex: 1 1 120px; min-width: 96px; height: 18px;
+               display: block; }
+  .ra-slider input[type=range] {
+    position: absolute; left: 0; top: 0; width: 100%; margin: 0; height: 18px;
+    background: none; pointer-events: none; -webkit-appearance: none; appearance: none;
+  }
+  .ra-slider input[type=range]::-webkit-slider-thumb {
+    pointer-events: auto; -webkit-appearance: none; appearance: none;
+    width: 13px; height: 13px; border-radius: 50%; background: var(--panel);
+    border: 2px solid var(--accent); cursor: grab; margin-top: -5px;
+  }
+  .ra-slider input[type=range]::-moz-range-thumb {
+    pointer-events: auto; width: 13px; height: 13px; border-radius: 50%;
+    background: var(--panel); border: 2px solid var(--accent); cursor: grab;
+  }
+  .ra-slider input[type=range]::-webkit-slider-runnable-track {
+    height: 3px; background: var(--rule); border-radius: 2px; }
+  .ra-slider input[type=range]::-moz-range-track {
+    height: 3px; background: var(--rule); border-radius: 2px; }
+  .ra-slider input[type=range]:disabled::-webkit-slider-thumb { opacity: .35; }
+  .ra-slider input[type=range]:disabled::-moz-range-thumb { opacity: .35; }
+  .ra-track { position: absolute; top: 7px; height: 3px; background: var(--accent);
+              border-radius: 2px; pointer-events: none; }
+  #ra-yout { white-space: nowrap; }
   #ra-yout { font-size: 15px; font-weight: 500; color: var(--accent); min-width: 5ch; }
 
   .at-wrap { display: grid; grid-template-columns: 1fr 360px; gap: 18px; margin-top: 12px; }
@@ -1587,6 +1902,7 @@ window.addEventListener("load", async function () {
   :global(.at-hollow-key) { cursor: default; opacity: .75; }
   :global(.at-hollow-key i) { background: transparent !important;
     border: 1.5px solid var(--ink-3); }
+  :global(.at-natl-key i) { border-style: dotted !important; }
 
   :global(.at-h) { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
   :global(.at-h h3) { font-family: var(--serif); font-size: 22px; margin: 0; line-height: 1.25; }

@@ -17,15 +17,20 @@ const archiveCountries = new Set(archives.map(p => p.at.place.split(", ").pop())
   title="Record Atlas"
   dek="Every place your people came from, and who holds the paper.">
 
-  <div class="pagehead">
+  {/* TIGHTER THAN THE PROSE PAGES, BECAUSE THIS ONE IS A TOOL. The shared
+      .pagehead gives every page 56px of air above the title and holds the
+      standfirst to a 76ch measure — right for something you read, wrong for
+      something you use, where it pushed the map below the fold and left a
+      third of a wide screen blank. .ra-lede takes the air back and lets the
+      line run the full width. The wording is two sentences now; the old five
+      spent three of them clearing their throat before the point. */}
+  <div class="pagehead ra-lede">
     <div class="lab">{places} places · {volumes} record volumes · {archives.length} archives in {archiveCountries} countries · {regions.regions.length} record regions</div>
     <h1>Where the records are</h1>
     <p class="dek">
-      Genealogy is not short of websites. It is short of an answer to one question:
-      <em>my people came from here — who holds the paper, and can I see it tonight?</em>
-      This map answers that geographically. Click a place and it lists every collection
-      that covers it, coloured by what it actually costs to look. Set a year and it also
-      tells you whose empire that ground belonged to, and therefore whose archive to write to.
+      Click the place your people came from: every collection that covers it,
+      coloured by <em>what it actually costs to look</em>. Set a year and it also names
+      whose empire held that ground — and therefore whose archive to write to.
     </p>
   </div>
 

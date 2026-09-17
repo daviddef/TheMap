@@ -81,3 +81,49 @@ way the access and evidence tiers already do.
 Catholic *or* Orthodox specifically — different parishes, different surviving
 books, often different archives. «Church» as one bucket answers a question
 nobody has. The confession is already on every Croatian volume as `conf`.
+
+## Croatia's surnames — the sharpest gap, and David wants it tried again
+
+1,165 Croatian places, 6,528 volumes, the deepest ground this map has, and not
+one surname frequency. Every other measure has Croatia first and this one has
+it absent.
+
+Tried and failed, 16 and 17 September:
+
+    podaci.dzs.hr   CKAN package_search «prezimena» — no parseable response
+    podaci.dzs.hr   CKAN /api/3/action — 404
+    opendata.dzs.hr — no answer at all
+    data.gov.hr     CKAN package_search — ANSWERS 200 but not JSON
+
+**Start from that last line.** data.gov.hr is the national portal and it is
+alive; it simply does not serve the CKAN path used here. Find its real API
+before trying anything else — do not repeat the three URLs above.
+
+Other doors not yet knocked on:
+
+- **DZS census tables.** The 2011 and 2021 censuses are published through
+  PxWeb. Surnames are usually a separate vital-statistics series rather than a
+  census table, but the PxWeb catalogue has not actually been listed and read
+  the way Slovenia's was — and Slovenia's only turned up because somebody read
+  4,836 table names instead of searching for the word «surname». That is the
+  same move, unattempted for Croatia.
+- **Ask.** The Meertens request in `requests/` is the template. DZS has a
+  statistics enquiry service; a written request naming the use and the licence
+  is the polite route and has not been sent.
+
+## A habit to not repeat
+
+Seven waiter loops accumulated over seven hours on 17 September, one running
+the whole time. Each was `until grep -q "Complete!" log; do sleep; done`
+started ALONGSIDE a build — so when the build was killed to start another, the
+log never got its "Complete!" and the watcher spun forever, eating CPU next to
+the builds it was no longer watching.
+
+Start the wait and the build as ONE command, so killing one kills the other:
+
+    npm run build > log 2>&1 && <verify> && <push>
+
+not
+
+    npm run build > log 2>&1 &
+    until grep -q Complete log; do sleep; done   # orphaned the moment the build dies

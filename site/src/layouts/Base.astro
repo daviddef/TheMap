@@ -51,6 +51,13 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
     coordinates, that /archive/dapa/ is an ARCHIVE, and that the whole thing is
     a dataset with a licence. */}
 {jsonld && <script type="application/ld+json" set:html={JSON.stringify(jsonld)} />}
+{/* The house mark. Every sibling archive has one and this had none, so a tab
+    for Record Atlas sat among them showing a browser's grey placeholder. SVG
+    first because it stays sharp at every size a tab strip, a bookmark bar or a
+    phone home screen asks for; the OG cards already cover the social preview. */}
+<link rel="icon" href={u("/favicon.svg")} type="image/svg+xml" />
+<link rel="apple-touch-icon" href={u("/favicon.svg")} />
+<meta name="theme-color" content="#1F5C6B" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Libre+Franklin:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" />
@@ -104,7 +111,14 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
              data-full-width-responsive="true"></ins>
         <script async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${site.ads.client}`}
                 crossorigin="anonymous"></script>
-        <script is:inline set:html="(adsbygoogle = window.adsbygoogle || []).push({});" />
+        {/* BRACES IN A QUOTED ASTRO ATTRIBUTE ARE AN EXPRESSION, NOT TEXT.
+            Written as set:html="...push({});" Astro read the {} as an
+            interpolation, mis-parsed the rest of this file, and silently
+            dropped the <style is:global> block at the bottom — so every nav
+            rule vanished and the top menu ran together as one word. The value
+            has to be an expression containing a string, not a string
+            containing braces. */}
+        <script is:inline set:html={"(adsbygoogle = window.adsbygoogle || []).push({});"} />
       </div>
     )}
     <p class="foot-note">

@@ -44,6 +44,17 @@ def get(url):
 PROBES = ["Defranceski", "Lerena", "Blažević", "Booyzen", "Mazza", "D'Arcy"]
 
 
+def shard_key(form):
+    """First three alphanumerics anywhere in the string — see build.py."""
+    k = ""
+    for ch in form:
+        if ch.isalnum():
+            k += ch
+            if len(k) == 3:
+                break
+    return k if len(k) == 3 else ""
+
+
 def fold(s):
     """Accents off, separators KEPT — the same fold the dataset itself keys by.
 
@@ -94,7 +105,13 @@ def main():
 
     for name in PROBES:
         f = fold(name)
-        key = "".join(c for c in f[:3] if c.isalnum())
+        # THE SAME RULE THE BUILD AND THE CLIENT USE. This script found the
+        # shard-key bug and then turned out to be carrying its own copy of it:
+        # «d'arcy»[:3] is «d'a», which filters to «da», which is not a shard.
+        # It fetched a file that does not exist, got nothing, and reported a
+        # name as missing from a live site that was serving it. Three copies of
+        # one rule, and fixing two of them is not fixing it.
+        key = shard_key(f)
         shard = get(f"{base}/s/{key}.json") or []
         # Prefer the record whose name folds exactly; fall back to one that
         # matches once separators are ignored, so «D'Arcy» still finds itself

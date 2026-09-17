@@ -114,8 +114,14 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
         {/* BRACES IN A QUOTED ASTRO ATTRIBUTE ARE AN EXPRESSION, NOT TEXT.
             Written as set:html="...push({});" Astro read the {} as an
             interpolation, mis-parsed the rest of this file, and silently
-            dropped the <style is:global> block at the bottom — so every nav
-            rule vanished and the top menu ran together as one word. The value
+            dropped the global style block at the bottom — so every nav rule
+            vanished and the top menu ran together as one word.
+
+            AND THEN THIS COMMENT DID IT AGAIN. Written with the literal tag
+            name in angle brackets, Astro opened a style element HERE and
+            swallowed everything down to the real closing tag sixty lines
+            below. A comment explaining a parser bug, causing the same parser
+            bug. Do not write tag syntax in these comments. The value
             has to be an expression containing a string, not a string
             containing braces. */}
         <script is:inline set:html={"(adsbygoogle = window.adsbygoogle || []).push({});"} />

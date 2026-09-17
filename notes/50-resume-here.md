@@ -127,3 +127,39 @@ not
 
     npm run build > log 2>&1 &
     until grep -q Complete log; do sleep; done   # orphaned the moment the build dies
+
+## BROKEN AND UNDIAGNOSED — start here on Sunday
+
+**The global style block in `site/src/layouts/Base.astro` is not reaching the
+built CSS.** `grep -c topnav site/dist/_astro/*.css` returns 0. Every rule in
+that block is missing live: the nav runs together as one word, and `.adslot`
+has no height, which is likely why no ad appears even though the unit and the
+consent message are both live.
+
+TWO THEORIES TRIED, BOTH WRONG:
+
+1. `set:html="...push({});"` — braces in a quoted Astro attribute are parsed as
+   an expression. Fixed to `set:html={"..."}`. Did not restore the CSS.
+2. The comment above it contained literal tag syntax in angle brackets, which
+   I thought opened a style element inside the comment. Reworded. Also did not
+   restore the CSS.
+
+So the cause is still unknown. **Do not guess a third time — bisect.** Revert
+Base.astro to the last commit where the nav was intact (before the favicon,
+the ads block and the archives-osm import went in), confirm the rules return,
+then re-apply one change at a time.
+
+And then add the gate: assert that rules the layout declares appear in the
+built CSS. Six gates exist and none of them looks at this — the build
+succeeded, the data was sound, every import resolved, every inline script
+parsed, and the site shipped with no navigation styling at all.
+
+## Also asked for, not yet done
+
+- **Collections on a country page should group by region**, not run
+  regional-first then by record count. South Africa's 32 collections should sit
+  under Cape, Transvaal, Natal, Free State, then the national indexes.
+- **The places grid reads column-major**, so scanning across a row looks
+  unsorted. It is alphabetical down each column. Make it read left to right.
+- **Escape from full screen** works (Esc, or the button again) but nothing on
+  screen says so. A one-line hint while full screen is on.

@@ -234,6 +234,17 @@ def main():
     except FileNotFoundError:
         wa_cc = set()
 
+    # ---- the volumes themselves, per place --------------------------------
+    # The level below «a collection covers this place»: which book, for which
+    # years, and the link that opens its images. Croatia only, because that is
+    # the only walk that exists — FamilySearch will not serve a script and this
+    # one was done in a browser.
+    try:
+        fsv = json.load(open("data/fs-volumes.json"))
+        vol_by_place = fsv["byPlace"]
+    except FileNotFoundError:
+        fsv, vol_by_place = None, {}
+
     wa_by_cc = {}
     try:
         for _r in json.load(open("data/world-archives.json"))["archives"]:
@@ -329,6 +340,17 @@ def main():
         index.append(row)
 
         detail = dict(p)
+        # Volume-level detail rides in the per-place file, never the index:
+        # 4,903 volumes would be a megabyte on every first paint to answer a
+        # question nobody has asked until they click.
+        # The volumes ride in the DETAIL file only. A count in the index was
+        # the obvious next thought and nothing read it — which is exactly how
+        # `r` and `k` came to sit in 7,391 rows costing 22 KB of first paint to
+        # answer nobody. A field the map does not use is not a small cost, it
+        # is a pure one.
+        _v = vol_by_place.get(p["id"])
+        if _v:
+            detail["volumes"] = _v
         if span:
             detail["span"] = span
         if near_ch:
@@ -854,6 +876,9 @@ def main():
     if surn["surnames"]:
         print(f"surnames.json   {sz('surnames.json')/1024:8.1f} KB  "
               f"surnames.csv {sz('surnames.csv')/1024:.0f} KB — the shareable dataset")
+    if vol_by_place:
+        print(f"fs-volumes        {sum(len(v) for v in vol_by_place.values())} volumes "
+              f"across {len(vol_by_place)} places — the book, the years, the link")
     if n_wa:
         print(f"world-archives    {sz('world-archives.json')/1024:8.1f} KB  {n_wa} "
               f"national archives and libraries across {n_wacc} countries — "

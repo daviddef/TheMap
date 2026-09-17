@@ -372,6 +372,13 @@ def main():
                             # surname list is not the place to discover that.
                             if "*" in n or "," in n or len(n.split()) > 4:
                                 continue
+                            # A placeholder is not a name. «Surname not
+                            # indexed» appears 429 times in one archive and
+                            # would otherwise be its third commonest surname.
+                            if _fold(n) in ("surname not indexed", "unknown",
+                                            "not known", "no surname", "n/a",
+                                            "unnamed", "illegible"):
+                                continue
                             if len(n) < 2 or len(n) > 60:
                                 continue
                             names[n] += 1
@@ -467,8 +474,14 @@ def main():
         gained = [c for c in derived if c not in ccs]
         lost = [c for c in ccs if c not in derived]
 
+        # HOW OFTEN, NOT MERELY WHETHER. A surname mentioned once in an
+        # archive is not a surname that archive researches, and lending it the
+        # archive's whole geography is how «D'Arcy» came to be attested in
+        # Cuba, Paraguay and Zimbabwe — the Defranceschi archive names it in
+        # passing and it inherited all twenty-nine countries.
         out[label] = {"countries": allcc, "declared": ccs, "derived": derived,
                       "surnames": sorted(names),
+                      "mentions": {n: c for n, c in names.most_common() if c > 1},
                       "bySurname": {n: sorted(v) for n, v in sorted(per.items()) if v},
                       "placesResolved": sum(found.values()),
                       "placesUnresolved": sorted(set(unresolved))[:40],

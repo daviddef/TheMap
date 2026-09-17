@@ -31,6 +31,13 @@ const PROV = Object.fromEntries(provs.providers.map((p) => [p.id, p]));
    sources were invisible on all 2,130 Irish places. Ranked archive-first, then
    by how open it is. The worldwide dozen are excluded deliberately — covering
    everywhere is not a fact about here. */
+const VOLKINDS = ["Births", "Marriages", "Deaths", "Church Census",
+                  "Confirmations", "Index", "Other"];
+let volumes = [];
+try {
+  const fv = (await import("../../../../data/fs-volumes.json")).default;
+  volumes = (fv.byPlace || {})[place.id] || [];
+} catch (e) { volumes = []; }
 const national = sourcesFor(place.country);
 /* Wikidata's national archive and library, where this atlas has nothing
    curated for the country. Kept apart from `national` above because those
@@ -208,6 +215,33 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
           </li>
         ))}
       </ul>
+    </section>
+  )}
+
+  {volumes.length > 0 && (
+    <section style="margin-top:38px">
+      <h2>{volumes.length} volumes catalogued here</h2>
+      <p class="cap">The level below «a collection covers this place»: which book, for which
+      years, and the link that opens its images. From FamilySearch's own catalogue.
+      <b>Nobody here has opened any of them.</b></p>
+      {VOLKINDS.map((k) => {
+        const rows = volumes.filter((v) => (v.kinds && v.kinds.length ? v.kinds : ["Other"]).includes(k));
+        return rows.length > 0 && (
+          <div style="margin-top:16px">
+            <div class="lab">{k} — {rows.length}</div>
+            <ul class="vols">
+              {rows.map((v) => (
+                <li>
+                  {v.url ? <a href={v.url} target="_blank" rel="noopener">{v.t} ↗</a> : <b>{v.t}</b>}
+                  {v.from && <span class="y">{v.from}–{v.to}</span>}
+                  {v.conf && <span class="who">{v.conf}</span>}
+                  {v.film && <span class="who">film {v.film}</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
     </section>
   )}
 

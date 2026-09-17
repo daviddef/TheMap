@@ -238,6 +238,18 @@ def main():
         # because five Lerenas are recorded at Cape Town, not because the
         # archive as a whole touches South Africa.
         by_name = a.get("bySurname") or {}
+        mentions = a.get("mentions") or {}
+        # A PASSING MENTION IS NOT RESEARCH. The Defranceschi archive names
+        # «D'Arcy» exactly once — and its own name 830 times — and under the
+        # old rule that one mention lent D'Arcy all twenty-nine countries that
+        # archive touches, so the site shipped «D'Arcy, attested in Cuba».
+        #
+        # A name inherits an archive's country list when it is mentioned three
+        # times or more, OR when the archive is small enough that its whole
+        # list is deliberate: Booyzen's 94 surnames are DNA-cluster names, each
+        # written once, and every one of them IS that archive's research. A
+        # long tail of single mentions in a large archive is not.
+        deliberate = len(names) < 150
         for n in names:
             # A SLASH IS A PROMISE, A BRACKET IS A GUESS.
             #
@@ -269,7 +281,10 @@ def main():
             # The exact list when there is one, the archive's own list when
             # there is not. Never both: a name that can be placed precisely is
             # not helped by also being placed vaguely.
-            for cc in (by_name.get(n) or ccs):
+            where = by_name.get(n)
+            if not where and (deliberate or mentions.get(n, 1) >= 3):
+                where = ccs
+            for cc in (where or []):
                 attest(head, cc, "archive", label)
         print(f"{label:14} {len(names):5} surnames -> {','.join(ccs)}")
 

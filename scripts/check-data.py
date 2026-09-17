@@ -102,8 +102,14 @@ def main():
     if _sp.run(["node", "--version"], capture_output=True).returncode == 0:
         for _c in _g.glob("site/src/**/*.astro", recursive=True):
             _src = open(_c, encoding="utf-8").read()
+            # SELF-CLOSING TAGS HAVE NO BODY. Written without the `[^/]`,
+            # this pattern walked straight past `<script is:inline ... />` and
+            # ran on to the NEXT script's closing tag, so it handed node the
+            # intervening markup as if it were JavaScript and reported a
+            # syntax error in a script that was perfectly fine. A gate that
+            # cries wolf gets switched off, so it has to be right.
             for _i, _m in enumerate(re.finditer(
-                    r"<script[^>]*\bis:inline\b[^>]*>(.*?)</script>", _src, re.S)):
+                    r"<script[^>]*\bis:inline\b[^>]*[^/]>(.*?)</script>", _src, re.S)):
                 with _tf.NamedTemporaryFile("w", suffix=".js", delete=False,
                                             encoding="utf-8") as _fh:
                     _fh.write(_m.group(1))
@@ -113,6 +119,44 @@ def main():
                 if _r.returncode != 0:
                     err(f"{_c}: inline script #{_i + 1} does not parse — "
                         f"{_r.stderr.strip().splitlines()[-1] if _r.stderr else '?'}")
+
+    # -1b · EVERY SVG SHIPPED MUST BE VALID XML.
+    # favicon.svg carried «--accent #1F5C6B» inside an XML comment. A double
+    # hyphen is illegal there, so the file was not well-formed XML and a strict
+    # parser threw the whole thing away — which is why the tab showed a grey
+    # placeholder and David said there was no icon. It served HTTP 200 with the
+    # right content type the entire time, so every check that asked the network
+    # said it was fine. Only a parser can tell you an image is broken.
+    import xml.dom.minidom as _xd
+    for _svg in _g.glob("site/public/**/*.svg", recursive=True):
+        try:
+            _xd.parse(_svg)
+        except Exception as _e:
+            err(f"{_svg}: not well-formed XML — {_e}. A browser will refuse to "
+                f"render it however cleanly it downloads.")
+
+    # -1c · IF THE STYLESHEET HIDES THE NAV, THE LAYOUT MUST OFFER THE FALLBACK.
+    # styles.css came across whole from the family archive and brought a
+    # complete navigation design with it: dropdown groups, a menu button and a
+    # drawer, with `nav.topnav{display:none!important}` below 1180px. This
+    # layout rendered eleven bare links and no button — so on any window under
+    # 1180px there was NO navigation at all, and above it the sheet's higher
+    # specificity closed the links up to a 1px gap. Inheriting a stylesheet
+    # means inheriting the markup it was written for.
+    _css = open("site/public/styles.css", encoding="utf-8").read() \
+        if os.path.exists("site/public/styles.css") else ""
+    if re.search(r"nav\.topnav\s*{[^}]*display:\s*none", _css):
+        _base = open("site/src/layouts/Base.astro", encoding="utf-8").read()
+        for _need, _why in (('class="burger"', "the button that replaces the hidden bar"),
+                            ('id="drawer"', "the panel that button opens")):
+            if _need not in _base:
+                err(f"styles.css hides nav.topnav under a media query but "
+                    f"Base.astro has no {_need} — {_why}. Every narrow window "
+                    f"would get no navigation at all.")
+        if "details class=\"menu\"" not in _base and ".topnav details.menu" in _css:
+            err("styles.css styles .topnav details.menu and nothing else inside "
+                "the bar, but Base.astro renders bare links — they will take "
+                "the sheet's 1px gap and run together as one word.")
 
     # 0 · EVERY IMPORT IN A PAGE MUST RESOLVE.
     # The surname page imported ../../../data/frequencies/fr.json, which is one

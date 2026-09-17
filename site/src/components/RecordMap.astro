@@ -390,7 +390,12 @@ window.addEventListener("load", async function () {
       for (var si = 0; si < 2; si++) {
         var which = ["wikidata", "osm"][si];
         try {
-          var part = await (await fetch(FEAT + key + "-" + which + ".json")).json();
+          /* Checked, because not every layer has both halves — churches and
+             libraries are Wikidata-only — and an unchecked fetch logged two
+             404s on every page load that looked like a fault and were not. */
+          var res = await fetch(FEAT + key + "-" + which + ".json");
+          if (!res.ok) continue;
+          var part = await res.json();
           if (part.features && part.features.length) {
             d.features = d.features.concat(part.features);
             d.srcs.push(which === "osm" ? "OpenStreetMap" : "Wikidata");

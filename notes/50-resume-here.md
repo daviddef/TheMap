@@ -128,31 +128,27 @@ not
     npm run build > log 2>&1 &
     until grep -q Complete log; do sleep; done   # orphaned the moment the build dies
 
-## BROKEN AND UNDIAGNOSED — start here on Sunday
+## The nav CSS — FOUND AND FIXED
 
-**The global style block in `site/src/layouts/Base.astro` is not reaching the
-built CSS.** `grep -c topnav site/dist/_astro/*.css` returns 0. Every rule in
-that block is missing live: the nav runs together as one word, and `.adslot`
-has no height, which is likely why no ad appears even though the unit and the
-consent message are both live.
+The style block sat BELOW the closing html tag. Stray content there gets
+reparented by the parser and Astro never collected it, so every rule was
+dropped from the output. Moved into the head, where a style element belongs.
 
-TWO THEORIES TRIED, BOTH WRONG:
+The two earlier theories — braces in a quoted attribute, and tag syntax inside
+a comment — were both wrong, and the reason I believed them for two rounds is
+that my check looked in the wrong file. `grep topnav site/dist/_astro/*.css`
+returns 0 even when the CSS is perfectly fine, because Astro INLINES a
+stylesheet this small into each page. The check reported failure for a fix
+that had already worked and for one that had never been broken that way.
 
-1. `set:html="...push({});"` — braces in a quoted Astro attribute are parsed as
-   an expression. Fixed to `set:html={"..."}`. Did not restore the CSS.
-2. The comment above it contained literal tag syntax in angle brackets, which
-   I thought opened a style element inside the comment. Reworded. Also did not
-   restore the CSS.
+**A gate that looks in one of the two places a thing can be is not a gate.**
+The CSS gate, when it goes in, must search the built HTML as well as the
+bundle.
 
-So the cause is still unknown. **Do not guess a third time — bisect.** Revert
-Base.astro to the last commit where the nav was intact (before the favicon,
-the ads block and the archives-osm import went in), confirm the rules return,
-then re-apply one change at a time.
-
-And then add the gate: assert that rules the layout declares appear in the
-built CSS. Six gates exist and none of them looks at this — the build
-succeeded, the data was sound, every import resolved, every inline script
-parsed, and the site shipped with no navigation styling at all.
+Also fixed alongside it: the AdSense loader needed `is:inline`. Its src is a
+template literal, which Astro cannot resolve when it tries to bundle a script
+it thinks it owns — so the loader never reached the page. That is the likelier
+reason no ad appeared, ahead of anything about approval.
 
 ## Also asked for, not yet done
 

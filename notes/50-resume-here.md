@@ -53,3 +53,31 @@ Chrome; `scripts/ingest-fs-catalogue.py` in the Defranceski archive is the
 extractor. Every further country needs the same. Suggested order by where the
 research actually goes: Italy (pairs with Antenati), South Africa, Argentina,
 Australia.
+
+## Asked for on Sunday: a church-records filter
+
+David: «many people really want to look at church records — do we know which
+are which, and could we apply a filter?» We do, from three independent signals.
+
+    FamilySearch's own `kind`      CHURCH_RECORD   177 of 3,489 collections
+    Title says church/parish/etc                   633 of 3,489
+    Croatian volumes, by confession Roman Catholic  4,225
+                                    Orthodox          504
+                                    Greek Catholic     27
+                                    Jewish             21
+                                    Reformed           17 · Evangelical 7
+                                    — Civil             8  (NOT church)
+
+Antenati adds a third signal: its `fondo` separates «Stato civile» from parish
+series, and `parish` is already captured where the record has one.
+
+**Do not trust `kind` alone.** Only 177 collections carry CHURCH_RECORD while
+633 titles plainly say church, parish or baptism — the tag hides three-quarters
+of them. Do not trust the title alone either: «Civil Registration (Church
+transcripts)» is not a parish register. Use both and record WHICH fired, the
+way the access and evidence tiers already do.
+
+**Filter by CONFESSION, not by «church».** A Croatian researcher needs Roman
+Catholic *or* Orthodox specifically — different parishes, different surviving
+books, often different archives. «Church» as one bucket answers a question
+nobody has. The confession is already on every Croatian volume as `conf`.

@@ -39,6 +39,38 @@ def main():
     for k, v in OVR.items():
         if not v.get("why"):
             err(f"country-override {k}: no reason given")
+    # -2 · THE BUILD AND THE CLIENT MUST SHARD BY THE SAME RULE.
+    # They did not, and it cost 10,962 surnames. The build took the first three
+    # CHARACTERS and then dropped the non-alphanumerics — «d'arcy» became «da»,
+    # too short for a shard, so nothing was written. The client scans the whole
+    # string for its first three alphanumerics, gets «dar», and fetches a file
+    # that was never made. Every name with a separator near the front was
+    # affected: O'Brien, D'Angelo, Ah-Sing, Le Roy, de Witt.
+    #
+    # Both now compute the same thing, and this proves it on the real data
+    # rather than trusting that they still agree.
+    def client_key(f):
+        k = ""
+        for ch in f:
+            if ch.isalnum():
+                k += ch
+                if len(k) == 3:
+                    break
+        return k if len(k) == 3 else ""
+
+    try:
+        sys.path.insert(0, "scripts")
+        from build import shard_key as _bk
+        _dis = [n for n in ("d'arcy", "o'brien", "ah-sing", "le roy", "de witt",
+                            "st john", "d'angelo", "van der berg", "mcdonald")
+                if _bk(n) != client_key(n)]
+        if _dis:
+            err(f"build.py and the client disagree on the shard key for "
+                f"{', '.join(_dis)} — names sharded one way and looked up another "
+                f"are unfindable by their own spelling")
+    except ImportError:
+        err("cannot import shard_key from build.py to check it against the client")
+
     # -1 · THE INLINE SCRIPTS MUST PARSE.
     # RecordMap.astro carries 1,600 lines of JavaScript inside `<script
     # is:inline>`, which Astro copies into the page verbatim and never looks

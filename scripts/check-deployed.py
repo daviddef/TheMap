@@ -45,6 +45,19 @@ PROBES = ["Defranceski", "Lerena", "Blažević", "Booyzen", "Mazza", "D'Arcy"]
 
 
 def fold(s):
+    """Accents off, separators KEPT — the same fold the dataset itself keys by.
+
+    This got it wrong twice in opposite directions and both were instructive.
+    Keeping the apostrophe made «D'Arcy» miss its own record and this script
+    reported a name as absent from a live site that was serving it under seven
+    countries. Stripping the apostrophe then made «D'Arcy» and «Darcy» — two
+    genuinely different surnames, with different countries — collide onto one
+    key, so the lookup returned whichever was written last and reported a
+    mismatch that did not exist.
+
+    A checker that cries wolf is worse than no checker: the one time it is
+    right, nobody believes it. So it folds exactly as build-surnames.py does,
+    and where that is not enough it says so rather than guessing."""
     import unicodedata
     s = unicodedata.normalize("NFKD", s or "")
     return "".join(c for c in s if not unicodedata.combining(c)).lower().strip()
@@ -71,9 +84,10 @@ def main():
     # The surnames, by name, from the sharded corpus the site actually serves.
     local = {}
     try:
+        want = {fold(x) for x in PROBES}
         for r in json.load(open("data/surnames.json"))["surnames"]:
             k = fold(r["n"])
-            if k in {fold(x) for x in PROBES}:
+            if k in want and k not in local:
                 local[k] = r
     except OSError:
         pass
@@ -82,7 +96,13 @@ def main():
         f = fold(name)
         key = "".join(c for c in f[:3] if c.isalnum())
         shard = get(f"{base}/s/{key}.json") or []
-        got = next((r for r in shard if fold(r["n"]) == f), None)
+        # Prefer the record whose name folds exactly; fall back to one that
+        # matches once separators are ignored, so «D'Arcy» still finds itself
+        # if the display form ever loses its apostrophe.
+        import re as _re
+        bare = lambda x: _re.sub(r"[ '\u2019-]", "", fold(x))
+        got = (next((r for r in shard if fold(r["n"]) == f), None)
+               or next((r for r in shard if bare(r["n"]) == bare(name)), None))
         mine = local.get(f)
         lcc = sorted(c["cc"] for c in (got or {}).get("countries", []))
         hcc = sorted(c["cc"] for c in (mine or {}).get("countries", []))

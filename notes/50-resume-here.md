@@ -128,34 +128,50 @@ not
     npm run build > log 2>&1 &
     until grep -q Complete log; do sleep; done   # orphaned the moment the build dies
 
-## The nav CSS — FOUND AND FIXED
+## Fixed, with what the cause actually was
 
-The style block sat BELOW the closing html tag. Stray content there gets
-reparented by the parser and Astro never collected it, so every rule was
-dropped from the output. Moved into the head, where a style element belongs.
+**The nav.** styles.css came across whole from the family archive and carries a
+complete navigation design — dropdown groups, a menu button, a drawer, and
+`nav.topnav{display:none!important}` below 1180px. This layout rendered eleven
+bare links, which the sheet has no rule for. So above 1180px
+`header.site nav.topnav` won on specificity and closed them to its 1px gap, and
+below it they vanished behind a button that was never built. The inline block I
+rewrote three times was irrelevant: every rule in it was a duplicate losing a
+specificity contest.
 
-The two earlier theories — braces in a quoted attribute, and tag syntax inside
-a comment — were both wrong, and the reason I believed them for two rounds is
-that my check looked in the wrong file. `grep topnav site/dist/_astro/*.css`
-returns 0 even when the CSS is perfectly fine, because Astro INLINES a
-stylesheet this small into each page. The check reported failure for a fix
-that had already worked and for one that had never been broken that way.
+Two wrong diagnoses before that, both sustained by a check that looked in the
+wrong file — `dist/_astro/*.css` returns zero however healthy the CSS is,
+because Astro inlines a stylesheet this small into the page.
 
-**A gate that looks in one of the two places a thing can be is not a gate.**
-The CSS gate, when it goes in, must search the built HTML as well as the
-bundle.
+**Inheriting a stylesheet means inheriting the markup it was written for.**
 
-Also fixed alongside it: the AdSense loader needed `is:inline`. Its src is a
-template literal, which Astro cannot resolve when it tries to bundle a script
-it thinks it owns — so the loader never reached the page. That is the likelier
-reason no ad appeared, ahead of anything about approval.
+**The favicon** was invalid XML: `--accent` inside an XML comment, where a
+double hyphen is illegal. It served 200 with the right content type throughout,
+so everything that asked the network said it was fine. Only a parser can tell
+you an image is broken. PNG and ICO alongside it now — Safari ignores an SVG
+apple-touch-icon.
 
-## Also asked for, not yet done
+**The ad** had two faults and one remaining unknown. `.adslot` was a flex
+container and the `ins` a block-level child with no intrinsic width, so it
+measured zero and AdSense refused it: *No slot size for availableWidth=0*. The
+loader also needed `is:inline`, its src being a template literal. Both fixed;
+the slot now measures 1024x90 and Google answers. It answers
+`data-ad-status="unfilled"`, which is an account state, not a code one —
+David to check AdSense → Sites for approval status.
 
-- **Collections on a country page should group by region**, not run
-  regional-first then by record count. South Africa's 32 collections should sit
-  under Cape, Transvaal, Natal, Free State, then the national indexes.
-- **The places grid reads column-major**, so scanning across a row looks
-  unsorted. It is alphabetical down each column. Make it read left to right.
-- **Escape from full screen** works (Esc, or the button again) but nothing on
-  screen says so. A one-line hint while full screen is on.
+**Ordering.** Three complaints, one cause: lists ordered by size rather than by
+name. /countries/ is alphabetical with sortable columns; a country's
+collections group by province with nationwide last.
+
+**Full screen** now stretches the panel with the map, and carries a labelled
+exit button.
+
+Gates added, each negative-tested: every shipped SVG must parse as XML; if the
+stylesheet hides the nav under a media query the layout must render the button
+and drawer that replace it; if the sheet styles only grouped menus the layout
+must not render bare links. Also fixed the inline-script gate, which walked
+past a self-closing script tag and failed a file that was correct.
+
+Still wanted: a gate that checks declared CSS reaches the built output, looking
+in BOTH the bundle and the inlined HTML.
+

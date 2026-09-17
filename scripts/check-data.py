@@ -6,6 +6,7 @@ somebody who then drives to an archive. It runs before every deploy and fails
 the build rather than warning into a log nobody reads.
 """
 import json, os, re, sys, datetime
+import glob as _g
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from geo import country_of, km_to
 
@@ -38,6 +39,116 @@ def main():
     for k, v in OVR.items():
         if not v.get("why"):
             err(f"country-override {k}: no reason given")
+    # 2 · NOTHING MAY GET SMALLER WITHOUT SOMEBODY SAYING SO.
+    # Presence was never the failure mode. Every bug this project has shipped
+    # to the public site was a silent shrinkage: a file that was still there,
+    # still valid, still built, and holding a fraction of what it held the day
+    # before. data/_floors.json records the size each measure has reached, and
+    # a build that goes backwards stops here.
+    def floors():
+        try:
+            F = json.load(open("data/_floors.json"))["floors"]
+        except OSError:
+            err("data/_floors.json is missing — nothing is guarding against "
+                "the dataset quietly halving")
+            return
+        got = {}
+
+        def count(name, n):
+            got[name] = n
+            f = F.get(name)
+            if f is not None and n < f:
+                err(f"{name}: {n:,} is below the floor of {f:,} — something has "
+                    f"SHRUNK. Fix it, or raise the floor deliberately in "
+                    f"data/_floors.json and say why.")
+
+        pl = json.load(open("data/places.json"))["places"]
+        count("places", len(pl))
+        count("placesWalked", sum(1 for p in pl if p.get("via") != "geonames-admin"
+                                  and p.get("via") != "townlands-ie"
+                                  and (p.get("collections") or [])))
+        count("countriesWithGround", len({p.get("country") for p in pl if p.get("country")}))
+        count("collections", len(json.load(open("data/collections.json"))["collections"]))
+        count("providers", len(json.load(open("data/providers.json"))["providers"]))
+        rg = json.load(open("data/regions.json"))["regions"]
+        count("regions", len(rg))
+        count("regionEras", sum(len(r["eras"]) for r in rg))
+        try:
+            sn = json.load(open("data/surnames.json"))
+            count("surnames", sn["counts"]["surnames"])
+            count("surnamesWithCountries", sn["counts"]["withCountries"])
+            count("surnamesWithVariants", sn["counts"]["withVariants"])
+        except OSError:
+            pass
+        asn = json.load(open("data/archive-surnames.json"))["archives"]
+        count("archives", len(asn))
+        count("archiveSurnames", len({n for a in asn.values() for n in a["surnames"]}))
+        count("registers", len([f for f in _g.glob("data/frequencies/*.json")
+                                if not os.path.basename(f).startswith("_")]))
+        count("gazetteer", len(json.load(open("data/gazetteer.json"))["places"]))
+        try:
+            ie = json.load(open("data/ireland-osm.json"))
+            count("irishCivilParishes", len(ie["civilParishes"]))
+            count("irishTownlands", len(ie["townlands"]))
+        except OSError:
+            pass
+        count("adminDivisions", len(json.load(open("data/admin-divisions.json"))["divisions"]))
+        for name, f in (("churches", "churches-wikidata"), ("cemeteries", "cemeteries-wikidata"),
+                        ("libraries", "libraries-wikidata")):
+            try:
+                count(name, len(json.load(open(f"data/{f}.json"))["features"]))
+            except OSError:
+                pass
+        try:
+            count("settlements", len(json.load(
+                open("data/region-settlements.json"))["settlements"]))
+        except OSError:
+            pass
+        # A floor nobody measures is a floor nobody is standing on.
+        for k in F:
+            if k not in got:
+                err(f"_floors.json has a floor for '{k}' and nothing counts it")
+
+    floors()
+
+    # 1 · NO BUILD-TIME SCRIPT MAY READ OUTSIDE THIS REPOSITORY.
+    # build-surnames.py read the sibling archives through an absolute path. It
+    # worked on the laptop and returned nothing in CI, and nothing is a valid
+    # answer to a glob, so the build stayed green while the deployed dataset
+    # lost every archive attestation for days. The rule is now enforced rather
+    # than remembered: the three scripts `npm run build` invokes are read and
+    # refused if they contain an absolute path. Hand-run snapshot importers may
+    # have them — they are not in this list.
+    import re as _re
+    for _s in ("build-surnames.py", "build.py", "check-data.py"):
+        try:
+            _src = open(os.path.join("scripts", _s)).read()
+        except OSError:
+            continue
+        for _m in _re.finditer(r'["\'](/Users/|/home/|[A-Z]:\\\\)[^"\']*["\']', _src):
+            err(f"{_s}: absolute path {_m.group(0)[:60]} in a BUILD-TIME script — "
+                f"it will not exist in CI and will fail silently")
+
+    # THE ARCHIVES MUST ACTUALLY BE IN THERE. build-surnames.py read the sibling
+    # repositories through an absolute path that exists on one laptop, so every
+    # CI build shipped a dataset with none of their attestations and said
+    # nothing about it. Lerena lost Argentina and Uruguay, Defranceski lost
+    # Croatia, and the build was green every time. A silent zero is the one
+    # failure a build gate exists to catch.
+    try:
+        snap = json.load(open("data/archive-surnames.json"))
+        for label, a in snap["archives"].items():
+            if not a.get("surnames"):
+                err(f"archive-surnames: {label} contributes no surnames")
+            if not a.get("countries"):
+                err(f"archive-surnames: {label} attests no country")
+        if len(snap["archives"]) < 8:
+            err(f"archive-surnames: only {len(snap['archives'])} archives, expected 8 — "
+                f"re-run scripts/harvest-archive-surnames.py")
+    except FileNotFoundError:
+        err("data/archive-surnames.json is missing — every family archive's "
+            "attestations would be silently absent from the dataset")
+
     try:
         PIN = json.load(open("data/place-overrides.json"))["overrides"]
     except FileNotFoundError:

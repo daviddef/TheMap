@@ -33,6 +33,20 @@ os.chdir(_ROOT)
 from geo import country_of, in_ring_latlon
 
 PROJ = "/Users/daviddefranceski/Claude/Projects"
+
+# HAND-RUN ONLY, AND NEVER FROM THE BUILD. This reads a sibling repository
+# through an absolute path that exists on one laptop. That is fine for a
+# snapshot importer — it writes a committed file and stops — and it is
+# catastrophic in a build step, which is exactly what happened to
+# build-surnames.py: in CI the path did not exist, the read returned nothing,
+# and the deployed dataset silently lost every archive attestation. If this
+# ever needs to run at build time, snapshot it first.
+import sys as _sys, os as _os2
+if not _os2.path.exists(PROJ):
+    _sys.exit("PROJ is not here: " + PROJ + "
+"
+              "This is a hand-run snapshot importer. It cannot run without the "
+              "sibling archives, and it must never be wired into npm run build.")
 KIT_GAZ = os.path.join(PROJ, "Archive Kit/kit/data/gazetteer.json")
 GEONAMES = None
 

@@ -12,6 +12,8 @@
 import Base from "../../layouts/Base.astro";
 import { u } from "../../lib/url.js";
 import idx from "../../../public/index.json";
+import provs from "../../../public/providers.json";
+import fr from "../../../data/frequencies/fr.json";
 
 export async function getStaticPaths() {
   const surn = (await import("../../../public/surnames.json")).default;
@@ -22,11 +24,39 @@ export async function getStaticPaths() {
     .filter((r) => r.countries.length && r.variants.some((v) => v.how === "curated"))
     .map((r) => ({ r, s: slug(r.n) }))
     .filter(({ s }) => s && !seen.has(s) && seen.add(s))
-    .map(({ r, s }) => ({ params: { name: s }, props: { r, attestedBy: surn.attestedBy || {} } }));
+    .map(({ r, s }) => ({ params: { name: s },
+                         props: { r, attestedBy: surn.attestedBy || {},
+                                  /* Which variants have a page of their own, so a
+                                     link is never offered to a 404. */
+                                  pages: [...seen] } }));
 }
 
-const { r, attestedBy } = Astro.props;
+const { r, attestedBy, pages } = Astro.props;
+const pageFor = new Set(pages || []);
 const CN = idx.countries || {};
+const slugify = (x) => x.toLowerCase().normalize("NFKD")
+  .replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+/* WHO TO WRITE TO, which is the only question behind looking up a surname.
+   The page named the countries and stopped there, which is a quiz answer. A
+   reader who has just learnt their name is attested in Croatia wants the
+   Croatian archives, and this atlas holds 195 of them. The worldwide services
+   are left out: covering everywhere is not a fact about this name. */
+const KIND = ["national-archive", "diocesan", "regional-archive", "library",
+              "volunteer", "aggregator", "commercial"];
+const sourcesFor = (cc) => provs.providers
+  .filter((p) => (p.countries || []).includes(cc))
+  .sort((a, b) => (KIND.indexOf(a.kind) + 1 || 99) - (KIND.indexOf(b.kind) + 1 || 99))
+  .slice(0, 6);
+
+/* FRANCE DATES ITS NAMES and nothing else here does. INSEE counts births by
+   surname and decade from 1891, so a name that starts at zero and climbs is an
+   immigration signal with a date on it, and one that stops tells you the decade
+   to stop searching. Worth saying out loud on the one page about this name. */
+const frRow = (fr.surnames || []).find((x) => slugify(x.n) === slugify(r.n));
+const frCurve = frRow && frRow.by ? frRow.by.map((v, i) => ({
+  decade: (fr.decades || [])[i], n: v })) : null;
+const frPeak = frCurve ? frCurve.reduce((a, b) => (b.n > a.n ? b : a), frCurve[0]) : null;
 const TIER = {
   curated: ["Also written", "A person linked these — Wikidata's «said to be the same as», or a family archive that worked it out from documents."],
   grammar: ["The same name, inflected", "A rule of the language rather than an opinion. Polish makes Kowalski and Kowalska of one surname."],
@@ -55,7 +85,11 @@ const dek = `${r.n}${by.curated ? `, also written ${by.curated.slice(0,4).join("
     <section style="margin-top:24px">
       <h2>{TIER[how][0]}</h2>
       <p class="cap">{TIER[how][1]}</p>
-      <p class="vars">{by[how].slice(0, 40).map((n) => <b>{n}</b>)}</p>
+      <p class="vars">{by[how].slice(0, 40).map((n) => (
+        pageFor.has(slugify(n))
+          ? <a href={u(`/surname/${slugify(n)}/`)}><b>{n}</b></a>
+          : <b>{n}</b>
+      ))}</p>
     </section>
   ))}
 
@@ -77,6 +111,53 @@ const dek = `${r.n}${by.curated ? `, also written ${by.curated.slice(0,4).join("
     </table>
   </section>
 
+  {frCurve && (
+    <section style="margin-top:34px">
+      <h2>When it was being born, in France</h2>
+      <p class="cap">INSEE counts <b>births</b> by surname and decade from the état civil,
+      1891 to 2000 — the only dated evidence in this dataset. A name that starts at zero and
+      climbs arrived; a name that falls to nothing left, died out, or emigrated, and the
+      decade it stops is the decade to stop searching. It counts births registered in France,
+      so a family that emigrated in 1900 simply stops appearing, which is information rather
+      than a defect.
+      {frRow.from && <> This name's first French births fall in <b>{frRow.from}</b>
+      {frRow.to && <> and its last in <b>{frRow.to}</b></>}.</>}</p>
+      <ul class="curve">
+        {frCurve.map((d) => (
+          <li>
+            <span class="d">{d.decade}</span>
+            <span class="bar" style={`width:${frPeak.n ? Math.round(100 * d.n / frPeak.n) : 0}%`}></span>
+            <span class="n">{d.n ? d.n.toLocaleString() : "—"}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <section style="margin-top:34px">
+    <h2>Whose archive to write to</h2>
+    <p class="cap">The national and regional sources covering the countries this name is
+    attested in. This is the point of knowing where a name is: <b>a country is not an
+    answer, an archive is.</b></p>
+    {ccs.map((c) => {
+      const src = sourcesFor(c.cc);
+      return src.length > 0 && (
+        <div style="margin-top:16px">
+          <div class="lab"><a href={u(`/country/${c.cc.toLowerCase()}/`)}>{CN[c.cc] || c.cc}</a></div>
+          <ul class="vols">
+            {src.map((p) => (
+              <li>
+                <a href={u(`/archive/${p.id}/`)}>{p.name}</a>
+                <span class="who">{(provs.access || {})[p.access] || p.access}</span>
+                {p.at && <span class="who">{p.at.place}</span>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    })}
+  </section>
+
   <p style="margin-top:28px"><a class="bigl" href={u(`/?q=${encodeURIComponent(r.n)}`)}>
     Find {r.n} on the map →</a></p>
   <p class="cap"><a href={u("/surnames/")}>The surname dataset</a> · CC0, and downloadable</p>
@@ -88,4 +169,12 @@ const dek = `${r.n}${by.curated ? `, also written ${by.curated.slice(0,4).join("
   .vars b { font-weight: 500; margin-right: 16px; white-space: nowrap; }
   .bigl { font-family: var(--serif); font-size: 19px; }
   td { vertical-align: top; }
+  .vars a { text-decoration: none; border-bottom: 1px solid var(--rule-strong); }
+  .curve { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 4px; }
+  .curve li { display: grid; grid-template-columns: 92px 1fr 68px; align-items: center;
+              gap: 10px; font-family: var(--mono); font-size: 12px; }
+  .curve .d { color: var(--ink-3); }
+  .curve .bar { height: 11px; background: var(--accent); opacity: .72; min-width: 1px;
+                border-radius: 1px; }
+  .curve .n { text-align: right; color: var(--ink-2); }
 </style>

@@ -18,6 +18,20 @@ from geo import country_of, in_ring_latlon
 
 SRC = "/Users/daviddefranceski/Claude/Projects/Defranceski Family/site/src/data/researchmap.json"
 
+# HAND-RUN ONLY, AND NEVER FROM THE BUILD. This reads a sibling repository
+# through an absolute path that exists on one laptop. That is fine for a
+# snapshot importer — it writes a committed file and stops — and it is
+# catastrophic in a build step, which is exactly what happened to
+# build-surnames.py: in CI the path did not exist, the read returned nothing,
+# and the deployed dataset silently lost every archive attestation. If this
+# ever needs to run at build time, snapshot it first.
+import sys as _sys, os as _os2
+if not _os2.path.exists(SRC):
+    _sys.exit("SRC is not here: " + SRC + "
+"
+              "This is a hand-run snapshot importer. It cannot run without the "
+              "sibling archives, and it must never be wired into npm run build.")
+
 # The family archive's eight provider keys collapse to three real providers.
 # `fs-cat` is the library CATALOGUE, not the image collections — a card saying
 # a book exists. Calling that "images, free with an account" would be a lie of

@@ -25,6 +25,22 @@ export async function getStaticPaths() {
 
 const { place } = Astro.props;
 const PROV = Object.fromEntries(provs.providers.map((p) => [p.id, p]));
+/* THE NATIONAL SOURCES. A provider's `countries` list was read by the find box
+   and the country pages and by nothing else, so the five free Irish national
+   sources were invisible on all 2,130 Irish places. Ranked archive-first, then
+   by how open it is. The worldwide dozen are excluded deliberately — covering
+   everywhere is not a fact about here. */
+const KIND = ["national-archive", "diocesan", "regional-archive", "library",
+              "volunteer", "aggregator", "commercial"];
+const ACCESS = provs.access || {};
+const RANKA = idx.rank || [];
+const national = place.country
+  ? provs.providers
+      .filter((p) => (p.countries || []).includes(place.country))
+      .sort((a, b) => (KIND.indexOf(a.kind) + 1 || 99) - (KIND.indexOf(b.kind) + 1 || 99)
+                   || RANKA.indexOf(a.access) - RANKA.indexOf(b.access))
+  : [];
+const countryName = (idx.countries || {})[place.country] || place.country;
 const region = regions.regions.find((r) => r.id === place.region);
 const ACC = {
   free: "Images, free, no account",
@@ -187,6 +203,26 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
           <li>
             <a href={`https://www.wikidata.org/wiki/${c.q}`} target="_blank" rel="noopener">{c.n} ↗</a>
             <span class="y">{c.km} km</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  {national.length > 0 && (
+    <section style="margin-top:38px">
+      <h2>The sources for {countryName}</h2>
+      <p class="cap">National and regional sources that cover this ground <b>whether or not
+      anybody has walked it here</b> — which makes them the answer, not the consolation, for
+      a place with no volumes recorded on it. The worldwide services are left out: they cover
+      everywhere, so they say nothing about here.</p>
+      <ul class="vols" style="margin-top:12px">
+        {national.map((p) => (
+          <li>
+            <a href={u(`/archive/${p.id}/`)}>{p.name}</a>
+            <span class="who">{ACCESS[p.access] || p.access}</span>
+            {p.at && <span class="who">{p.at.place}</span>}
+            {p.what && <><br /><span class="who">{p.what}</span></>}
           </li>
         ))}
       </ul>

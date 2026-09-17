@@ -31,19 +31,10 @@ import json, os, re, sys, time, unicodedata, collections
 
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(_ROOT)
-PROJ = "/Users/daviddefranceski/Claude/Projects"
+# NO ABSOLUTE PATHS. The archives arrive through data/archive-surnames.json,
+# which is in this repository; see scripts/harvest-archive-surnames.py for why.
 
 # The seven archives, their ground, and where their people data lives.
-ARCHIVES = [
-    ("Defranceschi", "Defranceski Family", ["HR", "IT"]),
-    ("Falco",        "Falco Family",       ["IT"]),
-    ("Blažević",     "Blazevic Family",    ["HR"]),
-    ("Booyzen",      "Booyzen Family",     ["ZA"]),
-    ("Lerena",       "Lerena Family",      ["AR", "UY", "ES"]),
-    ("D'Arcy",       "D'arcy Family",      ["GB", "IE", "AU"]),
-    ("Mazza",        "Mazza Family",       ["IT", "AU", "US"]),
-    ("Luwinski",     "Luwinski Family",    ["PL", "DE"]),
-]
 
 
 def fold(s):
@@ -219,21 +210,23 @@ def main():
         link(a, b, "curated")
     print(f"Wikidata: {len(pairs)} curated variant pairs")
 
-    # ---- 2. The seven archives --------------------------------------------
-    import glob
-    for label, folder, ccs in ARCHIVES:
-        names = collections.Counter()
-        for p in glob.glob(os.path.join(PROJ, folder, "site/src/data/*.json")):
-            try:
-                j = json.load(open(p))
-            except Exception:
-                continue
-            rows = j.get("people") if isinstance(j, dict) else (j if isinstance(j, list) else None)
-            if not isinstance(rows, list):
-                continue
-            for r in rows:
-                if isinstance(r, dict) and r.get("surname"):
-                    names[r["surname"].strip()] += 1
+    # ---- 2. The eight archives, from a COMMITTED SNAPSHOT ------------------
+    # This used to glob the sibling repositories through an absolute path on
+    # one Mac. GitHub Actions checks out this repository and nothing else, so
+    # in CI the glob matched nothing, every archive attestation was dropped,
+    # and the site served a dataset quietly missing them:
+    #
+    #     LIVE   Lerena -> Spain, United States
+    #     LOCAL  Lerena -> ARGENTINA, Spain, United States, URUGUAY
+    #
+    # It was silent because iterating an empty list prints nothing. The snapshot
+    # is written by scripts/harvest-archive-surnames.py and committed, which is
+    # the same rule this project already applies to places: a cross-repo
+    # dependency is a snapshot, never a live read.
+    snap = json.load(open("data/archive-surnames.json"))["archives"]
+    for label, a in sorted(snap.items()):
+        ccs = a["countries"]
+        names = a["surnames"]
         for n in names:
             # A SLASH IS A PROMISE, A BRACKET IS A GUESS.
             #
@@ -264,8 +257,7 @@ def main():
                     link(head, other, "curated")
             for cc in ccs:
                 attest(head, cc, "archive", label)
-        if names:
-            print(f"{label:14} {len(names):5} surnames -> {','.join(ccs)}")
+        print(f"{label:14} {len(names):5} surnames -> {','.join(ccs)}")
 
     # ---- 3. National registers --------------------------------------------
     # The only source here that says how MANY people carry a name, and the
@@ -346,39 +338,86 @@ def main():
     # and the nearest eight are kept. Lerena/Lerina is one edit. Lerena and a
     # Polish name sharing a consonant skeleton is six, and six is not a
     # variant of anything.
-    def near(a, b):
-        """Edit distance, capped — anything past the cap is «not a variant».
+    # Separators are stripped ONCE PER NAME, here, and never inside the
+    # comparison. «De Franceschi» and «Defranceschi» are the same name written
+    # by two clerks rather than two edits apart, and counting the space as a
+    # difference cost Defranceski its closest relative — but the first cut did
+    # the stripping inside near(), which runs 23,870,844 times across these
+    # buckets. Two re.sub calls per comparison is forty-eight million regex
+    # executions to answer a question that has 667,561 distinct answers. The
+    # build went from three minutes to not finishing.
+    SEP = re.compile(r"[ '’-]")
+    bare = {}
 
-        Separators are stripped first. «De Franceschi» and «Defranceschi» are
-        the same name written by two clerks, not two edits apart, and counting
-        the space as a difference cost Defranceski its closest relative."""
-        a = re.sub(r"[ '\u2019-]", "", a)
-        b = re.sub(r"[ '\u2019-]", "", b)
-        if abs(len(a) - len(b)) > 3:
+    def strip(name):
+        v = bare.get(name)
+        if v is None:
+            v = bare[name] = SEP.sub("", fold(name))
+        return v
+
+    letters = {}
+
+    def chars(name):
+        v = letters.get(name)
+        if v is None:
+            v = letters[name] = frozenset(strip(name))
+        return v
+
+    def near(a, b, cap):
+        """Edit distance, and it only has to be right up to `cap`.
+
+        23,870,844 pairs go through this. A full Levenshtein on each one is
+        the whole cost of this build, and almost all of that work is spent
+        proving that two names are FAR APART — which is a much easier question
+        than how far.
+
+        Two cheap refusals first. A length gap wider than the cap cannot be
+        closed. And each edit can remove at most one distinct letter from each
+        side, so if the two names differ by more than 2·cap distinct letters,
+        no sequence of `cap` edits reconciles them: «Kowalski» and «Brzezinka»
+        are dismissed on a set operation rather than a 72-cell table.
+
+        Then a BANDED table: an alignment that ever wanders more than `cap`
+        cells off the diagonal has already spent more than `cap` edits getting
+        there, so those cells are not computed. The row is abandoned the moment
+        its cheapest cell exceeds the cap."""
+        if abs(len(a) - len(b)) > cap:
             return 99
-        prev = list(range(len(b) + 1))
+        prev = [0] * (len(b) + 1)
+        for j in range(len(b) + 1):
+            prev[j] = j
         for i, ca in enumerate(a, 1):
-            cur = [i]
-            for j, cb in enumerate(b, 1):
-                cur.append(min(prev[j] + 1, cur[j - 1] + 1,
-                               prev[j - 1] + (ca != cb)))
+            lo, hi = max(1, i - cap), min(len(b), i + cap)
+            cur = [99] * (len(b) + 1)
+            cur[lo - 1] = i if lo == 1 else 99
+            best = 99
+            for j in range(lo, hi + 1):
+                v = min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (ca != b[j - 1]))
+                cur[j] = v
+                if v < best:
+                    best = v
+            if best > cap:
+                return 99
             prev = cur
-        return prev[-1]
+        return prev[len(b)]
 
     sounded = 0
     for sk, group in by_skel.items():
         if len(group) < 2:
             continue
         for r in group:
-            fa = fold(r["n"])
+            fa = strip(r["n"])
             # Three edits on a short name is most of the name. Scale the
             # allowance: Bo/Ba is not a variant, Defranceschi/Defranceski is.
             cap = max(1, min(3, len(fa) // 4))
             cand = []
+            la = chars(r["n"])
             for other in group:
                 if other is r:
                     continue
-                d = near(fa, fold(other["n"]))
+                if len(la ^ chars(other["n"])) > 2 * cap:
+                    continue
+                d = near(fa, strip(other["n"]), cap)
                 if d <= cap:
                     cand.append((d, len(other["n"]), other["n"]))
             cand.sort()

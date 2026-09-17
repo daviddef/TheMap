@@ -13,6 +13,7 @@ import cem from "../../public/cemeteries-wikidata.json";
 import cemOsm from "../../public/cemeteries-osm.json";
 import chu from "../../public/churches-wikidata.json";
 import setts from "../../../data/region-settlements.json";
+import irl from "../../../data/ireland-osm.json";
 
 const CN = idx.countries || {};
 const LOCAL = new Set(["CITY","TOWN","COMMUNE","HAMLET","VILLAGE","PARISH","MUNICIPALITY",
@@ -104,6 +105,33 @@ const mapped = list.filter((r) => r.regions > 0).length;
     {T.walked.toLocaleString()} that hold something. Type one and it still tells you which
     region it is in, and the region knows whose archive held that ground.</p>
   </section>
+
+  {irl.coverage && (
+    <section style="margin-top:34px">
+      <h2>Ireland, measured against the Ordnance Survey</h2>
+      <p class="cap">The townland layer comes from Townlands.ie, an OpenStreetMap project
+      still in progress. Shipping it without this table would let a reader take a thin county
+      for an empty one — which is the single confusion this page exists to prevent. The
+      denominator is the Ordnance Survey's own historic townland count. A county over 100% is
+      not a surplus: a townland split across two civil parishes is counted once per parish
+      here, because <b>the parish is what makes a townland an address</b>.</p>
+      <table style="margin-top:12px">
+        <thead><tr><th>County</th><th class="m">Townlands</th><th class="m">Of</th>
+          <th class="m">Mapped</th><th class="m">Civil parishes</th></tr></thead>
+        <tbody>
+          {irl.coverage.counties.map((c) => (
+            <tr>
+              <td>{c.county}{c.alsoCalled && <span class="who"> · also {c.alsoCalled}</span>}</td>
+              <td class="m">{c.townlands.toLocaleString()}</td>
+              <td class="m">{c.expected.toLocaleString()}</td>
+              <td class={"m" + (c.pct < 90 ? " nil" : " yes")}>{c.pct}%</td>
+              <td class="m">{c.civilParishes || "—"}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  )}
 
   <p class="cap" style="margin-top:20px"><b>Reach</b> is the share of a country's collections
   catalogued under a town, county or province rather than under the country as a whole. A low

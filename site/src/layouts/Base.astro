@@ -62,6 +62,37 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Libre+Franklin:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" />
 <link rel="stylesheet" href={u("/styles.css")} />
+{/* THE STYLES LIVE HERE NOW, AND THE REASON MATTERS. They sat below the
+    closing html tag, where the parser reparents stray content and Astro never
+    collected them — so the whole block was dropped from the built CSS and the
+    nav shipped unstyled. Two other explanations were tried first and both were
+    wrong. A style element belongs in the head; anywhere else is luck. */}
+<style is:global>
+  .skip { position: absolute; left: -9999px; }
+  .skip:focus { left: 12px; top: 12px; z-index: 999; background: var(--panel);
+                padding: 10px 14px; border: 1px solid var(--accent); }
+  header.site { border-bottom: 1px solid var(--rule); background: var(--panel); }
+  .sitein { display: flex; align-items: baseline; gap: 28px; flex-wrap: wrap;
+            padding: 14px 0; }
+  .brand { font-family: var(--serif); font-size: 21px; font-weight: 600;
+           color: var(--ink); text-decoration: none; letter-spacing: .01em; }
+  .brand em { font-style: italic; font-weight: 400; color: var(--accent); }
+  .topnav { display: flex; gap: 18px; flex-wrap: wrap; }
+  .topnav a { font-family: var(--sans); font-size: 13px; color: var(--ink-2);
+              text-decoration: none; padding-bottom: 2px; }
+  .topnav a:hover { color: var(--accent); }
+  .topnav a.on { color: var(--accent); border-bottom: 2px solid var(--accent); }
+  .pagehead { margin: 30px 0 18px; }
+  .pagehead h1 { font-family: var(--serif); font-size: 38px; line-height: 1.12;
+                 margin: 8px 0 12px; font-weight: 500; }
+  footer.site-foot { margin-top: 60px; padding: 26px 0 40px;
+                     border-top: 1px solid var(--rule); background: var(--panel); }
+  .foot-note { font-family: var(--sans); font-size: 12.5px; line-height: 1.6;
+               color: var(--ink-3); max-width: 80ch; margin: 0 0 8px; }
+  .foot-thin { font-size: 11.5px; }
+  .adslot { min-height: 90px; margin: 0 0 24px; display: flex;
+            align-items: center; justify-content: center; }
+</style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to the map</a>
@@ -109,7 +140,11 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
         <ins class="adsbygoogle" style="display:block" data-ad-client={site.ads.client}
              data-ad-slot={site.ads.slot} data-ad-format="horizontal"
              data-full-width-responsive="true"></ins>
-        <script async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${site.ads.client}`}
+        {/* is:inline, because the src is a template literal. Astro tries to
+            bundle a script tag it thinks it owns, and a dynamic src is not
+            something it can resolve — so the loader never reached the page and
+            the slot stayed empty. This is the second reason no ad appeared. */}
+        <script is:inline async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${site.ads.client}`}
                 crossorigin="anonymous"></script>
         {/* BRACES IN A QUOTED ASTRO ATTRIBUTE ARE AN EXPRESSION, NOT TEXT.
             Written as set:html="...push({});" Astro read the {} as an
@@ -143,30 +178,3 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
 </footer>
 </body>
 </html>
-
-<style is:global>
-  .skip { position: absolute; left: -9999px; }
-  .skip:focus { left: 12px; top: 12px; z-index: 999; background: var(--panel);
-                padding: 10px 14px; border: 1px solid var(--accent); }
-  header.site { border-bottom: 1px solid var(--rule); background: var(--panel); }
-  .sitein { display: flex; align-items: baseline; gap: 28px; flex-wrap: wrap;
-            padding: 14px 0; }
-  .brand { font-family: var(--serif); font-size: 21px; font-weight: 600;
-           color: var(--ink); text-decoration: none; letter-spacing: .01em; }
-  .brand em { font-style: italic; font-weight: 400; color: var(--accent); }
-  .topnav { display: flex; gap: 18px; flex-wrap: wrap; }
-  .topnav a { font-family: var(--sans); font-size: 13px; color: var(--ink-2);
-              text-decoration: none; padding-bottom: 2px; }
-  .topnav a:hover { color: var(--accent); }
-  .topnav a.on { color: var(--accent); border-bottom: 2px solid var(--accent); }
-  .pagehead { margin: 30px 0 18px; }
-  .pagehead h1 { font-family: var(--serif); font-size: 38px; line-height: 1.12;
-                 margin: 8px 0 12px; font-weight: 500; }
-  footer.site-foot { margin-top: 60px; padding: 26px 0 40px;
-                     border-top: 1px solid var(--rule); background: var(--panel); }
-  .foot-note { font-family: var(--sans); font-size: 12.5px; line-height: 1.6;
-               color: var(--ink-3); max-width: 80ch; margin: 0 0 8px; }
-  .foot-thin { font-size: 11.5px; }
-  .adslot { min-height: 90px; margin: 0 0 24px; display: flex;
-            align-items: center; justify-content: center; }
-</style>

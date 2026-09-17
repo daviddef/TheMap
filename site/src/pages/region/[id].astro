@@ -29,6 +29,12 @@ const cols = collections.collections
   .sort((a, b) => (a.local === b.local ? (b.c.records || 0) - (a.c.records || 0)
                                        : a.local ? -1 : 1));
 const span = [region.eras[0].from, region.eras[region.eras.length - 1].to];
+/* The middle of the ring, for the map links. A region's own centre is a better
+   place to drop somebody than whatever they were last looking at. */
+const centre = [
+  (Math.min(...region.ring.map((p) => p[0])) + Math.max(...region.ring.map((p) => p[0]))) / 2,
+  (Math.min(...region.ring.map((p) => p[1])) + Math.max(...region.ring.map((p) => p[1]))) / 2,
+].map((n) => Math.round(n * 1000) / 1000);
 ---
 <Base
   og="region"
@@ -40,7 +46,9 @@ const span = [region.eras[0].from, region.eras[region.eras.length - 1].to];
     <div class="one" style="border-left-color:#C0392B">
       <div class="lab">Where researchers lose records here</div>
       {traps.map((e) => (
-        <p class="trap"><b>{e.from}–{e.to}</b> — {e.note.replace(/^THE (TRAP|HOLE|GOOD NEWS)\. /, "")}</p>
+        <p class="trap">
+          <b><a href={u(`/?layers=shelf,jurisdiction&years=${e.from},${e.to}&view=${centre[0]},${centre[1]},8`)}>{e.from}–{e.to}</a></b>
+          {" — "}{e.note.replace(/^THE (TRAP|HOLE|GOOD NEWS)\. /, "")}</p>
       ))}
     </div>
   )}
@@ -52,7 +60,14 @@ const span = [region.eras[0].from, region.eras[region.eras.length - 1].to];
       <tbody>
         {region.eras.map((e) => (
           <tr>
-            <td class="m">{e.from}–{e.to}</td>
+            <td class="m">
+              {/* Straight into the map with this era's span already set. The
+                  table says who held the ground; the map says which of your
+                  places it covers, and until now the reader had to set the
+                  range by hand to get from one to the other. */}
+              <a href={u(`/?layers=shelf,jurisdiction&years=${e.from},${e.to}&view=${centre[0]},${centre[1]},8`)}
+                 title={`See ${region.label} between ${e.from} and ${e.to}`}>{e.from}–{e.to}</a>
+            </td>
             <td><span class="reg" style={`--c:var(${regions.regimes[e.regime].var})`}><i></i>{e.polity || regions.regimes[e.regime].label}</span></td>
             <td>
               {e.filedUnder.length
@@ -65,6 +80,12 @@ const span = [region.eras[0].from, region.eras[region.eras.length - 1].to];
       </tbody>
     </table>
     <p class="cap" style="margin-top:12px">{regions.precision}</p>
+    <p style="margin-top:14px"><a class="bigl"
+      href={u(`/?layers=shelf,jurisdiction&years=${span[0]},${span[1]}&view=${centre[0]},${centre[1]},7`)}>
+      See the whole span, {span[0]}–{span[1]}, on the map →</a></p>
+    <p class="cap">The map takes a <b>range</b>, and a range that crosses one of the rows
+    above is where records get lost: the family never moved, and the archive on the far side
+    of the handover will tell you it holds nothing.</p>
   </section>
 
   {here.length > 0 && (

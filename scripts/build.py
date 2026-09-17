@@ -12,7 +12,7 @@ for the world. Here the map fetches an index that carries only what a marker
 needs to be DRAWN and FOUND, and the panel fetches one small file when somebody
 actually clicks. Worldwide, the index grows linearly and the panel never does.
 """
-import json, os, re, shutil, sys, unicodedata
+import collections, json, os, re, shutil, sys, unicodedata
 
 import os as _os
 _ROOT = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
@@ -227,6 +227,24 @@ def main():
     shutil.rmtree(pdir, ignore_errors=True)
     os.makedirs(pdir)
 
+    # Loaded before the index is written so a row can say whether its country
+    # has one; the file itself is written further down.
+    try:
+        wa_cc = {r["cc"] for r in json.load(open("data/world-archives.json"))["archives"]}
+    except FileNotFoundError:
+        wa_cc = set()
+
+    wa_by_cc = {}
+    try:
+        for _r in json.load(open("data/world-archives.json"))["archives"]:
+            wa_by_cc.setdefault(_r["cc"], []).append(
+                {k: v for k, v in _r.items()
+                 if k in ("name", "url", "kind", "status", "lat", "lon")})
+        for _k in wa_by_cc:
+            wa_by_cc[_k].sort(key=lambda r: (r["kind"] != "national-archive", r["name"]))
+    except FileNotFoundError:
+        pass
+
     index, nbytes, details = [], 0, []
     for p in places:
         cs = p.get("collections", [])
@@ -283,6 +301,14 @@ def main():
         extra = sorted(f for f in q.split(" ") if f and f != fold(p["name"]))
         row = {"i": p["id"], "n": p["name"], "y": p["lat"], "x": p["lon"],
                "c": len(cs)}
+        # DOES THIS PLACE'S COUNTRY HAVE A NAMED NATIONAL SOURCE? A hollow grey
+        # dot reading «nobody has walked this one yet» is true of almost every
+        # place in Africa and it is not the whole truth: 32 African countries
+        # have a national archive listed one click away in the panel, and the
+        # marker had no way to know. David looked at a continent of grey and
+        # reasonably concluded there was nothing there.
+        if wa_cc and p.get("country") in wa_cc:
+            row["w"] = 1
         if by_reach:
             # The colour is borrowed, and the map has to say so or it is
             # claiming a walk that never happened.
@@ -333,7 +359,8 @@ def main():
 
     idx = {"countries": cmap,
            "note": "One row per place. i=id n=name y=lat x=lon a=access c=collections "
-                   "a is an index into `rank`, not a word. "
+                   "a is an index into `rank`, not a word. w=1 when the "
+                   "country has a named national archive or library. "
                    "q=folded name variants s=[first year, last year] b=colour borrowed "
                    "from this many collections that reach the place rather than "
                    "from volumes walked in it. "
@@ -465,6 +492,114 @@ def main():
         blob = json.dumps(uniq, ensure_ascii=False, separators=(",", ":"))
         rsbytes += len(blob.encode())
         open(os.path.join(rs, k + ".json"), "w").write(blob)
+
+    # ---- ONE MARKER PER COUNTRY, so nowhere answers with nothing ----------
+    # «At least a marker on a country even if no volume is available» — and the
+    # reason it matters is Libya. Libya has a FamilySearch research guide, a
+    # GenWeb project and a DNA group, and this map showed empty ground, because
+    # a marker here has always meant «a place with volumes» and Libya has none.
+    #
+    # A country is a place too. It carries the coarsest possible answer — whose
+    # national archive, which research guide, what this atlas holds for it —
+    # and the coarsest answer is enormously better than a blank.
+    #
+    # FAMILYSEARCH'S COUNTRY GUIDE IS A TEMPLATE, NOT A HARVEST.
+    # familysearch.org/en/wiki/<Country>_Genealogy exists for every country;
+    # verified in a browser because the URL soft-404s to a JavaScript shell and
+    # its API is behind a bot gate. Libya returns 2,846 characters of guide,
+    # «Nonesuchland» returns 568 and «there is currently no text in this page».
+    # The template is only used where this map holds a name FamilySearch would
+    # recognise — an abbreviation like «Dem. Rep. Congo» gets no link rather
+    # than a dead one.
+    FS_WIKI = {
+        "Dem. Rep. Congo": "Democratic Republic of the Congo",
+        "Central African Rep.": "Central African Republic",
+        "Eq. Guinea": "Equatorial Guinea", "S. Sudan": "South Sudan",
+        "W. Sahara": "Western Sahara", "Bosnia and Herz.": "Bosnia and Herzegovina",
+        "Czechia": "Czech Republic", "Dominican Rep.": "Dominican Republic",
+        "Solomon Is.": "Solomon Islands", "Falkland Is.": "Falkland Islands",
+        "Fr. Polynesia": "French Polynesia", "N. Cyprus": "Cyprus",
+        "Macedonia": "North Macedonia", "Côte d'Ivoire": "Ivory Coast",
+        "Cabo Verde": "Cape Verde", "eSwatini": "Eswatini",
+        "Timor-Leste": "East Timor", "Myanmar": "Myanmar",
+        "St. Vin. and Gren.": "Saint Vincent and the Grenadines",
+        "Antigua and Barb.": "Antigua and Barbuda",
+        "Trinidad and Tobago": "Trinidad and Tobago",
+        "São Tomé and Principe": "Sao Tome and Principe",
+        "Turks and Caicos Is.": "Turks and Caicos Islands",
+        "Br. Indian Ocean Ter.": None, "Fr. S. Antarctic Lands": None,
+        "Antarctica": None, "Heard I. and McDonald Is.": None,
+        "S. Geo. and the Is.": None, "Indian Ocean Ter.": None,
+        "Ashmore and Cartier Is.": None, "Siachen Glacier": None,
+        "Bajo Nuevo Bank": None, "Serranilla Bank": None,
+        "Scarborough Reef": None, "Spratly Is.": None,
+        "Coral Sea Is.": None, "Clipperton I.": None,
+        "Cyprus U.N. Buffer Zone": None, "Dhekelia": None, "Baikonur": None,
+        "Akrotiri": None, "Brazilian I.": None, "USNB Guantanamo Bay": None,
+    }
+    cpts, placed, colled = [], collections.Counter(), collections.Counter()
+    for _p in places:
+        if _p.get("country"):
+            placed[_p["country"]] += 1
+            colled[_p["country"]] += len(_p.get("collections") or [])
+    cols_by_cc = collections.Counter()
+    for _c in json.load(open("data/collections.json"))["collections"]:
+        for _k in _c.get("countries", []):
+            cols_by_cc[_k] += 1
+    prov_by_cc = collections.Counter()
+    for _pv in providers["providers"]:
+        for _k in _pv.get("countries", []):
+            if _k != "*":
+                prov_by_cc[_k] += 1
+    for iso, v in json.load(open("data/countries.json"))["countries"].items():
+        rings = v.get("rings") or []
+        if not rings:
+            continue
+        big = max(rings, key=len)
+        lat = sum(q[1] for q in big) / len(big)
+        lon = sum(q[0] for q in big) / len(big)
+        name = v["name"]
+        wiki = FS_WIKI.get(name, name)
+        rec = {"cc": iso, "n": name, "y": round(lat, 4), "x": round(lon, 4),
+               "p": placed.get(iso, 0), "v": colled.get(iso, 0),
+               "c": cols_by_cc.get(iso, 0), "s": prov_by_cc.get(iso, 0),
+               "w": len(wa_by_cc.get(iso, []))}
+        if wiki and "." not in wiki:
+            rec["fs"] = wiki.replace(" ", "_")
+        cpts.append(rec)
+    json.dump({"note": ("One point per country, so that clicking anywhere answers "
+                        "with something. p=places drawn v=volumes walked "
+                        "c=collections covering it s=curated sources w=national "
+                        "archives fs=FamilySearch research-guide slug."),
+               "countries": sorted(cpts, key=lambda r: r["n"])},
+              open(os.path.join(OUT, "country-points.json"), "w"),
+              ensure_ascii=False, separators=(",", ":"))
+
+    # ---- a national source for every country there is one for -------------
+    # 38 countries had a named national source and 199 had nothing but the
+    # worldwide services, which cover everywhere and therefore say nothing
+    # about anywhere. These are Wikidata's national archives and national
+    # libraries: 393 institutions across 164 countries, each with a website
+    # that answered when it was asked.
+    #
+    # THEY ARE KEPT SEPARATE FROM THE 195 CURATED PROVIDERS ON PURPOSE. Those
+    # have been looked at; these have had their door rattled once. Mixing them
+    # would quietly downgrade the ones somebody checked.
+    try:
+        wa = json.load(open("data/world-archives.json"))
+        by_cc = wa_by_cc
+        for r in wa["archives"]:
+            by_cc.setdefault(r["cc"], []).append(
+                {k: v for k, v in r.items()
+                 if k in ("name", "url", "kind", "status", "lat", "lon")})
+        json.dump({"note": wa["note"], "source": wa["source"],
+                   "licence": wa["licence"], "harvested": wa["harvested"],
+                   "byCountry": by_cc},
+                  open(os.path.join(OUT, "world-archives.json"), "w"),
+                  ensure_ascii=False, separators=(",", ":"))
+        n_wa, n_wacc = len(wa["archives"]), len(by_cc)
+    except FileNotFoundError:
+        n_wa = n_wacc = 0
 
     # ---- Estonia's kihelkonnad: findable, and never drawn -----------------
     # 113 parishes and 11 historic counties, from the National Archives' own
@@ -719,6 +854,10 @@ def main():
     if surn["surnames"]:
         print(f"surnames.json   {sz('surnames.json')/1024:8.1f} KB  "
               f"surnames.csv {sz('surnames.csv')/1024:.0f} KB — the shareable dataset")
+    if n_wa:
+        print(f"world-archives    {sz('world-archives.json')/1024:8.1f} KB  {n_wa} "
+              f"national archives and libraries across {n_wacc} countries — "
+              f"unverified, from Wikidata")
     if eshards:
         print(f"ee/*.json       {ebytes/1024:8.1f} KB  {len(eshards)} shards, "
               f"{len(est['parishes'])} Estonian parishes and "

@@ -227,6 +227,17 @@ def main():
     for label, a in sorted(snap.items()):
         ccs = a["countries"]
         names = a["surnames"]
+        # PER SURNAME WHERE THE ARCHIVE CAN SAY SO. An archive's country list
+        # applied to every name in it is the coarse answer — «everything in the
+        # Lerena archive is in Argentina, Spain, Uruguay and South Africa» —
+        # and it is how Lerena came to be attested in Croatia, because the
+        # Defranceschi archive happens to mention the name once.
+        #
+        # Where an archive links its people to a place, and the place resolves
+        # to a country, the attribution is exact: LERENA in South Africa
+        # because five Lerenas are recorded at Cape Town, not because the
+        # archive as a whole touches South Africa.
+        by_name = a.get("bySurname") or {}
         for n in names:
             # A SLASH IS A PROMISE, A BRACKET IS A GUESS.
             #
@@ -255,7 +266,10 @@ def main():
                 other = re.sub(r"\s*\([^)]*\)", "", other).strip()
                 if len(other) > 1:
                     link(head, other, "curated")
-            for cc in ccs:
+            # The exact list when there is one, the archive's own list when
+            # there is not. Never both: a name that can be placed precisely is
+            # not helped by also being placed vaguely.
+            for cc in (by_name.get(n) or ccs):
                 attest(head, cc, "archive", label)
         print(f"{label:14} {len(names):5} surnames -> {','.join(ccs)}")
 

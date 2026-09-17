@@ -104,7 +104,12 @@ def main():
     # landed, and nothing between the two said so.
     for _pg in _g.glob("site/src/**/*.astro", recursive=True) + \
                _g.glob("site/src/**/*.js", recursive=True):
-        for _m in re.finditer(r'from\s+["\'](\.[^"\']+\.(?:json|js))["\']', open(_pg).read()):
+        # BOTH KINDS OF IMPORT. The first cut matched only `from "..."` and
+        # missed `await import("...")`, which is how the surname and place
+        # pages load their data — so this gate, built to stop exactly this
+        # failure, watched it happen a second time and said «data is sound».
+        _re_imp = r'(?:from|import)\s*\(?\s*["\'](\.[^"\']+\.(?:json|js))["\']'
+        for _m in re.finditer(_re_imp, open(_pg).read()):
             _t = os.path.normpath(os.path.join(os.path.dirname(_pg), _m.group(1)))
             # public/ artefacts are written by build.py earlier in this run.
             if not os.path.exists(_t):
@@ -170,6 +175,12 @@ def main():
         try:
             count("scottishParishes", len(json.load(
                 open("data/scotland-parishes.json"))["parishes"]))
+        except OSError:
+            pass
+        try:
+            _wa = json.load(open("data/world-archives.json"))
+            count("worldArchives", len(_wa["archives"]))
+            count("worldArchiveCountries", len({r["cc"] for r in _wa["archives"]}))
         except OSError:
             pass
         try:

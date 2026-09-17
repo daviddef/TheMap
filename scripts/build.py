@@ -43,6 +43,31 @@ def fold(s):
     return "".join(c for c in s if not unicodedata.combining(c)).lower()
 
 
+def shard_key(form):
+    """The first three alphanumerics ANYWHERE in the string.
+
+    THE BUILD AND THE CLIENT DISAGREED AND THE CLIENT WAS RIGHT. This used to
+    be `"".join(c for c in form[:3] if c.isalnum())` — take three characters,
+    then throw away the ones that are not letters. For «d'arcy» that is «d'a»
+    and then «da», which is two characters, which is too short to be a shard,
+    so nothing was written. The client meanwhile scans the whole string for its
+    first three alphanumerics, gets «dar», and fetches a file the build never
+    made.
+
+    10,962 surnames were unfindable by their own spelling because of it —
+    every name with a separator near the front: O'Brien, D'Angelo, Ah-Sing,
+    Le Roy, de Witt. Some were rescued by a variant that happened to shard
+    correctly, which is why it looked like it worked.
+    """
+    k = ""
+    for ch in form:
+        if ch.isalnum():
+            k += ch
+            if len(k) == 3:
+                break
+    return k if len(k) == 3 else ""
+
+
 def main():
     places = json.load(open("data/places.json"))["places"]
 
@@ -404,8 +429,8 @@ def main():
         rec = [r["n"], r["y"], r["x"], r["k"], r["a"], r["q"]]
         keys = set()
         for form in r["q"].split(" "):
-            key = "".join(c for c in form[:3] if c.isalnum())
-            if len(key) == 3:
+            key = shard_key(form)
+            if key:
                 keys.add(key)
         for key in keys:
             shards.setdefault(key, []).append(rec)
@@ -427,8 +452,8 @@ def main():
     for r in sett:
         rec = {"n": r["n"], "y": r["y"], "x": r["x"], "k": r["k"], "r": r["r"]}
         for form in set(r["q"].split(" ")):
-            k = "".join(c for c in form[:3] if c.isalnum())
-            if len(k) == 3:
+            k = shard_key(form)
+            if k:
                 rshards.setdefault(k, []).append(rec)
     for k, rows in rshards.items():
         seen, uniq = set(), []
@@ -460,13 +485,13 @@ def main():
     eshards, ebytes = {}, 0
     for n in est["parishes"]:
         rec = {"n": n, "k": "parish"}
-        k = "".join(c for c in fold(n)[:3] if c.isalnum())
-        if len(k) == 3:
+        k = shard_key(fold(n))
+        if k:
             eshards.setdefault(k, []).append(rec)
     for n in est["counties"]:
         rec = {"n": n, "k": "county"}
-        k = "".join(c for c in fold(n)[:3] if c.isalnum())
-        if len(k) == 3:
+        k = shard_key(fold(n))
+        if k:
             eshards.setdefault(k, []).append(rec)
     for k, rowlist in eshards.items():
         blob = json.dumps(rowlist, ensure_ascii=False, separators=(",", ":"))
@@ -500,8 +525,8 @@ def main():
             rec["a"] = c["a"]
         forms = {fold(c["n"])} | {fold(x) for x in c.get("a", [])}
         for form in forms:
-            k = "".join(ch for ch in form[:3] if ch.isalnum())
-            if len(k) == 3:
+            k = shard_key(form)
+            if k:
                 ishards.setdefault(k, []).append(rec)
     for k, rowlist in ishards.items():
         blob = json.dumps(rowlist, ensure_ascii=False, separators=(",", ":"))
@@ -533,8 +558,8 @@ def main():
                 rec[k] = t[k]
         forms = {fold(t["n"])} | {fold(x) for x in t.get("a", [])}
         for form in forms:
-            k = "".join(c for c in form[:3] if c.isalnum())
-            if len(k) == 3:
+            k = shard_key(form)
+            if k:
                 tshards.setdefault(k, []).append(rec)
     for k, rowlist in tshards.items():
         blob = json.dumps(rowlist, ensure_ascii=False, separators=(",", ":"))
@@ -603,8 +628,8 @@ def main():
             forms.add(fold(d["adm1"]))
         for form in forms:
             for word in form.split():
-                k = "".join(c for c in word[:3] if c.isalnum())
-                if len(k) == 3:
+                k = shard_key(word)
+                if k:
                     ashards.setdefault(k, []).append(rec)
     for k, rows in ashards.items():
         seen, uniq = set(), []
@@ -639,8 +664,8 @@ def main():
         keys = {r["q"]}
         keys.update(fold(v["n"]) for v in r["variants"])
         for form in keys:
-            k = "".join(c for c in form[:3] if c.isalnum())
-            if len(k) == 3:
+            k = shard_key(form)
+            if k:
                 sshards.setdefault(k, []).append(r)
     for k, rows in sshards.items():
         seen, uniq = set(), []

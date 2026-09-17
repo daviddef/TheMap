@@ -71,6 +71,27 @@ def main():
     except ImportError:
         err("cannot import shard_key from build.py to check it against the client")
 
+    # -1.5 · NO FIELD IN THE INDEX THAT NOTHING READS.
+    # index.json is fetched by every visitor before the map draws, so a field
+    # nobody uses is not a small cost but a pure one. This has happened three
+    # times: `r` and `k` sat in 7,391 rows costing 22 KB to answer nobody, and
+    # `vol` was added and never rendered on the same afternoon the lesson was
+    # written down. The client is read and every key must appear in it.
+    try:
+        _idx = json.load(open(os.path.join("site", "public", "index.json")))
+        _client = open(os.path.join("site", "src", "components",
+                                    "RecordMap.astro"), encoding="utf-8").read()
+        _keys = set()
+        for _r in _idx.get("places", []):
+            _keys |= set(_r)
+        for _k in sorted(_keys):
+            if not re.search(r"[\.\[]\s*[\"']?" + re.escape(_k) + r"[\"']?\s*\]?\b",
+                             _client):
+                err(f"index.json ships a field '{_k}' that RecordMap.astro never "
+                    f"reads — every visitor downloads it to answer nobody")
+    except OSError:
+        pass
+
     # -1 · THE INLINE SCRIPTS MUST PARSE.
     # RecordMap.astro carries 1,600 lines of JavaScript inside `<script
     # is:inline>`, which Astro copies into the page verbatim and never looks
@@ -175,6 +196,12 @@ def main():
         try:
             count("scottishParishes", len(json.load(
                 open("data/scotland-parishes.json"))["parishes"]))
+        except OSError:
+            pass
+        try:
+            _fv = json.load(open("data/fs-volumes.json"))
+            count("fsVolumes", sum(len(v) for v in _fv["byPlace"].values()))
+            count("fsVolumePlaces", len(_fv["byPlace"]))
         except OSError:
             pass
         try:

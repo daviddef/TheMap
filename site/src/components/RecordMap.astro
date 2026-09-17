@@ -64,6 +64,8 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wi
   <button class="ra-ico" id="ra-info" type="button" aria-expanded="false"
           title="What these controls mean">&#9432;</button>
   <button class="ra-ico" id="ra-copy" type="button" title="Copy a link to this exact view">&#128279;</button>
+  <button class="ra-ico" id="ra-reset" type="button"
+          title="Start again — clear the search, the year, the filters and the layers, and go back to the whole world">&#10226;</button>
   <span class="ra-copied" id="ra-copied" hidden>copied</span>
 </div>
 <div class="ra-help" id="ra-help" hidden></div>
@@ -551,6 +553,43 @@ window.addEventListener("load", async function () {
        these existed, 1,239 places had no address of their own. */
     h.push('<p class="at-go"><a href="' + BASE + "place/" + esc(d.id) + '/">' +
            "Everything about " + esc(d.name) + " &rarr;</a></p>");
+
+    /* THE BOOKS THEMSELVES. «Croatia, Church Books, 1516–1994 covers this
+       place» is true and one step short of what a researcher needs: which
+       book, for which years, and where is it. */
+    if (d.volumes && d.volumes.length) {
+      var byKind = {};
+      d.volumes.forEach(function (v) {
+        (v.kinds && v.kinds.length ? v.kinds : ["Other"]).forEach(function (k) {
+          (byKind[k] = byKind[k] || []).push(v);
+        });
+      });
+      h.push('<div class="at-sec"><div class="lab">The volumes themselves</div>');
+      h.push('<p class="at-sub">' + d.volumes.length + " book" +
+             (d.volumes.length === 1 ? "" : "s") + " catalogued for this place. " +
+             "<b>Nobody here has opened any of them</b> — these are the " +
+             "catalogue's own titles and the links that open the images.</p>");
+      ["Births", "Marriages", "Deaths", "Church Census", "Confirmations",
+       "Index", "Other"].forEach(function (k) {
+        if (!byKind[k]) return;
+        h.push('<div class="lab" style="margin-top:10px">' + esc(k) + "</div>");
+        h.push('<ul class="at-films">');
+        byKind[k].slice(0, 25).forEach(function (v) {
+          h.push("<li>" + (v.url
+              ? '<a href="' + esc(v.url) + '" target="_blank" rel="noopener">' +
+                esc(v.t) + " &#8599;</a>"
+              : "<b>" + esc(v.t) + "</b>") +
+            (v.from ? ' <span class="at-y">' + v.from + "\u2013" + v.to + "</span>" : "") +
+            (v.conf ? ' <span class="ra-who">' + esc(v.conf) + "</span>" : "") +
+            (v.film ? ' <span class="ra-who">film ' + esc(v.film) + "</span>" : "") +
+            "</li>");
+        });
+        if (byKind[k].length > 25)
+          h.push('<li class="ra-who">…and ' + (byKind[k].length - 25) + " more</li>");
+        h.push("</ul>");
+      });
+      h.push("</div>");
+    }
 
     /* THE NATIONAL SOURCES, WHICH NO PANEL HAS EVER SHOWN. David clicked an
        Irish parish and asked where IrishGenealogy had gone. It had never been
@@ -1787,6 +1826,43 @@ window.addEventListener("load", async function () {
     h.push("</div>");
     helpBox.innerHTML = h.join("");
     helpBox.hidden = false;
+  });
+
+  /* START AGAIN. Seven layers, a year range, eight access filters and a search
+     box is a lot of state to have got into by accident, and every one of them
+     hides something. A map whose filters can be set but not unset makes the
+     reader wonder whether it is broken — which, twice today, is exactly what
+     happened: a year slider left on 2004 emptied it, and the only way back was
+     to know which control had done it. */
+  document.getElementById("ra-reset").addEventListener("click", function () {
+    qbox.value = "";
+    yon.checked = false; year = year2 = null;
+    yin.value = 1780; yin2.value = 1920;
+    off = {};
+    on = { shelf: true, countries: true };
+    LAYERS.forEach(function (l) {
+      var el = document.querySelector('.ra-layer[data-l="' + l[0] + '"]');
+      if (el) {
+        el.classList.toggle("on", !!on[l[0]]);
+        var box = el.querySelector("input");
+        if (box) box.checked = !!on[l[0]];
+      }
+    });
+    document.querySelectorAll(".at-cat[data-cat]").forEach(function (b) {
+      b.classList.add("on");
+    });
+    if (gmark) { map.removeLayer(gmark); gmark = null; }
+    ctryLayer.clearLayers();
+    helpBox.hidden = true;
+    document.getElementById("ra-info").setAttribute("aria-expanded", "false");
+    panel.hidden = true; empty.hidden = false;
+    ["q", "year", "years", "off", "layers", "at", "view"].forEach(function (k) {
+      setQ(k, "");
+    });
+    syncLayers();
+    yearUI();
+    apply();
+    map.fitBounds(L.latLngBounds(HOME), { padding: [24, 24] });
   });
 
   document.getElementById("ra-copy").addEventListener("click", function () {

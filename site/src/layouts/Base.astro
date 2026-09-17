@@ -6,18 +6,30 @@ import site from "../data/site.json";
 import osm from "../../public/archives-osm.json";
 
 const { title, dek, eyebrow, bare, jsonld, og = "default" } = Astro.props;
+/* GROUPED, BECAUSE THE STYLESHEET ONLY EVER STYLED GROUPS. styles.css came
+   across whole from the family archive and it carries a complete navigation
+   design: dropdown groups, a menu button, a drawer. This file rendered eleven
+   bare links instead, and the sheet has no rule for a bare link in the bar —
+   so `header.site nav.topnav` won on specificity, the eleven ran together at
+   its 1px gap, and below 1180px its display:none!important hid them behind a
+   menu button that did not exist. Eleven top-level links was too many anyway. */
 const nav = [
-  ["/", "The map"],
-  ["/start/", "Start here"],
-  ["/places/", "Every place"],
-  ["/countries/", "Countries"],
-  ["/surnames/", "Surnames"],
-  ["/providers/", "The sources"],
-  ["/jurisdictions/", "Whose archive"],
-  ["/coverage/", "What's missing"],
-  ["/about/", "About"],
-  ["/changelog/", "What changed"],
-  ["/add/", "Add a source"],
+  ["Explore", [
+    ["/", "The map"],
+    ["/places/", "Every place"],
+    ["/countries/", "Countries"],
+    ["/surnames/", "Surnames"],
+  ]],
+  ["The sources", [
+    ["/providers/", "Who holds records"],
+    ["/jurisdictions/", "Whose archive"],
+    ["/coverage/", "What's missing"],
+  ]],
+  ["About", [
+    ["/start/", "Start here"],
+    ["/about/", "About the atlas"],
+    ["/changelog/", "What changed"],
+  ]],
 ];
 const here = Astro.url.pathname;
 /* Strip the query string: /?q=Breslau and / are the same page. */
@@ -56,7 +68,11 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
     first because it stays sharp at every size a tab strip, a bookmark bar or a
     phone home screen asks for; the OG cards already cover the social preview. */}
 <link rel="icon" href={u("/favicon.svg")} type="image/svg+xml" />
-<link rel="apple-touch-icon" href={u("/favicon.svg")} />
+{/* PNG alongside it, because an SVG is not enough on its own. Safari ignores
+    an SVG apple-touch-icon entirely, and a bookmark or a home screen falls
+    back to a grey square — which is what "no icon" looked like. */}
+<link rel="icon" href={u("/favicon-32.png")} sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href={u("/apple-touch-icon.png")} sizes="180x180" />
 <meta name="theme-color" content="#1F5C6B" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -68,30 +84,25 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
     nav shipped unstyled. Two other explanations were tried first and both were
     wrong. A style element belongs in the head; anywhere else is luck. */}
 <style is:global>
+  /* ONLY WHAT styles.css DOES NOT ALREADY DEFINE. It owns header.site,
+     .sitein, .brand, .pagehead, .topnav, .burger and .drawer — every one of
+     those was duplicated here and lost, because `header.site nav.topnav`
+     outranks a bare `.topnav`. A layout should not restate its stylesheet. */
   .skip { position: absolute; left: -9999px; }
   .skip:focus { left: 12px; top: 12px; z-index: 999; background: var(--panel);
                 padding: 10px 14px; border: 1px solid var(--accent); }
-  header.site { border-bottom: 1px solid var(--rule); background: var(--panel); }
-  .sitein { display: flex; align-items: baseline; gap: 28px; flex-wrap: wrap;
-            padding: 14px 0; }
-  .brand { font-family: var(--serif); font-size: 21px; font-weight: 600;
-           color: var(--ink); text-decoration: none; letter-spacing: .01em; }
-  .brand em { font-style: italic; font-weight: 400; color: var(--accent); }
-  .topnav { display: flex; gap: 18px; flex-wrap: wrap; }
-  .topnav a { font-family: var(--sans); font-size: 13px; color: var(--ink-2);
-              text-decoration: none; padding-bottom: 2px; }
-  .topnav a:hover { color: var(--accent); }
-  .topnav a.on { color: var(--accent); border-bottom: 2px solid var(--accent); }
-  .pagehead { margin: 30px 0 18px; }
-  .pagehead h1 { font-family: var(--serif); font-size: 38px; line-height: 1.12;
-                 margin: 8px 0 12px; font-weight: 500; }
   footer.site-foot { margin-top: 60px; padding: 26px 0 40px;
                      border-top: 1px solid var(--rule); background: var(--panel); }
   .foot-note { font-family: var(--sans); font-size: 12.5px; line-height: 1.6;
                color: var(--ink-3); max-width: 80ch; margin: 0 0 8px; }
   .foot-thin { font-size: 11.5px; }
-  .adslot { min-height: 90px; margin: 0 0 24px; display: flex;
-            align-items: center; justify-content: center; }
+    /* NOT A FLEX CONTAINER. It was, and the ins element inside it is a
+     block-level flex child with no intrinsic width, so it measured zero and
+     AdSense rejected the slot outright: "No slot size for availableWidth=0".
+     The loader was arriving and being turned away at the door. A responsive
+     unit needs a real width to size itself against. */
+  .adslot { min-height: 90px; margin: 0 0 24px; display: block; }
+  .adslot ins { display: block; width: 100%; }
 </style>
 </head>
 <body>
@@ -99,9 +110,31 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
 <header class="site">
   <div class="wrap sitein">
     <a class="brand" href={u("/")}>Record <em>Atlas</em></a>
+    <button class="burger" type="button" aria-expanded="false" aria-controls="drawer">
+      <span class="bars" aria-hidden="true"></span>Menu
+    </button>
     <nav class="topnav" aria-label="Main">
-      {nav.map(([h, l]) => <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}
+      {nav.map(([label, links]) => (
+        <details class="menu">
+          <summary>{label}</summary>
+          <div class="panel">
+            {links.map(([h, l]) => <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}
+          </div>
+        </details>
+      ))}
+      <a class="findbtn" href={u("/add/")}>Add a source</a>
     </nav>
+  </div>
+  <div class="drawer" id="drawer" hidden>
+    <div class="wrap">{nav.map(([label, links]) => (
+      <div class="dgrp"><span class="gl">{label}</span>
+        {links.map(([h, l]) => <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}
+      </div>
+    ))}
+      <div class="dgrp"><span class="gl">Contribute</span>
+        <a href={u("/add/")} class={here === u("/add/") ? "on" : ""}>Add a source</a>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -159,7 +192,7 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
             bug. Do not write tag syntax in these comments. The value
             has to be an expression containing a string, not a string
             containing braces. */}
-        <script is:inline set:html={"(adsbygoogle = window.adsbygoogle || []).push({});"} />
+        <script is:inline set:html={"(adsbygoogle = window.adsbygoogle || []).push({});"}></script>
       </div>
     )}
     <p class="foot-note">
@@ -176,5 +209,35 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
     </p>
   </div>
 </footer>
+<script is:inline>
+  /* The menu button, and one dropdown open at a time. */
+  (function () {
+    var bar = document.querySelector(".topnav");
+    var burger = document.querySelector(".burger");
+    var drawer = document.getElementById("drawer");
+    if (burger && drawer) {
+      burger.addEventListener("click", function () {
+        var open = drawer.hasAttribute("hidden");
+        if (open) { drawer.removeAttribute("hidden"); } else { drawer.setAttribute("hidden", ""); }
+        burger.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+    }
+    if (!bar) return;
+    var menus = [].slice.call(bar.querySelectorAll("details.menu"));
+    menus.forEach(function (d) {
+      d.addEventListener("toggle", function () {
+        if (!d.open) return;
+        menus.forEach(function (o) { if (o !== d) o.open = false; });
+      });
+    });
+    document.addEventListener("click", function (e) {
+      if (e.target.closest && e.target.closest(".topnav")) return;
+      menus.forEach(function (d) { d.open = false; });
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") menus.forEach(function (d) { d.open = false; });
+    });
+  })();
+</script>
 </body>
 </html>

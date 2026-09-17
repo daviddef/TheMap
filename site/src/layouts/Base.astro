@@ -84,14 +84,27 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
   <div class="wrap">
     {/* The ad slot. Reserved at a fixed height so that turning it on can never
         shove the page around, kept well below the map so nothing here is ever
-        clicked by somebody reaching for a control, and gated on consent —
-        the script does not load until a visitor has agreed to it. Off until
-        an ad unit exists; see site/src/data/site.json. */}
+        clicked by somebody reaching for a control.
+
+        THE LOADER WAS NEVER HERE. This block rendered the <ins> element and
+        nothing else — no adsbygoogle script, no push — so switching `enabled`
+        on would have produced an empty box and a puzzle. It is wired now.
+
+        CONSENT IS GOOGLE'S, NOT OURS, AND THE OLD COMMENT OVERSTATED IT. It
+        said «the script does not load until a visitor has agreed», which would
+        need a consent platform this site does not have. What actually happens
+        is that Google's own GDPR message, enabled in the AdSense dashboard,
+        shows before personalised ads are served. That is compliant and it is a
+        different mechanism, so it should not be described as the other one.
+        See site/src/data/site.json. */}
     {site.ads.enabled && site.ads.slot && (
       <div class="adslot" aria-label="Advertisement">
         <ins class="adsbygoogle" style="display:block" data-ad-client={site.ads.client}
              data-ad-slot={site.ads.slot} data-ad-format="horizontal"
              data-full-width-responsive="true"></ins>
+        <script async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${site.ads.client}`}
+                crossorigin="anonymous"></script>
+        <script is:inline set:html="(adsbygoogle = window.adsbygoogle || []).push({});" />
       </div>
     )}
     <p class="foot-note">

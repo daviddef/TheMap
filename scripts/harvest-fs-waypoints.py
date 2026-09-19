@@ -44,7 +44,13 @@ OUT = "data/fs-waypoints.json"
 UA = "RecordAtlas/1.0 (+https://daviddef.github.io/TheMap; volume index)"
 API = "https://api.familysearch.org/platform/records"
 MAX_DEPTH = 6
-MAX_NODES_PER_COLLECTION = 4000   # a runaway tree must not eat a whole run
+# A GUARD, NOT A BUDGET. At 4,000 this silently truncated Croatia, Church
+# Books — the browser walk of that same collection found 4,903 volumes, so
+# the cap would have cut nine hundred books off the one collection whose
+# right answer is known, and the validation would have "passed" by agreeing
+# with a truncation. Set where a genuine runaway still stops but no real
+# collection reaches.
+MAX_NODES_PER_COLLECTION = 60000
 
 
 def get(url, pause, tries=4):

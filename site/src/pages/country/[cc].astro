@@ -11,6 +11,7 @@ import Base from "../../layouts/Base.astro";
 import { u } from "../../lib/url.js";
 import full from "../../data/places-full.json";
 import cols from "../../data/collections-full.json";
+import dir from "../../data/directory.json";
 import regions from "../../../public/regions.json";
 import provs from "../../../public/providers.json";
 import idx from "../../../public/index.json";
@@ -67,6 +68,28 @@ const byRegion = [];
   byRegion.sort((a, b) => (a.national === b.national
     ? a.label.localeCompare(b.label) : a.national ? 1 : -1));
 }
+/* THE CONTRIBUTED DIRECTORY, grouped by what kind of record each row is.
+   David's own CSV. Country rows only — the 26 rows tagged Global would
+   otherwise repeat identically on all 97 country pages and say nothing about
+   any of them. Every link here was tried on the date shown and 430 of the
+   original 1,399 were dropped for not answering at all. */
+const KIND_LABEL = {
+  church: "Church and parish registers", cemetery: "Cemeteries and burials",
+  census: "Censuses and population lists", military: "Military and wartime",
+  migration: "Immigration and emigration", probate: "Probate, land and notarial",
+  civil: "Civil registration and vital records", minority: "Jewish and minority",
+  archives: "General historical archives",
+};
+const KIND_ORDER = ["church", "civil", "census", "probate", "military",
+                    "migration", "cemetery", "minority", "archives"];
+const contributed = (dir.rows || []).filter((r) => r.countries.includes(cc));
+const byKind = KIND_ORDER
+  .map((k) => ({ k, label: KIND_LABEL[k],
+                 rows: contributed.filter((r) => r.tags.includes(k))
+                                  .sort((a, b) => a.repo.localeCompare(b.repo)) }))
+  .filter((g) => g.rows.length);
+const untagged = contributed.filter((r) => !r.tags.length);
+
 const who = provs.providers.filter((p) => p.countries.includes(cc));
 const world = provs.providers.filter((p) => p.countries.includes("*"));
 /* Same correction as /coverage/: a country's regions are the ones whose GROUND
@@ -138,6 +161,46 @@ const span = mine.filter(x => x.c.from).length
           </ul>
         </div>
       ))}
+    </section>
+  )}
+
+  {contributed.length > 0 && (
+    <section style="margin-top:34px">
+      <h2>{contributed.length} more collections, contributed</h2>
+      <p class="cap">A directory David assembled, sorted by what kind of record each
+      one is. <b>Read this differently from the rest of the page.</b> The descriptions
+      are his, not an archive's catalogue, and nobody here has opened the volumes
+      behind them. Every link was tried on {dir.checked} and answered; the ones that
+      did not are not listed.</p>
+      {byKind.map((g) => (
+        <div class="cgrp">
+          <div class="lab">{g.label} <span class="n">{g.rows.length}</span></div>
+          <ul class="rows">
+            {g.rows.map((r) => (
+              <li>
+                <a href={r.url} target="_blank" rel="noopener">{r.name} ↗</a>
+                <span class="y">{r.repo}</span>
+                {r.from && <span class="y">{r.from}–{r.to}</span>}
+                {r.access !== "free" && <span class={"chip acc-" + r.access}>{r.access}</span>}
+                {r.gated && <span class="y" title="This address answered our checker by refusing it, which many archives do to any script while serving people perfectly well.">refuses scripts</span>}
+                <p class="what">{r.what}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+      {untagged.length > 0 && (
+        <div class="cgrp">
+          <div class="lab">Kind not stated <span class="n">{untagged.length}</span></div>
+          <ul class="rows">
+            {untagged.map((r) => (
+              <li><a href={r.url} target="_blank" rel="noopener">{r.name} ↗</a>
+                <span class="y">{r.repo}</span>
+                <p class="what">{r.what}</p></li>
+            ))}
+          </ul>
+        </div>
+      )}
     </section>
   )}
 

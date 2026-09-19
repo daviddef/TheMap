@@ -473,6 +473,21 @@ def main():
     json.dump({"collections": FS}, open(os.path.join(src, "collections-full.json"), "w"),
               ensure_ascii=False, separators=(",", ":"))
 
+    # THE CONTRIBUTED DIRECTORY. David's own CSV of named collections at named
+    # repositories — 1,399 rows, of which 969 survived having their links
+    # tried. It is kept apart from everything else in this file and labelled
+    # as contributed wherever it appears, because its descriptions are his
+    # rather than an archive's and nobody has opened the volumes behind them.
+    # Optional: the atlas builds perfectly well without it.
+    try:
+        directory = json.load(open("data/directory.json"))
+    except FileNotFoundError:
+        directory = {"rows": [], "checked": None, "counts": {}}
+    json.dump(directory, open(os.path.join(src, "directory.json"), "w"),
+              ensure_ascii=False, separators=(",", ":"))
+    print(f"directory       {len(directory['rows'])} contributed rows "
+          f"in {len({c for r in directory['rows'] for c in r['countries']})} countries")
+
     # ---- the gazetteer, sharded on three letters -------------------------
     # 48,906 places and 212,101 former names will not ride in the index that
     # draws the map, and must not: this is a search corpus, touched only when

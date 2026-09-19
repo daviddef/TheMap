@@ -94,6 +94,19 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wi
     <summary id="ra-catsum">What it costs to look</summary>
     <div class="atlas-key" id="ra-cats"></div>
   </details>
+  {/* WHAT KIND OF RECORD. David asked for this directly — "many people
+      really want to look at church records, do we know which are which and
+      could we apply a church record filter". Until now nothing in this
+      project knew which were which; the kind is read out of each
+      collection's title by one shared classifier and carried on the index as
+      a bitmask, so the filter works on first paint without fetching
+      anything. Unset means every kind, including the sixth of collections
+      whose title says nothing about what they are — a filter that quietly
+      dropped those would be lying about coverage. */}
+  <details class="ra-cats-wrap" id="ra-kindw">
+    <summary id="ra-kindsum">What kind of record</summary>
+    <div class="atlas-key" id="ra-kinds"></div>
+  </details>
   <span class="cap" id="ra-count"></span>
 </div>
 
@@ -911,6 +924,53 @@ window.addEventListener("load", async function () {
     apply();
   });
 
+  /* ---- what kind of record ------------------------------------------------ */
+  /* The bit for each kind comes from index.json rather than being written out
+     here. Two copies of a derived constant is exactly how the shard keys came
+     to disagree between build and client, and that cost 10,962 surnames their
+     own spelling — so the client reads the mapping it is given. */
+  var KBIT = idx.kinds || {};
+  var KLAB = idx.kindLabels || {};
+  var KORDER = Object.keys(KBIT);
+  var kindOn = {};
+  (Q.get("kind") || "").split(",").filter(Boolean).forEach(function (k) {
+    if (KBIT[k]) kindOn[k] = true;
+  });
+  function kindMask() {
+    var m = 0;
+    for (var k in kindOn) { if (kindOn[k]) m |= KBIT[k]; }
+    return m;
+  }
+  var kbox = document.getElementById("ra-kinds");
+  if (KORDER.length) {
+    kbox.innerHTML = KORDER.map(function (k) {
+      return '<button class="at-cat' + (kindOn[k] ? " on" : "") + '" data-kind="' + k +
+        '" title="' + esc(KLAB[k] || k) + '">' + esc(KLAB[k] || k) + "</button>";
+    }).join("") +
+      '<span class="at-cat at-hollow-key" title="A collection is sorted by what ' +
+      'its title says it is. About one in six says nothing either way, so it ' +
+      'appears only when no kind is chosen — narrowing to a kind can therefore ' +
+      'hide a register that simply is not described.">' +
+      "<i></i>Read from the title";
+  }
+  function kindSummary() {
+    var n = KORDER.filter(function (k) { return kindOn[k]; });
+    document.getElementById("ra-kindsum").textContent = !n.length
+      ? "What kind of record — every kind"
+      : "What kind of record — " + n.map(function (k) { return KLAB[k] || k; }).join(", ");
+  }
+  kindSummary();
+  if (Object.keys(kindOn).length) document.getElementById("ra-kindw").open = true;
+  kbox.addEventListener("click", function (ev) {
+    var b = ev.target.closest(".at-cat[data-kind]"); if (!b) return;
+    var k = b.getAttribute("data-kind");
+    kindOn[k] = !kindOn[k];
+    b.classList.toggle("on", !!kindOn[k]);
+    kindSummary();
+    setQ("kind", KORDER.filter(function (x) { return kindOn[x]; }).join(","));
+    apply();
+  });
+
   /* ---- the year ---------------------------------------------------------- */
   var year = null, year2 = null;
   var yon = document.getElementById("ra-yon"), yin = document.getElementById("ra-year"),
@@ -1022,6 +1082,12 @@ window.addEventListener("load", async function () {
        name itself is folded here rather than shipped 2,128 times. */
     if (t && fold(p.n).indexOf(t) < 0 && !(p.q && p.q.indexOf(t) > -1)) return false;
     if (year && p.s && (p.s[0] > year2 || p.s[1] < year)) return false;
+    /* ANY of the chosen kinds, not all of them: somebody after church records
+       and censuses wants both sorts of place, not only the places holding
+       both. A place with no kind at all is hidden once a kind is chosen,
+       which is honest — nothing about it says it holds that kind. */
+    var km = kindMask();
+    if (km && !((p.k || 0) & km)) return false;
     return true;
   }
   function apply() {
@@ -1923,14 +1989,20 @@ window.addEventListener("load", async function () {
     document.querySelectorAll(".at-cat[data-cat]").forEach(function (b) {
       b.classList.add("on");
     });
+    kindOn = {};
+    document.querySelectorAll(".at-cat[data-kind]").forEach(function (b) {
+      b.classList.remove("on");
+    });
+    kindSummary();
     catSummary();
     document.getElementById("ra-catsw").open = false;
+    document.getElementById("ra-kindw").open = false;
     if (gmark) { map.removeLayer(gmark); gmark = null; }
     ctryLayer.clearLayers();
     helpBox.hidden = true;
     document.getElementById("ra-info").setAttribute("aria-expanded", "false");
     panel.hidden = true; empty.hidden = false;
-    ["q", "year", "years", "off", "layers", "at", "view"].forEach(function (k) {
+    ["q", "year", "years", "off", "kind", "layers", "at", "view"].forEach(function (k) {
       setQ(k, "");
     });
     syncLayers();

@@ -13,6 +13,8 @@ needs to be DRAWN and FOUND, and the panel fetches one small file when somebody
 actually clicks. Worldwide, the index grows linearly and the panel never does.
 """
 import collections, json, os, re, shutil, sys, unicodedata
+import record_kinds  # one classifier, shared with the other scripts
+KIND_BIT = record_kinds.BIT
 
 import os as _os
 _ROOT = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
@@ -112,6 +114,19 @@ def main():
         FS = json.load(open("data/collections.json"))["collections"]
     except FileNotFoundError:
         FS = []
+    # WHAT KIND OF RECORD EACH ONE IS. David asked for a church-records
+    # filter — "many people really want to look at church records, do we know
+    # which are which" — and nothing here knew. The only structured thing a
+    # collection carries is its title, so the kind is read out of that, once,
+    # here, by the shared classifier every other consumer uses too. About one
+    # in six matches nothing and stays unclassified rather than being guessed.
+    # NOT `kinds` — THAT NAME IS TAKEN. A volume already carries kinds as
+    # single letters for the EVENTS it records: b, d, m, i for births,
+    # deaths, marriages and index. This is a different axis entirely — what
+    # sort of register the collection is — so it gets its own name rather
+    # than quietly shadowing a field 8,557 rows already use.
+    for c in FS:
+        c["rkinds"] = record_kinds.kinds_of(c["title"])
     fs_by_cc = {}
     for c in FS:
         for cc in c["countries"]:
@@ -312,6 +327,18 @@ def main():
         extra = sorted(f for f in q.split(" ") if f and f != fold(p["name"]))
         row = {"i": p["id"], "n": p["name"], "y": p["lat"], "x": p["lon"],
                "c": len(cs)}
+        # THE KINDS PRESENT HERE, AS A BITMASK. One small integer per place,
+        # rather than a list of words on 7,391 rows — the index has an 800 KB
+        # budget and a filter has to work on first paint, before any per-place
+        # detail has been fetched. KIND_BIT is written into the index header
+        # so the client reads the mapping rather than hard-coding it, which is
+        # the mistake the shard keys made.
+        kb = 0
+        for _c in cs:
+            for _k in (_c.get("rkinds") or record_kinds.kinds_of(_c.get("title", ""))):
+                kb |= KIND_BIT[_k]
+        if kb:
+            row["k"] = kb
         # DOES THIS PLACE'S COUNTRY HAVE A NAMED NATIONAL SOURCE? A hollow grey
         # dot reading «nobody has walked this one yet» is true of almost every
         # place in Africa and it is not the whole truth: 32 African countries
@@ -359,7 +386,7 @@ def main():
             detail["fs"] = [{"cc": c["cc"], "t": c["title"], "from": c.get("from"),
                              "to": c.get("to"), "n": c.get("records") or 0,
                              "img": c.get("images") or 0, "url": c["url"],
-                             "rank": rank, "where": where,
+                             "rank": rank, "where": where, "k": c.get("rkinds") or [],
                              "km": round(dist) if dist is not None else None}
                             for rank, _, _, c, where, dist in hits[:60]]
             detail["nfs"] = len(hits)
@@ -381,6 +408,7 @@ def main():
 
     idx = {"countries": cmap,
            "note": "One row per place. i=id n=name y=lat x=lon a=access c=collections "
+                   "k=bitmask of record kinds present, read against `kinds`. "
                    "a is an index into `rank`, not a word. w=1 when the "
                    "country has a named national archive or library. "
                    "q=folded name variants s=[first year, last year] b=colour borrowed "
@@ -389,6 +417,8 @@ def main():
                    "Detail is fetched per place from p/<id>.json when a marker is clicked.",
            "access": providers["access"],
            "rank": RANK,
+           "kinds": KIND_BIT,
+           "kindLabels": record_kinds.LABEL,
            "places": index}
     json.dump(idx, open(os.path.join(OUT, "index.json"), "w"),
               ensure_ascii=False, separators=(",", ":"))

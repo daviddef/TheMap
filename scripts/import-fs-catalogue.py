@@ -7,7 +7,17 @@ researcher needs: WHICH BOOK, FOR WHICH YEARS, AND WHERE IS IT. The Defranceski
 archive answers that for Croatia — «Births (Rođeni) 1798–1858», with a link —
 and this atlas did not.
 
-IT CANNOT BE HARVESTED FROM HERE AND THAT IS NOT A LIMITATION OF EFFORT.
+SUPERSEDED IN PART — SEE scripts/harvest-fs-waypoints.py. What follows was
+half right and the wrong half mattered. The CATALOGUE is indeed gated. But
+api.familysearch.org/platform/records/collections/<id>/waypoints answers 200
+to an ordinary identified request, with no token and no browser, and walks
+down to the individual book. I recorded the door as shut having tried only
+one of them — the same mistake as declaring Scotland's parishes closed when
+data.gov.uk had had them all along. This script still does its job: it
+imports the Croatian walk that was already done, at a depth and quality the
+API does not match, including confession and film numbers.
+
+THE CATALOGUE CANNOT BE HARVESTED FROM HERE, AND THAT MUCH IS NOT EFFORT.
 FamilySearch's catalogue and waypoint tree are behind a security service; every
 path answers 404 or a challenge to anything that is not a signed-in browser.
 The Defranceski archive's own ingest script says so in its header: «the harvest

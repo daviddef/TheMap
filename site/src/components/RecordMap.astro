@@ -586,19 +586,38 @@ window.addEventListener("load", async function () {
        place» is true and one step short of what a researcher needs: which
        book, for which years, and where is it. */
     if (d.volumes && d.volumes.length) {
-      var byKind = {};
+      /* TWO VOCABULARIES, BECAUSE THERE ARE TWO WALKS. Croatia's books were
+         read in a browser and carry the EVENT — Births, Marriages, Deaths —
+         parsed from titles that were all in one language. The rest of the
+         world arrives from the waypoint API with titles in every language
+         FamilySearch catalogues in, so those carry the record-kind reading
+         instead. Grouping by whichever a book has keeps both legible; the
+         alternative was every foreign book landing in "Other". */
+      var byKind = {}, order = [];
       d.volumes.forEach(function (v) {
-        (v.kinds && v.kinds.length ? v.kinds : ["Other"]).forEach(function (k) {
-          (byKind[k] = byKind[k] || []).push(v);
+        var gs = (v.kinds && v.kinds.length) ? v.kinds
+               : (v.rk && v.rk.length) ? v.rk.map(function (k) { return KLAB[k] || k; })
+               : ["Other"];
+        gs.forEach(function (k) {
+          if (!byKind[k]) { byKind[k] = []; order.push(k); }
+          byKind[k].push(v);
         });
+      });
+      /* Events first in their familiar order, then anything else as it came. */
+      var PREF = ["Births", "Marriages", "Deaths", "Church Census",
+                  "Confirmations", "Index"];
+      order.sort(function (a, b) {
+        var ia = PREF.indexOf(a), ib = PREF.indexOf(b);
+        if (ia < 0) ia = a === "Other" ? 999 : 500;
+        if (ib < 0) ib = b === "Other" ? 999 : 500;
+        return ia - ib || a.localeCompare(b);
       });
       h.push('<div class="at-sec"><div class="lab">The volumes themselves</div>');
       h.push('<p class="at-sub">' + d.volumes.length + " book" +
              (d.volumes.length === 1 ? "" : "s") + " catalogued for this place. " +
              "<b>Nobody here has opened any of them</b> — these are the " +
              "catalogue's own titles and the links that open the images.</p>");
-      ["Births", "Marriages", "Deaths", "Church Census", "Confirmations",
-       "Index", "Other"].forEach(function (k) {
+      order.forEach(function (k) {
         if (!byKind[k]) return;
         h.push('<div class="lab" style="margin-top:10px">' + esc(k) + "</div>");
         h.push('<ul class="at-films">');
@@ -610,6 +629,11 @@ window.addEventListener("load", async function () {
             (v.from ? ' <span class="at-y">' + v.from + "\u2013" + v.to + "</span>" : "") +
             (v.conf ? ' <span class="ra-who">' + esc(v.conf) + "</span>" : "") +
             (v.film ? ' <span class="ra-who">film ' + esc(v.film) + "</span>" : "") +
+            /* The path through FamilySearch's tree that put this book on
+               this dot. Without it a reader has no way to tell a good match
+               from a wrong one, and these are matched by name. */
+            (v["in"] ? ' <span class="ra-who" title="Where this book sits in ' +
+                       'FamilySearch\u2019s own tree">' + esc(v["in"]) + "</span>" : "") +
             "</li>");
         });
         if (byKind[k].length > 25)

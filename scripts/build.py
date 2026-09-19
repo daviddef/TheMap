@@ -251,14 +251,54 @@ def main():
 
     # ---- the volumes themselves, per place --------------------------------
     # The level below «a collection covers this place»: which book, for which
-    # years, and the link that opens its images. Croatia only, because that is
-    # the only walk that exists — FamilySearch will not serve a script and this
-    # one was done in a browser.
+    # years, and the link that opens its images.
+    #
+    # NO LONGER CROATIA ONLY. The note that used to sit here said FamilySearch
+    # will not serve a script, so the Croatian walk done in a browser was all
+    # there could ever be. That was true of the catalogue and false of the
+    # records API — see scripts/harvest-fs-waypoints.py — and the rest of the
+    # world now arrives from there.
+    #
+    # TWO SOURCES, AND CROATIA'S WINS WHERE THEY OVERLAP. The browser walk
+    # carries things the API does not: the confession that kept the register,
+    # and the microfilm number. The API walk carries breadth. So the richer
+    # rows are laid down first and the API only fills what they leave empty,
+    # deduped on the waypoint id, which is the book itself.
     try:
         fsv = json.load(open("data/fs-volumes.json"))
-        vol_by_place = fsv["byPlace"]
+        vol_by_place = {k: list(v) for k, v in fsv["byPlace"].items()}
     except FileNotFoundError:
         fsv, vol_by_place = None, {}
+    try:
+        world = json.load(open("data/fs-volumes-world.json"))
+    except FileNotFoundError:
+        world = None
+    if world:
+        _added = 0
+        for _pid, _rows in world["byPlace"].items():
+            _have = {r.get("waypoint") or r.get("wp") for r in vol_by_place.get(_pid, [])}
+            for _r in _rows:
+                if _r.get("wp") and _r["wp"] in _have:
+                    continue
+                vol_by_place.setdefault(_pid, []).append({
+                    "t": _r["t"], "from": _r.get("from"), "to": _r.get("to"),
+                    "url": _r.get("url"), "waypoint": _r.get("wp"),
+                    # NOT `kinds`. That field holds the Croatian walk's
+                    # EVENT vocabulary — Births, Marriages, Deaths — parsed
+                    # from titles written in one language. These titles are
+                    # in every language FamilySearch catalogues in
+                    # ("Bautismos", "Alistamiento militar", "Rodeni"), so
+                    # they carry the record-kind reading instead and the
+                    # panel groups by whichever a book has.
+                    "rk": record_kinds.kinds_of(_r["t"], _r.get("colTitle")),
+                    # Where in FamilySearch's own tree this book was found.
+                    # A reader who cannot see why a book is on this dot has
+                    # no way to tell a good match from a wrong one.
+                    "in": _r.get("in"),
+                })
+                _added += 1
+        print(f"volumes         {_added} from the waypoint API, "
+              f"on top of {sum(len(v) for v in (fsv or {}).get('byPlace', {}).values())} walked in Croatia")
 
     wa_by_cc = {}
     try:

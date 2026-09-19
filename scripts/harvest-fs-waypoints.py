@@ -181,6 +181,7 @@ def main():
     state.setdefault("indexOnly", [])
     done = set(state["done"])
     idx_only = [0]
+    since_save = [0]
 
     if a.probe:
         todo = [t for t in todo if t["id"] not in done][:a.probe]
@@ -195,6 +196,17 @@ def main():
     for i, c in enumerate(todo, 1):
         got, n = walk(c["id"], a.pause, lambda m: print(m, flush=True))
         calls += n
+        # BEFORE THE BRANCHES BELOW. The first cut put this at the foot of
+        # the loop, under two `continue`s — so whenever the 25th collection
+        # was index-only or unreachable, and most of them are, the save was
+        # skipped. A thirty-hour resumable job that does not actually write
+        # is just a thirty-hour job you do twice.
+        since_save[0] += 1
+        if not a.probe and since_save[0] >= 25:
+            since_save[0] = 0
+            state["harvested"] = time.strftime("%Y-%m-%d")
+            state["done"] = sorted(done)
+            json.dump(state, open(OUT, "w"), ensure_ascii=False, indent=1)
         if got is None:
             print(f"  [{i}/{len(todo)}] {c['id']} unreachable — leaving it "
                   f"undone so --resume tries again", flush=True)
@@ -216,9 +228,6 @@ def main():
         state["done"] = sorted(done)
         print(f"  [{i}/{len(todo)}] {c['id']} {len(got):5d} volumes "
               f"({n} calls) — {c['title'][:44]}", flush=True)
-        if not a.probe and i % 25 == 0:
-            state["harvested"] = time.strftime("%Y-%m-%d")
-            json.dump(state, open(OUT, "w"), ensure_ascii=False, indent=1)
 
     el = time.time() - t0
     if a.probe:

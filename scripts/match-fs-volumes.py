@@ -27,6 +27,7 @@ os.chdir(ROOT)
 SRC = "data/fs-waypoints.json"
 OUT = "data/fs-volumes-world.json"
 GAPS = "data/fs-volumes-unplaced.json"
+PROMOTE = "data/fs-volumes-promote.json"
 
 
 def fold(s):
@@ -67,7 +68,36 @@ def main():
                 if len(cand) > 2:
                     idx[(cc, cand)].append(p)
 
+    # SECOND CHANCE, FROM THE GAZETTEER. A parish FamilySearch has books for
+    # is very often a real settlement this atlas simply has not drawn yet —
+    # 45,985 of them are sitting in the gazetteer with coordinates and every
+    # name they answer to. Matching against those turns an unplaced book into
+    # a new dot instead of a line in a report nobody actions.
+    #
+    # It is a SECOND pass, never a competing one: a place already on the
+    # shelf wins, because it has been through the checks the gazetteer has
+    # not. And population breaks ties — where a country has four villages of
+    # the same name, the largest is the likeliest subject of a record
+    # collection, and the alternative is picking whichever came first in the
+    # file.
+    gaz_idx = collections.defaultdict(list)
+    try:
+        gaz = json.load(open("data/gazetteer.json"))["places"]
+    except FileNotFoundError:
+        gaz = []
+    for g in gaz:
+        cc = g.get("k")
+        if not cc:
+            continue
+        for f in {g.get("n", "")} | set(g.get("a") or []):
+            cand = fold(f)
+            if len(cand) > 2:
+                gaz_idx[(cc, cand)].append(g)
+    for key in gaz_idx:
+        gaz_idx[key].sort(key=lambda g: -(g.get("p") or 0))
+
     by_place = collections.defaultdict(list)
+    promote = {}
     unplaced = collections.Counter()
     unplaced_cc = {}
     matched = miss = noname = 0
@@ -93,6 +123,27 @@ def main():
                         break
                 if hit:
                     break
+            if not hit:
+                # Try the gazetteer before giving up on it.
+                for name in reversed(path):
+                    for cand in (name, bare(name)):
+                        for cc in ccs:
+                            got = gaz_idx.get((cc, fold(cand)))
+                            if got:
+                                g = got[0]
+                                pid = "g-" + re.sub(r"[^a-z0-9]+", "-",
+                                                    fold(g["n"])).strip("-")[:48] \
+                                      + "-" + cc.lower()
+                                hit = {"id": pid}
+                                promote.setdefault(pid, {
+                                    "id": pid, "name": g["n"], "country": cc,
+                                    "lat": g["y"], "lon": g["x"],
+                                    "from": "gazetteer"})
+                                break
+                        if hit:
+                            break
+                    if hit:
+                        break
             if not hit:
                 miss += 1
                 deepest = path[-1]
@@ -137,14 +188,24 @@ def main():
                   for n, c in unplaced.most_common(4000)],
     }, open(GAPS, "w"), ensure_ascii=False, indent=1)
 
+    json.dump({
+        "note": ("Settlements the gazetteer knows, with coordinates, that "
+                 "FamilySearch has books for and this shelf had not drawn. "
+                 "Promoted to places so the books have somewhere to land."),
+        "counts": {"places": len(promote)},
+        "places": sorted(promote.values(), key=lambda x: x["id"]),
+    }, open(PROMOTE, "w"), ensure_ascii=False, indent=1)
+
     print(f"{total:,} volumes considered")
-    print(f"  {matched:,} matched a place on this shelf "
-          f"({100*matched/max(total,1):.0f}%)")
+    print(f"  {matched:,} matched a place "
+          f"({100*matched/max(total,1):.0f}%), of which "
+          f"{len(promote):,} are new dots promoted from the gazetteer")
     print(f"  {miss:,} named a place this atlas does not hold")
     print(f"  {noname:,} had no place in their path at all")
     print(f"\n{sum(len(v) for v in by_place.values()):,} distinct books on "
           f"{len(by_place):,} places -> {OUT}")
     print(f"{len(unplaced):,} unknown place names -> {GAPS}")
+    print(f"{len(promote):,} promoted places -> {PROMOTE}")
     if unplaced:
         print("  most wanted: " + ", ".join(
             f"{n} ({c})" for n, c in unplaced.most_common(6)))

@@ -28,6 +28,12 @@ FIX = "data/_fixtures/pola-trieste-waypoints.json"
 MUST_CROSS = {"brtonigla": "HR", "buje": "HR", "izola": "SI"}
 MUST_NOT = {"Davor", "Bale", "Čabar", "Borojevići", "Topolo"}
 
+# A province may say WHICH COUNTRY a path is in; it may never be the answer
+# to which town. "Pola" is an alternate name of Polla in Campania, so four
+# books from Materada near Umag in Croatia were placed 600km away in Italy —
+# in the collection's own country, which is what made it look reasonable.
+MUST_NOT_PLACE = {"g-polla-it"}
+
 
 def main():
     # EVERYTHING THIS TOUCHES IS PUT BACK. The matcher writes three real
@@ -64,6 +70,10 @@ def main():
         else:
             print(f"  ok   {pid:12s} {len(crossed):3d} books, filed under "
                   f"{crossed[0].get('filedCc')}, via {crossed[0].get('in','')[:38]}")
+    for pid in MUST_NOT_PLACE:
+        if pid in world:
+            fails.append(f"{pid} has books again — a province level was used as "
+                         f"the destination instead of only vouching for a country")
     for pid, rows in world.items():
         for r in rows:
             if r.get("crossed") and any(m in (r.get("in") or "") for m in MUST_NOT):

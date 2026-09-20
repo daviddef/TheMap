@@ -60,6 +60,38 @@ def bare(s):
     return re.sub(r"\s*\([^)]*\)\s*$", "", s or "").strip()
 
 
+# Church-dedication prefixes that are never the place. "Sv. Stošija" is a
+# patron saint, not a settlement.
+ABBREV = {"sv", "st", "ss", "sta", "sto", "san", "sankt", "hl"}
+
+
+def readings(name):
+    """Every reading of one waypoint name, most specific first.
+
+    FamilySearch names a parish by its church inside its town — "Zadar, Sv.
+    Stošija", "Split, Sv. Dujma" — and those were the two commonest names
+    this matcher could not place, 59 and 40 books apiece. The town is on the
+    shelf; only the dedication was in the way. So the whole name is tried
+    first, because a parish is the better answer when we hold it, and the
+    segments only after that.
+    """
+    out, seen = [], set()
+    for cand in [name, bare(name)] + \
+                [x.strip() for x in re.split(r"\s*,\s*", name or "")] + \
+                [bare(x.strip()) for x in re.split(r"\s*,\s*", name or "")]:
+        c = (cand or "").strip()
+        # "Sv." must not be offered as a place name; Pag, Krk and Rab must.
+        # The first cut used a length test for this and threw away three real
+        # Croatian towns — 109 books between them — to exclude one
+        # abbreviation. Test for the abbreviation instead.
+        if c.endswith(".") or c.lower().rstrip(".") in ABBREV:
+            continue
+        if len(c) >= 3 and c.lower() not in seen:
+            seen.add(c.lower())
+            out.append(c)
+    return out
+
+
 def main():
     if not os.path.exists(SRC):
         sys.exit(f"{SRC} is not there — run harvest-fs-waypoints.py first.")
@@ -82,10 +114,19 @@ def main():
             # waypoint says only "A Coruña", so index the leading segment too.
             if "," in v:
                 forms.add(v.split(",")[0])
+        own = {fold(p["name"]), fold(bare(p["name"]))}
         for f in forms:
             for cand in {fold(f), fold(bare(f))}:
                 if len(cand) > 2:
-                    idx[(cc, cand)].append(p)
+                    # RANKED, BECAUSE A NAME CAN REACH SEVERAL PLACES AND THE
+                    # FIRST ONE IS NOT THE RIGHT ONE. "Albanasi (Zadar)" and
+                    # "Bolnica (Zadar)" both carry Zadar's own former names
+                    # among their variants, so (HR, "zadar") resolved to
+                    # albanasi, bolnica, zadar — in that order — and Zadar
+                    # itself, with 59 books, came third and never won. A
+                    # place whose OWN name is the one being matched outranks
+                    # a place that merely inherited it from a parent.
+                    idx[(cc, cand)].append((0 if cand in own else 1, p))
 
     # SECOND CHANCE, FROM THE GAZETTEER. A parish FamilySearch has books for
     # is very often a real settlement this atlas simply has not drawn yet —
@@ -145,11 +186,11 @@ def main():
             hit = None
             # Deepest first: the parish beats the municipality above it.
             for name in reversed(path):
-                for cand in (name, bare(name)):
+                for cand in readings(name):
                     for cc in ccs:
                         got = idx.get((cc, fold(cand)))
                         if got:
-                            hit = got[0]
+                            hit = min(got, key=lambda r: r[0])[1]
                             break
                     if hit:
                         break
@@ -158,7 +199,7 @@ def main():
             if not hit:
                 # Try the gazetteer before giving up on it.
                 for name in reversed(path):
-                    for cand in (name, bare(name)):
+                    for cand in readings(name):
                         for cc in ccs:
                             got = gaz_idx.get((cc, fold(cand)))
                             if got:

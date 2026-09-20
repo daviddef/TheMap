@@ -278,11 +278,27 @@ def main():
                 other = re.sub(r"\s*\([^)]*\)", "", other).strip()
                 if len(other) > 1:
                     link(head, other, "curated")
-            # The exact list when there is one, the archive's own list when
-            # there is not. Never both: a name that can be placed precisely is
-            # not helped by also being placed vaguely.
-            where = by_name.get(n)
-            if not where and (deliberate or mentions.get(n, 1) >= 3):
+            # THE EXACT LIST, OR NOTHING — NOT THE WHOLE ARCHIVE'S MAP.
+            #
+            # This used to fall back to every country the archive touches
+            # anywhere, for any name it could not place precisely. On David's
+            # own name that put "De Franceschi" in Albania, Cuba, Paraguay,
+            # Zimbabwe, Greece, Turkey, Russia and Hong Kong — 29 countries,
+            # from one Friulian family's archive, every one of them tagged as
+            # attested. It is the same fault that once put D'Arcy in Cuba,
+            # fixed then for passing mentions and left standing for the rest.
+            #
+            # The archives that place their names individually do it for most
+            # of them: Defranceschi names 82, Mazza 76, Lerena 56. When one of
+            # those does NOT name a surname, that silence is information — the
+            # archive did not place it, so this must not either.
+            #
+            # The fallback survives only where it cannot mislead: an archive
+            # whose whole geography is a single country. Falco and Booyzen
+            # have no per-name lists and one country each, so inheriting it
+            # says exactly what the archive says.
+            where = by_name.get(n) or by_name.get(head)
+            if not where and len(ccs) == 1 and (deliberate or mentions.get(n, 1) >= 3):
                 where = ccs
             for cc in (where or []):
                 attest(head, cc, "archive", label)

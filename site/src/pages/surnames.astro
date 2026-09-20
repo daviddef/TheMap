@@ -1,4 +1,5 @@
 ---
+import { statSync } from "node:fs";
 /* The surname dataset, as a page and as a download.
 
    Built because a place is not the only thing somebody arrives holding. Very
@@ -6,7 +7,7 @@
    start in. */
 import Base from "../layouts/Base.astro";
 import { u } from "../lib/url.js";
-import surn from "../../public/surnames.json";
+import surn from "../data/surnames.json";
 import idx from "../../public/index.json";
 import refused from "../../../data/frequencies/_refused.json";
 
@@ -19,6 +20,14 @@ const top = Object.entries(byCc).sort((a, b) => b[1] - a[1]);
 const examples = surn.surnames
   .filter((r) => r.variants.some((v) => v.how === "curated") && r.countries.length)
   .slice(0, 14);
+
+/* Read the built artefact rather than trusting a number in the markup. */
+function dlSize(name) {
+  try {
+    const b = statSync(new URL(`../../public/${name}`, import.meta.url)).size;
+    return b > 1048576 ? `${(b / 1048576).toFixed(0)} MB` : `${(b / 1024).toFixed(0)} KB`;
+  } catch (e) { return "a download"; }
+}
 ---
 <Base
   og="dataset"
@@ -30,8 +39,8 @@ const examples = surn.surnames
     license: "https://creativecommons.org/publicdomain/zero/1.0/",
     creator: { "@type": "Person", name: "David Defranceski" },
     distribution: [
-      { "@type": "DataDownload", encodingFormat: "text/csv", contentUrl: u("/surnames.csv") },
-      { "@type": "DataDownload", encodingFormat: "application/json", contentUrl: u("/surnames.json") },
+      { "@type": "DataDownload", encodingFormat: "text/csv", contentUrl: u("/surnames.csv.gz") },
+      { "@type": "DataDownload", encodingFormat: "application/json", contentUrl: u("/surnames.json.gz") },
     ],
   }}
   title="Surnames"
@@ -57,12 +66,19 @@ const examples = surn.surnames
     <p class="cap">CC0. No attribution required, no licence travels with it — the sources are
     Wikidata (CC0) and David Defranceski's own research, and nothing under CC BY was folded
     in so that this could stay true.</p>
+    {/* SIZES MEASURED, NOT TYPED. These read 21 MB and 64 MB while the files
+        were 58 and 107 — written once when they were true and never touched
+        again, so the page quietly understated a download by a factor of two.
+        A number a reader might act on has to come from the file. */}
     <p class="dl">
-      <a href={u("/surnames.csv")}>surnames.csv</a> — <b>21 MB</b>, one row per surname ×
-      variant × country. The practical one.<br />
-      <a href={u("/surnames.json")}>surnames.json</a> — <b>64 MB</b>, the same thing
-      structured, with the evidence tier on every claim.
+      <a href={u("/surnames.csv.gz")}>surnames.csv.gz</a> — <b>{dlSize("surnames.csv.gz")}</b>,
+      one row per surname × variant × country. The practical one.<br />
+      <a href={u("/surnames.json.gz")}>surnames.json.gz</a> — <b>{dlSize("surnames.json.gz")}</b>,
+      the same thing structured, with the evidence tier on every claim.
     </p>
+    <p class="cap">Both are gzipped: uncompressed they are a sixth of this whole
+    site, which has a gigabyte to live in. Every browser and every data tool
+    reads a .gz without being asked.</p>
     <p class="cap">Both are large because most of the rows are a national register. If you
     want one country's raw frequencies, take it straight from the source instead — they are
     in <code>data/frequencies/</code> in the repository, one file per country, each carrying

@@ -52,6 +52,15 @@ MAX_DEPTH = 6
 # with a truncation. Set where a genuine runaway still stops but no real
 # collection reaches.
 MAX_NODES_PER_COLLECTION = 60000
+# A BUDGET, SO ONE PATHOLOGICAL TREE CANNOT STALL THE RUN. Micronesia,
+# Pohnpei, Land Records is a register of land parcels, and its tree branches
+# like one: it had already spent 1,323 requests and eighteen minutes while
+# 3,455 other collections waited behind it. Across 3,504 collections a few
+# of these would decide when the job finishes.
+#
+# A capped collection is RECORDED as capped rather than quietly truncated,
+# so it can be revisited deliberately instead of looking complete.
+MAX_CALLS_PER_COLLECTION = 900
 
 
 def get(url, pause, tries=4):
@@ -135,12 +144,18 @@ def walk(cid, pause, log, workers=1):
     # milliseconds and publishes no rate limit — brisk, and nowhere near
     # enough to trouble anyone. Still no browser impersonation and still one
     # honest User-Agent.
-    leaves, calls = [], 2
+    leaves, calls, capped = [], 2, [None]
     level = [(root, doc, [])]
     with ThreadPoolExecutor(max_workers=workers) as pool:
         while level:
             if len(leaves) >= MAX_NODES_PER_COLLECTION:
                 log(f"    capped at {MAX_NODES_PER_COLLECTION} volumes")
+                capped[0] = "volumes"
+                break
+            if calls >= MAX_CALLS_PER_COLLECTION:
+                log(f"    capped at {calls} requests with {len(leaves)} volumes "
+                    f"— recorded as partial")
+                capped[0] = "calls"
                 break
             to_fetch = []
             for about, d, path in level:
@@ -191,7 +206,7 @@ def walk(cid, pause, log, workers=1):
                     "from": None, "to": None, "wp": m.group(1) if m else "",
                 })
             level = nxt
-    return leaves, calls
+    return (leaves, capped[0]), calls
 
 
 def main():
@@ -242,6 +257,9 @@ def main():
     t0, vols, calls = time.time(), 0, 0
     for i, c in enumerate(todo, 1):
         got, n = walk(c["id"], a.pause, lambda m: print(m, flush=True), a.workers)
+        part = None
+        if isinstance(got, tuple):
+            got, part = got
         calls += n
         # BEFORE THE BRANCHES BELOW. The first cut put this at the foot of
         # the loop, under two `continue`s — so whenever the 25th collection
@@ -264,7 +282,7 @@ def main():
             print(f"  … {i}/{len(todo)} · {vols:,} volumes · "
                   f"{rate:.0f}s per collection · about "
                   f"{rate*(len(todo)-i)/3600:.1f}h left", flush=True)
-        if got == "index-only":
+        if got == "index-only" or (isinstance(got, str)):
             # Recorded, not skipped silently. A reader asking "why are there
             # no books here" deserves the answer "because there are none to
             # turn", not an absence.
@@ -277,6 +295,8 @@ def main():
         if got:
             state["byCollection"][c["id"]] = {
                 "title": c["title"], "cc": c["cc"], "volumes": got}
+            if part:
+                state.setdefault("partial", {})[c["id"]] = part
         done.add(c["id"])
         state["done"] = sorted(done)
         print(f"  [{i}/{len(todo)}] {c['id']} {len(got):5d} volumes "

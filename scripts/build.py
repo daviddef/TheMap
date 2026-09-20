@@ -73,6 +73,35 @@ def shard_key(form):
 def main():
     places = json.load(open("data/places.json"))["places"]
 
+    # PLACES THE VOLUMES BROUGHT WITH THEM. The matcher finds books for
+    # settlements this atlas has never drawn — Douglas and Onchan on the Isle
+    # of Man, Porto-Novo in Benin — and resolves them against the gazetteer,
+    # which knows their coordinates. Those were written to
+    # data/fs-volumes-promote.json and then read by nothing at all, so
+    # seventeen places with real books existed only in a file. A dot the
+    # reader cannot see is not a finding.
+    #
+    # They are marked `from: "gazetteer"` so nothing later mistakes them for
+    # places somebody checked: they are here because a book pointed at them.
+    _known = {p["id"] for p in places}
+    try:
+        _promoted = json.load(open("data/fs-volumes-promote.json"))["places"]
+    except FileNotFoundError:
+        _promoted = []
+    _added = 0
+    for _pl in _promoted:
+        if _pl["id"] in _known or _pl.get("lat") is None:
+            continue
+        places.append({"id": _pl["id"], "name": _pl["name"],
+                       "lat": _pl["lat"], "lon": _pl["lon"],
+                       "country": _pl["country"], "names": [],
+                       "collections": [], "via": "gazetteer"})
+        _known.add(_pl["id"])
+        _added += 1
+    if _added:
+        print(f"promoted        {_added} places drawn because a book pointed "
+              f"at them, coordinates from the gazetteer")
+
     # ---- which region a place stands in, decided HERE and not remembered -----
     # This used to be written into data/places.json by whichever importer drew
     # the place, which meant a region could only ever catch the ground that was

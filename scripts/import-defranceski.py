@@ -27,8 +27,7 @@ SRC = "/Users/daviddefranceski/Claude/Projects/Defranceski Family/site/src/data/
 # ever needs to run at build time, snapshot it first.
 import sys as _sys, os as _os2
 if not _os2.path.exists(SRC):
-    _sys.exit("SRC is not here: " + SRC + "
-"
+    _sys.exit("SRC is not here: " + SRC + "\n"
               "This is a hand-run snapshot importer. It cannot run without the "
               "sibling archives, and it must never be wired into npm run build.")
 

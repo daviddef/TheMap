@@ -26,7 +26,7 @@
    Everything else — the find box, the filter pills, that every view is a link
    — is the family Atlas's and is kept deliberately, because a reader who knows
    one of these maps should know all of them. */
-const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wikidataUrl, osmUrl, featureBase, settlementBase, districtBase, countryBase, townlandBase, comuneBase, estoniaBase, worldArchivesUrl, countryPointsUrl, base } = Astro.props;
+const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wikidataUrl, osmUrl, featureBase, settlementBase, districtBase, countryBase, townlandBase, comuneBase, estoniaBase, scotlandBase, worldArchivesUrl, countryPointsUrl, base } = Astro.props;
 ---
 
 {/* ONE BAR, NOT THREE PANELS. The search box, seven layer switches, the year
@@ -113,7 +113,7 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wi
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 
-<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, WDA: wikidataUrl, OSMA: osmUrl, FEAT: featureBase, SETT: settlementBase, DIST: districtBase, CTRY: countryBase, TOWN: townlandBase, COMU: comuneBase, ESTO: estoniaBase, WARCH: worldArchivesUrl, CPTS: countryPointsUrl, BASE: base }}>
+<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, WDA: wikidataUrl, OSMA: osmUrl, FEAT: featureBase, SETT: settlementBase, DIST: districtBase, CTRY: countryBase, TOWN: townlandBase, COMU: comuneBase, ESTO: estoniaBase, SCOT: scotlandBase, WARCH: worldArchivesUrl, CPTS: countryPointsUrl, BASE: base }}>
 window.addEventListener("load", async function () {
   var el = document.getElementById("ra-map");
   if (!el || typeof L === "undefined") return;
@@ -1612,6 +1612,27 @@ window.addEventListener("load", async function () {
     }).slice(0, 4);
   }
 
+  /* Scotland's civil parishes. The unit every Scottish record is filed by —
+     the old parish registers, the statutory registers and the censuses all
+     use it — and until now typing one returned nothing at all. These carry
+     coordinates, so a hit can say where it is rather than only that it
+     exists. */
+  var sccache = {};
+  async function scotland(term) {
+    var f = fold(term);
+    var key = "";
+    for (var i = 0; i < f.length && key.length < 3; i++)
+      if (/[a-z0-9]/.test(f[i])) key += f[i];
+    if (key.length < 3) return [];
+    if (!(key in sccache)) {
+      try { sccache[key] = await (await fetch(SCOT + key + ".json")).json(); }
+      catch (e) { sccache[key] = []; }
+    }
+    return sccache[key].filter(function (r) {
+      return fold(r.n).indexOf(f) > -1;
+    }).slice(0, 4);
+  }
+
   async function elsewhere(term) {
     var mine = ++searchTok;
     /* TYPING A COUNTRY'S NAME SHOULD OPEN THE COUNTRY. David typed «libya» and
@@ -1666,6 +1687,7 @@ window.addEventListener("load", async function () {
     var tlands = await townlands(term);
     var com = await comuni(term);
     var est = await estonia(term);
+    var sct = await scotland(term);
     if (stale()) return;
     /* If the typed word is an OLD name, say which one it matched and what the
        place is called now. "Pressburg → Bratislava" is the whole answer to the
@@ -1727,6 +1749,24 @@ window.addEventListener("load", async function () {
              "over it, and the first question about any record is which one it came out " +
              "of. Some of these counties are in LATVIA today: the governorate boundary " +
              "did not follow the modern one.</p>");
+      h.push("</div>");
+    }
+    /* A Scottish civil parish. */
+    if (sct.length) {
+      h.push('<div class="ra-juris"><div class="lab">In the Scottish filing system</div>');
+      sct.forEach(function (r) {
+        h.push("<p><b>" + esc(r.n) + "</b> — a <b>civil parish</b>" +
+               (r.c ? ", parish number " + esc(r.c) : "") +
+               (r.y != null ? ' <a href="#" class="ra-goto" data-y="' + r.y +
+                 '" data-x="' + r.x + '">show on the map</a>' : "") + "</p>");
+      });
+      h.push('<p class="ra-note">Scotland files by civil parish and by nothing else: ' +
+             "the old parish registers before 1855, the statutory registers after it, " +
+             "and every census in between. The parish number is the one ScotlandsPeople " +
+             "indexes by, so it is the fastest thing to search with. Parish boundaries " +
+             "were redrawn in 1891 and a name can sit in two counties either side of " +
+             "that, which is why a search that finds nothing is worth trying under the " +
+             "older county.</p>");
       h.push("</div>");
     }
     /* An Italian comune, found under either of its names. */

@@ -1,4 +1,5 @@
 ---
+import { readFileSync } from "node:fs";
 /* One page per place — 1,239 of them, and the reason they exist is that until
    now there were six.
 
@@ -33,10 +34,25 @@ const PROV = Object.fromEntries(provs.providers.map((p) => [p.id, p]));
    everywhere is not a fact about here. */
 const VOLKINDS = ["Births", "Marriages", "Deaths", "Church Census",
                   "Confirmations", "Index", "Other"];
+/* THE SAME BOOKS THE MAP PANEL SHOWS. This read only
+   data/fs-volumes.json — the Croatian browser walk — so every place outside
+   Croatia said "no volumes recorded here yet" while clicking the same dot on
+   the map listed dozens. Two views of one shelf disagreeing is worse than
+   either being empty.
+   The merged set lives on the built detail file, which build.py has already
+   deduped and capped, so this reads that rather than re-doing the merge and
+   risking a third answer. */
+/* READ FROM DISK, NOT import(). A dynamic import with a template literal
+   cannot be statically analysed, so Vite would bundle all 9,472 detail
+   files into the build to satisfy one lookup per page. readFileSync costs
+   nothing at build time and bundles nothing. */
 let volumes = [];
+let volumesTotal = 0;
 try {
-  const fv = (await import("../../../../data/fs-volumes.json")).default;
-  volumes = (fv.byPlace || {})[place.id] || [];
+  const det = JSON.parse(
+    readFileSync(new URL(`../../../public/p/${place.id}.json`, import.meta.url), "utf8"));
+  volumes = det.volumes || [];
+  volumesTotal = det.volumesTotal || volumes.length;
 } catch (e) { volumes = []; }
 const national = sourcesFor(place.country);
 /* Wikidata's national archive and library, where this atlas has nothing
@@ -220,7 +236,12 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
 
   {volumes.length > 0 && (
     <section style="margin-top:38px">
-      <h2>{volumes.length} volumes catalogued here</h2>
+      <h2>{volumesTotal.toLocaleString()} volumes catalogued here</h2>
+      {volumesTotal > volumes.length && (
+        <p class="cap">The oldest {volumes.length} are listed. A researcher is
+        nearly always reaching back, and the rest are one click away at the
+        provider.</p>
+      )}
       <p class="cap">The level below «a collection covers this place»: which book, for which
       years, and the link that opens its images. From FamilySearch's own catalogue.
       <b>Nobody here has opened any of them.</b></p>

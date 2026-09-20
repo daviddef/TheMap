@@ -1,4 +1,5 @@
 ---
+import { timelineFor } from "../../lib/surname-timeline.js";
 /* One page per surname that has something real to say.
 
    NOT ONE PER SURNAME. There are 480,635 of them and 449,216 are a row in a
@@ -16,7 +17,7 @@ import { sourcesFor, access as PACCESS } from "../../lib/sources-by-country.js";
 import { curveFor } from "../../lib/fr-curve.js";
 
 export async function getStaticPaths() {
-  const surn = (await import("../../../public/surnames.json")).default;
+  const surn = (await import("../../data/surnames.json")).default;
   const slug = (s) => s.toLowerCase().normalize("NFKD")
     .replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const seen = new Set();
@@ -50,6 +51,8 @@ const slugify = (x) => x.toLowerCase().normalize("NFKD")
    to stop searching. Worth saying out loud on the one page about this name. */
 const frHit = curveFor(r.n);
 const frRow = frHit && frHit.row;
+const tl = timelineFor(row.n, row.variants);
+
 const frCurve = frHit && frHit.curve;
 const frPeak = frCurve ? frCurve.reduce((a, b) => (b.n > a.n ? b : a), frCurve[0]) : null;
 const TIER = {
@@ -148,6 +151,37 @@ const dek = `${r.n}${by.curated ? `, also written ${by.curated.slice(0,4).join("
       </tbody>
     </table>
   </section>
+
+  {tl && (
+    <section style="margin-top:34px">
+      <h2>When and where it was being born</h2>
+      <p class="cap">{tl.total.toLocaleString()} people with this name, or one of its
+      variants, whose birth year and birth country are both recorded — from the
+      {" "}{tl.decades[0]}s to the {tl.decades[tl.decades.length - 1]}s.
+      {tl.names.length > 1 && <> Counted across {tl.names.join(", ")}, because they
+      are the same name.</>}</p>
+      <div class="one" style="border-left-color:var(--rule-strong)">
+        <div class="lab">Read this as evidence, not as a count</div>
+        <p class="cap">These are people notable enough for an encyclopaedia, which is
+        not a census. It over-counts men, the recent, Europe and North America, and
+        misses almost everybody. It is good evidence that the name <b>was borne</b> in
+        a place at a time. It says nothing about how common it was.</p>
+      </div>
+      <table style="margin-top:16px">
+        <thead><tr><th>Country</th><th class="m">People</th><th>Decades of birth</th></tr></thead>
+        <tbody>
+          {tl.rows.map((r) => (
+            <tr>
+              <td><a href={u(`/country/${r.cc.toLowerCase()}/`)}>{CN[r.cc] || r.cc}</a></td>
+              <td class="m">{r.tot}</td>
+              <td class="cap">{Object.keys(r.d).map(Number).sort((a, b) => a - b)
+                .map((dd) => `${dd}s`).join(" · ")}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  )}
 
   {frCurve && (
     <section style="margin-top:34px">

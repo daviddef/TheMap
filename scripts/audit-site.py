@@ -79,6 +79,13 @@ def links(pages, have):
     checked = 0
     for f in pages:
         html = open(f, encoding="utf-8", errors="replace").read()
+        # SCRIPT BODIES ARE NOT MARKUP. The first cut matched href="..."
+        # anywhere in the file and so "found" 22 broken links that were
+        # JavaScript building a URL at runtime — '/' + BASE + ... — which is
+        # not a link and cannot be checked by reading the file. A checker
+        # that reports things that are not true teaches people to skim past
+        # its output.
+        html = re.sub(r"<script\b[^>]*>.*?</script>", " ", html, flags=re.S | re.I)
         for m in re.finditer(r'\b(?:href|src)="([^"#]+)"', html):
             u = m.group(1)
             if u.startswith(("http://", "https://", "mailto:", "data:", "//", "javascript:")):

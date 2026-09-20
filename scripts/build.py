@@ -1012,10 +1012,33 @@ def main():
     # The dataset as a thing you can take away, not only as something the map
     # uses: one JSON and one CSV at a stable address, CC0, so another project
     # can consume it without reading any of this code.
-    json.dump(surn, open(os.path.join(OUT, "surnames.json"), "w"),
+    # GZIPPED FOR DOWNLOAD, BECAUSE 165 MB OF IT IS A SIXTH OF THE SITE.
+    # surnames.json is 107 MB and surnames.csv 58, and both exist to be
+    # downloaded rather than read by the page. GitHub Pages publishes at most
+    # 1 GB and the site is already at 844 MB, so two files nobody loads in a
+    # browser were about to cost the deploy. Gzipped they are about a tenth
+    # of that, and a .gz is a perfectly ordinary thing to hand somebody who
+    # has come for a bulk dataset.
+    # THE BUILD NEEDS IT; THE WEB DOES NOT NEED IT UNCOMPRESSED.
+    #
+    # Three pages import surnames.json at build time, and anything in
+    # public/ is copied to dist/ and published — so a 107 MB build input was
+    # also a 107 MB download, next to a 58 MB CSV of the same thing. Between
+    # them a sixth of a site that has 1 GB to live in and a harvest still
+    # running.
+    #
+    # So the plain file goes to src/data/, which the build reads and the web
+    # never sees, and only the gzips are published. A .gz is an ordinary
+    # thing to hand somebody who came for a bulk dataset, and it is a tenth
+    # of the size.
+    import gzip as _gzip
+    with _gzip.open(os.path.join(OUT, "surnames.json.gz"), "wt", encoding="utf-8") as _gz:
+        json.dump(surn, _gz, ensure_ascii=False)
+    json.dump(surn, open(os.path.join(src, "surnames.json"), "w"),
               ensure_ascii=False, separators=(",", ":"))
     import csv
-    with open(os.path.join(OUT, "surnames.csv"), "w", newline="", encoding="utf-8") as fh:
+    with _gzip.open(os.path.join(OUT, "surnames.csv.gz"), "wt", newline="",
+                    encoding="utf-8") as fh:
         w = csv.writer(fh)
         w.writerow(["surname", "variant", "variant_source", "country", "country_source",
                     "attested_by", "phonetic_skeleton"])

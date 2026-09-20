@@ -1,0 +1,62 @@
+/* The birth timeline, loaded and indexed ONCE for the whole build.
+ *
+ * Written first as an IIFE in surname/[name].astro's frontmatter, which
+ * meant every surname page re-read a 25 MB file and rebuilt a 363,574-key
+ * fold index — thousands of times over. This project has made that mistake
+ * three times now (a regex inside near(), a find() over fr.surnames, a
+ * provider filter per page), and the fix is always the same: the work does
+ * not depend on the page, so it does not belong in the page.
+ */
+import { readFileSync } from "node:fs";
+import { gunzipSync } from "node:zlib";
+
+const foldKey = (x) => (x || "").normalize("NFKD")
+  .replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+
+let WHEN = {};
+let BY_FOLD = {};
+try {
+  /* Gzipped on disk: 25 MB of plain JSON timed out a push, and this is a
+     tenth of it. Read once for the whole build, so the inflate costs
+     nothing per page. */
+  WHEN = JSON.parse(gunzipSync(readFileSync(
+    new URL("../../../data/surname-timeline.json.gz", import.meta.url))).toString("utf8")).when;
+  for (const k of Object.keys(WHEN)) (BY_FOLD[foldKey(k)] ||= []).push(k);
+} catch (e) {
+  WHEN = {};
+  BY_FOLD = {};
+}
+
+/* Every form of one name, counted together.
+ *
+ * Defranceski has no notable namesake anywhere; De Franceschi has eleven, in
+ * Italy from the 1550s and Croatia from the 1800s — the same family, which
+ * is the entire reason the variants exist. The fold matters as much as the
+ * aggregation: the corpus writes "de Franceschi" and Wikidata writes "De
+ * Franceschi", so a literal comparison finds nothing at all. */
+export function timelineFor(name, variants) {
+  if (!Object.keys(BY_FOLD).length) return null;
+  const family = new Set([name, ...(variants || []).map((v) => v.n)]);
+  const out = {};
+  const used = new Set();
+  for (const f of family) {
+    for (const real of BY_FOLD[foldKey(f)] || []) {
+      used.add(real);
+      for (const [cc, decs] of Object.entries(WHEN[real])) {
+        for (const [dec, n] of Object.entries(decs)) {
+          out[cc] ||= {};
+          out[cc][dec] = (out[cc][dec] || 0) + n;
+        }
+      }
+    }
+  }
+  const total = Object.values(out).reduce(
+    (a, d) => a + Object.values(d).reduce((x, y) => x + y, 0), 0);
+  if (!total) return null;
+  const decades = [...new Set(Object.values(out).flatMap((d) => Object.keys(d)))]
+    .map(Number).sort((a, b) => a - b);
+  const rows = Object.entries(out)
+    .map(([cc, d]) => ({ cc, d, tot: Object.values(d).reduce((x, y) => x + y, 0) }))
+    .sort((a, b) => b.tot - a.tot);
+  return { rows, decades, total, names: [...used].sort() };
+}

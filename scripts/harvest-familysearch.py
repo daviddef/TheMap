@@ -69,6 +69,44 @@ def cached(name, fn):
 # and a historical one lands on ALL the modern countries it covered: a Posen
 # church-book collection filed under «Prussia» is the single most useful thing
 # on the map for somebody researching in Szubin, which is in Poland.
+# GENERATED FIRST, HAND-WRITTEN SECOND.
+#
+# The dict below was typed by hand and covered the ground this map started
+# on. Everywhere else fell through it and got NO COUNTRY AT ALL — 51
+# collections, including every one for the Isle of Man, Benin, Micronesia,
+# Lesotho and the Cook Islands. A collection with no country cannot be
+# scoped, so none of its books could ever be placed: 1,008 volumes sat in
+# the unplaced list looking like a matching problem when they were a missing
+# line in a lookup table.
+#
+# data/countries.json already carries 237 authoritative names from Natural
+# Earth, so those are loaded and the hand-written entries layered on top —
+# they are the ones the generated list cannot know: other languages
+# (Hrvatska, Magyarország), and polities that no longer exist and must land
+# on every modern country they covered (Prussia, Ottoman Empire).
+def _generated_iso():
+    out = {}
+    try:
+        for code, v in json.load(open("data/countries.json"))["countries"].items():
+            nm = (v or {}).get("name")
+            if nm and code and len(code) == 2:
+                out[nm] = [code]
+    except Exception:
+        pass
+    # Names FamilySearch uses that Natural Earth spells differently.
+    out.update({
+        "Cook Islands": ["CK"], "Federated States of Micronesia": ["FM"],
+        "Niue": ["NU"], "Tokelau": ["TK"], "Wallis and Futuna": ["WF"],
+        "Saint Helena": ["SH"], "Curacao": ["CW"], "Sint Maarten": ["SX"],
+        "Caribbean Netherlands": ["BQ"], "Vatican City": ["VA"],
+        "Czechia": ["CZ"], "Turkiye": ["TR"], "Cabo Verde": ["CV"],
+        "Eswatini": ["SZ"], "Timor-Leste": ["TL"],
+    })
+    return out
+
+
+ISO_GENERATED = _generated_iso()
+
 ISO = {
     "Italia": ["IT"], "Italy": ["IT"], "Hrvatska": ["HR"], "Croatia": ["HR"],
     "Polska": ["PL"], "Poland": ["PL"], "Deutschland": ["DE"], "Germany": ["DE"],
@@ -212,6 +250,13 @@ def plausible(cc, region):
     if not want or not got:
         return True          # no claim either way; do not invent one
     return want == got
+
+
+# Hand-written last, so a historical polity or a foreign spelling always
+# beats the plain modern name.
+_merged = dict(ISO_GENERATED)
+_merged.update(ISO)
+ISO = _merged
 
 
 def resolve(pid):

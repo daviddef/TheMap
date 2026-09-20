@@ -60,7 +60,16 @@ MAX_NODES_PER_COLLECTION = 60000
 #
 # A capped collection is RECORDED as capped rather than quietly truncated,
 # so it can be revisited deliberately instead of looking complete.
-MAX_CALLS_PER_COLLECTION = 900
+# RAISED, BECAUSE 900 WAS SOLVING THE WRONG PROBLEM. Argentina's 1895
+# national census has 5,096 branches; a 900-request budget kept 497 of them
+# and threw 4,599 real books away. The cap is there to stop ONE pathological
+# tree owning the run, not to decide how much of a large country's census
+# this atlas is allowed to know.
+#
+# The actual bottleneck was throughput, not tree size — see the worker count
+# below — so the budget can be generous now without the run becoming a week
+# long.
+MAX_CALLS_PER_COLLECTION = 6000
 
 
 def get(url, pause, tries=4):
@@ -227,7 +236,15 @@ def main():
     ap.add_argument("--limit", type=int, default=0, help="collections this run")
     ap.add_argument("--probe", type=int, default=0, help="measure N and stop")
     ap.add_argument("--pause", type=float, default=1.0)
-    ap.add_argument("--workers", type=int, default=3,
+    # EIGHT, AFTER MEASURING RATHER THAN GUESSING. The API answers in about
+    # 1.3 seconds, so three workers with a half-second pause is 1.67 requests
+    # a second — and at that rate the first honest pace line said 137 seconds
+    # per collection and 131 hours to go. Eight workers with a shorter pause
+    # is roughly five a second against a service that answers billions of
+    # queries, publishes no rate limit, and is being told exactly who we are.
+    # Still no browser impersonation, still one honest User-Agent, still
+    # backing off hard on 429 and 5xx.
+    ap.add_argument("--workers", type=int, default=8,
                     help="sibling fetches in flight; each one still pauses")
     ap.add_argument("--cc", default="", help="only this country code")
     a = ap.parse_args()

@@ -32,7 +32,17 @@ _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(_ROOT)
 
 LIST_URL = "https://www.familysearch.org/search/orchestration/collectionListData"
-PLACE_URL = "https://www.familysearch.org/service/standards/place/ws/places/reps/{}"
+# NOT .../places/reps/{id}. THAT IS A DIFFERENT NUMBERING AND IT SILENTLY
+# ANSWERED THE WRONG PLACE FOR EVERY COLLECTION IN THIS FILE.
+#
+# A collection's `placeIds` are PLACE ids. The /reps/ endpoint reads the same
+# number as a place-REPRESENTATION id, finds an unrelated row, and returns it
+# with HTTP 200 — so nothing failed and nothing looked wrong. placeId 1927178
+# belongs to "Italy, Pola and Trieste, Catholic Church Records"; through
+# /reps/ it came back as "Monomie, New South Wales, Australia". That is why
+# "Caribbean, Deaths and Burials, 1790-1906" was filed under Australia, and
+# why the countries on 3,504 collections could not be trusted.
+PLACE_URL = "https://www.familysearch.org/service/standards/place/ws/places/{}"
 UA = ("RecordAtlasHarvest/1.0 (+https://github.com/daviddef/TheMap; "
       "public collection catalogue, one request per place, cached)")
 CACHE = "/tmp/record-atlas-fs"
@@ -153,13 +163,70 @@ def from_title(title):
     return ISO.get(head) or SUBDIVISION.get(head)
 
 
+# FamilySearch's own region for a collection, reduced to a continent. This is
+# a SANITY CHECK ONLY and it is deliberately coarse.
+#
+# "Caribbean, Deaths and Burials, 1790-1906" resolved to Moolboolaman,
+# Queensland and Mitta Mitta, New South Wales — an outright resolution
+# failure, and the sort of thing that makes a directory untrustworthy. But
+# the fix must not also veto the case this atlas exists for: a collection
+# filed under Italy holding Croatian places is CORRECT and is the whole
+# product. Both are "the places disagree with the title", and only a
+# continent-scale test tells them apart — Italy and Croatia are both Europe,
+# Queensland and Barbados are not both anywhere.
+FS_CONTINENT = {
+    "UNITED_STATES": "AM", "CANADA": "AM", "MEXICO": "AM",
+    "CARIBBEAN_CENTRAL_AMERICA": "AM", "SOUTH_AMERICA": "AM",
+    "EUROPE": "EU", "UNITED_KINGDOM_IRELAND": "EU",
+    "AFRICA": "AF", "ASIA_MIDDLE_EAST": "AS",
+    "AUSTRALIA_NEW_ZEALAND": "OC", "PACIFIC_ISLAND": "OC",
+    # OTHER is left out on purpose: no region claim, so nothing to check.
+}
+CC_CONTINENT = {
+    "EU": set("AL AD AT BY BE BA BG HR CY CZ DK EE FI FR DE GI GR HU IS IE IT "
+              "LV LI LT LU MT MD MC ME NL MK NO PL PT RO RU SM RS SK SI ES SE "
+              "CH UA GB VA XK".split()),
+    "AM": set("AG AR AW BS BB BZ BM BO BR CA KY CL CO CR CU CW DM DO EC SV GL "
+              "GD GP GT GY HT HN JM MQ MX MS NI PA PY PE PR BL KN LC MF PM VC "
+              "SR TT TC US UY VE VG VI".split()),
+    "AF": set("DZ AO BJ BW BF BI CV CM CF TD KM CD CG CI DJ EG GQ ER SZ ET GA "
+              "GM GH GN GW KE LS LR LY MG MW ML MR MU YT MA MZ NA NE NG RE RW "
+              "SH ST SN SC SL SO ZA SS SD TZ TG TN UG ZM ZW".split()),
+    "AS": set("AF AM AZ BH BD BT BN KH CN GE HK IN ID IR IQ IL JP JO KZ KW KG "
+              "LA LB MO MY MV MN MM NP KP OM PK PS PH QA SA SG KR LK SY TW TJ "
+              "TH TL TR TM AE UZ VN YE".split()),
+    "OC": set("AS AU CK FJ PF GU KI MH FM NR NC NZ NU NF MP PW PG PN WS SB TK "
+              "TO TV VU WF".split()),
+}
+CONTINENT_OF = {cc: k for k, v in CC_CONTINENT.items() for cc in v}
+
+
+def plausible(cc, region):
+    """Could a collection FamilySearch files under `region` really cover `cc`?
+
+    Only a continent apart is refused. Anything closer — Italy and Croatia,
+    Prussia and Poland, Texas and Mexico — is exactly what this map is for.
+    """
+    want = FS_CONTINENT.get(region or "")
+    got = CONTINENT_OF.get(cc)
+    if not want or not got:
+        return True          # no claim either way; do not invent one
+    return want == got
+
+
 def resolve(pid):
     def fetch():
         time.sleep(1.0)                       # one a second. Nobody is being hammered.
         return get(PLACE_URL.format(pid))
     try:
-        rep = cached(f"place-{pid}.json", fetch)["rep"]
-    except Exception as e:
+        # The shape differs too: places/{id} wraps a place holding a list of
+        # representations, where places/reps/{id} returned one rep directly.
+        doc = cached(f"place-{pid}.json", fetch)
+        reps = (doc.get("place") or {}).get("reps") or []
+        if not reps:
+            return None
+        rep = reps[0]
+    except Exception:
         return None
     chain, j = [], rep.get("jurisdiction")
     while j:
@@ -217,21 +284,48 @@ def main():
         if i % 100 == 0:
             print(f"  {i}/{len(pids)} places ({time.time()-t0:.0f}s)")
 
-    mismatched = 0
+    implausible = 0
+    crossed = 0
     for c in cl:
         reps = [seen[p] for p in (c.get("placeIds") or []) if p in seen]
         ccs = set()
         for r in reps:
             ccs.update(r.get("cc") or [])
         titled = from_title(c["title"])
+        region = c.get("region")
+
+        # THIS USED TO THROW THE ANSWER AWAY. When the place ids resolved to a
+        # country the title did not name, the old code called it a mismatch,
+        # dropped every resolved place and kept only the title's country. That
+        # is precisely backwards. "Italy, Pola and Trieste, Catholic Church
+        # Records" holding Croatian parishes is not an error in the data — it
+        # is the single most useful fact this atlas can tell anybody with
+        # Istrian family, and the reason the project exists. Discarding it
+        # meant that of 1,165 Croatian places, exactly none were reached by a
+        # collection filed under another country.
+        #
+        # So the place authority is believed, and the title is added to it
+        # rather than allowed to veto it. The only thing refused is a
+        # resolution a continent away from where FamilySearch itself files
+        # the collection, which is a broken lookup rather than a border.
+        bad = {x for x in ccs if not plausible(x, region)}
+        if bad:
+            implausible += 1
+            ccs -= bad
+            reps = [r for r in reps
+                    if not (set(r.get("cc") or []) & bad) or
+                    (set(r.get("cc") or []) - bad)]
         if titled:
-            if ccs and not (ccs & set(titled)):
-                mismatched += 1        # the place id points somewhere else entirely
-                reps = []
-                ccs = set()
+            # Recorded separately so a page can say "filed under Italy,
+            # covers this Croatian place" instead of flattening the two.
+            crossings = sorted(ccs - set(titled))
             ccs.update(titled)
+        else:
+            crossings = sorted(ccs)
         if not a.all and not (ccs & want):
             continue
+        if crossings:
+            crossed += 1
         best = reps[0] if reps else None
         kept.append({
             "cc": c["collectionId"], "title": c["title"],
@@ -241,6 +335,11 @@ def main():
             "kind": c.get("recordType"),
             "url": f"https://www.familysearch.org/search/collection/{c['collectionId']}",
             "countries": sorted(ccs),
+            # The countries the TITLE names, and the ones only the place
+            # authority knows about. A collection where these differ is the
+            # interesting kind.
+            "filedUnder": sorted(titled) if titled else [],
+            "crosses": crossings,
             "places": [{"name": r["name"], "short": r["short"], "type": r["type"],
                         "cc": r.get("cc"), "lat": r.get("lat"), "lon": r.get("lon")}
                        for r in reps],
@@ -258,7 +357,14 @@ def main():
     import collections as _c
     by = _c.Counter(cc for c in kept for cc in c["countries"])
     print(f"\n{len(kept)} collections kept -> {a.out}")
-    print(f"  {mismatched} had a place id contradicting their own title; the title won")
+    print(f"  {crossed} reach a country their own title never names — the "
+          f"cross-border collections, which are the point of this map")
+    print(f"  {implausible} had a place id resolve a continent from where "
+          f"FamilySearch files the collection; only those were refused")
+    ex = [c for c in kept if c["crosses"]][:6]
+    for c in ex:
+        print(f"      filed {','.join(c['filedUnder']) or '—':8s} "
+              f"reaches {','.join(c['crosses']):18s} {c['title'][:44]}")
     print("  " + " · ".join(f"{k}:{n}" for k, n in by.most_common(16)))
 
 

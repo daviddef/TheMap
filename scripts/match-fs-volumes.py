@@ -156,8 +156,171 @@ def main():
     for key in gaz_idx:
         gaz_idx[key].sort(key=lambda g: -(g.get("p") or 0))
 
+    # THE COUNTRY SCOPE HAS TO BEND, OR THE CROSS-BORDER CASE CAN NEVER FIRE.
+    #
+    # Scoping every lookup to the collection's own countries is what stops
+    # "Santa Maria" matching nine countries at once. But it also guarantees
+    # that "Italy, Pola and Trieste, Catholic Church Records" — whose tree
+    # names Pola, which is Pula in Croatia — can only ever match Italian
+    # places. That collection is the reason this atlas exists, and a scope
+    # that excludes it defeats the product to avoid a bug.
+    #
+    # So: the collection's own countries first, always. Only if nothing
+    # matches there does it look at the rest of the continent, and then only
+    # accepts a name that is UNIQUE across it. "Pola" resolves to exactly one
+    # place in Europe and is taken; a name shared by four villages is left
+    # unplaced, because a wrong dot is worse than a missing one.
+    CONTINENT = {}
+    for _c, _set in {
+        "EU": "AL AD AT BY BE BA BG HR CY CZ DK EE FI FR DE GI GR HU IS IE IT LV "
+              "LI LT LU MT MD MC ME NL MK NO PL PT RO RU SM RS SK SI ES SE CH UA GB",
+        "AM": "AG AR AW BS BB BZ BM BO BR CA KY CL CO CR CU CW DM DO EC SV GL GD GP "
+              "GT GY HT HN JM MQ MX MS NI PA PY PE PR KN LC VC SR TT TC US UY VE",
+        "AF": "DZ AO BJ BW BF BI CV CM CF TD KM CD CG CI DJ EG GQ ER SZ ET GA GM GH "
+              "GN GW KE LS LR LY MG MW ML MR MU MA MZ NA NE NG RE RW ST SN SC SL SO "
+              "ZA SS SD TZ TG TN UG ZM ZW",
+        "AS": "AF AM AZ BH BD BT KH CN GE HK IN ID IR IQ IL JP JO KZ KW KG LA LB MO "
+              "MY MV MN MM NP KP OM PK PS PH QA SA SG KR LK SY TW TJ TH TL TR TM AE "
+              "UZ VN YE",
+        "OC": "AS AU CK FJ PF GU KI MH FM NR NC NZ NU PW PG WS SB TO TV VU",
+    }.items():
+        for _cc in _set.split():
+            CONTINENT.setdefault(_cc, _c)
+
+    def neighbours(ccs):
+        """Every country on the same continent as this collection's own."""
+        conts = {CONTINENT.get(c) for c in ccs} - {None}
+        return sorted({c for c, k in CONTINENT.items() if k in conts} - set(ccs))
+
+    def look_in(index, cand, ccs):
+        for cc in ccs:
+            got = index.get((cc, cand))
+            if got:
+                return min(got, key=lambda r: r[0])[1], cc
+        return None, None
+
+    def look_abroad(index, cand, wider):
+        """Every country on the continent where this name exists.
+
+        Returns {cc: place}. Uniqueness is NOT demanded here — that belongs
+        to the decision, not to the evidence. Requiring each level to be
+        unique across Europe AND requiring two levels to agree was two
+        safeguards multiplied together, and between them they threw away the
+        Istrian case they were written to protect: Pola and Buie both name
+        more than one European place, so neither could corroborate anything
+        and IT->HR collapsed from nine books to one.
+        """
+        out = {}
+        for cc in wider:
+            got = index.get((cc, cand))
+            if got:
+                out[cc] = min(got, key=lambda r: r[0])[1]
+        return out
+
+    def resolve_path(index, path, ccs, wider):
+        """TWO PASSES OVER THE WHOLE PATH, AND THE ORDER IS THE POINT.
+
+        The first cut asked, for each level deepest-first, "in country, then
+        abroad" — so the deepest level got its shot abroad before a shallower
+        level was tried at home. In "Italy, Pola and Trieste" the deepest
+        level is the PARISH CHURCH: Sant'Antonio Taumaturgo, San Giorgio,
+        San Martino Vescovo. A church dedication that happens to be the
+        unique name of some village elsewhere in Europe would have won
+        against Trieste sitting one level up in Italy.
+
+        So: everything at home first, deepest to shallowest. Only when the
+        whole path has failed at home does anything look across a border.
+        """
+        for name in reversed(path):
+            for cand in readings(name):
+                hit, cc = look_in(index, fold(cand), ccs)
+                if hit:
+                    return hit, cc, False
+        # CROSSING A BORDER NEEDS TWO WITNESSES.
+        #
+        # A single name matching abroad is not evidence, it is a coincidence
+        # waiting to happen. Davor, Bale, Čabar and Borojevići are Croatian
+        # villages this shelf has not drawn; each is also the name of a real
+        # village in Bosnia, Montenegro, Slovenia. With only the parish level
+        # to go on, the Croatian church books landed 79 books in Bosnia and
+        # 22 in Montenegro — confidently, uniquely, and wrongly. A wrong dot
+        # is worse than a missing one.
+        #
+        # The true crossing looks different. "Pola › Verteneglio › San Zenone
+        # Martire" has TWO levels pointing at Croatia: Pola is Pula, and
+        # Verteneglio is Brtonigla. So a crossing is accepted only when at
+        # least two distinct levels of the path independently resolve to the
+        # same foreign country. That keeps Istria, which is the case this
+        # atlas was built for, and refuses the coincidences.
+        # EVIDENCE FROM EVERYTHING WE KNOW; DESTINATION FROM THE SHELF.
+        #
+        # The shelf holds 7,391 places and is thin on exonyms — it does not
+        # know Pula answers to "Pola". The gazetteer holds 45,985 and does.
+        # Corroboration should draw on both, because the question "does this
+        # level also point at Croatia" is about knowledge, not about what we
+        # happen to have drawn. Restricting the witnesses to the shelf is
+        # what left the Istrian case with one vote and no crossing.
+        votes = collections.Counter()
+        best, gbest, depth = {}, {}, {}
+        levels_abroad = 0
+        for lvl, name in enumerate(reversed(path)):   # 0 is the deepest
+            shits, ghits = {}, {}            # place found per cc is the
+            for cand in readings(name):      # most specific one
+                shits = look_abroad(index, fold(cand), wider)
+                ghits = {cc: g for cc, g in
+                         ((cc, (gaz_idx.get((cc, fold(cand))) or [None])[0])
+                          for cc in wider) if g}
+                if shits or ghits:
+                    break
+            if shits or ghits:
+                levels_abroad += 1
+            for cc in set(shits) | set(ghits):
+                votes[cc] += 1
+                depth.setdefault(cc, lvl)
+                if cc in shits:
+                    best.setdefault(cc, shits[cc])
+                if cc in ghits:
+                    gbest.setdefault(cc, ghits[cc])
+        # TWO LEVELS MUST POINT ABROAD — THEN THE DEEPEST ONE DECIDES.
+        #
+        # Counting votes per COUNTRY was the wrong shape. "Pola › Isola
+        # d'Istria" gives one vote to Croatia (Pola is Pula) and one to
+        # Slovenia (Isola d'Istria is Izola): a tie under that rule, refused,
+        # eleven real books lost. But the right answer is obvious — the book
+        # is FROM the comune and merely FILED under the province.
+        #
+        # What actually separates that from the false positives is not which
+        # country wins, it is how much of the path is foreign at all. Davor,
+        # Bale and Čabar are single-level paths whose one name happens to
+        # exist in a neighbouring country; nothing else about them points
+        # outside Croatia. The Istrian paths are foreign from the province
+        # down. So: at least two levels must resolve abroad, and then the
+        # DEEPEST of them names the place, because it is the most specific
+        # claim in the path.
+        # DISTINCT LEVELS, NOT TOTAL VOTES. Summing votes across countries
+        # let a SINGLE level clear the bar by matching two countries at once
+        # — "Bale" exists in Croatia and Montenegro, so one name counted as
+        # two witnesses and put eight Istrian books in Montenegro. The test
+        # is how much of the PATH is foreign, so it has to count levels.
+        if levels_abroad >= 2:
+            top = sorted(votes.items(), key=lambda kv: (depth[kv[0]], -kv[1]))
+            if True:
+                cc = top[0][0]
+                if cc in best:
+                    return best[cc], cc, True
+                g = gbest.get(cc)
+                if g:
+                    pid = ("g-" + re.sub(r"[^a-z0-9]+", "-", fold(g["n"])).strip("-")[:48]
+                           + "-" + cc.lower())
+                    promote.setdefault(pid, {"id": pid, "name": g["n"],
+                                             "country": cc, "lat": g["y"],
+                                             "lon": g["x"], "from": "gazetteer"})
+                    return {"id": pid}, cc, True
+        return None, None, False
+
     by_place = collections.defaultdict(list)
     promote = {}
+    crossed = collections.Counter()
     unplaced = collections.Counter()
     unplaced_cc = {}
     matched = miss = noname = 0
@@ -183,24 +346,13 @@ def main():
             if not path:
                 noname += 1
                 continue
-            hit = None
-            # Deepest first: the parish beats the municipality above it.
-            for name in reversed(path):
-                for cand in readings(name):
-                    for cc in ccs:
-                        got = idx.get((cc, fold(cand)))
-                        if got:
-                            hit = min(got, key=lambda r: r[0])[1]
-                            break
-                    if hit:
-                        break
-                if hit:
-                    break
+            wider = neighbours(ccs)
+            hit, hit_cc, abroad = resolve_path(idx, path, ccs, wider)
             if not hit:
                 # Try the gazetteer before giving up on it.
                 for name in reversed(path):
                     for cand in readings(name):
-                        for cc in ccs:
+                        for cc in list(ccs):
                             got = gaz_idx.get((cc, fold(cand)))
                             if got:
                                 g = got[0]
@@ -224,6 +376,8 @@ def main():
                 unplaced_cc.setdefault(deepest, ccs[0] if ccs else "")
                 continue
             matched += 1
+            if abroad and hit_cc:
+                crossed[(ccs[0] if ccs else "?") + "\u2192" + hit_cc] += 1
             # One book can be reached by more than one route through the
             # tree; the waypoint id is the book, so dedupe on it.
             key = (hit["id"], v.get("wp") or v["t"])
@@ -237,6 +391,11 @@ def main():
                         + v["wp"]) if v.get("wp") else None,
                 "col": cid, "colTitle": col.get("title"),
                 "conf": conf,
+                # True when the book was found by looking outside the
+                # countries its collection is filed under. This is the
+                # finding, not an edge case.
+                "crossed": bool(abroad) or None,
+                "filedCc": (ccs[0] if ccs else None) if abroad else None,
                 "in": " › ".join(raw),
             })
 
@@ -280,6 +439,11 @@ def main():
           f"{len(by_place):,} places -> {OUT}")
     print(f"{len(unplaced):,} unknown place names -> {GAPS}")
     print(f"{len(promote):,} promoted places -> {PROMOTE}")
+    if crossed:
+        print("\n  books found across a border, where the collection is filed "
+              "under one country and the book belongs to another:")
+        for k, v in crossed.most_common(12):
+            print(f"      {k}  {v}")
     if unplaced:
         print("  most wanted: " + ", ".join(
             f"{n} ({c})" for n, c in unplaced.most_common(6)))

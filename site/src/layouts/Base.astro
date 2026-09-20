@@ -78,6 +78,16 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Libre+Franklin:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" />
 <link rel="stylesheet" href={u("/styles.css")} />
+{/* GoatCounter, as on every sibling archive. No cookies and no personal
+    data, so it needs no consent gate of its own — which is also why it is
+    not inside the AdSense consent flow. is:inline because the src is a
+    protocol-relative CDN path Astro would otherwise try to bundle, the same
+    trap that stopped the ad loader reaching the page.
+    Nothing renders at all when no code is configured. */}
+{site.analytics?.goatcounter && (
+  <script is:inline async src="//gc.zgo.at/count.js"
+          data-goatcounter={`https://${site.analytics.goatcounter}.goatcounter.com/count`}></script>
+)}
 {/* THE STYLES LIVE HERE NOW, AND THE REASON MATTERS. They sat below the
     closing html tag, where the parser reparents stray content and Astro never
     collected them — so the whole block was dropped from the built CSS and the
@@ -200,6 +210,12 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
       <a href={site.repo}>the data and the code are on GitHub</a>, and every source row
       says when it was last checked. A directory that lies is worse than no directory.
     </p>
+    {site.analytics?.goatcounter && site.analytics?.showCount && (
+      <p class="foot-note foot-thin vc" data-vc hidden>
+        <span data-vc-n>—</span> visits, counted without cookies by
+        <a href="https://www.goatcounter.com/" rel="noopener">GoatCounter</a>
+      </p>
+    )}
     <p class="foot-note foot-thin">
       <a href={u("/about/")}>About</a> · <a href={u("/add/")}>Add or correct a source</a> ·
       <a href={u("/privacy/")}>Privacy</a> · Maps and {osm.archives.length} archives &copy; OpenStreetMap
@@ -209,6 +225,33 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
     </p>
   </div>
 </footer>
+{site.analytics?.goatcounter && site.analytics?.showCount && (
+  <script is:inline define:vars={{
+    endpoint: `https://${site.analytics.goatcounter}.goatcounter.com/counter/TOTAL.json` }}>
+    /* The count is hidden until it arrives and removed if it never does. A
+       counter that cannot be reached should say nothing, rather than show a
+       nought that is not true. The public endpoint is off by default in
+       GoatCounter's own settings, so this failing quietly is the expected
+       state until that switch is thrown. */
+    (function () {
+      var box = document.querySelector("[data-vc]");
+      var n = box && box.querySelector("[data-vc-n]");
+      if (!box || !n) return;
+      fetch(endpoint)
+        .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+        .then(function (d) {
+          /* parseInt, because GoatCounter returns the count as a STRING and
+             "0" is truthy in JavaScript — a brand-new site would have
+             announced "0 visits" in its own footer. Below one, say nothing. */
+          var c = parseInt((d && d.count) || "0", 10);
+          if (c > 0) { n.textContent = c.toLocaleString(); box.hidden = false; }
+          else box.remove();
+        })
+        .catch(function () { box.remove(); });
+    })();
+  </script>
+)}
+
 <script is:inline>
   /* The menu button, and one dropdown open at a time. */
   (function () {

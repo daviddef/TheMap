@@ -166,8 +166,31 @@ def walk(cid, pause, log, workers=1):
                 break
             calls += len(to_fetch)
             docs = list(pool.map(lambda t: get(t[0], pause), to_fetch))
-            level = [(ab, sub, pth)
-                     for (ab, pth), sub in zip(to_fetch, docs) if sub is not None]
+            nxt = []
+            for (ab, pth), sub in zip(to_fetch, docs):
+                if sub is None:
+                    continue
+                if kids(sub, ab):
+                    nxt.append((ab, sub, pth))
+                    continue
+                # A FETCHED NODE WITH NO CHILDREN IS A BOOK, whatever its
+                # title looks like. The year in a title was the only signal
+                # used to spot one, which works for "Births 1834-1846" and
+                # fails completely for a collection that names its books
+                # another way: Micronesia, Pohnpei, Land Records has leaves
+                # called "Land parcel files, Kitti" and returned ZERO volumes
+                # after 1,323 requests — every book walked to, recognised as
+                # nothing, and dropped. The fetch is already paid for, so
+                # recording it costs nothing and recovers the whole
+                # collection.
+                m = re.search(r"/waypoints/([^?]+)", ab)
+                leaf = pth[-1] if pth else {"t": "", "l": None}
+                leaves.append({
+                    "t": leaf["t"], "path": [q["t"] for q in pth[:-1]],
+                    "labels": [q["l"] for q in pth[:-1]],
+                    "from": None, "to": None, "wp": m.group(1) if m else "",
+                })
+            level = nxt
     return leaves, calls
 
 

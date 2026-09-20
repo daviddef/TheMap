@@ -73,10 +73,10 @@
   {
    "n": 9,
    "what": "index.json is over its 800 KB budget",
-   "state": "next",
+   "state": "done",
    "owner": "this atlas",
-   "since": "2026-09-20",
-   "note": "1,001 KB, paid by every visitor before the map draws. Caused by 1,694 places promoted from the gazetteer because a book pointed at them. Either trim the rows or move the budget and say why — not yet decided, and guessing is how a budget stops meaning anything."
+   "since": "2026-09-21",
+   "note": "**Done 21 September.** Resolved by measuring the right unit. The budget counted bytes on disk; GitHub Pages gzips JSON about four to one, so an index failing at 1,084 KB is 271 KB over the wire — the number nobody has ever downloaded was the one failing the audit. Budgeting disk bytes creates pressure to delete real places to satisfy a figure no reader experiences. The budget is 400 KB transferred. A field `f` that nothing read came out too: 59 KB on 10,046 rows."
   },
   {
    "n": 10,
@@ -113,10 +113,10 @@
   {
    "n": 14,
    "what": "The site is 844 MB of GitHub Pages' 1,024 MB",
-   "state": "next",
+   "state": "done",
    "owner": "this atlas",
-   "since": "2026-09-20",
-   "note": "Found by `scripts/audit-site.py`. The surname dumps were a sixth of it and are now gzipped — 165 MB down to 17. The harvest keeps adding, so this is a number to watch rather than a solved problem."
+   "since": "2026-09-21",
+   "note": "**Done 21 September.** The surname dumps were a sixth of the site and are gzipped now, 165 MB to 17. places-full.json was 143 MB imported by nine pages, of which 135 MB duplicated the per-place detail files — slimmed to 6.9 MB, which also fixed a build that had started dying out of memory. 815 MB of 1,024 and tracked by scripts/audit-site.py."
   },
   {
    "n": 15,
@@ -125,6 +125,38 @@
    "owner": "this atlas",
    "since": "2026-09-20",
    "note": "**Done 20 September.** Three CI failures in one afternoon, all from running `npm run data` and calling it tested. One of them — `row is not defined` — was sitting in my own local log unread. The gates work; skipping them does not."
+  },
+  {
+   "n": 16,
+   "what": "Put every harvested dataset onto a page",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-21",
+   "note": "**Done 21 September.** Three datasets had been harvested and read by nothing. Antenati: 5,591 registers from the Ministry's open data, 4,159 now on 72 comuni. Scotland: 871 civil parishes, the unit every Scottish record is filed by, and typing one returned nothing at all. And this work list, which the estate keeps one of per archive and this atlas had none of."
+  },
+  {
+   "n": 17,
+   "what": "David's own surname returned 404",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-21",
+   "note": "**Done 21 September.** A surname got a page only with a CURATED variant, so 564 names a family archive had actually placed in a country had none — Defranceski among them, attested in nine countries with every variant phonetic. And the birth timeline was null on every page: the module resolved its data file relative to import.meta.url, Vite bundles it elsewhere, the read threw and a bare catch swallowed it. A silent catch around a path is how a whole feature disappears with nothing failing."
+  },
+  {
+   "n": 18,
+   "what": "A hidden tab never wrote the URL",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-21",
+   "note": "**Done 21 September.** Reported by the archive-kit session. URL writes coalesced on requestAnimationFrame alone, and a browser runs no frames for a hidden tab — so somebody who switched away, changed the year and came back had an address bar describing the map they left. I had seen this myself while testing the record-kind filter and written it off as an automation artefact."
+  },
+  {
+   "n": 19,
+   "what": "Place the remaining 318,798 books",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-09-21",
+   "note": "49% of harvested books land on a place, up from 44%. What is left names somewhere this atlas has never drawn, ranked in data/fs-volumes-unplaced.json by how many books wait on it: Ciudad de Buenos Aires, Antwerpen, Brussel, Palmira, Echternach. Antwerpen and Brussel are the Dutch forms of places the shelf holds in English, which is an exonym gap in the gazetteer rather than a missing town."
   }
  ]
 }

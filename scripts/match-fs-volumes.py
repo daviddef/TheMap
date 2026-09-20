@@ -115,6 +115,28 @@ def main():
     wp = json.load(open(SRC))
     places = json.load(open("data/places.json"))["places"]
 
+    # THE COUNTRIES COME FROM collections.json, NOT FROM THE WAYPOINT FILE.
+    #
+    # The harvester stamps each collection's countries into its output at the
+    # moment it walks it. That is a derived value with a long life: when the
+    # ISO lookup was later corrected, 30 collections gained a country they
+    # had never had — Isle of Man, Benin, Micronesia, Lesotho, the Cook
+    # Islands — but their waypoint rows still carried the empty list from
+    # before. A collection with no country cannot be scoped, so every one of
+    # their books stayed unplaceable, and it looked like a matching problem
+    # rather than a stale copy.
+    #
+    # So the live list wins and the stamped value is only a fallback.
+    live_cc = {}
+    try:
+        import re as _re
+        for c in json.load(open("data/collections.json"))["collections"]:
+            m = _re.search(r"/collection/(\d+)", c.get("url") or "")
+            if m:
+                live_cc[m.group(1)] = c.get("countries") or []
+    except FileNotFoundError:
+        pass
+
     # (country, folded name) -> places. Scoped by country from the start,
     # because an unscoped index of 7,391 places puts Santa Maria in nine
     # countries and the first one wins, silently and wrongly.
@@ -352,7 +374,7 @@ def main():
     seen = set()
 
     for cid, col in (wp.get("byCollection") or {}).items():
-        ccs = [c for c in (col.get("cc") or []) if c != "*"]
+        ccs = [x for x in (live_cc.get(cid) or col.get("cc") or []) if x != "*"]
         for v in col.get("volumes", []):
             raw = v.get("path") or []
             labels = v.get("labels") or []

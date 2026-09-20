@@ -503,7 +503,13 @@ def main():
         if span:
             row["s"] = span
         if hits:
-            row["f"] = len(hits)
+            # `f` held the count of collections reaching this place and
+            # nothing ever read it — 59 KB on 10,046 rows, downloaded by
+            # every visitor to answer nobody. The detail file carries `nfs`
+            # for the panel that actually shows it. The gate that should
+            # have caught this was satisfied by `[f.y, f.x]`, where f is a
+            # local variable; it now demands a real property read.
+            pass
         index.append(row)
 
         detail = dict(p)
@@ -631,7 +637,20 @@ def main():
     # where there are more than a thousand things to say.
     src = os.path.join("site", "src", "data")
     os.makedirs(src, exist_ok=True)
-    json.dump({"places": details}, open(os.path.join(src, "places-full.json"), "w"),
+    # WITHOUT THE TWO BIGGEST FIELDS, BECAUSE NINE PAGES IMPORT THIS FILE.
+    #
+    # places-full.json reached 143 MB and the build died stringifying it:
+    # "Zone Allocation failed - process out of memory". 54 MB of it was the
+    # volumes and 81 MB the FamilySearch collections — and both already live
+    # in public/p/<id>.json, which is fetched per place by the map and read
+    # from disk by the place page. Nothing read `volumes` off this file at
+    # all, and only the place page read `fs`, which it can take from the
+    # detail file it already opens.
+    #
+    # 143 MB to 8, paid by every one of the nine pages that import it.
+    _slim = [{k: v for k, v in d.items() if k not in ("volumes", "fs")}
+             for d in details]
+    json.dump({"places": _slim}, open(os.path.join(src, "places-full.json"), "w"),
               ensure_ascii=False, separators=(",", ":"))
     json.dump({"collections": FS}, open(os.path.join(src, "collections-full.json"), "w"),
               ensure_ascii=False, separators=(",", ":"))

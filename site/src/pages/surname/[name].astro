@@ -51,7 +51,7 @@ const slugify = (x) => x.toLowerCase().normalize("NFKD")
    to stop searching. Worth saying out loud on the one page about this name. */
 const frHit = curveFor(r.n);
 const frRow = frHit && frHit.row;
-const tl = timelineFor(row.n, row.variants);
+const tl = timelineFor(r.n, r.variants);
 
 const frCurve = frHit && frHit.curve;
 const frPeak = frCurve ? frCurve.reduce((a, b) => (b.n > a.n ? b : a), frCurve[0]) : null;

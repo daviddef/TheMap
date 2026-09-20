@@ -95,7 +95,6 @@ def main():
 
     json.dump(doc, open("data/places.json", "w"), ensure_ascii=False, indent=1)
     print(f"{hit} places given a province or county, {miss} left without one")
-    import collections
     ex = [p for p in doc["places"] if p.get("admin")][:6]
     for p in ex:
         print(f"   {p['name']:22} {p.get('country')}  "

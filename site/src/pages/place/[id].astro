@@ -48,12 +48,13 @@ const VOLKINDS = ["Births", "Marriages", "Deaths", "Church Census",
    nothing at build time and bundles nothing. */
 let volumes = [];
 let volumesTotal = 0;
+let det = {};
 try {
-  const det = JSON.parse(
+  det = JSON.parse(
     readFileSync(new URL(`../../../public/p/${place.id}.json`, import.meta.url), "utf8"));
   volumes = det.volumes || [];
   volumesTotal = det.volumesTotal || volumes.length;
-} catch (e) { volumes = []; }
+} catch (e) { volumes = []; det = {}; }
 const national = sourcesFor(place.country);
 /* Wikidata's national archive and library, where this atlas has nothing
    curated for the country. Kept apart from `national` above because those
@@ -98,7 +99,11 @@ const dek = older.length
   : `${place.name} in ${where}. ${cs.length} record volume${cs.length === 1 ? "" : "s"} ` +
     (span ? `covering ${span[0]}–${span[1]}, ` : "") + "and who holds them.";
 /* The FamilySearch collections that cover this ground, and how nearly. */
-const fs = place.fs || [];
+/* From the detail file, not from places-full.json. The collections are 81 MB
+   across 10,355 places and nine pages import that file; only this one reads
+   them, and it already opens the per-place detail above. Carrying them in a
+   shared import was what pushed the build out of memory. */
+const fs = det.fs || [];
 const adm = place.admin || {};
 const RANKS = [
   [0, "Named for this place", "Catalogued under this place by name — the closest thing to a direct hit."],

@@ -1,0 +1,130 @@
+{
+ "title": "The work list",
+ "dek": "What is being done here, as opposed to what is known.",
+ "lead": "Every other page in this atlas answers what it holds. This one answers what is being done to it, including the parts that are stuck and the parts that were wrong. An item marked **struck** was founded on a mistake and is kept rather than deleted, because a work list that only records successes is a advertisement.",
+ "close": "Nothing here is a research finding. Those belong on the map, the country pages and the surname pages. This is the state of the work.",
+ "accounts": [],
+ "unreconciled": [],
+ "rows": [
+  {
+   "n": 1,
+   "what": "Walk every FamilySearch collection's waypoint tree",
+   "state": "running",
+   "owner": "this atlas",
+   "since": "2026-09-20",
+   "note": "**Running now.** 3,504 collections; the tree descends to the individual book. 707,471 volumes so far against 4,903 when the day started. The catalogue is gated but the records API is not, which an earlier note in `import-fs-catalogue.py` had written off without trying — the same mistake as declaring Scotland's parishes closed when data.gov.uk had them. Publishes every two hours while it runs. US collections are half the total and come last, so the rest of the world lands first."
+  },
+  {
+   "n": 2,
+   "what": "Place the harvested volumes on the places they belong to",
+   "state": "running",
+   "owner": "this atlas",
+   "since": "2026-09-20",
+   "note": "347,272 of 775,686 books land on a place. The rest name somewhere this atlas has never drawn, and they are written to `data/fs-volumes-unplaced.json` ranked by how many books are waiting — the map's next places, not a silent loss."
+  },
+  {
+   "n": 3,
+   "what": "Cross-border collections: a register moves when a jurisdiction moves",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-20",
+   "note": "**Done 20 September.** Of 1,165 Croatian places, none was reached by a collection filed under another country — the stated thesis of this atlas was dead. Two causes: `placeIds` were resolved through the wrong endpoint, which answered an unrelated place with HTTP 200 (Italy, Pola and Trieste came back as Monomie, New South Wales); and a title disagreeing with its places was treated as an error and the places discarded. Now ten explicit filing groups — Habsburg, Yugoslav, Prussian, Russian, Ottoman, Nordic, Low Countries, Iberia, these islands, the Alps — because records cross for historical reasons, not geographic ones. Verteneglio finds Brtonigla, Isola d'Istria finds Izola. Kept honest by `scripts/test-cross-border.py`."
+  },
+  {
+   "n": 4,
+   "what": "A surname timeline for every country, not only France",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-20",
+   "note": "**Done 20 September.** Where a name is found today and its variations were already global; WHEN it was borne existed for France alone. 363,574 surnames now carry a birth timeline from Wikidata, reaching the 1400s. Aggregated over the variant family and folded, so a rare spelling inherits its family's history — Defranceski has no notable namesake, De Franceschi has eleven, Italy from the 1550s and Croatia from the 1800s. The bias is stated on the page: these are people notable enough for an encyclopaedia, not a census."
+  },
+  {
+   "n": 5,
+   "what": "Stop a name inheriting every country its archive touches",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-20",
+   "note": "**Done 20 September.** Testing on David's own name found `De Franceschi` attested in 29 countries including Albania, Cuba, Paraguay and Zimbabwe — all from one Friulian family's archive. The fallback gave any unplaced name the archive's whole geography. Archives that place names individually do it for most of them, so silence in that list is information. The fallback survives only where an archive has one country and cannot mislead."
+  },
+  {
+   "n": 6,
+   "what": "Antenati: the Ministry's own registers, on the map",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-20",
+   "note": "**Done 20 September.** 5,591 registers harvested from the SAN open-data feed in September and read by nothing since — the file sat in `data/` while Italian places showed only FamilySearch. 4,159 are now on 72 comuni, 68 of which this atlas drew because a register pointed at them."
+  },
+  {
+   "n": 7,
+   "what": "Scotland's civil parishes, searchable",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-20",
+   "note": "**Done 20 September.** 871 parishes from data.gov.uk, harvested and then read by nothing. The civil parish is the unit every Scottish record is filed by — the OPRs, the statutory registers, every census — and typing one returned nothing at all."
+  },
+  {
+   "n": 8,
+   "what": "Resume the Antenati harvest at volume 6,000 of 464,770",
+   "state": "blocked",
+   "owner": "the Ministry",
+   "since": "2026-09-20",
+   "note": "Blocked on THEIR side, not ours. `www.san.beniculturali.it` is unreachable — port 80 refuses and the parent site times out. Stopped cleanly with its resumption token intact. Test with `curl \"http://www.san.beniculturali.it/oaicat/OAIHandler?verb=Identify\"` before retrying."
+  },
+  {
+   "n": 9,
+   "what": "index.json is over its 800 KB budget",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-09-20",
+   "note": "1,001 KB, paid by every visitor before the map draws. Caused by 1,694 places promoted from the gazetteer because a book pointed at them. Either trim the rows or move the budget and say why — not yet decided, and guessing is how a budget stops meaning anything."
+  },
+  {
+   "n": 10,
+   "what": "Point recordatlas.org at GitHub Pages",
+   "state": "blocked",
+   "owner": "David",
+   "since": "2026-09-20",
+   "note": "Bought 17 September; the A records still point at the registrar's landing page. `scripts/cutover-domain.sh` does the whole switch and refuses to run until at least two of GitHub's four addresses appear, because a CNAME file and a base of `/` are not independently safe. Replace the A records with 185.199.108–111.153."
+  },
+  {
+   "n": 11,
+   "what": "AdSense answers unfilled",
+   "state": "blocked",
+   "owner": "David",
+   "since": "2026-09-20",
+   "note": "The code is right: loader present, slot measuring 1024x90, iframe created, correct client and slot. Google answers `data-ad-status=\"unfilled\"`, which is an account state. Check AdSense → Sites for the approval status of daviddef.github.io."
+  },
+  {
+   "n": 12,
+   "what": "Ask the Meertens Instituut about the Familienamenbank",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-09-20",
+   "note": "`requests/meertens-familienamenbank.md` has been written and read by nothing. Dutch surname distribution with real counts would be the first register-tier evidence this atlas has for the Netherlands, where it currently holds 37 collections and no surname counts at all."
+  },
+  {
+   "n": 13,
+   "what": "Waiting on NARA and Trove",
+   "state": "blocked",
+   "owner": "David",
+   "since": "2026-09-17",
+   "note": "NARA's API key needs a human to request it. Trove replied with ticket RSref189042 and nothing since."
+  },
+  {
+   "n": 14,
+   "what": "The site is 844 MB of GitHub Pages' 1,024 MB",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-09-20",
+   "note": "Found by `scripts/audit-site.py`. The surname dumps were a sixth of it and are now gzipped — 165 MB down to 17. The harvest keeps adding, so this is a number to watch rather than a solved problem."
+  },
+  {
+   "n": 15,
+   "what": "Run the whole build before pushing, not one stage of it",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-20",
+   "note": "**Done 20 September.** Three CI failures in one afternoon, all from running `npm run data` and calling it tested. One of them — `row is not defined` — was sitting in my own local log unread. The gates work; skipping them does not."
+  }
+ ]
+}

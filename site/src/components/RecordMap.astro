@@ -165,14 +165,28 @@ window.addEventListener("load", async function () {
      looking. A view can be sent to somebody rather than only remembered. */
   var Q; try { Q = new URLSearchParams(location.search); } catch (e) { Q = new URLSearchParams(); }
   var writing = false;
+  /* A HIDDEN TAB RUNS NO FRAMES, AND THE WRITE WAS WAITING FOR ONE.
+     Coalescing on requestAnimationFrame alone means that if somebody
+     switches tab, changes the year or the basemap, and comes back, the
+     address bar still describes the map they left — the write is queued
+     behind a frame that will not arrive until the page is looked at again.
+     Every share and every reload in between carries the wrong view.
+     I saw this myself while testing the record-kind filter and wrote it off
+     as an artefact of an automation pane being hidden; it took the archive
+     kit hitting it in the same condition to show it was the bug, not the
+     test. A timer runs in a hidden tab, so whichever fires first does the
+     write and the flag keeps it to once. */
   function push() {
     if (writing) return;
     writing = true;
-    requestAnimationFrame(function () {
+    var go = function () {
+      if (!writing) return;
       writing = false;
       var s = Q.toString();
       history.replaceState(null, "", location.pathname + (s ? "?" + s : "") + location.hash);
-    });
+    };
+    requestAnimationFrame(go);
+    setTimeout(go, 250);
   }
   function setQ(k, v) { if (v === "" || v == null) Q.delete(k); else Q.set(k, v); push(); }
 

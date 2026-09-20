@@ -18,7 +18,7 @@ import json, os, re, sys, math, unicodedata, collections
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(_ROOT)
-from geo import in_ring_latlon, country_of
+from geo import country_of
 
 XLAT = str.maketrans({"đ": "d", "ł": "l", "ø": "o", "ß": "ss", "æ": "ae", "œ": "oe"})
 

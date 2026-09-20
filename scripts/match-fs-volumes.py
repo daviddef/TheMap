@@ -20,7 +20,9 @@ descending order of how many books are waiting on them.
 
     python3 scripts/match-fs-volumes.py
 """
-import collections, gzip, json, os, re, sys, unicodedata
+import collections, gzip, json, os, re, sys, time, unicodedata
+
+THIS_YEAR = time.gmtime().tm_year
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
@@ -548,6 +550,14 @@ def main():
                 unplaced[deepest] += 1
                 unplaced_cc.setdefault(deepest, ccs[0] if ccs else "")
                 continue
+            # A SHELF MARK IS NOT A YEAR, and the harvester's fix only helps
+            # collections walked after it. These rows are already on disk:
+            # "V. 3077-1-2027, 1937" is call number 3077-1-2027 for 1937, and
+            # reading 2027 as a date gave three books ending after the
+            # present. Drop a span that runs past this year rather than
+            # publish a date that cannot be true.
+            if (v.get("to") or 0) > THIS_YEAR or (v.get("from") or 0) > THIS_YEAR:
+                v = dict(v, **{"from": None, "to": None})
             matched += 1
             if abroad and hit_cc:
                 crossed[(ccs[0] if ccs else "?") + "\u2192" + hit_cc] += 1

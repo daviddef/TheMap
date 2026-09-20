@@ -28,9 +28,11 @@ markers. Promote the ones that have registers onto the shelf, exactly as
   an archive links people to places; where it does not, a name inherits the
   archive's whole country list if mentioned three times or more. Mazza and
   Luwinski still lean on that.
-- **`index.json` is at 792 KB of an 800 KB budget.** The next field added will
-  burst it. `q`, `i` and `n` are the three biggest and `i` is derivable from `n`
-  for most places.
+- **The index budget is measured in TRANSFERRED bytes now, not disk bytes.**
+  It was 800 KB on disk; GitHub Pages gzips JSON about four to one, so an
+  index reported at 1,084 KB is 265 KB over the wire. Budgeting the wrong
+  unit creates pressure to delete real places to satisfy a number no reader
+  has ever downloaded. The budget is 400 KB transferred.
 - **72 countries have no national source at all**, mostly small territories.
 - **23 African countries have neither a collection nor an archive** — Chad, Mali,
   Niger, Senegal, Tanzania, Ghana among them.

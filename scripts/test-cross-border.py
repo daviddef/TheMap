@@ -26,7 +26,10 @@ LIVE = "data/fs-waypoints.json"
 FIX = "data/_fixtures/pola-trieste-waypoints.json"
 
 MUST_CROSS = {"brtonigla": "HR", "buje": "HR", "izola": "SI"}
-MUST_NOT = {"Davor", "Bale", "Čabar", "Borojevići", "Topolo"}
+MUST_NOT = {"Davor", "Bale", "Čabar", "Borojevići", "Topolo",
+            # Brazilian municipalities whose names are shared across the
+            # Americas. Brazil's registers do not interleave with anyone's.
+            "Califórnia", "Colorado", "Flórida", "Belém", "Buenos Aires"}
 
 # A province may say WHICH COUNTRY a path is in; it may never be the answer
 # to which town. "Pola" is an alternate name of Polla in Campania, so four

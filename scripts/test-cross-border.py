@@ -25,7 +25,14 @@ os.chdir(ROOT)
 LIVE = "data/fs-waypoints.json"
 FIX = "data/_fixtures/pola-trieste-waypoints.json"
 
-MUST_CROSS = {"brtonigla": "HR", "buje": "HR", "izola": "SI"}
+# Izola is deliberately NOT here. "Pola › Isola d'Istria" has the province
+# pointing at Croatia and the comune at Slovenia, one witness each, and the
+# rule requires two agreeing. Izola is the true answer and the evidence
+# cannot prove it, so the book goes unplaced rather than onto a guess — the
+# same principle that refuses Davor and Bale. If a later rule can tell a
+# split province from a coincidence, put it back and this comment is the
+# reason it was ever absent.
+MUST_CROSS = {"brtonigla": "HR", "buje": "HR"}
 MUST_NOT = {"Davor", "Bale", "Čabar", "Borojevići", "Topolo",
             # Brazilian municipalities whose names are shared across the
             # Americas. Brazil's registers do not interleave with anyone's.

@@ -31,8 +31,16 @@ import site from "../data/site.json";
       <>
         <p>This site carries a single advertisement in its footer, served by Google AdSense.
         Google and its partners may use cookies to serve and measure ads. In the EEA, the UK
-        and Switzerland the ad script is not loaded at all until you have given consent
-        through the banner, and you can change that choice at any time.</p>
+        and Switzerland, Google's own consent message appears before <b>personalised</b> ads
+        are served, and you can change that choice at any time.</p>
+        {/* THIS PARAGRAPH USED TO CLAIM MORE THAN IS TRUE. It said the ad
+            script "is not loaded at all until you have given consent", which
+            would need a consent-management platform this site does not run.
+            What actually happens is that Google's own GDPR message, enabled
+            in the AdSense dashboard, gates personalisation. That is
+            compliant, and it is a different mechanism — and a privacy page
+            is the last place to describe a protection a reader does not
+            actually have. */}
         <p>You can review Google's practices at
         <a href="https://policies.google.com/technologies/partner-sites" rel="noopener">
         policies.google.com/technologies/partner-sites</a>.</p>
@@ -42,6 +50,23 @@ import site from "../data/site.json";
       appear in the footer, it will be served by Google AdSense, and in the EEA, the UK and
       Switzerland nothing will load until you have consented through a banner. This page will
       say so before it happens.</p>
+    )}
+
+    <h3>Counting visits</h3>
+    {site.analytics?.goatcounter ? (
+      <>
+        <p>This site counts page views with
+        <a href="https://www.goatcounter.com/" rel="noopener">GoatCounter</a>, the same
+        counter every archive in this family of sites uses. It sets <b>no cookies</b>, gives
+        you no identifier, and keeps no personal data — it records that a page was loaded,
+        roughly where in the world from, and which page sent you. Nothing is shared with any
+        advertiser, and nothing is joined to the advertising above.</p>
+        <p>There is no consent banner for it because there is nothing to consent to: it
+        collects no personal data in the first place. If you would rather not be counted at
+        all, any tracker blocker will stop it, and the site works identically without it.</p>
+      </>
+    ) : (
+      <p>This site does not count visits.</p>
     )}
 
     <h3>Living people</h3>

@@ -37,6 +37,7 @@ recorded; --resume skips those and carries on. Interrupt it freely.
     python3 scripts/harvest-fs-waypoints.py --limit 200 --resume
 """
 import argparse, json, os, re, sys, time, urllib.request, urllib.error
+from concurrent.futures import ThreadPoolExecutor
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
@@ -100,7 +101,7 @@ def kids(doc, self_about):
 YEARS = re.compile(r"\b(1[0-9]{3}|20[0-2][0-9])\b")
 
 
-def walk(cid, pause, log):
+def walk(cid, pause, log, workers=1):
     """Every leaf under one collection, with the path that led to it.
 
     Returns (leaves, calls) — or (None, calls) when the collection has no
@@ -121,37 +122,52 @@ def walk(cid, pause, log):
     doc = get(root, pause)
     if doc is None:
         return None, 2
-    stack, leaves, calls = [(root, doc, [])], [], 2
-    while stack:
-        if len(leaves) >= MAX_NODES_PER_COLLECTION:
-            log(f"    capped at {MAX_NODES_PER_COLLECTION} volumes")
-            break
-        about, d, path = stack.pop()
-        ch = kids(d, about)
-        if not ch:
-            continue
-        for c in ch:
-            if len(path) + 1 >= MAX_DEPTH:
-                continue
-            # A node whose title names years is a book, not a folder. Asking
-            # the API to confirm that would double the traffic for nothing.
-            ys = [int(y) for y in YEARS.findall(c["t"])]
-            child_path = path + [{"l": c["label"], "t": c["t"]}]
-            if ys:
-                wp = ""
-                m = re.search(r"/waypoints/([^?]+)", c["about"])
-                if m:
-                    wp = m.group(1)
-                leaves.append({
-                    "t": c["t"], "path": [p["t"] for p in path],
-                    "labels": [p["l"] for p in path],
-                    "from": min(ys), "to": max(ys), "wp": wp,
-                })
-            else:
-                sub = get(c["about"], pause)
-                calls += 1
-                if sub is not None:
-                    stack.append((c["about"], sub, child_path))
+    # SIBLINGS IN PARALLEL, BECAUSE THE WAIT IS THE WHOLE COST. Walking one
+    # node at a time, the process spent 72 seconds per collection and almost
+    # all of it waiting — 0.6s of deliberate pause plus about a second of
+    # round trip, times ~19 calls, and far more for a big tree: Family Group
+    # Records alone needed 139. At that pace the 3,489 collections were a
+    # four-day job.
+    #
+    # Branches of a waypoint tree are independent, so a small pool fetches a
+    # level's children together. Each worker still pauses, so the aggregate
+    # is about five requests a second against an API that answers in nine
+    # milliseconds and publishes no rate limit — brisk, and nowhere near
+    # enough to trouble anyone. Still no browser impersonation and still one
+    # honest User-Agent.
+    leaves, calls = [], 2
+    level = [(root, doc, [])]
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        while level:
+            if len(leaves) >= MAX_NODES_PER_COLLECTION:
+                log(f"    capped at {MAX_NODES_PER_COLLECTION} volumes")
+                break
+            to_fetch = []
+            for about, d, path in level:
+                for c in kids(d, about):
+                    if len(path) + 1 >= MAX_DEPTH:
+                        continue
+                    # A node whose title names years is a book, not a folder.
+                    # Asking the API to confirm would double the traffic for
+                    # nothing.
+                    ys = [int(y) for y in YEARS.findall(c["t"])]
+                    child_path = path + [{"l": c["label"], "t": c["t"]}]
+                    if ys:
+                        m = re.search(r"/waypoints/([^?]+)", c["about"])
+                        leaves.append({
+                            "t": c["t"], "path": [p["t"] for p in path],
+                            "labels": [p["l"] for p in path],
+                            "from": min(ys), "to": max(ys),
+                            "wp": m.group(1) if m else "",
+                        })
+                    else:
+                        to_fetch.append((c["about"], child_path))
+            if not to_fetch:
+                break
+            calls += len(to_fetch)
+            docs = list(pool.map(lambda t: get(t[0], pause), to_fetch))
+            level = [(ab, sub, pth)
+                     for (ab, pth), sub in zip(to_fetch, docs) if sub is not None]
     return leaves, calls
 
 
@@ -161,6 +177,8 @@ def main():
     ap.add_argument("--limit", type=int, default=0, help="collections this run")
     ap.add_argument("--probe", type=int, default=0, help="measure N and stop")
     ap.add_argument("--pause", type=float, default=1.0)
+    ap.add_argument("--workers", type=int, default=3,
+                    help="sibling fetches in flight; each one still pauses")
     ap.add_argument("--cc", default="", help="only this country code")
     a = ap.parse_args()
 
@@ -200,7 +218,7 @@ def main():
           f"({len(done)} already done)", flush=True)
     t0, vols, calls = time.time(), 0, 0
     for i, c in enumerate(todo, 1):
-        got, n = walk(c["id"], a.pause, lambda m: print(m, flush=True))
+        got, n = walk(c["id"], a.pause, lambda m: print(m, flush=True), a.workers)
         calls += n
         # BEFORE THE BRANCHES BELOW. The first cut put this at the foot of
         # the loop, under two `continue`s — so whenever the 25th collection
@@ -217,6 +235,12 @@ def main():
             print(f"  [{i}/{len(todo)}] {c['id']} unreachable — leaving it "
                   f"undone so --resume tries again", flush=True)
             continue
+        if i % 25 == 0:
+            el = time.time() - t0
+            rate = el / i
+            print(f"  … {i}/{len(todo)} · {vols:,} volumes · "
+                  f"{rate:.0f}s per collection · about "
+                  f"{rate*(len(todo)-i)/3600:.1f}h left", flush=True)
         if got == "index-only":
             # Recorded, not skipped silently. A reader asking "why are there
             # no books here" deserves the answer "because there are none to

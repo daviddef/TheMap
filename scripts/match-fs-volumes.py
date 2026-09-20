@@ -53,6 +53,23 @@ NOT_A_PLACE = re.compile(
 # book, not inferred from its title.
 IS_RELIGION = re.compile(r"religion|denomination", re.I)
 
+# A LEVEL THAT IS AN ADMINISTRATIVE AREA MAY VOUCH FOR A COUNTRY BUT MUST NOT
+# BE THE ANSWER.
+#
+# "Pola › Materada (Frazione di Umago) › Beata Vergine della Neve" is a book
+# from Materada, a frazione of Umag in Croatia. Neither Materada nor the
+# church resolved, so the matcher fell back to the province — and "Pola" is
+# an alternate name of Polla in Campania, 600km away and conveniently in the
+# same country as the collection. Four books landed there, confidently.
+#
+# A province is not where a register was kept. It is useful for deciding
+# WHICH country a path is talking about and useless for deciding which town,
+# so it votes and never wins. Where the settlement levels resolve to nothing,
+# the honest answer is that the place is unknown.
+IS_AREA = re.compile(r"province|state|region|county|district|department|"
+                     r"prefecture|governorate|oblast|canton|diocese|deanery|"
+                     r"archdiocese|country", re.I)
+
 
 def bare(s):
     """«Albanasi (Zadar)» -> «Albanasi». The bracket disambiguates for a
@@ -217,7 +234,7 @@ def main():
                 out[cc] = min(got, key=lambda r: r[0])[1]
         return out
 
-    def resolve_path(index, path, ccs, wider):
+    def resolve_path(index, path, ccs, wider, areas=()):
         """TWO PASSES OVER THE WHOLE PATH, AND THE ORDER IS THE POINT.
 
         The first cut asked, for each level deepest-first, "in country, then
@@ -263,7 +280,11 @@ def main():
         votes = collections.Counter()
         best, gbest, depth = {}, {}, {}
         levels_abroad = 0
-        for lvl, name in enumerate(reversed(path)):   # 0 is the deepest
+        # Settlements decide; areas only vouch, so they come last and their
+        # places are never taken as the answer.
+        ladder = list(reversed(path)) + list(reversed(areas))
+        area_from = len(path)
+        for lvl, name in enumerate(ladder):           # 0 is the deepest
             shits, ghits = {}, {}            # place found per cc is the
             for cand in readings(name):      # most specific one
                 shits = look_abroad(index, fold(cand), wider)
@@ -277,6 +298,8 @@ def main():
             for cc in set(shits) | set(ghits):
                 votes[cc] += 1
                 depth.setdefault(cc, lvl)
+                if lvl >= area_from:
+                    continue        # an area voted; it does not get to win
                 if cc in shits:
                     best.setdefault(cc, shits[cc])
                 if cc in ghits:
@@ -306,6 +329,8 @@ def main():
             top = sorted(votes.items(), key=lambda kv: (depth[kv[0]], -kv[1]))
             if True:
                 cc = top[0][0]
+                if cc not in best and cc not in gbest:
+                    return None, None, False     # only an area vouched for it
                 if cc in best:
                     return best[cc], cc, True
                 g = gbest.get(cc)
@@ -332,7 +357,7 @@ def main():
             raw = v.get("path") or []
             labels = v.get("labels") or []
             conf = None
-            path = []
+            path, areas = [], []
             for i, name in enumerate(raw):
                 if not name:
                     continue
@@ -342,12 +367,15 @@ def main():
                     continue
                 if lab and NOT_A_PLACE.search(lab):
                     continue
+                if lab and IS_AREA.search(lab):
+                    areas.append(name)      # may vouch, may not win
+                    continue
                 path.append(name)
             if not path:
                 noname += 1
                 continue
             wider = neighbours(ccs)
-            hit, hit_cc, abroad = resolve_path(idx, path, ccs, wider)
+            hit, hit_cc, abroad = resolve_path(idx, path, ccs, wider, areas)
             if not hit:
                 # Try the gazetteer before giving up on it.
                 for name in reversed(path):

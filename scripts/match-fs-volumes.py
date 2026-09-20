@@ -222,6 +222,49 @@ def main():
     # accepts a name that is UNIQUE across it. "Pola" resolves to exactly one
     # place in Europe and is taken; a name shared by four villages is left
     # unplaced, because a wrong dot is worse than a missing one.
+    # WHERE RECORDS ACTUALLY CROSSED, WHICH IS HISTORY AND NOT GEOGRAPHY.
+    #
+    # Continent was the wrong model. It let a Brazilian collection reach
+    # Dominica and a Bolivian one reach the United States, because Latin
+    # America shares hundreds of place names — Santa Cruz, Buenavista, La
+    # Paz, Concepción, Belém, Colorado, Florida, California — and any two of
+    # them agreeing looked like corroboration. Three hundred books went to
+    # the wrong country before this.
+    #
+    # A register crosses a modern border for ONE reason: the jurisdiction
+    # that kept it moved. That is a knowable, finite thing, so it is written
+    # down rather than inferred. Each group is a filing system whose paper
+    # genuinely interleaves across today's borders.
+    #
+    # THIS LIST IS DELIBERATELY SHORT AND SHOULD GROW ONLY ON EVIDENCE. Latin
+    # America is absent not because its borders never moved but because
+    # nothing here has yet shown a collection whose books genuinely belong
+    # over one — and the cost of guessing wrong is a book on the wrong
+    # continent.
+    FILING_GROUPS = [
+        # Habsburg lands: an Istrian baptism is Croatian in 1863 and filed
+        # under Italy, Pola and Trieste in 1915. The case this atlas is for.
+        set("AT HU CZ SK SI HR BA RO PL UA IT RS ME".split()),
+        # Yugoslavia, which kept parish registers centrally for decades.
+        set("HR SI BA RS ME MK".split()),
+        # Prussia, Silesia, Pomerania, East Prussia.
+        set("DE PL RU LT CZ DK".split()),
+        # The Russian Empire and the Soviet Union.
+        set("RU UA BY LT LV EE PL MD GE AM AZ KZ FI".split()),
+        # Ottoman Europe.
+        set("TR GR BG RS MK AL BA RO ME CY".split()),
+        # The Nordic union states.
+        set("SE NO DK FI IS".split()),
+        # The Low Countries and the Rhine.
+        set("NL BE LU FR DE".split()),
+        # Iberia.
+        set("ES PT".split()),
+        # These islands, whose civil registration genuinely interleaves.
+        set("GB IE IM".split()),
+        # The Alpine borderlands.
+        set("FR IT CH AT DE".split()),
+    ]
+
     CONTINENT = {}
     for _c, _set in {
         "EU": "AL AD AT BY BE BA BG HR CY CZ DK EE FI FR DE GI GR HU IS IE IT LV "
@@ -240,9 +283,17 @@ def main():
             CONTINENT.setdefault(_cc, _c)
 
     def neighbours(ccs):
-        """Every country on the same continent as this collection's own."""
-        conts = {CONTINENT.get(c) for c in ccs} - {None}
-        return sorted({c for c, k in CONTINENT.items() if k in conts} - set(ccs))
+        """Countries whose records genuinely interleave with these.
+
+        Not the continent — the filing system. A collection filed in a
+        country that appears in none of the groups can never cross, which is
+        the right default: most national registries are exactly that.
+        """
+        out = set()
+        for g in FILING_GROUPS:
+            if g & set(ccs):
+                out |= g
+        return sorted(out - set(ccs))
 
     def look_in(index, cand, ccs):
         for cc in ccs:
@@ -250,6 +301,24 @@ def main():
             if got:
                 return min(got, key=lambda r: r[0])[1], cc
         return None, None
+
+    def is_exonym(place, cand):
+        """Did this name match the place under a name that is NOT its own?
+
+        The Istrian crossings are all exonyms: Verteneglio IS Brtonigla,
+        Pola IS Pula, Isola d'Istria IS Izola. A collection filed in one
+        country naming a place by the other country's word for it is exactly
+        the historical filing this atlas exists to expose.
+
+        A crossing earned by an EXACT name match is a different thing
+        entirely, and in Latin America it is almost always a coincidence:
+        Brazil, Bolivia, Argentina and Uruguay share Santa Cruz, Buenavista,
+        La Paz, Concepción, Belém, Colorado and hundreds more. Those put 300
+        books onto the wrong continent's states before this test.
+        """
+        own = {fold(place.get("name") or place.get("n") or "")}
+        own.add(fold(bare(place.get("name") or place.get("n") or "")))
+        return cand not in own
 
     def look_abroad(index, cand, wider):
         """Every country on the continent where this name exists.
@@ -315,6 +384,7 @@ def main():
         votes = collections.Counter()
         best, gbest, depth = {}, {}, {}
         levels_abroad = 0
+        witnessed, exonym = set(), set()
         # Settlements decide; areas only vouch, so they come last and their
         # places are never taken as the answer.
         ladder = list(reversed(path)) + list(reversed(areas))
@@ -328,8 +398,25 @@ def main():
                           for cc in wider) if g}
                 if shits or ghits:
                     break
-            if shits or ghits:
+            # TWO LEVELS WITH THE SAME NAME ARE ONE WITNESS, NOT TWO.
+            #
+            # Brazil has municipalities called Califórnia, Colorado, Flórida,
+            # Belém and Buenos Aires, and FamilySearch files a parish under a
+            # municipality of the same name — "Califórnia › Califórnia". Both
+            # levels matched California in the United States, counted as two
+            # independent witnesses, and 141 Bolivian and 239 Brazilian books
+            # crossed onto American states and Argentine provinces.
+            #
+            # Corroboration means two DIFFERENT names agreeing, which is what
+            # made Istria trustworthy: Pola is Pula and Verteneglio is
+            # Brtonigla, two distinct names both landing in Croatia. The same
+            # word twice is one piece of evidence written down twice.
+            if (shits or ghits) and fold(name) not in witnessed:
+                witnessed.add(fold(name))
                 levels_abroad += 1
+                for cc, pl in list(shits.items()) + list(ghits.items()):
+                    if is_exonym(pl, fold(readings(name)[0] if readings(name) else name)):
+                        exonym.add(cc)
             for cc in set(shits) | set(ghits):
                 votes[cc] += 1
                 depth.setdefault(cc, lvl)
@@ -360,10 +447,17 @@ def main():
         # — "Bale" exists in Croatia and Montenegro, so one name counted as
         # two witnesses and put eight Istrian books in Montenegro. The test
         # is how much of the PATH is foreign, so it has to count levels.
-        if levels_abroad >= 2:
+        # AND AT LEAST ONE OF THE WITNESSES MUST BE AN EXONYM. Two distinct
+        # names agreeing was still not enough where names repeat: Santa Cruz
+        # and Buenavista are both real in half of South America. A crossing
+        # has to be earned by a place being called something else, which is
+        # what a border moving actually leaves behind.
+        if levels_abroad >= 2 and exonym:
             top = sorted(votes.items(), key=lambda kv: (depth[kv[0]], -kv[1]))
             if True:
                 cc = top[0][0]
+                if cc not in exonym:
+                    return None, None, False
                 if cc not in best and cc not in gbest:
                     return None, None, False     # only an area vouched for it
                 if cc in best:

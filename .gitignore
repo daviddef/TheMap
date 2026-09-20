@@ -41,3 +41,10 @@ site/public/ee/
 site/public/world-archives.json
 site/public/country-points.json
 .harvest-published
+
+# The raw waypoint harvest state. 73 MB at 5% of the run and heading for
+# 1.5 GB — GitHub refuses at 100 MB. Only scripts/match-fs-volumes.py reads
+# it, and the build reads that script's output instead, so CI never needs
+# it. It is resume scaffolding, regenerable by re-running the harvest.
+data/fs-waypoints.json
+data/fs-volumes-world.json

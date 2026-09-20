@@ -22,7 +22,17 @@ export async function getStaticPaths() {
     .replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const seen = new Set();
   return (surn.surnames || [])
-    .filter((r) => r.countries.length && r.variants.some((v) => v.how === "curated"))
+    /* A CURATED VARIANT OR ARCHIVE EVIDENCE — either is a reason to exist.
+       Requiring a curated variant meant 564 surnames that a family archive
+       has actually placed in a country had no page at all, David's own
+       among them: Defranceski is attested in nine countries by the
+       Defranceschi archive and every one of its variants is phonetic, so
+       it failed the test and returned a 404. Somebody who has done the
+       research on a name is better evidence that the name is worth a page
+       than an editor having linked two spellings. */
+    .filter((r) => r.countries.length
+      && (r.variants.some((v) => v.how === "curated")
+          || r.countries.some((c) => c.how === "archive")))
     .map((r) => ({ r, s: slug(r.n) }))
     .filter(({ s }) => s && !seen.has(s) && seen.add(s))
     .map(({ r, s }) => ({ params: { name: s },

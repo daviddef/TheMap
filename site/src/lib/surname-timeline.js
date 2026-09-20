@@ -9,6 +9,8 @@
  */
 import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const foldKey = (x) => (x || "").normalize("NFKD")
   .replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -19,10 +21,30 @@ try {
   /* Gzipped on disk: 25 MB of plain JSON timed out a push, and this is a
      tenth of it. Read once for the whole build, so the inflate costs
      nothing per page. */
-  WHEN = JSON.parse(gunzipSync(readFileSync(
-    new URL("../../../data/surname-timeline.json.gz", import.meta.url))).toString("utf8")).when;
+  /* RESOLVED FROM THE WORKING DIRECTORY, NOT FROM import.meta.url.
+     Vite bundles this module into dist/chunks/, so at build time
+     import.meta.url points there and a path relative to the source file
+     resolves to nothing — the read threw, the catch swallowed it, and
+     every surname page rendered with no timeline while the data sat on
+     disk and the module worked perfectly when run on its own. A silent
+     catch around a path is how that stays hidden. Both candidates are
+     tried and the failure is reported rather than swallowed. */
+  const tries = [
+    resolve(process.cwd(), "../data/surname-timeline.json.gz"),
+    resolve(process.cwd(), "data/surname-timeline.json.gz"),
+    fileURLToPath(new URL("../../../data/surname-timeline.json.gz", import.meta.url)),
+  ];
+  let raw = null, lastErr = null;
+  for (const f of tries) {
+    try { raw = readFileSync(f); break; } catch (e) { lastErr = e; }
+  }
+  if (!raw) throw lastErr || new Error("surname-timeline.json.gz not found");
+  WHEN = JSON.parse(gunzipSync(raw).toString("utf8")).when;
   for (const k of Object.keys(WHEN)) (BY_FOLD[foldKey(k)] ||= []).push(k);
 } catch (e) {
+  /* Loud, because a silent failure here looks exactly like "this surname
+     has no timeline" on every page at once. */
+  console.warn("surname timeline unavailable: " + e.message);
   WHEN = {};
   BY_FOLD = {};
 }

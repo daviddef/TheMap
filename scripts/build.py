@@ -1067,8 +1067,17 @@ def main():
     for name, v in feats.items():
         print(f"{name:15} {len(v['features'])} in the record regions")
     if surn["surnames"]:
-        print(f"surnames.json   {sz('surnames.json')/1024:8.1f} KB  "
-              f"surnames.csv {sz('surnames.csv')/1024:.0f} KB — the shareable dataset")
+        # THE PUBLISHED FORMS ARE THE GZIPS NOW, and the plain JSON went to
+        # src/ where the build reads it and the web never sees it. This line
+        # still asked OUT for surnames.json, which is a file that no longer
+        # exists there — and it passed locally only because a copy from an
+        # earlier build was still sitting in public/. CI, with a clean
+        # checkout, failed on the first run. Report what is actually
+        # written, and report the build input separately.
+        print(f"surnames.json.gz {sz('surnames.json.gz')/1048576:6.1f} MB  "
+              f"surnames.csv.gz {sz('surnames.csv.gz')/1048576:.1f} MB — published")
+        print(f"surnames.json   {os.path.getsize(os.path.join(src, 'surnames.json'))/1048576:6.1f} MB  "
+              f"build input, never served")
     if vol_by_place:
         print(f"fs-volumes        {sum(len(v) for v in vol_by_place.values())} volumes "
               f"across {len(vol_by_place)} places — the book, the years, the link")

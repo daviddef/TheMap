@@ -479,6 +479,20 @@ def main():
         # is a pure one.
         _v = vol_by_place.get(p["id"])
         if _v:
+            # CAPPED, BECAUSE THE PANEL SHOWS 25 OF THEM AND THE FETCH IS ON
+            # A CLICK. Rio de Janeiro has 12,656 books and its detail file
+            # reached 3.4 MB — downloaded in full, the moment somebody taps
+            # the marker, to render a couple of dozen lines. São Paulo was
+            # 1 MB, Recife another. Across the harvest that put 115 MB into
+            # p/ and most of it would never be read by anyone.
+            #
+            # The oldest books first, because a researcher is nearly always
+            # reaching back, and the total is kept so the page can say what
+            # it is not showing rather than implying this is all there is.
+            _cap = 400
+            if len(_v) > _cap:
+                _v = sorted(_v, key=lambda r: (r.get("from") or 9999))[:_cap]
+                detail["volumesTotal"] = len(vol_by_place[p["id"]])
             detail["volumes"] = _v
         if span:
             detail["span"] = span

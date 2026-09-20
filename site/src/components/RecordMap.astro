@@ -616,8 +616,13 @@ window.addEventListener("load", async function () {
         return ia - ib || a.localeCompare(b);
       });
       h.push('<div class="at-sec"><div class="lab">The volumes themselves</div>');
-      h.push('<p class="at-sub">' + d.volumes.length + " book" +
-             (d.volumes.length === 1 ? "" : "s") + " catalogued for this place. " +
+      h.push('<p class="at-sub">' +
+             (d.volumesTotal
+                ? esc(d.volumesTotal.toLocaleString()) + " books catalogued for " +
+                  "this place, of which the oldest " + d.volumes.length +
+                  " are listed here. "
+                : d.volumes.length + " book" +
+                  (d.volumes.length === 1 ? "" : "s") + " catalogued for this place. ") +
              "<b>Nobody here has opened any of them</b> — these are the " +
              "catalogue's own titles and the links that open the images.</p>");
       order.forEach(function (k) {

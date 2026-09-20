@@ -260,10 +260,15 @@ def main():
     # world now arrives from there.
     #
     # TWO SOURCES, AND CROATIA'S WINS WHERE THEY OVERLAP. The browser walk
-    # carries things the API does not: the confession that kept the register,
-    # and the microfilm number. The API walk carries breadth. So the richer
-    # rows are laid down first and the API only fills what they leave empty,
-    # deduped on the waypoint id, which is the book itself.
+    # carries the microfilm number, which the API does not, and it has been
+    # checked by a person. So the richer rows are laid down first and the API
+    # only fills what they leave empty, deduped on the waypoint id, which is
+    # the book itself.
+    #
+    # (This comment first claimed the API had no confession either. It does:
+    # in Croatia the tree's own first level IS Religion — Civil, Evangelical,
+    # Greek Catholic, Jewish, Military, Orthodox, Roman Catholic — so the
+    # matcher reads it off the path labels and every country gets it.)
     try:
         fsv = json.load(open("data/fs-volumes.json"))
         vol_by_place = {k: list(v) for k, v in fsv["byPlace"].items()}
@@ -283,6 +288,11 @@ def main():
                 vol_by_place.setdefault(_pid, []).append({
                     "t": _r["t"], "from": _r.get("from"), "to": _r.get("to"),
                     "url": _r.get("url"), "waypoint": _r.get("wp"),
+                    # The panel has always rendered `conf` for Croatia's
+                    # books. It turns out the API gives it too — the tree's
+                    # own first level in Croatia is Religion — so the rest of
+                    # the world can have it on the same line.
+                    "conf": _r.get("conf"),
                     # NOT `kinds`. That field holds the Croatian walk's
                     # EVENT vocabulary — Births, Marriages, Deaths — parsed
                     # from titles written in one language. These titles are

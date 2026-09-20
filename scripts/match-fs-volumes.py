@@ -35,6 +35,25 @@ def fold(s):
     return "".join(c for c in s if not unicodedata.combining(c)).lower().strip()
 
 
+# NOT EVERY LEVEL OF THE TREE IS A PLACE, and treating them all as one is a
+# way to put books in the wrong country. Croatia's tree opens on RELIGION —
+# Civil, Evangelical, Greek Catholic, Jewish, Military, Orthodox, Roman
+# Catholic — and other collections branch on record type or on an archive.
+# Matching "Military" or "Index" against a gazetteer of 45,985 settlements
+# will eventually hit something, and the hit will be nonsense.
+#
+# So levels are read by their LABEL, which FamilySearch supplies. Anything
+# named here is never treated as a place; everything else may be.
+NOT_A_PLACE = re.compile(
+    r"religion|denomination|record type|event|type and years|volume|film|"
+    r"language|collection|series|archive|repository|source|category", re.I)
+
+# The same labels tell us the CONFESSION for free, which is the one thing the
+# browser walk had that this was assumed not to: "Roman Catholic" beside a
+# book, not inferred from its title.
+IS_RELIGION = re.compile(r"religion|denomination", re.I)
+
+
 def bare(s):
     """«Albanasi (Zadar)» -> «Albanasi». The bracket disambiguates for a
        human and gets in the way of a join."""
@@ -106,7 +125,20 @@ def main():
     for cid, col in (wp.get("byCollection") or {}).items():
         ccs = [c for c in (col.get("cc") or []) if c != "*"]
         for v in col.get("volumes", []):
-            path = [x for x in (v.get("path") or []) if x]
+            raw = v.get("path") or []
+            labels = v.get("labels") or []
+            conf = None
+            path = []
+            for i, name in enumerate(raw):
+                if not name:
+                    continue
+                lab = labels[i] if i < len(labels) else None
+                if lab and IS_RELIGION.search(lab):
+                    conf = name
+                    continue
+                if lab and NOT_A_PLACE.search(lab):
+                    continue
+                path.append(name)
             if not path:
                 noname += 1
                 continue
@@ -163,7 +195,8 @@ def main():
                 "url": ("https://www.familysearch.org/search/image/index?owc="
                         + v["wp"]) if v.get("wp") else None,
                 "col": cid, "colTitle": col.get("title"),
-                "in": " › ".join(path),
+                "conf": conf,
+                "in": " › ".join(raw),
             })
 
     total = matched + miss + noname

@@ -20,14 +20,27 @@ descending order of how many books are waiting on them.
 
     python3 scripts/match-fs-volumes.py
 """
-import collections, json, os, re, sys, unicodedata
+import collections, gzip, json, os, re, sys, unicodedata
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
 SRC = "data/fs-waypoints.json"
-OUT = "data/fs-volumes-world.json"
+# GZIPPED, BECAUSE THIS OUTGROWS GITHUB OTHERWISE. At 171 collections of
+# 3,504 the matched volumes were already 13.4 MB and heading for roughly
+# 275 MB; GitHub warns at 50 MB and refuses at 100. JSON of this shape
+# compresses about sixteen to one, so gzip keeps the whole harvest well
+# inside the limit and CI can still read it.
+OUT = "data/fs-volumes-world.json.gz"
 GAPS = "data/fs-volumes-unplaced.json"
 PROMOTE = "data/fs-volumes-promote.json"
+
+
+def dump(obj, path):
+    if path.endswith(".gz"):
+        with gzip.open(path, "wt", encoding="utf-8") as f:
+            json.dump(obj, f, ensure_ascii=False)
+    else:
+        json.dump(obj, open(path, "w"), ensure_ascii=False, indent=1)
 
 
 def fold(s):
@@ -450,7 +463,7 @@ def main():
             })
 
     total = matched + miss + noname
-    json.dump({
+    dump({
         "source": "FamilySearch records waypoint API",
         "note": ("One row per book, on the place its waypoint path names. "
                  "Matched deepest-first and only within the collection's own "
@@ -461,23 +474,23 @@ def main():
                    "matched": matched, "unmatched": miss,
                    "noPathName": noname},
         "byPlace": {k: v for k, v in sorted(by_place.items())},
-    }, open(OUT, "w"), ensure_ascii=False, indent=1)
+    }, OUT)
 
-    json.dump({
+    dump({
         "note": ("Settlements FamilySearch has books for and this atlas has "
                  "never heard of — the map's next places, commonest first."),
         "counts": {"names": len(unplaced), "volumes": sum(unplaced.values())},
         "names": [{"n": n, "cc": unplaced_cc.get(n, ""), "volumes": c}
                   for n, c in unplaced.most_common(4000)],
-    }, open(GAPS, "w"), ensure_ascii=False, indent=1)
+    }, GAPS)
 
-    json.dump({
+    dump({
         "note": ("Settlements the gazetteer knows, with coordinates, that "
                  "FamilySearch has books for and this shelf had not drawn. "
                  "Promoted to places so the books have somewhere to land."),
         "counts": {"places": len(promote)},
         "places": sorted(promote.values(), key=lambda x: x["id"]),
-    }, open(PROMOTE, "w"), ensure_ascii=False, indent=1)
+    }, PROMOTE)
 
     print(f"{total:,} volumes considered")
     print(f"  {matched:,} matched a place "

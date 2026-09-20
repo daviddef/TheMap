@@ -303,10 +303,20 @@ def main():
         vol_by_place = {k: list(v) for k, v in fsv["byPlace"].items()}
     except FileNotFoundError:
         fsv, vol_by_place = None, {}
-    try:
-        world = json.load(open("data/fs-volumes-world.json"))
-    except FileNotFoundError:
-        world = None
+    # GZIP FIRST, PLAIN SECOND. The matched volumes outgrow what GitHub will
+    # take as plain JSON — 13.4 MB at 5% of the harvest, heading for 275 —
+    # and this shape compresses about sixteen to one. Both forms are read so
+    # an older checkout still builds.
+    world = None
+    for _wf in ("data/fs-volumes-world.json.gz", "data/fs-volumes-world.json"):
+        if os.path.exists(_wf):
+            if _wf.endswith(".gz"):
+                import gzip as _gz
+                with _gz.open(_wf, "rt", encoding="utf-8") as _fh:
+                    world = json.load(_fh)
+            else:
+                world = json.load(open(_wf))
+            break
     if world:
         _added = 0
         # DEDUPE ON THE BOOK, NOT ON ITS IDENTIFIER. The two walks number

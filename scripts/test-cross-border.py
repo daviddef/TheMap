@@ -40,7 +40,7 @@ def main():
     # data files, so a test run left the repository holding results derived
     # from a 38-volume fixture — which then built into the site. A test that
     # quietly replaces the data it was checking is worse than no test.
-    OUTPUTS = ["data/fs-volumes-world.json", "data/fs-volumes-unplaced.json",
+    OUTPUTS = ["data/fs-volumes-world.json.gz", "data/fs-volumes-world.json", "data/fs-volumes-unplaced.json",
                "data/fs-volumes-promote.json"]
     backup = {}
     for f in [LIVE] + OUTPUTS:
@@ -54,7 +54,9 @@ def main():
         if r.returncode:
             print(r.stdout, r.stderr)
             sys.exit("the matcher itself failed")
-        world = json.load(open("data/fs-volumes-world.json"))["byPlace"]
+        import gzip
+        with gzip.open("data/fs-volumes-world.json.gz", "rt", encoding="utf-8") as fh:
+            world = json.load(fh)["byPlace"]
     finally:
         for f, b in backup.items():
             shutil.copy(b, f)

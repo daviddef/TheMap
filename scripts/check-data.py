@@ -85,7 +85,18 @@ def main():
         for _r in _idx.get("places", []):
             _keys |= set(_r)
         for _k in sorted(_keys):
-            if not re.search(r"[\.\[]\s*[\"']?" + re.escape(_k) + r"[\"']?\s*\]?\b",
+            # A BARE `[f` IS A VARIABLE, NOT A FIELD READ. The old pattern
+            # accepted anything after a dot OR a bracket, so `[f.y, f.x]`
+            # and `PROV[f]` — where f is a local — satisfied it, and the
+            # index shipped a field `f` on 10,046 rows that nothing reads.
+            # A gate that passes wrongly is worse than no gate: it is the
+            # reason nobody looked.
+            #
+            # A real read is a property access: `.f`, or a quoted subscript
+            # `["f"]`. Anything else is a coincidence of naming, which is
+            # near certain for the single-letter keys this index uses.
+            if not re.search(r"\.\s*" + re.escape(_k) + r"\b"
+                             r"|\[\s*[\"']" + re.escape(_k) + r"[\"']\s*\]",
                              _client):
                 err(f"index.json ships a field '{_k}' that RecordMap.astro never "
                     f"reads — every visitor downloads it to answer nobody")

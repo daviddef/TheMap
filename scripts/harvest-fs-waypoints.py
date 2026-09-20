@@ -117,6 +117,7 @@ def kids(doc, self_about):
 
 
 YEARS = re.compile(r"\b(1[0-9]{3}|20[0-2][0-9])\b")
+THIS_YEAR = time.gmtime().tm_year
 
 
 def walk(cid, pause, log, workers=1):
@@ -174,7 +175,13 @@ def walk(cid, pause, log, workers=1):
                     # A node whose title names years is a book, not a folder.
                     # Asking the API to confirm would double the traffic for
                     # nothing.
-                    ys = [int(y) for y in YEARS.findall(c["t"])]
+                    # A SHELF MARK IS NOT A YEAR. "V. 3077-1-2027, 1937"
+                    # is call number 3077-1-2027 for the year 1937, and
+                    # reading 2027 as a date gave three books that end
+                    # after the present. Anything past this year is a
+                    # number that happens to look like one.
+                    ys = [int(y) for y in YEARS.findall(c["t"])
+                          if int(y) <= THIS_YEAR]
                     child_path = path + [{"l": c["label"], "t": c["t"]}]
                     if ys:
                         m = re.search(r"/waypoints/([^?]+)", c["about"])

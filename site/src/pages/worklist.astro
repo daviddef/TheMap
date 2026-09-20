@@ -1,0 +1,25 @@
+---
+import Base from "../layouts/Base.astro";
+import WorkList from "@daviddef/archive-kit/components/WorkList.astro";
+import { u } from "../lib/url.js";
+import work from "../data/worklist.json";
+
+/* The estate keeps one work list per archive, in one shape, at one path, and
+   this atlas was one of two projects with none — so its state lived in
+   notes/ that nothing reads and in commit messages nobody greps. The
+   component and the checker were already installed; this is wiring. */
+const open = work.rows.filter((r) => ["running", "next", "blocked"].includes(r.state)).length;
+const waiting = work.rows.filter((r) => r.state === "blocked").length;
+---
+
+<Base title={work.title}
+      eyebrow="What is being done, as opposed to what is known"
+      dek={`${open} items open, ${waiting} of them waiting on somebody outside this atlas. Every other page here answers what the map holds; this one answers what is being done to it, including the parts that are stuck.`}>
+
+  <WorkList work={work} u={u} />
+
+  <p class="cap" style="margin-top:26px">The pages that answer <em>what is known</em> are
+  <a href={u("/")}>the map</a>, <a href={u("/countries/")}>Countries</a>,
+  <a href={u("/coverage/")}>What's missing</a> and
+  <a href={u("/changelog/")}>What changed</a>.</p>
+</Base>

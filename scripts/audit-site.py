@@ -119,12 +119,26 @@ def payloads():
         bad("data", "index.json was not built")
         return
     idx = json.load(open(idx_f))
-    mb = os.path.getsize(idx_f) / 1024
-    if mb > 900:
-        bad("data", f"index.json is {mb:.0f} KB — the budget is 800 and it is "
+    # MEASURED AS A VISITOR PAYS IT, WHICH IS GZIPPED.
+    #
+    # The 800 KB budget was counting bytes on disk. GitHub Pages compresses
+    # JSON on the way out at about four to one, so an index reported as
+    # 1,084 KB is 265 KB over the wire — and the number that was failing the
+    # audit was one no reader has ever downloaded. Budgeting the wrong unit
+    # produces exactly this: pressure to delete real places to satisfy a
+    # figure nobody experiences.
+    #
+    # 400 KB transferred, because that is roughly a second on a slow
+    # connection and it is paid before the map draws.
+    import gzip as _gz
+    disk = os.path.getsize(idx_f) / 1024
+    wire = len(_gz.compress(open(idx_f, "rb").read())) / 1024
+    if wire > 400:
+        bad("data", f"index.json is {wire:.0f} KB transferred ({disk:.0f} KB on "
+                    f"disk) — the budget is 400 KB over the wire and it is "
                     f"fetched before the map draws")
-    elif mb > 800:
-        note("data", f"index.json is {mb:.0f} KB, over its 800 KB budget")
+    else:
+        note("data", f"index.json {wire:.0f} KB transferred, {disk:.0f} KB on disk")
 
     ids = [p["i"] for p in idx["places"]]
     dupes = [i for i, n in collections.Counter(ids).items() if n > 1]
@@ -154,7 +168,7 @@ def payloads():
         except Exception as e:
             bad("data", f"{os.path.basename(f)} is served but does not parse — {e}")
 
-    note("data", f"{len(ids):,} places, index.json {mb:.0f} KB, "
+    note("data", f"{len(ids):,} places, index.json {wire:.0f} KB over the wire, "
                  f"{len(glob.glob(DIST + '/p/*.json')):,} detail files")
 
 

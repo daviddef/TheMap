@@ -7,7 +7,7 @@
     "data": "python3 ../scripts/build-surnames.py && python3 ../scripts/build.py",
     "check": "python3 ../scripts/check-data.py",
     "dev": "npm run data && astro dev --port 4330",
-    "build": "npm run data && npm run check && astro build && npm run check:built",
+    "build": "npm run data && npm run check && NODE_OPTIONS=--max-old-space-size=8192 astro build && npm run check:built",
     "preview": "astro preview --port 4330",
     "check:built": "python3 ../scripts/check-built.py"
   },

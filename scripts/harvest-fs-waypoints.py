@@ -179,6 +179,18 @@ def walk(cid, pause, log, workers=1):
                         to_fetch.append((c["about"], child_path))
             if not to_fetch:
                 break
+            # THE BUDGET HAS TO BIND INSIDE A LEVEL, NOT ONLY BETWEEN THEM.
+            # Checked only at the top of the loop, a single level holding
+            # thousands of siblings — a county list, a register of land
+            # parcels — spent the whole budget and far more in one batch
+            # before anything looked again. The cap existed and the run
+            # still sat on one collection for fifty minutes.
+            room = MAX_CALLS_PER_COLLECTION - calls
+            if len(to_fetch) > room:
+                log(f"    level has {len(to_fetch)} branches, budget allows "
+                    f"{room} — recorded as partial")
+                to_fetch = to_fetch[:room]
+                capped[0] = "calls"
             calls += len(to_fetch)
             docs = list(pool.map(lambda t: get(t[0], pause), to_fetch))
             nxt = []
@@ -205,7 +217,7 @@ def walk(cid, pause, log, workers=1):
                     "labels": [q["l"] for q in pth[:-1]],
                     "from": None, "to": None, "wp": m.group(1) if m else "",
                 })
-            level = nxt
+            level = [] if capped[0] == "calls" else nxt
     return (leaves, capped[0]), calls
 
 
@@ -276,7 +288,7 @@ def main():
             print(f"  [{i}/{len(todo)}] {c['id']} unreachable — leaving it "
                   f"undone so --resume tries again", flush=True)
             continue
-        if i % 25 == 0:
+        if i % 10 == 0:
             el = time.time() - t0
             rate = el / i
             print(f"  … {i}/{len(todo)} · {vols:,} volumes · "

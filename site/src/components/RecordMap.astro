@@ -138,6 +138,9 @@ window.addEventListener("load", async function () {
     return (s || "").toLowerCase().replace(/[đłøßæœ]/g, function (c) { return XL[c]; })
       .normalize("NFKD").replace(/[̀-ͯ]/g, "");
   }
+  /* index.json already carries the country names the rest of the site uses,
+     so a badge reads "Italy" and not "IT". */
+  var ccName = function (cc) { return (idx.countries || {})[cc] || cc; };
   var esc = function (x) { return String(x == null ? "" : x)
     .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); };
 
@@ -724,10 +727,26 @@ window.addEventListener("load", async function () {
              " cover this ground" + (near.length ? ", " + near.length +
              " of them catalogued under this place or the district it sits in" : "") + ".</p>");
       h.push('<ul class="at-films">');
+      /* WHOSE SHELF, WHEN IT IS NOT THIS COUNTRY'S. An 1863 baptism from an
+         Istrian village sits in a Croatian archive; a 1915 one from the same
+         village is filed under "Italy, Pola and Trieste". Somebody searching
+         Croatia will never think to look there, and until now this map could
+         not tell them — the harvest treated a collection whose places
+         disagreed with its title as an error and threw the places away. Now
+         it is a badge on the row, because it is the most useful single thing
+         this map knows.
+         NOT class ra-filed: that name is already the jurisdiction section's. */
       (near.length ? near : (d.fs || [])).slice(0, 5).forEach(function (c) {
         h.push('<li><a href="' + esc(c.url) + '" target="_blank" rel="noopener">' +
                esc(c.t) + " &#8599;</a>" +
                (c.from ? ' <span class="at-y">' + c.from + "\u2013" + c.to + "</span>" : "") +
+               (c.filed && c.filed.length
+                 ? ' <span class="ra-crossed" title="Filed under ' +
+                   esc(c.filed.map(ccName).join(", ")) +
+                   ', not under this place\u2019s own country \u2014 searching by ' +
+                   'country alone will not find it.">filed under ' +
+                   esc(c.filed.map(ccName).join(", ")) + "</span>"
+                 : "") +
                "</li>");
       });
       h.push("</ul></div>");
@@ -2104,6 +2123,10 @@ window.addEventListener("load", async function () {
      container that is already the height of the window; auto lets the row
      stretch them equally. */
   :global(.at-wrap.ra-fs .at-panel) { height: auto; }
+  :global(.ra-crossed) { display: inline-block; margin-left: 6px; padding: 1px 7px;
+    border-radius: 999px; font-family: var(--sans); font-size: 10.5px;
+    color: var(--accent); background: var(--accent-wash);
+    border: 1px solid var(--rule); white-space: nowrap; }
   .ra-cats-wrap { min-width: 240px; }
   .ra-cats-wrap summary { font: 400 12px/1.6 var(--sans); color: var(--ink-3);
     cursor: pointer; padding: 5px 9px; border: 1px solid var(--rule);

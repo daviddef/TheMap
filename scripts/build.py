@@ -450,6 +450,15 @@ def main():
                              "to": c.get("to"), "n": c.get("records") or 0,
                              "img": c.get("images") or 0, "url": c["url"],
                              "rank": rank, "where": where, "k": c.get("rkinds") or [],
+                             # WHOSE SHELF IT IS FILED ON, when that is not
+                             # this place's country. An 1863 baptism from an
+                             # Istrian village is in a Croatian archive and a
+                             # 1915 one is filed under «Italy, Pola and
+                             # Trieste» — and somebody searching Croatia will
+                             # never think to look. Saying it on the row is
+                             # the entire thesis of this map.
+                             "filed": ([x for x in (c.get("filedUnder") or [])
+                                        if x != p.get("country")] or None),
                              "km": round(dist) if dist is not None else None}
                             for rank, _, _, c, where, dist in hits[:60]]
             detail["nfs"] = len(hits)

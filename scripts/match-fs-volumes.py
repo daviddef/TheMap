@@ -68,7 +68,11 @@ NOT_A_PLACE = re.compile(
     # index. Between them 11,956 volumes were being offered to a gazetteer
     # of 45,985 settlements, where "Aabol" or "Bice" will eventually hit
     # something and the hit will be nonsense.
-    r"^group$|^range$|^box$|^reel$|^item$|^bundle$|^batch$|^part$", re.I)
+    r"^group$|^range$|^box$|^reel$|^item$|^bundle$|^batch$|^part$|"
+    # AND A SURNAME INITIAL IS NOT A PLACE. "First Letter of Surname" holds
+    # values like "S" and "B"; 503 volumes sat under "S". A single letter
+    # offered to a gazetteer of 45,985 settlements is a coin toss.
+    r"letter|initial|alphabet", re.I)
 
 # The same labels tell us the CONFESSION for free, which is the one thing the
 # browser walk had that this was assumed not to: "Roman Catholic" beside a
@@ -356,6 +360,29 @@ def main():
                 out[cc] = min(got, key=lambda r: r[0])[1]
         return out
 
+    def home_gaz(levels, ccs):
+        """The collection's own country, in the gazetteer rather than the shelf.
+
+        A settlement this atlas has not drawn is still a settlement, and the
+        gazetteer knows 45,985 of them with coordinates. Searching it at home
+        BEFORE looking abroad is the difference between promoting a Czech
+        town and inventing a Croatian one.
+        """
+        for name, lab in reversed(levels):
+            for cand in readings(name, lab):
+                for cc in ccs:
+                    g = (gaz_idx.get((cc, fold(cand))) or [None])[0]
+                    if not g:
+                        continue
+                    pid = ("g-" + re.sub(r"[^a-z0-9]+", "-",
+                                         fold(g["n"])).strip("-")[:48]
+                           + "-" + cc.lower())
+                    promote.setdefault(pid, {
+                        "id": pid, "name": g["n"], "country": cc,
+                        "lat": g["y"], "lon": g["x"], "from": "gazetteer"})
+                    return {"id": pid}, cc
+        return None, None
+
     def resolve_path(index, path, ccs, wider, areas=()):
         """TWO PASSES OVER THE WHOLE PATH, AND THE ORDER IS THE POINT.
 
@@ -375,6 +402,16 @@ def main():
                 hit, cc = look_in(index, fold(cand), ccs)
                 if hit:
                     return hit, cc, False
+        # AND THE GAZETTEER AT HOME, STILL BEFORE ANYTHING FOREIGN. Teplice,
+        # Osek, Karlín and Lipová are Czech towns this atlas has not drawn;
+        # searching abroad before the home gazetteer sent 39 books to
+        # Croatia and 3 to Poland on a namesake. Slavic names repeat right
+        # across the Habsburg group, which is why that group may cross at
+        # all — so home has to be exhausted first.
+        hit, cc = home_gaz(path, ccs)
+        if hit:
+            return hit, cc, False
+
         # CROSSING A BORDER NEEDS TWO WITNESSES.
         #
         # A single name matching abroad is not evidence, it is a coincidence
@@ -470,7 +507,28 @@ def main():
         # and Buenavista are both real in half of South America. A crossing
         # has to be earned by a place being called something else, which is
         # what a border moving actually leaves behind.
-        if levels_abroad >= 2 and exonym:
+        # TWO WITNESSES MUST AGREE ON THE SAME COUNTRY.
+        #
+        # This counted levels that matched anywhere abroad, which is not
+        # corroboration — it is two independent coincidences. "Catholic ›
+        # Teplice › Osek" is a Bohemian parish: Osek resolves to Osijek in
+        # Croatia and Teplice to Cieplice in Poland, one vote each, and 39
+        # books went to Croatia on the strength of a Polish coincidence
+        # agreeing with nothing.
+        #
+        # Requiring two votes for the WINNING country refuses that, and
+        # keeps Brtonigla and Buje, where Verteneglio and the province Pola
+        # both point at Croatia.
+        #
+        # IT ALSO REFUSES IZOLA, and that is the right trade. "Pola › Isola
+        # d'Istria" has the province pointing at Croatia and the comune at
+        # Slovenia — the evidence genuinely conflicts, because Istria is
+        # split between them. Izola is the true answer and this rule cannot
+        # prove it, so those 16 books go to the unplaced list rather than
+        # onto a dot this matcher guessed. A wrong dot is worse than a
+        # missing one, and that principle does not get suspended when the
+        # guess would have been right.
+        if levels_abroad >= 2 and exonym and votes and max(votes.values()) >= 2:
             top = sorted(votes.items(), key=lambda kv: (depth[kv[0]], -kv[1]))
             if True:
                 cc = top[0][0]
@@ -488,6 +546,36 @@ def main():
                                              "country": cc, "lat": g["y"],
                                              "lon": g["x"], "from": "gazetteer"})
                     return {"id": pid}, cc, True
+
+        # LAST OF ALL, THE DISTRICT — AT HOME ONLY, AND ONLY NOW.
+        #
+        # A district is not where a register was kept, so it must never beat
+        # a town. But it beats the WRONG COUNTRY, and that was the choice
+        # actually being made: the Czech church books file under
+        # Religion > District > Place, and where the place is undrawn only
+        # the district remains.
+        #
+        # It has to come AFTER the crossing test, not before. Placed first
+        # it reintroduced the trap it was meant to avoid — "Pola" is an
+        # alternate name of Polla in Campania, so the Istrian books would go
+        # to Italy instead of crossing to Brtonigla and Izola. The crossing
+        # test is strict, two distinct levels with one an exonym, so when it
+        # fires it is the better evidence. When it does not, Osek in the
+        # district of Teplice is in Bohemia whatever else is true.
+        # THE SHELF ONLY, NEVER THE GAZETTEER, for an area.
+        #
+        # An area name matching a place this atlas has already drawn is
+        # sound: that place is a province or a district and the book really
+        # is inside it. An area name matching a gazetteer SETTLEMENT is the
+        # Polla trap — "Pola" the Istrian province against Polla the town in
+        # Campania — and promoting a new dot from a province name is
+        # inventing a location, not recording one. Where only the district
+        # is left and it is not drawn, unplaced is the honest answer.
+        for name, lab in reversed(areas):
+            for cand in readings(name, lab):
+                hit, cc = look_in(index, fold(cand), ccs)
+                if hit:
+                    return hit, cc, False
         return None, None, False
 
     by_place = collections.defaultdict(list)
@@ -546,7 +634,16 @@ def main():
                         break
             if not hit:
                 miss += 1
-                deepest = path[-1][0]
+                # REPORT THE TOWN, NOT THE CHURCH. Counting the deepest
+                # level put Inmaculada Concepción at the head of "the map's
+                # next places" with 2,381 books — aggregating unrelated
+                # parishes in dozens of towns under one saint, and naming
+                # something nobody can add. The shallowest level is the
+                # settlement, which makes the list a list of towns.
+                deepest = (path[0][0] if path else
+                           (areas[0][0] if areas else ""))
+                if not deepest:
+                    continue
                 unplaced[deepest] += 1
                 unplaced_cc.setdefault(deepest, ccs[0] if ccs else "")
                 continue

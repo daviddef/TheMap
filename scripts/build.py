@@ -280,10 +280,23 @@ def main():
         world = None
     if world:
         _added = 0
+        # DEDUPE ON THE BOOK, NOT ON ITS IDENTIFIER. The two walks number
+        # waypoints differently — the browser walk has "9R2S-T3N", the API
+        # has "32P4-MNG:1051984701,1051984702" — so comparing those never
+        # matched and every Croatian book shipped twice, once per walk. The
+        # titles are byte-identical ("Births (Rođeni) 1834-1846"), so the
+        # title and its years are what actually identify the book.
+        def _bookkey(r):
+            _t = re.sub(r"\s+", " ", (r.get("t") or "")).strip().lower()
+            return (_t, r.get("from"), r.get("to"))
         for _pid, _rows in world["byPlace"].items():
-            _have = {r.get("waypoint") or r.get("wp") for r in vol_by_place.get(_pid, [])}
+            _existing = vol_by_place.get(_pid, [])
+            _have = {r.get("waypoint") for r in _existing if r.get("waypoint")}
+            _have_book = {_bookkey(r) for r in _existing}
             for _r in _rows:
                 if _r.get("wp") and _r["wp"] in _have:
+                    continue
+                if _bookkey(_r) in _have_book:
                     continue
                 vol_by_place.setdefault(_pid, []).append({
                     "t": _r["t"], "from": _r.get("from"), "to": _r.get("to"),

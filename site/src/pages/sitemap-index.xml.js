@@ -5,7 +5,7 @@ import full from "../data/places-full.json";
 import regions from "../../public/regions.json";
 import provs from "../../public/providers.json";
 import cols from "../data/collections-full.json";
-import surn from "../../public/surnames.json";
+import surn from "../data/surnames.json";
 
 export const SETS = ["pages", "places", "archives", "countries", "regions", "surnames"];
 

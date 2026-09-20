@@ -88,6 +88,13 @@ def main():
         _promoted = json.load(open("data/fs-volumes-promote.json"))["places"]
     except FileNotFoundError:
         _promoted = []
+    # Antenati names comuni this shelf has not drawn; ISTAT knows where they
+    # are. Same rule as the gazetteer promotions — on the map because a
+    # register points at them, and labelled as such.
+    try:
+        _promoted += json.load(open("data/antenati-volumes.json"))["promote"]
+    except FileNotFoundError:
+        pass
     _added = 0
     for _pl in _promoted:
         if _pl["id"] in _known or _pl.get("lat") is None:
@@ -317,6 +324,37 @@ def main():
             else:
                 world = json.load(open(_wf))
             break
+    # THE MINISTRY'S OWN REGISTERS, which had been harvested in September and
+    # read by nothing since. 5,591 volumes from the Antenati OAI feed, of
+    # which 4,159 name a comune this atlas can place. They are state civil
+    # registration and FamilySearch's Italian collections are a different
+    # filming of overlapping ground, so both are kept: deduped on title and
+    # years, and each carries the archive that holds it.
+    try:
+        _ant = json.load(open("data/antenati-volumes.json"))
+    except FileNotFoundError:
+        _ant = None
+    if _ant:
+        _an = 0
+        for _pid, _rows in _ant["byPlace"].items():
+            _seen = {(re.sub(r"\s+", " ", (r.get("t") or "")).strip().lower(),
+                      r.get("from"), r.get("to"))
+                     for r in vol_by_place.get(_pid, [])}
+            for _r in _rows:
+                _k = (re.sub(r"\s+", " ", _r["t"]).strip().lower(),
+                      _r.get("from"), _r.get("to"))
+                if _k in _seen:
+                    continue
+                vol_by_place.setdefault(_pid, []).append({
+                    "t": _r["t"], "from": _r.get("from"), "to": _r.get("to"),
+                    "held": _r.get("held"), "provider": "antenati",
+                    "rk": record_kinds.kinds_of(_r["t"]),
+                    "url": "https://antenati.cultura.gov.it/",
+                })
+                _an += 1
+        print(f"antenati        {_an} registers from the Ministry's open data, "
+              f"on {len(_ant['byPlace'])} comuni")
+
     if world:
         _added = 0
         # DEDUPE ON THE BOOK, NOT ON ITS IDENTIFIER. The two walks number
@@ -824,6 +862,38 @@ def main():
         blob = json.dumps(rowlist, ensure_ascii=False, separators=(",", ":"))
         ebytes += len(blob.encode())
         open(os.path.join(ee, k + ".json"), "w").write(blob)
+
+    # ---- Scotland's civil parishes: findable, and never drawn -------------
+    # 871 of them, harvested from data.gov.uk in September and then read by
+    # nothing at all — the file sat in data/ while the map could not answer
+    # the name of a single Scottish parish.
+    #
+    # NOT DRAWN, for the reason Italy's comuni are not: the index is at its
+    # budget and Scotland already has its dots. But the civil parish is the
+    # unit every Scottish record names — the OPRs, the statutory registers
+    # and the censuses are all filed by it — so a reader holding one and
+    # getting nothing back is the map failing at its own question. These
+    # carry coordinates, unlike Estonia's, so a hit can say where it is.
+    sc = os.path.join(OUT, "sc")
+    shutil.rmtree(sc, ignore_errors=True)
+    os.makedirs(sc)
+    try:
+        scot = json.load(open("data/scotland-parishes.json"))["parishes"]
+    except FileNotFoundError:
+        scot = []
+    sshards, sbytes = {}, 0
+    for pr in scot:
+        rec = {"n": pr["n"], "y": pr.get("y"), "x": pr.get("x"),
+               "c": pr.get("code", "")}
+        k = shard_key(fold(pr["n"]))
+        if k:
+            sshards.setdefault(k, []).append(rec)
+    for k, rowlist in sshards.items():
+        blob = json.dumps(rowlist, ensure_ascii=False, separators=(",", ":"))
+        sbytes += len(blob.encode())
+        open(os.path.join(sc, k + ".json"), "w").write(blob)
+    print(f"sc/*.json       {sbytes/1024:8.1f} KB  {len(sshards)} shards, "
+          f"{len(scot)} Scottish civil parishes — findable, not drawn")
 
     # ---- Italy's comuni: findable, and never drawn ------------------------
     # 7,894 of them. NOT DRAWN, for two reasons that point the same way. The

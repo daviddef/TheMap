@@ -59,7 +59,14 @@ def fold(s):
 # named here is never treated as a place; everything else may be.
 NOT_A_PLACE = re.compile(
     r"religion|denomination|record type|event|type and years|volume|film|"
-    r"language|collection|series|archive|repository|source|category", re.I)
+    r"language|collection|series|archive|repository|source|category|"
+    # GROUP AND RANGE ARE FILING BUCKETS, NOT GROUND. A level labelled
+    # "Group" holds "Group 1, Group 2"; one labelled "Range" holds
+    # "Aabol - Bakic", which is an alphabetical span of surnames in an
+    # index. Between them 11,956 volumes were being offered to a gazetteer
+    # of 45,985 settlements, where "Aabol" or "Bice" will eventually hit
+    # something and the hit will be nonsense.
+    r"^group$|^range$|^box$|^reel$|^item$|^bundle$|^batch$|^part$", re.I)
 
 # The same labels tell us the CONFESSION for free, which is the one thing the
 # browser walk had that this was assumed not to: "Roman Catholic" beside a
@@ -95,7 +102,7 @@ def bare(s):
 ABBREV = {"sv", "st", "ss", "sta", "sto", "san", "sankt", "hl"}
 
 
-def readings(name):
+def readings(name, label=None):
     """Every reading of one waypoint name, most specific first.
 
     FamilySearch names a parish by its church inside its town — "Zadar, Sv.
@@ -105,8 +112,17 @@ def readings(name):
     first, because a parish is the better answer when we hold it, and the
     segments only after that.
     """
+    # A LABEL NAMING TWO LEVELS MEANS THE VALUE HOLDS TWO PLACES.
+    # Benin files under "Commune - Arrondissement", whose values read
+    # "Sakété - Yoko" — the commune and the arrondissement inside it. The
+    # dash is only splittable when the LABEL says so: "Aabol - Bakic" under
+    # a "Range" label is an alphabetical span and splitting it would offer
+    # "Aabol" to the gazetteer as a town.
+    extra = []
+    if label and " - " in label and " - " in (name or ""):
+        extra = [x.strip() for x in name.split(" - ")]
     out, seen = [], set()
-    for cand in [name, bare(name)] + \
+    for cand in extra + [name, bare(name)] + \
                 [x.strip() for x in re.split(r"\s*,\s*", name or "")] + \
                 [bare(x.strip()) for x in re.split(r"\s*,\s*", name or "")]:
         c = (cand or "").strip()
@@ -352,8 +368,8 @@ def main():
         So: everything at home first, deepest to shallowest. Only when the
         whole path has failed at home does anything look across a border.
         """
-        for name in reversed(path):
-            for cand in readings(name):
+        for name, lab in reversed(path):
+            for cand in readings(name, lab):
                 hit, cc = look_in(index, fold(cand), ccs)
                 if hit:
                     return hit, cc, False
@@ -389,7 +405,7 @@ def main():
         # places are never taken as the answer.
         ladder = list(reversed(path)) + list(reversed(areas))
         area_from = len(path)
-        for lvl, name in enumerate(ladder):           # 0 is the deepest
+        for lvl, (name, lab) in enumerate(ladder):    # 0 is the deepest
             shits, ghits = {}, {}            # place found per cc is the
             for cand in readings(name):      # most specific one
                 shits = look_abroad(index, fold(cand), wider)
@@ -497,9 +513,9 @@ def main():
                 if lab and NOT_A_PLACE.search(lab):
                     continue
                 if lab and IS_AREA.search(lab):
-                    areas.append(name)      # may vouch, may not win
+                    areas.append((name, lab))   # may vouch, may not win
                     continue
-                path.append(name)
+                path.append((name, lab))
             if not path:
                 noname += 1
                 continue
@@ -507,8 +523,8 @@ def main():
             hit, hit_cc, abroad = resolve_path(idx, path, ccs, wider, areas)
             if not hit:
                 # Try the gazetteer before giving up on it.
-                for name in reversed(path):
-                    for cand in readings(name):
+                for name, lab in reversed(path):
+                    for cand in readings(name, lab):
                         for cc in list(ccs):
                             got = gaz_idx.get((cc, fold(cand)))
                             if got:
@@ -528,7 +544,7 @@ def main():
                         break
             if not hit:
                 miss += 1
-                deepest = path[-1]
+                deepest = path[-1][0]
                 unplaced[deepest] += 1
                 unplaced_cc.setdefault(deepest, ccs[0] if ccs else "")
                 continue

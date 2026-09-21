@@ -36,13 +36,28 @@ ENDPOINT = "https://qlever.dev/api/wikidata"
 UA = "RecordAtlas/1.0 (+https://daviddef.github.io/TheMap; exonyms)"
 PAGE = 150000
 
+# CITY DISTRICTS AS WELL AS SETTLEMENTS, but ranked below them.
+# Mercato, Vicaria, Montecalvario, Pendino and Avvocata are quartieri of
+# Naples carrying about 3,000 volumes between them, filed as though they
+# were towns. Wikidata types them Q3927261, a subclass of "quarter of a
+# city in Italy", which sits outside the Q486972 settlement tree entirely —
+# so no amount of searching settlements would ever have found them.
+# Q123705 (neighbourhood) is the general class and reaches all of them.
+#
+# Adding a class can LOSE placements as easily as gain them: a district
+# sharing a town's name turns a name this harvest could resolve into an
+# ambiguous one it must refuse. So the kind comes back with each row and a
+# settlement always wins; a district is taken only when no settlement of
+# that name exists.
+CLASSES = [("Q486972", "settlement"), ("Q123705", "district")]
+
 Q = """
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
 PREFIX wd: <http://www.wikidata.org/entity/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 SELECT ?form ?canon ?coord WHERE {
-  ?p wdt:P31/wdt:P279* wd:Q486972 ;
+  ?p wdt:P31/wdt:P279* wd:%s ;
      wdt:P17 ?c .
   ?c wdt:P297 "%s" .
   { ?p rdfs:label ?form } UNION { ?p skos:altLabel ?form }
@@ -154,12 +169,18 @@ def main():
     if os.path.exists(CACHE):
         try:
             cached = json.load(open(CACHE))
-            if set(cached.get("want", [])) == want_all:
+            # The cache key includes the classes queried. Without that, adding
+            # Q123705 would have been silently ignored on every machine that
+            # already had a cache, and the quartieri would have stayed missing
+            # with nothing to show why.
+            if (set(cached.get("want", [])) == want_all
+                    and cached.get("classes") == [c for c, _ in CLASSES]):
                 done = cached.get("by_cc", {})
                 for cc_, rows in done.items():
                     for rec in rows:
                         seen_forms[rec["f"]][cc_].append(
-                            {"n": rec["n"], "cc": cc_, "x": rec["x"], "y": rec["y"]})
+                            {"n": rec["n"], "cc": cc_, "x": rec["x"], "y": rec["y"],
+                             "kind": rec.get("kind", "settlement")})
                 print(f"resuming: {len(done)} countries already scanned\n")
             else:
                 print("cache is for a different name list, starting over\n")
@@ -171,36 +192,41 @@ def main():
         if cc in done:
             print(f"  [{i}/{len(ask_ccs)}] {cc}  cached, {len(done[cc]):,} wanted")
             continue
-        offset, scanned, kept = 0, 0, 0
-        while True:
-            rows = ask(Q % (cc, PAGE, offset))
-            if not rows:
-                break
-            scanned += len(rows)
-            for r in rows:
-                fm = fold(r["form"]["value"])
-                if fm not in want_all:
-                    continue
-                m = POINT.search(r.get("coord", {}).get("value", "") or "")
-                if not m:
-                    continue
-                rec = {"n": r["canon"]["value"], "cc": cc,
-                       "x": float(m.group(1)), "y": float(m.group(2))}
-                bucket = seen_forms[fm][cc]
-                # The same settlement arrives once per label and alias.
-                if not any(abs(b["x"] - rec["x"]) < 0.01 and
-                           abs(b["y"] - rec["y"]) < 0.01 for b in bucket):
-                    bucket.append(rec)
-                    kept += 1
-            if len(rows) < PAGE:
-                break
-            offset += PAGE
-            time.sleep(1)
-        done[cc] = [{"f": fm, "n": r["n"], "x": r["x"], "y": r["y"]}
+        scanned, kept = 0, 0
+        for cls, kind in CLASSES:
+            offset = 0
+            while True:
+                rows = ask(Q % (cls, cc, PAGE, offset))
+                if not rows:
+                    break
+                scanned += len(rows)
+                for r in rows:
+                    fm = fold(r["form"]["value"])
+                    if fm not in want_all:
+                        continue
+                    m = POINT.search(r.get("coord", {}).get("value", "") or "")
+                    if not m:
+                        continue
+                    rec = {"n": r["canon"]["value"], "cc": cc, "kind": kind,
+                           "x": float(m.group(1)), "y": float(m.group(2))}
+                    bucket = seen_forms[fm][cc]
+                    # The same place arrives once per label and alias, and
+                    # again under a second class if it belongs to both.
+                    if not any(abs(b["x"] - rec["x"]) < 0.01 and
+                               abs(b["y"] - rec["y"]) < 0.01 for b in bucket):
+                        bucket.append(rec)
+                        kept += 1
+                if len(rows) < PAGE:
+                    break
+                offset += PAGE
+                time.sleep(1)
+        done[cc] = [{"f": fm, "n": r["n"], "x": r["x"], "y": r["y"],
+                     "kind": r.get("kind", "settlement")}
                     for fm, per in seen_forms.items()
                     for r in per.get(cc, [])]
         tmp = CACHE + ".tmp"
-        json.dump({"want": sorted(want_all), "by_cc": done},
+        json.dump({"want": sorted(want_all),
+                   "classes": [c for c, _ in CLASSES], "by_cc": done},
                   open(tmp, "w"), ensure_ascii=False)
         os.replace(tmp, CACHE)
         print(f"  [{i}/{len(ask_ccs)}] {cc}  {scanned:8,} forms scanned, "
@@ -208,25 +234,49 @@ def main():
 
     # Resolve. Home country first; abroad only when the whole filing group
     # offers exactly one place of that name.
-    found, home_n, abroad_n, ambiguous = {}, 0, 0, 0
+    def pick(cands):
+        """One place, or none — with a settlement always beating a district.
+
+        A district is only in this data at all so that Naples' quartieri can
+        be found. If a name is both a town and somebody's neighbourhood, the
+        town is what a record means, and letting the neighbourhood make the
+        name "ambiguous" would lose a placement this harvest used to make."""
+        if not cands:
+            return None, 0
+        towns = [c for c in cands if c.get("kind", "settlement") == "settlement"]
+        if len(towns) == 1:
+            return towns[0], 0
+        if towns:
+            return None, 1          # two real towns of that name: refuse
+        districts = [c for c in cands if c.get("kind") == "district"]
+        if len(districts) == 1:
+            return districts[0], 0
+        return None, 1
+
+    found, home_n, abroad_n, district_n, ambiguous = {}, 0, 0, 0, 0
     for cc in ccs:
         for fm, books in wanted[cc].items():
-            here = seen_forms.get(fm, {}).get(cc, [])
-            if len(here) == 1:
-                found[cc + "|" + fm] = here[0]
+            hit, amb = pick(seen_forms.get(fm, {}).get(cc, []))
+            if hit:
+                found[cc + "|" + fm] = hit
                 home_n += 1
+                if hit.get("kind") == "district":
+                    district_n += 1
                 continue
-            if here:
+            if amb:
                 ambiguous += 1
                 continue
             away = [r for nb in neighbours(cc)
                     for r in seen_forms.get(fm, {}).get(nb, [])]
-            if len(away) == 1:
-                rec = dict(away[0])
+            hit, amb = pick(away)
+            if hit:
+                rec = dict(hit)
                 rec["via"] = cc          # the collection it was filed under
                 found[cc + "|" + fm] = rec
                 abroad_n += 1
-            elif away:
+                if rec.get("kind") == "district":
+                    district_n += 1
+            elif amb or away:
                 ambiguous += 1
 
     freed = sum(wanted[k.split("|", 1)[0]][k.split("|", 1)[1]] for k in found)
@@ -244,6 +294,7 @@ def main():
                  "offered exactly one place of the name."),
         "harvested": time.strftime("%Y-%m-%d"),
         "counts": {"forms": len(found), "home": home_n, "abroad": abroad_n,
+                   "of_which_city_districts": district_n,
                    "ambiguous_left_unplaced": ambiguous, "books_freed": freed},
         "forms": found,
     }, open(OUT + ".tmp", "w"), ensure_ascii=False)
@@ -252,7 +303,8 @@ def main():
     # matcher reads it on every run.
     os.replace(OUT + ".tmp", OUT)
     print(f"\n{len(found):,} name forms resolved "
-          f"({home_n:,} at home, {abroad_n:,} across a border), "
+          f"({home_n:,} at home, {abroad_n:,} across a border, "
+          f"{district_n:,} of them city districts), "
           f"{ambiguous:,} left unplaced as ambiguous")
     print(f"{freed:,} books freed -> {OUT}")
 

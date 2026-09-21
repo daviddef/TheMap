@@ -29,7 +29,6 @@ declare -a CMDS=("python3 scripts/harvest-fs-waypoints.py --resume --pause 0.2 -
 declare -a TRIES=(0)
 
 say "supervisor started (pid $$)"
-matched=0
 
 while true; do
   # 1. Keep the long harvest alive.
@@ -46,16 +45,22 @@ while true; do
     fi
   done
 
-  # 2. When both harvests are done, match once.
-  if [ "$matched" = "0" ] \
+  # 2. Match whenever the exonyms are newer than the last match.
+  #    This used to run exactly once, which was wrong: the exonym harvest
+  #    gets re-run whenever its rules improve — the filing groups, then the
+  #    full name list, then city districts — and each run frees books that
+  #    only a re-match actually places. A stamp file makes it idempotent, so
+  #    a harvest that changes nothing does not trigger anything.
+  if [ -f data/exonyms.json ] \
      && [ "$(alive harvest-exonyms.py)" = "0" ] \
      && [ "$(alive harvest-italy-surnames.py)" = "0" ] \
      && [ "$(alive match-fs-volumes.py)" = "0" ]; then
-    if [ -f data/exonyms.json ]; then
-      matched=1
-      say "both harvests done — running the matcher"
+    if [ ! -f .matched-stamp ] || [ data/exonyms.json -nt .matched-stamp ]; then
+      say "exonyms are newer than the last match — running the matcher"
       nice -n 10 python3 scripts/match-fs-volumes.py >> .matcher.log 2>&1
-      say "matcher finished, exit $?"
+      rc=$?
+      touch .matched-stamp
+      say "matcher finished, exit $rc"
     fi
   fi
 

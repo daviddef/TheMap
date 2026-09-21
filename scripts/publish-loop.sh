@@ -9,15 +9,19 @@ while true; do
   sleep "${1:-1800}"
   changed=$(git status --porcelain -- data/ | wc -l | tr -d ' ')
   if [ "$changed" -gt 0 ]; then
+    # The counts live under byPlace. Iterating the top level counted the
+    # file's own metadata keys instead and printed "?" into every commit
+    # message this loop has ever written.
     n=$(python3 -c "
-import gzip,json,sys
+import gzip,json
 try:
   d=json.load(gzip.open('data/fs-volumes-world.json.gz'))
-  print(sum(len(v) if isinstance(v,list) else len(v.get('books',[])) for v in d.values()))
-except Exception: print('?')
+  bp=d.get('byPlace',{})
+  print(f'{sum(len(v) for v in bp.values()):,} on {len(bp):,} places')
+except Exception: print('an unknown number of')
 " 2>/dev/null)
     git add -A data/
-    git commit -q -m "Harvest: $n volumes placed so far
+    git commit -q -m "Harvest: $n volumes placed
 
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>" 2>/dev/null
     if git push -q origin main 2>/dev/null; then

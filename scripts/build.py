@@ -308,8 +308,9 @@ def main():
     try:
         fsv = json.load(open("data/fs-volumes.json"))
         vol_by_place = {k: list(v) for k, v in fsv["byPlace"].items()}
+        _coltitles = fsv.get("colTitles") or {}
     except FileNotFoundError:
-        fsv, vol_by_place = None, {}
+        fsv, vol_by_place, _coltitles = None, {}, {}
     # GZIP FIRST, PLAIN SECOND. The matched volumes outgrow what GitHub will
     # take as plain JSON — 13.4 MB at 5% of the harvest, heading for 275 —
     # and this shape compresses about sixteen to one. Both forms are read so
@@ -377,7 +378,13 @@ def main():
                     continue
                 vol_by_place.setdefault(_pid, []).append({
                     "t": _r["t"], "from": _r.get("from"), "to": _r.get("to"),
-                    "url": _r.get("url"), "waypoint": _r.get("wp"),
+                    # Derived, not stored: the matcher stopped writing a
+                    # url that was always this prefix plus the waypoint, and
+                    # that was 27% of a 60 MB file.
+                    "url": (_r.get("url")
+                            or (("https://www.familysearch.org/search/image/"
+                                 "index?owc=" + _r["wp"]) if _r.get("wp") else None)),
+                    "waypoint": _r.get("wp"),
                     # The panel has always rendered `conf` for Croatia's
                     # books. It turns out the API gives it too — the tree's
                     # own first level in Croatia is Religion — so the rest of
@@ -390,7 +397,9 @@ def main():
                     # ("Bautismos", "Alistamiento militar", "Rodeni"), so
                     # they carry the record-kind reading instead and the
                     # panel groups by whichever a book has.
-                    "rk": record_kinds.kinds_of(_r["t"], _r.get("colTitle")),
+                    # colTitle is interned in the file's own colTitles map.
+                    "rk": record_kinds.kinds_of(
+                        _r["t"], _r.get("colTitle") or _coltitles.get(_r.get("col"))),
                     # Where in FamilySearch's own tree this book was found.
                     # A reader who cannot see why a book is on this dot has
                     # no way to tell a good match from a wrong one.

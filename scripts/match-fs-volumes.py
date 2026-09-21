@@ -869,6 +869,7 @@ def main():
     # Counter only — see the note in resolve_path.
     area_in_gaz = [0]
     area_placed = [0]
+    col_titles = {}
     by_place = collections.defaultdict(list)
     promote = {}
     crossed = collections.Counter()
@@ -987,20 +988,28 @@ def main():
             if key in seen:
                 continue
             seen.add(key)
+            # WRITTEN LEAN, BECAUSE THIS FILE IS 60 MB AND GROWING.
+            # GitHub warns above 50 MB and refuses above 100, and the harvest
+            # is not finished. Three quarters of the fat was avoidable:
+            #   `url`      26.7% of the file, and every one of 50,000 sampled
+            #              was exactly the prefix plus `wp`. Derived on read.
+            #   `colTitle` 14.9%, the same collection title written out on
+            #              each of 2.8 million rows. Interned into one map.
+            #   crossed / filedCc were written as null on every row to carry
+            #              about two hundred crossings. Omitted when absent.
             by_place[hit["id"]].append({
                 "t": v["t"], "from": v.get("from"), "to": v.get("to"),
                 "wp": v.get("wp"),
-                "url": ("https://www.familysearch.org/search/image/index?owc="
-                        + v["wp"]) if v.get("wp") else None,
-                "col": cid, "colTitle": col.get("title"),
+                "col": cid,
                 "conf": conf,
                 # True when the book was found by looking outside the
                 # countries its collection is filed under. This is the
                 # finding, not an edge case.
-                "crossed": bool(abroad) or None,
-                "filedCc": (ccs[0] if ccs else None) if abroad else None,
+                **({"crossed": True,
+                    "filedCc": (ccs[0] if ccs else None)} if abroad else {}),
                 "in": " › ".join(raw),
             })
+            col_titles[cid] = col.get("title")
 
     total = matched + miss + noname
     dump({
@@ -1015,6 +1024,8 @@ def main():
                    "noPathName": noname,
                    "unplacedButAreaIsInTheGazetteer": area_in_gaz[0],
                    "placedOnAnAdminDivision": area_placed[0]},
+        # The collection titles, once each, instead of on 2.8 million rows.
+        "colTitles": col_titles,
         "byPlace": {k: v for k, v in sorted(by_place.items())},
     }, OUT)
 

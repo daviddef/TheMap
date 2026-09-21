@@ -104,6 +104,7 @@ const KIND_OF = {
   archive: "Found in a record",
   curated: "Found in a record",
   grammar: "A grammatical form of the name",
+  spelling: "The same name, spelt two ways",
   sounds: "A phonetic neighbour only",
 };
 const ccs = r.countries.slice().sort((a, b) => (b.n || 0) - (a.n || 0));
@@ -123,7 +124,16 @@ const dek = `${r.n}${by.curated ? `, also written ${by.curated.slice(0,4).join("
   }}
   title={r.n} eyebrow={ccs.map((c) => CN[c.cc] || c.cc).join(" · ")} dek={dek}>
 
-  {["curated", "grammar", "sounds"].map((how) => by[how] && (
+  {/* SPELLING WAS BUILT, LABELLED, AND NEVER RENDERED. The tier has existed
+      in the data for a while and TIER above has carried its heading and its
+      explanation the whole time — it simply was not in this list, so no
+      surname page has ever shown a spelling variant. Kosina's page did not
+      mention Kozina. Defranceschi's did not mention Defranceski. Both are
+      in the data, and both are the whole point.
+      Ordered by what the evidence is worth: somebody checked, then a rule
+      of the language, then one systematic substitution with both forms
+      attested, then an algorithm's guess. */}
+  {["curated", "grammar", "spelling", "sounds"].map((how) => by[how] && (
     <section style="margin-top:24px">
       <h2>{TIER[how][0]}</h2>
       <p class="cap">{TIER[how][1]}</p>

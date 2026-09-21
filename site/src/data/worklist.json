@@ -160,11 +160,11 @@
   },
   {
    "n": 20,
-   "what": "Close the eight countries with no surname register",
+   "what": "Close the countries with no surname register — was eight, now seven",
    "state": "running",
    "owner": "this atlas",
    "since": "2026-09-21",
-   "note": "The surnames page names eight countries whose data was sought and not obtained — Belgium, Czechia, Denmark, Finland, Croatia, Italy, the Netherlands, Sweden — each with what was actually tried. Croatia is this map's deepest ground and has no surname counts at all. Retrying every one: some were refused because a search API did not answer, which is a different thing from a country not publishing. The Netherlands is the exception — Meertens needs a letter, not a request, and that is David's to send."
+   "note": "ITALY IS CLOSED. ISTAT publishes no national surname table and never will, but 63 Italian comuni publish their own residents' surnames as open data and the national catalogue indexes them: 27,005 surnames, 1,398,684 people. For genealogy that grain is better than a national count — which comune a name sits in is the actual question. It is labelled as what it is: the residents of those comuni and nobody else, never how common a name is in Italy.\\nThe other seven are closed as far as anything here can act, and three of them are now documented rather than inferred. Czechia is not a lost page but a refusal in law — the national catalogue holds a formal request to open exactly this, marked «NelzePublikovat» under Act 106/1999 Sb. Sweden's tables are retired, not withheld: two folders listed, neither served, in either language, titled «Äldre tabeller som inte längre uppdateras». Denmark has no name table in any of its 2,308. Belgium publishes first names only. Croatia's API answers and holds no names. Finland's holder gates crawlers and this atlas does not climb gates. The Netherlands needs a letter, which is drafted at docs/letter-meertens.md and only David can send."
   },
   {
    "n": 21,
@@ -177,10 +177,10 @@
   {
    "n": 22,
    "what": "Make surname pages lean enough to afford 16,138 of them",
-   "state": "next",
+   "state": "done",
    "owner": "this atlas",
    "since": "2026-09-21",
-   "note": "MEASURED PROPERLY AT LAST, and I had it wrong twice in opposite directions. CI's clean build reports 1,203 MB raw across 71,092 files. My local dist was 1,215 MB across 71,093 — the same build, not the pile of leftovers I claimed it was, and I should not have said so. The site really does carry about 1.2 GB of raw output. What makes it publishable is that the artifact GitHub actually deploys is 158 MB compressed, and it deploys green every time, so the 1,024 MB ceiling plainly binds on the artifact and not on the raw tree. Against that, 16,138 more surname pages at roughly 17 KB each — not the 24.6 KB this row used to say, which was measured off Defranceschi, a page with eleven country blocks when the median surname has one — is about 274 MB raw and perhaps 35 MB in the artifact. Affordable. Two cuts already taken: the nearest-archive fix and class-based style scoping, together about 28 MB. Next: admit the class."
+   "note": "Done. 16,135 surnames earn a page and all 16,135 are live and in the sitemap. The row was blocked for weeks on two numbers that were both wrong: 24.6 KB a page (measured off Defranceschi, which carries eleven country blocks when the median surname carries one) and «985 MB of 1,024» (the RAW build tree, when the limit applies to the artifact GitHub deploys). Admitting the class took the artifact from 158 MB to 164 MB. Twelve thousand pages cost six megabytes of what actually ships. Two cuts paid for part of it — nearest-archive listing and class-based style scoping — and CI now prints the weight on every build so no decision here is ever made against a guess again."
   },
   {
    "n": 23,

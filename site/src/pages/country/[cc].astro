@@ -25,8 +25,18 @@ export async function getStaticPaths() {
 
 const { cc } = Astro.props;
 const NAME = (idx.countries || {})[cc] || cc;
-const here = full.places.filter((p) => p.country === cc)
-                        .sort((a, b) => a.name.localeCompare(b.name));
+/* CAPPED, AND ORDERED BY WHAT IS ON THEM. Italy's page listed all 2,372 of
+   its places and was 536 KB — half a megabyte for one page, on a phone, and
+   growing every time the matcher places another town. The alphabetical order
+   made it worse: it opened on Abano Terme and Abbadia, so the places with
+   the most records were somewhere in the middle of a list nobody scrolls.
+   The heaviest shelves first, the rest counted and linked. */
+const PLACE_CAP = 250;
+const hereAll = full.places.filter((p) => p.country === cc)
+  .sort((a, b) => ((b.collections || []).length - (a.collections || []).length)
+                  || a.name.localeCompare(b.name));
+const here = hereAll.slice(0, PLACE_CAP);
+const hereHidden = hereAll.length - here.length;
 /* GROUPED BY THE GROUND THEY COVER, NOT BY HOW BIG THEY ARE. This was one
    flat list, regional collections first and then by record count — so South
    Africa's thirty-two ran Cape, Transvaal, Cape, Natal, Transvaal in an order
@@ -91,9 +101,13 @@ const world = provs.providers.filter((p) => p.countries.includes("*"));
 /* Same correction as /coverage/: a country's regions are the ones whose GROUND
    lies in it, whether or not a place inside them has been walked. */
 const regs = regions.regions.filter(
-  (r) => (r.countries || []).includes(cc) || here.some((p) => p.region === r.id));
+  (r) => (r.countries || []).includes(cc) || hereAll.some((p) => p.region === r.id));
 const records = mine.reduce((a, x) => a + (x.c.records || 0), 0);
-const vols = here.reduce((a, p) => a + (p.collections || []).length, 0);
+/* Every count here is about the COUNTRY, so it comes from the full set.
+   Only the rendered list is capped — reading a total off the capped list
+   would have printed "2,372 places, 4,118 volumes" where the volumes were
+   the top 250's alone. */
+const vols = hereAll.reduce((a, p) => a + (p.collections || []).length, 0);
 const span = mine.filter(x => x.c.from).length
   ? [Math.min(...mine.filter(x => x.c.from).map(x => x.c.from)),
      Math.max(...mine.filter(x => x.c.to).map(x => x.c.to))] : null;
@@ -102,7 +116,7 @@ const span = mine.filter(x => x.c.from).length
   title={NAME}
   eyebrow={[`${mine.length} FamilySearch collection${mine.length === 1 ? "" : "s"}`,
             who.length ? `${who.length} archive${who.length === 1 ? "" : "s"}` : null,
-            here.length ? `${here.length} place${here.length === 1 ? "" : "s"}` : null,
+            hereAll.length ? `${hereAll.length.toLocaleString()} place${hereAll.length === 1 ? "" : "s"}` : null,
             span ? `${span[0]}–${span[1]}` : null].filter(Boolean).join(" · ")}
   dek={`Where the records of ${NAME} are, who holds them, and what it costs to look. ${records.toLocaleString()} indexed records reachable through FamilySearch alone.`}>
 
@@ -200,9 +214,14 @@ const span = mine.filter(x => x.c.from).length
     </section>
   )}
 
-  {here.length > 0 ? (
+  {hereAll.length > 0 ? (
     <section style="margin-top:34px">
-      <h2>{here.length} places, {vols} volumes</h2>
+      <h2>{hereAll.length.toLocaleString()} places, {vols} volumes</h2>
+      {hereHidden > 0 && (
+        <p class="cap">The {here.length} carrying the most collections are listed;
+        <b> {hereHidden.toLocaleString()} more</b> are in {NAME} and on the map.
+        <a href={u("/places/")}> Every place</a> lists them all.</p>
+      )}
       <ul class="places">
         {here.map((p) => <li><a href={u(`/place/${p.id}/`)}>{p.name}</a>
           <span class="y">{(p.collections || []).length}</span></li>)}

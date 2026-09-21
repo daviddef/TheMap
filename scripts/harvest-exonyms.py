@@ -51,18 +51,26 @@ PAGE = 150000
 # that name exists.
 CLASSES = [("Q486972", "settlement"), ("Q123705", "district")]
 
+# Bump when the SPARQL changes shape. The cache already keys on the name list
+# and the classes, and adding population to the query changed neither — so a
+# stale cache would have supplied rows with no population, every tie would
+# have been refused for want of a number that was never fetched, and the
+# improvement would have looked like it simply did not work.
+QUERY_VERSION = 2
+
 Q = """
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
 PREFIX wd: <http://www.wikidata.org/entity/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-SELECT ?form ?canon ?coord WHERE {
+SELECT ?form ?canon ?coord ?pop WHERE {
   ?p wdt:P31/wdt:P279* wd:%s ;
      wdt:P17 ?c .
   ?c wdt:P297 "%s" .
   { ?p rdfs:label ?form } UNION { ?p skos:altLabel ?form }
   ?p rdfs:label ?canon . FILTER(LANG(?canon) = "en")
   OPTIONAL { ?p wdt:P625 ?coord }
+  OPTIONAL { ?p wdt:P1082 ?pop }
 }
 LIMIT %d OFFSET %d
 """
@@ -174,13 +182,15 @@ def main():
             # already had a cache, and the quartieri would have stayed missing
             # with nothing to show why.
             if (set(cached.get("want", [])) == want_all
-                    and cached.get("classes") == [c for c, _ in CLASSES]):
+                    and cached.get("classes") == [c for c, _ in CLASSES]
+                    and cached.get("query_version") == QUERY_VERSION):
                 done = cached.get("by_cc", {})
                 for cc_, rows in done.items():
                     for rec in rows:
                         seen_forms[rec["f"]][cc_].append(
                             {"n": rec["n"], "cc": cc_, "x": rec["x"], "y": rec["y"],
-                             "kind": rec.get("kind", "settlement")})
+                             "kind": rec.get("kind", "settlement"),
+                             "p": rec.get("p", 0)})
                 print(f"resuming: {len(done)} countries already scanned\n")
             else:
                 print("cache is for a different name list, starting over\n")
@@ -207,8 +217,13 @@ def main():
                     m = POINT.search(r.get("coord", {}).get("value", "") or "")
                     if not m:
                         continue
+                    try:
+                        pop = int(float(r.get("pop", {}).get("value") or 0))
+                    except (TypeError, ValueError):
+                        pop = 0
                     rec = {"n": r["canon"]["value"], "cc": cc, "kind": kind,
-                           "x": float(m.group(1)), "y": float(m.group(2))}
+                           "x": float(m.group(1)), "y": float(m.group(2)),
+                           "p": pop}
                     bucket = seen_forms[fm][cc]
                     # The same place arrives once per label and alias, and
                     # again under a second class if it belongs to both.
@@ -221,12 +236,13 @@ def main():
                 offset += PAGE
                 time.sleep(1)
         done[cc] = [{"f": fm, "n": r["n"], "x": r["x"], "y": r["y"],
-                     "kind": r.get("kind", "settlement")}
+                     "kind": r.get("kind", "settlement"), "p": r.get("p", 0)}
                     for fm, per in seen_forms.items()
                     for r in per.get(cc, [])]
         tmp = CACHE + ".tmp"
         json.dump({"want": sorted(want_all),
-                   "classes": [c for c, _ in CLASSES], "by_cc": done},
+                   "classes": [c for c, _ in CLASSES],
+                   "query_version": QUERY_VERSION, "by_cc": done},
                   open(tmp, "w"), ensure_ascii=False)
         os.replace(tmp, CACHE)
         print(f"  [{i}/{len(ask_ccs)}] {cc}  {scanned:8,} forms scanned, "
@@ -234,20 +250,43 @@ def main():
 
     # Resolve. Home country first; abroad only when the whole filing group
     # offers exactly one place of that name.
-    def pick(cands):
-        """One place, or none — with a settlement always beating a district.
+    def pick(cands, strict):
+        """One place, or none.
 
-        A district is only in this data at all so that Naples' quartieri can
-        be found. If a name is both a town and somebody's neighbourhood, the
-        town is what a record means, and letting the neighbourhood make the
-        name "ambiguous" would lose a placement this harvest used to make."""
+        A settlement always beats a district. Districts are in this data only
+        so that Naples' quartieri can be found; if a name is both a town and
+        somebody's neighbourhood, the town is what a record means, and
+        letting the neighbourhood make the name "ambiguous" would lose a
+        placement this harvest used to make.
+
+        WHERE TWO REAL TOWNS SHARE A NAME, `strict` decides.
+
+        At home, no: prefer the decisively larger one. That is not a new
+        licence, it is the rule the matcher has always used — its gazetteer
+        index is sorted by population and it takes the first — so refusing
+        here while the matcher decides there was inconsistent, and it was
+        costing a large share of the 4,880 names this harvest gives up on.
+        "Decisively" means at least three times the runner-up, so two towns
+        of comparable size are still refused rather than settled by a coin
+        toss.
+
+        Abroad, yes, strictly: crossing a border on a guess is how Bale
+        becomes Basel. Nothing but a single unambiguous candidate will do.
+        """
         if not cands:
             return None, 0
         towns = [c for c in cands if c.get("kind", "settlement") == "settlement"]
         if len(towns) == 1:
             return towns[0], 0
         if towns:
-            return None, 1          # two real towns of that name: refuse
+            if strict:
+                return None, 1
+            ranked = sorted(towns, key=lambda c: -(c.get("p") or 0))
+            top, next_ = ranked[0], ranked[1]
+            if (top.get("p") or 0) > 0 and \
+               (top.get("p") or 0) >= 3 * max(1, next_.get("p") or 0):
+                return top, 0
+            return None, 1
         districts = [c for c in cands if c.get("kind") == "district"]
         if len(districts) == 1:
             return districts[0], 0
@@ -256,7 +295,7 @@ def main():
     found, home_n, abroad_n, district_n, ambiguous = {}, 0, 0, 0, 0
     for cc in ccs:
         for fm, books in wanted[cc].items():
-            hit, amb = pick(seen_forms.get(fm, {}).get(cc, []))
+            hit, amb = pick(seen_forms.get(fm, {}).get(cc, []), strict=False)
             if hit:
                 found[cc + "|" + fm] = hit
                 home_n += 1
@@ -268,7 +307,7 @@ def main():
                 continue
             away = [r for nb in neighbours(cc)
                     for r in seen_forms.get(fm, {}).get(nb, [])]
-            hit, amb = pick(away)
+            hit, amb = pick(away, strict=True)
             if hit:
                 rec = dict(hit)
                 rec["via"] = cc          # the collection it was filed under

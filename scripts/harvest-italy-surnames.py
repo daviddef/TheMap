@@ -68,7 +68,22 @@ def fetch(url, timeout=60, tries=3):
         try:
             req = urllib.request.Request(url, headers={"User-Agent": UA})
             with urllib.request.urlopen(req, timeout=timeout) as r:
-                return r.read(MAX_BYTES)
+                # A DEADLINE FOR THE WHOLE TRANSFER, not just for each socket
+                # operation. One comune's own web server trickles bytes
+                # forever: urllib's timeout never fires because data keeps
+                # arriving, and r.read() blocks until it decides to stop.
+                # This has now stalled the harvest twice, once for fourteen
+                # minutes and once for seven.
+                deadline = time.monotonic() + timeout
+                buf = bytearray()
+                while len(buf) < MAX_BYTES:
+                    if time.monotonic() > deadline:
+                        return None
+                    chunk = r.read(65536)
+                    if not chunk:
+                        break
+                    buf += chunk
+                return bytes(buf)
         except urllib.error.HTTPError as e:
             if e.code in (403, 404):
                 return None
@@ -157,7 +172,7 @@ def read_csv(blob):
 
 def main():
     sets = catalogue()
-    print(f"{len(sets)} surname datasets in the national catalogue\n")
+    print(f"{len(sets)} surname datasets in the national catalogue\n", flush=True)
     total = collections.Counter()
     by_comune, sources, skipped = {}, [], []
     cache = {}
@@ -188,7 +203,7 @@ def main():
                               "year": year, "dataset": c["title"], "url": c["url"]}
             sources.append({"comune": org, "title": c["title"],
                             "licence": c["licence"], "url": c["url"], "year": year})
-            print(f"  [{i}/{len(sets)}] {org[:38]:40s} cached")
+            print(f"  [{i}/{len(sets)}] {org[:38]:40s} cached", flush=True)
             continue
         blob = fetch(csvs[0]["url"], timeout=90)
         if not blob:

@@ -307,12 +307,46 @@ def showcase():
     srows = sd["surnames"] if isinstance(sd, dict) and "surnames" in sd else sd
     srows = srows if isinstance(srows, list) else list(srows.values())
     known = {fold(r.get("n", "")) for r in srows}
+    # AND AGAINST EACH ARCHIVE'S OWN DATA, which is the better test.
+    # A name absent from the surname registers may just be somewhere no
+    # register covers — Booyzen is a Cape name and nothing here counts South
+    # Africa. But a name on a card that the archive it names has never
+    # recorded is a different thing: the card is claiming something its own
+    # evidence does not say. Booyzen's card printed Booyzen and Booysen
+    # while its archive records Booyens.
+    own = {}
+    af = "data/archive-surnames.json"
+    if os.path.exists(af):
+        for arch, v in json.load(open(af, encoding="utf-8"))["archives"].items():
+            names = v.get("surnames", v.get("names", [])) if isinstance(v, dict) else v
+            own[fold(arch)] = {fold(x) for x in names}
+
     missing = [(r.get("id"), n) for r in rows for n in r.get("names", [])
                if fold(n) not in known]
     if missing:
         note("showcase", f"{len(missing)} name(s) on a card that the surname "
                          f"dataset does not know: "
                          + ", ".join(f"{a}/{b}" for a, b in missing[:6]))
+    if own:
+        unevidenced = []
+        for r in rows:
+            key = next((k for k in own if k.startswith(fold(r.get("id", "")))
+                        or fold(r.get("id", "")).startswith(k)), None)
+            if not key:
+                continue
+            # An archive titled "The Booyzen Archive" is itself evidence for
+            # the name Booyzen, even where its surname list happens to record
+            # only Booyens. Its own title does not need a second source.
+            title = fold(r.get("name", "")).replace("the ", "").replace(" archive", "")
+            for n in r.get("names", []):
+                if fold(n) not in own[key] and fold(n) != title:
+                    unevidenced.append(f"{r.get('id')}/{n}")
+        if unevidenced:
+            bad("showcase", f"{len(unevidenced)} name(s) on a card that the "
+                            f"archive it names has never recorded: "
+                            + ", ".join(unevidenced[:6]))
+        else:
+            note("showcase", "every card name is in its own archive's data")
     note("showcase", f"{len(rows)} archive cards, "
                      f"{sum(len(r.get('names', [])) for r in rows)} names")
 

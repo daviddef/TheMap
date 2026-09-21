@@ -751,8 +751,12 @@ def main():
         "note": ("Settlements FamilySearch has books for and this atlas has "
                  "never heard of — the map's next places, commonest first."),
         "counts": {"names": len(unplaced), "volumes": sum(unplaced.values())},
+        # EVERY name, not the top 4,000. The exonym harvest is demand-driven
+        # off this list, so a name missing from it can never be looked up: the
+        # 27,530 names below the cut were carrying 200,641 books that nothing
+        # was even trying to place. The file is a work list; it can be long.
         "names": [{"n": n, "cc": unplaced_cc.get(n, ""), "volumes": c}
-                  for n, c in unplaced.most_common(4000)],
+                  for n, c in unplaced.most_common()],
     }, GAPS)
 
     dump({

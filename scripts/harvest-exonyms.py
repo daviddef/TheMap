@@ -28,6 +28,10 @@ import urllib.parse, urllib.request
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
 OUT = "data/exonyms.json"
+# A country's scan is expensive and the whole run is long. Each one is
+# written as it finishes, so an interrupted harvest resumes instead of
+# starting again.
+CACHE = "data/.exonym-scan.json"
 ENDPOINT = "https://qlever.dev/api/wikidata"
 UA = "RecordAtlas/1.0 (+https://daviddef.github.io/TheMap; exonyms)"
 PAGE = 150000
@@ -47,6 +51,43 @@ SELECT ?form ?canon ?coord WHERE {
 }
 LIMIT %d OFFSET %d
 """
+
+
+# THE COUNTRY ON AN UNPLACED NAME IS THE COLLECTION'S, NOT THE GROUND'S.
+# Ragogna, Moruzzo, Pocenia, Fagagna and 160 other Friulian villages are
+# listed here under AT, because the books are filed in an Austrian
+# collection — the Kuestenland, the Littoral, Habsburg ground that is Italy
+# today. So this asked Austria for an Italian village 168 times and found
+# nothing, while Wikidata answers "Moruzzo" with IT and a coordinate
+# immediately. 32,579 books were stranded behind that one wrong assumption.
+#
+# The same ten historical filing groups the matcher uses. Searching a whole
+# group is a licence to be wrong, so it is spent carefully: a name found in
+# its own country wins outright, and a name found only abroad is accepted
+# ONLY if the entire group offers exactly one place of that name. "Palma"
+# in an Austrian collection stays unplaced, because it is Palmanova in
+# Friuli and Palma de Mallorca and several more, and a wrong dot is worse
+# than a missing one.
+FILING_GROUPS = [
+    set("AT HU CZ SK SI HR BA RO PL UA IT RS ME".split()),
+    set("HR SI BA RS ME MK".split()),
+    set("DE PL RU LT CZ DK".split()),
+    set("RU UA BY LT LV EE PL MD GE AM AZ KZ FI".split()),
+    set("TR GR BG RS MK AL BA RO ME CY".split()),
+    set("SE NO DK FI IS".split()),
+    set("NL BE LU FR DE".split()),
+    set("ES PT".split()),
+    set("GB IE IM".split()),
+    set("FR IT CH AT DE".split()),
+]
+
+
+def neighbours(cc):
+    out = set()
+    for g in FILING_GROUPS:
+        if cc in g:
+            out |= g
+    return sorted(out - {cc})
 
 
 def fold(s):
@@ -88,49 +129,128 @@ def main():
         if cc and g["n"]:
             wanted[cc][fold(g["n"])] = g["volumes"]
     ccs = sorted(wanted, key=lambda c: -sum(wanted[c].values()))
-    print(f"{len(ccs)} countries hold unplaced books; "
-          f"{sum(len(v) for v in wanted.values()):,} distinct names to look for\n")
 
-    found, t0 = {}, time.time()
-    for i, cc in enumerate(ccs, 1):
-        want = wanted[cc]
-        hits, offset, seen = {}, 0, 0
+    # Every form anybody is looking for, so a country's scan can throw away
+    # the 99.9% of Wikidata that is not wanted before it costs any memory.
+    want_all = set()
+    for v in wanted.values():
+        want_all |= set(v)
+
+    # The countries worth asking: the ones with unplaced books, plus the
+    # ones their books could historically have been filed across.
+    ask_ccs = set(ccs)
+    for cc in ccs:
+        ask_ccs |= set(neighbours(cc))
+    ask_ccs = sorted(ask_ccs)
+
+    print(f"{len(ccs)} countries hold unplaced books; "
+          f"{len(want_all):,} distinct names to look for")
+    print(f"asking {len(ask_ccs)} countries, the filing groups included\n")
+
+    # form -> cc -> list of {n,x,y}. One scan per country, kept only where
+    # the form is one somebody is actually waiting on.
+    seen_forms = collections.defaultdict(lambda: collections.defaultdict(list))
+    done = {}
+    if os.path.exists(CACHE):
+        try:
+            cached = json.load(open(CACHE))
+            if set(cached.get("want", [])) == want_all:
+                done = cached.get("by_cc", {})
+                for cc_, rows in done.items():
+                    for rec in rows:
+                        seen_forms[rec["f"]][cc_].append(
+                            {"n": rec["n"], "cc": cc_, "x": rec["x"], "y": rec["y"]})
+                print(f"resuming: {len(done)} countries already scanned\n")
+            else:
+                print("cache is for a different name list, starting over\n")
+        except Exception:
+            done = {}
+
+    t0 = time.time()
+    for i, cc in enumerate(ask_ccs, 1):
+        if cc in done:
+            print(f"  [{i}/{len(ask_ccs)}] {cc}  cached, {len(done[cc]):,} wanted")
+            continue
+        offset, scanned, kept = 0, 0, 0
         while True:
             rows = ask(Q % (cc, PAGE, offset))
             if not rows:
                 break
-            seen += len(rows)
+            scanned += len(rows)
             for r in rows:
-                f = fold(r["form"]["value"])
-                if f not in want or f in hits:
+                fm = fold(r["form"]["value"])
+                if fm not in want_all:
                     continue
                 m = POINT.search(r.get("coord", {}).get("value", "") or "")
-                hits[f] = {"n": r["canon"]["value"], "cc": cc,
-                           "x": float(m.group(1)) if m else None,
-                           "y": float(m.group(2)) if m else None}
+                if not m:
+                    continue
+                rec = {"n": r["canon"]["value"], "cc": cc,
+                       "x": float(m.group(1)), "y": float(m.group(2))}
+                bucket = seen_forms[fm][cc]
+                # The same settlement arrives once per label and alias.
+                if not any(abs(b["x"] - rec["x"]) < 0.01 and
+                           abs(b["y"] - rec["y"]) < 0.01 for b in bucket):
+                    bucket.append(rec)
+                    kept += 1
             if len(rows) < PAGE:
                 break
             offset += PAGE
             time.sleep(1)
-        got = sum(want[f] for f in hits)
-        print(f"  [{i}/{len(ccs)}] {cc}  {len(hits):5,} of {len(want):,} names "
-              f"matched · {got:,} books freed · {seen:,} forms scanned "
-              f"({int(time.time()-t0)}s)", flush=True)
-        for f, v in hits.items():
-            found[cc + "|" + f] = v
-        json.dump({
-            "source": "Wikidata: settlements (Q486972 and subclasses) with a "
-                      "country, every label and alias.",
-            "licence": "CC0.",
-            "note": ("One row per NAME FORM this atlas failed on, resolved to "
-                     "the settlement it belongs to. Demand-driven: Wikidata "
-                     "holds 28.7 million settlement name-forms and this keeps "
-                     "only the few thousand that were actually costing books."),
-            "harvested": time.strftime("%Y-%m-%d"),
-            "counts": {"forms": len(found)},
-            "forms": found,
-        }, open(OUT, "w"), ensure_ascii=False)
-    print(f"\n{len(found):,} name forms resolved -> {OUT}")
+        done[cc] = [{"f": fm, "n": r["n"], "x": r["x"], "y": r["y"]}
+                    for fm, per in seen_forms.items()
+                    for r in per.get(cc, [])]
+        tmp = CACHE + ".tmp"
+        json.dump({"want": sorted(want_all), "by_cc": done},
+                  open(tmp, "w"), ensure_ascii=False)
+        os.replace(tmp, CACHE)
+        print(f"  [{i}/{len(ask_ccs)}] {cc}  {scanned:8,} forms scanned, "
+              f"{kept:5,} wanted ({int(time.time() - t0)}s)", flush=True)
+
+    # Resolve. Home country first; abroad only when the whole filing group
+    # offers exactly one place of that name.
+    found, home_n, abroad_n, ambiguous = {}, 0, 0, 0
+    for cc in ccs:
+        for fm, books in wanted[cc].items():
+            here = seen_forms.get(fm, {}).get(cc, [])
+            if len(here) == 1:
+                found[cc + "|" + fm] = here[0]
+                home_n += 1
+                continue
+            if here:
+                ambiguous += 1
+                continue
+            away = [r for nb in neighbours(cc)
+                    for r in seen_forms.get(fm, {}).get(nb, [])]
+            if len(away) == 1:
+                rec = dict(away[0])
+                rec["via"] = cc          # the collection it was filed under
+                found[cc + "|" + fm] = rec
+                abroad_n += 1
+            elif away:
+                ambiguous += 1
+
+    freed = sum(wanted[k.split("|", 1)[0]][k.split("|", 1)[1]] for k in found)
+    json.dump({
+        "source": "Wikidata: settlements (Q486972 and subclasses) with a "
+                  "country, every label and alias.",
+        "licence": "CC0.",
+        "note": ("One row per NAME FORM this atlas failed on, resolved to "
+                 "the settlement it belongs to. Demand-driven: Wikidata "
+                 "holds 28.7 million settlement name-forms and this keeps "
+                 "only the few thousand that were actually costing books. "
+                 "A row carrying `via` was found not in the country its "
+                 "collection is filed under but elsewhere in that country's "
+                 "historical filing group, and only because the whole group "
+                 "offered exactly one place of the name."),
+        "harvested": time.strftime("%Y-%m-%d"),
+        "counts": {"forms": len(found), "home": home_n, "abroad": abroad_n,
+                   "ambiguous_left_unplaced": ambiguous, "books_freed": freed},
+        "forms": found,
+    }, open(OUT, "w"), ensure_ascii=False)
+    print(f"\n{len(found):,} name forms resolved "
+          f"({home_n:,} at home, {abroad_n:,} across a border), "
+          f"{ambiguous:,} left unplaced as ambiguous")
+    print(f"{freed:,} books freed -> {OUT}")
 
 
 if __name__ == "__main__":

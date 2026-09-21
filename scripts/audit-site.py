@@ -269,6 +269,54 @@ def provider_places():
                       f"{len(off)} adrift")
 
 
+def showcase():
+    """The eight archive cards, against the data behind them.
+
+    The cards are hand-written and the surnames are harvested, so they drift.
+    Booyzen's card printed «Booyzen · Booysen · Booyzen» — the same name
+    twice — while the form its own archive actually records, Booyens, was
+    not printed at all. Luwinski's card listed Sauerbaum among Berlin,
+    Schubin and Lourenço Marques, as though a family name were a town.
+
+    A name on a card that the surname dataset has never heard of is not
+    necessarily wrong — Booyzen is a Cape name and no register here covers
+    South Africa — but it is worth knowing, because the card is a promise
+    that the site can say something about it.
+    """
+    sc = "site/src/data/archives-showcase.json"
+    sn = "site/src/data/surnames.json"
+    if not os.path.exists(sc):
+        note("showcase", "no showcase data")
+        return
+    d = json.load(open(sc, encoding="utf-8"))
+    rows = d if isinstance(d, list) else d.get("archives", [])
+    dupes = [(r.get("id"), n) for r in rows
+             for n in set(r.get("names", []))
+             if r.get("names", []).count(n) > 1]
+    if dupes:
+        bad("showcase", f"a card prints the same name twice: {dupes[0]}")
+    if not os.path.exists(sn):
+        note("showcase", f"{len(rows)} cards, surnames not built yet")
+        return
+
+    def fold(x):
+        return "".join(c for c in unicodedata.normalize("NFD", str(x).lower())
+                       if unicodedata.category(c) != "Mn")
+
+    sd = json.load(open(sn, encoding="utf-8"))
+    srows = sd["surnames"] if isinstance(sd, dict) and "surnames" in sd else sd
+    srows = srows if isinstance(srows, list) else list(srows.values())
+    known = {fold(r.get("n", "")) for r in srows}
+    missing = [(r.get("id"), n) for r in rows for n in r.get("names", [])
+               if fold(n) not in known]
+    if missing:
+        note("showcase", f"{len(missing)} name(s) on a card that the surname "
+                         f"dataset does not know: "
+                         + ", ".join(f"{a}/{b}" for a, b in missing[:6]))
+    note("showcase", f"{len(rows)} archive cards, "
+                     f"{sum(len(r.get('names', [])) for r in rows)} names")
+
+
 def weight():
     """What the site costs to host, and what one click costs to read.
 
@@ -346,6 +394,7 @@ def main():
         accessibility(pages)
     volumes()
     provider_places()
+    showcase()
 
     if NOTE:
         print("NOTES")

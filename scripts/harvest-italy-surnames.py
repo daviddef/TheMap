@@ -36,6 +36,15 @@ import urllib.parse, urllib.request, urllib.error
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
 OUT = "data/frequencies/it.json"
+# Each comune is cached as it is read. The first run of this script spent
+# fourteen minutes stalled on one municipality's own web server with 87 of
+# 93 datasets held only in memory, where killing it would have thrown all
+# of them away. A long job that cannot be interrupted is a job you do twice.
+CACHE = "data/.italy-surnames-scan.json"
+# urllib's timeout is per socket operation, not for the whole transfer, so a
+# server trickling bytes holds the connection open indefinitely. A surname
+# list for one comune is tens of kilobytes; nothing here is 20 MB.
+MAX_BYTES = 20 * 1024 * 1024
 CKAN = "https://dati.gov.it/opendata/api/3/action/package_search"
 UA = ("RecordAtlas/1.0 (+https://daviddef.github.io/TheMap; "
       "surname frequency; contact david.defranceski@gmail.com)")
@@ -59,7 +68,7 @@ def fetch(url, timeout=60, tries=3):
         try:
             req = urllib.request.Request(url, headers={"User-Agent": UA})
             with urllib.request.urlopen(req, timeout=timeout) as r:
-                return r.read()
+                return r.read(MAX_BYTES)
         except urllib.error.HTTPError as e:
             if e.code in (403, 404):
                 return None
@@ -151,6 +160,13 @@ def main():
     print(f"{len(sets)} surname datasets in the national catalogue\n")
     total = collections.Counter()
     by_comune, sources, skipped = {}, [], []
+    cache = {}
+    if os.path.exists(CACHE):
+        try:
+            cache = json.load(open(CACHE))
+            print(f"resuming: {len(cache)} comuni already read\n")
+        except Exception:
+            cache = {}
     for i, ds in enumerate(sets, 1):
         org = ((ds.get("organization") or {}).get("title")
                or ds.get("author") or "?")
@@ -162,6 +178,18 @@ def main():
             skipped.append((org, title, "no CSV"))
             continue
         csvs.sort(key=lambda r: str(r.get("url")), reverse=True)
+        if org in cache:
+            c = cache[org]
+            pairs, year = [tuple(x) for x in c["pairs"]], c.get("year")
+            for n, cnt in pairs:
+                total[n] += cnt
+            by_comune[org] = {"names": len(pairs),
+                              "people": sum(x for _, x in pairs),
+                              "year": year, "dataset": c["title"], "url": c["url"]}
+            sources.append({"comune": org, "title": c["title"],
+                            "licence": c["licence"], "url": c["url"], "year": year})
+            print(f"  [{i}/{len(sets)}] {org[:38]:40s} cached")
+            continue
         blob = fetch(csvs[0]["url"], timeout=90)
         if not blob:
             skipped.append((org, title, "could not fetch"))
@@ -188,6 +216,12 @@ def main():
         print(f"  [{i}/{len(sets)}] {org[:38]:40s} {len(pairs):6,} surnames"
               f"  {sum(c for _, c in pairs):8,} people"
               f"  {year or '—'}", flush=True)
+        cache[org] = {"pairs": pairs, "year": year, "title": title,
+                      "url": csvs[0]["url"],
+                      "licence": ds.get("license_title") or "not stated"}
+        tmp = CACHE + ".tmp"
+        json.dump(cache, open(tmp, "w"), ensure_ascii=False)
+        os.replace(tmp, CACHE)
         time.sleep(0.4)
 
     rows = [{"n": n, "c": c} for n, c in total.most_common()]

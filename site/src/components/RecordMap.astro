@@ -1678,6 +1678,23 @@ window.addEventListener("load", async function () {
     return out.slice(0, 3).map(function (x) { return x[1]; });
   }
 
+  /* A COUNTRY IS MATCHED ON WHOLE WORDS, NOT ON ANY RUN OF LETTERS INSIDE ONE.
+     «Krain» is the German name of Carniola, and typing it flew the map to
+     Ukraine — because "ukraine".indexOf("krain") is 1. The region's other
+     names all worked, so the one that failed was the one hiding inside a
+     larger word. A query matches a country when it begins the name or begins
+     a word in it: "united" and "kingdom" both find the United Kingdom, and
+     "krain" finds neither it nor Ukraine, and falls through to Carniola. */
+  function wordHit(hay, needle) {
+    if (!hay || !needle) return false;
+    var i = hay.indexOf(needle);
+    while (i > -1) {
+      if (i === 0 || /[^a-z0-9]/.test(hay.charAt(i - 1))) return true;
+      i = hay.indexOf(needle, i + 1);
+    }
+    return false;
+  }
+
   async function elsewhere(term) {
     var mine = ++searchTok;
     /* TYPING A COUNTRY'S NAME SHOULD OPEN THE COUNTRY. David typed «libya» and
@@ -1717,12 +1734,12 @@ window.addEventListener("load", async function () {
     ctryLayer.clearLayers();
     var f = fold(term);
     var iso = Object.keys(CNAME).filter(function (k) {
-      return fold(CNAME[k]).indexOf(f) > -1 || k.toLowerCase() === f;
+      return wordHit(fold(CNAME[k]), f) || k.toLowerCase() === f;
     });
     var cover = provs.providers.filter(function (p) {
       if (iso.some(function (k) { return (p.countries || []).indexOf(k) > -1; })) return true;
-      if (p.at && fold(p.at.place).indexOf(f) > -1) return true;
-      return fold(p.name).indexOf(f) > -1;
+      if (p.at && wordHit(fold(p.at.place), f)) return true;
+      return wordHit(fold(p.name), f);
     });
     var hits = await gazetteer(term);
     var names = await surnames(term);

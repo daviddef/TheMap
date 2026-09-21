@@ -456,6 +456,60 @@ def promoted_countries():
                          f"country it claims")
 
 
+def one_dot_per_town():
+    """Two dots for one town split its records between them.
+
+    The matcher promotes new places from the gazetteer and the exonym
+    index, minting an id from the name. Where this atlas already drew that
+    town, the result was two dots at the same spot and the volumes divided
+    between them: Genoa had 1,245 on the new dot and 0 on the old one, 0.0
+    km apart, so whichever a reader clicked first was as likely as not to
+    show an empty page. Agrigento split 716 against 250, Castellammare
+    1,052 against 57 — 36 towns, 23 of them carrying volumes on both sides.
+
+    Name and country alone will not do: there are two Fultons in the United
+    States 1,391 km apart and they are two towns. Same name, same country
+    and within 25 km is one town written down twice.
+    """
+    pf, gf = "data/fs-volumes-promote.json", "data/places.json"
+    if not (os.path.exists(pf) and os.path.exists(gf)):
+        return
+
+    def fold(x):
+        return "".join(c for c in unicodedata.normalize("NFD", str(x).lower())
+                       if unicodedata.category(c) != "Mn")
+
+    def km(a, b, c, d):
+        R, t = 6371.0, math.pi / 180
+        dla, dlo = (c - a) * t, (d - b) * t
+        h = (math.sin(dla / 2) ** 2
+             + math.cos(a * t) * math.cos(c * t) * math.sin(dlo / 2) ** 2)
+        return 2 * R * math.asin(math.sqrt(h))
+
+    places = json.load(open(gf, encoding="utf-8"))["places"]
+    byname = collections.defaultdict(list)
+    for p in places:
+        if p.get("lat") is not None:
+            byname[(p.get("country"), fold(p["name"]))].append(p)
+
+    pr = json.load(open(pf, encoding="utf-8"))["places"]
+    rows = pr if isinstance(pr, list) else list(pr.values())
+    dup = []
+    for r in rows:
+        if r.get("lat") is None:
+            continue
+        for p in byname.get((r.get("country"), fold(r["name"])), ()):
+            if km(r["lat"], r["lon"], p["lat"], p["lon"]) <= 25.0:
+                dup.append(f"{r['name']} ({r['id']} beside {p['id']})")
+                break
+    if dup:
+        bad("places", f"{len(dup)} towns are drawn twice, so their records are "
+                      f"split between two dots: " + "; ".join(dup[:4]))
+    else:
+        note("places", f"{len(rows):,} promoted dots, none duplicating a town "
+                       f"already drawn")
+
+
 def weight():
     """What the site costs to host, and what one click costs to read.
 
@@ -589,6 +643,7 @@ def main():
     volumes()
     provider_places()
     promoted_countries()
+    one_dot_per_town()
     showcase()
 
     if NOTE:

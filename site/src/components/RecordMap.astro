@@ -1208,6 +1208,38 @@ window.addEventListener("load", async function () {
       map.fitBounds(L.latLngBounds(frame.map(function (m) { return m.getLatLng(); })),
                     { padding: [40, 40], maxZoom: 11 });
       if (vis.length === 1) { open(vis[0]._p); return; }
+      /* SEVERAL PLACES MATCHED, SO THE MAP IS THE ANSWER — BUT THE PANEL
+         MUST NOT STILL BE ANSWERING THE LAST QUESTION. This branch framed
+         the matches and fell through without touching the panel, so the
+         panel kept whatever the previous search had put there. Typing
+         «Kranj» moved the map to Carniola while the panel went on
+         describing the surname Kosina from the search before it. I misread
+         that as a broken search twice today before noticing the panel and
+         the map were answering different questions.
+         One line saying what was framed, and which places they are. */
+      if (vis.length > 1) {
+        empty.hidden = true; panel.hidden = false;
+        var some = vis.slice(0, 12);
+        var hh = ['<div class="at-h"><h3>' + esc(qbox.value.trim()) + "</h3>" +
+                  '<span class="at-n">' + vis.length.toLocaleString() +
+                  " places</span></div>"];
+        hh.push('<p class="at-what"><b>' + vis.length.toLocaleString() +
+                " places match, and the map is framed on them.</b> Click a dot for " +
+                "what stands there, or narrow the name.</p>");
+        hh.push('<ul class="at-films">');
+        some.forEach(function (m) {
+          var p = m._p;
+          hh.push('<li><a href="' + BASE + "place/" + esc(p.i) + '/">' + esc(p.n) +
+                  "</a>" + (p.c ? ' <span class="ra-who">' + p.c +
+                  " collection" + (p.c === 1 ? "" : "s") + "</span>" : "") + "</li>");
+        });
+        hh.push("</ul>");
+        if (vis.length > some.length)
+          hh.push('<p class="cap">and ' + (vis.length - some.length).toLocaleString() +
+                  " more on the map.</p>");
+        panel.innerHTML = hh.join("");
+        return;
+      }
     }
 
     /* «NO PLACES OF THAT NAME» WHEN THE YEAR IS WHAT HID IT. David searched

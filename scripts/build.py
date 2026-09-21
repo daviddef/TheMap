@@ -467,6 +467,18 @@ def main():
         extra = sorted(f for f in q.split(" ") if f and f != fold(p["name"]))
         row = {"i": p["id"], "n": p["name"], "y": p["lat"], "x": p["lon"],
                "c": len(cs)}
+        # THE VOLUME COUNT, WHICH THE INDEX HAS NEVER CARRIED.
+        # `c` is the number of COLLECTIONS covering a place. The map was
+        # summing it and calling the total "record volumes": it told every
+        # visitor "26,699 places, 8,557 record volumes" while this atlas held
+        # 2,016,426. It also drew a dot hollow — the mark that means "nobody
+        # walked it" — whenever `c` was zero, which was true of 19,000 places
+        # carrying FamilySearch books.
+        # Written only where there are any, so the 5,000 places with none
+        # cost nothing on first paint.
+        _v = len(vol_by_place.get(p["id"], []))
+        if _v:
+            row["v"] = _v
         # THE KINDS PRESENT HERE, AS A BITMASK. One small integer per place,
         # rather than a list of words on 7,391 rows — the index has an 800 KB
         # budget and a filter has to work on first paint, before any per-place

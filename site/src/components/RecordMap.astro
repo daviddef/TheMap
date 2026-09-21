@@ -257,7 +257,11 @@ window.addEventListener("load", async function () {
      two are both on it, and the big one is not the better lead. */
   var shelfLayer = L.layerGroup();
   var markers = idx.places.map(function (p) {
-    var n = p.c || 0;
+    /* WALKED MEANS A BOOK STANDS HERE, by whatever route it was found.
+       This read the collection count alone, so a place carrying 1,500
+       FamilySearch volumes and no curated collection was drawn hollow —
+       the mark that says nobody has been through it. */
+    var n = (p.v || 0) || (p.c || 0);
     /* HOLLOW MEANS NOBODY WALKED IT. 2,199 of the 4,106 dots carry no volume of
        their own — mostly the administrative divisions, which are real ground,
        correctly placed, and completely unread. 319 of them still have a colour,
@@ -1264,7 +1268,8 @@ window.addEventListener("load", async function () {
         hh.push('<div class="ra-juris" style="border-left-color:#E8792B">' +
                 '<div class="lab">Hidden by the year, not missing</div>');
         hh.push("<p><b>" + esc(one.n) + "</b> is on this map with <b>" +
-                (one.c || 0) + " volume" + (one.c === 1 ? "" : "s") + "</b>" +
+                ((one.v || 0) || (one.c || 0)).toLocaleString() + " volume" +
+                (((one.v || 0) || (one.c || 0)) === 1 ? "" : "s") + "</b>" +
                 (one.s ? ", covering " + one.s[0] + "–" + one.s[1] : "") +
                 " — and <b>nothing here covers " + (year === year2 ? year : year + "\u2013" + year2) + "</b>, so the year " +
                 "filter has taken it off the map.</p>");
@@ -2228,9 +2233,13 @@ window.addEventListener("load", async function () {
     });
   });
 
+  /* VOLUMES ARE `v`; `c` IS COLLECTIONS. This line summed the collection
+     count and called the total "record volumes", so it told every visitor
+     "26,699 places, 8,557 record volumes" while the atlas held 2,016,426 —
+     wrong by a factor of 236, on the first line under the map. */
   document.getElementById("ra-hint").textContent =
-    idx.places.length + " places, " +
-    idx.places.reduce(function (a, p) { return a + (p.c || 0); }, 0) +
+    idx.places.length.toLocaleString() + " places, " +
+    idx.places.reduce(function (a, p) { return a + (p.v || 0); }, 0).toLocaleString() +
     " record volumes. Search by any name a place has ever had — Gallignana finds Gračišće.";
 
   syncLayers();

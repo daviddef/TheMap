@@ -754,8 +754,25 @@ def main():
                 hit, cc = look_in(index, fold(cand), ccs)
                 if hit:
                     return hit, cc, False
+        # MEASURE WHAT THE SHELF-ONLY RULE IS COSTING.
+        # «Santo Stefano» under an Austrian Küstenland collection has the
+        # path ["Udine", "Santo Stefano"] and the labels ["Province",
+        # "Comune or Frazione"]. Udine is the area, and Udine is not drawn on
+        # this map — though the gazetteer knows it perfectly well. The rule
+        # above refuses to promote a dot from an area name on purpose, to
+        # avoid the Polla trap, and the cost of that refusal has never been
+        # counted. Counting it here decides whether provincial capitals are
+        # worth drawing; it does not place anything.
+        for name, lab in reversed(areas):
+            for cand in readings(name, lab):
+                for _cc in ccs:
+                    if gaz_idx.get((_cc, fold(cand))):
+                        area_in_gaz[0] += 1
+                        return None, None, False
         return None, None, False
 
+    # Counter only — see the note in resolve_path.
+    area_in_gaz = [0]
     by_place = collections.defaultdict(list)
     promote = {}
     crossed = collections.Counter()
@@ -894,7 +911,8 @@ def main():
                    "volumes": sum(len(v) for v in by_place.values()),
                    "matched": matched, "unmatched": miss,
                    "noPathName": noname,
-                   "noPathButAnAreaNamed": area_only},
+                   "noPathButAnAreaNamed": area_only,
+                   "unplacedButAreaIsInTheGazetteer": area_in_gaz[0]},
         "byPlace": {k: v for k, v in sorted(by_place.items())},
     }, OUT)
 
@@ -929,7 +947,10 @@ def main():
     print(f"  {matched:,} matched a place "
           f"({100*matched/max(total,1):.0f}%), of which "
           f"{len(promote):,} are new dots promoted from the gazetteer")
-    print(f"  {miss:,} named a place this atlas does not hold")
+    print(f"  {miss:,} named a place this atlas does not hold"
+          + (f", and {area_in_gaz[0]:,} of those name an AREA the gazetteer "
+             f"knows and this shelf does not draw (Udine, and its like)"
+             if area_in_gaz[0] else ""))
     print(f"  {noname:,} had no place in their path at all"
           + (f" — but {area_only:,} of those name an area "
              f"(a province, a county) and only lack a town"

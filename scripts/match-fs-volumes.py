@@ -361,11 +361,19 @@ def main():
         _adm = json.load(open("data/admin-divisions.json"))
         _rows = _adm if isinstance(_adm, list) else _adm.get(
             "divisions", _adm.get("rows", list(_adm.values())))
+        # A LIST, NOT THE FIRST ONE FOUND. County names repeat: there are
+        # Wayne Counties in Michigan, New York, Ohio and a dozen more states,
+        # and keeping only the first would put a North Carolina register in
+        # Michigan without hesitating. The path almost always carries the
+        # state — ["North Carolina", "Gates County"], labels ["State",
+        # "County"] — so the parent is there to disambiguate with.
         for _r in _rows:
             if isinstance(_r, dict) and _r.get("name") and _r.get("lat") is not None:
-                adm_idx.setdefault((_r.get("cc"), fold(_r["name"])), _r)
+                adm_idx.setdefault((_r.get("cc"), fold(_r["name"])), []).append(_r)
+        _amb = sum(1 for v in adm_idx.values() if len(v) > 1)
         print(f"admin divisions  {len(adm_idx):,} keyed, for reading an area "
-              f"when no town survives")
+              f"when no town survives; {_amb:,} names are shared by more than "
+              f"one division and need their parent to tell them apart")
     except Exception as _e:
         print(f"admin divisions  unavailable ({_e})")
 
@@ -495,6 +503,26 @@ def main():
             if haversine(lat, lon, _p["lat"], _p["lon"]) <= limit_km:
                 return _p["id"]
         return None
+
+    def division_for(cand, cc, areas):
+        """The division that `cand` means in `cc`, or None if it is unclear.
+
+        Where a name belongs to one division, that is the answer. Where it
+        belongs to several — Wayne County, and a dozen others — the path's
+        other area levels are the tiebreak: a book filed under ["North
+        Carolina", "Gates County"] names its state one level up. With no
+        parent to go on, this refuses rather than guesses, because the
+        states are a thousand miles apart and the wrong one is not a near
+        miss.
+        """
+        got = adm_idx.get((cc, fold(cand))) or []
+        if len(got) == 1:
+            return got[0]
+        if not got:
+            return None
+        parents = {fold(n) for n, _l in areas} | {fold(bare(n)) for n, _l in areas}
+        near = [g for g in got if fold(g.get("adm1") or "") in parents]
+        return near[0] if len(near) == 1 else None
 
     def look_in(index, cand, ccs):
         for cc in ccs:
@@ -832,7 +860,7 @@ def main():
         for name, lab in reversed(areas):
             for cand in readings(name, lab):
                 for _cc in ccs:
-                    a = adm_idx.get((_cc, fold(cand)))
+                    a = division_for(cand, _cc, areas)
                     if not a:
                         continue
                     pname = division_label(a["name"])

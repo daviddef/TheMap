@@ -10,6 +10,11 @@ import { u } from "../lib/url.js";
 import surn from "../data/surnames.json";
 import idx from "../../public/index.json";
 import refused from "../../../data/frequencies/_refused.json";
+/* COUNTED, NOT TYPED — like the heading below, which was fixed for exactly this
+   after saying «Four» above a list of eight. The typed «Five» under it happened
+   to be right, and that is the whole problem with a typed number: it is right
+   until an entry moves and nobody notices. Italy moved today. */
+const rechecked = refused.refused.filter((r) => r.rechecked).length;
 
 const CN = idx.countries || {};
 const c = surn.counts || {surnames: 0, withVariants: 0, withCountries: 0, curatedLinks: 0};
@@ -137,9 +142,11 @@ function dlSize(name) {
     is to be accurate about what is missing. */}
     <h2>{refused.refused.length} countries that are not here, and exactly why</h2>
     <p class="cap">Sought and not obtained. Without this list the next person spends the same
-    afternoon finding the same walls. Five were re-tested on {refused.checked} against
-    live endpoints rather than remembered ones — every refusal held, and three of them
-    are evidence now where they were inference.</p>
+    afternoon finding the same walls. {rechecked} were re-tested on {refused.checked} against
+    live endpoints rather than remembered ones, and every refusal held.
+    {(refused.resolved || []).length > 0 && <> But retrying is also what closed
+    <b>{(refused.resolved || []).map((r) => r.name).join(", ")}</b>, which had been the
+    weakest verdict here — «not found», meaning only that somebody looked once.</>}</p>
     <ul class="refused">
       {refused.refused.map((r) => (
         <li>

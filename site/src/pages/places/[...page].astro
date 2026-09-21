@@ -1,0 +1,100 @@
+---
+/* The crawl path. A sitemap tells a search engine a page exists; a page that
+   nothing links to still reads as an orphan. This is the index that makes the
+   place pages reachable by walking, which is how they get read.
+ *
+ * PAGINATED, BECAUSE IT OUTGREW ITSELF. This was one page listing every
+ * place, written when there were 1,239 of them. There are now 13,494 and it
+ * had become 2.58 MB of HTML — the heaviest thing on the site by a factor of
+ * five, unusable on a phone, and self-defeating as a crawl path because a
+ * crawler is no more likely to read 2.58 MB than a person is.
+ *
+ * Capping it was the wrong answer: the whole job of this page is that NO
+ * place is orphaned, and a cap orphans everything past the cut. So it splits
+ * instead. Every place is still linked from somewhere, each page is a few
+ * hundred kilobytes at most, and /places/ still exists as the first of them.
+ */
+import Base from "../../layouts/Base.astro";
+import { u } from "../../lib/url.js";
+import full from "../../data/places-full.json";
+import idx from "../../../public/index.json";
+
+const PER_PAGE = 600;
+
+export function getStaticPaths({ paginate }) {
+  const CN = idx.countries || {};
+  /* Grouped by country, biggest first, then alphabetical inside a country —
+     so a page is a coherent run of one or two countries rather than a
+     scattering, and the country heading only has to be printed when it
+     changes. */
+  const by = {};
+  for (const p of full.places) (by[p.country || "??"] = by[p.country || "??"] || []).push(p);
+  const flat = Object.entries(by)
+    .sort((a, b) => b[1].length - a[1].length || String(a[0]).localeCompare(String(b[0])))
+    .flatMap(([cc, list]) =>
+      list.sort((a, b) => a.name.localeCompare(b.name))
+          .map((p) => ({ ...p, cc, ccName: CN[cc] || cc })));
+  return paginate(flat, { pageSize: PER_PAGE });
+}
+
+const { page } = Astro.props;
+const CN = idx.countries || {};
+const vols = full.places.reduce((a, p) => a + (p.collections || []).length, 0);
+const countries = new Set(full.places.map((p) => p.country || "??")).size;
+
+/* Print a country heading only where the country changes. */
+let last = null;
+const rows = page.data.map((p) => {
+  const head = p.cc !== last ? p.ccName : null;
+  last = p.cc;
+  return { p, head };
+});
+---
+<Base
+  title={page.currentPage === 1 ? "Every place" : `Every place — ${page.currentPage} of ${page.lastPage}`}
+  eyebrow={`${full.places.length.toLocaleString()} places · ${vols.toLocaleString()} volumes · ${countries} countries`}
+  dek={`Every place the shelf has walked, with the number of record volumes standing at each. Page ${page.currentPage} of ${page.lastPage}.`}>
+
+  <p class="cap">This index exists so that no place page is an orphan — everything here
+  is reachable by walking from the front of the site. It is split across
+  <b>{page.lastPage} pages</b> because listing all {full.places.length.toLocaleString()} at once
+  came to 2.58 MB, which is no use to a reader or to a crawler.
+  To find one place, <a href={u("/")}>the map</a> searches every name a place has ever had.</p>
+
+  <ul class="places">
+    {rows.map(({ p, head }) => (
+      <>
+        {head && <li class="head"><h2>{head}</h2></li>}
+        <li>
+          <a href={u(`/place/${p.id}/`)}>{p.name}</a>
+          <span class="y">{(p.collections || []).length}</span>
+          {(p.names || []).length > 0 && (
+            <span class="alt">{p.names.map((n) => n.n).slice(0, 2).join(" · ")}</span>
+          )}
+        </li>
+      </>
+    ))}
+  </ul>
+
+  <nav class="pager">
+    {page.url.prev && <a href={page.url.prev}>← previous</a>}
+    <span>{page.currentPage} of {page.lastPage}</span>
+    {page.url.next && <a href={page.url.next}>next →</a>}
+  </nav>
+</Base>
+
+<style>
+  h2 { font-family: var(--serif); font-size: 24px; font-weight: 500; margin: 22px 0 4px;
+       border-bottom: 1px solid var(--rule); padding-bottom: 6px; }
+  .places { list-style: none; padding: 0; margin: 10px 0 0; }
+  .places li { font-family: var(--sans); font-size: 13.5px; line-height: 1.9; }
+  .places li.head { line-height: 1; }
+  .y { font-family: var(--mono); font-size: 11px; color: var(--ink-3); margin-left: 8px; }
+  .alt { font-family: var(--sans); font-size: 12px; color: var(--ink-3); margin-left: 8px; }
+  .cap { font-family: var(--sans); font-size: 13px; color: var(--ink-2); line-height: 1.6;
+         margin-top: 12px; }
+  .pager { display: flex; gap: 18px; align-items: center; margin-top: 34px;
+           font-family: var(--mono); font-size: 13px; }
+  .pager a { text-decoration: none; border-bottom: 1px solid var(--rule-strong); }
+  .pager span { color: var(--ink-3); }
+</style>

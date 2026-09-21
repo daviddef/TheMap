@@ -13,11 +13,20 @@ export const SETS = ["pages", "places", "archives", "countries", "regions", "sur
 export function urlsFor(set) {
   const slug = (x) => x.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-  if (set === "pages")
+  if (set === "pages") {
+    /* The place index is paginated — /places/, /places/2/ and so on. Listing
+       only the first page would leave the rest out of the sitemap, and the
+       whole reason that index exists is that nothing it links to should be
+       an orphan. PER_PAGE here must match the page's own. */
+    const PER_PAGE = 600;
+    const pages = Math.max(1, Math.ceil(full.places.length / PER_PAGE));
+    const placeIndex = [["places/", "0.9"]];
+    for (let i = 2; i <= pages; i++) placeIndex.push([`places/${i}/`, "0.4"]);
     return [["", "1.0"], ["start/", "0.9"], ["about/", "0.6"], ["providers/", "0.9"],
-            ["jurisdictions/", "0.9"], ["places/", "0.9"], ["countries/", "0.9"],
+            ["jurisdictions/", "0.9"], ...placeIndex, ["countries/", "0.9"],
             ["surnames/", "0.9"], ["coverage/", "0.8"], ["changelog/", "0.4"],
             ["add/", "0.5"], ["privacy/", "0.3"]];
+  }
   if (set === "places") return full.places.map((p) => [`place/${p.id}/`, "0.6"]);
   if (set === "archives") return provs.providers.map((p) => [`archive/${p.id}/`, "0.7"]);
   if (set === "regions") return regions.regions.map((r) => [`region/${r.id}/`, "0.8"]);

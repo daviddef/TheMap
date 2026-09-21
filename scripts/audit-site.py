@@ -12,7 +12,7 @@ switched off.
 
     python3 scripts/audit-site.py
 """
-import ast, collections, glob, gzip, json, os, re, sys, urllib.parse
+import ast, collections, glob, gzip, json, math, os, re, sys, unicodedata, urllib.parse
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
@@ -196,6 +196,79 @@ def volumes():
                     f"{noyear:,} with no year in the title · {nourl:,} with no link")
 
 
+def provider_places():
+    """Every archive named after a town should stand near that town.
+
+    The place page now lists the nearest provincial archives rather than all
+    126 Italian ones, which is only an improvement if the coordinates are
+    true. Three were not: Alessandria sat in Calabria 842 km from itself,
+    Prato had been geocoded to Prato Carnico in Friuli, and Ferrara stood
+    near Lake Garda. Nothing caught them, because a wrong coordinate looks
+    exactly like a right one until you measure it against the gazetteer.
+
+    A branch — "sezione di Trani" — is checked against the branch town, not
+    the parent city, because that is where it genuinely is.
+    """
+    import re
+    pf, gf = "data/providers.json", "data/gazetteer.json"
+    if not (os.path.exists(pf) and os.path.exists(gf)):
+        note("providers", "providers or gazetteer missing")
+        return
+    P = json.load(open(pf, encoding="utf-8"))["providers"]
+    g = json.load(open(gf, encoding="utf-8"))
+    G = g if isinstance(g, list) else g.get("places", list(g.values()))
+
+    def fold(x):
+        return "".join(c for c in unicodedata.normalize("NFD", str(x).lower())
+                       if unicodedata.category(c) != "Mn")
+
+    gaz = {}
+    for r in G:
+        if isinstance(r, dict) and r.get("n") and r.get("k"):
+            gaz.setdefault((fold(r["n"]), r["k"]), []).append(r)
+
+    def km(a, b, c, e):
+        R, t = 6371, math.pi / 180
+        dl, do = (c - a) * t, (e - b) * t
+        h = (math.sin(dl / 2) ** 2
+             + math.cos(a * t) * math.cos(c * t) * math.sin(do / 2) ** 2)
+        return 2 * R * math.asin(math.sqrt(h))
+
+    seen, dupes, off, checked = {}, [], [], 0
+    for p in P:
+        nm = p.get("name", "")
+        if nm in seen:
+            dupes.append(f"{nm} ({seen[nm]} and {p['id']})")
+        seen[nm] = p["id"]
+        at = p.get("at") or {}
+        if at.get("lat") is None:
+            continue
+        cc = (p.get("countries") or [None])[0]
+        # A branch sits at the branch town; otherwise at the city it is named for.
+        m = re.search(r"sezione di (.+)$", nm) or re.match(
+            r"(?:Archivio di Stato di|Archivio Storico Diocesano di|"
+            r"Staatsarchiv|Archiwum Pa.stwowe w) (.+)$", nm)
+        if not (m and cc):
+            continue
+        town = re.split(r"[—–,-]", m.group(1))[0].strip()
+        cand = gaz.get((fold(town), cc))
+        if not cand:
+            continue
+        checked += 1
+        best = max(cand, key=lambda r: r.get("p", 0) or 0)
+        d = km(at["lat"], at["lon"], best["y"], best["x"])
+        if d > 40:
+            off.append(f"{p['id']} is {d:,.0f} km from {best['n']}")
+    if dupes:
+        bad("providers", f"{len(dupes)} archives share a name, so a page lists "
+                         f"the same one twice: {dupes[0]}")
+    if off:
+        bad("providers", f"{len(off)} archives are more than 40 km from the town "
+                         f"they are named after: {'; '.join(off[:3])}")
+    note("providers", f"{checked:,} archives measured against the gazetteer, "
+                      f"{len(off)} adrift")
+
+
 def weight():
     """What the site costs to host, and what one click costs to read.
 
@@ -272,6 +345,7 @@ def main():
         weight()
         accessibility(pages)
     volumes()
+    provider_places()
 
     if NOTE:
         print("NOTES")

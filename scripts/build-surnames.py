@@ -331,7 +331,13 @@ def main():
             attest(row["n"], cc, "register", key, row["c"])
         for fem, masc in (fq.get("gendered") or {}).items():
             link(fem, masc, "grammar")
-        print(f"{cc}: {len(fq['surnames'])} surnames from a national register, "
+        # NOT ALL OF THESE ARE NATIONAL. Italy has no national surname
+        # table and never has; its file is the sum of the comuni that
+        # publish their own residents' surnames as open data. Saying
+        # "national register" of that would overstate the coverage of
+        # exactly the country this atlas knows best.
+        grain = "comuni" if fq.get("byComune") else "a national register"
+        print(f"{cc}: {len(fq['surnames'])} surnames from {grain}, "
               f"{len(fq.get('gendered') or {})} grammatical pairs")
 
     # ---- 3b. The same name, spelt two ways --------------------------------
@@ -645,7 +651,8 @@ def main():
         "sources": [
             "Wikidata, instance of family name (Q101352), property P460. CC0.",
             "The seven Defranceski-family archives — David Defranceski's own research.",
-            "National surname registers — see data/frequencies/ for each one's "
+            "National surname registers, and for Italy the comuni that publish "
+            "their own — see data/frequencies/ for each one's "
             "source, licence and date.",
             "Phonetic skeletons computed here; algorithmic, not evidence.",
         ],

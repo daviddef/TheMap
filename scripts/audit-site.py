@@ -130,15 +130,41 @@ def payloads():
     #
     # 400 KB transferred, because that is roughly a second on a slow
     # connection and it is paid before the map draws.
+    #
+    # AND MEASURED PER PLACE, BECAUSE THE MAP KEEPS GROWING.
+    # The same reasoning that moved this from disk bytes to wire bytes
+    # applies to a fixed total. The map held 7,391 places when 400 KB was
+    # set and holds 20,359 now; the index is 547 KB and 28 bytes a place.
+    # Checked for fat before touching the budget: omitting every id that is
+    # a slug of its own name saves 3%, because gzip already collapses that
+    # repetition, and the places carrying nothing are only 126 KB of it —
+    # the meaningful ones alone are 420 KB. There is no padding to remove.
+    # Holding 400 KB now would mean deleting real places, which is the
+    # failure the note above warns about, one level up.
+    #
+    # So the per-place cost is what efficiency means here, and it is what
+    # fails. The total still matters — it is paid before the map draws — so
+    # it warns above 400 KB and fails above 700, by which point the answer
+    # is loading dots by viewport rather than trimming fields.
     import gzip as _gz
     disk = os.path.getsize(idx_f) / 1024
     wire = len(_gz.compress(open(idx_f, "rb").read())) / 1024
-    if wire > 400:
-        bad("data", f"index.json is {wire:.0f} KB transferred ({disk:.0f} KB on "
-                    f"disk) — the budget is 400 KB over the wire and it is "
-                    f"fetched before the map draws")
+    n_pl = len(idx.get("places") or []) or 1
+    per = wire * 1024 / n_pl
+    if wire > 700:
+        bad("data", f"index.json is {wire:.0f} KB transferred for {n_pl:,} places "
+                    f"({per:.0f} bytes each) — past 700 KB the answer is loading "
+                    f"dots by viewport, not trimming fields")
+    elif per > 40:
+        bad("data", f"index.json is {per:.0f} bytes per place ({wire:.0f} KB for "
+                    f"{n_pl:,}) — that is fat in the rows, not a big map")
+    elif wire > 400:
+        note("data", f"index.json {wire:.0f} KB transferred for {n_pl:,} places, "
+                     f"{per:.0f} bytes each — over the 400 KB that is about a "
+                     f"second on a slow line, but lean per place")
     else:
-        note("data", f"index.json {wire:.0f} KB transferred, {disk:.0f} KB on disk")
+        note("data", f"index.json {wire:.0f} KB transferred, {disk:.0f} KB on disk, "
+                     f"{per:.0f} bytes per place")
 
     ids = [p["i"] for p in idx["places"]]
     dupes = [i for i, n in collections.Counter(ids).items() if n > 1]

@@ -394,6 +394,15 @@ def weight():
     about, and sample rather than gzip 1.4 GB on every build. Report the
     raw figure too, because it is what a local `du` will show and somebody
     will otherwise think the two disagree.
+
+    THE ESTIMATE IS DELIBERATELY PESSIMISTIC, and by a known amount. It
+    gzips files one at a time; GitHub tars the tree and compresses the
+    whole stream, where thousands of near-identical pages compress against
+    each other. First measured run: this said 339 MB where the artifact
+    came out at 189 MB — 4.2:1 against a real 7.5:1. That is the safe
+    direction for a ceiling check, and it is written down here so nobody
+    later reads 339 as the artifact size and goes looking for the missing
+    150 MB.
     """
     import random
     by_ext, total = {}, 0
@@ -432,8 +441,9 @@ def weight():
         packed += b["bytes"] * ratio
 
     mb, pmb = total / 1048576, packed / 1048576
-    detail = (f"{pmb:,.0f} MB stored, from {mb:,.0f} MB of files "
-              f"({mb / pmb:.1f}:1)" if pmb else f"{mb:,.0f} MB")
+    detail = (f"at most {pmb:,.0f} MB stored, from {mb:,.0f} MB of files "
+              f"({mb / pmb:.1f}:1 here, better once tarred)"
+              if pmb else f"{mb:,.0f} MB")
     if pmb > 1024:
         bad("weight", f"the published artifact would be {detail} and GitHub "
                       f"Pages publishes at most 1,024 MB — this will not deploy")

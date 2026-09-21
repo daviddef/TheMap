@@ -6,6 +6,7 @@ import regions from "../../public/regions.json";
 import provs from "../../public/providers.json";
 import cols from "../data/collections-full.json";
 import surn from "../data/surnames.json";
+import { surnamePageSlugs } from "../lib/surname-pages.js";
 
 export const SETS = ["pages", "places", "archives", "countries", "regions", "surnames"];
 
@@ -29,11 +30,11 @@ export function urlsFor(set) {
     return [...ccs].map((cc) => [`country/${cc.toLowerCase()}/`, "0.8"]);
   }
   if (set === "surnames") {
-    const seen = new Set();
-    return (surn.surnames || [])
-      .filter((r) => r.countries.length && r.variants.some((v) => v.how === "curated"))
-      .map((r) => slug(r.n)).filter((s) => s && !seen.has(s) && seen.add(s))
-      .map((s) => [`surname/${s}/`, "0.5"]);
+    /* THE SAME RULE THE PAGES ARE BUILT FROM, imported rather than copied.
+       This file kept its own copy and it never followed: 17,961 surname
+       pages were live and 3,577 were listed here. Kosina, Defranceschi and
+       Luwinski all had pages and none of them were in the sitemap. */
+    return surnamePageSlugs(surn.surnames).map((s) => [`surname/${s}/`, "0.5"]);
   }
   return [];
 }

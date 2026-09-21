@@ -1,6 +1,7 @@
 ---
 import { timelineFor } from "../../lib/surname-timeline.js";
 import { hasCountryPage } from "../../lib/country-pages.js";
+import { earnsPage } from "../../lib/surname-pages.js";
 /* One page per surname that has something real to say.
 
    NOT ONE PER SURNAME. There are 480,635 of them and 449,216 are a row in a
@@ -36,26 +37,10 @@ export async function getStaticPaths() {
        had no page, because the filter wanted a curated variant. A surname
        three national registers agree on is not a maybe. One country alone
        stays out — that is 600,000 pages of nothing to say. */
-    .filter((r) => r.countries.length
-      && (r.variants.some((v) => v.how === "curated")
-          || r.countries.some((c) => c.how === "archive")
-          /* A SPELLING LINK PLUS THREE REGISTERS — ADMITTED, after being
-             refused on a number that was wrong.
-             Kosina is linked to Kozina by the spelling tier and counted by
-             the Polish, Slovene and American registers. That is exactly the
-             case David raised, and it returned a 404.
-             The refusal said this class was 16,138 pages at 24.6 KB, about
-             397 MB, "against a site already at 985 MB of the 1,024 MB
-             GitHub Pages publishes". Both halves were wrong. 24.6 KB came
-             from measuring Defranceschi, which carries eleven country
-             blocks when the median surname carries one — an ordinary page
-             is about 17 KB. And the 985 MB was the RAW build tree, which is
-             not what the limit is about: the artifact GitHub actually
-             deploys is 158 MB, and it goes green every time.
-             Measured today: 11,994 new pages, about 199 MB raw and perhaps
-             26 MB in the artifact. Kosina gets its page. */
-          || (r.variants.some((v) => v.how === "spelling")
-              && r.countries.length >= 3)))
+    /* THE RULE ITSELF LIVES IN lib/surname-pages.js, because the sitemap
+       needs the identical answer and its own copy had drifted three
+       clauses behind this one. */
+    .filter(earnsPage)
     .map((r) => ({ r, s: slug(r.n) }))
     .filter(({ s }) => s && !seen.has(s) && seen.add(s))
     .map(({ r, s }) => ({ params: { name: s },

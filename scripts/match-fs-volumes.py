@@ -20,7 +20,7 @@ descending order of how many books are waiting on them.
 
     python3 scripts/match-fs-volumes.py
 """
-import collections, gzip, json, os, re, sys, time, unicodedata
+import math, collections, gzip, json, os, re, sys, time, unicodedata
 
 THIS_YEAR = time.gmtime().tm_year
 
@@ -106,6 +106,15 @@ IS_RELIGION = re.compile(r"religion|denomination", re.I)
 IS_AREA = re.compile(r"province|state|region|county|district|department|"
                      r"prefecture|governorate|oblast|canton|diocese|deanery|"
                      r"archdiocese|country", re.I)
+
+
+def haversine(a_lat, a_lon, b_lat, b_lon):
+    """Kilometres between two points. Good enough to tell one town from two."""
+    R, t = 6371.0, math.pi / 180
+    dlat, dlon = (b_lat - a_lat) * t, (b_lon - a_lon) * t
+    h = (math.sin(dlat / 2) ** 2
+         + math.cos(a_lat * t) * math.cos(b_lat * t) * math.sin(dlon / 2) ** 2)
+    return 2 * R * math.asin(math.sqrt(h))
 
 
 def bare(s):
@@ -393,6 +402,30 @@ def main():
                 out |= g
         return sorted(out - set(ccs))
 
+    # ONE DOT PER TOWN. Four separate places in this file promote a new dot
+    # from the gazetteer or the exonym index, and each was minting an id
+    # from the name without asking whether this atlas already draws that
+    # town. It already drew 36 of them: Genoa ended up with 1,245 volumes
+    # on a new dot and 0 on the old one, 0.0 km away, so whichever a reader
+    # clicked first was as likely as not to show an empty page. Agrigento
+    # split 716 against 250, Castellammare 1,052 against 57.
+    #
+    # Name and country alone are not enough — there are two Fultons in the
+    # United States a thousand kilometres apart, and they are two towns.
+    # The same name, the same country AND within 25 km is one town written
+    # down twice.
+    existing_by_name = collections.defaultdict(list)
+    for _p in places:
+        if _p.get("lat") is not None:
+            existing_by_name[(_p.get("country"), fold(_p["name"]))].append(_p)
+
+    def already_drawn(name, cc, lat, lon, limit_km=25.0):
+        """The id of a place this atlas already draws here, or None."""
+        for _p in existing_by_name.get((cc, fold(name)), ()):
+            if haversine(lat, lon, _p["lat"], _p["lon"]) <= limit_km:
+                return _p["id"]
+        return None
+
     def look_in(index, cand, ccs):
         for cc in ccs:
             got = index.get((cc, cand))
@@ -484,6 +517,9 @@ def main():
                         return min(got, key=lambda r: r[0])[1], true_cc
                     if e.get("y") is None:
                         continue
+                    drawn = already_drawn(e["n"], true_cc, e["y"], e["x"])
+                    if drawn:
+                        return {"id": drawn}, true_cc
                     pid = ("g-" + re.sub(r"[^a-z0-9]+", "-",
                                          fold(e["n"])).strip("-")[:48]
                            + "-" + true_cc.lower())
@@ -507,6 +543,9 @@ def main():
                     g = (gaz_idx.get((cc, fold(cand))) or [None])[0]
                     if not g:
                         continue
+                    drawn = already_drawn(g["n"], cc, g["y"], g["x"])
+                    if drawn:
+                        return {"id": drawn}, cc
                     pid = ("g-" + re.sub(r"[^a-z0-9]+", "-",
                                          fold(g["n"])).strip("-")[:48]
                            + "-" + cc.lower())
@@ -676,6 +715,9 @@ def main():
                     return best[cc], cc, True
                 g = gbest.get(cc)
                 if g:
+                    drawn = already_drawn(g["n"], cc, g["y"], g["x"])
+                    if drawn:
+                        return {"id": drawn}, cc, True
                     pid = ("g-" + re.sub(r"[^a-z0-9]+", "-", fold(g["n"])).strip("-")[:48]
                            + "-" + cc.lower())
                     promote.setdefault(pid, {"id": pid, "name": g["n"],
@@ -774,6 +816,10 @@ def main():
                             got = gaz_idx.get((cc, fold(cand)))
                             if got:
                                 g = got[0]
+                                drawn = already_drawn(g["n"], cc, g["y"], g["x"])
+                                if drawn:
+                                    hit = {"id": drawn}
+                                    break
                                 pid = "g-" + re.sub(r"[^a-z0-9]+", "-",
                                                     fold(g["n"])).strip("-")[:48] \
                                       + "-" + cc.lower()

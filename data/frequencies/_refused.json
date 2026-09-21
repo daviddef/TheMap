@@ -1,5 +1,5 @@
 {
- "note": "Countries whose surname data was sought and not obtained, with what was actually tried. A gap somebody can see is worth more than a gap they cannot, and without this file the next person spends the same afternoon finding the same three walls. A «not found» verdict is weaker than a «refused» one: it means this project looked and did not find, not that the data is absent. Both are worth writing down and they are not the same claim. Five of the eight were re-tested on 21 September 2026 against live endpoints rather than remembered ones, and every refusal held — but three of them are now evidence where they were inference. Czechia's is not a lost page but a refusal in law — the national catalogue holds a formal request to open it, marked «cannot be published» under Act 106/1999 Sb.; Croatia's statistics API works and has no surname table; Denmark's entire table list contains no name table; Sweden lists two name folders and serves neither, in either language, and their own titles say the tables are retired. Finland's holder answers 403 to a crawler and this atlas does not climb bot gates, so that one is refused by choice as much as by circumstance. The Netherlands needs a letter to the Meertens Instituut, which is not a thing a script can send.",
+ "note": "Countries whose surname data was sought. Those still not obtained are in `refused`, with what was actually tried; those since obtained are in `resolved`, with how. A gap somebody can see is worth more than a gap they cannot, and without this file the next person spends the same afternoon finding the same walls. A «not found» verdict is weaker than a «refused» one: it means this project looked and did not find, not that the data is absent. Both are worth writing down and they are not the same claim. Italy was the weakest entry here — «not found» — and retrying it is what closed it, which is the argument for keeping this file honest about the difference.",
  "checked": "2026-09-21",
  "refused": [
   {
@@ -65,16 +65,6 @@
    "rechecked": "2026-09-21"
   },
   {
-   "country": "IT",
-   "name": "Italy",
-   "tried": [
-    "esploradati.istat.it SDMX dataflow list — no parseable response to a documented Accept header",
-    "istat.it — responds, but publishes no surname frequency series that this probe could find"
-   ],
-   "verdict": "not found",
-   "why": "ISTAT does not appear to publish surname frequencies. What circulates for Italy is derived from telephone directories by commercial sites, which is neither open nor redistributable. Recorded as NOT FOUND rather than as absent — a human who knows ISTAT may know better, and this is three archives' core ground."
-  },
-  {
    "country": "NL",
    "name": "Netherlands",
    "tried": [
@@ -97,6 +87,20 @@
    "verdict": "the tables are retired, not withheld",
    "why": "RETRIED 21 September in both languages. The name-statistics branch lists exactly two folders and neither can be entered: both answer 400. Their own Swedish titles say what has happened — «Äldre tabeller som inte längre uppdateras», older tables no longer updated. SCB has retired its name statistics rather than gated them, which is a different and more final answer than the one this file used to give.",
    "rechecked": "2026-09-21"
+  }
+ ],
+ "resolved": [
+  {
+   "country": "IT",
+   "name": "Italy",
+   "tried": [
+    "esploradati.istat.it SDMX dataflow list — no parseable response to a documented Accept header",
+    "istat.it — responds, but publishes no surname frequency series that this probe could find"
+   ],
+   "verdict": "closed, by the comuni rather than the state",
+   "why": "ISTAT does not appear to publish surname frequencies. What circulates for Italy is derived from telephone directories by commercial sites, which is neither open nor redistributable. Recorded as NOT FOUND rather than as absent — a human who knows ISTAT may know better, and this is three archives' core ground.",
+   "resolved": "2026-09-21",
+   "how": "ISTAT publishes no national surname table. 63 Italian comuni publish their own residents' surnames as open data and dati.gov.it indexes them — 27,005 surnames, 1,398,684 people, now in data/frequencies/it.json. It counts the residents of those comuni and nobody else, which is stated on the data and must stay stated: it is evidence that a name is borne in Italy and roughly where, never how common it is in Italy. For genealogy that is the more useful grain anyway — which comune a name sits in is the question a national total cannot answer."
   }
  ]
 }

@@ -405,6 +405,57 @@ def sitemap_covers_pages():
     note("sitemap", f"{len(listed):,} urls listed, {len(built):,} pages built")
 
 
+def promoted_countries():
+    """A promoted place should stand in the country it claims.
+
+    The matcher draws new dots from the exonym index, which is keyed by the
+    country a book is FILED under — all the book tells us — while the record
+    it returns carries the country the place is actually in. For a
+    cross-border hit those differ, and that is the whole point of searching
+    a historical filing group.
+
+    Writing the key's country onto the dot put 424 places in the wrong
+    country: 277 Estonian towns recorded as Belarusian, because the
+    collection is Belarusian, plus Polish, Swiss, Slovak and Czech ones.
+    The coordinates were right throughout, so the map looked perfect — only
+    the country pages, the country counts and every "places in X" figure
+    were wrong. Nothing visual catches that, so it is measured here.
+
+    The comparison is against the extent of the places this atlas already
+    trusts in that country, with two degrees of slack, because the
+    gazetteer is a sample and coastlines are ragged.
+    """
+    pf, gf = "data/fs-volumes-promote.json", "data/gazetteer.json"
+    if not (os.path.exists(pf) and os.path.exists(gf)):
+        return
+    g = json.load(open(gf, encoding="utf-8"))
+    G = g if isinstance(g, list) else g.get("places", list(g.values()))
+    box = {}
+    for r in G:
+        if not isinstance(r, dict) or not r.get("k") or r.get("y") is None:
+            continue
+        b = box.setdefault(r["k"], [90.0, -90.0, 180.0, -180.0])
+        b[0] = min(b[0], r["y"]); b[1] = max(b[1], r["y"])
+        b[2] = min(b[2], r["x"]); b[3] = max(b[3], r["x"])
+
+    pr = json.load(open(pf, encoding="utf-8"))["places"]
+    rows = pr if isinstance(pr, list) else list(pr.values())
+    PAD, off = 2.0, []
+    for r in rows:
+        b = box.get(r.get("country"))
+        if not b or r.get("lat") is None:
+            continue
+        if not (b[0] - PAD <= r["lat"] <= b[1] + PAD
+                and b[2] - PAD <= r["lon"] <= b[3] + PAD):
+            off.append(f"{r.get('name')} says {r.get('country')}")
+    if off:
+        bad("promoted", f"{len(off):,} promoted places sit outside the country "
+                        f"they claim: " + "; ".join(off[:4]))
+    else:
+        note("promoted", f"{len(rows):,} promoted places, every one inside the "
+                         f"country it claims")
+
+
 def weight():
     """What the site costs to host, and what one click costs to read.
 
@@ -537,6 +588,7 @@ def main():
         sitemap_covers_pages()
     volumes()
     provider_places()
+    promoted_countries()
     showcase()
 
     if NOTE:

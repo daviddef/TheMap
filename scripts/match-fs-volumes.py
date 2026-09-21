@@ -461,19 +461,36 @@ def main():
                     e = exonym_idx.get((cc, fold(cand)))
                     if not e:
                         continue
-                    # Prefer the place already drawn under its other name.
-                    got = idx.get((cc, fold(e["n"])))
+                    # THE COUNTRY OF THE PLACE, NOT OF THE COLLECTION.
+                    # The index is keyed by the country a book is FILED
+                    # under, because that is all the book tells us. The
+                    # record it returns carries the country the place was
+                    # actually found in, which for a cross-border hit is a
+                    # different country — that is the entire point of
+                    # searching the filing group.
+                    # Writing the key's country onto the promoted place put
+                    # 424 places in the wrong country: 277 Estonian towns
+                    # filed as Belarusian, because the collection is
+                    # Belarusian, plus Polish, Swiss, Slovak and Czech ones.
+                    # Their coordinates were right the whole time, which is
+                    # why nothing looked wrong on the map — only the country
+                    # pages, the country counts and every "places in X"
+                    # figure were.
+                    true_cc = e.get("cc") or cc
+                    # Prefer the place already drawn under its other name,
+                    # looked for where it actually is.
+                    got = idx.get((true_cc, fold(e["n"]))) or idx.get((cc, fold(e["n"])))
                     if got:
-                        return min(got, key=lambda r: r[0])[1], cc
+                        return min(got, key=lambda r: r[0])[1], true_cc
                     if e.get("y") is None:
                         continue
                     pid = ("g-" + re.sub(r"[^a-z0-9]+", "-",
                                          fold(e["n"])).strip("-")[:48]
-                           + "-" + cc.lower())
+                           + "-" + true_cc.lower())
                     promote.setdefault(pid, {
-                        "id": pid, "name": e["n"], "country": cc,
+                        "id": pid, "name": e["n"], "country": true_cc,
                         "lat": e["y"], "lon": e["x"], "from": "wikidata-exonym"})
-                    return {"id": pid}, cc
+                    return {"id": pid}, true_cc
         return None, None
 
     def home_gaz(levels, ccs):

@@ -80,13 +80,18 @@ const rows = page.data.map((p) => {
     ))}
   </ul>
 
-  {/* THE HREFS ARE BUILT HERE, not taken from page.url.
-      Every other link on this site goes through u(), which prefixes the
-      deployment base — the site is served from /TheMap/ and will move to
-      recordatlas.org. Astro's page.url.prev/next are meant to carry the base
-      too, but "meant to" is not worth 23 pages of navigation quietly 404ing,
-      and the page numbering is trivial to derive. Page one is /places/,
-      matching the nav link and every inbound link that already exists. */}
+  {/* THE HREFS ARE BUILT HERE, not taken from page.url — and the honest
+      reason is smaller than the one I first wrote here.
+      I changed this expecting Astro's page.url.prev/next to omit the
+      deployment base and 404 on a site served from /TheMap/. Measured
+      against the deployed build, they do not: Astro emitted
+      "/TheMap/places/3" correctly. What they omit is the trailing slash,
+      and with build.format 'directory' that costs a 301 to
+      "/TheMap/places/3/" on every pager click. So this is a redirect
+      removed, not a fault fixed. It also puts these links through u() like
+      every other link on the site, which is what will matter when the base
+      changes to recordatlas.org. Page one is /places/, matching the nav
+      link and every inbound link that already exists. */}
   <nav class="pager">
     {page.currentPage > 1 && (
       <a href={u(page.currentPage === 2 ? "/places/" : `/places/${page.currentPage - 1}/`)}>← previous</a>

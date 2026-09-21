@@ -31,6 +31,26 @@ jobs:
       - name: Build
         run: npm run build
         working-directory: site
+      # WHAT THE SITE ACTUALLY WEIGHS, MEASURED WHERE IT IS CLEAN.
+      # Every size decision on this project has been made against a local
+      # dist/ that accumulates: it held 71,093 files from earlier builds and
+      # read 1,215 MB, which is where "985 MB of 1,024" came from and why the
+      # 16,138 surname pages were refused as unaffordable. The deployed
+      # artifact was 158 MB the whole time. CI builds from nothing every run,
+      # so this is the only number worth trusting.
+      - name: What it weighs
+        run: |
+          echo "raw dist:  $(du -sm site/dist | cut -f1) MB"
+          echo "files:     $(find site/dist -type f | wc -l)"
+          echo "GitHub Pages publishes at most 1,024 MB."
+          echo "--- the heaviest directories:"
+          du -sm site/dist/* | sort -rn | head -12
+          echo "--- pages by kind:"
+          for d in place surname country archive p s rs g; do
+            [ -d "site/dist/$d" ] && \
+              echo "  $d: $(find site/dist/$d -type f | wc -l) files, $(du -sm site/dist/$d | cut -f1) MB"
+          done
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

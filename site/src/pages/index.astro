@@ -2,6 +2,7 @@
 import Base from "../layouts/Base.astro";
 import RecordMap from "../components/RecordMap.astro";
 import { u } from "../lib/url.js";
+import ArchiveShowcase from "../components/ArchiveShowcase.astro";
 import idx from "../../public/index.json";
 import regions from "../../public/regions.json";
 import provs from "../../public/providers.json";
@@ -94,4 +95,6 @@ const archiveCountries = new Set(archives.map(p => p.at.place.split(", ").pop())
       <p><a href={u("/add/")}>Add a source, or correct one →</a></p>
     </div>
   </div>
+
+  <ArchiveShowcase u={u} />
 </Base>

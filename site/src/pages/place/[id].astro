@@ -52,7 +52,11 @@ let det = {};
 try {
   det = JSON.parse(
     readFileSync(new URL(`../../../public/p/${place.id}.json`, import.meta.url), "utf8"));
-  volumes = det.volumes || [];
+  /* THE OLDEST SIXTY. The page exists to orient somebody, and the whole
+     shelf is a click away at the provider. Rendering every volume took the
+     place pages to 570 MB across the site, which is more than half of what
+     GitHub Pages will publish. */
+  volumes = (det.volumes || []).slice(0, 25);
   volumesTotal = det.volumesTotal || volumes.length;
 } catch (e) { volumes = []; det = {}; }
 const national = sourcesFor(place.country);
@@ -78,7 +82,12 @@ const ACC = {
   onsite: "On paper, in the building",
 };
 const RANK = ["free", "account", "index", "mixed", "paid", "catalogue", "onsite"];
-const cs = place.collections || [];
+/* CAPPED, LIKE EVERY OTHER LIST ON THIS PAGE. Sutrio rendered 126 of these
+   in a single 71 KB list inside a 148 KB page, and across 13,494 place
+   pages that section alone was most of 483 MB — against a 1,024 MB limit
+   for the whole site. The page orients; the provider holds the catalogue. */
+const csAll = place.collections || [];
+const cs = csAll.slice(0, 20);
 const byAccess = RANK.map((a) => [a, cs.filter((c) => c.access === a)]).filter(([, v]) => v.length);
 const years = cs.filter((c) => c.from).map((c) => [c.from, c.to || c.from]);
 const span = years.length
@@ -195,7 +204,9 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
 
   {cs.length > 0 ? (
     <section style="margin-top:34px">
-      <h2>The volumes</h2>
+      <h2>{csAll.length > cs.length
+        ? `${csAll.length.toLocaleString()} volumes, the first ${cs.length} listed`
+        : "The volumes"}</h2>
       <p class="cap">Grouped by what it costs to look, most open first — which is the order
       worth trying them in.</p>
       {byAccess.map(([a, list]) => (

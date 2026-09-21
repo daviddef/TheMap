@@ -1295,6 +1295,7 @@ window.addEventListener("load", async function () {
   }
 
   var HOWLAB = {
+    spelling: "the same name, spelt two ways",
     curated: "a person linked these",
     archive: "appears in a family archive",
     sounds:  "only sounds alike"
@@ -1306,6 +1307,9 @@ window.addEventListener("load", async function () {
       h.push('<div class="ra-surn"><div class="lab">The name</div>');
       h.push("<p><b>" + esc(r.n) + "</b></p>");
 
+      /* Everything but the phonetic guess counts as evidence here, which
+                 now includes the spelling tier: one systematic substitution
+                 between two names that are both independently attested. */
       var cur = r.variants.filter(function (v) { return v.how !== "sounds"; });
       var snd = r.variants.filter(function (v) { return v.how === "sounds"; });
       if (cur.length)
@@ -1647,6 +1651,33 @@ window.addEventListener("load", async function () {
     }).slice(0, 4);
   }
 
+  /* A RECORD NAMES THE GROUND BY ITS OWN NAME, NOT BY OURS.
+     David's Blazevic research has a man from "Kranjska zupa sv. Martin kod
+     Krainburg" — Carniola, the parish of St Martin near Kranj, whose German
+     name is Krainburg. This atlas HAS that region, with eight eras from
+     Inner Austria through the Illyrian Provinces to the Duchy of Carniola,
+     and typing any of those words found nothing at all: the regions were
+     drawn, shaded and clickable, and never searchable. A jurisdiction layer
+     that cannot be reached by the name the record uses is a layer for
+     people who already know the answer. */
+  function regionsNamed(term) {
+    var f = fold(term);
+    if (f.length < 3) return [];
+    var out = [];
+    regions.regions.forEach(function (reg) {
+      var names = [reg.label].concat(reg.alt || []);
+      var best = null;
+      names.forEach(function (n) {
+        var fn = fold(n);
+        var m = fn === f ? 0 : fn.indexOf(f) === 0 ? 1 : fn.indexOf(f) > -1 ? 2 : null;
+        if (m !== null && (best === null || m < best)) best = m;
+      });
+      if (best !== null) out.push([best, reg]);
+    });
+    out.sort(function (a, b) { return a[0] - b[0]; });
+    return out.slice(0, 3).map(function (x) { return x[1]; });
+  }
+
   async function elsewhere(term) {
     var mine = ++searchTok;
     /* TYPING A COUNTRY'S NAME SHOULD OPEN THE COUNTRY. David typed «libya» and
@@ -1702,6 +1733,7 @@ window.addEventListener("load", async function () {
     var com = await comuni(term);
     var est = await estonia(term);
     var sct = await scotland(term);
+    var regs = regionsNamed(term);
     if (stale()) return;
     /* If the typed word is an OLD name, say which one it matched and what the
        place is called now. "Pressburg → Bratislava" is the whole answer to the
@@ -1763,6 +1795,27 @@ window.addEventListener("load", async function () {
              "over it, and the first question about any record is which one it came out " +
              "of. Some of these counties are in LATVIA today: the governorate boundary " +
              "did not follow the modern one.</p>");
+      h.push("</div>");
+    }
+    /* THE GROUND ITSELF, under whichever name the record used. */
+    if (regs.length) {
+      h.push('<div class="ra-juris"><div class="lab">Whose archive this ground was</div>');
+      regs.forEach(function (reg) {
+        var eras = (reg.eras || []).length;
+        h.push("<p><b>" + esc(reg.label) + "</b>" +
+               (reg.alt && reg.alt.length
+                 ? ' <span class="ra-who">also written ' +
+                   esc(reg.alt.slice(0, 4).join(", ")) + "</span>" : "") +
+               " — " + eras + " era" + (eras === 1 ? "" : "s") +
+               ' on this ground. <a href="' + esc(BASE) + "region/" +
+               esc(reg.id) + '/">who held it, and when</a>' +
+               ' · <a href="#" class="ra-setyear">set a year</a></p>');
+      });
+      h.push('<p class="ra-note">A record names the ground by the name it had at ' +
+             "the time. Kranjska, Krain and Krainburg are all Carniola; Küstenland " +
+             "is the Austrian Littoral. The era table says which archive held the " +
+             "paper in the year you care about, which is a different question from " +
+             "which country the ground is in now.</p>");
       h.push("</div>");
     }
     /* A Scottish civil parish. */

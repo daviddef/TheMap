@@ -211,10 +211,17 @@ def weight():
         for f in fs:
             total += os.path.getsize(os.path.join(r, f))
     mb = total / 1048576
-    if mb > 900:
+    # 1,024 IS THE CEILING; 950 IS WHERE THERE IS NO ROOM LEFT TO ADD A
+    # COLLECTION. Reporting a problem at 900 while quoting the limit read as
+    # though the site was already over, which it was not — and a warning
+    # that overstates gets discounted.
+    if mb > 1024:
         bad("weight", f"the deployable site is {mb:.0f} MB and GitHub Pages "
-                      f"publishes at most 1,024")
-    elif mb > 700:
+                      f"publishes at most 1,024 — this will not deploy")
+    elif mb > 950:
+        bad("weight", f"the deployable site is {mb:.0f} MB of 1,024 — under the "
+                      f"ceiling but with no room for the harvest still running")
+    elif mb > 800:
         note("weight", f"the deployable site is {mb:.0f} MB of a 1,024 MB limit")
     else:
         note("weight", f"deployable site {mb:.0f} MB")

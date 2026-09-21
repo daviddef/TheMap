@@ -2299,6 +2299,28 @@ window.addEventListener("load", async function () {
      container that is already the height of the window; auto lets the row
      stretch them equally. */
   :global(.at-wrap.ra-fs .at-panel) { height: auto; }
+  /* FULL SCREEN ON A PHONE GAVE THE MAP A SLIVER.
+     The two rules above say `height: auto` so that, in the two-COLUMN
+     desktop layout, both sides stretch to the height of the window. Below
+     900px the wrap collapses to one column, so map and panel become two
+     ROWS — and `height: auto` then means "size to your content". The panel
+     has volumes, sources and eras in it and the map has none, so the panel
+     took the window and the map was left about 200px tall, letterboxed,
+     with the basemap switcher hanging off the edge.
+     Given rows, the map needs a share of the window rather than a share of
+     its own content. min-height:0 is what lets a grid item shrink below its
+     content and scroll instead of pushing the row open. */
+  @media (max-width: 900px) {
+    :global(.at-wrap.ra-fs) { grid-template-rows: 3fr 2fr; padding: 8px; gap: 8px; }
+    :global(.at-wrap.ra-fs .at-map) { height: 100%; min-height: 0; }
+    :global(.at-wrap.ra-fs .at-panel) { height: 100%; min-height: 0;
+      max-height: none; overflow-y: auto; }
+    /* Clear of Leaflet's own controls: zoom sits top-left and the basemap
+       switcher top-right, and the exit button was landing on the switcher.
+       At the bottom it is over the map and in reach of a thumb. */
+    :global(#ra-fs-esc) { top: auto; bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+      right: 50%; transform: translateX(50%); }
+  }
   :global(.ra-crossed) { display: inline-block; margin-left: 6px; padding: 1px 7px;
     border-radius: 999px; font-family: var(--sans); font-size: 10.5px;
     color: var(--accent); background: var(--accent-wash);

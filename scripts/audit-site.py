@@ -374,32 +374,76 @@ def sitemap_covers_pages():
 def weight():
     """What the site costs to host, and what one click costs to read.
 
-    GitHub Pages publishes up to 1 GB. The volume harvest took p/ from a few
-    megabytes to 115 in a day, so this is no longer a theoretical limit —
-    and `chunks/` is Astro scratch left behind by an interrupted build, not
-    something that ships, so it is excluded.
+    GitHub Pages publishes up to 1 GB — OF THE ARTIFACT IT STORES, which is
+    compressed, and that distinction is the whole of this check.
+
+    This used to add up the raw bytes in dist/ and compare that to 1,024.
+    On 21 September it therefore reported "the deployable site is 1418 MB
+    and GitHub Pages publishes at most 1,024 — this will not deploy" about
+    a build that deployed perfectly well, in the same run, minutes later:
+    the artifact GitHub actually stored was 189 MB. A 7.5:1 ratio, because
+    this site is almost entirely HTML and JSON.
+
+    That wrong number did real damage before it was caught. It is why the
+    16,138 surname pages were refused as unaffordable for weeks, and why I
+    spent an hour treating a size emergency that did not exist. A check
+    that cries wolf gets discounted, and this one was crying about the
+    wrong animal.
+
+    So: measure the compressed size, because that is what the limit is
+    about, and sample rather than gzip 1.4 GB on every build. Report the
+    raw figure too, because it is what a local `du` will show and somebody
+    will otherwise think the two disagree.
     """
-    total = 0
+    import random
+    by_ext, total = {}, 0
     for r, _d, fs in os.walk(DIST):
+        # Astro scratch from an interrupted build; it does not ship.
         if os.sep + "chunks" in r:
             continue
         for f in fs:
-            total += os.path.getsize(os.path.join(r, f))
-    mb = total / 1048576
-    # 1,024 IS THE CEILING; 950 IS WHERE THERE IS NO ROOM LEFT TO ADD A
-    # COLLECTION. Reporting a problem at 900 while quoting the limit read as
-    # though the site was already over, which it was not — and a warning
-    # that overstates gets discounted.
-    if mb > 1024:
-        bad("weight", f"the deployable site is {mb:.0f} MB and GitHub Pages "
-                      f"publishes at most 1,024 — this will not deploy")
-    elif mb > 950:
-        bad("weight", f"the deployable site is {mb:.0f} MB of 1,024 — under the "
-                      f"ceiling but with no room for the harvest still running")
-    elif mb > 800:
-        note("weight", f"the deployable site is {mb:.0f} MB of a 1,024 MB limit")
+            p = os.path.join(r, f)
+            try:
+                n = os.path.getsize(p)
+            except OSError:
+                continue
+            total += n
+            e = os.path.splitext(f)[1].lower() or "(none)"
+            b = by_ext.setdefault(e, {"bytes": 0, "files": []})
+            b["bytes"] += n
+            b["files"].append(p)
+
+    # Compression differs by kind — HTML and JSON squeeze far harder than
+    # an already-compressed .gz or .png — so sample within each kind and
+    # weight by how much of the site that kind is.
+    rng = random.Random(0)          # deterministic, so builds are comparable
+    packed = 0
+    for e, b in by_ext.items():
+        sample = rng.sample(b["files"], min(40, len(b["files"])))
+        raw = pk = 0
+        for p in sample:
+            try:
+                blob = open(p, "rb").read()
+            except OSError:
+                continue
+            raw += len(blob)
+            pk += len(gzip.compress(blob, 6))
+        ratio = (pk / raw) if raw else 1.0
+        packed += b["bytes"] * ratio
+
+    mb, pmb = total / 1048576, packed / 1048576
+    detail = (f"{pmb:,.0f} MB stored, from {mb:,.0f} MB of files "
+              f"({mb / pmb:.1f}:1)" if pmb else f"{mb:,.0f} MB")
+    if pmb > 1024:
+        bad("weight", f"the published artifact would be {detail} and GitHub "
+                      f"Pages publishes at most 1,024 MB — this will not deploy")
+    elif pmb > 900:
+        bad("weight", f"the published artifact would be {detail}, against a "
+                      f"1,024 MB ceiling — no room for the harvest still running")
+    elif pmb > 700:
+        note("weight", f"the published artifact would be {detail} of 1,024 MB")
     else:
-        note("weight", f"deployable site {mb:.0f} MB")
+        note("weight", f"the published artifact would be {detail} of 1,024 MB")
 
     det = glob.glob(os.path.join(DIST, "p", "*.json"))
     if det:

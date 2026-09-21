@@ -80,10 +80,21 @@ const rows = page.data.map((p) => {
     ))}
   </ul>
 
+  {/* THE HREFS ARE BUILT HERE, not taken from page.url.
+      Every other link on this site goes through u(), which prefixes the
+      deployment base — the site is served from /TheMap/ and will move to
+      recordatlas.org. Astro's page.url.prev/next are meant to carry the base
+      too, but "meant to" is not worth 23 pages of navigation quietly 404ing,
+      and the page numbering is trivial to derive. Page one is /places/,
+      matching the nav link and every inbound link that already exists. */}
   <nav class="pager">
-    {page.url.prev && <a href={page.url.prev}>← previous</a>}
+    {page.currentPage > 1 && (
+      <a href={u(page.currentPage === 2 ? "/places/" : `/places/${page.currentPage - 1}/`)}>← previous</a>
+    )}
     <span>{page.currentPage} of {page.lastPage}</span>
-    {page.url.next && <a href={page.url.next}>next →</a>}
+    {page.currentPage < page.lastPage && (
+      <a href={u(`/places/${page.currentPage + 1}/`)}>next →</a>
+    )}
   </nav>
 </Base>
 

@@ -119,6 +119,32 @@ def bare(s):
 ABBREV = {"sv", "st", "ss", "sta", "sto", "san", "sankt", "hl"}
 
 
+# A VALUE THAT MEANS "WE DO NOT KNOW" IS NOT A PLACE NAME.
+# 不明 is Japanese for "unknown" and carried 2,516 volumes at the top of the
+# unplaced list, where it will sit forever because no gazetteer contains it.
+# Offering it to a fuzzy match is worse than leaving it: it is exactly the
+# kind of token that eventually hits something and the hit is nonsense.
+UNKNOWN_VALUE = re.compile(
+    r"^(不明|不詳|未詳|unknown|unspecified|not ?stated|no ?place|none|n/?a|"
+    r"desconocid[oa]|sin ?lugar|sconosciut[oa]|ignoto|onbekend|inconnu|"
+    r"nieznane|neznám[éy]|nepoznato|ukjent|okänd|tuntematon|"
+    r"\?+|-+|\.+)$", re.I)
+
+# ADMINISTRATIVE WRAPPERS AROUND A PLACE THAT IS RIGHT THERE IN THE STRING.
+# «Zona de reclutamiento de Madrid» is 5,718 volumes of Madrid conscription
+# records, and the town is the last two words. «Auckland Court» and
+# «Christchurch Court» are 1,000 volumes each of court records sitting in a
+# city this atlas has drawn. Stripping the wrapper is a READING, not a
+# replacement — the whole string is still tried first, so a place genuinely
+# called "X Court" is unharmed.
+WRAPPERS = [
+    re.compile(r"^zona de reclutamiento de\s+(.+)$", re.I),
+    re.compile(r"^(?:distrito|partido|juzgado|registro) de\s+(.+)$", re.I),
+    re.compile(r"^(.+?)\s+(?:district|magistrate'?s|registration)?\s*court$", re.I),
+    re.compile(r"^(?:tribunal|cour) de\s+(.+)$", re.I),
+]
+
+
 def readings(name, label=None):
     """Every reading of one waypoint name, most specific first.
 
@@ -135,13 +161,26 @@ def readings(name, label=None):
     # dash is only splittable when the LABEL says so: "Aabol - Bakic" under
     # a "Range" label is an alphabetical span and splitting it would offer
     # "Aabol" to the gazetteer as a town.
+    if name and UNKNOWN_VALUE.match(name.strip()):
+        return []
     extra = []
     if label and " - " in label and " - " in (name or ""):
         extra = [x.strip() for x in name.split(" - ")]
+    # The wrapper readings go AFTER the whole name, never before it — and
+    # putting them in `extra` did exactly the opposite, because `extra` is
+    # tried first. «Hampton Court» resolved to Hampton, which is a different
+    # place three miles away. They belong at the end, where they are the
+    # last thing tried rather than the first.
+    unwrapped = []
+    for w in WRAPPERS:
+        m = w.match((name or "").strip())
+        if m and m.group(1).strip():
+            unwrapped.append(m.group(1).strip())
     out, seen = [], set()
     for cand in extra + [name, bare(name)] + \
                 [x.strip() for x in re.split(r"\s*,\s*", name or "")] + \
-                [bare(x.strip()) for x in re.split(r"\s*,\s*", name or "")]:
+                [bare(x.strip()) for x in re.split(r"\s*,\s*", name or "")] + \
+                unwrapped:
         c = (cand or "").strip()
         # "Sv." must not be offered as a place name; Pag, Krk and Rab must.
         # The first cut used a length test for this and threw away three real

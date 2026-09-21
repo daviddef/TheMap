@@ -19,9 +19,13 @@ import { u } from "../../lib/url.js";
 import full from "../../data/places-full.json";
 import idx from "../../../public/index.json";
 
-const PER_PAGE = 600;
-
 export function getStaticPaths({ paginate }) {
+  /* DECLARED IN HERE, NOT OUTSIDE. Astro hoists getStaticPaths out of the
+     component scope: it can see imports and nothing else. A `const PER_PAGE`
+     at module level was simply undefined by the time this ran, paginate()
+     was handed pageSize: undefined, and the build died with "Failed to call
+     getStaticPaths" and no further explanation. */
+  const PER_PAGE = 600;
   const CN = idx.countries || {};
   /* Grouped by country, biggest first, then alphabetical inside a country —
      so a page is a coherent run of one or two countries rather than a

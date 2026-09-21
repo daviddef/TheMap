@@ -38,11 +38,22 @@ PROMOTE = "data/fs-volumes-promote.json"
 
 
 def dump(obj, path):
+    """Write, then rename — never leave a half-written file in place.
+
+    A build read fs-volumes-promote.json while a second matcher run was
+    still writing it and died on a truncated document. A partial JSON is
+    indistinguishable from a whole one until something parses it, so the
+    file is written beside its destination and moved into place, which is
+    atomic on one filesystem.
+    """
+    tmp = path + ".partial"
     if path.endswith(".gz"):
-        with gzip.open(path, "wt", encoding="utf-8") as f:
+        with gzip.open(tmp, "wt", encoding="utf-8") as f:
             json.dump(obj, f, ensure_ascii=False)
     else:
-        json.dump(obj, open(path, "w"), ensure_ascii=False, indent=1)
+        with open(tmp, "w") as f:
+            json.dump(obj, f, ensure_ascii=False, indent=1)
+    os.replace(tmp, path)
 
 
 def fold(s):
@@ -360,6 +371,46 @@ def main():
                 out[cc] = min(got, key=lambda r: r[0])[1]
         return out
 
+    # THE NAMES A PLACE ANSWERS TO IN ANOTHER LANGUAGE.
+    #
+    # FamilySearch files Belgian records under Antwerpen and Brussel; the
+    # shelf and the gazetteer hold Antwerp and Brussels. A thousand books
+    # each were failing on a naming convention rather than a missing place —
+    # the same failure this whole atlas exists to fix, happening inside the
+    # matcher. scripts/harvest-exonyms.py resolves the forms that actually
+    # cost books, and they are consulted at home, before anything foreign.
+    try:
+        _exo = json.load(open("data/exonyms.json"))["forms"]
+    except FileNotFoundError:
+        _exo = {}
+    exonym_idx = {}
+    for _k, _v in _exo.items():
+        _cc, _f = _k.split("|", 1)
+        exonym_idx[(_cc, _f)] = _v
+
+    def home_exonym(levels, ccs):
+        """A local-language form of a place we hold under another name."""
+        for name, lab in reversed(levels):
+            for cand in readings(name, lab):
+                for cc in ccs:
+                    e = exonym_idx.get((cc, fold(cand)))
+                    if not e:
+                        continue
+                    # Prefer the place already drawn under its other name.
+                    got = idx.get((cc, fold(e["n"])))
+                    if got:
+                        return min(got, key=lambda r: r[0])[1], cc
+                    if e.get("y") is None:
+                        continue
+                    pid = ("g-" + re.sub(r"[^a-z0-9]+", "-",
+                                         fold(e["n"])).strip("-")[:48]
+                           + "-" + cc.lower())
+                    promote.setdefault(pid, {
+                        "id": pid, "name": e["n"], "country": cc,
+                        "lat": e["y"], "lon": e["x"], "from": "wikidata-exonym"})
+                    return {"id": pid}, cc
+        return None, None
+
     def home_gaz(levels, ccs):
         """The collection's own country, in the gazetteer rather than the shelf.
 
@@ -409,6 +460,9 @@ def main():
         # across the Habsburg group, which is why that group may cross at
         # all — so home has to be exhausted first.
         hit, cc = home_gaz(path, ccs)
+        if hit:
+            return hit, cc, False
+        hit, cc = home_exonym(path, ccs)
         if hit:
             return hit, cc, False
 

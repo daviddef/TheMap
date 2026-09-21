@@ -533,7 +533,13 @@ def main():
             # The oldest books first, because a researcher is nearly always
             # reaching back, and the total is kept so the page can say what
             # it is not showing rather than implying this is all there is.
-            _cap = 400
+            # 120, NOT 400. At 400 the detail files were 260 MB and the
+            # place pages 570, putting the site at 1,188 MB against a
+            # 1,024 MB limit — it would simply have stopped deploying. The
+            # panel shows 25 per kind and the page lists the oldest; 120 is
+            # still more than anybody reads in one sitting, and the total
+            # is stated so nothing pretends this is all of them.
+            _cap = 60
             if len(_v) > _cap:
                 _v = sorted(_v, key=lambda r: (r.get("from") or 9999))[:_cap]
                 detail["volumesTotal"] = len(vol_by_place[p["id"]])

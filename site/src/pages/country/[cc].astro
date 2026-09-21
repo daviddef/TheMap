@@ -17,14 +17,10 @@ import provs from "../../../public/providers.json";
 import idx from "../../../public/index.json";
 
 export async function getStaticPaths() {
-  const cols = (await import("../../data/collections-full.json")).default;
-  const full = (await import("../../data/places-full.json")).default;
-  const provs = (await import("../../../public/providers.json")).default;
-  const ccs = new Set();
-  for (const c of cols.collections) for (const k of c.countries) ccs.add(k);
-  for (const p of full.places) if (p.country) ccs.add(p.country);
-  for (const p of provs.providers) for (const k of p.countries) if (k !== "*") ccs.add(k);
-  return [...ccs].map((cc) => ({ params: { cc: cc.toLowerCase() }, props: { cc } }));
+  /* One shared list — see site/src/lib/country-pages.js for why. */
+  const { COUNTRY_PAGES } = await import("../../lib/country-pages.js");
+  return [...COUNTRY_PAGES].map((cc) => ({ params: { cc: cc.toLowerCase() },
+                                           props: { cc } }));
 }
 
 const { cc } = Astro.props;

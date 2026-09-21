@@ -1,5 +1,6 @@
 ---
 import { timelineFor } from "../../lib/surname-timeline.js";
+import { hasCountryPage } from "../../lib/country-pages.js";
 /* One page per surname that has something real to say.
 
    NOT ONE PER SURNAME. There are 480,635 of them and 449,216 are a row in a
@@ -30,9 +31,30 @@ export async function getStaticPaths() {
        it failed the test and returned a 404. Somebody who has done the
        research on a name is better evidence that the name is worth a page
        than an editor having linked two spellings. */
+    /* A CURATED LINK, AN ARCHIVE, OR A REGISTER IN MORE THAN ONE COUNTRY.
+       Kosina is counted by the Polish, Slovene and American registers and
+       had no page, because the filter wanted a curated variant. A surname
+       three national registers agree on is not a maybe. One country alone
+       stays out — that is 600,000 pages of nothing to say. */
     .filter((r) => r.countries.length
       && (r.variants.some((v) => v.how === "curated")
-          || r.countries.some((c) => c.how === "archive")))
+          || r.countries.some((c) => c.how === "archive")
+          /* A SPELLING LINK PLUS THREE REGISTERS WOULD BE RIGHT, AND DOES
+             NOT FIT. Kosina is linked to Kozina by the spelling tier and
+             counted by the Polish, Slovene and American registers, which is
+             exactly the case David raised — and admitting that class is
+             16,138 pages at 24.6 KB each, about 397 MB, against a site
+             already at 985 MB of the 1,024 MB GitHub Pages publishes. I
+             measured it mid-build rather than guessing: at 6,246 of those
+             pages the site was 1,086 MB and still climbing.
+             Two wider cuts were worse — two registers is 87,479 pages and
+             the build died out of memory, any non-phonetic variant is
+             209,464.
+             So this stays at curated-or-archive, and Kosina remains
+             findable through the search and the map panel, which do show
+             its spellings and its three countries. Making surname pages
+             lean enough to afford the other 12,000 is the way in, and it is
+             on the work list rather than pretended away. */))
     .map((r) => ({ r, s: slug(r.n) }))
     .filter(({ s }) => s && !seen.has(s) && seen.add(s))
     .map(({ r, s }) => ({ params: { name: s },
@@ -68,6 +90,7 @@ const frPeak = frCurve ? frCurve.reduce((a, b) => (b.n > a.n ? b : a), frCurve[0
 const TIER = {
   curated: ["Also written", "A person linked these — Wikidata's «said to be the same as», or a family archive that worked it out from documents."],
   grammar: ["The same name, inflected", "A rule of the language rather than an opinion. Polish makes Kowalski and Kowalska of one surname."],
+  spelling: ["The same name, spelt two ways", "One systematic substitution — s for z, w for v, ch for h — where BOTH spellings are independently attested surnames. Kosina and Kozina are one man in two clerks' handwriting. Stronger than sounding alike, weaker than somebody having checked."],
   sounds:  ["Only sounds alike", "An algorithm's guess. Useful for casting a net, and not evidence."],
 };
 const by = {};
@@ -182,7 +205,12 @@ const dek = `${r.n}${by.curated ? `, also written ${by.curated.slice(0,4).join("
         <tbody>
           {tl.rows.map((r) => (
             <tr>
-              <td><a href={u(`/country/${r.cc.toLowerCase()}/`)}>{CN[r.cc] || r.cc}</a></td>
+              {/* Only a link where there is a page. Wikidata knows people
+                  born in East Germany and Taiwan; this atlas holds nothing
+                  for either, and a link to a 404 is worse than plain text. */}
+              <td>{hasCountryPage(r.cc)
+                ? <a href={u(`/country/${r.cc.toLowerCase()}/`)}>{CN[r.cc] || r.cc}</a>
+                : <span>{CN[r.cc] || r.cc}</span>}</td>
               <td class="m">{r.tot}</td>
               <td class="cap">{Object.keys(r.d).map(Number).sort((a, b) => a - b)
                 .map((dd) => `${dd}s`).join(" · ")}</td>

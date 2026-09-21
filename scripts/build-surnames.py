@@ -334,6 +334,55 @@ def main():
         print(f"{cc}: {len(fq['surnames'])} surnames from a national register, "
               f"{len(fq.get('gendered') or {})} grammatical pairs")
 
+    # ---- 3b. The same name, spelt two ways --------------------------------
+    #
+    # David is researching a Martin KOZINA from a Slovene parish, recorded
+    # elsewhere as KOSINA. Those did not link. s/z is the commonest
+    # orthographic alternation in the Slavic languages and half of Central
+    # Europe writes a name both ways depending on which clerk held the pen —
+    # but this atlas had no tier for it. Curated means somebody checked;
+    # grammar meant only the gendered pairs a register happened to publish;
+    # and the phonetic tier is not offered to names carrying nothing but a
+    # register row, which is exactly what Kosina and Kozina are.
+    #
+    # SAFE BECAUSE BOTH FORMS MUST ALREADY EXIST. A rule that generates
+    # spellings would invent names; this only connects two surnames that are
+    # both independently attested, which is a much smaller claim. One
+    # substitution, four letters or more, and the pair has to be real.
+    ALTERNATIONS = [
+        ("s", "z"),      # Kosina / Kozina, Josip / Jozip
+        ("c", "k"),      # Marcek / Markek
+        ("c", "z"),      # Vucic / Vuzic
+        ("w", "v"),      # Kowal / Koval
+        ("i", "y"),      # Kosinski / Kosynski
+        ("ch", "h"),     # Blachut / Blahut
+        ("tz", "z"),     # Schultz / Schulz
+        ("ck", "k"),     # Stucki / Stuki
+        ("ff", "f"),     # Hoffman / Hofman
+        ("ll", "l"), ("nn", "n"), ("tt", "t"), ("ss", "s"),
+    ]
+    # `rec` is keyed by the folded name already, and holds every surname
+    # this build has seen from any source.
+    _known = {_k: _v["n"] for _k, _v in rec.items()}
+    _spelt = 0
+    for _f, _real in list(_known.items()):
+        if len(_f) < 4:
+            continue
+        for _a, _b in ALTERNATIONS:
+            for _x, _y in ((_a, _b), (_b, _a)):
+                if _x not in _f:
+                    continue
+                # One substitution only: two makes a different name.
+                if _f.count(_x) != 1:
+                    continue
+                _cand = _f.replace(_x, _y)
+                _other = _known.get(_cand)
+                if _other and _other != _real:
+                    link(_real, _other, "spelling")
+                    _spelt += 1
+    print(f"spelling: {_spelt} pairs that differ by one systematic substitution "
+          f"and are both real surnames")
+
     # ---- 4. What merely sounds alike --------------------------------------
     # Only names that already carry something — a curated link, an archive, a
     # country beyond a bare register row — get phonetic neighbours. Clustering

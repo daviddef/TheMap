@@ -303,11 +303,23 @@ def main():
         # skipped. A thirty-hour resumable job that does not actually write
         # is just a thirty-hour job you do twice.
         since_save[0] += 1
-        if not a.probe and since_save[0] >= 25:
+        # WRITTEN WHOLE OR NOT AT ALL, AND NOT SO OFTEN. This checkpoint had
+        # grown into 845 MB of indented JSON rewritten every 25 collections,
+        # which is most of why this machine sat at a load average of 350 with
+        # the disk at 1,100 transactions a second — another session's publish
+        # was killed by it. It was also writing straight over the only copy,
+        # so a kill in the middle of a save destroyed a thirty-hour harvest.
+        # Now: a temporary file renamed into place, which is atomic, no
+        # indentation, which is a third of the bytes, and every 200
+        # collections rather than every 25.
+        if not a.probe and since_save[0] >= 200:
             since_save[0] = 0
             state["harvested"] = time.strftime("%Y-%m-%d")
             state["done"] = sorted(done)
-            json.dump(state, open(OUT, "w"), ensure_ascii=False, indent=1)
+            tmp = OUT + ".tmp"
+            with open(tmp, "w") as fh:
+                json.dump(state, fh, ensure_ascii=False)
+            os.replace(tmp, OUT)
         if got is None:
             print(f"  [{i}/{len(todo)}] {c['id']} unreachable — leaving it "
                   f"undone so --resume tries again", flush=True)

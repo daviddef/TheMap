@@ -51,6 +51,18 @@ jobs:
               echo "  $d: $(find site/dist/$d -type f | wc -l) files, $(du -sm site/dist/$d | cut -f1) MB"
           done
 
+      # THE AUDIT, ON EVERY BUILD RATHER THAN WHEN SOMEBODY REMEMBERS.
+      # It checks internal links, payload validity, coordinates, duplicate
+      # ids, volume date sanity, archive coordinates against the gazetteer,
+      # and the showcase cards against the surname data. Today it caught
+      # three archives that were nowhere near the towns they are named
+      # after, and it only ran because I ran it by hand.
+      # Reporting, not blocking, for now: it is new, and a false positive
+      # here would stop David's site deploying. It should be made blocking
+      # once it has been green for a while.
+      - name: Audit
+        run: python3 scripts/audit-site.py || echo "::warning::audit reported problems — see above"
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

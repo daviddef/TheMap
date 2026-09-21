@@ -39,22 +39,23 @@ export async function getStaticPaths() {
     .filter((r) => r.countries.length
       && (r.variants.some((v) => v.how === "curated")
           || r.countries.some((c) => c.how === "archive")
-          /* A SPELLING LINK PLUS THREE REGISTERS WOULD BE RIGHT, AND DOES
-             NOT FIT. Kosina is linked to Kozina by the spelling tier and
-             counted by the Polish, Slovene and American registers, which is
-             exactly the case David raised — and admitting that class is
-             16,138 pages at 24.6 KB each, about 397 MB, against a site
-             already at 985 MB of the 1,024 MB GitHub Pages publishes. I
-             measured it mid-build rather than guessing: at 6,246 of those
-             pages the site was 1,086 MB and still climbing.
-             Two wider cuts were worse — two registers is 87,479 pages and
-             the build died out of memory, any non-phonetic variant is
-             209,464.
-             So this stays at curated-or-archive, and Kosina remains
-             findable through the search and the map panel, which do show
-             its spellings and its three countries. Making surname pages
-             lean enough to afford the other 12,000 is the way in, and it is
-             on the work list rather than pretended away. */))
+          /* A SPELLING LINK PLUS THREE REGISTERS — ADMITTED, after being
+             refused on a number that was wrong.
+             Kosina is linked to Kozina by the spelling tier and counted by
+             the Polish, Slovene and American registers. That is exactly the
+             case David raised, and it returned a 404.
+             The refusal said this class was 16,138 pages at 24.6 KB, about
+             397 MB, "against a site already at 985 MB of the 1,024 MB
+             GitHub Pages publishes". Both halves were wrong. 24.6 KB came
+             from measuring Defranceschi, which carries eleven country
+             blocks when the median surname carries one — an ordinary page
+             is about 17 KB. And the 985 MB was the RAW build tree, which is
+             not what the limit is about: the artifact GitHub actually
+             deploys is 158 MB, and it goes green every time.
+             Measured today: 11,994 new pages, about 199 MB raw and perhaps
+             26 MB in the artifact. Kosina gets its page. */
+          || (r.variants.some((v) => v.how === "spelling")
+              && r.countries.length >= 3)))
     .map((r) => ({ r, s: slug(r.n) }))
     .filter(({ s }) => s && !seen.has(s) && seen.add(s))
     .map(({ r, s }) => ({ params: { name: s },

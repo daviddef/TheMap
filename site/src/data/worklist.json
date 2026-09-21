@@ -12,7 +12,7 @@
    "state": "running",
    "owner": "this atlas",
    "since": "2026-09-20",
-   "note": "**Running now.** 3,504 collections; the tree descends to the individual book. 707,471 volumes so far against 4,903 when the day started. The catalogue is gated but the records API is not, which an earlier note in `import-fs-catalogue.py` had written off without trying — the same mistake as declaring Scotland's parishes closed when data.gov.uk had them. Publishes every two hours while it runs. US collections are half the total and come last, so the rest of the world lands first."
+   "note": "**Running now.** 3,504 collections; the tree descends to the individual book. 707,471 volumes so far against 4,903 when the day started. The catalogue is gated but the records API is not, which an earlier note in `import-fs-catalogue.py` had written off without trying — the same mistake as declaring Scotland's parishes closed when data.gov.uk had them. Publishes every two hours while it runs. US collections are half the total and come last, so the rest of the world lands first.\\nSupervised now: scripts/supervise.sh restarts it if it dies, bounded to five attempts."
   },
   {
    "n": 2,
@@ -156,7 +156,7 @@
    "state": "running",
    "owner": "this atlas",
    "since": "2026-09-21",
-   "note": "Measured 21 September: 1,571,627 volumes are placed, across 7,778 places — L'Aquila 72,724, Avellino 62,558, Bergamo 55,242. What is still unplaced is 870,018 volumes under 31,530 names. The largest single cause found so far is that an unplaced name carries its COLLECTION's country and not its own: 168 Friulian villages sat under AT holding 32,579 books, because the collection is the Austrian Küstenland. The exonym harvest now searches the historical filing groups, and the unplaced list is no longer cut at 4,000 names, which had been hiding 200,641 books from the only thing that looks for them."
+   "note": "Measured 21 September: 1,571,627 volumes are placed, across 7,778 places — L'Aquila 72,724, Avellino 62,558, Bergamo 55,242. What is still unplaced is 870,018 volumes under 31,530 names. The largest single cause found so far is that an unplaced name carries its COLLECTION's country and not its own: 168 Friulian villages sat under AT holding 32,579 books, because the collection is the Austrian Küstenland. The exonym harvest now searches the historical filing groups, and the unplaced list is no longer cut at 4,000 names, which had been hiding 200,641 books from the only thing that looks for them.\\n21 September, measured: 2,187,438 volumes placed on 9,910 places; 799,897 volumes across 46,345 names still unplaced, and the list is now written out in full rather than cut at 4,000. Three systematic causes found in the top of that list and fixed in the matcher: «不明» is Japanese for unknown and held 2,516 volumes that no gazetteer will ever match; «Zona de reclutamiento de Madrid» is 5,718 volumes of Madrid behind an administrative wrapper; «Auckland Court» and «Christchurch Court» are a thousand volumes each standing in cities this atlas has drawn. Unwrapped readings are tried last, never first, because put first they made «Hampton Court» resolve to Hampton."
   },
   {
    "n": 20,
@@ -197,6 +197,14 @@
    "owner": "this atlas",
    "since": "2026-09-21",
    "note": "David asked whether the atlas would pick up Otočac being indexed by two collections across a border — Church Books 1839-46 and Austria Küstenland 1848-58. Traced end to end on 21 September. Half of it works and the other half cannot. Otočac's page does carry its FamilySearch collections and the cross-border matcher does cross borders where there is something to cross with — IT to HR 9 places, IT to SI 16, AT to DE 2, with no false positives. But the Austrian side of David's example is not reachable by this method at all: «Austria, Catholic Church Records, 1565-2007» (collection 5000002) has been walked and is recorded in the harvest's own indexOnly list. It publishes no browsable volumes through the open waypoint API, so its tree names no places, Croatian or Austrian. The Küstenland attribution David saw is in the FamilySearch CATALOGUE, which is gated, and this atlas does not climb gates. So the honest position is: the map shows Otočac's Croatian books and names the archives for the rest, and no amount of better matching will reach the Austrian volumes while they are only in the catalogue."
+  },
+  {
+   "n": 25,
+   "what": "Stop measuring the site against the wrong limit",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-21",
+   "note": "audit-site.py reported «the deployable site is 1418 MB and GitHub Pages publishes at most 1,024 — this will not deploy» about a build that deployed successfully minutes later in the same CI run. It was adding up raw bytes in dist/ and comparing them to a limit that applies to the COMPRESSED artifact, which GitHub stored at 189 MB. A 7.5:1 ratio, on a site that is almost all HTML and JSON. That one wrong comparison is why 16,138 surname pages were refused as unaffordable for weeks. The check now estimates the compressed size, sampled per file extension with a seeded sample so builds stay comparable, and prints the raw figure beside it so a local `du` does not look like a contradiction."
   }
  ]
 }

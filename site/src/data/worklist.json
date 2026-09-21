@@ -92,7 +92,7 @@
    "state": "blocked",
    "owner": "David",
    "since": "2026-09-20",
-   "note": "The code is right: loader present, slot measuring 1024x90, iframe created, correct client and slot. Google answers `data-ad-status=\"unfilled\"`, which is an account state. Check AdSense → Sites for the approval status of daviddef.github.io."
+   "note": "Everything this atlas controls is verified correct, live, on 21 September. The slot renders as <ins class=\"adsbygoogle\" style=\"display:block\"> with data-ad-client=ca-pub-4156851882993001 and data-ad-slot=1255898967, format horizontal, full-width-responsive; the adsbygoogle script loads; the push call is present; and ads.txt at daviddef.github.io answers 200 with the matching publisher line. The earlier faults are both gone — the slot was a flex child with zero width, which is what «No slot size» meant, and it is display:block now. So an unfilled slot from here is AdSense's own decision about approval or inventory, not a mistake in the page. Only David can see the AdSense dashboard."
   },
   {
    "n": 12,
@@ -180,7 +180,7 @@
    "state": "next",
    "owner": "this atlas",
    "since": "2026-09-21",
-   "note": "Kosina is linked to Kozina by the spelling tier and counted by three national registers — it should have a page and does not. The class is 16,138 pages at 24.6 KB each, about 397 MB raw. THE FIGURE THIS ROW WAS BLOCKED ON WAS WRONG: it read 985 MB of 1,024 from a local dist/ that held 71,093 files left over from earlier builds, none written in the previous three hours. GitHub's own number for the deployed artifact is 158 MB. Needs one clean build to measure the true raw figure, and then these pages are very likely affordable."
+   "note": "MEASURED PROPERLY AT LAST, and I had it wrong twice in opposite directions. CI's clean build reports 1,203 MB raw across 71,092 files. My local dist was 1,215 MB across 71,093 — the same build, not the pile of leftovers I claimed it was, and I should not have said so. The site really does carry about 1.2 GB of raw output. What makes it publishable is that the artifact GitHub actually deploys is 158 MB compressed, and it deploys green every time, so the 1,024 MB ceiling plainly binds on the artifact and not on the raw tree. Against that, 16,138 more surname pages at roughly 17 KB each — not the 24.6 KB this row used to say, which was measured off Defranceschi, a page with eleven country blocks when the median surname has one — is about 274 MB raw and perhaps 35 MB in the artifact. Affordable. Two cuts already taken: the nearest-archive fix and class-based style scoping, together about 28 MB. Next: admit the class."
   },
   {
    "n": 23,

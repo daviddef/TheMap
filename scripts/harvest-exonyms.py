@@ -246,7 +246,11 @@ def main():
         "counts": {"forms": len(found), "home": home_n, "abroad": abroad_n,
                    "ambiguous_left_unplaced": ambiguous, "books_freed": freed},
         "forms": found,
-    }, open(OUT, "w"), ensure_ascii=False)
+    }, open(OUT + ".tmp", "w"), ensure_ascii=False)
+    # Renamed into place, like every other write here. A crash during the
+    # final dump would otherwise leave data/exonyms.json truncated, and the
+    # matcher reads it on every run.
+    os.replace(OUT + ".tmp", OUT)
     print(f"\n{len(found):,} name forms resolved "
           f"({home_n:,} at home, {abroad_n:,} across a border), "
           f"{ambiguous:,} left unplaced as ambiguous")

@@ -49,11 +49,27 @@ CKAN = "https://dati.gov.it/opendata/api/3/action/package_search"
 UA = ("RecordAtlas/1.0 (+https://daviddef.github.io/TheMap; "
       "surname frequency; contact david.defranceski@gmail.com)")
 
-# Header names seen across the municipal files. Read, not assumed.
-NAME_COL = re.compile(r"^(cognome|cognomi|descrizione|denominazione)$", re.I)
-COUNT_COL = re.compile(r"^(occorrenze|numero|num|frequenza|conteggio|quantita|"
-                       r"quantità|totale|residenti|n_residenti|valore|count)$", re.I)
-YEAR_COL = re.compile(r"^(anno|year)$", re.I)
+# Header names seen across the municipal files. Read, not assumed — and
+# matched on a PREFIX, because twelve datasets were skipped for "no
+# surname/count columns" when they had both, spelt differently:
+#
+#   "COGNOME","DIFFUSIONE (FREQUENZA)"      Emilia-Romagna
+#   Cognome;Diffusione (Frequenza);Diffusione (Percentuale)
+#   FID,NOME,OCCORRENZE,OBJECTID,SHAPE      Emilia-Romagna, as a map layer
+#   Cognome,Conteggio di Cognome            Matera
+#
+# A fully anchored regex matched none of them. `nome` is normally a GIVEN
+# name in Italian and would be wrong to treat as a surname, but nothing gets
+# this far unless its dataset title is about cognomi, where NOME is the
+# surname column.
+NAME_COL = re.compile(r"^(cognome|cognomi|nome|descrizione|denominazione)\b", re.I)
+COUNT_COL = re.compile(r"^(occorrenze|numero|num|frequenza|diffusione|conteggio|"
+                       r"quantita|quantità|totale|residenti|n_residenti|valore|"
+                       r"count)\b", re.I)
+# A percentage is not a count. One file offers both «Diffusione (Frequenza)»
+# and «Diffusione (Percentuale)» and the prefix above matches each.
+NOT_A_COUNT = re.compile(r"percentual|percent|%|media|rank|posizione", re.I)
+YEAR_COL = re.compile(r"^(anno|year)\b", re.I)
 
 # A title has to be about surnames, not merely mention one. «Eletti nel 2023
 # al Consiglio regionale» matches "cognome" because it lists councillors.
@@ -63,7 +79,18 @@ NOT_A_SURNAME_SET = re.compile(
     r"dipendenti|docenti|albo|nomin|curricul", re.I)
 
 
+# A host that has already timed out once is not going to answer the next
+# file either. One comune's server held this run for twenty-nine minutes
+# across six datasets that all live on it — three tries each, ninety seconds
+# to connect and ninety to read, and none of them was ever going to arrive.
+# First failure retires the host for the rest of the run.
+DEAD_HOSTS = set()
+
+
 def fetch(url, timeout=60, tries=3):
+    host = urllib.parse.urlparse(url).netloc
+    if host in DEAD_HOSTS:
+        return None
     for a in range(tries):
         try:
             req = urllib.request.Request(url, headers={"User-Agent": UA})
@@ -78,6 +105,7 @@ def fetch(url, timeout=60, tries=3):
                 buf = bytearray()
                 while len(buf) < MAX_BYTES:
                     if time.monotonic() > deadline:
+                        DEAD_HOSTS.add(host)
                         return None
                     chunk = r.read(65536)
                     if not chunk:
@@ -91,6 +119,7 @@ def fetch(url, timeout=60, tries=3):
             pass
         if a < tries - 1:
             time.sleep(4 * (a + 1))
+    DEAD_HOSTS.add(host)
     return None
 
 
@@ -147,7 +176,12 @@ def read_csv(blob):
         return [], None
     head = [h.strip().strip('"').lower() for h in head]
     ni = next((i for i, h in enumerate(head) if NAME_COL.match(h)), None)
-    ci = next((i for i, h in enumerate(head) if COUNT_COL.match(h)), None)
+    # Prefer a column that says outright it is a frequency or a count.
+    cands = [i for i, h in enumerate(head)
+             if COUNT_COL.match(h) and not NOT_A_COUNT.search(h)]
+    cands.sort(key=lambda i: 0 if re.search(r"frequenza|occorrenze|conteggio|numero",
+                                            head[i], re.I) else 1)
+    ci = cands[0] if cands else None
     yi = next((i for i, h in enumerate(head) if YEAR_COL.match(h)), None)
     if ni is None or ci is None:
         return [], None
@@ -208,6 +242,13 @@ def main():
         blob = fetch(csvs[0]["url"], timeout=90)
         if not blob:
             skipped.append((org, title, "could not fetch"))
+            continue
+        # Tuscany's four «CSV» resources are ZIP archives of xlsx, mislabelled
+        # in the catalogue. Saying "no surname/count columns" of those was
+        # true and useless; say what they actually are, so the next person
+        # knows it is a packaging problem and not a missing column.
+        if blob[:2] == b"PK":
+            skipped.append((org, title, "a ZIP of xlsx, labelled CSV in the catalogue"))
             continue
         try:
             pairs, year = read_csv(blob)

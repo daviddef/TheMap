@@ -1,5 +1,5 @@
 {
- "note": "Countries whose surname data was sought and not obtained, with what was actually tried. A gap somebody can see is worth more than a gap they cannot, and without this file the next person spends the same afternoon finding the same three walls. A «not found» verdict is weaker than a «refused» one: it means this project looked and did not find, not that the data is absent. Both are worth writing down and they are not the same claim. Five of the eight were re-tested on 21 September 2026 against live endpoints rather than remembered ones, and every refusal held — but three of them are now evidence where they were inference. Croatia's statistics API works and has no surname table; Denmark's entire table list contains no name table; Sweden lists two name folders it will not serve. Finland's holder answers 403 to a crawler and this atlas does not climb bot gates, so that one is refused by choice as much as by circumstance. The Netherlands needs a letter to the Meertens Instituut, which is not a thing a script can send.",
+ "note": "Countries whose surname data was sought and not obtained, with what was actually tried. A gap somebody can see is worth more than a gap they cannot, and without this file the next person spends the same afternoon finding the same three walls. A «not found» verdict is weaker than a «refused» one: it means this project looked and did not find, not that the data is absent. Both are worth writing down and they are not the same claim. Five of the eight were re-tested on 21 September 2026 against live endpoints rather than remembered ones, and every refusal held — but three of them are now evidence where they were inference. Croatia's statistics API works and has no surname table; Denmark's entire table list contains no name table; Sweden lists two name folders and serves neither, in either language, and their own titles say the tables are retired. Finland's holder answers 403 to a crawler and this atlas does not climb bot gates, so that one is refused by choice as much as by circumstance. The Netherlands needs a letter to the Meertens Instituut, which is not a thing a script can send.",
  "checked": "2026-09-21",
  "refused": [
   {
@@ -87,10 +87,13 @@
    "name": "Sweden",
    "tried": [
     "api.scb.se BE0001 «Namnstatistik» — the folder is listed and its two sub-folders, BE0001D and BE0001G, both answer 400 Bad Request",
-    "api.scb.se/OV0104/v1/doris/en/ssd/BE/BE0001 — the two name folders found, then opened"
+    "api.scb.se/OV0104/v1/doris/en/ssd/BE/BE0001 — the two name folders found, then opened",
+    "api.scb.se/OV0104/v1/doris/en/ssd/BE/BE0001 — 200, lists BE0001D and BE0001G",
+    "api.scb.se/OV0104/v1/doris/en/ssd/BE/BE0001/BE0001G — 400",
+    "api.scb.se/OV0104/v1/doris/sv/ssd/BE/BE0001/BE0001G — 400, so it is not a language problem"
    ],
-   "verdict": "the folders are listed and cannot be entered",
-   "why": "RETRIED 21 September. Both folders are still advertised in the tree — 'Newborn' and 'All registered persons in Sweden', each marked 'Old tables not updated' — and every path inside them answers 400. SCB lists what it no longer serves, which is why this looked available and is not.",
+   "verdict": "the tables are retired, not withheld",
+   "why": "RETRIED 21 September in both languages. The name-statistics branch lists exactly two folders and neither can be entered: both answer 400. Their own Swedish titles say what has happened — «Äldre tabeller som inte längre uppdateras», older tables no longer updated. SCB has retired its name statistics rather than gated them, which is a different and more final answer than the one this file used to give.",
    "rechecked": "2026-09-21"
   }
  ]

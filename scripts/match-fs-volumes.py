@@ -702,6 +702,16 @@ def main():
     crossed = collections.Counter()
     unplaced = collections.Counter()
     unplaced_cc = {}
+    # NOT EVERY NAME WE FAIL TO PLACE IS A GAP IN THE MAP. «不明» is
+    # Japanese for unknown and «Propiedades y Testamentos» is a bundle of
+    # wills: readings() refuses both, correctly, and yet they were being
+    # written into the unplaced list as though somebody should go and find
+    # them. 不明 sat at the top of "most wanted" with 2,516 volumes after
+    # the very change that made it unmatchable.
+    # That list is not decoration — the exonym harvest is demand-driven off
+    # it, so every one of these was spending Wikidata queries on a name
+    # nothing will ever match. Counted separately, under what they are.
+    unplaceable = collections.Counter()
     matched = miss = noname = 0
     seen = set()
 
@@ -763,8 +773,11 @@ def main():
                            (areas[0][0] if areas else ""))
                 if not deepest:
                     continue
-                unplaced[deepest] += 1
-                unplaced_cc.setdefault(deepest, ccs[0] if ccs else "")
+                if not readings(deepest):
+                    unplaceable[deepest] += 1
+                else:
+                    unplaced[deepest] += 1
+                    unplaced_cc.setdefault(deepest, ccs[0] if ccs else "")
                 continue
             # A SHELF MARK IS NOT A YEAR, and the harvester's fix only helps
             # collections walked after it. These rows are already on disk:
@@ -815,13 +828,20 @@ def main():
     dump({
         "note": ("Settlements FamilySearch has books for and this atlas has "
                  "never heard of — the map's next places, commonest first."),
-        "counts": {"names": len(unplaced), "volumes": sum(unplaced.values())},
+        "counts": {"names": len(unplaced), "volumes": sum(unplaced.values()),
+                   "unplaceable_names": len(unplaceable),
+                   "unplaceable_volumes": sum(unplaceable.values())},
         # EVERY name, not the top 4,000. The exonym harvest is demand-driven
         # off this list, so a name missing from it can never be looked up: the
         # 27,530 names below the cut were carrying 200,641 books that nothing
         # was even trying to place. The file is a work list; it can be long.
         "names": [{"n": n, "cc": unplaced_cc.get(n, ""), "volumes": c}
                   for n, c in unplaced.most_common()],
+        "unplaceableNote": ("Values this matcher refuses on sight — «unknown» in "
+                            "several languages, and record types like a binding or "
+                            "a bundle of wills. They are not missing towns and "
+                            "nothing should go looking for them."),
+        "unplaceable": [{"n": n, "volumes": c} for n, c in unplaceable.most_common(200)],
     }, GAPS)
 
     dump({

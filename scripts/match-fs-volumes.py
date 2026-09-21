@@ -712,7 +712,7 @@ def main():
     # it, so every one of these was spending Wikidata queries on a name
     # nothing will ever match. Counted separately, under what they are.
     unplaceable = collections.Counter()
-    matched = miss = noname = 0
+    matched = miss = noname = area_only = 0
     seen = set()
 
     for cid, col in (wp.get("byCollection") or {}).items():
@@ -736,7 +736,16 @@ def main():
                     continue
                 path.append((name, lab))
             if not path:
+                # TWO VERY DIFFERENT FAILURES WERE BEING COUNTED AS ONE.
+                # A volume whose every level was filtered out might have
+                # nothing usable in it at all — or it might name a province
+                # and no town, in which case this atlas knows roughly where
+                # it is and is throwing that away. 321,582 volumes land here
+                # and the split between those two decides whether an
+                # area-level dot is worth building. Counted, not guessed.
                 noname += 1
+                if areas:
+                    area_only += 1
                 continue
             wider = neighbours(ccs)
             hit, hit_cc, abroad = resolve_path(idx, path, ccs, wider, areas)
@@ -821,7 +830,8 @@ def main():
         "counts": {"places": len(by_place),
                    "volumes": sum(len(v) for v in by_place.values()),
                    "matched": matched, "unmatched": miss,
-                   "noPathName": noname},
+                   "noPathName": noname,
+                   "noPathButAnAreaNamed": area_only},
         "byPlace": {k: v for k, v in sorted(by_place.items())},
     }, OUT)
 
@@ -857,7 +867,10 @@ def main():
           f"({100*matched/max(total,1):.0f}%), of which "
           f"{len(promote):,} are new dots promoted from the gazetteer")
     print(f"  {miss:,} named a place this atlas does not hold")
-    print(f"  {noname:,} had no place in their path at all")
+    print(f"  {noname:,} had no place in their path at all"
+          + (f" — but {area_only:,} of those name an area "
+             f"(a province, a county) and only lack a town"
+             if area_only else ""))
     print(f"\n{sum(len(v) for v in by_place.values()):,} distinct books on "
           f"{len(by_place):,} places -> {OUT}")
     print(f"{len(unplaced):,} unknown place names -> {GAPS}")

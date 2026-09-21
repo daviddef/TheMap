@@ -360,6 +360,25 @@ def main():
         ("ck", "k"),     # Stucki / Stuki
         ("ff", "f"),     # Hoffman / Hofman
         ("ll", "l"), ("nn", "n"), ("tt", "t"), ("ss", "s"),
+        # WHERE ONE ALPHABET WAS USED TO WRITE ANOTHER LANGUAGE'S SOUNDS.
+        # The list above catches a slip of the pen. These catch a border.
+        # David's own name is the case: Italian spells the ending -schi and
+        # Croatian spells the same sound -ski, so Defranceschi and
+        # Defranceski were two unrelated surnames on this site, each listing
+        # the other nowhere, while the archive's own card calls them one
+        # family. An Istrian clerk writing Gallignana and a Croatian one
+        # writing Galinjana are doing this too.
+        ("sch", "sk"),   # Defranceschi / Defranceski
+        ("ch", "k"),     # Chersano / Kersano, Michel / Mikel
+        ("gn", "nj"),    # Gallignana / Galinjana, Bagnoli / Banjoli
+        ("gl", "lj"),    # Veglia / Velja
+        ("ph", "f"),     # Stephan / Stefan
+        ("th", "t"),     # Mathias / Matias
+        ("sz", "s"),     # Hungarian and Polish against everyone else
+        ("cz", "c"),     # Czajka / Cajka
+        ("j", "i"),      # Jakov / Iakov
+        # German umlauts, written out where the diacritic could not be.
+        ("ae", "a"), ("oe", "o"), ("ue", "u"),
     ]
     # `rec` is keyed by the folded name already, and holds every surname
     # this build has seen from any source.

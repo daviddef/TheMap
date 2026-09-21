@@ -142,7 +142,32 @@ WRAPPERS = [
     re.compile(r"^(?:distrito|partido|juzgado|registro) de\s+(.+)$", re.I),
     re.compile(r"^(.+?)\s+(?:district|magistrate'?s|registration)?\s*court$", re.I),
     re.compile(r"^(?:tribunal|cour) de\s+(.+)$", re.I),
+    # «Ciudad de Buenos Aires» is 1,408 volumes of Buenos Aires with the
+    # word "city" in front of it.
+    # THE CONNECTOR IS REQUIRED. Written with "de" optional this also
+    # matched «Ciudad Real», which is a city in Castile and not a wrapper
+    # around a place called Real. Only "Ciudad DE X" is the city of X.
+    re.compile(r"^(?:ciudad|cidade|citt[àa]|ville) (?:de |di |d')\s*(.+)$", re.I),
+    # Swedish parishes name the church and then the town it is in:
+    # «Stockholms domkyrkoförsamling» is Stockholm's cathedral parish, 735
+    # volumes. The genitive -s goes with the suffix.
+    re.compile(r"^(.+?)s? (?:domkyrko)?f[öo]rsamling$", re.I),
+    # And the same shape in German and Italian.
+    re.compile(r"^(?:pfarrei|pfarre|kirchspiel) (.+)$", re.I),
+    re.compile(r"^parrocchia di\s+(.+)$", re.I),
 ]
+
+# A RECORD TYPE IS NOT A PLACE, even when it is the deepest label in the
+# tree. Paraguay files «Nueva Encuadernación» — new binding — and
+# «Propiedades y Testamentos» — properties and wills — as though they were
+# towns, a thousand volumes each. They will never match a gazetteer, and a
+# long Spanish phrase offered to a fuzzy match is exactly the kind of token
+# that eventually hits something by accident.
+RECORD_TYPE = re.compile(
+    r"^(?:nueva |nuevo )?(?:encuadernaci[óo]n|propiedades y testamentos|"
+    r"protocolos?|testamentos?|[íi]ndices?|varios|sin clasificar|"
+    r"documentos? (?:varios|sueltos)|legajos?|expedientes?|"
+    r"registro civil|libros? de .*|actas? de .*)$", re.I)
 
 
 def readings(name, label=None):
@@ -161,7 +186,8 @@ def readings(name, label=None):
     # dash is only splittable when the LABEL says so: "Aabol - Bakic" under
     # a "Range" label is an alphabetical span and splitting it would offer
     # "Aabol" to the gazetteer as a town.
-    if name and UNKNOWN_VALUE.match(name.strip()):
+    if name and (UNKNOWN_VALUE.match(name.strip())
+                 or RECORD_TYPE.match(name.strip())):
         return []
     extra = []
     if label and " - " in label and " - " in (name or ""):

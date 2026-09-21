@@ -1142,7 +1142,18 @@ window.addEventListener("load", async function () {
     var t = fold(qbox.value.trim());
     /* `q` now holds only the forms that are NOT the place's own name, so the
        name itself is folded here rather than shipped 2,128 times. */
-    if (t && fold(p.n).indexOf(t) < 0 && !(p.q && p.q.indexOf(t) > -1)) return false;
+    /* THE BLOB IS MATCHED ON WHOLE WORDS. `q` holds a place's other names
+       AND the country it stands in — Kyiv's reads "kyiv, soviet ukraine,
+       union". Searching «Krain», the German name of Carniola, therefore
+       selected every Ukrainian place on the map, and the map fitted its
+       bounds to Kyiv, Odesa and Stalin and flew to the middle of Ukraine
+       with an empty panel. Found by patching L.Map.fitBounds on the live
+       site and reading the stack, after three wrong guesses about which
+       corpus was matching.
+       The place's own name is still matched loosely, so typing part of a
+       name still finds it. It is the blob, which carries the country, that
+       has to respect word boundaries. */
+    if (t && fold(p.n).indexOf(t) < 0 && !(p.q && wordHit(p.q, t))) return false;
     if (year && p.s && (p.s[0] > year2 || p.s[1] < year)) return false;
     /* ANY of the chosen kinds, not all of them: somebody after church records
        and censuses wants both sorts of place, not only the places holding
@@ -1162,7 +1173,9 @@ window.addEventListener("load", async function () {
     });
     var aShown = 0;
     archMarkers.forEach(function (m) {
-      var ok = !t || m._q.indexOf(t) > -1;
+      /* Same blob, same fix: an archive's _q carries the town and country
+         it stands in, so «Krain» matched every archive in Ukraine too. */
+      var ok = !t || wordHit(m._q, t);
       if (ok) { if (!archiveLayer.hasLayer(m)) m.addTo(archiveLayer); aShown++; }
       else if (archiveLayer.hasLayer(m)) archiveLayer.removeLayer(m);
     });
@@ -1210,7 +1223,7 @@ window.addEventListener("load", async function () {
         var p = m._p;
         if (shelfLayer.hasLayer(m)) return false;
         var q = fold(p.n) + " " + (p.q || "");
-        return q.indexOf(t) > -1;
+        return wordHit(q, t);
       });
       if (hidden.length) {
         var one = hidden[0]._p;

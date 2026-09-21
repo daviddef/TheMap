@@ -15,14 +15,25 @@ export async function getStaticPaths() {
 
 const { region } = Astro.props;
 const PROV = Object.fromEntries(provs.providers.map((p) => [p.id, p]));
-const here = full.places.filter((p) => p.region === region.id)
-                        .sort((a, b) => a.name.localeCompare(b.name));
+/* CAPPED, like the country page and for the same reason. Ireland's region
+   holds 2,420 places and Scotland's 728; listing every one alphabetically
+   made a page of half a megabyte whose first screen was whichever places
+   begin with A. The ones carrying records come first, the rest are counted
+   rather than dropped, and /places/ has all of them. */
+const REGION_PLACE_CAP = 200;
+const hereAll = full.places.filter((p) => p.region === region.id)
+  .sort((a, b) => ((b.collections || []).length - (a.collections || []).length)
+                  || a.name.localeCompare(b.name));
+const here = hereAll.slice(0, REGION_PLACE_CAP);
+const hereHidden = hereAll.length - here.length;
 const traps = region.eras.filter((e) => (e.note || "").startsWith("THE "));
 
 /* The FamilySearch collections that reach this ground. A region's countries
    are taken from the places standing on it — which is why a region with no
    places yet shows none, honestly, rather than guessing from its outline. */
-const ccs = new Set(here.map((p) => p.country).filter(Boolean));
+/* From the FULL set: a country whose only place in this region sits past
+   the display cap still belongs to the region. */
+const ccs = new Set(hereAll.map((p) => p.country).filter(Boolean));
 const cols = collections.collections
   .filter((c) => c.countries.some((k) => ccs.has(k)))
   .map((c) => ({ c, local: c.places.some((p) => p.type && p.type !== "COUNTRY") }))
@@ -39,7 +50,7 @@ const centre = [
 <Base
   og="region"
   title={region.label}
-  eyebrow={`${region.eras.length} eras · ${span[0]}–${span[1]} · ${here.length} places`}
+  eyebrow={`${region.eras.length} eras · ${span[0]}–${span[1]} · ${hereAll.length.toLocaleString()} places`}
   dek={`${region.sub}. Which empire held this ground in which years — and, the part that matters, which archive that means.`}>
 
   {traps.length > 0 && (
@@ -88,9 +99,14 @@ const centre = [
     of the handover will tell you it holds nothing.</p>
   </section>
 
-  {here.length > 0 && (
+  {hereAll.length > 0 && (
     <section style="margin-top:34px">
-      <h2>{here.length} places on this ground</h2>
+      <h2>{hereAll.length.toLocaleString()} places on this ground</h2>
+      {hereHidden > 0 && (
+        <p class="cap">The {here.length} carrying the most collections are listed;
+        <b> {hereHidden.toLocaleString()} more</b> stand on this ground.
+        <a href={u("/places/")}> Every place</a> has them all.</p>
+      )}
       <ul class="places">
         {here.map((p) => <li><a href={u(`/place/${p.id}/`)}>{p.name}</a>
           <span class="y">{(p.collections || []).length}</span></li>)}

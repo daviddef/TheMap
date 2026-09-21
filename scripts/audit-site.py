@@ -317,6 +317,60 @@ def showcase():
                      f"{sum(len(r.get('names', [])) for r in rows)} names")
 
 
+def sitemap_covers_pages():
+    """Every page that was built should be in a sitemap, and vice versa.
+
+    17,961 surname pages were live while the sitemap listed 3,577 of them,
+    because the sitemap carried its own copy of the rule for which surnames
+    earn a page and that copy was three clauses out of date. Kosina had just
+    been given a page and no search engine would ever have been told.
+
+    A page missing from the sitemap is invisible. A sitemap entry with no
+    page is a 404 served to a crawler. Both are worth catching, and neither
+    shows up in a build log.
+    """
+    import xml.etree.ElementTree as ET
+    dist = "site/dist"
+    if not os.path.isdir(dist):
+        return
+    listed = set()
+    for p in glob.glob(os.path.join(dist, "sitemap-*.xml")):
+        if p.endswith("sitemap-index.xml"):
+            continue
+        try:
+            root = ET.parse(p).getroot()
+        except Exception as e:
+            bad("sitemap", f"{os.path.basename(p)} will not parse: {e}")
+            continue
+        for loc in root.iter("{http://www.sitemaps.org/schemas/sitemap/0.9}loc"):
+            u = (loc.text or "").strip()
+            i = u.find("/TheMap/")
+            if i >= 0:
+                listed.add(u[i + len("/TheMap/"):].strip("/"))
+    if not listed:
+        note("sitemap", "no sitemap files in the build")
+        return
+
+    built = set()
+    for kind in ("place", "surname", "country", "archive", "region"):
+        for p in glob.glob(os.path.join(dist, kind, "*", "index.html")):
+            built.add(f"{kind}/{os.path.basename(os.path.dirname(p))}")
+
+    missing = built - listed
+    orphan = {u for u in listed
+              if u.split("/")[0] in ("place", "surname", "country",
+                                     "archive", "region")} - built
+    if missing:
+        ex = ", ".join(sorted(missing)[:4])
+        bad("sitemap", f"{len(missing):,} built pages are in no sitemap, "
+                       f"so nothing will index them: {ex}")
+    if orphan:
+        ex = ", ".join(sorted(orphan)[:4])
+        bad("sitemap", f"{len(orphan):,} sitemap entries have no page, "
+                       f"so a crawler is being sent to a 404: {ex}")
+    note("sitemap", f"{len(listed):,} urls listed, {len(built):,} pages built")
+
+
 def weight():
     """What the site costs to host, and what one click costs to read.
 
@@ -392,6 +446,7 @@ def main():
         payloads()
         weight()
         accessibility(pages)
+        sitemap_covers_pages()
     volumes()
     provider_places()
     showcase()

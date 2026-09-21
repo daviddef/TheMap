@@ -22,7 +22,7 @@ actually failed on.
 
     python3 scripts/harvest-exonyms.py
 """
-import collections, json, os, re, sys, time, unicodedata
+import collections, json, math, os, re, sys, time, unicodedata
 import urllib.parse, urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -103,6 +103,53 @@ FILING_GROUPS = [
     set("GB IE IM".split()),
     set("FR IT CH AT DE".split()),
 ]
+
+
+# HOW FAR A BOOK MAY PLAUSIBLY HAVE CROSSED.
+# A filing group is a regional accident of history, not a licence to travel:
+# the Habsburg lands, the Russian Empire, the Low Countries. Nothing in one
+# is ten thousand kilometres from anything else in it.
+#
+# Without this, a Swiss collection's «Hane» resolved to Hane in the
+# Marquesas Islands — which is genuinely in France by country code, and
+# 15,000 km from Switzerland. The country-code test could never catch that,
+# because the country code was right.
+MAX_CROSSING_KM = 1500
+
+
+def km(a_lat, a_lon, b_lat, b_lon):
+    R, t = 6371.0, math.pi / 180
+    dlat, dlon = (b_lat - a_lat) * t, (b_lon - a_lon) * t
+    h = (math.sin(dlat / 2) ** 2
+         + math.cos(a_lat * t) * math.cos(b_lat * t) * math.sin(dlon / 2) ** 2)
+    return 2 * R * math.asin(math.sqrt(h))
+
+
+def country_boxes():
+    """Rough extent per country, from the places this atlas already trusts."""
+    try:
+        g = json.load(open("data/gazetteer.json", encoding="utf-8"))
+    except Exception:
+        return {}
+    G = g if isinstance(g, list) else g.get("places", list(g.values()))
+    box = {}
+    for r in G:
+        if not isinstance(r, dict) or not r.get("k") or r.get("y") is None:
+            continue
+        b = box.setdefault(r["k"], [90.0, -90.0, 180.0, -180.0])
+        b[0] = min(b[0], r["y"]); b[1] = max(b[1], r["y"])
+        b[2] = min(b[2], r["x"]); b[3] = max(b[3], r["x"])
+    return box
+
+
+def far_from(box, cc, y, x):
+    """Distance in km from a point to a country's extent; 0 if inside it."""
+    b = box.get(cc)
+    if not b:
+        return 0.0
+    cy = min(max(y, b[0]), b[1])
+    cx = min(max(x, b[2]), b[3])
+    return km(y, x, cy, cx)
 
 
 def neighbours(cc):
@@ -292,6 +339,7 @@ def main():
             return districts[0], 0
         return None, 1
 
+    boxes = country_boxes()
     found, home_n, abroad_n, district_n, ambiguous = {}, 0, 0, 0, 0
     for cc in ccs:
         for fm, books in wanted[cc].items():
@@ -305,8 +353,14 @@ def main():
             if amb:
                 ambiguous += 1
                 continue
+            # Only candidates a book could plausibly have crossed to. A
+            # filing group is a regional accident of history, not a licence
+            # to travel: «Hane» in a Swiss collection resolved to Hane in
+            # the Marquesas, which is France by country code and 15,000 km
+            # from Switzerland.
             away = [r for nb in neighbours(cc)
-                    for r in seen_forms.get(fm, {}).get(nb, [])]
+                    for r in seen_forms.get(fm, {}).get(nb, [])
+                    if far_from(boxes, cc, r["y"], r["x"]) <= MAX_CROSSING_KM]
             hit, amb = pick(away, strict=True)
             if hit:
                 rec = dict(hit)

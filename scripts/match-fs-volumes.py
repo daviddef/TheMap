@@ -108,6 +108,30 @@ IS_AREA = re.compile(r"province|state|region|county|district|department|"
                      r"archdiocese|country", re.I)
 
 
+# A DIVISION THAT ALREADY SAYS WHAT IT IS DOES NOT NEED TELLING.
+# The first cut appended "(province)" to every adm2, which produced «Kings
+# County (province)» — a US county is not a province, and 103,480 volumes
+# were sitting under that label. Two thirds of these names disclose their
+# own kind already: County, Borough, Municipality, Census Area, Provincia,
+# Bezirk. Those are left exactly as they are.
+# Where a name says nothing — «Udine», «Napoli» — it gets "(area)", which
+# is neutral and true of a province, a county and a canton alike. The point
+# of the suffix is only that a book placed on a division must not read like
+# a book placed on a parish.
+SELF_NAMING = re.compile(
+    r"\b(county|counties|province|provincia|provincie|region|regione|"
+    r"district|distrito|parish|shire|borough|municipality|municipio|"
+    r"d[ée]partement|departamento|bezirk|kreis|landkreis|oblast|okrug|"
+    r"voivodeship|prefecture|census area|city and borough|governorate|"
+    r"canton|comarca|condado|amt|fylke|l[äa]n|megye|zupanija|\u017eupanija)\b",
+    re.I)
+
+
+def division_label(name):
+    """The division's name, made honest about being a division."""
+    return name if SELF_NAMING.search(name) else f"{name} (area)"
+
+
 def haversine(a_lat, a_lon, b_lat, b_lon):
     """Kilometres between two points. Good enough to tell one town from two."""
     R, t = 6371.0, math.pi / 180
@@ -232,7 +256,30 @@ def readings(name, label=None):
 def main():
     if not os.path.exists(SRC):
         sys.exit(f"{SRC} is not there — run harvest-fs-waypoints.py first.")
-    wp = json.load(open(SRC))
+    # THE HARVEST IS WRITING THIS FILE WHILE WE READ IT.
+    # fs-waypoints.json is over a gigabyte and the waypoint harvest rewrites
+    # it whole at every checkpoint. That write is atomic in the current
+    # script — temp file, then rename — but the harvest running right now
+    # was started before that fix and truncates in place, so a reader can
+    # catch it half-written. This matcher died on exactly that, at char
+    # 885,953,526, after eight minutes of work.
+    #
+    # The file was perfectly valid thirty seconds later. So: read it again
+    # rather than fall over, and only give up if it stays broken, which
+    # would mean genuine corruption rather than a race.
+    wp = None
+    for _try in range(5):
+        try:
+            wp = json.load(open(SRC))
+            break
+        except json.JSONDecodeError as _e:
+            if _try == 4:
+                sys.exit(f"{SRC} will not parse after five attempts over two "
+                         f"minutes — this is corruption, not the harvest "
+                         f"writing: {_e}")
+            print(f"  {SRC} caught mid-write ({_e}); waiting 30s and rereading",
+                  flush=True)
+            time.sleep(30)
     places = json.load(open("data/places.json"))["places"]
 
     # THE COUNTRIES COME FROM collections.json, NOT FROM THE WAYPOINT FILE.
@@ -788,8 +835,7 @@ def main():
                     a = adm_idx.get((_cc, fold(cand)))
                     if not a:
                         continue
-                    kind = "province" if a.get("level") == "adm2" else "region"
-                    pname = f"{a['name']} ({kind})"
+                    pname = division_label(a["name"])
                     drawn = already_drawn(pname, _cc, a["lat"], a["lon"])
                     if drawn:
                         return {"id": drawn}, _cc, False
@@ -838,7 +884,7 @@ def main():
     # it, so every one of these was spending Wikidata queries on a name
     # nothing will ever match. Counted separately, under what they are.
     unplaceable = collections.Counter()
-    matched = miss = noname = area_only = 0
+    matched = miss = noname = 0
     seen = set()
 
     for cid, col in (wp.get("byCollection") or {}).items():
@@ -861,17 +907,23 @@ def main():
                     areas.append((name, lab))   # may vouch, may not win
                     continue
                 path.append((name, lab))
-            if not path:
-                # TWO VERY DIFFERENT FAILURES WERE BEING COUNTED AS ONE.
-                # A volume whose every level was filtered out might have
-                # nothing usable in it at all — or it might name a province
-                # and no town, in which case this atlas knows roughly where
-                # it is and is throwing that away. 321,582 volumes land here
-                # and the split between those two decides whether an
-                # area-level dot is worth building. Counted, not guessed.
+            if not path and not areas:
+                # NOTHING USABLE AT ALL — no town, no province, no county.
+                #
+                # This used to read `if not path`, which sent every volume
+                # whose only level was an AREA straight into the "no place
+                # at all" counter without ever calling resolve_path. That is
+                # where the division lookup lives, and its first loop simply
+                # does nothing on an empty path, so those books could have
+                # been read all along. 626,860 of them were falling past it.
+                #
+                # The measurement that proved this is what it replaced: a
+                # counter that split "nothing at all" from "an area and no
+                # town". Its whole purpose was to decide whether reading an
+                # area was worth building, the answer was 626,860 volumes,
+                # and it has now been built. A counter that can only report
+                # zero is worse than no counter, so it is gone.
                 noname += 1
-                if areas:
-                    area_only += 1
                 continue
             wider = neighbours(ccs)
             hit, hit_cc, abroad = resolve_path(idx, path, ccs, wider, areas)
@@ -961,7 +1013,6 @@ def main():
                    "volumes": sum(len(v) for v in by_place.values()),
                    "matched": matched, "unmatched": miss,
                    "noPathName": noname,
-                   "noPathButAnAreaNamed": area_only,
                    "unplacedButAreaIsInTheGazetteer": area_in_gaz[0],
                    "placedOnAnAdminDivision": area_placed[0]},
         "byPlace": {k: v for k, v in sorted(by_place.items())},
@@ -1005,10 +1056,7 @@ def main():
           + (f", and {area_in_gaz[0]:,} of those name an AREA the gazetteer "
              f"knows and this shelf does not draw (Udine, and its like)"
              if area_in_gaz[0] else ""))
-    print(f"  {noname:,} had no place in their path at all"
-          + (f" — but {area_only:,} of those name an area "
-             f"(a province, a county) and only lack a town"
-             if area_only else ""))
+    print(f"  {noname:,} had nothing usable in their path at all")
     print(f"\n{sum(len(v) for v in by_place.values()):,} distinct books on "
           f"{len(by_place):,} places -> {OUT}")
     print(f"{len(unplaced):,} unknown place names -> {GAPS}")

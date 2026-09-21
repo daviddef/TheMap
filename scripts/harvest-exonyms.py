@@ -193,11 +193,42 @@ def main():
         gaps = json.load(open("data/fs-volumes-unplaced.json"))["names"]
     except FileNotFoundError:
         sys.exit("run scripts/match-fs-volumes.py first")
+    # ASK FOR THE SEGMENTS TOO, NOT JUST THE WHOLE STRING.
+    # 8,790 unplaced names carry a comma and 116,159 volumes with them, and
+    # almost all are Cyrillic «place, church» pairs from Russian, Belarusian
+    # and Moldovan parish registers:
+    #
+    #   Кишинев, Харлампьевская церковь   Chișinău, the church of St Charalampus
+    #   Самара, Воскресенский собор       Samara, the Resurrection cathedral
+    #
+    # The first segment is a city. Wikidata knows it — this harvest has
+    # already resolved 698 bare Cyrillic names, Тверь to Tver and Бежецк to
+    # Bezhetsk among them — but it was asking for the entire string, church
+    # and all, which matches nothing and never will.
+    #
+    # The matcher already reads a name in segments, so a segment resolved
+    # here is a segment it can use. Brackets go the same way: «Albanasi
+    # (Zadar)» wants Albanasi asked for as well.
+    def wants(name):
+        out = [name]
+        out += [p.strip() for p in re.split(r"\s*,\s*", name) if p.strip()]
+        out += [re.sub(r"\s*\([^)]*\)", "", x).strip() for x in list(out)]
+        seen, keep = set(), []
+        for x in out:
+            f = fold(x)
+            if len(f) >= 3 and f not in seen:
+                seen.add(f)
+                keep.append(f)
+        return keep
+
     wanted = collections.defaultdict(dict)   # cc -> folded form -> books
     for g in gaps:
         cc = g.get("cc")
         if cc and g["n"]:
-            wanted[cc][fold(g["n"])] = g["volumes"]
+            for f in wants(g["n"]):
+                # The whole name keeps its own count; a segment inherits it,
+                # because placing the segment is what places the book.
+                wanted[cc][f] = max(wanted[cc].get(f, 0), g["volumes"])
     ccs = sorted(wanted, key=lambda c: -sum(wanted[c].values()))
 
     # Every form anybody is looking for, so a country's scan can throw away

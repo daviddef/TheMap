@@ -299,6 +299,29 @@ def main():
     # the same name, the largest is the likeliest subject of a record
     # collection, and the alternative is picking whichever came first in the
     # file.
+    # THE ADMINISTRATIVE DIVISIONS, which are the safe way to read an area.
+    # 360,259 volumes — 10.7% of everything harvested — fail because the only
+    # level they carry is an area: 124,201 name a province the gazetteer
+    # knows and this shelf does not draw, and 236,058 carry no town name at
+    # all, so a province is the only answer they can ever have.
+    # The shelf-only rule exists to avoid the Polla trap: «Pola» the Istrian
+    # province matching Polla the town in Campania. Matching an area against
+    # DIVISIONS cannot do that — Polla is a town and is not in this file,
+    # while Udine is, as adm2 at 46.06,13.19. It is the settlement gazetteer
+    # that was never safe for an area name, not the idea of reading one.
+    adm_idx = {}
+    try:
+        _adm = json.load(open("data/admin-divisions.json"))
+        _rows = _adm if isinstance(_adm, list) else _adm.get(
+            "divisions", _adm.get("rows", list(_adm.values())))
+        for _r in _rows:
+            if isinstance(_r, dict) and _r.get("name") and _r.get("lat") is not None:
+                adm_idx.setdefault((_r.get("cc"), fold(_r["name"])), _r)
+        print(f"admin divisions  {len(adm_idx):,} keyed, for reading an area "
+              f"when no town survives")
+    except Exception as _e:
+        print(f"admin divisions  unavailable ({_e})")
+
     gaz_idx = collections.defaultdict(list)
     try:
         gaz = json.load(open("data/gazetteer.json"))["places"]
@@ -754,6 +777,32 @@ def main():
                 hit, cc = look_in(index, fold(cand), ccs)
                 if hit:
                     return hit, cc, False
+        # THE DIVISION, WHERE THE SHELF HAS NO TOWN AND NEVER WILL.
+        # Placed on the province, and SAID so: the dot is named "Udine
+        # (province)", because a book placed to a province must not look
+        # like a book placed to a parish. The name carries the disclosure
+        # into the tooltip, the panel, the page title and the search.
+        for name, lab in reversed(areas):
+            for cand in readings(name, lab):
+                for _cc in ccs:
+                    a = adm_idx.get((_cc, fold(cand)))
+                    if not a:
+                        continue
+                    kind = "province" if a.get("level") == "adm2" else "region"
+                    pname = f"{a['name']} ({kind})"
+                    drawn = already_drawn(pname, _cc, a["lat"], a["lon"])
+                    if drawn:
+                        return {"id": drawn}, _cc, False
+                    pid = ("a-" + re.sub(r"[^a-z0-9]+", "-",
+                                         fold(a["name"])).strip("-")[:44]
+                           + "-" + _cc.lower())
+                    promote.setdefault(pid, {
+                        "id": pid, "name": pname, "country": _cc,
+                        "lat": a["lat"], "lon": a["lon"],
+                        "from": "admin-division"})
+                    area_placed[0] += 1
+                    return {"id": pid}, _cc, False
+
         # MEASURE WHAT THE SHELF-ONLY RULE IS COSTING.
         # «Santo Stefano» under an Austrian Küstenland collection has the
         # path ["Udine", "Santo Stefano"] and the labels ["Province",
@@ -773,6 +822,7 @@ def main():
 
     # Counter only — see the note in resolve_path.
     area_in_gaz = [0]
+    area_placed = [0]
     by_place = collections.defaultdict(list)
     promote = {}
     crossed = collections.Counter()
@@ -912,7 +962,8 @@ def main():
                    "matched": matched, "unmatched": miss,
                    "noPathName": noname,
                    "noPathButAnAreaNamed": area_only,
-                   "unplacedButAreaIsInTheGazetteer": area_in_gaz[0]},
+                   "unplacedButAreaIsInTheGazetteer": area_in_gaz[0],
+                   "placedOnAnAdminDivision": area_placed[0]},
         "byPlace": {k: v for k, v in sorted(by_place.items())},
     }, OUT)
 
@@ -947,6 +998,9 @@ def main():
     print(f"  {matched:,} matched a place "
           f"({100*matched/max(total,1):.0f}%), of which "
           f"{len(promote):,} are new dots promoted from the gazetteer")
+    if area_placed[0]:
+        print(f"  {area_placed[0]:,} placed on a province or region, named as such, "
+              f"because no town survived in their path")
     print(f"  {miss:,} named a place this atlas does not hold"
           + (f", and {area_in_gaz[0]:,} of those name an AREA the gazetteer "
              f"knows and this shelf does not draw (Udine, and its like)"

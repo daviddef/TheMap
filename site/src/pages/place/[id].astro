@@ -17,7 +17,7 @@ import { u } from "../../lib/url.js";
 import full from "../../data/places-full.json";
 import regions from "../../../public/regions.json";
 import provs from "../../../public/providers.json";
-import { sourcesFor, access as ACCESS } from "../../lib/sources-by-country.js";
+import { sourcesFor, sourcesNear, access as ACCESS } from "../../lib/sources-by-country.js";
 import idx from "../../../public/index.json";
 
 export async function getStaticPaths() {
@@ -59,7 +59,10 @@ try {
   volumes = (det.volumes || []).slice(0, 25);
   volumesTotal = det.volumesTotal || volumes.length;
 } catch (e) { volumes = []; det = {}; }
-const national = sourcesFor(place.country);
+/* Narrowed to what is near, not merely in the same country — see
+   sources-by-country.js. Italy put 126 archives on every Italian page. */
+const { shown: national, hidden: nationalHidden } =
+  sourcesNear(place.country, place.lat, place.lon, 10);
 /* Wikidata's national archive and library, where this atlas has nothing
    curated for the country. Kept apart from `national` above because those
    have been looked at and these have not. */
@@ -312,13 +315,16 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
       <p class="cap">National and regional sources that cover this ground <b>whether or not
       anybody has walked it here</b> — which makes them the answer, not the consolation, for
       a place with no volumes recorded on it. The worldwide services are left out: they cover
-      everywhere, so they say nothing about here.</p>
+      everywhere, so they say nothing about here.{nationalHidden > 0 && <> A country-wide body is
+      listed whatever the distance; a provincial archive is a claim over its own province, so
+      those are the <b>nearest</b> ones. <b>{nationalHidden.toLocaleString()} more</b> cover {countryName}
+      and are on the <a href={u(`/country/${place.country.toLowerCase()}/`)}>country page</a>.</>}</p>
       <ul class="vols" style="margin-top:12px">
         {national.map((p) => (
           <li>
             <a href={u(`/archive/${p.id}/`)}>{p.name}</a>
             <span class="who">{ACCESS[p.access] || p.access}</span>
-            {p.at && <span class="who">{p.at.place}</span>}
+            {p.at && <span class="who">{p.at.place}{p.km != null && ` — ${p.km.toLocaleString()} km`}</span>}
             {p.what && <><br /><span class="who">{p.what}</span></>}
           </li>
         ))}

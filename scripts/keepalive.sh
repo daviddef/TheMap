@@ -21,7 +21,18 @@ say() { echo "$(date '+%F %T')  $*" >> "$LOG"; }
 alive() {
   pgrep -f "$1" 2>/dev/null | while read -r p; do
     [ "$p" = "$$" ] && continue
-    ps -o args= -p "$p" 2>/dev/null | grep -q "keepalive.sh" || echo "$p"
+    a=$(ps -o args= -p "$p" 2>/dev/null)
+    # Skip this script, and skip SHELL WRAPPERS that merely mention the job.
+    # `pgrep -f` matches any command line containing the pattern, so a status
+    # command that types the job's name counts as the job running. That is
+    # how every wait-loop written this morning came to wait on itself, and
+    # here it would be worse than a hang: a dead harvest would look alive and
+    # never be restarted, which is the one thing this script exists to do.
+    case "$a" in
+      *supervise.sh*|*keepalive.sh*) continue ;;
+      *zsh\ -c*|*bash\ -c*|*sh\ -c*|*shell-snapshots*) continue ;;
+    esac
+    echo "$p"
   done | grep -c .
 }
 

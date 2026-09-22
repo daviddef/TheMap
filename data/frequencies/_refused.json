@@ -3,17 +3,6 @@
  "checked": "2026-09-22",
  "refused": [
   {
-   "country": "BE",
-   "name": "Belgium",
-   "tried": [
-    "statbel.fgov.be/en/open-data — the full open-data catalogue searched for name/nom/naam",
-    "statbel.fgov.be/en/open-data?category=51 — the population open-data category itself, read and searched for surname / nom de famille / familienaam / achternaam: not one dataset"
-   ],
-   "verdict": "first names only",
-   "why": "RECHECKED 22 September against the website, in the pass that corrected Croatia and closed Denmark, and Belgium is the one that did not move. Statbel publishes first names in exhaustive detail — by year, region and sex — and the population open-data category, read directly rather than searched through an API, contains no surname dataset in any of the three languages it publishes in. The gap is in what Belgium chooses to publish, not in what it holds, and no interactive lookup stands behind it either.",
-   "rechecked": "2026-09-22"
-  },
-  {
    "country": "CZ",
    "name": "Czechia",
    "tried": [
@@ -21,11 +10,12 @@
     "no surname table in the Czech Statistical Office's own catalogue",
     "mvcr.cz/clanek/cetnost-jmen-a-prijmeni — followed the redirect to mv.gov.cz, which 404s",
     "data.gov.cz SPARQL — the national open data catalogue, searched for «příjmení»",
-    "one record: «Četnost příjmení v ČR», IRI data.gov.cz/zdroj/podněty-na-data-k-otevření/R23"
+    "one record: «Četnost příjmení v ČR», IRI data.gov.cz/zdroj/podněty-na-data-k-otevření/R23",
+    "data.gov.cz SPARQL, rechecked 22 September: two name records in the whole catalogue — «Četnost jmen v ČR» and «Četnost příjmení v ČR» — and both are entries in the register of REQUESTS, not datasets"
    ],
-   "verdict": "formally requested, and formally refused in law",
-   "why": "RETRIED 21 September against the national catalogue rather than the old ministry page, and this is a better answer than the one this file had. The only record of Czech surname frequency in data.gov.cz is not a dataset at all — it sits in the register of REQUESTS for data to be opened (podněty na data k otevření, R23, filed 7 May 2024, publisher the Ministry of the Interior). Its status is «NelzePublikovat» — cannot be published — and it carries the flag existuje-překážka-dle-z. 106/1999 Sb., an obstacle under the Czech Act on Free Access to Information. So somebody asked for exactly this, through the proper channel, and the answer was a legal no. That is not a dead link or a page that moved; it is a decision, and it is the strongest evidence in this file. NOT RECHECKED 22 September, deliberately, while the other five were. The answer here is not an endpoint that might have moved — it is a decision recorded in the national catalogue under the Act on Free Access to Information. Re-fetching a URL would not change it, and pretending to have looked again would make this file less honest, not more current.",
-   "rechecked": "2026-09-21"
+   "verdict": "possible, and refused — the ministry says both",
+   "why": "RECHECKED 22 September against the national catalogue, and the answer is unchanged and more precise. R23 «Četnost příjmení v ČR», filed 7 May 2024 by the Ministry of the Interior (00007064), still carries status NelzePublikovat — cannot publish. What is new is what sits beside that status. The record asserts `existuje-překážka-dle-z--106-1999-sb: 1` — an obstacle exists under the Act on Free Access to Information — and, in the same breath, `možnost-poskytovat-formou-otevřených-dat: 1`: it IS possible to provide this as open data. The ministry is not saying the data cannot be made; it is saying the data will not be released. That distinction matters for what to do next. Every other country left on this list needs a file found or a gate to lift. Czechia needs somebody to ask — R23 is a request already lodged through the proper channel, and a formal žádost under Act 106/1999 is the route, not a better harvester. Nothing a script does will change this one.",
+   "rechecked": "2026-09-22"
   },
   {
    "country": "FI",
@@ -113,6 +103,19 @@
    "verdict": "the data is obtained; shipping it is not finished",
    "why": "RESOLVED 22 September, and this entry is kept in full because being wrong here was instructive. The refusal was not lazy: all 2,308 tables in api.statbank.dk were downloaded and searched for «navn», twice, and the finding — not one table mentions it — was true. It was also useless, because Denmark does not put its name statistics in the statistics bank. It puts them on its website. The same mistake as Croatia, found on the same afternoon, by the same method: a reader looked at the institution instead of its API. This project had built a habit of asking machines and concluding about organisations. What is published, under CC BY 4.0, is every surname borne by three or more people in Denmark as of January 2020 — 294,496 of them, harvested by scripts/harvest-denmark-surnames.py. AND NO COUNTS AT ALL: Denmark says which surnames exist and declines to say how many carry each, so the file is marked `counted: false` and its rows must never be summed. A figure for one name comes from «Hvor mange hedder...?», which is Denmark's version of the Croatian lookup. HELD BACK FOR AN HOUR, WRONGLY. 294,496 names is about 79 MB of surname shards, and this project nearly deferred shipping them against GitHub Pages' 1,024 MB — by measuring raw bytes, which is the exact mistake worklist row 25 was written to stop. The deploy's own report says the published artifact is 385 MB stored from 2,142 MB of files. Denmark costs about 18 MB of that. Measure the unit the limit is in. AND THEN IT BROKE THE BUILD. Having talked itself out of the size worry, this project shipped Denmark and astro build died with «Ineffective mark-compacts near heap limit» part-way through the surname pages. The worry was real and had been aimed at the wrong resource: not disk, which has 639 MB spare, but build memory — 294,496 names take the corpus from 668,450 to about 960,000, and the whole graph is held live while every surname page renders. Both calls on this file, the hold and the release, were made by reasoning rather than measuring, and both were wrong. The data is correct and waits in data/_pending with what has to be established before it ships. Denmark is obtained, not delivered, and this entry says so until it is.",
    "rechecked": "2026-09-21",
+   "resolved": "2026-09-22"
+  },
+  {
+   "country": "BE",
+   "name": "Belgium",
+   "tried": [
+    "statbel.fgov.be/en/open-data — the full open-data catalogue searched for name/nom/naam",
+    "statbel.fgov.be/en/open-data?category=51 — the population open-data category itself, read and searched for surname / nom de famille / familienaam / achternaam: not one dataset",
+    "statbel.fgov.be/en/themes/population/family-names-and-first-names/family-names — the theme page, which carries ten surname files (2017–2026) and links the open dataset TA_POP_LST_2026"
+   ],
+   "verdict": "CLOSED — and richer than anything else here",
+   "why": "RESOLVED 22 September, by a reader, hours after this entry had been rechecked and confirmed. The recheck was not lazy: the population open-data CATEGORY was read directly rather than searched through an API, in all three languages, and it contains no surname dataset. True. Statbel does not put its surname data in that category; it puts it on the family-names theme page, with ten files. THE FOURTH TIME THIS MISTAKE WAS CAUGHT IN ONE DAY — Croatia, Denmark, Sweden and now Belgium, every one an entry that searched a machine-readable index exhaustively and then made a claim about an institution, and every one found by somebody opening the organisation's website. The pattern is the finding; the four entries are just where it showed. AND BELGIUM IS BY MUNICIPALITY, which nothing else in this directory is. Every other register answers «how many people in this country carry this name». Belgium answers it for each of 565 communes — 510,811 rows of NIS code, commune, surname, count, CC BY 4.0. That is surname to place to number, the shape this whole atlas is built on and the thing it could not do for names: not «the Peeters are Belgian» but «there are 101 Peeters in Aartselaar». 106,869 surnames, 6,384,407 people, and the per-commune grain kept whole in data/belgium-by-municipality.json rather than summed away.",
+   "rechecked": "2026-09-22",
    "resolved": "2026-09-22"
   }
  ]

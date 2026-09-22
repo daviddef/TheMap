@@ -1,4 +1,7 @@
 ---
+/* Fixed when the page is generated, not read in the browser:
+   a date computed client-side would say «today» forever. */
+const built = new Date().toISOString().slice(0, 10);
 import { u } from "../lib/url.js";
 import site from "../data/site.json";
 /* Counted, not typed. This line is on all 6,000 pages and it is a licence
@@ -102,6 +105,7 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
   .skip { position: absolute; left: -9999px; }
   .skip:focus { left: 12px; top: 12px; z-index: 999; background: var(--panel);
                 padding: 10px 14px; border: 1px solid var(--accent); }
+  .foot-when { color: var(--ink-3); }
   footer.site-foot { margin-top: 60px; padding: 26px 0 40px;
                      border-top: 1px solid var(--rule); background: var(--panel); }
   .foot-note { font-family: var(--sans); font-size: 12.5px; line-height: 1.6;
@@ -210,6 +214,12 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
       <b>Record Atlas</b> — {site.tagline}. Built in the open:
       <a href={site.repo}>the data and the code are on GitHub</a>, and every source row
       says when it was last checked. A directory that lies is worse than no directory.
+      {/* WHEN THIS COPY WAS MADE. A researcher who looked in March and
+          found nothing for their parish has no way to know whether to
+          look again — the atlas gains places and volumes most weeks and
+          said so nowhere. The date is the build's own, which is the only
+          one that cannot drift from what is actually being served. */}
+      <br /><span class="foot-when">This copy built {built}.</span>
     </p>
     {site.analytics?.goatcounter && site.analytics?.showCount && (
       <p class="foot-note foot-thin vc" data-vc hidden>

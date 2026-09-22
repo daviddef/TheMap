@@ -211,7 +211,14 @@ export function surnameMap(ccs, { width = 680 } = {}) {
    one is about: a name in four Flemish communes should draw Flanders,
    not Belgium with a corner used. The country outline goes underneath so
    the towns have a shape to sit in. */
-export function placesMap(points, { cc = null, width = 680, max = 150 } = {}) {
+export function placesMap(points, { cc = null, width = 680, max = 150,
+                                    minPad = 0.25 } = {}) {
+  /* ONE COUNTRY OR SEVERAL. Belgium's communes are all Belgian, so this
+     began taking a single code. The place-name origin does not: a
+     surname that is also a place is often a place in three countries,
+     and calling this without a code at all drew a single dot in an
+     empty box — a map with no ground, which is not a map. */
+  const ccs = Array.isArray(cc) ? cc.filter(Boolean) : (cc ? [cc] : []);
   const pts = (points || []).filter((p) => p && p.y != null && p.x != null);
   if (!pts.length) return null;
   /* THE COMMONEST 150, AND SAY SO. Peeters is counted in 411 of the 565
@@ -225,8 +232,15 @@ export function placesMap(points, { cc = null, width = 680, max = 150 } = {}) {
     minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
     minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
   }
-  const padX = Math.max(0.25, (maxX - minX) * 0.12);
-  const padY = Math.max(0.15, (maxY - minY) * 0.12);
+  /* A FLOOR ON THE PADDING, BECAUSE ONE DOT HAS NO SPAN.
+     Belgium's communes spread four degrees and the proportional rule is
+     right for them. A surname that is also one town gives a span of
+     zero, and 0.25° of padding put the reader INSIDE Spain: a solid
+     block of land with a dot in the middle, which tells them nothing
+     about where in Spain it is. The caller says how much context the
+     picture needs. */
+  const padX = Math.max(minPad, (maxX - minX) * 0.12);
+  const padY = Math.max(minPad * 0.6, (maxY - minY) * 0.12);
   minX -= padX; maxX += padX; minY -= padY; maxY += padY;
 
   const spanX = maxX - minX || 1, spanY = maxY - minY || 1;
@@ -242,8 +256,12 @@ export function placesMap(points, { cc = null, width = 680, max = 150 } = {}) {
   const Y = (lat) => ((maxY - lat) / spanY) * height;
 
   const land = [];
-  const ring0 = cc && outline(cc);
-  for (const ring of (ring0 && ring0.rings) || []) {
+  const rings0 = [];
+  for (const one of ccs) {
+    const o = outline(one);
+    for (const r of (o && o.rings) || []) rings0.push(r);
+  }
+  for (const ring of rings0) {
     if (ring.length < 3) continue;
     const out = [];
     let px = null, py = null;

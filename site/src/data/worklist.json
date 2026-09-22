@@ -233,10 +233,10 @@
   {
    "n": 29,
    "what": "Denmark's 294,496 surnames are harvested and will not build",
-   "state": "next",
+   "state": "done",
    "owner": "this atlas",
    "since": "2026-09-22",
-   "note": "The data is right — CC BY 4.0, every surname borne by three or more people, from Statistics Denmark's own website. Shipping it killed `astro build` with «Ineffective mark-compacts near heap limit» at 8 GB, part-way through the surname pages. It had been held back an hour earlier on a guess about GitHub Pages' 1,024 MB, then released when the deploy's own report showed 385 MB stored of that. Both calls were reasoning, not measuring, and the second commit message said «there was never a decision to make». There was: the constraint was build memory, not disk. The ceiling is now 10240, which is headroom and not an answer. Two things to find out, in order: where the memory actually goes — site/src/data/surnames.json is imported whole and every page holds the graph live — and whether a Danish name whose only fact is «Denmark says this exists» should earn a page at all. `earnsPage` is the right place for that judgement, and finding it out through an out-of-memory crash is the wrong way. Waiting in data/_pending with a README. Measure, then ship."
+   "note": "**Done 22 September.** 294,496 Danish surnames, CC BY 4.0, now in the corpus — verified by a full local build before pushing: 41,263 pages, 19,779 surname pages, peak RSS 4.6 GB against a 10 GB ceiling. It took three wrong diagnoses. First GitHub Pages' 1,024 MB, which the deploy's own report already answered — 385 MB stored. Then the heap ceiling, raised twice. The stack trace named the real one: «Zone Allocation failed» inside FastJsonStringifier, 55 seconds in, heap at 1.4 GB. Four build entrypoints imported surnames.json, so Vite inlined 152 MB into a module's source text, in a compiler arena --max-old-space-size does not govern. Reading it from disk fixed it in one change. Every wrong guess here was reasoning where a measurement was available: the size was in the build log, and the cause was in the stack trace."
   },
   {
    "n": 30,

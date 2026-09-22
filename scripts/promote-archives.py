@@ -57,6 +57,7 @@ def verify(url):
         socket.getaddrinfo(host, None)
     except socket.gaierror:
         return "dead-host", url
+    last = None
     for candidate in (https, url):
         try:
             req = urllib.request.Request(candidate, headers={"User-Agent": UA})
@@ -69,8 +70,19 @@ def verify(url):
         except urllib.error.HTTPError as e:
             if candidate.startswith("https://") and e.code in (403, 418, 429):
                 return "https", candidate
+            last = e.code
         except Exception:
-            continue
+            last = last or "no-answer"
+    # «NO ANSWER» IS THREE DIFFERENT PROBLEMS AND ONLY ONE OF THEM IS OURS.
+    # A re-check flagged 41 providers at once and called them all the
+    # same thing. Opened by hand they were: a 404, where the institution
+    # is fine and the path moved; a 503, which wants retrying tomorrow
+    # and nothing else; and a connection that never completed. Telling a
+    # person «41 need a human» when 20 of them need a patience is how a
+    # list stops being read.
+    if isinstance(last, int):
+        return ("moved" if last == 404 else
+                "server-error" if 500 <= last < 600 else f"http-{last}"), url
     return "no-answer", url
 
 

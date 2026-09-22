@@ -190,7 +190,20 @@ window.addEventListener("load", async function () {
   }
   function setQ(k, v) { if (v === "" || v == null) Q.delete(k); else Q.set(k, v); push(); }
 
-  var map = L.map(el, { scrollWheelZoom: true, worldCopyJump: true });
+  /* CANVAS, NOT SVG, BECAUSE THERE ARE TWENTY-ONE THOUSAND DOTS.
+     Leaflet's default renderer makes one DOM element per vector marker.
+     Measured on the live site: 21,322 <path> elements, 21,645 DOM nodes in
+     the whole document, and a 268 MB JavaScript heap — so every pan and
+     every zoom asked the browser to lay out twenty-one thousand nodes, and
+     David reported the map as very slow.
+     preferCanvas draws them all into one canvas instead. circleMarker
+     supports it fully: clicks, tooltips, dashArray and per-marker styling
+     all behave the same, because this map styles through Leaflet options
+     rather than CSS on the paths.
+     The dot count is not the problem to solve — the places are real and
+     the map is meant to show them. The renderer was. */
+  var map = L.map(el, { scrollWheelZoom: true, worldCopyJump: true,
+                        preferCanvas: true });
   var BASES = {
     map: L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",
       { attribution: "&copy; OpenStreetMap contributors", maxZoom: 18 }),

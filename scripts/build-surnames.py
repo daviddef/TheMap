@@ -327,8 +327,29 @@ def main():
         key = os.path.basename(p)[:-5]
         SRC[key] = {"name": fq["source"], "url": fq.get("url"),
                     "licence": fq.get("licence"), "harvested": fq.get("harvested")}
+        # A THIRD GRAIN, AND THE MOST EASILY OVERSTATED.
+        # Italy taught this loop that «national» is a claim, not a default.
+        # Croatia is a further step down: its file is not a register at all
+        # but the answers to questions, because DZS's application will say
+        # how many people carry a surname you name and will not say which
+        # surnames exist. A reader told «Croatia: a national register» would
+        # reasonably conclude that a name absent from it is absent from
+        # Croatia, and that would be this atlas's own inference dressed as
+        # the census's.
+        if fq.get("enumerable") is False:
+            SRC[key]["enumerable"] = False
+            SRC[key]["grain"] = fq.get("grain") or (
+                "a lookup answered one name at a time, not a published list")
+        # A COUNT IS NOT GUARANTEED, AND ITS ABSENCE IS NOT A ZERO.
+        # attest() has always taken n=None and simply omitted the number,
+        # but this loop demanded row["c"], so a register that publishes
+        # WHICH names exist without saying how many people carry each —
+        # Denmark's, which lists every surname borne by three or more
+        # people and no figures at all — could not be read in at all.
+        # «Attested here» is the claim this atlas is actually built on;
+        # the count is a bonus.
         for row in fq["surnames"]:
-            attest(row["n"], cc, "register", key, row["c"])
+            attest(row["n"], cc, "register", key, row.get("c"))
         for fem, masc in (fq.get("gendered") or {}).items():
             link(fem, masc, "grammar")
         # NOT ALL OF THESE ARE NATIONAL. Italy has no national surname
@@ -336,7 +357,8 @@ def main():
         # publish their own residents' surnames as open data. Saying
         # "national register" of that would overstate the coverage of
         # exactly the country this atlas knows best.
-        grain = "comuni" if fq.get("byComune") else "a national register"
+        grain = ("a lookup, not a list" if fq.get("enumerable") is False
+                 else "comuni" if fq.get("byComune") else "a national register")
         print(f"{cc}: {len(fq['surnames'])} surnames from {grain}, "
               f"{len(fq.get('gendered') or {})} grammatical pairs")
 

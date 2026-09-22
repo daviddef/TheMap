@@ -81,8 +81,16 @@ def main():
         _idx = json.load(open(os.path.join("site", "public", "index.json")))
         _client = open(os.path.join("site", "src", "components",
                                     "RecordMap.astro"), encoding="utf-8").read()
+        # Both halves of the split index: a field that only the quiet rows
+        # carry is still a field every one of them ships.
+        _rows = list(_idx.get("places", []))
+        try:
+            _rows += json.load(open(os.path.join(
+                "site", "public", "index-quiet.json"))).get("places", [])
+        except OSError:
+            pass
         _keys = set()
-        for _r in _idx.get("places", []):
+        for _r in _rows:
             _keys |= set(_r)
         for _k in sorted(_keys):
             # A BARE `[f` IS A VARIABLE, NOT A FIELD READ. The old pattern
@@ -238,8 +246,18 @@ def main():
         asn = json.load(open("data/archive-surnames.json"))["archives"]
         count("archives", len(asn))
         count("archiveSurnames", len({n for a in asn.values() for n in a["surnames"]}))
-        count("registers", len([f for f in _g.glob("data/frequencies/*.json")
-                                if not os.path.basename(f).startswith("_")]))
+        # A LOOKUP IS NOT A REGISTER, AND THIS COUNTER SAYS SO.
+        # Counting every file in frequencies/ as a register would have made
+        # Croatia the ninth country with a published surname table, which is
+        # the one thing Croatia does not have: its file is the answers to
+        # 466 questions put to a form, not a list anybody published.
+        _fq = [f for f in _g.glob("data/frequencies/*.json")
+               if not os.path.basename(f).startswith("_")]
+        _enum = [f for f in _fq
+                 if json.load(open(f)).get("enumerable") is not False]
+        count("registers", len(_enum))
+        if len(_fq) > len(_enum):
+            count("lookups", len(_fq) - len(_enum))
         count("gazetteer", len(json.load(open("data/gazetteer.json"))["places"]))
         try:
             ie = json.load(open("data/ireland-osm.json"))

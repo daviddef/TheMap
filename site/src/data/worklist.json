@@ -297,18 +297,18 @@
   {
    "n": 37,
    "what": "Test the thing end to end, because nothing tests the client",
-   "state": "next",
+   "state": "running",
    "owner": "this atlas",
    "since": "2026-09-22",
-   "note": "David's, 22 September, and overdue. There are three data gates — check-data.py, audit-site.py, check-deployed.py — and they are good: they caught the shard-key bug, the wrong-country places and the duplicate dots. NOTHING TESTS THE THING A READER TOUCHES. Every client bug this month was found by a person looking at the page: the black continent in dark mode, the dots wiped a millisecond after being drawn, the map flying to the Atlantic, two headings for one name, 200 country markers left standing after a surname search. Two layers. Unit tests for site/src/lib — surname-pages, surname-map, belgium-surnames, atlas, url — which are pure functions and were where the box-order and framing bugs lived. Then Playwright over the built site: search a place, search a surname, click a dot, set a year, open full screen on a phone viewport, and assert the panel says what it should. Run both in CI before the deploy step, not after."
+   "note": "**Partly done 22 September — unit layer in, browser layer not.** 22 tests on Node's own runner, no dependency to install, wired into `npm run check` so they gate the build. They pin where the real bugs were: the box order read as x,y pairs, France's frame dragged to Réunion, the clamped height that squashed Belgium, the padding that put a reader inside a Spanish town, and «three countries with no count must not earn a page». Writing them found two things immediately: atlas.js could not load outside a bundler, and `node --test test/` dies on a directory in Node 26 — which would have failed on CI's first run. STILL MISSING: the browser layer. Playwright over the built site — search a place, search a surname, click a dot, set a year, a phone viewport — is the half that would have caught every bug David found by looking. It needs a browser download in CI and its own job, not a slot in a build that already takes forty minutes."
   },
   {
    "n": 38,
    "what": "Germany has 1,069 archives on the map and not one provider",
-   "state": "next",
+   "state": "done",
    "owner": "this atlas",
    "since": "2026-09-22",
-   "note": "The biggest single hole left. The Wikidata layer now carries 1,069 German archives with websites — more than any other country — and data/providers.json has exactly one row touching Germany, the Bundesarchiv, which is the least useful of them for a parish register. Germany's records sit in Landesarchive, Stadtarchive and church archives, and the French pattern applies: find the top-level set, open every URL, ship the ones that answer, mark them unsurveyed. Sixteen Landesarchive is an afternoon."
+   "note": "**Done 22 September.** 1 provider to 35: the Landesarchive, Staatsarchive and Landeskirchliche Archive. German civil registration begins in 1876 and the parish registers before it are largely with the church archives, so which of the two holds a record depends on its date and both are now in. Twelve did not answer and are not in. Done with scripts/promote-archives.py, which is general: a country, a name pattern, every URL opened."
   },
   {
    "n": 39,
@@ -337,10 +337,10 @@
   {
    "n": 42,
    "what": "The provider `checked` dates will start ageing out",
-   "state": "next",
+   "state": "done",
    "owner": "this atlas",
    "since": "2026-09-22",
-   "note": "check-data.py warns when a provider has not been re-checked in 365 days. 216 rows were written on 22 September, so in a year they all go off at once and the warning becomes noise nobody reads. A rolling re-check — the oldest fifty a month, by the same probe the French harvest uses — keeps it a signal."
+   "note": "**Done 22 September.** scripts/recheck-providers.py takes the N oldest, opens them and writes the date back; 120 done in the first run and one moved (Archion). A link that stops resolving is reported and NOT dropped — removing an institution is somebody's decision, not a script's, and ARHiNET is why the discipline exists."
   },
   {
    "n": 43,
@@ -369,10 +369,10 @@
   {
    "n": 46,
    "what": "The Others layer has 5,276 links nobody knows are there",
-   "state": "next",
+   "state": "done",
    "owner": "this atlas",
    "since": "2026-09-22",
-   "note": "Today's archive harvest gave 10,786 Wikidata archives and, for the first time, 5,276 websites. The layer is called «Others» and is off by default, so the map gained five thousand openable institutions and says nothing about it. Either the layer earns a better name and a count, or the archives layer merges them with the provenance shown."
+   "note": "**Done 22 September.** The label now counts them: «10,786 mapped by others, 5,276 with a website · unchecked, and not all genealogical». A layer worth turning on should say what turning it on gets you."
   },
   {
    "n": 47,
@@ -385,10 +385,10 @@
   {
    "n": 48,
    "what": "Measure the first paint on a real connection",
-   "state": "next",
+   "state": "done",
    "owner": "this atlas",
    "since": "2026-09-22",
-   "note": "index.json is 419 KB and the map waits on it, and that number is the one this project has reasoned about most and measured least. No Lighthouse run, no throttled profile, no figure for when a dot first appears on a phone on 4G. The split was justified by a byte count, which is not the same as a second."
+   "note": "**Done 22 September, and the answer was not the file size.** Measured live: first contentful paint 4,500 ms, and index.json was not REQUESTED until 4,821 ms because the map is built inside window.load, which waits for every image, font and CDN script. The 533→419 KB split saved a hundred kilobytes on a request that had not been made. Fetch now starts at parse time with a preload; locally index.json completes at 1,472 ms, before DOMContentLoaded. A budget is not a measurement."
   },
   {
    "n": 49,
@@ -409,10 +409,10 @@
   {
    "n": 51,
    "what": "One accessibility pass, properly",
-   "state": "next",
+   "state": "running",
    "owner": "this atlas",
    "since": "2026-09-22",
-   "note": "The map is a canvas of circles driven by a search box, the panel rewrites itself without announcing it, and the year control is two sliders. None of that has been through a screen reader or a keyboard-only run. This is the kind of thing that is cheap early and expensive at 45,000 pages."
+   "note": "**Partly done 22 September.** The panel rewrites itself on every answer and said nothing while doing it — aria-live=polite now, and the result count is its own status region. The map is labelled for what it is: 21,302 dots on one canvas cannot be tabbed through, and making them focusable would be 21,302 tab stops, so it says so and points at the search box and /places/, which reach the same answers in text. That is a fallback rather than an ARIA costume over an unusable control. NOT DONE: a real screen-reader run, contrast checks, and the year slider, which is two overlapping range inputs and almost certainly unusable by keyboard."
   },
   {
    "n": 52,

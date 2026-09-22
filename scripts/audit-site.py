@@ -237,7 +237,15 @@ def volumes():
     backwards = [r for r in rows
                  if r.get("from") and r.get("to") and r["from"] > r["to"]]
     future = [r for r in rows if (r.get("to") or 0) > 2026]
-    nourl = sum(1 for r in rows if not r.get("url"))
+    # A LINK THIS ROW CANNOT MAKE, NOT A LINK IT DOES NOT CARRY.
+    # This counted rows with no `url` field and reported «2,521,864 with
+    # no link» — every book in the atlas — on the same day the project
+    # spent hours proving those links work. The rows dropped their `url`
+    # deliberately when the volume file was slimmed; build.py builds it
+    # from the collection and waypoint ids instead. What is worth
+    # counting is a row that could not produce one if it tried.
+    nourl = sum(1 for r in rows
+                if not (r.get("url") or (r.get("col") and r.get("wp"))))
     if backwards:
         bad("volumes", f"{len(backwards)} books end before they begin, "
                        f"e.g. {backwards[0]['t'][:40]}")
@@ -245,7 +253,7 @@ def volumes():
         bad("volumes", f"{len(future)} books claim to run past this year, "
                        f"e.g. {future[0]['t'][:40]}")
     note("volumes", f"{len(rows):,} books on {len(w['byPlace']):,} places · "
-                    f"{noyear:,} with no year in the title · {nourl:,} with no link")
+                    f"{noyear:,} with no year in the title · {nourl:,} that cannot make a link")
 
 
 def provider_places():

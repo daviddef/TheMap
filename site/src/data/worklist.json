@@ -160,11 +160,11 @@
   },
   {
    "n": 20,
-   "what": "Close the countries with no surname register — was eight, now seven",
-   "state": "blocked",
+   "what": "Close the countries with no surname register — was eight, now five",
+   "state": "running",
    "owner": "the holders, and David for the Netherlands",
-   "since": "2026-09-21",
-   "note": "Italy is closed and the other seven are not mine to close. Each is blocked by a fact outside this project rather than by work not yet done: Czechia refused in law under Act 106/1999 Sb.; Sweden's tables retired by SCB; Denmark has no name table among 2,308; Belgium publishes first names only; Croatia's API holds no names; Finland's holder gates crawlers and this atlas does not climb gates; and the Netherlands needs a letter to the Meertens Instituut, drafted at docs/letter-meertens.md, which only David can send. Marked blocked rather than running because nothing here moves without one of them changing their mind."
+   "since": "2026-09-22",
+   "note": "**Denmark closed 22 September; Croatia, Sweden and Finland rewritten.** A reader asked why Croatia was blank and sent the Bureau of Statistics' own name application — which answers. This file had recorded Croatia as «the API answers now, and holds no names», a true statement about the wrong thing: DZS's PxWeb really has no surname table, and the data was on the website. Checking the other six the same way found the identical mistake under Denmark, whose entry proudly recorded that all 2,308 tables in the statistics bank had been searched for «navn». They had. Denmark publishes its names on its website, CC BY 4.0, and 294,496 surnames are now in data/frequencies/dk.json. Left: Belgium (publishes first names only), Czechia (formally refused in law), Netherlands (Meertens, to be asked not taken), Sweden and Finland (both answer one name at a time and publish no list). Croatia is partly closed — 466 surnames the atlas already attests, asked one at a time, marked `enumerable: false`. The lesson is worth more than the four entries: this project had been asking machines and concluding about organisations."
   },
   {
    "n": 21,
@@ -205,6 +205,30 @@
    "owner": "this atlas",
    "since": "2026-09-21",
    "note": "audit-site.py reported «the deployable site is 1418 MB and GitHub Pages publishes at most 1,024 — this will not deploy» about a build that deployed successfully minutes later in the same CI run. It was adding up raw bytes in dist/ and comparing them to a limit that applies to the COMPRESSED artifact, which GitHub stored at 189 MB. A 7.5:1 ratio, on a site that is almost all HTML and JSON. That one wrong comparison is why 16,138 surname pages were refused as unaffordable for weeks. The check now estimates the compressed size, sampled per file extension with a seeded sample so builds stay comparable, and prints the raw figure beside it so a local `du` does not look like a contradiction."
+  },
+  {
+   "n": 26,
+   "what": "The map waited on a fetch a quarter of which said «nothing here»",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-22",
+   "note": "**Done 22 September.** index.json is the one file the first paint waits on and it had reached 533 KB over the wire. There is no fat in the rows — 28 bytes each, and dropping every derivable id saves 3% because gzip already collapses that repetition. The honest saving was not in the rows but in which rows: 4,932 of the places carry no volume and no collection. They are real ground, correctly placed, nobody has walked them, and the difference between «not surveyed» and «nothing here» is one of this atlas's promises — so they stay on the map. They just stop being something the map waits for. 409 KB draws the atlas; 124 KB fills in the ground behind it a moment later. The split's real cost was everywhere else: ten static pages imported index.json and would have silently dropped those places — no `/place/<id>/` page for any of them — so they now import the index whole from `lib/atlas.js`. The audit's integrity checks, the deployed-site comparison and the unread-field gate were all reading half a file and believing it was the whole one."
+  },
+  {
+   "n": 27,
+   "what": "Draw the migration a surname made, not just where it ended up",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-09-22",
+   "note": "David's, 22 September. The surname page says where a name is borne and where a record names it, as two lists. It does not say that the one became the other. Blažević on this map is a column of countries; what a reader wants to see is Croatia to Germany, Croatia to the United States, with the weight of each line. The data for it is partly here already — archive-surnames.json carries each archive's declared country against every country its research reaches, which is a claim about movement — and partly not: nothing in this atlas yet holds «N families of this name left HERE for THERE». Acta Croatica has exactly that for Croatia and cannot be ingested (no licence, unstated derivation — see data/_declined.json), so the honest version is built from emigration sources this atlas can cite, not from arrows we felt like drawing. An arrow is a strong claim. Drawn from a guess it is the most confident-looking lie a map can tell."
+  },
+  {
+   "n": 28,
+   "what": "Make every surname a page worth citing: spellings, meaning, history",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-09-22",
+   "note": "David's, 22 September, and the largest thing on this list. The aim is for Record Atlas to become a source people cite for names, by drawing pictures no other site can — which it can only earn by being right, one name at a time. Three parts, and they are not equally hard. SPELLINGS is nearly solvable now: the atlas already links s/z and c/k alternations between two independently attested names, and Acta Croatica's Horvat page (Horvath, Horwath, Thorvat, Horváth, Horwat, Horvát, Thorwat, Horvatt, Horvaht) shows the standard to reach. MEANING and HISTORY are research per name, not a harvest — and the moment a page asserts an etymology it cannot cite, it stops being citable itself. So: no generated etymologies, no plausible guesses. Each one carries its source or the page says nothing. 16,138 surname pages at that standard is years of work, which is the right answer rather than a reason not to start: begin with the names the family archives actually turn on."
   }
  ]
 }

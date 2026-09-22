@@ -17,11 +17,29 @@ import gzip,json
 try:
   d=json.load(gzip.open('data/fs-volumes-world.json.gz'))
   bp=d.get('byPlace',{})
-  print(f'{sum(len(v) for v in bp.values()):,} on {len(bp):,} places')
-except Exception: print('an unknown number of')
+  print(f'{sum(len(v) for v in bp.values()):,} volumes on {len(bp):,} places')
+except Exception: print('an unknown number of volumes')
 " 2>/dev/null)
-    git add -A data/
-    git commit -q -m "Harvest: $n volumes placed
+    # STAGE THE HARVEST, NOT WHATEVER ELSE IS IN data/.
+    # `git add -A data/` swept up everything in the directory, including
+    # work in progress. On 22 September it committed and pushed a scratch
+    # scan file and a 5.4 MB surname corpus that had been deliberately held
+    # back pending a size check — the held-back file reached main within
+    # eleven minutes of being written, from a loop nobody was watching.
+    # An unattended committer must stage what it is FOR, by name.
+    git add -A data/fs-volumes.json data/fs-volumes-promote.json \
+              data/fs-volumes-unplaced.json data/fs-volumes-world.json.gz \
+              data/admin-divisions.json data/admin-undrawn.json \
+              data/exonyms.json 2>/dev/null
+    # Nothing of ours changed? Then there is nothing to publish, even if
+    # the working tree is busy with somebody else's edits.
+    git diff --cached --quiet && { \
+      echo "$(date '+%F %T')  harvest unchanged (other edits pending)" >> "$LOG"; \
+      continue; }
+    # The count already reads «N volumes on M places», so the old template's
+    # trailing «volumes placed» produced «2,840,841 on 15,816 places volumes
+    # placed» on every commit this loop has written.
+    git commit -q -m "Harvest: $n placed
 
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>" 2>/dev/null
     if git push -q origin main 2>/dev/null; then

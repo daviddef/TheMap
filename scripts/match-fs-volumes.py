@@ -492,6 +492,10 @@ def main():
     # United States a thousand kilometres apart, and they are two towns.
     # The same name, the same country AND within 25 km is one town written
     # down twice.
+    # Coordinates of every drawn place, by id — so a name match can be
+    # checked against where the two actually are.
+    _place_xy = {p["id"]: (p["lat"], p["lon"]) for p in places
+                 if p.get("lat") is not None}
     existing_by_name = collections.defaultdict(list)
     for _p in places:
         if _p.get("lat") is not None:
@@ -503,6 +507,46 @@ def main():
             if haversine(lat, lon, _p["lat"], _p["lon"]) <= limit_km:
                 return _p["id"]
         return None
+
+    def rough_xy(name, ccs):
+        """Roughly where a name is, by any route, or None.
+
+        Only used to sanity-check a match against its own parents, so a
+        rough answer is enough and being wrong here costs nothing: it can
+        only decline to veto.
+        """
+        for cand in readings(name):
+            fc = fold(cand)
+            for cc in ccs:
+                g = (gaz_idx.get((cc, fc)) or [None])[0]
+                if g and g.get("y") is not None:
+                    return (g["y"], g["x"])
+                e = exonym_idx.get((cc, fc))
+                if e and e.get("y") is not None:
+                    return (e["y"], e["x"])
+                got = idx.get((cc, fc))
+                if got:
+                    xy = _place_xy.get(min(got, key=lambda r: r[0])[1].get("id"))
+                    if xy:
+                        return xy
+        return None
+
+    # Memoised on the path, because the same tree repeats across thousands
+    # of volumes and this would otherwise run per book.
+    _parent_xy = {}
+
+    def parent_anchor(path, areas, ccs):
+        key = tuple(n for n, _ in list(path) + list(areas))
+        if key in _parent_xy:
+            return _parent_xy[key]
+        xy = None
+        # Shallowest first: the province or city, not the parish.
+        for name, _lab in list(areas) + list(path)[:-1]:
+            xy = rough_xy(name, ccs)
+            if xy:
+                break
+        _parent_xy[key] = xy
+        return xy
 
     def division_for(cand, cc, areas):
         """The division that `cand` means in `cc`, or None if it is unclear.
@@ -608,9 +652,28 @@ def main():
                     # pages, the country counts and every "places in X"
                     # figure were.
                     true_cc = e.get("cc") or cc
-                    # Prefer the place already drawn under its other name,
-                    # looked for where it actually is.
+                    # PREFER THE DOT ALREADY DRAWN — BUT ONLY IF IT IS THE
+                    # SAME PLACE. This matched on name alone and threw the
+                    # exonym's own coordinates away.
+                    #
+                    # «Архангельская» is a village in Tatarstan: 193 books
+                    # from «Russia, Tatarstan, Church Books», filed under
+                    # Казань › Чистополь. The exonym resolved it correctly,
+                    # to a settlement, with coordinates. Then this step
+                    # looked up the name on the shelf, found Arkhangelskaya
+                    # the first-level REGION at 63.71,41.17, and put all 193
+                    # on it — fifteen hundred kilometres north, in a
+                    # different republic.
+                    #
+                    # The exonym knows where it means. An existing dot is
+                    # only the same place if it is near it.
                     got = idx.get((true_cc, fold(e["n"]))) or idx.get((cc, fold(e["n"])))
+                    if got and e.get("y") is not None:
+                        near = [g for g in got
+                                if _place_xy.get(g[1].get("id")) and
+                                haversine(e["y"], e["x"],
+                                          *_place_xy[g[1]["id"]]) <= 25.0]
+                        got = near or None
                     if got:
                         return min(got, key=lambda r: r[0])[1], true_cc
                     if e.get("y") is None:
@@ -897,6 +960,7 @@ def main():
     # Counter only — see the note in resolve_path.
     area_in_gaz = [0]
     area_placed = [0]
+    far_from_parent = [0]
     col_titles = {}
     by_place = collections.defaultdict(list)
     promote = {}
@@ -1014,6 +1078,27 @@ def main():
             if (v.get("to") or 0) > THIS_YEAR or (v.get("from") or 0) > THIS_YEAR \
                or (0 < (v.get("from") or 0) < 1450) or (0 < (v.get("to") or 0) < 1450):
                 v = dict(v, **{"from": None, "to": None})
+            # A BOOK MUST LAND NEAR ITS OWN PARENTS.
+            # «Архангельская» is one of many Russian villages of that name.
+            # Its path says Казань › Чистополь — Tatarstan — and the match
+            # put 193 books on Arkhangelsk oblast, fifteen hundred
+            # kilometres north, because the name matched and nothing
+            # checked the geography. Correcting that one lookup only moved
+            # them to a third Архангельская, in Krasnodar, because a name
+            # alone cannot say which is meant.
+            # The parents can. Where a shallower level of the same path
+            # resolves to a rough position and the match sits more than
+            # 400 km from it, this refuses: the book stays unplaced, which
+            # is the honest answer, and a wrong dot is worse than a missing
+            # one.
+            anchor_xy = parent_anchor(path, areas, ccs)
+            hit_xy = _place_xy.get(hit.get("id")) or (
+                (promote[hit["id"]]["lat"], promote[hit["id"]]["lon"])
+                if hit.get("id") in promote else None)
+            if anchor_xy and hit_xy and haversine(*anchor_xy, *hit_xy) > 400:
+                far_from_parent[0] += 1
+                continue
+
             matched += 1
             if abroad and hit_cc:
                 crossed[(ccs[0] if ccs else "?") + "\u2192" + hit_cc] += 1
@@ -1058,7 +1143,8 @@ def main():
                    "matched": matched, "unmatched": miss,
                    "noPathName": noname,
                    "unplacedButAreaIsInTheGazetteer": area_in_gaz[0],
-                   "placedOnAnAdminDivision": area_placed[0]},
+                   "placedOnAnAdminDivision": area_placed[0],
+                   "refusedAsFarFromItsParent": far_from_parent[0]},
         # The collection titles, once each, instead of on 2.8 million rows.
         "colTitles": col_titles,
         "byPlace": {k: v for k, v in sorted(by_place.items())},
@@ -1095,6 +1181,9 @@ def main():
     print(f"  {matched:,} matched a place "
           f"({100*matched/max(total,1):.0f}%), of which "
           f"{len(promote):,} are new dots promoted from the gazetteer")
+    if far_from_parent[0]:
+        print(f"  {far_from_parent[0]:,} refused for landing more than 400 km "
+              f"from the province or city their own path names")
     if area_placed[0]:
         print(f"  {area_placed[0]:,} placed on a province or region, named as such, "
               f"because no town survived in their path")

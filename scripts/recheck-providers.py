@@ -56,7 +56,15 @@ def main():
 
     print(f"\n{dict(tally)}")
     if broken:
-        print(f"{len(broken)} need a human: a dead link is worse than a "
+        kinds = collections.Counter(v for _, v in broken)
+        moved = [r for r, v in broken if v == "moved"]
+        temp = [r for r, v in broken if v == "server-error"]
+        gone = [r for r, v in broken if v in ("dead-host", "no-answer")]
+        print(f"  {len(moved)} moved (404 — the body is fine, the path is not)")
+        print(f"  {len(temp)} server errors (retry, do not touch)")
+        print(f"  {len(gone)} did not answer at all")
+        print(f"{len(moved) + len(gone)} need a human; the {len(temp)} "
+              f"server errors need patience. A dead link is worse than a "
               f"missing one, and removing an institution is somebody's "
               f"decision, not a script's.")
     if not a.write:

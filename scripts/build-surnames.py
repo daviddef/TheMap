@@ -610,13 +610,17 @@ def main():
     gaz = collections.defaultdict(list)
     try:
         for g in json.load(open("data/gazetteer.json"))["places"]:
-            gaz[fold(g["n"])].append((g["n"], g.get("k"), g.get("p") or 0, "gazetteer"))
+            gaz[fold(g["n"])].append((g["n"], g.get("k"), g.get("p") or 0,
+                                      "gazetteer", g.get("y"), g.get("x")))
     except OSError:
         pass
     try:
         for c in json.load(open("data/italy-comuni.json"))["comuni"]:
             for form in [c["n"]] + (c.get("a") or []):
-                gaz[fold(form)].append((form, "IT", 0, "comune"))
+                # The comuni file has no coordinates; the gazetteer
+                # entry for the same town usually does, and a place with
+                # no position cannot be drawn.
+                gaz[fold(form)].append((form, "IT", 0, "comune", None, None))
     except OSError:
         pass
     toponym = 0
@@ -633,12 +637,22 @@ def main():
         forms[fold(r["n"])] = "name"
         hits, seen_p = [], set()
         for f, via in forms.items():
-            for nm, cc, pop, kind in gaz.get(f, []):
+            for nm, cc, pop, kind, y, x in gaz.get(f, []):
                 key = (fold(nm), cc)
                 if key in seen_p:
                     continue
                 seen_p.add(key)
-                hits.append({"n": nm, "cc": cc, "pop": pop, "kind": kind, "via": via})
+                h = {"n": nm, "cc": cc, "pop": pop, "kind": kind, "via": via}
+                # COORDINATES, SO THE CLAIM CAN BE DRAWN.
+                # This is a map, and «Llerena is a town in Extremadura»
+                # was being made as a sentence on a page while the town's
+                # position sat unused in the same gazetteer the match came
+                # from. A place-name origin a reader can see on the ground
+                # is the strongest thing this atlas can say about where a
+                # name came from — and the only one it can cite.
+                if y is not None and x is not None:
+                    h["y"], h["x"] = round(y, 4), round(x, 4)
+                hits.append(h)
         if hits:
             order = {"name": 0, "variant": 1, "sounds": 2}
             hits.sort(key=lambda h: (order[h["via"]], -h["pop"]))

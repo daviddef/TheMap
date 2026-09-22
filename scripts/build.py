@@ -1148,6 +1148,35 @@ def main():
                                            "withCountries": 0, "curatedLinks": 0,
                                            "withRegisterCount": 0},
                 "sources": [], "attestedBy": {}, "licence": "CC0-1.0"}
+    # ---- WHICH NAMES HAVE A PAGE, SO THE MAP CAN LINK TO THEM ---------
+    # The panel names a surname and had nowhere to send anybody: the
+    # surname page exists, with its variants, its timeline and its
+    # archives to write to, and the one place a reader meets the name was
+    # a dead end.
+    #
+    # ONLY 23,926 OF 946,575 NAMES HAVE A PAGE, so the link cannot simply
+    # be built from the name — it would 404 for all but one in forty. The
+    # rule lives in site/src/lib/surname-pages.js, shared by the page and
+    # the sitemap because those two had already drifted once and cost
+    # 14,384 pages their place in the sitemap.
+    #
+    # This is a THIRD copy of that rule, in another language, which is
+    # exactly the shape of that bug. It is mirrored here rather than
+    # fetched because build.py writes these shards long before Astro
+    # runs — and check-data.py runs both rules over the corpus and fails
+    # the build if they disagree by a single name.
+    def earns_page(r):
+        ccs = r.get("countries") or []
+        if not ccs:
+            return False
+        v = r.get("variants") or []
+        if any(x.get("how") == "curated" for x in v):
+            return True
+        if any(c.get("how") == "archive" for c in ccs):
+            return True
+        counted = sum(1 for c in ccs if c.get("n") is not None)
+        return counted >= 3 and any(x.get("how") == "spelling" for x in v)
+
     sshards, sbytes = {}, 0
     for r in surn["surnames"]:
         keys = {r["q"]}
@@ -1166,7 +1195,10 @@ def main():
             # itself, so shipping them is 440,000 copies of something already
             # known. The full record stays in surnames.json for anyone who
             # wants it; this is a search corpus, not the dataset.
-            uniq.append({kk: vv for kk, vv in r.items() if kk not in ("skel", "q")})
+            rec = {kk: vv for kk, vv in r.items() if kk not in ("skel", "q")}
+            if earns_page(r):
+                rec["pg"] = 1        # the map may link to /surname/<slug>/
+            uniq.append(rec)
         blob = json.dumps(uniq, ensure_ascii=False, separators=(",", ":"))
         sbytes += len(blob.encode())
         open(os.path.join(sn, k + ".json"), "w").write(blob)

@@ -1373,9 +1373,28 @@ window.addEventListener("load", async function () {
 
   function renderSurnames(list, term) {
     var h = [];
+    var same = list.length && fold(list[0].n) === fold(term);
     list.forEach(function (r) {
       h.push('<div class="ra-surn"><div class="lab">The name</div>');
-      h.push("<p><b>" + esc(r.n) + "</b></p>");
+      /* Suppressed when the panel's own heading is already this name —
+         see the canon note where the heading is built. */
+      if (!(same && fold(r.n) === fold(term)))
+        h.push("<p><b>" + esc(r.n) + "</b></p>");
+
+      /* AND SOMEWHERE TO GO. The panel named a surname and stopped,
+         while the atlas holds a page for it — variants, where it is
+         borne, when it was being born, and which archives to write to.
+         `pg` is set by build.py for the 23,926 names that have one;
+         without the flag this would 404 for thirty-nine names in forty,
+         because most surnames in a 946,575-name corpus have nothing to
+         put on a page. */
+      if (r.pg) {
+        var slug = fold(r.n).replace(/[^a-z0-9]+/g, "-")
+                            .replace(/^-|-$/g, "");
+        if (slug)
+          h.push('<p class="ra-go"><a href="' + BASE + "surname/" + slug +
+                 '/">Everything about ' + esc(r.n) + " &#8594;</a></p>");
+      }
 
       /* Everything but the phonetic guess counts as evidence here, which
                  now includes the spelling tier: one systematic substitution
@@ -1901,7 +1920,17 @@ window.addEventListener("load", async function () {
        place is called now. "Pressburg → Bratislava" is the whole answer to the
        first of the three problems, and it works in any country on earth. */
     empty.hidden = true; panel.hidden = false;
-    var h = ['<div class="at-h"><h3>' + esc(term) + "</h3></div>"];
+    /* ONE HEADER, AND THE NAME AS ITS OWNER SPELLS IT.
+       This echoed what was typed — «defranceski», lower case, because
+       that is how it was keyed — and then renderSurnames printed «The
+       name / Defranceski» directly underneath. Two headings for one
+       answer, the first of them a transcript of the reader's own
+       keystrokes. When the search is an exact surname the canonical
+       spelling is the better title, and the card below drops its
+       duplicate. */
+    var canon = null;
+    if (names.length && fold(names[0].n) === fold(term)) canon = names[0].n;
+    var h = ['<div class="at-h"><h3>' + esc(canon || term) + "</h3></div>"];
     if (names.length) {
       h.push(renderSurnames(names, term));
       /* The strongest evidence for a country wins its outline. A name in both

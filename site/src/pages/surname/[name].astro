@@ -360,22 +360,35 @@ const dek = `${r.n}${by.curated ? `, also written ${by.curated.slice(0,4).join("
      first version of this rendered a black continent with invisible dots
      on it — the browser's defaults, applied to markup no rule could
      reach. */
+  /* DARK MODE WAS HALF-APPLIED, WHICH IS WORSE THAN NOT AT ALL.
+     The background was written as var(--paper, #EDEAE3) and there is no
+     --paper token in this stylesheet, so it always fell back to the
+     light parchment — while the land, which did have a dark rule, went
+     near-black. The result was a black continent on a white sea, in a
+     dark page. Half a theme looks like a bug because it is one.
+     The site's own tokens now carry it, and the dark rules are written
+     twice the way styles.css does it: once for the media query and once
+     for an explicit [data-theme="dark"], because this site has a toggle
+     as well as a system preference. */
   .smap { margin: 14px 0 6px; }
   .smap :global(svg.sm) { display: block; width: 100%; height: auto;
               /* True aspect in the viewBox, height capped here — see
                  lib/surname-map.js, where clamping it squashed Belgium. */
               max-height: 460px;
-              background: var(--paper, #EDEAE3);
+              background: var(--panel, #EDEAE3);
               border: 1px solid var(--rule, #D8D3C8); border-radius: 2px; }
   .smap :global(.sm-land) { fill: #D5CFC2; stroke: #BDB6A6; stroke-width: .5; }
   .smap :global(.sm-c circle) { fill: var(--accent, #2F6F4E); fill-opacity: .78;
-                       stroke: #fff; stroke-width: 1; }
-  .smap :global(.sm-u circle) { fill: none; stroke: #7C8A91; stroke-width: 1.6;
-                       stroke-dasharray: 2 2; }
+                       stroke: var(--panel, #fff); stroke-width: 1; }
+  .smap :global(.sm-u circle) { fill: none; stroke: var(--ink-3, #7C8A91);
+                       stroke-width: 1.6; stroke-dasharray: 2 2; }
   .smap figcaption { margin-top: 8px; }
   @media (prefers-color-scheme: dark) {
-    .smap :global(.sm-land) { fill: #3A3D3B; stroke: #4E524F; }
+    :root:not([data-theme="light"]) .smap :global(.sm-land) {
+      fill: #2A3841; stroke: #3F515C; }
   }
+  :root[data-theme="dark"] .smap :global(.sm-land) {
+    fill: #2A3841; stroke: #3F515C; }
   h2 { font-family: var(--serif); font-size: 24px; font-weight: 500; margin: 0 0 4px; }
   .vars { font-family: var(--serif); font-size: 18px; line-height: 1.9; margin: 8px 0 0; }
   .vars b { font-weight: 500; margin-right: 16px; white-space: nowrap; }

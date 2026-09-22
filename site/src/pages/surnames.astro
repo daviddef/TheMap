@@ -8,6 +8,8 @@ import { statSync } from "node:fs";
 import Base from "../layouts/Base.astro";
 import { u } from "../lib/url.js";
 import { corpus } from "../lib/surname-corpus.js";
+import { surnameMap } from "../lib/surname-map.js";
+import { earnsPage, slugForSurname } from "../lib/surname-pages.js";
 const surn = corpus();
 import { atlas as idx } from "../lib/atlas.js";
 import refused from "../../../data/frequencies/_refused.json";
@@ -18,6 +20,22 @@ import refused from "../../../data/frequencies/_refused.json";
 const rechecked = refused.refused.filter((r) => r.rechecked).length;
 
 const CN = idx.countries || {};
+/* One real name to draw, picked rather than hard-coded: the name with a
+   page that is attested in the most countries, so the picture has
+   something in it. Hard-coding «Blažević» would have been a caption that
+   quietly rots the first time the corpus changes. */
+const demo = (() => {
+  let best = null;
+  for (const r of surn.surnames || []) {
+    const n = (r.countries || []).length;
+    if (n < 3 || !earnsPage(r)) continue;
+    if (!best || n > (best.countries || []).length) best = r;
+  }
+  if (!best) return null;
+  return { r: best, slug: slugForSurname(best.n),
+           map: surnameMap(best.countries.slice()
+                  .sort((a, b) => (b.n || 0) - (a.n || 0))) };
+})();
 const c = surn.counts || {surnames: 0, withVariants: 0, withCountries: 0, curatedLinks: 0};
 const withCc = surn.surnames.filter((r) => r.countries.length);
 const byCc = {};
@@ -92,6 +110,30 @@ function dlSize(name) {
     <p class="cap">Sources: {surn.sources.map((s) => <span>{s}<br /></span>)}</p>
   </section>
 
+  {/* THE ONE THING THIS PAGE DID NOT DO WAS SHOW YOU A NAME.
+      It listed what the corpus contains, how to download it and which
+      countries are missing — a dataset page, and a good one, for a
+      project whose whole argument is that a question about people is a
+      question about ground. A reader who came here after seeing a
+      surname drawn somewhere else found a table. */}
+  {demo && demo.map && (
+    <section style="margin-top:30px">
+      <h2>A name is a place, so it is drawn</h2>
+      <p class="cap">Every surname page carries this: the countries where
+      the registers and archives behind this atlas attest the name, sized
+      by how many people a state counted. Below is
+      {" "}<a href={u(`/surname/${demo.slug}/`)}>{demo.r.n}</a>.</p>
+      <figure class="smap">
+        <Fragment set:html={demo.map.svg} />
+      </figure>
+      <p class="cap"><b>A dot is a country, not a place</b>, and a hollow
+      ring is a name attested without being counted. Neither says anything
+      about the countries not drawn — most of the world has no surname
+      register this project can read, and the
+      {" "}{refused.refused.length} that do and will not are below.</p>
+    </section>
+  )}
+
   {examples.length > 0 && (
     <section style="margin-top:30px">
       <h2>What it looks like</h2>
@@ -162,6 +204,23 @@ function dlSize(name) {
 </Base>
 
 <style>
+  /* Same map, same rules, same reason for :global — the SVG arrives
+     through set:html and carries none of Astro's scoping attributes.
+     See src/pages/surname/[name].astro, where this was learnt by
+     shipping a black continent. */
+  .smap { margin: 14px 0 6px; }
+  .smap :global(svg.sm) { display: block; width: 100%; height: auto;
+              background: var(--paper, #EDEAE3);
+              border: 1px solid var(--rule, #D8D3C8); border-radius: 2px; }
+  .smap :global(.sm-land) { fill: #D5CFC2; stroke: #BDB6A6; stroke-width: .5; }
+  .smap :global(.sm-c circle) { fill: var(--accent, #2F6F4E); fill-opacity: .78;
+                       stroke: #fff; stroke-width: 1; }
+  .smap :global(.sm-u circle) { fill: none; stroke: #7C8A91; stroke-width: 1.6;
+                       stroke-dasharray: 2 2; }
+  @media (prefers-color-scheme: dark) {
+    .smap :global(.sm-land) { fill: #3A3D3B; stroke: #4E524F; }
+  }
+
   h2 { font-family: var(--serif); font-size: 26px; font-weight: 500; margin: 0 0 6px; }
   .verdict.re { background: var(--accent-wash); color: var(--accent);
                 border-color: var(--rule); }

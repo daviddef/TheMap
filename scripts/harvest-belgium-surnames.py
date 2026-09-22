@@ -30,7 +30,8 @@ grain, for the map to use when there is somewhere to put it.
 
 Statbel's open data are CC BY 4.0.
 """
-import collections, io, json, os, time, urllib.request, zipfile
+import collections, io, json, os, re, time, urllib.parse
+import urllib.request, zipfile
 
 ZIP = ("https://statbel.fgov.be/sites/default/files/files/opendata/"
        "Familienamen/TA_POP_LST_2026.zip")
@@ -41,6 +42,51 @@ UA = ("RecordAtlas/1.0 (+https://daviddef.github.io/TheMap; "
 CACHE = "data/.belgium-names-2026.zip"
 OUT = "data/frequencies/be.json"
 OUT_MUNI = "data/belgium-by-municipality.json"
+
+
+QLEVER = "https://qlever.dev/api/wikidata"
+
+
+def commune_points():
+    """NIS code -> (lat, lon), so the per-commune rows can be drawn.
+
+    Statbel gives the code and the name and no coordinates, which makes
+    the richest surname data in this atlas the only kind it cannot put on
+    a map. Wikidata carries the NIS code as P1567 on Belgian places, so
+    the join is exact rather than by name — and names are exactly what
+    would have gone wrong here, with every commune spelled two ways and
+    Sint-Gillis, Saint-Gilles and a dozen Sint-Martens- to choose between.
+
+    The codes must be the five-digit municipal ones. Wikidata holds 2,981
+    Belgian NIS codes and most are deelgemeenten with a letter suffix —
+    45059G, 12021B — which are real places and not what Statbel counted.
+    All 565 of Statbel's communes match on that rule.
+    """
+    q = """PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX wd: <http://www.wikidata.org/entity/>
+SELECT ?nis ?coord WHERE {
+  ?m wdt:P1567 ?nis . ?m wdt:P17 wd:Q31 . ?m wdt:P625 ?coord .
+}"""
+    url = QLEVER + "?" + urllib.parse.urlencode({"query": q})
+    req = urllib.request.Request(url, headers={
+        "Accept": "application/sparql-results+json", "User-Agent": UA})
+    try:
+        with urllib.request.urlopen(req, timeout=120) as r:
+            rows = json.loads(r.read())["results"]["bindings"]
+    except Exception as e:
+        print(f"  no coordinates this run ({e}) — the file keeps its codes")
+        return {}
+    out = {}
+    for x in rows:
+        nis = x["nis"]["value"].strip()
+        if not re.fullmatch(r"\d{5}", nis):
+            continue
+        w = x["coord"]["value"]
+        if not w[:6].upper().startswith("POINT("):
+            continue
+        lon, lat = w[6:w.rindex(")")].split()
+        out.setdefault(nis, (round(float(lat), 5), round(float(lon), 5)))
+    return out
 
 
 def fetch():
@@ -114,6 +160,9 @@ def main():
     }
     json.dump(out, open(OUT, "w"), ensure_ascii=False, separators=(",", ":"))
 
+    xy = commune_points()
+    placed = sum(1 for nis in by_muni if nis in xy)
+
     muni = {
         "note": ("Belgian surnames per municipality, CC BY 4.0 (Statbel, "
                  "1 January 2026). `m` is the NIS code, with the Dutch and "
@@ -124,10 +173,11 @@ def main():
                  "the smallest counts per commune."),
         "source": out["source"], "licence": out["licence"],
         "harvested": out["harvested"],
-        "counts": out["counts"],
+        "counts": dict(out["counts"], placed=placed),
         "municipalities": [
-            {"m": nis, "nl": names[nis]["nl"], "fr": names[nis]["fr"],
-             "s": sorted(v, key=lambda r: (-r[1], r[0]))}
+            dict({"m": nis, "nl": names[nis]["nl"], "fr": names[nis]["fr"],
+                  "s": sorted(v, key=lambda r: (-r[1], r[0]))},
+                 **({"y": xy[nis][0], "x": xy[nis][1]} if nis in xy else {}))
             for nis, v in sorted(by_muni.items())],
     }
     json.dump(muni, open(OUT_MUNI, "w"), ensure_ascii=False,
@@ -135,7 +185,8 @@ def main():
 
     print(f"{OUT}: {len(surnames):,} surnames, "
           f"{sum(national.values()):,} people")
-    print(f"{OUT_MUNI}: {len(by_muni):,} municipalities, {rows:,} rows"
+    print(f"{OUT_MUNI}: {len(by_muni):,} municipalities "
+          f"({placed:,} with coordinates), {rows:,} rows"
           + (f", {skipped:,} unparsed" if skipped else ""))
     for n, c in surnames[:8]:
         print(f"  {c:>7,}  {n}")

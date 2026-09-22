@@ -18,6 +18,8 @@ import { atlas as idx } from "../../lib/atlas.js";
 import { sourcesFor, access as PACCESS } from "../../lib/sources-by-country.js";
 import { curveFor } from "../../lib/fr-curve.js";
 import { corpus } from "../../lib/surname-corpus.js";
+import { surnameMap, placesMap } from "../../lib/surname-map.js";
+import { belgiumFor } from "../../lib/belgium-surnames.js";
 
 export async function getStaticPaths() {
   const surn = corpus();
@@ -95,6 +97,18 @@ const KIND_OF = {
 };
 const ccs = r.countries.slice().sort((a, b) => (b.n || 0) - (a.n || 0));
 const total = ccs.reduce((a, c) => a + (c.n || 0), 0);
+/* The same countries, drawn. Built here rather than fetched, so the
+   picture is in the page before any script runs — see lib/surname-map.js
+   for why nineteen thousand Leaflets was not the answer. */
+const smap = surnameMap(ccs);
+/* AND ONE COUNTRY CAN BE DRAWN PROPERLY. Statbel counts every surname in
+   each of 565 communes, so where the other ten registers can only put a
+   dot on a country, Belgium puts dots on towns. It is the only one, and
+   the page has to say so rather than let a reader read a blank France as
+   a fact about the name. */
+const beRows = belgiumFor(r.n);
+const bemap = beRows && placesMap(beRows, { cc: "BE" });
+const beTotal = beRows ? beRows.reduce((a, x) => a + x.c, 0) : 0;
 const dek = `${r.n}${by.curated ? `, also written ${by.curated.slice(0,4).join(", ")}` : ""}. `
   + `Attested in ${ccs.map((c) => CN[c.cc] || c.cc).join(", ")}`
   + (total ? `, borne by about ${total.toLocaleString()} people in the registers this map holds.` : ".");
@@ -163,6 +177,51 @@ const dek = `${r.n}${by.curated ? `, also written ${by.curated.slice(0,4).join("
 
   <section style="margin-top:30px">
     <h2>Where it is borne, and where a record names it</h2>
+    {smap && (
+      <figure class="smap">
+        <Fragment set:html={smap.svg} />
+        <figcaption class="cap">
+          {/* THE CAPTION IS PART OF THE PICTURE, not decoration under it.
+              A map with two dots on it makes three claims a reader will
+              believe unless told otherwise, and all three would be wrong. */}
+          <b>A dot is a country, not a place.</b> It sits at the country's
+          centre because a national register counts a country; nothing here
+          says where in it these people are.
+          {smap.counted < smap.drawn && (
+            <> <b>A hollow ring is attested but not counted</b> — Denmark
+            publishes which surnames exist and not how many carry each, and a
+            family archive finds a name without counting heads. Sizing those
+            by a number nobody published would invent it.</>
+          )}
+          {" "}<b>Blank is not absence.</b> This draws
+          {" "}{ccs.length === 1 ? "the one country" : `the ${ccs.length} countries`}
+          {" "}where the eleven registers and eight archives behind this atlas
+          attest the name. Most of the world has no surname register this
+          project can read, and <a href={u("/surnames/")}>the ones that do and
+          will not are listed with the reason</a>.
+        </figcaption>
+      </figure>
+    )}
+
+    {bemap && (
+      <figure class="smap" style="margin-top:22px">
+        <figcaption class="cap" style="margin:0 0 8px">
+          <b>Belgium, by commune.</b> {beTotal.toLocaleString()} people in
+          {" "}{beRows.length} of Belgium's 565 communes, counted by Statbel.
+          The biggest is <b>{beRows[0].nl}</b> with
+          {" "}{beRows[0].c.toLocaleString()}.
+          {bemap.omitted > 0 && (
+            <> Only the {bemap.drawn} commonest are drawn; {bemap.omitted}
+            {" "}more communes hold a few each.</>
+          )}
+          {" "}This is the only country here that can be drawn this way —
+          every other register counts a country and stops, so a blank
+          elsewhere is a gap in what states publish, not in the name.
+        </figcaption>
+        <Fragment set:html={bemap.svg} />
+      </figure>
+    )}
+
     <p class="cap">Two different claims, and they used to be one word. A <b>register</b> is a
     head-count — a state counted these people. A <b>record</b> is one document naming the
     surname on that ground, which is narrower evidence and often very much older. Neither ever
@@ -290,6 +349,33 @@ const dek = `${r.n}${by.curated ? `, also written ${by.curated.slice(0,4).join("
 </Base>
 
 <style>
+  /* The surname map. Land is a wash, not a subject: it is there so a dot
+     has somewhere to sit. The dot colours match the main map's grammar —
+     filled means somebody counted, hollow and dashed means nobody has.
+
+     :global BECAUSE THE SVG IS INJECTED, NOT WRITTEN HERE. Astro scopes
+     a component's styles by stamping a data attribute on the elements in
+     its own template, and the map arrives through `set:html`, so it
+     carries no such attribute and every scoped selector missed it. The
+     first version of this rendered a black continent with invisible dots
+     on it — the browser's defaults, applied to markup no rule could
+     reach. */
+  .smap { margin: 14px 0 6px; }
+  .smap :global(svg.sm) { display: block; width: 100%; height: auto;
+              /* True aspect in the viewBox, height capped here — see
+                 lib/surname-map.js, where clamping it squashed Belgium. */
+              max-height: 460px;
+              background: var(--paper, #EDEAE3);
+              border: 1px solid var(--rule, #D8D3C8); border-radius: 2px; }
+  .smap :global(.sm-land) { fill: #D5CFC2; stroke: #BDB6A6; stroke-width: .5; }
+  .smap :global(.sm-c circle) { fill: var(--accent, #2F6F4E); fill-opacity: .78;
+                       stroke: #fff; stroke-width: 1; }
+  .smap :global(.sm-u circle) { fill: none; stroke: #7C8A91; stroke-width: 1.6;
+                       stroke-dasharray: 2 2; }
+  .smap figcaption { margin-top: 8px; }
+  @media (prefers-color-scheme: dark) {
+    .smap :global(.sm-land) { fill: #3A3D3B; stroke: #4E524F; }
+  }
   h2 { font-family: var(--serif); font-size: 24px; font-weight: 500; margin: 0 0 4px; }
   .vars { font-family: var(--serif); font-size: 18px; line-height: 1.9; margin: 8px 0 0; }
   .vars b { font-weight: 500; margin-right: 16px; white-space: nowrap; }

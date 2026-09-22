@@ -229,6 +229,14 @@
    "owner": "this atlas",
    "since": "2026-09-22",
    "note": "David's, 22 September, and the largest thing on this list. The aim is for Record Atlas to become a source people cite for names, by drawing pictures no other site can — which it can only earn by being right, one name at a time. Three parts, and they are not equally hard. SPELLINGS is nearly solvable now: the atlas already links s/z and c/k alternations between two independently attested names, and Acta Croatica's Horvat page (Horvath, Horwath, Thorvat, Horváth, Horwat, Horvát, Thorwat, Horvatt, Horvaht) shows the standard to reach. MEANING and HISTORY are research per name, not a harvest — and the moment a page asserts an etymology it cannot cite, it stops being citable itself. So: no generated etymologies, no plausible guesses. Each one carries its source or the page says nothing. 16,138 surname pages at that standard is years of work, which is the right answer rather than a reason not to start: begin with the names the family archives actually turn on."
+  },
+  {
+   "n": 29,
+   "what": "Denmark's 294,496 surnames are harvested and will not build",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-09-22",
+   "note": "The data is right — CC BY 4.0, every surname borne by three or more people, from Statistics Denmark's own website. Shipping it killed `astro build` with «Ineffective mark-compacts near heap limit» at 8 GB, part-way through the surname pages. It had been held back an hour earlier on a guess about GitHub Pages' 1,024 MB, then released when the deploy's own report showed 385 MB stored of that. Both calls were reasoning, not measuring, and the second commit message said «there was never a decision to make». There was: the constraint was build memory, not disk. The ceiling is now 10240, which is headroom and not an answer. Two things to find out, in order: where the memory actually goes — site/src/data/surnames.json is imported whole and every page holds the graph live — and whether a Danish name whose only fact is «Denmark says this exists» should earn a page at all. `earnsPage` is the right place for that judgement, and finding it out through an out-of-memory crash is the wrong way. Waiting in data/_pending with a README. Measure, then ship."
   }
  ]
 }

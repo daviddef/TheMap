@@ -69,6 +69,19 @@ COUNT_COL = re.compile(r"^(occorrenze|numero|num|frequenza|diffusione|conteggio|
 # A percentage is not a count. One file offers both «Diffusione (Frequenza)»
 # and «Diffusione (Percentuale)» and the prefix above matches each.
 NOT_A_COUNT = re.compile(r"percentual|percent|%|media|rank|posizione", re.I)
+
+# A SUMMARY ROW IS NOT A SURNAME.
+# Several comuni end their spreadsheet with a total, and one of them shipped
+# «TOTALE COMPLESSIVO» into this atlas as an Italian surname borne by
+# 541,764 people — by a wide margin the commonest name in the country, on a
+# page that invites people to look their family up. It survived because the
+# row is shaped exactly like a surname row: a word in the name column and a
+# number in the count column.
+# Matched whole, not as a prefix: «Somma», «Sommariva» and «Sommavilla» are
+# real surnames, and a loose rule would have quietly deleted them.
+SUMMARY_ROW = re.compile(
+    r"^\s*(totale(\s+complessivo)?|tot\.?|somma\s+totale|complessivo|"
+    r"altri\s+cognomi|totali)\s*$", re.I)
 YEAR_COL = re.compile(r"^(anno|year)\b", re.I)
 
 # A title has to be about surnames, not merely mention one. «Eletti nel 2023
@@ -195,6 +208,8 @@ def read_csv(blob):
             continue
         # A surname, not a sentence, and not a single initial.
         if len(n) < 2 or len(n) > 60 or any(ch.isdigit() for ch in n):
+            continue
+        if SUMMARY_ROW.match(n):
             continue
         pairs.append((n.upper(), int(c)))
         if yi is not None and year is None and len(row) > yi:

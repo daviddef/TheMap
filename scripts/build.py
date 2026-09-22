@@ -1171,6 +1171,77 @@ def main():
         sbytes += len(blob.encode())
         open(os.path.join(sn, k + ".json"), "w").write(blob)
 
+    # ---- WHERE A NAME IS, AT THE GRAIN OF A TOWN --------------------------
+    # Every register in data/frequencies/ answers «how many people in this
+    # COUNTRY carry this name», so a surname search could only ever shade a
+    # country. Belgium answers it per commune, and once the NIS codes are
+    # joined to coordinates the map can stop pointing at a country and point
+    # at towns: not «the Peeters are Belgian» but 2,060 of them in Antwerpen.
+    #
+    # ITS OWN SHARDS, NOT FOLDED INTO s/. The search shards are fetched on
+    # every keystroke past three characters. Belgian commune rows are wanted
+    # only once a name has actually matched and only for Belgian names, and
+    # Peeters alone is 411 communes — putting them in s/ would make every
+    # search pay for a layer most searches never draw. Same three-character
+    # rule, so the client already knows how to find the file.
+    bs = os.path.join(OUT, "bs")
+    shutil.rmtree(bs, ignore_errors=True)
+    os.makedirs(bs)
+    try:
+        bemu = json.load(open("data/belgium-by-municipality.json"))["municipalities"]
+    except (FileNotFoundError, KeyError):
+        bemu = []
+    # THE SAME THREE-CHARACTER RULE AS EVERY OTHER SHARD HERE.
+    # A fourth character was tried, because Belgian surnames pile up behind
+    # «Van » — at three, every one of them lands in a single shard. Four
+    # splits vand/vanh/vanb and takes the worst file from 481 KB to 185.
+    # It also quintuples the file count, from 5,390 to 25,509, on a site
+    # already serving 106,000 files and taking forty-five minutes to
+    # deploy; and it puts a second sharding rule in the codebase that the
+    # client must match exactly, which is a bug this project has already
+    # had once between build and client.
+    # 481 KB is about 130 KB over the wire, paid once, only by someone who
+    # searched a name and only for Belgian names. Interning the commune
+    # table below is what makes that affordable. One rule, fewer files.
+
+    place = {m["m"]: [round(m["y"], 4), round(m["x"], 4), m["nl"]]
+             for m in bemu if m.get("y") is not None and m.get("x") is not None}
+    byname = {}
+    for m in bemu:
+        if m["m"] not in place:
+            continue
+        for name, c in m.get("s", []):
+            byname.setdefault(fold(name), []).append((m["m"], c))
+
+    bshards, bbytes, bnames = {}, 0, 0
+    for form, rowsb in byname.items():
+        k = shard_key(form)
+        if not k:
+            continue
+        # Commonest first and capped at sixty: past that a commune holds
+        # three people and two pixels. The client is told the true total so
+        # the picture never implies the name stops where the drawing does.
+        rowsb.sort(key=lambda r: -r[1])
+        bshards.setdefault(k, {})[form] = (rowsb[:60], len(rowsb),
+                                           sum(r[1] for r in rowsb))
+        bnames += 1
+    for k, names in bshards.items():
+        # THE COMMUNE TABLE IS INTERNED PER SHARD. «Antwerpen» and its two
+        # coordinates appear in thousands of rows otherwise; naming each
+        # commune once and referring to it by index took bs/ from 17 MB to
+        # 13.7 and the worst shard from 461 KB to 185.
+        used = sorted({nis for v in names.values() for nis, _ in v[0]})
+        at = {nis: i for i, nis in enumerate(used)}
+        obj = {"c": [place[nis] for nis in used],
+               "n": {f: [[[at[nis], cnt] for nis, cnt in v[0]], v[1], v[2]]
+                     for f, v in names.items()}}
+        blob = json.dumps(obj, ensure_ascii=False, separators=(",", ":"))
+        bbytes += len(blob.encode())
+        open(os.path.join(bs, k + ".json"), "w").write(blob)
+    if bnames:
+        print(f"bs/*.json       {bbytes/1024:8.1f} KB  {len(bshards)} shards, "
+              f"{bnames:,} Belgian surnames at commune grain")
+
     # The dataset as a thing you can take away, not only as something the map
     # uses: one JSON and one CSV at a stable address, CC0, so another project
     # can consume it without reading any of this code.

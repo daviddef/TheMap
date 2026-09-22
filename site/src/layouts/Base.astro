@@ -17,11 +17,17 @@ const { title, dek, eyebrow, bare, jsonld, og = "default" } = Astro.props;
    its 1px gap, and below 1180px its display:none!important hid them behind a
    menu button that did not exist. Eleven top-level links was too many anyway. */
 const nav = [
+  /* SURNAMES ARE THE FRONT DOOR AND WERE FILED AS A DATASET. People arrive
+     holding a name far more often than a place — it is the one thing on a
+     certificate that survives every border change — and 23,930 of these
+     pages exist, each naming the spellings, the countries, and the archives
+     to write to. The navigation listed them fourth, under a word that reads
+     like a table of statistics. Second, and named as the question. */
   ["Explore", [
     ["/", "The map"],
+    ["/surnames/", "Look up a surname"],
     ["/places/", "Every place"],
     ["/countries/", "Countries"],
-    ["/surnames/", "Surnames"],
   ]],
   ["The sources", [
     ["/providers/", "Who holds records"],
@@ -31,6 +37,9 @@ const nav = [
   ["About", [
     ["/start/", "Start here"],
     ["/about/", "About the atlas"],
+    /* The files this map draws from are public URLs and nothing said so.
+       A licence nobody can find is a licence nobody can act on. */
+    ["/data/", "Use the data"],
     ["/changelog/", "What changed"],
     ["/worklist/", "What is being done"],
   ]],
@@ -52,6 +61,14 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
     view is a query string, a crawler will otherwise find the same page under
     a dozen addresses and split its credit between them. */}
 <link rel="canonical" href={canon} />
+{/* A FEED READER CAN NOW SUBSCRIBE TO THIS ATLAS. The changelog page has
+    existed for a while with no way to be told about it, which is no good
+    for the society editors and archivists this most needs to reach — they
+    read feeds, they do not revisit a page on the chance it moved. One
+    entry per day rather than per commit, because a day here is routinely
+    fifteen commits and fifteen notifications is how a feed gets dropped. */}
+<link rel="alternate" type="application/atom+xml" title="Record Atlas — what changed"
+      href={u("/feed.xml")} />
 <meta property="og:url" content={canon} />
 <meta property="og:site_name" content={site.name} />
 {/* A shared link with no og:image renders as a blank grey rectangle. One card
@@ -229,6 +246,8 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
     )}
     <p class="foot-note foot-thin">
       <a href={u("/about/")}>About</a> · <a href={u("/add/")}>Add or correct a source</a> ·
+      <a href={u("/data/")}>Use the data</a> ·
+      <a href={u("/feed.xml")}>Feed</a> ·
       <a href={u("/privacy/")}>Privacy</a> · Maps and {osm.archives.length} archives &copy; OpenStreetMap
       contributors, <a href="https://opendatacommons.org/licenses/odbl/">ODbL</a> ·
       Country outlines from Natural Earth, public domain · Archives and surnames from

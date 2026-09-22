@@ -100,11 +100,16 @@ const archiveCountries = new Set(archives.map(p => p.at.place.split(", ").pop())
         {archiveCountries} countries, each saying what it holds and what it costs to look.
         <b>The shelf is deep in one corner</b>: {places} places and {volumes} volumes across
         Croatia, Istria and Carnia, and thin to the point of empty everywhere else.
+        {/* WRITTEN OUT BY HAND, AND STALE THE DAY AFTER. This named eleven
+            regions when there were thirty-three and read like the whole
+            list, so it understated the layer by two thirds while looking
+            authoritative. The count and the names now come from the same
+            file the map draws, and «and N more» is the honest ending. */}
         <b>The jurisdiction layer covers {regions.regions.length} pieces of ground</b>, not the
-        planet — Istria and the Kvarner, Carnia, Dalmatia, Campania, eastern Sicily, Calabria,
-        Prussian Posen, the eastern Cape, England, Queensland and Santa Fe. A place outside them
-        says so in its own panel rather than guessing, because a confident wrong answer about
-        which archive to write to costs somebody a month.</p>
+        planet — {regions.regions.slice(0, 8).map((r) => r.label.split(" — ")[0]).join(", ")}
+        {regions.regions.length > 8 ? ` and ${regions.regions.length - 8} more` : ""}. A place
+        outside them says so in its own panel rather than guessing, because a confident wrong
+        answer about which archive to write to costs somebody a month.</p>
         <p><b>A grey dot means nobody has surveyed it. It does not mean nothing is there.</b>
         That distinction is the difference between a map and a claim, and it is worth more
         than coverage.</p>

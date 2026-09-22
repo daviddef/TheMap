@@ -15,6 +15,8 @@
   --r-uk:#44567E; --r-england:#8A3C3C; --r-ireland:#2E6E4E; --r-scotland:#6A4F8C;
   --r-france:#1E6E8C; --r-sweden:#C7A03A; --r-baltic:#4F7E72; --r-slovenia:#3F7A5E;
   --r-bosnia:#7A6A4A; --r-serbia:#8E3A44; --r-canada:#B05C3C;
+  --r-netherlands:#E8902B; --r-denmark:#B03A3A; --r-norway:#1E7A6E;
+  --r-finland:#5A6FB5; --r-portugal:#4E8A3C;
   --band-label:#F5F3EE;
   --serif:"EB Garamond",Georgia,"Times New Roman",serif;
   --sans:"Libre Franklin","Helvetica Neue",Arial,sans-serif;
@@ -38,6 +40,8 @@
   --r-uk:#7F8DBA; --r-england:#C07070; --r-ireland:#5FA882; --r-scotland:#A088C4;
   --r-france:#5AA4C0; --r-sweden:#E0BF66; --r-baltic:#82B0A4; --r-slovenia:#74AE92;
   --r-bosnia:#AE9E7C; --r-serbia:#C46E78; --r-canada:#DE8E6E;
+  --r-netherlands:#F2B267; --r-denmark:#D97676; --r-norway:#59B3A6;
+  --r-finland:#8E9DD6; --r-portugal:#85BE71;
   --band-label:#10171E;
 }}
 :root[data-theme="dark"]{
@@ -57,6 +61,8 @@
   --r-uk:#7F8DBA; --r-england:#C07070; --r-ireland:#5FA882; --r-scotland:#A088C4;
   --r-france:#5AA4C0; --r-sweden:#E0BF66; --r-baltic:#82B0A4; --r-slovenia:#74AE92;
   --r-bosnia:#AE9E7C; --r-serbia:#C46E78; --r-canada:#DE8E6E;
+  --r-netherlands:#F2B267; --r-denmark:#D97676; --r-norway:#59B3A6;
+  --r-finland:#8E9DD6; --r-portugal:#85BE71;
   --band-label:#10171E;
 }
 *{box-sizing:border-box}
@@ -873,3 +879,62 @@ body.is-home #onthispage{display:none}
 }
 .ksearch input:focus{outline:none;border-color:var(--accent)}
 .ksearch input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ---- PAPER ---------------------------------------------------------------
+   A PLACE'S SOURCES COULD NOT LEAVE THE SCREEN. The whole point of a place
+   page is that it is a list of things to go and do — write to this archive,
+   open that film, the registers before 1797 are in Venice — and people
+   doing that work sit in reading rooms with no wifi, or take a page to a
+   relative who does not use a computer. Printed, it came out with a sticky
+   navigation bar across the top, an ad slot, a cookie strip, and every link
+   as blue text whose destination had vanished.
+
+   So: the chrome goes, the links print their own URLs, and a table is not
+   allowed to break across a page in the middle of a row. This is in the
+   shared stylesheet rather than on one page because every page here is a
+   list of somewhere to look.
+
+   `@page` margins rather than body padding: a browser will happily print a
+   two-column layout into a 12 mm gutter otherwise. */
+@page { margin: 16mm 14mm; }
+
+@media print {
+  :root { --ground:#fff; --panel:#fff; --ink:#000; --ink-2:#222; --ink-3:#555; }
+  html, body { background:#fff !important; color:#000;
+               font-size:10.5pt; line-height:1.45; }
+
+  /* Everything that is a control rather than a fact. */
+  header.site, footer.site, .topnav, .burger, .drawer, .adbox, .adslot,
+  .ksearch, .ra-bar, .at-map, .ra-foot, .ra-help, .skip,
+  ins.adsbygoogle, .fc-consent-root { display:none !important; }
+
+  /* The panel is the map's answer and the map itself is gone, so it stops
+     being a scrolling column and becomes the page. */
+  .at-wrap { display:block !important; }
+  .at-panel { height:auto !important; max-height:none !important;
+              overflow:visible !important; border:0 !important; padding:0 !important;
+              position:static !important; box-shadow:none !important; }
+
+  main, .wrap, .one { max-width:none !important; width:auto !important;
+                      margin-left:0 !important; margin-right:0 !important; }
+  a { color:#000; text-decoration:underline; }
+
+  /* THE DESTINATION IS THE POINT. A printed «FamilySearch» that does not say
+     where it goes is worse than useless to somebody typing it back in.
+     In-page anchors and javascript: links are left alone — printing «#top»
+     after a word is noise. */
+  main a[href^="http"]::after { content:" \2039" attr(href) "\203A";
+    font-family:var(--mono); font-size:8pt; color:#444; word-break:break-all; }
+
+  h1, h2, h3 { break-after:avoid-page; }
+  tr, li, .one, .vols li { break-inside:avoid; }
+  table { break-inside:auto; }
+  thead { display:table-header-group; }
+
+  /* Where this came from, on every sheet that leaves the building. */
+  .pagehead::after {
+    content:"Record Atlas \2014 daviddef.github.io/TheMap";
+    display:block; margin-top:8px;
+    font-family:var(--mono); font-size:8pt; color:#555;
+  }
+}

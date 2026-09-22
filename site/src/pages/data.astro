@@ -1,0 +1,207 @@
+---
+/* THE DATA IS CC0 AND THERE WAS NO WAY TO USE IT.
+ *
+ * Every file this map draws from is already a plain JSON document on a
+ * public URL — the map is only the first client. A society wanting to
+ * list the archives that hold their county's registers, a researcher
+ * wanting the volume spans for one place in a spreadsheet, another atlas
+ * wanting the jurisdiction eras: all of that is one fetch away and
+ * nothing said so anywhere. A licence with no documentation is a licence
+ * nobody can act on.
+ *
+ * AND IT DOES NOT SAY "ALL CC0", which was the first draft and was wrong.
+ * Three different licences are served out of this one directory. The
+ * archives and cemeteries harvested from OpenStreetMap are ODbL - share
+ * alike, attribution required - and telling somebody they could take those
+ * under CC0 would put THEM in breach, not us. Wikidata's sets are CC0
+ * because Wikidata is. So every licence shown here is READ OUT OF THE FILE
+ * ITSELF at build time, and a file that declares none is shown as
+ * declaring none rather than being assigned a guess.
+ *
+ * WHAT THIS PAGE DELIBERATELY DOES NOT DO is promise stability it cannot
+ * keep. These are the files the site itself loads; they change shape when
+ * the site needs them to. Saying so here is more useful than a version
+ * number that would be a lie the first time a field is added.
+ *
+ * Every count is read from the shipped files at build time, so this page
+ * cannot drift from what is actually being served.
+ */
+import fs from "node:fs";
+import path from "node:path";
+import Base from "../layouts/Base.astro";
+import { u } from "../lib/url.js";
+import idx from "../../public/index.json";
+import regions from "../../public/regions.json";
+import provs from "../../public/providers.json";
+import site from "../data/site.json";
+
+const PUB = fs.existsSync(path.join(process.cwd(), "public"))
+  ? path.join(process.cwd(), "public")
+  : path.join(process.cwd(), "site", "public");
+
+const kb = (n) => n >= 1048576 ? (n / 1048576).toFixed(1) + " MB"
+                               : Math.round(n / 1024).toLocaleString() + " KB";
+const sizeOf = (f) => { try { return kb(fs.statSync(path.join(PUB, f)).size); }
+                        catch { return "—"; } };
+const countIn = (d) => { try { return fs.readdirSync(path.join(PUB, d))
+                          .filter((f) => f.endsWith(".json")).length; }
+                         catch { return 0; } };
+/* What a file says about itself. Never a guess, and never a blanket claim. */
+const licOf = (f) => {
+  try {
+    const j = JSON.parse(fs.readFileSync(path.join(PUB, f), "utf8"));
+    return { lic: j.licence || j.license || null, src: j.source || null };
+  } catch { return { lic: null, src: null }; }
+};
+
+const nPlaces = idx.places.length + ((idx.quiet && idx.quiet.places) || 0);
+const nVolumes = idx.places.reduce((a, p) => a + (p.v || 0), 0);
+
+/* One row per published file. `shards` means the path carries a key. */
+const FILES = [
+  { path: "/index.json", size: sizeOf("index.json"), ...licOf("index.json"),
+    what: `Every place the map can draw, with only what a marker needs: id, name, latitude, longitude, folded search text, access class, collection and volume counts, and the year span its books cover. ${idx.places.length.toLocaleString()} rows.`,
+    shape: `{ countries, access, rank, kinds, kindLabels, places: [{ i, n, y, x, c, v, a, q, s: [from, to] }] }` },
+  { path: "/index-quiet.json", size: sizeOf("index-quiet.json"), ...licOf("index-quiet.json"),
+    what: `The second half of the index — places with nothing catalogued yet. Fetched after first paint so the map draws before it arrives. ${((idx.quiet && idx.quiet.places) || 0).toLocaleString()} rows, same shape.`,
+    shape: `{ places: [ … as above … ] }` },
+  { path: "/p/<place-id>.json", size: `${countIn("p").toLocaleString()} files`,
+    what: "Everything about one place that a marker does not need: every collection covering it, every volume with its year span and deep link, its other names, and which archive holds it. The `i` field of an index row is the filename.",
+    shape: `{ id, name, lat, lon, country, names[], collections[], volumes: [{ t, from, to, url, in }] }` },
+  { path: "/regions.json", size: sizeOf("regions.json"), ...licOf("regions.json"),
+    what: `The jurisdiction layer — ${regions.regions.length} record regions, each an era with the polity that held that ground and the archives its paper went to. This is the file nobody else publishes.`,
+    shape: `{ regions: [{ id, from, to, polity, filedUnder[], note, geo }] }` },
+  { path: "/providers.json", size: sizeOf("providers.json"), ...licOf("providers.json"),
+    what: `${provs.providers.length} providers with their coverage, access class, and the date each was last checked to be alive.`,
+    shape: `{ providers: [{ id, name, kind, access, countries[], url, checked }] }` },
+  { path: "/c/<cc>.json", size: `${countIn("c")} files`,
+    what: "One file per country: its bounding box, its archives, and what this atlas holds there. Keyed by ISO 3166-1 alpha-2, lowercased.",
+    shape: `{ cc, name, box: [minLat, minLon, maxLat, maxLon], archives[], … }` },
+  { path: "/s/<3-char>.json", size: `${countIn("s").toLocaleString()} files`,
+    what: "The surname register, sharded on the first three folded characters of a name. Which countries attest a name, how many people each counted, and which spellings are linked to which.",
+    shape: `{ "<name>": { countries: [{ cc, n, how }], variants: [{ n, how }] } }` },
+  { path: "/world-archives.json", size: sizeOf("world-archives.json"), ...licOf("world-archives.json"),
+    what: "The archives layer — institutions at their street address, with what it takes to get an answer out of them.",
+    shape: `{ archives: [{ name, lat, lon, cc, url, kind }] }` },
+  { path: "/archives-wikidata.json", size: sizeOf("archives-wikidata.json"), ...licOf("archives-wikidata.json"),
+    what: "The wider, unchecked set harvested from Wikidata. Drawn as its own layer because it is not all genealogical and none of it has been verified by hand.",
+    shape: `{ archives: [{ q, name, lat, lon, cc, site }] }` },
+  { path: "/surnames.json.gz", size: sizeOf("surnames.json.gz"),
+    lic: "CC0-1.0", src: "national statistical registers — see the file's own note",
+    what: "The whole surname corpus in one gzipped file, including the 946,575 names that do not earn a page. There is a CSV beside it.",
+    shape: `{ name, licence, built, note, surnames: [{ n, countries[], variants[] }] }` },
+  { path: "/archives-osm.json", size: sizeOf("archives-osm.json"), ...licOf("archives-osm.json"),
+    what: "Archives OpenStreetMap knows about. 572 of 726 are more than 500 m from anything else on this map, so OSM holds buildings the other sets do not. Unchecked. THIS FILE IS SHARE-ALIKE — see the licence column.",
+    shape: `{ archives: [{ name, lat, lon, cc, tags }] }` },
+  { path: "/cemeteries-osm.json", size: sizeOf("cemeteries-osm.json"), ...licOf("cemeteries-osm.json"),
+    what: "Named cemeteries, clipped to this atlas's record regions. Unnamed ones are left out: a shape on a map is not a place a researcher can ask about. Share-alike, as above.",
+    shape: `{ cemeteries: [{ name, lat, lon, cc }] }` },
+  { path: "/sitemap-index.xml", size: "—",
+    what: "Every page on this site, split by type — places, archives, countries, regions, surnames.",
+    shape: "sitemap index → six sitemaps" },
+  { path: "/feed.xml", size: "—",
+    what: "An Atom feed of what changed, one entry per day, generated from the git history.",
+    shape: "Atom 1.0" },
+];
+---
+<Base
+  title="Use the data"
+  eyebrow={`${FILES.length} public files · no key, no rate limit, no account`}
+  dek="Everything this map draws is a plain JSON file on a public URL, and the map is only the first client. Take any of it, for anything, without asking.">
+
+  <div class="one" style="margin-top:20px">
+    <div class="lab">The licences — there are three, and the difference matters</div>
+    <p><b>Read the <code>licence</code> field of the file you are taking.</b> Every
+    file derived from somebody else's work declares whose and on what terms, and
+    the table below prints what each one actually says rather than one blanket
+    claim over all of them.</p>
+    <ul class="ra-lic">
+      <li><b>ODbL 1.0, © OpenStreetMap contributors</b> — the archives and the
+        cemeteries harvested from OSM. Attribution required, and share-alike: a
+        derived database has to be published under ODbL too.</li>
+      <li><b>CC0 1.0</b> — the sets harvested from Wikidata, because Wikidata is
+        CC0, and the surname corpus, which declares it.</li>
+      <li><b>This atlas's own compilation</b> — the index, the place files, the
+        record regions, the provider spine. That is our research and it carries
+        no licence file yet, because <a href={site.repo}>the repository</a> has
+        none to point at. Declaring one is the owner's to do and not a build
+        script's; until it is done, take it and cite it.</li>
+    </ul>
+    <p class="cap">What no licence here covers: the records themselves. This atlas
+    publishes <em>pointers</em> — that a collection exists, what it covers, where
+    to look. Each provider sets its own terms for the images and indexes at the
+    other end of those links, and those terms are theirs.</p>
+  </div>
+
+  <div class="one" style="margin-top:18px">
+    <div class="lab">How to fetch it</div>
+    <pre class="ra-code"><code>{`# every place the map can draw
+curl -s https://daviddef.github.io/TheMap/index.json | jq '.places | length'
+
+# one place, in full
+curl -s https://daviddef.github.io/TheMap/p/gracisce.json
+
+# which archive held this ground, and when
+curl -s https://daviddef.github.io/TheMap/regions.json | jq '.regions[0]'`}</code></pre>
+    <p class="cap">No key, no rate limit, no account, readable from any origin — these
+    are static files on GitHub Pages, which is also why there is no query
+    endpoint. Fetch the index and filter it yourself; it is {sizeOf("index.json")}.</p>
+  </div>
+
+  <div class="one" style="margin-top:18px">
+    <div class="lab">The files</div>
+    <table class="ra-files">
+      <thead><tr><th>Path</th><th>Size</th><th>What it is</th><th>Licence</th></tr></thead>
+      <tbody>
+        {FILES.map((f) => (
+          <tr>
+            <td><code>{f.path}</code><br /><span class="ra-shape">{f.shape}</span></td>
+            <td class="ra-size">{f.size}</td>
+            <td>{f.what}{f.src && <><br /><span class="ra-shape">from {f.src}</span></>}</td>
+            <td class="ra-size">{f.lic || "this atlas — none declared"}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="one" style="margin-top:18px">
+    <div class="lab">What the numbers are today</div>
+    <p>{nPlaces.toLocaleString()} places, {nVolumes.toLocaleString()} record volumes,
+    {" "}{provs.providers.length} providers, {regions.regions.length} jurisdiction regions.
+    Rebuilt whenever anything lands, so these files move under you — there is no
+    version number, because adding a field and calling it v1 forever would be a
+    promise this project cannot keep. Fields are added; existing fields are not
+    quietly repurposed.</p>
+    <p class="cap"><a href={u("/feed.xml")}>Subscribe to the feed</a> to be told when
+    they change, or <a href={u("/changelog/")}>read what changed</a>. If you build
+    something with this, <a href={u("/add/")}>say so</a> — knowing what the data is
+    used for is the only way to know which parts are worth deepening.</p>
+  </div>
+</Base>
+
+<style>
+  .ra-lic { margin: 8px 0 0; padding-left: 18px; }
+  .ra-lic li { font: 400 12.5px/1.65 var(--sans); color: var(--ink-2); margin-bottom: 6px; }
+  .ra-code { background: var(--panel); border: 1px solid var(--rule); border-radius: 3px;
+             padding: 12px 14px; overflow-x: auto; margin: 10px 0 8px; }
+  .ra-code code { font: 400 12px/1.7 var(--mono); color: var(--ink-2); white-space: pre; }
+  .ra-files { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  .ra-files th { text-align: left; font: 500 11px/1 var(--sans); color: var(--ink-3);
+                 text-transform: uppercase; letter-spacing: .06em;
+                 border-bottom: 1px solid var(--rule); padding: 0 10px 7px 0; }
+  .ra-files td { vertical-align: top; padding: 10px 10px 10px 0;
+                 border-bottom: 1px solid var(--rule);
+                 font: 400 12.5px/1.6 var(--sans); color: var(--ink-2); }
+  .ra-files code { font: 500 12px/1.5 var(--mono); color: var(--accent);
+                   word-break: break-all; }
+  .ra-shape { font: 400 10.5px/1.5 var(--mono); color: var(--ink-3);
+              display: inline-block; margin-top: 4px; word-break: break-word; }
+  .ra-size { font: 400 11.5px/1.6 var(--mono); color: var(--ink-3); white-space: nowrap; }
+  @media (max-width: 700px) {
+    .ra-files, .ra-files tbody, .ra-files tr, .ra-files td { display: block; width: auto; }
+    .ra-files thead { display: none; }
+    .ra-files tr { border-bottom: 1px solid var(--rule); padding: 10px 0; }
+    .ra-files td { border: 0; padding: 2px 0; }
+  }
+</style>

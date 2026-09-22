@@ -61,6 +61,20 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
     </span>
     <output id="ra-yout" class="mono">any year</output>
   </label>
+  {/* PLAY IT, BECAUSE THE ARGUMENT IS A CHANGE OVER TIME.
+      This atlas exists to say that ground changed hands and the paper
+      followed it — that an 1863 baptism from a Croatian village is in a
+      Croatian archive and a 1930 one from the same village is filed under
+      Italy. That is a sentence on the about page and a slider somebody
+      has to think to drag. Run it and it is the map telling you: Venice
+      gives way to Austria gives way to Italy gives way to Yugoslavia over
+      one piece of Istria, while the dots thin to the books that can
+      answer for the decade on screen.
+      A window, not a point: it walks a fifty-year range forward a decade
+      at a time, because records come in runs and a single year empties
+      the map. */}
+  <button class="ra-ico" id="ra-play" type="button" aria-pressed="false"
+          title="Play the years — watch the jurisdictions change and the records follow">&#9654;</button>
   <button class="ra-ico" id="ra-info" type="button" aria-expanded="false"
           title="What these controls mean">&#9432;</button>
   <button class="ra-ico" id="ra-copy" type="button" title="Copy a link to this exact view">&#128279;</button>
@@ -85,7 +99,18 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
   <div class="at-map" id="ra-map" role="application"
        aria-label="Map of places and archives. Not keyboard-navigable: use
                    the search box above, which finds any place by any name
-                   it has ever had, or the full list of places linked below."></div>
+                   it has ever had, or the full list of places linked below.">
+    {/* THE MAP WAS A GREY BOX FOR AS LONG AS THE FETCHES TOOK, and a grey
+        box is indistinguishable from a broken one. This says what is
+        coming and how much of it, is server-rendered so it is on screen
+        in the first paint, and is removed the moment the markers are
+        drawn. It is not a spinner: a number tells the reader the wait is
+        proportionate to something. */}
+    <div class="ra-loading" id="ra-loading">
+      <span class="ra-loading-b"></span>
+      <span id="ra-loading-t">Loading the atlas&hellip;</span>
+    </div>
+  </div>
   {/* THE PANEL REWRITES ITSELF AND SAID NOTHING WHILE DOING IT.
       Every answer on this map arrives by replacing this element's
       innerHTML — a place, a surname, a country, a region. A sighted
@@ -97,9 +122,39 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
       places shown» is the answer to a filter, and it was silent. */}
   <aside class="at-panel" role="region" aria-live="polite"
          aria-label="What the map found">
+    {/* «PICK A PLACE» ASKED THE READER TO ALREADY KNOW THE ANSWER.
+        Most people arrive holding a surname, a half-remembered village, or
+        nothing but a country — and the first thing this said was «click
+        any marker», which assumes they know which. Three ways in, in the
+        order people actually have them, and the legend's one idea stated
+        in a sentence instead of hidden in a filter: the colour is what it
+        costs to look. */}
+    {/* ON A PHONE THE ANSWER ARRIVED BELOW THE FOLD. The panel stacks
+        under the map at 900px, so tapping a dot filled a box the reader
+        could not see and gave no sign anything had happened — they tapped
+        again, and again. Under 700px a result becomes a sheet over the
+        bottom of the map, which is where every phone map on earth puts
+        one. It needs a way back out that is not a scroll, hence this.
+        It is driven off :has() on the body's hidden attribute, so there
+        is no state to keep in sync; a browser without :has() simply keeps
+        the stacked panel it has today. */}
+    <button class="ra-sheet-x" id="ra-sheet-x" type="button">
+      &#9662;&nbsp;Back to the map</button>
     <div class="at-empty" id="ra-empty">
-      <div class="lab">Pick a place</div>
-      <p>Click any marker. Bigger markers hold more record volumes.</p>
+      <div class="lab">Start with what you have</div>
+      <ul class="at-start">
+        <li><b>A surname.</b> Type it above — <a href="#" class="ra-try" data-q="Peeters">Peeters</a>,
+          <a href="#" class="ra-try" data-q="Blažević">Blažević</a> — and the map lights the
+          countries a register or an archive attests it in.</li>
+        <li><b>A village, by any name it ever had.</b>
+          <a href="#" class="ra-try" data-q="Gallignana">Gallignana</a> finds Gračišće;
+          <a href="#" class="ra-try" data-q="Breslau">Breslau</a> finds Wrocław.</li>
+        <li><b>Only a country.</b> Click anywhere on it — every country on earth answers with
+          something, even where this atlas has nothing yet.</li>
+      </ul>
+      <p><b>The colour of a dot is what it costs to look</b> — free images, behind a login,
+      an index with no images, a catalogue card for paper nobody has photographed. That is
+      the thing most directories flatten into a link.</p>
       <p class="at-hint" id="ra-hint"></p>
     </div>
     <div class="at-body" id="ra-body" hidden></div>
@@ -112,8 +167,20 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
       a filter most readers set once or never, and a row of eight was more
       chrome than that deserves. Folded into a disclosure that says how many
       are on. */}
+  {/* EIGHT COLOURS AND NO RULE FOR READING THEM. The swatches named
+      themselves — "an index only", "behind a paywall" — and left the two
+      facts that make the legend usable unsaid: that they run from what you
+      can open tonight down to what needs a letter, and that a place takes
+      the colour of the MOST OPEN thing it has, so a red dot means red is
+      the best on offer there and a green one says nothing about what else
+      is underneath. That a swatch is also a filter was undiscoverable. */}
   <details class="ra-cats-wrap" id="ra-catsw">
     <summary id="ra-catsum">What it costs to look</summary>
+    <p class="ra-key-lead">Ordered from what you can open tonight down to what
+      needs a letter. <b>A place takes the colour of the most open thing it
+      has</b> — so red means red is the best on offer there, and green says
+      nothing about what else is underneath it. The panel lists the rest.
+      Click a colour to take it off the map.</p>
     <div class="atlas-key" id="ra-cats"></div>
   </details>
   {/* WHAT KIND OF RECORD. David asked for this directly — "many people
@@ -322,6 +389,9 @@ window.addEventListener("load", async function () {
      from idx.places.length would have quietly shed the 4,932 quiet dots —
      the same class of mistake as the header that said 8,557 volumes. */
   var TOTAL_PLACES = idx.places.length + ((idx.quiet && idx.quiet.places) || 0);
+  var loadT = document.getElementById("ra-loading-t");
+  if (loadT) loadT.textContent =
+    "Drawing " + TOTAL_PLACES.toLocaleString() + " places\u2026";
 
   /* ---- the markers -------------------------------------------------------
      Radius by how many volumes stand at a place, which is the one piece of
@@ -1030,10 +1100,15 @@ window.addEventListener("load", async function () {
   drawLayers();
   function syncLayers() {
     LAYERS.forEach(function (l) {
+      /* The shelf is the one layer this does not touch: below zoom 6 it is
+         represented by the cluster bubbles instead, and drawClusters owns
+         which of the two is on the map. */
+      if (l[0] === "shelf") return;
       var has = map.hasLayer(l[3]);
       if (on[l[0]] && !has) l[3].addTo(map);
       if (!on[l[0]] && has) map.removeLayer(l[3]);
     });
+    drawClusters(lastVisible);
     var live = LAYERS.filter(function (l) { return on[l[0]]; }).map(function (l) { return l[0]; });
     setQ("layers", live.join(","));
   }
@@ -1175,6 +1250,88 @@ window.addEventListener("load", async function () {
     readRange();
     yearUI();
   });
+
+  /* ---- the years, running ------------------------------------------------
+     Stepped on a timer rather than an animation frame: each step redraws
+     every region polygon and re-filters 21,302 markers, which is far too
+     much for 60fps and does not want to be smooth anyway. A decade every
+     900ms is about reading speed — long enough to see a border move,
+     short enough that five centuries take under a minute.
+
+     It stops at the end rather than looping, and any touch of the sliders
+     or the checkbox stops it, because a control that keeps moving under
+     somebody trying to use it is worse than no control. */
+  var playT = null, playBtn = document.getElementById("ra-play");
+  var PLAY_SPAN = 50, PLAY_STEP = 10, PLAY_MS = 900;
+  function stopPlay() {
+    if (!playT) return;
+    clearInterval(playT); playT = null;
+    playBtn.innerHTML = "&#9654;";
+    playBtn.setAttribute("aria-pressed", "false");
+    playBtn.title = "Play the years — watch the jurisdictions change and the records follow";
+  }
+  function startPlay() {
+    if (playT) return stopPlay();
+    if (!yon.checked) { yon.checked = true; readRange(); }
+    year = 1500; year2 = year + PLAY_SPAN;
+    yin.value = year; yin2.value = year2;
+    playBtn.innerHTML = "&#9632;";
+    playBtn.setAttribute("aria-pressed", "true");
+    playBtn.title = "Stop";
+    yearUI();
+    playT = setInterval(function () {
+      if (year2 >= 2026) { stopPlay(); return; }
+      year = Math.min(year + PLAY_STEP, 2026 - PLAY_SPAN);
+      year2 = Math.min(year + PLAY_SPAN, 2026);
+      yin.value = year; yin2.value = year2;
+      yearUI();
+    }, PLAY_MS);
+  }
+  /* Re-bucketing on every zoom, because a grid sized for zoom 2 is
+     nonsense at zoom 5. Not on pan: the cells are absolute, so panning
+     shows the same cells from a different angle. */
+  map.on("zoomend", function () { drawClusters(lastVisible); });
+
+  playBtn.addEventListener("click", startPlay);
+
+  /* The examples on the opening panel actually run a search, rather than
+     being decoration a reader has to retype. */
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest(".ra-try");
+    if (!a) return;
+    e.preventDefault();
+    qbox.value = a.getAttribute("data-q") || "";
+    qbox.dispatchEvent(new Event("input", { bubbles: true }));
+    qbox.focus();
+  });
+
+  /* ---- keys, for people who are here for an hour -------------------------
+     A researcher works down a list of parishes, and every one of them
+     meant reaching for the mouse to clear the box. Four keys, all of them
+     the ones already in muscle memory from everywhere else, and none of
+     them stealing a keystroke from somebody typing into a field. */
+  document.addEventListener("keydown", function (e) {
+    var t = e.target || {};
+    var typing = t.tagName === "INPUT" || t.tagName === "TEXTAREA"
+              || t.isContentEditable;
+    if (e.key === "Escape") {
+      if (typing && t === qbox && qbox.value) { qbox.value = ""; apply(); return; }
+      stopPlay();
+      /* On a phone the result is a sheet over the map, and Escape is the
+         other way out of it. On a desktop the panel is a column that is
+         not covering anything, so closing it would just throw the answer
+         away — hence the width test. */
+      if (!panel.hidden && window.innerWidth <= 700) closeSheet();
+      return;
+    }
+    if (typing || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === "/") { e.preventDefault(); qbox.focus(); qbox.select(); }
+    else if (e.key === "y") { e.preventDefault(); yon.click(); }
+    else if (e.key === "p") { e.preventDefault(); startPlay(); }
+  });
+  yon.addEventListener("change", stopPlay);
+  yin.addEventListener("input", stopPlay);
+  yin2.addEventListener("input", stopPlay);
   /* Either handle may be dragged past the other; the range is whichever way
      round they end up. Forbidding it would mean a handle that sticks, which
      is the more annoying of the two behaviours. */
@@ -1260,9 +1417,44 @@ window.addEventListener("load", async function () {
      index carries no spans, so this uses the volume count as a cheap proxy and
      the panel does the exact test — except that the exact test is the one that
      matters, so spans ride in the index after all. See build.py. */
+  /* ---- A SURNAME AND A PLACE, ASKED TOGETHER -----------------------------
+     «Blazevic Istria» is the question everybody actually has, and this map
+     could only be asked one half of it at a time: type both and it matched
+     nothing, because no place is called that and no register holds a name
+     with a space in it.
+
+     The split is only attempted when the WHOLE query matches no place, so
+     nothing that works today changes — «Nova Gorica» is still one place,
+     not a Nova in Gorica. Then the query is cut at each space and the first
+     cut whose right-hand side names places on this map wins; the left-hand
+     side is carried off to the surname register.
+
+     `qPlace` is what the map filters on. `qName` is what the panel goes and
+     looks up. If the register does not attest the name, the panel says so
+     and still shows the places — «we hold no register for this name» and
+     «nobody of this name lived there» are different statements and only the
+     first one is ours to make. */
+  var qPlace = null, qName = null;
+  function nameMatch(p, t) {
+    return fold(p.n).indexOf(t) > -1 || !!(p.q && wordHit(p.q, t));
+  }
+  function splitQuery(t) {
+    qPlace = qName = null;
+    if (!t || t.indexOf(" ") < 0) return;
+    if (markers.some(function (m) { return nameMatch(m._p, t); })) return;
+    var w = t.split(/\s+/).filter(Boolean);
+    for (var i = 1; i < w.length; i++) {
+      var left = w.slice(0, i).join(" "), right = w.slice(i).join(" ");
+      if (left.length < 3 || right.length < 3) continue;
+      if (markers.some(function (m) { return nameMatch(m._p, right); })) {
+        qPlace = right; qName = left; return;
+      }
+    }
+  }
+
   function keep(p) {
     if (off[RANK[p.a]]) return false;
-    var t = fold(qbox.value.trim());
+    var t = qPlace || fold(qbox.value.trim());
     /* `q` now holds only the forms that are NOT the place's own name, so the
        name itself is folded here rather than shipped 2,128 times. */
     /* THE BLOB IS MATCHED ON WHOLE WORDS. `q` holds a place's other names
@@ -1292,15 +1484,89 @@ window.addEventListener("load", async function () {
      boxes too — but the visitor may already be typing, and re-framing the
      map on a wider set of matches would move the ground under them for a
      reason they did not ask for. Every other caller frames. */
+  /* ---- CLUSTERS, BECAUSE 21,302 DOTS AT WORLD ZOOM IS A SMEAR ----------
+     Canvas made drawing them all fast and did nothing for reading them:
+     zoomed out, Europe is one grey mass and the eye cannot find where the
+     collection actually is. This is a grid, not a clustering library —
+     buckets sized in degrees by zoom, one circle per bucket, labelled
+     with what it stands for.
+
+     It swaps rather than overlays: below the threshold the individual
+     markers come off the map entirely, because a bubble drawn on top of
+     the dots it summarises is just more ink. Above it the bubbles go and
+     the real dots come back, which is where clicking a place has to work.
+
+     THE COUNT IS PLACES, NOT VOLUMES, and the tooltip says both. A bubble
+     over Croatia reading "1,177" that silently meant books would be the
+     map lying at the one zoom where nobody can check it. */
+  /* THE CELL IS SEVENTY PIXELS, NOT SO-MANY DEGREES. The first version cut
+     the world into degree-wide squares and at the opening zoom that gave
+     639 bubbles for 21,473 places — a finer smear on top of the old one,
+     which is worse than no clustering because it also hides the colours.
+     Measured, not guessed: `recordAtlas.state()` reports the count, which
+     is most of why that handle exists.
+     A cell in projected pixels is the same size on screen at every zoom, so
+     the map holds roughly ninety bubbles whatever the reader does, and
+     zooming in genuinely divides them instead of merely redrawing. */
+  var clusterLayer = L.layerGroup(), CLUSTER_TO = 6, CLUSTER_PX = 70,
+      lastVisible = [];
+  function show(layer, want) {
+    var has = map.hasLayer(layer);
+    if (want && !has) layer.addTo(map);
+    else if (!want && has) map.removeLayer(layer);
+  }
+  function drawClusters(visible) {
+    clusterLayer.clearLayers();
+    var z = map.getZoom();
+    var bubbles = !!(on.shelf && z < CLUSTER_TO && visible.length);
+    show(clusterLayer, bubbles);
+    show(shelfLayer, on.shelf && !bubbles);
+    if (!bubbles) return false;
+    /* Read the token rather than hard-coding the teal: Leaflet paints these
+       into a canvas, where a CSS variable would come out as nothing, and
+       dark mode moves --accent from #1F5C6B to #6FB6C6. */
+    var ink = getComputedStyle(document.documentElement)
+      .getPropertyValue("--accent").trim() || "#1F5C6B";
+    var cells = {}, top = 1;
+    visible.forEach(function (m) {
+      var p = m._p, pt = map.latLngToLayerPoint(m.getLatLng());
+      var k = Math.floor(pt.x / CLUSTER_PX) + ":" + Math.floor(pt.y / CLUSTER_PX);
+      var c = cells[k] || (cells[k] = { n: 0, v: 0, y: 0, x: 0 });
+      c.n++; c.v += p.v || 0; c.y += pt.y; c.x += pt.x;
+      if (c.n > top) top = c.n;
+    });
+    Object.keys(cells).forEach(function (k) {
+      var c = cells[k];
+      var at = map.layerPointToLatLng(L.point(c.x / c.n, c.y / c.n));
+      L.circleMarker(at, {
+        radius: 7 + 22 * Math.sqrt(c.n / top),
+        color: "#fff", weight: 1, opacity: 0.9,
+        fillColor: ink, fillOpacity: 0.62
+      })
+        .bindTooltip(c.n.toLocaleString() + (c.n === 1 ? " place" : " places") +
+          (c.v ? " \u00b7 " + c.v.toLocaleString() + " volumes" : ""),
+          { sticky: true })
+        .on("click", function (e) {
+          map.setView(e.latlng, Math.min(map.getZoom() + 3, CLUSTER_TO + 1));
+        })
+        .addTo(clusterLayer);
+    });
+    return true;
+  }
+
   function apply(noFrame) {
     var t = fold(qbox.value.trim());
+    splitQuery(t);
+    if (qPlace) t = qPlace;
     syncCountryDots();
-    var shown = 0;
+    var shown = 0, vis = [];
     markers.forEach(function (m) {
       var ok = keep(m._p);
-      if (ok) { if (!shelfLayer.hasLayer(m)) m.addTo(shelfLayer); shown++; }
+      if (ok) { if (!shelfLayer.hasLayer(m)) m.addTo(shelfLayer); shown++; vis.push(m); }
       else if (shelfLayer.hasLayer(m)) shelfLayer.removeLayer(m);
     });
+    lastVisible = vis;
+    drawClusters(vis);
     var aShown = 0;
     archMarkers.forEach(function (m) {
       /* Same blob, same fix: an archive's _q carries the town and country
@@ -1340,6 +1606,8 @@ window.addEventListener("load", async function () {
     if (frame.length) {
       map.fitBounds(L.latLngBounds(frame.map(function (m) { return m.getLatLng(); })),
                     { padding: [40, 40], maxZoom: 11 });
+      /* Both halves were asked, so both get answered, in one panel. */
+      if (qName) { both(vis, qName, qbox.value.trim()); return; }
       if (vis.length === 1) { open(vis[0]._p); return; }
       /* SEVERAL PLACES MATCHED, SO THE MAP IS THE ANSWER — BUT THE PANEL
          MUST NOT STILL BE ANSWERING THE LAST QUESTION. This branch framed
@@ -1420,6 +1688,96 @@ window.addEventListener("load", async function () {
        and "there is nothing here" has to be said out loud every single time or
        the map quietly implies a completeness it does not have. */
     if (!shown) elsewhere(qbox.value.trim());
+  }
+
+  /* THE ANSWER TO «A NAME, IN A PLACE».
+     The map is already framed on the places by the time this runs; this
+     writes the panel. The one thing it must not do is imply that an
+     attestation is a presence: the Croatian register saying 11,163 people
+     carry a name is a fact about Croatia, not about the four villages the
+     map happens to be showing. So the two statements are kept apart, and
+     the places that DO sit in an attested country are marked as such and
+     the others are not. */
+  async function both(vis, name, raw) {
+    var mine = ++searchTok;
+    var list = await surnames(name);
+    if (mine !== searchTok) return;
+    var r = list[0];
+    /* MATCHED ON THE COUNTRY CODE, not on the country's name turning up in
+       the place's search blob. The first version did the latter and was
+       wrong every single time: `q` carries only the names a place used to
+       have, so Gračišće's is the one word "gallignana" and it matched
+       nothing at all. The panel then told a reader that Blažević is not
+       attested where Gračišće stands — which is Croatia, which the same
+       paragraph went on to list. `cc` is back on the index row for this. */
+    var attested = {}, ccs = [];
+    if (r) r.countries.forEach(function (c) {
+      if (!c.cc) return;
+      attested[String(c.cc).toUpperCase()] = c; ccs.push(c);
+    });
+    var inAttested = function (p) {
+      return p.cc ? attested[String(p.cc).toUpperCase()] || null : null;
+    };
+    var hit = vis.filter(function (m) { return !!inAttested(m._p); });
+
+    empty.hidden = true; panel.hidden = false;
+    /* The heading is the register's own spelling where there is one —
+       «Blažević», not the folded «blazevic» the matcher works in, which is
+       what the first version printed across the top of the panel. Failing
+       that, the words the reader actually typed. */
+    var typed = raw.split(/\s+/);
+    var asked = typed.slice(0, Math.max(1, typed.length -
+                  qPlace.split(/\s+/).length)).join(" ");
+    var title = r ? r.n : asked;
+    var h = ['<div class="at-h"><h3>' + esc(title) + "</h3>" +
+             '<span class="at-n">' + vis.length.toLocaleString() +
+             (vis.length === 1 ? " place" : " places") + "</span></div>"];
+    h.push('<p class="at-sub">' + esc(raw) + " — read as the name <b>" + esc(asked) +
+           "</b> and the place <b>" + esc(vis[0]._p.n) + "</b>.</p>");
+
+    if (!r) {
+      h.push('<p class="at-what"><b>No register here attests ' + esc(asked) + '.</b> ' +
+             "That is a statement about this atlas and not about the name — the " +
+             "registers it holds cover some countries and not others, and a name " +
+             "absent from them may be perfectly common where your people lived. " +
+             "The places below are the other half of what you asked.</p>");
+    } else if (!ccs.length) {
+      h.push('<p class="at-what"><b>' + esc(r.n) + " is held here with no country " +
+             "attached,</b> so it cannot be lined up against these places.</p>");
+    } else if (hit.length) {
+      h.push('<p class="at-what"><b>' + hit.length.toLocaleString() + " of these " +
+             vis.length.toLocaleString() + " places " +
+             (hit.length === 1 ? "stands" : "stand") + " in a country where " +
+             esc(r.n) + " is attested.</b> Attested means a register counted the " +
+             "name in that country. It does not mean anybody of the name lived in " +
+             "these particular villages — that is what the records are for, and " +
+             "they are listed on each place below.</p>");
+    } else {
+      h.push('<p class="at-what"><b>None of these places is in a country where ' +
+             esc(r.n) + " is attested here.</b> That is worth knowing and it is not " +
+             "a verdict: it can equally mean this atlas holds no register for that " +
+             "country. The name is attested in " +
+             ccs.slice(0, 6).map(function (c) { return esc(CNAME[c.cc]); }).join(", ") +
+             (ccs.length > 6 ? " and " + (ccs.length - 6) + " more" : "") + ".</p>");
+    }
+
+    h.push('<ul class="at-films">');
+    vis.slice(0, 14).forEach(function (m) {
+      var pl = m._p, a = inAttested(pl);
+      h.push('<li><a href="' + BASE + "place/" + esc(pl.i) + '/">' + esc(pl.n) + "</a>" +
+             (pl.c ? ' <span class="ra-who">' + pl.c + " collection" +
+              (pl.c === 1 ? "" : "s") + "</span>" : "") +
+             (a ? ' <span class="ra-crossed">' + esc(CNAME[a.cc]) +
+              (a.n ? " · " + a.n.toLocaleString() + " of the name" : "") +
+              "</span>" : "") + "</li>");
+    });
+    h.push("</ul>");
+    if (vis.length > 14)
+      h.push('<p class="cap">and ' + (vis.length - 14).toLocaleString() +
+             " more on the map.</p>");
+    if (r) h.push(renderSurnames([r], r.n));
+    panel.innerHTML = h.join("");
+    if (r) showCountries(r.countries, function () { return mine !== searchTok; });
   }
 
   /* SURNAMES. A place is not the only thing somebody arrives holding: very
@@ -2518,6 +2876,46 @@ window.addEventListener("load", async function () {
     map.fitBounds(L.latLngBounds(HOME), { padding: [24, 24] });
   });
 
+  function closeSheet() { panel.hidden = true; empty.hidden = false; }
+  document.getElementById("ra-sheet-x").addEventListener("click", closeSheet);
+
+  /* ---- A HANDLE ON THE MAP, ON PURPOSE -----------------------------------
+     Everything above lives inside one closure, which is right for the page
+     and wrong for testing it: the Playwright specs in test/e2e can see the
+     DOM and nothing else, so «are the clusters up at this zoom» was a
+     question only a human squinting at a screenshot could answer. Trying to
+     answer it from outside is what surfaced the need — synthetic mouse
+     events do not reach Leaflet's canvas hit-testing, and a canvas in a
+     window the compositor has parked is simply never painted, so an empty
+     canvas proves nothing either way.
+
+     Read-only by intent: it hands over the Leaflet map and a few counters,
+     not the setters. Nothing on the page uses it, so removing it would
+     break nothing here — it exists for the test suite and for anyone who
+     wants to drive this map from their own console. */
+  window.recordAtlas = {
+    map: map,
+    version: 1,
+    layers: { shelf: shelfLayer, clusters: clusterLayer, archives: archiveLayer,
+              countries: countryLayer, regions: regionLayer },
+    state: function () {
+      var bubbles = map.hasLayer(clusterLayer), n = 0;
+      clusterLayer.eachLayer(function () { n++; });
+      return {
+        zoom: map.getZoom(),
+        clustered: bubbles,
+        clusters: n,
+        shelfOnMap: map.hasLayer(shelfLayer),
+        shown: lastVisible.length,
+        total: markers.length,
+        query: qbox.value.trim(),
+        splitName: qName,
+        splitPlace: qPlace,
+        year: year === null ? null : [year, year2]
+      };
+    }
+  };
+
   document.getElementById("ra-copy").addEventListener("click", function () {
     navigator.clipboard.writeText(location.href).then(function () {
       var t = document.getElementById("ra-copied");
@@ -2537,6 +2935,8 @@ window.addEventListener("load", async function () {
   syncLayers();
   paintRegions();
   yearUI();
+  var loadingEl = document.getElementById("ra-loading");
+  if (loadingEl) loadingEl.remove();
 
   var openAt = Q.get("at");
   var opened = false;
@@ -2591,6 +2991,13 @@ window.addEventListener("load", async function () {
             margin: 14px 0 10px; }
   .ra-bar #ra-q { flex: 1 1 260px; min-width: 200px; font-size: 14px;
                   padding: 9px 12px; }
+  /* The opening panel's three ways in. Compact, because it is scaffolding
+     the reader should stop needing after their first search. */
+  .at-start { margin: 8px 0 12px; padding-left: 1.1em; }
+  .at-start li { margin: 0 0 7px; line-height: 1.5; }
+  .at-start a { border-bottom: 1px solid var(--rule-strong); }
+  #ra-play[aria-pressed="true"] { background: var(--accent); color: var(--band-label, #fff);
+                                  border-color: var(--accent); }
   .ra-ico { flex: 0 0 auto; width: 32px; height: 32px; border: 1px solid var(--rule);
             border-radius: 3px; background: var(--panel); color: var(--ink-2);
             font-size: 15px; line-height: 1; cursor: pointer; }
@@ -2661,6 +3068,9 @@ window.addEventListener("load", async function () {
   .ra-cats-wrap summary::after { content: " \25BE"; }
   .ra-cats-wrap[open] summary::after { content: " \25B4"; }
   .ra-cats-wrap[open] .atlas-key { margin-top: 8px; }
+  .ra-key-lead { display: none; }
+  .ra-cats-wrap[open] .ra-key-lead { display: block; margin: 9px 0 0;
+    font: 400 11.5px/1.6 var(--sans); color: var(--ink-2); max-width: 62ch; }
   .ra-foot { display: flex; align-items: flex-start; gap: 10px 14px; flex-wrap: wrap;
              margin-top: 10px; }
   .ra-foot .cap { margin: 0; font-size: 11.5px; }
@@ -2798,5 +3208,46 @@ window.addEventListener("load", async function () {
   @media (max-width: 900px) {
     .at-wrap { grid-template-columns: 1fr; }
     .at-map { height: 420px; } .at-panel { height: auto; max-height: 480px; }
+  }
+
+  .ra-loading { position: absolute; z-index: 900; left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex; align-items: center; gap: 9px;
+    padding: 9px 15px; border: 1px solid var(--rule); border-radius: 999px;
+    background: var(--panel); box-shadow: 0 2px 12px rgba(0, 0, 0, .1);
+    font: 400 12px/1 var(--sans); color: var(--ink-2); white-space: nowrap; }
+  .ra-loading-b { width: 9px; height: 9px; border-radius: 50%;
+    background: var(--accent); animation: ra-pulse 1.1s ease-in-out infinite; }
+  @keyframes ra-pulse { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) {
+    .ra-loading-b { animation: none; opacity: .7; }
+  }
+
+  /* ---- the phone sheet --------------------------------------------------- */
+  .ra-sheet-x { display: none; }
+  @media (max-width: 700px) {
+    .at-panel:has(.at-body:not([hidden])) {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 1200;
+      height: auto; max-height: 70vh; overflow-y: auto;
+      border: 1px solid var(--rule); border-bottom: 0;
+      border-radius: 14px 14px 0 0;
+      box-shadow: 0 -10px 30px rgba(0, 0, 0, .24);
+      padding: 0 16px calc(env(safe-area-inset-bottom, 0px) + 20px);
+      animation: ra-sheet-up .18s ease-out;
+      overscroll-behavior: contain;
+    }
+    .at-panel:has(.at-body:not([hidden])) .ra-sheet-x {
+      display: block; position: sticky; top: 0; z-index: 2;
+      width: calc(100% + 32px); margin: 0 -16px 10px; padding: 12px 16px;
+      text-align: left; cursor: pointer;
+      font: 500 12px/1 var(--sans); color: var(--ink-3);
+      background: var(--panel); border: 0;
+      border-bottom: 1px solid var(--rule);
+    }
+  }
+  @keyframes ra-sheet-up { from { transform: translateY(18px); opacity: .4; }
+                           to   { transform: none; opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) {
+    .at-panel:has(.at-body:not([hidden])) { animation: none; }
   }
 </style>

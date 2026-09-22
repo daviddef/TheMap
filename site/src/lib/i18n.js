@@ -53,8 +53,13 @@ const HR = {
   "What changed": "Što se promijenilo",
   "What is being done": "Što se radi",
 
-  "Search a place by any name it has ever had, or a surname":
-    "Pretražite mjesto po bilo kojem imenu koje je ikad nosilo, ili prezime",
+  "Find a place or a surname \u2014 Gallignana \u00b7 \u017dubrini\u0107 \u00b7 Lerena":
+    "Na\u0111ite mjesto ili prezime \u2014 Gallignana \u00b7 \u017dubrini\u0107 \u00b7 Lerena",
+  "Find a place or a surname, by any name it has ever had":
+    "Na\u0111ite mjesto ili prezime, po bilo kojem imenu koje je ikad nosilo",
+  "Churches and parishes": "Crkve i \u017eupe",
+  "Skip to the map": "Prije\u0111i na kartu",
+  "Language:": "Jezik:",
   "Start with what you have": "Počnite s onim što imate",
   "A surname.": "Prezime.",
   "A village, by any name it ever had.": "Selo, pod bilo kojim imenom koje je nosilo.",
@@ -105,8 +110,13 @@ const IT = {
   "What changed": "Cosa è cambiato",
   "What is being done": "Cosa si sta facendo",
 
-  "Search a place by any name it has ever had, or a surname":
-    "Cerca un luogo con qualunque nome abbia mai avuto, oppure un cognome",
+  "Find a place or a surname \u2014 Gallignana \u00b7 \u017dubrini\u0107 \u00b7 Lerena":
+    "Trova un luogo o un cognome \u2014 Gallignana \u00b7 \u017dubrini\u0107 \u00b7 Lerena",
+  "Find a place or a surname, by any name it has ever had":
+    "Trova un luogo o un cognome, con qualunque nome abbia mai avuto",
+  "Churches and parishes": "Chiese e parrocchie",
+  "Skip to the map": "Vai alla mappa",
+  "Language:": "Lingua:",
   "Start with what you have": "Comincia da quello che hai",
   "A surname.": "Un cognome.",
   "A village, by any name it ever had.": "Un paese, con qualunque nome abbia avuto.",

@@ -220,6 +220,53 @@ def main():
         near.sort(key=lambda z: z["km"])
         return near[:most]
 
+    # ---- and the burials --------------------------------------------------
+    # 48,482 cemeteries have been sitting in this build being drawn as a layer
+    # and connected to nothing. A cemetery is the other end of a parish: the
+    # register records the burial and the ground holds it, and a family that
+    # left no other trace very often left a stone.
+    #
+    # Two sources, and they overlap. Wikidata names 33,651 and OpenStreetMap
+    # 14,831, and a churchyard both of them know about would otherwise appear
+    # twice under slightly different names. Deduplicated on «same name within
+    # 300 m», which is the case that actually occurs; two genuinely different
+    # graveyards of the same name that close together would be a fair mistake
+    # to make and is not one that has been seen.
+    #
+    # THE SAME FIFTEEN-KILOMETRE HONESTY AS THE PARISHES. A short list here
+    # means the harvest is thin, not that nobody was buried; the page says so
+    # rather than letting a blank imply it.
+    CEM = []
+    for _f, _src in (("data/cemeteries-wikidata.json", "wikidata"),
+                     ("data/cemeteries-osm.json", "osm")):
+        try:
+            for _c in json.load(open(_f))["features"]:
+                _c = dict(_c); _c["src"] = _src; CEM.append(_c)
+        except FileNotFoundError:
+            pass
+    cem_by_region = {}
+    for c in CEM:
+        cem_by_region.setdefault(c.get("r"), []).append(c)
+
+    def graves(place, within=12.0, most=5):
+        near = []
+        for c in cem_by_region.get(place.get("region") or "", []):
+            if abs(c["y"] - place["lat"]) > 0.16 or abs(c["x"] - place["lon"]) > 0.24:
+                continue
+            d = km(place["lat"], place["lon"], c["y"], c["x"])
+            if d <= within:
+                near.append({"n": c["n"], "km": round(d, 1), "src": c["src"],
+                             "id": c.get("q") or c.get("id")})
+        near.sort(key=lambda z: z["km"])
+        out = []
+        for c in near:
+            if any(o["n"] == c["n"] and abs(o["km"] - c["km"]) < 0.3 for o in out):
+                continue                      # the same ground, twice named
+            out.append(c)
+            if len(out) >= most:
+                break
+        return out
+
     def reach(place):
         """How nearly a collection reaches a place.
 
@@ -461,6 +508,7 @@ def main():
 
         hits = reach(p) if p.get("country") else []
         near_ch = parishes(p) if p.get("region") else []
+        near_cm = graves(p) if p.get("region") else []
 
         # A DIVISION IS NOT UNSURVEYED BECAUSE NOBODY WALKED IT. 1,978 of the
         # places on this shelf are administrative divisions, and none of them
@@ -602,6 +650,8 @@ def main():
             detail["span"] = span
         if near_ch:
             detail["parishes"] = near_ch
+        if near_cm:
+            detail["graves"] = near_cm
         if hits:
             detail["fs"] = [{"cc": c["cc"], "t": c["title"], "from": c.get("from"),
                              "to": c.get("to"), "n": c.get("records") or 0,

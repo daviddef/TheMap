@@ -21,6 +21,7 @@ import { corpus } from "../../lib/surname-corpus.js";
 import { surnameMap, placesMap } from "../../lib/surname-map.js";
 import { belgiumFor } from "../../lib/belgium-surnames.js";
 import { contextFor } from "../../lib/surname-context.js";
+import regions from "../../../public/regions.json";
 
 export async function getStaticPaths() {
   const surn = corpus();
@@ -113,6 +114,38 @@ const beTotal = beRows ? beRows.reduce((a, x) => a + x.c, 0) : 0;
 const dek = `${r.n}${by.curated ? `, also written ${by.curated.slice(0,4).join(", ")}` : ""}. `
   + `Attested in ${ccs.map((c) => CN[c.cc] || c.cc).join(", ")}`
   + (total ? `, borne by about ${total.toLocaleString()} people in the registers this map holds.` : ".");
+/* THE BRIDGE BETWEEN THE TWO DATASETS. A region belongs to a country when
+   its own `countries` list says so — the same rule /coverage/ and the
+   country pages use, so a region whose ground lies in a country counts
+   even where no place inside it has been walked. Eras are collapsed to a
+   span and the distinct polities across it, because a surname page is not
+   the place to reprint a region's whole timeline; the region's own page
+   is one click away and has it in full. */
+const attestedCcs = [...new Set(ccs.map((c) => c.cc).filter(Boolean))];
+const jurisdiction = attestedCcs.map((cc) => {
+  const rs = (regions.regions || [])
+    .filter((rg) => (rg.countries || []).includes(cc))
+    .map((rg) => {
+      const eras = rg.eras || [];
+      const polities = [...new Set(eras.map((e) =>
+        (e.polity || "").split(" \u2014 ")[0].split(" \u00b7 ")[0].trim()).filter(Boolean))];
+      /* THE SPAN WAS NOISE THAT LOOKED LIKE INFORMATION. Nearly every region
+         here runs 1200 to 2026, because they all reach from the first
+         surviving records to today, so seven Croatian rows said the same
+         thing seven times over. The era COUNT is the honest summary of a
+         timeline, and it is the idiom the country pages already use. */
+      return {
+        id: rg.id, label: rg.label, eras: eras.length,
+        first: eras.length ? Math.min(...eras.map((e) => e.from)) : 0,
+        polities: polities.slice(0, 4).join(" \u2192 ") +
+                  (polities.length > 4 ? " \u2192 \u2026" : ""),
+      };
+    })
+    .sort((a, b) => a.first - b.first);
+  return { cc, regions: rs };
+}).filter((g) => g.regions.length);
+const mapped = new Set(jurisdiction.map((g) => g.cc));
+const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
 ---
 <Base
   og="surname"
@@ -407,6 +440,43 @@ const dek = `${r.n}${by.curated ? `, also written ${by.curated.slice(0,4).join("
       );
     })}
   </section>
+
+  {jurisdiction.length > 0 && (
+    <section style="margin-top:34px">
+      <h2>Whose archive held that ground, and when</h2>
+      <p class="cap">Every surname site can tell you a name is common somewhere. This one
+      also knows <b>which filing system held that ground in which years</b> — and those are
+      the two halves of one question: my people were called this, they were there, so who
+      has the paper, and for which century. A name in Croatia before 1881 may sit in a
+      military series and not a county one; a name in the Netherlands before 1811 has no
+      civil record at all, only a baptism.</p>
+      <p class="cap"><b>This is about the ground, not about your family.</b> A register
+      counting a name in a country says nothing about which village. And these are the
+      pieces of a country this atlas has drawn, which in a large one may be a corner of
+      it — Acadia reaches into Maine and is not a statement about the United States,
+      and Bohemia's ground crosses into Poland. Each region's own page says which ground
+      it covers. Where a country is missing below, nothing covers it yet.</p>
+      {jurisdiction.map((g) => (
+        <div style="margin-top:16px">
+          <div class="lab"><a href={u(`/country/${g.cc.toLowerCase()}/`)}>{CN[g.cc] || g.cc}</a></div>
+          <ul class="vols">
+            {g.regions.map((rg) => (
+              <li>
+                <a href={u(`/region/${rg.id}/`)}>{rg.label}</a>
+                <span class="y">{rg.eras} eras</span>
+                <span class="who">{rg.polities}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+      {unmapped.length > 0 && (
+        <p class="cap" style="margin-top:14px">No record region is drawn yet for{" "}
+        {unmapped.map((cc) => CN[cc] || cc).join(", ")} — which is a gap in this atlas
+        and not a statement about {unmapped.length === 1 ? "that country" : "those countries"}.</p>
+      )}
+    </section>
+  )}
 
   <p style="margin-top:28px"><a class="bigl" href={u(`/?q=${encodeURIComponent(r.n)}`)}>
     Find {r.n} on the map →</a></p>

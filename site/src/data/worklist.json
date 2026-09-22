@@ -160,11 +160,11 @@
   },
   {
    "n": 20,
-   "what": "Close the countries with no surname register — was eight, now five",
+   "what": "Close the countries with no surname register — was eight, now four and a half",
    "state": "running",
    "owner": "the holders, and David for the Netherlands",
    "since": "2026-09-22",
-   "note": "**Denmark closed 22 September; Croatia, Sweden and Finland rewritten.** A reader asked why Croatia was blank and sent the Bureau of Statistics' own name application — which answers. This file had recorded Croatia as «the API answers now, and holds no names», a true statement about the wrong thing: DZS's PxWeb really has no surname table, and the data was on the website. Checking the other six the same way found the identical mistake under Denmark, whose entry proudly recorded that all 2,308 tables in the statistics bank had been searched for «navn». They had. Denmark publishes its names on its website, CC BY 4.0, and 294,496 surnames are now in data/frequencies/dk.json. Left: Belgium (publishes first names only), Czechia (formally refused in law), Netherlands (Meertens, to be asked not taken), Sweden and Finland (both answer one name at a time and publish no list). Croatia is partly closed — 466 surnames the atlas already attests, asked one at a time, marked `enumerable: false`. The lesson is worth more than the four entries: this project had been asking machines and concluding about organisations."
+   "note": "**Italy, Denmark and Belgium closed; Croatia, Sweden and Finland rewritten — all on 22 September, and all by a reader rather than this project.** David sent the Croatian statistics office's own name application, which answers. Checking the rest the same way found the identical mistake under Denmark, whose entry proudly recorded that all 2,308 tables in the statistics bank had been searched for «navn» — they had been; Denmark publishes on its website. Then Belgium, which had been rechecked and confirmed that same morning by reading the open-data category directly: Statbel keeps its surnames on the family-names theme page. FOUR ENTRIES, ONE MISTAKE: search a machine-readable index exhaustively, then make a claim about an institution. The pattern is the finding. Belgium is also the best surname data here — per municipality, 565 communes, 106,869 names, CC BY 4.0, which is surname to place to count and nothing else in the directory has that grain. Left: Czechia (possible and refused — the ministry's own record says both, so it needs a formal request, not a script), the Netherlands (Meertens, needs the letter), Finland (one manual download from a portal that 403s us), Sweden (a lookup and a top-100 table, no list published anywhere). Croatia is half closed: 141 surnames the atlas already attests, asked one at a time."
   },
   {
    "n": 21,
@@ -245,6 +245,14 @@
    "owner": "this atlas",
    "since": "2026-09-22",
    "note": "**Done 22 September.** David asked whether the atlas had mapped Geneanet's collection catalogue. It had not, and the catalogue cannot be read: it sits behind a Cloudflare managed challenge whose own page carries «noindex, nofollow», and this project does not climb bot gates. But the question exposed the gap behind it. The atlas held four providers covering France — Bas-Rhin, Haut-Rhin, Moselle and a link to Geneanet itself — for a country with one of the deepest register series in Europe. Geneanet is largely an aggregator OF the archives départementales, so the answer was to go to them. 96 of them now, from Wikidata, each with a checked https address and coordinates a median 1.3 km from its own town. Every one is access «unsurveyed», because nobody here has opened 96 archive sites to see what is free and what is not, and marking them «free» because departmental archives usually are would be the map asserting 96 things nobody verified. What was refused is the useful part: two hosts that no longer resolve at all were dropped rather than shipped, which is the ARHiNET lesson from the same morning; two abolished archives — Seine-et-Oise and the Archives de la Seine, départements dissolved in 1968 — were caught by P576, the filter the US county harvest already needed; and six archives alive only on http are held back, because this project's data gate requires https and relaxing a rule to admit one's own data is the wrong way round. Those six need their current address found by hand. Next: 555 archives communales are on Wikidata too, and are a larger and much more variable question."
+  },
+  {
+   "n": 31,
+   "what": "Belgium hands us surname-by-town, and the map has nowhere to put it",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-09-22",
+   "note": "data/belgium-by-municipality.json holds 510,811 rows of NIS code, commune, surname and count — 565 Belgian communes, CC BY 4.0. Every other register in data/frequencies/ can only say «this many in this country»; this says «101 Peeters in Aartselaar». It is the data behind the feature David asked for after seeing Geneanet — where a name is thickest, drawn rather than listed — and behind row 27's migration arrows, which cannot honestly be drawn from nothing. Two pieces of work, in order: match 565 NIS codes to places this atlas already holds, which is the same join scripts/match-fs-volumes.py does for volumes and should reuse its lessons about names that repeat; then decide what a surname page shows for one country when it can show nothing for the other nine. A map that draws Belgium in detail and leaves France blank must say WHY, or it reads as «no Dupont in France»."
   }
  ]
 }

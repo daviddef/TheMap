@@ -336,6 +336,8 @@ def main():
         # reasonably conclude that a name absent from it is absent from
         # Croatia, and that would be this atlas's own inference dressed as
         # the census's.
+        if fq.get("basis"):
+            SRC[key]["basis"] = fq["basis"]
         if fq.get("enumerable") is False:
             SRC[key]["enumerable"] = False
             SRC[key]["grain"] = fq.get("grain") or (
@@ -357,8 +359,14 @@ def main():
         # publish their own residents' surnames as open data. Saying
         # "national register" of that would overstate the coverage of
         # exactly the country this atlas knows best.
+        # A FOURTH GRAIN. Ireland's list is births, not people: babies
+        # given the surname in 2023–2025, not Irish people alive. Calling
+        # that «a national register» in the same sentence as Belgium's
+        # 6.4 million would invite exactly the addition the file forbids.
         grain = ("a lookup, not a list" if fq.get("enumerable") is False
-                 else "comuni" if fq.get("byComune") else "a national register")
+                 else "births, not a head-count" if fq.get("basis") == "births"
+                 else "comuni" if fq.get("byComune")
+                 else "a national register")
         print(f"{cc}: {len(fq['surnames'])} surnames from {grain}, "
               f"{len(fq.get('gendered') or {})} grammatical pairs")
 

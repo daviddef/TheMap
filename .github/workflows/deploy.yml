@@ -12,7 +12,16 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  # QUEUE, DO NOT CANCEL.
+  # With cancel-in-progress a push kills the build already running. A
+  # build here takes about forty minutes, so on any day with steady work
+  # nothing reaches the site at all: on 22 September five consecutive
+  # deploys were cancelled by the next push and the live map sat six hours
+  # behind main, still showing a figure that had been fixed twice.
+  # GitHub keeps at most one run pending per group and a newer push
+  # replaces the pending one, so this wastes nothing: the build in flight
+  # finishes and deploys, and the newest commit goes next.
+  cancel-in-progress: false
 
 jobs:
   build:

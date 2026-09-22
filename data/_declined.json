@@ -1,6 +1,6 @@
 {
   "note": "Sources assessed and declined, with what was found. Declining after looking is a result; declining without looking is a gap.",
-  "checked": "2026-09-16",
+  "checked": "2026-09-22",
   "declined": [
     {
       "source": "Antenati — the nine sitemaps other than ant_archivio",
@@ -78,6 +78,30 @@
       "verdict": "open, and the sweep parameter is wrong",
       "why": "THIS WAS LISTED AS «NEEDS A HUMAN TO REGISTER» AND THAT WAS WRONG. Discovery's API needs no key, no token and no account — David went looking for the key request page on my say-so and there is no such page. Verified anonymously: three endpoints, three 200s.\n\nThe harvester is written (scripts/harvest-tna-archives.py) and does not work yet, and the reason turned out not to be the rate limit it was first blamed on. It sweeps by `sps.titleFirstLetter`, which Discovery does not accept — the endpoint answers perfectly to `sps.searchQuery` and returns nothing at all for a parameter it does not know, which is the most expensive kind of silence. An empty answer was read as «blocked», the harvester backed off politely, and the real fault sat untouched for an hour. It needs a different sweep: searchQuery against a vocabulary of terms, or the county and repository-type facets the response already returns.\n\nWorth the wait: Discovery indexes roughly two and a half thousand British repositories with their addresses — the county record offices where English parish registers actually live.",
       "pending": true
+    },
+    {
+      "id": "rodoslovlje-indeks",
+      "name": "Indeks — Hrvatsko rodoslovno društvo, bulk read of its index",
+      "url": "https://indeks.rodoslovlje.hr/",
+      "asked": "2026-09-22",
+      "verdict": "refused by name, in robots.txt",
+      "why": "Its robots.txt is not a generic crawl-delay: it lists twenty-one AI and LLM agents — ClaudeBot, Claude-Web and anthropic-ai among them — disallows each from the whole site, and then explicitly allows everyone else, under the heading «keep them off the index data». That is not a gate that happened to catch us; it is a Croatian genealogical society saying which readers it does not want, and this atlas is one of them. Nothing here was read beyond robots.txt itself. It keeps a provider row, because a link a human clicks is the thing they built it for, and pointing researchers at it costs them nothing they objected to."
+    },
+    {
+      "id": "acta-croatica-ingest",
+      "name": "Acta Croatica — ingesting its surname statistics",
+      "url": "https://actacroatica.com/en/surname/Horvat",
+      "asked": "2026-09-22",
+      "verdict": "declined on provenance and licence, not on access",
+      "why": "The pages are open and its robots.txt is empty, so this is a choice rather than a wall. A surname page is genuinely the best thing of its kind — for Horvat it gives 19,900 people in 8,100 households, the five towns holding most of them with counts, the mid-century figure for comparison, fourteen countries emigrated to with counts, and nine spelling variants. But the site states no licence at all, and its prose says «according to some sources» without naming them. This atlas's rule is that every row carries a checked date and a resolvable provider; importing derived counts whose derivation is not stated would put unsourced numbers behind a map that promises the opposite. Note the disagreement it exposes, which is worth more than the rows would have been: Acta Croatica and Wikipedia both give Horvat as about 19,700–19,900, and DZS's own 2011 census lookup answers 21,618. Three sources, one census, three numbers. That is the argument for taking the primary one and saying which it is. Acta Croatica keeps a provider row with a per-surname deep link."
+    },
+    {
+      "id": "geneanet-surnames",
+      "name": "Geneanet — its surname pages",
+      "url": "https://en.geneanet.org/surnames/BLAZEVIC",
+      "asked": "2026-09-22",
+      "verdict": "403 to an identified agent",
+      "why": "Answers 403 to a plain request while loading for a human, which is the same wall as IrishGenealogy and Antenati. Not climbed. Geneanet already has a provider row here and keeps it. What is worth taking from it is not its data but its shape — a page per surname showing where the name is thickest and how it is spelled elsewhere — and this atlas can build that from sources that let it: see the per-place surname counts it already holds."
     }
   ]
 }

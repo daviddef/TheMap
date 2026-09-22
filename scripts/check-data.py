@@ -111,6 +111,60 @@ def main():
     except OSError:
         pass
 
+    # -1.4 · THE PAGE RULE IS IN TWO LANGUAGES AND MUST AGREE.
+    # site/src/lib/surname-pages.js decides which surnames get a page,
+    # and scripts/build.py mirrors it in Python to flag `pg` in the
+    # search shards so the map can link without 404ing. Two copies of a
+    # derived set is precisely how the sitemap came to list 3,577 pages
+    # while 17,961 were live, and how the shard keys once disagreed
+    # between build and client. So they are both run over the real
+    # corpus and compared by name, not by count — a count can match
+    # while the sets differ.
+    try:
+        import subprocess as _sp
+        _js = _sp.run(
+            ["node", "--input-type=module", "--max-old-space-size=8192", "-e",
+             "import {earnsPage} from './site/src/lib/surname-pages.js';"
+             "import fs from 'node:fs';"
+             "const d=JSON.parse(fs.readFileSync('data/surnames.json','utf8'));"
+             "const s=d.surnames.filter(earnsPage).map(r=>r.n);"
+             "process.stdout.write(JSON.stringify(s));"],
+            capture_output=True, text=True, timeout=600)
+        if _js.returncode != 0:
+            warn("surname page rule: could not run the JavaScript copy "
+                 f"({_js.stderr.strip()[:90]})")
+        else:
+            _jsset = set(json.loads(_js.stdout))
+            _d = json.load(open("data/surnames.json"))
+
+            def _earns(r):
+                ccs = r.get("countries") or []
+                if not ccs:
+                    return False
+                v = r.get("variants") or []
+                if any(x.get("how") == "curated" for x in v):
+                    return True
+                if any(c.get("how") == "archive" for c in ccs):
+                    return True
+                n = sum(1 for c in ccs if c.get("n") is not None)
+                return n >= 3 and any(x.get("how") == "spelling" for x in v)
+
+            _pyset = {r["n"] for r in _d["surnames"] if _earns(r)}
+            _only_js = _jsset - _pyset
+            _only_py = _pyset - _jsset
+            if _only_js or _only_py:
+                err(f"the surname page rule disagrees between "
+                    f"surname-pages.js and build.py: {len(_only_js)} names "
+                    f"only JavaScript grants a page (e.g. "
+                    f"{sorted(_only_js)[:3]}), {len(_only_py)} only Python "
+                    f"(e.g. {sorted(_only_py)[:3]}) — the map would link to "
+                    f"pages that do not exist, or miss pages that do")
+            else:
+                print(f"surname pages: {len(_pyset):,} names earn one, and "
+                      f"surname-pages.js and build.py agree on every one")
+    except (OSError, ValueError, json.JSONDecodeError) as _e:
+        warn(f"surname page rule not cross-checked: {_e}")
+
     # -1 · THE INLINE SCRIPTS MUST PARSE.
     # RecordMap.astro carries 1,600 lines of JavaScript inside `<script
     # is:inline>`, which Astro copies into the page verbatim and never looks

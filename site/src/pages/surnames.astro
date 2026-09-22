@@ -37,11 +37,21 @@ const absent = (refused.refused || []).filter((r) => !partial.includes(r));
    something in it. Hard-coding «Blažević» would have been a caption that
    quietly rots the first time the corpus changes. */
 const demo = (() => {
-  let best = null;
+  /* PICKED ON PEOPLE COUNTED, NOT ON COUNTRIES TOUCHED. The first rule
+     took the name attested in the most countries, which is «de
+     Franceschi» — one filled dot over Italy and seven dashed rings
+     scattered across empty ocean. It is a true picture and a terrible
+     example: the reader's first sight of this feature should show the
+     thing it is good at. Most people counted, across at least three
+     countries, gives a name with weight in several places. */
+  let best = null, bestN = 0;
   for (const r of surn.surnames || []) {
-    const n = (r.countries || []).length;
-    if (n < 3 || !earnsPage(r)) continue;
-    if (!best || n > (best.countries || []).length) best = r;
+    const ccs = r.countries || [];
+    if (ccs.length < 3 || !earnsPage(r)) continue;
+    const counted = ccs.filter((c) => c.n != null);
+    if (counted.length < 3) continue;
+    const people = counted.reduce((a, c) => a + c.n, 0);
+    if (people > bestN) { best = r; bestN = people; }
   }
   if (!best) return null;
   return { r: best, slug: slugForSurname(best.n),
@@ -128,6 +138,28 @@ function dlSize(name) {
       project whose whole argument is that a question about people is a
       question about ground. A reader who came here after seeing a
       surname drawn somewhere else found a table. */}
+  {/* THE PAGE HAD NOWHERE TO TYPE A NAME.
+      It described a corpus, offered it as a download, drew one example
+      and listed the countries that refuse — everything except the thing
+      a person arriving with a surname in their head wants to do with
+      it. The box goes to the map, which is where the real answer is:
+      the countries lit by evidence, and for Belgian names the actual
+      towns. A plain GET form, so it works before any script does. */}
+  <section style="margin-top:30px">
+    <h2>Look one up</h2>
+    <form class="snfind" method="get" action={u("/")}>
+      <label class="vh" for="snq">Surname</label>
+      <input id="snq" name="q" type="search" autocomplete="off"
+             placeholder="A surname — Peeters · Blažević · Murphy · Kosina" />
+      <button type="submit">Find it on the map</button>
+    </form>
+    <p class="cap">Takes you to the map with the name searched: the
+    countries where a register or an archive attests it, and — for
+    Belgian names, the only country that counts below itself — the
+    communes, sized by how many people the state counted there.
+    {demo && <> Or read a made page: <a href={u(`/surname/${demo.slug}/`)}>{demo.r.n}</a>.</>}</p>
+  </section>
+
   {demo && demo.map && (
     <section style="margin-top:30px">
       <h2>A name is a place, so it is drawn</h2>
@@ -239,18 +271,44 @@ function dlSize(name) {
      through set:html and carries none of Astro's scoping attributes.
      See src/pages/surname/[name].astro, where this was learnt by
      shipping a black continent. */
+  /* DARK MODE WAS HALF-APPLIED, WHICH IS WORSE THAN NOT AT ALL.
+     The background was written as var(--paper, #EDEAE3) and there is no
+     --paper token in this stylesheet, so it always fell back to the
+     light parchment — while the land, which did have a dark rule, went
+     near-black. The result was a black continent on a white sea, in a
+     dark page. Half a theme looks like a bug because it is one.
+     The site's own tokens now carry it, and the dark rules are written
+     twice the way styles.css does it: once for the media query and once
+     for an explicit [data-theme="dark"], because this site has a toggle
+     as well as a system preference. */
+  .snfind { display: flex; gap: 8px; margin: 12px 0 10px; flex-wrap: wrap; }
+  .snfind input { flex: 1 1 22rem; min-width: 0; font: inherit;
+    padding: 10px 12px; border: 1px solid var(--rule-strong);
+    border-radius: 3px; background: var(--panel); color: var(--ink); }
+  .snfind button { font: inherit; padding: 10px 16px; cursor: pointer;
+    border: 1px solid var(--accent); border-radius: 3px;
+    background: var(--accent); color: var(--band-label, #fff); }
+  .vh { position: absolute; width: 1px; height: 1px; overflow: hidden;
+        clip: rect(0 0 0 0); white-space: nowrap; }
   .smap { margin: 14px 0 6px; }
   .smap :global(svg.sm) { display: block; width: 100%; height: auto;
-              background: var(--paper, #EDEAE3);
+              /* True aspect in the viewBox, height capped here — see
+                 lib/surname-map.js, where clamping it squashed Belgium. */
+              max-height: 460px;
+              background: var(--panel, #EDEAE3);
               border: 1px solid var(--rule, #D8D3C8); border-radius: 2px; }
   .smap :global(.sm-land) { fill: #D5CFC2; stroke: #BDB6A6; stroke-width: .5; }
   .smap :global(.sm-c circle) { fill: var(--accent, #2F6F4E); fill-opacity: .78;
-                       stroke: #fff; stroke-width: 1; }
-  .smap :global(.sm-u circle) { fill: none; stroke: #7C8A91; stroke-width: 1.6;
-                       stroke-dasharray: 2 2; }
+                       stroke: var(--panel, #fff); stroke-width: 1; }
+  .smap :global(.sm-u circle) { fill: none; stroke: var(--ink-3, #7C8A91);
+                       stroke-width: 1.6; stroke-dasharray: 2 2; }
+  .smap figcaption { margin-top: 8px; }
   @media (prefers-color-scheme: dark) {
-    .smap :global(.sm-land) { fill: #3A3D3B; stroke: #4E524F; }
+    :root:not([data-theme="light"]) .smap :global(.sm-land) {
+      fill: #2A3841; stroke: #3F515C; }
   }
+  :root[data-theme="dark"] .smap :global(.sm-land) {
+    fill: #2A3841; stroke: #3F515C; }
 
   h2 { font-family: var(--serif); font-size: 26px; font-weight: 500; margin: 0 0 6px; }
   .verdict.re { background: var(--accent-wash); color: var(--accent);

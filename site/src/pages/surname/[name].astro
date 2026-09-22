@@ -20,6 +20,7 @@ import { curveFor } from "../../lib/fr-curve.js";
 import { corpus } from "../../lib/surname-corpus.js";
 import { surnameMap, placesMap } from "../../lib/surname-map.js";
 import { belgiumFor } from "../../lib/belgium-surnames.js";
+import { contextFor } from "../../lib/surname-context.js";
 
 export async function getStaticPaths() {
   const surn = corpus();
@@ -106,6 +107,24 @@ const smap = surnameMap(ccs);
    dot on a country, Belgium puts dots on towns. It is the only one, and
    the page has to say so rather than let a reader read a blank France as
    a fact about the name. */
+const wd = contextFor(r.n);
+/* PLACES THIS NAME IS ALSO THE NAME OF, drawn rather than only listed.
+   The gazetteer match has always been here; its coordinates were sitting
+   unused in the same file the match came from, so «Llerena is a town in
+   Extremadura» was a sentence on a page about a map. Only matches on the
+   name or a real spelling of it are drawn — a phonetic neighbour is an
+   algorithm's guess and putting it on the ground would dress it up. */
+const placePins = (r.places || [])
+  .filter((p) => p.y != null && p.x != null && p.via !== "sounds")
+  .map((p) => ({ y: p.y, x: p.x, c: Math.max(p.pop || 0, 1), nl: p.n }));
+const placeCcs = [...new Set((r.places || [])
+  .filter((p) => p.y != null && p.via !== "sounds" && p.cc)
+  .map((p) => p.cc))];
+const placeMap = placePins.length
+  /* Three degrees of margin, so a single town is shown in its country
+     rather than filling the frame with land. */
+  ? placesMap(placePins, { max: 12, cc: placeCcs, minPad: 3 })
+  : null;
 const beRows = belgiumFor(r.n);
 const bemap = beRows && placesMap(beRows, { cc: "BE" });
 const beTotal = beRows ? beRows.reduce((a, x) => a + x.c, 0) : 0;
@@ -145,9 +164,73 @@ const dek = `${r.n}${by.curated ? `, also written ${by.curated.slice(0,4).join("
     </section>
   ))}
 
+  {wd && (wd.lang || wd.kind || wd.after || wd.wiki) && (
+    <section style="margin-top:30px">
+      <h2>What Wikidata says this name is</h2>
+      {/* ATTRIBUTED IN THE HEADING, NOT IN A FOOTNOTE.
+          Every genealogy site on the web will tell you a surname's
+          meaning and almost none will say who says so — «from the Latin
+          Franciscus, meaning free man», the same three sentences on forty
+          sites. This atlas will not join them. Nothing in this section is
+          generated, inferred or paraphrased: four fields are copied from
+          Wikidata and the item that said each one is linked at the end,
+          so a reader who doubts it can go and look. Wikidata is
+          crowd-sourced and wrong in places, and saying so is cheaper than
+          being wrong quietly. */}
+      <p class="cap">Copied from Wikidata, not worked out here. It is
+      crowd-sourced and wrong in places, which is why the item is linked
+      below rather than the claim simply repeated.</p>
+      <ul class="vols" style="margin-top:12px">
+        {wd.lang && (
+          <li>
+            <b>{wd.lang.join(" · ")}</b>
+            <span class="who">the language of the name</span>
+            <p class="cap" style="margin:4px 0 0">Which is not where a
+            family is from. A Polish surname can be borne by people whose
+            forebears never saw Poland, and often is.</p>
+          </li>
+        )}
+        {wd.kind && (
+          <li>
+            <b>{wd.kind.join(" · ")}</b>
+            <span class="who">kind of surname</span>
+          </li>
+        )}
+        {wd.after && (
+          <li>
+            <b>Named after {wd.after.join(" · ")}</b>
+            <span class="who">what the name is from</span>
+          </li>
+        )}
+        {wd.wiki && (
+          <li>
+            <a href={wd.wiki} target="_blank" rel="noopener">Read about it on Wikipedia ↗</a>
+            <span class="who">an article, with its own sources</span>
+          </li>
+        )}
+      </ul>
+      <p class="cap" style="margin-top:10px">
+        <a href={wd.cite} target="_blank" rel="noopener">{wd.q} on Wikidata ↗</a>
+        {" "}— the item every line above came from.
+      </p>
+    </section>
+  )}
+
   {r.places && r.places.length > 0 ? (
     <section style="margin-top:30px">
       <h2>It is also the name of a place</h2>
+      {placeMap && (
+        <figure class="smap" style="margin:12px 0 4px">
+          <Fragment set:html={placeMap.svg} />
+          <figcaption class="cap" style="margin-top:8px">
+            Where those places are. A dot is a settlement whose name is
+            this surname, sized by its population — <b>not</b> a claim
+            that anybody of the name lives there. Phonetic neighbours are
+            listed below but not drawn: putting a machine's guess on the
+            ground would dress it up as geography.
+          </figcaption>
+        </figure>
+      )}
       <p class="cap"><b>This is as close to an origin as this map will go.</b> A surname that
       is also a place name often came from it — and often did not: plenty are occupations or
       patronymics that happen to collide with a place, and plenty of places are named after a

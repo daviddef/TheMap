@@ -124,6 +124,21 @@ def kids(doc, self_about):
 # by refusing a three-digit-looking year, and a shelf mark is far more
 # likely than a mediaeval baptism.
 YEARS = re.compile(r"\b(1[5-9][0-9]{2}|1[4][5-9][0-9]|20[0-2][0-9])\b")
+# AND A SHELF NUMBER IN BRACKETS IS NOT A YEAR EITHER. The floor above
+# catches «д. 1000» because 1000 is not year-shaped. It does nothing for
+# «Matrimoni 1862 (Registro 1486)», where the register number is a
+# perfectly plausible year, and taking the smallest number in the title
+# gave 33,748 volumes a start year that is somebody's shelf mark — Italian
+# civil registers answering the year control for the fifteenth century.
+# Numbers introduced by a shelf word are struck out before the years are
+# read; if that leaves none, what was there stands, because this must
+# never empty a book's span.
+SHELF_MARK = re.compile(
+    r"(?:registro|registre|register|pasta|busta|fasc(?:icolo)?\.?|filza|"
+    r"legajo|libro|livro|vol(?:ume)?\.?|bd\.?|sign\.?|ms\.?|inv\.?|"
+    r"box|file|folder|carton|bundle|item|piece|"
+    r"\u0444\.|\u043e\u043f\.|\u043e\.|\u0434\.|\u0441\u0432\.)"
+    r"\s*\u2116?\s*\d+(?:[.\-/]\d+)*", re.I)
 THIS_YEAR = time.gmtime().tm_year
 
 
@@ -187,8 +202,12 @@ def walk(cid, pause, log, workers=1):
                     # reading 2027 as a date gave three books that end
                     # after the present. Anything past this year is a
                     # number that happens to look like one.
-                    ys = [int(y) for y in YEARS.findall(c["t"])
-                          if int(y) <= THIS_YEAR]
+                    _every = [int(y) for y in YEARS.findall(c["t"])
+                              if int(y) <= THIS_YEAR]
+                    _kept = [int(y) for y in
+                             YEARS.findall(SHELF_MARK.sub(" ", c["t"]))
+                             if int(y) <= THIS_YEAR]
+                    ys = _kept or _every
                     child_path = path + [{"l": c["label"], "t": c["t"]}]
                     if ys:
                         m = re.search(r"/waypoints/([^?]+)", c["about"])

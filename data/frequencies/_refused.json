@@ -76,6 +76,18 @@
    "verdict": "a lookup and a top-100 table; the full list is not published",
    "why": "RECHECKED 22 September against the website rather than the database, after the same check corrected Croatia and closed Denmark. The old verdict — «the tables are retired, not withheld» — was right about PxWeb and incomplete about Sweden. SCB stopped producing name statistics altogether in 2024 and now refers enquirers to Skatteverket. What remains on scb.se is a top-100 surnames table and Namnsök, a working public lookup over every surname with at least ten bearers. So Sweden is Croatia's shape, not Denmark's: the data exists and is answerable one name at a time, and no complete list is published by anybody. A hundred names is not a register and this atlas will not present it as one.",
    "rechecked": "2026-09-22"
+  },
+  {
+   "country": "AR",
+   "name": "Argentina",
+   "tried": [
+    "datos.gob.ar — «Distribución de apellidos en Argentina», RENAPER, CC BY 4.0, three CSVs including surnames by province",
+    "datosabiertos.renaper.gob.ar over https — connects on 443 and the handshake never completes, at 60s and at 180s",
+    "the same host over http — 301 to the https that does not answer"
+   ],
+   "verdict": "found, licensed, and the host will not answer us",
+   "why": "The best lead of the sweep and the most frustrating. Argentina's registry of persons publishes surname distribution BY PROVINCE under CC BY 4.0 — the same grain that makes Belgium the richest thing in this directory, for a country where this atlas already holds places and which took a great deal of European emigration. The catalogue entry is real, the licence is clear, the file names are known. datosabiertos.renaper.gob.ar resolves, accepts a TCP connection on 443, and then never completes the TLS handshake, at sixty seconds or at a hundred and eighty. That is not a gate and not a refusal: nothing said no. It may be geography, it may be a server having a bad day. Worth retrying, and worth one person in Argentina fetching three CSVs if it stays shut.",
+   "rechecked": "2026-09-22"
   }
  ],
  "resolved": [
@@ -116,6 +128,17 @@
    "verdict": "CLOSED — and richer than anything else here",
    "why": "RESOLVED 22 September, by a reader, hours after this entry had been rechecked and confirmed. The recheck was not lazy: the population open-data CATEGORY was read directly rather than searched through an API, in all three languages, and it contains no surname dataset. True. Statbel does not put its surname data in that category; it puts it on the family-names theme page, with ten files. THE FOURTH TIME THIS MISTAKE WAS CAUGHT IN ONE DAY — Croatia, Denmark, Sweden and now Belgium, every one an entry that searched a machine-readable index exhaustively and then made a claim about an institution, and every one found by somebody opening the organisation's website. The pattern is the finding; the four entries are just where it showed. AND BELGIUM IS BY MUNICIPALITY, which nothing else in this directory is. Every other register answers «how many people in this country carry this name». Belgium answers it for each of 565 communes — 510,811 rows of NIS code, commune, surname, count, CC BY 4.0. That is surname to place to number, the shape this whole atlas is built on and the thing it could not do for names: not «the Peeters are Belgian» but «there are 101 Peeters in Aartselaar». 106,869 surnames, 6,384,407 people, and the per-commune grain kept whole in data/belgium-by-municipality.json rather than summed away.",
    "rechecked": "2026-09-22",
+   "resolved": "2026-09-22"
+  },
+  {
+   "country": "IE",
+   "name": "Ireland",
+   "tried": [
+    "data.gov.ie catalogue swept for «surname» — VSA110",
+    "ws.cso.ie PxStat API, CSV endpoint"
+   ],
+   "verdict": "closed, and it counts births rather than people",
+   "why": "Found by sweeping national open-data catalogues instead of guessing a country at a time — the method the last four wrong verdicts argued for. The CSO publishes VSA110, surnames of babies with ten or more occurrences, CC BY 4.0: 908 names, 80,922 births across 2023–2025. IT IS NOT A HEAD-COUNT AND THE FILE SAYS SO. Murphy at 1,717 is children given the name in three years, not Murphys alive in Ireland, and summing these into a population would be wrong by two orders of magnitude in the direction that flatters this atlas. The rows carry `b` for births and no `c`, so a name is attested in Ireland with no number claimed. It is also only newborns: a surname that died out in Ireland in 1900 is absent, and that absence means nothing.",
    "resolved": "2026-09-22"
   }
  ]

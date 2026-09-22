@@ -26,7 +26,7 @@
    Everything else — the find box, the filter pills, that every view is a link
    — is the family Atlas's and is kept deliberately, because a reader who knows
    one of these maps should know all of them. */
-const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wikidataUrl, osmUrl, featureBase, settlementBase, districtBase, countryBase, townlandBase, comuneBase, estoniaBase, scotlandBase, worldArchivesUrl, countryPointsUrl, base } = Astro.props;
+const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, belgiumBase, wikidataUrl, osmUrl, featureBase, settlementBase, districtBase, countryBase, townlandBase, comuneBase, estoniaBase, scotlandBase, worldArchivesUrl, countryPointsUrl, base } = Astro.props;
 ---
 
 {/* ONE BAR, NOT THREE PANELS. The search box, seven layer switches, the year
@@ -113,7 +113,7 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, wi
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 
-<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, WDA: wikidataUrl, OSMA: osmUrl, FEAT: featureBase, SETT: settlementBase, DIST: districtBase, CTRY: countryBase, TOWN: townlandBase, COMU: comuneBase, ESTO: estoniaBase, SCOT: scotlandBase, WARCH: worldArchivesUrl, CPTS: countryPointsUrl, BASE: base }}>
+<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, BSURN: belgiumBase, WDA: wikidataUrl, OSMA: osmUrl, FEAT: featureBase, SETT: settlementBase, DIST: districtBase, CTRY: countryBase, TOWN: townlandBase, COMU: comuneBase, ESTO: estoniaBase, SCOT: scotlandBase, WARCH: worldArchivesUrl, CPTS: countryPointsUrl, BASE: base }}>
 window.addEventListener("load", async function () {
   var el = document.getElementById("ra-map");
   if (!el || typeof L === "undefined") return;
@@ -1228,6 +1228,7 @@ window.addEventListener("load", async function () {
          search is an answer to a question nobody is asking any more. */
       if (gmark) { map.removeLayer(gmark); gmark = null; }
       ctryLayer.clearLayers();
+      communeLayer.clearLayers();
       return;
     }
     if (noFrame) return;
@@ -1562,6 +1563,62 @@ window.addEventListener("load", async function () {
      are fetched one country at a time from c/, so answering «Lerena» costs
      four small files and nothing at all for anyone who never searches a name. */
   var ccache = {}, ctryLayer = L.layerGroup();
+
+  /* ---- A NAME AT THE GRAIN OF A TOWN -------------------------------------
+     Shading a country is the most a national register supports, and for ten
+     of the eleven registers here it is the honest maximum. Belgium counts
+     every surname in each of its 565 communes, so for a Belgian name this
+     map can do what the whole atlas is for: put the answer on the ground.
+
+     Fetched only when a name has matched, from its own shards, so a search
+     that has nothing to do with Belgium never pays for it. */
+  var bcache = {}, communeLayer = L.layerGroup(), communeBox = null;
+  /* The same three-character shard rule as the search corpus — see
+     build.py, which tried four to split the Belgian «Van » names and put
+     it back rather than keep two rules in step by hand. */
+  async function communes(name) {
+    var f = fold(name), key = "";
+    for (var i = 0; i < f.length && key.length < 3; i++)
+      if (/[a-z0-9]/.test(f[i])) key += f[i];
+    if (key.length < 3) return null;
+    if (!(key in bcache)) {
+      try { bcache[key] = await (await fetch(BSURN + key + ".json")).json(); }
+      catch (e) { bcache[key] = null; }
+    }
+    var sh = bcache[key];
+    if (!sh || !sh.n || !sh.n[f]) return null;
+    var row = sh.n[f];
+    /* [index, count] against the shard's own commune table, so each
+       commune's name and coordinates are written once per file. */
+    return [row[0].map(function (p) {
+      var c = sh.c[p[0]];
+      return [c[0], c[1], p[1], c[2]];
+    }), row[1], row[2]];
+  }
+
+  function showCommunes(rec, label) {
+    communeLayer.clearLayers();
+    communeBox = null;
+    if (!rec) return null;
+    var rows = rec[0], total = rec[1], people = rec[2];
+    if (!map.hasLayer(communeLayer)) communeLayer.addTo(map);
+    var top = rows.reduce(function (a, r) { return Math.max(a, r[2]); }, 1);
+    rows.forEach(function (r) {
+      /* Sized like the shelf dots, so the two layers read as one map. A
+         commune is a place a state counted people in, which is a firmer
+         claim than anything else drawn here, and it is drawn solid. */
+      L.circleMarker([r[0], r[1]], {
+        radius: Math.min(3 + Math.sqrt(r[2]) * 0.9, 14),
+        color: "#fff", weight: 0.8, opacity: .9,
+        fillColor: "#1E8449", fillOpacity: .8
+      }).bindTooltip(esc(r[3]) + " — " + r[2].toLocaleString() + " " +
+                     esc(label), { sticky: true }).addTo(communeLayer);
+    });
+    communeBox = L.latLngBounds(rows.map(function (r) {
+      return [r[0], r[1]];
+    }));
+    return { drawn: rows.length, total: total, people: people };
+  }
   async function outline(cc) {
     var k = (cc || "").toLowerCase();
     if (!k) return null;
@@ -1592,6 +1649,11 @@ window.addEventListener("load", async function () {
   };
 
   async function showCountries(list, stale) {
+    /* Clears its own outlines and NOT the commune dots. It used to clear
+       both, which was invisible until the dots started being drawn first
+       — showCommunes ran, drew 60 towns, and this wiped them a
+       millisecond later. Each layer is cleared by whoever fills it, and
+       by the search that starts a new question. */
     ctryLayer.clearLayers();
     if (!list.length) return;
     var got = await Promise.all(list.slice(0, 10).map(function (x) {
@@ -1612,7 +1674,16 @@ window.addEventListener("load", async function () {
       box = box ? box.extend(b) : b;
     });
     if (!map.hasLayer(ctryLayer)) ctryLayer.addTo(map);
-    if (box) map.fitBounds(box, { padding: [30, 30], maxZoom: 7 });
+    if (!map.hasLayer(communeLayer)) communeLayer.addTo(map);
+    /* THE SHARPEST ANSWER FRAMES THE MAP.
+       Searching «Peeters» lit Spain, France, Poland and the United States,
+       fitted the map to all four and landed the reader in the middle of
+       the Atlantic — while 411 Belgian communes, the only place-level
+       answer on the map, sat unframed off the edge. Country outlines are
+       context; towns a state counted people in are the answer, so when
+       there are towns they decide the view. */
+    if (communeBox) map.fitBounds(communeBox, { padding: [40, 40], maxZoom: 9 });
+    else if (box) map.fitBounds(box, { padding: [30, 30], maxZoom: 7 });
   }
 
   /* Irish townlands. Undrawn — 60,883 dots would bury Ireland — but a townland
@@ -1785,6 +1856,7 @@ window.addEventListener("load", async function () {
     if (hitCC) {
       if (gmark) { map.removeLayer(gmark); gmark = null; }
       ctryLayer.clearLayers();
+      communeLayer.clearLayers();
       openCountry(hitCC);
       showCountries([{ cc: hitCC.cc, how: "register" }], function () {
         return mine !== searchTok;
@@ -1801,6 +1873,7 @@ window.addEventListener("load", async function () {
        said otherwise, and the map is louder. */
     if (gmark) { map.removeLayer(gmark); gmark = null; }
     ctryLayer.clearLayers();
+    communeLayer.clearLayers();
     var f = fold(term);
     var iso = Object.keys(CNAME).filter(function (k) {
       return wordHit(fold(CNAME[k]), f) || k.toLowerCase() === f;
@@ -1812,6 +1885,9 @@ window.addEventListener("load", async function () {
     });
     var hits = await gazetteer(term);
     var names = await surnames(term);
+    /* Fetched here with the rest, because the panel is written once
+       and a promise landing after it has nowhere to put its line. */
+    var beRec = names.length ? await communes(names[0].n) : null;
     if (stale()) return;
     var setts = await settlements(term);
     var dists = await districts(term);
@@ -1833,14 +1909,66 @@ window.addEventListener("load", async function () {
          is the true one, and the panel lists both anyway. */
       var lit = [], seen = {};
       var STRONG = ["register", "curated", "archive", "grammar", "sounds"];
-      names.forEach(function (r) {
-        (r.countries || []).forEach(function (c) {
+      function light(list) {
+        (list || []).forEach(function (c) {
           var was = seen[c.cc];
           if (was === undefined) { seen[c.cc] = lit.length; lit.push({cc: c.cc, how: c.how}); }
           else if (STRONG.indexOf(c.how) < STRONG.indexOf(lit[was].how)) lit[was].how = c.how;
         });
+      }
+      /* Drawn before the outlines, because showCountries decides the
+         view and needs to know whether there is anything sharper. */
+      var be = showCommunes(beRec, names[0].n);
+      names.forEach(function (r) { light(r.countries); });
+      /* THE SPELLINGS COUNT TOO, AND THEY WERE NOT COUNTING.
+         «One card per cluster» folds Blazevich and Blaževič into the
+         Blažević card, which is right for the panel and was quietly wrong
+         for the map: only the representative's countries were lit, so a
+         search for a name showed where THAT spelling is counted and not
+         where the name is. The clerk's choice of letter is exactly what a
+         researcher does not know.
+         Sounds-alike variants are left out. They are an algorithm's guess,
+         the panel says so, and lighting a country on one would put a
+         family in Poland because a machine thought two names rhymed. */
+      var VARIANT_OK = { curated: 1, grammar: 1, spelling: 1 };
+      var byName = {};
+      names.forEach(function (r) { byName[fold(r.n)] = 1; });
+      var extra = [];
+      names.forEach(function (r) {
+        (r.variants || []).forEach(function (v) {
+          if (!VARIANT_OK[v.how]) return;
+          var fv = fold(v.n);
+          if (byName[fv]) return;
+          byName[fv] = 1;
+          extra.push(fv);
+        });
       });
+      if (extra.length) {
+        var pool = [];
+        Object.keys(scache).forEach(function (k) {
+          (scache[k] || []).forEach(function (r) { pool.push(r); });
+        });
+        pool.forEach(function (r) {
+          if (extra.indexOf(fold(r.n)) > -1) light(r.countries);
+        });
+      }
       showCountries(lit, stale);
+
+      /* And where a state counted by town rather than by country, draw
+         the towns. Belgium is the only one, and the panel says so — a
+         reader seeing Belgium in dots and France in a wash must not read
+         that as a fact about the name. */
+      if (be) {
+        h.push('<p class="ra-note"><b>' + esc(names[0].n) +
+          " in Belgium, by commune.</b> " + be.people.toLocaleString() +
+          " people in " + be.total + " of Belgium's 565 communes" +
+          (be.drawn < be.total ? ", the " + be.drawn + " biggest drawn"
+                               : "") +
+          ". Statbel counts every surname in every commune, and no other " +
+          "register here counts below the country — so this layer is " +
+          "Belgium alone, and a country drawn as a wash is a gap in what " +
+          "states publish, not in the name.</p>");
+      }
     }
     /* A village inside a mapped region: no shelf, but a jurisdiction answer,
        which is the thing this map is actually for. */
@@ -2240,6 +2368,7 @@ window.addEventListener("load", async function () {
     document.getElementById("ra-kindw").open = false;
     if (gmark) { map.removeLayer(gmark); gmark = null; }
     ctryLayer.clearLayers();
+    communeLayer.clearLayers();
     helpBox.hidden = true;
     document.getElementById("ra-info").setAttribute("aria-expanded", "false");
     panel.hidden = true; empty.hidden = false;

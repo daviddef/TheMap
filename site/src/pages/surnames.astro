@@ -20,6 +20,18 @@ import refused from "../../../data/frequencies/_refused.json";
 const rechecked = refused.refused.filter((r) => r.rechecked).length;
 
 const CN = idx.countries || {};
+/* Which of the refused actually have nothing. A register marked
+   `enumerable: false` is a country this atlas can ask about but not
+   enumerate — some of its names are in, and saying «not here» of it is
+   false. */
+const partialCc = new Set(
+  (surn.sources ? Object.values(surn.sources) : [])
+    .filter((x) => x && x.enumerable === false)
+    .map((x) => x.cc)
+    .filter(Boolean));
+const partial = (refused.refused || []).filter(
+  (r) => partialCc.has(r.country) || r.verdict.startsWith("queryable"));
+const absent = (refused.refused || []).filter((r) => !partial.includes(r));
 /* One real name to draw, picked rather than hard-coded: the name with a
    page that is attested in the most countries, so the picture has
    something in it. Hard-coding «Blažević» would have been a caption that
@@ -183,13 +195,32 @@ function dlSize(name) {
     {/* COUNTED, NOT TYPED. It said «Four» and listed eight — written when there
     were four and never looked at again, on the one page whose whole purpose
     is to be accurate about what is missing. */}
-    <h2>{refused.refused.length} countries that are not here, and exactly why</h2>
+    {/* «NOT HERE» WAS TOO BLUNT FOR CROATIA, and a reader caught it.
+        Croatia's 141 surnames are in the corpus, with real 2011 census
+        counts, harvested one name at a time from the Bureau's own
+        application — and the heading still filed it under countries that
+        are not here. «No complete register» had been rendered as
+        «nothing», which is the same collapsing of two claims this page
+        spends the rest of its length warning about. A country with some
+        of its names here is a different animal from one with none, and
+        the list now separates them. */}
+    <h2>{absent.length} countries that are not here, and exactly why</h2>
     <p class="cap">Sought and not obtained. Without this list the next person spends the same
     afternoon finding the same walls. {rechecked} were re-tested on {refused.checked} against
     live endpoints rather than remembered ones, and every refusal held.
     {(refused.resolved || []).length > 0 && <> But retrying is also what closed
     <b>{(refused.resolved || []).map((r) => r.name).join(", ")}</b>, which had been the
     weakest verdict here — «not found», meaning only that somebody looked once.</>}</p>
+    {partial.length > 0 && (
+      <div class="one" style="margin:0 0 18px;border-left-color:var(--accent)">
+        <div class="lab">Partly here, which is not the same as missing</div>
+        {partial.map((r) => (
+          <p class="cap"><b>{r.name}</b> — {r.verdict}. Some of its names
+          are in the corpus and the rest are not obtainable; the entry
+          below says exactly how far it goes.</p>
+        ))}
+      </div>
+    )}
     <ul class="refused">
       {refused.refused.map((r) => (
         <li>

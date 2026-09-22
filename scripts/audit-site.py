@@ -462,7 +462,26 @@ def sitemap_covers_pages():
         ex = ", ".join(sorted(orphan)[:4])
         bad("sitemap", f"{len(orphan):,} sitemap entries have no page, "
                        f"so a crawler is being sent to a 404: {ex}")
-    note("sitemap", f"{len(listed):,} urls listed, {len(built):,} pages built")
+    # COMPARE LIKE WITH LIKE, OR DO NOT PUT THE TWO NUMBERS TOGETHER.
+    # This printed «45,829 urls listed, 45,782 pages built» for weeks.
+    # `listed` is every url in every sitemap; `built` is only the five
+    # kinds this check knows how to walk — place, surname, country,
+    # archive, region — so the sitemap's /about/, /surnames/, /coverage/
+    # and the paginated /places/N/ counted on one side and not the other.
+    # The gap was the difference between two definitions, and it read as
+    # forty-seven urls pointing at nothing. It was believed, written into
+    # the worklist as «47 urls handed to search engines that answer 404»,
+    # and reported to David as a real defect. It never was: `orphan`
+    # above does the honest test, scoped to the same five kinds, and has
+    # always said zero.
+    # Two numbers that are not comparable do not belong in one sentence.
+    kinds = ("place", "surname", "country", "archive", "region")
+    listed_kinds = {u for u in listed if u.split("/")[0] in kinds}
+    note("sitemap", f"{len(listed):,} urls listed, of which "
+                    f"{len(listed_kinds):,} are the kinds this check walks, "
+                    f"against {len(built):,} such pages built "
+                    f"({len(listed) - len(listed_kinds):,} others are "
+                    f"standalone pages)")
 
 
 def promoted_countries():

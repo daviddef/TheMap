@@ -17,9 +17,10 @@ import { u } from "../../lib/url.js";
 import { atlas as idx } from "../../lib/atlas.js";
 import { sourcesFor, access as PACCESS } from "../../lib/sources-by-country.js";
 import { curveFor } from "../../lib/fr-curve.js";
+import { corpus } from "../../lib/surname-corpus.js";
 
 export async function getStaticPaths() {
-  const surn = (await import("../../data/surnames.json")).default;
+  const surn = corpus();
   const slug = (s) => s.toLowerCase().normalize("NFKD")
     .replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const seen = new Set();

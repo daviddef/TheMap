@@ -5,8 +5,14 @@ import full from "../data/places-full.json";
 import regions from "../../public/regions.json";
 import provs from "../../public/providers.json";
 import cols from "../data/collections-full.json";
-import surn from "../data/surnames.json";
+import { corpus } from "../lib/surname-corpus.js";
 import { surnamePageSlugs } from "../lib/surname-pages.js";
+
+/* Read once, off disk. This file and surname/[name].astro must agree on
+   which names have pages — a sitemap listing URLs that were never built is
+   the bug surnamePageSlugs exists to prevent — so they share both the rule
+   and the corpus. */
+const surn = corpus();
 
 export const SETS = ["pages", "places", "archives", "countries", "regions", "surnames"];
 

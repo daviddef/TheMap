@@ -7,7 +7,8 @@ import { statSync } from "node:fs";
    start in. */
 import Base from "../layouts/Base.astro";
 import { u } from "../lib/url.js";
-import surn from "../data/surnames.json";
+import { corpus } from "../lib/surname-corpus.js";
+const surn = corpus();
 import { atlas as idx } from "../lib/atlas.js";
 import refused from "../../../data/frequencies/_refused.json";
 /* COUNTED, NOT TYPED — like the heading below, which was fixed for exactly this

@@ -157,6 +157,49 @@ ABBREV = {"sv", "st", "ss", "sta", "sto", "san", "sankt", "hl"}
 # unplaced list, where it will sit forever because no gazetteer contains it.
 # Offering it to a fuzzy match is worse than leaving it: it is exactly the
 # kind of token that eventually hits something and the hit is nonsense.
+# ---- A SHELF MARK IS NOT A YEAR, AND IT IS USUALLY IN BRACKETS -----------
+# The waypoint harvester takes every four-digit number in a volume's title
+# and calls the smallest one the start year. For «Matrimoni 1862 (Registro
+# 1486)» — an 1862 marriage register, register number 1486 — that produced
+# a book running from 1486 to 1862, and 33,748 volumes carried a start year
+# that is somebody's shelf number.
+#
+# That is not a cosmetic error. The year control is the reason this atlas
+# exists: set it to 1500 and it promises the books that can answer for
+# 1500. Nineteen thousand Italian civil registers answering for the
+# fifteenth century is the map lying about the one thing it is for.
+#
+# Two rules, and the second is what makes the first safe:
+#   1. Numbers introduced by a shelf word — Registro, Busta, Pasta, Box,
+#      File, д., оп. — are not years.
+#   2. If striking them out leaves NO year at all, keep what was there.
+#      A title whose only date sits behind «Libro» is more likely a year
+#      than nothing, and this rule must never empty a book's span.
+# 29,222 spans come back to the right century. The 4,526 that stay long
+# are mostly genuine — «Index, Begraven 1573-1808» really does cover 235
+# years — which is the point of fixing the cause rather than capping the
+# span.
+SHELF_MARK = re.compile(
+    r"(?:registro|registre|register|pasta|busta|fasc(?:icolo)?\.?|filza|"
+    r"legajo|libro|livro|vol(?:ume)?\.?|bd\.?|sign\.?|ms\.?|inv\.?|"
+    r"box|file|folder|carton|bundle|item|piece|"
+    r"\u0444\.|\u043e\u043f\.|\u043e\.|\u0434\.|\u0441\u0432\.)"
+    r"\s*\u2116?\s*\d+(?:[.\-/]\d+)*", re.I)
+TITLE_YEARS = re.compile(r"\b(1[5-9][0-9]{2}|14[5-9][0-9]|20[0-2][0-9])\b")
+
+
+def years_in_title(t, ceiling):
+    """(from, to) for a volume title, ignoring numbers that are shelf marks."""
+    if not t:
+        return None, None
+    every = [int(y) for y in TITLE_YEARS.findall(t) if int(y) <= ceiling]
+    if not every:
+        return None, None
+    kept = [int(y) for y in TITLE_YEARS.findall(SHELF_MARK.sub(" ", t))
+            if int(y) <= ceiling]
+    ys = kept or every
+    return min(ys), max(ys)
+
 UNKNOWN_VALUE = re.compile(
     r"^(不明|不詳|未詳|unknown|unspecified|not ?stated|no ?place|none|n/?a|"
     r"desconocid[oa]|sin ?lugar|sconosciut[oa]|ignoto|onbekend|inconnu|"
@@ -961,6 +1004,7 @@ def main():
     area_in_gaz = [0]
     area_placed = [0]
     far_from_parent = [0]
+    reyeared = [0]
     col_titles = {}
     by_place = collections.defaultdict(list)
     promote = {}
@@ -1075,6 +1119,13 @@ def main():
             # fixed, but these rows are already on disk and only a re-walk
             # would clear them. 1450 is below the earliest span this atlas
             # actually holds, Croatia's church books at 1516.
+            # Re-derived from the title every pass, so the correction
+            # reaches the 2.5 million rows already on disk instead of
+            # waiting on a re-walk that would cost a week of API calls.
+            _f, _t = years_in_title(v.get("t"), THIS_YEAR)
+            if _f and (_f, _t) != (v.get("from"), v.get("to")):
+                v = dict(v, **{"from": _f, "to": _t})
+                reyeared[0] += 1
             if (v.get("to") or 0) > THIS_YEAR or (v.get("from") or 0) > THIS_YEAR \
                or (0 < (v.get("from") or 0) < 1450) or (0 < (v.get("to") or 0) < 1450):
                 v = dict(v, **{"from": None, "to": None})
@@ -1144,7 +1195,8 @@ def main():
                    "noPathName": noname,
                    "unplacedButAreaIsInTheGazetteer": area_in_gaz[0],
                    "placedOnAnAdminDivision": area_placed[0],
-                   "refusedAsFarFromItsParent": far_from_parent[0]},
+                   "refusedAsFarFromItsParent": far_from_parent[0],
+                   "spansRederivedFromTheTitle": reyeared[0]},
         # The collection titles, once each, instead of on 2.8 million rows.
         "colTitles": col_titles,
         "byPlace": {k: v for k, v in sorted(by_place.items())},
@@ -1181,6 +1233,9 @@ def main():
     print(f"  {matched:,} matched a place "
           f"({100*matched/max(total,1):.0f}%), of which "
           f"{len(promote):,} are new dots promoted from the gazetteer")
+    if reyeared[0]:
+        print(f"  {reyeared[0]:,} spans re-read from the title, where a shelf "
+              f"number had been taken for a year")
     if far_from_parent[0]:
         print(f"  {far_from_parent[0]:,} refused for landing more than 400 km "
               f"from the province or city their own path names")

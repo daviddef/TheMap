@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""France's departmental archives, from Wikidata.
+"""France's departmental and communal archives, from Wikidata.
 
 WHY FRANCE WAS A HOLE THE SIZE OF FRANCE.
 
@@ -44,7 +44,49 @@ import io, json, math, os, sys, time, urllib.parse, urllib.request
 QLEVER = "https://qlever.dev/api/wikidata"
 UA = ("RecordAtlas/1.0 (+https://daviddef.github.io/TheMap; "
       "a map of genealogical sources)")
-OUT = "data/departementales.json"
+
+# TWO CLASSES, AND THEY ARE NOT THE SAME ANSWER.
+#
+# A département's archive is where that département's PARISH AND CIVIL
+# REGISTERS are deposited — the series a genealogist actually wants, for
+# every commune in it. A commune's archive holds the commune's own
+# papers: its copy of the état civil, council deliberations, the cadastre,
+# school and electoral rolls. Useful, sometimes the only surviving copy,
+# and a different claim. Listing 500 town halls as though each were a
+# register office would overstate what this map knows, so the two are
+# harvested apart and say different things about themselves.
+#
+# The distance a coordinate may stray from its own town differs too: a
+# département is a region and a commune is a town.
+KINDS = {
+    "departementales": {
+        "qid": "Q2860456",
+        "out": "data/departementales.json",
+        "prefix": "ad-",
+        "maxKm": 120.0,
+        "label": "archives départementales",
+        "what": ("The archives d\u00e9partementales for {x} \u2014 in France, "
+                 "where a d\u00e9partement's parish registers and civil "
+                 "registers are deposited. Harvested from Wikidata and not "
+                 "yet opened: what is online, and at what price, is "
+                 "unchecked."),
+    },
+    "communales": {
+        "qid": "Q604177",
+        "out": "data/communales.json",
+        "prefix": "ac-",
+        "maxKm": 30.0,
+        "label": "archives communales",
+        "what": ("The municipal archive of {x} \u2014 a French commune's own "
+                 "papers: its copy of the \u00e9tat civil, council "
+                 "deliberations, the cadastre. NOT the d\u00e9partement's "
+                 "register series, which is held by its archives "
+                 "d\u00e9partementales. Harvested from Wikidata and not yet "
+                 "opened."),
+    },
+}
+KIND = KINDS["departementales"]      # replaced by main() from argv
+OUT = KIND["out"]
 
 PREFIXES = """PREFIX wdt: <http://www.wikidata.org/prop/direct/>
 PREFIX wd: <http://www.wikidata.org/entity/>
@@ -54,9 +96,20 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 # The archive, its site, where it stands, and the département it serves
 # with that département's own coordinates — which is what makes the
 # distance check possible.
-QUERY = PREFIXES + """
+QUERY_TEMPLATE = PREFIXES + """
 SELECT ?a ?al ?site ?coord ?dep ?depl ?depcoord ?code WHERE {
-  ?a wdt:P31 wd:Q2860456 .
+  ?a wdt:P31 wd:%QID% .
+  # FRANCE, EXPLICITLY.
+  # «archives départementales» is a French institution by definition, so
+  # the first version of this query did not bother saying so. «archives
+  # communales» is not: Q604177 is the generic municipal archive, and
+  # asking it without a country returned 998 rows including the City of
+  # Boston Archives, Stadtarchiv Winterthur, the Arxiu Municipal de
+  # Sants-Montjuïc and the general archives of Rio de Janeiro — each of
+  # which this script was about to describe as «a French commune's own
+  # papers». A class that happens to be national is not the same as a
+  # constraint, and only one of those survives being reused.
+  ?a wdt:P17 wd:Q142 .
   # ABOLISHED ARCHIVES ARE NOT PLACES TO WRITE TO.
   # «Archives de la Seine» and «Archives départementales de Seine-et-Oise»
   # both served départements dissolved in 1968. They came through the first
@@ -76,7 +129,6 @@ SELECT ?a ?al ?site ?coord ?dep ?depl ?depcoord ?code WHERE {
 }
 """
 
-MAX_KM = 120.0      # a département is smaller than this from its centre
 
 
 def verify(url):
@@ -172,7 +224,7 @@ def haversine(a, b, c, d):
 
 
 def main():
-    rows = ask(QUERY)
+    rows = ask(QUERY_TEMPLATE.replace("%QID%", KIND["qid"]))
     print(f"{len(rows)} rows from Wikidata")
 
     seen, keep, noplace, faraway = {}, [], [], []
@@ -202,7 +254,7 @@ def main():
         if rec["depxy"]:
             km = haversine(rec["lat"], rec["lon"], *rec["depxy"])
             rec["kmFromItsDepartement"] = round(km, 1)
-            if km > MAX_KM:
+            if km > KIND["maxKm"]:
                 faraway.append(rec)
                 continue
         keep.append(rec)
@@ -230,9 +282,8 @@ def main():
 
     keep.sort(key=lambda r: (r["code"] or "zz", r["name"]))
     out = {
-        "note": ("France's archives départementales, from Wikidata "
-                 "(P31 = Q2860456). Each holds the parish and civil "
-                 "registers of one département. NOTHING HERE HAS BEEN "
+        "note": (f"France's {KIND['label']}, from Wikidata "
+                 f"(P31 = {KIND['qid']}). NOTHING HERE HAS BEEN "
                  "OPENED: no claim is made about what any of them puts "
                  "online, which is why every provider row built from this "
                  "file is access «unsurveyed». `kmFromItsDepartement` is "
@@ -294,12 +345,34 @@ def merge_providers():
               .replace("à", "a").replace("ô", "o").replace("û", "u")
               .replace("ç", "c").replace("î", "i").replace("ï", "i"))
         t = re.sub(r"[^a-z0-9]+", "-", t).strip("-")
-        return "ad-" + t
+        return KIND["prefix"] + t
 
     def served(name):
-        t = re.sub(r"^[Aa]rchives?\s+d[eé]partementales?\s+", "", name)
-        t = re.sub(r"^[Aa]rchives?\s+", "", t)
-        return t.strip() or name
+        """The place an archive is for, taken out of its own name.
+
+        Wikidata's French labels are not one shape. Most read «archives
+        municipales de X», but «Archives Municipales et Métropolitaines de
+        Grenoble», «Archives de Nantes», «archives de Bordeaux Métropole»
+        and «archives de l'agglomération Évreux Portes de Normandie» all
+        exist. The first version stripped «archives départementales » and
+        then «archives », which left the connector behind: every row this
+        script has written so far says «for de Maine-et-Loire», and the
+        communal ones would have said «the municipal archive of
+        Municipales et Métropolitaines de Grenoble».
+
+        So: take off the institution words wherever they sit, then the
+        connector, and if that leaves nothing keep the whole name rather
+        than publish a fragment.
+        """
+        t = re.sub(r"^\s*[Aa]rchives?\b", "", name)
+        for _ in range(3):
+            t = re.sub(r"^\s*(d[eé]partementales?|communales?|municipales?"
+                       r"|m[eé]tropolitaines?|g[eé]n[eé]rales?|patrimoniales?"
+                       r"|et)\b", "", t, flags=re.I)
+        t = re.sub(r"^\s*(de\s+la|de\s+l'|de\s+l\u2019|du|des|de|d'|d\u2019)\s*",
+                   "", t, flags=re.I)
+        t = t.strip(" .,\u2019'")
+        return t or name.strip()
 
     added, skipped = [], []
     for r in d["archives"]:
@@ -320,11 +393,7 @@ def merge_providers():
             ("kind", "regional-archive"),
             ("access", "unsurveyed"),
             ("countries", ["FR"]),
-            ("what", f"The archives d\u00e9partementales for {served(r['name'])} "
-                     f"\u2014 in France, where a d\u00e9partement's parish registers "
-                     f"and civil registers are deposited. Harvested from "
-                     f"Wikidata and not yet opened: what is online, and at "
-                     f"what price, is unchecked."),
+            ("what", KIND["what"].format(x=served(r["name"]))),
             ("deepLink", None),
             ("checked", d["harvested"]),
             ("at", collections.OrderedDict([
@@ -344,6 +413,11 @@ def merge_providers():
 
 
 if __name__ == "__main__":
+    for name in KINDS:
+        if "--" + name in sys.argv:
+            KIND = KINDS[name]
+            OUT = KIND["out"]
+            break
     if "--merge" in sys.argv:
         merge_providers()
     else:

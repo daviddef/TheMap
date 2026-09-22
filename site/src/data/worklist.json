@@ -237,6 +237,14 @@
    "owner": "this atlas",
    "since": "2026-09-22",
    "note": "The data is right — CC BY 4.0, every surname borne by three or more people, from Statistics Denmark's own website. Shipping it killed `astro build` with «Ineffective mark-compacts near heap limit» at 8 GB, part-way through the surname pages. It had been held back an hour earlier on a guess about GitHub Pages' 1,024 MB, then released when the deploy's own report showed 385 MB stored of that. Both calls were reasoning, not measuring, and the second commit message said «there was never a decision to make». There was: the constraint was build memory, not disk. The ceiling is now 10240, which is headroom and not an answer. Two things to find out, in order: where the memory actually goes — site/src/data/surnames.json is imported whole and every page holds the graph live — and whether a Danish name whose only fact is «Denmark says this exists» should earn a page at all. `earnsPage` is the right place for that judgement, and finding it out through an out-of-memory crash is the wrong way. Waiting in data/_pending with a README. Measure, then ship."
+  },
+  {
+   "n": 30,
+   "what": "France had four providers, and one of them was a link to Geneanet",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-22",
+   "note": "**Done 22 September.** David asked whether the atlas had mapped Geneanet's collection catalogue. It had not, and the catalogue cannot be read: it sits behind a Cloudflare managed challenge whose own page carries «noindex, nofollow», and this project does not climb bot gates. But the question exposed the gap behind it. The atlas held four providers covering France — Bas-Rhin, Haut-Rhin, Moselle and a link to Geneanet itself — for a country with one of the deepest register series in Europe. Geneanet is largely an aggregator OF the archives départementales, so the answer was to go to them. 96 of them now, from Wikidata, each with a checked https address and coordinates a median 1.3 km from its own town. Every one is access «unsurveyed», because nobody here has opened 96 archive sites to see what is free and what is not, and marking them «free» because departmental archives usually are would be the map asserting 96 things nobody verified. What was refused is the useful part: two hosts that no longer resolve at all were dropped rather than shipped, which is the ARHiNET lesson from the same morning; two abolished archives — Seine-et-Oise and the Archives de la Seine, départements dissolved in 1968 — were caught by P576, the filter the US county harvest already needed; and six archives alive only on http are held back, because this project's data gate requires https and relaxing a rule to admit one's own data is the wrong way round. Those six need their current address found by hand. Next: 555 archives communales are on Wikidata too, and are a larger and much more variable question."
   }
  ]
 }

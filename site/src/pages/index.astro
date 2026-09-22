@@ -8,7 +8,11 @@ import regions from "../../public/regions.json";
 import provs from "../../public/providers.json";
 
 const places = idx.places.length;
-const volumes = idx.places.reduce((a, p) => a + (p.c || 0), 0);
+/* `v` IS VOLUMES; `c` IS COLLECTIONS. The map's own hint had this wrong
+   and was fixed; this line is the same mistake in the page header above
+   it, and it is the one a reader sees first. It was printing "8557 record
+   volumes" for an atlas holding 2,328,191. */
+const volumes = idx.places.reduce((a, p) => a + (p.v || 0), 0);
 const countries = new Set(idx.places.map(p => p.k).filter(Boolean)).size;
 const archives = provs.providers.filter(p => p.at);
 const archiveCountries = new Set(archives.map(p => p.at.place.split(", ").pop())).size;
@@ -26,7 +30,7 @@ const archiveCountries = new Set(archives.map(p => p.at.place.split(", ").pop())
       line run the full width. The wording is two sentences now; the old five
       spent three of them clearing their throat before the point. */}
   <div class="pagehead ra-lede">
-    <div class="lab">{places} places · {volumes} record volumes · {archives.length} archives in {archiveCountries} countries · {regions.regions.length} record regions</div>
+    <div class="lab">{places.toLocaleString()} places · {volumes.toLocaleString()} record volumes · {archives.length} archives in {archiveCountries} countries · {regions.regions.length} record regions</div>
     <h1>Where the records are</h1>
     <p class="dek">
       Click the place your people came from: every collection that covers it,

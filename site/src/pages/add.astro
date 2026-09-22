@@ -13,6 +13,24 @@ const iss = site.repo + "/issues/new";
     <p>Three things are worth more than anything else you could send:</p>
   </div>
 
+  {/* A ROUTE FOR PEOPLE WHO DO NOT HAVE A GITHUB ACCOUNT.
+      Every path on this page was an issue or a pull request, which is a
+      developer's idea of how a stranger reports a dead link. The people
+      best placed to correct this atlas — an archivist who finds their own
+      institution marked «unsurveyed», a researcher who knows a collection
+      went behind a paywall last year — will not open an account to say
+      so. Rendered only when an address exists, because a contact link
+      that goes nowhere is worse than none. */}
+  {site.contact && site.contact.email && (
+    <div class="one" style="margin:22px 0 0;border-left-color:var(--accent)">
+      <div class="lab">Or just write</div>
+      <p class="cap">No account, no template. Tell us what is wrong and
+      where you saw it, and it will be checked against the source before
+      anything changes — <a href={`mailto:${site.contact.email}?subject=${
+        encodeURIComponent("Record Atlas — a correction")}`}>{site.contact.email}</a>.</p>
+    </div>
+  )}
+
   <div class="ways">
     <a class="way" href={`${iss}?template=add-source.yml`}>
       <div class="lab">Most useful</div>

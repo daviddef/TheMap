@@ -256,11 +256,11 @@
   },
   {
    "n": 32,
-   "what": "The sitemap lists 47 urls that were never built",
-   "state": "next",
+   "what": "The sitemap 404s that were never there",
+   "state": "done",
    "owner": "this atlas",
    "since": "2026-09-22",
-   "note": "The audit has said «45,829 urls listed, 45,782 pages built» for some time, and it was read past while chasing other things. It predates the surname maps — the same 47 appear in the last successful CI run before them — so it is old and constant, which is worse than new: it means 47 urls have been handed to search engines that answer 404. The surname pages cannot be the cause; sitemap-index.xml.js and surname/[name].astro share surnamePageSlugs precisely so they cannot drift. Look at the other sets — pages, places, archives, countries, regions — and at whatever is listed unconditionally rather than from the same list that builds it."
+   "note": "**Not a defect, and recorded because believing it was cost real time.** The audit printed «45,829 urls listed, 45,782 pages built» for weeks. I read the gap as 47 urls pointing at nothing, wrote it into this list as «handed to search engines that answer 404», and reported it to David as a defect. `listed` is every url in every sitemap; `built` counted only the five kinds that check knows how to walk, so /about/, /surnames/, /coverage/ and the paginated /places/N/ were on one side and not the other. Two definitions, not two numbers. Verified independently: 45,409 listed, 0 without a page. The note now compares like with like."
   },
   {
    "n": 33,
@@ -293,6 +293,134 @@
    "owner": "this atlas",
    "since": "2026-09-22",
    "note": "Eight countries were checked one at a time and four of those verdicts were wrong in a single day. scripts/sweep-surname-portals.py asks nineteen national catalogues at once, each in its own language — the word for «surname», not the English one, because missing that is how a sweep quietly finds nothing. First run: Ireland's VSA110, which closed Ireland, and Argentina's RENAPER distribution, which is blocked on its host. Nine portals answered nothing and five errored — 403 from Mexico, 401 from Brazil, a dead TLS version from Chile, a 404 from Australia's api path. Those five are the next work: an error is not an answer, and «the catalogue found nothing» is the exact sentence that was wrong four times, so the output file says as much in those words. It is a FINDER, not a verdict — every hit still needs somebody to open it."
+  },
+  {
+   "n": 37,
+   "what": "Test the thing end to end, because nothing tests the client",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-09-22",
+   "note": "David's, 22 September, and overdue. There are three data gates — check-data.py, audit-site.py, check-deployed.py — and they are good: they caught the shard-key bug, the wrong-country places and the duplicate dots. NOTHING TESTS THE THING A READER TOUCHES. Every client bug this month was found by a person looking at the page: the black continent in dark mode, the dots wiped a millisecond after being drawn, the map flying to the Atlantic, two headings for one name, 200 country markers left standing after a surname search. Two layers. Unit tests for site/src/lib — surname-pages, surname-map, belgium-surnames, atlas, url — which are pure functions and were where the box-order and framing bugs lived. Then Playwright over the built site: search a place, search a surname, click a dot, set a year, open full screen on a phone viewport, and assert the panel says what it should. Run both in CI before the deploy step, not after."
+  },
+  {
+   "n": 38,
+   "what": "Germany has 1,069 archives on the map and not one provider",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-09-22",
+   "note": "The biggest single hole left. The Wikidata layer now carries 1,069 German archives with websites — more than any other country — and data/providers.json has exactly one row touching Germany, the Bundesarchiv, which is the least useful of them for a parish register. Germany's records sit in Landesarchive, Stadtarchive and church archives, and the French pattern applies: find the top-level set, open every URL, ship the ones that answer, mark them unsurveyed. Sixteen Landesarchive is an afternoon."
+  },
+  {
+   "n": 39,
+   "what": "Five open-data portals errored rather than answered",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-22",
+   "note": "**Done 22 September.** Three of the five were this project's fault, not the portal's: Australia had moved its API under /data/, Colombia is Socrata rather than CKAN and wanted a different path and result shape, and Chile answers curl but not urllib, whose default context refuses the TLS version it offers. All three answer now and none of them publishes surnames — which is a verdict, where before there were three errors being read as one. Chile could have been forced with a lowered SECLEVEL and was not: weakening a TLS client to read a public catalogue is a bad trade, so it was read by hand instead. Mexico still returns 403 to every client and Brazil 401 without an API key. Those two remain UNANSWERED, which is not the same as answered no, and the file says so."
+  },
+  {
+   "n": 40,
+   "what": "Survey the 204 French archives nobody has opened",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-09-22",
+   "note": "France went from 4 providers to 204 in a day and every new row says access «unsurveyed», which is honest and is not the end of the job. Most départementales put their registers online free; some charge, some are index-only, a few have nothing. Until somebody looks, the map cannot colour them, and colour is the whole legend. Sample twenty by hand first to find out whether the answer is usually the same, because if it is, the remaining 184 are a much smaller job."
+  },
+  {
+   "n": 41,
+   "what": "Place the 799,897 books still without a place",
+   "state": "running",
+   "owner": "this atlas",
+   "since": "2026-09-22",
+   "note": "Long-running, and the number that most changes what this atlas is worth. Every one is a volume that exists, is catalogued, and has no dot — so a reader whose parish is in that pile is told there is nothing. Continues under the matcher; see row 19."
+  },
+  {
+   "n": 42,
+   "what": "The provider `checked` dates will start ageing out",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-09-22",
+   "note": "check-data.py warns when a provider has not been re-checked in 365 days. 216 rows were written on 22 September, so in a year they all go off at once and the warning becomes noise nobody reads. A rolling re-check — the oldest fifty a month, by the same probe the French harvest uses — keeps it a signal."
+  },
+  {
+   "n": 43,
+   "what": "Nothing tells a reader when the atlas last changed",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-09-22",
+   "note": "There is a changelog in src/data and no way to see, from a place page, that its volumes were added last week or last year. A researcher who looked in March needs to know whether to look again."
+  },
+  {
+   "n": 44,
+   "what": "Collect more content: depth where the atlas is already deep",
+   "state": "running",
+   "owner": "this atlas",
+   "since": "2026-09-22",
+   "note": "David's, 22 September. Breadth is the obvious gap and depth is the quieter one. Croatia, Istria and Carnia are the ground this project knows best and they are still thin below the parish: no notarial records, no land registers, no school or conscription lists, and those are where a family appears when the church books stop. The Antenati harvest (row 8) is 6,000 of 464,770 volumes and blocked on the Ministry's own server. Matricula is NOT an option and the earlier note here was wrong to imply it: it covers Austrian, German and Polish parishes and its images and descriptive metadata are CC BY-NC-ND. This site carries advertising, so republishing its inventory is exactly what that licence refuses. It is linked, correctly, and will stay linked — see data/_declined.json. Depth here has to come from sources that permit it."
+  },
+  {
+   "n": 45,
+   "what": "Collect more content: breadth across the 199 countries with nothing",
+   "state": "running",
+   "owner": "this atlas",
+   "since": "2026-09-22",
+   "note": "David's, 22 September. 199 of 237 countries have no curated provider. Mexico, Brazil and the Philippines got their first twelve today, which leaves the rest. The order that matters is places-already-on-the-map: Colombia 143, Guatemala 122, Chile 118, the Dominican Republic 109, Honduras 88, Turkey 81, India 73 — every one of them a country where this atlas holds ground and cannot name an archive to write to."
+  },
+  {
+   "n": 46,
+   "what": "The Others layer has 5,276 links nobody knows are there",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-09-22",
+   "note": "Today's archive harvest gave 10,786 Wikidata archives and, for the first time, 5,276 websites. The layer is called «Others» and is off by default, so the map gained five thousand openable institutions and says nothing about it. Either the layer earns a better name and a count, or the archives layer merges them with the provenance shown."
+  },
+  {
+   "n": 47,
+   "what": "A surname page for a name with nothing to say",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-09-22",
+   "note": "23,930 names have a page and 946,575 do not, and the ones that do not are where most searches land. The panel now links only where a page exists, which is right — but the reader is still told nothing about the other 922,645. A minimal page for any attested name, saying which register counted it and where, would be better than a dead end, and would need the page rule relaxed deliberately rather than by accident."
+  },
+  {
+   "n": 48,
+   "what": "Measure the first paint on a real connection",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-09-22",
+   "note": "index.json is 419 KB and the map waits on it, and that number is the one this project has reasoned about most and measured least. No Lighthouse run, no throttled profile, no figure for when a dot first appears on a phone on 4G. The split was justified by a byte count, which is not the same as a second."
+  },
+  {
+   "n": 49,
+   "what": "The atlas cannot be corrected by the people who would know",
+   "state": "blocked",
+   "owner": "David",
+   "since": "2026-09-22",
+   "note": "The page and the plumbing are done: set `contact.email` in site/src/data/site.json and /add/ grows a plain «or just write» route with no account and no template. Left empty deliberately — publishing a personal address on a public site is the owner's decision, and a contact link that goes nowhere is worse than none. A forwarding address would do; it does not have to be a personal one."
+  },
+  {
+   "n": 50,
+   "what": "Cemeteries and churches are harvested and barely used",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-09-22",
+   "note": "33,651 cemeteries and 108,054 churches sit in the build, drawn as layers and connected to nothing. A church is where a parish register was kept and a cemetery is where the family ended up; neither is linked to the volumes or the places they belong to."
+  },
+  {
+   "n": 51,
+   "what": "One accessibility pass, properly",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-09-22",
+   "note": "The map is a canvas of circles driven by a search box, the panel rewrites itself without announcing it, and the year control is two sliders. None of that has been through a screen reader or a keyboard-only run. This is the kind of thing that is cheap early and expensive at 45,000 pages."
+  },
+  {
+   "n": 52,
+   "what": "Wire the Croatian and Belgian lookups into a re-runnable job",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-09-22",
+   "note": "harvest-croatia-surnames.py asks DZS one name at a time and stops when it has asked about the 466 the atlas knows. When the atlas learns a new Croatian surname — and it does, every matcher pass — nothing asks about it. Same for any lookup-only country. It needs to run on a cadence against the names added since."
   }
  ]
 }

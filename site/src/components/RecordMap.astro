@@ -73,8 +73,30 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
 <div class="ra-help" id="ra-help" hidden></div>
 
 <div class="at-wrap">
-  <div class="at-map" id="ra-map"></div>
-  <aside class="at-panel">
+  {/* A CANVAS OF CIRCLES IS NOT REACHABLE BY KEYBOARD, and pretending
+      otherwise helps nobody. Leaflet with preferCanvas draws 21,302 dots
+      into one element: there are no focusable markers to tab through and
+      making them focusable would mean 21,302 tab stops, which is worse
+      than none. So the map is labelled for what it is, and the reader is
+      told where the same answers live in text — the search box reaches
+      every place by any name it has ever had, and /places/ lists them
+      all with a page each. That is an honest fallback rather than an
+      ARIA costume over an unusable control. */}
+  <div class="at-map" id="ra-map" role="application"
+       aria-label="Map of places and archives. Not keyboard-navigable: use
+                   the search box above, which finds any place by any name
+                   it has ever had, or the full list of places linked below."></div>
+  {/* THE PANEL REWRITES ITSELF AND SAID NOTHING WHILE DOING IT.
+      Every answer on this map arrives by replacing this element's
+      innerHTML — a place, a surname, a country, a region. A sighted
+      reader sees the change; a screen reader was told nothing at all,
+      because nothing announced it. aria-live="polite" reads the new
+      panel after the current utterance instead of interrupting, which is
+      right for a result that follows a search the reader just typed.
+      The count below is its own region for the same reason: «0 of 21302
+      places shown» is the answer to a filter, and it was silent. */}
+  <aside class="at-panel" role="region" aria-live="polite"
+         aria-label="What the map found">
     <div class="at-empty" id="ra-empty">
       <div class="lab">Pick a place</div>
       <p>Click any marker. Bigger markers hold more record volumes.</p>
@@ -107,7 +129,7 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
     <summary id="ra-kindsum">What kind of record</summary>
     <div class="atlas-key" id="ra-kinds"></div>
   </details>
-  <span class="cap" id="ra-count"></span>
+  <span class="cap" id="ra-count" role="status" aria-live="polite"></span>
 </div>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
@@ -347,7 +369,7 @@ window.addEventListener("load", async function () {
      diamond a checked provider gets, because the difference between «we have
      read this and it is free» and «Wikidata says there is an archive here» is
      the whole editorial value of the other 178. */
-  var wikiLayer = L.layerGroup();
+  var wikiLayer = L.layerGroup(), nsite = 0;
   var wikiMarkers = [];
   (async function () {
     var wd;
@@ -379,6 +401,9 @@ window.addEventListener("load", async function () {
       wikiMarkers.push(m);
     });
     var n = wd.archives.length;
+    nsite = wd.archives.filter(function (a) {
+      return a.sites && a.sites.length;
+    }).length;
     /* OpenStreetMap's archives share this layer and this caveat. They are a
        separate FILE because ODbL is share-alike and everything else here is
        CC0 — but to a reader they are the same kind of claim: somebody mapped
@@ -407,9 +432,16 @@ window.addEventListener("load", async function () {
       });
       n += om.archives.length;
     } catch (e) {}
+    /* SAY HOW MANY CAN BE OPENED, because most of them now can.
+       This layer drew 4,929 archives with no website at all — a dot a
+       reader could see and not follow — and the label said «unchecked»,
+       which was true and buried the useful half. The harvest now carries
+       5,276 addresses, so the label counts them: a layer worth turning on
+       is a layer that says what turning it on gets you. */
     var lab = document.querySelector('.ra-layer[data-l="wikidata"]');
     if (lab) lab.title = "Others — " + n.toLocaleString() +
-      " mapped by others · unchecked, and not all genealogical";
+      " mapped by others, " + nsite.toLocaleString() +
+      " with a website · unchecked, and not all genealogical";
     if (on.wikidata) wikiLayer.addTo(map);
   })();
 
@@ -849,7 +881,10 @@ window.addEventListener("load", async function () {
      FamilySearch research guide, a national archive and a GenWeb project —
      showed empty ground. A country is a place too, and the coarsest possible
      answer is enormously better than a blank. */
-  var countryLayer = L.layerGroup(), cpts = [];
+  var countryLayer = L.layerGroup(), cpts = [], cmarks = [];
+  /* WHICH COUNTRIES THE CURRENT ANSWER IS ABOUT, or null when the
+     question is not a surname. See syncCountryDots. */
+  var litCC = null;
   /* Held as a promise, not just a variable. A visitor types faster than a
      fetch returns, and «libya» arriving before the country list did would
      find nothing and say so — which is the bug this layer exists to fix,
@@ -867,9 +902,12 @@ window.addEventListener("load", async function () {
       });
       m.bindTooltip(c.n, { sticky: true });
       m.on("click", function () { openCountry(c); });
+      m._cc = c.cc; m._n = fold(c.n);
+      cmarks.push(m);
       m.addTo(countryLayer);
     });
     syncLayers();
+    syncCountryDots();
     return cpts;
   }).catch(function () { return []; });
 
@@ -1153,6 +1191,35 @@ window.addEventListener("load", async function () {
     yin.scrollIntoView({ block: "center", behavior: "smooth" });
   });
 
+  /* EVERY COUNTRY ON EARTH IS THE RIGHT ANSWER TO NOTHING IN PARTICULAR.
+     This layer draws all 237 of them so that clicking anywhere gives
+     something back, which is right when nobody has asked a question. It
+     was not filtered by the search, so typing a surname left two hundred
+     country dots standing across Africa and Asia next to eight lit
+     outlines — and a reader looking at a map of dots after typing a name
+     reads the dots as the name. «0 of 21302 places shown» was printed at
+     the bottom of a map covered in markers.
+
+     So: no question, every country. A surname, only the countries that
+     surname is attested in. Any other search, only countries whose name
+     matches what was typed — «libya» should still find Libya. */
+  function syncCountryDots() {
+    /* The country list is fetched and can land before the search box is
+       wired; `var qbox` is hoisted but undefined until then, and reading
+       .value off it throws. This layer's whole reason for existing is a
+       race exactly like that one. */
+    if (!cmarks.length || !qbox) return;
+    var t = fold(qbox.value.trim());
+    cmarks.forEach(function (m) {
+      var keep;
+      if (litCC) keep = litCC[m._cc] === 1;
+      else if (!t) keep = true;
+      else keep = m._n.indexOf(t) > -1;
+      if (keep) { if (!countryLayer.hasLayer(m)) m.addTo(countryLayer); }
+      else if (countryLayer.hasLayer(m)) countryLayer.removeLayer(m);
+    });
+  }
+
   /* ---- find, filter, count ----------------------------------------------- */
   var qbox = document.getElementById("ra-q"), count = document.getElementById("ra-count");
   qbox.value = Q.get("q") || "";
@@ -1194,6 +1261,7 @@ window.addEventListener("load", async function () {
      reason they did not ask for. Every other caller frames. */
   function apply(noFrame) {
     var t = fold(qbox.value.trim());
+    syncCountryDots();
     var shown = 0;
     markers.forEach(function (m) {
       var ok = keep(m._p);
@@ -1229,6 +1297,7 @@ window.addEventListener("load", async function () {
       if (gmark) { map.removeLayer(gmark); gmark = null; }
       ctryLayer.clearLayers();
       communeLayer.clearLayers();
+      litCC = null;
       return;
     }
     if (noFrame) return;
@@ -1876,6 +1945,7 @@ window.addEventListener("load", async function () {
       if (gmark) { map.removeLayer(gmark); gmark = null; }
       ctryLayer.clearLayers();
       communeLayer.clearLayers();
+      litCC = null;
       openCountry(hitCC);
       showCountries([{ cc: hitCC.cc, how: "register" }], function () {
         return mine !== searchTok;
@@ -1893,6 +1963,7 @@ window.addEventListener("load", async function () {
     if (gmark) { map.removeLayer(gmark); gmark = null; }
     ctryLayer.clearLayers();
     communeLayer.clearLayers();
+    litCC = null;
     var f = fold(term);
     var iso = Object.keys(CNAME).filter(function (k) {
       return wordHit(fold(CNAME[k]), f) || k.toLowerCase() === f;
@@ -1949,6 +2020,7 @@ window.addEventListener("load", async function () {
          view and needs to know whether there is anything sharper. */
       var be = showCommunes(beRec, names[0].n);
       names.forEach(function (r) { light(r.countries); });
+      litCC = {};
       /* THE SPELLINGS COUNT TOO, AND THEY WERE NOT COUNTING.
          «One card per cluster» folds Blazevich and Blaževič into the
          Blažević card, which is right for the panel and was quietly wrong
@@ -1981,6 +2053,8 @@ window.addEventListener("load", async function () {
           if (extra.indexOf(fold(r.n)) > -1) light(r.countries);
         });
       }
+      lit.forEach(function (c) { litCC[c.cc] = 1; });
+      syncCountryDots();
       showCountries(lit, stale);
 
       /* And where a state counted by town rather than by country, draw
@@ -2398,6 +2472,7 @@ window.addEventListener("load", async function () {
     if (gmark) { map.removeLayer(gmark); gmark = null; }
     ctryLayer.clearLayers();
     communeLayer.clearLayers();
+    litCC = null;
     helpBox.hidden = true;
     document.getElementById("ra-info").setAttribute("aria-expanded", "false");
     panel.hidden = true; empty.hidden = false;

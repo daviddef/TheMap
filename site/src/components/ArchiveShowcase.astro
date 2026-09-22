@@ -1,65 +1,83 @@
 ---
-/* THE EIGHT ARCHIVES THIS ATLAS WAS GENERALISED OUT OF.
+/* AN ADVERTISEMENT, NOT AN APPENDIX.
  *
- * Record Atlas answers "who holds the paper for this place" for everybody.
- * It exists because that question was first answered for one family, eight
- * times over, and the shelf turned out to be the part that generalises.
- * Showing them is not decoration: it is the only demonstration on the site
- * of what the method looks like when it is finished — every claim carrying
- * how sure it is and what it rests on.
+ * This was eight cards, three rows deep, each carrying a paragraph of
+ * narrative and a list of spelling variants — near half a screen of page,
+ * below a map, describing families the reader has no connection to. It
+ * read as documentation of somebody else's research.
  *
- * Deliberately at the FOOT of the page and deliberately plain. Somebody who
- * came to find a parish register should find it first; this is for the
- * reader who has already got what they came for and is wondering whether
- * the same thing could be done for their own family.
+ * What it is for is simpler: to say that this is what the work looks like
+ * finished, and that it can be done for your family too. One row, one
+ * line each, and the pitch in the lead rather than spread across eight
+ * paragraphs. The archives are still linked and still carry their colour,
+ * because the point is that there are nine of them and they are real.
+ *
+ * Our Family goes first and is marked, because it is the one written for
+ * children and it is the best answer to «what would I get» — a tree a
+ * six-year-old can follow, which is the thing people actually want and
+ * the thing a list of parish registers does not convey.
  */
 import showcase from "../data/archives-showcase.json";
 const { u } = Astro.props;
+
+/* The kids' site is not in archives-showcase.json: that file is the eight
+   one-family archives, and this is the landing site they all meet in. */
+const kids = {
+  id: "our-family",
+  name: "Our Family",
+  url: "https://daviddef.github.io/Our-Family/",
+  accent: "var(--accent)",
+  where: "written for children",
+};
+const all = [kids, ...showcase.archives];
 ---
 <section class="showcase">
-  <h2>Eight families, the same method</h2>
-  <p class="lead">{showcase.lead}</p>
+  <h2>This is what it looks like finished</h2>
+  <p class="lead">I build <b>interactive family histories</b> — the records
+  found and cited, the claims tested, and the whole thing published as
+  something a family can actually explore rather than a folder nobody opens.
+  Nine of them so far, including <a href={kids.url}>one written for
+  children</a>. <a href={u("/about/")}>How this work is done →</a></p>
 
-  <div class="cards">
-    {showcase.archives.map((a) => (
-      <a class="card" href={a.url} style={`--edge:${a.accent}`}>
-        <span class="nm">{a.name}</span>
-        <span class="where">{a.where}</span>
-        <span class="what">{a.what}</span>
-        <span class="names">{a.names.join(" · ")}</span>
-      </a>
+  <ul class="strip">
+    {all.map((a) => (
+      <li>
+        <a href={a.url} style={`--edge:${a.accent}`}
+           class={a.id === "our-family" ? "kids" : ""}>
+          <span class="nm">{a.name.replace(/^The /, "")}</span>
+          <span class="where">{a.where}</span>
+        </a>
+      </li>
     ))}
-  </div>
-
-  <p class="offer">Each of these began as somebody's shoebox of certificates and
-  half-remembered stories. If you would like your own family put together this
-  way — the records found, the claims tested, and the whole thing published so
-  it outlives the shoebox — <a href={u("/about/")}>there is more about how this
-  work is done</a>.</p>
+  </ul>
 </section>
 
 <style>
-  .showcase { margin-top: 64px; padding-top: 30px; border-top: 1px solid var(--rule); }
-  .showcase h2 { font-family: var(--serif); font-size: 26px; font-weight: 500;
+  .showcase { margin-top: 56px; padding-top: 26px;
+              border-top: 1px solid var(--rule); }
+  .showcase h2 { font-family: var(--serif); font-size: 24px; font-weight: 500;
                  margin: 0 0 8px; }
-  .lead { font-family: var(--sans); font-size: 14px; line-height: 1.6;
-          color: var(--ink-2); max-width: 74ch; margin: 0 0 20px; }
-  .cards { display: grid; gap: 12px;
-           grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); }
-  .card { display: block; text-decoration: none; background: var(--panel);
-          border: 1px solid var(--rule); border-left: 3px solid var(--edge);
-          border-radius: 3px; padding: 14px 16px 15px; }
-  .card:hover { border-color: var(--rule-strong); border-left-color: var(--edge); }
-  .nm { display: block; font-family: var(--serif); font-size: 17px;
-        color: var(--edge); margin-bottom: 3px; }
-  .where { display: block; font-family: var(--sans); font-size: 10.5px;
-           font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
-           color: var(--ink-3); margin-bottom: 8px; }
-  .what { display: block; font-family: var(--sans); font-size: 13px;
-          line-height: 1.55; color: var(--ink-2); margin-bottom: 8px; }
-  .names { display: block; font-family: var(--mono); font-size: 11px;
-           line-height: 1.6; color: var(--ink-3); }
-  .offer { font-family: var(--sans); font-size: 13.5px; line-height: 1.65;
-           color: var(--ink-2); max-width: 74ch; margin: 22px 0 0; }
-  @media (max-width: 640px) { .cards { grid-template-columns: 1fr; } }
+  .lead { font-family: var(--sans); font-size: 14px; line-height: 1.65;
+          color: var(--ink-2); max-width: 78ch; margin: 0 0 18px; }
+
+  /* ONE ROW THAT SCROLLS RATHER THAN WRAPS TO THREE.
+     Nine tiles will not fit across a phone and should not try; they run
+     sideways there, which is a known gesture, instead of rebuilding the
+     wall of cards this replaced. */
+  .strip { display: flex; gap: 8px; margin: 0; padding: 0 0 6px;
+           list-style: none; overflow-x: auto; scrollbar-width: thin; }
+  .strip li { flex: 1 1 0; min-width: 132px; }
+  .strip a { display: block; height: 100%; text-decoration: none;
+             background: var(--panel); border: 1px solid var(--rule);
+             border-top: 2px solid var(--edge); border-radius: 3px;
+             padding: 9px 10px 10px; }
+  .strip a:hover { border-color: var(--rule-strong);
+                   border-top-color: var(--edge); }
+  .strip a.kids { background: var(--accent-wash); }
+  .nm { display: block; font-family: var(--serif); font-size: 15px;
+        line-height: 1.25; color: var(--edge); }
+  .where { display: block; font-family: var(--sans); font-size: 9.5px;
+           font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+           color: var(--ink-3); margin-top: 4px; }
+  @media (max-width: 640px) { .strip li { flex: 0 0 auto; } }
 </style>

@@ -116,7 +116,14 @@ def kids(doc, self_about):
     return out
 
 
-YEARS = re.compile(r"\b(1[0-9]{3}|20[0-2][0-9])\b")
+# A FILE NUMBER IS NOT A YEAR. This matched 1000-1999, so «Ф. 4, о. 176,
+# д. 1000» — fond 4, inventory 176, file 1000 — was read as a book running
+# from the year 1000, and the panel showed «1000–1901» for an 1901 register.
+# Parish registers in these collections begin in the 1500s; the earliest
+# span this atlas holds is Croatia's church books at 1516. Nothing is lost
+# by refusing a three-digit-looking year, and a shelf mark is far more
+# likely than a mediaeval baptism.
+YEARS = re.compile(r"\b(1[5-9][0-9]{2}|1[4][5-9][0-9]|20[0-2][0-9])\b")
 THIS_YEAR = time.gmtime().tm_year
 
 

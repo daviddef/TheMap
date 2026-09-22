@@ -39,6 +39,15 @@ XLAT = str.maketrans({"đ": "d", "Đ": "D", "ł": "l", "Ł": "L", "ø": "o", "Ø
                       "ß": "ss", "æ": "ae", "œ": "oe", "ı": "i"})
 
 
+def _fs_image_url(col, wp):
+    """The browse-images link for a waypoint, in the form the site accepts."""
+    if not (col and wp):
+        return None
+    return ("https://www.familysearch.org/search/image/index?owc="
+            "https://www.familysearch.org/service/cds/recapi/collections/"
+            f"{col}/waypoints/{wp}")
+
+
 def fold(s):
     s = (s or "").translate(XLAT)
     s = unicodedata.normalize("NFKD", s)
@@ -381,9 +390,21 @@ def main():
                     # Derived, not stored: the matcher stopped writing a
                     # url that was always this prefix plus the waypoint, and
                     # that was 27% of a 60 MB file.
-                    "url": (_r.get("url")
-                            or (("https://www.familysearch.org/search/image/"
-                                 "index?owc=" + _r["wp"]) if _r.get("wp") else None)),
+                    # THE owc PARAMETER TAKES A URL, NOT A WAYPOINT ID.
+                    # Every FamilySearch link this atlas has ever published
+                    # was "…/search/image/index?owc=" + the bare waypoint,
+                    # and every one of them landed on "Something Went Wrong
+                    # — we are unable to display the search results". Two
+                    # point eight million dead links, on a map whose whole
+                    # claim is that it gives you the link that opens the
+                    # image.
+                    # FamilySearch's own collection page says the shape:
+                    #   ?owc=https://www.familysearch.org/service/cds/recapi
+                    #        /collections/<collection>/waypoints/<waypoint>
+                    # Verified in a browser: that opens the Image Viewer on
+                    # «Россия, Татарстанские метрические книги, 1721-1939»,
+                    # where the bare-id form errors.
+                    "url": (_r.get("url") or _fs_image_url(_r.get("col"), _r.get("wp"))),
                     "waypoint": _r.get("wp"),
                     # The panel has always rendered `conf` for Croatia's
                     # books. It turns out the API gives it too — the tree's

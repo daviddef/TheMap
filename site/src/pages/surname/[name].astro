@@ -14,7 +14,7 @@ import { earnsPage } from "../../lib/surname-pages.js";
    phone book. */
 import Base from "../../layouts/Base.astro";
 import { u } from "../../lib/url.js";
-import idx from "../../../public/index.json";
+import { atlas as idx } from "../../lib/atlas.js";
 import { sourcesFor, access as PACCESS } from "../../lib/sources-by-country.js";
 import { curveFor } from "../../lib/fr-curve.js";
 
@@ -179,6 +179,25 @@ const dek = `${r.n}${by.curated ? `, also written ${by.curated.slice(0,4).join("
         ))}
       </tbody>
     </table>
+    {/* WHEN A SOURCE CANNOT BE ENUMERATED, ITS SILENCE IS NOT EVIDENCE.
+        Every other register in this table was downloaded whole, so a name
+        missing from it is a name the state did not count. Croatia's cannot
+        be downloaded at all: DZS answers one surname at a time and will not
+        say which surnames exist, so this atlas asked only about names it
+        already attests on Croatian ground. A reader who took a blank row
+        for «not in Croatia» would be reading our question list, not the
+        census. */}
+    {ccs.some((c) => (c.by || []).some((b) => attestedBy[b]?.enumerable === false)) && (
+      <p class="cap" style="margin-top:10px">
+        One of these sources answers questions rather than publishing a list:
+        {" "}{[...new Set(ccs.flatMap((c) => (c.by || [])
+              .filter((b) => attestedBy[b]?.enumerable === false)
+              .map((b) => attestedBy[b].name)))].join("; ")}.
+        {" "}It was asked about this name because the atlas already holds it.
+        A surname absent from that country's row may simply never have been
+        asked about.
+      </p>
+    )}
   </section>
 
   {tl && (

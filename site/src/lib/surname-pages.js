@@ -34,12 +34,33 @@ export const slugForSurname = (x) =>
  *
  * A name in one register with no variant of any kind stays out: that is
  * 600,000 pages with nothing to say. */
+/* AN UNCOUNTED ATTESTATION IS A WEAKER CLAIM, AND THE THRESHOLD WAS
+   CALIBRATED ON STRONGER ONES.
+
+   «Three countries agree» earns a page because three states each counted
+   these people. Denmark does not count them: it publishes which surnames
+   exist and declines to say how many carry each, which is «at least three
+   people» rather than «11,163 people». That is a real attestation and it
+   belongs in the corpus, on the map and in search — it is simply not the
+   thing this threshold was weighing.
+
+   Letting it count anyway is not a judgement call, it is a measurement:
+   adding Denmark took the page set from 16,138 to 27,724, and only 207 of
+   those 11,586 new pages are Danish names. The rest are existing names
+   that crossed «three countries» because a list without numbers said yes.
+   The build then died out of memory, which is how this was found.
+
+   So the spelling tier counts countries that actually counted somebody.
+   Denmark still earns pages the honest way — through the spelling links it
+   reveals between names already counted elsewhere, which is exactly what
+   that tier is for, and which is worth 3,644 pages on its own. */
 export function earnsPage(r) {
   if (!r || !r.countries || !r.countries.length) return false;
   const v = r.variants || [];
+  const counted = r.countries.filter((c) => c.n != null).length;
   return v.some((x) => x.how === "curated")
       || r.countries.some((c) => c.how === "archive")
-      || (v.some((x) => x.how === "spelling") && r.countries.length >= 3);
+      || (v.some((x) => x.how === "spelling") && counted >= 3);
 }
 
 /* Every slug that will exist, deduplicated, in one place. */

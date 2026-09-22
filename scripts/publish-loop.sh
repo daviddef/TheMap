@@ -43,7 +43,7 @@ except Exception: print('an unknown number of volumes')
 
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>" 2>/dev/null
     if git push -q origin main 2>/dev/null; then
-      echo "$(date '+%F %T')  pushed  $n volumes  ($changed files)" >> "$LOG"
+      echo "$(date '+%F %T')  pushed  $n  ($changed files)" >> "$LOG"
     else
       echo "$(date '+%F %T')  PUSH FAILED  — $changed files still local" >> "$LOG"
     fi

@@ -637,8 +637,33 @@ def main():
            "kinds": KIND_BIT,
            "kindLabels": record_kinds.LABEL,
            "places": index}
+
+    # SPLIT, SO THE MAP DRAWS BEFORE THE QUIET DOTS ARRIVE.
+    # index.json is fetched before anything is drawn and had grown to
+    # 547 KB over the wire for 20,359 places. There is no fat in the rows —
+    # 28 bytes each, and dropping every derivable id saves 3% because gzip
+    # already collapses the repetition — so the only honest saving is to
+    # stop making the first paint wait for dots that say "nothing here
+    # yet".
+    # 4,932 of those places carry no volume and no collection. They are
+    # real ground and they belong on the map: the difference between "not
+    # surveyed" and "nothing here" is one of this atlas's promises. But
+    # they are context, not answers, so they come second — index-quiet.json
+    # is fetched right after the map draws and adds them.
+    quiet = [p for p in index if not (p.get("v") or p.get("c"))]
+    loud = [p for p in index if p.get("v") or p.get("c")]
+    idx["places"] = loud
+    idx["quiet"] = {"file": "index-quiet.json", "places": len(quiet),
+                    "note": ("Places with no volume and no collection yet. "
+                             "Real ground, correctly placed, nobody has "
+                             "walked it. Fetched after the map draws.")}
     json.dump(idx, open(os.path.join(OUT, "index.json"), "w"),
               ensure_ascii=False, separators=(",", ":"))
+    json.dump({"note": idx["quiet"]["note"], "places": quiet},
+              open(os.path.join(OUT, "index-quiet.json"), "w"),
+              ensure_ascii=False, separators=(",", ":"))
+    print(f"index split      {len(loud):,} drawn first, "
+          f"{len(quiet):,} quiet dots after")
     json.dump(regions, open(os.path.join(OUT, "regions.json"), "w"),
               ensure_ascii=False, separators=(",", ":"))
     json.dump(providers, open(os.path.join(OUT, "providers.json"), "w"),

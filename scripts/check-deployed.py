@@ -86,7 +86,28 @@ def main():
         sys.exit("could not read the live index — is it deployed?")
     here = json.load(open("site/public/index.json"))
 
-    for label, l, h in (("places", len(live["places"]), len(here["places"])),
+    # COUNT THE WHOLE ATLAS ON BOTH SIDES OF THE SPLIT.
+    # index.json stopped being the whole index the day the quiet dots moved
+    # into their own file. Comparing its length live-to-local would have
+    # read that move as the map losing 4,932 places, and this script's whole
+    # job is to shout when the map shrinks — a gate that cries wolf at its
+    # own release is a gate that gets ignored.
+    def _total(d, url_or_path, remote):
+        n = len(d.get("places") or [])
+        q = (d.get("quiet") or {}).get("file")
+        if not q:
+            return n
+        if remote:
+            o = get(url_or_path.replace("index.json", q))
+            return n + len((o or {}).get("places") or [])
+        try:
+            return n + len(json.load(open(
+                os.path.join("site", "public", q))).get("places") or [])
+        except OSError:
+            return n
+
+    for label, l, h in (("places", _total(live, base + "/index.json", True),
+                         _total(here, "", False)),
                         ("countries named", len(live.get("countries") or {}),
                          len(here.get("countries") or {}))):
         mark = "same" if l == h else ("GREW" if h > l else "SHRANK")

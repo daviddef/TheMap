@@ -262,6 +262,11 @@ window.addEventListener("load", async function () {
     if (!(k in byName)) byName[k] = p.i;
   });
   var REGIONS_N = regions.regions.length;
+  /* THE SPLIT MUST NOT CHANGE WHAT THE MAP CLAIMS TO HOLD. index.json now
+     stops at the places that have something to show, so every count taken
+     from idx.places.length would have quietly shed the 4,932 quiet dots —
+     the same class of mistake as the header that said 8,557 volumes. */
+  var TOTAL_PLACES = idx.places.length + ((idx.quiet && idx.quiet.places) || 0);
 
   /* ---- the markers -------------------------------------------------------
      Radius by how many volumes stand at a place, which is the one piece of
@@ -269,7 +274,7 @@ window.addEventListener("load", async function () {
      importance. A parish with ninety volumes nobody has read and a parish with
      two are both on it, and the big one is not the better lead. */
   var shelfLayer = L.layerGroup();
-  var markers = idx.places.map(function (p) {
+  function makeMarker(p) {
     /* WALKED MEANS A BOOK STANDS HERE, by whatever route it was found.
        This read the collection count alone, so a place carrying 1,500
        FamilySearch volumes and no curated collection was drawn hollow —
@@ -306,7 +311,8 @@ window.addEventListener("load", async function () {
     m.bindTooltip(p.n, { sticky: true });
     m.on("click", function () { open(p); });
     return m;
-  });
+  }
+  var markers = idx.places.map(makeMarker);
 
   /* ---- the archives -------------------------------------------------------
      Where the paper physically is. Drawn as a hollow square rather than a
@@ -927,7 +933,7 @@ window.addEventListener("load", async function () {
 
   var LAYERS = [
     ["countries", "Countries", "every country on earth · the coarsest answer, and better than a blank", countryLayer],
-    ["shelf", "Shelf", idx.places.length.toLocaleString() + " places · every volume that covers them", shelfLayer],
+    ["shelf", "Shelf", TOTAL_PLACES.toLocaleString() + " places · every volume that covers them", shelfLayer],
     ["archives", "Archives", archives.length + " institutions · where the paper actually is", archiveLayer],
     ["jurisdiction", "Jurisdiction", regions.regions.length + " record regions · whose archive this ground was", regionLayer],
     ["wikidata", "Others", "loading · unchecked, and not all genealogical", wikiLayer],
@@ -1180,7 +1186,13 @@ window.addEventListener("load", async function () {
     if (km && !((p.k || 0) & km)) return false;
     return true;
   }
-  function apply() {
+  /* `noFrame` is for the one caller that is not a visitor doing something:
+     the quiet dots arriving a second after the map drew. They have to be
+     filtered in like every other marker — they obey the year and the kind
+     boxes too — but the visitor may already be typing, and re-framing the
+     map on a wider set of matches would move the ground under them for a
+     reason they did not ask for. Every other caller frames. */
+  function apply(noFrame) {
     var t = fold(qbox.value.trim());
     var shown = 0;
     markers.forEach(function (m) {
@@ -1218,6 +1230,7 @@ window.addEventListener("load", async function () {
       ctryLayer.clearLayers();
       return;
     }
+    if (noFrame) return;
     var vis = markers.filter(function (m) { return shelfLayer.hasLayer(m); });
     var avis = archMarkers.filter(function (m) { return archiveLayer.hasLayer(m); });
     var frame = vis.concat(on.archives ? avis : []);
@@ -2251,7 +2264,7 @@ window.addEventListener("load", async function () {
      "26,699 places, 8,557 record volumes" while the atlas held 2,016,426 —
      wrong by a factor of 236, on the first line under the map. */
   document.getElementById("ra-hint").textContent =
-    idx.places.length.toLocaleString() + " places, " +
+    TOTAL_PLACES.toLocaleString() + " places, " +
     idx.places.reduce(function (a, p) { return a + (p.v || 0); }, 0).toLocaleString() +
     " record volumes. Search by any name a place has ever had — Gallignana finds Gračišće.";
 
@@ -2260,9 +2273,44 @@ window.addEventListener("load", async function () {
   yearUI();
 
   var openAt = Q.get("at");
+  var opened = false;
   if (openAt) {
     var hit = idx.places.filter(function (p) { return p.i === openAt; })[0];
-    if (hit) open(hit);
+    if (hit) { open(hit); opened = true; }
+  }
+
+  /* ---- the quiet dots, once the map is already up -------------------------
+     index.json is the one fetch the first paint waits on, and it had grown
+     to 533 KB. A quarter of that was places carrying no volume and no
+     collection — real ground, correctly placed, nobody has walked it. They
+     belong on the map, but nothing about them is an answer to a search, so
+     making the map wait for them was paying the whole latency for the least
+     urgent quarter of it. They come second now: 409 KB draws the atlas,
+     124 KB fills in the ground behind it.
+
+     Everything they touch has to be topped up, not just the layer — the
+     name index, so a search for one of them still resolves; the filters,
+     so they obey the year and the kind boxes the visitor has already set;
+     and a ?at= link that pointed at one, which found nothing a moment ago
+     and can now be honoured. */
+  if (idx.quiet && idx.quiet.file) {
+    fetch(INDEX.replace(/[^/]*$/, idx.quiet.file))
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        var qp = d.places || [];
+        qp.forEach(function (p) {
+          var k = fold(p.n);
+          if (!(k in byName)) byName[k] = p.i;
+          markers.push(makeMarker(p));
+        });
+        idx.places = idx.places.concat(qp);
+        apply(true);
+        if (openAt && !opened) {
+          var late = qp.filter(function (p) { return p.i === openAt; })[0];
+          if (late) { open(late); opened = true; }
+        }
+      })
+      .catch(function () { /* the atlas is still an atlas without them */ });
   }
 });
 </script>

@@ -1,6 +1,6 @@
 {
- "note": "Countries whose surname data was sought. Those still not obtained are in `refused`, with what was actually tried; those since obtained are in `resolved`, with how. A gap somebody can see is worth more than a gap they cannot, and without this file the next person spends the same afternoon finding the same walls. A «not found» verdict is weaker than a «refused» one: it means this project looked and did not find, not that the data is absent. Both are worth writing down and they are not the same claim. Italy was the weakest entry here — «not found» — and retrying it is what closed it, which is the argument for keeping this file honest about the difference.",
- "checked": "2026-09-21",
+ "note": "Countries whose surname data was sought. Those still not obtained are in `refused`, with what was actually tried; those since obtained are in `resolved`, with how. A gap somebody can see is worth more than a gap they cannot, and without this file the next person spends the same afternoon finding the same walls. A «not found» verdict is weaker than a «refused» one: it means this project looked and did not find, not that the data is absent. Both are worth writing down and they are not the same claim. Italy was the weakest entry here — «not found» — and retrying it is what closed it, which is the argument for keeping this file honest about the difference. TWO CORRECTIONS ON 22 SEPTEMBER, BOTH THE SAME MISTAKE. A reader asked why Croatia was blank and sent the Bureau of Statistics' own name application, which answers. Checking the other six the same way — the institution's website, not its API — closed Denmark outright and rewrote Sweden and Finland. Four of these entries had searched an API exhaustively and concluded about an organisation. That is the failure this file now exists to catch, and it was not caught by this project.",
+ "checked": "2026-09-22",
  "refused": [
   {
    "country": "BE",
@@ -26,29 +26,19 @@
    "rechecked": "2026-09-21"
   },
   {
-   "country": "DK",
-   "name": "Denmark",
-   "tried": [
-    "api.statbank.dk — all 2,308 tables listed and searched for navn/fornavn/efternavn: none",
-    "dst.dk/da/Statistik/emner/borgere/navne — the page exists and offers «hvor mange hedder», an interactive lookup for one name at a time",
-    "api.statbank.dk/v1/tables — the COMPLETE table list, 531 KB, searched for 'navn'"
-   ],
-   "verdict": "zero name tables in the whole bank",
-   "why": "RETRIED 21 September. The refusal said Statistics Denmark 'does not put names in its statistics bank at all', which was inference from a failed lookup. The entire table list has now been downloaded and searched: not one of its tables mentions navn. The inference was right and is now evidence.",
-   "rechecked": "2026-09-21"
-  },
-  {
    "country": "FI",
    "name": "Finland",
    "tried": [
     "pxdata.stat.fi StatFin — all 135 subject folders, none name-related",
     "avoindata.fi — HTTP 403 to every request",
     "avoindata.fi CKAN — 403 to an identified crawler",
-    "pxdata.stat.fi PxWeb — answers, and holds no names"
+    "pxdata.stat.fi PxWeb — answers, and holds no names",
+    "dvv.fi/en/name-service — the DVV's own page, which offers an interactive lookup and points at avoindata.fi for the dataset",
+    "nimipalvelu.dvv.fi — the lookup itself, which answers 200 to a plain request and is a JavaScript application with no documented API"
    ],
-   "verdict": "the holder gates crawlers, and the statistics office has no names",
-   "why": "RETRIED 21 September. Statistics Finland's PxWeb works and has no name data, which is consistent: the names belong to the DVV. The DVV's dataset sits on avoindata.fi, which answers 403 to an identified crawler. THIS ATLAS DOES NOT CLIMB BOT GATES — the same rule that keeps it off the Antenati portal and IrishGenealogy — so this stays refused until a human downloads it or the gate lifts.",
-   "rechecked": "2026-09-21"
+   "verdict": "a working lookup for humans; the file is behind the gate",
+   "why": "RECHECKED 22 September against the DVV's website rather than the open-data portal. Statistics Finland has no names and never did — they belong to the DVV — and the DVV does publish: nimipalvelu.dvv.fi answers, and gives the number of people carrying any forename or surname in the Population Information System. It is a JavaScript application, and the DVV's own page sends anyone wanting the DATA to avoindata.fi, which answers 403 to an identified agent. Guessing at the application's private endpoints until one answered was considered and rejected: it is the same act as climbing the gate, done less honestly. THIS ATLAS DOES NOT CLIMB BOT GATES, and it does not go round the back of them either. Finland stays refused until a human downloads the avoindata file or the gate lifts — and unlike before, we now know exactly which file that is.",
+   "rechecked": "2026-09-22"
   },
   {
    "country": "HR",
@@ -58,11 +48,12 @@
     "data.gov.hr CKAN package_search for «prezimena» — answers 200 but not JSON",
     "podaci.dzs.hr CKAN — 404",
     "opendata.dzs.hr — no answer",
-    "web.dzs.hr/PXWeb/api/v1 — the whole PxWeb tree walked two levels deep, looking for ime/prezime/name in every folder"
+    "web.dzs.hr/PXWeb/api/v1 — the whole PxWeb tree walked two levels deep, looking for ime/prezime/name in every folder",
+    "web.dzs.hr/app/imena/default_en.aspx — DZS's own «Names and surnames» application, which ANSWERS: HORVAT 21,618, KOVAČEVIĆ 15,160, NOVAK 10,794, from the 2011 Population Census"
    ],
-   "verdict": "the API answers now, and holds no names",
-   "why": "RETRIED 21 September and the verdict is firmer, not weaker. The refusal said the open-data portal 'responds but not to a CKAN search', which left open the possibility that the data existed behind a working endpoint. The DZS PxWeb API does work — 20 subject folders, navigable — and walking it finds no surname table at all. The one name-shaped hit was 'Eksperimentalne statistike' under Tourism, matching on the letters in 'eksperimentalne'. Croatia is this atlas's deepest ground and has no published surname counts; that is now a checked fact rather than a failed search.",
-   "rechecked": "2026-09-21"
+   "verdict": "queryable, not enumerable — and this file was wrong about it",
+   "why": "CORRECTED 22 September, and the correction matters more than the entry. This file said «the API answers now, and holds no names», which was a true statement about the wrong thing: the DZS PxWeb API really does have no surname table, and walking it exhaustively proved only that the data is not THERE. It is at web.dzs.hr/app/imena — the Bureau's own «Names and surnames» application, 2011 census, one name at a time behind an ASP.NET form, with a confidentiality floor of 10. It was found by a reader who simply looked at the statistics office's website, which this project had stopped doing the moment its API said no. A negative from one endpoint is not a negative from an institution, and «I searched the machine-readable catalogue» is not «Croatia does not publish this». It stays in this file because it is still not a corpus. There is no listing endpoint: the application will tell you about a surname you already have and will not tell you which surnames exist, so no amount of polite querying produces the table Slovenia and Italy publish. Brute-forcing the alphabet at a government service to synthesise a list it declines to publish would be taking by volume what it offers by question, and this atlas does not do that. What it does instead is scripts/harvest-croatia-surnames.py: ask only about the 466 surnames the atlas already attests in archives whose declared country is Croatia, and write the answers to data/frequencies/hr.json marked `enumerable: false`. Croatia is therefore no longer a blank — it is a partial, honestly bounded one. Closing it properly needs the table, and the table is not published.",
+   "rechecked": "2026-09-22"
   },
   {
    "country": "NL",
@@ -82,11 +73,14 @@
     "api.scb.se/OV0104/v1/doris/en/ssd/BE/BE0001 — the two name folders found, then opened",
     "api.scb.se/OV0104/v1/doris/en/ssd/BE/BE0001 — 200, lists BE0001D and BE0001G",
     "api.scb.se/OV0104/v1/doris/en/ssd/BE/BE0001/BE0001G — 400",
-    "api.scb.se/OV0104/v1/doris/sv/ssd/BE/BE0001/BE0001G — 400, so it is not a language problem"
+    "api.scb.se/OV0104/v1/doris/sv/ssd/BE/BE0001/BE0001G — 400, so it is not a language problem",
+    "scb.se/namnstatistik — the statistics page itself, not the database",
+    "scb.se Namnsök — a working lookup covering every surname with at least ten bearers among the registered population",
+    "skatteverket.se — where SCB now sends people, and also a search"
    ],
-   "verdict": "the tables are retired, not withheld",
-   "why": "RETRIED 21 September in both languages. The name-statistics branch lists exactly two folders and neither can be entered: both answer 400. Their own Swedish titles say what has happened — «Äldre tabeller som inte längre uppdateras», older tables no longer updated. SCB has retired its name statistics rather than gated them, which is a different and more final answer than the one this file used to give.",
-   "rechecked": "2026-09-21"
+   "verdict": "a lookup and a top-100 table; the full list is not published",
+   "why": "RECHECKED 22 September against the website rather than the database, after the same check corrected Croatia and closed Denmark. The old verdict — «the tables are retired, not withheld» — was right about PxWeb and incomplete about Sweden. SCB stopped producing name statistics altogether in 2024 and now refers enquirers to Skatteverket. What remains on scb.se is a top-100 surnames table and Namnsök, a working public lookup over every surname with at least ten bearers. So Sweden is Croatia's shape, not Denmark's: the data exists and is answerable one name at a time, and no complete list is published by anybody. A hundred names is not a register and this atlas will not present it as one.",
+   "rechecked": "2026-09-22"
   }
  ],
  "resolved": [
@@ -101,6 +95,20 @@
    "why": "ISTAT does not appear to publish surname frequencies. What circulates for Italy is derived from telephone directories by commercial sites, which is neither open nor redistributable. Recorded as NOT FOUND rather than as absent — a human who knows ISTAT may know better, and this is three archives' core ground.",
    "resolved": "2026-09-21",
    "how": "ISTAT publishes no national surname table. 63 Italian comuni publish their own residents' surnames as open data and dati.gov.it indexes them — 27,005 surnames, 1,398,684 people, now in data/frequencies/it.json. It counts the residents of those comuni and nobody else, which is stated on the data and must stay stated: it is evidence that a name is borne in Italy and roughly where, never how common it is in Italy. For genealogy that is the more useful grain anyway — which comune a name sits in is the question a national total cannot answer."
+  },
+  {
+   "country": "DK",
+   "name": "Denmark",
+   "tried": [
+    "api.statbank.dk — all 2,308 tables listed and searched for navn/fornavn/efternavn: none",
+    "dst.dk/da/Statistik/emner/borgere/navne — the page exists and offers «hvor mange hedder», an interactive lookup for one name at a time",
+    "api.statbank.dk/v1/tables — the COMPLETE table list, 531 KB, searched for 'navn'",
+    "sprogteknologi.dk — Digitaliseringsstyrelsen's republication of Danmarks Statistik's own name lists, CC BY 4.0: navne_registreret_i_danmark_2020.zip"
+   ],
+   "verdict": "CLOSED — it was on the website all along, not in the bank",
+   "why": "RESOLVED 22 September, and this entry is kept in full because being wrong here was instructive. The refusal was not lazy: all 2,308 tables in api.statbank.dk were downloaded and searched for «navn», twice, and the finding — not one table mentions it — was true. It was also useless, because Denmark does not put its name statistics in the statistics bank. It puts them on its website. The same mistake as Croatia, found on the same afternoon, by the same method: a reader looked at the institution instead of its API. This project had built a habit of asking machines and concluding about organisations. What is published, under CC BY 4.0, is every surname borne by three or more people in Denmark as of January 2020 — 294,496 of them, harvested by scripts/harvest-denmark-surnames.py. AND NO COUNTS AT ALL: Denmark says which surnames exist and declines to say how many carry each, so the file is marked `counted: false` and its rows must never be summed. A figure for one name comes from «Hvor mange hedder...?», which is Denmark's version of the Croatian lookup.",
+   "rechecked": "2026-09-21",
+   "resolved": "2026-09-22"
   }
  ]
 }

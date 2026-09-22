@@ -1005,7 +1005,14 @@ def main():
             # reading 2027 as a date gave three books ending after the
             # present. Drop a span that runs past this year rather than
             # publish a date that cannot be true.
-            if (v.get("to") or 0) > THIS_YEAR or (v.get("from") or 0) > THIS_YEAR:
+            # AND A FLOOR, FOR THE SAME REASON AS THE CEILING ABOVE.
+            # «д. 1000» is file 1000 and was being read as the year 1000,
+            # so an 1901 register showed as «1000–1901». The harvester is
+            # fixed, but these rows are already on disk and only a re-walk
+            # would clear them. 1450 is below the earliest span this atlas
+            # actually holds, Croatia's church books at 1516.
+            if (v.get("to") or 0) > THIS_YEAR or (v.get("from") or 0) > THIS_YEAR \
+               or (0 < (v.get("from") or 0) < 1450) or (0 < (v.get("to") or 0) < 1450):
                 v = dict(v, **{"from": None, "to": None})
             matched += 1
             if abroad and hit_cc:

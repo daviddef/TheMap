@@ -28,6 +28,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", type=int, default=50)
     ap.add_argument("--write", action="store_true")
+    ap.add_argument("--repair", action="store_true",
+                    help="on a 404, fall back to the site root and say so")
     a = ap.parse_args()
 
     prov = json.load(open("data/providers.json"),
@@ -42,7 +44,7 @@ def main():
         out = list(ex.map(lambda r: (r, *verify(r["url"])), batch))
 
     today = time.strftime("%Y-%m-%d")
-    tally, broken = collections.Counter(), []
+    tally, broken, repaired = collections.Counter(), [], []
     for r, verdict, url in out:
         tally[verdict] += 1
         if verdict == "https":
@@ -50,11 +52,40 @@ def main():
             if url != r["url"]:
                 print(f"  moved   {r['id']:<28} -> {url[:56]}")
                 r["url"] = url
+        elif verdict == "moved" and a.repair:
+            # A DEEP LINK THAT ROTTED IS NOT A DEAD INSTITUTION.
+            # All 29 of these are French communal archives whose page has
+            # moved inside a municipal CMS — spip.php?rubrique149, ?p=166,
+            # article229.html. The town is fine; the path is not. The root
+            # is a worse link than the archive's own page and a far better
+            # one than a 404, so it is used AND the row says the deep link
+            # rotted, rather than quietly pretending the town hall is the
+            # archive page.
+            import urllib.parse as _up
+            parts = _up.urlparse(r["url"])
+            root = f"{parts.scheme}://{parts.netloc}/"
+            v2, u2 = verify(root)
+            if v2 == "https":
+                print(f"  repaired {r['id']:<28} -> {u2[:50]}")
+                r["url"] = u2
+                r["checked"] = today
+                note = (" The deep link Wikidata had for this archive has "
+                        "since 404ed, so this points at the town's own site: "
+                        "the archive page is somewhere on it and this is a "
+                        "working start rather than a dead end.")
+                if note.strip() not in (r.get("what") or ""):
+                    r["what"] = (r.get("what") or "") + note
+                repaired.append(r["id"])
+            else:
+                broken.append((r, verdict))
+                print(f"  {verdict:<10} {r['id']:<28} {r['url'][:56]}")
         else:
             broken.append((r, verdict))
             print(f"  {verdict:<10} {r['id']:<28} {r['url'][:56]}")
 
     print(f"\n{dict(tally)}")
+    if repaired:
+        print(f"{len(repaired)} deep links repaired to their site root")
     if broken:
         kinds = collections.Counter(v for _, v in broken)
         moved = [r for r, v in broken if v == "moved"]

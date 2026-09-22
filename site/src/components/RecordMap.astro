@@ -108,7 +108,7 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
         proportionate to something. */}
     <div class="ra-loading" id="ra-loading">
       <span class="ra-loading-b"></span>
-      <span id="ra-loading-t">Loading the atlas&hellip;</span>
+      <span id="ra-loading-t" data-i18n>Loading the atlas&hellip;</span>
     </div>
   </div>
   {/* THE PANEL REWRITES ITSELF AND SAID NOTHING WHILE DOING IT.
@@ -139,7 +139,7 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
         is no state to keep in sync; a browser without :has() simply keeps
         the stacked panel it has today. */}
     <button class="ra-sheet-x" id="ra-sheet-x" type="button">
-      &#9662;&nbsp;Back to the map</button>
+      &#9662;&nbsp;<span data-i18n>Back to the map</span></button>
     <div class="at-empty" id="ra-empty">
       <div class="lab">Start with what you have</div>
       <ul class="at-start">
@@ -269,15 +269,20 @@ window.addEventListener("load", async function () {
   /* ---- access, which is what the colour means ---------------------------
      Read off the stylesheet so the two themes stay in one place. */
   var css = getComputedStyle(document.documentElement);
+  /* Base.astro defines these before anything in this component runs. The
+     fallback is for the component being used outside that layout, where
+     the honest answer is the English it was given. */
+  var T = window.RA_T || function (x) { return x; };
+
   var ACC = {
-    free:      ["#1E8449", "Images, free, no account"],
-    account:   ["#6FA82E", "Images, free, account needed"],
-    index:     ["#EFC03B", "An index only — no images"],
-    mixed:     ["#E8792B", "Partly free, partly paid"],
-    paid:      ["#C0392B", "Images, behind a paywall"],
-    catalogue: ["#8E6FA8", "A catalogue entry — not photographed"],
-    onsite:    ["#7C8A91", "On paper, in the building"],
-    unsurveyed:["#B6B2A6", "Nobody has walked this one yet"]
+    free:      ["#1E8449", T("Images, free, no account")],
+    account:   ["#6FA82E", T("Images, free, account needed")],
+    index:     ["#EFC03B", T("An index only — no images")],
+    mixed:     ["#E8792B", T("Partly free, partly paid")],
+    paid:      ["#C0392B", T("Images, behind a paywall")],
+    catalogue: ["#8E6FA8", T("A catalogue entry — not photographed")],
+    onsite:    ["#7C8A91", T("On paper, in the building")],
+    unsurveyed:["#B6B2A6", T("Nobody has walked this one yet")]
   };
   var RANK = idx.rank || Object.keys(ACC);
 
@@ -390,8 +395,13 @@ window.addEventListener("load", async function () {
      the same class of mistake as the header that said 8,557 volumes. */
   var TOTAL_PLACES = idx.places.length + ((idx.quiet && idx.quiet.places) || 0);
   var loadT = document.getElementById("ra-loading-t");
+  /* «Drawing 21,473 places…» has an English verb in it, so a translated
+     page says the number and the noun rather than a half-translated
+     sentence. */
   if (loadT) loadT.textContent =
-    "Drawing " + TOTAL_PLACES.toLocaleString() + " places\u2026";
+    (window.RA_LANG && window.RA_LANG !== "en"
+      ? TOTAL_PLACES.toLocaleString() + " " + T("places") + "\u2026"
+      : "Drawing " + TOTAL_PLACES.toLocaleString() + " places\u2026");
 
   /* ---- the markers -------------------------------------------------------
      Radius by how many volumes stand at a place, which is the one piece of
@@ -1074,13 +1084,13 @@ window.addEventListener("load", async function () {
 
   var LAYERS = [
     ["countries", "Countries", "every country on earth · the coarsest answer, and better than a blank", countryLayer],
-    ["shelf", "Shelf", TOTAL_PLACES.toLocaleString() + " places · every volume that covers them", shelfLayer],
-    ["archives", "Archives", archives.length + " institutions · where the paper actually is", archiveLayer],
-    ["jurisdiction", "Jurisdiction", regions.regions.length + " record regions · whose archive this ground was", regionLayer],
-    ["wikidata", "Others", "loading · unchecked, and not all genealogical", wikiLayer],
-    ["cemeteries", "Cemeteries", "loading", featLayers.cemeteries],
-    ["churches", "Churches", "loading", featLayers.churches],
-    ["libraries", "Libraries", "loading", featLayers.libraries]
+    ["shelf", T("Shelf"), TOTAL_PLACES.toLocaleString() + " places · every volume that covers them", shelfLayer],
+    ["archives", T("Archives"), archives.length + " institutions · where the paper actually is", archiveLayer],
+    ["jurisdiction", T("Jurisdiction"), regions.regions.length + " record regions · whose archive this ground was", regionLayer],
+    ["wikidata", T("Others"), "loading · unchecked, and not all genealogical", wikiLayer],
+    ["cemeteries", T("Cemeteries"), "loading", featLayers.cemeteries],
+    ["churches", T("Churches"), "loading", featLayers.churches],
+    ["libraries", T("Libraries"), "loading", featLayers.libraries]
   ];
   var on = {};
   (Q.get("layers") !== null ? Q.get("layers").split(",").filter(Boolean)
@@ -1745,10 +1755,17 @@ window.addEventListener("load", async function () {
       h.push('<p class="at-what"><b>' + esc(r.n) + " is held here with no country " +
              "attached,</b> so it cannot be lined up against these places.</p>");
     } else if (hit.length) {
-      h.push('<p class="at-what"><b>' + hit.length.toLocaleString() + " of these " +
-             vis.length.toLocaleString() + " places " +
-             (hit.length === 1 ? "stands" : "stand") + " in a country where " +
-             esc(r.n) + " is attested.</b> Attested means a register counted the " +
+      /* «1 of these 1 places stands» is what arithmetic says and not what
+         a person would. One place gets a sentence about that place. */
+      h.push('<p class="at-what"><b>' +
+             (vis.length === 1
+               ? esc(vis[0]._p.n) + " stands in a country where " + esc(r.n) +
+                 " is attested."
+               : hit.length.toLocaleString() + " of these " +
+                 vis.length.toLocaleString() + " places " +
+                 (hit.length === 1 ? "stands" : "stand") + " in a country where " +
+                 esc(r.n) + " is attested.") +
+             "</b> Attested means a register counted the " +
              "name in that country. It does not mean anybody of the name lived in " +
              "these particular villages — that is what the records are for, and " +
              "they are listed on each place below.</p>");

@@ -265,6 +265,31 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
     </section>
   )}
 
+  {(place.graves || []).length > 0 && (
+    <section style="margin-top:34px">
+      <h2>Where the burials are</h2>
+      <p class="cap">The other end of a parish: the register records the burial and the
+      ground holds it, and a family that left no other trace very often left a stone.
+      <b>These are points on a map, not record collections</b> — named cemeteries from
+      Wikidata and OpenStreetMap, nobody here has visited one, and whether the burial
+      register survives is a question for the parish or the municipality above. Unnamed
+      cemeteries are left out: a shape with no name is not a place anyone can ask about.
+      Only inside a mapped record region.</p>
+      <ul class="vols">
+        {place.graves.map((c) => (
+          <li>
+            <a href={c.src === "wikidata"
+                       ? `https://www.wikidata.org/wiki/${c.id}`
+                       : `https://www.openstreetmap.org/${c.id.startsWith("w") ? "way" : "node"}/${c.id.slice(1)}`}
+               target="_blank" rel="noopener">{c.n} ↗</a>
+            <span class="y">{c.km} km</span>
+            <span class="who">{c.src === "wikidata" ? "Wikidata" : "OpenStreetMap"}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
   {volumes.length > 0 && (
     <section style="margin-top:38px">
       <h2>{volumesTotal.toLocaleString()} volumes catalogued here</h2>

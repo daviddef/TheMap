@@ -3,6 +3,7 @@
    a date computed client-side would say «today» forever. */
 const built = new Date().toISOString().slice(0, 10);
 import { u } from "../lib/url.js";
+import { TABLES, LANGS } from "../lib/i18n.js";
 import site from "../data/site.json";
 /* Counted, not typed. This line is on all 6,000 pages and it is a licence
    attribution — the one kind of number that must not quietly go stale. */
@@ -135,10 +136,88 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
      unit needs a real width to size itself against. */
   .adslot { min-height: 90px; margin: 0 0 24px; display: block; }
   .adslot ins { display: block; width: 100%; }
+  .ra-lang a { margin-left: 10px; }
+  .ra-lang a.on { font-weight: 600; text-decoration: none; color: var(--ink-2); }
+  .ra-lang [data-lang-note] { margin-left: 10px; }
 </style>
 </head>
 <body>
-<a class="skip" href="#main">Skip to the map</a>
+{/* The table is inlined rather than fetched: it is under four kilobytes
+    and a reader whose language is not English should not watch the page
+    change under them a second after it arrives. */}
+<script is:inline define:vars={{ RA_I18N: TABLES }}>
+  (function () {
+    /* WHICH LANGUAGE. An explicit ?lang= wins and is remembered, because
+       it is the reader saying so; then a previous choice; then the
+       browser's own preference, which is what gets this to work for
+       somebody who never finds the switcher. */
+    var pick = null;
+    try {
+      var q = new URLSearchParams(location.search).get("lang");
+      if (q && (q === "en" || RA_I18N[q])) { pick = q; localStorage.setItem("ra-lang", q); }
+      if (!pick) pick = localStorage.getItem("ra-lang");
+    } catch (e) {}
+    if (!pick) {
+      var nav = (navigator.languages || [navigator.language || ""]);
+      for (var i = 0; i < nav.length && !pick; i++) {
+        var two = String(nav[i]).slice(0, 2).toLowerCase();
+        if (RA_I18N[two]) pick = two;
+      }
+    }
+    var tab = (pick && RA_I18N[pick]) || null;
+    /* The one function the rest of the page uses. Unknown key returns the
+       English it was given, because the keys ARE the English — so a
+       half-finished language is «not yet translated», never a blank. */
+    window.RA_LANG = tab ? pick : "en";
+    window.RA_T = function (s) { return (tab && tab[s]) || s; };
+    if (!tab) return;
+
+    function walk(root) {
+      if (!root) return;
+      var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      var n, hits = [];
+      while ((n = w.nextNode())) {
+        var k = n.nodeValue.trim();
+        if (k && tab[k]) hits.push([n, n.nodeValue.replace(k, tab[k])]);
+      }
+      hits.forEach(function (h) { h[0].nodeValue = h[1]; });
+    }
+    /* ONLY INSIDE CONTAINERS THAT OPTED IN. A blanket walk would translate
+       the word «places» wherever it appears in a sentence and leave the
+       rest of that sentence in English, which reads worse than not
+       translating at all. */
+    function apply() {
+      document.documentElement.lang = pick;
+      ["header.site nav", "#drawer", ".ra-bar", "#ra-empty",
+       ".ra-cats-wrap summary", "[data-i18n]"].forEach(function (sel) {
+        document.querySelectorAll(sel).forEach(walk);
+      });
+      /* Attributes are not text nodes, so the walker cannot reach them,
+         and a translated box with an English label is worse for a screen
+         reader than one that is honestly all English. */
+      var box = document.getElementById("ra-q");
+      if (box) {
+        if (tab[box.placeholder]) box.placeholder = tab[box.placeholder];
+        var al = box.getAttribute("aria-label");
+        if (al && tab[al]) box.setAttribute("aria-label", tab[al]);
+      }
+      var sw = document.querySelector("[data-ra-lang]");
+      if (sw) {
+        sw.querySelectorAll("a[data-lang]").forEach(function (a) {
+          a.classList.toggle("on", a.getAttribute("data-lang") === pick);
+        });
+        var note = sw.querySelector("[data-lang-note]");
+        if (note) note.textContent =
+          "\u2014 the controls are translated; the longer explanations are " +
+          "still in English, on purpose.";
+      }
+    }
+    if (document.readyState === "loading")
+      document.addEventListener("DOMContentLoaded", apply);
+    else apply();
+  })();
+</script>
+<a class="skip" href="#main" data-i18n>Skip to the map</a>
 <header class="site">
   <div class="wrap sitein">
     <a class="brand" href={u("/")}>Record <em>Atlas</em></a>
@@ -244,6 +323,25 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
         <a href="https://www.goatcounter.com/" rel="noopener">GoatCounter</a>
       </p>
     )}
+    {/* THE ATLAS SPOKE ENGLISH AT PEOPLE RESEARCHING CROATIA, which is the
+        single biggest ceiling on its reach: somebody after a Gračišće
+        baptism or a Puglia birth is likelier to read Croatian or Italian.
+        This translates the CHROME — the navigation, the controls, the
+        labels, the words that say what to type and what a colour means.
+        It does NOT touch the prose, because the prose on this site is
+        careful about evidence and a translated «attested» that drifts is
+        worse than an English one that does not. It also carries no
+        hreflang: there is one URL per page and pointing hreflang at a page
+        that is still mostly English would be a claim this site cannot
+        back. Translated routes are the next step and would triple a
+        46,000-page build, so they are deliberately not this one. */}
+    <p class="foot-note foot-thin ra-lang" data-ra-lang>
+      <span>Language:</span>
+      {LANGS.map(([code, label]) => (
+        <a href={`?lang=${code}`} data-lang={code} hreflang={code}>{label}</a>
+      ))}
+      <span class="foot-when" data-lang-note></span>
+    </p>
     <p class="foot-note foot-thin">
       <a href={u("/about/")}>About</a> · <a href={u("/add/")}>Add or correct a source</a> ·
       <a href={u("/data/")}>Use the data</a> ·

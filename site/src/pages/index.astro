@@ -61,45 +61,75 @@ const archiveCountries = new Set(archives.map(p => p.at.place.split(", ").pop())
     countryPointsUrl={u("/country-points.json")}
     base={u("/")} />
 
-  <div class="one" style="margin-top:34px">
-    <div class="lab">Why a map, and not another list</div>
-    <div class="prose">
-      <p><b>Three things stand between a researcher and a record, and all three are geographic.</b></p>
-      <p><b>The name changed.</b> Gallignana is Gračišće. Fiume is Rijeka. Pola is Pula.
-      You cannot search for a place whose name you do not know, so the find box here matches
-      every name a place has ever had — type <em>Gallignana</em> and the map goes to Gračišće.
-      This works <b>worldwide</b>, well outside the shelf: <em>Breslau</em> answers Wrocław,
-      <em>Czernowitz</em> answers Chernivtsi, <em>Memel</em> answers Klaipėda.</p>
-      <p><b>The jurisdiction changed.</b> An 1863 baptism from a Croatian village sits in a
-      Croatian archive. A 1930 one, from the same village, is filed under <em>Italy</em> —
-      because between the wars that village was Italian. Searching the Croatian collection
-      alone finds nothing, and nothing is not the same as not existing. Set the year and this
-      map tells you which it is.</p>
-      <p><b>"Online" is four different things.</b> Free images, images behind a login, an index
-      with no images at all, and a catalogue card for paper nobody has photographed. Most
-      directories flatten these into a link. Here they are the colour of the dot.</p>
+  {/* FOLDED, BECAUSE IT WAS TAKING HALF THE PAGE.
+      Two panels of prose sat under the map explaining why the atlas is a
+      map — worth saying, and worth saying once. A reader who has already
+      got the point scrolled past four hundred words of it every single
+      visit, and a reader who arrived with a surname met an essay before
+      they met an answer. It is the same text, behind a summary line, open
+      to anyone who wants it and out of the way of everyone who does not.
+      Not hidden: <details> is in the page, in the DOM, indexable, and it
+      prints. */}
+  <details class="whymap" style="margin-top:34px">
+    <summary>Why a map, and not another list — and what it does not know yet</summary>
+    <div class="one" style="margin-top:34px">
+      <div class="lab">Why a map, and not another list</div>
+      <div class="prose">
+        <p><b>Three things stand between a researcher and a record, and all three are geographic.</b></p>
+        <p><b>The name changed.</b> Gallignana is Gračišće. Fiume is Rijeka. Pola is Pula.
+        You cannot search for a place whose name you do not know, so the find box here matches
+        every name a place has ever had — type <em>Gallignana</em> and the map goes to Gračišće.
+        This works <b>worldwide</b>, well outside the shelf: <em>Breslau</em> answers Wrocław,
+        <em>Czernowitz</em> answers Chernivtsi, <em>Memel</em> answers Klaipėda.</p>
+        <p><b>The jurisdiction changed.</b> An 1863 baptism from a Croatian village sits in a
+        Croatian archive. A 1930 one, from the same village, is filed under <em>Italy</em> —
+        because between the wars that village was Italian. Searching the Croatian collection
+        alone finds nothing, and nothing is not the same as not existing. Set the year and this
+        map tells you which it is.</p>
+        <p><b>"Online" is four different things.</b> Free images, images behind a login, an index
+        with no images at all, and a catalogue card for paper nobody has photographed. Most
+        directories flatten these into a link. Here they are the colour of the dot.</p>
+      </div>
     </div>
-  </div>
 
-  <div class="one" style="margin-top:26px;border-left-color:var(--rule-strong)">
-    <div class="lab">What this map does not know yet</div>
-    <div class="prose">
-      <p>It is honest about being early, and the three layers are at three different stages.
-      <b>The archives layer is worldwide</b> — {archives.length} institutions across
-      {archiveCountries} countries, each saying what it holds and what it costs to look.
-      <b>The shelf is deep in one corner</b>: {places} places and {volumes} volumes across
-      Croatia, Istria and Carnia, and thin to the point of empty everywhere else.
-      <b>The jurisdiction layer covers {regions.regions.length} pieces of ground</b>, not the
-      planet — Istria and the Kvarner, Carnia, Dalmatia, Campania, eastern Sicily, Calabria,
-      Prussian Posen, the eastern Cape, England, Queensland and Santa Fe. A place outside them
-      says so in its own panel rather than guessing, because a confident wrong answer about
-      which archive to write to costs somebody a month.</p>
-      <p><b>A grey dot means nobody has surveyed it. It does not mean nothing is there.</b>
-      That distinction is the difference between a map and a claim, and it is worth more
-      than coverage.</p>
-      <p><a href={u("/add/")}>Add a source, or correct one →</a></p>
+    <div class="one" style="margin-top:26px;border-left-color:var(--rule-strong)">
+      <div class="lab">What this map does not know yet</div>
+      <div class="prose">
+        <p>It is honest about being early, and the three layers are at three different stages.
+        <b>The archives layer is worldwide</b> — {archives.length} institutions across
+        {archiveCountries} countries, each saying what it holds and what it costs to look.
+        <b>The shelf is deep in one corner</b>: {places} places and {volumes} volumes across
+        Croatia, Istria and Carnia, and thin to the point of empty everywhere else.
+        <b>The jurisdiction layer covers {regions.regions.length} pieces of ground</b>, not the
+        planet — Istria and the Kvarner, Carnia, Dalmatia, Campania, eastern Sicily, Calabria,
+        Prussian Posen, the eastern Cape, England, Queensland and Santa Fe. A place outside them
+        says so in its own panel rather than guessing, because a confident wrong answer about
+        which archive to write to costs somebody a month.</p>
+        <p><b>A grey dot means nobody has surveyed it. It does not mean nothing is there.</b>
+        That distinction is the difference between a map and a claim, and it is worth more
+        than coverage.</p>
+        <p><a href={u("/add/")}>Add a source, or correct one →</a></p>
+      </div>
     </div>
-  </div>
+  </details>
 
   <ArchiveShowcase u={u} />
 </Base>
+
+<style>
+  /* The folded explanation. A summary that looks like a control, not like
+     a heading somebody forgot to style — a reader has to be able to tell
+     it opens. */
+  .whymap > summary {
+    cursor: pointer; font-family: var(--sans); font-size: .82rem;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink-2); padding: 10px 12px;
+    border: 1px solid var(--rule); border-radius: 3px;
+    background: var(--panel); list-style: none;
+  }
+  .whymap > summary::-webkit-details-marker { display: none; }
+  .whymap > summary::before { content: "＋  "; color: var(--accent); }
+  .whymap[open] > summary::before { content: "－  "; }
+  .whymap > summary:hover { border-color: var(--rule-strong); color: var(--ink); }
+  .whymap[open] > summary { margin-bottom: 14px; }
+</style>

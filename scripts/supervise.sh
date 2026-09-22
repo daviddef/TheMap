@@ -34,6 +34,23 @@ alive() {
   done | grep -c . 
 }
 
+# A JOB THAT HAS FINISHED IS NOT A JOB THAT KEEPS CRASHING.
+# The waypoint harvest walked its last collection and started exiting in
+# seconds, so this loop restarted it five times, declared it failed and
+# wrote «needs a human» every two minutes for hours — while the truth was
+# that 3,503 of 3,504 collections were done and 4,254,303 volumes were on
+# disk. A supervisor that cannot tell «finished» from «died» turns success
+# into an alarm, and an alarm that repeats every two minutes is one nobody
+# reads.
+#
+# The harvest says so itself on its last line, so that is what is checked.
+# The one collection left is unreachable at FamilySearch's end, and
+# --resume tries it again every time at no cost.
+finished() {
+  tail -3 ".${1%.py}.log" 2>/dev/null |
+    grep -qE "of [0-9]+ collections walked|nothing left to walk"
+}
+
 MAX_RESTARTS=5
 declare -a NAMES=("harvest-fs-waypoints.py")
 declare -a CMDS=("python3 scripts/harvest-fs-waypoints.py --resume --pause 0.2 --workers 4")
@@ -46,7 +63,12 @@ while true; do
   for i in "${!NAMES[@]}"; do
     n="${NAMES[$i]}"
     if [ "$(alive "$n")" = "0" ]; then
-      if [ "${TRIES[$i]}" -lt "$MAX_RESTARTS" ]; then
+      if finished "$n"; then
+        if [ "${TRIES[$i]}" != "done" ]; then
+          say "$n has finished its queue — not restarting"
+          TRIES[$i]="done"
+        fi
+      elif [ "${TRIES[$i]}" -lt "$MAX_RESTARTS" ]; then
         TRIES[$i]=$(( TRIES[$i] + 1 ))
         say "$n is not running — restart ${TRIES[$i]}/$MAX_RESTARTS"
         nohup nice -n 15 $(echo "${CMDS[$i]}") >> ".${n%.py}.log" 2>&1 &

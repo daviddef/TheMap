@@ -26,6 +26,14 @@ UA = ("RecordAtlas/1.0 (+https://daviddef.github.io/TheMap; "
 
 # The word for «surname» in the language the portal is catalogued in.
 # Missing one is how a sweep like this quietly finds nothing.
+#
+# FIVE OF THESE ANSWERED WITH AN ERROR AND NOT A VERDICT, and an error is
+# not a negative — that distinction is the whole reason this file exists.
+# Chased: Australia had moved its API under /data/, Chile needed a modern
+# TLS client, Colombia is Socrata rather than CKAN and wanted a different
+# path and result shape. All three answer now and none of them publishes
+# surnames. Mexico still returns 403 to any client and Brazil 401 without
+# an API key, so those two remain unanswered rather than answered no.
 PORTALS = [
     ("IE", "data.gov.ie",     "https://data.gov.ie/api/3/action/package_search",      ["surname", "family name"]),
     ("LV", "data.gov.lv",     "https://data.gov.lv/dati/api/3/action/package_search", ["uzvārd", "vārdu"]),
@@ -37,15 +45,16 @@ PORTALS = [
     ("SI", "podatki.gov.si",  "https://podatki.gov.si/api/3/action/package_search",   ["priimek"]),
     ("HR", "data.gov.hr",     "https://data.gov.hr/api/3/action/package_search",      ["prezime"]),
     ("GR", "data.gov.gr",     "https://data.gov.gr/api/3/action/package_search",      ["επώνυμο"]),
-    ("AU", "data.gov.au",     "https://data.gov.au/api/3/action/package_search",      ["surname"]),
+    ("AU", "data.gov.au",     "https://data.gov.au/data/api/3/action/package_search", ["surname"]),
     ("CA", "open.canada.ca",  "https://open.canada.ca/data/api/3/action/package_search", ["surname", "nom de famille"]),
     ("NZ", "catalogue.data.govt.nz", "https://catalogue.data.govt.nz/api/3/action/package_search", ["surname"]),
     ("MX", "datos.gob.mx",    "https://datos.gob.mx/busca/api/3/action/package_search", ["apellido"]),
     ("BR", "dados.gov.br",    "https://dados.gov.br/api/3/action/package_search",     ["sobrenome"]),
     ("AR", "datos.gob.ar",    "https://datos.gob.ar/api/3/action/package_search",     ["apellido"]),
     ("CL", "datos.gob.cl",    "https://datos.gob.cl/api/3/action/package_search",     ["apellido"]),
+    # Socrata, not CKAN, and a different result shape.
+    ("CO2", "datos.gov.co",   "https://www.datos.gov.co/api/catalog/v1",              ["apellido"]),
     ("UY", "catalogodatos.gub.uy", "https://catalogodatos.gub.uy/api/3/action/package_search", ["apellido"]),
-    ("CO", "datos.gov.co",    "https://www.datos.gov.co/api/views.json",              ["apellido"]),
 ]
 
 
@@ -74,6 +83,10 @@ def titles(payload):
         for x in res[:40]:
             if isinstance(x, dict):
                 out.append(str(x.get("title") or x.get("name") or "")[:90])
+    # Socrata (datos.gov.co) nests the title under results[].resource.name
+    for x in (payload.get("results") or [])[:40]:
+        if isinstance(x, dict) and isinstance(x.get("resource"), dict):
+            out.append(str(x["resource"].get("name") or "")[:90])
     for key in ("data", "datasets", "items"):
         for x in (payload.get(key) or [])[:40]:
             if isinstance(x, dict):

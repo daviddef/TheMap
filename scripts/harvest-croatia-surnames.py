@@ -57,12 +57,27 @@ def candidates():
     and «BLAŽEVIĆ» — and the longest-cased form is kept so the output
     reads like a name rather than a shout.
     """
+    pool = []
     d = json.load(open("data/archive-surnames.json"))
-    seen = {}
     for arch in d["archives"].values():
-        if "HR" not in (arch.get("declared") or []):
-            continue
-        for s in arch.get("surnames") or []:
+        if "HR" in (arch.get("declared") or []):
+            pool += arch.get("surnames") or []
+    # AND EVERY NAME THE CORPUS HAS SINCE LEARNED IN CROATIA.
+    # The first version asked about the 466 surnames two family archives
+    # declared, and then never grew: the matcher places Croatian volumes
+    # on most passes and every new name it finds was a name this lookup
+    # would never think to ask about. The cache means asking again costs
+    # nothing for names already answered, so the candidate list should be
+    # everything the atlas believes is Croatian, not a fixed file.
+    try:
+        for r in json.load(open("data/surnames.json"))["surnames"]:
+            if any(c.get("cc") == "HR" for c in r.get("countries") or []):
+                pool.append(r["n"])
+    except OSError:
+        pass
+    seen = {}
+    for block in (pool,):
+        for s in block:
             s = " ".join(s.split())
             if not s:
                 continue

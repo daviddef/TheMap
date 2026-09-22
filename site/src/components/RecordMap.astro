@@ -132,19 +132,52 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
   <span class="cap" id="ra-count" role="status" aria-live="polite"></span>
 </div>
 
+{/* The map cannot draw without these three, and the browser cannot know
+    that from markup it never sees — they are fetched by script. A preload
+    lets it start them at the same time as the stylesheets instead of
+    after them, and a preconnect opens the CDN socket while the parser is
+    still working. Measured cost of not doing it: index.json was not even
+    requested until 4,821 ms. */}
+<link rel="preload" as="fetch" href={indexUrl} crossorigin />
+<link rel="preload" as="fetch" href={regionsUrl} crossorigin />
+<link rel="preload" as="fetch" href={providersUrl} crossorigin />
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 
 <script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, BSURN: belgiumBase, WDA: wikidataUrl, OSMA: osmUrl, FEAT: featureBase, SETT: settlementBase, DIST: districtBase, CTRY: countryBase, TOWN: townlandBase, COMU: comuneBase, ESTO: estoniaBase, SCOT: scotlandBase, WARCH: worldArchivesUrl, CPTS: countryPointsUrl, BASE: base }}>
+/* ASK FOR THE DATA NOW, NOT AFTER EVERYTHING ELSE HAS LOADED.
+   Measured on the live site rather than reasoned about, which is what
+   should have happened the first time:
+
+     first contentful paint   4,500 ms
+     index.json REQUESTED     4,821 ms
+     index.json arrived       5,696 ms   (422 KB)
+
+   The map has always been built inside window.load, which fires only
+   after every image, font, stylesheet and CDN script on the page has
+   finished. So the one fetch the map cannot start without sat waiting
+   nearly five seconds for things it does not need, and then took 875 ms.
+   Splitting index.json from 533 KB to 419 KB — a careful, well-argued
+   change — saved about 100 KB on a request that had not been made yet.
+   That is what comes of budgeting bytes and never timing anything.
+
+   The request starts here, while the parser is still working and while
+   Leaflet is still downloading. `load` then waits on a promise that is
+   usually already settled. Nothing else changes: the map still needs
+   Leaflet, and still builds when the page is ready. */
+var DATA = Promise.all([fetch(INDEX), fetch(REGIONS), fetch(PROVIDERS)])
+  .then(function (r) { return Promise.all(r.map(function (x) { return x.json(); })); })
+  .catch(function () { return null; });
+
 window.addEventListener("load", async function () {
   var el = document.getElementById("ra-map");
   if (!el || typeof L === "undefined") return;
 
   var idx, regions, provs;
-  try {
-    var r = await Promise.all([fetch(INDEX), fetch(REGIONS), fetch(PROVIDERS)]);
-    idx = await r[0].json(); regions = await r[1].json(); provs = await r[2].json();
-  } catch (e) { el.innerHTML = '<p class="ra-dead">The map data could not be loaded.</p>'; return; }
+  var got = await DATA;
+  if (!got) { el.innerHTML = '<p class="ra-dead">The map data could not be loaded.</p>'; return; }
+  idx = got[0]; regions = got[1]; provs = got[2];
 
   var PROV = {}; provs.providers.forEach(function (p) { PROV[p.id] = p; });
   /* National archives and libraries by country, fetched once and kept for the

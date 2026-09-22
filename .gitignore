@@ -8,6 +8,7 @@ site/.astro/
 # Written by scripts/build.py out of data/, on every build including CI.
 # Committing them would mean two sources of truth, and the stale one always wins.
 site/public/index.json
+site/public/index-quiet.json
 site/public/regions.json
 site/public/providers.json
 site/public/p/
@@ -78,3 +79,18 @@ data/.italy-surnames-scan.json
 .s[A-Za-z0-9]
 .d[A-Za-z0-9]
 .e[A-Za-z0-9]
+
+# The Danish name zip, 1.3 MB, refetched by scripts/harvest-denmark-surnames.py
+data/.denmark-names-2020.zip
+
+# Per-name scan state for the harvesters that ask a form one question at a
+# time — «have I already asked about this name». Regenerable, and the
+# Croatian one was committed by the publish loop's `git add -A data/`
+# before this rule existed.
+data/.croatia-surnames-scan.json
+data/*.partial
+data/**/*.partial
+
+# Held-back harvest output. The script regenerates it; the README beside
+# it says why it is not in data/frequencies/ yet.
+data/_pending/*.json

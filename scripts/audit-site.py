@@ -119,6 +119,27 @@ def payloads():
         bad("data", "index.json was not built")
         return
     idx = json.load(open(idx_f))
+    # THE SPLIT MUST NOT SPLIT THE AUDIT.
+    # index.json now carries only the places that have something to show;
+    # the quiet ones arrive in a second file after the map draws. Every
+    # integrity check below — duplicate ids, coordinates off the earth,
+    # null island, a detail file behind every marker — has to see both, and
+    # the quiet half is precisely where a bad coordinate hides: they are the
+    # administrative divisions and the promoted places, the rows nobody
+    # clicks and nobody would notice. Auditing the loud half alone would be
+    # checking the places that get looked at anyway.
+    quiet_f = os.path.join(DIST, "index-quiet.json")
+    quiet = []
+    if idx.get("quiet"):
+        if not os.path.exists(quiet_f):
+            bad("data", "index.json promises index-quiet.json and it was not "
+                        "built — every quiet dot is missing from the map")
+        else:
+            quiet = json.load(open(quiet_f)).get("places") or []
+            if len(quiet) != idx["quiet"].get("places"):
+                bad("data", f"index.json says {idx['quiet'].get('places')} quiet "
+                            f"places, index-quiet.json holds {len(quiet)}")
+    places = (idx.get("places") or []) + quiet
     # MEASURED AS A VISITOR PAYS IT, WHICH IS GZIPPED.
     #
     # The 800 KB budget was counting bytes on disk. GitHub Pages compresses
@@ -166,17 +187,22 @@ def payloads():
         note("data", f"index.json {wire:.0f} KB transferred, {disk:.0f} KB on disk, "
                      f"{per:.0f} bytes per place")
 
-    ids = [p["i"] for p in idx["places"]]
+    if quiet:
+        qwire = len(_gz.compress(open(quiet_f, "rb").read())) / 1024
+        note("data", f"index-quiet.json {qwire:.0f} KB more for {len(quiet):,} "
+                     f"places with nothing on them yet, fetched after the draw")
+
+    ids = [p["i"] for p in places]
     dupes = [i for i, n in collections.Counter(ids).items() if n > 1]
     if dupes:
         bad("data", f"{len(dupes)} place ids appear more than once, e.g. {dupes[:4]}")
 
-    offmap = [p["i"] for p in idx["places"]
+    offmap = [p["i"] for p in places
               if not (-90 <= p["y"] <= 90) or not (-180 <= p["x"] <= 180)]
     if offmap:
         bad("data", f"{len(offmap)} places have coordinates off the earth: {offmap[:4]}")
 
-    nullisland = [p["i"] for p in idx["places"] if p["y"] == 0 and p["x"] == 0]
+    nullisland = [p["i"] for p in places if p["y"] == 0 and p["x"] == 0]
     if nullisland:
         bad("data", f"{len(nullisland)} places sit at 0,0 — the sea off Ghana, "
                     f"which is what an unset coordinate looks like: {nullisland[:4]}")

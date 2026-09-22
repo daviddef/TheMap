@@ -1,7 +1,7 @@
 ---
 import { timelineFor } from "../../lib/surname-timeline.js";
 import { hasCountryPage } from "../../lib/country-pages.js";
-import { earnsPage } from "../../lib/surname-pages.js";
+import { surnamePageRows } from "../../lib/surname-pages.js";
 /* One page per surname that has something real to say.
 
    NOT ONE PER SURNAME. There are 480,635 of them and 449,216 are a row in a
@@ -24,38 +24,20 @@ import { contextFor } from "../../lib/surname-context.js";
 
 export async function getStaticPaths() {
   const surn = corpus();
-  const slug = (s) => s.toLowerCase().normalize("NFKD")
-    .replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-  const seen = new Set();
-  return (surn.surnames || [])
-    /* A CURATED VARIANT OR ARCHIVE EVIDENCE — either is a reason to exist.
-       Requiring a curated variant meant 564 surnames that a family archive
-       has actually placed in a country had no page at all, David's own
-       among them: Defranceski is attested in nine countries by the
-       Defranceschi archive and every one of its variants is phonetic, so
-       it failed the test and returned a 404. Somebody who has done the
-       research on a name is better evidence that the name is worth a page
-       than an editor having linked two spellings. */
-    /* A CURATED LINK, AN ARCHIVE, OR A REGISTER IN MORE THAN ONE COUNTRY.
-       Kosina is counted by the Polish, Slovene and American registers and
-       had no page, because the filter wanted a curated variant. A surname
-       three national registers agree on is not a maybe. One country alone
-       stays out — that is 600,000 pages of nothing to say. */
-    /* THE RULE ITSELF LIVES IN lib/surname-pages.js, because the sitemap
-       needs the identical answer and its own copy had drifted three
-       clauses behind this one. */
-    .filter(earnsPage)
-    .map((r) => ({ r, s: slug(r.n) }))
-    .filter(({ s }) => s && !seen.has(s) && seen.add(s))
-    .map(({ r, s }) => ({ params: { name: s },
-                         props: { r, attestedBy: surn.attestedBy || {},
-                                  /* Which variants have a page of their own, so a
-                                     link is never offered to a 404. */
-                                  pages: [...seen] } }));
+  /* WHICH SURNAMES EARN A PAGE is entirely lib/surname-pages.js's
+     question now — earnsPage for the rule, surnamePageRows for the
+     deduplicated set. Three copies of that rule had drifted apart once
+     already (the sitemap listed 3,577 of 17,961 live pages), and the page
+     body below needs the identical answer, so there is one. */
+  const { rows: pageRows } = surnamePageRows(surn.surnames || []);
+  return pageRows.map(({ r, s }) => ({
+    params: { name: s },
+    props: { r, attestedBy: surn.attestedBy || {} } }));
 }
 
-const { r, attestedBy, pages } = Astro.props;
-const pageFor = new Set(pages || []);
+const { r, attestedBy } = Astro.props;
+/* Free after the first call: same corpus object, same Set handed back. */
+const pageFor = surnamePageRows(corpus().surnames || []).slugs;
 const CN = idx.countries || {};
 const slugify = (x) => x.toLowerCase().normalize("NFKD")
   .replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");

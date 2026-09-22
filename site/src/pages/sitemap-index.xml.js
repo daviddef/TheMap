@@ -31,7 +31,8 @@ export function urlsFor(set) {
     return [["", "1.0"], ["start/", "0.9"], ["about/", "0.6"], ["providers/", "0.9"],
             ["jurisdictions/", "0.9"], ...placeIndex, ["countries/", "0.9"],
             ["surnames/", "0.9"], ["coverage/", "0.8"], ["changelog/", "0.4"],
-            ["add/", "0.5"], ["privacy/", "0.3"]];
+            ["add/", "0.5"], ["data/", "0.7"], ["worklist/", "0.4"],
+            ["privacy/", "0.3"]];
   }
   if (set === "places") return full.places.map((p) => [`place/${p.id}/`, "0.6"]);
   if (set === "archives") return provs.providers.map((p) => [`archive/${p.id}/`, "0.7"]);

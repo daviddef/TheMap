@@ -148,6 +148,18 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
             span ? `${span[0]}–${span[1]}` : null].filter(Boolean).join(" · ")}
   dek={dek}>
 
+  {/* THIS PAGE IS A LIST OF THINGS TO GO AND DO, and the people doing them
+      sit in reading rooms with no wifi, or hand a sheet to a relative who
+      does not use a computer. The print stylesheet makes it come out as a
+      research sheet rather than a screenshot of a website — chrome gone,
+      every link followed by the URL it goes to. This says so, because
+      nobody presses Cmd-P on a page they assume will print badly. */}
+  <p class="ra-print">
+    <button type="button" class="ra-printb" onclick="window.print()">Print this plan</button>
+    <span class="cap">Comes out as a sheet for the reading room — what to ask for,
+    who holds it, and every link written out in full.</span>
+  </p>
+
   {place.filedUnder && (
     <div class="one" style="border-left-color:#C0392B">
       <div class="lab">Filed under a country that no longer holds it</div>
@@ -379,6 +391,15 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
 </Base>
 
 <style>
+  .ra-print { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+              margin: 16px 0 0; }
+  .ra-printb { font: 500 12px/1 var(--sans); color: var(--ink-2); cursor: pointer;
+               background: var(--panel); border: 1px solid var(--rule);
+               border-radius: 999px; padding: 7px 13px; }
+  .ra-printb:hover { border-color: var(--accent); color: var(--accent); }
+  .ra-print .cap { margin: 0; flex: 1 1 24ch; }
+  @media print { .ra-print { display: none !important; } }
+
   h2 { font-family: var(--serif); font-size: 26px; font-weight: 500; margin: 0 0 6px; }
   .names { font-family: var(--serif); font-size: 21px; line-height: 1.5; margin: 8px 0 6px; }
   .names b { font-weight: 500; margin-right: 14px; }

@@ -529,6 +529,18 @@ def main():
         # reasonably concluded there was nothing there.
         if wa_cc and p.get("country") in wa_cc:
             row["w"] = 1
+        # THE COUNTRY, BACK ON THE ROW AFTER BEING REMOVED AS DEAD WEIGHT.
+        # The note above is right that `r` and `k` were carried and read by
+        # nothing, and removing them was correct at the time. Something reads
+        # this now: asking the map «Blazevic Gracisce» has to line a place up
+        # against the countries a surname register attests, and the first
+        # attempt did it by looking for a country name inside `q` — which
+        # fails silently and completely, because `q` holds only the names a
+        # place used to have. Gracisce's is the single word "gallignana".
+        # Two bytes a row against a question that cannot be answered without
+        # them, and no bounding-box guessing.
+        if p.get("country"):
+            row["cc"] = p["country"]
         if by_reach:
             # The colour is borrowed, and the map has to say so or it is
             # claiming a walk that never happened.

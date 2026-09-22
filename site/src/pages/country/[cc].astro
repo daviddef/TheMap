@@ -111,6 +111,37 @@ const vols = hereAll.reduce((a, p) => a + (p.collections || []).length, 0);
 const span = mine.filter(x => x.c.from).length
   ? [Math.min(...mine.filter(x => x.c.from).map(x => x.c.from)),
      Math.max(...mine.filter(x => x.c.to).map(x => x.c.to))] : null;
+
+/* «RECORDS IN BOLIVIA» IS THE QUESTION AND THE PAGE ANSWERED WITH FOUR
+   LISTS. Everything needed was on the page already — collections, archives,
+   providers, regions, places — and a reader had to read all of it and do
+   the arithmetic themselves to learn the only things they came for: is
+   there anything I can open tonight, who do I have to write to, and what
+   does this atlas simply not know here.
+
+   Every sentence below is computed from the same data the lists render, so
+   it cannot claim coverage the page does not show. In particular it says
+   the unknown parts OUT LOUD: a country with archives and no walked places
+   is a country where nobody has been through the paper, and a summary that
+   glossed that would be the map implying completeness it has not got. */
+const freeNow = who.filter((p) => p.access === "free");
+const acctNow = who.filter((p) => p.access === "account");
+const idxOnly = who.filter((p) => p.access === "index");
+const paidish = who.filter((p) => p.access === "paid" || p.access === "mixed");
+const onsite  = who.filter((p) => p.access === "onsite" || p.access === "catalogue");
+/* 317 OF 516 PROVIDERS ARE `unsurveyed` AND THE FIRST DRAFT OF THIS SUMMARY
+   COUNTED THEM AS THE DENOMINATOR. It would have read «2 of 19 sources can
+   be opened tonight» for a country whose other seventeen have simply never
+   been looked at — a sentence that reads as a judgement on the country's
+   archives and is actually a report on our own idleness. Unsurveyed is its
+   own number, said out loud, and it is never in the bottom of a fraction. */
+const unsurv  = who.filter((p) => p.access === "unsurveyed" || !p.access);
+const graded  = who.filter((p) => p.access && p.access !== "unsurveyed");
+const natl    = who.filter((p) => p.kind === "national-archive"
+                              || p.kind === "national-library");
+const openable = freeNow.length + acctNow.length + idxOnly.length;
+const worldFree = world.filter((p) => p.access === "free" || p.access === "account");
+const nf = (n) => n.toLocaleString();
 ---
 <Base
   title={NAME}
@@ -119,6 +150,64 @@ const span = mine.filter(x => x.c.from).length
             hereAll.length ? `${hereAll.length.toLocaleString()} place${hereAll.length === 1 ? "" : "s"}` : null,
             span ? `${span[0]}–${span[1]}` : null].filter(Boolean).join(" · ")}
   dek={`Where the records of ${NAME} are, who holds them, and what it costs to look. ${records.toLocaleString()} indexed records reachable through FamilySearch alone.`}>
+
+  <div class="one" style="margin-top:20px">
+    <div class="lab">Where to start in {NAME}</div>
+    <p><b>{!who.length
+        ? `This atlas holds no source of its own for ${NAME} yet`
+        : openable > 0
+          ? `${nf(openable)} of the ${nf(graded.length)} checked ${graded.length === 1 ? "source" : "sources"} here can be opened tonight`
+          : graded.length
+            ? `None of the ${nf(graded.length)} checked ${graded.length === 1 ? "source" : "sources"} here can be opened from a keyboard`
+            : `Nothing here has been checked for what it costs to look`}.</b>{" "}
+      {freeNow.length > 0 && <>{nf(freeNow.length)} {freeNow.length === 1 ? "is" : "are"} free
+        images with no account. </>}
+      {acctNow.length > 0 && <>{nf(acctNow.length)} need{acctNow.length === 1 ? "s" : ""} a
+        free account. </>}
+      {idxOnly.length > 0 && <>{nf(idxOnly.length)} {idxOnly.length === 1 ? "is" : "are"} an
+        index with no images. </>}
+      {paidish.length > 0 && <>{nf(paidish.length)} {paidish.length === 1 ? "is" : "are"} paid
+        or part-paid. </>}
+      {onsite.length > 0 && <>{nf(onsite.length)} {onsite.length === 1 ? "is a catalogue card or paper in a building" : "are catalogue cards or paper in a building"} —
+        a letter, not a click. </>}
+      {worldFree.length > 0 && <>On top of that, {nf(worldFree.length)} worldwide services
+        reach {NAME} without a subscription.</>}</p>
+
+    {unsurv.length > 0 && (
+      <p class="cap"><b>{nf(unsurv.length)} more {unsurv.length === 1 ? "institution is" : "institutions are"} listed
+        here and {unsurv.length === 1 ? "has" : "have"} never been checked</b> — nobody has
+        opened {unsurv.length === 1 ? "it" : "them"}, written to {unsurv.length === 1 ? "it" : "them"},
+        or found out what {unsurv.length === 1 ? "it holds" : "they hold"}. They are on the
+        map as grey because that is what they are, and the honest reading of this page is
+        {" "}{nf(openable)} known-open, {nf(unsurv.length)} unknown.</p>
+    )}
+
+    <p class="cap">{natl.length > 0
+      ? <>Write to <b>{natl.map((p) => p.name).join(", ")}</b> for what is not online.{" "}</>
+      : <>No national archive is recorded here yet, which is a gap in this atlas and
+         not a statement about {NAME}.{" "}</>}
+      {mine.length > 0
+        ? <>FamilySearch has {nf(mine.length)} collection{mine.length === 1 ? "" : "s"} covering
+          it{span ? <>, running {span[0]}–{span[1]}</> : null}
+          {records > 0 ? <>, {nf(records)} indexed records</> : null}.{" "}</>
+        : <>FamilySearch has no catalogued collection for {NAME} in this atlas.{" "}</>}
+      {regs.length > 0
+        ? <>{regs.length === 1 ? "One piece" : `${regs.length} pieces`} of this ground
+          {" "}{regs.length === 1 ? "is" : "are"} mapped for jurisdiction, so the atlas can
+          say whose archive held it in a given year.</>
+        : <>No jurisdiction region covers {NAME} yet, so this atlas cannot say whose archive
+          held this ground in a given year — and it will not guess.</>}</p>
+
+    <p class="cap">{hereAll.length > 0
+      ? <><b>{nf(hereAll.length)} place{hereAll.length === 1 ? "" : "s"} placed, {nf(vols)} volume{vols === 1 ? "" : "s"} walked.</b>{" "}
+        {vols === 0 && <>Not one of them has had its paper counted yet, so treat the shelf here as
+          a list of somewhere to look rather than a list of what survives.</>}</>
+      : <><b>No place in {NAME} has been walked.</b> The archives above are real and the shelf
+        below is empty — which means nobody has been through the paper, not that there is
+        none.</>}
+      {" "}<a href={u(`/?q=${encodeURIComponent(NAME)}`)}>Open {NAME} on the map</a>, or{" "}
+      <a href={u("/add/")}>tell us what is missing</a>.</p>
+  </div>
 
   {regs.length > 0 && (
     <section style="margin-top:26px">

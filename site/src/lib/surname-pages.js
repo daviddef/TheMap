@@ -63,14 +63,33 @@ export function earnsPage(r) {
       || (v.some((x) => x.how === "spelling") && counted >= 3);
 }
 
-/* Every slug that will exist, deduplicated, in one place. */
-export function surnamePageSlugs(surnames) {
-  const seen = new Set();
-  const out = [];
+/* Every slug that will exist, deduplicated, in one place.
+ *
+ * MEMOISED, AND THAT IS NOT AN OPTIMISATION, IT IS THE BUILD.
+ * surname/[name].astro used to hand each of its 23,930 pages a fresh copy
+ * of this list and rebuild a Set from it in the page body — 23,930 copies
+ * of a 23,930-element array, and 573 million hash insertions, to answer a
+ * question whose answer is identical on every page. The surname routes
+ * were taking about 1.9 seconds each — roughly eight hours of a build
+ * spent recomputing one constant.
+ *
+ * The corpus is read once per process and never mutated, so caching on the
+ * array's identity is safe: a different corpus object gets a fresh answer,
+ * and the same one gets the same Set back. */
+let _slugCache = null;
+export function surnamePageRows(surnames) {
+  if (_slugCache && _slugCache.src === surnames) return _slugCache;
+  const slugs = new Set();
+  const rows = [];
   for (const r of surnames || []) {
     if (!earnsPage(r)) continue;
     const s = slugForSurname(r.n);
-    if (s && !seen.has(s)) { seen.add(s); out.push(s); }
+    if (s && !slugs.has(s)) { slugs.add(s); rows.push({ r, s }); }
   }
-  return out;
+  _slugCache = { src: surnames, rows, slugs };
+  return _slugCache;
+}
+
+export function surnamePageSlugs(surnames) {
+  return surnamePageRows(surnames).rows.map((x) => x.s);
 }

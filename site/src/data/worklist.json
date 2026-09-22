@@ -421,6 +421,166 @@
    "owner": "this atlas",
    "since": "2026-09-22",
    "note": "harvest-croatia-surnames.py asks DZS one name at a time and stops when it has asked about the 466 the atlas knows. When the atlas learns a new Croatian surname — and it does, every matcher pass — nothing asks about it. Same for any lookup-only country. It needs to run on a cadence against the names added since."
+  },
+  {
+   "n": 53,
+   "what": "The atlas speaks English at people researching Croatia",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-09-23",
+   "note": "The single biggest ceiling on reach. Everyone this is FOR — someone looking for a Gračišće baptism, a Puglia birth, a Wielkopolska parish — is likelier to read Croatian, Italian or Polish than English, and the site is `lang=\"en\"` with no hreflang anywhere. The hard half is already done: every place carries the names it has ever had, in the languages it had them in. What is missing is the chrome — a few hundred UI strings and the standing sentences. Start with Croatian and Italian, which are the deepest ground here, and let the rest wait rather than machine-translating the careful wording about evidence into nonsense."
+  },
+  {
+   "n": 54,
+   "what": "21,085 place pages share one social card",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-09-23",
+   "note": "site/public/og has six images, one per page TYPE, so every place on earth shares a single grey rectangle when it is shared. A card naming the place, its country, its volume count and its shape on a small map would make a shared link legible before it is clicked — and the machinery exists: lib/surname-map.js already composes SVG at build time, and scripts/build-og-images.py already writes PNGs."
+  },
+  {
+   "n": 55,
+   "what": "The data is CC0 and there is no way to use it",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-23",
+   "note": "Done. /data/ documents every published file — path, size, shape, what it is and, read out of the file itself, its licence. That last part corrected the first draft: three licences are served out of this one directory, and the OpenStreetMap-derived sets are ODbL share-alike, so telling somebody they were CC0 would have put them in breach. The repository still carries no licence file for this atlas's own compilation; the page says so rather than inventing one."
+  },
+  {
+   "n": 56,
+   "what": "An archive cannot show its own holdings here",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-09-23",
+   "note": "516 institutions are listed and not one of them can put «our records, mapped» on their own site. A small embeddable widget — one archive, its places, its volumes — turns the directory into something the directory's own subjects want to link to."
+  },
+  {
+   "n": 57,
+   "what": "Nobody has told the 516 archives they are listed",
+   "state": "blocked",
+   "owner": "David",
+   "since": "2026-09-23",
+   "note": "Most carry access «unsurveyed», which means this atlas has published a claim about an institution without asking it anything. Writing to them is both the correction path and the reach: an archivist who is told «you are on this map, here is what it says, tell us what is wrong» usually answers, and sometimes links back. Needs the contact address of row 49."
+  },
+  {
+   "n": 58,
+   "what": "There is no way to hear that the atlas changed",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-23",
+   "note": "Done. /feed.xml is an Atom feed of the changelog, one entry per day rather than per commit — a day here is routinely fifteen commits and fifteen notifications is how a feed gets dropped. Advertised in every page's head and linked in the footer."
+  },
+  {
+   "n": 59,
+   "what": "Surname pages are the front door and are treated as a side room",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-23",
+   "note": "Done, as far as navigation goes. Surnames are second in Explore and named as the question — «Look up a surname» — instead of fourth under a word that reads like a table of statistics. The opening panel of the map now asks for a surname first as well. The surname pages themselves are still the next thing to deepen."
+  },
+  {
+   "n": 60,
+   "what": "«Records in Bolivia» is a question nobody here answers well",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-23",
+   "note": "Done. Every country page opens with what a reader came for: how many sources can be opened tonight, who to write to for the rest, what FamilySearch holds and over what years, whether the jurisdiction layer reaches this ground, and how many places have actually been walked. Writing it caught a real trap — 317 of 516 providers are unsurveyed, so the first draft would have read «2 of 19 sources can be opened» for countries whose other seventeen nobody has ever looked at. Unsurveyed is now its own number and never the bottom of a fraction."
+  },
+  {
+   "n": 61,
+   "what": "The map opens by asking the reader to already know the answer",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-23",
+   "note": "Done. The panel opens on «Start with what you have» — a surname, a village by any name it ever had, or only a country — with three live examples (Peeters, Gallignana, Breslau) that run the search on click, and one sentence saying the colour is what it costs to look."
+  },
+  {
+   "n": 62,
+   "what": "Nothing points at the atlas from where genealogists already are",
+   "state": "next",
+   "owner": "David",
+   "since": "2026-09-23",
+   "note": "Cyndi's List, the FamilySearch Wiki's country pages, national genealogical society link lists — these are where people looking for exactly this already go. Being absent from them is a bigger gap than any ranking problem."
+  },
+  {
+   "n": 63,
+   "what": "Play the years, because that is the whole argument",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-23",
+   "note": "Done. A play button runs the year window forward in ten-year steps from 1500, fifty years at a time, redrawing the jurisdiction shading and refiltering the shelf at every step. `p` starts it; Escape, or touching either slider, stops it."
+  },
+  {
+   "n": 64,
+   "what": "21,302 dots at world zoom is a grey smear",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-23",
+   "note": "Done. Below zoom 6 the shelf is drawn as one bubble per grid cell — 12° cells at zoom 2 down to 2° at zoom 5 — area by count, tooltip naming places AND volumes so the bubble cannot be mistaken for a book count. The individual markers come off the map entirely while bubbles are up, because a cluster drawn over the dots it summarises is just more ink."
+  },
+  {
+   "n": 65,
+   "what": "A surname and a place cannot be asked about together",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-23",
+   "note": "Done. «Blazevic Istria» is read as a name and a place: the query is split only when the whole of it matches no place, so nothing that works today changes, and the panel answers both halves at once. It refuses to conflate them — a register counting 11,163 people in Croatia is a fact about Croatia and not about the four villages on screen, and the panel says which places sit in an attested country and leaves the rest unmarked."
+  },
+  {
+   "n": 66,
+   "what": "The panel is a wall of text on a phone",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-23",
+   "note": "Done. Under 700px a result becomes a sheet over the bottom of the map with its own way out, instead of filling a box below the fold that the reader never sees. Driven off :has() on the body's hidden attribute, so there is no state to keep in sync and a browser without :has() keeps today's stacked panel."
+  },
+  {
+   "n": 67,
+   "what": "A place's sources cannot be taken away from the screen",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-23",
+   "note": "Done. A print stylesheet in the shared stylesheet — chrome, ad slot and map gone, every link followed by the URL it goes to, tables that do not break across a row — and a «Print this plan» button on every place page. The links mattered most: a printed «FamilySearch» that does not say where it goes is no use to somebody typing it back in."
+  },
+  {
+   "n": 68,
+   "what": "The map is blank while it loads and says nothing",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-23",
+   "note": "Done. The map says «Loading the atlas…», then «Drawing 21,302 places…» the moment the index arrives, and the notice is removed when the markers are on. A number rather than a spinner: it tells the reader the wait is proportionate to something."
+  },
+  {
+   "n": 69,
+   "what": "The legend lists eight colours and teaches nothing",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-23",
+   "note": "Done. The legend now states the two things that make it readable: that the colours run from what you can open tonight down to what needs a letter, and that a place takes the colour of the MOST OPEN thing it has — so red means red is the best on offer there, and green says nothing about what is underneath. It also says the swatches are filters, which was undiscoverable."
+  },
+  {
+   "n": 70,
+   "what": "No keyboard shortcuts on a tool people will use for hours",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-23",
+   "note": "Done. `/` focuses the search, `y` toggles the year, `p` plays the years, Escape clears the box or closes the phone sheet. None of them steal a keystroke from a field."
+  },
+  {
+   "n": 71,
+   "what": "The jurisdiction layer covers 33 regions and is the reason to be here",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-23",
+   "note": "Seven more record regions, 33 → 40. The Military Frontier is the one that earns its place: from 1746 a Lika or Slavonian village belonged to its REGIMENT, not to a county, so its registers were kept by the regimental chaplain and filed under Ogulin, Otočac, Slunj, Gradiška, Brod or Petrovaradin — and a search of the county archive for anything before 1881 finds nothing, which is not the same as there being nothing. Also the Netherlands (civil registration from 1811, and 1796 in the parts annexed early), Denmark (two parish registers kept separately from 1814, so a gap in one is usually survivable in the other — and Schleswig filed under Prussia from 1864 to 1920), Norway, Sweden (the 1686 church law and the husförhörslängder), Finland (the Karelian parishes' registers were evacuated WITH the people, so they are in Finland and not where the places are) and Portugal (civil registration only from 1911)."
+  },
+  {
+   "n": 72,
+   "what": "The first thirty seconds are never rehearsed",
+   "state": "done",
+   "owner": "this atlas",
+   "since": "2026-09-23",
+   "note": "Done, as far as a machine can do it. test/e2e/first-thirty-seconds.spec.js walks the path a stranger takes, in order, and asserts each step gives them something to act on: second one the map says what it is doing, second five the panel asks for something they actually have, second ten the world is bubbles rather than a smear, second fifteen a surname answers with ONE heading, second twenty a name and a place are asked together, second twenty-five the panel is not still answering the previous question, second thirty there is a way out. Plus the phone, where the answer must be a sheet and not a box below the fold. It is not a substitute for watching a real stranger — it is a rehearsal, so the same ground is not lost twice."
   }
  ]
 }

@@ -42,7 +42,43 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
   <input id="ra-q" type="search" autocomplete="off"
          aria-label="Find a place or a surname, by any name it has ever had"
          placeholder="Find a place or a surname — Gallignana · Žubrinić · Lerena" />
-  <div class="ra-layers" id="ra-layers"></div>
+  {/* THREE FILTERS, THREE DIFFERENT SHAPES. The layers were eight loose
+      pills in a row while «what it costs» and «what kind» were tidy
+      disclosures that said how many were on — so the one control a reader
+      touches most looked like scattered chrome beside two that looked
+      designed. David said it was messy and it was. All three are the same
+      control now, each saying its own state in its summary.
+
+      AND ALL THREE LIVE IN THE BAR. The other two sat under the map, which
+      meant full screen hid them exactly as it hid the search box — the same
+      bug, two controls further along, and it would have been found the same
+      way eventually. */}
+  <details class="ra-cats-wrap ra-drop" id="ra-layersw">
+    <summary id="ra-laysum">Layers</summary>
+    <div class="ra-drop-in">
+      <p class="ra-key-lead">What the map draws. The shelf is the places and
+        their volumes; the rest are context, and the unchecked ones cost
+        nothing until you ask for them.</p>
+      <div class="ra-layers" id="ra-layers"></div>
+    </div>
+  </details>
+  <details class="ra-cats-wrap ra-drop" id="ra-catsw">
+    <summary id="ra-catsum">What it costs to look</summary>
+    <div class="ra-drop-in">
+      <p class="ra-key-lead">Ordered from what you can open tonight down to what
+        needs a letter. <b>A place takes the colour of the most open thing it
+        has</b> — so red means red is the best on offer there, and green says
+        nothing about what else is underneath it. The panel lists the rest.
+        Click a colour to take it off the map.</p>
+      <div class="atlas-key" id="ra-cats"></div>
+    </div>
+  </details>
+  <details class="ra-cats-wrap ra-drop" id="ra-kindw">
+    <summary id="ra-kindsum">What kind of record</summary>
+    <div class="ra-drop-in">
+      <div class="atlas-key" id="ra-kinds"></div>
+    </div>
+  </details>
   {/* A RANGE, NOT A YEAR. «What covers 1880 to 1920» is the question a
       researcher actually has; «what covers exactly 1904» is a question nobody
       asks. A single handle also made the map look broken whenever it landed on
@@ -174,15 +210,7 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
       the colour of the MOST OPEN thing it has, so a red dot means red is
       the best on offer there and a green one says nothing about what else
       is underneath. That a swatch is also a filter was undiscoverable. */}
-  <details class="ra-cats-wrap" id="ra-catsw">
-    <summary id="ra-catsum">What it costs to look</summary>
-    <p class="ra-key-lead">Ordered from what you can open tonight down to what
-      needs a letter. <b>A place takes the colour of the most open thing it
-      has</b> — so red means red is the best on offer there, and green says
-      nothing about what else is underneath it. The panel lists the rest.
-      Click a colour to take it off the map.</p>
-    <div class="atlas-key" id="ra-cats"></div>
-  </details>
+
   {/* WHAT KIND OF RECORD. David asked for this directly — "many people
       really want to look at church records, do we know which are which and
       could we apply a church record filter". Until now nothing in this
@@ -192,10 +220,6 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
       anything. Unset means every kind, including the sixth of collections
       whose title says nothing about what they are — a filter that quietly
       dropped those would be lying about coverage. */}
-  <details class="ra-cats-wrap" id="ra-kindw">
-    <summary id="ra-kindsum">What kind of record</summary>
-    <div class="atlas-key" id="ra-kinds"></div>
-  </details>
   <span class="cap" id="ra-count" role="status" aria-live="polite"></span>
 </div>
 
@@ -1099,7 +1123,18 @@ window.addEventListener("load", async function () {
   if (!Object.keys(on).length) on.shelf = true;
 
   var lbox = document.getElementById("ra-layers");
+  /* The summary carries the state, so a closed dropdown still answers «what
+     is on the map». Without it a reader has to open the thing to find out
+     what they already chose. */
+  function laySummary() {
+    var n = LAYERS.filter(function (l) { return on[l[0]]; }).length;
+    var el = document.getElementById("ra-laysum");
+    if (el) el.textContent = n === LAYERS.length
+      ? "Layers \u2014 all " + LAYERS.length + " on"
+      : "Layers \u2014 " + n + " of " + LAYERS.length + " on";
+  }
   function drawLayers() {
+    laySummary();
     lbox.innerHTML = LAYERS.map(function (l) {
       return '<label class="ra-layer' + (on[l[0]] ? " on" : "") + '" data-l="' + l[0] +
         '" title="' + esc(l[1] + " — " + l[2]) + '">' +
@@ -1127,7 +1162,48 @@ window.addEventListener("load", async function () {
     var k = lab.getAttribute("data-l");
     on[k] = ev.target.checked;
     lab.classList.toggle("on", !!on[k]);
+    laySummary();
     syncLayers();
+  });
+
+  /* ---- the three dropdowns behave like dropdowns --------------------------
+     <details> on its own stays open until it is clicked again, and three of
+     them open at once in one bar is the mess this replaced. One at a time,
+     and a click anywhere else closes the open one. */
+  var drops = function () {
+    return [].slice.call(document.querySelectorAll(".ra-drop"));
+  };
+  document.addEventListener("click", function (e) {
+    var inside = e.target.closest && e.target.closest(".ra-drop");
+    drops().forEach(function (d) {
+      if (d !== inside && d.open) d.open = false;
+    });
+  });
+  drops().forEach(function (d) {
+    d.addEventListener("toggle", function () {
+      if (!d.open) return;
+      drops().forEach(function (o) { if (o !== d) o.open = false; });
+      /* KEEP IT ON SCREEN, BY MEASURING RATHER THAN BY BREAKPOINT. These
+         controls sit in a bar that WRAPS, so the same control is at the
+         right-hand end at one width and the left-hand end at another, and
+         no media query knows which. The first version flipped the last
+         dropdown to right-aligned under 900px and duly pushed it 49 pixels
+         off the LEFT edge, because at that width the bar had wrapped and
+         the control was no longer on the right. Measured and nudged, it is
+         correct at every width without knowing any of them. */
+      var box = d.querySelector(".ra-drop-in");
+      if (box) {
+        box.style.left = "";
+        var r = box.getBoundingClientRect(), pad = 10, shift = 0;
+        if (r.right > window.innerWidth - pad) shift = (window.innerWidth - pad) - r.right;
+        if (r.left + shift < pad) shift = pad - r.left;
+        if (shift) box.style.left = Math.round(shift) + "px";
+      }
+      /* The bar is fixed in full screen and its height is measured; a
+         popover does not change that height, but the summary text does when
+         it grows, so re-fit rather than assume. */
+      if (typeof fitFsBar === "function") fitFsBar();
+    });
   });
 
   /* ---- the access filter pills ------------------------------------------- */
@@ -3136,6 +3212,21 @@ window.addEventListener("load", async function () {
     color: var(--accent); background: var(--accent-wash);
     border: 1px solid var(--rule); white-space: nowrap; }
   .ra-cats-wrap { min-width: 240px; }
+  /* A POPOVER, NOT A FOLD-OUT. An inline disclosure pushed the map down
+     every time somebody looked at a filter, and in full screen it would
+     have changed the height of a bar whose height is measured. Absolutely
+     positioned, so opening one moves nothing. */
+  .ra-drop { position: relative; min-width: 0; }
+  :global(.ra-drop > .ra-drop-in) {
+    position: absolute; top: calc(100% + 6px); left: 0; z-index: 30;
+    min-width: 280px; max-width: min(92vw, 540px);
+    background: var(--panel); border: 1px solid var(--rule-strong);
+    border-radius: 6px; padding: 12px 14px;
+    box-shadow: 0 10px 28px rgba(10, 20, 26, .22);
+  }
+  :global(.ra-drop .ra-key-lead) { display: block; margin: 0 0 10px;
+    font: 400 11.5px/1.6 var(--sans); color: var(--ink-2); max-width: 54ch; }
+  :global(.ra-drop .ra-layers) { gap: 6px; }
   .ra-cats-wrap summary { font: 400 12px/1.6 var(--sans); color: var(--ink-3);
     cursor: pointer; padding: 5px 9px; border: 1px solid var(--rule);
     border-radius: 999px; background: var(--panel); display: inline-block;

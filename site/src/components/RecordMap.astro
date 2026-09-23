@@ -119,6 +119,19 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
   <button class="ra-ico" id="ra-reset" type="button"
           title="Start again — clear the search, the year, the filters and the layers, and go back to the whole world">&#10226;</button>
   <span class="ra-copied" id="ra-copied" hidden>copied</span>
+  {/* THE COUNT REPORTS ON THE FILTERS AND SAT NOWHERE NEAR THEM. It lived
+      under the map, which put it outside the element that goes full screen
+      — so the one line that says whether a filter did anything was missing
+      in the mode where the map is biggest. David asked for it up here with
+      the rest.
+
+      `margin-left: auto` sends it to the right-hand end of the bar when
+      there is room and lets it take its own line when there is not, which
+      matters because this is not always short: set a year nothing can
+      answer for and it becomes a sentence explaining why the map is empty,
+      with a way out. That message is better placed here than below a map
+      the reader has already decided is broken. */}
+  <span class="cap" id="ra-count" role="status" aria-live="polite"></span>
 </div>
 <div class="ra-help" id="ra-help" hidden></div>
 
@@ -197,31 +210,7 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
   </aside>
 </div>
 
-<div class="ra-foot">
-  {/* EIGHT PILLS FOR SOMETHING RARELY CHANGED. The colours still have to be
-      legible — they are what the map means — but the SWITCHES behind them are
-      a filter most readers set once or never, and a row of eight was more
-      chrome than that deserves. Folded into a disclosure that says how many
-      are on. */}
-  {/* EIGHT COLOURS AND NO RULE FOR READING THEM. The swatches named
-      themselves — "an index only", "behind a paywall" — and left the two
-      facts that make the legend usable unsaid: that they run from what you
-      can open tonight down to what needs a letter, and that a place takes
-      the colour of the MOST OPEN thing it has, so a red dot means red is
-      the best on offer there and a green one says nothing about what else
-      is underneath. That a swatch is also a filter was undiscoverable. */}
 
-  {/* WHAT KIND OF RECORD. David asked for this directly — "many people
-      really want to look at church records, do we know which are which and
-      could we apply a church record filter". Until now nothing in this
-      project knew which were which; the kind is read out of each
-      collection's title by one shared classifier and carried on the index as
-      a bitmask, so the filter works on first paint without fetching
-      anything. Unset means every kind, including the sixth of collections
-      whose title says nothing about what they are — a filter that quietly
-      dropped those would be lying about coverage. */}
-  <span class="cap" id="ra-count" role="status" aria-live="polite"></span>
-</div>
 
 {/* The map cannot draw without these three, and the browser cannot know
     that from markup it never sees — they are fetched by script. A preload
@@ -3238,9 +3227,14 @@ window.addEventListener("load", async function () {
   .ra-key-lead { display: none; }
   .ra-cats-wrap[open] .ra-key-lead { display: block; margin: 9px 0 0;
     font: 400 11.5px/1.6 var(--sans); color: var(--ink-2); max-width: 62ch; }
-  .ra-foot { display: flex; align-items: flex-start; gap: 10px 14px; flex-wrap: wrap;
-             margin-top: 10px; }
-  .ra-foot .cap { margin: 0; font-size: 11.5px; }
+  .ra-bar #ra-count { margin: 0 0 0 auto; font-size: 11.5px; line-height: 1.5;
+                      max-width: 100%; text-align: right; }
+  /* When it grows into the «nothing can answer for that year» explanation it
+     takes the whole row rather than squeezing the buttons off the end. */
+  :global(.ra-bar #ra-count b) { color: var(--ink); }
+  @media (max-width: 760px) {
+    .ra-bar #ra-count { margin-left: 0; text-align: left; flex: 1 1 100%; }
+  }
 
   .ra-top { margin-top: 10px; }
   /* The layer switches and the filter pills are written by the script with

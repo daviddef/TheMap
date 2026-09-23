@@ -198,6 +198,11 @@ test("full screen keeps the controls, which is the point of controls", async ({ 
   /* The way out stays reachable and does not sit on top of the bar. */
   const esc = await page.locator("#ra-fs-esc").boundingBox();
   expect(esc.y).toBeGreaterThan(bar.y + bar.height);
+  /* And the count, which reports on the filters, is in the bar with them —
+     it used to live under the map, so the one line saying whether a filter
+     did anything was missing in the mode where the map is biggest. */
+  await expect(page.locator(".ra-bar #ra-count")).toHaveCount(1);
+  await expect(page.locator("#ra-count")).toContainText(/places shown/);
   await page.keyboard.press("Escape");
   await expect(page.locator(".at-wrap.ra-fs")).toHaveCount(0);
 });

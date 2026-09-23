@@ -1871,6 +1871,16 @@ window.addEventListener("load", async function () {
         if (slug)
           h.push('<p class="ra-go"><a href="' + BASE + "surname/" + slug +
                  '/">Everything about ' + esc(r.n) + " &#8594;</a></p>");
+      } else {
+        /* AND THE THIRTY-NINE IN FORTY THAT HAVE NO PAGE NOW GO SOMEWHERE
+           TOO. They used to stop here, which is where most searches land —
+           the panel said what the register knew and then offered nothing to
+           click. /surname/ answers for any name in the corpus off the same
+           shard this panel just read, so there is a destination without
+           900,000 pages of one line each. */
+        h.push('<p class="ra-go"><a href="' + BASE + "surname/?q=" +
+               encodeURIComponent(r.n) + '">What the registers say about ' +
+               esc(r.n) + " &#8594;</a></p>");
       }
 
       /* Everything but the phonetic guess counts as evidence here, which

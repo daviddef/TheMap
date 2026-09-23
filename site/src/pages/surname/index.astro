@@ -1,0 +1,222 @@
+---
+/* A DESTINATION FOR THE 922,645 NAMES THAT DO NOT EARN A PAGE.
+ *
+ * 23,930 surnames have a page of their own and 946,575 do not, and the
+ * ones that do not are where most searches land. Until now those were a
+ * dead end: the map's panel links to a page only when one exists, which
+ * is right, and the reader was told nothing about the rest.
+ *
+ * THE OBVIOUS FIX IS THE WRONG ONE. Relaxing the page rule to cover every
+ * attested name would build 970,000 pages — the current 46,000 take
+ * twenty-three minutes and the Pages artefact has a one-gigabyte ceiling —
+ * and it would build them out of one row each, which is the textbook
+ * definition of a doorway page and is rightly punished for it. The rule
+ * exists for a reason and this does not weaken it.
+ *
+ * So: ONE page that answers for all of them. It reads the same sharded
+ * register the map reads — /s/<first three folded characters>.json — so
+ * there is no new data, no new build cost, and a name added to the corpus
+ * is answerable here the moment it lands, without a page being generated
+ * for it.
+ *
+ * What it will not do is pretend. A name the registers have never counted
+ * gets told that plainly, and told that it is a statement about this
+ * atlas's registers and not about the name.
+ */
+import Base from "../../layouts/Base.astro";
+import { u } from "../../lib/url.js";
+import { atlas as idx } from "../../lib/atlas.js";
+import { corpus } from "../../lib/surname-corpus.js";
+import { surnamePageRows } from "../../lib/surname-pages.js";
+
+const surn = corpus();
+const total = (surn.surnames || []).length;
+const withPage = surnamePageRows(surn.surnames || []).rows.length;
+const shardBase = u("/s/");
+const CN = idx.countries || {};
+---
+<Base
+  title="Look up any surname"
+  eyebrow={`${total.toLocaleString()} names in the register · ${withPage.toLocaleString()} have a page of their own`}
+  dek="Type a name. This answers for every surname the registers here have counted, not only the ones with a page — and says plainly when it has never seen one.">
+
+  <div class="one" style="margin-top:20px">
+    <label class="lab" for="ra-sq">The name, however it is spelled</label>
+    <input id="ra-sq" type="search" autocomplete="off" spellcheck="false"
+           placeholder="Blažević · Peeters · Defranceski · Kosina"
+           aria-describedby="ra-sq-note" />
+    <p class="cap" id="ra-sq-note">Accents and case do not matter. The register is
+    sharded on the first three letters, so nothing is downloaded until you have
+    typed three.</p>
+  </div>
+
+  <div id="ra-sout" aria-live="polite"></div>
+
+  <div class="one" style="margin-top:22px;border-left-color:var(--rule-strong)">
+    <div class="lab">Why most names have no page</div>
+    <p class="cap">A page is built for a name when this atlas knows something a
+    phone book does not — a spelling somebody linked by hand, a family archive
+    that placed it in a country from documents, or three national registers
+    agreeing. <b>{(total - withPage).toLocaleString()} names meet none of those</b>,
+    and are a row in one register and nothing else. Building a page for each
+    would be {Math.round(total / 1000).toLocaleString()},000 pages of one line,
+    which is what a search engine calls a doorway and what a reader calls a
+    waste of a click. They are answered here instead, from the same data, with
+    nothing invented to fill the space.</p>
+  </div>
+</Base>
+
+<script is:inline define:vars={{ SHARD: shardBase, CN, BASE: u("/") }}>
+  (function () {
+    var box = document.getElementById("ra-sq");
+    var out = document.getElementById("ra-sout");
+    var cache = {};
+    var esc = function (s) {
+      return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; });
+    };
+    /* The same fold the register was built with, or «Blažević» finds nothing. */
+    var fold = function (s) {
+      return String(s).toLowerCase().normalize("NFKD")
+        .replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+    };
+    var slug = function (s) {
+      return String(s).toLowerCase().normalize("NFKD")
+        .replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "");
+    };
+    var HOW = {
+      curated: "somebody linked these by hand",
+      archive: "a family archive placed it from documents",
+      spelling: "one systematic substitution, both forms attested",
+      sounds: "an algorithm thinks they sound alike",
+      register: "a national register counted it"
+    };
+
+    function key(f) {
+      var k = "";
+      for (var i = 0; i < f.length && k.length < 3; i++)
+        if (/[a-z0-9]/.test(f[i])) k += f[i];
+      return k;
+    }
+
+    function render(rows, term) {
+      if (!rows.length) {
+        out.innerHTML =
+          '<div class="one" style="margin-top:18px;border-left-color:#E8792B">' +
+          '<div class="lab">No register here has counted ' + esc(term) + "</div>" +
+          '<p class="cap"><b>That is a statement about this atlas, not about the ' +
+          "name.</b> The registers here cover some countries and not others — " +
+          "several states publish no surname table at all, and a few that do " +
+          "suppress anything below a handful of people. A name absent from " +
+          "these lists may be perfectly common where your people lived.</p>" +
+          '<p class="cap"><a href="' + BASE + "?q=" + encodeURIComponent(term) +
+          '">Try it on the map</a> — it also searches places, and a surname is ' +
+          "very often a place somebody came from.</p></div>";
+        return;
+      }
+      var h = [];
+      rows.slice(0, 8).forEach(function (r) {
+        var ccs = (r.countries || []).slice().sort(function (a, b) {
+          return (b.n || 0) - (a.n || 0); });
+        var counted = ccs.filter(function (c) { return c.n != null; });
+        var people = counted.reduce(function (a, c) { return a + c.n; }, 0);
+        h.push('<div class="one" style="margin-top:18px">');
+        h.push('<div class="lab">' + esc(r.n) +
+               (r.pg ? ' · <a href="' + BASE + "surname/" + slug(r.n) +
+                       '/">it has a page of its own →</a>' : "") + "</div>");
+        h.push("<p>" + (ccs.length
+          ? "<b>Attested in " + ccs.length + (ccs.length === 1 ? " country" : " countries") +
+            "</b>" + (people ? ", counting about " + people.toLocaleString() +
+            " people where a register gave a number" : "") + "."
+          : "<b>Held here with no country attached.</b>") + "</p>");
+        if (ccs.length) {
+          h.push('<ul class="at-films">');
+          ccs.slice(0, 12).forEach(function (c) {
+            h.push("<li>" + esc(CN[c.cc] || c.cc) +
+                   (c.n != null ? ' <span class="y">' + c.n.toLocaleString() + "</span>"
+                                : ' <span class="ra-who">counted, number not published</span>') +
+                   ' <span class="ra-who">' + esc(HOW[c.how] || c.how) + "</span></li>");
+          });
+          h.push("</ul>");
+          if (ccs.length > 12)
+            h.push('<p class="cap">and ' + (ccs.length - 12) + " more.</p>");
+        }
+        var v = (r.variants || []).filter(function (x) { return x.how !== "sounds"; });
+        if (v.length) {
+          h.push('<p class="cap"><b>Also written</b> ' +
+            v.slice(0, 14).map(function (x) { return esc(x.n); }).join(", ") +
+            (v.length > 14 ? ", and " + (v.length - 14) + " more" : "") + ".</p>");
+        }
+        var sounds = (r.variants || []).filter(function (x) { return x.how === "sounds"; });
+        if (sounds.length)
+          h.push('<p class="cap">' + sounds.length + " further " +
+            (sounds.length === 1 ? "spelling is" : "spellings are") +
+            " grouped with it only because an algorithm thinks they sound alike, " +
+            "which is the weakest kind of link here and is not shown as a fact.</p>");
+        h.push('<p class="cap"><a href="' + BASE + "?q=" + encodeURIComponent(r.n) +
+               '">Find ' + esc(r.n) + " on the map →</a></p>");
+        h.push("</div>");
+      });
+      if (rows.length > 8)
+        h.push('<p class="cap">' + (rows.length - 8) +
+               " more names begin with those letters. Type another letter.</p>");
+      out.innerHTML = h.join("");
+    }
+
+    function look() {
+      var term = box.value.trim();
+      var f = fold(term);
+      var k = key(f);
+      if (k.length < 3) {
+        out.innerHTML = term
+          ? '<p class="cap" style="margin-top:18px">Three letters, and it will answer.</p>'
+          : "";
+        return;
+      }
+      var go = function (rows) {
+        /* Exact first, then names that begin with it, then names that
+           merely contain it — and never the whole shard, which for «bla»
+           is 1,853 names and answers nothing. */
+        var exact = [], starts = [], has = [];
+        rows.forEach(function (r) {
+          var fn = fold(r.n);
+          if (fn === f) exact.push(r);
+          else if (fn.indexOf(f) === 0) starts.push(r);
+          else if (fn.indexOf(f) > -1) has.push(r);
+          else if ((r.variants || []).some(function (x) { return fold(x.n) === f; }))
+            starts.push(r);
+        });
+        render(exact.concat(starts, has), term);
+      };
+      if (cache[k]) return go(cache[k]);
+      out.innerHTML = '<p class="cap" style="margin-top:18px">Looking…</p>';
+      fetch(SHARD + k + ".json")
+        .then(function (r) { return r.ok ? r.json() : []; })
+        .catch(function () { return []; })
+        .then(function (rows) { cache[k] = rows || []; go(cache[k]); });
+    }
+
+    box.addEventListener("input", function () {
+      clearTimeout(box._t); box._t = setTimeout(look, 160);
+    });
+    /* Arriving with ?q= — the map's panel links here that way. */
+    var q = new URLSearchParams(location.search).get("q");
+    if (q) { box.value = q; look(); }
+    box.focus();
+  })();
+</script>
+
+<style>
+  #ra-sq { width: 100%; max-width: 44ch; padding: 10px 12px; margin-top: 8px;
+           font: 400 15px/1.3 var(--sans); color: var(--ink);
+           background: var(--ground); border: 1px solid var(--rule);
+           border-radius: 3px; }
+  #ra-sq:focus { outline: none; border-color: var(--accent); }
+  #ra-sq:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  :global(#ra-sout .at-films) { list-style: none; margin: 8px 0 0; padding: 0;
+                                display: grid; gap: 5px; }
+  :global(#ra-sout .at-films li) { font-size: 12.5px; line-height: 1.5; }
+  :global(#ra-sout .y) { font: 400 11px/1 var(--mono); color: var(--accent); }
+  :global(#ra-sout .ra-who) { font: 400 10.5px/1 var(--sans); color: var(--ink-3); }
+</style>

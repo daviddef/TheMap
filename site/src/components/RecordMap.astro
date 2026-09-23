@@ -53,8 +53,17 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
       meant full screen hid them exactly as it hid the search box — the same
       bug, two controls further along, and it would have been found the same
       way eventually. */}
+  {/* THE SEARCHES SOMEBODY ALREADY MADE. A researcher works down a list of
+      parishes and comes back to the same three or four names all week, and
+      every visit started from an empty box. These are the last eight, most
+      recent first, kept in this browser and nowhere else — no account, no
+      server, nothing that leaves the machine. Written only when a search
+      actually found something, so the list is things that worked rather
+      than things that were typed. */}
+  <div class="ra-recent" id="ra-recent" hidden
+       aria-label="Searches you made before"></div>
   <details class="ra-cats-wrap ra-drop" id="ra-layersw">
-    <summary id="ra-laysum">Layers</summary>
+    <summary id="ra-laysum" title="Which layers the map draws">Layers</summary>
     <div class="ra-drop-in">
       <p class="ra-key-lead">What the map draws. The shelf is the places and
         their volumes; the rest are context, and the unchecked ones cost
@@ -63,7 +72,7 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
     </div>
   </details>
   <details class="ra-cats-wrap ra-drop" id="ra-catsw">
-    <summary id="ra-catsum">What it costs to look</summary>
+    <summary id="ra-catsum" title="Filter by what it costs to look">What it costs to look</summary>
     <div class="ra-drop-in">
       <p class="ra-key-lead">Ordered from what you can open tonight down to what
         needs a letter. <b>A place takes the colour of the most open thing it
@@ -74,29 +83,11 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
     </div>
   </details>
   <details class="ra-cats-wrap ra-drop" id="ra-kindw">
-    <summary id="ra-kindsum">What kind of record</summary>
+    <summary id="ra-kindsum" title="Filter by what kind of record">What kind of record</summary>
     <div class="ra-drop-in">
       <div class="atlas-key" id="ra-kinds"></div>
     </div>
   </details>
-  {/* A RANGE, NOT A YEAR. «What covers 1880 to 1920» is the question a
-      researcher actually has; «what covers exactly 1904» is a question nobody
-      asks. A single handle also made the map look broken whenever it landed on
-      a recent year, because privacy windows close births for a century.
-      Two overlaid sliders, because the web has no two-handled range input and
-      a pair of them is honest about what it is. */}
-  <label class="ra-ylab" id="ra-ylab"
-         title="Keep only the places that can answer for any year in this range — and every panel will say whose archive those years belonged to.">
-    <input type="checkbox" id="ra-yon" />
-    <span class="ra-slider">
-      <span class="ra-track" id="ra-track"></span>
-      <input type="range" id="ra-year" min="1500" max="2026" value="1780" step="1" disabled
-             aria-label="Earliest year" />
-      <input type="range" id="ra-year2" min="1500" max="2026" value="1920" step="1" disabled
-             aria-label="Latest year" />
-    </span>
-    <output id="ra-yout" class="mono">any year</output>
-  </label>
   {/* PLAY IT, BECAUSE THE ARGUMENT IS A CHANGE OVER TIME.
       This atlas exists to say that ground changed hands and the paper
       followed it — that an 1863 baptism from a Croatian village is in a
@@ -109,15 +100,18 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
       A window, not a point: it walks a fifty-year range forward a decade
       at a time, because records come in runs and a single year empties
       the map. */}
-  <button class="ra-ico" id="ra-play" type="button" aria-pressed="false"
-          title="Play the years — watch the jurisdictions change and the records follow">&#9654;</button>
   <button class="ra-ico" id="ra-info" type="button" aria-expanded="false"
           title="What these controls mean">&#9432;</button>
   <button class="ra-ico" id="ra-copy" type="button" title="Copy a link to this exact view">&#128279;</button>
   <button class="ra-ico" id="ra-full" type="button"
           title="Full screen — the map and its panel fill the window">&#9974;</button>
-  <button class="ra-ico" id="ra-reset" type="button"
-          title="Start again — clear the search, the year, the filters and the layers, and go back to the whole world">&#10226;</button>
+  {/* «↺» AT TWELVE PIXELS IS A SMUDGE. David could not tell what it was, and
+      an icon nobody recognises is a button nobody presses. The others in this
+      row are conventional enough to stand alone — ⓘ, a link, the full-screen
+      corners — but «start again» has no agreed glyph, so it gets a word. */}
+  <button class="ra-ico ra-ico-wide" id="ra-reset" type="button"
+          aria-label="Start again — clear the search, the year, the filters and the layers, and go back to the whole world"
+          title="Start again — clear the search, the year, the filters and the layers, and go back to the whole world"><span aria-hidden="true">&#8634;</span> Reset</button>
   <span class="ra-copied" id="ra-copied" hidden>copied</span>
   {/* THE COUNT REPORTS ON THE FILTERS AND SAT NOWHERE NEAR THEM. It lived
       under the map, which put it outside the element that goes full screen
@@ -155,6 +149,36 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
         in the first paint, and is removed the moment the markers are
         drawn. It is not a spinner: a number tells the reader the wait is
         proportionate to something. */}
+    {/* THE YEAR BELONGS TO THE MAP, NOT TO THE TOOLBAR.
+        David: «can year slider go at base of map? more like an animation
+        bar? doesnt need to be at the top». It is a scrubber — it plays,
+        it has a handle you drag, and what it changes is the picture. Up
+        in the bar it read as one more setting among eight; along the
+        bottom of the map it reads as what it is.
+
+        It sits 26 pixels up so it never covers OpenStreetMap's
+        attribution, which is a licence condition and not decoration, and
+        below Leaflet's own controls at z-index 1000 so zoom and the
+        basemap switcher stay clickable. Being inside the map means full
+        screen carries it without anything extra. */}
+    <div class="ra-time" id="ra-time">
+  <button class="ra-ico" id="ra-play" type="button" aria-pressed="false"
+            title="Play the years — watch the jurisdictions change and the records follow">&#9654;</button>
+    <label class="ra-ylab" id="ra-ylab"
+           title="Keep only the places that can answer for any year in this range — and every panel will say whose archive those years belonged to.">
+      <input type="checkbox" id="ra-yon"
+             aria-label="Filter by year"
+             title="Turn the year filter on or off" />
+      <span class="ra-slider">
+        <span class="ra-track" id="ra-track"></span>
+        <input type="range" id="ra-year" min="1500" max="2026" value="1780" step="1" disabled
+               aria-label="Earliest year" />
+        <input type="range" id="ra-year2" min="1500" max="2026" value="1920" step="1" disabled
+               aria-label="Latest year" />
+      </span>
+      <output id="ra-yout" class="mono">any year</output>
+    </label>
+    </div>
     <div class="ra-loading" id="ra-loading">
       <span class="ra-loading-b"></span>
       <span id="ra-loading-t" data-i18n>Loading the atlas&hellip;</span>
@@ -187,17 +211,18 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
         It is driven off :has() on the body's hidden attribute, so there
         is no state to keep in sync; a browser without :has() simply keeps
         the stacked panel it has today. */}
-    <button class="ra-sheet-x" id="ra-sheet-x" type="button">
+    <button class="ra-sheet-x" id="ra-sheet-x" type="button"
+            title="Close this result and go back to the map">
       &#9662;&nbsp;<span data-i18n>Back to the map</span></button>
     <div class="at-empty" id="ra-empty">
       <div class="lab">Start with what you have</div>
       <ul class="at-start">
-        <li><b>A surname.</b> Type it above — <a href="#" class="ra-try" data-q="Peeters">Peeters</a>,
-          <a href="#" class="ra-try" data-q="Blažević">Blažević</a> — and the map lights the
+        <li><b>A surname.</b> Type it above — <a href="#" class="ra-try" data-q="Peeters" title="Run this search: Peeters — a Belgian name">Peeters</a>,
+          <a href="#" class="ra-try" data-q="Blažević" title="Run this search: Blažević — a Croatian name">Blažević</a> — and the map lights the
           countries a register or an archive attests it in.</li>
         <li><b>A village, by any name it ever had.</b>
-          <a href="#" class="ra-try" data-q="Gallignana">Gallignana</a> finds Gračišće;
-          <a href="#" class="ra-try" data-q="Breslau">Breslau</a> finds Wrocław.</li>
+          <a href="#" class="ra-try" data-q="Gallignana" title="Run this search: Gallignana — the Italian name of Gračišće">Gallignana</a> finds Gračišće;
+          <a href="#" class="ra-try" data-q="Breslau" title="Run this search: Breslau — the German name of Wrocław">Breslau</a> finds Wrocław.</li>
         <li><b>Only a country.</b> Click anywhere on it — every country on earth answers with
           something, even where this atlas has nothing yet.</li>
       </ul>
@@ -1038,6 +1063,8 @@ window.addEventListener("load", async function () {
   }).catch(function () { return []; });
 
   function openCountry(c) {
+    searchHit = true;
+    noteSearch();
     empty.hidden = true; panel.hidden = false;
     var h = ['<div class="at-h"><h3>' + esc(c.n) + "</h3>" +
              '<span class="at-n">the whole country</span></div>'];
@@ -1115,20 +1142,74 @@ window.addEventListener("load", async function () {
   /* The summary carries the state, so a closed dropdown still answers «what
      is on the map». Without it a reader has to open the thing to find out
      what they already chose. */
+  /* A NAME AND A BADGE. These read «Layers — 2 of 8 on», «What it costs to
+     look — all 8 shown», «What kind of record — every kind» — three long
+     sentences in a row, which is a paragraph pretending to be a toolbar.
+     David asked for «Layers [2]», and he is right: the sentence is what a
+     reader needs ONCE, and the number is what they need every time after.
+
+     So the sentence moves to `title` and `aria-label`, where it is a hover
+     away and still the accessible name — a screen reader hears «what it
+     costs to look, all 8 shown», not «costs, all». Nothing is lost; it
+     stops shouting. */
+  function setSummary(id, label, badge, full) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = esc(label) + ' <b class="ra-badge">' + esc(badge) + "</b>";
+    el.setAttribute("title", full);
+    el.setAttribute("aria-label", full);
+  }
   function laySummary() {
     var n = LAYERS.filter(function (l) { return on[l[0]]; }).length;
-    var el = document.getElementById("ra-laysum");
-    if (el) el.textContent = n === LAYERS.length
-      ? "Layers \u2014 all " + LAYERS.length + " on"
-      : "Layers \u2014 " + n + " of " + LAYERS.length + " on";
+    setSummary("ra-laysum", "Layers", n === LAYERS.length ? "All" : String(n),
+      n === LAYERS.length ? "Layers — all " + LAYERS.length + " on"
+                          : "Layers — " + n + " of " + LAYERS.length + " on");
   }
+  /* HOW MANY PLACES ARE ACTUALLY BEHIND EACH OPTION.
+     David: «i dont even see much for eg. costs, almost nothing for most
+     categories? can you check as well.» He was right, and the numbers are
+     worse than «not much»: of the eight access classes, `index`, `mixed`
+     and `paid` are ZERO places, `free` is 3 and `catalogue` is 6, while
+     `unsurveyed` is 19,416 — ninety per cent of the map. A filter offering
+     eight choices where five do nothing is a filter that lies about what
+     is there, which is the one thing this atlas is not allowed to do.
+     Counted from the markers rather than asserted, so the numbers cannot
+     drift, and recounted when the quiet half of the index lands. */
+  function optionCounts() {
+    var acc = {}, kind = {};
+    markers.forEach(function (m) {
+      var pl = m._p;
+      var a = RANK[pl.a];
+      if (a) acc[a] = (acc[a] || 0) + 1;
+      var k = pl.k || 0;
+      if (k) for (var name in KBIT) if (k & KBIT[name]) kind[name] = (kind[name] || 0) + 1;
+    });
+    return { acc: acc, kind: kind };
+  }
+  var COUNTS = { acc: {}, kind: {} };
+  var nf = function (n) { return (n || 0).toLocaleString(); };
+
+  /* ONE OPTION, ONE SHAPE, THREE MENUS. They were a checkbox in one, a
+     coloured pill in another and a colourless pill in the third — three
+     answers to the same question in three boxes a reader opens in a row.
+     All of them are a checkbox now, because that is what a multi-select
+     filter is, and the colour survives where colour is the meaning: on the
+     access classes it is what the dots on the map are coloured by. */
+  function optionHTML(kind, key, label, count, swatch, title, isOn, dead) {
+    return '<label class="ra-opt' + (isOn ? " on" : "") + (dead ? " dead" : "") +
+      '" data-' + kind + '="' + esc(key) + '" title="' + esc(title) + '">' +
+      '<input type="checkbox"' + (isOn ? " checked" : "") +
+      (dead ? " disabled" : "") + " />" +
+      (swatch ? '<i class="ra-sw" style="background:' + swatch + '"></i>' : "") +
+      "<span>" + esc(label) + "</span>" +
+      '<b class="ra-n">' + (count == null ? "" : nf(count)) + "</b></label>";
+  }
+
   function drawLayers() {
     laySummary();
     lbox.innerHTML = LAYERS.map(function (l) {
-      return '<label class="ra-layer' + (on[l[0]] ? " on" : "") + '" data-l="' + l[0] +
-        '" title="' + esc(l[1] + " — " + l[2]) + '">' +
-        '<input type="checkbox"' + (on[l[0]] ? " checked" : "") + ' />' +
-        "<b>" + esc(l[1]) + "</b></label>";
+      return optionHTML("l", l[0], l[1], null, null,
+                        l[1] + " — " + l[2], !!on[l[0]], false);
     }).join("");
   }
   drawLayers();
@@ -1218,11 +1299,13 @@ window.addEventListener("load", async function () {
   /* ---- the access filter pills ------------------------------------------- */
   var off = {};
   (Q.get("off") || "").split(",").filter(Boolean).forEach(function (k) { off[k] = true; });
+  function drawCats() {
   document.getElementById("ra-cats").innerHTML = RANK.map(function (a) {
-    return '<button class="at-cat' + (off[a] ? "" : " on") + '" data-cat="' + a +
-      '" title="' + esc(ACC[a][1]) + '">' +
-      '<i style="background:' + ACC[a][0] + '"></i>' + esc(ACC[a][2] || ACC[a][1]) +
-      "</button>";
+    var n = COUNTS.acc[a] || 0;
+    return optionHTML("cat", a, ACC[a][2] || ACC[a][1], n, ACC[a][0],
+      ACC[a][1] + " — " + nf(n) + (n === 1 ? " place" : " places") +
+      (n ? "" : " on this map, so this filter has nothing to remove"),
+      !off[a], n === 0);
   }).join("") +
     /* The one thing on this map that the colours alone cannot say. */
     '<span class="at-cat at-hollow-key" title="A hollow dot means no volumes are ' +
@@ -1233,17 +1316,22 @@ window.addEventListener("load", async function () {
     'reaches that place, but its country has a named national archive or ' +
     'library — click the place and the panel lists it.">' +
     "<i></i>Dotted&nbsp;= country has an archive</span>";
+  }
+  COUNTS = optionCounts();
+  drawCats();
   function catSummary() {
     var n = RANK.filter(function (a) { return !off[a]; }).length;
-    document.getElementById("ra-catsum").textContent =
+    setSummary("ra-catsum", "Costs", n === RANK.length ? "All" : String(n),
       n === RANK.length ? "What it costs to look — all " + RANK.length + " shown"
-                        : "What it costs to look — " + n + " of " + RANK.length + " shown";
+                        : "What it costs to look — " + n + " of " + RANK.length + " shown");
   }
   catSummary();
-  document.getElementById("ra-cats").addEventListener("click", function (ev) {
-    var b = ev.target.closest(".at-cat"); if (!b) return;
+  /* `change`, not `click`: these are checkboxes now, so the keyboard works
+     for free and a click on the label reaches the input by itself. */
+  document.getElementById("ra-cats").addEventListener("change", function (ev) {
+    var b = ev.target.closest(".ra-opt[data-cat]"); if (!b) return;
     var c = b.getAttribute("data-cat");
-    off[c] = !off[c];
+    off[c] = !ev.target.checked;
     b.classList.toggle("on", !off[c]);
     catSummary();
     setQ("off", Object.keys(off).filter(function (k) { return off[k]; }).join(","));
@@ -1268,10 +1356,14 @@ window.addEventListener("load", async function () {
     return m;
   }
   var kbox = document.getElementById("ra-kinds");
+  function drawKinds() {
   if (KORDER.length) {
     kbox.innerHTML = KORDER.map(function (k) {
-      return '<button class="at-cat' + (kindOn[k] ? " on" : "") + '" data-kind="' + k +
-        '" title="' + esc(KLAB[k] || k) + '">' + esc(KLAB[k] || k) + "</button>";
+      var n = COUNTS.kind[k] || 0;
+      return optionHTML("kind", k, KLAB[k] || k, n, null,
+        (KLAB[k] || k) + " — " + nf(n) + (n === 1 ? " place" : " places") +
+        (n ? "" : " on this map, so choosing it would empty the shelf"),
+        !!kindOn[k], n === 0);
     }).join("") +
       '<span class="at-cat at-hollow-key" title="A collection is sorted by what ' +
       'its title says it is. About one in six says nothing either way, so it ' +
@@ -1279,18 +1371,22 @@ window.addEventListener("load", async function () {
       'hide a register that simply is not described.">' +
       "<i></i>Read from the title";
   }
+  }
+  drawKinds();
   function kindSummary() {
     var n = KORDER.filter(function (k) { return kindOn[k]; });
-    document.getElementById("ra-kindsum").textContent = !n.length
-      ? "What kind of record — every kind"
-      : "What kind of record — " + n.map(function (k) { return KLAB[k] || k; }).join(", ");
+    setSummary("ra-kindsum", "Kind", !n.length ? "All" : String(n.length),
+      !n.length ? "What kind of record — every kind"
+                : "What kind of record — " +
+                  n.map(function (k) { return KLAB[k] || k; }).join(", "));
   }
   kindSummary();
   if (Object.keys(kindOn).length) document.getElementById("ra-kindw").open = true;
-  kbox.addEventListener("click", function (ev) {
-    var b = ev.target.closest(".at-cat[data-kind]"); if (!b) return;
+  kbox.addEventListener("change", function (ev) {
+    var b = ev.target.closest(".ra-opt[data-kind]"); if (!b) return;
     var k = b.getAttribute("data-kind");
-    kindOn[k] = !kindOn[k];
+    kindOn[k] = ev.target.checked;
+    if (!kindOn[k]) delete kindOn[k];
     b.classList.toggle("on", !!kindOn[k]);
     kindSummary();
     setQ("kind", KORDER.filter(function (x) { return kindOn[x]; }).join(","));
@@ -1530,6 +1626,28 @@ window.addEventListener("load", async function () {
      «nobody of this name lived there» are different statements and only the
      first one is ours to make. */
   var qPlace = null, qName = null;
+  /* DID THE SEARCH ACTUALLY FIND ANYTHING. The remembered-searches list used
+     «is a panel showing» and that is not the same question: a search that
+     finds nothing still shows a panel, because saying «nothing here, and
+     here is why» is the honest answer. So «zzzzqq» went into the list of
+     things that worked. Set only by the three paths that produce a real
+     answer — places framed, countries lit for a surname, a country opened —
+     and cleared at the start of every new query. */
+  var searchHit = false;
+  /* TWO CLOCKS, BECAUSE THE ANSWERS ARRIVE ON TWO. A place match is decided
+     inside apply(), 140ms after the last keystroke, so a timer is the only
+     way to tell it apart from somebody still typing. A surname match is
+     decided after fetching a shard, which lands well after any reasonable
+     timer — «Blazevic» was found, and forgotten, because the timer had
+     already been and gone. So: the timer catches the fast answers, and the
+     slow ones report themselves when they arrive, as long as the reader has
+     stopped typing. */
+  var lastTyped = 0;
+  function noteSearch() {
+    if (Date.now() - lastTyped < 1100) return;
+    var v = qbox.value.trim();
+    if (v.length >= 2 && searchHit) recentAdd(v);
+  }
   function nameMatch(p, t) {
     return fold(p.n).indexOf(t) > -1 || !!(p.q && wordHit(p.q, t));
   }
@@ -1651,6 +1769,7 @@ window.addEventListener("load", async function () {
 
   function apply(noFrame) {
     var t = fold(qbox.value.trim());
+    searchHit = false;
     splitQuery(t);
     if (qPlace) t = qPlace;
     syncCountryDots();
@@ -1699,6 +1818,8 @@ window.addEventListener("load", async function () {
     var avis = archMarkers.filter(function (m) { return archiveLayer.hasLayer(m); });
     var frame = vis.concat(on.archives ? avis : []);
     if (frame.length) {
+      searchHit = true;
+      noteSearch();
       map.fitBounds(L.latLngBounds(frame.map(function (m) { return m.getLatLng(); })),
                     { padding: [40, 40], maxZoom: 11 });
       /* Both halves were asked, so both get answered, in one panel. */
@@ -2240,6 +2361,7 @@ window.addEventListener("load", async function () {
   };
 
   async function showCountries(list, stale) {
+    if (list && list.length) { searchHit = true; noteSearch(); }
     /* Clears its own outlines and NOT the commune dots. It used to clear
        both, which was invisible until the dots started being drawn first
        — showCommunes ran, drew 60 towns, and this wiped them a
@@ -2820,10 +2942,81 @@ window.addEventListener("load", async function () {
     }
     panel.innerHTML = h.join("");
   }
+  /* ---- what you looked for last time -------------------------------------
+     localStorage, because this is a convenience and not a record: it is
+     per-browser, it never reaches us, and a reader who clears their site
+     data has cleared it. Every read and write is wrapped, because private
+     windows and blocked site data throw on access rather than returning
+     empty, and a map that will not draw because it could not remember a
+     search would be a poor trade. */
+  var RECENT_KEY = "ra-recent", RECENT_MAX = 8;
+  function recentGet() {
+    try {
+      var v = JSON.parse(localStorage.getItem(RECENT_KEY) || "[]");
+      return Object.prototype.toString.call(v) === "[object Array]" ? v : [];
+    } catch (e) { return []; }
+  }
+  function recentPut(list) {
+    try { localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, RECENT_MAX))); }
+    catch (e) { /* private window, or the reader has blocked it. Fine. */ }
+  }
+  var recentBox = document.getElementById("ra-recent");
+  function drawRecent() {
+    var list = recentGet();
+    if (!list.length) { recentBox.hidden = true; recentBox.innerHTML = ""; return; }
+    recentBox.hidden = false;
+    recentBox.innerHTML = '<span class="ra-recent-l">Again:</span>' +
+      list.map(function (t) {
+        return '<button type="button" class="ra-recent-p" data-q="' + esc(t) +
+          '" title="Search ' + esc(t) + ' again">' + esc(t) + "</button>";
+      }).join("") +
+      '<button type="button" class="ra-recent-x" title="Forget these searches. ' +
+      'They are kept in this browser only and never leave it.">Forget</button>';
+  }
+  function recentAdd(term) {
+    term = String(term || "").trim();
+    if (term.length < 2) return;
+    var list = recentGet().filter(function (t) {
+      return t.toLowerCase() !== term.toLowerCase();
+    });
+    list.unshift(term);
+    recentPut(list);
+    drawRecent();
+  }
+  recentBox.addEventListener("click", function (ev) {
+    var x = ev.target.closest(".ra-recent-x");
+    if (x) { recentPut([]); drawRecent(); return; }
+    var b = ev.target.closest(".ra-recent-p");
+    if (!b) return;
+    qbox.value = b.getAttribute("data-q");
+    setQ("q", qbox.value);
+    apply();
+  });
+  drawRecent();
+
   qbox.addEventListener("input", function () {
     setQ("q", qbox.value.trim());
+    lastTyped = Date.now();
     clearTimeout(qbox._t);
     qbox._t = setTimeout(apply, 140);
+    /* REMEMBERED ONLY WHEN IT WORKED, AND ONLY WHEN THE TYPING STOPPED.
+       apply() runs on a 140ms debounce, so recording there would keep «B»,
+       «Bl» and «Bla» as well as «Blažević». A second and a half of quiet,
+       and a panel actually showing something, is the difference between a
+       search and a keystroke. */
+    clearTimeout(qbox._r);
+    qbox._r = setTimeout(function () {
+      var v = qbox.value.trim();
+      if (v.length >= 2 && searchHit) recentAdd(v);
+    }, 1600);
+  });
+  /* Enter is the reader saying they meant it, so it does not wait. */
+  qbox.addEventListener("keydown", function (e) {
+    if (e.key !== "Enter") return;
+    clearTimeout(qbox._t);
+    apply();
+    var v = qbox.value.trim();
+    setTimeout(function () { if (v.length >= 2 && searchHit) recentAdd(v); }, 350);
   });
 
   /* ---- basemap switch, home, and the view in the address bar -------------- */
@@ -2831,7 +3024,14 @@ window.addEventListener("load", async function () {
   bctl.onAdd = function () {
     var b = L.DomUtil.create("div", "leaflet-bar ra-base");
     b.innerHTML = ["map", "terrain", "satellite"].map(function (k) {
-      return '<a href="#" data-b="' + k + '"' + (k === baseNow ? ' class="on"' : "") + ">" + k + "</a>";
+      /* Each of the three had no hover text at all — «Map», «Terrain» and
+         «Satellite» are a guess unless you click them. */
+      var what = { map: "Plain map — place names and borders, easiest to read",
+                   terrain: "Terrain — hills and rivers, which is often why a "
+                          + "parish is where it is",
+                   satellite: "Satellite — what the ground looks like now" };
+      return '<a href="#" data-b="' + k + '" title="' + esc(what[k] || k) + '"' +
+             (k === baseNow ? ' class="on"' : "") + ">" + k + "</a>";
     }).join("");
     L.DomEvent.disableClickPropagation(b);
     L.DomEvent.on(b, "click", function (e) {
@@ -2929,6 +3129,36 @@ window.addEventListener("load", async function () {
      because the bar wraps to two or three rows depending on width and a
      hard-coded offset would cover the map at one size and leave a gap at
      another. */
+  /* A DRAG ON THE SCRUBBER IS NOT A DRAG ON THE MAP. The strip sits inside
+     the Leaflet container, so without this, pulling a year handle pans the
+     world underneath it and a scroll over the strip zooms. */
+  /* HOW MUCH PAGE SITS ABOVE THE MAP, measured rather than guessed. The
+     first attempt at fitting the map to the window subtracted a flat 300px
+     for the header, the lede and the bar — and the real figure is 342, so
+     the scrubber pinned to the foot of the map still finished sixteen
+     pixels below the fold. It is not a constant anyway: the lede wraps
+     differently at every width and the bar wraps to two rows or three.
+     Measured on load and on resize, and the CSS clamp still floors and
+     caps it so this can never produce a letterbox or a sprawl. */
+  function fitMapToWindow() {
+    var el = document.getElementById("ra-map");
+    if (!el) return;
+    var above = el.getBoundingClientRect().top + window.scrollY;
+    document.documentElement.style.setProperty("--ra-above",
+      Math.round(above + 34) + "px");
+  }
+  fitMapToWindow();
+  window.addEventListener("resize", function () {
+    fitMapToWindow();
+    setTimeout(function () { map.invalidateSize(); }, 80);
+  });
+
+  var timeEl = document.getElementById("ra-time");
+  if (timeEl && window.L && L.DomEvent) {
+    L.DomEvent.disableClickPropagation(timeEl);
+    L.DomEvent.disableScrollPropagation(timeEl);
+  }
+
   var fullBtn = document.getElementById("ra-full");
   var fsBar = document.querySelector(".ra-bar");
   function fitFsBar() {
@@ -2984,12 +3214,14 @@ window.addEventListener("load", async function () {
         if (box) box.checked = !!on[l[0]];
       }
     });
-    document.querySelectorAll(".at-cat[data-cat]").forEach(function (b) {
+    document.querySelectorAll(".ra-opt[data-cat]").forEach(function (b) {
       b.classList.add("on");
+      var i = b.querySelector("input"); if (i) i.checked = true;
     });
     kindOn = {};
-    document.querySelectorAll(".at-cat[data-kind]").forEach(function (b) {
+    document.querySelectorAll(".ra-opt[data-kind]").forEach(function (b) {
       b.classList.remove("on");
+      var i = b.querySelector("input"); if (i) i.checked = false;
     });
     kindSummary();
     catSummary();
@@ -3105,6 +3337,14 @@ window.addEventListener("load", async function () {
           markers.push(makeMarker(p));
         });
         idx.places = idx.places.concat(qp);
+        /* The counts in the filters were taken from the loud half alone;
+           the quiet half is 5,693 more places and almost all of them
+           unsurveyed, so redraw or the numbers are a third of the truth. */
+        COUNTS = optionCounts();
+        drawCats();
+        drawKinds();
+        catSummary();
+        kindSummary();
         apply(true);
         if (openAt && !opened) {
           var late = qp.filter(function (p) { return p.i === openAt; })[0];
@@ -3253,6 +3493,11 @@ window.addEventListener("load", async function () {
     border-radius: 999px; background: var(--panel); display: inline-block;
     list-style: none; }
   .ra-cats-wrap summary::-webkit-details-marker { display: none; }
+  :global(.ra-cats-wrap summary .ra-badge) {
+    display: inline-block; margin-left: 5px; padding: 0 5px;
+    font: 500 10.5px/1.7 var(--mono); color: var(--accent);
+    background: var(--accent-wash); border-radius: 4px;
+    vertical-align: baseline; }
   .ra-cats-wrap summary::after { content: " \25BE"; }
   .ra-cats-wrap[open] summary::after { content: " \25B4"; }
   .ra-cats-wrap[open] .atlas-key { margin-top: 8px; }
@@ -3329,8 +3574,19 @@ window.addEventListener("load", async function () {
     :global(.pagehead.ra-lede) { padding: 18px 0 14px; margin-bottom: 12px; }
   }
   .at-wrap { display: grid; grid-template-columns: 1fr 360px; gap: 18px; margin-top: 12px; }
-  .at-map { height: 600px; border: 1px solid var(--rule); border-radius: 3px; }
-  .at-panel { height: 600px; overflow-y: auto; border: 1px solid var(--rule);
+  /* A MAP THAT DOES NOT FIT THE WINDOW IS A MAP YOU SCROLL TO USE.
+     600px was fine while every control lived in the bar above it. It stopped
+     being fine the moment the year scrubber moved to the FOOT of the map:
+     header, lede and bar come to about 300px, so on a 800px laptop the last
+     hundred pixels of the map — and the scrubber pinned to them — sat below
+     the fold. David saw a page that «seems to cut off», and the page was
+     fine; what was cut off was the control I had just moved there.
+     Sized against the window, floored so it never becomes a letterbox and
+     capped so it does not sprawl on a tall monitor. */
+  .at-map { height: clamp(380px, calc(100vh - var(--ra-above, 340px)), 620px);
+            border: 1px solid var(--rule); border-radius: 3px; }
+  .at-panel { height: clamp(380px, calc(100vh - var(--ra-above, 340px)), 620px);
+              overflow-y: auto; border: 1px solid var(--rule);
               border-radius: 3px; background: var(--panel); padding: 18px 18px 24px; }
   .at-empty p { font-size: 13px; line-height: 1.6; color: var(--ink-2); margin: 8px 0 0; }
   .at-hint { color: var(--ink-3) !important; font-size: 12px !important; }
@@ -3391,8 +3647,37 @@ window.addEventListener("load", async function () {
   :global(.at-cat.on) { opacity: 1; color: var(--ink-2); border-color: var(--ink-3); }
   :global(.at-cat i) { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
 
+  /* ONE OPTION, ONE SHAPE, IN ALL THREE MENUS. */
+  :global(.ra-opt) { display: inline-flex; align-items: center; gap: 7px;
+    padding: 6px 11px; border: 1px solid var(--rule); border-radius: 999px;
+    background: var(--panel); cursor: pointer; white-space: nowrap;
+    font: 400 12px/1.2 var(--sans); color: var(--ink-2); }
+  :global(.ra-opt.on) { border-color: var(--accent); color: var(--ink); }
+  :global(.ra-opt input) { margin: 0; width: 12px; height: 12px;
+    accent-color: var(--accent); flex: none; }
+  :global(.ra-opt .ra-sw) { width: 9px; height: 9px; border-radius: 50%;
+    display: inline-block; flex: none; }
+  :global(.ra-opt .ra-n) { font: 500 10.5px/1.6 var(--mono); color: var(--ink-3); }
+  /* NOTHING BEHIND IT, AND SAYING SO. Five of the eight access classes are
+     empty or near-empty and three are exactly zero; an option that would
+     remove nothing, or empty the map, should not look like a live choice. */
+  :global(.ra-opt.dead) { opacity: .4; cursor: default; border-style: dashed; }
+  :global(.ra-opt.dead .ra-n) { color: var(--ink-3); }
+
   .ra-copy { font: 400 12px/1 var(--sans); color: var(--accent); cursor: pointer;
              background: none; border: 1px solid var(--rule); border-radius: 3px; padding: 6px 10px; }
+  :global(.ra-ico-wide) { width: auto !important; padding: 0 11px;
+    gap: 5px; font: 400 12px/1 var(--sans); }
+  .ra-recent { display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+               flex-basis: 100%; margin: -2px 0 2px; }
+  .ra-recent-l { font: 400 11px/1 var(--sans); color: var(--ink-3); }
+  :global(.ra-recent-p) { font: 400 11.5px/1 var(--sans); color: var(--ink-2);
+    background: var(--panel); border: 1px solid var(--rule); border-radius: 999px;
+    padding: 5px 10px; cursor: pointer; }
+  :global(.ra-recent-p:hover) { border-color: var(--accent); color: var(--accent); }
+  :global(.ra-recent-x) { font: 400 10.5px/1 var(--sans); color: var(--ink-3);
+    background: none; border: 0; cursor: pointer; text-decoration: underline;
+    padding: 5px 2px; }
   .ra-copied { font-family: var(--mono); font-size: 11px; color: var(--ink-3); margin-left: 8px; }
   :global(.ra-base a) { width: auto !important; padding: 0 9px; font: 500 11px/26px var(--sans);
                         text-transform: capitalize; }
@@ -3401,6 +3686,24 @@ window.addEventListener("load", async function () {
   @media (max-width: 900px) {
     .at-wrap { grid-template-columns: 1fr; }
     .at-map { height: 420px; } .at-panel { height: auto; max-height: 480px; }
+  }
+
+  /* ---- the scrubber along the foot of the map ---------------------------- */
+  :global(.ra-time) { position: absolute; z-index: 800;
+    left: 10px; right: 10px; bottom: 26px;
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 12px; border-radius: 999px;
+    background: var(--panel); border: 1px solid var(--rule-strong);
+    box-shadow: 0 4px 16px rgba(10, 20, 26, .18); }
+  :global(.ra-time .ra-ylab) { flex: 1 1 auto; border: 0; background: none;
+    padding: 0; min-width: 0; }
+  :global(.ra-time .ra-slider) { flex: 1 1 auto; }
+  :global(.ra-time #ra-yout) { flex: none; }
+  /* On a phone the map is 420px tall and the strip would eat it; it keeps
+     the full width and loses the padding instead. */
+  @media (max-width: 700px) {
+    :global(.ra-time) { left: 6px; right: 6px; bottom: 22px; gap: 7px;
+      padding: 6px 9px; }
   }
 
   .ra-loading { position: absolute; z-index: 900; left: 50%; top: 50%;

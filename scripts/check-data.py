@@ -5,7 +5,7 @@ Everything here is a rule that, broken, would put a wrong answer in front of
 somebody who then drives to an archive. It runs before every deploy and fails
 the build rather than warning into a log nobody reads.
 """
-import json, os, re, sys, datetime
+import json, os, re, sys, datetime, io
 import glob as _g
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from geo import country_of, km_to
@@ -29,6 +29,92 @@ def warn(m):
 # Coordinates inside the country they claim. A geocoder that silently puts a
 # Croatian parish in Chad is the single likeliest way this map ships a lie, and
 # it is cheap to catch — against real outlines, not a rectangle.
+
+
+# ---------------------------------------------------------------------------
+# ATTRIBUTION IS A LICENCE CONDITION AND WAS MET BY MEMORY, WHICH FAILED TWICE.
+#
+# /data/ shipped saying "there are three licences". There were seven. The
+# gazetteer, the administrative divisions and the settlements are GeoNames,
+# CC BY 4.0, attribution required — and GeoNames is the reason every old place
+# name on this site resolves to a point on the ground at all. It was credited
+# nowhere. An earlier draft of the same page told readers OpenStreetMap data
+# was CC0. Both were caught by a person looking, which is not a system.
+#
+# Two files also stated their licence in an English sentence inside `source`,
+# where no machine could read it, so the page printed "none declared" over
+# CC BY data and was not wrong to — it was reading the only field there was.
+#
+# So, three rules, and they fail the build rather than warn:
+#
+#   1. A data file that names a `source` must declare a `licence`. Prose is
+#      for humans; the field is what any tool can act on.
+#   2. Every distinct licence in data/ must appear on /data/, which is the
+#      page that tells a reuser what they are taking on.
+#   3. Every licence requiring attribution must appear in the site footer,
+#      because that is the page a reuser of the SITE sees, and CC BY asks for
+#      credit wherever the work is used, not only where it is catalogued.
+#
+# Rule 3 knows only what it can check: that the name appears. It cannot judge
+# whether the credit is adequate, and does not pretend to.
+ATTRIBUTION_NAMES = {
+    "geonames": "GeoNames",
+    "statbel": "Statbel",
+    "istat": "Istat",
+    "national records of scotland": "the National Records of Scotland",
+    "openstreetmap": "OpenStreetMap",
+    "townlands.ie": "Townlands.ie",
+}
+# Ours by construction: research and derivations this project made itself.
+OUR_OWN = {"regions.json", "providers.json", "collections.json", "directory.json",
+           "countries.json", "country-overrides.json", "worklist.json"}
+
+
+def licence_gate():
+    data_page = ""
+    for c in ("site/src/pages/data.astro",):
+        if os.path.exists(c):
+            data_page = io.open(c, encoding="utf-8").read()
+    footer = ""
+    if os.path.exists("site/src/layouts/Base.astro"):
+        footer = io.open("site/src/layouts/Base.astro", encoding="utf-8").read()
+
+    seen = {}
+    for f in sorted(_g.glob("data/*.json")):
+        base = os.path.basename(f)
+        if base.startswith(".") or base.startswith("_") or base in OUR_OWN:
+            continue
+        try:
+            with io.open(f, encoding="utf-8") as fh:
+                d = json.load(fh)
+        except Exception:
+            continue                      # shape is other checks' business
+        if not isinstance(d, dict):
+            continue
+        src = d.get("source")
+        lic = d.get("licence") or d.get("license")
+        if src and not lic:
+            err(f"{base} names a source and declares no licence. Put the "
+                f"licence in a `licence` field — a licence stated only inside "
+                f"the source sentence cannot be read by the page that has to "
+                f"tell people what they are taking.")
+        if lic:
+            seen.setdefault(lic, []).append(base)
+
+    for lic, files in sorted(seen.items()):
+        # The bare licence name, without the parenthetical attribution.
+        short = re.split(r"\s*[—(]", lic)[0].strip()
+        if data_page and short and short not in data_page:
+            err(f"licence '{short}' is on {files[0]} and is not named anywhere "
+                f"on /data/. That page tells a reuser what they are taking on; "
+                f"a licence it does not mention is one nobody is told about.")
+        low = lic.lower()
+        for key, name in ATTRIBUTION_NAMES.items():
+            if key in low and footer and name not in footer:
+                err(f"{files[0]} is licensed '{lic}', which asks for "
+                    f"attribution, and '{name}' does not appear in the site "
+                    f"footer. Credit in a caption is most of the courtesy and "
+                    f"none of the condition.")
 
 
 def main():
@@ -504,6 +590,12 @@ def main():
             # An access class that promises images must have something to open.
             if c.get("access") in ("free", "account", "paid") and not c.get("url"):
                 err(f"place {pid}: '{c.get('title')}' claims {c['access']} but carries no link")
+
+    # Runs here, BEFORE the reporting loops. It was first placed after them,
+    # so its twelve findings were counted into the exit code and never
+    # printed — a gate that stops a build without saying why is worse than no
+    # gate, because the next person assumes the build is broken.
+    licence_gate()
 
     for w in WARN[:12]:
         print("warn:", w)

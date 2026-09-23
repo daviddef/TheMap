@@ -9,7 +9,7 @@ import site from "../data/site.json";
    attribution — the one kind of number that must not quietly go stale. */
 import osm from "../../public/archives-osm.json";
 
-const { title, dek, eyebrow, bare, jsonld, og = "default" } = Astro.props;
+const { title, dek, eyebrow, bare, jsonld, og = "default", wide } = Astro.props;
 /* GROUPED, BECAUSE THE STYLESHEET ONLY EVER STYLED GROUPS. styles.css came
    across whole from the family archive and it carries a complete navigation
    design: dropdown groups, a menu button, a drawer. This file rendered eleven
@@ -134,6 +134,12 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
      AdSense rejected the slot outright: "No slot size for availableWidth=0".
      The loader was arriving and being turned away at the door. A responsive
      unit needs a real width to size itself against. */
+  /* NO :global() HERE. This block is <style is:global>, where :global() is
+     not a selector function but literal text — the browser parses it as an
+     unknown pseudo-class and drops the whole rule, silently. The class was
+     on the body and the rule was nowhere, which is why the page stayed
+     1080px wide while everything said it should not. */
+  body.ra-wide { --maxw: min(1600px, 94vw); }
   .adslot { min-height: 90px; margin: 0 0 24px; display: block; }
   .adslot ins { display: block; width: 100%; }
   .ra-lang a { margin-left: 10px; }
@@ -141,7 +147,16 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
   .ra-lang [data-lang-note] { margin-left: 10px; }
 </style>
 </head>
-<body>
+{/* 1080px IS A READING MEASURE AND A MAP IS NOT PROSE. --maxw caps every
+    page at 1080 so a paragraph never runs to an unreadable line length,
+    which is right for /about/ and wrong for the map: on a 1280 screen it
+    left the map 646 pixels and gave the rest to margin, and on anything
+    wider it just grew the margin. David: «why are you only using half the
+    page?»
+    Set on the body so the header and the footer widen with the content
+    rather than floating in the middle of it, and only on the pages that
+    ask for it. */}
+<body class={wide ? "ra-wide" : undefined}>
 {/* The table is inlined rather than fetched: it is under four kilobytes
     and a reader whose language is not English should not watch the page
     change under them a second after it arrives. */}

@@ -417,10 +417,10 @@
   {
    "n": 52,
    "what": "Wire the Croatian and Belgian lookups into a re-runnable job",
-   "state": "next",
+   "state": "done",
    "owner": "this atlas",
-   "since": "2026-09-22",
-   "note": "harvest-croatia-surnames.py asks DZS one name at a time and stops when it has asked about the 466 the atlas knows. When the atlas learns a new Croatian surname — and it does, every matcher pass — nothing asks about it. Same for any lookup-only country. It needs to run on a cadence against the names added since."
+   "since": "2026-09-23",
+   "note": "Half of this was already done and the note had not caught up: harvest-croatia-surnames.py stopped reading a fixed list of 466 some time ago and now asks about every name the corpus believes is Croatian, skipping anything already in its scan cache. What was missing was the cadence — nothing ran it.\n\n.github/workflows/surnames.yml runs it weekly, and two details are the whole design. The scan cache is gitignored, correctly, so a CI run would start blind and re-ask every name it has ever asked, every week, at a government form — actions/cache restores it. And HR_MAX caps one run at forty questions, so even with the cache lost the backlog drains over a few weeks instead of DZS being asked eleven hundred questions in a row. Taking by volume what a service offers by question is the thing this project does not do.\n\nIT DOES NOT COMMIT, which is deliberate and follows the link-rot job next door. These are answers about people's names from national services and they should land in the repository because somebody looked at them, not because a cron job had a quiet Wednesday. Results come back as an artifact and an issue with the commands to fold them in."
   },
   {
    "n": 53,

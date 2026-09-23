@@ -43,6 +43,14 @@ UA = ("RecordAtlas/1.0 (+https://daviddef.github.io/TheMap; "
 OUT = "data/frequencies/hr.json"
 CACHE = "data/.croatia-surnames-scan.json"
 PAUSE = float(os.environ.get("HR_PAUSE", "1.5"))
+# A CEILING ON ONE RUN, because this is a government form being asked one
+# question at a time and the candidate list grows every time the matcher
+# places another Croatian volume. Unbounded, a scheduled job that loses its
+# cache would sit there asking DZS eleven hundred questions in a row, which
+# is taking by volume what they offer by question. Bounded, the backlog
+# drains over several weeks and nobody notices us. 0 means no ceiling, which
+# is right for a person running it by hand and watching.
+MAX = int(os.environ.get("HR_MAX", "0"))
 
 # The application's own words, matched rather than guessed at, so a change
 # in its wording stops the harvest instead of silently recording zeroes.
@@ -106,8 +114,13 @@ def main():
     if os.path.exists(CACHE):
         cache = json.load(open(CACHE))
     todo = [n for n in names if n not in cache]
+    backlog = len(todo)
+    if MAX and len(todo) > MAX:
+        todo = todo[:MAX]
     print(f"{len(names)} surnames attested in Croatian archives, "
-          f"{len(cache)} already asked, {len(todo)} to ask")
+          f"{len(cache)} already asked, {backlog} to ask"
+          + (f" — asking {len(todo)} this run, {backlog - len(todo)} left for "
+             f"the next one" if MAX and backlog > len(todo) else ""))
 
     op = opener()
     try:

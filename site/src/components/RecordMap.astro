@@ -39,93 +39,106 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
     who cannot hover. A control that explains itself on demand is not the same
     as a control that explains itself at you. */}
 <div class="ra-bar">
-  <input id="ra-q" type="search" autocomplete="off"
-         aria-label="Find a place or a surname, by any name it has ever had"
-         placeholder="Find a place or a surname — Gallignana · Žubrinić · Lerena" />
-  {/* THREE FILTERS, THREE DIFFERENT SHAPES. The layers were eight loose
-      pills in a row while «what it costs» and «what kind» were tidy
-      disclosures that said how many were on — so the one control a reader
-      touches most looked like scattered chrome beside two that looked
-      designed. David said it was messy and it was. All three are the same
-      control now, each saying its own state in its summary.
+  {/* TWO ROWS, EXPLICITLY. The bar was one wrapping flex line, so where a
+      control landed depended on the width of everything before it — the
+      buttons drifted onto their own row on a narrow window and sat in the
+      middle of the filters on a wide one. David asked for them on the
+      search line, at the right. Two rows that say which is which do that,
+      and stop the layout being an accident of arithmetic. */}
+  <div class="ra-bar-row ra-bar-find">
+    {/* A DROPDOWN ON THE SEARCH BOX, NOT A ROW OF ITS OWN. The remembered
+        searches sat in the bar all the time, which is a lot of standing
+        real estate for something wanted at the start of a visit and never
+        again. David asked for it on focus. It appears under the box when
+        you click in with the box empty, and gets out of the way the moment
+        you type — these are the searches you made, not suggestions for the
+        one you are making. */}
+    <div class="ra-find">
+      <input id="ra-q" type="search" autocomplete="off"
+             aria-label="Find a place or a surname, by any name it has ever had"
+             aria-describedby="ra-recent"
+             placeholder="Find a place or a surname — Gallignana · Žubrinić · Lerena" />
+      <div class="ra-recent" id="ra-recent" hidden
+           aria-label="Searches you made before"></div>
+    </div>
+    <button class="ra-ico" id="ra-info" type="button" aria-expanded="false"
+            title="What these controls mean">&#9432;</button>
+    <button class="ra-ico" id="ra-copy" type="button" title="Copy a link to this exact view">&#128279;</button>
+    <button class="ra-ico" id="ra-full" type="button"
+            title="Full screen — the map and its panel fill the window">&#9974;</button>
+    <button class="ra-ico ra-ico-wide" id="ra-reset" type="button"
+            aria-label="Start again — clear the search, the year, the filters and the layers, and go back to the whole world"
+            title="Start again — clear the search, the year, the filters and the layers, and go back to the whole world"><span aria-hidden="true">&#8634;</span> Reset</button>
+    <span class="ra-copied" id="ra-copied" hidden>copied</span>
+  </div>
+  <div class="ra-bar-row ra-bar-filters">
+    {/* THREE FILTERS, THREE DIFFERENT SHAPES. The layers were eight loose
+        pills in a row while «what it costs» and «what kind» were tidy
+        disclosures that said how many were on — so the one control a reader
+        touches most looked like scattered chrome beside two that looked
+        designed. David said it was messy and it was. All three are the same
+        control now, each saying its own state in its summary.
 
-      AND ALL THREE LIVE IN THE BAR. The other two sat under the map, which
-      meant full screen hid them exactly as it hid the search box — the same
-      bug, two controls further along, and it would have been found the same
-      way eventually. */}
-  {/* THE SEARCHES SOMEBODY ALREADY MADE. A researcher works down a list of
-      parishes and comes back to the same three or four names all week, and
-      every visit started from an empty box. These are the last eight, most
-      recent first, kept in this browser and nowhere else — no account, no
-      server, nothing that leaves the machine. Written only when a search
-      actually found something, so the list is things that worked rather
-      than things that were typed. */}
-  <div class="ra-recent" id="ra-recent" hidden
-       aria-label="Searches you made before"></div>
-  <details class="ra-cats-wrap ra-drop" id="ra-layersw">
-    <summary id="ra-laysum" title="Which layers the map draws">Layers</summary>
-    <div class="ra-drop-in">
-      <p class="ra-key-lead">What the map draws. The shelf is the places and
-        their volumes; the rest are context, and the unchecked ones cost
-        nothing until you ask for them.</p>
-      <div class="ra-layers" id="ra-layers"></div>
-    </div>
-  </details>
-  <details class="ra-cats-wrap ra-drop" id="ra-catsw">
-    <summary id="ra-catsum" title="Filter by what it costs to look">What it costs to look</summary>
-    <div class="ra-drop-in">
-      <p class="ra-key-lead">Ordered from what you can open tonight down to what
-        needs a letter. <b>A place takes the colour of the most open thing it
-        has</b> — so red means red is the best on offer there, and green says
-        nothing about what else is underneath it. The panel lists the rest.
-        Click a colour to take it off the map.</p>
-      <div class="atlas-key" id="ra-cats"></div>
-    </div>
-  </details>
-  <details class="ra-cats-wrap ra-drop" id="ra-kindw">
-    <summary id="ra-kindsum" title="Filter by what kind of record">What kind of record</summary>
-    <div class="ra-drop-in">
-      <div class="atlas-key" id="ra-kinds"></div>
-    </div>
-  </details>
-  {/* PLAY IT, BECAUSE THE ARGUMENT IS A CHANGE OVER TIME.
-      This atlas exists to say that ground changed hands and the paper
-      followed it — that an 1863 baptism from a Croatian village is in a
-      Croatian archive and a 1930 one from the same village is filed under
-      Italy. That is a sentence on the about page and a slider somebody
-      has to think to drag. Run it and it is the map telling you: Venice
-      gives way to Austria gives way to Italy gives way to Yugoslavia over
-      one piece of Istria, while the dots thin to the books that can
-      answer for the decade on screen.
-      A window, not a point: it walks a fifty-year range forward a decade
-      at a time, because records come in runs and a single year empties
-      the map. */}
-  <button class="ra-ico" id="ra-info" type="button" aria-expanded="false"
-          title="What these controls mean">&#9432;</button>
-  <button class="ra-ico" id="ra-copy" type="button" title="Copy a link to this exact view">&#128279;</button>
-  <button class="ra-ico" id="ra-full" type="button"
-          title="Full screen — the map and its panel fill the window">&#9974;</button>
-  {/* «↺» AT TWELVE PIXELS IS A SMUDGE. David could not tell what it was, and
-      an icon nobody recognises is a button nobody presses. The others in this
-      row are conventional enough to stand alone — ⓘ, a link, the full-screen
-      corners — but «start again» has no agreed glyph, so it gets a word. */}
-  <button class="ra-ico ra-ico-wide" id="ra-reset" type="button"
-          aria-label="Start again — clear the search, the year, the filters and the layers, and go back to the whole world"
-          title="Start again — clear the search, the year, the filters and the layers, and go back to the whole world"><span aria-hidden="true">&#8634;</span> Reset</button>
-  <span class="ra-copied" id="ra-copied" hidden>copied</span>
-  {/* THE COUNT REPORTS ON THE FILTERS AND SAT NOWHERE NEAR THEM. It lived
-      under the map, which put it outside the element that goes full screen
-      — so the one line that says whether a filter did anything was missing
-      in the mode where the map is biggest. David asked for it up here with
-      the rest.
+        AND ALL THREE LIVE IN THE BAR. The other two sat under the map, which
+        meant full screen hid them exactly as it hid the search box — the same
+        bug, two controls further along, and it would have been found the same
+        way eventually. */}
+    <details class="ra-cats-wrap ra-drop" id="ra-layersw">
+      <summary id="ra-laysum" title="Which layers the map draws">Layers</summary>
+      <div class="ra-drop-in">
+        <p class="ra-key-lead">What the map draws. The shelf is the places and
+          their volumes; the rest are context, and the unchecked ones cost
+          nothing until you ask for them.</p>
+        <div class="ra-layers" id="ra-layers"></div>
+      </div>
+    </details>
+    <details class="ra-cats-wrap ra-drop" id="ra-catsw">
+      <summary id="ra-catsum" title="Filter by what it costs to look">What it costs to look</summary>
+      <div class="ra-drop-in">
+        <p class="ra-key-lead">Ordered from what you can open tonight down to what
+          needs a letter. <b>A place takes the colour of the most open thing it
+          has</b> — so red means red is the best on offer there, and green says
+          nothing about what else is underneath it. The panel lists the rest.
+          Click a colour to take it off the map.</p>
+        <div class="atlas-key" id="ra-cats"></div>
+      </div>
+    </details>
+    <details class="ra-cats-wrap ra-drop" id="ra-kindw">
+      <summary id="ra-kindsum" title="Filter by what kind of record">What kind of record</summary>
+      <div class="ra-drop-in">
+        <div class="atlas-key" id="ra-kinds"></div>
+      </div>
+    </details>
+    {/* PLAY IT, BECAUSE THE ARGUMENT IS A CHANGE OVER TIME.
+        This atlas exists to say that ground changed hands and the paper
+        followed it — that an 1863 baptism from a Croatian village is in a
+        Croatian archive and a 1930 one from the same village is filed under
+        Italy. That is a sentence on the about page and a slider somebody
+        has to think to drag. Run it and it is the map telling you: Venice
+        gives way to Austria gives way to Italy gives way to Yugoslavia over
+        one piece of Istria, while the dots thin to the books that can
+        answer for the decade on screen.
+        A window, not a point: it walks a fifty-year range forward a decade
+        at a time, because records come in runs and a single year empties
+        the map. */}
+    {/* «↺» AT TWELVE PIXELS IS A SMUDGE. David could not tell what it was, and
+        an icon nobody recognises is a button nobody presses. The others in this
+        row are conventional enough to stand alone — ⓘ, a link, the full-screen
+        corners — but «start again» has no agreed glyph, so it gets a word. */}
+    {/* THE COUNT REPORTS ON THE FILTERS AND SAT NOWHERE NEAR THEM. It lived
+        under the map, which put it outside the element that goes full screen
+        — so the one line that says whether a filter did anything was missing
+        in the mode where the map is biggest. David asked for it up here with
+        the rest.
 
-      `margin-left: auto` sends it to the right-hand end of the bar when
-      there is room and lets it take its own line when there is not, which
-      matters because this is not always short: set a year nothing can
-      answer for and it becomes a sentence explaining why the map is empty,
-      with a way out. That message is better placed here than below a map
-      the reader has already decided is broken. */}
-  <span class="cap" id="ra-count" role="status" aria-live="polite"></span>
+        `margin-left: auto` sends it to the right-hand end of the bar when
+        there is room and lets it take its own line when there is not, which
+        matters because this is not always short: set a year nothing can
+        answer for and it becomes a sentence explaining why the map is empty,
+        with a way out. That message is better placed here than below a map
+        the reader has already decided is broken. */}
+    <span class="cap" id="ra-count" role="status" aria-live="polite"></span>
+  </div>
 </div>
 <div class="ra-help" id="ra-help" hidden></div>
 
@@ -3016,10 +3029,27 @@ window.addEventListener("load", async function () {
     catch (e) { /* private window, or the reader has blocked it. Fine. */ }
   }
   var recentBox = document.getElementById("ra-recent");
+  /* A FLAG THE EVENTS SET, rather than reading document.activeElement back.
+     activeElement is the browser's answer to «what is focused right now»,
+     and it is not dependable while a window is in the background — which is
+     exactly where this was being tested, and it produced two results that
+     looked like bugs and were not. The events themselves are unambiguous:
+     focus happened, or blur did. */
+  var qFocused = false;
+  function recentShouldShow() {
+    return recentGet().length > 0 && qbox.value.trim() === "" && qFocused;
+  }
+  function recentSync() {
+    var show = recentShouldShow();
+    recentBox.hidden = !show;
+    /* The bar has to clear the map for this exactly as it does for the
+       filter dropdowns, or the list opens behind Leaflet's controls. */
+    document.querySelector(".ra-bar").classList.toggle("ra-bar-raised",
+      show || [].slice.call(document.querySelectorAll(".ra-drop")).some(function (d) { return d.open; }));
+  }
   function drawRecent() {
     var list = recentGet();
     if (!list.length) { recentBox.hidden = true; recentBox.innerHTML = ""; return; }
-    recentBox.hidden = false;
     recentBox.innerHTML = '<span class="ra-recent-l">Again:</span>' +
       list.map(function (t) {
         return '<button type="button" class="ra-recent-p" data-q="' + esc(t) +
@@ -3027,7 +3057,19 @@ window.addEventListener("load", async function () {
       }).join("") +
       '<button type="button" class="ra-recent-x" title="Forget these searches. ' +
       'They are kept in this browser only and never leave it.">Forget</button>';
+    recentSync();
   }
+  qbox.addEventListener("focus", function () { qFocused = true; recentSync(); });
+  qbox.addEventListener("blur", function () {
+    /* A click on a pill moves focus out of the box before the click lands,
+       so the list cannot close the instant blur fires — it waits a beat,
+       and the pill's own handler closes it when it runs. */
+    qFocused = false;
+    setTimeout(function () {
+      if (recentBox.contains(document.activeElement)) return;
+      recentSync();
+    }, 140);
+  });
   function recentAdd(term) {
     term = String(term || "").trim();
     if (term.length < 2) return;
@@ -3045,6 +3087,8 @@ window.addEventListener("load", async function () {
     if (!b) return;
     qbox.value = b.getAttribute("data-q");
     setQ("q", qbox.value);
+    qFocused = false;
+    recentSync();
     apply();
   });
   drawRecent();
@@ -3052,6 +3096,7 @@ window.addEventListener("load", async function () {
   qbox.addEventListener("input", function () {
     setQ("q", qbox.value.trim());
     lastTyped = Date.now();
+    recentSync();
     clearTimeout(qbox._t);
     qbox._t = setTimeout(apply, 140);
     /* REMEMBERED ONLY WHEN IT WORKED, AND ONLY WHEN THE TYPING STOPPED.
@@ -3418,10 +3463,15 @@ window.addEventListener("load", async function () {
      wraps only when it has to. It replaces roughly 800px of stacked panels
      with about 100, and the map — the thing the page is for — starts near the
      top of the screen instead of below the fold. */
-  .ra-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-            margin: 14px 0 10px; }
-  .ra-bar #ra-q { flex: 1 1 260px; min-width: 200px; font-size: 14px;
-                  padding: 9px 12px; }
+  /* A COLUMN OF ROWS, not one long wrapping line. Where a control landed
+     used to depend on the width of everything before it. */
+  .ra-bar { display: flex; flex-direction: column; align-items: stretch;
+            gap: 8px; margin: 14px 0 10px; }
+  .ra-bar-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  /* The search takes the row and the buttons are pushed to the far end. */
+  .ra-bar-find #ra-q { font-size: 14px; padding: 9px 12px; }
+  .ra-bar-find #ra-info { margin-left: auto; }
+  .ra-bar #ra-q { font-size: 14px; padding: 9px 12px; }
   /* The opening panel's three ways in. Compact, because it is scaffolding
      the reader should stop needing after their first search. */
   .at-start { margin: 8px 0 12px; padding-left: 1.1em; }
@@ -3429,7 +3479,19 @@ window.addEventListener("load", async function () {
   .at-start a { border-bottom: 1px solid var(--rule-strong); }
   #ra-play[aria-pressed="true"] { background: var(--accent); color: var(--band-label, #fff);
                                   border-color: var(--accent); }
-  .ra-ico { flex: 0 0 auto; width: 32px; height: 32px; border: 1px solid var(--rule);
+  /* THE SAME HEIGHT AS THE SEARCH BOX. They were 32px against its 38 and sat
+     on the same line looking like an afterthought. One variable, so the two
+     cannot drift apart again — the input's height is its own padding plus
+     line-height, and this is set to match it rather than guessed at. */
+  /* margin: 0 is the whole fix. A global form rule gives this input a 6px
+     top margin; centring it in a 38px row then splits the overflow and puts
+     the box three pixels below the buttons beside it. Everything measured
+     38 and it still looked wrong, which is why the answer came from asking
+     for the computed margin rather than from staring at heights. */
+  .ra-bar-find #ra-q { height: var(--ra-ctl, 38px); box-sizing: border-box;
+                       margin: 0; }
+  .ra-ico { flex: 0 0 auto; width: var(--ra-ctl, 38px); height: var(--ra-ctl, 38px);
+            box-sizing: border-box; border: 1px solid var(--rule);
             border-radius: 3px; background: var(--panel); color: var(--ink-2);
             font-size: 15px; line-height: 1; cursor: pointer; }
   .ra-ico:hover { border-color: var(--accent); color: var(--accent); }
@@ -3562,6 +3624,12 @@ window.addEventListener("load", async function () {
     font: 400 11.5px/1.6 var(--sans); color: var(--ink-2); max-width: 62ch; }
   .ra-bar #ra-count { margin: 0 0 0 auto; font-size: 11.5px; line-height: 1.5;
                       max-width: 100%; text-align: right; }
+  /* On a narrow window the four buttons would be squeezed against the search
+     box; let them fall to their own line rather than crush it. */
+  @media (max-width: 620px) {
+    .ra-bar-find #ra-info { margin-left: 0; }
+    .ra-find { flex: 1 1 100%; }
+  }
   /* When it grows into the «nothing can answer for that year» explanation it
      takes the whole row rather than squeezing the buttons off the end. */
   :global(.ra-bar #ra-count b) { color: var(--ink); }
@@ -3724,8 +3792,18 @@ window.addEventListener("load", async function () {
              background: none; border: 1px solid var(--rule); border-radius: 3px; padding: 6px 10px; }
   :global(.ra-ico-wide) { width: auto !important; padding: 0 11px;
     gap: 5px; font: 400 12px/1 var(--sans); }
-  .ra-recent { display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
-               flex-basis: 100%; margin: -2px 0 2px; }
+  /* The wrapper has to be the control's height too, or it is the odd one out
+     on the row: it measured 44 against the buttons' 38 and pushed the input
+     three pixels low. Everything on this row is one variable now. */
+  .ra-find { position: relative; flex: 1 1 260px; min-width: 200px;
+             display: flex; align-items: center;
+             height: var(--ra-ctl, 38px); box-sizing: border-box; }
+  .ra-find #ra-q { width: 100%; }
+  .ra-recent { position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+               z-index: 40; display: flex; align-items: center; gap: 6px;
+               flex-wrap: wrap; padding: 10px 12px;
+               background: var(--panel); border: 1px solid var(--rule-strong);
+               border-radius: 6px; box-shadow: 0 10px 28px rgba(10, 20, 26, .22); }
   .ra-recent-l { font: 400 11px/1 var(--sans); color: var(--ink-3); }
   :global(.ra-recent-p) { font: 400 11.5px/1 var(--sans); color: var(--ink-2);
     background: var(--panel); border: 1px solid var(--rule); border-radius: 999px;

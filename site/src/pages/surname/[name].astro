@@ -144,6 +144,15 @@ const jurisdiction = attestedCcs.map((cc) => {
     .sort((a, b) => a.first - b.first);
   return { cc, regions: rs };
 }).filter((g) => g.regions.length);
+/* CAPPED, AND THE ORDER IS WHY IT CAN BE. `ccs` is sorted by how many people
+   a register counted, so the first countries here are the ones the name
+   actually belongs to. Uncapped, Peeters — a Belgian name — listed eleven
+   regions across Poland, Czechia, Canada and Alsace, because a register
+   somewhere counted a Peeters, and buried the countries that matter under
+   the ones that do not. Five countries, then a count of the rest. */
+const JUR_CAP = 5;
+const jurMore = Math.max(0, jurisdiction.length - JUR_CAP);
+const jurShown = jurisdiction.slice(0, JUR_CAP);
 const mapped = new Set(jurisdiction.map((g) => g.cc));
 const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
 ---
@@ -441,7 +450,7 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
     })}
   </section>
 
-  {jurisdiction.length > 0 && (
+  {jurShown.length > 0 && (
     <section style="margin-top:34px">
       <h2>Whose archive held that ground, and when</h2>
       <p class="cap">Every surname site can tell you a name is common somewhere. This one
@@ -456,7 +465,7 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
       it — Acadia reaches into Maine and is not a statement about the United States,
       and Bohemia's ground crosses into Poland. Each region's own page says which ground
       it covers. Where a country is missing below, nothing covers it yet.</p>
-      {jurisdiction.map((g) => (
+      {jurShown.map((g) => (
         <div style="margin-top:16px">
           <div class="lab"><a href={u(`/country/${g.cc.toLowerCase()}/`)}>{CN[g.cc] || g.cc}</a></div>
           <ul class="vols">
@@ -470,6 +479,13 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
           </ul>
         </div>
       ))}
+      {jurMore > 0 && (
+        <p class="cap" style="margin-top:14px">Regions are also drawn in{" "}
+        {jurMore} other {jurMore === 1 ? "country" : "countries"} where this name
+        is attested, further down the register's own list. The order here is how
+        many people a register counted, so the countries above are the ones the
+        name most belongs to.</p>
+      )}
       {unmapped.length > 0 && (
         <p class="cap" style="margin-top:14px">No record region is drawn yet for{" "}
         {unmapped.map((cc) => CN[cc] || cc).join(", ")} — which is a gap in this atlas

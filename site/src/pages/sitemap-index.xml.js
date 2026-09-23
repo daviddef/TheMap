@@ -32,6 +32,9 @@ export function urlsFor(set) {
             ["jurisdictions/", "0.9"], ...placeIndex, ["countries/", "0.9"],
             ["surnames/", "0.9"], ["coverage/", "0.8"], ["changelog/", "0.4"],
             ["add/", "0.5"], ["data/", "0.7"], ["worklist/", "0.4"],
+            /* The lookup that answers for the 922,645 names with no page of
+               their own. One URL, not 922,645 doorways. */
+            ["surname/", "0.8"],
             ["privacy/", "0.3"]];
   }
   if (set === "places") return full.places.map((p) => [`place/${p.id}/`, "0.6"]);

@@ -154,6 +154,28 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
       research sheet rather than a screenshot of a website — chrome gone,
       every link followed by the URL it goes to. This says so, because
       nobody presses Cmd-P on a page they assume will print badly. */}
+  {/* A RESEARCHER WHO LOOKED IN MARCH HAS NO WAY TO KNOW WHETHER TO LOOK
+      AGAIN. The footer carries a build date, and it moves whenever anything
+      anywhere in the atlas moves, so it says nothing about THIS place. This
+      is fingerprinted on what a reader would notice here — the collections,
+      the volumes, the names, the parishes, the burials.
+
+      And it refuses to overclaim. Until a place has been seen to change,
+      «first» and «last» are both the day tracking began, which means «not
+      seen to change», not «changed that day». Those are different
+      sentences and the second one would be a small lie renewing itself on
+      every build. */}
+  {place.last && (
+    <p class="cap ra-when">
+      {place.first === place.last
+        ? <>Nothing here has changed since this page began being watched
+            on <b>{place.first}</b>.</>
+        : <>Last changed <b>{place.last}</b>{" "}
+            <span class="ra-dim">· first mapped {place.first}</span></>}
+      {" "}<a href={u("/feed.xml")}>Follow what changes</a>.
+    </p>
+  )}
+
   <p class="ra-print">
     <button type="button" class="ra-printb" onclick="window.print()">Print this plan</button>
     <span class="cap">Comes out as a sheet for the reading room — what to ask for,
@@ -416,6 +438,8 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
 </Base>
 
 <style>
+  .ra-when { margin: 14px 0 0; }
+  .ra-when .ra-dim { color: var(--ink-3); }
   .ra-print { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
               margin: 16px 0 0; }
   .ra-printb { font: 500 12px/1 var(--sans); color: var(--ink-2); cursor: pointer;

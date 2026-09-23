@@ -84,7 +84,7 @@ const FILES = [
     what: `The second half of the index — places with nothing catalogued yet. Fetched after first paint so the map draws before it arrives. ${((idx.quiet && idx.quiet.places) || 0).toLocaleString()} rows, same shape.`,
     shape: `{ places: [ … as above … ] }` },
   { path: "/p/<place-id>.json", size: `${countIn("p").toLocaleString()} files`,
-    what: "Everything about one place that a marker does not need: every collection covering it, every volume with its year span and deep link, its other names, and which archive holds it. The `i` field of an index row is the filename.",
+    what: "Everything about one place that a marker does not need: every collection covering it, every volume with its year span and deep link, its other names, which archive holds it, the nearest parishes and the nearest cemeteries. The `i` field of an index row is the filename. NOTE: the volume TITLES here are FamilySearch's catalogue metadata, not this atlas's writing — see the licence column and the note above.",
     shape: `{ id, name, lat, lon, country, names[], collections[], volumes: [{ t, from, to, url, in }] }` },
   { path: "/regions.json", size: sizeOf("regions.json"), ...licOf("regions.json"),
     what: `The jurisdiction layer — ${regions.regions.length} record regions, each an era with the polity that held that ground and the archives its paper went to. This is the file nobody else publishes.`,
@@ -123,7 +123,7 @@ const FILES = [
     what: "Administrative divisions no collection names — findable in the search box, never drawn as a dot, because a district is not a parish.",
     shape: `{ "<folded name>": [{ n, y, x, cc, level }] }` },
   { path: "/rs/<3-char>.json", size: `${countIn("rs").toLocaleString()} files`,
-    ...srcLic("admin-divisions.json"),
+    ...srcLic("region-settlements.json"),
     what: "Settlements inside a mapped record region. Findable, not drawn.",
     shape: `{ "<folded name>": [{ n, y, x, r }] }` },
   { path: "/bs/<3-char>.json", size: `${countIn("bs").toLocaleString()} files`,
@@ -176,7 +176,11 @@ const FILES = [
   dek="Everything this map draws is a plain JSON file on a public URL, and the map is only the first client. Take any of it, for anything, without asking.">
 
   <div class="one" style="margin-top:20px">
-    <div class="lab">The licences — there are seven, and the difference matters</div>
+    {/* A COUNT HERE GOES STALE THE NEXT TIME A SOURCE IS ADDED, and this
+        page has already been wrong twice about how many there are. The list
+        below is the thing to keep right; check-data.py now refuses a build
+        whose data declares a licence this page does not name. */}
+    <div class="lab">The licences — there is more than one, and the difference matters</div>
     <p><b>Read the <code>licence</code> field of the file you are taking.</b> Every
     file derived from somebody else's work declares whose and on what terms, and
     the table below prints what each one actually says rather than one blanket
@@ -197,6 +201,13 @@ const FILES = [
       <li><b>Public domain</b> — Natural Earth, for the country outlines.</li>
       <li><b>Terms not declared</b> — the Estonian parish and county vocabularies
         from the Rahvusarhiiv. Said plainly rather than assumed either way.</li>
+      <li><b>FamilySearch catalogue metadata — not an open licence.</b> This one
+        matters most and this page had it wrong. Every volume title and waypoint
+        id in a place file comes from FamilySearch's catalogue: «Defunciones
+        1980-1989» is their cataloguing, not our writing. The <em>fact</em> that
+        a collection covers a place is not theirs to own and is what this atlas
+        is for; the titles are theirs. Take the shape and the coverage freely,
+        and do not treat the strings as relicensable.</li>
       <li><b>This atlas's own compilation</b> — the index, the place files, the
         record regions, the provider spine. That is our research and it carries
         no licence file yet, because <a href={site.repo}>the repository</a> has

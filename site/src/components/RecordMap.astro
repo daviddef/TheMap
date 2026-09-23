@@ -2831,10 +2831,33 @@ window.addEventListener("load", async function () {
      one never did — and it matters more here, because the panel beside the map
      is now long enough to scroll: volumes, sources, eras, national archives.
      Leaflet has to be told the size changed or it renders into the old box. */
+  /* AND THE CONTROLS HAVE TO COME WITH IT. Full screen fixed `.at-wrap` —
+     the map and the panel — to the viewport, and the control bar is a
+     SIBLING of that element, not a child. So going full screen left the
+     search box, the layer switches, the year slider and every button
+     behind the overlay: David asked where the search box had gone, and the
+     answer was "underneath". The `/` shortcut made it worse by focusing a
+     box nobody could see.
+
+     The bar is fixed to the top of the window and the wrap is padded down
+     by however tall it turns out to be. Measured rather than assumed,
+     because the bar wraps to two or three rows depending on width and a
+     hard-coded offset would cover the map at one size and leave a gap at
+     another. */
   var fullBtn = document.getElementById("ra-full");
+  var fsBar = document.querySelector(".ra-bar");
+  function fitFsBar() {
+    var wrap = document.querySelector(".at-wrap");
+    if (!wrap.classList.contains("ra-fs")) return;
+    wrap.style.paddingTop = (fsBar.offsetHeight + 12) + "px";
+  }
   function setFull(on2) {
-    document.querySelector(".at-wrap").classList.toggle("ra-fs", on2);
+    var wrap = document.querySelector(".at-wrap");
+    wrap.classList.toggle("ra-fs", on2);
+    fsBar.classList.toggle("ra-fs-bar", on2);
     document.body.classList.toggle("ra-fs-on", on2);
+    if (on2) { fitFsBar(); window.addEventListener("resize", fitFsBar); }
+    else { wrap.style.paddingTop = ""; window.removeEventListener("resize", fitFsBar); }
     fullBtn.title = on2 ? "Leave full screen (or press Escape)"
                         : "Full screen — the map and its panel fill the window";
     /* A WAY OUT THAT CAN BE SEEN. Escape worked from the first day and the
@@ -2853,7 +2876,7 @@ window.addEventListener("load", async function () {
     } else if (!on2 && esc) {
       esc.remove();
     }
-    setTimeout(function () { map.invalidateSize(); }, 60);
+    setTimeout(function () { fitFsBar(); map.invalidateSize(); }, 60);
   }
   fullBtn.addEventListener("click", function () {
     setFull(!document.querySelector(".at-wrap").classList.contains("ra-fs"));
@@ -3042,6 +3065,32 @@ window.addEventListener("load", async function () {
   :global(.at-wrap.ra-fs) { position: fixed; inset: 0; z-index: 900;
     margin: 0; padding: 12px; background: var(--ground); gap: 12px; }
   :global(body.ra-fs-on) { overflow: hidden; }
+  /* The bar rides along, fixed to the top. Above the wrap (900) so it is
+     not covered, below the exit pill (950) so that stays reachable. It
+     scrolls if somebody has a very narrow window and the controls wrap to
+     four rows, rather than eating the whole screen. */
+  :global(.ra-bar.ra-fs-bar) { position: fixed; top: 0; left: 0; right: 0;
+    z-index: 940; margin: 0; padding: 10px 12px;
+    background: var(--ground); border-bottom: 1px solid var(--rule-strong);
+    max-height: 45vh; overflow-y: auto; }
+  /* ON A PHONE THE BAR WRAPS TO 268 PIXELS, which in «full screen» left the
+     map 296 of an 812-pixel window — the controls taking a third of the
+     screen in the mode whose whole purpose is to give the map the screen.
+     Capped so the search row is always visible and the rest is one scroll
+     away, which keeps the thing that was missing and gives the map back
+     the space. */
+  @media (max-width: 760px) {
+    :global(.ra-bar.ra-fs-bar) { max-height: 96px; }
+  }
+  /* AND THE EXIT PILL MOVES OUT OF ITS WAY. It used to sit top-right, which
+     is exactly where the bar's own buttons now are; the two overlapped. The
+     phone layout had already put it at the bottom for the same reason. */
+  :global(body.ra-fs-on #ra-fs-esc) { top: auto;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); right: 18px;
+    /* The phone rule centres it with a translate. This wins on specificity
+       for `right`, and without resetting the transform too the pill would
+       be shoved half its own width off the edge. */
+    transform: none; }
   :global(#ra-fs-esc) { position: fixed; top: 14px; right: 16px; z-index: 950;
     display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
     font-family: var(--sans); font-size: 12.5px; color: var(--ink-2);

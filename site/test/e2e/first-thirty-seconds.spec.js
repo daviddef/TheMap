@@ -129,6 +129,48 @@ test("second thirty: there is a way out of everything", async ({ page }) => {
   await expect(page.locator("#ra-q")).toBeFocused();
 });
 
+test("full screen keeps the controls, which is the point of controls", async ({ page }) => {
+  await ready(page);
+  /* Full screen fixed only the map and its panel to the viewport, and the
+     control bar is their SIBLING — so going full screen left the search
+     box, the layers, the year and every button underneath the overlay.
+     David asked where the search box had gone. The `/` shortcut made it
+     worse by focusing a box nobody could see. */
+  await page.locator("#ra-full").click();
+  await page.waitForTimeout(400);
+  const q = page.locator("#ra-q");
+  await expect(q).toBeVisible();
+  const box = await q.boundingBox();
+  const vh = page.viewportSize().height;
+  expect(box.y).toBeGreaterThanOrEqual(0);
+  expect(box.y + box.height).toBeLessThanOrEqual(vh);
+  /* And the map must start below the bar rather than under it. */
+  const bar = await page.locator(".ra-bar").boundingBox();
+  const map = await page.locator("#ra-map").boundingBox();
+  expect(map.y).toBeGreaterThanOrEqual(bar.y + bar.height - 1);
+  /* The way out stays reachable and does not sit on top of the bar. */
+  const esc = await page.locator("#ra-fs-esc").boundingBox();
+  expect(esc.y).toBeGreaterThan(bar.y + bar.height);
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".at-wrap.ra-fs")).toHaveCount(0);
+});
+
+test("full screen on a phone still leaves the map most of the screen", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await ready(page);
+  await page.locator("#ra-full").click();
+  await page.waitForTimeout(500);
+  /* The bar wraps to 268px at this width. Uncapped it took a third of the
+     window in the one mode whose whole purpose is to give the map the
+     window, so it is capped and scrolls — the search row stays, the rest
+     is one scroll away. */
+  const bar = await page.locator(".ra-bar").boundingBox();
+  expect(bar.height).toBeLessThanOrEqual(110);
+  await expect(page.locator("#ra-q")).toBeVisible();
+  const map = await page.locator("#ra-map").boundingBox();
+  expect(map.height).toBeGreaterThan(300);
+});
+
 test("on a phone, the answer is not below the fold", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 780 });
   await ready(page);

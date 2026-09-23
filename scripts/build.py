@@ -12,7 +12,7 @@ for the world. Here the map fetches an index that carries only what a marker
 needs to be DRAWN and FOUND, and the panel fetches one small file when somebody
 actually clicks. Worldwide, the index grows linearly and the panel never does.
 """
-import collections, json, os, re, shutil, sys, unicodedata
+import collections, datetime, hashlib, json, os, re, shutil, sys, unicodedata
 import record_kinds  # one classifier, shared with the other scripts
 KIND_BIT = record_kinds.BIT
 
@@ -21,6 +21,37 @@ _ROOT = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
 sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
 _os.chdir(_ROOT)
 from geo import in_ring_latlon
+
+TODAY = datetime.date.today().isoformat()
+
+# WHEN EACH PLACE LAST CHANGED, remembered across builds.
+#
+# It is committed on purpose. The point of the file is that it remembers, and
+# a CI run regenerating it from nothing would stamp today onto all 21,473
+# places every time and turn a useful line into a lie that renews itself.
+#
+# `since` is the honest caveat: on the first run every place reads first ==
+# last == today, which means "this is when we started watching", not "this
+# changed today". The page has to say which, and does.
+HISTORY = "data/_place-history.json"
+
+
+def _load_history():
+    try:
+        with open(HISTORY, encoding="utf-8") as fh:
+            h = json.load(fh)
+        h.setdefault("places", {})
+        h.setdefault("since", TODAY)
+        return h
+    except (FileNotFoundError, ValueError):
+        return {"note": "When each place last changed, by a fingerprint of what "
+                        "a reader would notice — its collections, volumes, names, "
+                        "parishes and burials. Not the build date: that moves "
+                        "whenever anything anywhere moves. `since` is the day "
+                        "tracking began, and until a place has changed once, "
+                        "first == last == since means «not seen to change», not "
+                        "«changed today».",
+                "since": TODAY, "places": {}}
 
 OUT = "site/public"
 
@@ -488,6 +519,7 @@ def main():
     except FileNotFoundError:
         pass
 
+    history = _load_history()
     index, nbytes, details = [], 0, []
     for p in places:
         cs = p.get("collections", [])
@@ -669,6 +701,32 @@ def main():
                              "km": round(dist) if dist is not None else None}
                             for rank, _, _, c, where, dist in hits[:60]]
             detail["nfs"] = len(hits)
+        # ---- WHEN THIS PLACE LAST CHANGED -------------------------------
+        # A researcher who looked for their parish in March and found four
+        # volumes has no way to tell whether to look again. The atlas gains
+        # places and volumes most weeks and said so nowhere except a build
+        # date in the footer, which moves every time anything anywhere moves
+        # and therefore tells them nothing about THEIR place.
+        #
+        # Fingerprinted on what a reader would notice — the collections, the
+        # volumes, the names, the parishes, the burials — and deliberately
+        # NOT on the build date or on counts derived from elsewhere, or every
+        # place would "change" on every build and the line would be noise.
+        sig = hashlib.sha1(json.dumps(
+            {k: detail.get(k) for k in
+             ("collections", "volumes", "names", "parishes", "graves", "fs")},
+            ensure_ascii=False, sort_keys=True, separators=(",", ":")
+        ).encode()).hexdigest()[:12]
+        was = history["places"].get(p["id"])
+        if was is None:
+            history["places"][p["id"]] = {"first": TODAY, "last": TODAY, "h": sig}
+        elif was.get("h") != sig:
+            was["last"] = TODAY
+            was["h"] = sig
+        hrow = history["places"][p["id"]]
+        detail["first"] = hrow["first"]
+        detail["last"] = hrow["last"]
+
         details.append(detail)
         blob = json.dumps(detail, ensure_ascii=False, separators=(",", ":"))
         nbytes += len(blob.encode())
@@ -682,6 +740,16 @@ def main():
     # EVERY country, not only the ones the shelf reaches. The gazetteer answers
     # for the whole world, and a hit that reads "Kaliningrad — RU" has stopped
     # short of the answer. 245 names is five kilobytes.
+    # Written back after every place has been fingerprinted. Committed, because
+    # the whole value is that it remembers across builds; CI regenerating it
+    # from nothing would reset every date to today on every run.
+    history["built"] = TODAY
+    json.dump(history, open(HISTORY, "w"), ensure_ascii=False,
+              separators=(",", ":"), sort_keys=True)
+    _tracked = sum(1 for v in history["places"].values() if v["first"] != v["last"])
+    print(f"place history  {len(history['places']):>6} places, {_tracked} with a "
+          f"change since tracking began on {history['since']}")
+
     names = json.load(open("data/countries.json"))["countries"]
     cmap = {iso: v["name"] for iso, v in sorted(names.items())}
 

@@ -345,10 +345,10 @@
   {
    "n": 43,
    "what": "Nothing tells a reader when the atlas last changed",
-   "state": "next",
+   "state": "done",
    "owner": "this atlas",
-   "since": "2026-09-22",
-   "note": "There is a changelog in src/data and no way to see, from a place page, that its volumes were added last week or last year. A researcher who looked in March needs to know whether to look again."
+   "since": "2026-09-23",
+   "note": "Every place page now says when it last changed. The footer's build date could not do this: it moves whenever anything anywhere in the atlas moves, so it tells a reader nothing about THEIR parish.\n\nFingerprinted on what a reader would notice at that place — its collections, volumes, names, parishes and burials — and deliberately not on the build date or on counts derived elsewhere, or every place would «change» on every build and the line would be noise. Checked in isolation before shipping: a rebuild with identical content does not move the date, adding a field the reader cannot see does not move it, and a volume arriving does.\n\nIT REFUSES TO OVERCLAIM. Until a place has been seen to change, first and last are both the day tracking began, and «not seen to change since 23 September» is a different sentence from «changed on 23 September». The second would be a small lie renewing itself on every build, so the page says the first.\n\ndata/_place-history.json is committed on purpose — the whole value is that it remembers across builds, and CI regenerating it from nothing would stamp today onto all 21,473 places every run."
   },
   {
    "n": 44,

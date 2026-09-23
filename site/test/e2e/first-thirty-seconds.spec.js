@@ -154,6 +154,29 @@ test("the three filters are one control, and none of them shoves the map", async
   await expect(page.locator(".ra-drop[open]")).toHaveCount(0);
 });
 
+test("a dropdown opens ON TOP of the map, not behind it", async ({ page }) => {
+  await ready(page);
+  /* It opened behind. z-index inside an element that establishes no
+     stacking context is measured against its siblings, and the bar's
+     sibling is the map — whose Leaflet controls sit at z-index 1000 in the
+     root context. Thirty never stood a chance, and it LOOKED fine in every
+     structural check: the popover was positioned, sized and on screen. The
+     only test that catches it is asking what is actually painted. */
+  await page.locator("#ra-layersw summary").click();
+  await page.waitForTimeout(400);
+  const b = await page.locator("#ra-layersw .ra-drop-in").boundingBox();
+  const map = await page.locator("#ra-map").boundingBox();
+  expect(b.y + b.height, "the popover should overlap the map, or this proves nothing")
+    .toBeGreaterThan(map.y);
+  for (const [dx, dy] of [[20, 20], [b.width / 2, b.height / 2], [b.width - 20, b.height - 12]]) {
+    const onTop = await page.evaluate(([x, y]) => {
+      const el = document.elementFromPoint(Math.round(x), Math.round(y));
+      return !!(el && el.closest && el.closest(".ra-drop-in"));
+    }, [b.x + dx, b.y + dy]);
+    expect(onTop, `point ${Math.round(dx)},${Math.round(dy)} is behind the map`).toBe(true);
+  }
+});
+
 test("a dropdown stays on screen at every width the bar wraps at", async ({ page }) => {
   await ready(page);
   /* The bar WRAPS, so the same control is at the right-hand end at one

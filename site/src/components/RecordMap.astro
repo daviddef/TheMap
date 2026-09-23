@@ -1167,10 +1167,29 @@ window.addEventListener("load", async function () {
     drops().forEach(function (d) {
       if (d !== inside && d.open) d.open = false;
     });
+    if (!drops().some(function (d) { return d.open; }))
+      document.querySelector(".ra-bar").classList.remove("ra-bar-raised");
   });
+  /* Close on scroll. A popover anchored to a control has no business
+     floating once that control has moved, and it also settles a question I
+     could not answer by testing: the bar is lifted to z-index 1200 while
+     open and the page header is sticky at 60, so a bar scrolling up past
+     the header would paint over it. I could not get the page to scroll in
+     the harness to prove that either way, and closing on scroll makes the
+     question moot rather than leaving it open. */
+  window.addEventListener("scroll", function () {
+    if (!drops().some(function (d) { return d.open; })) return;
+    drops().forEach(function (d) { d.open = false; });
+    document.querySelector(".ra-bar").classList.remove("ra-bar-raised");
+  }, { passive: true });
   drops().forEach(function (d) {
     d.addEventListener("toggle", function () {
-      if (!d.open) return;
+      if (!d.open) {
+        /* The last one closing puts the bar back below the header. */
+        if (!drops().some(function (o) { return o.open; }))
+          document.querySelector(".ra-bar").classList.remove("ra-bar-raised");
+        return;
+      }
       drops().forEach(function (o) { if (o !== d) o.open = false; });
       /* KEEP IT ON SCREEN, BY MEASURING RATHER THAN BY BREAKPOINT. These
          controls sit in a bar that WRAPS, so the same control is at the
@@ -1180,6 +1199,7 @@ window.addEventListener("load", async function () {
          off the LEFT edge, because at that width the bar had wrapped and
          the control was no longer on the right. Measured and nudged, it is
          correct at every width without knowing any of them. */
+      document.querySelector(".ra-bar").classList.add("ra-bar-raised");
       var box = d.querySelector(".ra-drop-in");
       if (box) {
         box.style.left = "";
@@ -3206,8 +3226,20 @@ window.addEventListener("load", async function () {
      have changed the height of a bar whose height is measured. Absolutely
      positioned, so opening one moves nothing. */
   .ra-drop { position: relative; min-width: 0; }
+  /* THE POPOVER OPENED BEHIND THE MAP. z-index inside an element that
+     establishes no stacking context is measured against its siblings, and
+     the bar's sibling is the map — whose Leaflet controls sit at z-index
+     1000 in the root context. Thirty never stood a chance.
+
+     Lifted only WHILE A DROPDOWN IS OPEN, not permanently: the page header
+     is sticky at z-index 60, so a bar parked above everything would scroll
+     up and paint over the header on its way past. Raised on open, dropped
+     on close, and the map is the only thing it needs to beat. */
+  :global(.ra-bar.ra-bar-raised) { position: relative; z-index: 1200; }
   :global(.ra-drop > .ra-drop-in) {
     position: absolute; top: calc(100% + 6px); left: 0; z-index: 30;
+    /* z-index 30 is only meaningful INSIDE the bar's stacking context. The
+       bar has to be lifted above the map first — see .ra-bar-raised. */
     min-width: 280px; max-width: min(92vw, 540px);
     background: var(--panel); border: 1px solid var(--rule-strong);
     border-radius: 6px; padding: 12px 14px;

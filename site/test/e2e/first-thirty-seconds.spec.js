@@ -129,6 +129,53 @@ test("second thirty: there is a way out of everything", async ({ page }) => {
   await expect(page.locator("#ra-q")).toBeFocused();
 });
 
+test("the three filters are one control, and none of them shoves the map", async ({ page }) => {
+  await ready(page);
+  /* They were eight loose pills beside two tidy disclosures — the control a
+     reader touches most looking like scattered chrome next to two that
+     looked designed. All three say their own state now, so a closed one
+     still answers "what is on the map". */
+  for (const id of ["ra-laysum", "ra-catsum", "ra-kindsum"]) {
+    await expect(page.locator("#" + id)).toContainText(/—/);
+  }
+  const mapTop = async () => (await page.locator("#ra-map").boundingBox()).y;
+  const settled = await mapTop();
+  await page.locator("#ra-layersw summary").click();
+  await page.waitForTimeout(300);
+  /* A popover, not a fold-out: opening a filter must not move the map. */
+  expect(await mapTop()).toBe(settled);
+  /* One at a time. */
+  await page.locator("#ra-catsw summary").click();
+  await page.waitForTimeout(300);
+  await expect(page.locator("#ra-layersw[open]")).toHaveCount(0);
+  /* And a click anywhere else closes it. */
+  await page.locator("#ra-map").click({ position: { x: 5, y: 5 } });
+  await page.waitForTimeout(300);
+  await expect(page.locator(".ra-drop[open]")).toHaveCount(0);
+});
+
+test("a dropdown stays on screen at every width the bar wraps at", async ({ page }) => {
+  await ready(page);
+  /* The bar WRAPS, so the same control is at the right-hand end at one
+     width and the left-hand end at another. A breakpoint cannot know which:
+     flipping the last one to right-aligned under 900px duly pushed it 49
+     pixels off the LEFT edge, because by then the bar had wrapped. */
+  for (const width of [1100, 820, 640, 480, 380]) {
+    await page.setViewportSize({ width, height: 800 });
+    await page.waitForTimeout(250);
+    for (const id of ["ra-layersw", "ra-catsw", "ra-kindw"]) {
+      await page.locator(`#${id} summary`).click();
+      await page.waitForTimeout(220);
+      const b = await page.locator(`#${id} .ra-drop-in`).boundingBox();
+      expect(b.x, `${id} at ${width}px runs off the left`).toBeGreaterThanOrEqual(-1);
+      expect(b.x + b.width, `${id} at ${width}px runs off the right`)
+        .toBeLessThanOrEqual(width + 1);
+      await page.locator(`#${id} summary`).click();
+      await page.waitForTimeout(120);
+    }
+  }
+});
+
 test("full screen keeps the controls, which is the point of controls", async ({ page }) => {
   await ready(page);
   /* Full screen fixed only the map and its panel to the viewport, and the

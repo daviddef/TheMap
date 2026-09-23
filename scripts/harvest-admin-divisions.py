@@ -138,6 +138,7 @@ def main():
                  "dot where the registrar was. Built by "
                  "scripts/harvest-admin-divisions.py."),
         "source": "GeoNames admin1CodesASCII, admin2Codes and cities5000, CC BY 4.0 — https://www.geonames.org/",
+        "licence": "CC BY 4.0 (GeoNames)",
         "divisions": out,
     }, open(path, "w"), ensure_ascii=False, separators=(",", ":"))
     print(f"\n{len(out)} -> {path}")

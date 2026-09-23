@@ -346,10 +346,28 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
       <a href={u("/about/")}>About</a> · <a href={u("/add/")}>Add or correct a source</a> ·
       <a href={u("/data/")}>Use the data</a> ·
       <a href={u("/feed.xml")}>Feed</a> ·
-      <a href={u("/privacy/")}>Privacy</a> · Maps and {osm.archives.length} archives &copy; OpenStreetMap
-      contributors, <a href="https://opendatacommons.org/licenses/odbl/">ODbL</a> ·
-      Country outlines from Natural Earth, public domain · Archives and surnames from
-      Wikidata, CC0
+      <a href={u("/privacy/")}>Privacy</a>
+    </p>
+    {/* ATTRIBUTION IS A LICENCE CONDITION, NOT A COURTESY, and four of these
+        were missing. This credited OpenStreetMap, Natural Earth and Wikidata
+        and said nothing about GeoNames — which is the gazetteer, and
+        therefore the reason any old place name on this site resolves at all
+        — nor Statbel, Istat or the National Records of Scotland. Three of
+        those four are CC BY, where attribution is the whole of what is
+        asked in return. Found while documenting /data/, which had made the
+        same omission one layer up. */}
+    <p class="foot-note foot-thin">
+      Maps and {osm.archives.length} archives &copy; OpenStreetMap contributors,
+      <a href="https://opendatacommons.org/licenses/odbl/">ODbL</a>, as are the Irish
+      townlands via Townlands.ie ·
+      Place names from <a href="https://www.geonames.org/">GeoNames</a>, CC BY 4.0 ·
+      Belgian surnames by commune from <a href="https://statbel.fgov.be/">Statbel</a>,
+      CC BY 4.0 · Italian comuni from Istat, CC BY 3.0 IT ·
+      Scottish civil parishes from the National Records of Scotland, OGL v3.0 ·
+      Estonian parishes from the Rahvusarhiiv ·
+      Country outlines from Natural Earth, public domain ·
+      Archives, churches, cemeteries and surnames from Wikidata, CC0 ·
+      <a href={u("/data/")}>the whole list, per file</a>
     </p>
   </div>
 </footer>

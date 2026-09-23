@@ -54,6 +54,24 @@ const licOf = (f) => {
   } catch { return { lic: null, src: null }; }
 };
 
+/* THE SHARDED DIRECTORIES DO NOT CARRY THEIR OWN LICENCE, and this page
+   must not invent one for them. Each is cut from a single file in data/
+   that DOES declare one, so the declaration is read from there — the same
+   rule as above, one directory further back. Hard-coding them is exactly
+   how the first draft of this page came to tell people OpenStreetMap data
+   was CC0. */
+const DATA_ROOTS = [path.join(process.cwd(), "..", "data"),
+                    path.join(process.cwd(), "data")];
+const srcLic = (f) => {
+  for (const root of DATA_ROOTS) {
+    try {
+      const j = JSON.parse(fs.readFileSync(path.join(root, f), "utf8"));
+      return { lic: j.licence || j.license || null, src: j.source || null };
+    } catch { /* try the next root */ }
+  }
+  return { lic: null, src: null };
+};
+
 const nPlaces = idx.places.length + ((idx.quiet && idx.quiet.places) || 0);
 const nVolumes = idx.places.reduce((a, p) => a + (p.v || 0), 0);
 
@@ -96,6 +114,54 @@ const FILES = [
   { path: "/cemeteries-osm.json", size: sizeOf("cemeteries-osm.json"), ...licOf("cemeteries-osm.json"),
     what: "Named cemeteries, clipped to this atlas's record regions. Unnamed ones are left out: a shape on a map is not a place a researcher can ask about. Share-alike, as above.",
     shape: `{ cemeteries: [{ name, lat, lon, cc }] }` },
+  { path: "/g/<3-char>.json", size: `${countIn("g").toLocaleString()} files`,
+    ...srcLic("gazetteer.json"),
+    what: "The gazetteer: every settlement the search box can find, sharded on the first three folded characters. This is what makes «Gallignana» resolve to Gračišće. ATTRIBUTION REQUIRED — see the licence column.",
+    shape: `{ "<folded name>": [{ n, y, x, cc, alt[] }] }` },
+  { path: "/a/<3-char>.json", size: `${countIn("a").toLocaleString()} files`,
+    ...srcLic("admin-divisions.json"),
+    what: "Administrative divisions no collection names — findable in the search box, never drawn as a dot, because a district is not a parish.",
+    shape: `{ "<folded name>": [{ n, y, x, cc, level }] }` },
+  { path: "/rs/<3-char>.json", size: `${countIn("rs").toLocaleString()} files`,
+    ...srcLic("admin-divisions.json"),
+    what: "Settlements inside a mapped record region. Findable, not drawn.",
+    shape: `{ "<folded name>": [{ n, y, x, r }] }` },
+  { path: "/bs/<3-char>.json", size: `${countIn("bs").toLocaleString()} files`,
+    ...srcLic("belgium-by-municipality.json"),
+    what: "Belgian surnames at COMMUNE grain — 510,811 rows, and nothing else in this atlas has that grain; every other register answers only «how many in the country». Statbel suppresses anything under five people, so the smallest number published anywhere here is 5. ATTRIBUTION REQUIRED.",
+    shape: `{ "<folded surname>": [[[communeIndex, count]], total, people] }` },
+  { path: "/t/<3-char>.json", size: `${countIn("t").toLocaleString()} files`,
+    ...srcLic("ireland-osm.json"),
+    what: "60,883 Irish townlands — the unit an Irish record actually names. Findable, not drawn: «Glebe» is the name of 213 of them. Share-alike.",
+    shape: `{ "<folded name>": [{ n, y, x, county, parish }] }` },
+  { path: "/it/<3-char>.json", size: `${countIn("it").toLocaleString()} files`,
+    ...srcLic("italy-comuni.json"),
+    what: "7,894 Italian comuni, 121 of them carrying an official second name.",
+    shape: `{ "<folded name>": [{ n, y, x, prov }] }` },
+  { path: "/sc/<3-char>.json", size: `${countIn("sc").toLocaleString()} files`,
+    ...srcLic("scotland-parishes.json"),
+    what: "Scottish civil parishes, from the National Records of Scotland.",
+    shape: `{ "<folded name>": [{ n, y, x }] }` },
+  { path: "/ee/<3-char>.json", size: `${countIn("ee").toLocaleString()} files`,
+    ...srcLic("estonia-parishes.json"),
+    what: "113 Estonian parishes and 11 historic counties, names only.",
+    shape: `{ "<folded name>": [{ n, y, x }] }` },
+  { path: "/cemeteries-wikidata.json", size: sizeOf("cemeteries-wikidata.json"),
+    ...licOf("cemeteries-wikidata.json"),
+    what: "Named cemeteries from Wikidata. Drawn as a layer, and listed on a place page as the nearest few — unvisited, and not a claim that a burial register survives.",
+    shape: `{ features: [{ q, n, y, x, r }] }` },
+  { path: "/churches-wikidata.json", size: sizeOf("churches-wikidata.json"),
+    ...licOf("churches-wikidata.json"),
+    what: "108,054 churches. A church is a parish and a parish is where a register was kept, so these are the «nearest parishes» on a place page, with the distance shown.",
+    shape: `{ features: [{ q, n, y, x, r }] }` },
+  { path: "/libraries-wikidata.json", size: sizeOf("libraries-wikidata.json"),
+    ...licOf("libraries-wikidata.json"),
+    what: "Libraries, as a layer. Unchecked, and not all of them hold anything genealogical.",
+    shape: `{ features: [{ q, n, y, x, r }] }` },
+  { path: "/country-points.json", size: sizeOf("country-points.json"),
+    ...licOf("country-points.json"),
+    what: "One point per country, so that clicking anywhere on earth answers with something rather than nothing.",
+    shape: `{ points: [{ cc, n, y, x, p, v, c, s, w, fs }] }` },
   { path: "/sitemap-index.xml", size: "—",
     what: "Every page on this site, split by type — places, archives, countries, regions, surnames.",
     shape: "sitemap index → six sitemaps" },
@@ -110,17 +176,27 @@ const FILES = [
   dek="Everything this map draws is a plain JSON file on a public URL, and the map is only the first client. Take any of it, for anything, without asking.">
 
   <div class="one" style="margin-top:20px">
-    <div class="lab">The licences — there are three, and the difference matters</div>
+    <div class="lab">The licences — there are seven, and the difference matters</div>
     <p><b>Read the <code>licence</code> field of the file you are taking.</b> Every
     file derived from somebody else's work declares whose and on what terms, and
     the table below prints what each one actually says rather than one blanket
     claim over all of them.</p>
     <ul class="ra-lic">
       <li><b>ODbL 1.0, © OpenStreetMap contributors</b> — the archives and the
-        cemeteries harvested from OSM. Attribution required, and share-alike: a
-        derived database has to be published under ODbL too.</li>
+        cemeteries harvested from OSM, and the 60,883 Irish townlands, which come
+        from Townlands.ie. Attribution required, and share-alike: a derived
+        database has to be published under ODbL too.</li>
       <li><b>CC0 1.0</b> — the sets harvested from Wikidata, because Wikidata is
         CC0, and the surname corpus, which declares it.</li>
+      <li><b>CC BY 4.0, attribution required</b> — GeoNames, which is the
+        gazetteer and therefore the reason any old place name resolves at all;
+        and Statbel, for the Belgian surnames at commune grain.</li>
+      <li><b>CC BY 3.0 IT</b> — Istat, for the Italian comuni.</li>
+      <li><b>Open Government Licence v3.0</b> — the National Records of Scotland,
+        for the civil parishes.</li>
+      <li><b>Public domain</b> — Natural Earth, for the country outlines.</li>
+      <li><b>Terms not declared</b> — the Estonian parish and county vocabularies
+        from the Rahvusarhiiv. Said plainly rather than assumed either way.</li>
       <li><b>This atlas's own compilation</b> — the index, the place files, the
         record regions, the provider spine. That is our research and it carries
         no licence file yet, because <a href={site.repo}>the repository</a> has

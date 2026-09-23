@@ -133,6 +133,7 @@ def main():
                    "p=population a=other names it has been written under q=every form "
                    "folded for search. Built by scripts/build-gazetteer.py.",
            "source": "GeoNames cities5000, CC BY 4.0 — https://www.geonames.org/",
+           "licence": "CC BY 4.0 (GeoNames)",
            "built": "2026-09-16",
            "places": rows}
     json.dump(out, open(a.out, "w"), ensure_ascii=False, separators=(",", ":"))

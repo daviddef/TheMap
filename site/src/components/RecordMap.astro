@@ -176,6 +176,7 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
         <input type="range" id="ra-year2" min="1500" max="2026" value="1920" step="1" disabled
                aria-label="Latest year" />
       </span>
+      <span class="ra-ylab-w">Year</span>
       <output id="ra-yout" class="mono">any year</output>
     </label>
     </div>
@@ -1036,6 +1037,22 @@ window.addEventListener("load", async function () {
   /* WHICH COUNTRIES THE CURRENT ANSWER IS ABOUT, or null when the
      question is not a surname. See syncCountryDots. */
   var litCC = null;
+  /* WHICH QUERY LIT THEM. The country outlines and the country dots are the
+     answer to a SURNAME — «this name is attested in these eight countries».
+     They were cleared when the box was emptied and when a search found
+     nothing, and not when the next search succeeded. So searching a surname
+     and then a place left eight countries outlined and eight dots standing,
+     answering a question the reader had already moved on from. David saw
+     exactly that: «some countries become bordered/outlines indicating
+     something, but i dont know what» — they were Blažević's, and he was
+     looking at Gračišće. */
+  var litFor = null;
+  var hitLayer = L.layerGroup(), lastHitFor = null;
+  function clearLit() {
+    litCC = null; litFor = null;
+    ctryLayer.clearLayers();
+    communeLayer.clearLayers();
+  }
   /* Held as a promise, not just a variable. A visitor types faster than a
      fetch returns, and «libya» arriving before the country list did would
      find nothing and say so — which is the bug this layer exists to fix,
@@ -1419,6 +1436,14 @@ window.addEventListener("load", async function () {
   }
   function yearUI() {
     yin.disabled = yin2.disabled = !year;
+    /* COLLAPSED UNTIL IT IS DOING SOMETHING. Off, the scrubber was still a
+       full-width strip across the foot of the map holding an inert slider
+       and the words «any year» — a lot of map given to a control that was
+       switched off. David asked for just the pill. It keeps the word «Year»
+       with the checkbox, because a lone unlabelled tickbox sitting on a map
+       is a puzzle, and one word is cheaper than the puzzle. */
+    var strip = document.getElementById("ra-time");
+    if (strip) strip.classList.toggle("on", !!year);
     yout.textContent = year
       ? (year === year2 ? String(year) : year + "\u2013" + year2)
       : "any year";
@@ -1555,6 +1580,9 @@ window.addEventListener("load", async function () {
       radius: 9, color: "var(--accent)", weight: 2, opacity: .9,
       fillColor: "#8E6FA8", fillOpacity: .35, dashArray: "3 3"
     }).addTo(map).bindTooltip(g.getAttribute("data-n"), { permanent: false });
+    /* A place the gazetteer knows and the shelf does not is still the place
+       that was asked for, and gets the same ring. */
+    markHit({ y: y, x: x }, fold(qbox.value.trim()));
     map.setView([y, x], Math.max(map.getZoom(), 11));
     document.querySelector(".at-map").scrollIntoView({ block: "center", behavior: "smooth" });
   });
@@ -1770,6 +1798,9 @@ window.addEventListener("load", async function () {
   function apply(noFrame) {
     var t = fold(qbox.value.trim());
     searchHit = false;
+    /* The lighting belongs to the query that produced it, and nothing else. */
+    if (litFor !== null && litFor !== t) { clearLit(); syncCountryDots(); }
+    if (t !== lastHitFor) { hitLayer.clearLayers(); lastHitFor = null; }
     splitQuery(t);
     if (qPlace) t = qPlace;
     syncCountryDots();
@@ -1824,7 +1855,7 @@ window.addEventListener("load", async function () {
                     { padding: [40, 40], maxZoom: 11 });
       /* Both halves were asked, so both get answered, in one panel. */
       if (qName) { both(vis, qName, qbox.value.trim()); return; }
-      if (vis.length === 1) { open(vis[0]._p); return; }
+      if (vis.length === 1) { markHit(vis[0]._p, t); open(vis[0]._p); return; }
       /* SEVERAL PLACES MATCHED, SO THE MAP IS THE ANSWER — BUT THE PANEL
          MUST NOT STILL BE ANSWERING THE LAST QUESTION. This branch framed
          the matches and fell through without touching the panel, so the
@@ -2001,6 +2032,29 @@ window.addEventListener("load", async function () {
     if (r) h.push(renderSurnames([r], r.n));
     panel.innerHTML = h.join("");
     if (r) showCountries(r.countries, function () { return mine !== searchTok; });
+  }
+
+  /* THE PLACE YOU ASKED FOR, IN A COLOUR NOTHING ELSE USES.
+     A search framed the map on Gračišće and then drew it as one more small
+     grey dot among grey dots — «i cant differentiate the country icons from
+     the one i searched». Every other colour on this map means «what it
+     costs to look», so the answer cannot be another of those: this is amber,
+     which the access scale does not use, and it pulses, which nothing else
+     does. A ring around the dot rather than a replacement for it, so the
+     dot's own colour — the thing the legend is about — is still readable
+     underneath.
+
+     A DOM marker rather than a canvas one, because the canvas renderer
+     cannot animate and the whole point is that it moves. */
+  function markHit(p, term) {
+    hitLayer.clearLayers();
+    lastHitFor = term;
+    L.marker([p.y, p.x], {
+      interactive: false, keyboard: false,
+      icon: L.divIcon({ className: "ra-hit", iconSize: [34, 34],
+                        iconAnchor: [17, 17], html: "<i></i><b></b>" })
+    }).addTo(hitLayer);
+    if (!map.hasLayer(hitLayer)) hitLayer.addTo(map);
   }
 
   /* SURNAMES. A place is not the only thing somebody arrives holding: very
@@ -2362,6 +2416,7 @@ window.addEventListener("load", async function () {
 
   async function showCountries(list, stale) {
     if (list && list.length) { searchHit = true; noteSearch(); }
+    litFor = fold(qbox.value.trim());
     /* Clears its own outlines and NOT the commune dots. It used to clear
        both, which was invisible until the dots started being drawn first
        — showCommunes ran, drew 60 towns, and this wiped them a
@@ -3230,7 +3285,8 @@ window.addEventListener("load", async function () {
     if (gmark) { map.removeLayer(gmark); gmark = null; }
     ctryLayer.clearLayers();
     communeLayer.clearLayers();
-    litCC = null;
+    litCC = null; litFor = null;
+    hitLayer.clearLayers(); lastHitFor = null;
     helpBox.hidden = true;
     document.getElementById("ra-info").setAttribute("aria-expanded", "false");
     panel.hidden = true; empty.hidden = false;
@@ -3689,14 +3745,22 @@ window.addEventListener("load", async function () {
   }
 
   /* ---- the scrubber along the foot of the map ---------------------------- */
+  /* Collapsed it hugs its contents; switched on it takes the width it needs
+     for a slider worth dragging. */
   :global(.ra-time) { position: absolute; z-index: 800;
-    left: 10px; right: 10px; bottom: 26px;
+    left: 10px; right: auto; max-width: calc(100% - 20px); bottom: 26px;
     display: flex; align-items: center; gap: 10px;
     padding: 7px 12px; border-radius: 999px;
     background: var(--panel); border: 1px solid var(--rule-strong);
     box-shadow: 0 4px 16px rgba(10, 20, 26, .18); }
+  :global(.ra-time.on) { right: 10px; }
   :global(.ra-time .ra-ylab) { flex: 1 1 auto; border: 0; background: none;
-    padding: 0; min-width: 0; }
+    padding: 0; min-width: 0; display: flex; align-items: center; gap: 8px; }
+  /* Off: the slider and the readout go, the word stays. */
+  :global(.ra-time:not(.on) .ra-slider) { display: none; }
+  :global(.ra-time:not(.on) #ra-yout) { display: none; }
+  :global(.ra-time.on .ra-ylab-w) { display: none; }
+  :global(.ra-ylab-w) { font: 400 12px/1 var(--sans); color: var(--ink-2); }
   :global(.ra-time .ra-slider) { flex: 1 1 auto; }
   :global(.ra-time #ra-yout) { flex: none; }
   /* On a phone the map is 420px tall and the strip would eat it; it keeps
@@ -3704,6 +3768,23 @@ window.addEventListener("load", async function () {
   @media (max-width: 700px) {
     :global(.ra-time) { left: 6px; right: 6px; bottom: 22px; gap: 7px;
       padding: 6px 9px; }
+  }
+
+  /* The searched place. Amber because the access scale never uses it, and
+     a ring rather than a fill so the dot's own colour still reads. */
+  :global(.ra-hit) { pointer-events: none; }
+  :global(.ra-hit i), :global(.ra-hit b) {
+    position: absolute; inset: 0; border-radius: 50%;
+    border: 2px solid #E8912B; display: block; }
+  :global(.ra-hit b) { animation: ra-ping 1.8s ease-out infinite; }
+  @keyframes ra-ping {
+    0%   { transform: scale(.42); opacity: .95; }
+    70%  { transform: scale(1);   opacity: 0; }
+    100% { transform: scale(1);   opacity: 0; }
+  }
+  :global(.ra-hit i) { transform: scale(.42); background: rgba(232,145,43,.16); }
+  @media (prefers-reduced-motion: reduce) {
+    :global(.ra-hit b) { animation: none; transform: scale(.72); opacity: .55; }
   }
 
   .ra-loading { position: absolute; z-index: 900; left: 50%; top: 50%;

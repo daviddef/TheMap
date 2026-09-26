@@ -3450,6 +3450,15 @@ window.addEventListener("load", async function () {
           markers.push(makeMarker(p));
         });
         idx.places = idx.places.concat(qp);
+        /* AND NOW THE TRUTH REPLACES THE DECLARATION. TOTAL_PLACES was
+           idx.places.length plus idx.quiet.places — a number index.json
+           STATES about a file it does not contain. If the two ever disagree
+           the count can never settle: it reads «21,479 of 21,473 places
+           shown», which is both wrong and impossible, and it stays that way.
+           A stale local public/ produced exactly that, six places apart.
+           Once the file is here, its rows are the count, so the declaration
+           is only ever used for the second before it can be checked. */
+        TOTAL_PLACES = idx.places.length;
         /* The counts in the filters were taken from the loud half alone;
            the quiet half is 5,693 more places and almost all of them
            unsurveyed, so redraw or the numbers are a third of the truth. */

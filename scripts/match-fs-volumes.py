@@ -1185,6 +1185,15 @@ def main():
     total = matched + miss + noname
     dump({
         "source": "FamilySearch records waypoint API",
+        # THE LICENCE, BECAUSE THE NOTE BELOW IS NOT ONE.
+        # This file said "Titles are FamilySearch's" in prose and declared no
+        # licence field, so check-data.py failed it — rightly: a licence stated
+        # inside a sentence cannot be read by the page that has to tell a
+        # reader what they are taking. Its two siblings, fs-volumes.json and
+        # fs-waypoints.json, both carry this exact string; the world-scale one
+        # was written later and missed it. Fixed here rather than only in the
+        # file, because the file is gitignored and regenerated.
+        "licence": "FamilySearch catalogue metadata (not an open licence)",
         "note": ("One row per book, on the place its waypoint path names. "
                  "Matched deepest-first and only within the collection's own "
                  "countries. Titles are FamilySearch's."),

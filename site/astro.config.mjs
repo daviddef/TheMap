@@ -17,4 +17,24 @@ export default defineConfig({
      ('where' would be smaller still, but it drops specificity to zero and
      that does change which rule wins.) */
   scopedStyleStrategy: 'class',
+
+  /* DEV DIED OF EMFILE BEFORE IT FINISHED STARTING.
+     public/ holds 53,089 files, of which 52,000-odd are the generated name
+     shards — public/rs/ alone is 20,198. Vite's dev watcher tries to watch
+     the lot, runs the process out of file descriptors, and `astro dev`
+     exits before it serves anything. The workaround in use was
+     `ulimit -n 20480`, which raises the ceiling without reducing the count
+     and has to be remembered by every shell that ever runs the server.
+
+     Nothing is lost by not watching them: they are build output, written by
+     scripts/build.py, never edited by hand. If one changes, the page that
+     reads it re-fetches on reload, which is what you would do anyway. This
+     touches the dev server only — `astro build` does not watch. */
+  vite: {
+    server: {
+      watch: {
+        ignored: ['**/site/public/**', '**/dist/**', '**/dist-*/**'],
+      },
+    },
+  },
 });

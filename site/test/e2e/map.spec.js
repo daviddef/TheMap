@@ -36,12 +36,25 @@ test("the index is requested before the page has finished loading", async ({ pag
 });
 
 test("the quiet half arrives and every place is on the map", async ({ page }) => {
+  /* Waiting on the count text alone was not enough: it fills as soon as the
+     loud half draws, so this read «15780 of 15780» and failed — and it was
+     right to. The denominator was markers.length, which is the loud half
+     until the quiet fetch lands, so for that second the line did not
+     undercount, it misstated the size of the atlas. Wait for the fetch this
+     test is named after, then poll, because the redraw follows the response
+     rather than arriving with it. */
+  const quiet = page.waitForResponse(
+    (r) => /\/index-quiet\.json$/.test(r.url()) && r.status() === 200,
+    { timeout: 45000 });
   await mapReady(page);
-  const text = await page.locator("#ra-count").innerText();
-  const [shown, total] = text.match(/([\d,]+) of ([\d,]+)/).slice(1)
-    .map((n) => Number(n.replace(/,/g, "")));
-  expect(shown).toBe(total);
-  expect(total).toBeGreaterThan(20000);
+  await quiet;
+  await expect.poll(async () => {
+    const text = await page.locator("#ra-count").innerText();
+    const m = text.match(/([\d,]+) of ([\d,]+)/);
+    if (!m) return null;
+    const [shown, total] = m.slice(1).map((n) => Number(n.replace(/,/g, "")));
+    return shown === total ? total : null;
+  }, { timeout: 20000 }).toBeGreaterThan(20000);
 });
 
 test("a surname search lights only the countries it is attested in", async ({ page }) => {

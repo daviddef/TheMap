@@ -29,12 +29,20 @@ async function ready(page) {
 const state = (page) => page.evaluate(() => window.recordAtlas.state());
 
 test("second one: the map says what it is doing instead of showing a grey box", async ({ page }) => {
-  await page.goto(MAP);
-  /* Server-rendered, so it is on screen in the first paint rather than
-     after the three fetches the map cannot start without. */
+  /* This asserted «visible within 3s of goto» and failed on the live site,
+     which was not a bug: off a warm CDN the index arrives before goto even
+     returns, so the notice is born and removed inside that window and the
+     test was racing a sub-second lifetime. Hold the index back instead. Now
+     the slow load the notice exists FOR is the one being tested, rather than
+     the fast load where nobody needs it. */
+  await page.route(/\/index\.json$/, async (route) => {
+    await new Promise((r) => setTimeout(r, 2500));
+    await route.continue();
+  });
+  await page.goto(MAP, { waitUntil: "domcontentloaded" });
   const note = page.locator("#ra-loading");
   await expect(note).toBeVisible({ timeout: 3000 });
-  await expect(note).toContainText(/Loading the atlas|Drawing/);
+  await expect(note).toContainText(/Loading the atlas|Drawing|places/);
   /* And it goes away. A loading notice that outlives the load is worse
      than none, because it says the page is broken. */
   await expect(note).toHaveCount(0, { timeout: 45000 });
@@ -136,7 +144,15 @@ test("the three filters are one control, and none of them shoves the map", async
      looked designed. All three say their own state now, so a closed one
      still answers "what is on the map". */
   for (const id of ["ra-laysum", "ra-catsum", "ra-kindsum"]) {
-    await expect(page.locator("#" + id)).toContainText(/—/);
+    const sum = page.locator("#" + id);
+    /* The state used to be spelt out in the label — «Layers — 2 of 8 on».
+       David asked for the light form, so the visible text is now «Layers 2»
+       and the sentence moved to the tooltip, where it is still the thing a
+       reader gets when they ask. Assert both halves: the label carries a
+       number, and hovering explains what the number counts. */
+    await expect(sum).toContainText(/\d/);
+    await expect(sum).toHaveAttribute("title", /—/);
+    await expect(sum).toHaveAttribute("aria-label", /—/);
   }
   const mapTop = async () => (await page.locator("#ra-map").boundingBox()).y;
   const settled = await mapTop();

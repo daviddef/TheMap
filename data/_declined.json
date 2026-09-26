@@ -1,6 +1,6 @@
 {
  "note": "Sources assessed and declined, with what was found. Declining after looking is a result; declining without looking is a gap.",
- "checked": "2026-09-23",
+ "checked": "2026-09-27",
  "declined": [
   {
    "source": "Antenati — the nine sitemaps other than ant_archivio",
@@ -124,6 +124,17 @@
    "successor-of": "search.arch.be",
    "why": "This is the LIVE successor to the retired search.arch.be — arch.be's own «Online resources» page links to https://agatha.arch.be/search/genealogie/ as its genealogical search. It answers a TLS handshake and then hangs up without an HTTP response, and refuses a real browser from here too, which is a gate and not an outage. This project does not work around gates or claim to be a browser it is not, so agatha stays out of the provider list until it will talk to an ordinary client or somebody asks its keepers. David raised it directly, so it is written down rather than silently dropped.",
    "checked": "2026-09-23"
+  },
+  {
+   "source": "Archives départementales du Puy-de-Dôme — surveying beyond the homepage",
+   "looked": [
+    "Homepage fetched with the project's own user-agent: answers 200 and reads normally.",
+    "Opening it in a real browser to reach the état civil pages returned an interstitial titled «Making sure you're not a bot!» instead of the site.",
+    "The homepage's «Accès libre» is about heritage open days — «Accès libre pour les journées européennes du patrimoine» — not about the registers, so the homepage alone establishes nothing about access."
+   ],
+   "verdict": "bot gate — survey stopped, access class left unsurveyed",
+   "why": "The site challenged the browser, and this project does not defeat bot gates or send a user-agent it is not. The plain fetch that succeeded is not a way round it: what the homepage says is not enough to classify access, and everything that would be enough sits behind the challenge. Left as unsurveyed, which is true. Worth a letter rather than a workaround — the département almost certainly publishes its état civil free, like its neighbours, and a human visitor can confirm it in a minute.",
+   "checked": "2026-09-27"
   }
  ]
 }

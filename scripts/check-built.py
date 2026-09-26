@@ -17,7 +17,7 @@ had already worked and for one that had never been broken that way.
 
 A check that looks in one of the two places a thing can be is not a check.
 """
-import glob, os, re, sys
+import glob, json, os, re, sys
 
 # npm runs this from site/, so every relative path below would resolve one
 # directory too deep. Anchor on the repository root the way the other scripts
@@ -30,6 +30,101 @@ def err(m):
     print("FAIL: " + m)
 
 DIST = "site/dist"
+
+# ---------------------------------------------------------------------------
+# ATTRIBUTION, CHECKED ON THE PAGES THAT SHIP RATHER THAN ON THE SOURCE.
+#
+# check-data.py already refuses a build whose data declares a licence the
+# /data/ page does not name, and whose attribution licences are not credited
+# in the footer. It reads site/src/layouts/Base.astro to do the second one,
+# and that is the weaker half of the rule for exactly the reason this whole
+# file exists: the source is not what ships. A credit inside a conditional
+# that never renders, a layout a page does not use, a component dropped from
+# the template — the source check passes through all three.
+#
+# The Defranceski archive's session made the same point from the other end
+# and better: they check the pages that USE each dataset, because a site-wide
+# footer satisfies a footer check while the page actually built on the data
+# stays silent. Their repo needed it more than this one does — here the
+# footer is on every page — but the principle holds, and the shipped-HTML
+# version of it is strictly stronger than what was here.
+#
+# So: each holder that asks for credit is mapped to the page KINDS whose
+# content depends on it, and the rendered HTML of a sample of each must name
+# them. GeoNames is on the map because the gazetteer is the reason any old
+# place name resolves at all; Statbel is on surname pages because that is
+# where the commune-grain counts are read.
+ATTRIBUTION_ON = {
+    "GeoNames":    ["home", "place", "surname"],
+    "Statbel":     ["home", "surname"],
+    "Istat":       ["home"],
+    "the National Records of Scotland": ["home"],
+    "OpenStreetMap": ["home", "place"],
+    "Townlands.ie": ["home"],
+}
+# Which declared licence strings mean which holder.
+LICENCE_HOLDER = {
+    "geonames": "GeoNames",
+    "statbel": "Statbel",
+    "istat": "Istat",
+    "national records of scotland": "the National Records of Scotland",
+    "openstreetmap": "OpenStreetMap",
+    "townlands.ie": "Townlands.ie",
+}
+
+
+def _sample(kind, n=3):
+    """A few built pages of one kind, so this costs a handful of reads and
+    not a walk of 46,000 files."""
+    if kind == "home":
+        return [os.path.join(DIST, "index.html")]
+    return sorted(glob.glob(os.path.join(DIST, kind, "*", "index.html")))[:n]
+
+
+def attribution_gate():
+    """Every holder whose licence asks for credit must be named in the HTML
+    of the pages built on their data — not merely in a source file."""
+    wanted = set()
+    for f in sorted(glob.glob("data/*.json")):
+        base = os.path.basename(f)
+        if base.startswith(".") or base.startswith("_"):
+            continue
+        try:
+            with io.open(f, encoding="utf-8") as fh:
+                d = json.load(fh)
+        except Exception:
+            continue
+        if not isinstance(d, dict):
+            continue
+        lic = (d.get("licence") or d.get("license") or "").lower()
+        for key, holder in LICENCE_HOLDER.items():
+            if key in lic:
+                wanted.add(holder)
+
+    for holder in sorted(wanted):
+        kinds = ATTRIBUTION_ON.get(holder)
+        if not kinds:
+            err(f"'{holder}' holds an attribution licence on data this build "
+                f"uses and ATTRIBUTION_ON says nothing about where the credit "
+                f"belongs. Add the page kinds, or the rule is decorative.")
+            continue
+        for kind in kinds:
+            pages = _sample(kind)
+            if not pages:
+                err(f"no built '{kind}' pages to check '{holder}' against")
+                continue
+            for page in pages:
+                try:
+                    html = io.open(page, encoding="utf-8").read()
+                except OSError:
+                    continue
+                if holder not in html:
+                    err(f"{os.path.relpath(page, DIST)} is built on data "
+                        f"licensed to '{holder}' and does not name them. "
+                        f"Attribution is a condition of the licence, not a "
+                        f"courtesy, and a credit in the source that does not "
+                        f"reach the page is not a credit.")
+                    break
 
 def selectors_declared():
     """Class selectors written in a layout or component's own style block."""
@@ -103,6 +198,8 @@ def main():
     # a permanently empty box.
     if 'class="adslot"' in home and "adsbygoogle.js" not in home:
         err("the page renders an ad slot but never loads adsbygoogle.js")
+
+    attribution_gate()
 
     print(f"\n{len(pages)} pages · {len(bundle)}b bundled css · {len(inlined)}b inlined")
     if FAIL:

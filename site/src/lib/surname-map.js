@@ -189,13 +189,28 @@ export function surnameMap(ccs, { width = 680 } = {}) {
         + `<circle cx="${cx}" cy="${cy}" r="${rad(r.n).toFixed(1)}"/></g>`;
     });
 
+  /* role="img" WITHOUT A NAME IS A PICTURE THAT REFUSES TO SAY WHAT IT IS.
+     axe flagged it; the real cost is that every dot already carries a
+     <title>, so a sighted reader gets every country on hover and a screen
+     reader got the word "image". The countries are right here in `rows`, so
+     the name is the information rather than a label about it: an alt text
+     that reads the map out, biggest register first. */
+  const spoken = rows.slice().sort((a, b) => (b.n || 0) - (a.n || 0))
+    .map((r) => r.pt.n || r.cc);
+  const alt = "Attested in " + rows.length
+    + (rows.length === 1 ? " country: " : " countries: ")
+    + spoken.slice(0, 10).join(", ")
+    + (spoken.length > 10 ? ", and " + (spoken.length - 10) + " more" : "");
+
   return {
     drawn: rows.length,
     missing: (ccs || []).length - rows.length,
     counted: counted.length,
     height,
+    alt,
     svg: `<svg viewBox="0 0 ${width} ${height}" width="100%" `
        + `height="${height}" role="img" class="sm">`
+       + `<title>${esc(alt)}</title>`
        + `<g>${paths.join("")}</g><g>${dots.join("")}</g></svg>`,
   };
 }
@@ -295,12 +310,21 @@ export function placesMap(points, { cc = null, width = 680, max = 150,
         + ` \u2014 ${(p.c || 0).toLocaleString()}</title>${c}</g>`;
     });
 
+  /* The same naming as surnameMap, from the places actually drawn. */
+  const spoken = ranked.slice(0, 10).map((p) => p.nl || p.label).filter(Boolean);
+  const alt = shown.length + (shown.length === 1 ? " place" : " places") + " drawn"
+    + (spoken.length ? ", the largest being " + spoken.join(", ") : "")
+    + (pts.length > shown.length
+        ? ", with " + (pts.length - shown.length) + " smaller ones omitted" : "");
+
   return {
     drawn: shown.length,
     omitted: pts.length - shown.length,
     height,
+    alt,
     svg: `<svg viewBox="0 0 ${width} ${height}" width="100%" `
        + `height="${height}" role="img" class="sm">`
+       + `<title>${esc(alt)}</title>`
        + `<g>${land.join("")}</g><g>${dots.join("")}</g></svg>`,
   };
 }

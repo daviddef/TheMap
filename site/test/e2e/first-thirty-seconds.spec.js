@@ -150,7 +150,9 @@ test("the three filters are one control, and none of them shoves the map", async
        and the sentence moved to the tooltip, where it is still the thing a
        reader gets when they ask. Assert both halves: the label carries a
        number, and hovering explains what the number counts. */
-    await expect(sum).toContainText(/\d/);
+    /* A number when some are off, «All» when none are — «Costs All» carries
+       no digit and my first pass at this asserted one. Either is a state. */
+    await expect(sum).toContainText(/\d+|All/);
     await expect(sum).toHaveAttribute("title", /—/);
     await expect(sum).toHaveAttribute("aria-label", /—/);
   }

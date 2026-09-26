@@ -1,0 +1,125 @@
+name: The first thirty seconds
+
+# TWENTY-TWO BROWSER SPECS THAT HAD NEVER RUN.
+#
+# test/e2e has been "written, not wired" since the day it was added, and five
+# more specs went in on 23 September without any of them executing once. A
+# test nobody runs is a comment with a worse syntax.
+#
+# IT RUNS AGAINST THE LIVE SITE, NOT A REBUILD. Two reasons, and the first is
+# not the obvious one. Rebuilding here would cost forty minutes to test a
+# copy of what was already built and deployed thirty seconds earlier — but
+# more than that, what a reader gets is the thing on GitHub Pages, served
+# from that CDN, and that is the only artefact whose behaviour is worth an
+# assertion. Every fault these specs encode was found by a person looking at
+# the live site.
+#
+# So it waits for the deploy to finish, waits for Pages to actually serve the
+# new commit, and then drives it.
+on:
+  workflow_run:
+    workflows: ["Build and deploy Record Atlas"]
+    types: [completed]
+  workflow_dispatch:
+  schedule:
+    - cron: "23 7 * * 2"     # Tuesday, in case a dependency rots under us
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  drive:
+    # A deploy that failed has nothing new to test; the site is still the
+    # previous commit and testing it again proves nothing.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+
+      - name: Install
+        run: npm ci || npm install
+        working-directory: site
+
+      - name: Chromium only
+        run: npx playwright install --with-deps chromium
+        working-directory: site
+
+      # PAGES SERVES A MOMENT AFTER THE WORKFLOW GOES GREEN. Driving it too
+      # early tests the previous deploy and calls it this one, which is the
+      # kind of pass that is worse than a failure.
+      - name: Wait for the site to answer
+        run: |
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' https://daviddef.github.io/TheMap/ || true)
+            if [ "$code" = "200" ]; then echo "live after ${i} tries"; exit 0; fi
+            sleep 10
+          done
+          echo "::error::the site never answered 200"; exit 1
+
+      - name: Drive it
+        id: drive
+        env:
+          RA_BASE: https://daviddef.github.io
+        run: |
+          set +e
+          npx playwright test test/e2e --config test/e2e/playwright.config.js --reporter=list 2>&1 | tee e2e.txt
+          echo "code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+        working-directory: site
+        continue-on-error: true
+
+      - name: Say what broke
+        if: steps.drive.outputs.code != '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let out = '(no output)';
+            try { out = fs.readFileSync('site/e2e.txt', 'utf8').trim().slice(-6000); } catch {}
+            const body = [
+              'The browser specs failed against the **live site**, so this is',
+              'something a reader can currently hit — not a build artefact.',
+              '',
+              'Every assertion in `first-thirty-seconds.spec.js` is a fault that',
+              'shipped once and was found by a person looking. If one of them is',
+              'red, that fault is back.',
+              '',
+              'Run it locally against the same target:',
+              '',
+              '```',
+              'cd site && npx playwright install chromium',
+              'RA_BASE=https://daviddef.github.io npm run test:e2e',
+              '```',
+              '',
+              '```', out, '```',
+            ].join('\n');
+            const title = 'The live site fails its own browser specs';
+            const open = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'e2e',
+            });
+            const existing = open.data.find(i => i.title === title);
+            if (existing) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: existing.number, body });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo,
+                title, body, labels: ['e2e'] });
+            }
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e
+          path: |
+            site/e2e.txt
+            site/playwright-report
+            site/test-results
+
+      - name: Fail the run if the site failed
+        if: steps.drive.outputs.code != '0'
+        run: exit 1

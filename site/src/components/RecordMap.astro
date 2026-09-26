@@ -1838,14 +1838,22 @@ window.addEventListener("load", async function () {
        close births for a century and deaths for fifty years. That is a correct
        answer and it looks exactly like a broken map, which is why the count
        line now says which it is and offers the way out. */
-    count.innerHTML = esc(shown + " of " + markers.length + " places shown") +
+    /* TOTAL_PLACES, not markers.length. markers holds the loud half until the
+       quiet fetch lands about a second later, so this line spent that second
+       saying «15780 of 15780 places shown» — which does not merely undercount,
+       it states that the atlas holds 15,780 places when it holds 21,473. That
+       is the precise mistake the comment at TOTAL_PLACES was written to stop,
+       made in the one line a reader actually reads. */
+    count.innerHTML = esc(shown.toLocaleString() + " of " +
+                          TOTAL_PLACES.toLocaleString() + " places shown") +
       (year ? esc(", able to answer for " + year) : "") +
-      (on.archives ? esc(", and " + aShown + " of " + archives.length + " archives") : "");
+      (on.archives ? esc(", and " + aShown.toLocaleString() + " of " +
+                          archives.length.toLocaleString() + " archives") : "");
     if (year && !shown) {
       count.innerHTML = '<b>Nothing on this map can answer for ' + (year === year2 ? year : year + '\u2013' + year2) + '.</b> ' +
         "Records close for a lifetime — a century for births, fifty years for " +
         'deaths — so a recent year empties it. <a href="#" class="ra-clearyear">' +
-        "Clear the year</a> to see all " + markers.length + " places.";
+        "Clear the year</a> to see all " + TOTAL_PLACES.toLocaleString() + " places.";
     }
 
     if (!t) {
@@ -3799,6 +3807,14 @@ window.addEventListener("load", async function () {
              display: flex; align-items: center;
              height: var(--ra-ctl, 38px); box-sizing: border-box; }
   .ra-find #ra-q { width: 100%; }
+  /* [hidden] is a UA rule, and `display: flex` below is an author rule, so
+     the author rule wins: the closed dropdown stayed laid out — a 1074x22
+     panel-coloured box with a shadow, absolutely positioned six pixels under
+     the search input. Once the bar became two rows those six pixels landed
+     exactly on the filter row, and elementFromPoint over "Layers" returned
+     this box. All three filters were unclickable on the live site. Nothing
+     looked wrong, which is why it took a browser asking for the click. */
+  .ra-recent[hidden] { display: none; }
   .ra-recent { position: absolute; top: calc(100% + 6px); left: 0; right: 0;
                z-index: 40; display: flex; align-items: center; gap: 6px;
                flex-wrap: wrap; padding: 10px 12px;

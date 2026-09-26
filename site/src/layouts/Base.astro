@@ -294,8 +294,19 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
         shows before personalised ads are served. That is compliant and it is a
         different mechanism, so it should not be described as the other one.
         See site/src/data/site.json. */}
+    {/* AN ASIDE, NOT A DIV — and note where this comment is. A div has no
+        role, and aria-label is prohibited on a roleless element, so axe calls
+        it aria-prohibited-attr and a screen reader simply drops the name:
+        the ad was an unannounced block of nothing before the article. An
+        aside element carries role=complementary implicitly, which permits
+        the name.
+
+        Written inside the parenthesised expression below, this comment broke
+        the build twice over: a comment is not a valid first child there, and
+        it named the two elements in angle brackets, which is the fault the
+        comment forty lines down describes in capitals. Read that one. */}
     {site.ads.enabled && site.ads.slot && (
-      <div class="adslot" aria-label="Advertisement">
+      <aside class="adslot" aria-label="Advertisement">
         <ins class="adsbygoogle" style="display:block" data-ad-client={site.ads.client}
              data-ad-slot={site.ads.slot} data-ad-format="horizontal"
              data-full-width-responsive="true"></ins>
@@ -319,7 +330,7 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
             has to be an expression containing a string, not a string
             containing braces. */}
         <script is:inline set:html={"(adsbygoogle = window.adsbygoogle || []).push({});"}></script>
-      </div>
+      </aside>
     )}
     <p class="foot-note">
       <b>Record Atlas</b> — {site.tagline}. Built in the open:

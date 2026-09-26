@@ -58,7 +58,11 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
              aria-label="Find a place or a surname, by any name it has ever had"
              aria-describedby="ra-recent"
              placeholder="Find a place or a surname — Gallignana · Žubrinić · Lerena" />
-      <div class="ra-recent" id="ra-recent" hidden
+      {/* role="group", because a div has no role and aria-label is prohibited
+          on a roleless element — so the name this box was given was being
+          discarded, and the one thing it had to say to a screen reader was
+          the one thing it did not say. */}
+      <div class="ra-recent" id="ra-recent" hidden role="group"
            aria-label="Searches you made before"></div>
     </div>
     <button class="ra-ico" id="ra-info" type="button" aria-expanded="false"

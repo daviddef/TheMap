@@ -137,9 +137,40 @@ def selectors_declared():
                 want.setdefault(sel, f)
     return want
 
+# ---------------------------------------------------------------------------
+# A NUMBER ONE FILE STATES ABOUT ANOTHER FILE.
+# index.json carries `quiet.places`, the row count of index-quiet.json, so the
+# map can say how many places the atlas holds before the second file arrives.
+# Both are written by the same build, so they agree by construction — until
+# they do not, and then the count on the page reads «21,479 of 21,473 places
+# shown», which is wrong, impossible, and permanent. The page now recounts
+# from the file once it lands; this makes sure the declaration was right in
+# the first place, because it is what every visitor sees for the first second.
+def quiet_count_gate():
+    loud_p = os.path.join(DIST, "index.json")
+    quiet_p = os.path.join(DIST, "index-quiet.json")
+    if not (os.path.exists(loud_p) and os.path.exists(quiet_p)):
+        err("index.json or index-quiet.json is missing from the build")
+        return
+    loud = json.load(open(loud_p, encoding="utf-8"))
+    quiet = json.load(open(quiet_p, encoding="utf-8"))
+    declared = ((loud.get("quiet") or {}).get("places"))
+    actual = len(quiet.get("places") or [])
+    if declared is None:
+        err("index.json has no quiet.places — the map cannot count the atlas")
+    elif declared != actual:
+        err(f"index.json declares quiet.places={declared} and index-quiet.json "
+            f"holds {actual} — the place count would be wrong by "
+            f"{abs(actual - declared)} for every visitor")
+    else:
+        print(f"quiet half: {actual:,} places, declared and counted agree")
+
+
 def main():
     if not os.path.isdir(DIST):
         sys.exit(f"{DIST} is not there — run this after astro build.")
+
+    quiet_count_gate()
 
     pages = glob.glob(DIST + "/**/*.html", recursive=True)
     if len(pages) < 100:

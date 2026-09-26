@@ -21,6 +21,15 @@ site/public/s/
 data/surnames.json
 site/public/surnames.json
 site/public/surnames.csv
+# AND THE GZIPPED ONES, which were tracked while their plain twins were not.
+# build.py writes all four on every run, CI included, so none of them ever
+# needed committing — but these two were, and they are 28 MB a pair. Twelve
+# commits have touched them, which is roughly 330 MB of a 685 MB .git spent on
+# versions of a download that is regenerated before every deploy. Untracked
+# now, which stops the growth; the history already written can only be removed
+# by a rewrite, and that is David's call, not a cleanup to slip into a commit.
+site/public/surnames.json.gz
+site/public/surnames.csv.gz
 
 # Everything under site/public that the build writes. `site/public` is Astro's
 # static root, so generated artefacts land beside the one file that is real

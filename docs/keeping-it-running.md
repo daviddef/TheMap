@@ -53,3 +53,44 @@ Two ways to fix it, and the second is better:
     tail .keepalive.log        # one heartbeat an hour; silence means the agent stopped
     tail .supervisor.log       # restarts, and when the matcher ran
     tail .publish-loop.log     # what was committed, and any failed push
+
+## The one file the build cannot rebuild
+
+`data/fs-volumes-world.json.gz` — 2,545,054 FamilySearch volumes matched to
+15,411 of the places this atlas holds. `scripts/match-fs-volumes.py` makes it
+from `data/fs-waypoints.json`, and that input is **740 MB and is not in the
+repository**. So no fresh clone and no CI runner can reproduce this file. It has
+to be carried from the machine that ran the harvest.
+
+It used to be carried in git. Sixteen committed versions cost **431 MB of a
+686 MB `.git`**: gzip does not delta-compress, so each version paid full price,
+while a plain-JSON sibling compressed 177 MB down to 9. It is a release asset
+now:
+
+    https://github.com/daviddef/TheMap/releases/tag/harvest-data
+
+**After a harvest re-runs, upload it or the deploy keeps building the old one:**
+
+```bash
+gh release upload harvest-data data/fs-volumes-world.json.gz --clobber
+```
+
+The deploy downloads it before `npm run build` and checks it holds more than
+20,000 volumes, so a truncated download fails rather than passes.
+
+### Why `build.py` now refuses to build without it
+
+It used to skip silently — `if world:` — and publish a complete-looking atlas
+with two and a half million volumes quietly absent. That was survivable while
+the file was always present in the checkout. The moment it moved out of git it
+stopped being survivable: a failed download would have produced a smaller atlas
+and a **green build**, which is the one pairing this project cannot afford.
+
+So a missing file is now a hard failure. If you are working on something
+unrelated and genuinely do not need the volumes:
+
+```bash
+RA_ALLOW_NO_WORLD=1 npm run build
+```
+
+which warns, in words, exactly what is missing. CI never sets it.

@@ -37,6 +37,31 @@ jobs:
       - name: Install
         run: npm ci || npm install
         working-directory: site
+
+      # THE HARVEST ARTEFACT THE BUILD CANNOT REPRODUCE.
+      #
+      # data/fs-volumes-world.json.gz holds 2,545,054 FamilySearch volumes over
+      # 15,411 places. scripts/match-fs-volumes.py makes it from data/fs-waypoints.
+      # json, which is 740 MB and is not in the repository — so no checkout and
+      # no runner can rebuild it. It has to be carried.
+      #
+      # It used to be carried in git, and that cost 431 MB of a 686 MB .git
+      # across sixteen versions: gzip does not delta-compress, so each version
+      # paid full price while a plain-JSON sibling compressed 177 MB down to 9.
+      # It is a release asset now, replaced in place when the harvest re-runs.
+      #
+      # NO `continue-on-error` HERE, DELIBERATELY. build.py fails when the file
+      # is absent, because the alternative is a green build publishing an atlas
+      # with 2.5 million volumes quietly missing — and a wrong site that looks right
+      # is the one failure this project cannot afford. A download that breaks
+      # must break the deploy.
+      - name: Fetch the harvest artefact
+        run: |
+          curl -fsSL --retry 4 --retry-delay 5 \
+            -o data/fs-volumes-world.json.gz \
+            https://github.com/daviddef/TheMap/releases/download/harvest-data/fs-volumes-world.json.gz
+          python3 -c "import gzip,json,sys; d=json.load(gzip.open('data/fs-volumes-world.json.gz','rt',encoding='utf-8')); n=sum(len(v) for v in d['byPlace'].values()); print(f'{n:,} volumes over {len(d[\"byPlace\"]):,} places'); sys.exit(0 if n > 20000 else 'the artefact downloaded but is too small to be right')"
+
       - name: Build
         run: npm run build
         working-directory: site

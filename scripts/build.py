@@ -402,6 +402,20 @@ def main():
     # take as plain JSON — 13.4 MB at 5% of the harvest, heading for 275 —
     # and this shape compresses about sixteen to one. Both forms are read so
     # an older checkout still builds.
+    # ITS ABSENCE MUST BE LOUD, AND UNTIL NOW IT WAS SILENT.
+    #
+    # `if world:` below simply skips when this file is missing, and the build
+    # goes on to publish a complete-looking atlas with 2.5 million matched volumes
+    # quietly absent from it. That was tolerable while the file was committed,
+    # because it was always there. It stopped being tolerable the moment the
+    # file moved OUT of git to a release asset: a download that fails would
+    # produce a smaller atlas and a green build, which is the worst pairing
+    # this project has.
+    #
+    # So a missing file is now an error unless someone says, in an environment
+    # variable, that they know. A contributor without the harvest can still
+    # build with RA_ALLOW_NO_WORLD=1 and will be told exactly what they are
+    # missing; CI never sets it, so a failed download fails the deploy.
     world = None
     for _wf in ("data/fs-volumes-world.json.gz", "data/fs-volumes-world.json"):
         if os.path.exists(_wf):
@@ -442,6 +456,17 @@ def main():
                 _an += 1
         print(f"antenati        {_an} registers from the Ministry's open data, "
               f"on {len(_ant['byPlace'])} comuni")
+
+    if world is None:
+        _msg = ("data/fs-volumes-world.json.gz is missing. It holds 2,545,054 "
+                "FamilySearch volumes over 15,411 places and the build cannot "
+                "reproduce it — its input, data/fs-waypoints.json, is 740 MB "
+                "and is not in the repository. It is published as a release "
+                "asset; see docs/keeping-it-running.md. Set "
+                "RA_ALLOW_NO_WORLD=1 to build a deliberately smaller atlas.")
+        if os.environ.get("RA_ALLOW_NO_WORLD") != "1":
+            sys.exit("FAIL: " + _msg)
+        print("WARNING: " + _msg)
 
     if world:
         _added = 0

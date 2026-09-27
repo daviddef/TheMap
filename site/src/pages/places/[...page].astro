@@ -1,11 +1,9 @@
 ---
-/* The crawl path. A sitemap tells a search engine a page exists; a page that
-   nothing links to still reads as an orphan. This is the index that makes the
-   place pages reachable by walking, which is how they get read.
+/* The crawl path, and — since today — something a person can actually use.
  *
  * PAGINATED, BECAUSE IT OUTGREW ITSELF. This was one page listing every
- * place, written when there were 1,239 of them. There are now 13,494 and it
- * had become 2.58 MB of HTML — the heaviest thing on the site by a factor of
+ * place, written when there were 1,239 of them. There were 13,494 by the time
+ * it had become 2.58 MB of HTML — the heaviest thing on the site by a factor of
  * five, unusable on a phone, and self-defeating as a crawl path because a
  * crawler is no more likely to read 2.58 MB than a person is.
  *
@@ -13,6 +11,29 @@
  * place is orphaned, and a cap orphans everything past the cut. So it splits
  * instead. Every place is still linked from somewhere, each page is a few
  * hundred kilobytes at most, and /places/ still exists as the first of them.
+ *
+ * AND THEN SPLITTING TURNED OUT TO BE THE WHOLE PROBLEM.
+ * David: «incredibly useless. i cant search it, its layed out really badly in
+ * a long impossible list». All three true, and the pagination caused them. A
+ * reader who wants Gračišće is on page 1 of thirty-six, looking down a column
+ * of six hundred Italian comuni, with no way to search and no way to jump.
+ * The split solved the byte count and left the page answering no question.
+ *
+ * Three things fix it, in order of how much they matter:
+ *
+ *   1. SEARCH, over every place at once rather than the six hundred on this
+ *      page. It reads index.json — the same file the map fetches, so it is
+ *      usually already cached — and matches against `q`, the fold of every
+ *      name a place has ever had. Gallignana finds Gračišće here too.
+ *   2. A COUNTRY DIRECTORY at the top. Almost nobody wants «every place»;
+ *      they want every place in one country, and /country/<cc>/ already
+ *      exists and is better at it. Thirty-six pages of pagination were
+ *      standing where a list of countries should have been.
+ *   3. COLUMNS. Six hundred names in one column is nine screens of scrolling
+ *      on a laptop. The same six hundred in a responsive grid is two.
+ *
+ * The server-rendered list stays exactly as it was, because it is the crawl
+ * path and because search that needs JavaScript must not be the only way in.
  */
 import Base from "../../layouts/Base.astro";
 import { u } from "../../lib/url.js";
@@ -43,8 +64,30 @@ export function getStaticPaths({ paginate }) {
 
 const { page } = Astro.props;
 const CN = idx.countries || {};
-const vols = full.places.reduce((a, p) => a + (p.collections || []).length, 0);
-const countries = new Set(full.places.map((p) => p.country || "??")).size;
+/* NOT «VOLUMES», WHICH IS WHAT THIS SAID AND WHAT IT IS NOT.
+   This sums the collections covering each place — 8,557 place-and-collection
+   pairs — and the eyebrow labelled it «8,557 volumes» while the front page of
+   the same site says «2,547,650 record volumes». Both true of different
+   things, both called volumes, three hundred times apart. A reader comparing
+   the two would conclude this index had lost 99.7% of the atlas. The number
+   beside each place is the same figure per place, so it is the one thing on
+   this page that most needs saying plainly. */
+const covers = full.places.reduce((a, p) => a + (p.collections || []).length, 0);
+const withAny = full.places.filter((p) => (p.collections || []).length).length;
+
+/* THE COUNTRY DIRECTORY, alphabetical by name rather than by size. Ordering
+   by count answers «where is this map thickest», which is a question nobody
+   arrives with; a reader arrives knowing a country's name and wants to run
+   their eye down a column and find it. */
+const counts = {};
+for (const p of full.places) {
+  const cc = p.country || "??";
+  counts[cc] = (counts[cc] || 0) + 1;
+}
+const countryList = Object.entries(counts)
+  .map(([cc, n]) => ({ cc, n, name: CN[cc] || cc }))
+  .sort((a, b) => a.name.localeCompare(b.name));
+const countries = countryList.length;
 
 /* Print a country heading only where the country changes. */
 let last = null;
@@ -56,14 +99,38 @@ const rows = page.data.map((p) => {
 ---
 <Base
   title={page.currentPage === 1 ? "Every place" : `Every place — ${page.currentPage} of ${page.lastPage}`}
-  eyebrow={`${full.places.length.toLocaleString()} places · ${vols.toLocaleString()} volumes · ${countries} countries`}
-  dek={`Every place the shelf has walked, with the number of record volumes standing at each. Page ${page.currentPage} of ${page.lastPage}.`}>
+  eyebrow={`${full.places.length.toLocaleString()} places · ${countries} countries · ${withAny.toLocaleString()} with a collection over them`}
+  dek={`Every place this atlas holds. The number beside a name is how many collections cover it — ${covers.toLocaleString()} such coverings in all. Page ${page.currentPage} of ${page.lastPage}.`}>
+
+  {/* SEARCH FIRST, because it is the answer to the question this page is
+      actually asked. It is hidden until the script runs: a search box that
+      does nothing is worse than no search box, and a reader without
+      JavaScript still has the country directory and the list below. */}
+  <form class="psearch" id="psearch" hidden autocomplete="off"
+        onsubmit="return false">
+    <label class="vh" for="pq">Find a place by any name it has ever had</label>
+    <input id="pq" type="search" placeholder="Find a place — Gallignana finds Gračišće" />
+    <p class="phint" id="phint" role="status" aria-live="polite"></p>
+    <ul class="phits" id="phits"></ul>
+  </form>
+
+  <details class="cdir" id="cdir" open={page.currentPage === 1}>
+    <summary><b>Jump to a country</b> — {countries} of them</summary>
+    <p class="cap">Almost nobody wants every place at once. Each country page lists
+    its own places and what covers them.</p>
+    <ul class="cgrid">
+      {countryList.map((c) => (
+        <li><a href={u(`/country/${c.cc.toLowerCase()}/`)}>{c.name}</a><span class="y">{c.n.toLocaleString()}</span></li>
+      ))}
+    </ul>
+  </details>
 
   <p class="cap">This index exists so that no place page is an orphan — everything here
   is reachable by walking from the front of the site. It is split across
   <b>{page.lastPage} pages</b> because listing all {full.places.length.toLocaleString()} at once
-  came to 2.58 MB, which is no use to a reader or to a crawler.
-  To find one place, <a href={u("/")}>the map</a> searches every name a place has ever had.</p>
+  came to 2.58 MB at a smaller count than today's, which is no use to a reader
+  or to a crawler.
+  To find one place, search above or use <a href={u("/")}>the map</a>.</p>
 
   <ul class="places">
     {rows.map(({ p, head }) => (
@@ -71,7 +138,7 @@ const rows = page.data.map((p) => {
         {head && <li class="head"><h2>{head}</h2></li>}
         <li>
           <a href={u(`/place/${p.id}/`)}>{p.name}</a>
-          <span class="y">{(p.collections || []).length}</span>
+          <span class="y" title={`${(p.collections || []).length} collection${(p.collections || []).length === 1 ? "" : "s"} cover this place`}>{(p.collections || []).length}</span>
           {(p.names || []).length > 0 && (
             <span class="alt">{p.names.map((n) => n.n).slice(0, 2).join(" · ")}</span>
           )}
@@ -101,14 +168,138 @@ const rows = page.data.map((p) => {
       <a href={u(`/places/${page.currentPage + 1}/`)}>next →</a>
     )}
   </nav>
+
+  <script is:inline define:vars={{ BASE: u("/"), IDX: u("/index.json"), QUIET: u("/index-quiet.json") }}>
+    /* SEARCH ACROSS ALL OF IT, not across the six hundred on this page.
+       index.json is what the map fetches, so a reader arriving from the map
+       has it cached already; the quiet half follows so that ground nobody has
+       walked is findable too — those are exactly the places a reader is most
+       likely to be the first to ask about. */
+    (function () {
+      var form = document.getElementById("psearch");
+      var box = document.getElementById("pq");
+      var hits = document.getElementById("phits");
+      var hint = document.getElementById("phint");
+      var rows = null, loading = false, pending = "";
+
+      form.hidden = false;
+
+      function fold(s) {
+        return (s || "").toString().toLowerCase()
+          .normalize("NFD").replace(/[̀-ͯ]/g, "");
+      }
+      function esc(s) {
+        return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+        });
+      }
+
+      function load() {
+        if (rows || loading) return Promise.resolve();
+        loading = true;
+        hint.textContent = "Loading the index…";
+        return fetch(IDX).then(function (r) { return r.json(); }).then(function (d) {
+          rows = d.places.slice();
+          hint.textContent = "";
+          /* The quiet half arrives second and is merged in place, so a search
+             typed in the first second still works and simply gets better. */
+          return fetch(QUIET).then(function (r) { return r.json(); })
+            .then(function (q) { rows = rows.concat(q.places || []); })
+            .catch(function () {});
+        }).catch(function () {
+          hint.textContent = "The index did not load. The list below still works, " +
+                             "and so does the map.";
+        }).then(function () {
+          loading = false;
+          if (pending) run(pending);
+        });
+      }
+
+      function run(t) {
+        var k = fold(t).trim();
+        if (k.length < 2) { hits.innerHTML = ""; hint.textContent = ""; return; }
+        if (!rows) { pending = t; load(); return; }
+        pending = "";
+        var out = [], starts = [];
+        for (var i = 0; i < rows.length && out.length < 400; i++) {
+          var p = rows[i];
+          /* `q` is the fold of every name the place has ever had, which is why
+             Gallignana finds Gračišće. Fall back to the display name for rows
+             that carry no blob. */
+          var hay = p.q || fold(p.n);
+          if (hay.indexOf(k) === -1) continue;
+          (fold(p.n).indexOf(k) === 0 ? starts : out).push(p);
+        }
+        /* A name that STARTS with what was typed is what the reader meant;
+           one that merely contains it is a maybe. Sorting that way means
+           «pazin» does not answer with Kaliningrad-Pazin-something first. */
+        var all = starts.concat(out).slice(0, 60);
+        if (!all.length) {
+          hits.innerHTML = "";
+          hint.textContent = "Nothing here answers to “" + t.trim() +
+            "”. The map searches the gazetteer as well, which is larger.";
+          return;
+        }
+        hint.textContent = all.length + (all.length === 60 ? "+ " : " ") +
+          "place" + (all.length === 1 ? "" : "s");
+        hits.innerHTML = all.map(function (p) {
+          return '<li><a href="' + BASE + "place/" + esc(p.i) + '/">' + esc(p.n) +
+                 "</a>" + (p.cc ? '<span class="cc">' + esc(p.cc) + "</span>" : "") +
+                 (p.v ? '<span class="y">' + p.v + "</span>" : "") + "</li>";
+        }).join("");
+      }
+
+      var t = null;
+      box.addEventListener("input", function () {
+        clearTimeout(t);
+        var v = box.value;
+        t = setTimeout(function () { run(v); }, 110);
+      });
+      box.addEventListener("focus", load, { once: true });
+    })();
+  </script>
 </Base>
 
 <style>
   h2 { font-family: var(--serif); font-size: 24px; font-weight: 500; margin: 22px 0 4px;
        border-bottom: 1px solid var(--rule); padding-bottom: 6px; }
-  .places { list-style: none; padding: 0; margin: 10px 0 0; }
-  .places li { font-family: var(--sans); font-size: 13.5px; line-height: 1.9; }
-  .places li.head { line-height: 1; }
+
+  /* ---- search ----------------------------------------------------------- */
+  .vh { position: absolute; width: 1px; height: 1px; overflow: hidden;
+        clip: rect(0 0 0 0); white-space: nowrap; }
+  .psearch { margin: 18px 0 6px; }
+  .psearch input { width: 100%; box-sizing: border-box; font-family: var(--sans);
+    font-size: 15px; padding: 11px 13px; border: 1px solid var(--rule-strong);
+    border-radius: 6px; background: var(--panel); color: var(--ink); }
+  .psearch input:focus { outline: 2px solid var(--accent); outline-offset: 1px;
+    border-color: var(--accent); }
+  .phint { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3);
+    margin: 6px 0 0; min-height: 1em; }
+  .phits { list-style: none; padding: 0; margin: 8px 0 0;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 2px 18px; }
+  .phits li { font-family: var(--sans); font-size: 13.5px; line-height: 1.75; }
+  .phits .cc { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3);
+    margin-left: 6px; }
+
+  /* ---- the country directory -------------------------------------------- */
+  .cdir { margin: 16px 0 6px; border: 1px solid var(--rule);
+    border-radius: 6px; padding: 12px 14px; background: var(--panel); }
+  .cdir summary { font-family: var(--sans); font-size: 14px; cursor: pointer; }
+  .cgrid { list-style: none; padding: 0; margin: 10px 0 2px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 1px 18px; }
+  .cgrid li { font-family: var(--sans); font-size: 13px; line-height: 1.8; }
+
+  /* ---- the list, in columns rather than one nine-screen ribbon ----------- */
+  .places { list-style: none; padding: 0; margin: 10px 0 0;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 0 20px; }
+  .places li { font-family: var(--sans); font-size: 13.5px; line-height: 1.9;
+    break-inside: avoid; }
+  /* A country heading spans the grid, so the names under it read as that
+     country's and a run never starts mid-row under the wrong title. */
+  .places li.head { line-height: 1; grid-column: 1 / -1; }
   .y { font-family: var(--mono); font-size: 11px; color: var(--ink-3); margin-left: 8px; }
   .alt { font-family: var(--sans); font-size: 12px; color: var(--ink-3); margin-left: 8px; }
   .cap { font-family: var(--sans); font-size: 13px; color: var(--ink-2); line-height: 1.6;

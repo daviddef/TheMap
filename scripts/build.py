@@ -539,7 +539,18 @@ def main():
             wa_by_cc.setdefault(_r["cc"], []).append(
                 {k: v for k, v in _r.items()
                  if k in ("name", "url", "kind", "status", "lat", "lon")})
+        # AN INSTITUTION THAT MOVED IS NOT TWO INSTITUTIONS. France carried
+        # «Archives nationales» twice: once at http://www.archivesnationales…
+        # recorded `unreachable`, once at the https://www.archives-nationales…
+        # that works. Alphabetically the dead one sorted first, so the panel
+        # led with a link that goes nowhere and a reader had no way to tell
+        # the two apart — the names are byte-identical. Where a country has
+        # the same name both live and dead, the dead address is dropped: the
+        # institution is still listed, at the address that answers.
         for _k in wa_by_cc:
+            _live = {r["name"] for r in wa_by_cc[_k] if r.get("status") == "ok"}
+            wa_by_cc[_k] = [r for r in wa_by_cc[_k]
+                            if r.get("status") == "ok" or r["name"] not in _live]
             wa_by_cc[_k].sort(key=lambda r: (r["kind"] != "national-archive", r["name"]))
     except FileNotFoundError:
         pass
@@ -1064,11 +1075,18 @@ def main():
     # would quietly downgrade the ones somebody checked.
     try:
         wa = json.load(open("data/world-archives.json"))
+        # ALREADY GROUPED, SIX HUNDRED LINES ABOVE. wa_by_cc is built from this
+        # same file where the country points need its counts, and this block
+        # then appended every row into it a SECOND time — so the shipped file
+        # held 786 rows where the source has 393, and every country panel
+        # listed each archive twice. France showed «Archives nationales» three
+        # times, two of them the same dead URL, and a reader clicking the first
+        # got nothing: the duplicate was not merely untidy, it put a link
+        # recorded as `unreachable` above the one that works.
+        #
+        # 393 duplicate rows across 164 countries; Bulgaria had 23, Hungary 20.
+        # Group once, use it twice.
         by_cc = wa_by_cc
-        for r in wa["archives"]:
-            by_cc.setdefault(r["cc"], []).append(
-                {k: v for k, v in r.items()
-                 if k in ("name", "url", "kind", "status", "lat", "lon")})
         json.dump({"note": wa["note"], "source": wa["source"],
                    "licence": wa["licence"], "harvested": wa["harvested"],
                    "byCountry": by_cc},

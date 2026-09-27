@@ -59,10 +59,15 @@ jobs:
           fi
           n=$(python3 -c "import json;print(json.load(open('data/trove-newspapers.json'))['counts']['titles'])")
           git add data/trove-newspapers.json
-          git commit -m "Trove: $n newspaper titles, refreshed inside the 30-day cache limit
-
-The Trove API terms cap caching at thirty days and scripts/build.py fails past
-that, so this is a licence obligation on a timer rather than a data update.
-
-Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
+          # ONE -m PER PARAGRAPH, and the reason is that the first version of
+          # this wrote a multi-line message whose continuation lines began at
+          # column 1. That ends the YAML block scalar, so GitHub read the prose
+          # as a workflow key, called the file invalid, and reported it as a
+          # FAILED RUN ON EVERY PUSH — a workflow that had never run failing
+          # loudly about something it does not do. Every line in a run: block
+          # has to stay indented; separate -m flags keep it that way.
+          git commit \
+            -m "Trove: $n newspaper titles, refreshed inside the 30-day limit" \
+            -m "The Trove API terms cap caching at thirty days and scripts/build.py fails past that, so this is a licence obligation on a timer rather than a data update." \
+            -m "Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
           git push

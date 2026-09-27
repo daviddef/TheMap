@@ -457,6 +457,80 @@ def main():
         print(f"antenati        {_an} registers from the Ministry's open data, "
               f"on {len(_ant['byPlace'])} comuni")
 
+    # ---- TROVE: Australia's digitised newspapers --------------------------
+    # There is no parish-register series covering Australia. Civil registration
+    # is state by state, closed for a lifetime and mostly not online. What IS
+    # online, free and full-text is 2,014 digitised newspapers, and Australian
+    # papers printed births, marriages, deaths and obituaries in volume. For
+    # most Australian ancestors before 1950 the newspaper IS the record.
+    #
+    # MATCHED ON TOWN **AND** COUNTRY, which is the whole of the care here.
+    # Matching on the town alone looks like it works — 595 hits led by Sydney
+    # with 145 titles and Perth with 103. This atlas's Sydney is Sydney, NOVA
+    # SCOTIA, and its Perth is Perth, SCOTLAND. That match would have filed 102
+    # Western Australian papers in Scotland and 145 Sydney papers in Canada:
+    # 151 titles, every one confidently wrong and undetectable on a map,
+    # because a dot on Perth looks exactly as right as a dot on Perth.
+    #
+    # A town this atlas does not hold is NOT invented. Katoomba, Kalgoorlie and
+    # Coolgardie are real and the gap is ours, not Trove's.
+    #
+    # THIRTY DAYS. The Trove API terms permit distributing this metadata inside
+    # our own site and cap caching at thirty days. A static site bakes its data
+    # in until the next build, so a stale file here is not untidiness — it is
+    # falling outside the licence. Hence the hard failure below rather than a
+    # warning: the whole argument of this project is that a source is used on
+    # the terms it was given under.
+    try:
+        _tv = json.load(open("data/trove-newspapers.json"))
+    except FileNotFoundError:
+        _tv = None
+    if _tv:
+        _age = (datetime.date.today()
+                - datetime.date.fromisoformat(_tv["harvested"])).days
+        if _age > 30 and os.environ.get("RA_ALLOW_STALE_TROVE") != "1":
+            sys.exit(f"FAIL: data/trove-newspapers.json was harvested {_age} days "
+                     f"ago and the Trove API terms allow caching for 30. "
+                     f"Re-run scripts/harvest-trove.py, or set "
+                     f"RA_ALLOW_STALE_TROVE=1 to build without the newspapers.")
+        _tby = {}
+        for _p in places:
+            _cc = _p.get("country")
+            for _n in [_p["name"]] + [x.get("n", "")
+                                      for x in (_p.get("names") or [])]:
+                for _form in {fold(_n), fold(_n.split(",")[0])}:
+                    if _form:
+                        _tby.setdefault((_form, _cc), _p["id"])
+        _tn, _tplaces, _tmiss = 0, set(), 0
+        for _t in _tv["titles"]:
+            _town, _cc2 = _t.get("town"), _t.get("cc")
+            if not _town or not _cc2:
+                continue
+            _pid = _tby.get((fold(_town), _cc2))
+            if not _pid:
+                _tmiss += 1
+                continue
+            _from = int(_t["from"]) if _t.get("from") else None
+            _to = int(_t["to"]) if _t.get("to") else None
+            _seen2 = {(re.sub(r"\s+", " ", (r.get("t") or "")).strip().lower(),
+                       r.get("from"), r.get("to"))
+                      for r in vol_by_place.get(_pid, [])}
+            if (_t["masthead"].strip().lower(), _from, _to) in _seen2:
+                continue
+            vol_by_place.setdefault(_pid, []).append({
+                "t": _t["masthead"], "from": _from, "to": _to,
+                "provider": "trove", "url": _t["url"],
+                "held": "National Library of Australia",
+                # Set rather than read off the title: «Molong Argus» contains no
+                # word any classifier would recognise, and these are newspapers
+                # whatever they are called.
+                "rk": ["newspaper"],
+            })
+            _tn += 1
+            _tplaces.add(_pid)
+        print(f"trove           {_tn} newspaper titles on {len(_tplaces)} places "
+              f"({_tmiss} name a town this atlas does not hold yet)")
+
     if world is None:
         _msg = ("data/fs-volumes-world.json.gz is missing. It holds 2,545,054 "
                 "FamilySearch volumes over 15,411 places and the build cannot "

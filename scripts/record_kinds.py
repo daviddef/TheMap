@@ -47,6 +47,22 @@ KINDS = [
     ("civil", "Civil registration and vital records",
      r"civil regist|vital record|\bbirths?\b|\bdeaths?\b|\bmarriages?\b|"
      r"divorce|register office|state registration"),
+    # LAST, AND THE POSITION IS THE POINT. Trove's 2,014 Australian papers are
+    # a genealogical source of the first rank — Australian papers printed
+    # births, marriages, deaths and obituaries in volume, and for most
+    # Australian ancestors before 1950 the newspaper IS the record, because
+    # civil registration is state-by-state and closed for a lifetime.
+    #
+    # The pattern is deliberately two words rather than the obvious list of
+    # mastheads. «advertiser», «chronicle», «courier», «herald», «times» and
+    # «journal» would each have reclassified existing church and probate
+    # collections that merely carry the word, and this list is ordered so that
+    # the FIRST match wins. Sitting last, with a narrow pattern, it can only
+    # claim a title nothing else wanted. Trove's own rows do not rely on it at
+    # all: build.py sets `rk` explicitly, because «Molong Argus» contains no
+    # word any classifier could recognise and it is a newspaper regardless.
+    ("newspaper", "Newspapers and gazettes",
+     r"\bnewspapers?\b|\bgazette\b"),
 ]
 RX = [(k, label, re.compile(p, re.I)) for k, label, p in KINDS]
 LABEL = {k: label for k, label, _ in KINDS}

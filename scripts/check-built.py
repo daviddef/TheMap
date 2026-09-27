@@ -61,6 +61,10 @@ ATTRIBUTION_ON = {
     "the National Records of Scotland": ["home"],
     "OpenStreetMap": ["home", "place"],
     "Townlands.ie": ["home"],
+    # Trove's terms require the application to say it uses Trove data and link
+    # to it. An unmet condition on a licence is not a missing footnote, so it
+    # is gated like the CC BY ones rather than trusted to survive edits.
+    "Trove": ["home", "place"],
 }
 # Which declared licence strings mean which holder.
 LICENCE_HOLDER = {

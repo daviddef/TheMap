@@ -1,0 +1,68 @@
+name: Trove refresh
+
+# THIRTY DAYS IS A LICENCE TERM, NOT A PREFERENCE.
+#
+# The Trove API terms permit copying and distributing this metadata inside our
+# own site, and cap caching at thirty days. A static site bakes its data in
+# until the next build, so data/trove-newspapers.json going stale is not
+# untidiness — it is falling outside the terms we were given the key under.
+# scripts/build.py FAILS when the file is older than thirty days, which turns a
+# licence breach into a broken build rather than a quiet one.
+#
+# So this re-harvests fortnightly, at half the allowance, leaving room for a
+# fortnight of failures before anything expires.
+#
+# ONE API CALL. /v3/newspaper/titles returns all 2,014 titles at once, so this
+# costs Trove a single request a fortnight and needs no rate limiting.
+on:
+  schedule:
+    - cron: "17 4 */14 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # THE KEY IS A SECRET AND HAS AN EXPIRY. David's runs to December 2026.
+      # Without it this job fails loudly rather than committing a file that
+      # says it was refreshed when it was not.
+      - name: Harvest
+        env:
+          TROVE_API_KEY: ${{ secrets.TROVE_API_KEY }}
+        run: |
+          if [ -z "$TROVE_API_KEY" ]; then
+            echo "::error::TROVE_API_KEY is not set as a repository secret. The"
+            echo "::error::build fails once data/trove-newspapers.json is 30 days"
+            echo "::error::old, because that is the Trove caching limit."
+            exit 1
+          fi
+          python3 scripts/harvest-trove.py
+
+      - name: Commit if it changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # `harvested` changes on every run, so a diff of only that line means
+          # nothing changed but the date — which is still worth committing,
+          # because the date is what the build's thirty-day gate reads.
+          if git diff --quiet -- data/trove-newspapers.json; then
+            echo "no change at all — nothing to commit"
+            exit 0
+          fi
+          n=$(python3 -c "import json;print(json.load(open('data/trove-newspapers.json'))['counts']['titles'])")
+          git add data/trove-newspapers.json
+          git commit -m "Trove: $n newspaper titles, refreshed inside the 30-day cache limit
+
+The Trove API terms cap caching at thirty days and scripts/build.py fails past
+that, so this is a licence obligation on a timer rather than a data update.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
+          git push

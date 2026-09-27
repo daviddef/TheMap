@@ -436,6 +436,88 @@ window.addEventListener("load", async function () {
         : esc(rs.reg.label));
     });
   }
+  /* ---- WHO HELD THIS GROUND, AND WHERE TO SEE ITS FLAG ------------------
+     David asked for the Flag History timeline to arrive in these results, so a
+     reader gets the map and, under it, the polities that governed the place
+     they just searched. The eras are OURS — regions.json, 230 researched eras
+     with `filedUnder`, which archive a regime's paper actually went to. Flag
+     History is the destination, not the source: nothing here parses their
+     pages and nothing of theirs is embedded.
+
+     JOINED ON THE REGION, NOT THE COUNTRY, and that is the whole point. A flag
+     timeline keyed on a modern country is a statement about a border that
+     mostly did not exist for the period it covers. Gračišće was Aquileian,
+     Venetian, Habsburg, Napoleonic, Austrian, Italian, Yugoslav and Croatian,
+     and only the last of those is answered by a page called croatia-flags.
+
+     THE LINK CARRIES NO ANCHOR. Their ids are #era-<startyear> keyed on the
+     year a FLAG changed; ours is the year a FILING system changed. Croatia's
+     page has eighteen anchors and era-1374 is not one of them, so a precise
+     link would land silently at the top of the page and look like it worked.
+     Their page can find the year; we do not invent an address for it. */
+  var FLAG_SLUG = {
+    AR: "argentina", AT: "austria", AU: "australia", BA: "bosnia-and-herzegovina",
+    BE: "belgium", BY: "belarus", CA: "canada", CZ: "czechia", DE: "germany",
+    DK: "denmark", EE: "estonia", FI: "finland", FR: "france",
+    GB: "united-kingdom", HR: "croatia", HU: "hungary", IE: "ireland",
+    IT: "italy", LT: "lithuania", LV: "latvia", NL: "netherlands",
+    NO: "norway", PL: "poland", PT: "portugal", RO: "romania", RS: "serbia",
+    RU: "russia", SE: "sweden", SI: "slovenia", SK: "slovakia", UA: "ukraine",
+    US: "united-states", ZA: "south-africa"
+  };
+  var FLAG_BASE = "https://daviddef.github.io/Flag-History/";
+
+  /* Which regions contain this point. Leaflet's polygons are already built, so
+     this asks them rather than carrying a second point-in-ring implementation —
+     a place near an edge may fall in two, which is correct: the rings shade a
+     filing system, they do not adjudicate a border. */
+  function regionsAt(lat, lon) {
+    var out = [];
+    regionShapes.forEach(function (rs) {
+      var r = rs.reg.ring, inside = false;
+      for (var i = 0, j = r.length - 1; i < r.length; j = i++) {
+        var yi = r[i][0], xi = r[i][1], yj = r[j][0], xj = r[j][1];
+        if (((yi > lat) !== (yj > lat)) &&
+            (lon < (xj - xi) * (lat - yi) / (yj - yi) + xi)) inside = !inside;
+      }
+      if (inside) out.push(rs.reg);
+    });
+    return out;
+  }
+
+  function heldBy(d) {
+    if (d.lat == null || d.lon == null) return "";
+    var regs = regionsAt(d.lat, d.lon);
+    if (!regs.length) return "";
+    var h = [];
+    regs.forEach(function (reg) {
+      h.push('<p class="at-lab">' + esc(T("Who held this ground")) + " · " +
+             esc(reg.label) + "</p>");
+      h.push('<ul class="ra-eras">');
+      reg.eras.forEach(function (e) {
+        var filed = (e.filedUnder || []).length
+          ? (e.filedUnder || []).map(esc).join(" · ")
+          /* An era with no archive is not a gap in the research — for Istria
+             before 1374 no parish registers exist anywhere, because Trent only
+             required them from 1563. Saying so beats an empty cell. */
+          : '<span class="ra-era-none">' + esc(T("no archive holds this yet")) + "</span>";
+        h.push('<li><span class="ra-era-y">' + e.from + "\u2013" + e.to + "</span>" +
+               '<span class="ra-era-p">' + esc(e.polity) + "</span>" +
+               '<span class="ra-era-f">' + filed + "</span>" +
+               (e.note ? '<span class="ra-era-n">' + esc(e.note) + "</span>" : "") +
+               "</li>");
+      });
+      h.push("</ul>");
+      var cc = (reg.countries || [])[0];
+      if (cc && FLAG_SLUG[cc])
+        h.push('<p class="at-hint"><a href="' + FLAG_BASE + FLAG_SLUG[cc] +
+               '-flags.html" rel="noopener">' +
+               esc(T("See the flags these regimes flew")) +
+               " \u2197</a> " + esc(T("on Flag History, a sister project.")) + "</p>");
+    });
+    return h.join("");
+  }
+
   var REGION = {}; regions.regions.forEach(function (r) { REGION[r.id] = r; });
   /* Folded name -> place id, so a civil parish or a province named in a search
      result can be turned into a link to the page this map already has for it. */
@@ -1029,6 +1111,10 @@ window.addEventListener("load", async function () {
       });
       h.push("</ul></div>");
     });
+    /* Last, because it is context rather than an answer: the volumes above are
+       what a reader came for, and whose archive held the ground is what they
+       need next when the volumes run out. */
+    h.push(heldBy(d));
     return h.join("");
   }
 
@@ -3841,6 +3927,22 @@ window.addEventListener("load", async function () {
   :global(.ra-recent-x) { font: 400 10.5px/1 var(--sans); color: var(--ink-3);
     background: none; border: 0; cursor: pointer; text-decoration: underline;
     padding: 5px 2px; }
+  /* ---- who held this ground -------------------------------------------- */
+  .ra-eras { list-style: none; margin: 4px 0 10px; padding: 0; }
+  :global(.ra-eras li) { display: grid; gap: 1px 10px; padding: 6px 0;
+    grid-template-columns: 5.9em 1fr; border-top: 1px solid var(--rule); }
+  :global(.ra-eras li:first-child) { border-top: 0; }
+  :global(.ra-era-y) { font-family: var(--mono); font-size: 11.5px;
+    color: var(--ink-2); white-space: nowrap; }
+  :global(.ra-era-p) { font-size: 12.5px; color: var(--ink); line-height: 1.4; }
+  /* The archive sits under the polity rather than beside it: «which archive»
+     is the answer to «who governed», not a second fact of equal weight. */
+  :global(.ra-era-f) { grid-column: 2; font-family: var(--mono); font-size: 11px;
+    color: var(--ink-2); }
+  :global(.ra-era-n) { grid-column: 2; font-size: 11.5px; color: var(--ink-3);
+    line-height: 1.45; margin-top: 2px; }
+  :global(.ra-era-none) { font-family: var(--sans); font-style: italic;
+    color: var(--ink-3); }
   .ra-copied { font-family: var(--mono); font-size: 11px; color: var(--ink-3); margin-left: 8px; }
   :global(.ra-base a) { width: auto !important; padding: 0 9px; font: 500 11px/26px var(--sans);
                         text-transform: capitalize; }

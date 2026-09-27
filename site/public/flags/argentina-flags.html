@@ -1,0 +1,820 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+</style></head><body>
+<title>Flags of Argentina</title>
+<meta name="description" content="A chronological, paint-ready atlas of every flag that flew over Argentina, from Spanish colonial rule out of Lima to the modern republic — with the real dates of viceregal founding, revolution, independence, and reunification.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.08rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; font-size: .94rem; color: var(--muted); }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  .legend { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+
+  /* ---------- Timeline ---------- */
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1px; background: var(--hair); }
+  @media (max-width: 560px) { .timeline::before { left: 9px; } }
+  .entry { position: relative; padding-left: 46px; margin-bottom: 46px; }
+  @media (max-width: 560px) { .entry { padding-left: 30px; } }
+  .entry::before {
+    content: attr(data-n);
+    position: absolute; left: 1px; top: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--paper); outline: 1px solid var(--hair);
+    background: var(--card);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--brick); display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) { .entry::before { left: -5px; width: 18px; height: 18px; font-size: 9px; } }
+
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+  .card-head { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  @media (max-width: 620px) { .card-head { flex-direction: column; } }
+  .flag-box { flex: none; width: 168px; }
+  .flag-box svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-caption { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .card-title { font-size: 1.32rem; font-weight: 600; line-height: 1.18; margin: 0 0 10px; text-wrap: balance; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px; border: 1px solid var(--card-border); color: var(--muted);
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  /* Flip tooltip below tags near the top of the viewport so it isn't clipped */
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  /* Keep tooltips from overflowing the left/right edges on narrow screens */
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint { border-top: 1px solid var(--hair); }
+  details.paint > summary {
+    cursor: pointer; list-style: none; padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--adriatic); display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before { content: "+"; font-family: "Fraunces", serif; font-size: 15px; width: 14px; }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row { display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px; }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--card-border); border-radius: 2px; padding: 5px 9px 5px 5px; background: var(--paper); }
+  .swatch .chip { width: 20px; height: 20px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: none; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 88px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 340px; height: auto; }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .iborder-line { transition: stroke-opacity 0.6s ease, stroke-width 0.6s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .ireg-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 700; text-anchor: middle; transition: fill .4s ease, stroke .4s ease; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="south-america-hub.html">South America hub</a></p>
+  <p class="kicker">Family research &middot; Phase 15 of the world atlas</p>
+  <h1>Flags of Argentina</h1>
+  <p class="lede">Buenos Aires spends its first two and a half centuries as a secondary port under the distant Viceroyalty of Peru, elevated to the seat of its own viceroyalty only in 1776 as Spain reoriented toward Atlantic trade. The 25 May 1810 May Revolution deposed the Spanish viceroy in favor of a local junta, and two years into the independence war, Manuel Belgrano raised a new light-blue-and-white flag over the Rosario batteries in February 1812 &mdash; a banner that, with one addition, has flown ever since.</p>
+  <p class="lede">Formal independence was declared at the Congress of Tucumán on 9 July 1816, and José de San Martín's subsequent campaigns carried that same flag across the Andes to liberate Chile (1817&ndash;18) and on to Peru (1821). What followed at home was far rockier: decades of civil war between a Buenos Aires-centered Unitarian faction and the Federalists of the interior provinces, not settled into a stable, unified republic until national reorganization in the 1860s.</p>
+
+  <div class="scope-note">
+    <b>Scope of this page:</b> the lands of present-day Argentina, c. 1516&ndash;present, six political entities. Unlike some other pages in this atlas, this one carries no internal-partition map: Argentina's 19th-century turmoil was a factional and political struggle &mdash; Unitarians versus Federalists, Buenos Aires versus the interior provinces &mdash; fought under one continuous flag rather than a genuine split into separately crowned or separately flagged entities. The provinces fought each other, but nobody raised a rival banner. Part of a larger atlas &mdash; see the linked pages at the bottom.
+  </div>
+
+    <div class="imap-section">
+    <h2>One border &mdash; except for the nine years Buenos Aires Province split away</h2>
+    <p class="imap-sub">Argentina's own real border, traced whole for most of its history. Buenos Aires Province seceded from the rest of the Argentine Confederation from 1852 to 1861, and the map below now draws that split as its own traced region for exactly that span, merging back into one border at the 1861 reunification. Press play, or drag the slider, to watch who held it, era to era.</p>
+    <div class="rule-box">
+      <b>Buenos Aires Province seceded from the Argentine Confederation from 1852 to 1861 &mdash; the closest this country comes to a genuine internal partition.</b> That split was real but resolved within a single decade, inside a period this atlas&rsquo; own Argentina timeline still treats as one combined "civil war era" entry rather than two separate rival states. The map below now draws Buenos Aires Province as its own traced region for exactly that nine-year span &mdash; schematic, since no surveyed 1850s provincial boundary is being reproduced here and no specific documented flag is claimed for the seceding province &mdash; before the two regions merge back into one border at the 1861 reunification, matching this page&rsquo;s own timeline.
+    </div>
+    <div class="imap-frame">
+      <div class="imap-controls">
+        <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="imap-year" id="iYearTag">c. 1516</span>
+        <input type="range" id="iSlider" min="0" max="6" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="imap-svg" viewBox="0 0 300 280" xmlns="http://www.w3.org/2000/svg">
+        <path id="ireg-interior" class="ireg-fill" d="M142.43,29.63 L145.52,34.47 L147.56,29.08 L153.54,29.36 L154.39,30.79 L164.03,41.73 L168.31,42.75 L174.72,47.70 L180.12,50.32 L180.87,53.28 L175.71,63.47 L181.00,65.29 L186.88,66.32 L191.03,65.24 L195.79,60.10 L196.64,54.19 L199.24,52.90 L201.87,56.77 L201.76,62.13 L197.35,65.82 L193.83,68.55 L187.91,75.06 L180.92,84.20 L179.61,89.56 L178.20,96.45 L178.26,103.13 L177.12,104.62 L176.71,108.95 L176.35,112.45 L183.01,118.19 L182.29,122.81 L185.57,125.74 L185.30,129.01 L180.27,137.61 L172.49,141.20 L161.98,142.60 L106.00,230.28 L103.82,226.37 L103.93,221.35 L100.43,221.78 L98.59,219.35 L98.13,212.24 L102.15,209.29 L103.81,205.04 L103.21,201.65 L105.98,195.93 L107.90,187.05 L107.34,183.12 L109.63,181.85 L109.06,179.32 L106.63,177.98 L108.36,175.17 L105.99,172.63 L104.77,164.89 L106.88,163.53 L105.99,155.36 L107.22,148.49 L108.63,142.51 L111.77,140.08 L110.17,133.54 L110.15,127.38 L114.12,123.00 L114.00,117.40 L116.99,110.86 L117.01,104.69 L115.65,103.47 L113.23,91.90 L116.46,85.00 L115.97,78.51 L117.84,72.42 L121.27,66.13 L124.97,61.96 L123.40,59.33 L124.50,57.18 L124.33,46.01 L130.04,42.70 L131.84,35.74 L131.21,34.06 L135.57,28.00 Z M139.63,251.66 L134.65,252.00 L131.97,249.63 L128.82,249.45 L123.20,249.45 L123.20,234.48 L125.21,237.59 L127.83,242.62 L134.65,246.64 L141.99,248.31 L139.63,251.66 Z"/>
+        <path id="ireg-bsas" class="ireg-fill" d="M161.98,142.60 L156.22,141.92 L157.32,145.92 L156.25,150.94 L157.21,154.32 L154.07,156.67 L148.70,157.60 L143.66,155.16 L141.63,156.91 L142.36,163.57 L145.90,165.59 L148.77,163.48 L150.33,166.96 L145.51,169.04 L141.30,173.21 L140.53,179.95 L139.29,183.54 L134.33,183.56 L130.22,186.99 L128.72,192.02 L133.88,196.93 L138.89,198.28 L137.09,204.30 L130.89,208.08 L127.49,215.94 L122.70,218.58 L120.55,221.72 L122.25,228.68 L125.74,232.56 L123.53,232.22 L118.67,231.17 L106.00,230.28 Z"/>
+        <path class="iborder-line" id="ib-interior-bsas" d="M161.98,142.60 L106.00,230.28"/>
+        <g font-family="IBM Plex Mono, monospace">
+          <text class="ireg-label" id="ilbl-interior" x="146" y="82">REST OF</text>
+          <text class="ireg-label" id="ilbl-interior2" x="146" y="93">ARGENTINA</text>
+          <text class="ireg-label" id="ilbl-bsas" x="121" y="192">BUENOS AIRES</text>
+          <text class="ireg-label" id="ilbl-bsas2" x="121" y="203">PROVINCE</text>
+        </g>
+      </svg>
+      <div class="imap-head">
+        <div class="imap-name" id="iEraName">Spanish colonial rule from Lima / earlier settlement</div>
+        <div class="imap-owners" id="iEraOwners"></div>
+      </div>
+      <div class="iflags-row" id="iFlagsRow"></div>
+      <p class="imap-story" id="iEraStory"></p>
+
+      <p class="map-note">Real traced border (modern frontier); the Buenos Aires Province / rest-of-Argentina dividing line is a schematic approximation, not a surveyed 1850s provincial boundary, and appears only for the 1852&ndash;61 secession &mdash; see the rule box above.</p>
+      <div class="imap-key" id="iLegend"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <!-- 1 -->
+    <div class="entry" data-n="6" id="era-1861">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#74acdf"/>
+              <rect y="66.7" width="300" height="66.7" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#74acdf"/>
+              <g transform="translate(150,100)">
+                <g fill="#f6b40e" stroke="#c98a0a" stroke-width="0.5">
+                  <path d="M0,-36 L7,-20 L-7,-20 Z"/>
+                  <path d="M0,-36 L7,-20 L-7,-20 Z" transform="rotate(45)"/>
+                  <path d="M0,-36 L7,-20 L-7,-20 Z" transform="rotate(90)"/>
+                  <path d="M0,-36 L7,-20 L-7,-20 Z" transform="rotate(135)"/>
+                  <path d="M0,-36 L7,-20 L-7,-20 Z" transform="rotate(180)"/>
+                  <path d="M0,-36 L7,-20 L-7,-20 Z" transform="rotate(225)"/>
+                  <path d="M0,-36 L7,-20 L-7,-20 Z" transform="rotate(270)"/>
+                  <path d="M0,-36 L7,-20 L-7,-20 Z" transform="rotate(315)"/>
+                </g>
+                <circle r="17" fill="#f6b40e" stroke="#c98a0a" stroke-width="1"/>
+              </g>
+            </svg>
+            <div class="flag-caption">light blue &ndash; white &ndash; light blue, gold Sol de Mayo &mdash; unchanged since 1861 reunification</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1861 &ndash; present</div>
+            <h3 class="card-title">Argentine Republic (unified, modern)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Republic</span><span class="tag" tabindex="0" data-tip="Governor of Buenos Aires whose victory at Pavón in 1861 ended Confederation resistance; he became the reunified republic’s first constitutional president in 1862."><span class="dot" style="background:#4a3b78"></span>Bartolomé Mitre</span><span class="tag" tabindex="0" data-tip="Argentina’s constitution has, since 1853, committed the federal government to supporting the Roman Apostolic Catholic religion, though it establishes freedom of worship for other faiths."><span class="dot" style="background:#8e3b62"></span>Roman Catholic (constitutionally supported)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Roughly six million European immigrants, mainly from Italy and Spain, settle in Argentina between the 1870s and the 1930s, one of the largest immigration waves in world history relative to population, permanently reshaping the country's demographics and culture."><span class="dot" style="background:#2f7a6b"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="6.67" height="14" fill="#009246"/><rect x="6.67" width="6.67" height="14" fill="#fff"/><rect x="13.33" width="6.67" height="14" fill="#ce2b37"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#aa151b"/><rect y="3.5" width="20" height="7" fill="#f1bf00"/></svg></span>Immigration: mass Italian &amp; Spanish wave (1870s&ndash;1930s)</span><span class="tag" tabindex="0" data-tip="Argentina hosts one of Latin America's largest Jewish immigrant communities, growing from Eastern European (particularly Russian Empire) migration beginning in the 1880s and continuing through the pre-WWII period."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#fff"/><rect y="4.67" width="20" height="4.67" fill="#0039a6"/><rect y="9.33" width="20" height="4.67" fill="#d52b1e"/></svg>Immigration: Eastern European Jewish settlers</span><span class="tag" tabindex="0" data-tip="An estimated several hundred thousand people, disproportionately young and university-educated, emigrate from Argentina during the severe 1998&ndash;2002 economic crisis, mainly to Spain, Italy, and the United States."><span class="dot" style="background:#a3672f"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#aa151b"/><rect y="3.5" width="20" height="7" fill="#f1bf00"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="6.67" height="14" fill="#009246"/><rect x="6.67" width="6.67" height="14" fill="#fff"/><rect x="13.33" width="6.67" height="14" fill="#ce2b37"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#b22234"/><g fill="#fff"><rect y="1.6" width="20" height="1.6"/><rect y="4.8" width="20" height="1.6"/><rect y="8" width="20" height="1.6"/><rect y="11.2" width="20" height="1.6"/></g><rect width="8" height="7.5" fill="#3c3b6e"/></svg></span>Emigration: economic-crisis exodus (1998&ndash;2002)</span></div>
+            <p><span class="label">Who &amp; why:</span> the September 1861 Battle of Pavón breaks the last major Confederation resistance, and Buenos Aires province rejoins the rest of the country under the 1853 federal constitution, finally settling the Unitarian&ndash;Federalist civil wars into one stable republic. The flag itself sees no further changes even through a genuinely turbulent 20th century &mdash; Peronism from the 1940s, a series of military coups, the brutal 1976&ndash;83 dictatorship and its "Dirty War," and the 1982 Falklands/Malvinas War against Britain.</p>
+            <p><span class="label">What it represents:</span> the same light-blue-white-light-blue horizontal triband fixed by law in 1816, now carrying the golden Sol de Mayo (Sun of May) that was added to the center stripe in 1818 and made the sole official civil and state flag as the country reunified.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">9:14, three equal horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Light blue &ndash; white &ndash; light blue horizontal triband, gold sun with a simple face centered on the white stripe.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#74acdf"></span><span class="meta"><span class="name">Light blue (celeste)</span><span class="hex">#74ACDF</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f6b40e"></span><span class="meta"><span class="name">Sol de Mayo, gold</span><span class="hex">#F6B40E</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="entry" data-n="5" id="era-1820">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#74acdf"/>
+              <rect y="66.7" width="300" height="66.7" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#74acdf"/>
+              <g transform="translate(150,100)">
+                <g fill="#f6b40e" stroke="#c98a0a" stroke-width="0.5">
+                  <path d="M0,-36 L7,-20 L-7,-20 Z"/>
+                  <path d="M0,-36 L7,-20 L-7,-20 Z" transform="rotate(45)"/>
+                  <path d="M0,-36 L7,-20 L-7,-20 Z" transform="rotate(90)"/>
+                  <path d="M0,-36 L7,-20 L-7,-20 Z" transform="rotate(135)"/>
+                  <path d="M0,-36 L7,-20 L-7,-20 Z" transform="rotate(180)"/>
+                  <path d="M0,-36 L7,-20 L-7,-20 Z" transform="rotate(225)"/>
+                  <path d="M0,-36 L7,-20 L-7,-20 Z" transform="rotate(270)"/>
+                  <path d="M0,-36 L7,-20 L-7,-20 Z" transform="rotate(315)"/>
+                </g>
+                <circle r="17" fill="#f6b40e" stroke="#c98a0a" stroke-width="1"/>
+              </g>
+            </svg>
+            <div class="flag-caption">the same law-fixed flag, flown by both sides of a fractured country</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1820s &ndash; 1861</div>
+            <h3 class="card-title">Civil war era / Argentine Confederation</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#7c6a4a"></span>Confederation, civil conflict</span><span class="tag" tabindex="0" data-tip="Governor of Buenos Aires province who dominated the era’s federalist coalition from 1829 to 1852, controlling the confederation’s foreign affairs without ever unifying it under a written constitution."><span class="dot" style="background:#4a3b78"></span>Juan Manuel de Rosas</span><span class="tag" tabindex="0" data-tip="Both Unitarian and Federalist factions remained overwhelmingly Roman Catholic, and no rival faction challenged the Church’s traditional standing during the civil wars."><span class="dot" style="background:#8e3b62"></span>Roman Catholic (traditional)</span></div>
+            <p><span class="label">Who &amp; why:</span> after 1820 the fragile national government collapses, and the country splinters into loosely confederated provinces racked by recurring war between Unitarians, who wanted a centralized state run from Buenos Aires, and Federalists, who wanted provincial autonomy. Juan Manuel de Rosas, governor of Buenos Aires province, dominates the era's federalist coalition from 1829 to 1852, controlling the confederation's foreign affairs without ever fully unifying it under a written constitution. His fall at Caseros in 1852 opens a decade of further struggle between Buenos Aires and the rest of the Confederation before Pavón finally resolves it in 1861.</p>
+            <p><span class="label">What it represents:</span> despite the deep internal conflict, no rival flag emerges &mdash; the light-blue-white-light-blue banner with its 1818 sun, already fixed by national law, is flown by Unitarians, Federalists, and everyone in between throughout this fractured period.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No single ratio enforced during this period; shown at 3:2.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Light blue &ndash; white &ndash; light blue horizontal triband, gold sun centered on the white stripe.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#74acdf"></span><span class="meta"><span class="name">Light blue (celeste)</span><span class="hex">#74ACDF</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f6b40e"></span><span class="meta"><span class="name">Sol de Mayo, gold</span><span class="hex">#F6B40E</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="entry" data-n="4" id="era-1816">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#74acdf"/>
+              <rect y="66.7" width="300" height="66.7" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#74acdf"/>
+              <g transform="translate(150,100)">
+                <g fill="#f6b40e" stroke="#c98a0a" stroke-width="0.5">
+                  <path d="M0,-36 L7,-20 L-7,-20 Z"/>
+                  <path d="M0,-36 L7,-20 L-7,-20 Z" transform="rotate(45)"/>
+                  <path d="M0,-36 L7,-20 L-7,-20 Z" transform="rotate(90)"/>
+                  <path d="M0,-36 L7,-20 L-7,-20 Z" transform="rotate(135)"/>
+                  <path d="M0,-36 L7,-20 L-7,-20 Z" transform="rotate(180)"/>
+                  <path d="M0,-36 L7,-20 L-7,-20 Z" transform="rotate(225)"/>
+                  <path d="M0,-36 L7,-20 L-7,-20 Z" transform="rotate(270)"/>
+                  <path d="M0,-36 L7,-20 L-7,-20 Z" transform="rotate(315)"/>
+                </g>
+                <circle r="17" fill="#f6b40e" stroke="#c98a0a" stroke-width="1"/>
+              </g>
+            </svg>
+            <div class="flag-caption">the sun is added to the stripe in 1818, two years into this era</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1816 &ndash; 1820s</div>
+            <h3 class="card-title">United Provinces of the R&iacute;o de la Plata (independence declared)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Republic, independence declared</span><span class="tag" tabindex="0" data-tip="Supreme Director of the United Provinces at the time delegates at the Congress of Tucumán formally declared independence from Spain on 9 July 1816."><span class="dot" style="background:#4a3b78"></span>Juan Martín de Pueyrredón</span><span class="tag" tabindex="0" data-tip="The newly independent provinces retained Roman Catholicism as the established faith inherited from Spanish rule, with the 1819 constitution affirming it as the state religion."><span class="dot" style="background:#8e3b62"></span>Roman Catholic (established, per 1819 constitution)</span></div>
+            <p><span class="label">Who &amp; why:</span> delegates at the Congress of Tucum&aacute;n, with San Mart&iacute;n's army already in the field, formally declare independence from Spain on 9 July 1816. The following year San Mart&iacute;n leads his army across the Andes, liberating Chile by 1818, and in 1821 pushes on to liberate Peru &mdash; extending the reach of the new flag far beyond the provinces that raised it.</p>
+            <p><span class="label">What it represents:</span> Belgrano's light-blue-and-white banner, already the flag of the independence war, is joined on 25 February 1818 by the gold Sol de Mayo on its center stripe, commemorating the May Revolution; the design from this point on is essentially the flag Argentina still flies.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed civil ratio recorded for this period; shown at 3:2.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Light blue &ndash; white &ndash; light blue horizontal triband; plain through mid-1816, gold sun added to the center stripe from 25 February 1818.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#74acdf"></span><span class="meta"><span class="name">Light blue (celeste)</span><span class="hex">#74ACDF</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f6b40e"></span><span class="meta"><span class="name">Sol de Mayo, gold (from 1818)</span><span class="hex">#F6B40E</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="entry" data-n="3" id="era-1810">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#74acdf"/>
+              <rect y="66.7" width="300" height="66.7" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#74acdf"/>
+            </svg>
+            <div class="flag-caption">Belgrano's original 1812 flag, plain, no sun yet</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1810 &ndash; 1816</div>
+            <h3 class="card-title">War of independence / United Provinces (revolutionary period)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Revolutionary junta</span><span class="tag" tabindex="0" data-tip="Military officer who presided over the Primera Junta formed in Buenos Aires after the May Revolution deposed the Spanish viceroy on 25 May 1810."><span class="dot" style="background:#4a3b78"></span>Cornelio Saavedra</span><span class="tag" tabindex="0" data-tip="The revolutionary junta kept Roman Catholicism as the territory’s established religion, inherited unchanged from Spanish colonial rule even as it broke with the crown."><span class="dot" style="background:#8e3b62"></span>Roman Catholic (established)</span></div>
+            <p><span class="label">Who &amp; why:</span> the 25 May 1810 May Revolution in Buenos Aires deposes the Spanish viceroy, replacing him with a local junta that governs, at first, nominally in the name of the deposed Spanish king Ferdinand VII while war with royalist forces spreads across the interior. Manuel Belgrano, commanding troops at the Rosario batteries on the Paran&aacute; River, raises a new light-blue-and-white flag on 27 February 1812 &mdash; a banner meant for the independence war effort rather than any single province.</p>
+            <p><span class="label">What it represents:</span> two horizontal light-blue stripes flanking a white one, with no sun or other device yet; the colors are traditionally linked to the sky over Buenos Aires on the day of the revolution, though the exact reasoning is debated. It is adopted informally as the flag of the patriot army well before any government formally sanctions it.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio recorded; shown at 3:2.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Light blue &ndash; white &ndash; light blue horizontal triband, no device.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#74acdf"></span><span class="meta"><span class="name">Light blue (celeste)</span><span class="hex">#74ACDF</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="entry" data-n="2" id="era-1776">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#f4efe1"/>
+              <path d="M0,0 L300,200 M300,0 L0,200" stroke="#9c3b28" stroke-width="26"/>
+            </svg>
+            <div class="flag-caption">Cross of Burgundy on white &mdash; the Spanish crown's military and naval ensign</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1776 &ndash; 1810</div>
+            <h3 class="card-title">Viceroyalty of the R&iacute;o de la Plata (Spanish colonial)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#6e6047"></span>Colony</span><span class="tag" tabindex="0" data-tip="Spanish soldier and administrator appointed as the first viceroy when Spain elevated Buenos Aires to the seat of the new Viceroyalty of the Río de la Plata in 1776."><span class="dot" style="background:#4a3b78"></span>Pedro de Cevallos</span><span class="tag" tabindex="0" data-tip="Roman Catholicism was the Spanish Empire’s official state religion, enforced throughout its American viceroyalties including the newly created Río de la Plata."><span class="dot" style="background:#8e3b62"></span>Roman Catholic (Spanish Empire)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Buenos Aires develops into a major port for the transatlantic slave trade under the viceroyalty, with tens of thousands of enslaved Africans forcibly brought through the city to work across the region between the 1770s and early 1800s."><span class="dot" style="background:#2f7a6b"></span>Immigration: forced deportation via the slave trade</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The Bourbon kings created the Viceroyalty of the R&iacute;o de la Plata in 1776, governing Argentina, 1700&ndash;1810, until the 1810 May Revolution. Their royal arms kept the Castile-Le&oacute;n quartering but added a central Bourbon inescutcheon of blue and gold fleurs-de-lis."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f4efe1"/><path d="M50,4 V116" stroke="#1a1a1a" stroke-width="2"/><path d="M4,60 H96" stroke="#1a1a1a" stroke-width="2"/><path d="M12,12 H42 V52 H12 Z" fill="#a4302a"/><path d="M18,18 h18 v10 h-18 Z M22,30 v18 M30,30 v18" stroke="#f9d616" stroke-width="2" fill="none"/><path d="M58,64 q10,-14 20,0 q-4,20 -20,26 q-16,-6 -20,-26 q10,-14 20,0 Z" fill="#a4302a"/><circle cx="50" cy="60" r="8" fill="#1e2f7a"/><path d="M45,55 q5,-6 10,0 q-2,5 -5,6 q-3,-1 -5,-6 Z" fill="#f9d616"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Bourbon (Spain)</span></div>
+            <p><span class="label">Who &amp; why:</span> Spain elevates Buenos Aires to the seat of a brand-new viceroyalty in 1776, carving it out of the older Viceroyalty of Peru. The move reflects the growing weight of Atlantic trade &mdash; silver, hides, and contraband moving through the R&iacute;o de la Plata estuary &mdash; over the older, more cumbersome Pacific route through Lima and Panama. Buenos Aires grows quickly into the region's real administrative and commercial center, setting up the conditions for the 1810 revolution three and a half decades later.</p>
+            <p><span class="label">What it represents:</span> Spain had no single national flag through most of this period; ships and fortresses of the crown flew the red, jagged Cross of Burgundy (Saint Andrew's cross) on white, the standard Spanish military and naval ensign of the era, shown here as representative of royal authority over the new viceroyalty.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed civil ratio; shown at 3:2.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">White field, red saltire (Cross of Burgundy) &mdash; shown simplified as straight diagonal bars rather than the traditional jagged, knotted-branch outline.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#9c3b28"></span><span class="meta"><span class="name">Cross, red</span><span class="hex">#9C3B28</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="entry" data-n="1" id="era-1516">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#f4efe1"/>
+              <path d="M0,0 L300,200 M300,0 L0,200" stroke="#9c3b28" stroke-width="26"/>
+            </svg>
+            <div class="flag-caption">the same Spanish ensign, administered from distant Lima</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 1516 &ndash; 1776</div>
+            <h3 class="card-title">Spanish colonial rule from Lima / earlier settlement</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#6e6047"></span>Colony</span><span class="tag" tabindex="0" data-tip="No single ruler documented across this long, thinly administered span — the territory was governed remotely as a minor holding of the Viceroyalty of Peru, seated far away in Lima."><span class="dot" style="background:#4a3b78"></span>No single ruler documented</span><span class="tag" tabindex="0" data-tip="Roman Catholicism was the Spanish Empire’s official religion, imposed through mission conversion of indigenous peoples like the Diaguita, Guaraní, and Mapuche as settlement slowly advanced."><span class="dot" style="background:#8e3b62"></span>Roman Catholic (Spanish Empire)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Spanish expeditions explore and gradually settle the R&iacute;o de la Plata region from 1516, founding and refounding Buenos Aires (1536, then 1580) and bringing the territory under distant colonial administration from Lima."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#aa151b"/><rect y="3.5" width="20" height="7" fill="#f1bf00"/></svg>Conquered by: Spain (from 1516)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The Spanish Habsburgs governed the Governorate of the R&iacute;o de la Plata, 1580&ndash;1700, founding Buenos Aires's colonial administration. Their royal arms quartered the castle of Castile with the lion of Le&oacute;n."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f4efe1"/><path d="M50,4 V116" stroke="#1a1a1a" stroke-width="2"/><path d="M4,60 H96" stroke="#1a1a1a" stroke-width="2"/><path d="M12,12 H42 V52 H12 Z" fill="#a4302a"/><path d="M18,18 h18 v10 h-18 Z M22,30 v18 M30,30 v18" stroke="#f9d616" stroke-width="2" fill="none"/><path d="M58,64 q10,-14 20,0 q-4,20 -20,26 q-16,-6 -20,-26 q10,-14 20,0 Z" fill="#a4302a"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Habsburg (Spain)</span><span class="tag" tabindex="0" data-tip="The Bourbon kings created the Viceroyalty of the R&iacute;o de la Plata in 1776, governing Argentina, 1700&ndash;1810, until the 1810 May Revolution. Their royal arms kept the Castile-Le&oacute;n quartering but added a central Bourbon inescutcheon of blue and gold fleurs-de-lis."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f4efe1"/><path d="M50,4 V116" stroke="#1a1a1a" stroke-width="2"/><path d="M4,60 H96" stroke="#1a1a1a" stroke-width="2"/><path d="M12,12 H42 V52 H12 Z" fill="#a4302a"/><path d="M18,18 h18 v10 h-18 Z M22,30 v18 M30,30 v18" stroke="#f9d616" stroke-width="2" fill="none"/><path d="M58,64 q10,-14 20,0 q-4,20 -20,26 q-16,-6 -20,-26 q10,-14 20,0 Z" fill="#a4302a"/><circle cx="50" cy="60" r="8" fill="#1e2f7a"/><path d="M45,55 q5,-6 10,0 q-2,5 -5,6 q-3,-1 -5,-6 Z" fill="#f9d616"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Bourbon (Spain)</span></div>
+            <p><span class="label">Who &amp; why:</span> before Spanish contact, the region is home to peoples including the Diaguita in the northwest, the Guaran&iacute; along the upper Paran&aacute; and Uruguay rivers, and the Mapuche in the south &mdash; none of them under any single flag or crown. Spanish exploration reaches the R&iacute;o de la Plata estuary in 1516 with Juan D&iacute;az de Sol&iacute;s; early Spanish settlement is sparse and slow, with Buenos Aires itself founded and then abandoned in 1536 before a lasting refoundation in 1580. For most of this span the territory is administered, thinly and from very far away, as a minor holding of the Viceroyalty of Peru, seated in Lima.</p>
+            <p><span class="label">What it represents:</span> no separate flag exists for this remote and lightly settled corner of the Spanish empire; the same Cross of Burgundy used across Spain's American possessions stands in here, honestly, for the crown's nominal authority rather than for any flag specific to the future Argentina.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed civil ratio; shown at 3:2.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">White field, red saltire (Cross of Burgundy), simplified.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#9c3b28"></span><span class="meta"><span class="name">Cross, red</span><span class="hex">#9C3B28</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#6e6047"></span><b>Colony</b> &mdash; under Spanish viceregal authority</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Revolutionary junta</b> &mdash; governing in revolt, independence not yet declared</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Republic, independence declared</b> &mdash; sovereign, formally declared at Tucum&aacute;n</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#7c6a4a"></span><b>Confederation, civil conflict</b> &mdash; loosely joined provinces at war with each other</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Republic</b> &mdash; unified, stable federal republic</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the named ruler most associated with the era's start</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official/established faith, not the population's</div>
+    </div>
+  </div>
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for Argentina lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/ar/">Search Record Atlas for Argentina &rarr;</a>
+    <p style="margin-top:14px;">Records here are filed by historical jurisdiction, not modern borders &mdash; check the region that covers your ancestral town:</p>
+    <div class="record-region-grid">
+      <a href="https://daviddef.github.io/TheMap/region/santafe/">Santa Fe — Rosario</a>
+    </div>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This page is one lineage in a larger set. See the region-wide map and the other countries here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="south-america-hub.html"><b>South America hub</b><span>The continent's countries, side by side</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are close historical approximations for painting reference; pre-19th-century swatches are informed reconstructions, not official specifications.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var IC = { spanish:"#9c3b28", viceroyalty:"#7c2e1f", revolution:"#204b5c", provinces:"#204b5c", confederation:"#8c5a2f", bsas_secession:"#3d6ea6", modern:"#204b5c" };
+  var INAMES = { spanish:"Spanish colonial rule from Lima / earlier settlement", viceroyalty:"Viceroyalty of the R&iacute;o de la Plata (Spanish colonial)", revolution:"War of independence / United Provinces (revolutionary period)", provinces:"United Provinces of the R&iacute;o de la Plata (independence declared)", confederation:"Civil war era / Argentine Confederation", bsas_secession:"Buenos Aires Province (seceded, 1852&ndash;61)", modern:"Argentine Republic (unified, modern)" };
+  var IFLAGS = {
+    spanish: "<rect width=\"300\" height=\"200\" fill=\"#f4efe1\"/>\n              <path d=\"M0,0 L300,200 M300,0 L0,200\" stroke=\"#9c3b28\" stroke-width=\"26\"/>",
+    viceroyalty: "<rect width=\"300\" height=\"200\" fill=\"#f4efe1\"/>\n              <path d=\"M0,0 L300,200 M300,0 L0,200\" stroke=\"#9c3b28\" stroke-width=\"26\"/>",
+    revolution: "<rect width=\"300\" height=\"66.7\" fill=\"#74acdf\"/>\n              <rect y=\"66.7\" width=\"300\" height=\"66.7\" fill=\"#f4efe1\"/>\n              <rect y=\"133.3\" width=\"300\" height=\"66.7\" fill=\"#74acdf\"/>",
+    provinces: "<rect width=\"300\" height=\"66.7\" fill=\"#74acdf\"/>\n              <rect y=\"66.7\" width=\"300\" height=\"66.7\" fill=\"#f4efe1\"/>\n              <rect y=\"133.3\" width=\"300\" height=\"66.7\" fill=\"#74acdf\"/>\n              <g transform=\"translate(150,100)\">\n                <g fill=\"#f6b40e\" stroke=\"#c98a0a\" stroke-width=\"0.5\">\n                  <path d=\"M0,-36 L7,-20 L-7,-20 Z\"/>\n                  <path d=\"M0,-36 L7,-20 L-7,-20 Z\" transform=\"rotate(45)\"/>\n                  <path d=\"M0,-36 L7,-20 L-7,-20 Z\" transform=\"rotate(90)\"/>\n                  <path d=\"M0,-36 L7,-20 L-7,-20 Z\" transform=\"rotate(135)\"/>\n                  <path d=\"M0,-36 L7,-20 L-7,-20 Z\" transform=\"rotate(180)\"/>\n                  <path d=\"M0,-36 L7,-20 L-7,-20 Z\" transform=\"rotate(225)\"/>\n                  <path d=\"M0,-36 L7,-20 L-7,-20 Z\" transform=\"rotate(270)\"/>\n                  <path d=\"M0,-36 L7,-20 L-7,-20 Z\" transform=\"rotate(315)\"/>\n                </g>\n                <circle r=\"17\" fill=\"#f6b40e\" stroke=\"#c98a0a\" stroke-width=\"1\"/>\n              </g>",
+    confederation: "<rect width=\"300\" height=\"66.7\" fill=\"#74acdf\"/>\n              <rect y=\"66.7\" width=\"300\" height=\"66.7\" fill=\"#f4efe1\"/>\n              <rect y=\"133.3\" width=\"300\" height=\"66.7\" fill=\"#74acdf\"/>\n              <g transform=\"translate(150,100)\">\n                <g fill=\"#f6b40e\" stroke=\"#c98a0a\" stroke-width=\"0.5\">\n                  <path d=\"M0,-36 L7,-20 L-7,-20 Z\"/>\n                  <path d=\"M0,-36 L7,-20 L-7,-20 Z\" transform=\"rotate(45)\"/>\n                  <path d=\"M0,-36 L7,-20 L-7,-20 Z\" transform=\"rotate(90)\"/>\n                  <path d=\"M0,-36 L7,-20 L-7,-20 Z\" transform=\"rotate(135)\"/>\n                  <path d=\"M0,-36 L7,-20 L-7,-20 Z\" transform=\"rotate(180)\"/>\n                  <path d=\"M0,-36 L7,-20 L-7,-20 Z\" transform=\"rotate(225)\"/>\n                  <path d=\"M0,-36 L7,-20 L-7,-20 Z\" transform=\"rotate(270)\"/>\n                  <path d=\"M0,-36 L7,-20 L-7,-20 Z\" transform=\"rotate(315)\"/>\n                </g>\n                <circle r=\"17\" fill=\"#f6b40e\" stroke=\"#c98a0a\" stroke-width=\"1\"/>\n              </g>",
+    modern: "<rect width=\"300\" height=\"66.7\" fill=\"#74acdf\"/>\n              <rect y=\"66.7\" width=\"300\" height=\"66.7\" fill=\"#f4efe1\"/>\n              <rect y=\"133.3\" width=\"300\" height=\"66.7\" fill=\"#74acdf\"/>\n              <g transform=\"translate(150,100)\">\n                <g fill=\"#f6b40e\" stroke=\"#c98a0a\" stroke-width=\"0.5\">\n                  <path d=\"M0,-36 L7,-20 L-7,-20 Z\"/>\n                  <path d=\"M0,-36 L7,-20 L-7,-20 Z\" transform=\"rotate(45)\"/>\n                  <path d=\"M0,-36 L7,-20 L-7,-20 Z\" transform=\"rotate(90)\"/>\n                  <path d=\"M0,-36 L7,-20 L-7,-20 Z\" transform=\"rotate(135)\"/>\n                  <path d=\"M0,-36 L7,-20 L-7,-20 Z\" transform=\"rotate(180)\"/>\n                  <path d=\"M0,-36 L7,-20 L-7,-20 Z\" transform=\"rotate(225)\"/>\n                  <path d=\"M0,-36 L7,-20 L-7,-20 Z\" transform=\"rotate(270)\"/>\n                  <path d=\"M0,-36 L7,-20 L-7,-20 Z\" transform=\"rotate(315)\"/>\n                </g>\n                <circle r=\"17\" fill=\"#f6b40e\" stroke=\"#c98a0a\" stroke-width=\"1\"/>\n              </g>",
+    bsas_secession: "<rect width=\"300\" height=\"200\" fill=\"#3d6ea6\"/>\n              <rect y=\"130\" width=\"300\" height=\"70\" fill=\"#f4efe1\"/>"
+  };
+  function iFlagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (IFLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  var iLegendEl = document.getElementById("iLegend");
+  iLegendEl.innerHTML = Object.keys(IC).map(function (k) {
+    return '<span><span class="sw" style="background:' + IC[k] + '"></span>' + INAMES[k] + "</span>";
+  }).join("");
+
+  var ISNAP = [
+    { year:"c. 1516", name:"Spanish colonial rule from Lima / earlier settlement", t:{ interior:IC.spanish, bsas:IC.spanish }, flagKeys:{ interior:"spanish", bsas:"spanish" },
+      story:"Spanish colonization begins with Buenos Aires's first, short-lived 1536 founding and Asunci&oacute;n's lasting one in 1537; for over two centuries the territory is governed remotely from the Viceroyalty of Peru in distant Lima, a genuinely marginal corner of the Spanish American empire." },
+    { year:"1776", name:"Viceroyalty of the R&iacute;o de la Plata (Spanish colonial)", t:{ interior:IC.viceroyalty, bsas:IC.viceroyalty }, flagKeys:{ interior:"viceroyalty", bsas:"viceroyalty" },
+      story:"Madrid creates the new Viceroyalty of the R&iacute;o de la Plata in 1776, finally giving Buenos Aires its own vice-regal government &mdash; recognition of the port city's growing trade importance, and the administrative unit whose borders roughly define modern Argentina, Uruguay, Paraguay, and Bolivia together." },
+    { year:"1810", name:"War of independence / United Provinces (revolutionary period)", t:{ interior:IC.revolution, bsas:IC.revolution }, flagKeys:{ interior:"revolution", bsas:"revolution" },
+      story:"The 25 May 1810 Revoluci&oacute;n de Mayo replaces the Spanish viceroy with a locally elected junta; formal independence is declared on 9 July 1816 at the Congress of Tucum&aacute;n, though the wars against remaining Spanish royalist forces continue for years after." },
+    { year:"1816", name:"United Provinces of the R&iacute;o de la Plata (independence declared)", t:{ interior:IC.provinces, bsas:IC.provinces }, flagKeys:{ interior:"provinces", bsas:"provinces" },
+      story:"The United Provinces spend over a decade without a permanent national government, riven by conflict between Unitarians (favoring a strong central state) and Federalists (favoring provincial autonomy) &mdash; a fight only nominally resolved, never fully, in this period." },
+    { year:"1820s", name:"Civil war era / Argentine Confederation", t:{ interior:IC.confederation, bsas:IC.confederation }, flagKeys:{ interior:"confederation", bsas:"confederation" },
+      story:"After 1820 the fragile national government collapses and the country splinters into loosely confederated provinces racked by recurring war between centralizing Unitarians and autonomy-minded Federalists. Juan Manuel de Rosas, governor of Buenos Aires province, dominates the era's federalist coalition from 1829 to 1852, controlling the confederation's foreign affairs without ever fully unifying it under a written constitution." },
+    { year:"1852", name:"Buenos Aires Province secedes from the Confederation", t:{ interior:IC.confederation, bsas:IC.bsas_secession }, flagKeys:{ interior:"confederation", bsas:"bsas_secession" },
+      story:"Rosas's 1852 fall opens a decade of further struggle: Buenos Aires Province splits from the rest of the Argentine Confederation for nine years &mdash; the closest this country comes to a genuine internal partition &mdash; before Bartolom&eacute; Mitre's 1861 victory at Pav&oacute;n resolves it." },
+    { year:"1861", name:"Argentine Republic (unified, modern)", t:{ interior:IC.modern, bsas:IC.modern }, flagKeys:{ interior:"modern", bsas:"modern" },
+      story:"The September 1861 Battle of Pav&oacute;n breaks the last major Confederation resistance, and Buenos Aires province rejoins the rest of the country under the 1853 federal constitution &mdash; the modern Argentine Republic takes its lasting shape, and the light-blue-white-light-blue flag with its golden Sun of May, first raised in 1812, has flown over the whole reunified country ever since." }
+  ];
+
+  var IREGIONS = ["interior","bsas"];
+  var IREGION_NAMES = { interior:"Rest of Argentina (interior provinces / Confederation)", bsas:"Buenos Aires Province" };
+  var IADJ = [["interior","bsas"]];
+
+  function iTextColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+
+  function iGroupsFor(t) {
+    var parent = {};
+    IREGIONS.forEach(function (r) { parent[r] = r; });
+    function find(x) { while (parent[x] !== x) x = parent[x]; return x; }
+    function union(a, b) { var ra = find(a), rb = find(b); if (ra !== rb) parent[ra] = rb; }
+    IADJ.forEach(function (pair) { if (t[pair[0]] === t[pair[1]]) union(pair[0], pair[1]); });
+    var groups = {};
+    IREGIONS.forEach(function (r) {
+      var root = find(r);
+      if (!groups[root]) groups[root] = [];
+      groups[root].push(r);
+    });
+    return Object.keys(groups).map(function (k) { return groups[k]; });
+  }
+
+  var iYearTag = document.getElementById("iYearTag");
+  var iEraName = document.getElementById("iEraName");
+  var iEraOwners = document.getElementById("iEraOwners");
+  var iEraStory = document.getElementById("iEraStory");
+  var iFlagsRow = document.getElementById("iFlagsRow");
+  var iSlider = document.getElementById("iSlider");
+
+  function iRender(idx) {
+    var era = ISNAP[idx];
+    iYearTag.textContent = era.year;
+    iEraName.textContent = era.name;
+    iEraStory.innerHTML = era.story;
+
+    IREGIONS.forEach(function (id) {
+      var el = document.getElementById("ireg-" + id);
+      if (el) el.setAttribute("fill", era.t[id]);
+      var tcol = iTextColorFor(era.t[id]);
+      var tcolHalo = tcol === "#201a12" ? "#f7f1e3" : "#201a12";
+      ["", "2"].forEach(function (suf) {
+        var lbl = document.getElementById("ilbl-" + id + suf);
+        if (lbl) { lbl.setAttribute("fill", tcol); lbl.setAttribute("stroke", tcolHalo); }
+      });
+    });
+
+    IADJ.forEach(function (pair) {
+      var same = era.t[pair[0]] === era.t[pair[1]];
+      var line = document.getElementById("ib-" + pair[0] + "-" + pair[1]);
+      if (line) {
+        line.setAttribute("stroke-opacity", same ? "0.06" : "0.85");
+        line.setAttribute("stroke-width", same ? "1" : "2.4");
+      }
+    });
+
+    var groups = iGroupsFor(era.t);
+    iEraOwners.innerHTML = groups.map(function (g) {
+      var color = era.t[g[0]];
+      var label = Object.keys(IC).filter(function (k) { return IC[k] === color; })[0];
+      var names = g.map(function (r) { return IREGION_NAMES[r]; }).join(" &amp; ");
+      return "<b>" + INAMES[label] + "</b>: " + names;
+    }).join(" &nbsp;|&nbsp; ");
+
+    iFlagsRow.innerHTML = IREGIONS.map(function (id) {
+      return '<div class="iflag-chip">' + iFlagSvg(era.flagKeys[id]) + '<div class="ic-label">' + IREGION_NAMES[id] + '</div></div>';
+    }).join("");
+  }
+
+  iSlider.addEventListener("input", function () { iRender(parseInt(iSlider.value, 10)); });
+  iRender(0);
+
+  var iPlaying = false, iPlayTimer = null;
+  var iPlayBtn = document.getElementById("iPlayBtn");
+  function iStepPlay() {
+    var next = parseInt(iSlider.value, 10) + 1;
+    if (next > ISNAP.length - 1) { iStopPlay(); return; }
+    iSlider.value = next;
+    iRender(next);
+  }
+  function iStartPlay() {
+    iPlaying = true;
+    iPlayBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(iSlider.value, 10) >= ISNAP.length - 1) { iSlider.value = 0; iRender(0); }
+    iPlayTimer = setInterval(iStepPlay, 1700);
+  }
+  function iStopPlay() {
+    iPlaying = false;
+    iPlayBtn.innerHTML = "&#9654;";
+    clearInterval(iPlayTimer);
+  }
+  iPlayBtn.addEventListener("click", function () { iPlaying ? iStopPlay() : iStartPlay(); });
+})();
+</script>
+
+<script>
+  document.querySelectorAll(".tag[data-tip]").forEach(function (tag) {
+    tag.addEventListener("click", function (e) {
+      var wasOpen = tag.classList.contains("tip-open");
+      document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+      if (!wasOpen) tag.classList.add("tip-open");
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+  });
+</script>
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var html = '<h4>Genealogical records for this ground</h4>';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>
+
+</body></html>

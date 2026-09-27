@@ -1,0 +1,330 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Flags of Europe's Microstates</title>
+<meta name="description" content="A hub for the family flag atlas: Europe's five smallest sovereign states — Vatican City, San Marino, Monaco, Liechtenstein, and Andorra — some with the longest unbroken statehood in the world.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    --tile: #ddd0aa; --tile-line: #b7a679; --tile-text: #7a6a45; --tile-sea: #b9d3da;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.2rem, 5.5vw, 3.4rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.1rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .countries { margin-top: 44px; }
+  .countries h2 { font-size: 1.15rem; font-weight: 600; margin: 0 0 16px; }
+  .country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .country-card {
+    display: block; padding: 20px; border: 1px solid var(--card-border); background: var(--card);
+    border-radius: 4px; text-decoration: none; color: var(--ink); position: relative; overflow: hidden;
+  }
+  .country-card .swatch-strip { position: absolute; top: 0; left: 0; right: 0; height: 5px; }
+  .country-card .era { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--brass); margin-bottom: 6px; }
+  .country-card b { display: block; font-family: "Fraunces", serif; font-size: 1.2rem; font-weight: 600; margin-bottom: 6px; }
+  .country-card span { color: var(--muted); font-size: .88rem; line-height: 1.5; }
+
+  .map-section { margin-top: 56px; padding-top: 36px; border-top: 1px solid var(--hair); }
+  .map-section h2 { font-size: 1.5rem; margin: 0 0 8px; }
+  .map-section .map-sub { font-size: .94rem; color: var(--muted); max-width: 66ch; margin: 0 0 22px; }
+  .map-section .rule-box { margin-bottom: 22px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .92rem; }
+  .map-section .rule-box b { color: var(--brick); }
+
+  .viz-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 22px; }
+
+  .controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .play-btn {
+    flex: none; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .play-btn:hover { border-color: var(--brick); }
+  input[type="range"] {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px;
+    background: var(--hair); outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper);
+    box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  .era-tag { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+
+  .era-head { text-align: center; margin-bottom: 16px; }
+  .era-name-inline { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.35rem; transition: opacity .35s ease; }
+  .era-owners { font-size: .86rem; color: var(--muted); max-width: 62ch; margin: 6px auto 0; transition: opacity .35s ease; }
+  .era-owners b { color: var(--ink); }
+  .era-story {
+    margin: 0 auto 22px; font-size: .98rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .35s ease; padding: 14px 18px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  .era-story b { color: var(--brick); }
+
+  .flags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin: 4px auto 18px; max-width: 620px; }
+  .flag-chip { text-align: center; width: 84px; }
+  .flag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-chip .fc-label { font-family: "IBM Plex Mono", monospace; font-size: 9px; color: var(--muted); margin-top: 5px; line-height: 1.3; }
+
+  #ms-map-svg { display: block; margin: 0 auto; width: 100%; max-width: 480px; height: auto; }
+  .neighbor-fill { fill: var(--tile); opacity: .55; }
+  .neighbor-line { fill: none; stroke: var(--tile-line); stroke-width: 1; opacity: .8; }
+  .ms-dot { transition: fill .6s ease, opacity .6s ease, r .6s ease; }
+  .ms-label { font-family: "IBM Plex Mono", monospace; font-weight: 700; transition: opacity .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2.5px; }
+
+  .map-key { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: .8rem; color: var(--muted); justify-content: center; }
+  .map-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .map-key .sw { width: 11px; height: 11px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .map-notes { margin-top: 20px; font-size: .85rem; color: var(--muted); }
+  .map-notes b { color: var(--ink); }
+
+  .about { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .about h2 { font-size: 1.3rem; margin: 0 0 12px; }
+  .about p { max-width: none; opacity: .88; margin: 0 0 12px; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a></p>
+  <p class="kicker">Family research &middot; Hub &middot; Phase 20 of the world atlas</p>
+  <h1>Flags of Europe's Microstates</h1>
+  <p class="lede">Five sovereign states, none bigger than a mid-size city, tucked into corners of Europe that larger powers never quite got around to absorbing. Several claim genuinely ancient, unbroken statehood: San Marino dates its founding to 301 CE and calls itself the world's oldest surviving republic; Andorra's co-principality has been governed jointly by the Bishop of Urgell and a French count (now the French president) since an actual 1278 treaty, a governance structure with no real parallel anywhere else; Monaco's Grimaldi dynasty has ruled continuously since 1297, one of the longest-reigning royal houses on Earth; the Vatican is the world's smallest sovereign state by both area and population, the seat of the Catholic Church since papal temporal power was restored via the 1929 Lateran Treaty with Italy; and Liechtenstein, though a modern constitutional monarchy, is arguably the last surviving territorial remnant of the Holy Roman Empire's patchwork of small princely states.</p>
+  <p class="lede">None of these five fit neatly into the atlas's other regional hubs &mdash; they're too small, too old, and too singular for the empire-and-nation-state narratives that carry countries like Germany or Italy. Each gets its own card below, plus a shared founding-date map further down the page.</p>
+
+  <div class="countries">
+    <h2>The 5 microstates</h2>
+    <div class="country-grid">
+      <a class="country-card" href="vatican-city-flags.html">
+        <span class="swatch-strip" style="background:#fdc82f"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Vatican City</b>
+        <span>The world's smallest sovereign state, 0.49 square kilometers, created by the 1929 Lateran Treaty to end six decades of dispute after Italian unification annexed the much larger Papal States in 1870.</span>
+      </a>
+      <a class="country-card" href="san-marino-flags.html">
+        <span class="swatch-strip" style="background:#5eb6e4"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>San Marino</b>
+        <span>Traditionally founded in 301 CE by a Christian stonemason fleeing persecution on Mount Titano; the world's oldest surviving republic, never conquered, ringed entirely by Italy.</span>
+      </a>
+      <a class="country-card" href="monaco-flags.html">
+        <span class="swatch-strip" style="background:#ce1126"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Monaco</b>
+        <span>Ruled by the Grimaldi family since 1297, when François Grimaldi seized the fortress disguised as a monk; a French protectorate for centuries, sovereign again since 1861.</span>
+      </a>
+      <a class="country-card" href="liechtenstein-flags.html">
+        <span class="swatch-strip" style="background:#002b7f"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Liechtenstein</b>
+        <span>Assembled in 1719 from two purchased Holy Roman Empire fiefs bought specifically to secure a seat in the Imperial Diet; a real constitutional monarchy today, prosperous on finance and industry.</span>
+      </a>
+      <a class="country-card" href="andorra-flags.html">
+        <span class="swatch-strip" style="background:#0018a8"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Andorra</b>
+        <span>A co-principality since an actual 1278 treaty between the Bishop of Urgell and the Count of Foix; the French half of the diarchy has passed down to the sitting French president.</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="map-section">
+    <h2>Five dots, one map, one shared timeline</h2>
+    <p class="map-sub">These five states are too small for a traced-coastline map to show anything useful at this scale &mdash; each would be a few pixels on a shape built to hold France, Spain, and Italy. So the map below represents each as a labeled point at its real location against a faint outline of its much larger neighbors, and the slider tracks not territory changing hands but <em>when each state came into being</em>: a dot stays hollow and grey until the year it actually became the state it is today, then lights up and stays lit.</p>
+    <div class="rule-box">
+      <b>This is a founding timeline, not a conquest map.</b> Unlike the atlas's other era-sliders, these five borders barely moved once established &mdash; the interesting variable is founding date, not territorial control. San Marino's 301 CE date is honestly legendary, not documented; the other four dates below are real, dated events.
+    </div>
+
+    <div class="viz-frame">
+      <div class="controls">
+        <button class="play-btn" id="msPlay" type="button" aria-label="Play">&#9654;</button>
+        <span class="era-tag" id="msYear">301</span>
+        <input type="range" id="msSlider" min="0" max="5" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="ms-map-svg" viewBox="0 0 480 320" xmlns="http://www.w3.org/2000/svg">
+        <path class="neighbor-fill" d="M20,190 L45,165 L75,170 L100,178 L118,205 L108,245 L78,268 L40,258 L18,228 Z"/>
+        <path class="neighbor-fill" d="M100,178 L120,110 L150,80 L195,72 L235,95 L255,130 L245,168 L215,185 L175,205 L128,222 L118,205 Z"/>
+        <path class="neighbor-fill" d="M235,95 L255,80 L272,92 L266,118 L285,140 L300,175 L318,205 L330,250 L315,285 L292,300 L280,258 L258,215 L236,178 L222,148 L222,118 Z"/>
+        <path class="neighbor-line" d="M100,178 L120,110 L150,80 L195,72 L235,95 L255,130 L245,168 L215,185 L175,205 L128,222 L118,205 Z"/>
+        <text x="55" y="222" class="ms-label" font-size="11" fill="var(--tile-text)" stroke="var(--card)" opacity="0.85">SPAIN</text>
+        <text x="168" y="150" class="ms-label" font-size="11" fill="var(--tile-text)" stroke="var(--card)" opacity="0.85">FRANCE</text>
+        <text x="272" y="215" class="ms-label" font-size="11" fill="var(--tile-text)" stroke="var(--card)" opacity="0.85">ITALY</text>
+        <g id="ms-dots"></g>
+        <g id="ms-labels"></g>
+      </svg>
+      <div class="era-head">
+        <div class="era-name-inline" id="msName">San Marino: a legendary founding</div>
+        <div class="era-owners" id="msOwners"></div>
+      </div>
+      <div class="flags-row" id="msFlags"></div>
+      <p class="era-story" id="msStory"></p>
+      <div class="map-key" id="msLegend"></div>
+      <p class="map-notes"><b>Simplifications:</b> France, Spain, and Italy are drawn as faint schematic blobs for orientation, not traced coastlines. Liechtenstein sits in the real Alps, north and east of the area these three shapes cover, so its dot is placed schematically at the map's edge rather than on accurate Alpine terrain. Flag chips show each state's current flag even for centuries-old founding events, since no period-specific flag survives for most of them &mdash; noted here rather than implied.</p>
+    </div>
+  </div>
+
+  <div class="about">
+    <h2>About this hub</h2>
+    <p>This hub pairs the five country cards above with one shared founding-date map rather than the atlas's usual territory-conquest slider &mdash; these five states are small enough, and their borders stable enough for long enough, that a conquest map would show little beyond a static dot on a much larger neighbor. Real historical context sits above and below; full deep-dive flag pages for each country are planned for a later phase.</p>
+    <p>Colors above are drawn from each country's current national flag, not a historical palette, since no per-country flag lineage exists yet. Once a country's own page publishes, its card here will link out.</p>
+    <p>This hub closes out the atlas's sovereign-state coverage for Europe. A few adjacent gaps turned up during the audit that produced this page and are being tracked for a later phase rather than folded in here: Switzerland, Cyprus, and Malta have no dedicated coverage anywhere in the atlas yet, and are not microstates in the sense the five above are, so they've been left for their own treatment.</p>
+  </div>
+
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This hub is one region in a larger set. See the other phases here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="iberia-hub.html"><b>Iberia hub</b><span>Spain and Portugal</span></a>
+      <a class="link-card" href="low-countries-hub.html"><b>Low Countries hub</b><span>Belgium, Netherlands, Luxembourg</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var svgNS = "http://www.w3.org/2000/svg";
+  var DOT_POS = { sm:[248,192], va:[231,216], mc:[212,175], li:[262,102], ad:[92,196] };
+  var DOT_COLOR = { sm:"#5eb6e4", va:"#fdc82f", mc:"#ce1126", li:"#002b7f", ad:"#0018a8" };
+  var DOT_NAME = { sm:"San Marino", va:"Vatican City", mc:"Monaco", li:"Liechtenstein", ad:"Andorra" };
+  var DOT_ORDER = ["sm","ad","mc","li","va"];
+
+  var MS_FLAGS = {
+    sm: '<rect width="300" height="100" fill="#f4efe1"/><rect y="100" width="300" height="100" fill="#5eb6e4"/>',
+    ad: '<rect width="100" height="200" fill="#0018a8"/><rect x="100" width="100" height="200" fill="#fedf00"/><rect x="200" width="100" height="200" fill="#d50032"/>',
+    mc: '<rect width="300" height="100" fill="#ce1126"/><rect y="100" width="300" height="100" fill="#f4efe1"/>',
+    li: '<rect width="300" height="100" fill="#002b7f"/><rect y="100" width="300" height="100" fill="#ce1126"/><rect x="20" y="15" width="50" height="35" fill="#fdc82f"/>',
+    va: '<rect width="150" height="200" fill="#fdc82f"/><rect x="150" width="150" height="200" fill="#f4efe1"/><circle cx="225" cy="100" r="30" fill="none" stroke="#fdc82f" stroke-width="5"/>'
+  };
+  function flagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (MS_FLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+
+  var MS_SNAP = [
+    { year:"301", name:"San Marino: a legendary founding", add:["sm"],
+      story:"Tradition holds that a Christian stonemason named Marinus, fleeing Diocletian's persecution, founded a small community on Monte Titano in 301 CE &mdash; a date accepted more as enduring civic legend than as something historians can document. What is verifiable is far rarer: San Marino has never been conquered and never lost its self-government since, its own long-standing claim to be the world's oldest surviving republic. Vatican City, Monaco, Liechtenstein, and Andorra are all still centuries away from existing in anything like their present form." },
+    { year:"1278", name:"Andorra: a co-principality by treaty", add:["ad"],
+      story:"A real, dated treaty &mdash; the 1278 paréage between the Bishop of Urgell and the Count of Foix &mdash; ends a long territorial dispute by making Andorra a co-principality jointly ruled by both. That dual-sovereign structure has no real parallel anywhere else in the world and survives to the present: the Bishop of Urgell remains one co-prince, and the Count of Foix's title, passed down through inheritance and French royal succession, is held automatically today by whoever is serving as President of France." },
+    { year:"1297", name:"Monaco: the Grimaldi seizure", add:["mc"],
+      story:"Fran&ccedil;ois Grimaldi, according to the well-documented family story, disguised himself as a Franciscan monk to gain entry to the fortress of Monaco in January 1297, then let his armed companions in to seize it. The Grimaldi family has ruled Monaco ever since, with interruptions under direct French control during the Revolutionary and Napoleonic periods and full sovereignty restored in 1861 &mdash; one of the longest-reigning dynasties on Earth." },
+    { year:"1719", name:"Liechtenstein: assembled to buy a seat", add:["li"],
+      story:"The Liechtenstein family, already wealthy and influential within the Holy Roman Empire, had one problem: they held no land answering directly to the Emperor, so they had no seat in the Imperial Diet. They solved it in 1719 by purchasing the lordship of Schellenberg and the county of Vaduz outright and having Emperor Charles VI unite the two as the Principality of Liechtenstein &mdash; a state assembled, more or less, to buy a vote." },
+    { year:"1929", name:"Vatican City: a treaty ends the Roman Question", add:["va"],
+      story:"Italian unification's 1870 seizure of Rome absorbed the much larger Papal States outright, leaving the pope a self-declared \"prisoner in the Vatican\" for nearly sixty years &mdash; the unresolved \"Roman Question.\" The 1929 Lateran Treaty between Mussolini's government and Pope Pius XI settled it by creating Vatican City as a new, tiny sovereign state, 0.49 square kilometers, distinct from and far smaller than the Papal States it replaced. It remains the world's smallest sovereign state by both area and population." },
+    { year:"today", name:"Five microstates, today", add:[],
+      story:"All five keep the same basic arrangement that got them here: San Marino an unbroken republic, Andorra a diarchy between a Spanish bishop and the French president, Monaco a Grimaldi monarchy, Liechtenstein a constitutional princely state, and the Vatican under papal sovereignty. None has been absorbed by a larger neighbor since the dates above &mdash; a genuine rarity for territories this small, each one entirely surrounded, or nearly so, by a single much larger neighbor." }
+  ];
+
+  var dotsG = document.getElementById("ms-dots");
+  var labelsG = document.getElementById("ms-labels");
+  var yearTag = document.getElementById("msYear"), nameEl = document.getElementById("msName"),
+      ownersEl = document.getElementById("msOwners"), storyEl = document.getElementById("msStory"),
+      flagsEl = document.getElementById("msFlags"), legendEl = document.getElementById("msLegend");
+
+  dotsG.innerHTML = DOT_ORDER.map(function (k) {
+    var p = DOT_POS[k];
+    return '<circle class="ms-dot" id="ms-dot-' + k + '" cx="' + p[0] + '" cy="' + p[1] + '" r="5" fill="var(--card-border)" opacity="0.45"/>';
+  }).join("");
+
+  legendEl.innerHTML = DOT_ORDER.map(function (k) {
+    return '<span><span class="sw" style="background:' + DOT_COLOR[k] + '"></span>' + DOT_NAME[k] + '</span>';
+  }).join("");
+
+  function render(i) {
+    var era = MS_SNAP[i];
+    var founded = {};
+    for (var k = 0; k <= i; k++) { (MS_SNAP[k].add || []).forEach(function (id) { founded[id] = true; }); }
+    yearTag.textContent = era.year;
+    nameEl.textContent = era.name;
+    storyEl.innerHTML = era.story;
+    flagsEl.innerHTML = (era.add.length ? era.add : DOT_ORDER).map(function (k) {
+      return '<div class="flag-chip">' + flagSvg(k) + '<div class="fc-label">' + DOT_NAME[k] + (era.add.length ? " (new)" : "") + '</div></div>';
+    }).join("");
+    var n = Object.keys(founded).length;
+    ownersEl.innerHTML = "<b>" + n + " of 5</b> microstates founded as of " + era.year;
+    labelsG.innerHTML = "";
+    DOT_ORDER.forEach(function (k) {
+      var d = document.getElementById("ms-dot-" + k);
+      var p = DOT_POS[k];
+      if (founded[k]) {
+        d.setAttribute("fill", DOT_COLOR[k]); d.setAttribute("opacity", "1"); d.setAttribute("r", "6");
+        var t = document.createElementNS(svgNS, "text");
+        t.setAttribute("x", p[0]);
+        t.setAttribute("y", p[1] - 10);
+        t.setAttribute("class", "ms-label");
+        t.setAttribute("font-size", "10");
+        t.setAttribute("fill", "#201a12");
+        t.setAttribute("stroke", "#f7f1e3");
+        t.textContent = DOT_NAME[k];
+        labelsG.appendChild(t);
+      } else {
+        d.setAttribute("fill", "var(--card-border)"); d.setAttribute("opacity", "0.4"); d.setAttribute("r", "4");
+      }
+    });
+  }
+
+  var sliderEl = document.getElementById("msSlider"), playBtn = document.getElementById("msPlay");
+  sliderEl.addEventListener("input", function () { render(parseInt(sliderEl.value, 10)); });
+  render(0);
+  var playing = false, timer = null;
+  function step() {
+    var next = parseInt(sliderEl.value, 10) + 1;
+    if (next > MS_SNAP.length - 1) { stop(); return; }
+    sliderEl.value = next; render(next);
+  }
+  function start() {
+    playing = true; playBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(sliderEl.value, 10) >= MS_SNAP.length - 1) { sliderEl.value = 0; render(0); }
+    timer = setInterval(step, 1700);
+  }
+  function stop() { playing = false; playBtn.innerHTML = "&#9654;"; clearInterval(timer); }
+  playBtn.addEventListener("click", function () { playing ? stop() : start(); });
+})();
+</script>
+
+</body></html>

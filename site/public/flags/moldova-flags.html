@@ -1,0 +1,830 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+</style></head><body>
+<title>Flags Between the Prut and the Dniester</title>
+<meta name="description" content="A chronological, paint-ready atlas of every flag that flew over Moldova, from the eastern half of a medieval principality to the republic of today — with a real-border map and an honest account of Transnistria.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.08rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; font-size: .94rem; color: var(--muted); }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  .legend { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+
+  /* ---------- Timeline ---------- */
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1px; background: var(--hair); }
+  @media (max-width: 560px) { .timeline::before { left: 9px; } }
+  .entry { position: relative; padding-left: 46px; margin-bottom: 46px; }
+  @media (max-width: 560px) { .entry { padding-left: 30px; } }
+  .entry::before {
+    content: attr(data-n);
+    position: absolute; left: 1px; top: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--paper); outline: 1px solid var(--hair);
+    background: var(--card);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--brick); display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) { .entry::before { left: -5px; width: 18px; height: 18px; font-size: 9px; } }
+
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+  .card-head { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  @media (max-width: 620px) { .card-head { flex-direction: column; } }
+  .flag-box { flex: none; width: 168px; }
+  .flag-box svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-caption { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .card-title { font-size: 1.32rem; font-weight: 600; line-height: 1.18; margin: 0 0 10px; text-wrap: balance; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px; border: 1px solid var(--card-border); color: var(--muted);
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  /* Flip tooltip below tags near the top of the viewport so it isn't clipped */
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  /* Keep tooltips from overflowing the left/right edges on narrow screens */
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint { border-top: 1px solid var(--hair); }
+  details.paint > summary {
+    cursor: pointer; list-style: none; padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--adriatic); display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before { content: "+"; font-family: "Fraunces", serif; font-size: 15px; width: 14px; }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row { display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px; }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--card-border); border-radius: 2px; padding: 5px 9px 5px 5px; background: var(--paper); }
+  .swatch .chip { width: 20px; height: 20px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: 64ch; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 88px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 300px; height: auto; }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .iborder-line { transition: stroke-opacity 0.6s ease, stroke-width 0.6s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .ireg-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 700; text-anchor: middle; transition: fill .4s ease, stroke .4s ease; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="eastern-europe-hub.html">Eastern Europe hub</a></p>
+  <p class="kicker">Family research &middot; Phase 6 of the world atlas</p>
+  <h1>Flags Between the Prut and the Dniester</h1>
+  <p class="lede">Moldova is not a country with one long, unbroken flag story &mdash; it's the eastern half of someone else's. Modern Moldova occupies only the portion of the old Principality of Moldavia that fell on the wrong side of an 1812 treaty line, a Russian province called Bessarabia that spent the next two centuries bouncing between Bucharest, Moscow, and, eventually, its own capital in Chișinău.</p>
+  <p class="lede">Seven political entities, and a blue-yellow-red tricolor that is, quite deliberately, Romania's own flag with a different coat of arms sewn on &mdash; a visible reminder that the two countries are, linguistically and historically, the same nation split by a river in 1812 and never fully rejoined. Before Moldavia itself was founded in 1359, the same territory sat on Rome's Dacian frontier and then on the great Migration Period corridor for the better part of thirteen centuries with no local state at all.</p>
+
+  <div class="scope-note">
+    <b>Scope of this page:</b> the lands of present-day Moldova &mdash; the eastern portion of historic Moldavia, between the Prut and Dniester rivers &mdash; c. 100 BCE&ndash;present, seven political-flag eras. This page cross-references <a href="romania-flags.html">Romania's own flag atlas</a>, which covers the shared medieval Principality of Moldavia in full before the 1812 split. Part of a larger atlas &mdash; see the map and linked pages at the bottom.
+  </div>
+
+  <div class="imap-section">
+    <h2>Moldova and Transnistria, 1991&ndash;present</h2>
+    <p class="imap-sub">Moldova's own real border, traced whole, with a schematic internal line marking the one genuine split this page's history supports: the breakaway strip on the Dniester's eastern bank. Press play, or drag the slider.</p>
+    <div class="rule-box">
+      <b>For every era before 1991, the whole territory shown here moved as one piece.</b> Transnistria's separate claim traces back to real administrative history &mdash; it was part of the Soviet Ukraine-nested Moldavian ASSR from 1924, two decades before the rest of Bessarabia joined it in 1940 &mdash; but no documented separate government actually ran the east bank on its own until the breakaway of 1990&ndash;92. The line below only solidifies for that final era.
+    </div>
+    <div class="imap-frame">
+      <div class="imap-controls">
+        <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="imap-year" id="iYearTag">c. 100 BCE</span>
+        <input type="range" id="iSlider" min="0" max="6" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="imap-svg" viewBox="0 0 340 424.6" xmlns="http://www.w3.org/2000/svg">
+        <g class="context-label" pointer-events="none">
+          <text x="60" y="90">ROMANIA</text>
+          <text x="290" y="120">UKRAINE</text>
+          <text x="130" y="370">UKRAINE</text>
+        </g>
+        <path id="ireg-core" class="ireg-fill" d="M20.0,51.8 L41.0,32.8 L99.6,20.0 L164.5,60.2 L200.7,65.1 L240.5,99.8 L234.2,143.6 L220,150 L210,175 L206,210 L208,250 L217.7,282.0 L223.9,305.1 L199.8,346.3 L184.4,390.6 L162.2,404.6 L146.4,345.7 L155.7,290.6 L152.9,233.9 L102.1,157.1 L74.1,102.7 L46.9,64.4 Z"/>
+        <path id="ireg-transnistria" class="ireg-fill" d="M234.2,143.6 L266.3,164.7 L279.0,218.7 L309.8,251.5 L303.6,270.7 L320.0,283.8 L296.7,293.4 L244.8,289.6 L236.1,271.7 L217.7,282.0 L208,250 L206,210 L210,175 L220,150 Z"/>
+        <path class="iborder-line" id="ib-core-transnistria" d="M234.2,143.6 L220,150 L210,175 L206,210 L208,250 L217.7,282.0"/>
+        <g font-family="IBM Plex Mono, monospace">
+          <text class="ireg-label" id="ilbl-core" x="120" y="220">MOLDOVA</text>
+          <text class="ireg-label" id="ilbl-transnistria" x="266" y="225" style="font-size:8.5px">TRANSNISTRIA</text>
+        </g>
+      </svg>
+      <div class="imap-head">
+        <div class="imap-name" id="iEraName">Dacia, the Roman Frontier, and the Age of Migrations</div>
+        <div class="imap-owners" id="iEraOwners"></div>
+      </div>
+      <div class="iflags-row" id="iFlagsRow"></div>
+      <p class="imap-story" id="iEraStory"></p>
+
+      <p class="map-note">Real traced border of modern Moldova; the internal Transnistria line is a schematic approximation of the Dniester, not a surveyed administrative boundary, and only solidifies for the 1991&ndash;present era &mdash; see the rule box above.</p>
+      <div class="imap-key" id="iLegend"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <!-- 1 -->
+    <div class="entry" data-n="7" id="era-1991">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="100" height="200" fill="#003da5"/>
+              <rect x="100" width="100" height="200" fill="#ffd200"/>
+              <rect x="200" width="100" height="200" fill="#ce1126"/>
+              <g transform="translate(150,100)">
+                <rect x="-17" y="-16" width="34" height="34" rx="3" fill="#a4302a" stroke="#c9a13c" stroke-width="2"/>
+                <path d="M0,-9 L-3,-1 L-11,-2 L-4,4 L-7,12 L0,6 L7,12 L4,4 L11,-2 L3,-1 Z" fill="#1a140d"/>
+                <circle cx="0" cy="-8" r="2" fill="#f4efe1"/>
+              </g>
+            </svg>
+            <div class="flag-caption">blue&ndash;yellow&ndash;red, with the state eagle and aurochs-head shield</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1991 &ndash; present</div>
+            <h3 class="card-title">Republic of Moldova</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="An internationally recognized, self-governing state since the 1991 Soviet collapse, though its authority does not extend to the breakaway Transnistria region on its eastern bank of the Dniester."><span class="dot" style="background:#2f6b4a"></span>Sovereign state</span><span class="tag" tabindex="0" data-tip="Chairman of the Supreme Soviet who led Moldova's August 1991 declaration of independence and became the newly sovereign republic's first president."><span class="dot" style="background:#4a3b78"></span>Mircea Snegur</span><span class="tag" tabindex="0" data-tip="Moldova's constitution establishes no state church, though the overwhelmingly Eastern Orthodox population's religious life is split between rival Moscow- and Romanian-affiliated church jurisdictions."><span class="dot" style="background:#8e3b62"></span>Secular (no state religion)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Since the 1991 Soviet collapse, hundreds of thousands of Moldovans &mdash; estimated at times to be roughly a quarter to a third of the working-age population &mdash; have left to work abroad, chiefly in Russia and, since visa liberalization, the European Union."><span class="dot" style="background:#a3672f"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#fff"/><rect y="4.67" width="20" height="4.67" fill="#0039a6"/><rect y="9.33" width="20" height="4.67" fill="#d52b1e"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#003399"/><g fill="#ffcc00"><circle cx="10" cy="3.5" r="0.6"/><circle cx="13.5" cy="5" r="0.6"/><circle cx="14.5" cy="7" r="0.6"/><circle cx="13.5" cy="9" r="0.6"/><circle cx="10" cy="10.5" r="0.6"/><circle cx="6.5" cy="9" r="0.6"/><circle cx="5.5" cy="7" r="0.6"/><circle cx="6.5" cy="5" r="0.6"/></g></svg></span>Emigration: labor migrants to Russia &amp; the EU (1991&ndash;)</span></div>
+            <p><span class="label">Who &amp; why:</span> the Moldavian SSR's Supreme Soviet declares independence on 27 August 1991 as the USSR collapses. Within months, a breakaway government on the Dniester's east bank &mdash; Transnistria, formed in 1990 by local Soviet-era officials and industrial managers wary of Moldova's pro-Romanian, pro-independence turn &mdash; fights a short war against the new Moldovan state in 1992. A Russian-brokered ceasefire that July freezes the front line roughly where it still sits: Transnistria remains internationally unrecognized by every UN member state, but has run its own government, currency, and (with a continued Russian military presence) its own security apparatus from Tiraspol ever since, a status quo now over three decades old and still unresolved.</p>
+            <p><span class="label">What it represents:</span> the tricolor readopts Romania's own blue-yellow-red bands (with Moldova using a slightly different, more saturated palette) but centers a distinct state eagle bearing a shield with the aurochs' head, star, rose, and crescent &mdash; the very same Moldavian princely device shown on the 1600&ndash;1812 flag further down this page, restored as the modern republic's own emblem.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, three equal vertical bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Blue at hoist, yellow center, red at fly; state coat of arms (eagle with aurochs-head shield, simplified here) centered on the yellow band.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#003da5"></span><span class="meta"><span class="name">Blue</span><span class="hex">#003DA5</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#ffd200"></span><span class="meta"><span class="name">Yellow</span><span class="hex">#FFD200</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#ce1126"></span><span class="meta"><span class="name">Red</span><span class="hex">#CE1126</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="entry" data-n="6" id="era-1940">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#b8262a"/>
+              <rect y="168" width="300" height="13" fill="#3f8f52"/>
+              <g transform="translate(58,52)">
+                <path d="M-16,10 L16,-10" stroke="#f2c94c" stroke-width="4" stroke-linecap="round"/>
+                <path d="M-16,-10 A16,16 0 1 0 -15.9,-10.3" fill="none" stroke="#f2c94c" stroke-width="4"/>
+                <path d="M4,-30 l3,9 10,0 -8,6 3,9 -8,-6 -8,6 3,-9 -8,-6 10,0 Z" fill="#f2c94c"/>
+              </g>
+            </svg>
+            <div class="flag-caption">Soviet red, hammer &amp; sickle and star, a thin green stripe near the fly</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1940 &ndash; 1991</div>
+            <h3 class="card-title">Moldavian Soviet Socialist Republic</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A union republic of the USSR formed in 1940 from Bessarabia and a strip of the existing Moldavian ASSR, governed through the local Communist Party under Moscow's direction."><span class="dot" style="background:#8c2f2f"></span>Communist state</span><span class="tag" tabindex="0" data-tip="First Secretary of the Moldavian Communist Party for two decades (1961–1980), the figure most associated with the era's postwar Sovietization and Russification policies."><span class="dot" style="background:#4a3b78"></span>Ivan Bodiul</span><span class="tag" tabindex="0" data-tip="Soviet doctrine suppressed the historically dominant Eastern Orthodox Church, closing monasteries and churches and persecuting clergy throughout this half-century period."><span class="dot" style="background:#8e3b62"></span>State atheism</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Soviet authorities deport tens of thousands of Bessarabians &mdash; landowners, clergy, and suspected nationalists &mdash; to Siberia and Kazakhstan in mass operations in June 1941 and again in July 1949."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#cc0000"/><path d="M3,4 l0.7,1.5 -0.7,1.5 -0.7,-1.5z" fill="#ffd700"/></svg>Emigration: deportees to Siberia &amp; Kazakhstan (1941, 1949)</span><span class="tag" tabindex="0" data-tip="Postwar Soviet policy brings substantial numbers of ethnic Russian and Ukrainian administrators, industrial workers, and military personnel to settle in the Moldavian SSR as part of broader Sovietization."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#cc0000"/><path d="M3,4 l0.7,1.5 -0.7,1.5 -0.7,-1.5z" fill="#ffd700"/></svg>Immigration: Russian &amp; Ukrainian settlers (postwar Sovietization)</span></div>
+            <p><span class="label">Who &amp; why:</span> the secret protocols of the August 1939 Molotov&ndash;Ribbentrop Pact assign Bessarabia to the Soviet sphere; the Red Army occupies it in June 1940, and on 2 August 1940 Moscow creates the Moldavian SSR by joining most of Bessarabia to a strip of the existing Moldavian Autonomous SSR &mdash; a Soviet autonomous republic that had already existed since 1924 on the Dniester's <i>eastern</i> bank, nested inside Soviet Ukraine. That older, separate Soviet administrative history for the east bank is part of why Transnistria, when the USSR itself dissolved fifty years later, saw itself as having a distinct claim rather than simply as a region of Moldova. The republic's existence is itself interrupted: Romania, now allied with Nazi Germany, reoccupies Bessarabia in 1941 as part of the Axis invasion of the Soviet Union, and Soviet rule is only restored when the Red Army retakes the territory in 1944, reconstituting the Moldavian SSR for the remainder of the Soviet period.</p>
+            <p><span class="label">What it represents:</span> a Soviet republic flag &mdash; plain red until an updated 1952 version added a green horizontal stripe near the bottom (echoing Bessarabia and Moldavia's own agricultural, wine-country identity) beneath a gold hammer, sickle, and star in the canton, discarding the Romanian tricolor entirely for the whole of this period.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, per Soviet-republic convention.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red field; narrow green stripe near the bottom (added 1952); gold hammer, sickle, and star in the canton.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#b8262a"></span><span class="meta"><span class="name">Red</span><span class="hex">#B8262A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#3f8f52"></span><span class="meta"><span class="name">Green</span><span class="hex">#3F8F52</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f2c94c"></span><span class="meta"><span class="name">Gold</span><span class="hex">#F2C94C</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="entry" data-n="5" id="era-1918">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="100" height="200" fill="#1e3d6b"/>
+              <rect x="100" width="100" height="200" fill="#d9a63c"/>
+              <rect x="200" width="100" height="200" fill="#a4302a"/>
+              <g transform="translate(150,100)">
+                <rect x="-16" y="-14" width="32" height="30" rx="2" fill="#f4efe1" stroke="#241f14" stroke-width="2"/>
+                <path d="M-10,-14 q10,-12 20,0" fill="none" stroke="#c9a13c" stroke-width="2.5"/>
+              </g>
+            </svg>
+            <div class="flag-caption">the Romanian royal tricolor, flown over a newly-doubled kingdom</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1918 &ndash; 1940</div>
+            <h3 class="card-title">Bessarabia, within the Kingdom of Romania</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="The historic Bessarabian lands reunited with the Kingdom of Romania after a 1918 vote by the local assembly (Sfatul Țării), following the collapse of the Russian Empire."><span class="dot" style="background:#a9762f"></span>Province of a kingdom</span><span class="tag" tabindex="0" data-tip="King of Romania who presided over Bessarabia's 1918 union with the Kingdom, formally recognized by the principal Allied powers in the 1920 Treaty of Paris."><span class="dot" style="background:#4a3b78"></span>Ferdinand I</span><span class="tag" tabindex="0" data-tip="The 1923 Romanian constitution recognized Orthodox Christianity as the &quot;dominant religion&quot; of the Romanian state, a status Bessarabia shared as part of the kingdom."><span class="dot" style="background:#8e3b62"></span>Eastern Orthodoxy (state-favored)</span></div>
+            <p><span class="label">Who &amp; why:</span> as the Russian Empire collapses in 1917, Bessarabia's own representative council, the <i>Sfatul Țării</i>, first declares an autonomous Moldavian Democratic Republic, then votes on 27 March 1918 to unite with the Kingdom of Romania &mdash; joining Transylvania's own union vote at Alba Iulia that December to roughly double Romania's prewar territory (see Romania's own flag atlas for the fuller Greater Romania story). The Soviet Union never recognizes the union as legitimate, a dispute that simmers unresolved for the next twenty-two years until Moscow reverses it by force in 1940.</p>
+            <p><span class="label">What it represents:</span> the same royal blue-yellow-red tricolor flown across the whole Romanian kingdom during this period &mdash; no separate Bessarabian flag exists; the province is administered as an ordinary part of Greater Romania, its own aurochs-head arms folded into the kingdom's larger combined coat of arms alongside Transylvania's and Wallachia's own devices.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3, three equal vertical bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Blue-yellow-red; royal coat of arms centered on state variant (simplified here), unchanged from the rest of the kingdom.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#1e3d6b"></span><span class="meta"><span class="name">Blue</span><span class="hex">#1E3D6B</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#d9a63c"></span><span class="meta"><span class="name">Yellow</span><span class="hex">#D9A63C</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="entry" data-n="4" id="era-1812">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#f4efe1"/>
+              <rect y="66.7" width="300" height="66.6" fill="#1e2f96"/>
+              <rect y="133.3" width="300" height="66.7" fill="#a4302a"/>
+            </svg>
+            <div class="flag-caption">the Russian Empire's own white-blue-red civil ensign</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1812 &ndash; 1918</div>
+            <h3 class="card-title">Bessarabia, within the Russian Empire</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Territory annexed from the Ottoman-vassal Principality of Moldavia by the 1812 Treaty of Bucharest, administered as the Russian imperial Governorate of Bessarabia."><span class="dot" style="background:#204b5c"></span>Annexed / provincial territory</span><span class="tag" tabindex="0" data-tip="Russian tsar whose 1812 Treaty of Bucharest, ending a war with the Ottoman Empire, annexed Bessarabia from the Principality of Moldavia and founded this era of Russian rule."><span class="dot" style="background:#4a3b78"></span>Alexander I</span><span class="tag" tabindex="0" data-tip="Orthodoxy was the empire's established faith, and Bessarabia's already-Orthodox population was gradually brought under the Russian Orthodox Church's own ecclesiastical administration."><span class="dot" style="background:#8e3b62"></span>Russian Orthodoxy (imperial state church)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Russian authorities settle thousands of Bulgarian and German colonists in the newly annexed Bessarabian steppe from the early 1810s, seeking loyal agricultural populations along the empire's new frontier &mdash; communities whose descendants (the Bessarabian Germans and Bessarabian Bulgarians) remained distinct well into the 20th century."><span class="dot" style="background:#2f7a6b"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#fff"/><rect y="4.67" width="20" height="4.67" fill="#00966e"/><rect y="9.33" width="20" height="4.67" fill="#d62612"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#000"/><rect y="4.67" width="20" height="4.67" fill="#dd0000"/><rect y="9.33" width="20" height="4.67" fill="#ffce00"/></svg></span>Immigration: Bulgarian &amp; German colonists (early 19th c.)</span></div>
+            <p><span class="label">Who &amp; why:</span> the 1806&ndash;12 Russo-Turkish War ends with the Treaty of Bucharest, in which the Ottoman Empire cedes the eastern half of the old Principality of Moldavia &mdash; the land between the Prut and Dniester rivers &mdash; to Russia. Renamed Bessarabia, it becomes a Russian province in its own right; the western remainder of historic Moldavia stays under Ottoman suzerainty and eventually unites with Wallachia in 1859 to form modern Romania (see Romania's own flag atlas). This is the moment "Moldova" and the rest of historic Moldavia first split into two separate stories, and the two territories experience the following century very differently &mdash; Bessarabia under the Tsar, the west under its own increasingly independent princes.</p>
+            <p><span class="label">What it represents:</span> no distinct Bessarabian flag exists under Russian rule; the province flies the empire's own white-blue-red tricolor (formalized as the national civil flag in 1883, though in informal use well before that), the same banner flown from Warsaw to Vladivostok, with no reference to Bessarabia's own Moldavian heritage.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3, three equal horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">White top, blue middle, red bottom &mdash; the Russian Empire's own civil ensign, used province-wide.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#1e2f96"></span><span class="meta"><span class="name">Blue</span><span class="hex">#1E2F96</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="entry" data-n="3" id="era-1600">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#a4302a"/>
+              <g transform="translate(150,100)" fill="#241f14">
+                <path d="M0,-30 L-6,-6 L-30,-8 L-10,8 L-20,30 L0,14 L20,30 L10,8 L30,-8 L6,-6 Z"/>
+                <path d="M-14,-30 L-2,-10 L-22,-14 Z" transform="translate(0,-2)"/>
+              </g>
+              <circle cx="150" cy="60" r="6" fill="#f4efe1"/>
+            </svg>
+            <div class="flag-caption">Moldavia's own aurochs head, black on red, star between the horns</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1600 &ndash; 1812</div>
+            <h3 class="card-title">Principality of Moldavia (Ottoman vassal)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A tributary principality retaining its own prince, laws, and Orthodox church under nominal Ottoman suzerainty, increasingly dominated in its later phase by Constantinople-appointed Greek Phanariote rulers."><span class="dot" style="background:#a9762f"></span>Ottoman vassal principality</span><span class="tag" tabindex="0" data-tip="Prince whose turn-of-the-17th-century reign marked the principality's deepening, more formalized vassalage to Ottoman authority, a pattern that defined most of this long era."><span class="dot" style="background:#4a3b78"></span>Ieremia Movilă</span><span class="tag" tabindex="0" data-tip="Moldavia remained an Orthodox Christian principality throughout Ottoman vassalage, its church and princely court continuing Orthodox tradition even under Muslim Ottoman overlordship."><span class="dot" style="background:#8e3b62"></span>Eastern Orthodoxy (state religion)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Crimean Tatar and Ottoman raiding parties periodically swept through Moldavia during this period, seizing captives for sale into Ottoman slave markets &mdash; part of the wider, well-documented pattern of steppe slave-raiding that afflicted the region for centuries."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#e30a17"/><circle cx="8" cy="7" r="3.4" fill="#fff"/><circle cx="9" cy="7" r="2.7" fill="#e30a17"/><path d="M12.5,7 l3.5,1.1 -2.2,-1.9 2.2,-1.9z" fill="#fff"/></svg>Emigration: captives taken in Tatar &amp; Ottoman slave raids</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Boyar family supplying several princes of Moldavia, 1595&ndash;1661, most notably Ieremia Movilă, whose reign deepened the principality's Ottoman vassalage. Arms: Moldavia's own aurochs head, gold on blue, as attested on the family's princely seals."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1e3f8c"/><path d="M50,38 L40,58 L60,58 Z" fill="#c9a13c"/><path d="M32,50 q-4,-14 -18,-16 q2,14 18,16 Z M68,50 q4,-14 18,-16 q-2,14 -18,16 Z" fill="#c9a13c"/><circle cx="50" cy="46" r="4" fill="#c9a13c"/><path d="M50,70 l5,10 h-10 Z" fill="#f4efe1"/><path d="M78,68 a8,8 0 1 1 -1,-1 a6,6 0 1 0 1,1 Z" fill="#c9a13c"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Movilă</span></div>
+            <p><span class="label">Who &amp; why:</span> the whole of Moldavia &mdash; the territory that will later be split between modern Romania and modern Moldova alike &mdash; keeps its own princes and institutions under Ottoman suzerainty through this period, losing effective self-rule to appointed Phanariote princes from Constantinople after 1711 much as Wallachia does (see Romania's own flag atlas for the parallel Wallachian story). Russian influence and Russian-backed reform grow through the 18th century, culminating in the 1812 Treaty of Bucharest that permanently cuts this single principality in two: everything east of the Prut becomes Russian Bessarabia, the ancestor of today's Moldova; everything west stays Ottoman-vassal Moldavia and later joins Wallachia to form Romania.</p>
+            <p><span class="label">What it represents:</span> the black aurochs' head with a star between its horns, a rose to one side and a crescent moon to the other, on a red field &mdash; Moldavia's own princely arms, attested from at least the 15th century and the direct ancestor of the aurochs-head shield still carried on modern Moldova's own coat of arms today.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio recorded; princely/state banner.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red field, black aurochs' head with star, rose, and crescent (simplified to star here).</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#241f14"></span><span class="meta"><span class="name">Black</span><span class="hex">#241F14</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="entry" data-n="2" id="era-1359">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; founding era, no flag survives this early</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 1359 &ndash; 1600</div>
+            <h3 class="card-title">Principality of Moldavia (founding era)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="An independent medieval principality founded by Vlach settlers and rulers east of the Carpathians, sovereign until growing Ottoman pressure forced vassal status onto it by 1538."><span class="dot" style="background:#a9762f"></span>Founding principality</span><span class="tag" tabindex="0" data-tip="Voivode traditionally credited with founding the independent Principality of Moldavia around 1359 by breaking away from Hungarian overlordship."><span class="dot" style="background:#4a3b78"></span>Bogdan I</span><span class="tag" tabindex="0" data-tip="The newly founded principality was Eastern Orthodox Christian from its outset, following the faith of its Vlach founders and the wider Orthodox world of the region."><span class="dot" style="background:#8e3b62"></span>Eastern Orthodoxy (state religion)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Founding dynasty of Moldavia, 1359&ndash;1432, beginning with Bogdan I and continuing through Alexander the Good. Arms: azure, an aurochs head between a star and a rose, with a crescent moon."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1e3f8c"/><path d="M50,38 L40,58 L60,58 Z" fill="#f4efe1"/><path d="M32,50 q-4,-14 -18,-16 q2,14 18,16 Z M68,50 q4,-14 18,-16 q-2,14 -18,16 Z" fill="#f4efe1"/><circle cx="50" cy="46" r="4" fill="#f4efe1"/><path d="M28,72 l6,-8 6,8 -6,4 Z" fill="#c9a13c"/><path d="M78,68 a8,8 0 1 1 -1,-1 a6,6 0 1 0 1,1 Z" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Mușat</span><span class="tag" tabindex="0" data-tip="Boyar family supplying several princes of Moldavia, 1595&ndash;1661, most notably Ieremia Movilă. Arms: Moldavia's own aurochs head, gold on blue, as attested on the family's princely seals."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1e3f8c"/><path d="M50,38 L40,58 L60,58 Z" fill="#c9a13c"/><path d="M32,50 q-4,-14 -18,-16 q2,14 18,16 Z M68,50 q4,-14 18,-16 q-2,14 -18,16 Z" fill="#c9a13c"/><circle cx="50" cy="46" r="4" fill="#c9a13c"/><path d="M50,70 l5,10 h-10 Z" fill="#f4efe1"/><path d="M78,68 a8,8 0 1 1 -1,-1 a6,6 0 1 0 1,1 Z" fill="#c9a13c"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Movilă</span></div>
+            <p><span class="label">Who &amp; why:</span> the same founding recounted in full on Romania's own flag atlas: Dragoș crosses the eastern Carpathians as a Hungarian vassal around 1350&ndash;59 to found a march against Tatar raids, and Bogdan I breaks from Hungary &mdash; traditionally dated to 1359 &mdash; to found Moldavia as a fully independent principality. Stephen the Great (r. 1457&ndash;1504) becomes the era's dominant figure, winning dozens of battles against Ottoman, Hungarian, and Polish armies alike; the territory he ruled sprawled well beyond today's Moldova; the modern Republic of Moldova corresponds only to this principality's eastern portion, between the Prut and Dniester rivers, which will not become a distinct story until the 1812 split covered further up this page.</p>
+            <p><span class="label">What it represents:</span> no flag is securely documented for this founding era, though the aurochs-head device that later becomes Moldavia's fixed emblem already appears on princely seals under Stephen the Great. Shown here honestly blank rather than borrowing the later, better-attested flag shown one card up &mdash; the same treatment Romania's own atlas gives this identical period.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <div class="entry" data-n="1" id="era-100bce">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder &mdash; no state banner from Dacian, Roman, or migration-era rule survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 100 BCE &ndash; 1359 CE</div>
+            <h3 class="card-title">Dacia, the Roman Frontier, and the Age of Migrations</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="No single state governed this territory across this span; a free Dacian kingdom gives way to a Roman province, then to thirteen centuries with no local state at all as successive migrating peoples pass through or briefly rule the region."><span class="dot" style="background:#a9762f"></span>Fragmented / successive rule</span><span class="tag" tabindex="0" data-tip="King of Dacia whose kingdom Emperor Trajan conquered in 101&ndash;106 CE after two hard-fought wars, ending Dacian independence and opening the region to Roman colonization."><span class="dot" style="background:#4a3b78"></span>Decebalus (Dacian king, d. 106 CE)</span><span class="tag" tabindex="0" data-tip="Pre-Roman Dacians practiced their own polytheistic religion centered on the god Zalmoxis; Roman rule brought Greco-Roman paganism, and the later migration era saw a patchwork of paganism and, from the Slavic centuries onward, gradual Eastern Orthodox Christianization, with no single established faith across the whole span."><span class="dot" style="background:#8e3b62"></span>Dacian &amp; Greco-Roman paganism, later Christianization (no single state religion)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Trajan's legions conquer the Dacian kingdom in two campaigns (101&ndash;102 and 105&ndash;106 CE), commemorated on Trajan's Column in Rome; the resulting province of Dacia is abandoned by Emperor Aurelian in 271 CE as Rome retreats south of the Danube."><span class="dot" style="background:#6b2c2c"></span>Conquered by: Rome (106 CE), abandoned 271 CE</span><span class="tag" tabindex="0" data-tip="After Rome's withdrawal, the territory lies on the main corridor of the Migration Period, crossed in turn by Goths, Huns, Avars, Slavs, Bulgars, Pechenegs, Cumans, and finally the Mongol Golden Horde, whose 1241 invasion devastates the region roughly a century before Bogdan I's 1359 founding of Moldavia."><span class="dot" style="background:#a3672f"></span>Migration corridor: Goths, Huns, Slavs, Cumans, Mongols (3rd&ndash;14th c.)</span></div>
+            <p><span class="label">Who &amp; why:</span> the free Dacian kingdom, centered on the Carpathians and reaching its peak under Decebalus, falls to Trajan's Rome in 106 CE; the resulting province lies mostly to the west and south of present-day Moldova, whose own territory sits on the Roman frontier's edge without ever being fully incorporated. Rome's 271 CE withdrawal opens roughly eleven centuries with no local state at all, as this stretch of the Black Sea steppe corridor is crossed and briefly dominated in succession by Goths, Huns, Avars, Slavs, Bulgars, Pechenegs, and Cumans, ending with Mongol Golden Horde overlordship following the catastrophic 1241 invasion of Europe. Voivode Bogdan I's break from Hungarian vassalage in 1359, founding the independent Principality of Moldavia, finally ends this long stretch of statelessness.</p>
+            <p><span class="label">What it represents:</span> no flag or state banner survives from any phase of this span &mdash; not from the free Dacian kingdom, not from Roman provincial rule, and not from any of the migrating peoples who passed through afterward. Shown here honestly blank rather than invented.</p>
+            <p><span class="label">World context:</span> Trajan's conquest of Dacia is commemorated by his namesake column in Rome (completed 113 CE), one of the best-preserved monuments of the Roman world, going up alongside his own forum and markets; Rome's 271 CE abandonment of the province comes amid the empire-wide Crisis of the Third Century. The Hunnic invasions under Attila in the mid-5th century run alongside the Western Roman Empire's final collapse in 476, and the Slavic migrations of the 6th&ndash;7th centuries are contemporaries of Justinian's Hagia Sophia (completed 537 CE) in Constantinople. The Mongol Golden Horde's devastating 1241 sweep through the region comes in the same generation as the founding of the Mamluk Sultanate in Egypt and the height of the Mongol Empire under Genghis Khan's immediate successors.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag from any ruling power across this span.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Principality / kingdom</b> &mdash; medieval or dynastic polity</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#204b5c"></span><b>Annexed / provincial territory</b> &mdash; ruled from a foreign capital</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#2f6b4a"></span><b>Republic</b> &mdash; democratic, sovereign or contested</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8c2f2f"></span><b>Communist state</b> &mdash; one-party, Soviet-aligned</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the named ruler most associated with the era's start</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official/established faith, not the population's</div>
+    </div>
+  </div>
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for Moldova lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/md/">Search Record Atlas for Moldova &rarr;</a>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This page is one lineage in a larger set. See the region-wide map and the other countries here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="eastern-europe-hub.html"><b>Eastern Europe hub</b><span>Ukraine, Belarus, Moldova</span></a>
+      <a class="link-card" href="romania-flags.html"><b>Romania</b><span>The shared medieval story, in full</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are close historical approximations for painting reference; pre-19th-century swatches are informed reconstructions, not official specifications. Map is schematic and not surveyed.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var IC = {
+    ancient: "#a9762f", founding: "#5c2a24", moldavia: "#a4302a", russia: "#204b5c", romania: "#a9762f",
+    soviet: "#8c2f2f", moldova: "#2f6b4a", transnistria: "#6b5c4a"
+  };
+  var INAMES = {
+    ancient: "Dacia, the Roman Frontier, and the Age of Migrations",
+    founding: "Principality of Moldavia (founding era)", moldavia: "Principality of Moldavia (Ottoman vassal)",
+    russia: "Bessarabia, within the Russian Empire", romania: "Bessarabia, within the Kingdom of Romania",
+    soviet: "Moldavian Soviet Socialist Republic", moldova: "Republic of Moldova",
+    transnistria: "Transnistria (unrecognized breakaway)"
+  };
+  var IFLAGS = {
+    ancient: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>',
+    founding: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>',
+    moldavia: '<rect width="300" height="200" fill="#a4302a"/><g transform="translate(150,100)" fill="#241f14"><path d="M0,-30 L-6,-6 L-30,-8 L-10,8 L-20,30 L0,14 L20,30 L10,8 L30,-8 L6,-6 Z"/></g><circle cx="150" cy="60" r="6" fill="#f4efe1"/>',
+    russia: '<rect width="300" height="66.7" fill="#f4efe1"/><rect y="66.7" width="300" height="66.6" fill="#1e2f96"/><rect y="133.3" width="300" height="66.7" fill="#a4302a"/>',
+    romania: '<rect width="100" height="200" fill="#1e3d6b"/><rect x="100" width="100" height="200" fill="#d9a63c"/><rect x="200" width="100" height="200" fill="#a4302a"/><g transform="translate(150,100)"><rect x="-16" y="-14" width="32" height="30" rx="2" fill="#f4efe1" stroke="#241f14" stroke-width="2"/></g>',
+    soviet: '<rect width="300" height="200" fill="#b8262a"/><rect y="168" width="300" height="13" fill="#3f8f52"/><g transform="translate(58,52)"><path d="M4,-30 l3,9 10,0 -8,6 3,9 -8,-6 -8,6 3,-9 -8,-6 10,0 Z" fill="#f2c94c"/></g>',
+    moldova: '<rect width="100" height="200" fill="#003da5"/><rect x="100" width="100" height="200" fill="#ffd200"/><rect x="200" width="100" height="200" fill="#ce1126"/><g transform="translate(150,100)"><rect x="-17" y="-16" width="34" height="34" rx="3" fill="#a4302a" stroke="#c9a13c" stroke-width="2"/></g>',
+    transnistria: '<rect width="300" height="66.7" fill="#a4302a"/><rect y="66.7" width="300" height="66.6" fill="#3f8f52"/><rect y="133.3" width="300" height="66.7" fill="#a4302a"/><g transform="translate(150,33)"><path d="M-12,7 l8,0 0,-4 -13,0 0,-4 18,0 0,12 -13,0 Z" fill="#f2c94c"/></g>'
+  };
+  function iFlagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (IFLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  var iLegendEl = document.getElementById("iLegend");
+  iLegendEl.innerHTML = Object.keys(IC).map(function (k) {
+    return '<span><span class="sw" style="background:' + IC[k] + '"></span>' + INAMES[k] + "</span>";
+  }).join("");
+
+  var ISNAP = [
+    { year:"c. 100 BCE", name:"Dacia, the Roman Frontier, and the Age of Migrations", t:{ core:IC.ancient, transnistria:IC.ancient }, flagKeys:{ core:"ancient", transnistria:"ancient" },
+      story:"For roughly fourteen centuries before Bogdan I's 1359 founding of Moldavia, this territory has no unified local state at all: a free Dacian kingdom falls to Trajan's Rome in 106 CE, Rome abandons the frontier province in 271 CE, and a succession of migrating peoples &mdash; Goths, Huns, Avars, Slavs, Bulgars, Pechenegs, Cumans, and finally the Mongol Golden Horde &mdash; pass through or briefly dominate the region. No internal line to draw yet &mdash; there is no state on either bank of the future Dniester divide to draw it between." },
+    { year:"c. 1359", name:"Principality of Moldavia (founding era)", t:{ core:IC.founding, transnistria:IC.founding }, flagKeys:{ core:"founding", transnistria:"founding" },
+      story:"Bogdan I breaks from Hungary around 1359 to found Moldavia as an independent principality; no flag is securely documented this early. The whole future Moldova, both banks of the Dniester alike, is unified territory throughout this era." },
+    { year:"1600", name:"Principality of Moldavia (Ottoman vassal)", t:{ core:IC.moldavia, transnistria:IC.moldavia }, flagKeys:{ core:"moldavia", transnistria:"moldavia" },
+      story:"Moldavia keeps its own princes under Ottoman suzerainty, flying the black aurochs' head on red &mdash; the direct ancestor of modern Moldova's own arms. The 1812 Treaty of Bucharest, still two centuries off, is what eventually cuts this single principality in two." },
+    { year:"1812", name:"Bessarabia, within the Russian Empire", t:{ core:IC.russia, transnistria:IC.russia }, flagKeys:{ core:"russia", transnistria:"russia" },
+      story:"The 1812 Treaty of Bucharest cedes the land between the Prut and Dniester to Russia as the province of Bessarabia, flying the empire's own white-blue-red tricolor. The whole province, both banks of the future internal line, is one Russian administrative unit." },
+    { year:"1918", name:"Bessarabia, within the Kingdom of Romania", t:{ core:IC.romania, transnistria:IC.romania }, flagKeys:{ core:"romania", transnistria:"romania" },
+      story:"The Sfatul Țării votes to unite Bessarabia with the Kingdom of Romania on 27 March 1918, flying Romania's own royal tricolor across the whole reunited province &mdash; the USSR never recognizes the union as legitimate." },
+    { year:"1940", name:"Moldavian Soviet Socialist Republic", t:{ core:IC.soviet, transnistria:IC.soviet }, flagKeys:{ core:"soviet", transnistria:"soviet" },
+      story:"Moscow creates the Moldavian SSR in 1940 by joining most of Bessarabia to a strip of the existing, Ukraine-nested Moldavian ASSR (itself dating to 1924) &mdash; the older, separate Soviet administrative history of that east-bank strip is part of why Transnistria later saw itself as having a distinct claim, though the whole SSR still flies one flag throughout this period." },
+    { year:"1991–present", name:"Republic of Moldova & Transnistria", t:{ core:IC.moldova, transnistria:IC.transnistria }, flagKeys:{ core:"moldova", transnistria:"transnistria" },
+      story:"Moldova declares independence on 27 August 1991; within months a breakaway government on the Dniester's east bank fights a short 1992 war and, after a Russian-brokered ceasefire, has run its own government, currency, and security apparatus from Tiraspol ever since &mdash; recognized by no UN member state, but a frozen, unresolved status quo for over three decades." }
+  ];
+
+  var IREGIONS = ["core","transnistria"];
+  var IREGION_NAMES = { core:"Moldova (rest of the country)", transnistria:"Transnistria" };
+  var IADJ = [["core","transnistria"]];
+
+  function iTextColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+
+  function iGroupsFor(t) {
+    var parent = {};
+    IREGIONS.forEach(function (r) { parent[r] = r; });
+    function find(x) { return parent[x] === x ? x : (parent[x] = find(parent[x])); }
+    function union(a, b) { var ra = find(a), rb = find(b); if (ra !== rb) parent[ra] = rb; }
+    IADJ.forEach(function (pair) { if (t[pair[0]] === t[pair[1]]) union(pair[0], pair[1]); });
+    var groups = {};
+    IREGIONS.forEach(function (r) { var root = find(r); if (!groups[root]) groups[root] = []; groups[root].push(r); });
+    return Object.keys(groups).map(function (k) { return groups[k]; });
+  }
+
+  var iYearTag = document.getElementById("iYearTag");
+  var iEraName = document.getElementById("iEraName");
+  var iEraOwners = document.getElementById("iEraOwners");
+  var iEraStory = document.getElementById("iEraStory");
+  var iFlagsRow = document.getElementById("iFlagsRow");
+  var iSlider = document.getElementById("iSlider");
+
+  function iRender(idx) {
+    var era = ISNAP[idx];
+    iYearTag.textContent = era.year;
+    iEraName.textContent = era.name;
+    iEraStory.innerHTML = era.story;
+
+    IREGIONS.forEach(function (id) {
+      document.getElementById("ireg-" + id).setAttribute("fill", era.t[id]);
+      var lbl = document.getElementById("ilbl-" + id);
+      if (lbl) {
+        var lblColor = iTextColorFor(era.t[id]);
+        lbl.setAttribute("fill", lblColor);
+        lbl.setAttribute("stroke", lblColor === "#201a12" ? "#f7f1e3" : "#201a12");
+      }
+    });
+
+    IADJ.forEach(function (pair) {
+      var same = era.t[pair[0]] === era.t[pair[1]];
+      var line = document.getElementById("ib-" + pair[0] + "-" + pair[1]);
+      line.setAttribute("stroke-opacity", same ? "0.06" : "0.85");
+      line.setAttribute("stroke-width", same ? "1" : "2.4");
+    });
+
+    var groups = iGroupsFor(era.t);
+    var seen = {}; var parts = [];
+    groups.forEach(function (g) {
+      var label = INAMES[Object.keys(IC).filter(function (k) { return IC[k] === era.t[g[0]]; })[0]] || era.t[g[0]];
+      if (!seen[label]) { seen[label] = []; parts.push(label); }
+      g.forEach(function (id) { seen[label].push(IREGION_NAMES[id]); });
+    });
+    iEraOwners.innerHTML = parts.map(function (label) { return "<b>" + label + "</b>: " + seen[label].join(", "); }).join(" &middot; ");
+
+    iFlagsRow.innerHTML = IREGIONS.map(function (id) {
+      return '<div class="iflag-chip">' + iFlagSvg(era.flagKeys[id]) + '<div class="ic-label">' + IREGION_NAMES[id] + '</div></div>';
+    }).join("");
+  }
+
+  iSlider.addEventListener("input", function () { iRender(parseInt(iSlider.value, 10)); });
+  iRender(0);
+
+  var iPlaying = false, iPlayTimer = null;
+  var iPlayBtn = document.getElementById("iPlayBtn");
+  function iStepPlay() {
+    var next = parseInt(iSlider.value, 10) + 1;
+    if (next > ISNAP.length - 1) { iStopPlay(); return; }
+    iSlider.value = next;
+    iRender(next);
+  }
+  function iStartPlay() {
+    iPlaying = true;
+    iPlayBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(iSlider.value, 10) >= ISNAP.length - 1) { iSlider.value = 0; iRender(0); }
+    iPlayTimer = setInterval(iStepPlay, 1700);
+  }
+  function iStopPlay() {
+    iPlaying = false;
+    iPlayBtn.innerHTML = "&#9654;";
+    clearInterval(iPlayTimer);
+  }
+  iPlayBtn.addEventListener("click", function () { iPlaying ? iStopPlay() : iStartPlay(); });
+})();
+
+  document.querySelectorAll(".tag[data-tip]").forEach(function (tag) {
+    tag.addEventListener("click", function (e) {
+      var wasOpen = tag.classList.contains("tip-open");
+      document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+      if (!wasOpen) tag.classList.add("tip-open");
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+  });
+</script>
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var html = '<h4>Genealogical records for this ground</h4>';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>
+
+</body></html>

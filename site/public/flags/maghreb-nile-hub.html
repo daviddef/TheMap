@@ -1,0 +1,707 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Flags of the Maghreb &amp; Nile</title>
+<meta name="description" content="A hub for the family flag atlas: six North African countries, and an interactive map showing who ruled each region at nine points across fourteen centuries.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    --tile: #ddd0aa; --tile-line: #b7a679; --tile-text: #7a6a45; --tile-sea: #b9d3da;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.2rem, 5.5vw, 3.4rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.1rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .countries { margin-top: 44px; }
+  .countries h2 { font-size: 1.15rem; font-weight: 600; margin: 0 0 16px; }
+  .country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .country-card {
+    display: block; padding: 20px; border: 1px solid var(--card-border); background: var(--card);
+    border-radius: 4px; text-decoration: none; color: var(--ink); position: relative; overflow: hidden;
+  }
+  .country-card .swatch-strip { position: absolute; top: 0; left: 0; right: 0; height: 5px; }
+  .country-card .era { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--brass); margin-bottom: 6px; }
+  .country-card b { display: block; font-family: "Fraunces", serif; font-size: 1.2rem; font-weight: 600; margin-bottom: 6px; }
+  .country-card span { color: var(--muted); font-size: .88rem; line-height: 1.5; }
+  .country-card.soon { opacity: .82; }
+
+  .map-section { margin-top: 56px; padding-top: 36px; border-top: 1px solid var(--hair); }
+  .map-section h2 { font-size: 1.5rem; margin: 0 0 8px; }
+  .map-section .map-sub { font-size: .94rem; color: var(--muted); max-width: 64ch; margin: 0 0 22px; }
+  .map-section .rule-box { margin-bottom: 22px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .92rem; }
+  .map-section .rule-box b { color: var(--brick); }
+
+  .viz-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 22px; }
+
+  .controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .play-btn {
+    flex: none; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .play-btn:hover { border-color: var(--brick); }
+  input[type="range"] {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px;
+    background: var(--hair); outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper);
+    box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  .era-tag { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 48px; }
+
+  .era-head { text-align: center; margin-bottom: 16px; }
+  .era-name-inline { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.35rem; transition: opacity .35s ease; }
+  .era-owners { font-size: .86rem; color: var(--muted); max-width: 62ch; margin: 6px auto 0; transition: opacity .35s ease; }
+  .era-owners b { color: var(--ink); }
+  .era-story {
+    margin: 0 auto 22px; font-size: .98rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .35s ease; padding: 14px 18px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  .era-story b { color: var(--brick); }
+
+  .flags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin: 4px auto 18px; max-width: 620px; }
+  .flag-chip { text-align: center; width: 92px; }
+  .flag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-chip .fc-label { font-family: "IBM Plex Mono", monospace; font-size: 9px; color: var(--muted); margin-top: 5px; line-height: 1.3; }
+
+  #map-svg { display: block; margin: 0 auto; width: 100%; max-width: 620px; height: auto; }
+  .region-fill { transition: fill 0.7s ease; }
+  .border-line { transition: stroke-opacity 0.7s ease, stroke-width 0.7s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .group-label { font-family: "Fraunces", serif; font-weight: 600; transition: opacity .5s ease, font-size .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2.5px; }
+  .sub-label { font-family: "IBM Plex Mono", monospace; font-weight: 700; transition: opacity .5s ease, fill .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9px; fill: var(--tile-text); opacity: .6; pointer-events: none; text-anchor: middle; }
+
+  .map-key { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: .8rem; color: var(--muted); justify-content: center; }
+  .map-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .map-key .sw { width: 11px; height: 11px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .map-notes { margin-top: 20px; font-size: .85rem; color: var(--muted); }
+  .map-notes b { color: var(--ink); }
+
+  .subview { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .subview h3 { font-size: 1.2rem; font-weight: 600; margin: 0 0 8px; }
+  .subview .sub-desc { font-size: .9rem; color: var(--muted); max-width: 64ch; margin: 0 0 18px; }
+
+  .gantt-row { display: flex; align-items: center; margin-bottom: 3px; }
+  .gantt-label { width: 100px; flex: none; font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--ink); text-align: right; padding-right: 10px; }
+  .gantt-track { flex: 1; height: 26px; position: relative; background: var(--paper); border-radius: 2px; overflow: hidden; }
+  .gantt-seg { position: absolute; top: 0; bottom: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .gantt-seg span { font-size: 9.5px; font-weight: 600; white-space: nowrap; padding: 0 3px; }
+  .gantt-axis { display: flex; margin-left: 100px; padding-top: 4px; font-family: "IBM Plex Mono", monospace; font-size: 9.5px; color: var(--muted); position: relative; height: 14px; }
+  .gantt-axis span { position: absolute; transform: translateX(-50%); }
+
+  .grid-3x3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .grid-cell { text-align: center; }
+  .grid-cell svg { width: 100%; height: auto; display: block; }
+  .grid-cell .cap { font-family: "IBM Plex Mono", monospace; font-size: 10px; color: var(--brass); margin-top: 6px; }
+  .grid-cell .cap b { display: block; font-family: "Fraunces", serif; font-size: .95rem; font-weight: 600; color: var(--ink); margin-top: 1px; }
+  .grid-cell .cap .diff { display: block; font-family: "Source Sans 3", sans-serif; font-size: .74rem; color: var(--brick); margin-top: 3px; font-weight: 600; }
+  .mini-label { font-family: "IBM Plex Mono", monospace; font-size: 7.5px; font-weight: 700; pointer-events: none; }
+
+  .about { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .about h2 { font-size: 1.3rem; margin: 0 0 12px; }
+  .about p { max-width: none; opacity: .88; margin: 0 0 12px; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a></p>
+  <p class="kicker">Family research &middot; Hub &middot; Phase 8 of the world atlas</p>
+  <h1>Flags of the Maghreb &amp; Nile</h1>
+  <p class="lede">Six countries across North Africa &mdash; Morocco, Algeria, Tunisia, Libya, Egypt, and Sudan &mdash; from the Islamic conquests of the 600s to today, plotted on one real map with a time slider across fourteen centuries.</p>
+  <p class="lede">Each country's own dedicated flag timeline is now published, linked below; this hub's own map anchors them regionally. Drag the slider below or press play to watch the whole region change hands.</p>
+
+  <div class="countries">
+    <h2>The six countries</h2>
+    <div class="country-grid">
+      <a class="country-card" href="morocco-flags.html">
+        <span class="swatch-strip" style="background:#c1272d"></span>
+        <span class="era">c. 788 &ndash; present</span>
+        <b>Morocco</b>
+        <span>Idrisid founders, Almoravid and Almohad empires, four centuries of Alaouite independence, never Ottoman.</span>
+      </a>
+      <a class="country-card" href="algeria-flags.html">
+        <span class="swatch-strip" style="background:#006233"></span>
+        <span class="era">c. 900 &ndash; present</span>
+        <b>Algeria</b>
+        <span>Zayyanid Tlemcen, the Ottoman Regency of Algiers, 132 years as French territory, independence won by war in 1962.</span>
+      </a>
+      <a class="country-card" href="tunisia-flags.html">
+        <span class="swatch-strip" style="background:#e70013"></span>
+        <span class="era">c. 800 &ndash; present</span>
+        <b>Tunisia</b>
+        <span>Aghlabid Kairouan, the Hafsid dynasty, three centuries as an Ottoman regency, and the 2011 revolution that began the Arab Spring.</span>
+      </a>
+      <a class="country-card" href="libya-flags.html">
+        <span class="swatch-strip" style="background:#239e46"></span>
+        <span class="era">c. 900 &ndash; present</span>
+        <b>Libya</b>
+        <span>Ottoman Tripolitania, Italian colonization, the UN's first-ever created state in 1951, Gaddafi's Jamahiriya, and the 2011 revolution.</span>
+      </a>
+      <a class="country-card" href="egypt-flags.html">
+        <span class="swatch-strip" style="background:#ce1126"></span>
+        <span class="era">Antiquity &ndash; present</span>
+        <b>Egypt</b>
+        <span>Pharaonic antiquity, Fatimid Cairo, Ayyubid and Mamluk sultans, four centuries Ottoman, British-occupied, a republic since 1953.</span>
+      </a>
+      <a class="country-card" href="sudan-flags.html">
+        <span class="swatch-strip" style="background:#d21034"></span>
+        <span class="era">c. 1070 BC &ndash; present</span>
+        <b>Sudan</b>
+        <span>The Kingdom of Kush, Christian Nubian kingdoms, the Funj Sultanate, the Mahdist State, Anglo-Egyptian rule.</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="map-section">
+    <h2>Fourteen centuries, one map</h2>
+    <p class="map-sub">A real, traced map &mdash; actual coastlines, not schematic shapes &mdash; covering Morocco's Atlantic coast to Sudan's Red Sea coast, with Mauritania, Mali, Niger, Chad, and Saudi Arabia shown faintly for context. Drag the slider or press play; each snapshot simplifies a messier reality into the dominant power of the moment.</p>
+    <div class="rule-box">
+      <b>Borders here are data, not decoration.</b> A line between two regions only draws solid when they were actually governed separately. When they weren't &mdash; Morocco and Algeria both under Almohad rule, say &mdash; the line dissolves and their names merge into whoever actually ruled them both. Colors blend between eras instead of jump-cutting.
+    </div>
+
+    <div class="viz-frame">
+      <div class="controls">
+        <button class="play-btn" id="playBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="era-tag" id="yearTag">700</span>
+        <input type="range" id="slider" min="0" max="8" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="map-svg" viewBox="0 0 900 524.3" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="0" width="900" height="524.3" fill="var(--tile-sea)"/>
+
+        <g id="context-land" fill="var(--tile)" stroke="var(--tile-line)" stroke-width="1" opacity="0.55" pointer-events="none">
+          <path d="M84.9,401.2 L74.4,389.3 L64.7,376.6 L54.2,372.0 L46.6,366.9 L37.7,367.1 L29.9,370.9 L22.0,369.4 L16.5,374.9 L15.1,365.6 L19.6,357.1 L21.6,340.8 L19.8,323.7 L17.9,315.1 L19.5,306.4 L15.4,298.2 L7.0,290.7 L10.4,285.0 L72.8,285.1 L69.8,260.1 L73.7,251.2 L88.6,249.6 L88.1,205.4 L140.4,206.3 L140.4,180.0 L200.3,221.9 L176.0,222.3 L183.6,296.9 L191.3,371.6 L194.1,373.8 L190.5,385.9 L126.6,386.1 L124.2,390.0 L118.1,388.8 L109.1,392.3 L98.0,387.4 L92.9,387.8 L90.3,398.0 L84.9,401.2 Z"/>
+          <path d="M84.9,401.2 L90.3,398.0 L92.9,387.8 L98.0,387.4 L109.1,392.3 L118.1,388.8 L124.2,390.0 L126.6,386.1 L190.5,385.9 L194.1,373.8 L191.3,371.6 L183.6,296.9 L176.0,222.3 L200.3,221.9 L254.1,259.7 L307.8,297.5 L311.6,305.6 L321.5,310.5 L328.9,313.3 L329.1,324.3 L346.7,322.6 L346.8,362.5 L338.1,374.1 L336.7,384.7 L322.6,387.5 L300.8,389.0 L294.9,395.1 L284.7,395.8 L274.5,395.9 L270.5,392.5 L261.8,395.0 L246.9,402.2 L243.8,407.6 L231.5,415.3 L229.3,419.8 L222.6,423.3 L214.9,421.0 L210.6,425.2 L208.2,437.1 L195.6,451.4 L196.0,457.3 L191.6,464.6 L192.7,474.7 L186.1,477.2 L182.4,479.4 L179.9,472.0 L175.3,474.0 L172.6,473.6 L169.6,478.7 L157.3,478.5 L152.9,475.9 L150.9,477.5 L146.0,472.5 L146.8,467.4 L144.8,465.3 L141.4,467.0 L142.1,461.4 L145.3,457.0 L138.8,449.7 L136.9,444.9 L133.4,441.1 L130.2,440.7 L126.4,443.1 L121.2,445.4 L116.8,449.2 L110.0,447.8 L105.6,443.4 L103.0,442.8 L98.8,445.1 L96.3,445.1 L95.4,438.8 L96.1,433.4 L94.7,426.7 L88.8,421.9 L85.6,411.9 L84.9,401.2 Z"/>
+          <path d="M313.1,447.5 L313.4,435.6 L295.1,431.7 L294.6,423.4 L285.6,412.1 L283.5,404.2 L284.7,395.8 L294.9,395.1 L300.8,389.0 L322.6,387.5 L336.7,384.7 L338.1,374.1 L346.8,362.5 L346.7,322.6 L369.2,314.9 L415.3,280.9 L469.9,247.9 L495.1,255.4 L504.1,264.9 L515.3,258.5 L519.2,285.4 L525.2,289.9 L525.5,295.4 L532.1,301.3 L528.6,308.8 L522.5,343.9 L521.6,366.4 L501.3,382.7 L494.4,405.5 L501.1,411.9 L501.0,423.0 L511.3,423.4 L509.7,431.6 L505.2,432.6 L504.7,438.1 L501.7,438.5 L490.9,419.5 L487.2,418.8 L474.7,428.5 L462.4,423.5 L453.8,422.5 L449.2,424.9 L439.9,424.4 L430.5,431.7 L422.4,432.2 L403.1,423.2 L395.5,427.5 L387.4,427.2 L381.4,420.6 L365.5,414.2 L348.3,416.2 L344.2,420.0 L342.0,429.9 L337.4,436.9 L336.3,452.3 L324.1,442.4 L318.4,442.4 L313.1,447.5 Z"/>
+          <path d="M509.7,431.6 L511.3,423.4 L501.0,423.0 L501.1,411.9 L494.4,405.5 L501.3,382.7 L521.6,366.4 L522.5,343.9 L528.6,308.8 L532.1,301.3 L525.5,295.4 L525.2,289.9 L519.2,285.4 L515.3,258.5 L531.4,249.0 L594.9,282.2 L658.5,315.3 L659.3,384.0 L645.5,382.8 L638.3,395.5 L634.0,406.2 L637.4,410.2 L632.1,415.6 L633.9,422.7 L629.8,429.9 L628.2,436.3 L633.8,435.3 L637.1,442.0 L637.3,452.0 L643.2,457.1 L643.0,461.3 L632.9,464.3 L624.8,471.3 L613.3,490.1 L598.3,498.2 L582.9,497.1 L578.4,498.7 L580.0,504.8 L571.7,510.8 L564.9,517.6 L544.9,524.2 L540.9,520.3 L538.3,519.9 L535.3,524.4 L522.2,525.7 L524.6,521.0 L519.6,509.1 L517.4,501.9 L510.4,499.0 L501.0,488.9 L504.5,480.7 L511.8,482.4 L516.3,481.2 L525.2,481.4 L516.5,465.7 L517.1,454.2 L516.0,442.7 L509.7,431.6 Z"/>
+          <path d="M960.2,371.2 L958.1,363.8 L953.3,358.6 L952.1,351.7 L943.9,345.5 L935.4,331.0 L930.9,316.9 L919.9,305.0 L912.8,302.2 L902.2,285.7 L900.4,273.6 L901.1,263.4 L891.9,244.2 L884.5,237.4 L875.8,233.9 L870.6,224.0 L871.5,220.0 L867.1,211.1 L862.4,207.2 L856.2,194.3 L846.5,180.4 L838.4,168.5 L830.4,168.6 L832.9,159.1 L833.6,153.0 L835.6,146.1 L853.3,148.9 L860.2,143.5 L864.0,137.3 L876.2,134.9 L878.8,129.1 L884.1,126.2 L868.2,108.9 L900.1,100.2 L903.1,97.6 L922.3,102.3 L946.0,114.4 L990.9,149.2 L1020.6,150.6 L1034.8,152.2 L1038.7,160.5 L1050.0,160.0 L1056.2,175.0 L1064.1,178.9 L1066.8,185.0 L1077.6,192.3 L1078.6,199.4 L1077.0,205.2 L1079.0,211.0 L1083.6,215.8 L1085.7,221.5 L1088.1,225.7 L1092.9,229.2 L1097.4,228.0 L1100.4,234.6 L1101.0,238.6 L1107.1,256.1 L1155.0,264.8 L1158.2,261.2 L1165.5,273.4 L1154.9,308.0 L1107.1,325.3 L1061.2,332.0 L1046.3,339.8 L1034.9,357.9 L1027.4,360.8 L1023.5,355.0 L1017.3,355.9 L1001.9,354.2 L999.0,352.4 L980.6,352.8 L976.3,354.4 L969.8,349.9 L965.6,358.4 L967.2,365.7 L960.2,371.2 Z"/>
+        </g>
+        <g class="context-label">
+          <text x="83" y="335">MAURITANIA</text>
+          <text x="230" y="425">MALI</text>
+          <text x="440" y="460">NIGER</text>
+          <text x="580" y="395">CHAD</text>
+          <text x="860" y="220">SAUDI ARABIA</text>
+        </g>
+
+        <path id="f-ma" class="region-fill" d="M196.0,35.4 L205.6,42.7 L220.8,41.5 L237.3,45.4 L244.2,45.5 L250.2,56.6 L251.1,67.1 L256.7,85.4 L260.8,89.1 L257.9,95.8 L237.1,98.7 L229.9,105.1 L220.7,106.6 L220.0,119.5 L201.4,126.3 L195.3,135.0 L182.2,139.6 L166.3,142.3 L140.6,155.0 L140.7,175.5 L138.3,175.5 L138.3,175.5 L138.7,184.8 L128.8,185.4 L123.7,189.3 L116.5,189.3 L110.7,187.1 L97.3,188.9 L92.1,202.4 L87.1,203.7 L79.6,225.5 L57.5,244.2 L52.2,268.0 L45.7,275.8 L43.8,282.1 L7.9,283.4 L7.6,283.4 L8.4,275.4 L14.5,270.7 L19.7,261.7 L18.7,255.8 L24.2,243.6 L33.0,232.6 L38.4,229.8 L42.6,219.7 L43.0,210.5 L48.7,199.8 L59.4,193.5 L69.5,175.8 L69.7,175.6 L77.8,168.9 L92.6,167.0 L105.1,155.2 L113.1,150.6 L126.4,136.1 L122.4,114.6 L128.5,99.7 L130.6,90.6 L140.9,78.9 L156.8,71.0 L168.6,63.8 L179.3,45.9 L184.3,35.3 L196.0,35.4 Z"/>
+        <path id="f-dz" class="region-fill" d="M469.9,247.9 L415.3,280.9 L369.2,314.9 L346.7,322.6 L329.1,324.3 L328.9,313.3 L321.5,310.5 L311.6,305.6 L307.8,297.5 L254.1,259.7 L200.3,221.9 L140.4,180.0 L140.7,176.7 L140.7,175.5 L140.6,155.0 L166.3,142.3 L182.2,139.6 L195.3,135.0 L201.4,126.3 L220.0,119.5 L220.7,106.6 L229.9,105.1 L237.1,98.7 L257.9,95.8 L260.8,89.1 L256.7,85.4 L251.1,67.1 L250.2,56.6 L244.2,45.5 L259.5,36.1 L276.7,33.1 L286.8,25.9 L302.1,20.7 L329.1,17.6 L355.5,16.2 L363.5,18.7 L378.5,11.9 L395.5,11.8 L402.0,15.8 L412.9,14.8 L409.7,23.7 L412.2,40.1 L408.4,54.4 L398.6,64.1 L400.0,77.1 L413.1,87.4 L413.2,91.6 L423.0,98.6 L429.8,129.7 L435.0,144.9 L435.8,153.0 L433.0,167.1 L434.2,175.0 L432.1,184.5 L433.5,195.3 L427.2,202.6 L436.6,215.2 L437.2,222.6 L442.9,232.2 L450.3,229.1 L462.9,237.1 L469.9,247.9 Z"/>
+        <path id="f-tn" class="region-fill" d="M429.8,129.7 L423.0,98.6 L413.2,91.6 L413.1,87.4 L400.0,77.1 L398.6,64.1 L408.4,54.4 L412.2,40.1 L409.7,23.7 L412.9,14.8 L430.2,7.8 L441.4,9.9 L440.9,18.6 L454.4,12.3 L455.6,15.6 L447.6,24.1 L447.5,32.1 L453.0,36.4 L450.9,51.3 L440.4,60.0 L443.5,69.5 L451.7,69.8 L455.7,78.0 L461.8,80.7 L460.9,94.0 L453.1,99.0 L448.2,104.5 L437.3,111.2 L439.0,118.3 L437.6,125.6 L429.8,129.7 Z"/>
+        <path id="f-ly" class="region-fill" d="M515.3,258.5 L504.1,264.9 L495.1,255.4 L469.9,247.9 L462.9,237.1 L450.3,229.1 L442.9,232.2 L437.2,222.6 L436.6,215.2 L427.2,202.6 L433.5,195.3 L432.1,184.5 L434.2,175.0 L433.0,167.1 L435.8,153.0 L435.0,144.9 L429.8,129.7 L437.6,125.6 L439.0,118.3 L437.3,111.2 L448.2,104.5 L453.1,99.0 L460.9,94.0 L461.8,80.7 L480.5,86.6 L487.2,85.2 L500.5,88.0 L521.6,95.8 L529.1,111.2 L543.4,114.5 L565.8,121.8 L582.8,130.4 L590.6,125.9 L598.2,117.9 L594.5,104.7 L599.5,96.2 L611.0,88.1 L621.9,85.8 L643.5,89.3 L648.9,97.1 L654.8,97.1 L659.9,100.1 L675.7,102.1 L679.6,107.8 L673.9,116.1 L676.3,123.5 L672.2,134.2 L677.0,148.2 L677.0,209.7 L677.0,273.4 L677.0,308.0 L658.7,308.0 L658.5,315.3 L594.9,282.2 L531.4,249.0 L515.3,258.5 Z"/>
+        <path id="f-eg" class="region-fill" d="M835.1,143.6 L830.6,150.6 L827.1,163.6 L822.8,172.6 L819.1,175.7 L813.8,170.1 L806.6,162.4 L795.2,137.6 L793.6,139.1 L800.2,157.4 L810.0,174.8 L822.0,201.7 L827.9,211.1 L833.0,220.9 L847.3,240.1 L844.1,243.1 L844.7,254.3 L863.2,269.9 L866.0,273.4 L802.8,273.4 L741.0,273.4 L677.0,273.4 L677.0,209.7 L677.0,148.2 L672.2,134.2 L676.3,123.5 L673.9,116.1 L679.6,107.8 L700.8,107.5 L716.1,112.1 L732.0,117.2 L739.3,119.9 L751.6,114.4 L758.2,109.5 L772.2,108.1 L783.5,110.2 L787.9,118.8 L791.6,113.2 L804.3,117.3 L816.7,118.2 L824.6,113.9 L835.1,143.6 Z"/>
+        <path id="f-sd" class="region-fill" d="M819.8,490.3 L817.6,490.0 L817.8,481.4 L815.9,475.4 L807.7,468.6 L805.8,456.1 L807.7,443.4 L800.3,442.2 L799.2,446.0 L789.7,446.9 L793.5,452.0 L794.9,462.4 L786.1,471.9 L778.2,484.4 L770.0,486.1 L756.6,476.0 L750.6,479.6 L748.9,484.7 L740.7,487.9 L740.2,491.5 L724.3,491.5 L722.1,487.9 L710.6,487.3 L704.9,490.3 L700.5,488.8 L692.3,478.7 L689.6,474.0 L678.1,476.3 L673.7,484.4 L669.6,499.8 L664.2,503.1 L659.3,505.0 L658.0,504.2 L652.4,499.2 L651.4,493.8 L654.0,486.6 L654.0,479.5 L644.8,468.7 L643.0,461.3 L643.2,457.1 L637.3,452.0 L637.1,442.0 L633.8,435.3 L628.2,436.3 L629.8,429.9 L633.9,422.7 L632.1,415.6 L637.4,410.2 L634.0,406.2 L638.3,395.5 L645.5,382.8 L659.3,384.0 L658.5,315.3 L658.7,308.0 L677.0,308.0 L677.0,273.4 L741.0,273.4 L802.8,273.4 L866.0,273.4 L871.1,290.4 L867.7,293.5 L870.0,311.3 L875.8,332.0 L881.9,336.3 L890.6,342.7 L882.5,352.5 L870.8,355.4 L865.8,360.7 L864.2,372.2 L857.4,397.6 L859.1,404.6 L856.5,419.4 L850.0,436.5 L840.4,445.0 L833.6,458.3 L832.0,465.3 L824.5,470.2 L819.7,488.3 L819.8,490.3 Z"/>
+
+        <g id="borders" stroke-width="1">
+          <path class="border-line" id="b-ma-dz" d="M237.3,45.4 L244.2,45.5 L250.2,56.6 L251.1,67.1 L256.7,85.4 L260.8,89.1 L257.9,95.8 L237.1,98.7 L229.9,105.1 L220.7,106.6 L220.0,119.5 L201.4,126.3 L195.3,135.0 L182.2,139.6 L166.3,142.3 L140.6,155.0 L140.7,175.5 L138.3,175.5 L138.3,175.5 L138.7,184.8 L128.8,185.4 L123.7,189.3"/>
+          <path class="border-line" id="b-dz-tn" d="M395.5,11.8 L402.0,15.8 L412.9,14.8 L409.7,23.7 L412.2,40.1 L408.4,54.4 L398.6,64.1 L400.0,77.1 L413.1,87.4 L413.2,91.6 L423.0,98.6 L429.8,129.7 L435.0,144.9"/>
+          <path class="border-line" id="b-dz-ly" d="M423.0,98.6 L429.8,129.7 L435.0,144.9 L435.8,153.0 L433.0,167.1 L434.2,175.0 L432.1,184.5 L433.5,195.3 L427.2,202.6 L436.6,215.2 L437.2,222.6 L442.9,232.2 L450.3,229.1 L462.9,237.1 L469.9,247.9"/>
+          <path class="border-line" id="b-tn-ly" d="M451.7,69.8 L455.7,78.0 L461.8,80.7 L460.9,94.0 L453.1,99.0 L448.2,104.5 L437.3,111.2 L439.0,118.3 L437.6,125.6 L429.8,129.7 L423.0,98.6"/>
+          <path class="border-line" id="b-ly-eg" d="M675.7,102.1 L679.6,107.8 L673.9,116.1 L676.3,123.5 L672.2,134.2 L677.0,148.2 L677.0,209.7 L677.0,273.4"/>
+          <path class="border-line" id="b-ly-sd" d="M677.0,273.4 L677.0,308.0 L658.7,308.0 L658.5,315.3"/>
+          <path class="border-line" id="b-eg-sd" d="M863.2,269.9 L866.0,273.4 L802.8,273.4 L741.0,273.4 L677.0,273.4"/>
+        </g>
+
+        <g id="labels"></g>
+      </svg>
+
+      <div class="era-head">
+        <div class="era-name-inline" id="eraName">The Umayyad conquest complete</div>
+        <div class="era-owners" id="eraOwners"></div>
+      </div>
+      <div class="flags-row" id="flagsRow"></div>
+      <p class="era-story" id="eraStory"></p>
+
+      <p class="map-note">Real traced coastlines (simplified): Morocco's Atlantic and Mediterranean shores, Algeria, Tunisia, and Libya's Mediterranean coast, and Egypt and Sudan's Mediterranean and Red Sea coasts. Mauritania, Mali, Niger, Chad, and Saudi Arabia are shown faintly for geographic context only &mdash; they aren't part of the tracked history here.</p>
+      <div class="map-key" id="legend"></div>
+      <div class="map-notes">
+        <b>Try:</b> drag slowly from 700 to 1250 and watch Morocco and Algeria's shared border dissolve twice &mdash; once under the Umayyad Caliphate, once under the Almohads &mdash; while Tunisia and Libya's own shared border dissolves separately under the Zirids and then the Hafsids, never quite the same grouping as Morocco and Algeria's. Then jump to 1517 and watch every one of the six borders snap solid at once except Algeria&ndash;Libya (Libya's under Spain, Algeria's newly Ottoman) and Libya&ndash;Egypt (also different rulers) &mdash; Morocco stays its own color the entire rest of the map's run, the one country here the Ottomans never took.
+      </div>
+    </div>
+
+    <div class="subview">
+      <h3>The same story, as a timeline</h3>
+      <p class="sub-desc">Maps are bad at showing <em>when</em>; timelines are bad at showing <em>where</em>. This uses real transition years instead of the nine arbitrary snapshots above &mdash; one horizontal band per country, colored the same way as the map, so you can trace exactly how long each era actually lasted (watch how long Morocco's medieval dynasties ran compared to how briefly Spain held Tripoli).</p>
+      <div class="viz-frame">
+        <div id="gantt"></div>
+        <div class="gantt-axis" id="gantt-axis"></div>
+      </div>
+    </div>
+
+    <div class="subview">
+      <h3>The same story, nine frames &mdash; only the change lights up</h3>
+      <p class="sub-desc">Every country keeps its true color, but anything unchanged from the previous frame fades to low opacity; only the country or countries that actually changed hands stay bold with a solid outline. A caption under each frame spells out exactly what flipped. No slider to operate &mdash; scan left to right, top to bottom, and watch the map redraw itself like a flipbook.</p>
+      <div class="viz-frame">
+        <div class="grid-3x3" id="grid9"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="about">
+    <h2>About this atlas</h2>
+    <p>This started as a family history project: tracing the flags that flew over the lands our ancestors came from, close enough to paint accurately &mdash; correct colors, correct proportions, correct dates. The Maghreb and Nile hub is the eighth phase: six countries whose histories genuinely do connect &mdash; a shared conquest in the 600s and 700s, an Ottoman wave that reached five of the six but never Morocco, a colonial wave that took all six in different ways and different years, and independence spread out from 1951 to 1962.</p>
+    <p>Individual dedicated pages for Morocco, Algeria, Tunisia, Libya, Egypt, and Sudan &mdash; each with its own full flag timeline, linked from the cards above &mdash; are now published. Colors are close historical approximations; pre-19th-century swatches especially are informed reconstructions, not official specifications, and are labeled as such throughout. The regional map above simplifies fourteen centuries of messy, overlapping, contested control into nine snapshots &mdash; useful for orientation, not a substitute for the detail each country's own page carries.</p>
+  </div>
+
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This hub is one region in a larger set. See the other phases here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="levant-hub.html"><b>Levant hub</b><span>Syria, Lebanon, Jordan, Israel</span></a>
+      <a class="link-card" href="arabian-peninsula-hub.html"><b>Arabian Peninsula hub</b><span>Seven countries, tribal to modern</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Map is schematic and not surveyed. Country outlines traced from public domain GeoJSON boundary data.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var C = {
+    early_islamic:"#8a7a4a", nubia:"#204b5c", fatimid:"#3f6b5c", berber_west:"#9c7a2f", zirid:"#b8923f",
+    almohad:"#5c3a8a", hafsid:"#7c2e1f", mamluk:"#a9762f", ottoman:"#d1453a", spanish:"#6b3a5c",
+    funj:"#6b8a4f", morocco_indep:"#9c3b28", fr_colonial:"#2447c4", fr_protectorate:"#4a6fd4",
+    br_colonial:"#8a2f3a", it_colonial:"#0b7a3d", mahdist:"#2a1f14", condominium:"#5c7a8a",
+    ind_ma:"#c9603c", ind_dz:"#2f8f5b", ind_tn:"#3fa88a", ind_ly:"#6faa4f", ind_eg:"#4a9d6f", ind_sd:"#8a9e5f"
+  };
+  var NAMES = {
+    early_islamic:"Umayyad / Abbasid Caliphate", nubia:"Christian Nubia (Makuria)", fatimid:"Fatimid Caliphate",
+    berber_west:"Berber dynasties (west)", zirid:"Zirid dynasty (Ifriqiya)", almohad:"Almohad Caliphate",
+    hafsid:"Hafsid dynasty", mamluk:"Mamluk Sultanate", ottoman:"Ottoman Empire", spanish:"Spain (Tripoli presidio)",
+    funj:"Funj Sultanate", morocco_indep:"Independent Morocco (Sharifian dynasties)", fr_colonial:"French Algeria",
+    fr_protectorate:"French protectorate", br_colonial:"British-occupied Egypt", it_colonial:"Italian Libya",
+    mahdist:"Mahdist State", condominium:"Anglo-Egyptian Condominium",
+    ind_ma:"Morocco", ind_dz:"Algeria", ind_tn:"Tunisia", ind_ly:"Libya", ind_eg:"Egypt", ind_sd:"Sudan"
+  };
+  var legendEl = document.getElementById("legend");
+  legendEl.innerHTML = Object.keys(C).map(function (k) {
+    return '<span><span class="sw" style="background:' + C[k] + '"></span>' + NAMES[k] + "</span>";
+  }).join("");
+
+  // ---- Real flag graphics, one per distinct historical power (not per map color) ----
+  var FLAGS = {
+    early_islamic: '<rect width="300" height="200" fill="#f4efe1" stroke="#a9762f" stroke-width="10"/>',
+    nubia: '<rect width="300" height="200" fill="#204b5c"/><rect x="135" width="30" height="200" fill="#f4efe1"/><rect y="85" width="300" height="30" fill="#f4efe1"/>',
+    fatimid: '<rect width="300" height="200" fill="#f4efe1"/><path d="M172,100 A46,46 0 1 1 165,56 A34,34 0 1 0 172,100 Z" fill="#3f6b5c"/>',
+    berber_west: '<rect width="300" height="200" fill="#9c7a2f"/>',
+    zirid: '<rect width="300" height="200" fill="#b8923f"/>',
+    almohad: '<rect width="300" height="200" fill="#7c2e1f"/><rect x="20" y="20" width="80" height="80" fill="#f4efe1"/>',
+    hafsid: '<rect width="300" height="200" fill="#7c2e1f"/><path d="M178,100 A42,42 0 1 1 168,60 A32,32 0 1 0 178,100 Z" fill="#f4efe1"/>',
+    mamluk: '<rect width="300" height="200" fill="#a9762f"/><path d="M100,140 L190,60 L200,70 L165,110 L180,120 L120,155 Z" fill="#241f14"/>',
+    ottoman: '<rect width="300" height="200" fill="#a4302a"/><path d="M120,70 A38,38 0 1 0 172,102 A28,28 0 1 1 120,70 Z" fill="#f4efe1"/><path d="M200,84 l5,15 16,0 -13,10 5,15 -13,-9 -13,9 5,-15 -13,-10 16,0 Z" fill="#f4efe1"/>',
+    spanish: '<rect width="300" height="200" fill="#f4efe1"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#a4302a" stroke-width="24"/>',
+    knights: '<rect width="300" height="200" fill="#7c1a2b"/><rect x="120" y="20" width="60" height="160" fill="#f4efe1"/><rect x="20" y="70" width="260" height="60" fill="#f4efe1"/>',
+    funj: '<rect width="300" height="200" fill="#6b8a4f"/><circle cx="150" cy="100" r="32" fill="#c9a13c"/>',
+    morocco_indep: '<rect width="300" height="200" fill="#9c3b28"/>',
+    fr_tricolor: '<rect width="100" height="200" fill="#0055a4"/><rect x="100" width="100" height="200" fill="#f4efe1"/><rect x="200" width="100" height="200" fill="#ef4135"/>',
+    br_unionjack: '<rect width="300" height="200" fill="#00247d"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#f4efe1" stroke-width="20"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#cf142b" stroke-width="9"/><rect x="125" width="50" height="200" fill="#f4efe1"/><rect y="80" width="300" height="40" fill="#f4efe1"/><rect x="137" width="26" height="200" fill="#cf142b"/><rect y="90" width="300" height="20" fill="#cf142b"/>',
+    it_tricolor: '<rect width="100" height="200" fill="#008c45"/><rect x="100" width="100" height="200" fill="#f4efe1"/><rect x="200" width="100" height="200" fill="#cd212a"/><rect x="132" y="78" width="36" height="46" fill="#f4efe1" stroke="#0033a0" stroke-width="3"/>',
+    mahdist: '<rect width="300" height="200" fill="#241f14"/><path d="M178,100 A42,42 0 1 1 168,60 A32,32 0 1 0 178,100 Z" fill="#f4efe1"/>',
+    condominium: '<rect width="300" height="200" fill="#0b7a3d"/><rect width="120" height="80" fill="#00247d"/><path d="M0,0 L120,80 M120,0 L0,80" stroke="#f4efe1" stroke-width="8"/><path d="M212,100 A30,30 0 1 1 205,72 A22,22 0 1 0 212,100 Z" fill="#f4efe1"/>',
+    ind_ma: '<rect width="300" height="200" fill="#c1272d"/><path d="M150,68 l9,27.7 29.1,0 -23.6,17.1 9,27.7 -23.5,-17.1 -23.5,17.1 9,-27.7 -23.6,-17.1 29.1,0 Z" fill="none" stroke="#006233" stroke-width="4.5"/>',
+    ind_dz: '<rect width="150" height="200" fill="#006233"/><rect x="150" width="150" height="200" fill="#f4efe1"/><path d="M178,100 A38,38 0 1 1 168,64 A28,28 0 1 0 178,100 Z" fill="#d21034"/><path d="M198,75 l6,17.5 18.4,0 -14.9,11 5.7,17.5 -15.2,-10.5 -15.2,10.5 5.7,-17.5 -14.9,-11 18.4,0 Z" fill="#d21034"/>',
+    ind_tn: '<rect width="300" height="200" fill="#e70013"/><circle cx="150" cy="100" r="50" fill="#f4efe1"/><path d="M167,100 A32,32 0 1 1 158,68 A24,24 0 1 0 167,100 Z" fill="#e70013"/><path d="M182,100 l6,17.5 18.4,0 -14.9,11 5.7,17.5 -15.2,-10.5 -15.2,10.5 5.7,-17.5 -14.9,-11 18.4,0 Z" fill="#e70013"/>',
+    ind_ly_kingdom: '<rect width="300" height="200" fill="#e70013"/><rect y="66.7" width="300" height="66.6" fill="#241f14"/><rect y="133.3" width="300" height="66.7" fill="#006233"/><path d="M164,100 A26,26 0 1 1 156,74 A19,19 0 1 0 164,100 Z" fill="#f4efe1"/><path d="M182,84 l4.6,14.1 14.8,0 -12,8.7 4.6,14.1 -12,-8.7 -12,8.7 4.6,-14.1 -12,-8.7 14.8,0 Z" fill="#f4efe1"/>',
+    egypt_1953: '<rect width="300" height="66.7" fill="#ce1126"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#000000"/><g fill="#006233"><path d="M120,90 l3.2,9.5 10.1,0 -8.1,5.9 3.1,9.5 -8.3,-6 -8.3,6 3.1,-9.5 -8.1,-5.9 10.1,0 Z"/><path d="M150,90 l3.2,9.5 10.1,0 -8.1,5.9 3.1,9.5 -8.3,-6 -8.3,6 3.1,-9.5 -8.1,-5.9 10.1,0 Z"/><path d="M180,90 l3.2,9.5 10.1,0 -8.1,5.9 3.1,9.5 -8.3,-6 -8.3,6 3.1,-9.5 -8.1,-5.9 10.1,0 Z"/></g>',
+    uar: '<rect width="300" height="66.7" fill="#ce1126"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#000000"/><g fill="#006233"><path d="M135,90 l3.2,9.5 10.1,0 -8.1,5.9 3.1,9.5 -8.3,-6 -8.3,6 3.1,-9.5 -8.1,-5.9 10.1,0 Z"/><path d="M165,90 l3.2,9.5 10.1,0 -8.1,5.9 3.1,9.5 -8.3,-6 -8.3,6 3.1,-9.5 -8.1,-5.9 10.1,0 Z"/></g>',
+    ind_eg: '<rect width="300" height="66.7" fill="#ce1126"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#000000"/><path d="M150,78 l-24,32 h15 l9,-13 9,13 h15 Z" fill="#c9a13c"/>',
+    sudan_1956: '<rect width="300" height="66.7" fill="#0072c6"/><rect y="66.7" width="300" height="66.6" fill="#f9d616"/><rect y="133.3" width="300" height="66.7" fill="#006233"/>',
+    ind_sd: '<rect width="300" height="66.7" fill="#d21034"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#000000"/><path d="M0,0 L112,100 L0,200 Z" fill="#006233"/>'
+  };
+  function flagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (FLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+
+  var SNAP = [
+    { year:"c. 700", name:"The Umayyad conquest complete", t:{ ma:C.early_islamic, dz:C.early_islamic, tn:C.early_islamic, ly:C.early_islamic, eg:C.early_islamic, sd:C.nubia },
+      story: "By the early 700s the Umayyad Caliphate, ruling from Damascus, has completed a conquest of North Africa that took barely two generations. Egypt fell fastest: General Amr ibn al-As took Alexandria from Byzantine rule in 641&ndash;642, founding Fustat &mdash; predecessor to Cairo &mdash; as a garrison capital almost immediately. Further west, progress was slower and far more contested: Uqba ibn Nafi founded Kairouan in Tunisia around 670 as a forward base, but Umayyad forces spent decades fighting sustained Amazigh (Berber) resistance under leaders like Kusaila and then the famous Kahina, a Berber queen whose forces held the Aurès Mountains until her defeat around 703. Morocco, the furthest theater, was only brought under nominal caliphal control by 710, on the eve of the 711 crossing into Spain that Berber and Arab forces launched together. Sudan stayed genuinely outside this conquest: the 652 Baqt treaty with the Christian kingdom of Makuria secured peaceful terms rather than submission, and Nubia's Christian kingdoms &mdash; Nobatia, Makuria, and Alodia &mdash; kept ruling the Nile south of Aswan for centuries yet, resisting Islamization long after the Maghreb and Egypt had been absorbed." },
+    { year:"c. 1000", name:"Fragmentation: Fatimids and Berber dynasties", t:{ ma:C.berber_west, dz:C.berber_west, tn:C.zirid, ly:C.zirid, eg:C.fatimid, sd:C.nubia },
+      story: "The caliphate that conquered North Africa never again ruled it as one piece. In 909 the Shia Fatimid dynasty seized power in Ifriqiya (Tunisia), and in 969 the Fatimid general Jawhar al-Siqilli conquered Egypt outright, founding a new capital at Cairo (al-Qahira) and moving the Fatimid court there by 973 &mdash; leaving the Maghreb under deputies. In Ifriqiya and Tripolitania those deputies, the Zirid emirs, ran a real state in all but name, formally Fatimid vassals but practically independent. Morocco and western Algeria, by contrast, answer to an entirely separate and unrelated cast of Zenata Berber leaders, some of them loosely aligned with the rival Umayyad Caliphate of Córdoba across the strait rather than with Cairo's Fatimids at all &mdash; a real division, not a rounding error, which is why the map draws a solid line between them and the Zirid lands to their east. Nubia, meanwhile, remains firmly Christian and independent: Makuria, ruling from Dongola, is at the height of its medieval power, having absorbed its neighbor Nobatia, and maintains its own diplomatic relations with both Cairo and Byzantium." },
+    { year:"1250", name:"Almohad twilight, a new Mamluk Egypt", t:{ ma:C.almohad, dz:C.almohad, tn:C.hafsid, ly:C.hafsid, eg:C.mamluk, sd:C.nubia },
+      story: "The Almohad Caliphate, built into an empire by Abd al-Mu'min after 1147 on the back of Ibn Tumart's reform movement, reached its real territorial height a generation earlier &mdash; under Caliph al-Nasir, before the catastrophic 1212 defeat at Las Navas de Tolosa in Spain broke Almohad power and set off a slow unraveling across the Maghreb. By 1250 that unraveling is well underway: Ifriqiya broke away for good in 1229 under Abu Zakariya, founding the Hafsid dynasty at Tunis, which now also holds Tripolitania &mdash; a real, permanent split from Almohad Morocco and Algeria that the map already shows, years before the Almohad state itself finally collapses in 1269. In Egypt, 1250 is the exact hinge: the last effective Ayyubid sultan, as-Salih Ayyub, has just died, and his own slave-soldier corps, the Mamluks, seize the throne this same year, founding the Mamluk Sultanate that will rule Egypt, and soon Syria, for over two and a half centuries. Sudan remains the era's most overlooked holdout: Makuria's Christian kings, under growing pressure from Mamluk Egypt to the north, are still ruling from Dongola and will keep doing so for another century &mdash; genuine, sustained resistance to Islamization even as the entire region around them has turned Muslim." },
+    { year:"1517", name:"Ottomans take Egypt; Morocco stays apart", t:{ ma:C.morocco_indep, dz:C.ottoman, tn:C.hafsid, ly:C.spanish, eg:C.ottoman, sd:C.funj },
+      story: "Sultan Selim I's Ottoman army crushed the Mamluk Sultanate at Marj Dabiq in 1516 and took Cairo itself in January 1517, ending Mamluk rule and absorbing Egypt into the Ottoman Empire as its wealthiest province. The same years saw Ottoman power reach the central Maghreb by an entirely different route: the corsair brothers Oruç and Hayreddin Barbarossa seized Algiers in 1516, and in 1517 Hayreddin formally submitted the city to Selim I in exchange for Janissary troops and cannon, founding the Ottoman Regency of Algiers. Tunis, still ruled by the Hafsid dynasty, and Tripoli, held by Spain since 1510 and soon to pass to the Knights Hospitaller in 1530, both remain outside Ottoman control for now &mdash; the empire's grip on the central Maghreb takes decades more to complete, Tripoli falling only in 1551 and Tunis only in 1574. Morocco is the era's clearest exception, and stays that way for four centuries: still ruled by its own Wattasid dynasty at Fez in 1517 (soon to be displaced by the rival Saadi dynasty from the south), it is never conquered or absorbed by the Ottomans at all. In Sudan, Christian Nubia has finally given way: the Funj Sultanate, an Islamic state founded around 1504 at Sennar on the Blue Nile, now rules the middle Nile in Makuria's place." },
+    { year:"1885", name:"Empires converge: French, British, Ottoman, Mahdist", t:{ ma:C.morocco_indep, dz:C.fr_colonial, tn:C.fr_protectorate, ly:C.ottoman, eg:C.br_colonial, sd:C.mahdist },
+      story: "By the 1880s, four different powers are converging on the same coastline from different directions. France annexed Algeria outright starting in 1830 and by 1848 was governing it as an integral part of France itself; in 1881 French troops crossed from Algeria into Tunisia and imposed the Bardo Treaty, establishing a protectorate that leaves the Bey of Tunis on his throne but strips him of real power &mdash; a genuinely different legal status from Algeria's, which is why the map draws a solid line between them. Egypt, still under nominal Ottoman suzerainty, fell under British control after the 1882 Anglo-Egyptian War, fought to crush the Urabi revolt and secure the Suez Canal, inaugurating a 'veiled protectorate' in which British officials ran the country behind a facade of continued Khedival rule. Sudan, nominally part of Egypt, broke away in the opposite direction entirely: Muhammad Ahmad, a religious leader proclaiming himself the Mahdi, led a revolt against Turco-Egyptian rule that captured Khartoum in January 1885 (killing the British general Charles Gordon) and founded an independent Mahdist State that will rule until its own defeat in 1898. Libya, still Ottoman territory, and Morocco, still fully independent under its Alaouite Sultan, are for now the two holdouts against this wave of foreign control." },
+    { year:"1912", name:"The colonial partition completes", t:{ ma:C.fr_protectorate, dz:C.fr_colonial, tn:C.fr_protectorate, ly:C.it_colonial, eg:C.br_colonial, sd:C.condominium },
+      story: "The staggered colonization completes within a single generation. Italy invaded Ottoman Tripolitania and Cyrenaica in 1911, and the Treaty of Ouchy in October 1912 formalized Italian rule over what becomes the colony of Libya &mdash; the last piece of Ottoman North Africa to fall. Morocco's turn came the same year: the Treaty of Fez, signed in March 1912, established a French protectorate over most of the country (with a smaller Spanish zone in the north and an international administration in Tangier), ending the sovereignty the Alaouite dynasty had held since 1659. Tunisia remains a French protectorate as it has since 1881, and Algeria stays fully incorporated into France &mdash; still a genuinely different legal status, still a solid border on the map. Egypt's status is legally ambiguous in 1912: Britain has controlled it in practice since 1882 but won't declare a formal protectorate until 1914, when Ottoman entry into World War I finally forces the issue. Sudan, since the 1898 Anglo-Egyptian reconquest that crushed the Mahdist State, is governed as a nominal Condominium of Britain and Egypt, though real power lies almost entirely with British administrators in Khartoum &mdash; distinct enough from British-run Egypt itself to draw its own line on the map." },
+    { year:"1956", name:"Independence, in waves", t:{ ma:C.ind_ma, dz:C.fr_colonial, tn:C.ind_tn, ly:C.ind_ly, eg:C.ind_eg, sd:C.ind_sd },
+      story: "Independence arrives out of order and for very different reasons. Libya got there first and fastest: created by United Nations resolution rather than won by revolt, the Kingdom of Libya became independent in December 1951 under King Idris &mdash; the first country in history to gain independence through the UN. Egypt's path was longer: nominal independence came in 1922, but real sovereignty waited for the Free Officers' coup of 1952, which toppled King Farouk, and by 1956 Gamal Abdel Nasser's republic is asserting that sovereignty dramatically, nationalizing the Suez Canal that same year and triggering the Suez Crisis. Sudan, Morocco, and Tunisia all reach independence within months of each other in 1956: Sudan's parliament declared independence from the Anglo-Egyptian Condominium on 1 January; Morocco's French protectorate ended in March, restoring Sultan (soon King) Mohammed V's full sovereignty; Tunisia's ended weeks later, also in March, under Habib Bourguiba, who abolishes the monarchy and becomes president the following year. Algeria alone remains under French rule in 1956, and by now under open war: the National Liberation Front's uprising, begun in November 1954, has escalated into the full Algerian War, still six years from its end." },
+    { year:"1962", name:"Algeria, after 132 years", t:{ ma:C.ind_ma, dz:C.ind_dz, tn:C.ind_tn, ly:C.ind_ly, eg:C.ind_eg, sd:C.ind_sd },
+      story: "Algeria's independence was the costliest and longest-delayed of the six, and the most bitterly contested by the colonial power itself &mdash; unlike the others, France had governed Algeria for 132 years as an integral, constitutionally French territory, not merely a protectorate, and a large settler population (the pieds-noirs) resisted any negotiated exit. The Algerian War of Independence, beginning with the FLN's coordinated attacks of 1 November 1954, cost several hundred thousand lives before French President Charles de Gaulle, who had come to see the war as unwinnable, opened real negotiations. The Évian Accords, signed in March 1962, set the terms; a referendum in Algeria that July produced an overwhelming vote for independence, formally declared on 5 July 1962. Ahmed Ben Bella became the new republic's first president. With Algeria's independence, all six countries in this region are, for the first time since the conquests of the 600s and 700s, once again ruled entirely by their own governments &mdash; even as several are only beginning decades of difficult nation-building." },
+    { year:"Today", name:"Six independent states", t:{ ma:C.ind_ma, dz:C.ind_dz, tn:C.ind_tn, ly:C.ind_ly, eg:C.ind_eg, sd:C.ind_sd },
+      story: "All six countries remain independent today, though several have had eventful, sometimes turbulent, decades since 1962. Egypt has been a republic continuously since 1953, through the presidencies of Nasser, Sadat, Mubarak, and their successors. Libya's monarchy was overthrown in a 1969 coup led by Muammar Gaddafi, who ruled for 42 years until the 2011 revolution and civil war ended his rule; Libya has experienced significant internal division in the years since. Tunisia's 2010&ndash;11 revolution, which forced President Zine el-Abidine Ben Ali from power in January 2011, is widely credited as the spark that began the wider wave of uprisings across the Arab world known as the Arab Spring. Sudan's most significant recent change to its own map came in 2011, when South Sudan &mdash; after decades of civil war &mdash; voted overwhelmingly in a referendum to secede, becoming its own separate country and leaving the Republic of Sudan, shown here, with its current borders. Morocco and Algeria have followed comparatively more continuous institutional paths since independence, each still governed by the same kind of state &mdash; a monarchy and a republic, respectively &mdash; that it was at independence." }
+  ];
+
+  var FLAG_SETS = {
+    "c. 700": [["early_islamic","Umayyad Caliphate"],["nubia","Christian Nubia (Makuria)"]],
+    "c. 1000": [["berber_west","Berber dynasties (west)"],["zirid","Zirid dynasty (Ifriqiya)"],["fatimid","Fatimid Egypt"],["nubia","Christian Nubia"]],
+    "1250": [["almohad","Almohad Caliphate"],["hafsid","Hafsid dynasty"],["mamluk","Mamluk Sultanate (new, 1250)"],["nubia","Christian Nubia (Makuria)"]],
+    "1517": [["morocco_indep","Independent Morocco (Wattasid)"],["ottoman","Ottoman Empire"],["hafsid","Hafsid Tunis (still independent)"],["spanish","Spain (Tripoli presidio)"],["funj","Funj Sultanate"]],
+    "1885": [["morocco_indep","Independent Morocco (Alaouite)"],["fr_tricolor","French Algeria"],["hafsid","Tunisia (protectorate, own flag kept)"],["ottoman","Ottoman Libya"],["br_unionjack","British-occupied Egypt"],["mahdist","Mahdist Sudan"]],
+    "1912": [["fr_tricolor","French protectorates &amp; Algeria"],["it_tricolor","Italian Libya"],["br_unionjack","British-controlled Egypt"],["condominium","Anglo-Egyptian Sudan"]],
+    "1956": [["ind_ma","Morocco"],["fr_tricolor","French Algeria (still)"],["ind_tn","Tunisia"],["ind_ly_kingdom","Kingdom of Libya"],["egypt_1953","Republic of Egypt"],["sudan_1956","Sudan"]],
+    "1962": [["ind_ma","Morocco"],["ind_dz","Algeria (newly independent)"],["ind_tn","Tunisia"],["ind_ly_kingdom","Libya"],["uar","Egypt (United Arab Republic)"],["sudan_1956","Sudan"]],
+    "Today": [["ind_ma","Morocco"],["ind_dz","Algeria"],["ind_tn","Tunisia"],["ind_ly_kingdom","Libya"],["ind_eg","Egypt"],["ind_sd","Sudan"]]
+  };
+
+  var REGIONS = ["ma","dz","tn","ly","eg","sd"];
+  var REGION_NAMES = { ma:"Morocco", dz:"Algeria", tn:"Tunisia", ly:"Libya", eg:"Egypt", sd:"Sudan" };
+  var REGION_ABBR = { ma:"MAR", dz:"DZA", tn:"TUN", ly:"LBY", eg:"EGY", sd:"SDN" };
+  var REGION_POS = { ma:[128,156], dz:[332,142], tn:[441,82], ly:[541,175], eg:[770,175], sd:[748,420] };
+  var ADJ = [["ma","dz"],["dz","tn"],["dz","ly"],["tn","ly"],["ly","eg"],["ly","sd"],["eg","sd"]];
+
+  function textColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+  function ownerName(hex) {
+    for (var k in C) { if (C[k] === hex) return NAMES[k]; }
+    return hex;
+  }
+
+  function groupsFor(t) {
+    var parent = {};
+    REGIONS.forEach(function (r) { parent[r] = r; });
+    function find(x) { return parent[x] === x ? x : (parent[x] = find(parent[x])); }
+    function union(a, b) { var ra = find(a), rb = find(b); if (ra !== rb) parent[ra] = rb; }
+    ADJ.forEach(function (pair) {
+      if (t[pair[0]] === t[pair[1]]) union(pair[0], pair[1]);
+    });
+    var groups = {};
+    REGIONS.forEach(function (r) {
+      var root = find(r);
+      if (!groups[root]) groups[root] = [];
+      groups[root].push(r);
+    });
+    return Object.keys(groups).map(function (k) { return groups[k]; });
+  }
+
+  var svgNS = "http://www.w3.org/2000/svg";
+  var labelsEl = document.getElementById("labels");
+  var yearTag = document.getElementById("yearTag");
+  var eraName = document.getElementById("eraName");
+  var eraOwners = document.getElementById("eraOwners");
+  var eraStory = document.getElementById("eraStory");
+  var flagsRow = document.getElementById("flagsRow");
+  var sliderEl = document.getElementById("slider");
+
+  function render(i) {
+    var era = SNAP[i];
+    yearTag.textContent = era.year;
+    eraName.textContent = era.name;
+    eraStory.innerHTML = era.story || "";
+    flagsRow.innerHTML = (FLAG_SETS[era.year] || []).map(function (f) {
+      return '<div class="flag-chip">' + flagSvg(f[0]) + '<div class="fc-label">' + f[1] + '</div></div>';
+    }).join("");
+
+    REGIONS.forEach(function (id) {
+      var el = document.getElementById("f-" + id);
+      el.setAttribute("fill", era.t[id]);
+    });
+
+    ADJ.forEach(function (pair) {
+      var same = era.t[pair[0]] === era.t[pair[1]];
+      var line = document.getElementById("b-" + pair[0] + "-" + pair[1]);
+      line.setAttribute("stroke-opacity", same ? "0.06" : "0.85");
+      line.setAttribute("stroke-width", same ? "1" : "2.6");
+    });
+
+    var groups = groupsFor(era.t);
+    var seenOwners = {};
+    var ownerParts = [];
+    groups.forEach(function (g) {
+      var label = ownerName(era.t[g[0]]);
+      if (!seenOwners[label]) { seenOwners[label] = []; ownerParts.push(label); }
+      g.forEach(function (id) { seenOwners[label].push(REGION_NAMES[id]); });
+    });
+    eraOwners.innerHTML = ownerParts.map(function (label) {
+      return "<b>" + label + "</b>: " + seenOwners[label].join(", ");
+    }).join(" &middot; ");
+
+    labelsEl.innerHTML = "";
+    function haloFor(txtColor) { return txtColor === "#201a12" ? "#f7f1e3" : "#201a12"; }
+    groups.forEach(function (g) {
+      var cx = g.reduce(function (s, id) { return s + REGION_POS[id][0]; }, 0) / g.length;
+      var cy = g.reduce(function (s, id) { return s + REGION_POS[id][1]; }, 0) / g.length;
+      var fillHex = era.t[g[0]];
+      var txtColor = textColorFor(fillHex);
+      var halo = haloFor(txtColor);
+
+      if (g.length > 1) {
+        var groupText = ownerName(fillHex).toUpperCase();
+        var gl = document.createElementNS(svgNS, "text");
+        gl.setAttribute("x", cx);
+        gl.setAttribute("y", cy);
+        gl.setAttribute("class", "group-label");
+        gl.setAttribute("font-size", groupText.length > 18 ? "12" : "15");
+        gl.setAttribute("fill", txtColor);
+        gl.setAttribute("stroke", halo);
+        gl.textContent = groupText;
+        labelsEl.appendChild(gl);
+        g.forEach(function (id) {
+          var pos = REGION_POS[id];
+          var sl = document.createElementNS(svgNS, "text");
+          sl.setAttribute("x", pos[0]);
+          sl.setAttribute("y", pos[1] + 15);
+          sl.setAttribute("class", "sub-label");
+          sl.setAttribute("font-size", "10");
+          sl.setAttribute("fill", txtColor);
+          sl.setAttribute("stroke", halo);
+          sl.setAttribute("opacity", "0.85");
+          sl.textContent = REGION_ABBR[id];
+          labelsEl.appendChild(sl);
+        });
+      } else {
+        var id = g[0];
+        var pos = REGION_POS[id];
+        var selfGoverning = Object.keys(C).some(function (k) { return k.indexOf("ind_") === 0 && C[k] === fillHex; });
+        var soloText = (selfGoverning ? REGION_NAMES[id] : ownerName(fillHex)).toUpperCase();
+        var sl2 = document.createElementNS(svgNS, "text");
+        sl2.setAttribute("x", pos[0]);
+        sl2.setAttribute("y", pos[1]);
+        sl2.setAttribute("class", "group-label");
+        sl2.setAttribute("font-size", selfGoverning ? "14" : (soloText.length > 16 ? "10" : "13"));
+        sl2.setAttribute("fill", txtColor);
+        sl2.setAttribute("stroke", halo);
+        sl2.textContent = soloText;
+        labelsEl.appendChild(sl2);
+        if (!selfGoverning) {
+          var subOnly = document.createElementNS(svgNS, "text");
+          subOnly.setAttribute("x", pos[0]);
+          subOnly.setAttribute("y", pos[1] + 15);
+          subOnly.setAttribute("class", "sub-label");
+          subOnly.setAttribute("font-size", "10");
+          subOnly.setAttribute("fill", txtColor);
+          subOnly.setAttribute("stroke", halo);
+          subOnly.setAttribute("opacity", "0.85");
+          subOnly.textContent = REGION_ABBR[id];
+          labelsEl.appendChild(subOnly);
+        }
+      }
+    });
+  }
+
+  sliderEl.addEventListener("input", function () { render(parseInt(sliderEl.value, 10)); });
+  render(0);
+
+  var playing = false, playTimer = null;
+  var playBtn = document.getElementById("playBtn");
+  function stepPlay() {
+    var next = parseInt(sliderEl.value, 10) + 1;
+    if (next > SNAP.length - 1) { stopPlay(); return; }
+    sliderEl.value = next;
+    render(next);
+  }
+  function startPlay() {
+    playing = true;
+    playBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(sliderEl.value, 10) >= SNAP.length - 1) { sliderEl.value = 0; render(0); }
+    playTimer = setInterval(stepPlay, 1700);
+  }
+  function stopPlay() {
+    playing = false;
+    playBtn.innerHTML = "&#9654;";
+    clearInterval(playTimer);
+  }
+  playBtn.addEventListener("click", function () { playing ? stopPlay() : startPlay(); });
+
+  // ---- Small multiples grid: same nine snapshots, diff-highlighted ----
+  var gridEl = document.getElementById("grid9");
+  var MINI_PATHS = {
+    ma: "M196.0,35.4 L205.6,42.7 L220.8,41.5 L237.3,45.4 L244.2,45.5 L250.2,56.6 L251.1,67.1 L256.7,85.4 L260.8,89.1 L257.9,95.8 L237.1,98.7 L229.9,105.1 L220.7,106.6 L220.0,119.5 L201.4,126.3 L195.3,135.0 L182.2,139.6 L166.3,142.3 L140.6,155.0 L140.7,175.5 L138.3,175.5 L138.7,184.8 L128.8,185.4 L123.7,189.3 L116.5,189.3 L110.7,187.1 L97.3,188.9 L92.1,202.4 L87.1,203.7 L79.6,225.5 L57.5,244.2 L52.2,268.0 L45.7,275.8 L43.8,282.1 L7.9,283.4 L7.6,283.4 L8.4,275.4 L14.5,270.7 L19.7,261.7 L18.7,255.8 L24.2,243.6 L33.0,232.6 L38.4,229.8 L42.6,219.7 L43.0,210.5 L48.7,199.8 L59.4,193.5 L69.5,175.8 L69.7,175.6 L77.8,168.9 L92.6,167.0 L105.1,155.2 L113.1,150.6 L126.4,136.1 L122.4,114.6 L128.5,99.7 L130.6,90.6 L140.9,78.9 L156.8,71.0 L168.6,63.8 L179.3,45.9 L184.3,35.3 Z",
+    dz: "M469.9,247.9 L415.3,280.9 L369.2,314.9 L346.7,322.6 L329.1,324.3 L328.9,313.3 L321.5,310.5 L311.6,305.6 L307.8,297.5 L254.1,259.7 L200.3,221.9 L140.4,180.0 L140.7,176.7 L140.7,175.5 L140.6,155.0 L166.3,142.3 L182.2,139.6 L195.3,135.0 L201.4,126.3 L220.0,119.5 L220.7,106.6 L229.9,105.1 L237.1,98.7 L257.9,95.8 L260.8,89.1 L256.7,85.4 L251.1,67.1 L250.2,56.6 L244.2,45.5 L259.5,36.1 L276.7,33.1 L286.8,25.9 L302.1,20.7 L329.1,17.6 L355.5,16.2 L363.5,18.7 L378.5,11.9 L395.5,11.8 L402.0,15.8 L412.9,14.8 L409.7,23.7 L412.2,40.1 L408.4,54.4 L398.6,64.1 L400.0,77.1 L413.1,87.4 L413.2,91.6 L423.0,98.6 L429.8,129.7 L435.0,144.9 L435.8,153.0 L433.0,167.1 L434.2,175.0 L432.1,184.5 L433.5,195.3 L427.2,202.6 L436.6,215.2 L437.2,222.6 L442.9,232.2 L450.3,229.1 L462.9,237.1 Z",
+    tn: "M429.8,129.7 L423.0,98.6 L413.2,91.6 L413.1,87.4 L400.0,77.1 L398.6,64.1 L408.4,54.4 L412.2,40.1 L409.7,23.7 L412.9,14.8 L430.2,7.8 L441.4,9.9 L440.9,18.6 L454.4,12.3 L455.6,15.6 L447.6,24.1 L447.5,32.1 L453.0,36.4 L450.9,51.3 L440.4,60.0 L443.5,69.5 L451.7,69.8 L455.7,78.0 L461.8,80.7 L460.9,94.0 L453.1,99.0 L448.2,104.5 L437.3,111.2 L439.0,118.3 L437.6,125.6 Z",
+    ly: "M515.3,258.5 L504.1,264.9 L495.1,255.4 L469.9,247.9 L462.9,237.1 L450.3,229.1 L442.9,232.2 L437.2,222.6 L436.6,215.2 L427.2,202.6 L433.5,195.3 L432.1,184.5 L434.2,175.0 L433.0,167.1 L435.8,153.0 L435.0,144.9 L429.8,129.7 L437.6,125.6 L439.0,118.3 L437.3,111.2 L448.2,104.5 L453.1,99.0 L460.9,94.0 L461.8,80.7 L480.5,86.6 L487.2,85.2 L500.5,88.0 L521.6,95.8 L529.1,111.2 L543.4,114.5 L565.8,121.8 L582.8,130.4 L590.6,125.9 L598.2,117.9 L594.5,104.7 L599.5,96.2 L611.0,88.1 L621.9,85.8 L643.5,89.3 L648.9,97.1 L654.8,97.1 L659.9,100.1 L675.7,102.1 L679.6,107.8 L673.9,116.1 L676.3,123.5 L672.2,134.2 L677.0,148.2 L677.0,209.7 L677.0,273.4 L677.0,308.0 L658.7,308.0 L658.5,315.3 L594.9,282.2 L531.4,249.0 Z",
+    eg: "M835.1,143.6 L830.6,150.6 L827.1,163.6 L822.8,172.6 L819.1,175.7 L813.8,170.1 L806.6,162.4 L795.2,137.6 L793.6,139.1 L800.2,157.4 L810.0,174.8 L822.0,201.7 L827.9,211.1 L833.0,220.9 L847.3,240.1 L844.1,243.1 L844.7,254.3 L863.2,269.9 L866.0,273.4 L802.8,273.4 L741.0,273.4 L677.0,273.4 L677.0,209.7 L677.0,148.2 L672.2,134.2 L676.3,123.5 L673.9,116.1 L679.6,107.8 L700.8,107.5 L716.1,112.1 L732.0,117.2 L739.3,119.9 L751.6,114.4 L758.2,109.5 L772.2,108.1 L783.5,110.2 L787.9,118.8 L791.6,113.2 L804.3,117.3 L816.7,118.2 L824.6,113.9 Z",
+    sd: "M819.8,490.3 L817.6,490.0 L817.8,481.4 L815.9,475.4 L807.7,468.6 L805.8,456.1 L807.7,443.4 L800.3,442.2 L799.2,446.0 L789.7,446.9 L793.5,452.0 L794.9,462.4 L786.1,471.9 L778.2,484.4 L770.0,486.1 L756.6,476.0 L750.6,479.6 L748.9,484.7 L740.7,487.9 L740.2,491.5 L724.3,491.5 L722.1,487.9 L710.6,487.3 L704.9,490.3 L700.5,488.8 L692.3,478.7 L689.6,474.0 L678.1,476.3 L673.7,484.4 L669.6,499.8 L664.2,503.1 L659.3,505.0 L658.0,504.2 L652.4,499.2 L651.4,493.8 L654.0,486.6 L654.0,479.5 L644.8,468.7 L643.0,461.3 L643.2,457.1 L637.3,452.0 L637.1,442.0 L633.8,435.3 L628.2,436.3 L629.8,429.9 L633.9,422.7 L632.1,415.6 L637.4,410.2 L634.0,406.2 L638.3,395.5 L645.5,382.8 L659.3,384.0 L658.5,315.3 L658.7,308.0 L677.0,308.0 L677.0,273.4 L741.0,273.4 L802.8,273.4 L866.0,273.4 L871.1,290.4 L867.7,293.5 L870.0,311.3 L875.8,332.0 L881.9,336.3 L890.6,342.7 L882.5,352.5 L870.8,355.4 L865.8,360.7 L864.2,372.2 L857.4,397.6 L859.1,404.6 L856.5,419.4 L850.0,436.5 L840.4,445.0 L833.6,458.3 L832.0,465.3 L824.5,470.2 L819.7,488.3 Z"
+  };
+  SNAP.forEach(function (era, idx) {
+    var prev = idx > 0 ? SNAP[idx - 1] : null;
+    var changed = [];
+    if (prev) {
+      Object.keys(MINI_PATHS).forEach(function (id) {
+        if (era.t[id] !== prev.t[id]) changed.push(id);
+      });
+    }
+    var cell = document.createElement("div");
+    cell.className = "grid-cell";
+    var svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("viewBox", "0 0 900 524.3");
+    var sea = document.createElementNS(svgNS, "rect");
+    sea.setAttribute("width", "900"); sea.setAttribute("height", "524.3");
+    sea.setAttribute("fill", "var(--tile-sea)");
+    svg.appendChild(sea);
+    Object.keys(MINI_PATHS).forEach(function (id) {
+      var isBaseline = !prev;
+      var isChanged = prev && changed.indexOf(id) !== -1;
+      var bold = isBaseline || isChanged;
+      var p = document.createElementNS(svgNS, "path");
+      p.setAttribute("d", MINI_PATHS[id]);
+      p.setAttribute("fill", era.t[id]);
+      if (bold) {
+        p.setAttribute("fill-opacity", "1");
+        p.setAttribute("stroke", "#241f14");
+        p.setAttribute("stroke-width", "2.2");
+      } else {
+        p.setAttribute("fill-opacity", "0.22");
+        p.setAttribute("stroke", "#241f14");
+        p.setAttribute("stroke-width", "0.75");
+        p.setAttribute("stroke-opacity", "0.4");
+      }
+      svg.appendChild(p);
+      var pos = REGION_POS[id];
+      var lbl = document.createElementNS(svgNS, "text");
+      lbl.setAttribute("x", pos[0]);
+      lbl.setAttribute("y", pos[1]);
+      lbl.setAttribute("text-anchor", "middle");
+      lbl.setAttribute("class", "mini-label");
+      lbl.setAttribute("fill", bold ? textColorFor(era.t[id]) : "#8a7d5c");
+      lbl.setAttribute("opacity", bold ? "1" : "0.55");
+      lbl.textContent = REGION_ABBR[id];
+      svg.appendChild(lbl);
+    });
+    cell.appendChild(svg);
+    var cap = document.createElement("div");
+    cap.className = "cap";
+    var diffText = !prev ? "Starting point" : (changed.length ? "&rarr; " + changed.map(function (id) { return REGION_NAMES[id]; }).join(", ") + " change" + (changed.length === 1 ? "s" : "") + " hands" : "&rarr; no change from previous frame");
+    cap.innerHTML = era.year + "<b>" + era.name + "</b><span class=\"diff\">" + diffText + "</span>";
+    cell.appendChild(cap);
+    gridEl.appendChild(cell);
+  });
+
+  // ---- Timeline: same data, real continuous date ranges ----
+  var GANTT_START = 600, GANTT_END = 2024;
+  var GANTT_DATA = [
+    { id:"ma", segs:[
+      [600,710,C.early_islamic,"Umayyad conquest"], [710,788,C.early_islamic,"Umayyad/Abbasid rule"],
+      [788,1055,"#8a6a3a","Idrisid &amp; Berber dynasties"], [1055,1147,"#7a5a2e","Almoravid dynasty"],
+      [1147,1269,C.almohad,"Almohad Caliphate"], [1269,1465,"#6b4a8a","Marinid dynasty"],
+      [1465,1554,"#8a5a7a","Wattasid dynasty"], [1554,1659,"#a9576a","Saadi dynasty"],
+      [1659,1912,C.morocco_indep,"Alaouite dynasty (independent)"], [1912,1956,C.fr_protectorate,"French protectorate"],
+      [1956,2024,C.ind_ma,"Independent Kingdom"]
+    ]},
+    { id:"dz", segs:[
+      [600,710,C.early_islamic,"Umayyad conquest"], [710,909,"#8a6a3a","Rustamid &amp; early dynasties"],
+      [909,1015,C.zirid,"Zirid/Fatimid vassal"], [1015,1152,"#8a6a2f","Hammadid dynasty"],
+      [1152,1269,C.almohad,"Almohad Caliphate"], [1269,1516,"#8a6a3a","Zayyanid dynasty (Tlemcen)"],
+      [1516,1830,C.ottoman,"Ottoman Regency of Algiers"], [1830,1962,C.fr_colonial,"French Algeria"],
+      [1962,2024,C.ind_dz,"Independent"]
+    ]},
+    { id:"tn", segs:[
+      [600,710,C.early_islamic,"Umayyad conquest"], [710,800,C.early_islamic,"Umayyad/Abbasid Ifriqiya"],
+      [800,909,"#b98a3f","Aghlabid dynasty"], [909,1160,C.zirid,"Zirid dynasty (Fatimid vassal)"],
+      [1160,1229,C.almohad,"Almohad rule"], [1229,1574,C.hafsid,"Hafsid dynasty"],
+      [1574,1881,C.ottoman,"Ottoman Regency of Tunis"], [1881,1956,C.fr_protectorate,"French protectorate"],
+      [1956,2024,C.ind_tn,"Independent"]
+    ]},
+    { id:"ly", segs:[
+      [600,710,C.early_islamic,"Umayyad conquest"], [710,909,C.early_islamic,"Umayyad/Abbasid Tripolitania"],
+      [909,1160,C.zirid,"Zirid/Fatimid vassal"], [1160,1229,C.almohad,"Almohad rule"],
+      [1229,1510,C.hafsid,"Hafsid dynasty"], [1510,1530,C.spanish,"Spanish occupation"],
+      [1530,1551,"#4a5a8a","Knights Hospitaller (Malta)"], [1551,1711,C.ottoman,"Ottoman Tripoli"],
+      [1711,1835,"#b56a3f","Karamanli dynasty (autonomous)"], [1835,1911,C.ottoman,"Direct Ottoman rule restored"],
+      [1911,1943,C.it_colonial,"Italian Libya"], [1943,1951,"#6a7a8a","British/French military rule"],
+      [1951,2024,C.ind_ly,"Independent"]
+    ]},
+    { id:"eg", segs:[
+      [600,641,"#8a5a2e","Byzantine Egypt"], [641,969,C.early_islamic,"Umayyad/Abbasid Egypt"],
+      [969,1171,C.fatimid,"Fatimid Caliphate"], [1171,1250,"#c9a13c","Ayyubid dynasty"],
+      [1250,1517,C.mamluk,"Mamluk Sultanate"], [1517,1882,C.ottoman,"Ottoman Egypt"],
+      [1882,1922,C.br_colonial,"British occupation"], [1922,1952,C.br_colonial,"Kingdom of Egypt (nominal)"],
+      [1952,2024,C.ind_eg,"Republic of Egypt"]
+    ]},
+    { id:"sd", segs:[
+      [600,1504,C.nubia,"Christian Nubian kingdoms"], [1504,1821,C.funj,"Funj Sultanate (Sennar)"],
+      [1821,1885,"#8a2f3a","Turco-Egyptian rule"], [1885,1898,C.mahdist,"Mahdist State"],
+      [1898,1956,C.condominium,"Anglo-Egyptian Condominium"], [1956,2024,C.ind_sd,"Independent"]
+    ]}
+  ];
+  var ganttEl = document.getElementById("gantt");
+  function yearToPct(y) { return (y - GANTT_START) / (GANTT_END - GANTT_START) * 100; }
+  GANTT_DATA.forEach(function (row) {
+    var rowEl = document.createElement("div");
+    rowEl.className = "gantt-row";
+    var label = document.createElement("div");
+    label.className = "gantt-label";
+    label.textContent = REGION_NAMES[row.id];
+    rowEl.appendChild(label);
+    var track = document.createElement("div");
+    track.className = "gantt-track";
+    row.segs.forEach(function (seg) {
+      var left = yearToPct(seg[0]);
+      var width = yearToPct(seg[1]) - left;
+      var segEl = document.createElement("div");
+      segEl.className = "gantt-seg";
+      segEl.style.left = left + "%";
+      segEl.style.width = width + "%";
+      segEl.style.background = seg[2];
+      segEl.title = REGION_NAMES[row.id] + ": " + seg[3].replace(/&amp;/g,"&") + " (" + seg[0] + "–" + seg[1] + ")";
+      if (width > 3.4) {
+        var sp = document.createElement("span");
+        sp.innerHTML = seg[3];
+        sp.style.color = textColorFor(seg[2]);
+        segEl.appendChild(sp);
+      }
+      track.appendChild(segEl);
+    });
+    rowEl.appendChild(track);
+    ganttEl.appendChild(rowEl);
+  });
+  var axisEl = document.getElementById("gantt-axis");
+  [600, 900, 1200, 1500, 1700, 1900, 2024].forEach(function (y) {
+    var s = document.createElement("span");
+    s.style.left = yearToPct(y) + "%";
+    s.textContent = y;
+    axisEl.appendChild(s);
+  });
+})();
+</script>
+</body></html>

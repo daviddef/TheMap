@@ -1,0 +1,677 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Flags of Central America</title>
+<meta name="description" content="A hub for the family flag atlas: seven country lineages across the Central American isthmus, and an interactive map showing who ruled each region at nine points across eleven centuries.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    --tile: #ddd0aa; --tile-line: #b7a679; --tile-text: #7a6a45; --tile-sea: #b9d3da;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.2rem, 5.5vw, 3.4rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.1rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .countries { margin-top: 44px; }
+  .countries h2 { font-size: 1.15rem; font-weight: 600; margin: 0 0 16px; }
+  .country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .country-card {
+    display: block; padding: 20px; border: 1px solid var(--card-border); background: var(--card);
+    border-radius: 4px; text-decoration: none; color: var(--ink); position: relative; overflow: hidden;
+  }
+  .country-card .swatch-strip { position: absolute; top: 0; left: 0; right: 0; height: 5px; }
+  .country-card .era { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--brass); margin-bottom: 6px; }
+  .country-card b { display: block; font-family: "Fraunces", serif; font-size: 1.2rem; font-weight: 600; margin-bottom: 6px; }
+  .country-card span { color: var(--muted); font-size: .88rem; line-height: 1.5; }
+  .country-card.placeholder { cursor: default; opacity: .82; }
+  .country-card .soon { display: inline-block; margin-top: 8px; font-family: "IBM Plex Mono", monospace; font-size: 9.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--adriatic); border: 1px dashed var(--card-border); padding: 3px 7px; border-radius: 3px; }
+
+  .map-section { margin-top: 56px; padding-top: 36px; border-top: 1px solid var(--hair); }
+  .map-section h2 { font-size: 1.5rem; margin: 0 0 8px; }
+  .map-section .map-sub { font-size: .94rem; color: var(--muted); max-width: 64ch; margin: 0 0 22px; }
+  .map-section .rule-box { margin-bottom: 22px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .92rem; }
+  .map-section .rule-box b { color: var(--brick); }
+
+  .viz-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 22px; }
+
+  .controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .play-btn {
+    flex: none; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .play-btn:hover { border-color: var(--brick); }
+  input[type="range"] {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px;
+    background: var(--hair); outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper);
+    box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  .era-tag { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+
+  .era-head { text-align: center; margin-bottom: 16px; }
+  .era-name-inline { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.35rem; transition: opacity .35s ease; }
+  .era-owners { font-size: .86rem; color: var(--muted); max-width: 62ch; margin: 6px auto 0; transition: opacity .35s ease; }
+  .era-owners b { color: var(--ink); }
+  .era-story {
+    margin: 0 auto 22px; font-size: .98rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .35s ease; padding: 14px 18px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  .era-story b { color: var(--brick); }
+
+  .flags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin: 4px auto 18px; max-width: 620px; }
+  .flag-chip { text-align: center; width: 92px; }
+  .flag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-chip .fc-label { font-family: "IBM Plex Mono", monospace; font-size: 9px; color: var(--muted); margin-top: 5px; line-height: 1.3; }
+
+  #map-svg { display: block; margin: 0 auto; width: 100%; max-width: 460px; height: auto; }
+  .region-fill { transition: fill 0.7s ease; }
+  .border-line { transition: stroke-opacity 0.7s ease, stroke-width 0.7s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .context-line { fill: none; stroke: var(--tile-text); stroke-width: 1; stroke-dasharray: 2 2; opacity: .55; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 600; fill: var(--tile-text); opacity: .75; letter-spacing: .05em; }
+  .group-label { font-family: "Fraunces", serif; font-weight: 600; transition: opacity .5s ease, font-size .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2.5px; }
+  .sub-label { font-family: "IBM Plex Mono", monospace; font-weight: 700; transition: opacity .5s ease, fill .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+
+  .map-key { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: .8rem; color: var(--muted); justify-content: center; }
+  .map-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .map-key .sw { width: 11px; height: 11px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .map-notes { margin-top: 20px; font-size: .85rem; color: var(--muted); }
+  .map-notes b { color: var(--ink); }
+
+  .subview { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .subview h3 { font-size: 1.2rem; font-weight: 600; margin: 0 0 8px; }
+  .subview .sub-desc { font-size: .9rem; color: var(--muted); max-width: 64ch; margin: 0 0 18px; }
+
+  .gantt-row { display: flex; align-items: center; margin-bottom: 3px; }
+  .gantt-label { width: 100px; flex: none; font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--ink); text-align: right; padding-right: 10px; }
+  .gantt-track { flex: 1; height: 26px; position: relative; background: var(--paper); border-radius: 2px; overflow: hidden; }
+  .gantt-seg { position: absolute; top: 0; bottom: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .gantt-seg span { font-size: 9.5px; font-weight: 600; white-space: nowrap; padding: 0 3px; }
+  .gantt-axis { display: flex; margin-left: 100px; padding-top: 4px; font-family: "IBM Plex Mono", monospace; font-size: 9.5px; color: var(--muted); position: relative; height: 14px; }
+  .gantt-axis span { position: absolute; transform: translateX(-50%); }
+
+  .grid-3x3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .grid-cell { text-align: center; }
+  .grid-cell svg { width: 100%; height: auto; display: block; }
+  .grid-cell .cap { font-family: "IBM Plex Mono", monospace; font-size: 10px; color: var(--brass); margin-top: 6px; }
+  .grid-cell .cap b { display: block; font-family: "Fraunces", serif; font-size: .95rem; font-weight: 600; color: var(--ink); margin-top: 1px; }
+  .grid-cell .cap .diff { display: block; font-family: "Source Sans 3", sans-serif; font-size: .74rem; color: var(--brick); margin-top: 3px; font-weight: 600; }
+  .mini-label { font-family: "IBM Plex Mono", monospace; font-size: 7.5px; font-weight: 700; pointer-events: none; }
+
+  .about { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .about h2 { font-size: 1.3rem; margin: 0 0 12px; }
+  .about p { max-width: none; opacity: .88; margin: 0 0 12px; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a></p>
+  <p class="kicker">Family research &middot; Hub &middot; Phase 9 of the world atlas</p>
+  <h1>Flags of Central America</h1>
+  <p class="lede">Seven countries strung along one narrow isthmus, the Pacific on one shore and the Caribbean on the other &mdash; and, below, one map that shows how the same land changed hands across eleven centuries, one slider-turn at a time.</p>
+  <p class="lede">Dedicated country pages are still being built. For now, drag the map's slider below &mdash; and don't miss 1823, when five of these countries briefly become one.</p>
+
+  <div class="countries">
+    <h2>The seven lineages</h2>
+    <div class="country-grid">
+      <a class="country-card" href="guatemala-flags.html">
+        <span class="swatch-strip" style="background:#4a9d6f"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Guatemala</b>
+        <span>Maya heartland, Alvarado's 1524 conquest, the Captaincy General's seat, the federation's largest state.</span>
+      </a>
+      <a class="country-card" href="belize-flags.html">
+        <span class="swatch-strip" style="background:#1e2f96"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Belize</b>
+        <span>Maya polities Spain never subdued, British logwood cutters, a colony in 1862, the last of the seven to go independent.</span>
+      </a>
+      <a class="country-card" href="honduras-flags.html">
+        <span class="swatch-strip" style="background:#2f7a52"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Honduras</b>
+        <span>Olid's 1524 landing, four Ottoman&ndash;free colonial centuries, a federal state that fielded General Morazán.</span>
+      </a>
+      <a class="country-card" href="el-salvador-flags.html">
+        <span class="swatch-strip" style="background:#5c8f3f"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>El Salvador</b>
+        <span>Cuzcatlán's Pipil resistance, the smallest and most densely settled federal state, a 20th-century civil war.</span>
+      </a>
+      <a class="country-card" href="nicaragua-flags.html">
+        <span class="swatch-strip" style="background:#3fa88a"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Nicaragua</b>
+        <span>León and Granada founded in 1524, the federation's largest territory, a 20th-century revolution and civil war.</span>
+      </a>
+      <a class="country-card" href="costa-rica-flags.html">
+        <span class="swatch-strip" style="background:#8a9e5f"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Costa Rica</b>
+        <span>Unpacified into the 1560s, the federation's poorest and most peripheral member, its own 1848 flag redesign.</span>
+      </a>
+      <a class="country-card" href="panama-flags.html">
+        <span class="swatch-strip" style="background:#c9603c"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Panama</b>
+        <span>Conquered by 1519, administered from Peru not Guatemala, part of Gran Colombia, independent in 1903 with US backing.</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="map-section">
+    <h2>Eleven centuries, one map</h2>
+    <p class="map-sub">A real, traced map &mdash; actual Pacific and Caribbean coastlines, actual borders, not schematic shapes. Faint gray context traces the edges of Mexico to the north and Colombia to the south, across the Darién Gap. Drag the slider or press play; each snapshot simplifies a messier reality into the dominant power of the moment.</p>
+    <div class="rule-box">
+      <b>Borders here are data, not decoration.</b> A line between two regions only draws solid when they were actually governed separately. When they weren't &mdash; five of these states sharing one federal government from 1823 to 1841, say &mdash; the line dissolves and their names merge into whoever actually ruled them all. Colors blend between eras instead of jump-cutting. Watch Panama: it never joins that federation at all, and its own colonial line runs through Peru and Bogotá, not Guatemala City.
+    </div>
+
+    <div class="viz-frame">
+      <div class="controls">
+        <button class="play-btn" id="playBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="era-tag" id="yearTag">900</span>
+        <input type="range" id="slider" min="0" max="8" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="map-svg" viewBox="0 0 640 482" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="0" width="640" height="482" fill="var(--tile-sea)"/>
+
+        <g id="context">
+          <path class="context-line" d="M-86.6,-204.5 L-99.4,-174.9 L-105.1,-150.6 L-107.5,-105.5 L-110.7,-89.1 L-105.0,-70.7 L-94.8,-54.3 L-88.3,-28.1 L-66.5,-3.1 L-58.8,16.2 L-46.0,32.7 L-11.1,41.7 L2.4,55.8 L31.2,46.4 L56.3,43.0 L80.8,36.9 L101.5,31.1 L122.4,17.4 L130.2,-2.3 L132.9,-30.6 L138.5,-40.4 L160.8,-49.2 L195.5,-57.0 L224.5,-55.9 L244.5,-58.7 L252.3,-51.6 L251.2,-35.4 L233.6,-15.3 L225.8,5.2 L231.8,11.0 L226.9,25.6 L218.7,51.9 L210.4,43.2 L203.5,43.8 L197.2,44.2 L185.5,64.6 L179.5,60.6 L175.6,62.1 L175.8,67.1 L145.5,66.7 L114.8,66.8 L114.8,85.7 L100.0,85.8 L112.2,97.1 L124.3,104.8 L128.0,112.1 L133.3,114.2 L132.4,125.7 L90.3,125.8 L74.5,153.2 L79.2,159.5 L75.4,167.4 L74.6,177.2 L37.4,141.0 L20.5,130.0 L-6.3,121.2 L-24.6,123.7 L-51.0,136.3 L-67.5,139.7 L-90.7,130.8 L-115.3,124.4 L-146.0,108.9 L-170.6,104.2 L-207.7,88.6 L-235.2,72.5 L-243.5,63.5 L-261.8,61.4 L-295.4,50.8 L-309.1,35.4 L-344.4,16.3 L-360.8,-4.9 L-368.6,-21.4 L-357.7,-24.6 L-361.0,-34.3 L-353.5,-43.0 L-353.3,-54.6 L-364.4,-69.8 L-367.4,-83.2 L-378.4,-100.2 L-407.3,-133.6 L-440.3,-160.0 L-456.3,-181.0 L-484.4,-194.7 L-490.5,-202.9 L-485.5,-223.8 L-502.2,-231.6 L-521.6,-248.0 L-529.8,-271.5 L-547.4,-274.2 L-566.5,-292.0 L-581.8,-308.4 L-583.3,-318.9 L-600.9,-344.3 L-612.6,-370.1 L-612.1,-383.0 L-635.8,-396.4 L-646.8,-394.9 L-665.5,-404.2 L-670.7,-390.5 L-665.3,-374.3 L-662.1,-349.1 L-650.9,-335.2 L-626.5,-312.0 L-621.1,-304.0 L-616.1,-301.6 L-611.8,-290.1 L-605.9,-290.5 L-599.4,-268.8 L-589.4,-260.2 L-582.4,-248.3 L-561.8,-231.2 L-550.9,-199.8 L-541.1,-185.1 L-532.0,-169.3 L-530.2,-151.5 L-514.4,-150.4 L-501.2,-135.1 L-489.3,-120.1 L-490.1,-114.0 L-503.9,-101.7 L-509.7,-101.8 L-518.4,-122.3 L-539.9,-141.5 L-563.5,-157.8 L-580.3,-166.3 L-579.2,-191.0 L-584.2,-209.2 L-599.9,-219.7 L-622.4,-234.7 L-626.8,-230.4 L-635.0,-239.2 L-655.3,-247.3 L-674.6,-266.9 L-672.2,-269.4 L-658.7,-267.5 L-646.5,-280.1 L-645.3,-295.3 L-670.6,-319.3 L-689.8,-328.6 L-701.9,-349.7 L-714.1,-371.8 L-729.3,-398.7 L-742.7,-429.0 L-705.4,-431.6 L-663.7,-435.2 L-666.7,-428.6 L-617.2,-412.3 L-542.3,-388.5 L-477.0,-388.8 L-451.0,-388.8 L-451.0,-402.7 L-394.1,-402.7 L-382.1,-390.7 L-365.3,-380.1 L-345.8,-365.3 L-335.0,-347.7 L-326.8,-329.2 L-309.8,-319.0 L-282.6,-308.9 L-261.9,-335.5 L-235.1,-336.1 L-211.9,-322.7 L-195.5,-299.7 L-184.1,-279.9 L-164.8,-260.7 L-157.5,-237.1 L-148.3,-221.3 L-122.7,-210.9 L-99.4,-203.5 L-86.6,-204.5 Z"/>
+          <path class="context-line" d="M627.8,672.1 L613.7,664.1 L597.6,652.9 L588.3,658.3 L560.4,653.6 L552.4,639.1 L546.3,639.7 L513.5,620.4 L509.0,610.0 L521.3,607.4 L519.8,590.6 L527.5,578.4 L543.8,576.1 L557.6,554.9 L570.2,537.3 L558.1,529.3 L564.3,509.7 L556.9,478.9 L563.9,470.0 L558.7,441.6 L545.4,423.6 L549.6,407.2 L560.2,409.7 L566.4,399.6 L558.8,379.8 L562.8,374.9 L579.7,376.0 L604.3,352.4 L617.9,348.9 L618.2,337.7 L624.2,309.3 L643.1,293.6 L663.7,293.0 L666.3,286.0 L692.0,288.8 L717.9,271.8 L730.6,264.2 L746.5,248.0 L758.2,250.1 L766.8,258.9 L760.4,270.3 L739.3,275.9 L731.0,292.8 L718.3,302.4 L708.7,314.9 L704.7,339.0 L695.6,358.7 L712.6,360.9 L716.8,376.4 L724.0,383.8 L726.6,397.4 L722.7,409.8 L723.9,416.9 L732.0,419.7 L739.8,431.4 L782.0,428.2 L801.0,432.5 L824.1,461.5 L837.4,457.9 L861.0,459.7 L879.8,455.8 L891.4,461.6 L885.4,479.8 L878.1,491.1 L875.6,515.2 L882.2,537.6 L891.5,547.6 L892.6,555.2 L876.0,571.9 L887.9,579.4 L896.6,591.1 L906.6,624.7 L900.4,628.9 L894.0,609.0 L884.9,598.3 L874.1,609.9 L810.1,609.2 L810.5,630.3 L829.7,633.7 L828.6,646.6 L822.1,643.2 L803.6,648.7 L803.4,673.2 L818.0,685.5 L823.1,704.8 L822.3,719.4 L807.6,811.7 L791.2,793.8 L781.4,793.0 L802.5,758.7 L777.4,743.0 L757.7,745.9 L745.9,740.0 L727.8,748.9 L703.3,744.7 L684.0,709.4 L668.8,700.7 L658.3,684.8 L636.5,668.9 L627.8,672.1 Z"/>
+          <text class="context-label" x="70" y="28">MEXICO</text>
+          <text class="context-label" x="560" y="465">COLOMBIA</text>
+        </g>
+
+        <path id="f-gt" class="region-fill" d="M144.6,204.3 L127.7,198.4 L107.2,197.8 L92.2,191.1 L74.6,177.2 L75.4,167.4 L79.2,159.5 L74.5,153.2 L90.3,125.8 L132.4,125.7 L133.3,114.2 L128.0,112.1 L124.3,104.8 L112.2,97.1 L100.0,85.8 L114.8,85.7 L114.8,66.8 L145.5,66.7 L175.8,67.1 L175.6,93.8 L173.0,131.8 L182.8,131.8 L193.5,137.9 L196.3,132.9 L205.9,137.2 L191.0,150.0 L175.4,159.4 L173.1,165.9 L175.7,172.5 L168.9,181.1 L161.2,183.2 L163.0,187.1 L156.8,190.8 L145.6,199.3 L144.6,204.3 Z"/>
+        <path id="f-bz" class="region-fill" d="M175.8,67.1 L175.6,62.1 L179.5,60.6 L185.5,64.6 L197.2,44.2 L203.5,43.8 L203.6,48.7 L209.8,48.9 L209.3,58.0 L204.0,72.6 L206.8,77.8 L203.4,89.9 L205.5,93.1 L201.7,110.1 L195.2,119.1 L189.3,120.1 L182.8,131.8 L173.0,131.8 L175.6,93.8 L175.8,67.1 Z"/>
+        <path id="f-hn" class="region-fill" d="M235.8,229.6 L230.1,219.0 L220.1,216.1 L222.4,202.6 L217.9,199.0 L211.2,196.6 L196.8,200.6 L195.6,196.0 L185.7,190.6 L178.6,183.9 L168.9,181.1 L175.7,172.5 L173.1,165.9 L175.4,159.4 L191.0,150.0 L205.9,137.2 L209.4,138.5 L216.6,132.6 L225.9,132.1 L229.0,134.8 L234.1,133.2 L249.3,136.2 L264.5,135.3 L275.1,131.6 L278.9,127.8 L289.4,129.6 L297.2,131.8 L305.8,131.1 L312.3,128.1 L327.3,132.8 L332.5,133.6 L342.5,139.8 L352.0,147.4 L364.0,152.6 L372.6,161.8 L361.4,161.1 L356.8,165.7 L345.4,170.1 L337.1,170.1 L329.9,174.4 L323.3,172.9 L317.7,167.8 L314.3,168.7 L310.1,176.8 L306.9,176.5 L306.4,183.4 L294.9,192.7 L288.9,196.7 L285.5,200.9 L275.8,194.1 L268.7,203.1 L261.9,202.8 L254.2,203.6 L254.9,220.2 L250.1,220.5 L246.0,228.2 L235.8,229.6 Z"/>
+        <path id="f-sv" class="region-fill" d="M220.1,216.1 L216.5,224.0 L197.5,223.5 L185.7,220.3 L172.1,213.6 L153.8,211.5 L144.6,204.3 L145.6,199.3 L156.8,190.8 L163.0,187.1 L161.2,183.2 L168.9,181.1 L178.6,183.9 L185.7,190.6 L195.6,196.0 L196.8,200.6 L211.2,196.6 L217.9,199.0 L222.4,202.6 L220.1,216.1 Z"/>
+        <path id="f-ni" class="region-fill" d="M288.4,293.4 L277.1,282.8 L261.7,269.2 L254.5,257.9 L240.7,247.3 L224.2,232.1 L227.9,226.9 L233.3,231.9 L235.8,229.6 L246.0,228.2 L250.1,220.5 L254.9,220.2 L254.2,203.6 L261.9,202.8 L268.7,203.1 L275.8,194.1 L285.5,200.9 L288.9,196.7 L294.9,192.7 L306.4,183.4 L306.9,176.5 L310.1,176.8 L314.3,168.7 L317.7,167.8 L323.3,172.9 L329.9,174.4 L337.1,170.1 L345.4,170.1 L356.8,165.7 L361.4,161.1 L372.6,161.8 L369.8,165.1 L368.1,172.6 L371.5,184.9 L363.9,196.4 L360.4,209.9 L359.3,224.8 L361.1,233.5 L361.9,248.6 L356.9,251.9 L353.8,266.3 L356.1,275.2 L349.4,283.8 L350.9,292.9 L355.9,298.5 L348.1,305.6 L338.4,303.4 L332.9,296.4 L322.5,293.6 L315.0,298.0 L293.4,289.1 L288.4,293.4 Z"/>
+        <path id="f-cr" class="region-fill" d="M378.6,389.9 L360.7,382.4 L354.1,375.3 L357.9,369.5 L356.7,362.1 L347.6,354.0 L334.7,347.4 L323.4,343.1 L321.2,333.2 L312.6,327.2 L314.7,337.0 L308.2,345.0 L300.7,335.7 L290.1,332.3 L285.6,325.6 L285.8,315.3 L290.2,304.7 L280.9,299.9 L288.4,293.4 L293.4,289.1 L315.0,298.0 L322.5,293.6 L332.9,296.4 L338.4,303.4 L348.1,305.6 L355.9,298.5 L364.2,316.8 L376.9,330.3 L392.3,344.7 L379.6,347.7 L379.8,361.3 L386.7,366.3 L381.7,370.3 L383.0,376.4 L380.3,383.2 L378.6,389.9 Z"/>
+        <path id="f-pa" class="region-fill" d="M545.4,423.6 L534.5,413.9 L527.5,395.7 L535.6,386.7 L527.2,384.4 L521.1,373.3 L504.8,363.9 L490.4,366.1 L483.8,377.8 L470.5,386.2 L463.3,387.4 L460.1,394.4 L475.8,412.7 L466.8,417.0 L462.1,422.0 L446.8,423.7 L441.1,403.6 L436.9,409.3 L426.0,407.4 L419.4,393.8 L405.9,391.6 L397.4,387.6 L383.3,387.7 L382.3,395.0 L378.6,389.9 L380.3,383.2 L383.0,376.4 L381.7,370.3 L386.7,366.3 L379.8,361.3 L379.6,347.7 L392.3,344.7 L404.1,356.8 L403.4,363.9 L416.5,365.4 L419.6,362.7 L428.7,371.0 L444.8,368.6 L458.8,360.0 L478.7,353.3 L489.9,343.2 L508.0,345.2 L506.8,348.5 L525.1,349.6 L539.7,355.4 L550.4,365.6 L562.8,374.9 L558.8,379.8 L566.4,399.6 L560.2,409.7 L549.6,407.2 L545.4,423.6 Z"/>
+
+        <g id="borders" stroke-width="1">
+          <path class="border-line" id="b-gt-bz" d="M175.8,67.1 L175.6,93.8 L173.0,131.8 L182.8,131.8"/>
+          <path class="border-line" id="b-gt-hn" d="M205.9,137.2 L191.0,150.0 L175.4,159.4 L173.1,165.9 L175.7,172.5 L168.9,181.1"/>
+          <path class="border-line" id="b-gt-sv" d="M168.9,181.1 L161.2,183.2 L163.0,187.1 L156.8,190.8 L145.6,199.3 L144.6,204.3"/>
+          <path class="border-line" id="b-hn-sv" d="M220.1,216.1 L222.4,202.6 L217.9,199.0 L211.2,196.6 L196.8,200.6 L195.6,196.0 L185.7,190.6 L178.6,183.9 L168.9,181.1"/>
+          <path class="border-line" id="b-hn-ni" d="M372.6,161.8 L361.4,161.1 L356.8,165.7 L345.4,170.1 L337.1,170.1 L329.9,174.4 L323.3,172.9 L317.7,167.8 L314.3,168.7 L310.1,176.8 L306.9,176.5 L306.4,183.4 L294.9,192.7 L288.9,196.7 L285.5,200.9 L275.8,194.1 L268.7,203.1 L261.9,202.8 L254.2,203.6 L254.9,220.2 L250.1,220.5 L246.0,228.2 L235.8,229.6"/>
+          <path class="border-line" id="b-ni-cr" d="M355.9,298.5 L348.1,305.6 L338.4,303.4 L332.9,296.4 L322.5,293.6 L315.0,298.0 L293.4,289.1 L288.4,293.4"/>
+          <path class="border-line" id="b-cr-pa" d="M392.3,344.7 L379.6,347.7 L379.8,361.3 L386.7,366.3 L381.7,370.3 L383.0,376.4 L380.3,383.2 L378.6,389.9"/>
+        </g>
+
+        <g id="labels"></g>
+      </svg>
+
+      <div class="era-head">
+        <div class="era-name-inline" id="eraName"></div>
+        <div class="era-owners" id="eraOwners"></div>
+      </div>
+      <div class="flags-row" id="flagsRow"></div>
+      <p class="era-story" id="eraStory"></p>
+
+      <p class="map-note">Real traced coastlines and borders (simplified). Mexico and Colombia are shown only as faint dashed context, never as full participants in the color-and-border logic above.</p>
+      <div class="map-key" id="legend"></div>
+      <div class="map-notes">
+        <b>Try:</b> jump straight to 1823 and watch Guatemala, Honduras, El Salvador, Nicaragua, and Costa Rica melt into one solid color with every internal line dissolved &mdash; the Federal Republic of Central America &mdash; while Panama, still part of Gran Colombia, and Belize, still a British settlement, stay their own separate colors the entire time. Then step to 1841 and watch all five lines snap back solid at once as the federation collapses into five separate republics. Panama and Belize barely change at that step &mdash; they were never part of the union to begin with.
+      </div>
+    </div>
+
+    <div class="subview">
+      <h3>The same story, as a timeline</h3>
+      <p class="sub-desc">Maps are bad at showing <em>when</em>; timelines are bad at showing <em>where</em>. This uses real transition years instead of the nine arbitrary snapshots above &mdash; one horizontal band per region, colored the same way as the map, so you can trace exactly how long each era actually lasted and compare regions directly. Watch Panama's row: it never touches the federal-blue color that fills five other rows from 1823 to 1841.</p>
+      <div class="viz-frame">
+        <div id="gantt"></div>
+        <div class="gantt-axis" id="gantt-axis"></div>
+      </div>
+    </div>
+
+    <div class="subview">
+      <h3>The same story, nine frames &mdash; only the change lights up</h3>
+      <p class="sub-desc">Every region keeps its true color, but anything unchanged from the previous frame fades to low opacity; only the region(s) that actually changed hands stay bold with a solid outline. A caption under each frame spells out exactly what flipped. No slider to operate &mdash; scan left to right, top to bottom, and watch the map redraw itself like a flipbook.</p>
+      <div class="viz-frame">
+        <div class="grid-3x3" id="grid9"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="about">
+    <h2>About this atlas</h2>
+    <p>This started as a family history project: tracing the flags that flew over the lands our ancestors came from, close enough to paint accurately &mdash; correct colors, correct proportions, correct dates. Central America is Phase 9: seven countries on one narrow isthmus, two coasts, and a genuinely clean, well-documented story &mdash; a real federal union that formed and broke apart in under two decades, and two countries (Belize, Panama) that never joined the other five's story at all.</p>
+    <p>Every future country page will carry its own timeline of flags with paint-ready color specs and a per-era location map. Colors here are close historical approximations; the pre-Columbian era predates any state flags entirely, and the two chips shown for 900 CE are labeled as undocumented placeholders, not real flags. The regional map above simplifies eleven centuries of messy, overlapping, disputed control into nine snapshots &mdash; useful for orientation, not a substitute for the detail each country's own page will eventually carry.</p>
+  </div>
+
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This hub is one region in a larger set. See the other phases here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="caucasus-hub.html"><b>Caucasus hub</b><span>Georgia, Armenia, Azerbaijan</span></a>
+      <a class="link-card" href="yugoslavia-hub.html"><b>Former Yugoslavia hub</b><span>Nine centuries, ten countries</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Map is schematic and not surveyed. Coastlines traced from public-domain GeoJSON country boundary data.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var C = {
+    maya:"#9c7c3c", chibchan:"#5c8a6b", spain:"#c9302a", unconquered_bz:"#2f8f5b", unpacified_cr:"#b58a3c",
+    panama_tf:"#7c3a5c", capt_gt:"#8a2f2f", panama_peru:"#6a3f8f", brit_settle:"#3a7a6b",
+    mex_empire:"#0b7a3d", gc_panama:"#d4a017", fed_rep:"#2447c4", col_panama:"#e0b31e", brit_honduras:"#1e2f96",
+    ind_gt:"#4a9d6f", ind_hn:"#2f7a52", ind_sv:"#5c8f3f", ind_ni:"#3fa88a", ind_cr:"#8a9e5f", ind_pa:"#c9603c", ind_bz:"#1e2f96"
+  };
+  var NAMES = {
+    maya:"Maya polities (no flag documented)", chibchan:"Chibchan-speaking cacicazgos (no flag documented)",
+    spain:"Spanish Empire", unconquered_bz:"Unconquered Maya (future Belize)", unpacified_cr:"Unpacified — nominal Spanish claim",
+    panama_tf:"Spain — Castilla del Oro / Tierra Firme", capt_gt:"Captaincy General of Guatemala",
+    panama_peru:"Spain — Audiencia of Panama (Peru/New Granada)", brit_settle:"British settlement (Belize)",
+    mex_empire:"First Mexican Empire", gc_panama:"Gran Colombia", fed_rep:"Federal Republic of Central America",
+    col_panama:"Republic of Colombia", brit_honduras:"British Honduras",
+    ind_gt:"Guatemala", ind_hn:"Honduras", ind_sv:"El Salvador", ind_ni:"Nicaragua", ind_cr:"Costa Rica", ind_pa:"Panama", ind_bz:"Belize"
+  };
+  var legendEl = document.getElementById("legend");
+  legendEl.innerHTML = Object.keys(C).map(function (k) {
+    return '<span><span class="sw" style="background:' + C[k] + '"></span>' + NAMES[k] + "</span>";
+  }).join("");
+
+  // ---- Real flag graphics, one per distinct historical power (not per map color) ----
+  var FLAGS = {
+    maya: '<rect width="300" height="200" fill="#e9dfc4"/><text x="150" y="120" font-size="70" text-anchor="middle" fill="#8a6a2f" font-family="serif">&#9642;</text><text x="150" y="175" font-size="12" text-anchor="middle" fill="#6e6047" font-family="monospace">NO FLAG DOCUMENTED</text>',
+    chibchan: '<rect width="300" height="200" fill="#e2ecd8"/><circle cx="150" cy="95" r="34" fill="none" stroke="#5c7a4f" stroke-width="5"/><circle cx="150" cy="95" r="14" fill="#5c7a4f"/><text x="150" y="175" font-size="12" text-anchor="middle" fill="#4a5a3f" font-family="monospace">NO FLAG DOCUMENTED</text>',
+    cross_burgundy: '<rect width="300" height="200" fill="#f4efe1"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#c9302a" stroke-width="34"/>',
+    union_jack: '<rect width="300" height="200" fill="#1e2f96"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#f4efe1" stroke-width="26"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#a4302a" stroke-width="12"/><rect x="125" width="50" height="200" fill="#f4efe1"/><rect y="75" width="300" height="50" fill="#f4efe1"/><rect x="135" width="30" height="200" fill="#a4302a"/><rect y="85" width="300" height="30" fill="#a4302a"/>',
+    mex_empire: '<rect width="100" height="200" fill="#0b7a3d"/><rect x="100" width="100" height="200" fill="#f4efe1"/><rect x="200" width="100" height="200" fill="#c9302a"/><circle cx="150" cy="100" r="20" fill="#c9a13c" stroke="#8a6a1f" stroke-width="2"/>',
+    gc_panama: '<rect width="300" height="100" fill="#f9d616"/><rect y="100" width="300" height="50" fill="#1e2f96"/><rect y="150" width="300" height="50" fill="#c9302a"/>',
+    fed_rep_ca: '<rect width="300" height="66.7" fill="#2447c4"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#2447c4"/><path d="M110,120 L140,80 L160,80 L190,120 Z" fill="#3fa88a" stroke="#241f14" stroke-width="1.5"/><circle cx="150" cy="75" r="10" fill="#f9d616" stroke="#8a6a1f" stroke-width="1.5"/>',
+    col_tricolor: '<rect width="300" height="100" fill="#fcd116"/><rect y="100" width="300" height="50" fill="#003893"/><rect y="150" width="300" height="50" fill="#ce1126"/>',
+    gt_modern: '<rect width="100" height="200" fill="#4997d0"/><rect x="100" width="100" height="200" fill="#f4efe1"/><rect x="200" width="100" height="200" fill="#4997d0"/><ellipse cx="150" cy="100" rx="26" ry="20" fill="none" stroke="#3f8f3f" stroke-width="3"/>',
+    hn_modern: '<rect width="300" height="66.7" fill="#0073cf"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#0073cf"/><g fill="#0073cf"><circle cx="110" cy="100" r="6"/><circle cx="135" cy="90" r="6"/><circle cx="150" cy="100" r="6"/><circle cx="165" cy="90" r="6"/><circle cx="190" cy="100" r="6"/></g>',
+    sv_modern: '<rect width="300" height="66.7" fill="#0047ab"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#0047ab"/><path d="M132,118 L150,84 L168,118 Z" fill="none" stroke="#8a6a1f" stroke-width="3"/>',
+    ni_modern: '<rect width="300" height="66.7" fill="#0067c6"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#0067c6"/><path d="M128,118 L150,86 L172,118 Z" fill="none" stroke="#8a6a1f" stroke-width="3"/><circle cx="150" cy="103" r="9" fill="#8a6a1f" opacity=".5"/>',
+    cr_early: '<rect width="300" height="66.7" fill="#002b7f"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#002b7f"/>',
+    cr_modern: '<rect width="300" height="40" fill="#002b7f"/><rect y="40" width="300" height="40" fill="#f4efe1"/><rect y="80" width="300" height="40" fill="#ce1126"/><rect y="120" width="300" height="40" fill="#f4efe1"/><rect y="160" width="300" height="40" fill="#002b7f"/>',
+    pa_modern: '<rect width="150" height="100" fill="#f4efe1"/><rect x="150" width="150" height="100" fill="#da121a"/><rect y="100" width="150" height="100" fill="#0033a0"/><rect x="150" y="100" width="150" height="100" fill="#f4efe1"/><path d="M75,32 l7,20 21,0 -17,14 6.5,20 -17.5,-13 -17.5,13 6.5,-20 -17,-14 21,0 Z" fill="#0033a0"/><path d="M225,132 l7,20 21,0 -17,14 6.5,20 -17.5,-13 -17.5,13 6.5,-20 -17,-14 21,0 Z" fill="#da121a"/>',
+    bz_modern: '<rect width="300" height="200" fill="#1e2f96"/><rect y="0" width="300" height="14" fill="#c9302a"/><rect y="186" width="300" height="14" fill="#c9302a"/><circle cx="150" cy="100" r="46" fill="#f4efe1"/><circle cx="150" cy="100" r="38" fill="#e9dfc4" stroke="#3f7a3f" stroke-width="3"/>'
+  };
+  function flagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (FLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+
+  var SNAP = [
+    { year:"900", name:"Maya decline, Chibchan south", t:{ gt:C.maya, bz:C.maya, hn:C.maya, sv:C.maya, ni:C.chibchan, cr:C.chibchan, pa:C.chibchan },
+      story: "By 900 CE the great lowland Maya cities of the Classic period &mdash; Tikal, in what's now Guatemala's Petén, foremost among them &mdash; are collapsing under drought, warfare, and dynastic exhaustion that had already emptied Copán, in western Honduras, of its royal court a generation earlier. Highland Guatemala, Belize's northern lowlands, and western Honduras and El Salvador had all lived under Maya city-state rule for centuries by this point, and Maya communities never actually disappear here &mdash; the political centers just fragment and shift north toward Yucatán. No state in this region flew anything resembling a flag; the placeholder swatches below are honest about that. To the south, Nicaragua, Costa Rica, and Panama had a genuinely different story: smaller, less centralized societies, many speaking Chibchan languages with cultural and trade ties running south toward Colombia rather than north toward Mexico &mdash; the goldworking cacicazgos later Spanish chroniclers found in central Panama, for instance, were part of this same southern, non-Maya world." },
+    { year:"1524", name:"Spanish conquest begins", t:{ gt:C.spain, bz:C.unconquered_bz, hn:C.spain, sv:C.spain, ni:C.spain, cr:C.unpacified_cr, pa:C.panama_tf },
+      story: "Pedro de Alvarado, a lieutenant of Hernán Cortés, marched south from conquered Mexico into the Guatemalan highlands in 1523&ndash;24, defeating the K'iche' Maya and founding the first Spanish capital near Iximché; the same campaign pushed into Pipil-speaking Cuzcatlán (El Salvador) later in 1524, though real Pipil resistance continued for years. Cristóbal de Olid landed on the Honduran coast in 1524 on Cortés's orders, and that same year Francisco Hernández de Córdoba founded León and Granada in Nicaragua, giving Spain nominal control of the region's western, population-dense corridor within a single remarkable year. Costa Rica, poorer, more rugged, and more thinly populated, is claimed on paper but not effectively conquered for decades yet. Panama is the outlier on a different clock entirely: Vasco Núñez de Balboa had already crossed the isthmus to the Pacific in 1513, and Panama City, founded in 1519, was already a functioning Spanish base for further conquests of Peru &mdash; administered as Castilla del Oro, on its own track, never part of the Guatemala story. Belize is the other outlier: the Maya communities there were never conquered by this wave at all, and stayed effectively outside Spanish control." },
+    { year:"1609", name:"Captaincy General of Guatemala", t:{ gt:C.capt_gt, bz:C.unconquered_bz, hn:C.capt_gt, sv:C.capt_gt, ni:C.capt_gt, cr:C.capt_gt, pa:C.panama_peru },
+      story: "By 1609 the Real Audiencia established at Santiago de Guatemala (modern Antigua) had been elevated into the Captaincy General of Guatemala, consolidating Spanish administration over Guatemala, Honduras, El Salvador, Nicaragua, and Costa Rica into one colonial unit under the distant authority of the Viceroyalty of New Spain in Mexico City. Costa Rica's effective conquest had only really stabilized around the 1560s, with the founding of Cartago, but by 1609 it sits inside the same administrative box as the rest. Panama, notably, is not part of this picture at all: its Audiencia answered instead to the Viceroyalty of Peru's orbit (and later New Granada), a genuinely separate colonial lineage that the map keeps visually distinct here. Belize remains outside Spanish rule altogether &mdash; the English logwood cutters who would eventually settle its coast are still a generation away, arriving from the 1630s on, but the territory was never brought under Spanish administration either before or after their arrival." },
+    { year:"1821", name:"Independence from Spain", t:{ gt:C.mex_empire, bz:C.brit_settle, hn:C.mex_empire, sv:C.mex_empire, ni:C.mex_empire, cr:C.mex_empire, pa:C.gc_panama },
+      story: "Central America declared independence from Spain on 15 September 1821, part of the same wave that had just carried Mexico to its own independence weeks earlier. Rather than standing alone, the former Captaincy General voted to join the newly proclaimed First Mexican Empire under Agustín de Iturbide &mdash; a union imposed as much as chosen, and one that would not last two years. Panama's independence, declared that same November, took a completely different path: it joined Simón Bolívar's Gran Colombia, the vast republic uniting the old Viceroyalty of New Granada, never Mexico and never the Central American union to come. Belize in 1821 remains what it had been for generations &mdash; a British logwood- and mahogany-cutting settlement, tolerated rather than formally annexed, with no independence of its own to declare." },
+    { year:"1823", name:"Federal Republic of Central America", t:{ gt:C.fed_rep, bz:C.brit_settle, hn:C.fed_rep, sv:C.fed_rep, ni:C.fed_rep, cr:C.fed_rep, pa:C.gc_panama },
+      story: "Iturbide's Mexican Empire collapsed in early 1823, and the five former Guatemalan-captaincy provinces seized the chance to go their own way: on 1 July 1823 they declared themselves the Federal Republic of Central America, later formalizing a constitution in 1824 modeled partly on the United States'. Guatemala City served as the federal capital; General Francisco Morazán, a Honduran liberal, would become its most consequential president from 1830. It's a real, if short-lived, union &mdash; exactly the kind of story this atlas's dissolve-and-merge map is built to show, with five countries' worth of borders vanishing into one federal color. Panama, still part of Gran Colombia the whole time, and Belize, still a British settlement, sit entirely outside this story; the federation was always a five-state affair, never seven." },
+    { year:"1841", name:"Federation dissolves — five republics", t:{ gt:C.ind_gt, bz:C.brit_honduras, hn:C.ind_hn, sv:C.ind_sv, ni:C.ind_ni, cr:C.ind_cr, pa:C.col_panama },
+      story: "The federation's liberal reforms provoked conservative revolts through the 1830s; Costa Rica's 1838 withdrawal was effectively the beginning of the end, and Morazán's final defeat in 1840 (he was executed in 1842 after a failed attempt to reunite the isthmus from exile in Costa Rica) closed the book on the union for good. By 1841 all five &mdash; Guatemala, Honduras, El Salvador, Nicaragua, Costa Rica &mdash; are functioning as fully separate republics, each keeping a version of the old federal flag's blue-white-blue bands as its own new national colors. Panama, meanwhile, had stayed with Bogotá through Gran Colombia's own 1830&ndash;31 breakup, remaining part of the Republic of Colombia rather than joining any Central American arrangement. Belize is administered as a de facto British possession throughout this period, though Britain would not formally proclaim it the colony of British Honduras until 1862 &mdash; a distinction worth keeping honest even as the map, working in decade-scale snapshots, shows it in British colors already." },
+    { year:"1903", name:"Panama's independence", t:{ gt:C.ind_gt, bz:C.brit_honduras, hn:C.ind_hn, sv:C.ind_sv, ni:C.ind_ni, cr:C.ind_cr, pa:C.ind_pa },
+      story: "The five ex-federal republics spend the six decades after 1841 as fully separate states &mdash; occasionally warring with each other, occasionally scheming to reunite, never quite managing either for long. Panama's break comes from a different direction entirely: when Colombia's senate rejected a treaty granting the United States rights to build a canal across the isthmus, Panamanian separatists declared independence on 3 November 1903 with unmistakable US naval backing, and Washington recognized the new republic within days. The Panama Canal, finished in 1914, made the new country strategically indispensable and left it under heavy US influence for decades. Belize, still British Honduras, remains the one holdout: a colony, not yet a republic of its own." },
+    { year:"1981", name:"Belize independence — all seven sovereign", t:{ gt:C.ind_gt, bz:C.ind_bz, hn:C.ind_hn, sv:C.ind_sv, ni:C.ind_ni, cr:C.ind_cr, pa:C.ind_pa },
+      story: "Belize's road to independence was slowed for decades by Guatemala's own long-standing territorial claim to the whole territory, a dispute that made Britain wary of simply walking away. A 1981 agreement finally cleared the path, and Belize became fully independent on 21 September 1981 &mdash; the last of these seven countries to reach sovereignty, just over a century and a half after the first five went their separate ways. British troops remained stationed in Belize for years afterward as a deterrent against the still-unresolved Guatemalan claim. For the first time in this map's eleven centuries, all seven isthmus states are simultaneously independent and answering to no outside power." },
+    { year:"2024", name:"Independent states, today", t:{ gt:C.ind_gt, bz:C.ind_bz, hn:C.ind_hn, sv:C.ind_sv, ni:C.ind_ni, cr:C.ind_cr, pa:C.ind_pa },
+      story: "No borders on this map have moved since 1981; what changed after was almost entirely internal. Nicaragua's 1979 Sandinista revolution and the US-backed Contra war that followed it, El Salvador's 1979&ndash;92 civil war, and Guatemala's own decades-long internal conflict (1960&ndash;96, including genocidal violence against Maya communities in the early 1980s) are real, well-documented, and genuinely traumatic chapters that the map's borders can't show, because none of them changed who controlled which territory. Peace accords across the region through the 1990s (Guatemala's signed in 1996) ended the fighting without redrawing a single line on this map. Costa Rica, by contrast, abolished its own army in 1948 and has stayed the region's most stable democracy since; Panama operated under US control of the Canal Zone until the treaties took full effect in 1999. Seven flags fly today where, a thousand years ago, none flew at all." }
+  ];
+
+  var FLAG_SETS = {
+    "900": [["maya","Maya polities (no flag)"],["chibchan","Chibchan cacicazgos (no flag)"]],
+    "1524": [["cross_burgundy","Spain (conquest under way)"],["maya","Unconquered Maya (Belize)"],["chibchan","Costa Rica (unpacified)"]],
+    "1609": [["cross_burgundy","Spain (Capt. Gen. of Guatemala / Panama–Peru)"],["maya","Unconquered / contested (Belize)"]],
+    "1821": [["mex_empire","First Mexican Empire"],["gc_panama","Gran Colombia (Panama)"],["union_jack","British settlement (Belize)"]],
+    "1823": [["fed_rep_ca","Federal Republic of Central America"],["gc_panama","Gran Colombia (Panama)"],["union_jack","British settlement (Belize)"]],
+    "1841": [["gt_modern","Guatemala"],["hn_modern","Honduras"],["sv_modern","El Salvador"],["ni_modern","Nicaragua"],["cr_early","Costa Rica (pre-1848 flag)"],["col_tricolor","Colombia (Panama)"],["union_jack","British Honduras"]],
+    "1903": [["gt_modern","Guatemala"],["hn_modern","Honduras"],["sv_modern","El Salvador"],["ni_modern","Nicaragua"],["cr_modern","Costa Rica"],["pa_modern","Panama"],["union_jack","British Honduras"]],
+    "1981": [["gt_modern","Guatemala"],["hn_modern","Honduras"],["sv_modern","El Salvador"],["ni_modern","Nicaragua"],["cr_modern","Costa Rica"],["pa_modern","Panama"],["bz_modern","Belize"]],
+    "2024": [["gt_modern","Guatemala"],["hn_modern","Honduras"],["sv_modern","El Salvador"],["ni_modern","Nicaragua"],["cr_modern","Costa Rica"],["pa_modern","Panama"],["bz_modern","Belize"]]
+  };
+
+  var REGIONS = ["gt","bz","hn","sv","ni","cr","pa"];
+  var REGION_NAMES = { gt:"Guatemala", bz:"Belize", hn:"Honduras", sv:"El Salvador", ni:"Nicaragua", cr:"Costa Rica", pa:"Panama" };
+  var REGION_ABBR = { gt:"GTM", bz:"BLZ", hn:"HND", sv:"SLV", ni:"NIC", cr:"CRI", pa:"PAN" };
+  var REGION_POS = { gt:[135.6,138.1], bz:[190.2,87.7], hn:[259.6,167.6], sv:[184.7,204.6], ni:[311.1,234.2], cr:[338.9,331.3], pa:[472.3,379.6] };
+  var ADJ = [["gt","bz"],["gt","hn"],["gt","sv"],["hn","sv"],["hn","ni"],["ni","cr"],["cr","pa"]];
+
+  function textColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+  function ownerName(hex) {
+    for (var k in C) { if (C[k] === hex) return NAMES[k]; }
+    return hex;
+  }
+
+  function groupsFor(t) {
+    var parent = {};
+    REGIONS.forEach(function (r) { parent[r] = r; });
+    function find(x) { return parent[x] === x ? x : (parent[x] = find(parent[x])); }
+    function union(a, b) { var ra = find(a), rb = find(b); if (ra !== rb) parent[ra] = rb; }
+    ADJ.forEach(function (pair) {
+      if (t[pair[0]] === t[pair[1]]) union(pair[0], pair[1]);
+    });
+    var groups = {};
+    REGIONS.forEach(function (r) {
+      var root = find(r);
+      if (!groups[root]) groups[root] = [];
+      groups[root].push(r);
+    });
+    return Object.keys(groups).map(function (k) { return groups[k]; });
+  }
+
+  var svgNS = "http://www.w3.org/2000/svg";
+  var labelsEl = document.getElementById("labels");
+  var yearTag = document.getElementById("yearTag");
+  var eraName = document.getElementById("eraName");
+  var eraOwners = document.getElementById("eraOwners");
+  var eraStory = document.getElementById("eraStory");
+  var flagsRow = document.getElementById("flagsRow");
+  var sliderEl = document.getElementById("slider");
+
+  function render(i) {
+    var era = SNAP[i];
+    yearTag.textContent = era.year;
+    eraName.textContent = era.name;
+    eraStory.innerHTML = era.story || "";
+    flagsRow.innerHTML = (FLAG_SETS[era.year] || []).map(function (f) {
+      return '<div class="flag-chip">' + flagSvg(f[0]) + '<div class="fc-label">' + f[1] + '</div></div>';
+    }).join("");
+
+    REGIONS.forEach(function (id) {
+      var el = document.getElementById("f-" + id);
+      el.setAttribute("fill", era.t[id]);
+    });
+
+    ADJ.forEach(function (pair) {
+      var same = era.t[pair[0]] === era.t[pair[1]];
+      var line = document.getElementById("b-" + pair[0] + "-" + pair[1]);
+      line.setAttribute("stroke-opacity", same ? "0.06" : "0.85");
+      line.setAttribute("stroke-width", same ? "1" : "2.6");
+    });
+
+    var groups = groupsFor(era.t);
+    var seenOwners = {};
+    var ownerParts = [];
+    groups.forEach(function (g) {
+      var label = ownerName(era.t[g[0]]);
+      if (!seenOwners[label]) { seenOwners[label] = []; ownerParts.push(label); }
+      g.forEach(function (id) { seenOwners[label].push(REGION_NAMES[id]); });
+    });
+    eraOwners.innerHTML = ownerParts.map(function (label) {
+      return "<b>" + label + "</b>: " + seenOwners[label].join(", ");
+    }).join(" &middot; ");
+
+    labelsEl.innerHTML = "";
+    function haloFor(txtColor) { return txtColor === "#201a12" ? "#f7f1e3" : "#201a12"; }
+    groups.forEach(function (g) {
+      var cx = g.reduce(function (s, id) { return s + REGION_POS[id][0]; }, 0) / g.length;
+      var cy = g.reduce(function (s, id) { return s + REGION_POS[id][1]; }, 0) / g.length;
+      var fillHex = era.t[g[0]];
+      var txtColor = textColorFor(fillHex);
+      var halo = haloFor(txtColor);
+
+      if (g.length > 1) {
+        var groupText = ownerName(fillHex).toUpperCase();
+        var gl = document.createElementNS(svgNS, "text");
+        gl.setAttribute("x", cx);
+        gl.setAttribute("y", cy);
+        gl.setAttribute("class", "group-label");
+        gl.setAttribute("font-size", groupText.length > 16 ? "11" : "14");
+        gl.setAttribute("fill", txtColor);
+        gl.setAttribute("stroke", halo);
+        gl.textContent = groupText;
+        labelsEl.appendChild(gl);
+        g.forEach(function (id) {
+          var pos = REGION_POS[id];
+          var sl = document.createElementNS(svgNS, "text");
+          sl.setAttribute("x", pos[0]);
+          sl.setAttribute("y", pos[1] + 14);
+          sl.setAttribute("class", "sub-label");
+          sl.setAttribute("font-size", "9.5");
+          sl.setAttribute("fill", txtColor);
+          sl.setAttribute("stroke", halo);
+          sl.setAttribute("opacity", "0.85");
+          sl.textContent = REGION_ABBR[id];
+          labelsEl.appendChild(sl);
+        });
+      } else {
+        var id = g[0];
+        var pos = REGION_POS[id];
+        var selfGoverning = Object.keys(C).some(function (k) { return k.indexOf("ind_") === 0 && C[k] === fillHex; });
+        var soloText = (selfGoverning ? REGION_NAMES[id] : ownerName(fillHex)).toUpperCase();
+        var sl2 = document.createElementNS(svgNS, "text");
+        sl2.setAttribute("x", pos[0]);
+        sl2.setAttribute("y", pos[1]);
+        sl2.setAttribute("class", "group-label");
+        sl2.setAttribute("font-size", selfGoverning ? "13" : (soloText.length > 16 ? "9" : "11.5"));
+        sl2.setAttribute("fill", txtColor);
+        sl2.setAttribute("stroke", halo);
+        sl2.textContent = soloText;
+        labelsEl.appendChild(sl2);
+        if (!selfGoverning) {
+          var subOnly = document.createElementNS(svgNS, "text");
+          subOnly.setAttribute("x", pos[0]);
+          subOnly.setAttribute("y", pos[1] + 14);
+          subOnly.setAttribute("class", "sub-label");
+          subOnly.setAttribute("font-size", "9.5");
+          subOnly.setAttribute("fill", txtColor);
+          subOnly.setAttribute("stroke", halo);
+          subOnly.setAttribute("opacity", "0.85");
+          subOnly.textContent = REGION_ABBR[id];
+          labelsEl.appendChild(subOnly);
+        }
+      }
+    });
+  }
+
+  sliderEl.addEventListener("input", function () { render(parseInt(sliderEl.value, 10)); });
+  render(0);
+
+  var playing = false, playTimer = null;
+  var playBtn = document.getElementById("playBtn");
+  function stepPlay() {
+    var next = parseInt(sliderEl.value, 10) + 1;
+    if (next > SNAP.length - 1) { stopPlay(); return; }
+    sliderEl.value = next;
+    render(next);
+  }
+  function startPlay() {
+    playing = true;
+    playBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(sliderEl.value, 10) >= SNAP.length - 1) { sliderEl.value = 0; render(0); }
+    playTimer = setInterval(stepPlay, 1700);
+  }
+  function stopPlay() {
+    playing = false;
+    playBtn.innerHTML = "&#9654;";
+    clearInterval(playTimer);
+  }
+  playBtn.addEventListener("click", function () { playing ? stopPlay() : startPlay(); });
+
+  // ---- Small multiples grid: same nine snapshots, diff-highlighted ----
+  var gridEl = document.getElementById("grid9");
+  var MINI_PATHS = {
+    gt: "M144.6,204.3 L127.7,198.4 L107.2,197.8 L92.2,191.1 L74.6,177.2 L75.4,167.4 L79.2,159.5 L74.5,153.2 L90.3,125.8 L132.4,125.7 L133.3,114.2 L128.0,112.1 L124.3,104.8 L112.2,97.1 L100.0,85.8 L114.8,85.7 L114.8,66.8 L145.5,66.7 L175.8,67.1 L175.6,93.8 L173.0,131.8 L182.8,131.8 L193.5,137.9 L196.3,132.9 L205.9,137.2 L191.0,150.0 L175.4,159.4 L173.1,165.9 L175.7,172.5 L168.9,181.1 L161.2,183.2 L163.0,187.1 L156.8,190.8 L145.6,199.3 L144.6,204.3 Z", bz: "M175.8,67.1 L175.6,62.1 L179.5,60.6 L185.5,64.6 L197.2,44.2 L203.5,43.8 L203.6,48.7 L209.8,48.9 L209.3,58.0 L204.0,72.6 L206.8,77.8 L203.4,89.9 L205.5,93.1 L201.7,110.1 L195.2,119.1 L189.3,120.1 L182.8,131.8 L173.0,131.8 L175.6,93.8 L175.8,67.1 Z", hn: "M235.8,229.6 L230.1,219.0 L220.1,216.1 L222.4,202.6 L217.9,199.0 L211.2,196.6 L196.8,200.6 L195.6,196.0 L185.7,190.6 L178.6,183.9 L168.9,181.1 L175.7,172.5 L173.1,165.9 L175.4,159.4 L191.0,150.0 L205.9,137.2 L209.4,138.5 L216.6,132.6 L225.9,132.1 L229.0,134.8 L234.1,133.2 L249.3,136.2 L264.5,135.3 L275.1,131.6 L278.9,127.8 L289.4,129.6 L297.2,131.8 L305.8,131.1 L312.3,128.1 L327.3,132.8 L332.5,133.6 L342.5,139.8 L352.0,147.4 L364.0,152.6 L372.6,161.8 L361.4,161.1 L356.8,165.7 L345.4,170.1 L337.1,170.1 L329.9,174.4 L323.3,172.9 L317.7,167.8 L314.3,168.7 L310.1,176.8 L306.9,176.5 L306.4,183.4 L294.9,192.7 L288.9,196.7 L285.5,200.9 L275.8,194.1 L268.7,203.1 L261.9,202.8 L254.2,203.6 L254.9,220.2 L250.1,220.5 L246.0,228.2 L235.8,229.6 Z", sv: "M220.1,216.1 L216.5,224.0 L197.5,223.5 L185.7,220.3 L172.1,213.6 L153.8,211.5 L144.6,204.3 L145.6,199.3 L156.8,190.8 L163.0,187.1 L161.2,183.2 L168.9,181.1 L178.6,183.9 L185.7,190.6 L195.6,196.0 L196.8,200.6 L211.2,196.6 L217.9,199.0 L222.4,202.6 L220.1,216.1 Z",
+    ni: "M288.4,293.4 L277.1,282.8 L261.7,269.2 L254.5,257.9 L240.7,247.3 L224.2,232.1 L227.9,226.9 L233.3,231.9 L235.8,229.6 L246.0,228.2 L250.1,220.5 L254.9,220.2 L254.2,203.6 L261.9,202.8 L268.7,203.1 L275.8,194.1 L285.5,200.9 L288.9,196.7 L294.9,192.7 L306.4,183.4 L306.9,176.5 L310.1,176.8 L314.3,168.7 L317.7,167.8 L323.3,172.9 L329.9,174.4 L337.1,170.1 L345.4,170.1 L356.8,165.7 L361.4,161.1 L372.6,161.8 L369.8,165.1 L368.1,172.6 L371.5,184.9 L363.9,196.4 L360.4,209.9 L359.3,224.8 L361.1,233.5 L361.9,248.6 L356.9,251.9 L353.8,266.3 L356.1,275.2 L349.4,283.8 L350.9,292.9 L355.9,298.5 L348.1,305.6 L338.4,303.4 L332.9,296.4 L322.5,293.6 L315.0,298.0 L293.4,289.1 L288.4,293.4 Z", cr: "M378.6,389.9 L360.7,382.4 L354.1,375.3 L357.9,369.5 L356.7,362.1 L347.6,354.0 L334.7,347.4 L323.4,343.1 L321.2,333.2 L312.6,327.2 L314.7,337.0 L308.2,345.0 L300.7,335.7 L290.1,332.3 L285.6,325.6 L285.8,315.3 L290.2,304.7 L280.9,299.9 L288.4,293.4 L293.4,289.1 L315.0,298.0 L322.5,293.6 L332.9,296.4 L338.4,303.4 L348.1,305.6 L355.9,298.5 L364.2,316.8 L376.9,330.3 L392.3,344.7 L379.6,347.7 L379.8,361.3 L386.7,366.3 L381.7,370.3 L383.0,376.4 L380.3,383.2 L378.6,389.9 Z", pa: "M545.4,423.6 L534.5,413.9 L527.5,395.7 L535.6,386.7 L527.2,384.4 L521.1,373.3 L504.8,363.9 L490.4,366.1 L483.8,377.8 L470.5,386.2 L463.3,387.4 L460.1,394.4 L475.8,412.7 L466.8,417.0 L462.1,422.0 L446.8,423.7 L441.1,403.6 L436.9,409.3 L426.0,407.4 L419.4,393.8 L405.9,391.6 L397.4,387.6 L383.3,387.7 L382.3,395.0 L378.6,389.9 L380.3,383.2 L383.0,376.4 L381.7,370.3 L386.7,366.3 L379.8,361.3 L379.6,347.7 L392.3,344.7 L404.1,356.8 L403.4,363.9 L416.5,365.4 L419.6,362.7 L428.7,371.0 L444.8,368.6 L458.8,360.0 L478.7,353.3 L489.9,343.2 L508.0,345.2 L506.8,348.5 L525.1,349.6 L539.7,355.4 L550.4,365.6 L562.8,374.9 L558.8,379.8 L566.4,399.6 L560.2,409.7 L549.6,407.2 L545.4,423.6 Z"
+  };
+  SNAP.forEach(function (era, idx) {
+    var prev = idx > 0 ? SNAP[idx - 1] : null;
+    var changed = [];
+    if (prev) {
+      Object.keys(MINI_PATHS).forEach(function (id) {
+        if (era.t[id] !== prev.t[id]) changed.push(id);
+      });
+    }
+    var cell = document.createElement("div");
+    cell.className = "grid-cell";
+    var svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("viewBox", "0 0 640 482");
+    var sea = document.createElementNS(svgNS, "rect");
+    sea.setAttribute("x","0"); sea.setAttribute("y","0");
+    sea.setAttribute("width","640"); sea.setAttribute("height","482");
+    sea.setAttribute("fill", "var(--tile-sea)");
+    svg.appendChild(sea);
+    Object.keys(MINI_PATHS).forEach(function (id) {
+      var isBaseline = !prev;
+      var isChanged = prev && changed.indexOf(id) !== -1;
+      var bold = isBaseline || isChanged;
+      var p = document.createElementNS(svgNS, "path");
+      p.setAttribute("d", MINI_PATHS[id]);
+      p.setAttribute("fill", era.t[id]);
+      if (bold) {
+        p.setAttribute("fill-opacity", "1");
+        p.setAttribute("stroke", "#241f14");
+        p.setAttribute("stroke-width", "2.2");
+      } else {
+        p.setAttribute("fill-opacity", "0.22");
+        p.setAttribute("stroke", "#241f14");
+        p.setAttribute("stroke-width", "0.75");
+        p.setAttribute("stroke-opacity", "0.4");
+      }
+      svg.appendChild(p);
+      var pos = REGION_POS[id];
+      var lbl = document.createElementNS(svgNS, "text");
+      lbl.setAttribute("x", pos[0]);
+      lbl.setAttribute("y", pos[1]);
+      lbl.setAttribute("text-anchor", "middle");
+      lbl.setAttribute("class", "mini-label");
+      lbl.setAttribute("fill", bold ? textColorFor(era.t[id]) : "#8a7d5c");
+      lbl.setAttribute("opacity", bold ? "1" : "0.55");
+      lbl.textContent = REGION_ABBR[id];
+      svg.appendChild(lbl);
+    });
+    cell.appendChild(svg);
+    var cap = document.createElement("div");
+    cap.className = "cap";
+    var diffText = !prev ? "Starting point" : (changed.length ? "&rarr; " + changed.map(function (id) { return REGION_NAMES[id]; }).join(", ") + " change" + (changed.length === 1 ? "s" : "") + " hands" : "&rarr; no change from previous frame");
+    cap.innerHTML = era.year + "<b>" + era.name + "</b><span class=\"diff\">" + diffText + "</span>";
+    cell.appendChild(cap);
+    gridEl.appendChild(cell);
+  });
+
+  // ---- Timeline: same data, real continuous date ranges ----
+  var GANTT_START = 900, GANTT_END = 2024;
+  var GANTT_DATA = [
+    { id:"gt", segs:[
+      [900,1524,C.maya,"Maya polities"], [1524,1609,C.spain,"Spanish conquest"], [1609,1821,C.capt_gt,"Capt. Gen. of Guatemala"],
+      [1821,1823,C.mex_empire,"1st Mexican Empire"], [1823,1841,C.fed_rep,"Federal Republic"], [1841,2024,C.ind_gt,"Republic of Guatemala"]
+    ]},
+    { id:"bz", segs:[
+      [900,1524,C.maya,"Maya polities"], [1524,1862,C.unconquered_bz,"Unconquered / British settlement"],
+      [1862,1981,C.brit_honduras,"British Honduras (colony)"], [1981,2024,C.ind_bz,"Independent Belize"]
+    ]},
+    { id:"hn", segs:[
+      [900,1524,C.maya,"Maya polities"], [1524,1609,C.spain,"Spanish conquest"], [1609,1821,C.capt_gt,"Capt. Gen. of Guatemala"],
+      [1821,1823,C.mex_empire,"1st Mexican Empire"], [1823,1841,C.fed_rep,"Federal Republic"], [1841,2024,C.ind_hn,"Republic of Honduras"]
+    ]},
+    { id:"sv", segs:[
+      [900,1524,C.maya,"Maya / Pipil polities"], [1524,1609,C.spain,"Spanish conquest"], [1609,1821,C.capt_gt,"Capt. Gen. of Guatemala"],
+      [1821,1823,C.mex_empire,"1st Mexican Empire"], [1823,1841,C.fed_rep,"Federal Republic"], [1841,2024,C.ind_sv,"Republic of El Salvador"]
+    ]},
+    { id:"ni", segs:[
+      [900,1524,C.chibchan,"Pre-Columbian polities"], [1524,1609,C.spain,"Spanish conquest"], [1609,1821,C.capt_gt,"Capt. Gen. of Guatemala"],
+      [1821,1823,C.mex_empire,"1st Mexican Empire"], [1823,1841,C.fed_rep,"Federal Republic"], [1841,2024,C.ind_ni,"Republic of Nicaragua"]
+    ]},
+    { id:"cr", segs:[
+      [900,1524,C.chibchan,"Chibchan cacicazgos"], [1524,1609,C.unpacified_cr,"Unpacified — nominal claim"], [1609,1821,C.capt_gt,"Capt. Gen. of Guatemala"],
+      [1821,1823,C.mex_empire,"1st Mexican Empire"], [1823,1841,C.fed_rep,"Federal Republic"], [1841,2024,C.ind_cr,"Republic of Costa Rica"]
+    ]},
+    { id:"pa", segs:[
+      [900,1524,C.chibchan,"Isthmo-Colombian cacicazgos"], [1524,1609,C.panama_tf,"Spain — Castilla del Oro"], [1609,1821,C.panama_peru,"Spain — Audiencia (Peru/N. Granada)"],
+      [1821,1831,C.gc_panama,"Gran Colombia"], [1831,1903,C.col_panama,"Republic of Colombia"], [1903,2024,C.ind_pa,"Independent Panama"]
+    ]}
+  ];
+  var ganttEl = document.getElementById("gantt");
+  function yearToPct(y) { return (y - GANTT_START) / (GANTT_END - GANTT_START) * 100; }
+  GANTT_DATA.forEach(function (row) {
+    var rowEl = document.createElement("div");
+    rowEl.className = "gantt-row";
+    var label = document.createElement("div");
+    label.className = "gantt-label";
+    label.textContent = REGION_NAMES[row.id];
+    rowEl.appendChild(label);
+    var track = document.createElement("div");
+    track.className = "gantt-track";
+    row.segs.forEach(function (seg) {
+      var left = yearToPct(seg[0]);
+      var width = yearToPct(seg[1]) - left;
+      var segEl = document.createElement("div");
+      segEl.className = "gantt-seg";
+      segEl.style.left = left + "%";
+      segEl.style.width = width + "%";
+      segEl.style.background = seg[2];
+      segEl.title = REGION_NAMES[row.id] + ": " + seg[3] + " (" + seg[0] + "–" + seg[1] + ")";
+      if (width > 4) {
+        var sp = document.createElement("span");
+        sp.textContent = seg[3];
+        sp.style.color = textColorFor(seg[2]);
+        segEl.appendChild(sp);
+      }
+      track.appendChild(segEl);
+    });
+    rowEl.appendChild(track);
+    ganttEl.appendChild(rowEl);
+  });
+  var axisEl = document.getElementById("gantt-axis");
+  [900, 1100, 1300, 1500, 1700, 1821, 1900, 2024].forEach(function (y) {
+    var s = document.createElement("span");
+    s.style.left = yearToPct(y) + "%";
+    s.textContent = y;
+    axisEl.appendChild(s);
+  });
+})();
+</script>

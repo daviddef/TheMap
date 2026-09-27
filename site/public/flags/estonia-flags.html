@@ -1,0 +1,829 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+</style></head><body>
+<title>Flags of Estonia</title>
+<meta name="description" content="A chronological, paint-ready atlas of every flag that flew over Estonia, from the pre-Christian tribal confederations to the restored republic of today — with a map of each era.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c; --tile-sea: #b9d3da;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f; --tile-sea: #17303a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f; --tile-sea: #17303a;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.08rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; font-size: .94rem; color: var(--muted); }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  .legend { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+
+  /* ---------- Timeline ---------- */
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1px; background: var(--hair); }
+  @media (max-width: 560px) { .timeline::before { left: 9px; } }
+  .entry { position: relative; padding-left: 46px; margin-bottom: 46px; }
+  @media (max-width: 560px) { .entry { padding-left: 30px; } }
+  .entry::before {
+    content: attr(data-n);
+    position: absolute; left: 1px; top: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--paper); outline: 1px solid var(--hair);
+    background: var(--card);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--brick); display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) { .entry::before { left: -5px; width: 18px; height: 18px; font-size: 9px; } }
+
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+  .card-head { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  @media (max-width: 620px) { .card-head { flex-direction: column; } }
+  .flag-box { flex: none; width: 168px; }
+  .flag-box svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-caption { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .card-title { font-size: 1.32rem; font-weight: 600; line-height: 1.18; margin: 0 0 10px; text-wrap: balance; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px; border: 1px solid var(--card-border); color: var(--muted);
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  /* Flip tooltip below tags near the top of the viewport so it isn't clipped */
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  /* Keep tooltips from overflowing the left/right edges on narrow screens */
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint { border-top: 1px solid var(--hair); }
+  details.paint > summary {
+    cursor: pointer; list-style: none; padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--adriatic); display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before { content: "+"; font-family: "Fraunces", serif; font-size: 15px; width: 14px; }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row { display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px; }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--card-border); border-radius: 2px; padding: 5px 9px 5px 5px; background: var(--paper); }
+  .swatch .chip { width: 20px; height: 20px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: none; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 88px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 320px; height: auto; }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .ireg-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 700; text-anchor: middle; transition: fill .4s ease, stroke .4s ease; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="baltics-hub.html">Baltic States hub</a></p>
+  <p class="kicker">Family research &middot; Phase 6 of the world atlas</p>
+  <h1>Flags of Estonia</h1>
+  <p class="lede">The Roman historian Tacitus already named this coast's amber-gathering inhabitants the Aestii around 98 CE, and the Salme ship burials on Saaremaa (c. 750 CE) preserve one of the best-documented Baltic Sea battles of the early Viking Age &mdash; centuries before any named Estonian polity. Estonia's own later story is the Baltic hub's simplest lineage to trace territorially &mdash; no internal duchy split like Latvia's Livonia/Courland, just one small, remarkably consistent northern coastline passed whole from conqueror to conqueror: Danish and German crusaders, then Sweden, then Russia, twice interrupted in the 20th century, and finally itself.</p>
+  <p class="lede">The blue-black-white tricolor was first raised by Estonian students at Otep&auml;&auml; in 1884, decades before there was a state to fly it over &mdash; making it, like Lithuania's and Latvia's own colors, a flag that predates the country and was simply waiting for 1918.</p>
+
+  <div class="scope-note">
+    <b>Scope of this page:</b> the lands of present-day Estonia, c. 100&ndash;present, eight political entities. The two oldest entries predate any surviving flag and are shown honestly blank. Part of a larger atlas &mdash; see the map and linked pages at the bottom.
+  </div>
+
+  <div class="imap-section">
+    <h2>One coastline, eight rulers</h2>
+    <p class="imap-sub">Estonia's own real border, traced from actual coastline data &mdash; the one Baltic country in this atlas without a clean internal division to show. Press play, or drag the slider, to watch who held all of it, era to era.</p>
+    <div class="rule-box">
+      <b>Estonia doesn't split internally the way Latvia does.</b> Latvia's own page carves out a genuine Livonia/Courland difference because those two pieces were, for real stretches of history, governed separately. Estonia has no equivalent: whichever single outside power held the territory &mdash; Danish and German crusaders, then Sweden, then Russia &mdash; held all of it at once. (The one partial exception, Danish rule of the north from 1227 to 1346 while the Livonian Order held the south, is folded into a single "Livonian" era below and covered in prose rather than mapped as a border, since both halves answered to the same crusading order's confederation and no fixed boundary between them is reliably attested.) What changes on this map is only who ruled all of it at once.
+    </div>
+    <div class="imap-frame">
+      <div class="imap-controls">
+        <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="imap-year" id="iYearTag">c. 100</span>
+        <input type="range" id="iSlider" min="0" max="9" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="imap-svg" viewBox="0 0 254 220" xmlns="http://www.w3.org/2000/svg">
+        <path id="ireg-sea" fill="var(--tile-sea)" d="M237.0,22.7 L237.0,0 L0,0 L0,180.1 L57.6,180.1 L63.3,124.9 L45.3,136.7 L14.2,103.4 L10.0,49.7 L71.8,23.6 L133.4,10.0 L186.5,25.5 L237.0,22.7 Z"/>
+        <path id="ireg-ee" class="ireg-fill" d="M57.6,180.1 L63.3,124.9 L45.3,136.7 L14.2,103.4 L10.0,49.7 L71.8,23.6 L133.4,10.0 L186.5,25.5 L237.0,22.7 L244.4,39.0 L209.5,93.0 L224.1,180.3 L203.1,210.0 L162.8,209.8 L120.7,175.1 L99.3,163.6 Z"/>
+        <g font-family="IBM Plex Mono, monospace">
+          <text class="ireg-label" id="ilbl-ee" x="127" y="118">ESTONIA</text>
+        </g>
+      </svg>
+      <div class="imap-head">
+        <div class="imap-name" id="iEraName">The Aestii, Amber Trade &amp; Iron Age Estonia</div>
+        <div class="imap-owners" id="iEraOwners"></div>
+      </div>
+      <div class="iflags-row" id="iFlagsRow"></div>
+      <p class="imap-story" id="iEraStory"></p>
+
+      <p class="map-note">Real traced coastline (mainland outline, simplified) &mdash; no internal partition; see the rule box above for why. Islands (Saaremaa, Hiiumaa) omitted from the source outline data but discussed in the timeline text.</p>
+      <div class="imap-key" id="iLegend"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <!-- 1 -->
+    <div class="entry" data-n="8" id="era-1991">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#0072ce"/>
+              <rect y="66.7" width="300" height="66.6" fill="#000000"/>
+              <rect y="133.3" width="300" height="66.7" fill="#f4efe1"/>
+            </svg>
+            <div class="flag-caption">blue&ndash;black&ndash;white, the flag first flown in 1884</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1991 &ndash; present</div>
+            <h3 class="card-title">Republic of Estonia (restored)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="An internationally recognized, self-governing state — independence restored on 20 August 1991 during the failed Soviet coup, with the last Russian troops leaving in 1994."><span class="dot" style="background:#2f6b4a"></span>Sovereign state</span><span class="tag" tabindex="0" data-tip="Writer and diplomat who became Estonia's first post-Soviet head of state, elected president in 1992 and a leading figure in steering the country toward NATO and EU membership."><span class="dot" style="background:#4a3b78"></span>Lennart Meri</span><span class="tag" tabindex="0" data-tip="Modern Estonia's constitution keeps church and state separate; the country is among Europe's least religious, with Lutheranism historically dominant but no formally established church."><span class="dot" style="background:#8e3b62"></span>Secular (no state religion)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Tens of thousands of Estonians emigrate for work to Finland, the United Kingdom, and other EU states following Estonia's 2004 EU accession and the free movement it opened up."><span class="dot" style="background:#a3672f"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#fff"/><rect x="6" width="3" height="14" fill="#003580"/><rect y="5.5" width="20" height="3" fill="#003580"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#012169"/><path d="M0,0 L20,14 M20,0 L0,14" stroke="#fff" stroke-width="2"/><path d="M10,0 V14 M0,7 H20" stroke="#fff" stroke-width="3.4"/><path d="M10,0 V14 M0,7 H20" stroke="#c8102e" stroke-width="1.8"/></svg></span>Emigration: EU labor migration to Finland &amp; UK (2004&ndash;)</span><span class="tag" tabindex="0" data-tip="Estonia takes in tens of thousands of Ukrainian refugees, one of the largest per-capita intakes in the EU, following Russia's full-scale invasion of Ukraine in February 2022."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="7" fill="#005bbb"/><rect y="7" width="20" height="7" fill="#ffd500"/></svg>Immigration: Ukrainian refugees (2022&ndash;)</span></div>
+            <p><span class="label">Who &amp; why:</span> the Supreme Council declares a formal transitional break with Soviet law on 30 March 1990 and issues a fuller sovereignty declaration that May; full restoration follows on 20 August 1991, during the failed Moscow coup against Gorbachev, and international recognition (including from the USSR itself) arrives within weeks. Estonia joins NATO and the EU in 2004 and adopts the euro in 2011.</p>
+            <p><span class="label">What it represents:</span> the same blue-black-white tricolor flown by the first republic before 1940 is restored exactly, unaltered &mdash; a deliberate statement of legal continuity, treating the Soviet decades as an illegal interruption rather than a new beginning. Blue is traditionally read as sky and loyalty, black as the soil and the nation's past suffering, white as the aspiration toward a brighter future and snow.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">7:11, three equal horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Blue top, black middle, white bottom.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#0072ce"></span><span class="meta"><span class="name">Blue</span><span class="hex">#0072CE</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#000000"></span><span class="meta"><span class="name">Black</span><span class="hex">#000000</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="entry" data-n="7" id="era-1940">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#a4272a"/>
+              <rect y="176" width="300" height="10" fill="#f4efe1"/>
+              <rect y="186" width="300" height="14" fill="#1e5288"/>
+              <g transform="translate(46,36)" fill="#f9d616">
+                <path d="M0,-19 l5.6,17.2 18.1,0 -14.6,10.6 5.6,17.2 -14.6,-10.6 -14.6,10.6 5.6,-17.2 -14.6,-10.6 18.1,0 Z"/>
+                <path d="M-19,32 a24,24 0 1 0 32,-32" fill="none" stroke="#f9d616" stroke-width="4.5"/>
+                <path d="M-3,17 v18 M-12,26 h18" stroke="#f9d616" stroke-width="4.5"/>
+              </g>
+            </svg>
+            <div class="flag-caption">the 1953 redesign &mdash; a wavy blue-white stripe added near the bottom edge</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1940 &ndash; 1991</div>
+            <h3 class="card-title">Estonian Soviet Socialist Republic</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A one-party Soviet republic governed from Moscow through the local Communist Party from 1940/44 until independence was restored in 1991, interrupted only by the 1941–44 Nazi occupation."><span class="dot" style="background:#a4272a"></span>Soviet republic</span><span class="tag" tabindex="0" data-tip="First Secretary of the Estonian Communist Party for a quarter-century (1950–1978), the figure most associated with the consolidation of postwar Soviet rule."><span class="dot" style="background:#4a3b78"></span>Johannes Käbin</span><span class="tag" tabindex="0" data-tip="Soviet policy suppressed the historically dominant Lutheran church, closing seminaries and restricting clergy, part of a decades-long campaign against organized religion."><span class="dot" style="background:#8e3b62"></span>State atheism</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Nazi Germany occupies Estonia from 1941 to 1944, administering it as part of Reichskommissariat Ostland, interrupting Soviet rule entirely rather than merely contesting it."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#000"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#dd0000"/></svg>Occupied by: Nazi Germany (1941&ndash;44)</span><span class="tag" tabindex="0" data-tip="Soviet authorities deport tens of thousands of Estonians to Siberia and other remote parts of the USSR in mass operations in June 1941 and March 1949, targeting perceived class enemies and those resisting farm collectivization."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#cc0000"/><path d="M3,3 l0.6,1.3 -0.6,1.3 -0.6,-1.3z" fill="#ffd700"/></svg>Emigration: mass deportations to Siberia (1941, 1949)</span><span class="tag" tabindex="0" data-tip="An estimated 70,000&ndash;80,000 Estonians flee west to Sweden and Germany in 1944 ahead of the returning Red Army, in what is remembered in Estonia as &quot;the Great Flight.&quot;"><span class="dot" style="background:#a3672f"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#006aa7"/><rect x="7" width="3" height="14" fill="#fecc00"/><rect y="5.5" width="20" height="3" fill="#fecc00"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#000"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#dd0000"/></svg></span>Emigration: &quot;Great Flight&quot; to Sweden &amp; Germany (1944)</span><span class="tag" tabindex="0" data-tip="Soviet industrialization policy brings large numbers of Russian-speaking workers and their families to settle in Estonia over four decades, shifting the ethnic Estonian share of the population from roughly 90% before the war to about 61% by 1989."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#cc0000"/><path d="M3,3 l0.6,1.3 -0.6,1.3 -0.6,-1.3z" fill="#ffd700"/></svg>Immigration: Russian-speaking settlers (Soviet era)</span></div>
+            <p><span class="label">Who &amp; why:</span> annexed by the USSR in August 1940 following the secret protocols of the 1939 Molotov&ndash;Ribbentrop Pact, alongside Latvia and Lithuania on the same schedule (see the Baltic hub map). Mass deportations to Siberia began within a year. Nazi Germany's occupation from 1941 to 1944, administered as part of Reichskommissariat Ostland, interrupts Soviet rule entirely rather than merely contesting it &mdash; a different flag, a different regime, shown as its own map snapshot above &mdash; before the Red Army reoccupies the whole territory by autumn 1944. Forest Brothers partisans resisted into the 1950s; the USSR itself never recognized any gap in its own claim of sovereignty across the whole 1940&ndash;1991 span.</p>
+            <p><span class="label">What it represents:</span> a plain red field with hammer, sickle, and star at first (1940&ndash;41, then again 1944&ndash;53), redesigned in 1953 to add a wavy white-and-blue stripe near the bottom &mdash; a nod to the Baltic Sea and, unusually among Soviet republic flags, one of the only ones to depart from a purely symbolic design toward a literal, local geographic reference.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red field; gold hammer, sickle and star in upper hoist canton; wavy white stripe over a wavy blue stripe near the bottom edge (added 1953 &mdash; earlier 1940/44 versions were plain red with the Soviet emblem only).</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#a4272a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4272A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f9d616"></span><span class="meta"><span class="name">Emblem, gold</span><span class="hex">#F9D616</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#1e5288"></span><span class="meta"><span class="name">Wave, blue</span><span class="hex">#1E5288</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">Wave, white</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="entry" data-n="6" id="era-1918">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#0072ce"/>
+              <rect y="66.7" width="300" height="66.6" fill="#000000"/>
+              <rect y="133.3" width="300" height="66.7" fill="#f4efe1"/>
+            </svg>
+            <div class="flag-caption">the tricolor's first run as a national flag, not just a student society's banner</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1918 &ndash; 1940</div>
+            <h3 class="card-title">Republic of Estonia (first republic)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="An independent parliamentary republic proclaimed at the close of World War I, democratic until a 1934 &quot;silent era&quot; coup installed authoritarian rule under one leader."><span class="dot" style="background:#2f6b4a"></span>Republic</span><span class="tag" tabindex="0" data-tip="Led the February 1918 declaration of independence as head of the Salvation Committee, and later seized authoritarian power in the 1934 coup, ruling until the 1940 Soviet occupation."><span class="dot" style="background:#4a3b78"></span>Konstantin Päts</span><span class="tag" tabindex="0" data-tip="The interwar republic established no state church, though Lutheranism remained the historically dominant confession, a legacy of centuries of German and Swedish rule."><span class="dot" style="background:#8e3b62"></span>Secular, Lutheran-majority</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Roughly 13,000 Baltic Germans leave Estonia for Nazi-occupied Poland in late 1939 under the Nazi-Soviet population transfer (Umsiedlung) agreement, ending centuries of Baltic German settlement in Estonia on the eve of Soviet occupation."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#000"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#dd0000"/></svg>Emigration: Baltic Germans resettled to Nazi Germany (1939)</span></div>
+            <p><span class="label">Who &amp; why:</span> independence is declared on 24 February 1918, in the brief gap between the retreating Russian army and the arriving Germans &mdash; the same nine-month window in which Lithuania and Latvia also declared their own independence (see the Baltic hub map). The Estonian War of Independence follows immediately, fought through 1918&ndash;1920 against both German Freikorps/Landeswehr forces and the Bolshevik Red Army, ending with the Tartu Peace Treaty of February 1920, in which Soviet Russia formally and permanently renounced its claim to Estonia.</p>
+            <p><span class="label">What it represents:</span> the blue-black-white tricolor, already decades old as the flag of the Estonian Students' Society (consecrated in 1884 at &Ouml;tep&auml;&auml;), is adopted as the national flag &mdash; the first time it flies over an actual sovereign state rather than a fraternal organization under Tsarist rule.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">7:11, three equal horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Blue top, black middle, white bottom.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#0072ce"></span><span class="meta"><span class="name">Blue</span><span class="hex">#0072CE</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#000000"></span><span class="meta"><span class="name">Black</span><span class="hex">#000000</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="entry" data-n="5" id="era-1721">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#f4efe1"/>
+              <rect y="66.7" width="300" height="66.6" fill="#1e5288"/>
+              <rect y="133.3" width="300" height="66.7" fill="#a4302a"/>
+            </svg>
+            <div class="flag-caption">the imperial Russian civil tricolor, flown over the Governorate of Estland</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1721 &ndash; 1918</div>
+            <h3 class="card-title">Russian Empire (Governorate of Estland)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Estonian lands governed as the imperial Governorate of Estland (and northern Livland), administered directly from St. Petersburg after Russia's conquest of Swedish Estonia."><span class="dot" style="background:#7a2430"></span>Empire's governorate</span><span class="tag" tabindex="0" data-tip="Russian tsar whose Great Northern War campaigns conquered Swedish Estonia, formally ceded to Russia by the 1721 Treaty of Nystad, founding this governorate period."><span class="dot" style="background:#4a3b78"></span>Peter I "the Great"</span><span class="tag" tabindex="0" data-tip="Orthodoxy was formally the empire's state religion, but Russia largely preserved the existing Lutheran church structure and Baltic German landholding elite throughout most of this period."><span class="dot" style="background:#8e3b62"></span>Russian Orthodoxy (imperial state church)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Peter the Great's Russia conquers Swedish Estonia during the Great Northern War, formalized by the 1721 Treaty of Nystad, ending Swedish rule and opening two centuries of imperial Russian governance."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#fff"/><rect y="4.67" width="20" height="4.67" fill="#0039a6"/><rect y="9.33" width="20" height="4.67" fill="#d52b1e"/></svg>Conquered by: Russia (1721)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Russia's Romanov tsars, who governed Estland as a Baltic governorate until the 1917 revolution, 1710–1917. Arms: or, a double-headed eagle sable."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f2c14e"/><g fill="#1a1a1a"><ellipse cx="50" cy="58" rx="10" ry="14"/><circle cx="38" cy="40" r="8"/><circle cx="62" cy="40" r="8"/><path d="M40,52 L6,30 L18,54 L40,60 Z"/><path d="M60,52 L94,30 L82,54 L60,60 Z"/><rect x="34" y="70" width="5" height="20"/><rect x="61" y="70" width="5" height="20"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Romanov (Russia)</span></div>
+            <p><span class="label">Who &amp; why:</span> the 1721 Treaty of Nystad ends the Great Northern War and formally cedes Swedish Estonia and Livonia to Peter the Great's Russia &mdash; the same treaty that lets Peter proclaim Russia an empire (see the Baltic hub map). Baltic German nobility retain considerable local privilege and landholding for most of this period even as St. Petersburg governs from above; Russification campaigns intensify sharply in the 1880s&ndash;90s, provoking the same national cultural awakening that produces the tricolor's 1884 consecration.</p>
+            <p><span class="label">What it represents:</span> the standard Russian Empire civil ensign, white-blue-red, flown as ordinary imperial territory &mdash; no distinct flag existed for the Governorate of Estland itself, its administration expressed through coats of arms and seals rather than a separate banner.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3, three equal horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">White top, blue middle, red bottom.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#1e5288"></span><span class="meta"><span class="name">Blue</span><span class="hex">#1E5288</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="entry" data-n="4" id="era-1561">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#1e5288"/>
+              <rect x="100" width="40" height="200" fill="#f9d616"/>
+              <rect y="80" width="300" height="40" fill="#f9d616"/>
+            </svg>
+            <div class="flag-caption">the Swedish crown's own flag &mdash; remembered in Estonia as "the good old Swedish time"</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1561 &ndash; 1721</div>
+            <h3 class="card-title">Swedish Estonia</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Territory won by Sweden from the fragmenting Livonian Order and administered as a Swedish crown province, remembered locally for relatively orderly &quot;good old Swedish times&quot; administration."><span class="dot" style="background:#1e5288"></span>Kingdom's province</span><span class="tag" tabindex="0" data-tip="Swedish king whose forces secured Reval (Tallinn) and northern Estonia in the early 17th century, consolidating Swedish rule over the province."><span class="dot" style="background:#4a3b78"></span>Gustav II Adolf</span><span class="tag" tabindex="0" data-tip="Sweden imposed and reinforced its Lutheran state church across Estonia, building on a Reformation that had already taken hold among the Baltic German urban and landholding classes."><span class="dot" style="background:#8e3b62"></span>Lutheranism (state church)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="As the Livonian Order collapses under Russian invasion, Sweden conquers and secures Reval (Tallinn) and northern Estonia in 1561, later extending control over the rest of the territory."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#006aa7"/><rect x="7" width="3" height="14" fill="#fecc00"/><rect y="5.5" width="20" height="3" fill="#fecc00"/></svg>Conquered by: Sweden (1561)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Sweden's royal House of Vasa, ruling Estonia and Livonia as Swedish provinces, 1561–1654. Arms: azure, a sheaf or."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1e3a5f"/><g fill="#f2c14e"><ellipse cx="50" cy="60" rx="16" ry="26"/><rect x="34" y="46" width="32" height="6"/><rect x="34" y="76" width="32" height="6"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Vasa (Sweden)</span><span class="tag" tabindex="0" data-tip="Russia's Romanov tsars, whose Great Northern War conquest of Swedish Estonia from 1710 overlapped this era's end, ruling until the 1917 revolution. Arms: or, a double-headed eagle sable."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f2c14e"/><g fill="#1a1a1a"><ellipse cx="50" cy="58" rx="10" ry="14"/><circle cx="38" cy="40" r="8"/><circle cx="62" cy="40" r="8"/><path d="M40,52 L6,30 L18,54 L40,60 Z"/><path d="M60,52 L94,30 L82,54 L60,60 Z"/><rect x="34" y="70" width="5" height="20"/><rect x="61" y="70" width="5" height="20"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Romanov (Russia)</span></div>
+            <p><span class="label">Who &amp; why:</span> as the Livonian Order collapses under Ivan the Terrible's 1558 invasion, the town council of Reval (Tallinn) and the northern Estonian nobility submit to Swedish protection in 1561 rather than face Russian conquest alone (see the Baltic hub map). Sweden later takes the rest of Estonia and Livonia through the following decades of war, holding the whole territory until Russia's victory in the Great Northern War two centuries later.</p>
+            <p><span class="label">What it represents:</span> the plain Swedish Nordic-cross flag, flown as an ordinary crown province. This period is remembered in Estonian folk memory relatively favorably as <em>"vana hea Rootsi aeg"</em> &mdash; "the good old Swedish time" &mdash; for reforms including expanded local schooling and comparatively lighter serfdom than what followed under Russian rule, a reputation that has outlasted the two intervening centuries since Sweden actually governed here.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">5:8.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Blue field, off-center gold Nordic cross.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#1e5288"></span><span class="meta"><span class="name">Blue</span><span class="hex">#1E5288</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f9d616"></span><span class="meta"><span class="name">Gold</span><span class="hex">#F9D616</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="entry" data-n="3" id="era-1227">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#f4efe1"/>
+              <path d="M138,30 h24 v60 h60 v24 h-60 v60 h-24 v-60 h-60 v-24 h60 Z" fill="#201a12"/>
+            </svg>
+            <div class="flag-caption">a plain black cross on white &mdash; the crusader confederation's own device</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1227 &ndash; 1561</div>
+            <h3 class="card-title">Livonian Order (Terra Mariana)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Estonian lands incorporated into the Livonian Order's confederation after the German-led Northern Crusades subdued the local Estonian tribes, alongside Danish rule in the north until 1346."><span class="dot" style="background:#44484f"></span>Crusader state</span><span class="tag" tabindex="0" data-tip="Master of the Order of the Sword Brothers whose forces led the conquest and Christianization campaigns across Estonian lands in the 1220s, before the Order's later absorption into the Livonian confederation."><span class="dot" style="background:#4a3b78"></span>Volquin</span><span class="tag" tabindex="0" data-tip="The crusading Order and its allied bishoprics existed explicitly to Christianize and rule the region under Catholic authority, making Catholicism the confederation's defining institution."><span class="dot" style="background:#8e3b62"></span>Roman Catholicism (state religion)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="German crusaders of the Livonian Brothers of the Sword and Danish forces under King Valdemar II conquer and forcibly Christianize Estonia's tribal territories through the Northern Crusades, completed with Saaremaa's fall in 1227."><span class="dot" style="background:#6b2c2c"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#fff"/><rect x="7.5" width="5" height="14" fill="#000"/><rect y="4.5" width="20" height="5" fill="#000"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#c60c30"/><rect x="6" width="3" height="14" fill="#fff"/><rect y="5.5" width="20" height="3" fill="#fff"/></svg></span>Conquered by: German &amp; Danish crusaders (1227)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The crusading Teutonic Order's Livonian branch, ruling Estonia and Latvia as an ecclesiastical military state, 1237–1561. Arms: argent, a cross sable."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f4efe1"/><rect x="42" y="4" width="16" height="112" fill="#1a1a1a"/><rect x="4" y="52" width="92" height="16" fill="#1a1a1a"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Livonian Order (Teutonic Knights)</span><span class="tag" tabindex="0" data-tip="Denmark's royal house held Tallinn and the northern province until selling its claim to the Teutonic Order in 1346, part of its 1219–1346 hold on Estonia. Arms: or, three lions passant azure, semé of hearts gules."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f2c14e"/><g fill="#1e3a5f"><ellipse cx="42" cy="40" rx="16" ry="9" transform="rotate(-8 42 40)"/><ellipse cx="42" cy="66" rx="16" ry="9" transform="rotate(-8 42 66)"/><ellipse cx="42" cy="92" rx="16" ry="9" transform="rotate(-8 42 92)"/></g><g fill="#a4302a"><path d="M66,38 c-4,-6 -12,-2 -8,4 c2,3 6,5 8,7 c2,-2 6,-4 8,-7 c4,-6 -4,-10 -8,-4 Z"/><path d="M66,64 c-4,-6 -12,-2 -8,4 c2,3 6,5 8,7 c2,-2 6,-4 8,-7 c4,-6 -4,-10 -8,-4 Z"/><path d="M66,90 c-4,-6 -12,-2 -8,4 c2,3 6,5 8,7 c2,-2 6,-4 8,-7 c4,-6 -4,-10 -8,-4 Z"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Oldenburg (Denmark)</span></div>
+            <p><span class="label">Who &amp; why:</span> the Northern Crusades reach Estonia in the early 13th century from two directions at once: German crusaders (the Livonian Brothers of the Sword, merged into the Teutonic Order's Livonian branch after a 1237 reorganization) conquer the south, while Denmark's King Valdemar II takes the north directly, founding Reval (Tallinn) in 1219. By 1227, with the fall of Saaremaa, the whole of Estonia's mainland and islands is under crusader or Danish control, organized loosely as part of the confederation known as Terra Mariana &mdash; "Land of Mary." Denmark sells its northern holding to the Livonian Order outright in 1346, following the St. George's Night Uprising of 1343&ndash;45, unifying all of Estonia under the Order for the remainder of this period. The Order's own authority steadily erodes against the Hanseatic towns and prince-bishoprics it nominally oversees, until it collapses outright under Russian invasion in 1561.</p>
+            <p><span class="label">What it represents:</span> the plain black cross on white associated with the Teutonic Order and its Livonian branch, the crusading confederation's shared heraldic device &mdash; flown loosely across a patchwork of bishoprics, the Order's own lands, and Hanseatic town governments rather than a single centralized state.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio recorded.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">White field, plain black cross centered.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#201a12"></span><span class="meta"><span class="name">Black</span><span class="hex">#201A12</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 7 -->
+    <div class="entry" data-n="2" id="era-1000">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; pre-conquest, pre-heraldic era, no flag survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 1000 &ndash; 1227</div>
+            <h3 class="card-title">Ancient Estonia (tribal confederations)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A patchwork of ancient Estonian counties (maakonnad) loosely allied in shifting confederations, without a unified state, before German and Danish crusaders arrived in the early 13th century."><span class="dot" style="background:#3f5c6b"></span>Tribal confederations</span><span class="tag" tabindex="0" data-tip="This era predates any unified Estonian political authority; power was held locally by county elders and chieftains across the various maakonnad."><span class="dot" style="background:#4a3b78"></span>No single ruler documented</span><span class="tag" tabindex="0" data-tip="The ancient Estonians practiced an indigenous polytheistic religion, with no institutional &quot;state&quot; structure to formally establish any single faith."><span class="dot" style="background:#8e3b62"></span>Estonian paganism</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Danish crusaders under this royal house conquered northern Estonia in 1219, part of their 1219–1346 hold on the province. Arms: or, three lions passant azure, semé of hearts gules."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f2c14e"/><g fill="#1e3a5f"><ellipse cx="42" cy="40" rx="16" ry="9" transform="rotate(-8 42 40)"/><ellipse cx="42" cy="66" rx="16" ry="9" transform="rotate(-8 42 66)"/><ellipse cx="42" cy="92" rx="16" ry="9" transform="rotate(-8 42 92)"/></g><g fill="#a4302a"><path d="M66,38 c-4,-6 -12,-2 -8,4 c2,3 6,5 8,7 c2,-2 6,-4 8,-7 c4,-6 -4,-10 -8,-4 Z"/><path d="M66,64 c-4,-6 -12,-2 -8,4 c2,3 6,5 8,7 c2,-2 6,-4 8,-7 c4,-6 -4,-10 -8,-4 Z"/><path d="M66,90 c-4,-6 -12,-2 -8,4 c2,3 6,5 8,7 c2,-2 6,-4 8,-7 c4,-6 -4,-10 -8,-4 Z"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Oldenburg (Denmark)</span></div>
+            <p><span class="label">Who &amp; why:</span> pre-conquest Estonia was never a single kingdom but a patchwork of parishes (<em>kihelkonnad</em>) loosely grouped into larger counties (<em>maakonnad</em>) such as Saaremaa, Harju, and Sakala, with no central monarch or unifying government. Estonia and Saaremaa in particular were among the very last pagan regions of Europe to be forcibly Christianized, resisting repeated Danish, Swedish, and Russian raids for over a century before the Northern Crusades finally subdued the whole territory by 1227 &mdash; Saaremaa's fall that year marking the last piece to go.</p>
+            <p><span class="label">What it represents:</span> no securely documented flag or fixed heraldic device survives from this pre-Christian, pre-state era; individual parishes and their strongholds (<em>linnused</em>) are not known to have flown any standardized banner. Shown here honestly blank rather than invented.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <div class="entry" data-n="1" id="era-100">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder &mdash; no banner from the Aestii or Iron Age Estonia survives or was likely ever made</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 100 &ndash; 1000</div>
+            <h3 class="card-title">The Aestii, Amber Trade &amp; Iron Age Estonia</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="The Roman historian Tacitus, writing around 98 CE, names the Aestii as a Baltic coastal people gathering amber for trade &mdash; among the earliest written references to the ancestors of the Baltic Finnic and Baltic peoples of this coast."><span class="dot" style="background:#3f5c6b"></span>Aestii / Baltic Iron Age tribes</span><span class="tag" tabindex="0" data-tip="No named individual ruler survives from this era; Tacitus and later sources describe a loose, decentralized society without a single monarch."><span class="dot" style="background:#4a3b78"></span>No single ruler documented</span><span class="tag" tabindex="0" data-tip="Indigenous Baltic/Finnic polytheism prevailed throughout, continuing directly into the tribal-confederation paganism of the following entry."><span class="dot" style="background:#8e3b62"></span>Estonian/Baltic paganism</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Baltic amber gathered along this coast reached the Roman Empire via the long-distance Amber Road trade route, a trade Tacitus records explicitly in his Germania (c. 98 CE)."><span class="dot" style="background:#2f7a6b"></span>Trade network: Amber Road (to Rome)</span><span class="tag" tabindex="0" data-tip="Archaeologists excavating the Salme ship burials on Saaremaa (dated to roughly 750 CE) found the mass grave of warriors, likely Scandinavian, killed in a battle &mdash; one of the earliest and best-documented Baltic Sea conflicts of the Viking Age, fought on or near Estonian shores."><span class="dot" style="background:#6b2c2c"></span>Salme ship burials: Baltic Sea conflict (c. 750 CE)</span></div>
+            <p><span class="label">Who &amp; why:</span> the Roman historian Tacitus is the first to put this coast on the written record, naming its amber-gathering inhabitants the Aestii in his c. 98 CE Germania &mdash; centuries before any Estonian polity is named in its own right. Archaeology fills in the rest: Iron Age hill forts, farming settlements, and, most strikingly, the Salme ship burials on Saaremaa (c. 750 CE), where the mass grave of warriors killed in a Baltic Sea battle was uncovered only in 2008&ndash;2012, among the most significant Viking-Age discoveries in the region. This long Iron Age of scattered farming and trading communities gradually consolidates into the named parishes and counties (<em>kihelkonnad</em>, <em>maakonnad</em>) of the following entry.</p>
+            <p><span class="label">What it represents:</span> no flag or comparable banner survives or was likely ever made in this era; what survives is archaeological &mdash; hill forts, grave goods, amber, and ship timbers. Shown here honestly blank rather than invented.</p>
+            <p><span class="label">World context:</span> Tacitus's account of the Aestii dates to the height of the Roman Empire under Trajan, when Baltic amber reached Roman markets via the long-distance Amber Road; the Salme ship burials, roughly contemporary with Charlemagne's Frankish kingdom in the west, fall right at the opening of the Viking Age that would soon bring Scandinavian raiders and traders across the whole Baltic and North Sea world.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#44484f"></span><b>Crusader state</b> &mdash; ecclesiastical/military confederation</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#1e5288"></span><b>Kingdom's province</b> &mdash; ruled from a foreign capital</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#7a2430"></span><b>Empire's governorate</b> &mdash; annexed territory of an empire</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#2f6b4a"></span><b>Republic</b> &mdash; sovereign, democratic</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a4272a"></span><b>Soviet republic</b> &mdash; one-party, annexed by the USSR</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#2b2e33"></span><b>Nazi-occupied territory</b> &mdash; wartime interruption, 1941&ndash;44</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the named ruler most associated with the era's start</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official/established faith, not the population's</div>
+    </div>
+  </div>
+
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for Estonia lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/ee/">Search Record Atlas for Estonia &rarr;</a>
+    <p style="margin-top:14px;">Records here are filed by historical jurisdiction, not modern borders &mdash; check the region that covers your ancestral town:</p>
+    <div class="record-region-grid">
+      <a href="https://daviddef.github.io/TheMap/region/baltic-governorates/">Livonia, Estonia and Courland</a>
+    </div>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This page is one lineage in a larger set. See the region-wide map and the other countries here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="baltics-hub.html"><b>Baltic States hub</b><span>Lithuania, Latvia, Estonia together</span></a>
+      <a class="link-card" href="habsburg-hub.html"><b>Habsburg Lands hub</b><span>Seven countries, four centuries</span></a>
+      <a class="link-card" href="germany-hub.html"><b>German Lands hub</b><span>Germany's own east-west split</span></a>
+      <a class="link-card" href="yugoslavia-hub.html"><b>Former Yugoslavia hub</b><span>Nine countries, nine centuries</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are close historical approximations for painting reference; pre-19th-century swatches are informed reconstructions, not official specifications. Map is traced from simplified public coastline data (johan/world.geo.json), not surveyed.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var IC = {
+    aestii: "#5c4a3a", pagan: "#3f5c6b", liv: "#44484f", swe: "#1e5288", rus: "#7a2430",
+    ind: "#1560bd", soviet: "#a4272a", nazi: "#2b2e33"
+  };
+  var INAMES = {
+    aestii: "The Aestii, Amber Trade &amp; Iron Age Estonia",
+    pagan: "Estonian tribal confederations", liv: "Livonian Order (Terra Mariana)", swe: "Swedish crown",
+    rus: "Russian Empire", ind: "Republic of Estonia", soviet: "USSR (Estonian SSR)",
+    nazi: "Nazi Germany (Reichskommissariat Ostland)"
+  };
+  var IFLAGS = {
+    aestii: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="6" stroke-dasharray="10 8"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>',
+    pagan: '<rect width="300" height="200" fill="#3f5c6b"/><g fill="#e8d9a8"><path d="M150,55 L172,100 L150,145 L128,100 Z"/><path d="M150,75 L162,100 L150,125 L138,100 Z" fill="#3f5c6b"/></g>',
+    liv: '<rect width="300" height="200" fill="#f4efe1"/><path d="M138,30 h24 v60 h60 v24 h-60 v60 h-24 v-60 h-60 v-24 h60 Z" fill="#201a12"/>',
+    swe: '<rect width="300" height="200" fill="#1e5288"/><rect x="100" width="40" height="200" fill="#f9d616"/><rect y="80" width="300" height="40" fill="#f9d616"/>',
+    rus: '<rect width="300" height="66.7" fill="#f4efe1"/><rect y="66.7" width="300" height="66.6" fill="#1e5288"/><rect y="133.3" width="300" height="66.7" fill="#a4302a"/>',
+    ind: '<rect width="300" height="66.7" fill="#0072ce"/><rect y="66.7" width="300" height="66.6" fill="#000000"/><rect y="133.3" width="300" height="66.7" fill="#f4efe1"/>',
+    soviet: '<rect width="300" height="200" fill="#a4272a"/><rect y="176" width="300" height="10" fill="#f4efe1"/><rect y="186" width="300" height="14" fill="#1e5288"/><g transform="translate(46,36)" fill="#f9d616"><path d="M0,-19 l5.6,17.2 18.1,0 -14.6,10.6 5.6,17.2 -14.6,-10.6 -14.6,10.6 5.6,-17.2 -14.6,-10.6 18.1,0 Z"/></g>',
+    nazi: '<rect width="300" height="200" fill="#a4302a"/><circle cx="150" cy="100" r="35" fill="#f4efe1"/><path d="M150,72 v14 M150,114 v14 M122,100 h14 M164,100 h14 M150,86 l10,-10 M150,86 l-10,-10 M150,114 l10,10 M150,114 l-10,10" stroke="#241f14" stroke-width="6"/>'
+  };
+  function iFlagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (IFLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  var iLegendEl = document.getElementById("iLegend");
+  iLegendEl.innerHTML = Object.keys(IC).map(function (k) {
+    return '<span><span class="sw" style="background:' + IC[k] + '"></span>' + INAMES[k] + "</span>";
+  }).join("");
+
+  var ISNAP = [
+    { year:"c. 100", name:"The Aestii, Amber Trade &amp; Iron Age Estonia", color:IC.aestii, flagKey:"aestii",
+      story:"The Roman historian Tacitus, writing around 98 CE, is the first to put this coast on the written record, naming its amber-gathering inhabitants the Aestii &mdash; centuries before any Estonian polity is named in its own right. Archaeology fills in the rest: Iron Age hill forts, farming settlements, and the Salme ship burials on Saaremaa (c. 750 CE), a mass grave of warriors killed in a Baltic Sea battle. No flag or comparable banner survives from this era; scattered farming and trading communities gradually consolidate into the named parishes and counties of the following era." },
+    { year:"c. 1000", name:"Estonian tribal confederations", color:IC.pagan, flagKey:"pagan",
+      story:"No central government exists yet &mdash; parishes and counties (Saaremaa, Harju, Sakala, and others) govern themselves, loosely allied at most. Estonia is one of the last pagan corners of Europe, having already turned back repeated Danish, Swedish, and Russian raids for generations." },
+    { year:"1227", name:"Northern Crusades complete", color:IC.liv, flagKey:"liv",
+      story:"German crusaders (organized from 1237 as the Livonian Order) take the south while Denmark's King Valdemar II conquers the north directly, founding Reval (Tallinn) in 1219. Saaremaa, the last holdout, falls in 1227 &mdash; the whole territory is now under crusader or Danish control, loosely bound together as Terra Mariana." },
+    { year:"1346", name:"Denmark sells the north", color:IC.liv, flagKey:"liv",
+      story:"Following the St. George's Night Uprising of 1343&ndash;45, Denmark sells its remaining northern Estonian territory outright to the Livonian Order, unifying the whole country under one crusading authority for the first time since the conquest &mdash; the line between \"Danish Estonia\" and \"Livonian Estonia\" disappears for good." },
+    { year:"1561", name:"The Livonian Order collapses", color:IC.swe, flagKey:"swe",
+      story:"Ivan the Terrible's 1558 invasion of Livonia exposes the Order's hollow authority; it dissolves outright by 1561. Reval's town council and the northern Estonian nobility submit to Swedish protection that same year, and Sweden gradually absorbs the rest of the territory over the following decades &mdash; the start of what Estonian folk memory still calls \"the good old Swedish time.\"" },
+    { year:"1721", name:"Treaty of Nystad", color:IC.rus, flagKey:"rus",
+      story:"Peter the Great's Russia breaks Swedish power in the Baltic during the Great Northern War (1700&ndash;1721); the Treaty of Nystad formally cedes Estonia and Livonia to Russia, the same treaty that lets Peter proclaim himself Emperor. Estonia is organized as the Governorate of Estland, with Baltic German nobility retaining local privilege under St. Petersburg's distant authority." },
+    { year:"1918", name:"Independence declared", color:IC.ind, flagKey:"ind",
+      story:"Independence is declared on 24 February 1918, in the same nine-month window as Lithuania's and Latvia's own declarations. The Estonian War of Independence (1918&ndash;1920) is fought against both German and Bolshevik forces before the Tartu Peace Treaty secures internationally recognized borders." },
+    { year:"1940", name:"Soviet annexation", color:IC.soviet, flagKey:"soviet",
+      story:"The secret protocols of the 1939 Molotov&ndash;Ribbentrop Pact place Estonia in the Soviet sphere; the Red Army occupies the country in June 1940 and formal annexation as the Estonian SSR follows by August, on nearly the same calendar as Latvia and Lithuania. Mass deportations to Siberia begin within the year." },
+    { year:"1941", name:"Nazi occupation", color:IC.nazi, flagKey:"nazi",
+      story:"Operation Barbarossa reaches Estonia by summer 1941; the country is folded into Reichskommissariat Ostland, replacing one occupying power with another. The Red Army reoccupies the whole territory by autumn 1944, and the USSR treats 1941&ndash;44 as a mere interruption rather than any lapse in its own claimed sovereignty." },
+    { year:"1991", name:"Independence restored", color:IC.ind, flagKey:"ind",
+      story:"Mass demonstrations through the Singing Revolution (1987&ndash;91), including the Baltic Way human chain of August 1989, keep independence on the agenda as Soviet control weakens. Full restoration comes on 20 August 1991, during the failed Moscow coup; the pre-1940 blue-black-white tricolor is restored exactly as it had flown before &mdash; a statement of continuity, not a new beginning." }
+  ];
+
+  var iYearTag = document.getElementById("iYearTag");
+  var iEraName = document.getElementById("iEraName");
+  var iEraOwners = document.getElementById("iEraOwners");
+  var iEraStory = document.getElementById("iEraStory");
+  var iFlagsRow = document.getElementById("iFlagsRow");
+  var iSlider = document.getElementById("iSlider");
+  var iRegEl = document.getElementById("ireg-ee");
+  var iLblEl = document.getElementById("ilbl-ee");
+
+  function iTextColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+
+  function iRender(idx) {
+    var era = ISNAP[idx];
+    iYearTag.textContent = era.year;
+    iEraName.textContent = era.name;
+    iEraStory.innerHTML = era.story;
+    iEraOwners.innerHTML = "<b>" + INAMES[Object.keys(IC).filter(function (k) { return IC[k] === era.color; })[0]] + "</b>: all of Estonia";
+
+    iRegEl.setAttribute("fill", era.color);
+    var lblColor = iTextColorFor(era.color);
+    iLblEl.setAttribute("fill", lblColor);
+    iLblEl.setAttribute("stroke", lblColor === "#201a12" ? "#f7f1e3" : "#201a12");
+
+    iFlagsRow.innerHTML = '<div class="iflag-chip">' + iFlagSvg(era.flagKey) + '<div class="ic-label">' + INAMES[Object.keys(IC).filter(function (k) { return IC[k] === era.color; })[0]] + '</div></div>';
+  }
+
+  iSlider.addEventListener("input", function () { iRender(parseInt(iSlider.value, 10)); });
+  iRender(0);
+
+  var iPlaying = false, iPlayTimer = null;
+  var iPlayBtn = document.getElementById("iPlayBtn");
+  function iStepPlay() {
+    var next = parseInt(iSlider.value, 10) + 1;
+    if (next > ISNAP.length - 1) { iStopPlay(); return; }
+    iSlider.value = next;
+    iRender(next);
+  }
+  function iStartPlay() {
+    iPlaying = true;
+    iPlayBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(iSlider.value, 10) >= ISNAP.length - 1) { iSlider.value = 0; iRender(0); }
+    iPlayTimer = setInterval(iStepPlay, 1700);
+  }
+  function iStopPlay() {
+    iPlaying = false;
+    iPlayBtn.innerHTML = "&#9654;";
+    clearInterval(iPlayTimer);
+  }
+  iPlayBtn.addEventListener("click", function () { iPlaying ? iStopPlay() : iStartPlay(); });
+})();
+
+  // Tap-to-toggle for the pill tag tooltips (hover doesn't work on touch devices).
+  document.querySelectorAll(".tag[data-tip]").forEach(function (tag) {
+    tag.addEventListener("click", function (e) {
+      var wasOpen = tag.classList.contains("tip-open");
+      document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+      if (!wasOpen) tag.classList.add("tip-open");
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+  });
+</script>
+
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var html = '<h4>Genealogical records for this ground</h4>';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>
+
+</body></html>

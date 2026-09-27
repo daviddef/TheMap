@@ -1,0 +1,293 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>The Schengen Area</title>
+<meta name="description" content="A hub for the family flag atlas: the Schengen Area, the passport-free travel zone of 29 European states — a different list of countries from the European Union, built by treaty rather than conquest.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    --tile: #ddd0aa; --tile-line: #b7a679; --tile-text: #7a6a45; --tile-sea: #b9d3da;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.2rem, 5.5vw, 3.4rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.1rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .callout { margin: 24px 0; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .95rem; }
+  .callout b { color: var(--brick); }
+
+  .countries { margin-top: 44px; }
+  .countries h2 { font-size: 1.15rem; font-weight: 600; margin: 0 0 4px; }
+  .countries .sub { color: var(--muted); font-size: .9rem; margin: 0 0 16px; }
+  .country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .country-card {
+    display: block; padding: 20px; border: 1px solid var(--card-border); background: var(--card);
+    border-radius: 4px; text-decoration: none; color: var(--ink); position: relative; overflow: hidden;
+  }
+  .country-card .swatch-strip { position: absolute; top: 0; left: 0; right: 0; height: 5px; }
+  .country-card .era { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--brass); margin-bottom: 6px; }
+  .country-card b { display: block; font-family: "Fraunces", serif; font-size: 1.2rem; font-weight: 600; margin-bottom: 6px; }
+  .country-card span.desc { color: var(--muted); font-size: .88rem; line-height: 1.5; display: block; }
+
+  .about { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .about h2 { font-size: 1.3rem; margin: 0 0 12px; }
+  .about p { max-width: none; opacity: .88; margin: 0 0 12px; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a></p>
+  <p class="kicker">Family research &middot; Hub &middot; Phase 25 of the world atlas</p>
+  <h1>The Schengen Area</h1>
+  <p class="lede">Every other hub in this atlas encodes literal sovereignty &mdash; a shared ruler, a shared crown, a border that dissolves on the map only when the same government actually controlled both sides of it. The Schengen Area is a genuinely different kind of thing, and this hub is built differently on purpose. No one conquered anyone here. Schengen is a treaty among fully independent, self-governing states that agreed to stop checking passports at the lines between them. The countries keep their own governments, laws, currencies (mostly), and borders on a map &mdash; they just stopped enforcing document checks when people cross them.</p>
+  <p class="lede">It began almost by accident of geography: on 14 June 1985, France, West Germany, Belgium, the Netherlands, and Luxembourg signed the Schengen Agreement aboard a boat moored on the Moselle River, near the small Luxembourg town of Schengen where their three borders meet. That first agreement was a statement of intent; the detailed rulebook came five years later with the 1990 Schengen Convention, and the zone only actually went live on 26 March 1995, abolishing routine checks at the internal borders of its first seven members.</p>
+  <p class="lede">Thirty years on, the Schengen Area covers 29 countries and roughly 450 million people, making it one of the largest passport-free travel zones on Earth. It grew in waves &mdash; a handful of founding and early-1990s members, a Nordic bloc that joined together in 2001, a large 2007&ndash;2008 wave tied to the EU's 2004 eastern enlargement, and the most recent arrivals, Croatia (2023) and Bulgaria and Romania (2024&ndash;2025). Below, each member's card shows when it actually joined.</p>
+
+  <div class="callout">
+    <b>Schengen is not the European Union.</b> The two are separate clubs with separate, overlapping membership lists, and mixing them up is the single most common mistake about this treaty. Some EU members are not in Schengen: <b>Ireland</b> opted out from the start and instead maintains the older Common Travel Area with the United Kingdom, while <b>Cyprus</b> is an EU member still outside Schengen. Conversely, some Schengen members are not in the EU at all: <b>Norway</b> and <b>Iceland</b> joined via a 1996 association tied to the pre-existing Nordic Passport Union, and <b>Switzerland</b> and <b>Liechtenstein</b> joined later through their own bilateral association agreements. And the <b>United Kingdom</b>, even while it was an EU member, never joined Schengen at all &mdash; it kept its own border checks and its Common Travel Area with Ireland throughout, and left the EU entirely in 2020. Schengen membership is about border control, not EU membership; the two lists simply don't match.
+  </div>
+
+  <div class="countries">
+    <h2>The 29 members</h2>
+    <p class="sub">Ordered by when each joined. Where a country already has its own flag-history page elsewhere in the atlas, its card links there; the rest are placeholders for pages not yet written.</p>
+    <div class="country-grid">
+
+      <a class="country-card" href="#" onclick="return false;">
+        <span class="swatch-strip" style="background:#0055a4"></span>
+        <span class="era">Founding signatory &middot; 1985 / implemented 1995</span>
+        <b>France</b>
+        <span class="desc">Hosted the original signing at the town of Schengen itself; one of the two founding states (with West Germany) around which the whole treaty was built.</span>
+      </a>
+      <a class="country-card" href="germany-flags.html">
+        <span class="swatch-strip" style="background:#2f6b4a"></span>
+        <span class="era">Founding signatory &middot; 1985 / implemented 1995</span>
+        <b>Germany</b>
+        <span class="desc">Signed as West Germany in 1985; reunified Germany carried the commitment forward into the 1995 launch.</span>
+      </a>
+      <a class="country-card" href="belgium-flags.html">
+        <span class="swatch-strip" style="background:#1a1a1a"></span>
+        <span class="era">Founding signatory &middot; 1985 / implemented 1995</span>
+        <b>Belgium</b>
+        <span class="desc">One of the five original signatories aboard the Moselle, just downriver from the treaty's namesake town.</span>
+      </a>
+      <a class="country-card" href="netherlands-flags.html">
+        <span class="swatch-strip" style="background:#c9762f"></span>
+        <span class="era">Founding signatory &middot; 1985 / implemented 1995</span>
+        <b>Netherlands</b>
+        <span class="desc">Founding member, and one of the original Benelux three whose earlier passport union informed the wider treaty.</span>
+      </a>
+      <a class="country-card" href="luxembourg-flags.html">
+        <span class="swatch-strip" style="background:#00a1de"></span>
+        <span class="era">Founding signatory &middot; 1985 / implemented 1995</span>
+        <b>Luxembourg</b>
+        <span class="desc">Gave the treaty its name &mdash; signed on a boat on the river just off the village of Schengen in Luxembourg's far southeast.</span>
+      </a>
+      <a class="country-card" href="portugal-flags.html">
+        <span class="swatch-strip" style="background:#0b6e3f"></span>
+        <span class="era">Signed 1991 &middot; implemented 1995</span>
+        <b>Portugal</b>
+        <span class="desc">Joined the Convention alongside Spain in 1991 and went live with the original launch group in March 1995.</span>
+      </a>
+      <a class="country-card" href="spain-flags.html">
+        <span class="swatch-strip" style="background:#aa151b"></span>
+        <span class="era">Signed 1991 &middot; implemented 1995</span>
+        <b>Spain</b>
+        <span class="desc">Joined alongside Portugal in 1991, part of the first enlargement beyond the five founders and live from day one in 1995.</span>
+      </a>
+      <a class="country-card" href="italy-flags.html">
+        <span class="swatch-strip" style="background:#0b7a3d"></span>
+        <span class="era">Signed 1990 &middot; implemented 1997</span>
+        <b>Italy</b>
+        <span class="desc">Signed the Convention in 1990 but didn't fully implement border-free travel until 1997, two years after the original launch.</span>
+      </a>
+      <a class="country-card" href="austria-flags.html">
+        <span class="swatch-strip" style="background:#7a5a9a"></span>
+        <span class="era">Signed 1995 &middot; implemented 1997</span>
+        <b>Austria</b>
+        <span class="desc">Joined in 1995, shortly after the zone first went live, and lifted its own internal checks in 1997.</span>
+      </a>
+      <a class="country-card" href="greece-flags.html">
+        <span class="swatch-strip" style="background:#2c5f8a"></span>
+        <span class="era">Signed 1992 &middot; implemented 2000</span>
+        <b>Greece</b>
+        <span class="desc">Signed in 1992 but, separated from the rest of the zone by non-Schengen neighbors, only completed implementation in 2000.</span>
+      </a>
+      <a class="country-card" href="sweden-flags.html">
+        <span class="swatch-strip" style="background:#1e2f96"></span>
+        <span class="era">Signed 1996 &middot; implemented 2001</span>
+        <b>Sweden</b>
+        <span class="desc">Joined in the 1996 Nordic wave, live from 2001 &mdash; folding the pre-existing Nordic Passport Union into the wider Schengen system.</span>
+      </a>
+      <a class="country-card" href="denmark-flags.html">
+        <span class="swatch-strip" style="background:#a4302a"></span>
+        <span class="era">Signed 1996 &middot; implemented 2001</span>
+        <b>Denmark</b>
+        <span class="desc">Joined with its Nordic neighbors in 1996, live in 2001; keeps other EU opt-outs but is a full Schengen member.</span>
+      </a>
+      <a class="country-card" href="finland-flags.html">
+        <span class="swatch-strip" style="background:#1a3a6b"></span>
+        <span class="era">Signed 1996 &middot; implemented 2001</span>
+        <b>Finland</b>
+        <span class="desc">Part of the 1996 Nordic accession, live in 2001, bringing Schengen to the EU's border with Russia.</span>
+      </a>
+      <a class="country-card" href="norway-flags.html">
+        <span class="swatch-strip" style="background:#c0392b"></span>
+        <span class="era">Associate (non-EU) &middot; 1996 / implemented 2001</span>
+        <b>Norway</b>
+        <span class="desc">Not an EU member, but joined via a 1996 association agreement built on the older Nordic Passport Union &mdash; live in 2001 with its Nordic neighbors.</span>
+      </a>
+      <a class="country-card" href="iceland-flags.html">
+        <span class="swatch-strip" style="background:#2f6b8a"></span>
+        <span class="era">Associate (non-EU) &middot; 1996 / implemented 2001</span>
+        <b>Iceland</b>
+        <span class="desc">Also outside the EU; joined the same 1996 Nordic association agreement as Norway and went live in 2001.</span>
+      </a>
+      <a class="country-card" href="czechia-flags.html">
+        <span class="swatch-strip" style="background:#1e2f96"></span>
+        <span class="era">Joined 2007 (land/sea) &middot; 2008 (air)</span>
+        <b>Czechia</b>
+        <span class="desc">Part of the large 2007&ndash;2008 wave tied to the EU's 2004 eastern enlargement &mdash; land and sea borders opened in December 2007, air borders that March.</span>
+      </a>
+      <a class="country-card" href="estonia-flags.html">
+        <span class="swatch-strip" style="background:#0072ce"></span>
+        <span class="era">Joined 2007 (land/sea) &middot; 2008 (air)</span>
+        <b>Estonia</b>
+        <span class="desc">Joined in the same 2007&ndash;2008 wave, bringing Schengen to the EU's northeastern border with Russia.</span>
+      </a>
+      <a class="country-card" href="hungary-flags.html">
+        <span class="swatch-strip" style="background:#b8863f"></span>
+        <span class="era">Joined 2007 (land/sea) &middot; 2008 (air)</span>
+        <b>Hungary</b>
+        <span class="desc">Joined with the 2007&ndash;2008 wave; its border with non-Schengen Serbia became a Schengen external frontier.</span>
+      </a>
+      <a class="country-card" href="latvia-flags.html">
+        <span class="swatch-strip" style="background:#9e3039"></span>
+        <span class="era">Joined 2007 (land/sea) &middot; 2008 (air)</span>
+        <b>Latvia</b>
+        <span class="desc">Joined in the 2007&ndash;2008 wave alongside its Baltic neighbors.</span>
+      </a>
+      <a class="country-card" href="lithuania-flags.html">
+        <span class="swatch-strip" style="background:#1c7a3d"></span>
+        <span class="era">Joined 2007 (land/sea) &middot; 2008 (air)</span>
+        <b>Lithuania</b>
+        <span class="desc">Joined in the 2007&ndash;2008 wave; its border with Kaliningrad and Belarus is now a Schengen external frontier.</span>
+      </a>
+      <a class="country-card" href="#" onclick="return false;">
+        <span class="swatch-strip" style="background:#cf142b"></span>
+        <span class="era">Joined 2007 (land/sea) &middot; 2008 (air)</span>
+        <b>Malta</b>
+        <span class="desc">The only island member of the 2007&ndash;2008 wave, its Mediterranean sea border now a Schengen external frontier.</span>
+      </a>
+      <a class="country-card" href="poland-flags.html">
+        <span class="swatch-strip" style="background:#1f8a8a"></span>
+        <span class="era">Joined 2007 (land/sea) &middot; 2008 (air)</span>
+        <b>Poland</b>
+        <span class="desc">Joined in the 2007&ndash;2008 wave; its long eastern border with Belarus, Ukraine, and Kaliningrad is now a Schengen external frontier.</span>
+      </a>
+      <a class="country-card" href="slovakia-flags.html">
+        <span class="swatch-strip" style="background:#d4924a"></span>
+        <span class="era">Joined 2007 (land/sea) &middot; 2008 (air)</span>
+        <b>Slovakia</b>
+        <span class="desc">Joined with the 2007&ndash;2008 wave, alongside its fellow former-Czechoslovak neighbor Czechia.</span>
+      </a>
+      <a class="country-card" href="slovenia-flags.html">
+        <span class="swatch-strip" style="background:#1e2f96"></span>
+        <span class="era">Joined 2007 (land/sea) &middot; 2008 (air)</span>
+        <b>Slovenia</b>
+        <span class="desc">Joined in the 2007&ndash;2008 wave, the first former Yugoslav republic to become a Schengen member.</span>
+      </a>
+      <a class="country-card" href="#" onclick="return false;">
+        <span class="swatch-strip" style="background:#d52b1e"></span>
+        <span class="era">Associate (non-EU) &middot; joined 2008</span>
+        <b>Switzerland</b>
+        <span class="desc">Not an EU member; joined Schengen through its own bilateral association agreement, with land borders opening in December 2008 and air borders in March 2009.</span>
+      </a>
+      <a class="country-card" href="#" onclick="return false;">
+        <span class="swatch-strip" style="background:#002b7f"></span>
+        <span class="era">Associate (non-EU) &middot; joined 2011</span>
+        <b>Liechtenstein</b>
+        <span class="desc">Also outside the EU; joined via its own association agreement in 2011, tied to its customs union with Schengen member Switzerland.</span>
+      </a>
+      <a class="country-card" href="croatia-flags.html">
+        <span class="swatch-strip" style="background:#a4302a"></span>
+        <span class="era">Joined 1 January 2023</span>
+        <b>Croatia</b>
+        <span class="desc">The most recent former Yugoslav republic to join, entering Schengen and adopting the euro on the same day.</span>
+      </a>
+      <a class="country-card" href="bulgaria-flags.html">
+        <span class="swatch-strip" style="background:#9a5a3a"></span>
+        <span class="era">Air/sea 2024 &middot; land checks lifted 2025</span>
+        <b>Bulgaria</b>
+        <span class="desc">Air and sea border checks with the rest of Schengen ended in March 2024, with land borders following; confirm the most current status before relying on an exact date.</span>
+      </a>
+      <a class="country-card" href="romania-flags.html">
+        <span class="swatch-strip" style="background:#8c2f6b"></span>
+        <span class="era">Air/sea 2024 &middot; land checks lifted 2025</span>
+        <b>Romania</b>
+        <span class="desc">Joined the same phased 2024&ndash;2025 process as Bulgaria, air and sea first, land borders following; confirm the most current status before relying on an exact date.</span>
+      </a>
+
+    </div>
+  </div>
+
+  <div class="about">
+    <h2>About this hub</h2>
+    <p>This hub deliberately does not use the atlas's usual interactive map &mdash; the real-coastline, era-slider visualization that the Former Yugoslavia and other hubs use to dissolve a border wherever the same government ruled both sides of it. That mechanic is a sovereignty visualization: it is built to show <em>who ruled whom</em>. Schengen is not a story about rulers. Every member state here kept its own government, army, laws, and elections throughout; all that changed was whether a passport got checked at the line between them. A real "open borders" visualization for a voluntary treaty like this is a genuinely different mechanic from the shared-ruler map, and building it properly is deferred to a later phase across the whole atlas, not improvised here. This page ships instead as a lighter placeholder: real accession history above, one card per member, each linking to that country's own flag-history page where one already exists elsewhere in the atlas.</p>
+    <p>Dates above reflect signing, association, and implementation milestones as commonly reported; Bulgaria and Romania's land-border status is noted with a caveat rather than an unqualified date, since that step lagged their 2024 air/sea accession and is worth double-checking against a current source.</p>
+  </div>
+
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This hub is one region in a larger set. See related hubs here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="european-union-hub.html"><b>European Union hub</b><span>A different list of members entirely</span></a>
+      <a class="link-card" href="eea-hub.html"><b>European Economic Area hub</b><span>Shares Iceland and Norway, but not Switzerland</span></a>
+      <a class="link-card" href="european-independents-hub.html"><b>Europe's Independents</b><span>Switzerland, Cyprus, and Malta</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, the European Commission and Council of the EU's official Schengen documentation, and Britannica.
+  </footer>
+
+</div>
+
+</body></html>

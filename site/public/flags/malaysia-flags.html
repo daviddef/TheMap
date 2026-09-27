@@ -1,0 +1,817 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+</style></head><body>
+<title>Flags of Malaysia</title>
+<meta name="description" content="A chronological, paint-ready atlas of every flag that flew over Malaysia, from the Malacca Sultanate's trading empire through British Malaya, Japanese occupation, independence in 1957, and the 1963 federation.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.08rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; font-size: .94rem; color: var(--muted); }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  .legend { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+
+  /* ---------- Timeline ---------- */
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1px; background: var(--hair); }
+  @media (max-width: 560px) { .timeline::before { left: 9px; } }
+  .entry { position: relative; padding-left: 46px; margin-bottom: 46px; }
+  @media (max-width: 560px) { .entry { padding-left: 30px; } }
+  .entry::before {
+    content: attr(data-n);
+    position: absolute; left: 1px; top: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--paper); outline: 1px solid var(--hair);
+    background: var(--card);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--brick); display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) { .entry::before { left: -5px; width: 18px; height: 18px; font-size: 9px; } }
+
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+  .card-head { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  @media (max-width: 620px) { .card-head { flex-direction: column; } }
+  .flag-box { flex: none; width: 168px; }
+  .flag-box svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-caption { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .card-title { font-size: 1.32rem; font-weight: 600; line-height: 1.18; margin: 0 0 10px; text-wrap: balance; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px; border: 1px solid var(--card-border); color: var(--muted);
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  /* Flip tooltip below tags near the top of the viewport so it isn't clipped */
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  /* Keep tooltips from overflowing the left/right edges on narrow screens */
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint { border-top: 1px solid var(--hair); }
+  details.paint > summary {
+    cursor: pointer; list-style: none; padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--adriatic); display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before { content: "+"; font-family: "Fraunces", serif; font-size: 15px; width: 14px; }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row { display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px; }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--card-border); border-radius: 2px; padding: 5px 9px 5px 5px; background: var(--paper); }
+  .swatch .chip { width: 20px; height: 20px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: 64ch; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 88px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 460px; height: auto; }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .iborder-line { transition: stroke-opacity 0.6s ease, stroke-width 0.6s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .ireg-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 700; text-anchor: middle; transition: fill .4s ease, stroke .4s ease; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="southeast-asia-hub.html">Southeast Asia hub</a></p>
+  <p class="kicker">Family research &middot; Southeast Asia atlas</p>
+  <h1>Flags of Malaysia</h1>
+  <p class="lede">Centuries before Malacca, Indian Ocean trade brought Hindu and Buddhist religious practice to small port kingdoms on the northern peninsula, above all Kedah Tua's Bujang Valley, whose temple ruins still stand; Kedah's court legendarily converted to Islam in 1136, well before Parameswara founded Malacca. From the Malacca Sultanate's trading empire commanding the strait that still bears its name, through more than a century of British colonial rule, brutal Japanese wartime occupation, independence for the Malayan peninsula in 1957, and a broader federation formed in 1963 &mdash; six flags across the peninsula and Borneo territories that became modern Malaysia.</p>
+  <p class="lede">The Jalur Gemilang ("Stripes of Glory") still carries fourteen stripes and a fourteen-point star today, a design fixed in 1963 for the federation's original fourteen states and territories &mdash; unchanged even after Singapore's 1965 departure left the count symbolically, rather than literally, accurate.</p>
+
+  <div class="scope-note">
+    <b>Scope of this page:</b> the lands of present-day Malaysia (Peninsular Malaya, Sabah, and Sarawak), c. 2nd century CE&ndash;present, seven entries. The timeline cards below follow the peninsula's own lineage for readability; the map just above the timeline splits the two halves apart, since Sabah and Sarawak's own separate colonial and wartime histories genuinely diverged from the peninsula's until 1963. Part of a larger atlas &mdash; see the map and linked pages at the bottom.
+  </div>
+
+  <div class="imap-section">
+    <h2>Two Malaysias, c. 100&ndash;1963</h2>
+    <p class="imap-sub">Peninsular Malaysia and East Malaysia (Sabah &amp; Sarawak, on Borneo) are separated by more than 600&nbsp;km of the South China Sea &mdash; and for most of their history, by entirely different governments too. Press play, or drag the slider, to watch the two halves converge only once, in 1963.</p>
+    <div class="rule-box">
+      <b>This is the one page in this batch with a genuine, documented internal split.</b> The peninsula and Borneo were never part of the same polity before 1963: different sultanates, then a crown colony (Straits Settlements) on one side against the private Brooke Raj and the British North Borneo Chartered Company on the other, then separate Crown Colonies even after both were nominally British. They are shown here as two disconnected regions, colored independently, because that is what they were &mdash; not one country with an internal border, but two countries that later merged.
+    </div>
+    <div class="imap-frame">
+      <div class="imap-controls">
+        <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="imap-year" id="iYearTag">c. 100&ndash;1136</span>
+        <input type="range" id="iSlider" min="0" max="7" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="imap-svg" viewBox="0 0 460 260" xmlns="http://www.w3.org/2000/svg">
+        <g class="context-label" pointer-events="none">
+          <text x="105" y="18">THAILAND</text>
+          <text x="151" y="182">SINGAPORE</text>
+          <text x="335" y="240">INDONESIA (Kalimantan)</text>
+          <text x="80" y="235">INDONESIA (Sumatra)</text>
+          <text x="304" y="98">BRUNEI</text>
+          <text x="213" y="130" style="opacity:.6">SOUTH CHINA SEA</text>
+        </g>
+        <path id="ireg-pen" class="ireg-fill" d="M114.8,98.2 L115.9,105.2 L124.7,103.6 L129.1,98.0 L132.2,99.3 L140.2,107.4 L145.8,116.4 L146.6,125.5 L145.2,131.7 L146.5,136.3 L147.5,144.3 L152.2,148.0 L157.5,159.9 L157.2,164.5 L147.7,165.4 L135.0,155.4 L119.0,144.7 L117.5,137.8 L109.7,128.8 L107.8,117.6 L103.0,110.3 L104.4,100.5 L101.5,94.7 L103.8,92.3 L114.8,98.2 Z"/>
+        <path id="ireg-bor" class="ireg-fill" d="M350.9,121.5 L341.0,126.1 L329.4,123.9 L313.9,123.8 L309.2,139.2 L304.0,143.9 L297.1,162.6 L286.2,165.5 L273.4,161.7 L267.0,162.9 L259.1,169.7 L250.5,168.8 L241.8,171.5 L232.6,163.9 L230.4,154.9 L240.3,159.5 L250.7,157.0 L253.4,145.6 L259.1,143.0 L275.3,140.1 L284.9,129.4 L291.5,120.9 L297.7,127.9 L300.5,123.3 L306.9,123.7 L308.3,108.5 L318.7,99.1 L325.5,88.5 L330.9,88.5 L337.8,95.3 L338.4,101.2 L347.3,104.9 L358.5,109.0 L357.6,114.3 L348.5,114.9 L350.9,121.5 Z"/>
+        <g font-family="IBM Plex Mono, monospace">
+          <text class="ireg-label" id="ilbl-pen" x="129" y="196" style="font-size:9px">PENINSULAR</text>
+          <text class="ireg-label" id="ilbl-pen2" x="129" y="207" style="font-size:9px">MALAYSIA</text>
+          <text class="ireg-label" id="ilbl-bor" x="298" y="186" style="font-size:9px">EAST MALAYSIA</text>
+          <text class="ireg-label" id="ilbl-bor2" x="298" y="197" style="font-size:8px">(SABAH &amp; SARAWAK)</text>
+        </g>
+      </svg>
+      <div class="imap-head">
+        <div class="imap-name" id="iEraName">Kedah Tua, Langkasuka &amp; early Hindu-Buddhist kingdoms</div>
+        <div class="imap-owners" id="iEraOwners"></div>
+      </div>
+      <div class="iflags-row" id="iFlagsRow"></div>
+      <p class="imap-story" id="iEraStory"></p>
+
+      <p class="map-note">Real traced coastlines for both halves; there is no shared land border between them to draw, since &ndash; unlike the internal splits elsewhere in this atlas &ndash; they are separated by open sea, not a survey line.</p>
+      <div class="imap-key" id="iLegend"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <!-- 1 -->
+    <div class="entry" data-n="7" id="era-1963">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#cc0001"/>
+              <rect y="14.3" width="300" height="14.3" fill="#f4efe1"/>
+              <rect y="42.9" width="300" height="14.3" fill="#f4efe1"/>
+              <rect y="71.4" width="300" height="14.3" fill="#f4efe1"/>
+              <rect y="100" width="300" height="14.3" fill="#f4efe1"/>
+              <rect y="128.6" width="300" height="14.3" fill="#f4efe1"/>
+              <rect y="157.1" width="300" height="14.3" fill="#f4efe1"/>
+              <rect y="185.7" width="300" height="14.3" fill="#f4efe1"/>
+              <rect width="130" height="107" fill="#010066"/>
+              <path d="M65,54 l8,18 20,2 -15,12 5,19 -18,-10 -18,10 5,-19 -15,-12 20,-2 Z" fill="#fecb00"/>
+            </svg>
+            <div class="flag-caption">Jalur Gemilang &mdash; fourteen stripes, crescent and star, adopted 1963</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1963 &ndash; present</div>
+            <h3 class="card-title">Malaysia (federation)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A sovereign federal state uniting formerly separate territories under one central government, formed in 1963 from Malaya, Singapore, Sabah, and Sarawak."><span class="dot" style="background:#a9762f"></span>Federation, independent</span><span class="tag" tabindex="0" data-tip="Malaya's independence-era prime minister who led the negotiations to form the wider Malaysian federation in 1963 and became its first prime minister."><span class="dot" style="background:#4a3b78"></span>Tunku Abdul Rahman</span><span class="tag" tabindex="0" data-tip="Article 3 of Malaysia's constitution establishes Islam as the religion of the Federation, while guaranteeing freedom of worship for the country's substantial non-Muslim population."><span class="dot" style="background:#8e3b62"></span>Islam (constitutional state religion)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="From the 1970s onward, hundreds of thousands of Indonesian workers migrate to Malaysia for plantation, construction, and domestic work, becoming the country's largest foreign-labor community by the 21st century."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="7" fill="#ce1126"/><rect y="7" width="20" height="7" fill="#fff"/></svg>Immigration: Indonesian migrant workers (1970s&ndash;)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The Sultanate of Johor remains one of Malaysia's constituent states today, 1528&ndash;present. Arms: crescent and star on blue, red keris field."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1e3a8c"/><path d="M64,34 a18,18 0 1,0 0,32 a14,14 0 1,1 0,-32 Z" fill="#f4efe1"/><path d="M34,70 L66,70 L60,100 L40,100 Z" fill="#a4302a"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Johor</span><span class="tag" tabindex="0" data-tip="The Sultanate of Perak remains one of Malaysia's constituent states today, 1528&ndash;present. Colors: white and yellow."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f4efe1"/><path d="M60,34 a16,16 0 1,0 0,30 a13,13 0 1,1 0,-30 Z" fill="#f2b705"/><path d="M28,66 Q50,50 72,66 L72,100 Q50,112 28,100 Z" fill="#f2b705" opacity="0.35"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Perak</span><span class="tag" tabindex="0" data-tip="The Sultanate of Kedah remains one of Malaysia's constituent states today, 1136&ndash;present. Royal color: yellow."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f2b705"/><path d="M50,24 L58,44 L50,56 L42,44 Z" fill="#1a1a1a"/><path d="M30,70 Q50,58 70,70 L70,104 Q50,116 30,104 Z" fill="none" stroke="#1a1a1a" stroke-width="3"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Kedah</span></div>
+            <p><span class="label">Who &amp; why:</span> on 16 September 1963, the Federation of Malaya merges with Singapore, Sabah, and Sarawak to form Malaysia. Singapore's own uneasy fit &mdash; both economic tension and communal politics between its majority-Chinese population and the peninsula's Malay-majority leadership &mdash; leads to its separation, by mutual (if strained) agreement, on 9 August 1965, after which the remaining thirteen states plus federal territories continue as Malaysia.</p>
+            <p><span class="label">What it represents:</span> fourteen alternating red and white stripes and a fourteen-point star, originally for the federation's fourteen states and territories at founding &mdash; the design was kept unchanged after Singapore's departure, now read as representing the states plus the federal government.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, fourteen equal horizontal stripes, blue canton with crescent and star.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#cc0001"></span><span class="meta"><span class="name">Red</span><span class="hex">#CC0001</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#010066"></span><span class="meta"><span class="name">Blue</span><span class="hex">#010066</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#fecb00"></span><span class="meta"><span class="name">Yellow</span><span class="hex">#FECB00</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="entry" data-n="6" id="era-1957">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#cc0001"/>
+              <rect y="18.2" width="300" height="18.2" fill="#f4efe1"/>
+              <rect y="54.5" width="300" height="18.2" fill="#f4efe1"/>
+              <rect y="90.9" width="300" height="18.2" fill="#f4efe1"/>
+              <rect y="127.3" width="300" height="18.2" fill="#f4efe1"/>
+              <rect y="163.6" width="300" height="18.2" fill="#f4efe1"/>
+              <rect width="130" height="109" fill="#010066"/>
+              <path d="M65,55 l8,18 20,2 -15,12 5,19 -18,-10 -18,10 5,-19 -15,-12 20,-2 Z" fill="#fecb00"/>
+            </svg>
+            <div class="flag-caption">the original eleven-stripe design, for Malaya's eleven states</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1957 &ndash; 1963</div>
+            <h3 class="card-title">Federation of Malaya (independent)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A sovereign federal state uniting Malaya's constituent sultanates and settlements under one central government at independence in 1957."><span class="dot" style="background:#a9762f"></span>Federation, independent</span><span class="tag" tabindex="0" data-tip="Independence leader who negotiated Malaya's freedom from Britain and became its first prime minister on 31 August 1957."><span class="dot" style="background:#4a3b78"></span>Tunku Abdul Rahman</span><span class="tag" tabindex="0" data-tip="The 1957 constitution establishes Islam as the religion of the Federation, carried forward from the individual Malay sultanates' own established faith, while guaranteeing freedom of worship."><span class="dot" style="background:#8e3b62"></span>Islam (constitutional state religion)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The Sultanate of Johor is one of Malaya's constituent states at independence, 1528&ndash;present. Arms: crescent and star on blue, red keris field."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1e3a8c"/><path d="M64,34 a18,18 0 1,0 0,32 a14,14 0 1,1 0,-32 Z" fill="#f4efe1"/><path d="M34,70 L66,70 L60,100 L40,100 Z" fill="#a4302a"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Johor</span><span class="tag" tabindex="0" data-tip="The Sultanate of Perak is one of Malaya's constituent states at independence, 1528&ndash;present. Colors: white and yellow."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f4efe1"/><path d="M60,34 a16,16 0 1,0 0,30 a13,13 0 1,1 0,-30 Z" fill="#f2b705"/><path d="M28,66 Q50,50 72,66 L72,100 Q50,112 28,100 Z" fill="#f2b705" opacity="0.35"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Perak</span><span class="tag" tabindex="0" data-tip="The Sultanate of Kedah is one of Malaya's constituent states at independence, 1136&ndash;present. Royal color: yellow."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f2b705"/><path d="M50,24 L58,44 L50,56 L42,44 Z" fill="#1a1a1a"/><path d="M30,70 Q50,58 70,70 L70,104 Q50,116 30,104 Z" fill="none" stroke="#1a1a1a" stroke-width="3"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Kedah</span></div>
+            <p><span class="label">Who &amp; why:</span> the Federation of Malaya gains independence from Britain on 31 August 1957, led by Tunku Abdul Rahman, following negotiations that also addressed the ongoing communist insurgency of the Malayan Emergency (1948&ndash;60). Independence covers only the peninsula's states at this stage; Singapore, Sabah, and Sarawak remain separate British territories.</p>
+            <p><span class="label">What it represents:</span> eleven red-and-white stripes and an eleven-point star, one for each of Malaya's original states, with the same crescent and star canton later carried forward into the 1963 federation flag.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, eleven equal horizontal stripes.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#cc0001"></span><span class="meta"><span class="name">Red</span><span class="hex">#CC0001</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#010066"></span><span class="meta"><span class="name">Blue</span><span class="hex">#010066</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="entry" data-n="5" id="era-1946">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#00247d"/>
+              <path d="M0,0 L300,200 M300,0 L0,200" stroke="#f4efe1" stroke-width="34"/>
+              <path d="M0,0 L300,200 M300,0 L0,200" stroke="#cf142b" stroke-width="14"/>
+              <rect x="125" width="50" height="200" fill="#f4efe1"/>
+              <rect y="75" width="300" height="50" fill="#f4efe1"/>
+              <rect x="137" width="26" height="200" fill="#cf142b"/>
+              <rect y="87" width="300" height="26" fill="#cf142b"/>
+            </svg>
+            <div class="flag-caption">British colonial ensign, flown over post-war Malaya</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1946 &ndash; 1957</div>
+            <h3 class="card-title">British Malaya (post-war)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Territory administered by Britain following its post-war return, first through the centralizing Malayan Union and then a more devolved federal arrangement."><span class="dot" style="background:#204b5c"></span>Colonial (Britain)</span><span class="tag" tabindex="0" data-tip="British colonial administrator installed as the first Governor of the short-lived Malayan Union in 1946, whose centralizing policies provoked fierce Malay political opposition."><span class="dot" style="background:#4a3b78"></span>Edward Gent</span><span class="tag" tabindex="0" data-tip="Britain's post-war administration established no colony-wide official church; Islam remained the recognized religion within each restored sultan's own state affairs, short of a single federation-wide establishment."><span class="dot" style="background:#8e3b62"></span>No colony-wide state religion (Islam recognized within states)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The Sultanate of Johor's status is restored under this postwar arrangement, 1528&ndash;present. Arms: crescent and star on blue, red keris field."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1e3a8c"/><path d="M64,34 a18,18 0 1,0 0,32 a14,14 0 1,1 0,-32 Z" fill="#f4efe1"/><path d="M34,70 L66,70 L60,100 L40,100 Z" fill="#a4302a"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Johor</span><span class="tag" tabindex="0" data-tip="The Sultanate of Perak's status is restored under this postwar arrangement, 1528&ndash;present. Colors: white and yellow."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f4efe1"/><path d="M60,34 a16,16 0 1,0 0,30 a13,13 0 1,1 0,-30 Z" fill="#f2b705"/><path d="M28,66 Q50,50 72,66 L72,100 Q50,112 28,100 Z" fill="#f2b705" opacity="0.35"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Perak</span><span class="tag" tabindex="0" data-tip="The Sultanate of Kedah's status is restored under this postwar arrangement, 1136&ndash;present. Royal color: yellow."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f2b705"/><path d="M50,24 L58,44 L50,56 L42,44 Z" fill="#1a1a1a"/><path d="M30,70 Q50,58 70,70 L70,104 Q50,116 30,104 Z" fill="none" stroke="#1a1a1a" stroke-width="3"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Kedah</span></div>
+            <p><span class="label">Who &amp; why:</span> Britain returns after Japan's surrender, first proposing the centralizing Malayan Union in 1946, then, after fierce Malay political opposition, replacing it with the more devolved Federation of Malaya in 1948, restoring the individual sultans' status. This same period sees the outbreak of the Malayan Emergency, a communist insurgency Britain and Commonwealth forces spend over a decade suppressing before independence.</p>
+            <p><span class="label">What it represents:</span> the British colonial Union flag, flown as the territory's own ensign under the reconstituted post-war administration.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#00247d"></span><span class="meta"><span class="name">Blue</span><span class="hex">#00247D</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="entry" data-n="4" id="era-1942">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#f4efe1"/>
+              <circle cx="150" cy="100" r="55" fill="#a4302a"/>
+            </svg>
+            <div class="flag-caption">Japanese military administration ensign</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1942 &ndash; 1945</div>
+            <h3 class="card-title">Japanese occupation</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Territory under direct Japanese military administration following the wartime conquest of the peninsula and Singapore."><span class="dot" style="background:#5c2a24"></span>Occupation (Japan)</span><span class="tag" tabindex="0" data-tip="Japanese general known as the 'Tiger of Malaya' who led the swift 1941-42 conquest of the peninsula and Singapore, becoming the campaign's most closely associated commander."><span class="dot" style="background:#4a3b78"></span>Yamashita Tomoyuki</span><span class="tag" tabindex="0" data-tip="State Shinto was Imperial Japan's own official religion, though the occupation did not force it on the largely Muslim and Buddhist local population, who continued their existing faiths under harsh military rule."><span class="dot" style="background:#8e3b62"></span>State Shinto (Japan's own state religion)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Japanese forces take Singapore, Britain's supposedly impregnable fortress, in February 1942 and occupy the whole Malayan peninsula, ruling it under direct military administration until 1945."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#fff"/><circle cx="10" cy="7" r="4" fill="#bc002d"/></svg>Conquered by: Japan</span><span class="tag" tabindex="0" data-tip="Japan's occupation authorities conscript tens of thousands of Malayan Tamil and Chinese laborers (romusha) to build the Thailand&ndash;Burma &quot;Death Railway&quot; and other wartime projects, with many thousands dying from disease, starvation, and brutal treatment."><span class="dot" style="background:#a3672f"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="2" fill="#ed1c24"/><rect y="2" width="20" height="2.33" fill="#fff"/><rect y="4.33" width="20" height="5.33" fill="#241d4f"/><rect y="9.67" width="20" height="2.33" fill="#fff"/><rect y="12" width="20" height="2" fill="#ed1c24"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#00732f"/><circle cx="10" cy="7" r="3.5" fill="#ffd700"/></svg></span>Emigration: forced laborers to the Death Railway</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The Sultanate of Johor continued under Japanese occupation, 1528&ndash;present. Arms: crescent and star on blue, red keris field."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1e3a8c"/><path d="M64,34 a18,18 0 1,0 0,32 a14,14 0 1,1 0,-32 Z" fill="#f4efe1"/><path d="M34,70 L66,70 L60,100 L40,100 Z" fill="#a4302a"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Johor</span><span class="tag" tabindex="0" data-tip="The Sultanate of Perak continued under Japanese occupation, 1528&ndash;present. Colors: white and yellow."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f4efe1"/><path d="M60,34 a16,16 0 1,0 0,30 a13,13 0 1,1 0,-30 Z" fill="#f2b705"/><path d="M28,66 Q50,50 72,66 L72,100 Q50,112 28,100 Z" fill="#f2b705" opacity="0.35"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Perak</span><span class="tag" tabindex="0" data-tip="The Sultanate of Kedah continued under Japanese occupation, 1136&ndash;present. Royal color: yellow."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f2b705"/><path d="M50,24 L58,44 L50,56 L42,44 Z" fill="#1a1a1a"/><path d="M30,70 Q50,58 70,70 L70,104 Q50,116 30,104 Z" fill="none" stroke="#1a1a1a" stroke-width="3"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Kedah</span></div>
+            <p><span class="label">Who &amp; why:</span> Japanese forces sweep down the peninsula after landing in December 1941, taking Singapore &mdash; Britain's supposedly impregnable fortress &mdash; in February 1942 in one of the war's most significant defeats for Britain. Occupation is marked by harsh treatment, particularly of the ethnic Chinese population, and by the growth of resistance movements, including communist guerrillas who later become central to the postwar Emergency.</p>
+            <p><span class="label">What it represents:</span> the Japanese naval and military ensign, flown over the occupied peninsula and Singapore; no distinct Malayan flag flew during this period.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="entry" data-n="3" id="era-1826">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#00247d"/>
+              <path d="M0,0 L300,200 M300,0 L0,200" stroke="#f4efe1" stroke-width="34"/>
+              <path d="M0,0 L300,200 M300,0 L0,200" stroke="#cf142b" stroke-width="14"/>
+              <rect x="125" width="50" height="200" fill="#f4efe1"/>
+              <rect y="75" width="300" height="50" fill="#f4efe1"/>
+              <rect x="137" width="26" height="200" fill="#cf142b"/>
+              <rect y="87" width="300" height="26" fill="#cf142b"/>
+            </svg>
+            <div class="flag-caption">British colonial ensign, over the Straits Settlements and Malay states</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1826 &ndash; 1942</div>
+            <h3 class="card-title">British Malaya (colonial)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Territory administered by Britain as a crown colony (the Straits Settlements) and as protectorates over the Malay sultanates."><span class="dot" style="background:#204b5c"></span>Colonial (Britain)</span><span class="tag" tabindex="0" data-tip="British colonial administrator who became first Governor of the newly consolidated Straits Settlements crown colony in 1826, overseeing Penang, Malacca, and Singapore."><span class="dot" style="background:#4a3b78"></span>Robert Fullerton</span><span class="tag" tabindex="0" data-tip="Britain established no official church over its colonial territories; Islam remained the recognized religion within each Malay sultanate's own internal affairs, advised but not displaced by British Residents."><span class="dot" style="background:#8e3b62"></span>No colony-wide state religion (Islam recognized within sultanates)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Colonial-era tin mining draws hundreds of thousands of Chinese laborers to the Malay peninsula from the mid-19th century onward, forming the core of the country's large ethnic Chinese community."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#f7d117"/><circle cx="4" cy="4" r="1.8" fill="#dc143c"/><path d="M6,10 q3,-4 6,-2 q3,2 6,-3" stroke="#1e3a8a" stroke-width="1.5" fill="none"/></svg>Immigration: Chinese tin-mine laborers (mid-1800s&ndash;)</span><span class="tag" tabindex="0" data-tip="Britain recruits hundreds of thousands of Indian, chiefly Tamil, indentured and contract laborers to work the peninsula's rubber plantations from the late 19th century, permanently reshaping Malaya's demographics."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#ff9933"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#138808"/><circle cx="10" cy="7" r="1.2" fill="none" stroke="#000080" stroke-width="0.4"/></svg>Immigration: Indian (Tamil) plantation laborers</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The Sultanate of Johor continued as one of the British-advised Malay states, 1528&ndash;present. Arms: crescent and star on blue, red keris field."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1e3a8c"/><path d="M64,34 a18,18 0 1,0 0,32 a14,14 0 1,1 0,-32 Z" fill="#f4efe1"/><path d="M34,70 L66,70 L60,100 L40,100 Z" fill="#a4302a"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Johor</span><span class="tag" tabindex="0" data-tip="The Sultanate of Perak continued as a British-advised Malay state, 1528&ndash;present. Colors: white and yellow."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f4efe1"/><path d="M60,34 a16,16 0 1,0 0,30 a13,13 0 1,1 0,-30 Z" fill="#f2b705"/><path d="M28,66 Q50,50 72,66 L72,100 Q50,112 28,100 Z" fill="#f2b705" opacity="0.35"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Perak</span><span class="tag" tabindex="0" data-tip="The Sultanate of Kedah continued as a British-advised Malay state, 1136&ndash;present. Royal color: yellow."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f2b705"/><path d="M50,24 L58,44 L50,56 L42,44 Z" fill="#1a1a1a"/><path d="M30,70 Q50,58 70,70 L70,104 Q50,116 30,104 Z" fill="none" stroke="#1a1a1a" stroke-width="3"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Kedah</span></div>
+            <p><span class="label">Who &amp; why:</span> Britain consolidates Penang, Malacca, and Singapore into the Straits Settlements crown colony in 1826, then extends control over the Malay peninsula's individual sultanates through a series of protectorate treaties from the 1870s to early 1900s &mdash; never fully annexing them outright, but governing through British Residents advising each sultan. Rubber and tin exports drive major Chinese and Indian immigration, reshaping the peninsula's demographics through this era.</p>
+            <p><span class="label">What it represents:</span> the British colonial Union flag, flown as the collective territories' own ensign; individual sultanates kept their own state flags for internal use throughout.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#00247d"></span><span class="meta"><span class="name">Blue</span><span class="hex">#00247D</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="entry" data-n="2" id="era-1826-1">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#a4302a"/>
+            </svg>
+            <div class="flag-caption">plain red field, the sultanate's traditional royal color</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">pre-1826</div>
+            <h3 class="card-title">Malacca Sultanate and successor sultanates</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A sovereign Islamic-Malay monarchy under its own sultan, the dominant trading power of the strait before Portuguese conquest."><span class="dot" style="background:#a9762f"></span>Sultanate, independent</span><span class="tag" tabindex="0" data-tip="Founder of the Malacca Sultanate around 1400, a Palembang prince who established the port-state that came to command the strait between Sumatra and the peninsula."><span class="dot" style="background:#4a3b78"></span>Parameswara</span><span class="tag" tabindex="0" data-tip="Malacca's rulers adopted Islam in the 15th century, making it the sultanate's official court religion and cementing the Malay Peninsula's lasting identity as a center of Islamic-Malay culture."><span class="dot" style="background:#8e3b62"></span>Islam (Malacca court religion)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Portuguese forces under Afonso de Albuquerque conquer the wealthy port of Malacca in 1511, ending the Malacca Sultanate's independent rule and seizing control of the strait's trade."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="8" height="14" fill="#046a38"/><rect x="8" width="12" height="14" fill="#da291c"/></svg>Conquered by: Portugal (1511)</span><span class="tag" tabindex="0" data-tip="The Dutch East India Company captures Malacca from Portugal in 1641 after a lengthy siege, ruling the port for nearly two centuries before ceding it to Britain in 1824."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#ae1c28"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#21468b"/></svg>Conquered by: Netherlands (1641)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Founded by Parameswara around 1400, the source dynasty of the wider Malay sultanate tradition, ended by Portuguese conquest in 1511, 1400&ndash;1511. Royal colors: yellow with a red kris."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f2b705"/><path d="M62,36 a18,18 0 1,0 0,32 a14,14 0 1,1 0,-32 Z" fill="#a4302a"/><path d="M40,72 L34,96 L46,96 L50,84 L54,96 L66,96 L60,72 Z" fill="#a4302a"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Melaka</span><span class="tag" tabindex="0" data-tip="Founded by a fleeing Malacca prince in 1528 as its direct successor state, the oldest continuously reigning line among Malaysia's sultanates, 1528&ndash;present. Arms: crescent and star on blue, red keris field."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1e3a8c"/><path d="M64,34 a18,18 0 1,0 0,32 a14,14 0 1,1 0,-32 Z" fill="#f4efe1"/><path d="M34,70 L66,70 L60,100 L40,100 Z" fill="#a4302a"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Johor</span><span class="tag" tabindex="0" data-tip="Also descended from the Malacca line, Perak's sultans bear a documented jata with a white elephant beneath the crescent and star, 1528&ndash;present. Colors: white and yellow."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f4efe1"/><path d="M60,34 a16,16 0 1,0 0,30 a13,13 0 1,1 0,-30 Z" fill="#f2b705"/><path d="M28,66 Q50,50 72,66 L72,100 Q50,112 28,100 Z" fill="#f2b705" opacity="0.35"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Perak</span><span class="tag" tabindex="0" data-tip="The oldest continuously reigning Malay royal house, tracing its Islamic-era founding to 1136, predating Malacca itself, 1136&ndash;present. Royal color: yellow."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f2b705"/><path d="M50,24 L58,44 L50,56 L42,44 Z" fill="#1a1a1a"/><path d="M30,70 Q50,58 70,70 L70,104 Q50,116 30,104 Z" fill="none" stroke="#1a1a1a" stroke-width="3"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Kedah</span></div>
+            <p><span class="label">Who &amp; why:</span> the Malacca Sultanate, founded around 1400 by Parameswara, becomes the region's dominant trading power, commanding the strait between Sumatra and the peninsula until Portugal conquers it in 1511. Its royal line and Islamic-Malay court culture continue through successor states, notably Johor, and the peninsula settles into a patchwork of independent Malay sultanates that persists until British commercial and colonial expansion begins in earnest in the early 1800s.</p>
+            <p><span class="label">What it represents:</span> no single flag unified the peninsula's sultanates; plain red, the color traditionally associated with Malacca's own royal banners, is shown here as a schematic reconstruction representing the era, not a single documented national flag.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no fixed flag; shown as the traditional royal color.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 7 -->
+    <div class="entry" data-n="1" id="era-100">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="120" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; pre-Islamic era, no flag survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 2nd century &ndash; 1136 CE</div>
+            <h3 class="card-title">Kedah Tua, Langkasuka &amp; early Hindu-Buddhist kingdoms</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Small Hindu-Buddhist port kingdoms along the peninsula, most notably Kedah Tua and Langkasuka, at times paying tribute to larger regional powers such as Srivijaya rather than acting as fully independent states throughout."><span class="dot" style="background:#6b5c4a"></span>Kingdom, independent (Hindu-Buddhist era)</span><span class="tag" tabindex="0" data-tip="No individual founder is confidently documented for Kedah Tua's earliest phase; later Kedah court chronicles credit a legendary ruler, Phra Ong Mahawangsa, with converting the kingdom to Islam in 1136, ending this era."><span class="dot" style="background:#4a3b78"></span>No single founder documented (Kedah Tua)</span><span class="tag" tabindex="0" data-tip="Hinduism and Buddhism, brought by Indian Ocean traders, are the attested religions of the archaeologically documented temple remains at Bujang Valley; Islam replaces them at Kedah's court from the legendary 1136 conversion onward."><span class="dot" style="background:#8e3b62"></span>Hinduism &amp; Buddhism (Islamized from 1136)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Indian Ocean traders and settlers from South Asia bring Hindu and Buddhist religious practice, Sanskrit-derived script, and Indian Ocean trade contact to the northern Malay peninsula from around the 2nd century CE, documented archaeologically at the Bujang Valley temple complex in Kedah."><span class="dot" style="background:#2f7a6b"></span>Contact/settlement: Indian Ocean traders (Hindu-Buddhist)</span><span class="tag" tabindex="0" data-tip="The Sumatra-based Srivijaya empire extends tributary influence and, at times, direct control over Kedah and other peninsula ports from around the 7th century, drawing them into its wider maritime trading network before Srivijaya's own decline in the 13th century."><span class="dot" style="background:#6b2c2c"></span>Tributary to: Srivijaya (from c. 7th c.)</span></div>
+            <p><span class="label">Who &amp; why:</span> from around the 2nd century CE, Indian Ocean trade brings Hindu and Buddhist religious practice to small port kingdoms on the northern Malay peninsula, most notably Kedah Tua (centered on the Bujang Valley, where temple ruins and inscriptions survive) and Langkasuka on the east coast, both known to Indian, Chinese, and Arab records under various transliterated names over the centuries. From around the 7th century these kingdoms fall within the tributary orbit of the Sumatra-based Srivijaya empire, and later that of Java's Majapahit, before Kedah's court legendarily converts to Islam in 1136 under Phra Ong Mahawangsa &mdash; setting the peninsula's later Malay-Islamic sultanate tradition in motion well before Parameswara founds Malacca around 1400.</p>
+            <p><span class="label">What it represents:</span> no flag or banner survives from Kedah Tua, Langkasuka, or any other Hindu-Buddhist-era Malay port kingdom; the surviving Bujang Valley temple remains are religious architecture, not a vexillological record. Shown here honestly blank rather than invented.</p>
+            <p><span class="label">World context:</span> this span opens within the era of Indian Ocean trade described in the 1st-century Greco-Roman Periplus of the Erythraean Sea, and runs through Srivijaya's maritime heyday alongside the construction of Java's Borobudur (8th&ndash;9th century) and Cambodia's earliest temples at Angkor (9th century onward) &mdash; contemporaneous Hindu-Buddhist wonders built by the same trading world that reached Kedah's own shores.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#6b5c4a"></span><b>Kingdom, independent (Hindu-Buddhist era)</b> &mdash; sovereign or tributary local rule</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Sultanate / Federation, independent</b> &mdash; sovereign rule</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#204b5c"></span><b>Colonial (Britain)</b> &mdash; direct or indirect British rule</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#5c2a24"></span><b>Occupation (Japan)</b> &mdash; wartime military rule</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the named ruler most associated with the era's start</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official/established faith, not the population's</div>
+    </div>
+  </div>
+
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for Malaysia lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/my/">Search Record Atlas for Malaysia &rarr;</a>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This page is one lineage in a larger set. See the region-wide hub and the other countries here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="southeast-asia-hub.html"><b>Southeast Asia hub</b><span>Eleven countries, thirteen centuries</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are close historical approximations for painting reference; pre-19th-century swatches are informed reconstructions, not official specifications. Map is schematic and not surveyed.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var IC = {
+    kedah_tua:"#6b5c4a", bor_indigenous:"#6e6047",
+    sultanate:"#a4302a", brunei_suz:"#6e6047", straits:"#00247d", brooke:"#7c2e1f",
+    japan:"#f4efe1", crowncolony:"#163846", malaya1957:"#cc0001", malaysia1963:"#cc0001"
+  };
+  var INAMES = {
+    kedah_tua:"Kedah Tua, Langkasuka &amp; early Hindu-Buddhist kingdoms", bor_indigenous:"Indigenous self-governing communities (pre-Brunei era)",
+    sultanate:"Malacca Sultanate &amp; successor sultanates", brunei_suz:"Brunei suzerainty &amp; local polities",
+    straits:"Straits Settlements / British Malaya", brooke:"Brooke Raj (Sarawak) &amp; North Borneo Chartered Company",
+    japan:"Japanese occupation", crowncolony:"Crown Colonies of Sarawak &amp; North Borneo",
+    malaya1957:"Federation of Malaya (independent)", malaysia1963:"Malaysia (federation)"
+  };
+  var IFLAGS = {
+    kedah_tua: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" fill="#c9a13c">DOCUMENTED</text>',
+    bor_indigenous: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" fill="#c9a13c">DOCUMENTED</text>',
+    sultanate: '<rect width="300" height="200" fill="#a4302a"/>',
+    brunei_suz: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" fill="#c9a13c">DOCUMENTED</text>',
+    straits: '<rect width="300" height="200" fill="#00247d"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#f4efe1" stroke-width="34"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#cf142b" stroke-width="14"/><rect x="125" width="50" height="200" fill="#f4efe1"/><rect y="75" width="300" height="50" fill="#f4efe1"/><rect x="137" width="26" height="200" fill="#cf142b"/><rect y="87" width="300" height="26" fill="#cf142b"/>',
+    brooke: '<rect width="300" height="200" fill="#241f14"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#fecb00" stroke-width="22"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#a4302a" stroke-width="8"/><circle cx="150" cy="100" r="18" fill="#241f14" stroke="#fecb00" stroke-width="3"/><path d="M150,90 l4,10 11,1 -8,7 3,10 -10,-6 -10,6 3,-10 -8,-7 11,-1 Z" fill="#fecb00"/>',
+    japan: '<rect width="300" height="200" fill="#f4efe1"/><circle cx="150" cy="100" r="55" fill="#a4302a"/>',
+    crowncolony: '<rect width="300" height="200" fill="#00247d"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#f4efe1" stroke-width="34"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#cf142b" stroke-width="14"/><rect x="125" width="50" height="200" fill="#f4efe1"/><rect y="75" width="300" height="50" fill="#f4efe1"/><rect x="137" width="26" height="200" fill="#cf142b"/><rect y="87" width="300" height="26" fill="#cf142b"/><circle cx="220" cy="120" r="26" fill="#fff" stroke="#6e6047" stroke-width="2"/>',
+    malaya1957: '<rect width="300" height="200" fill="#cc0001"/><rect y="18.2" width="300" height="18.2" fill="#f4efe1"/><rect y="54.5" width="300" height="18.2" fill="#f4efe1"/><rect y="90.9" width="300" height="18.2" fill="#f4efe1"/><rect y="127.3" width="300" height="18.2" fill="#f4efe1"/><rect y="163.6" width="300" height="18.2" fill="#f4efe1"/><rect width="130" height="109" fill="#010066"/><path d="M65,55 l8,18 20,2 -15,12 5,19 -18,-10 -18,10 5,-19 -15,-12 20,-2 Z" fill="#fecb00"/>',
+    malaysia1963: '<rect width="300" height="200" fill="#cc0001"/><rect y="14.3" width="300" height="14.3" fill="#f4efe1"/><rect y="42.9" width="300" height="14.3" fill="#f4efe1"/><rect y="71.4" width="300" height="14.3" fill="#f4efe1"/><rect y="100" width="300" height="14.3" fill="#f4efe1"/><rect y="128.6" width="300" height="14.3" fill="#f4efe1"/><rect y="157.1" width="300" height="14.3" fill="#f4efe1"/><rect y="185.7" width="300" height="14.3" fill="#f4efe1"/><rect width="130" height="107" fill="#010066"/><path d="M65,54 l8,18 20,2 -15,12 5,19 -18,-10 -18,10 5,-19 -15,-12 20,-2 Z" fill="#fecb00"/>'
+  };
+  function iFlagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (IFLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  var iLegendEl = document.getElementById("iLegend");
+  iLegendEl.innerHTML = Object.keys(IC).map(function (k) {
+    return '<span><span class="sw" style="background:' + IC[k] + '"></span>' + INAMES[k] + "</span>";
+  }).join("");
+
+  var ISNAP = [
+    { year:"c. 100–1136", name:"Kedah Tua, Langkasuka & early Hindu-Buddhist kingdoms", t:{ pen:IC.kedah_tua, bor:IC.bor_indigenous }, flagKeys:{ pen:"kedah_tua", bor:"bor_indigenous" },
+      story:"On the peninsula, small Hindu-Buddhist port kingdoms &mdash; above all Kedah Tua, centered on the Bujang Valley, and Langkasuka on the east coast &mdash; take shape from around the 2nd century CE through Indian Ocean trade contact, falling within the tributary orbit of Srivijaya from the 7th century before Kedah's court legendarily converts to Islam in 1136. No flag or banner survives from any of them. On Borneo, indigenous Dayak, Kadazan-Dusun, and Murut communities remain self-governing throughout this span, centuries before Brunei's own sultanate takes shape &mdash; the two territories share no political connection at all." },
+    { year:"pre-1826", name:"Divided: sultanates and Brunei suzerainty", t:{ pen:IC.sultanate, bor:IC.brunei_suz }, flagKeys:{ pen:"sultanate", bor:"brunei_suz" },
+      story:"On the peninsula, the Malacca Sultanate and its successor states (notably Johor) hold the strait's trade; no single flag unifies them, and plain red, Malacca's traditional royal color, stands in as a schematic reconstruction. On Borneo, the coast lies under the loose suzerainty of the Sultanate of Brunei, with Dayak, Kadazan-Dusun, and Murut communities largely self-governing inland &mdash; no flag survives for either side, and the two territories share no political connection at all." },
+    { year:"1826", name:"Straits Settlements formed; Borneo unchanged", t:{ pen:IC.straits, bor:IC.brunei_suz }, flagKeys:{ pen:"straits", bor:"brunei_suz" },
+      story:"Britain consolidates Penang, Malacca, and Singapore into the Straits Settlements crown colony in 1826, later extending protectorate treaties over the peninsula's individual sultanates. Borneo is untouched by this expansion for another fifteen years, remaining under Brunei's loose suzerainty and local rule &mdash; the first genuine divergence between the two halves of what is now Malaysia." },
+    { year:"1841", name:"Sarawak ceded to James Brooke; North Borneo follows in 1881", t:{ pen:IC.straits, bor:IC.brooke }, flagKeys:{ pen:"straits", bor:"brooke" },
+      story:"The Sultan of Brunei cedes Sarawak to the English adventurer James Brooke in 1841, founding a private dynasty of \"White Rajahs\" that rules for over a century. North Borneo follows a different path in 1881, chartered to the British North Borneo Company. Neither is ever part of the Straits Settlements or the peninsula's protected sultanates &mdash; shown here as one bracketed Borneo era, distinct from the peninsula throughout." },
+    { year:"1942", name:"Japanese occupation, both regions", t:{ pen:IC.japan, bor:IC.japan }, flagKeys:{ pen:"japan", bor:"japan" },
+      story:"Japanese forces sweep down the peninsula after landing in December 1941 and separately invade Borneo in January 1942, occupying Sarawak, North Borneo, and Brunei alongside Malaya and Singapore. For the only time before 1963, one single foreign power governs both halves of today's Malaysia at once &mdash; though still through two separate military administrations, never a unified one." },
+    { year:"1946", name:"Postwar: Malayan Union vs. Borneo Crown Colonies", t:{ pen:IC.straits, bor:IC.crowncolony }, flagKeys:{ pen:"straits", bor:"crowncolony" },
+      story:"Britain returns after Japan's surrender. On the peninsula, the centralizing Malayan Union gives way to the more devolved Federation of Malaya by 1948. On Borneo, Rajah Vyner Brooke cedes Sarawak to the British Crown on 1 July 1946, and the North Borneo Chartered Company transfers its territory that same year &mdash; both becoming ordinary Crown Colonies, administratively separate from the peninsula throughout." },
+    { year:"1957", name:"Malaya independent; Borneo still colonial", t:{ pen:IC.malaya1957, bor:IC.crowncolony }, flagKeys:{ pen:"malaya1957", bor:"crowncolony" },
+      story:"The Federation of Malaya gains independence from Britain on 31 August 1957 under Tunku Abdul Rahman, adopting an eleven-stripe flag for its eleven states. Sarawak and North Borneo remain separate British Crown Colonies for six more years, governed from London, with no role in Malaya's own independence." },
+    { year:"1963–present", name:"Malaysia: the two halves unite", t:{ pen:IC.malaysia1963, bor:IC.malaysia1963 }, flagKeys:{ pen:"malaysia1963", bor:"malaysia1963" },
+      story:"On 16 September 1963 the Federation of Malaya merges with Singapore, Sabah (the renamed North Borneo), and Sarawak to form Malaysia &mdash; the first and only time the peninsula and Borneo territories are governed as one state. Singapore separates in 1965; the fourteen-stripe flag, kept unchanged, still nods to the federation's original fourteen states and territories." }
+  ];
+
+  var IREGIONS = ["pen","bor"];
+  var IREGION_NAMES = { pen:"Peninsular Malaysia", bor:"East Malaysia (Sabah &amp; Sarawak)" };
+
+  function iTextColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+
+  var iYearTag = document.getElementById("iYearTag");
+  var iEraName = document.getElementById("iEraName");
+  var iEraOwners = document.getElementById("iEraOwners");
+  var iEraStory = document.getElementById("iEraStory");
+  var iFlagsRow = document.getElementById("iFlagsRow");
+  var iSlider = document.getElementById("iSlider");
+
+  function iRender(idx) {
+    var era = ISNAP[idx];
+    iYearTag.textContent = era.year;
+    iEraName.innerHTML = era.name;
+    iEraStory.innerHTML = era.story;
+
+    IREGIONS.forEach(function (id) {
+      document.getElementById("ireg-" + id).setAttribute("fill", era.t[id]);
+      var tcol = iTextColorFor(era.t[id]);
+      var tcolHalo = tcol === "#201a12" ? "#f7f1e3" : "#201a12";
+      ["ilbl-" + id, "ilbl-" + id + "2"].forEach(function (lid) {
+        var lbl = document.getElementById(lid);
+        if (lbl) { lbl.setAttribute("fill", tcol); lbl.setAttribute("stroke", tcolHalo); }
+      });
+    });
+
+    var penLabel = era.flagKeys.pen;
+    var borLabel = era.flagKeys.bor;
+    if (era.t.pen === era.t.bor) {
+      iEraOwners.innerHTML = "<b>" + INAMES[penLabel] + "</b>: " + IREGION_NAMES.pen + ", " + IREGION_NAMES.bor;
+    } else {
+      iEraOwners.innerHTML = "<b>" + INAMES[penLabel] + "</b>: " + IREGION_NAMES.pen + " &middot; <b>" + INAMES[borLabel] + "</b>: " + IREGION_NAMES.bor;
+    }
+
+    iFlagsRow.innerHTML = IREGIONS.map(function (id) {
+      return '<div class="iflag-chip">' + iFlagSvg(era.flagKeys[id]) + '<div class="ic-label">' + IREGION_NAMES[id] + '</div></div>';
+    }).join("");
+  }
+
+  iSlider.addEventListener("input", function () { iRender(parseInt(iSlider.value, 10)); });
+  iRender(0);
+
+  var iPlaying = false, iPlayTimer = null;
+  var iPlayBtn = document.getElementById("iPlayBtn");
+  function iStepPlay() {
+    var next = parseInt(iSlider.value, 10) + 1;
+    if (next > ISNAP.length - 1) { iStopPlay(); return; }
+    iSlider.value = next;
+    iRender(next);
+  }
+  function iStartPlay() {
+    iPlaying = true;
+    iPlayBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(iSlider.value, 10) >= ISNAP.length - 1) { iSlider.value = 0; iRender(0); }
+    iPlayTimer = setInterval(iStepPlay, 1700);
+  }
+  function iStopPlay() {
+    iPlaying = false;
+    iPlayBtn.innerHTML = "&#9654;";
+    clearInterval(iPlayTimer);
+  }
+  iPlayBtn.addEventListener("click", function () { iPlaying ? iStopPlay() : iStartPlay(); });
+})();
+
+  document.querySelectorAll(".tag[data-tip]").forEach(function (tag) {
+    tag.addEventListener("click", function (e) {
+      var wasOpen = tag.classList.contains("tip-open");
+      document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+      if (!wasOpen) tag.classList.add("tip-open");
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+  });
+</script>
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var html = '<h4>Genealogical records for this ground</h4>';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>
+
+</body></html>

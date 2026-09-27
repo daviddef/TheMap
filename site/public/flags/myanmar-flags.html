@@ -1,0 +1,820 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+</style></head><body>
+<title>Flags of Myanmar</title>
+<meta name="description" content="A chronological, paint-ready atlas of every flag that flew over Myanmar, from the Bagan, Toungoo, and Konbaung dynasties through British colonization, independence, and decades of military-dominated rule.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.08rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; font-size: .94rem; color: var(--muted); }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  .legend { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+
+  /* ---------- Timeline ---------- */
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1px; background: var(--hair); }
+  @media (max-width: 560px) { .timeline::before { left: 9px; } }
+  .entry { position: relative; padding-left: 46px; margin-bottom: 46px; }
+  @media (max-width: 560px) { .entry { padding-left: 30px; } }
+  .entry::before {
+    content: attr(data-n);
+    position: absolute; left: 1px; top: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--paper); outline: 1px solid var(--hair);
+    background: var(--card);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--brick); display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) { .entry::before { left: -5px; width: 18px; height: 18px; font-size: 9px; } }
+
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+  .card-head { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  @media (max-width: 620px) { .card-head { flex-direction: column; } }
+  .flag-box { flex: none; width: 168px; }
+  .flag-box svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-caption { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .card-title { font-size: 1.32rem; font-weight: 600; line-height: 1.18; margin: 0 0 10px; text-wrap: balance; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px; border: 1px solid var(--card-border); color: var(--muted);
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  /* Flip tooltip below tags near the top of the viewport so it isn't clipped */
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  /* Keep tooltips from overflowing the left/right edges on narrow screens */
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint { border-top: 1px solid var(--hair); }
+  details.paint > summary {
+    cursor: pointer; list-style: none; padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--adriatic); display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before { content: "+"; font-family: "Fraunces", serif; font-size: 15px; width: 14px; }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row { display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px; }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--card-border); border-radius: 2px; padding: 5px 9px 5px 5px; background: var(--paper); }
+  .swatch .chip { width: 20px; height: 20px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: 64ch; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 88px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 380px; height: auto; }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .iborder-line { transition: stroke-opacity 0.6s ease, stroke-width 0.6s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .ireg-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 700; text-anchor: middle; transition: fill .4s ease, stroke .4s ease; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="southeast-asia-hub.html">Southeast Asia hub</a></p>
+  <p class="kicker">Family research &middot; Southeast Asia atlas</p>
+  <h1>Flags of Myanmar</h1>
+  <p class="lede">From the Pyu city-states' millennium-long river-trade network and the Bagan, Toungoo, and Konbaung dynasties that in turn unified and reunified the Irrawaddy basin, through British colonization following three Anglo-Burmese wars, brutal Japanese wartime occupation, independence in 1948, and a political history dominated for most of the decades since by the military &mdash; eight entries tracing one of the region's longest-running struggles between civilian and military rule.</p>
+  <p class="lede">The current flag, adopted in 2010, has flown over both a short-lived democratic opening (2011&ndash;2021) and the military rule that returned after the February 2021 coup &mdash; a reminder that a flag's design and a country's freedoms don't always change together.</p>
+
+  <div class="scope-note">
+    <b>Scope of this page:</b> the lands of present-day Myanmar, c. 200 BCE&ndash;present, eight political entries. The timeline opens with the Pyu city-states, the region's first well-documented urban civilization, predating unified Burmese statehood by well over a thousand years. The Bagan, Toungoo, and Konbaung dynasties are combined into one long bridging entry, since no single flag is attested for the earlier two and the Konbaung royal peacock banner is used here to represent the whole pre-colonial span, with that scope made explicit. Part of a larger atlas &mdash; see the linked pages at the bottom.
+  </div>
+
+
+  <div class="imap-section">
+    <h2>Myanmar's own border, eight rulers</h2>
+    <p class="imap-sub">Myanmar's own real border, traced whole &mdash; one continuous territory whose government changed hands repeatedly without ever splitting into separately governed halves. Press play, or drag the slider, to watch who held all of it, era to era.</p>
+    <div class="rule-box">
+      <b>This is a single-region page &mdash; Myanmar's borders were never genuinely partitioned between two rival administrations.</b> The country changed rulers violently and often, but each transition (dynastic collapse, British annexation, Japanese occupation, independence, military coups) passed control of the whole territory at once, not a divided piece of it.
+    </div>
+    <div class="imap-frame">
+      <div class="imap-controls">
+        <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="imap-year" id="iYearTag">2021–present</span>
+        <input type="range" id="iSlider" min="0" max="7" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="imap-svg" viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg">
+        <g style="pointer-events:none">
+          <path fill="none" stroke="var(--hair)" stroke-width="1" opacity=".55" pointer-events="none" d="M-72.9,-53.7 L-60.4,-26.5 L-55.7,-12.5 L-61.3,0.7 L-39.0,25.1 L-31.5,43.1 L-2.6,57.5 L22.4,66.2 L58.5,70.5 L58.2,56.4 L67.1,47.6 L68.4,61.1 L99.0,65.1 L110.4,56.3 L115.5,50.2 L142.0,31.3 L168.0,37.4 L177.5,45.2 L174.0,52.9 L149.2,68.3 L142.5,87.6 L136.1,105.5 L125.6,116.6 L117.7,130.3 L107.4,108.6 L98.3,110.3 L108.0,101.7 L94.6,88.0 L81.2,76.6 L64.9,70.0 L69.7,86.5 L66.7,100.3 L69.0,118.8 L69.1,135.1 L45.3,148.0 L19.9,165.3 L-4.1,190.0 L-16.9,205.2 L-40.9,214.2 L-42.1,242.4 L-46.9,266.8 L-53.6,290.7 L-67.2,309.5 L-76.7,322.7 L-94.8,290.8 L-104.2,270.5 L-116.5,231.8 L-133.5,186.5 L-137.3,152.4 L-167.5,146.2 L-178.1,124.7 L-197.0,107.7 L-160.2,98.6 L-171.4,69.4 L-165.6,48.9 L-137.3,35.6 L-116.8,8.1 L-116.4,-16.4 L-125.4,-37.6 L-99.6,-40.1 L-72.9,-53.7 Z"/><path fill="none" stroke="var(--hair)" stroke-width="1" opacity=".55" pointer-events="none" d="M567.2,-248.7 L610.0,-221.8 L655.1,-218.9 L621.5,-188.0 L605.4,-155.0 L572.3,-142.5 L548.2,-130.4 L505.7,-110.3 L486.5,-111.9 L464.2,-113.9 L443.9,-88.8 L479.4,-86.2 L483.0,-69.5 L457.9,-45.7 L493.3,-1.7 L495.7,23.7 L473.9,61.7 L416.0,120.1 L382.0,130.1 L346.0,153.5 L321.4,134.7 L298.3,120.0 L256.9,121.2 L235.0,142.1 L226.6,132.9 L205.8,117.8 L182.6,88.7 L189.3,52.2 L168.0,37.4 L127.2,40.0 L99.6,48.2 L68.2,58.4 L29.7,46.0 L-2.2,28.8 L-48.7,9.4 L-55.3,-19.5 L-72.9,-53.7 L-109.6,-80.0 L-123.1,-94.8 L-112.2,-120.3 L-68.4,-131.5 L-42.8,-155.2 L-13.5,-191.0 L28.4,-217.2 L54.5,-242.4 L95.9,-209.4 L128.1,-183.3 L165.0,-152.5 L235.4,-149.6 L275.6,-137.1 L345.6,-154.5 L357.7,-176.2 L397.6,-188.3 L454.3,-208.3 L443.9,-225.6 L414.1,-220.9 L441.6,-245.3 L478.3,-278.8 L497.7,-298.9 L553.1,-276.4 L567.2,-248.7 Z"/><path fill="none" stroke="var(--hair)" stroke-width="1" opacity=".55" pointer-events="none" d="M245.1,265.0 L233.5,258.7 L222.5,259.0 L224.4,248.2 L213.1,248.3 L212.1,263.3 L205.2,283.3 L201.0,295.4 L201.9,305.3 L210.2,305.7 L215.5,318.2 L217.8,330.0 L224.9,337.9 L232.7,339.4 L239.4,346.5 L235.2,352.2 L225.7,346.8 L215.2,340.8 L213.0,343.2 L207.9,338.0 L205.7,331.2 L198.9,323.5 L192.6,317.0 L190.5,325.0 L188.1,317.4 L189.5,308.9 L193.3,295.8 L199.5,281.8 L206.6,269.0 L201.5,256.5 L201.7,250.2 L191.7,231.7 L188.6,224.8 L193.1,222.3 L197.8,210.4 L192.5,201.4 L184.4,191.4 L178.1,179.4 L183.6,176.9 L189.4,162.2 L198.5,161.5 L206.0,155.6 L213.4,152.5 L218.9,156.7 L219.7,164.9 L225.2,179.9 L225.5,192.2 L239.0,184.0 L242.9,186.4 L250.4,186.0 L253.0,181.3 L262.7,182.2 L272.5,193.3 L273.3,206.8 L283.7,218.7 L283.1,230.3 L278.9,236.5 L266.9,234.5 L250.3,237.1 L242.0,248.5 L245.1,265.0 Z"/><path fill="none" stroke="var(--hair)" stroke-width="1" opacity=".55" pointer-events="none" d="M278.9,236.5 L283.1,230.3 L283.7,218.7 L273.3,206.8 L272.5,193.3 L262.7,182.2 L253.0,181.3 L250.4,186.0 L242.9,186.4 L239.0,184.0 L225.5,192.2 L225.2,179.9 L228.3,165.5 L219.7,164.9 L218.9,156.7 L213.4,152.5 L216.1,147.4 L227.0,138.5 L228.2,141.7 L235.0,142.1 L233.1,126.5 L239.7,124.5 L247.3,135.3 L253.0,147.7 L268.8,147.8 L273.8,159.7 L265.6,163.3 L261.9,168.2 L277.3,176.4 L288.0,192.5 L296.1,204.6 L305.8,214.1 L309.0,223.8 L306.7,237.4 L295.3,232.4 L289.5,241.8 L278.9,236.5 Z"/><path fill="none" stroke="var(--hair)" stroke-width="1" opacity=".55" pointer-events="none" d="M117.7,130.3 L117.5,140.1 L113.0,138.0 L113.8,149.0 L110.1,141.9 L109.4,134.9 L107.0,128.3 L101.6,120.4 L89.8,119.8 L90.9,125.5 L86.9,133.1 L81.4,130.3 L79.6,132.8 L75.9,131.3 L71.0,130.1 L69.0,118.8 L64.5,108.5 L66.7,100.3 L58.8,96.6 L61.6,91.6 L69.7,86.5 L60.4,79.3 L64.9,70.0 L75.1,75.9 L81.2,76.6 L82.4,86.1 L94.6,88.0 L106.5,87.8 L113.9,90.1 L108.0,101.7 L102.2,102.5 L98.3,110.3 L105.3,117.4 L107.4,108.6 L111.0,108.6 L117.7,130.3 Z"/>
+          <g class="context-label">
+            <text x="12" y="103.2">INDIA</text><text x="287.3" y="14">CHINA</text><text x="219.8" y="251.8">THAILAND</text><text x="258.6" y="181.6">LAOS</text><text x="91.2" y="111.7">BANGLADESH</text>
+          </g>
+        </g>
+        <path id="ireg-mm-0" class="ireg-fill" d="M206.0,155.6 L198.5,161.5 L189.4,162.2 L183.6,176.9 L178.1,179.4 L184.4,191.4 L192.5,201.4 L197.8,210.4 L193.1,222.3 L188.6,224.8 L191.7,231.7 L200.3,242.6 L201.7,250.2 L201.5,256.5 L206.6,269.0 L199.5,281.8 L193.3,295.8 L192.0,285.7 L196.0,275.2 L191.7,267.1 L192.7,252.2 L187.5,245.1 L183.3,228.7 L181.0,211.5 L175.4,200.2 L167.0,207.0 L152.4,216.8 L145.2,215.5 L137.2,212.3 L141.6,195.4 L139.0,182.6 L128.9,166.8 L130.5,161.9 L122.9,160.1 L113.8,149.0 L113.0,138.0 L117.5,140.1 L117.7,130.3 L124.1,127.0 L122.7,121.2 L125.6,116.6 L126.1,102.4 L136.1,105.5 L141.9,94.2 L142.5,87.6 L149.6,76.1 L149.2,68.3 L165.9,58.8 L175.0,61.3 L174.0,52.9 L178.5,50.4 L177.5,45.2 L185.0,44.2 L189.3,52.2 L194.9,55.5 L195.3,66.0 L194.8,77.2 L182.6,88.7 L181.1,104.9 L194.6,102.6 L197.7,115.2 L205.8,117.8 L202.1,129.2 L211.6,134.3 L217.2,136.9 L226.6,132.9 L227.0,138.5 L216.1,147.4 L213.4,152.5 L206.0,155.6 Z"/>
+        <g font-family="IBM Plex Mono, monospace">
+          <text class="ireg-label" id="ilbl-mm-0" x="175.2" y="158.2">MYANMAR</text>
+        </g>
+      </svg>
+      <div class="imap-head">
+        <div class="imap-name" id="iEraName">Military rule (State Administration Council)</div>
+        <div class="imap-owners" id="iEraOwners"></div>
+      </div>
+      <div class="iflags-row" id="iFlagsRow"></div>
+      <p class="imap-story" id="iEraStory"></p>
+
+      <p class="map-note">Real traced coastline and border, no internal partition &mdash; see the rule box above for why.</p>
+      <div class="imap-key" id="iLegend"></div>
+    </div>
+  </div>
+  <div class="timeline">
+
+    <!-- 1 -->
+    <div class="entry" data-n="8" id="era-2021">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#fecb00"/>
+              <rect y="66.7" width="300" height="66.6" fill="#34b233"/>
+              <rect y="133.3" width="300" height="66.7" fill="#ea2839"/>
+              <path d="M150,80 l10,22 24,3 -17,17 4,24 -21,-11 -21,11 4,-24 -17,-17 24,-3 Z" fill="#f4efe1"/>
+            </svg>
+            <div class="flag-caption">yellow-green-red with a central white star, adopted 2010</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">2021 &ndash; present</div>
+            <h3 class="card-title">Military rule (State Administration Council)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Direct military rule reimposed after the February 2021 coup ousted the elected civilian government, run by a junta calling itself the State Administration Council."><span class="dot" style="background:#5c2a24"></span>Military rule</span><span class="tag" tabindex="0" data-tip="Commander-in-chief who led the February 2021 coup against the elected government and heads the ruling State Administration Council."><span class="dot" style="background:#4a3b78"></span>Min Aung Hlaing</span><span class="tag" tabindex="0" data-tip="The junta maintains no official state religion, though it continues to grant Buddhism the constitutionally recognized special position carried over from the 2008 charter."><span class="dot" style="background:#8e3b62"></span>No official state religion (Buddhism given special position)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Escalating civil war and conscription following the 2021 coup drive well over a million people to flee across the border into Thailand, India, and China, on top of more than two million internally displaced within the country by 2024."><span class="dot" style="background:#a3672f"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="2.33" fill="#a51931"/><rect y="2.33" width="20" height="2.33" fill="#fff"/><rect y="4.67" width="20" height="4.67" fill="#2d2a4a"/><rect y="9.33" width="20" height="2.33" fill="#fff"/><rect y="11.67" width="20" height="2.33" fill="#a51931"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#ff9933"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#138808"/><circle cx="10" cy="7" r="1.2" fill="none" stroke="#000080" stroke-width="0.3"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#de2910"/><g fill="#ffde00"><path d="M4,2 l0.6,1.3 1.4,0.15 -1,1 0.24,1.4 -1.24,-0.7 -1.24,0.7 0.24,-1.4 -1,-1 1.4,-0.15z"/><circle cx="8" cy="1.5" r="0.4"/><circle cx="9" cy="3" r="0.4"/><circle cx="9" cy="5" r="0.4"/><circle cx="8" cy="6" r="0.4"/></g></svg></span>Emigration: refugees &amp; conscription evaders (2021&ndash;)</span></div>
+            <p><span class="label">Who &amp; why:</span> the military (Tatmadaw), alleging electoral fraud in the November 2020 election won decisively by Aung San Suu Kyi's National League for Democracy, seizes power in a coup on 1 February 2021, detaining civilian leaders and declaring a state of emergency. Widespread civil disobedience and armed resistance follow, and the military-led State Administration Council continues to govern the country amid ongoing conflict.</p>
+            <p><span class="label">What it represents:</span> the same 2010 flag, unchanged since it first flew, now representing military rather than civilian rule.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">5:9, three equal horizontal bands.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#fecb00"></span><span class="meta"><span class="name">Yellow</span><span class="hex">#FECB00</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#34b233"></span><span class="meta"><span class="name">Green</span><span class="hex">#34B233</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#ea2839"></span><span class="meta"><span class="name">Red</span><span class="hex">#EA2839</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="entry" data-n="7" id="era-2011">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#fecb00"/>
+              <rect y="66.7" width="300" height="66.6" fill="#34b233"/>
+              <rect y="133.3" width="300" height="66.7" fill="#ea2839"/>
+              <path d="M150,80 l10,22 24,3 -17,17 4,24 -21,-11 -21,11 4,-24 -17,-17 24,-3 Z" fill="#f4efe1"/>
+            </svg>
+            <div class="flag-caption">the same flag, first flown over a nominally civilian government</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">2011 &ndash; 2021</div>
+            <h3 class="card-title">Democratic transition (civilian-led government)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A quasi-civilian government elected under a military-drafted constitution, opening a decade of political and economic liberalization before the 2021 coup ended it."><span class="dot" style="background:#204b5c"></span>Republic, transitional</span><span class="tag" tabindex="0" data-tip="Former general who became Myanmar&#x27;s first president under the new quasi-civilian system in 2011, initiating reforms including the release of Aung San Suu Kyi and economic opening."><span class="dot" style="background:#4a3b78"></span>Thein Sein</span><span class="tag" tabindex="0" data-tip="The 2008 constitution names no official state religion, though it grants Buddhism a constitutionally recognized &quot;special position&quot; given its majority following."><span class="dot" style="background:#8e3b62"></span>No official state religion (Buddhism given special position)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Military clearance operations in Rakhine State from August 2017 force more than 740,000 Rohingya Muslims to flee across the border into Bangladesh, the largest single refugee exodus in the country's modern history."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#006a4e"/><circle cx="9" cy="7" r="3.4" fill="#f42a41"/></svg>Emigration: Rohingya exodus to Bangladesh (2017)</span></div>
+            <p><span class="label">Who &amp; why:</span> a 2008 military-drafted constitution and 2010 elections usher in a nominally civilian government under President Thein Sein in 2011, beginning a period of political and economic liberalization; Aung San Suu Kyi, released from years of house arrest, and her party win landslide elections in 2015 and 2020, though the military retains guaranteed parliamentary seats and key ministries throughout.</p>
+            <p><span class="label">What it represents:</span> the flag adopted in 2010 under the new constitution &mdash; yellow, green, and red bands with a central white star &mdash; replacing the earlier socialist-era design.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">5:9, three equal horizontal bands.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#fecb00"></span><span class="meta"><span class="name">Yellow</span><span class="hex">#FECB00</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#34b233"></span><span class="meta"><span class="name">Green</span><span class="hex">#34B233</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="entry" data-n="6" id="era-1974">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#a4302a"/>
+              <rect width="130" height="86.7" fill="#21468b"/>
+              <g fill="#f4efe1"><circle cx="30" cy="20" r="6"/><circle cx="65" cy="15" r="6"/><circle cx="100" cy="20" r="6"/><circle cx="20" cy="45" r="6"/><circle cx="65" cy="55" r="14"/><path d="M65,58 h10 M60,63 a10,4 0 0 0 10,0" stroke="#a4302a" stroke-width="3" fill="none"/></g>
+            </svg>
+            <div class="flag-caption">red field, blue canton with a cogwheel, rice, and stars (1974)</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1974 &ndash; 2010</div>
+            <h3 class="card-title">Military-dominated rule (Ne Win era through SPDC)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Nearly four decades of direct or dominant military rule, from Ne Win&#x27;s one-party socialist state through the SLORC/SPDC juntas that followed his 1988 fall."><span class="dot" style="background:#5c2a24"></span>Military rule</span><span class="tag" tabindex="0" data-tip="General who seized power in a 1962 coup and, from the 1974 constitution, formalized one-party rule under his Burma Socialist Programme Party until stepping back amid the 1988 uprising."><span class="dot" style="background:#4a3b78"></span>Ne Win</span><span class="tag" tabindex="0" data-tip="Ne Win&#x27;s socialist state was officially secular, reversing U Nu&#x27;s earlier declaration of Buddhism as state religion; no state church was recognized through this military-dominated era."><span class="dot" style="background:#8e3b62"></span>Secular (no state religion)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="The junta's 1978 'Operation Naga Min' (King Dragon) citizenship-screening campaign in Arakan State drives roughly 200,000 Rohingya to flee across the border into Bangladesh."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#006a4e"/><circle cx="9" cy="7" r="3.4" fill="#f42a41"/></svg>Emigration: Rohingya expelled by Operation Naga Min (1978)</span></div>
+            <p><span class="label">Who &amp; why:</span> General Ne Win, who seized power in a 1962 coup, formalizes one-party military-socialist rule under a 1974 constitution as the Socialist Republic of the Union of Burma; a 1988 pro-democracy uprising is violently suppressed, and the military renames itself the State Law and Order Restoration Council, later the State Peace and Development Council, renaming the country Myanmar in 1989 while continuing to rule by force through this entire span.</p>
+            <p><span class="label">What it represents:</span> the 1974 socialist-era flag, a cogwheel encircled by a rice stalk and stars in a blue canton on red, symbolizing the ruling party's peasant-worker ideology.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">5:9.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#21468b"></span><span class="meta"><span class="name">Blue</span><span class="hex">#21468B</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="entry" data-n="5" id="era-1948">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#f4efe1"/>
+              <rect y="66.7" width="300" height="66.6" fill="#a4302a"/>
+              <rect y="133.3" width="300" height="66.7" fill="#21468b"/>
+              <rect width="130" height="86.7" fill="#21468b"/>
+              <path d="M65,20 l7,20 21,1 -17,14 6,20 -17,-12 -17,12 6,-20 -17,-14 21,-1 Z" fill="#f4efe1"/>
+              <circle cx="30" cy="48" r="5" fill="#f4efe1"/><circle cx="100" cy="48" r="5" fill="#f4efe1"/>
+            </svg>
+            <div class="flag-caption">blue canton with a large star, red-white-blue horizontal stripes</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1948 &ndash; 1974</div>
+            <h3 class="card-title">Union of Burma (independent)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A fully sovereign republic upon independence from Britain in January 1948, though one soon strained by ethnic insurgencies and, from 1962, direct military dominance."><span class="dot" style="background:#a9762f"></span>Republic, independent</span><span class="tag" tabindex="0" data-tip="Independence-era prime minister who led the Union of Burma from 1948, later briefly securing passage of a 1961 act declaring Buddhism the state religion before the 1962 military coup ousted him."><span class="dot" style="background:#4a3b78"></span>U Nu</span><span class="tag" tabindex="0" data-tip="The 1947 constitution was officially secular at independence; U Nu&#x27;s government briefly made Buddhism the state religion by the 1961 State Religion Promotion Act, reversed after the 1962 coup."><span class="dot" style="background:#8e3b62"></span>Secular, briefly Buddhism (1961&ndash;62)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Thousands of retreating Chinese Nationalist (Kuomintang) troops cross into northern Burma's Shan State after the 1949 Communist victory in China, prompting UN-brokered evacuation efforts in 1953&ndash;54 that fail to remove them all."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#fe0000"/><rect width="9" height="7" fill="#000095"/><circle cx="4.5" cy="3.5" r="1.8" fill="#fff"/><circle cx="4.5" cy="3.5" r="1.3" fill="#000095"/></svg>Immigration: Kuomintang remnant troops into Shan State (1949&ndash;)</span><span class="tag" tabindex="0" data-tip="Ne Win's 1962&ndash;64 nationalization of trade and industry, coupled with rising anti-Indian sentiment, drives an estimated 300,000 people of Indian descent to leave Burma for India and elsewhere."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#ff9933"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#138808"/><circle cx="10" cy="7" r="1.2" fill="none" stroke="#000080" stroke-width="0.3"/></svg>Emigration: Burmese Indians (1962&ndash;64 nationalization)</span></div>
+            <p><span class="label">Who &amp; why:</span> Burma gains independence from Britain on 4 January 1948, following independence hero Aung San's 1947 assassination just months before it was achieved; the new union struggles with ethnic insurgencies and political instability through the 1950s, until General Ne Win's 1962 coup ends civilian parliamentary government and installs military rule that persists, in one form or another, for most of the decades that follow.</p>
+            <p><span class="label">What it represents:</span> a large white star (union) flanked by smaller stars for the constituent states, in a blue canton on red-white-blue stripes, the newly independent union's chosen national design.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">5:9, three equal horizontal bands with a blue canton.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#21468b"></span><span class="meta"><span class="name">Blue</span><span class="hex">#21468B</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="entry" data-n="4" id="era-1942">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#fecb00"/>
+              <path d="M150,60 q40,10 32,58 q-6,32 -32,52 q-26,-20 -32,-52 q-8,-48 32,-58 Z" fill="#34b233"/>
+              <path d="M150,60 q40,10 32,58 q-30,-10 -32,-58 Z" fill="#1a7a2e"/>
+            </svg>
+            <div class="flag-caption">the peacock flag flown under Ba Maw's Japanese-sponsored State of Burma</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1942 &ndash; 1945</div>
+            <h3 class="card-title">Japanese occupation (State of Burma)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Territory administered under Japanese military occupation after Britain&#x27;s 1942 defeat, with a nominally independent client state proclaimed in 1943 under close Japanese oversight."><span class="dot" style="background:#5c2a24"></span>Occupation (Japan)</span><span class="tag" tabindex="0" data-tip="Nationalist politician installed as head of state of the Japanese-sponsored State of Burma in 1943, given the title Adipadi (leader) while real authority remained with Japanese military advisors."><span class="dot" style="background:#4a3b78"></span>Ba Maw</span><span class="tag" tabindex="0" data-tip="The occupation government established no official state religion; Theravada Buddhism remained the population&#x27;s dominant faith without formal establishment."><span class="dot" style="background:#8e3b62"></span>No official state religion</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Imperial Japan invades British Burma in January 1942 and drives out the colonial administration by May, occupying the country for the rest of the war."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#fff"/><circle cx="10" cy="7" r="4" fill="#bc002d"/></svg>Occupied by: Imperial Japan (1942&ndash;45)</span><span class="tag" tabindex="0" data-tip="An estimated half a million Indian residents flee overland to India in the chaotic 1942 'trek', escaping the Japanese invasion of Burma on foot through jungle and mountain routes with high mortality."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#ff9933"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#138808"/><circle cx="10" cy="7" r="1.2" fill="none" stroke="#000080" stroke-width="0.3"/></svg>Emigration: Indian residents' overland trek (1942)</span></div>
+            <p><span class="label">Who &amp; why:</span> Japanese forces invade in early 1942 and drive out British administration by May; Japan installs a nominally independent State of Burma under Ba Maw in August 1943, hoping to win nationalist support, while the exiled British colonial government continues to plan for reoccupation. Aung San, who had initially collaborated with Japan, switches sides in 1945 to join the Allied advance that retakes the country.</p>
+            <p><span class="label">What it represents:</span> a golden peacock, a traditional Burmese royal and national symbol dating to the Konbaung dynasty, on a green field &mdash; the flag of Ba Maw's Japanese-sponsored republic.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio recorded; shown at 3:2.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#fecb00"></span><span class="meta"><span class="name">Yellow</span><span class="hex">#FECB00</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#34b233"></span><span class="meta"><span class="name">Green (peacock)</span><span class="hex">#34B233</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="entry" data-n="3" id="era-1886">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#00247d"/>
+              <path d="M0,0 L300,200 M300,0 L0,200" stroke="#f4efe1" stroke-width="34"/>
+              <path d="M0,0 L300,200 M300,0 L0,200" stroke="#cf142b" stroke-width="14"/>
+              <rect x="125" width="50" height="200" fill="#f4efe1"/>
+              <rect y="75" width="300" height="50" fill="#f4efe1"/>
+              <rect x="137" width="26" height="200" fill="#cf142b"/>
+              <rect y="87" width="300" height="26" fill="#cf142b"/>
+            </svg>
+            <div class="flag-caption">British colonial ensign, flown over the Burma province and later colony</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1886 &ndash; 1942</div>
+            <h3 class="card-title">British Burma</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Burma administered as a British colony, first as a province of British India and from 1937 as a separate Crown colony, until the 1942 Japanese invasion."><span class="dot" style="background:#204b5c"></span>Colonial (Britain)</span><span class="tag" tabindex="0" data-tip="British monarch and Empress of India under whom the 1885 Third Anglo-Burmese War ended in the annexation of Upper Burma and the exile of King Thibaw in 1886."><span class="dot" style="background:#4a3b78"></span>Queen Victoria</span><span class="tag" tabindex="0" data-tip="British colonial administration maintained religious neutrality and established no state church over Burma; Theravada Buddhism remained the population&#x27;s dominant faith without formal establishment."><span class="dot" style="background:#8e3b62"></span>No official state religion</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="British colonial policy actively encourages large-scale migration of Indian laborers, moneylenders (notably Chettiars), and civil servants into Burma; by the 1930s Indian-born residents form a majority of Rangoon's population."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#ff9933"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#138808"/><circle cx="10" cy="7" r="1.2" fill="none" stroke="#000080" stroke-width="0.3"/></svg>Immigration: Indian laborers &amp; administrators (colonial era)</span></div>
+            <p><span class="label">Who &amp; why:</span> the third Anglo-Burmese War in 1885 ends the Konbaung dynasty entirely; Britain formally annexes what remains of the kingdom on 1 January 1886, initially administering Burma as a province of British India before separating it into its own colony in 1937. A nationalist movement builds through the interwar decades, and the country's push for self-rule is interrupted by the Japanese invasion of 1942.</p>
+            <p><span class="label">What it represents:</span> the British colonial Union flag, flown as the territory's own ensign, with no distinct Burmese national symbol under direct colonial rule.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#00247d"></span><span class="meta"><span class="name">Blue</span><span class="hex">#00247D</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#cf142b"></span><span class="meta"><span class="name">Red</span><span class="hex">#CF142B</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 7 -->
+    <div class="entry" data-n="2" id="era-1044">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#fecb00"/>
+              <path d="M150,55 q42,10 34,62 q-6,34 -34,54 q-28,-20 -34,-54 q-8,-52 34,-62 Z" fill="#34b233"/>
+              <path d="M150,55 q42,10 34,62 q-32,-10 -34,-62 Z" fill="#1a7a2e"/>
+            </svg>
+            <div class="flag-caption">the Konbaung royal peacock, shown for the whole pre-colonial span</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 1044 &ndash; 1886</div>
+            <h3 class="card-title">Bagan, Toungoo, and Konbaung dynasties</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Independent Burmese kingdoms spanning over eight centuries and three major dynasties &mdash; Bagan, Toungoo, and Konbaung &mdash; each unifying much of the country under its own crown before British conquest."><span class="dot" style="background:#a9762f"></span>Kingdom, independent</span><span class="tag" tabindex="0" data-tip="Founder-king who unified Burma under the Pagan (Bagan) Empire around 1044, establishing Theravada Buddhism as the kingdom&#x27;s religion and building the foundations of Burmese statehood."><span class="dot" style="background:#4a3b78"></span>Anawrahta</span><span class="tag" tabindex="0" data-tip="Theravada Buddhism, established as the kingdom&#x27;s religion under Anawrahta, remained the state faith of the Bagan, Toungoo, and Konbaung dynasties throughout this long era."><span class="dot" style="background:#8e3b62"></span>Theravada Buddhism</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Mongol forces under Kublai Khan invade the Bagan kingdom in a series of campaigns between 1277 and 1287, sacking the capital and forcing the fractured Burmese state into tributary submission, ending unified Bagan rule."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#0f2a4a"/><path d="M10,2 L10,12 M7,4 L13,4" stroke="#f0c419" stroke-width="1.2"/><circle cx="10" cy="2" r="1.2" fill="#f0c419"/></svg>Conquered by: Mongol Empire (1277&ndash;87 invasions)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Founded the first unified Burmese kingdom c.849&ndash;1297, centered on the temple city of Bagan. Emblem: the chinthe, a leonine guardian figure carved at temple entrances across the capital."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><g fill="#f9d616"><path d="M30,70 q0,-24 20,-24 q20,0 20,24 q-4,10 -20,12 q-16,-2 -20,-12 Z"/><path d="M50,46 q6,-8 14,-6 q-2,8 -10,10 Z"/><circle cx="40" cy="58" r="2.5" fill="#241f14"/></g><path d="M22,88 L30,80 L34,90 L26,96 Z" fill="#f9d616"/><path d="M78,88 L70,80 L66,90 L74,96 Z" fill="#f9d616"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Pagan Dynasty</span><span class="tag" tabindex="0" data-tip="Briefly built the largest empire in mainland Southeast Asian history under Tabinshwehti and Bayinnaung, 1510&ndash;1752. Its kings took titulature invoking the galon (garuda), the mythical bird-king of Burmese royal regalia."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#3a5a8c"/><g fill="#f4efe1"><path d="M50,30 L60,45 L50,50 L40,45 Z"/><path d="M50,50 L70,58 L60,80 L50,68 Z"/><path d="M50,50 L30,58 L40,80 L50,68 Z"/><path d="M46,30 L50,20 L54,30 Z"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Taungoo Dynasty</span><span class="tag" tabindex="0" data-tip="The last Burmese royal dynasty, 1752&ndash;1885, ending with Thibaw Min's exile after the third Anglo-Burmese War. Its royal peacock emblem still appears on the &#x27;fighting peacock&#x27; flag of Myanmar's democracy movement."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#0b6e3f"/><g fill="#f9d616"><path d="M50,80 q-16,0 -18,-20 q10,-10 18,-4 q8,-6 18,4 q-2,20 -18,20 Z"/><path d="M50,56 q4,-14 16,-16 q2,10 -6,18 Z"/><path d="M50,56 q-4,-14 -16,-16 q-2,10 6,18 Z"/><circle cx="44" cy="66" r="2.5" fill="#241f14"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Konbaung Dynasty</span></div>
+            <p><span class="label">Who &amp; why:</span> King Anawrahta founds the Bagan Empire around 1044, the first major unification of the Irrawaddy basin, before Mongol invasion breaks it apart in the late 1200s. The Toungoo dynasty reunifies the region in the 1500s, building briefly one of Southeast Asia's largest empires, and the Konbaung dynasty, founded by Alaungpaya in 1752, is the last independent Burmese kingdom &mdash; ended only by three nineteenth-century Anglo-Burmese wars (1824&ndash;26, 1852, 1885) that progressively strip its territory before Britain annexes what remains in 1886.</p>
+            <p><span class="label">What it represents:</span> no flag survives from Bagan or Toungoo; the golden peacock, the Konbaung dynasty's own royal emblem from the eighteenth century onward, is shown here representing the whole pre-colonial span as an informed reconstruction, not a documented banner from Bagan's own era.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no fixed flag; shown as the later Konbaung royal peacock emblem.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#fecb00"></span><span class="meta"><span class="name">Yellow</span><span class="hex">#FECB00</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#34b233"></span><span class="meta"><span class="name">Green (peacock)</span><span class="hex">#34B233</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 8 -->
+    <div class="entry" data-n="1" id="era-200bce">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder &mdash; no banner survives; Pyu material culture is known from brick stupas, urns, and inscriptions, not flags</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 200 BCE &ndash; 9th c. CE</div>
+            <h3 class="card-title">Pyu City-States (Irrawaddy Valley)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="No single Pyu state ever unified the Irrawaddy valley; the term covers a network of independent walled city-states &mdash; Sri Ksetra, Beikthano, Halin, and others &mdash; sharing language, script, and Buddhist culture but no common government."><span class="dot" style="background:#a9762f"></span>Fragmented / city-state network</span><span class="tag" tabindex="0" data-tip="The largest and longest-lasting Pyu city-state, near modern Pyay, and the presumed leading center of the loose Pyu network at its height in the mid-to-late first millennium CE."><span class="dot" style="background:#4a3b78"></span>Sri Ksetra (leading city-state)</span><span class="tag" tabindex="0" data-tip="Pyu cities practiced a mix of Theravada and Mahayana Buddhism alongside Hindu influences absorbed through trade contact with India, recorded in Pyu-script inscriptions and temple remains."><span class="dot" style="background:#8e3b62"></span>Buddhism (Theravada &amp; Mahayana, with Hindu influence)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Tibeto-Burman-speaking Pyu peoples migrate south into the Irrawaddy valley, likely from the Tibetan Plateau/Yunnan borderlands, establishing the region's first well-documented urban civilization by around the 2nd century BCE."><span class="dot" style="background:#2f7a6b"></span>Migration: Tibeto-Burman peoples into the Irrawaddy valley (from c. 200 BCE)</span><span class="tag" tabindex="0" data-tip="The Nanzhao kingdom of Yunnan launches repeated campaigns against the Pyu city-states between 832 and 835 CE, sacking cities and deporting population, fatally weakening the Pyu network and opening the valley to incoming Bamar migrants."><span class="dot" style="background:#6b2c2c"></span>Conquered by: Nanzhao Kingdom (832&ndash;835 CE campaigns)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Leading city-state:</span><span class="tag" tabindex="0" data-tip="Sri Ksetra, near modern Pyay, was the largest Pyu city by area and population, walled and moated, with monumental brick stupas still standing; part of the Pyu Ancient Cities UNESCO World Heritage listing."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#9c3b28"/><g fill="#f9d616"><path d="M50,20 L62,42 L38,42 Z"/><path d="M42,42 L58,42 L54,66 L46,66 Z"/><path d="M34,66 L66,66 L70,90 L30,90 Z"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Sri Ksetra</span></div>
+            <p><span class="label">Who &amp; why:</span> Tibeto-Burman-speaking Pyu peoples move south into the Irrawaddy valley by around the 2nd century BCE, building a network of walled, moated brick city-states &mdash; Sri Ksetra, Beikthano, and Halin foremost among them, now jointly inscribed as the Pyu Ancient Cities UNESCO World Heritage Site &mdash; that never unify under one crown but together form Myanmar's first well-documented urban civilization. Trade contact with India brings Buddhism and a Brahmi-derived Pyu script; the network flourishes as a link on overland and riverine routes between India and China for roughly a thousand years, until the Yunnan-based Nanzhao kingdom's campaigns of 832&ndash;835 CE sack Pyu cities and scatter their population, fatally weakening the network in the same span that incoming Bamar (Burman) migrants settle the region and, within two centuries, found the unified kingdom at Bagan.</p>
+            <p><span class="label">What it represents:</span> no flag or banner of any kind survives from the Pyu era; shown here honestly blank. Pyu material culture instead survives as monumental brick stupas, burial urns, and Pyu-script inscriptions at Sri Ksetra, Beikthano, and Halin.</p>
+            <p><span class="label">World context:</span> this millennium runs alongside the late Roman Republic and the Roman Empire it becomes, the Han dynasty's rise and fall in China, India's Gupta Empire (4th&ndash;6th c. CE) whose trade and Buddhist missionary contacts helped shape Pyu religion and script, and the construction of Java's Borobudur temple in the early 9th century CE &mdash; roughly contemporary with the Nanzhao campaigns that break the Pyu network apart.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested Pyu flag or banner of any kind.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Kingdom / Republic, independent</b> &mdash; sovereign rule</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#204b5c"></span><b>Colonial / transitional</b> &mdash; British rule, or civilian-military transition</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#5c2a24"></span><b>Occupation / Military rule</b> &mdash; wartime or military-dominated rule</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the named ruler most associated with the era's start</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official/established faith, not the population's</div>
+    </div>
+  </div>
+
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for Myanmar lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/mm/">Search Record Atlas for Myanmar &rarr;</a>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This page is one lineage in a larger set. See the region-wide hub and the other countries here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="southeast-asia-hub.html"><b>Southeast Asia hub</b><span>Eleven countries, thirteen centuries</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are close historical approximations for painting reference; pre-19th-century swatches are informed reconstructions, not official specifications. Map is schematic and not surveyed.
+  </footer>
+
+</div>
+
+
+<script>
+(function () {
+  var IC = { m2010: "#5c2a24", m1974: "#5c2a24", m1948: "#a9762f", mpeacock1943: "#5c2a24", mbritish: "#204b5c", mpeacockold: "#a9762f", mpyu: "#a9762f" };
+  var INAMES = { m2010: "Military rule (State Administration Council)", m1974: "Military-dominated rule (Ne Win era through SPDC)", m1948: "Union of Burma (independent)", mpeacock1943: "Japanese occupation (State of Burma)", mbritish: "British Burma", mpeacockold: "Bagan, Toungoo, and Konbaung dynasties", mpyu: "Pyu City-States (Irrawaddy Valley)" };
+  var IFLAGS = {
+    m2010: '<rect width="300" height="66.7" fill="#fecb00"/> <rect y="66.7" width="300" height="66.6" fill="#34b233"/> <rect y="133.3" width="300" height="66.7" fill="#ea2839"/> <path d="M150,80 l10,22 24,3 -17,17 4,24 -21,-11 -21,11 4,-24 -17,-17 24,-3 Z" fill="#f4efe1"/>',
+    m1974: '<rect width="300" height="200" fill="#a4302a"/> <rect width="130" height="86.7" fill="#21468b"/> <g fill="#f4efe1"><circle cx="30" cy="20" r="6"/><circle cx="65" cy="15" r="6"/><circle cx="100" cy="20" r="6"/><circle cx="20" cy="45" r="6"/><circle cx="65" cy="55" r="14"/><path d="M65,58 h10 M60,63 a10,4 0 0 0 10,0" stroke="#a4302a" stroke-width="3" fill="none"/></g>',
+    m1948: '<rect width="300" height="66.7" fill="#f4efe1"/> <rect y="66.7" width="300" height="66.6" fill="#a4302a"/> <rect y="133.3" width="300" height="66.7" fill="#21468b"/> <rect width="130" height="86.7" fill="#21468b"/> <path d="M65,20 l7,20 21,1 -17,14 6,20 -17,-12 -17,12 6,-20 -17,-14 21,-1 Z" fill="#f4efe1"/> <circle cx="30" cy="48" r="5" fill="#f4efe1"/><circle cx="100" cy="48" r="5" fill="#f4efe1"/>',
+    mpeacock1943: '<rect width="300" height="200" fill="#fecb00"/> <path d="M150,60 q40,10 32,58 q-6,32 -32,52 q-26,-20 -32,-52 q-8,-48 32,-58 Z" fill="#34b233"/> <path d="M150,60 q40,10 32,58 q-30,-10 -32,-58 Z" fill="#1a7a2e"/>',
+    mbritish: '<rect width="300" height="200" fill="#00247d"/> <path d="M0,0 L300,200 M300,0 L0,200" stroke="#f4efe1" stroke-width="34"/> <path d="M0,0 L300,200 M300,0 L0,200" stroke="#cf142b" stroke-width="14"/> <rect x="125" width="50" height="200" fill="#f4efe1"/> <rect y="75" width="300" height="50" fill="#f4efe1"/> <rect x="137" width="26" height="200" fill="#cf142b"/> <rect y="87" width="300" height="26" fill="#cf142b"/>',
+    mpeacockold: '<rect width="300" height="200" fill="#fecb00"/> <path d="M150,55 q42,10 34,62 q-6,34 -34,54 q-28,-20 -34,-54 q-8,-52 34,-62 Z" fill="#34b233"/> <path d="M150,55 q42,10 34,62 q-32,-10 -34,-62 Z" fill="#1a7a2e"/>',
+    mpyu: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>'
+  };
+  function iFlagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (IFLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  var iLegendEl = document.getElementById("iLegend");
+  iLegendEl.innerHTML = Object.keys(IC).map(function (k) {
+    return '<span><span class="sw" style="background:' + IC[k] + '"></span>' + INAMES[k] + "</span>";
+  }).join("");
+
+  var ISNAP = [
+    { year:"2021\u2013present", name:"Military rule (State Administration Council)", t:{ mm: IC.m2010 }, flagKeys:{ mm: "m2010" }, story:"The military (Tatmadaw) seizes power in a coup on 1 February 2021, alleging fraud in the 2020 election won decisively by Aung San Suu Kyi's party, and the State Administration Council continues to govern amid civil resistance. The 2010 flag flies unchanged &mdash; the same cloth, now standing for a government that overthrew the one elected under it." },
+    { year:"2011\u20132021", name:"Democratic transition (civilian-led government)", t:{ mm: IC.m2010 }, flagKeys:{ mm: "m2010" }, story:"A 2008 military-drafted constitution and 2010 elections usher in a nominally civilian government under President Thein Sein, beginning a decade of liberalization in which Aung San Suu Kyi's party wins landslide elections twice &mdash; before the military ends it all with the 2021 coup." },
+    { year:"1974\u20132010", name:"Military-dominated rule (Ne Win era through SPDC)", t:{ mm: IC.m1974 }, flagKeys:{ mm: "m1974" }, story:"General Ne Win's 1962 coup hardens into one-party military-socialist rule under the 1974 constitution; the 1988 uprising is violently suppressed, and successive juntas (SLORC, then SPDC) rename the country Myanmar in 1989 while ruling by force through this entire span." },
+    { year:"1948\u20131974", name:"Union of Burma (independent)", t:{ mm: IC.m1948 }, flagKeys:{ mm: "m1948" }, story:"Burma gains independence from Britain on 4 January 1948, months after independence hero Aung San's assassination. Ethnic insurgencies and political instability follow through the 1950s, until Ne Win's 1962 coup ends civilian parliamentary government for decades." },
+    { year:"1942\u20131945", name:"Japanese occupation (State of Burma)", t:{ mm: IC.mpeacock1943 }, flagKeys:{ mm: "mpeacock1943" }, story:"Japanese forces drive out British administration by mid-1942 and install a nominally independent State of Burma under Ba Maw in August 1943. Aung San, an initial collaborator, switches to the Allied side in 1945 as British and Commonwealth forces retake the country." },
+    { year:"1886\u20131942", name:"British Burma", t:{ mm: IC.mbritish }, flagKeys:{ mm: "mbritish" }, story:"The Third Anglo-Burmese War in 1885 ends the Konbaung dynasty; Britain formally annexes what remains of the kingdom on 1 January 1886, ruling it first as a province of British India, then as its own colony from 1937, until the 1942 Japanese invasion." },
+    { year:"c. 1044\u20131886", name:"Bagan, Toungoo, and Konbaung dynasties", t:{ mm: IC.mpeacockold }, flagKeys:{ mm: "mpeacockold" }, story:"King Anawrahta founds the Bagan Empire around 1044, the first major unification of the Irrawaddy basin. The Toungoo dynasty reunifies the region in the 1500s, and the Konbaung dynasty, founded in 1752, is the last independent Burmese kingdom &mdash; ended by three 19th-century Anglo-Burmese wars that culminate in Britain's 1886 annexation." },
+    { year:"c. 200 BCE\u20139th c. CE", name:"Pyu City-States (Irrawaddy Valley)", t:{ mm: IC.mpyu }, flagKeys:{ mm: "mpyu" }, story:"Tibeto-Burman-speaking Pyu peoples move into the Irrawaddy valley by around the 2nd century BCE, building a network of walled brick city-states &mdash; Sri Ksetra, Beikthano, and Halin foremost &mdash; that never unify under one crown and form Myanmar's first well-documented urban civilization. The Yunnan-based Nanzhao kingdom's campaigns of 832\u2013835 CE fatally weaken the network, opening the valley to the Bamar migrants who found Bagan around 1044. No flag or banner survives from any Pyu city-state, and with only one region on this map there is no internal line to draw." }
+  ];
+
+  var IREGIONS = ["mm"];
+  var IREGION_NAMES = { mm: "Myanmar" };
+  var IREGION_PATHS = { mm: ["ireg-mm-0"] };
+  var IREGION_LABELS = { mm: ["ilbl-mm-0"] };
+
+  function iTextColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+
+  var iYearTag = document.getElementById("iYearTag");
+  var iEraName = document.getElementById("iEraName");
+  var iEraOwners = document.getElementById("iEraOwners");
+  var iEraStory = document.getElementById("iEraStory");
+  var iFlagsRow = document.getElementById("iFlagsRow");
+  var iSlider = document.getElementById("iSlider");
+
+  function iRender(idx) {
+    var era = ISNAP[idx];
+    iYearTag.textContent = era.year;
+    iEraName.textContent = era.name;
+    iEraStory.innerHTML = era.story;
+
+    IREGIONS.forEach(function (id) {
+      var fillColor = era.t[id];
+      (IREGION_PATHS[id] || []).forEach(function (pid) {
+        var el = document.getElementById(pid);
+        if (el) el.setAttribute("fill", fillColor);
+      });
+      var tcol = iTextColorFor(fillColor);
+      var tcolHalo = tcol === "#201a12" ? "#f7f1e3" : "#201a12";
+      (IREGION_LABELS[id] || []).forEach(function (lid) {
+        var lbl = document.getElementById(lid);
+        if (lbl) { lbl.setAttribute("fill", tcol); lbl.setAttribute("stroke", tcolHalo); }
+      });
+    });
+
+    var fk0 = era.flagKeys[IREGIONS[0]];
+    iEraOwners.innerHTML = "<b>" + INAMES[fk0] + "</b>: whole territory";
+
+    iFlagsRow.innerHTML = IREGIONS.map(function (id) {
+      return '<div class="iflag-chip">' + iFlagSvg(era.flagKeys[id]) + '<div class="ic-label">' + IREGION_NAMES[id] + '</div></div>';
+    }).join("");
+  }
+
+  iSlider.addEventListener("input", function () { iRender(parseInt(iSlider.value, 10)); });
+  iRender(0);
+
+  var iPlaying = false, iPlayTimer = null;
+  var iPlayBtn = document.getElementById("iPlayBtn");
+  function iStepPlay() {
+    var next = parseInt(iSlider.value, 10) + 1;
+    if (next > ISNAP.length - 1) { iStopPlay(); return; }
+    iSlider.value = next;
+    iRender(next);
+  }
+  function iStartPlay() {
+    iPlaying = true;
+    iPlayBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(iSlider.value, 10) >= ISNAP.length - 1) { iSlider.value = 0; iRender(0); }
+    iPlayTimer = setInterval(iStepPlay, 1700);
+  }
+  function iStopPlay() {
+    iPlaying = false;
+    iPlayBtn.innerHTML = "&#9654;";
+    clearInterval(iPlayTimer);
+  }
+  iPlayBtn.addEventListener("click", function () { iPlaying ? iStopPlay() : iStartPlay(); });
+})();
+</script>
+
+<script>
+  document.querySelectorAll(".tag[data-tip]").forEach(function (tag) {
+    tag.addEventListener("click", function (e) {
+      var wasOpen = tag.classList.contains("tip-open");
+      document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+      if (!wasOpen) tag.classList.add("tip-open");
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+  });
+</script>
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var html = '<h4>Genealogical records for this ground</h4>';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>
+
+</body></html>

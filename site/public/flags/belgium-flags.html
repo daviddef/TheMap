@@ -1,0 +1,956 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+</style></head><body>
+<title>Flags of Belgium</title>
+<meta name="description" content="A chronological, paint-ready atlas of every flag that flew over Belgium, from the Burgundian dukes to the kingdom of today — with a real traced map of each era, including the two 20th-century German occupations.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c; --tile-sea: #b9d3da;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f; --tile-sea: #17303a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f; --tile-sea: #17303a;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.08rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; font-size: .94rem; color: var(--muted); }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  .legend { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+
+  /* ---------- Timeline ---------- */
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1px; background: var(--hair); }
+  @media (max-width: 560px) { .timeline::before { left: 9px; } }
+  .entry { position: relative; padding-left: 46px; margin-bottom: 46px; }
+  @media (max-width: 560px) { .entry { padding-left: 30px; } }
+  .entry::before {
+    content: attr(data-n);
+    position: absolute; left: 1px; top: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--paper); outline: 1px solid var(--hair);
+    background: var(--card);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--brick); display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) { .entry::before { left: -5px; width: 18px; height: 18px; font-size: 9px; } }
+
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+  .card-head { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  @media (max-width: 620px) { .card-head { flex-direction: column; } }
+  .flag-box { flex: none; width: 168px; }
+  .flag-box svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-caption { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .card-title { font-size: 1.32rem; font-weight: 600; line-height: 1.18; margin: 0 0 10px; text-wrap: balance; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px; border: 1px solid var(--card-border); color: var(--muted);
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  /* Flip tooltip below tags near the top of the viewport so it isn't clipped */
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  /* Keep tooltips from overflowing the left/right edges on narrow screens */
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint { border-top: 1px solid var(--hair); }
+  details.paint > summary {
+    cursor: pointer; list-style: none; padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--adriatic); display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before { content: "+"; font-family: "Fraunces", serif; font-size: 15px; width: 14px; }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row { display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px; }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--card-border); border-radius: 2px; padding: 5px 9px 5px 5px; background: var(--paper); }
+  .swatch .chip { width: 20px; height: 20px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: none; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 88px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 320px; height: auto; }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .ireg-label { font-family: "Fraunces", serif; font-weight: 600; text-anchor: middle; transition: fill .4s ease, stroke .4s ease; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2.5px; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .8; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; pointer-events: none; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="low-countries-hub.html">Low Countries hub</a></p>
+  <p class="kicker">Family research &middot; Phase 6b of the world atlas</p>
+  <h1>Flags of Belgium</h1>
+  <p class="lede">Long before Belgium existed as an idea, Julius Caesar's legions carved the province of Gallia Belgica &mdash; the source of the modern name &mdash; out of the fierce Belgae tribes, and Rome's fall left a patchwork of feudal counties, a duchy, and a prince-bishopric with no shared government for half a millennium. Belgium's own borders were then fixed by other people's decisions for four and a half centuries before its own 1830 revolution &mdash; a Burgundian purchase, a Habsburg succession, a French annexation, a peace conference in Vienna &mdash; and then, twice in the 20th century, briefly erased again by German occupation. Eleven political entities, and a black-yellow-red tricolor that has now outlasted every regime that ever flew a different flag over these same provinces.</p>
+  <p class="lede">Belgium's flag colors come from the coat of arms of the old Duchy of Brabant &mdash; a black lion with red claws and tongue on a gold field &mdash; abstracted into three vertical bands by the revolutionaries of 1830, deliberately styled after republican France's tricolor rather than the horizontal Dutch one they had just rebelled against.</p>
+
+  <div class="scope-note">
+    <b>Scope of this page:</b> the lands of present-day Belgium, c. 57 BCE&ndash;present, eleven political entities. Part of a larger atlas &mdash; see the Low Countries hub map and linked pages at the bottom.
+  </div>
+
+  <div class="imap-section">
+    <h2>One country, on a real map, 57 BCE&ndash;present</h2>
+    <p class="imap-sub">Belgium doesn't get this atlas's usual split-border treatment. Its historic north/south linguistic divide &mdash; Dutch-speaking Flanders and French-speaking Wallonia, formalized through federal reforms between 1970 and 1993 &mdash; is genuine, but it's an internal, negotiated devolution of a single existing state, not two territories separately conquered or ruled by rival foreign powers at the same time the way Hungary's Royal/Ottoman split was. Inventing a military-style partition line here would misrepresent what actually happened, so this map instead traces a single Belgian outline &mdash; a real shape, lifted from the same boundary data as the hub map above &mdash; and simply recolors it as control changes hands, including the two 20th-century interruptions when it briefly wasn't self-governed at all.</p>
+    <div class="rule-box">
+      <b>The Belgian tricolor is younger than it looks, and the country under it was occupied twice.</b> The flag itself dates only to 1830. But it has now flown continuously since 1944 &mdash; longer than any single flag flew over these provinces before it &mdash; broken only by two German occupations, four years in the First World War and four in the Second, both of which get their own frame below rather than being folded silently into the Kingdom's story.
+    </div>
+    <div class="imap-frame">
+      <div class="imap-controls">
+        <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="imap-year" id="iYearTag">57 BCE</span>
+        <input type="range" id="iSlider" min="0" max="11" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="imap-svg" viewBox="15 265 315 270" xmlns="http://www.w3.org/2000/svg">
+        <rect x="15" y="265" width="315" height="270" fill="var(--card)"/>
+        <path fill="var(--tile-sea)" d="M91.9,296.1 L91.9,265 L15,265 L15,320.3 L30.0,320.3 Z"/>
+        <path class="ireg-context" fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" d="M113.0,414.9 L166.9,472.9 L206.5,463.3 L274.1,519.3 L291.3,530.0 L313.6,527.4 L350.0,559.6 L461.3,582.2 L422.3,666.4 L412.5,754.0 L391.3,775.0 L356.1,763.7 L358.6,794.9 L302.1,864.0 L301.0,919.6 L337.8,900.4 L364.4,954.3 L361.2,989.0 L383.9,1035.2 L357.1,1072.6 L377.0,1167.7 L418.9,1183.3 L410.0,1236.7 L340.1,1306.1 L187.8,1272.8 L75.3,1312.7 L66.5,1386.7 L-23.0,1402.7 L-109.9,1347.1 L-138.0,1373.6 L-280.1,1317.8 L-310.9,1270.0 L-270.9,1196.3 L-256.2,951.4 L-335.9,822.4 L-392.9,760.2 L-510.9,712.9 L-518.7,623.2 L-418.5,596.5 L-288.9,628.1 L-313.4,489.0 L-240.5,541.7 L-60.7,445.9 L-37.5,345.1 L30.0,320.3 L41.2,363.5 L77.1,365.6 L113.0,414.9 Z"/>
+        <path class="ireg-context" fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" d="M304.9,30.0 L369.1,33.5 L383.5,75.0 L364.3,187.6 L344.7,233.8 L298.3,233.9 L311.3,362.7 L268.9,334.0 L220.0,280.2 L148.4,305.7 L91.9,296.1 L131.7,262.3 L199.3,81.4 L304.9,30.0 Z"/>
+        <path class="ireg-context" fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" d="M602.0,-151.0 L603.4,-103.5 L681.4,-74.9 L680.6,-31.3 L759.1,-54.3 L802.5,-88.0 L889.7,-39.5 L926.2,-0.3 L944.2,62.2 L922.7,95.0 L950.7,138.8 L969.8,204.6 L963.8,247.0 L995.5,325.5 L961.0,338.3 L940.6,324.2 L921.3,347.6 L865.8,371.4 L837.2,402.0 L781.0,428.8 L794.6,465.3 L802.7,517.1 L842.1,546.7 L885.7,599.5 L858.5,656.2 L830.8,671.8 L841.7,751.9 L834.5,772.8 L810.4,747.6 L773.4,743.8 L718.2,765.9 L650.1,760.6 L639.1,793.1 L600.0,758.9 L576.7,765.7 L494.0,728.1 L478.1,754.8 L412.5,754.0 L422.3,666.4 L461.3,582.2 L350.0,559.6 L313.6,527.4 L318.0,473.5 L302.5,445.8 L311.3,362.7 L298.3,233.9 L344.7,233.8 L364.3,187.6 L383.5,75.0 L369.1,33.5 L384.2,7.4 L448.7,0.7 L463.0,27.9 L515.5,-32.7 L497.8,-78.8 L494.3,-148.5 L552.6,-132.3 L602.0,-151.0 Z"/>
+        <path class="ireg-context" fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" d="M302.5,445.8 L318.0,473.5 L313.6,527.4 L291.3,530.0 L274.1,519.3 L282.4,450.4 L302.5,445.8 Z"/>
+        <g class="context-label">
+          <text x="110" y="478">FRANCE</text>
+          <text x="248" y="295">NETHERLANDS</text>
+          <text x="304" y="433">GERMANY</text>
+          <text x="287" y="490">LUXEMBOURG</text>
+        </g>
+        <path id="ireg-be" class="ireg-fill" d="M91.9,296.1 L148.4,305.7 L220.0,280.2 L268.9,334.0 L311.3,362.7 L302.5,445.8 L282.4,450.4 L274.1,519.3 L206.5,463.3 L166.9,472.9 L113.0,414.9 L77.1,365.6 L41.2,363.5 L30.0,320.3 L91.9,296.1 Z"/>
+        <text class="ireg-label" id="ilbl-be" x="181" y="389">BELGIUM</text>
+      </svg>
+      <div class="imap-head">
+        <div class="imap-name" id="iEraName">Roman Gallia Belgica and the Frankish/feudal principalities</div>
+        <div class="imap-owners" id="iEraOwners"></div>
+      </div>
+      <div class="iflags-row" id="iFlagsRow"></div>
+      <p class="imap-story" id="iEraStory"></p>
+
+      <p class="map-note">Real traced outline (simplified from GeoJSON boundary data, BEL, current-day borders) &mdash; shown at modern borders throughout for consistency, one color per governing power, no internal line invented. Neighboring France, the Netherlands, Germany, and Luxembourg are traced from the same source data and shown faint, for geographic context only.</p>
+      <div class="imap-key" id="iLegend"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <!-- 1 -->
+    <div class="entry" data-n="11" id="era-1944">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="100" height="200" fill="#000000"/>
+              <rect x="100" width="100" height="200" fill="#fdda24"/>
+              <rect x="200" width="100" height="200" fill="#ef3340"/>
+            </svg>
+            <div class="flag-caption">black&ndash;yellow&ndash;red, vertical bands, flown since liberation</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1944 &ndash; present</div>
+            <h3 class="card-title">Kingdom of Belgium</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Sovereign state</span><span class="tag" tabindex="0" data-tip="King who remained with the army through the 1940 occupation rather than following his government into exile, still formally head of state at the September 1944 liberation despite the bitter postwar controversy that followed."><span class="dot" style="background:#4a3b78"></span>Leopold III</span><span class="tag" tabindex="0" data-tip="Belgium’s constitution establishes no official church, though Roman Catholicism has remained the traditionally dominant faith of the population throughout the kingdom’s history."><span class="dot" style="background:#8e3b62"></span>Secular (no state religion; Catholic majority)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Belgium signs a 1964 bilateral recruitment agreement with Morocco (and earlier with Turkey and Italy) to bring in guest-worker labor for its coal mines and industry, forming the basis of today's large Moroccan- and Turkish-Belgian communities."><span class="dot" style="background:#2f7a6b"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#c1272d"/><path d="M10,4.5 l0.9,2.8 2.9,0 -2.4,1.7 0.9,2.8 -2.3,-1.7 -2.3,1.7 0.9,-2.8 -2.4,-1.7 2.9,0z" fill="none" stroke="#006233" stroke-width="0.6"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#e30a17"/><circle cx="8" cy="7" r="3.4" fill="#fff"/><circle cx="9" cy="7" r="2.7" fill="#e30a17"/><path d="M12.5,7 l3.5,1.1 -2.2,-1.9 2.2,-1.9z" fill="#fff"/></svg></span>Immigration: Moroccan &amp; Turkish guest workers (1960s&ndash;)</span><span class="tag" tabindex="0" data-tip="Belgium receives roughly 44,000 asylum applications in 2015 during the European migrant crisis, mostly from Syrian, Iraqi, and Afghan nationals."><span class="dot" style="background:#2f7a6b"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#ce1126"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#000"/><g fill="#007a3d"><path d="M5,5.5 l1.2,2.5 -1.2,2.5 -1.2,-2.5z"/><path d="M8.5,5.5 l1.2,2.5 -1.2,2.5 -1.2,-2.5z"/></g></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#ce1126"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#000"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="6.67" height="14" fill="#000"/><rect x="6.67" width="6.67" height="14" fill="#d32011"/><rect x="13.33" width="6.67" height="14" fill="#007a36"/></svg></span>Immigration: 2015 refugee crisis</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Monarchy restored after liberation; Leopold III abdicates in 1951 in favor of Baudouin, 1831–present. Arms carry the black lion rampant on gold of the old Duchy of Brabant."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f9d616"/><path d="M50,20 q-16,4 -16,26 q0,16 10,26 q-6,2 -10,8 l6,4 q4,-6 10,-6 q6,0 10,6 l6,-4 q-4,-6 -10,-8 q10,-10 10,-26 q0,-22 -16,-26 Z" fill="#241f14"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Belgium</span></div>
+            <p><span class="label">Who &amp; why:</span> Brussels is liberated on 3 September 1944; the government returns from exile in London and the monarchy is restored, though King Leopold III's controversial 1940 surrender triggers a bitter postwar "Royal Question," resolved only by his 1951 abdication in favor of his son Baudouin. Belgium becomes a founding member of NATO (1949) and the European project that follows, with Brussels emerging as its de facto capital.</p>
+            <p><span class="label">What it represents:</span> the same 1830 tricolor, unchanged, now the longest-continuous flag these provinces have flown &mdash; the 1970&ndash;1993 constitutional reforms that turn Belgium into a federal state of Flemish, Walloon, and Brussels regions happen entirely underneath this one national flag, which none of that devolution ever touches.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">13:15 (nearly square), three equal vertical bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Black at hoist, yellow center, red at fly.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#000000"></span><span class="meta"><span class="name">Black</span><span class="hex">#000000</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#fdda24"></span><span class="meta"><span class="name">Yellow</span><span class="hex">#FDDA24</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#ef3340"></span><span class="meta"><span class="name">Red</span><span class="hex">#EF3340</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="entry" data-n="10" id="era-1940">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#a4302a"/>
+              <circle cx="150" cy="100" r="35" fill="#f4efe1"/>
+              <path d="M150,72 v14 M150,114 v14 M122,100 h14 M164,100 h14 M150,86 l10,-10 M150,86 l-10,-10 M150,114 l10,10 M150,114 l-10,10" stroke="#241f14" stroke-width="6"/>
+            </svg>
+            <div class="flag-caption">Nazi Germany's own flag, flown over an occupied kingdom</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1940 &ndash; 1944</div>
+            <h3 class="card-title">German Military Administration in Belgium</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#204b5c"></span>Occupied territory</span><span class="tag" tabindex="0" data-tip="German general appointed military governor of occupied Belgium, heading the Militärverwaltung that ruled directly rather than through a collaborationist Belgian regime."><span class="dot" style="background:#4a3b78"></span>Alexander von Falkenhausen</span><span class="tag" tabindex="0" data-tip="The German military administration did not impose a state church, leaving Belgium’s traditionally dominant Roman Catholic majority formally unchanged during the occupation."><span class="dot" style="background:#8e3b62"></span>Roman Catholic (majority, unchanged); no state religion imposed</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Nazi Germany occupies Belgium from May 1940 to September 1944, administering it directly through a military government while deporting roughly 25,000 Belgian Jews to death camps, the large majority of whom did not survive."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#cc0000"/><circle cx="10" cy="7" r="4.3" fill="#fff"/><g fill="#000"><path d="M10,3 h1.4 v3 h3 v1.4 h-4.4 z"/><path d="M10,3 h1.4 v3 h3 v1.4 h-4.4 z" transform="rotate(90 10 7)"/><path d="M10,3 h1.4 v3 h3 v1.4 h-4.4 z" transform="rotate(180 10 7)"/><path d="M10,3 h1.4 v3 h3 v1.4 h-4.4 z" transform="rotate(270 10 7)"/></g></svg>Occupied by: Nazi Germany (1940&ndash;44)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="King Leopold III remains with the army through the invasion and surrenders on 28 May 1940, 1831–present. Arms carry the black lion rampant on gold of the old Duchy of Brabant."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f9d616"/><path d="M50,20 q-16,4 -16,26 q0,16 10,26 q-6,2 -10,8 l6,4 q4,-6 10,-6 q6,0 10,6 l6,-4 q-4,-6 -10,-8 q10,-10 10,-26 q0,-22 -16,-26 Z" fill="#241f14"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Belgium</span></div>
+            <p><span class="label">Who &amp; why:</span> Germany invades on 10 May 1940 without a declaration of war; King Leopold III, remaining with the army rather than following his government into exile, surrenders on 28 May 1940, while his ministers set up a government-in-exile in London. Belgium is placed under a German military governor (Militärverwaltung) rather than a puppet Belgian regime, a distinction from occupied countries that got collaborationist governments. Liberation begins with Brussels falling on 3 September 1944.</p>
+            <p><span class="label">What it represents:</span> the Belgian tricolor is suppressed and Nazi Germany's own flag flies in its place &mdash; no Belgian symbol of any kind is issued or tolerated by the occupying authority during these four years.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">3:5, standard Nazi Germany state flag.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red field, white disc, black swastika centered.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="entry" data-n="9" id="era-1918">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="100" height="200" fill="#000000"/>
+              <rect x="100" width="100" height="200" fill="#fdda24"/>
+              <rect x="200" width="100" height="200" fill="#ef3340"/>
+            </svg>
+            <div class="flag-caption">the same tricolor, restored between the two occupations</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1918 &ndash; 1940</div>
+            <h3 class="card-title">Kingdom of Belgium (interwar)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Sovereign state</span><span class="tag" tabindex="0" data-tip="King hailed as a wartime hero for staying with his troops on the Yser front, who led the country’s reconstruction after the armistice until his death in a 1934 mountaineering accident."><span class="dot" style="background:#4a3b78"></span>Albert I</span><span class="tag" tabindex="0" data-tip="Belgium’s constitution established no official church, though Roman Catholicism remained the traditionally dominant faith of the reconstructed kingdom."><span class="dot" style="background:#8e3b62"></span>Secular (no state religion; Catholic majority)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="King Albert I leads postwar reconstruction, then Leopold III inherits the throne in 1934, 1831–present. Arms carry the black lion rampant on gold of the old Duchy of Brabant."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f9d616"/><path d="M50,20 q-16,4 -16,26 q0,16 10,26 q-6,2 -10,8 l6,4 q4,-6 10,-6 q6,0 10,6 l6,-4 q-4,-6 -10,-8 q10,-10 10,-26 q0,-22 -16,-26 Z" fill="#241f14"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Belgium</span></div>
+            <p><span class="label">Who &amp; why:</span> King Albert I, hailed as a wartime hero for staying with his troops on the Yser front through the whole occupation, leads the country's reconstruction; Belgium receives war reparations and the small former German territories of Eupen and Malmedy under the 1919 Treaty of Versailles. Albert dies in a 1934 mountaineering accident; his son Leopold III inherits the throne five years before the next invasion.</p>
+            <p><span class="label">What it represents:</span> the same 1830 tricolor resumes the moment the German occupation ends, with no redesign &mdash; a deliberate statement of unbroken continuity after four years when the flag itself could not legally be flown.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">13:15, three equal vertical bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Black at hoist, yellow center, red at fly.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#000000"></span><span class="meta"><span class="name">Black</span><span class="hex">#000000</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#fdda24"></span><span class="meta"><span class="name">Yellow</span><span class="hex">#FDDA24</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#ef3340"></span><span class="meta"><span class="name">Red</span><span class="hex">#EF3340</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="entry" data-n="8" id="era-1914">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#000000"/>
+              <rect y="66.7" width="300" height="66.6" fill="#ffffff"/>
+              <rect y="133.3" width="300" height="66.7" fill="#dd0000"/>
+            </svg>
+            <div class="flag-caption">the German Empire's own flag, flown over occupied Belgium</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1914 &ndash; 1918</div>
+            <h3 class="card-title">German-occupied Belgium (Generalgouvernement)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#204b5c"></span>Occupied territory</span><span class="tag" tabindex="0" data-tip="German general who headed the Generalgouvernement administering nearly all of occupied Belgium after the 1914 invasion, while King Albert I held out with the unoccupied sliver behind the Yser."><span class="dot" style="background:#4a3b78"></span>Moritz von Bissing</span><span class="tag" tabindex="0" data-tip="The German General Government imposed no state church, leaving Belgium’s traditionally dominant Roman Catholic majority formally unchanged through the occupation."><span class="dot" style="background:#8e3b62"></span>Roman Catholic (majority, unchanged); no state religion imposed</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Imperial Germany invades and occupies nearly all of Belgium from August 1914, administering it through the Generalgouvernement for the war's duration while the unoccupied sliver behind the Yser holds out under King Albert I."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#000"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#dd0000"/></svg>Occupied by: German Empire (1914&ndash;18)</span><span class="tag" tabindex="0" data-tip="Roughly 1.5 million Belgians, about a fifth of the population, flee as refugees to France, the Netherlands, and Britain during the German invasion and occupation, one of the largest displacements of the First World War."><span class="dot" style="background:#a3672f"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="6.67" height="14" fill="#0055a4"/><rect x="6.67" width="6.67" height="14" fill="#fff"/><rect x="13.33" width="6.67" height="14" fill="#ef4135"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#ae1c28"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#21468b"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#012169"/><path d="M0,0 L20,14 M20,0 L0,14" stroke="#fff" stroke-width="2"/><path d="M10,0 V14 M0,7 H20" stroke="#fff" stroke-width="3.4"/><path d="M10,0 V14 M0,7 H20" stroke="#c8102e" stroke-width="1.8"/></svg></span>Emigration: wartime refugees (1914&ndash;18)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="King Albert I holds out with the army behind the Yser through the whole war, 1831–present. Arms carry the black lion rampant on gold of the old Duchy of Brabant."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f9d616"/><path d="M50,20 q-16,4 -16,26 q0,16 10,26 q-6,2 -10,8 l6,4 q4,-6 10,-6 q6,0 10,6 l6,-4 q-4,-6 -10,-8 q10,-10 10,-26 q0,-22 -16,-26 Z" fill="#241f14"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Belgium</span></div>
+            <p><span class="label">Who &amp; why:</span> Germany invades neutral Belgium on 4 August 1914 as part of the Schlieffen Plan's route into France, triggering Britain's entry into the war over its own 1839 treaty guarantee of Belgian neutrality. Nearly the whole country falls under a German General Government within weeks; King Albert I and a sliver of unoccupied territory hold out behind the Yser river for the rest of the war, while the elected government relocates to Le Havre, France.</p>
+            <p><span class="label">What it represents:</span> the Imperial German tricolor administered from Brussels by a German governor-general, not a puppet Belgian regime &mdash; the legitimate Belgian government continues to exist throughout, just not on Belgian soil, a pattern the country repeats a generation later.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3, three equal horizontal bands (German Empire state flag).</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Black top, white middle, red bottom.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#000000"></span><span class="meta"><span class="name">Black</span><span class="hex">#000000</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#ffffff"></span><span class="meta"><span class="name">White</span><span class="hex">#FFFFFF</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#dd0000"></span><span class="meta"><span class="name">Red</span><span class="hex">#DD0000</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="entry" data-n="7" id="era-1830">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="100" height="200" fill="#000000"/>
+              <rect x="100" width="100" height="200" fill="#fdda24"/>
+              <rect x="200" width="100" height="200" fill="#ef3340"/>
+            </svg>
+            <div class="flag-caption">the founding tricolor, adopted within days of the revolution</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1830 &ndash; 1914</div>
+            <h3 class="card-title">Kingdom of Belgium (founding era)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Sovereign state</span><span class="tag" tabindex="0" data-tip="German prince offered the crown by the National Congress after the great powers would not accept a Belgian candidate, inaugurated as the new kingdom’s first king on 21 July 1831."><span class="dot" style="background:#4a3b78"></span>Leopold I</span><span class="tag" tabindex="0" data-tip="The 1831 constitution established no official church and guaranteed freedom of worship, even as the overwhelming majority of Belgians remained Roman Catholic."><span class="dot" style="background:#8e3b62"></span>Secular (no state religion, 1831 constitution); Catholic majority</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Tens of thousands of Belgians, particularly from the impoverished Flemish countryside, emigrate to the United States and to French and Dutch industrial regions across the late 19th century in search of work."><span class="dot" style="background:#a3672f"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#b22234"/><g fill="#fff"><rect y="1.6" width="20" height="1.6"/><rect y="4.8" width="20" height="1.6"/><rect y="8" width="20" height="1.6"/><rect y="11.2" width="20" height="1.6"/></g><rect width="8" height="7.5" fill="#3c3b6e"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="6.67" height="14" fill="#0055a4"/><rect x="6.67" width="6.67" height="14" fill="#fff"/><rect x="13.33" width="6.67" height="14" fill="#ef4135"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#ae1c28"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#21468b"/></svg></span>Emigration: rural Flemish emigration (late 19th c.)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Leopold I, of Saxe-Coburg origin, became the first King of the Belgians in 1831; the dynasty took the name &quot;of Belgium&quot; in 1920, 1831–present. Arms carry the black lion rampant on gold of the old Duchy of Brabant."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f9d616"/><path d="M50,20 q-16,4 -16,26 q0,16 10,26 q-6,2 -10,8 l6,4 q4,-6 10,-6 q6,0 10,6 l6,-4 q-4,-6 -10,-8 q10,-10 10,-26 q0,-22 -16,-26 Z" fill="#241f14"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Belgium</span></div>
+            <p><span class="label">Who &amp; why:</span> independence is declared on 4 October 1830 after the August riot that grew into full revolution against King William I's rule; the National Congress adopts a constitutional monarchy and, unable to find a Belgian candidate the great powers would accept, offers the crown to Leopold of Saxe-Coburg, inaugurated as Leopold I on 21 July 1831 &mdash; still celebrated as Belgian National Day. Rapid industrialization follows, and Leopold II's brutal personal rule over the Congo Free State (1885&ndash;1908) becomes the era's darkest legacy before the state itself annexes it as the Belgian Congo in 1908.</p>
+            <p><span class="label">What it represents:</span> vertical black-yellow-red bands, adopted by the provisional government within days of the uprising &mdash; colors drawn from the old Duchy of Brabant's coat of arms, arranged vertically in deliberate homage to revolutionary France rather than the horizontal Dutch flag the rebels had just overthrown.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">Roughly square in the earliest years, later standardized to 13:15.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Black at hoist, yellow center, red at fly.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#000000"></span><span class="meta"><span class="name">Black</span><span class="hex">#000000</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#fdda24"></span><span class="meta"><span class="name">Yellow</span><span class="hex">#FDDA24</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#ef3340"></span><span class="meta"><span class="name">Red</span><span class="hex">#EF3340</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="entry" data-n="6" id="era-1815">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#ae1c28"/>
+              <rect y="66.7" width="300" height="66.6" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#21468b"/>
+            </svg>
+            <div class="flag-caption">the Dutch tricolor, flown over a union that never really took</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1815 &ndash; 1830</div>
+            <h3 class="card-title">United Kingdom of the Netherlands</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#b8862f"></span>Personal union</span><span class="tag" tabindex="0" data-tip="Dutch prince installed by the Congress of Vienna as king of the newly merged United Kingdom of the Netherlands, uniting the former Austrian Netherlands with the former Dutch Republic under his crown."><span class="dot" style="background:#4a3b78"></span>William I of Orange-Nassau</span><span class="tag" tabindex="0" data-tip="The king’s own Dutch Reformed Protestant faith held favored status at court, a source of friction with the largely Catholic, French- and Flemish-speaking southern provinces."><span class="dot" style="background:#8e3b62"></span>Dutch Reformed Protestant (royal court); Catholic majority in the south</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="William I united the Low Countries as the United Kingdom of the Netherlands after 1815, a union Belgium left in the 1830 revolution, 1815–1830. Arms: azure billeted or, with a gold lion rampant."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1e2f7a"/><g fill="#f9d616"><rect x="16" y="16" width="12" height="9"/><rect x="34" y="16" width="12" height="9"/><rect x="52" y="16" width="12" height="9"/><rect x="70" y="16" width="12" height="9"/><rect x="25" y="30" width="12" height="9"/><rect x="43" y="30" width="12" height="9"/><rect x="61" y="30" width="12" height="9"/><rect x="16" y="44" width="12" height="9"/><rect x="34" y="44" width="12" height="9"/><rect x="52" y="44" width="12" height="9"/><rect x="70" y="44" width="12" height="9"/></g><path d="M50,64 q-16,4 -16,26 q0,16 10,26 q-6,2 -10,8 l6,4 q4,-6 10,-6 q6,0 10,6 l6,-4 q-4,-6 -10,-8 q10,-10 10,-26 q0,-22 -16,-26 Z" fill="#f9d616"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Orange-Nassau</span></div>
+            <p><span class="label">Who &amp; why:</span> the Congress of Vienna, seeking a stronger buffer state against any future French expansion, merges the former Austrian Netherlands (Belgium) with the former Dutch Republic under King William I of Orange-Nassau, finalized through 1814&ndash;15. The union strains almost immediately: the largely Catholic, French- and Flemish-speaking south resents a Dutch Protestant king, an official Dutch-language policy, and chronic underrepresentation in government despite having the larger population.</p>
+            <p><span class="label">What it represents:</span> the same red-white-blue Dutch tricolor flown across both halves of the union &mdash; no distinct Belgian flag exists in this period, part of exactly the erasure of separate identity that fuels the 1830 revolution.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3, three equal horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red top, white middle, blue bottom.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#ae1c28"></span><span class="meta"><span class="name">Red</span><span class="hex">#AE1C28</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#21468b"></span><span class="meta"><span class="name">Blue</span><span class="hex">#21468B</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 7 -->
+    <div class="entry" data-n="5" id="era-1795">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="100" height="200" fill="#002395"/>
+              <rect x="100" width="100" height="200" fill="#f4efe1"/>
+              <rect x="200" width="100" height="200" fill="#ed2939"/>
+            </svg>
+            <div class="flag-caption">the French tricolor, flown after direct annexation</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1795 &ndash; 1815</div>
+            <h3 class="card-title">French Republic / Empire (annexed)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#2c5f8a"></span>Annexed territory</span><span class="tag" tabindex="0" data-tip="The revolutionary government ruling France at the moment of the 1 October 1795 annexation decree, which divided the former Austrian Netherlands into French administrative départements."><span class="dot" style="background:#4a3b78"></span>French National Convention</span><span class="tag" tabindex="0" data-tip="Revolutionary France pursued official anti-clerical secularism, suppressing the Catholic Church’s traditional establishment in the annexed provinces despite the population’s overwhelmingly Catholic identity."><span class="dot" style="background:#8e3b62"></span>State-imposed secularism (French Revolutionary policy)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="French Revolutionary armies conquer the Austrian Netherlands by 1794 and formally annex the territory in October 1795, dividing it into French administrative départements and imposing conscription that sparked the 1798 Peasants' War."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="6.67" height="14" fill="#0055a4"/><rect x="6.67" width="6.67" height="14" fill="#fff"/><rect x="13.33" width="6.67" height="14" fill="#ef4135"/></svg>Conquered by: Revolutionary France (1794&ndash;95)</span></div>
+            <p><span class="label">Who &amp; why:</span> Revolutionary France defeats Austrian forces at Fleurus in June 1794 and formally annexes the former Austrian Netherlands on 1 October 1795, dividing it into French administrative départements. Napoleon's own defeat comes on Belgian soil at Waterloo, just south of Brussels, on 18 June 1815, ending French rule here for good.</p>
+            <p><span class="label">What it represents:</span> not a client state's own flag but France's own tricolor, since these provinces are legally absorbed as French territory rather than governed as a separate possession &mdash; the most complete erasure of a distinct Belgian identity in the whole timeline, direct incorporation rather than occupation or union.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3, three equal vertical bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Blue at hoist, white center, red at fly.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#002395"></span><span class="meta"><span class="name">Blue</span><span class="hex">#002395</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#ed2939"></span><span class="meta"><span class="name">Red</span><span class="hex">#ED2939</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 8 -->
+    <div class="entry" data-n="4" id="era-1714">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#f4c430"/>
+              <g fill="#241f14">
+                <ellipse cx="150" cy="100" rx="28" ry="20"/>
+                <path d="M150,82 L108,42 L128,78 Z"/>
+                <path d="M150,82 L192,42 L172,78 Z"/>
+                <path d="M150,118 L118,163 L138,128 Z"/>
+                <path d="M150,118 L182,163 L162,128 Z"/>
+              </g>
+            </svg>
+            <div class="flag-caption">the Habsburg imperial eagle, on a crown worn now from Vienna</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1714 &ndash; 1795</div>
+            <h3 class="card-title">Austrian Netherlands</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#5b3f7a"></span>Habsburg rule</span><span class="tag" tabindex="0" data-tip="Austrian Habsburg emperor who received these provinces under the 1713–14 treaties of Utrecht and Rastatt settling the War of the Spanish Succession, opening Austrian rule over the region."><span class="dot" style="background:#4a3b78"></span>Charles VI</span><span class="tag" tabindex="0" data-tip="Roman Catholicism remained the Austrian Habsburgs’ established faith, continuing the Counter-Reformation religious order inherited from Spanish rule."><span class="dot" style="background:#8e3b62"></span>Roman Catholic (Habsburg)</span></div>
+            <p><span class="label">Who &amp; why:</span> the Spanish Habsburg line dies out with Charles II in 1700, and the resulting War of the Spanish Succession is settled by the treaties of Utrecht (1713) and Rastatt (1714): the Spanish throne goes to a Bourbon, but these provinces pass instead to the Austrian branch of the Habsburgs under Emperor Charles VI. Empress Maria Theresa's mid-century reforms modernize administration, and a brief 1789&ndash;90 revolt (the Brabant Revolution) briefly declares an independent United Belgian States before Austrian troops restore control &mdash; the first time the name "Belgian" is used for a state of its own, five years before it becomes permanent.</p>
+            <p><span class="label">What it represents:</span> still Habsburg, still flying the Cross of Burgundy on many occasions, but now under the Austrian rather than Spanish crown &mdash; shown here with the Habsburg imperial eagle to mark the dynastic shift, even though daily governance changes less than the ruling address does.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed civil ratio recorded for this period.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Gold field, black double-headed Habsburg eagle (shown simplified, single head).</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#f4c430"></span><span class="meta"><span class="name">Gold</span><span class="hex">#F4C430</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#241f14"></span><span class="meta"><span class="name">Black</span><span class="hex">#241F14</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 9 -->
+    <div class="entry" data-n="3" id="era-1581">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#f4efe1"/>
+              <path d="M0,0 L300,200" stroke="#a4302a" stroke-width="24" stroke-linecap="round"/>
+              <path d="M300,0 L0,200" stroke="#a4302a" stroke-width="24" stroke-linecap="round"/>
+              <g fill="#7c2e1f">
+                <circle cx="75" cy="50" r="7"/><circle cx="150" cy="100" r="7"/><circle cx="225" cy="150" r="7"/>
+                <circle cx="225" cy="50" r="7"/><circle cx="75" cy="150" r="7"/>
+              </g>
+            </svg>
+            <div class="flag-caption">the Cross of Burgundy, the Spanish crown's own southern provinces</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1581 &ndash; 1714</div>
+            <h3 class="card-title">Spanish Netherlands</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#5b3f7a"></span>Habsburg rule</span><span class="tag" tabindex="0" data-tip="King of Spain against whom the northern provinces rebelled in 1581, while the Belgian provinces stayed loyal after Alexander Farnese’s reconquest secured them for the Spanish crown."><span class="dot" style="background:#4a3b78"></span>Philip II</span><span class="tag" tabindex="0" data-tip="Roman Catholicism was the Spanish crown’s enforced state religion, actively upheld against Protestant rebellion throughout the Eighty Years’ War in the loyal southern provinces."><span class="dot" style="background:#8e3b62"></span>Roman Catholic (Spanish crown, enforced)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Tens of thousands of Protestant merchants, artisans, and intellectuals flee Antwerp and other southern cities for the Dutch Republic and England after the Spanish reconquest of the 1580s, a brain-drain that helped fuel the Dutch Golden Age while the south's economy stagnated."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#ff7f00"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#21468b"/></svg>Emigration: Protestant refugees to the Dutch Republic (1580s&ndash;)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Held the Belgian provinces after the Dutch Revolt split the Low Countries, ruling as Habsburg and Catholic through the Spanish line, 1482–1700. Arms: gules, a fess argent (the Bindenschild)."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><rect x="4" y="46" width="92" height="24" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Habsburg</span></div>
+            <p><span class="label">Who &amp; why:</span> when the northern provinces formally renounce Philip II in the 26 July 1581 Act of Abjuration, the Belgian provinces &mdash; Flanders, Brabant, Hainaut, and the rest &mdash; do not follow. Alexander Farnese, Duke of Parma, spends the early 1580s reconquering the south city by city for Spain, and it stays Habsburg and Catholic for the rest of the Eighty Years' War, formally confirmed at the 1648 Peace of Westphalia. Antwerp, cut off from the sea by a Dutch blockade of the Scheldt, declines sharply while Amsterdam rises in its place.</p>
+            <p><span class="label">What it represents:</span> the Cross of Burgundy &mdash; two red diagonal branches on white, the personal badge of the Dukes of Burgundy inherited by their Habsburg successors &mdash; used across Spain's entire empire, flown here specifically to mark the provinces that stayed loyal to Madrid rather than joining the Dutch Revolt.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio recorded; varied by use.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">White field, red saltire made of two knotted, raguly (branch-like) diagonal bars.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 10 -->
+    <div class="entry" data-n="2" id="era-1384">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#f4efe1"/>
+              <path d="M0,0 L300,200" stroke="#a4302a" stroke-width="24" stroke-linecap="round"/>
+              <path d="M300,0 L0,200" stroke="#a4302a" stroke-width="24" stroke-linecap="round"/>
+              <g fill="#7c2e1f">
+                <circle cx="75" cy="50" r="7"/><circle cx="150" cy="100" r="7"/><circle cx="225" cy="150" r="7"/>
+                <circle cx="225" cy="50" r="7"/><circle cx="75" cy="150" r="7"/>
+              </g>
+            </svg>
+            <div class="flag-caption">the same Cross of Burgundy, from the dynasty's own beginning here</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1384 &ndash; 1581</div>
+            <h3 class="card-title">Burgundian / Habsburg Netherlands</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#5b3f7a"></span>Habsburg rule</span><span class="tag" tabindex="0" data-tip="Duke of Burgundy who became Count of Flanders in 1384 through marriage, the founding acquisition of what becomes the core Belgian territory under Burgundian rule."><span class="dot" style="background:#4a3b78"></span>Philip the Bold</span><span class="tag" tabindex="0" data-tip="Roman Catholicism was the unquestioned faith of the Burgundian court and its provinces, the standard religious order of late medieval Western Christendom."><span class="dot" style="background:#8e3b62"></span>Roman Catholic</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Dukes of Burgundy who assembled most of the Low Countries into a single state under Philip the Good and Charles the Bold, 1384–1482. Arms: bendy or and azure within a bordure gules."><svg class="noble-mini" viewBox="0 0 100 120"><defs><clipPath id="shieldClipBE1-1384"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z"/></clipPath></defs><g clip-path="url(#shieldClipBE1-1384)"><rect x="0" y="0" width="100" height="120" fill="#1e2f7a"/><g fill="#f9d616"><path d="M-30,10 L10,-30 L30,-30 L-10,10 Z"/><path d="M-10,30 L30,-10 L50,-10 L10,30 Z"/><path d="M10,50 L50,10 L70,10 L30,50 Z"/><path d="M30,70 L70,30 L90,30 L50,70 Z"/><path d="M50,90 L90,50 L110,50 L70,90 Z"/><path d="M70,110 L110,70 L130,70 L90,110 Z"/></g></g><path d="M9,9 H91 V63 Q91,96 50,110 Q9,96 9,63 Z" fill="none" stroke="#a4302a" stroke-width="7"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Valois-Burgundy</span><span class="tag" tabindex="0" data-tip="Inherited the Burgundian Netherlands through Mary of Burgundy's marriage to Maximilian I, 1482–1700. Arms: gules, a fess argent (the Bindenschild)."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><rect x="4" y="46" width="92" height="24" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Habsburg</span></div>
+            <p><span class="label">Who &amp; why:</span> Philip the Bold, Duke of Burgundy, becomes Count of Flanders in 1384 through his marriage to Margaret of Male &mdash; the founding acquisition of what becomes the core Belgian territory. His successors add the rest piece by piece through the early 15th century: Namur by purchase in 1421, Brabant and Limburg by inheritance in 1430, Hainaut in the early 1430s, so that by the reign of Philip the Good nearly every Belgian province answers to one Burgundian court at Brussels. The line passes by marriage to the Habsburgs in 1482, and Charles V's 1549 Pragmatic Sanction formally locks the whole bloc &mdash; Belgian and Dutch provinces alike &mdash; together as one indivisible inheritance, intact until the Dutch Revolt splits it in 1581.</p>
+            <p><span class="label">What it represents:</span> the Cross of Burgundy, the dukes' own personal badge, used as the common banner of their whole domain well before "Belgium" or "the Netherlands" existed as separate ideas &mdash; each province still kept its own local arms and Estates underneath this shared symbol.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio recorded; varied by use.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">White field, red saltire made of two knotted, raguly (branch-like) diagonal bars.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <div class="entry" data-n="1" id="era-57bce">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; Roman province, then feudal principalities, no shared flag survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 57 BCE &ndash; 1384 CE</div>
+            <h3 class="card-title">Roman Gallia Belgica and the Frankish/feudal principalities</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Rome's conquest of the Belgae tribes creates the province of Gallia Belgica, the direct source of the modern country's name; after Rome's fall, Frankish and then feudal rule fragments the region into separate counties, duchies, and a prince-bishopric with no shared government."><span class="dot" style="background:#6b5c4a"></span>Roman province, then feudal principalities</span><span class="tag" tabindex="0" data-tip="Roman general and later dictator whose Gallic Wars (58&ndash;51 BCE) conquer the Belgae, the Celtic tribal coalition Caesar himself singled out as the fiercest fighters in all of Gaul, giving the future province and country its name."><span class="dot" style="background:#4a3b78"></span>Julius Caesar (conqueror of the Belgae)</span><span class="tag" tabindex="0" data-tip="Celtic and Roman polytheism give way to Christianity under Frankish sponsorship from the 5th&ndash;8th centuries; by the time of the region's feudal principalities, Roman Catholicism is the unquestioned faith of every count, duke, and bishop."><span class="dot" style="background:#8e3b62"></span>Celtic/Roman paganism, then Christianity</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Julius Caesar's legions defeat the Belgae tribal coalition in a series of hard-fought campaigns during the Gallic Wars, incorporating the region into Roman Gaul as the province of Gallia Belgica by 51 BCE."><span class="dot" style="background:#6b2c2c"></span>Conquered by: Rome (Julius Caesar, 57&ndash;51 BCE)</span></div>
+            <p><span class="label">Who &amp; why:</span> Julius Caesar's Gallic Wars (58&ndash;51 BCE) conquer the Belgae, a coalition of Celtic tribes Caesar himself singled out as the fiercest fighters in all of Gaul, incorporating the region into the Roman province of Gallia Belgica &mdash; the direct source of the modern country's name. Roman rule lasts nearly five centuries until the Western Empire's collapse, after which Frankish Merovingian and then Carolingian kings absorb the region; Charlemagne's grandsons' 843 partition at Verdun splits the Low Countries between competing heirs, and out of that fragmented Carolingian inheritance a patchwork of feudal principalities emerges from the 9th century onward &mdash; the County of Flanders (Baldwin I, from 862), the Duchy of Brabant, the Prince-Bishopric of Li&egrave;ge, and the County of Hainaut foremost among them &mdash; each under its own count, duke, or bishop, with no shared government, until Philip the Bold's 1384 marriage begins consolidating them under one Burgundian court.</p>
+            <p><span class="label">What it represents:</span> no flag survives from Roman Gallia Belgica or the early feudal principalities in the modern territorial sense; Rome used legionary and provincial insignia, and the medieval counts, dukes, and bishops bore their own personal heraldic arms &mdash; Flanders' black lion on gold is attested only from the 12th century onward &mdash; rather than any single banner shared across the future Belgian territory. Shown here honestly blank rather than invented.</p>
+            <p><span class="label">World context:</span> this span runs alongside the height of the Roman Empire (the Colosseum, built 70&ndash;80 CE, while Gallia Belgica was a quiet Roman province), the fall of the Western Roman Empire in 476, Charlemagne's own 800 coronation as Holy Roman Emperor and his empire's 843 partition at Verdun, and the First Crusade's 1099 capture of Jerusalem &mdash; a campaign in which Flemish and Hainaut nobles were themselves prominent participants.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested shared flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#5b3f7a"></span><b>Burgundian / Habsburg rule</b> &mdash; dynastic possession, pre-1581</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Kingdom</b> &mdash; sovereign Belgian state, 1830&ndash;present</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#204b5c"></span><b>Occupied territory</b> &mdash; ruled from a foreign capital</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#2c5f8a"></span><b>Annexed empire</b> &mdash; absorbed directly into a foreign state</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#b8862f"></span><b>Personal union</b> &mdash; shared crown, own institutions</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the named ruler most associated with the era's start</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official/established faith, not the population's</div>
+    </div>
+  </div>
+
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for Belgium lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/be/">Search Record Atlas for Belgium &rarr;</a>
+    <p style="margin-top:14px;">Records here are filed by historical jurisdiction, not modern borders &mdash; check the region that covers your ancestral town:</p>
+    <div class="record-region-grid">
+      <a href="https://daviddef.github.io/TheMap/region/belgium/">Belgium and the Southern Netherlands</a>
+    </div>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This page is one lineage in a larger set. See the region-wide map and the other countries here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="low-countries-hub.html"><b>Low Countries hub</b><span>Belgium, the Netherlands, Luxembourg</span></a>
+      <a class="link-card" href="habsburg-hub.html"><b>Habsburg Lands hub</b><span>Seven countries, four centuries</span></a>
+      <a class="link-card" href="germany-hub.html"><b>German Lands hub</b><span>Germany's own east-west split</span></a>
+      <a class="link-card" href="yugoslavia-hub.html"><b>Former Yugoslavia hub</b><span>Nine countries, nine centuries</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are close historical approximations for painting reference; pre-19th-century swatches are informed reconstructions, not official specifications. Boundary tracing from world.geo.json (BEL). Map is schematic and not surveyed.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var IC = {
+    ancient:"#6b5c4a", bh:"#5b3f7a", kingdom:"#a9762f", occ:"#204b5c", fr:"#2c5f8a", union:"#b8862f"
+  };
+  var INAMES = {
+    ancient:"Roman Gallia Belgica and the Frankish/feudal principalities", bh:"Burgundian / Habsburg rule", kingdom:"Kingdom of Belgium", occ:"German occupation",
+    fr:"French Republic / Empire", union:"United Kingdom of the Netherlands"
+  };
+  var IFLAGS = {
+    ancient: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>',
+    burgundy: '<rect width="300" height="200" fill="#f4efe1"/><path d="M0,0 L300,200" stroke="#a4302a" stroke-width="24" stroke-linecap="round"/><path d="M300,0 L0,200" stroke="#a4302a" stroke-width="24" stroke-linecap="round"/><g fill="#7c2e1f"><circle cx="75" cy="50" r="7"/><circle cx="150" cy="100" r="7"/><circle cx="225" cy="150" r="7"/><circle cx="225" cy="50" r="7"/><circle cx="75" cy="150" r="7"/></g>',
+    habsburg_austria: '<rect width="300" height="200" fill="#f4c430"/><g fill="#241f14"><ellipse cx="150" cy="100" rx="28" ry="20"/><path d="M150,82 L108,42 L128,78 Z"/><path d="M150,82 L192,42 L172,78 Z"/><path d="M150,118 L118,163 L138,128 Z"/><path d="M150,118 L182,163 L162,128 Z"/></g>',
+    french: '<rect width="100" height="200" fill="#002395"/><rect x="100" width="100" height="200" fill="#f4efe1"/><rect x="200" width="100" height="200" fill="#ed2939"/>',
+    dutch: '<rect width="300" height="66.7" fill="#ae1c28"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#21468b"/>',
+    belgium: '<rect width="100" height="200" fill="#000000"/><rect x="100" width="100" height="200" fill="#fdda24"/><rect x="200" width="100" height="200" fill="#ef3340"/>',
+    german_empire: '<rect width="300" height="66.7" fill="#000000"/><rect y="66.7" width="300" height="66.6" fill="#ffffff"/><rect y="133.3" width="300" height="66.7" fill="#dd0000"/>',
+    nazi: '<rect width="300" height="200" fill="#a4302a"/><circle cx="150" cy="100" r="35" fill="#f4efe1"/><path d="M150,72 v14 M150,114 v14 M122,100 h14 M164,100 h14 M150,86 l10,-10 M150,86 l-10,-10 M150,114 l10,10 M150,114 l-10,10" stroke="#241f14" stroke-width="6"/>'
+  };
+  function iFlagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (IFLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  var iLegendEl = document.getElementById("iLegend");
+  iLegendEl.innerHTML = Object.keys(IC).map(function (k) {
+    return '<span><span class="sw" style="background:' + IC[k] + '"></span>' + INAMES[k] + "</span>";
+  }).join("");
+
+  var ISNAP = [
+    { year:"57 BCE", name:"Roman Gallia Belgica and the Frankish/feudal principalities", fill:IC.ancient, flagKey:"ancient",
+      story:"Julius Caesar's Gallic Wars (58&ndash;51 BCE) conquer the Belgae, incorporating the region into the Roman province of Gallia Belgica &mdash; the direct source of the modern country's name. Roman rule lasts nearly five centuries until the Western Empire's collapse, after which Frankish and then feudal rule fragments the region into separate counties, a duchy, and a prince-bishopric with no shared government, until Philip the Bold's 1384 marriage begins consolidating them under one Burgundian court. No flag survives from Roman Gallia Belgica or the early feudal principalities &mdash; shown here honestly blank." },
+    { year:"1384", name:"Philip the Bold takes Flanders", fill:IC.bh, flagKey:"burgundy",
+      story:"Philip the Bold, Duke of Burgundy, becomes Count of Flanders in 1384 by marriage &mdash; the founding acquisition of the core Belgian territory. His successors add Namur, Brabant, Limburg, and Hainaut over the following decades, until nearly the whole area answers to one Burgundian court at Brussels." },
+    { year:"1549", name:"Pragmatic Sanction", fill:IC.bh, flagKey:"burgundy",
+      story:"Nothing changes on this map: the same Habsburg hand (Burgundian by marriage since 1482) has been governing the whole bloc for decades. Charles V's Pragmatic Sanction of 4 November 1549 just makes the union a formal, indivisible inheritance on paper." },
+    { year:"1581", name:"Spanish Netherlands", fill:IC.bh, flagKey:"burgundy",
+      story:"The northern provinces renounce Philip II in the 1581 Act of Abjuration; the Belgian provinces do not follow, and Alexander Farnese reconquers the south for Spain city by city. Belgium stays Habsburg and Catholic while the Dutch Republic to the north becomes a separate, sovereign state." },
+    { year:"1714", name:"Austrian Netherlands", fill:IC.bh, flagKey:"habsburg_austria",
+      story:"The War of the Spanish Succession transfers these provinces from the Spanish to the Austrian branch of the Habsburgs under the 1713&ndash;14 treaties of Utrecht and Rastatt. Still Habsburg, but the crown is now worn in Vienna rather than Madrid." },
+    { year:"1795", name:"French annexation", fill:IC.fr, flagKey:"french",
+      story:"Revolutionary France annexes the former Austrian Netherlands outright on 1 October 1795, dividing it into French départements. These provinces are now legally French territory, not merely occupied or allied." },
+    { year:"1815", name:"United Kingdom of the Netherlands", fill:IC.union, flagKey:"dutch",
+      story:"The Congress of Vienna merges Belgium with the former Dutch Republic under King William I, hoping a stronger buffer state will deter any future French expansion. The union strains almost immediately over language, religion, and representation." },
+    { year:"1830", name:"Belgian independence", fill:IC.kingdom, flagKey:"belgium",
+      story:"The August 1830 revolution in Brussels grows into full independence, declared 4 October 1830. Leopold I is inaugurated as king on 21 July 1831 &mdash; still celebrated as Belgian National Day." },
+    { year:"1914", name:"German occupation (WWI)", fill:IC.occ, flagKey:"german_empire",
+      story:"Germany invades neutral Belgium on 4 August 1914; nearly the whole country falls under German military government within weeks. King Albert I and the army hold a sliver of territory behind the Yser for the rest of the war." },
+    { year:"1918", name:"Kingdom restored", fill:IC.kingdom, flagKey:"belgium",
+      story:"The armistice ends the occupation and the elected government returns from exile in Le Havre. The same 1830 tricolor resumes with no redesign, asserting unbroken continuity." },
+    { year:"1940", name:"German occupation (WWII)", fill:IC.occ, flagKey:"nazi",
+      story:"Germany invades again on 10 May 1940; King Leopold III surrenders on 28 May while his government sets up in exile in London. Brussels is liberated on 3 September 1944, ending the second and final occupation." },
+    { year:"1944–present", name:"Kingdom of Belgium, today", fill:IC.kingdom, flagKey:"belgium",
+      story:"The tricolor resumes for good after liberation &mdash; now the longest-continuous flag these provinces have flown. The 1970–93 federal reforms that create Flanders, Wallonia, and Brussels as regions happen entirely underneath this one unchanged national flag." }
+  ];
+
+  function iTextColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+
+  var iYearTag = document.getElementById("iYearTag");
+  var iEraName = document.getElementById("iEraName");
+  var iEraOwners = document.getElementById("iEraOwners");
+  var iEraStory = document.getElementById("iEraStory");
+  var iFlagsRow = document.getElementById("iFlagsRow");
+  var iSlider = document.getElementById("iSlider");
+  var regEl = document.getElementById("ireg-be");
+  var lblEl = document.getElementById("ilbl-be");
+
+  function iRender(idx) {
+    var era = ISNAP[idx];
+    iYearTag.textContent = era.year;
+    iEraName.textContent = era.name;
+    iEraStory.innerHTML = era.story;
+
+    regEl.setAttribute("fill", era.fill);
+    var lblColor = iTextColorFor(era.fill);
+    lblEl.setAttribute("fill", lblColor);
+    lblEl.setAttribute("stroke", lblColor === "#201a12" ? "#f7f1e3" : "#201a12");
+
+    iEraOwners.innerHTML = "<b>" + INAMES[Object.keys(IC).filter(function (k) { return IC[k] === era.fill; })[0]] + "</b>";
+
+    iFlagsRow.innerHTML = '<div class="iflag-chip">' + iFlagSvg(era.flagKey) + '<div class="ic-label">Belgium</div></div>';
+  }
+
+  iSlider.addEventListener("input", function () { iRender(parseInt(iSlider.value, 10)); });
+  iRender(0);
+
+  var iPlaying = false, iPlayTimer = null;
+  var iPlayBtn = document.getElementById("iPlayBtn");
+  function iStepPlay() {
+    var next = parseInt(iSlider.value, 10) + 1;
+    if (next > ISNAP.length - 1) { iStopPlay(); return; }
+    iSlider.value = next;
+    iRender(next);
+  }
+  function iStartPlay() {
+    iPlaying = true;
+    iPlayBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(iSlider.value, 10) >= ISNAP.length - 1) { iSlider.value = 0; iRender(0); }
+    iPlayTimer = setInterval(iStepPlay, 1700);
+  }
+  function iStopPlay() {
+    iPlaying = false;
+    iPlayBtn.innerHTML = "&#9654;";
+    clearInterval(iPlayTimer);
+  }
+  iPlayBtn.addEventListener("click", function () { iPlaying ? iStopPlay() : iStartPlay(); });
+})();
+
+  // Tap-to-toggle for the pill tag tooltips (hover doesn't work on touch devices).
+  document.querySelectorAll(".tag[data-tip]").forEach(function (tag) {
+    tag.addEventListener("click", function (e) {
+      var wasOpen = tag.classList.contains("tip-open");
+      document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+      if (!wasOpen) tag.classList.add("tip-open");
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+  });
+</script>
+
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var html = '<h4>Genealogical records for this ground</h4>';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>
+
+</body></html>

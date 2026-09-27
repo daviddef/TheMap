@@ -1,0 +1,835 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+</style></head><body>
+<title>Flags of the Philippines</title>
+<meta name="description" content="A chronological, paint-ready atlas of every flag that flew over the Philippines, from Spanish colonization through US rule, Japanese occupation, and full independence in 1946.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.08rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; font-size: .94rem; color: var(--muted); }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  .legend { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+
+  /* ---------- Timeline ---------- */
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1px; background: var(--hair); }
+  @media (max-width: 560px) { .timeline::before { left: 9px; } }
+  .entry { position: relative; padding-left: 46px; margin-bottom: 46px; }
+  @media (max-width: 560px) { .entry { padding-left: 30px; } }
+  .entry::before {
+    content: attr(data-n);
+    position: absolute; left: 1px; top: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--paper); outline: 1px solid var(--hair);
+    background: var(--card);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--brick); display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) { .entry::before { left: -5px; width: 18px; height: 18px; font-size: 9px; } }
+
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+  .card-head { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  @media (max-width: 620px) { .card-head { flex-direction: column; } }
+  .flag-box { flex: none; width: 168px; }
+  .flag-box svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-caption { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .card-title { font-size: 1.32rem; font-weight: 600; line-height: 1.18; margin: 0 0 10px; text-wrap: balance; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px; border: 1px solid var(--card-border); color: var(--muted);
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  /* Flip tooltip below tags near the top of the viewport so it isn't clipped */
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  /* Keep tooltips from overflowing the left/right edges on narrow screens */
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint { border-top: 1px solid var(--hair); }
+  details.paint > summary {
+    cursor: pointer; list-style: none; padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--adriatic); display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before { content: "+"; font-family: "Fraunces", serif; font-size: 15px; width: 14px; }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row { display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px; }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--card-border); border-radius: 2px; padding: 5px 9px 5px 5px; background: var(--paper); }
+  .swatch .chip { width: 20px; height: 20px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: 64ch; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 88px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 380px; height: auto; }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .iborder-line { transition: stroke-opacity 0.6s ease, stroke-width 0.6s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .ireg-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 700; text-anchor: middle; transition: fill .4s ease, stroke .4s ease; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="southeast-asia-hub.html">Southeast Asia hub</a></p>
+  <p class="kicker">Family research &middot; Southeast Asia atlas</p>
+  <h1>Flags of the Philippines</h1>
+  <p class="lede">From scattered pre-colonial polities, through three and a third centuries as a Spanish colony administered from Mexico City and then Madrid, a brief revolutionary republic crushed by a new colonial power, nearly four decades of American rule, brutal Japanese wartime occupation, and finally full sovereignty in 1946 &mdash; eight flags tracing one of the longest colonial histories in Southeast Asia.</p>
+  <p class="lede">The Philippine flag itself is unusual in the region: the same sun-and-stars design, first raised in 1898, has survived every regime change since &mdash; including a US colonial administration that permitted it only from 1919 onward, and a wartime Japanese-sponsored republic that flew it too.</p>
+
+  <div class="scope-note">
+    <b>Scope of this page:</b> the lands of present-day Philippines, pre-1565&ndash;present, eight political entities. No single flag unified the pre-colonial archipelago's many competing polities, so that era is shown honestly blank rather than with an invented banner. Part of a larger atlas &mdash; see the linked pages at the bottom.
+  </div>
+
+  <div class="imap-section">
+    <h2>One archipelago, eight flags over it</h2>
+    <p class="imap-sub">The Philippines' own real coastline, traced whole &mdash; every major island from Luzon to Mindanao answered to the same government in every era below, so there's no genuinely separate internal region to carve out honestly. Press play, or drag the slider, to watch who held it all at once.</p>
+    <div class="rule-box">
+      <b>This is a single-region page.</b> The pre-1565 era was fragmented among many competing polities, but none of them controlled a distinct, stable piece of today's national territory long enough to trace as its own honest border &mdash; and every government since 1565, Spanish, American, Japanese, or Filipino, ruled the archipelago as one administrative unit. What changes here is only who held it all.
+    </div>
+    <div class="imap-frame">
+      <div class="imap-controls">
+        <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="imap-year" id="iYearTag">pre-1565</span>
+        <input type="range" id="iSlider" min="0" max="7" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="imap-svg" viewBox="0 0 380 300" xmlns="http://www.w3.org/2000/svg">
+        <g class="context-label" pointer-events="none">
+          <text x="330" y="60">PACIFIC OCEAN</text>
+          <text x="60" y="150">SOUTH CHINA SEA</text>
+          <text x="220" y="290">SULU / CELEBES SEA</text>
+        </g>
+        <path id="ireg-ph" class="ireg-fill" d="M283.1,226.4 L286.4,252.2 L279.3,271.4 L271.8,250.0 L262.2,260.6 L268.8,276.1 L262.9,286.0 L238.7,273.8 L232.9,258.6 L239.1,248.5 L226.1,238.6 L219.6,247.3 L210.0,246.5 L194.7,258.3 L191.3,252.1 L199.4,234.4 L212.4,228.4 L223.6,220.5 L230.9,230.0 L246.5,224.3 L249.9,214.9 L264.4,214.3 L263.2,198.0 L279.9,208.0 L283.1,226.4 Z M233.8,187.1 L226.4,194.0 L219.9,207.3 L213.5,213.6 L200.8,199.0 L210.2,187.5 L212.5,174.4 L223.8,173.2 L220.5,187.4 L235.7,167.1 L233.8,187.1 Z M121.0,207.4 L93.6,227.4 L103.7,212.6 L118.6,199.6 L131.0,185.1 L141.7,164.2 L145.4,181.3 L131.8,192.9 L121.0,207.4 Z M190.6,153.2 L202.9,159.7 L216.0,159.7 L215.6,168.5 L206.1,177.4 L193.0,183.7 L192.3,173.9 L193.8,163.2 L190.6,153.2 Z M265.1,147.5 L270.8,171.0 L255.0,165.4 L255.4,172.5 L260.4,185.4 L250.6,190.2 L249.8,175.4 L243.6,174.3 L240.4,161.5 L252.5,163.2 L252.2,155.2 L239.6,139.2 L259.4,139.6 L265.1,147.5 Z M183.2,128.4 L177.8,146.6 L169.0,136.1 L158.5,120.0 L176.1,120.8 L183.2,128.4 Z M179.0,14.0 L191.7,20.0 L198.0,14.6 L199.9,19.9 L196.6,28.6 L203.6,43.7 L198.2,61.2 L186.0,68.2 L182.8,85.1 L187.4,101.9 L198.3,104.2 L207.4,101.7 L233.1,113.4 L231.1,124.9 L237.9,129.9 L235.7,139.6 L219.7,129.3 L212.1,118.2 L206.8,126.0 L193.7,113.4 L175.0,116.5 L164.7,111.8 L165.8,103.1 L172.2,97.8 L166.1,92.9 L163.4,100.5 L153.3,88.4 L150.2,79.2 L149.4,59.1 L157.7,66.0 L159.8,33.1 L166.5,14.0 L179.0,14.0 Z"/>
+        <g font-family="IBM Plex Mono, monospace">
+          <text class="ireg-label" id="ilbl-ph" x="205" y="145">PHILIPPINES</text>
+        </g>
+      </svg>
+      <div class="imap-head">
+        <div class="imap-name" id="iEraName">Pre-colonial polities</div>
+        <div class="imap-owners" id="iEraOwners"></div>
+      </div>
+      <div class="iflags-row" id="iFlagsRow"></div>
+      <p class="imap-story" id="iEraStory"></p>
+
+      <p class="map-note">Real traced coastline (Luzon, the Visayas, Mindanao, and the archipelago's major islands), no internal partition &mdash; see the rule box above for why.</p>
+      <div class="imap-key" id="iLegend"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <!-- 1 -->
+    <div class="entry" data-n="8" id="era-1946">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="0,0 0,200 130,100" fill="#f4efe1"/>
+              <rect x="130" width="170" height="100" fill="#0038a8"/>
+              <rect x="130" y="100" width="170" height="100" fill="#ce1126"/>
+              <circle cx="65" cy="100" r="26" fill="#fcd116"/>
+              <circle cx="30" cy="30" r="9" fill="#fcd116"/>
+              <circle cx="30" cy="170" r="9" fill="#fcd116"/>
+              <circle cx="118" cy="100" r="9" fill="#fcd116"/>
+            </svg>
+            <div class="flag-caption">the sun-and-three-stars flag, unchanged in design since 1898</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1946 &ndash; present</div>
+            <h3 class="card-title">Republic of the Philippines</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Republic, independent</span><span class="tag" tabindex="0" data-tip="Wartime resistance leader and Commonwealth official who became the first president of the fully independent Third Republic, inaugurated on 4 July 1946 when the United States formally relinquished sovereignty."><span class="dot" style="background:#4a3b78"></span>Manuel Roxas</span><span class="tag" tabindex="0" data-tip="The 1935/1943 constitutional tradition of church-state separation continued into full independence; no faith is officially established, even though the population remains overwhelmingly Roman Catholic."><span class="dot" style="background:#8e3b62"></span>No official state religion (Catholic majority)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="The Immigration and Nationality Act of 1965 abolishes the US's earlier national-origin quotas, opening the door to a large, sustained wave of Filipino immigration to the United States that continues for decades afterward."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#b22234"/><g fill="#fff"><rect y="1.6" width="20" height="1.6"/><rect y="4.8" width="20" height="1.6"/><rect y="8" width="20" height="1.6"/><rect y="11.2" width="20" height="1.6"/></g><rect width="8" height="7.5" fill="#3c3b6e"/></svg>Emigration: to the United States (surging after 1965)</span><span class="tag" tabindex="0" data-tip="From the 1970s onward, the Philippine government formally promotes labor export, and millions of overseas Filipino workers (OFWs) take up contract jobs across the Middle East, East Asia, Europe, and North America, remittances becoming a pillar of the national economy."><span class="dot" style="background:#a3672f"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#006c35"/><path d="M4,10 L15,10 M13,7 L16,10 L13,10" stroke="#fff" stroke-width="1" fill="none"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#fff"/><circle cx="10" cy="7" r="4" fill="#bc002d"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="6.67" height="14" fill="#009246"/><rect x="6.67" width="6.67" height="14" fill="#fff"/><rect x="13.33" width="6.67" height="14" fill="#ce2b37"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#b22234"/><g fill="#fff"><rect y="1.6" width="20" height="1.6"/><rect y="4.8" width="20" height="1.6"/><rect y="8" width="20" height="1.6"/><rect y="11.2" width="20" height="1.6"/></g><rect width="8" height="7.5" fill="#3c3b6e"/></svg></span>Emigration: overseas Filipino workers (1970s&ndash;)</span></div>
+            <p><span class="label">Who &amp; why:</span> the United States grants full independence on 4 July 1946, honoring a commitment made in the 1934 Tydings&ndash;McDuffie Act, delayed by the war. The republic goes on to endure Ferdinand Marcos's martial-law dictatorship (1972&ndash;1981, with Marcos remaining in power until the 1986 "People Power" revolution) before returning to democratic rule.</p>
+            <p><span class="label">What it represents:</span> the same 1898 design &mdash; a white triangle for liberty, equality, and fraternity; a golden sun with eight rays for the first provinces to revolt; three stars for Luzon, Visayas, and Mindanao &mdash; now finally the flag of a fully sovereign state, blue stripe uppermost in peacetime.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, white triangle at hoist, blue over red field (reversed to red-over-blue in wartime).</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Gold sun (8 rays) centered in the triangle, one small gold star at each triangle corner.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#0038a8"></span><span class="meta"><span class="name">Blue</span><span class="hex">#0038A8</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#ce1126"></span><span class="meta"><span class="name">Red</span><span class="hex">#CE1126</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#fcd116"></span><span class="meta"><span class="name">Gold</span><span class="hex">#FCD116</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="entry" data-n="7" id="era-1945">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="0,0 0,200 130,100" fill="#f4efe1"/>
+              <rect x="130" width="170" height="100" fill="#0038a8"/>
+              <rect x="130" y="100" width="170" height="100" fill="#ce1126"/>
+              <circle cx="65" cy="100" r="26" fill="#fcd116"/>
+              <circle cx="30" cy="30" r="9" fill="#fcd116"/>
+              <circle cx="30" cy="170" r="9" fill="#fcd116"/>
+              <circle cx="118" cy="100" r="9" fill="#fcd116"/>
+            </svg>
+            <div class="flag-caption">flown again once the Commonwealth government returns</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1945 &ndash; 1946</div>
+            <h3 class="card-title">Commonwealth of the Philippines (restored)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#204b5c"></span>Colonial (US), autonomous</span><span class="tag" tabindex="0" data-tip="Commonwealth vice-president who became president in exile after Manuel Quezon&#x27;s death in August 1944, presiding over the government's return and the liberation of the islands with US forces through 1945."><span class="dot" style="background:#4a3b78"></span>Sergio Osme&ntilde;a</span><span class="tag" tabindex="0" data-tip="The restored Commonwealth government continued the 1935 constitution&#x27;s separation of church and state; no faith was officially established, despite the population's overwhelmingly Catholic character."><span class="dot" style="background:#8e3b62"></span>No official state religion</span></div>
+            <p><span class="label">Who &amp; why:</span> US and Filipino forces liberate the islands from Japanese occupation through 1944&ndash;45; the exiled Commonwealth government, which had continued operating from Washington throughout the war, returns to Manila under President Sergio Osme&ntilde;a and then Manuel Roxas to prepare the transition to full independence already promised for 1946.</p>
+            <p><span class="label">What it represents:</span> the same national flag, now flown legally again after Japan's occupation-era restrictions, in its peacetime blue-over-red orientation.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, as above.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#0038a8"></span><span class="meta"><span class="name">Blue</span><span class="hex">#0038A8</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#ce1126"></span><span class="meta"><span class="name">Red</span><span class="hex">#CE1126</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="entry" data-n="6" id="era-1942">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="0,0 0,200 130,100" fill="#f4efe1"/>
+              <rect x="130" width="170" height="200" fill="#ce1126"/>
+              <circle cx="65" cy="100" r="26" fill="#fcd116"/>
+              <circle cx="30" cy="30" r="9" fill="#fcd116"/>
+              <circle cx="30" cy="170" r="9" fill="#fcd116"/>
+              <circle cx="118" cy="100" r="9" fill="#fcd116"/>
+            </svg>
+            <div class="flag-caption">the same flag, permitted by Japan under a puppet republic</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1942 &ndash; 1945</div>
+            <h3 class="card-title">Japanese occupation (Second Republic)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#5c2a24"></span>Occupation (Japan)</span><span class="tag" tabindex="0" data-tip="Legal scholar and politician installed as president of the Japanese-sponsored Second Republic in October 1943, heading a nominally independent government that operated under Japanese military control until 1945."><span class="dot" style="background:#4a3b78"></span>Jos&eacute; P. Laurel</span><span class="tag" tabindex="0" data-tip="The puppet republic established no official religion of its own; Japan promoted Shinto veneration and suppressed some Western influence, but the Catholic majority's religious life continued largely intact."><span class="dot" style="background:#8e3b62"></span>No official state religion</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Imperial Japanese forces conquer and occupy the entire archipelago between December 1941 and mid-1942, ruling through a Japanese military administration and later the puppet Second Republic until liberation in 1944&ndash;45."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#fff"/><circle cx="10" cy="7" r="4" fill="#bc002d"/></svg>Occupied by: Japan (1942&ndash;45)</span></div>
+            <p><span class="label">Who &amp; why:</span> Japanese forces invade in December 1941 and complete their conquest by mid-1942, despite fierce Filipino-American resistance at Bataan and Corregidor. Japan installs a nominally independent puppet republic under President Jos&eacute; P. Laurel in October 1943, while the exiled Commonwealth government continues abroad and Filipino guerrillas wage sustained resistance throughout the occupation.</p>
+            <p><span class="label">What it represents:</span> the puppet republic is permitted to fly the existing Philippine flag, though the historical wartime convention shown here places red uppermost, a variant associated with a state of war.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, red field uppermost (wartime convention).</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#ce1126"></span><span class="meta"><span class="name">Red</span><span class="hex">#CE1126</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#fcd116"></span><span class="meta"><span class="name">Gold</span><span class="hex">#FCD116</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="entry" data-n="5" id="era-1935">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="0,0 0,200 130,100" fill="#f4efe1"/>
+              <rect x="130" width="170" height="100" fill="#0038a8"/>
+              <rect x="130" y="100" width="170" height="100" fill="#ce1126"/>
+              <circle cx="65" cy="100" r="26" fill="#fcd116"/>
+              <circle cx="30" cy="30" r="9" fill="#fcd116"/>
+              <circle cx="30" cy="170" r="9" fill="#fcd116"/>
+              <circle cx="118" cy="100" r="9" fill="#fcd116"/>
+            </svg>
+            <div class="flag-caption">legally flown for the first time under US rule from 1919</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1935 &ndash; 1942</div>
+            <h3 class="card-title">Commonwealth of the Philippines</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#204b5c"></span>Colonial (US), autonomous</span><span class="tag" tabindex="0" data-tip="Nationalist leader elected the Commonwealth's first president in 1935 under the Tydings&ndash;McDuffie framework, leading the self-governing transitional period until independence, planned for ten years later."><span class="dot" style="background:#4a3b78"></span>Manuel L. Quezon</span><span class="tag" tabindex="0" data-tip="The 1935 constitution formally separated church and state, establishing no official religion despite the population's overwhelmingly Roman Catholic character inherited from Spanish rule."><span class="dot" style="background:#8e3b62"></span>No official state religion</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="The same 1934 Tydings&ndash;McDuffie Act that creates the Commonwealth reclassifies Filipinos as aliens for immigration purposes and caps Filipino immigration to the United States at just 50 people per year, sharply curtailing the labor migration of the preceding decades."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#b22234"/><g fill="#fff"><rect y="1.6" width="20" height="1.6"/><rect y="4.8" width="20" height="1.6"/><rect y="8" width="20" height="1.6"/><rect y="11.2" width="20" height="1.6"/></g><rect width="8" height="7.5" fill="#3c3b6e"/></svg>Emigration: US quota cuts Filipino immigration to 50/yr (1934)</span></div>
+            <p><span class="label">Who &amp; why:</span> the 1934 Tydings&ndash;McDuffie Act creates a self-governing Commonwealth under Manuel Quezon as an intermediate step toward the full independence promised within ten years, with the United States retaining control of defense and foreign affairs throughout.</p>
+            <p><span class="label">What it represents:</span> the same 1898 design, formally adopted as the Commonwealth's official flag &mdash; the US had permitted it to fly, initially restricted, since a 1919 legislative act, decades before independence itself.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, as above.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#0038a8"></span><span class="meta"><span class="name">Blue</span><span class="hex">#0038A8</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#ce1126"></span><span class="meta"><span class="name">Red</span><span class="hex">#CE1126</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="entry" data-n="4" id="era-1898">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#f4efe1"/>
+              <rect y="0" width="300" height="18" fill="#ce1126"/>
+              <rect y="182" width="300" height="18" fill="#ce1126"/>
+              <rect y="36" width="300" height="18" fill="#0038a8"/>
+              <rect y="146" width="300" height="18" fill="#0038a8"/>
+            </svg>
+            <div class="flag-caption">US insular ensign, red-white-blue stripes without a canton</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1898 &ndash; 1935</div>
+            <h3 class="card-title">United States colonial administration</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#204b5c"></span>Colonial (US)</span><span class="tag" tabindex="0" data-tip="Future US president who served as the first civilian Governor-General of the Philippines from 1901 to 1903, establishing the framework of American colonial administration after military rule ended."><span class="dot" style="background:#4a3b78"></span>William Howard Taft</span><span class="tag" tabindex="0" data-tip="US colonial policy carried over the American constitutional tradition of church-state separation; no faith was officially established, though the population remained overwhelmingly Roman Catholic from Spanish rule."><span class="dot" style="background:#8e3b62"></span>No official state religion</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Beginning in 1906, the Hawaiian Sugar Planters' Association recruits tens of thousands of Filipino contract laborers, the sakada, to work Hawaii's plantations, the start of a large and sustained labor migration to Hawaii and the US mainland."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#b22234"/><g fill="#fff"><rect y="1.6" width="20" height="1.6"/><rect y="4.8" width="20" height="1.6"/><rect y="8" width="20" height="1.6"/><rect y="11.2" width="20" height="1.6"/></g><rect width="8" height="7.5" fill="#3c3b6e"/></svg>Emigration: sakada laborers to Hawaii/US (1906&ndash;)</span></div>
+            <p><span class="label">Who &amp; why:</span> Spain cedes the Philippines to the United States in the December 1898 Treaty of Paris, ending the Spanish-American War; Filipino revolutionaries, who had already declared independence, refuse to accept the new colonial power, and the brutal Philippine-American War (1899&ndash;1902) kills hundreds of thousands before US civil administration consolidates control. The Philippine flag itself is banned as seditious until an 1919 act permits it.</p>
+            <p><span class="label">What it represents:</span> the US Insular Government's own administrative ensign, distinct from the Stars and Stripes, used across US-administered territories of this era.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3, five horizontal stripes.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#ce1126"></span><span class="meta"><span class="name">Red</span><span class="hex">#CE1126</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#0038a8"></span><span class="meta"><span class="name">Blue</span><span class="hex">#0038A8</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="entry" data-n="3" id="era-1898-1">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="0,0 0,200 130,100" fill="#f4efe1"/>
+              <rect x="130" width="170" height="100" fill="#0038a8"/>
+              <rect x="130" y="100" width="170" height="100" fill="#ce1126"/>
+              <circle cx="65" cy="100" r="26" fill="#fcd116"/>
+              <circle cx="30" cy="30" r="9" fill="#fcd116"/>
+              <circle cx="30" cy="170" r="9" fill="#fcd116"/>
+              <circle cx="118" cy="100" r="9" fill="#fcd116"/>
+            </svg>
+            <div class="flag-caption">first raised 12 June 1898 &mdash; still the national flag today</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1898</div>
+            <h3 class="card-title">First Philippine Republic (Malolos)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#7c2e1f"></span>Republic, contested</span><span class="tag" tabindex="0" data-tip="Revolutionary general who declared Philippine independence in 1898 and was elected the Malolos Republic's first (and, until 1946, only recognized) president before US forces suppressed the revolutionary government."><span class="dot" style="background:#4a3b78"></span>Emilio Aguinaldo</span><span class="tag" tabindex="0" data-tip="The 1899 Malolos Constitution explicitly established separation of church and state and freedom of religion, a deliberate break from the friar-dominated Catholic establishment of Spanish colonial rule."><span class="dot" style="background:#8e3b62"></span>No official state religion (separation established)</span></div>
+            <p><span class="label">Who &amp; why:</span> revolutionary leader Emilio Aguinaldo proclaims independence from Spain on 12 June 1898 at Kawit, and a congress at Malolos ratifies Asia's first democratic constitution in January 1899. The nascent republic's sovereignty is recognized by neither Spain, which cedes the islands to the US instead, nor the incoming Americans, whose war against it snuffs it out within a few years.</p>
+            <p><span class="label">What it represents:</span> the flag sewn in exile and raised at the proclamation &mdash; white triangle, gold sun, three stars &mdash; the same core design that outlives every regime that follows it.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, as above.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#0038a8"></span><span class="meta"><span class="name">Blue</span><span class="hex">#0038A8</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#ce1126"></span><span class="meta"><span class="name">Red</span><span class="hex">#CE1126</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#fcd116"></span><span class="meta"><span class="name">Gold</span><span class="hex">#FCD116</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 7 -->
+    <div class="entry" data-n="2" id="era-1565">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#ce1126"/>
+              <path d="M0,0 L150,0 L0,200 Z" fill="#f4efe1"/>
+              <path d="M0,0 L150,200 L0,200 Z" fill="#fcd116"/>
+              <path d="M0,0 L150,0 L150,200 L0,200 Z" fill="none" stroke="#a4302a" stroke-width="4"/>
+            </svg>
+            <div class="flag-caption">Cross of Burgundy ensign, flown over the Spanish colonial administration</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1565 &ndash; 1898</div>
+            <h3 class="card-title">Captaincy General of the Philippines (Spain)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a4302a"></span>Colonial (Spain)</span><span class="tag" tabindex="0" data-tip="Spanish conquistador who led the 1565 expedition from Mexico that founded the first permanent Spanish settlement in the islands and became the first governor-general, beginning over three centuries of colonial rule."><span class="dot" style="background:#4a3b78"></span>Miguel L&oacute;pez de Legazpi</span><span class="tag" tabindex="0" data-tip="Roman Catholicism was the compulsory, officially established religion of Spanish colonial rule, spread through an extensive friar-run parish and mission system that shaped much of Philippine society."><span class="dot" style="background:#8e3b62"></span>Roman Catholic (established)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Drawn by the Manila galleon trade, tens of thousands of Chinese merchants and artisans settle in Manila's Parián district from the 1580s onward, becoming indispensable to the colonial economy while facing recurring official suspicion."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#f7d117"/><path d="M2,10 Q6,3 10,8 T18,4" stroke="#1a3b8a" stroke-width="1.5" fill="none"/><circle cx="16" cy="3" r="1.3" fill="#c8102e"/></svg>Immigration: Chinese merchants to Manila (from 1580s)</span><span class="tag" tabindex="0" data-tip="Spanish authorities and settlers massacre or forcibly expel tens of thousands of Manila's Chinese residents in repeated episodes &mdash; 1603, 1639, 1662, and 1686 among the worst &mdash; over recurring fears of Chinese numbers and loyalty."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#f7d117"/><path d="M2,10 Q6,3 10,8 T18,4" stroke="#1a3b8a" stroke-width="1.5" fill="none"/><circle cx="16" cy="3" r="1.3" fill="#c8102e"/></svg>Emigration: Chinese massacres &amp; expulsions (1603, 1639, 1662, 1686)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Kings of Spain from Charles I (Charles V) in 1516; the Spanish Habsburgs ruled the Captaincy General from its 1565 founding until the dynasty's extinction in Spain in 1700. Arms: quarterly, Castile (gules a castle or) and Le&oacute;n (argent a lion purpure)."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f4efe1"/><path d="M4,4 H50 V60 H4 Z" fill="#a4302a"/><path d="M50,60 H96 V116 Q96,100 50,116 Z" fill="#a4302a"/><g fill="#c9a13c"><path d="M16,30 h22 v20 h-22 Z M16,22 h6 v8 h-6 Z M25,18 h6 v12 h-6 Z M34,22 h6 v8 h-6 Z"/><path d="M62,82 h22 v20 h-22 Z M62,74 h6 v8 h-6 Z M71,70 h6 v12 h-6 Z M80,74 h6 v8 h-6 Z"/></g><g fill="#5c3b78"><path d="M62,45 q6,-14 16,-10 q6,4 3,13 q-3,9 -12,11 q-9,-2 -11,-9 q-1,-3 4,-5 Z"/><path d="M20,100 q6,-14 16,-10 q6,4 3,13 q-3,9 -12,11 q-9,-2 -11,-9 q-1,-3 4,-5 Z"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Habsburg</span><span class="tag" tabindex="0" data-tip="Kings of Spain from Philip V's accession in 1700 until the end of Spanish rule in 1898, the second of the two royal houses to govern the Captaincy General. Arms: azure, three fleurs-de-lis or, for the House of Bourbon."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1a237a"/><g fill="#c9a13c"><path d="M29,42 Q27,34 31,28 Q32,24 32,22 Q32,24 33,28 Q37,34 35,42 Z M29,40 Q22,36 23,28 Q24,24 28,26 Q26,32 29,40 Z M35,40 Q42,36 41,28 Q40,24 36,26 Q38,32 35,40 Z M26,40 h12 v3 h-12 Z M29,43 L32,50 L35,43 Z"/><path d="M65,42 Q63,34 67,28 Q68,24 68,22 Q68,24 69,28 Q73,34 71,42 Z M65,40 Q58,36 59,28 Q60,24 64,26 Q62,32 65,40 Z M71,40 Q78,36 77,28 Q76,24 72,26 Q74,32 71,40 Z M62,40 h12 v3 h-12 Z M65,43 L68,50 L71,43 Z"/><path d="M47,88 Q45,80 49,74 Q50,70 50,68 Q50,70 51,74 Q55,80 53,88 Z M47,86 Q40,82 41,74 Q42,70 46,72 Q44,76 47,86 Z M53,86 Q60,82 59,74 Q58,70 54,72 Q56,76 53,86 Z M44,86 h12 v3 h-12 Z M47,89 L50,96 L53,89 Z"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Bourbon</span></div>
+            <p><span class="label">Who &amp; why:</span> Miguel L&oacute;pez de Legazpi establishes the first permanent Spanish settlement at Cebu in 1565, and Manila becomes the colonial capital from 1571, governed for over two centuries as part of the Viceroyalty of New Spain via the Manila galleon trade before passing to direct Madrid control after Mexican independence in 1821. Spanish rule Christianizes most of the archipelago and lasts 333 years, ending only when the Philippine Revolution and the Spanish-American War combine to end it in 1898.</p>
+            <p><span class="label">What it represents:</span> the red saltire Cross of Burgundy on white, the Spanish empire's own military and naval ensign flown across its colonial possessions, shown here on a red field as commonly used in the Philippines.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed civil ratio recorded; shown at 3:2.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#ce1126"></span><span class="meta"><span class="name">Red</span><span class="hex">#CE1126</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 8 -->
+    <div class="entry" data-n="1" id="era-1565-1">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO SINGLE</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">FLAG</text>
+            </svg>
+            <div class="flag-caption">placeholder &mdash; many independent polities, no shared banner</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">pre-1565</div>
+            <h3 class="card-title">Pre-colonial polities</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#6b5c4a"></span>Fragmented polities</span><span class="tag" tabindex="0" data-tip="No single ruler documented &mdash; the pre-1565 islands were a patchwork of independent barangays, rajahnates, and sultanates (such as Cebu, Tondo, Sulu, and Maguindanao), never unified under one leader."><span class="dot" style="background:#4a3b78"></span>No single ruler documented</span><span class="tag" tabindex="0" data-tip="No single state religion &mdash; indigenous animist traditions predominated across the islands, while Islam had taken root in Sulu and Mindanao and some coastal polities showed Hindu-Buddhist influence via trade."><span class="dot" style="background:#8e3b62"></span>Animism / Islam (no unified religion)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Chinese traders, recorded in Song- and Ming-dynasty sources, settle in small numbers at Manila, Cebu, and other coastal trading polities for centuries before Spanish contact, forming the early Sangley communities that later Spanish rule would greatly expand."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#f7d117"/><path d="M2,10 Q6,3 10,8 T18,4" stroke="#1a3b8a" stroke-width="1.5" fill="none"/><circle cx="16" cy="3" r="1.3" fill="#c8102e"/></svg>Immigration: Chinese traders at coastal ports (pre-Hispanic)</span></div>
+            <p><span class="label">Who &amp; why:</span> before Spanish arrival, the archipelago holds a patchwork of independent polities &mdash; the Hindu-Buddhist-influenced Rajahnate of Tondo near Manila Bay, Islamic sultanates such as Sulu and Maguindanao in the south, and numerous smaller barangay chiefdoms &mdash; connected by trade with China, other Southeast Asian kingdoms, and later Islamic traders, but never politically unified.</p>
+            <p><span class="label">What it represents:</span> no single flag can honestly represent this genuinely fragmented era; individual polities kept their own banners and none held archipelago-wide authority, so this entry is shown deliberately blank rather than inventing a false unifying symbol.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no single attested flag for this fragmented era.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#6b5c4a"></span><b>Fragmented polities</b> &mdash; no single ruling power</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a4302a"></span><b>Colonial (Spain)</b> &mdash; direct Spanish rule</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#7c2e1f"></span><b>Republic, contested</b> &mdash; sovereignty declared but not recognized</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#204b5c"></span><b>Colonial (US)</b> &mdash; direct or autonomous US rule</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#5c2a24"></span><b>Occupation (Japan)</b> &mdash; wartime military rule</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Republic, independent</b> &mdash; sovereign and recognized</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the named ruler most associated with the era's start</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official/established faith, not the population's</div>
+    </div>
+  </div>
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for Philippines lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/ph/">Search Record Atlas for Philippines &rarr;</a>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This page is one lineage in a larger set. See the region-wide hub and the other countries here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="southeast-asia-hub.html"><b>Southeast Asia hub</b><span>Eleven countries, thirteen centuries</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are close historical approximations for painting reference; pre-19th-century swatches are informed reconstructions, not official specifications. Map is schematic and not surveyed.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var IC = {
+    fragmented:"#6b5c4a", spain:"#a4302a", malolos:"#7c2e1f", us:"#204b5c", japan:"#5c2a24", independent:"#a9762f"
+  };
+  var INAMES = {
+    fragmented:"Fragmented pre-colonial polities", spain:"Captaincy General of the Philippines (Spain)",
+    malolos:"First Philippine Republic (Malolos)", us:"United States colonial rule / Commonwealth",
+    japan:"Japanese occupation (Second Republic)", independent:"Republic of the Philippines"
+  };
+  var IFLAGS = {
+    fragmented: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO SINGLE</text><text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">FLAG</text>',
+    spain: '<rect width="300" height="200" fill="#ce1126"/><path d="M0,0 L150,0 L0,200 Z" fill="#f4efe1"/><path d="M0,0 L150,200 L0,200 Z" fill="#fcd116"/><path d="M0,0 L150,0 L150,200 L0,200 Z" fill="none" stroke="#a4302a" stroke-width="4"/>',
+    malolos: '<polygon points="0,0 0,200 130,100" fill="#f4efe1"/><rect x="130" width="170" height="100" fill="#0038a8"/><rect x="130" y="100" width="170" height="100" fill="#ce1126"/><circle cx="65" cy="100" r="26" fill="#fcd116"/><circle cx="30" cy="30" r="9" fill="#fcd116"/><circle cx="30" cy="170" r="9" fill="#fcd116"/><circle cx="118" cy="100" r="9" fill="#fcd116"/>',
+    us: '<rect width="300" height="200" fill="#f4efe1"/><rect y="0" width="300" height="18" fill="#ce1126"/><rect y="182" width="300" height="18" fill="#ce1126"/><rect y="36" width="300" height="18" fill="#0038a8"/><rect y="146" width="300" height="18" fill="#0038a8"/>',
+    japan: '<polygon points="0,0 0,200 130,100" fill="#f4efe1"/><rect x="130" width="170" height="200" fill="#ce1126"/><circle cx="65" cy="100" r="26" fill="#fcd116"/><circle cx="30" cy="30" r="9" fill="#fcd116"/><circle cx="30" cy="170" r="9" fill="#fcd116"/><circle cx="118" cy="100" r="9" fill="#fcd116"/>',
+    independent: '<polygon points="0,0 0,200 130,100" fill="#f4efe1"/><rect x="130" width="170" height="100" fill="#0038a8"/><rect x="130" y="100" width="170" height="100" fill="#ce1126"/><circle cx="65" cy="100" r="26" fill="#fcd116"/><circle cx="30" cy="30" r="9" fill="#fcd116"/><circle cx="30" cy="170" r="9" fill="#fcd116"/><circle cx="118" cy="100" r="9" fill="#fcd116"/>'
+  };
+  function iFlagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (IFLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  var iLegendEl = document.getElementById("iLegend");
+  iLegendEl.innerHTML = Object.keys(IC).map(function (k) {
+    return '<span><span class="sw" style="background:' + IC[k] + '"></span>' + INAMES[k] + "</span>";
+  }).join("");
+
+  var ISNAP = [
+    { year:"pre-1565", name:"Pre-colonial polities", t:{ ph:IC.fragmented }, flagKeys:{ ph:"fragmented" },
+      story:"Before Spanish arrival, the archipelago holds a patchwork of independent polities &mdash; Tondo, Sulu, Maguindanao, and many barangay chiefdoms &mdash; connected by trade but never politically unified under one government. No single flag can honestly represent the whole territory shown here." },
+    { year:"1565", name:"Captaincy General of the Philippines (Spain)", t:{ ph:IC.spain }, flagKeys:{ ph:"spain" },
+      story:"Miguel L&oacute;pez de Legazpi establishes the first permanent Spanish settlement at Cebu in 1565; Manila becomes the colonial capital from 1571. Spain governs the whole archipelago as a single Captaincy General for 333 years, ending only in 1898." },
+    { year:"1898", name:"First Philippine Republic (Malolos)", t:{ ph:IC.malolos }, flagKeys:{ ph:"malolos" },
+      story:"Emilio Aguinaldo proclaims independence on 12 June 1898; a congress at Malolos ratifies Asia's first democratic constitution that January. The republic's sovereignty is recognized by neither Spain, which cedes the islands to the US instead, nor the incoming Americans." },
+    { year:"1898", name:"United States colonial administration", t:{ ph:IC.us }, flagKeys:{ ph:"us" },
+      story:"Spain cedes the Philippines to the US in the December 1898 Treaty of Paris. Filipino revolutionaries refuse to accept the new colonial power, and the brutal Philippine-American War (1899&ndash;1902) precedes US civil administration consolidating control over the whole territory." },
+    { year:"1935", name:"Commonwealth of the Philippines", t:{ ph:IC.us }, flagKeys:{ ph:"us" },
+      story:"The 1934 Tydings&ndash;McDuffie Act creates a self-governing Commonwealth under Manuel Quezon, an intermediate step toward the independence promised within ten years, with the US retaining control of defense and foreign affairs over the whole archipelago throughout." },
+    { year:"1942", name:"Japanese occupation (Second Republic)", t:{ ph:IC.japan }, flagKeys:{ ph:"japan" },
+      story:"Japanese forces invade in December 1941 and complete their conquest by mid-1942. Japan installs a nominally independent puppet republic under President Jos&eacute; P. Laurel in October 1943, while the exiled Commonwealth government continues abroad and guerrillas resist throughout the whole territory." },
+    { year:"1945", name:"Commonwealth of the Philippines (restored)", t:{ ph:IC.us }, flagKeys:{ ph:"us" },
+      story:"US and Filipino forces liberate the islands from Japanese occupation through 1944&ndash;45; the exiled Commonwealth government returns to Manila to prepare the transition to the full independence already promised for 1946." },
+    { year:"1946–present", name:"Republic of the Philippines", t:{ ph:IC.independent }, flagKeys:{ ph:"independent" },
+      story:"The United States grants full independence on 4 July 1946, honoring the Tydings&ndash;McDuffie Act. The republic governs the entire archipelago shown here as one unified, sovereign state &mdash; the same territory every prior era also ruled as a single administrative unit." }
+  ];
+
+  var IREGIONS = ["ph"];
+  var IREGION_NAMES = { ph:"Philippines" };
+  var IADJ = [];
+
+  function iTextColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+
+  var iYearTag = document.getElementById("iYearTag");
+  var iEraName = document.getElementById("iEraName");
+  var iEraOwners = document.getElementById("iEraOwners");
+  var iEraStory = document.getElementById("iEraStory");
+  var iFlagsRow = document.getElementById("iFlagsRow");
+  var iSlider = document.getElementById("iSlider");
+
+  function iRender(idx) {
+    var era = ISNAP[idx];
+    iYearTag.textContent = era.year;
+    iEraName.textContent = era.name;
+    iEraStory.innerHTML = era.story;
+
+    IREGIONS.forEach(function (id) {
+      document.getElementById("ireg-" + id).setAttribute("fill", era.t[id]);
+      var tcol = iTextColorFor(era.t[id]);
+      var tcolHalo = tcol === "#201a12" ? "#f7f1e3" : "#201a12";
+      var lbl = document.getElementById("ilbl-" + id);
+      if (lbl) { lbl.setAttribute("fill", tcol); lbl.setAttribute("stroke", tcolHalo); }
+    });
+
+    var label = Object.keys(IC).filter(function (k) { return IC[k] === era.t.ph; })[0];
+    iEraOwners.innerHTML = "<b>" + INAMES[label] + "</b>: whole country";
+
+    iFlagsRow.innerHTML = IREGIONS.map(function (id) {
+      return '<div class="iflag-chip">' + iFlagSvg(era.flagKeys[id]) + '<div class="ic-label">' + IREGION_NAMES[id] + '</div></div>';
+    }).join("");
+  }
+
+  iSlider.addEventListener("input", function () { iRender(parseInt(iSlider.value, 10)); });
+  iRender(0);
+
+  var iPlaying = false, iPlayTimer = null;
+  var iPlayBtn = document.getElementById("iPlayBtn");
+  function iStepPlay() {
+    var next = parseInt(iSlider.value, 10) + 1;
+    if (next > ISNAP.length - 1) { iStopPlay(); return; }
+    iSlider.value = next;
+    iRender(next);
+  }
+  function iStartPlay() {
+    iPlaying = true;
+    iPlayBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(iSlider.value, 10) >= ISNAP.length - 1) { iSlider.value = 0; iRender(0); }
+    iPlayTimer = setInterval(iStepPlay, 1700);
+  }
+  function iStopPlay() {
+    iPlaying = false;
+    iPlayBtn.innerHTML = "&#9654;";
+    clearInterval(iPlayTimer);
+  }
+  iPlayBtn.addEventListener("click", function () { iPlaying ? iStopPlay() : iStartPlay(); });
+
+  document.querySelectorAll(".tag[data-tip]").forEach(function (tag) {
+    tag.addEventListener("click", function (e) {
+      var wasOpen = tag.classList.contains("tip-open");
+      document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+      if (!wasOpen) tag.classList.add("tip-open");
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+  });
+})();
+</script>
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var html = '<h4>Genealogical records for this ground</h4>';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>
+
+</body></html>

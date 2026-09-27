@@ -1,0 +1,743 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+</style></head><body>
+<title>Flags of Colombia</title>
+<meta name="description" content="A chronological, paint-ready atlas of every flag that flew over Colombia, from the Muisca confederation through the Viceroyalty of New Granada, Bolívar's Gran Colombia, and the loss of Panama.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.08rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; font-size: .94rem; color: var(--muted); }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  .legend { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+
+  /* ---------- Timeline ---------- */
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1px; background: var(--hair); }
+  @media (max-width: 560px) { .timeline::before { left: 9px; } }
+  .entry { position: relative; padding-left: 46px; margin-bottom: 46px; }
+  @media (max-width: 560px) { .entry { padding-left: 30px; } }
+  .entry::before {
+    content: attr(data-n);
+    position: absolute; left: 1px; top: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--paper); outline: 1px solid var(--hair);
+    background: var(--card);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--brick); display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) { .entry::before { left: -5px; width: 18px; height: 18px; font-size: 9px; } }
+
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+  .card-head { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  @media (max-width: 620px) { .card-head { flex-direction: column; } }
+  .flag-box { flex: none; width: 168px; }
+  .flag-box svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-caption { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .card-title { font-size: 1.32rem; font-weight: 600; line-height: 1.18; margin: 0 0 10px; text-wrap: balance; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px; border: 1px solid var(--card-border); color: var(--muted);
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  /* Flip tooltip below tags near the top of the viewport so it isn't clipped */
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  /* Keep tooltips from overflowing the left/right edges on narrow screens */
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint { border-top: 1px solid var(--hair); }
+  details.paint > summary {
+    cursor: pointer; list-style: none; padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--adriatic); display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before { content: "+"; font-family: "Fraunces", serif; font-size: 15px; width: 14px; }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row { display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px; }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--card-border); border-radius: 2px; padding: 5px 9px 5px 5px; background: var(--paper); }
+  .swatch .chip { width: 20px; height: 20px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: 64ch; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 88px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 340px; height: auto; }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .iborder-line { transition: stroke-opacity 0.6s ease, stroke-width 0.6s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .ireg-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 700; text-anchor: middle; transition: fill .4s ease, stroke .4s ease; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="south-america-hub.html">South America hub</a></p>
+  <p class="kicker">Family research &middot; Phase 7 of the world atlas</p>
+  <h1>Flags of Colombia</h1>
+  <p class="lede">Centuries before the Muisca, the San Agustín culture of the southern Andes carved South America's largest collection of monumental stone statuary, then abandoned its ceremonial centers for reasons archaeology has not established. The high plateau around modern Bogotá later belonged to the Muisca, a confederation of chiefdoms famed for gold work so rich it fed the El Dorado legend &mdash; a real trading and political order, though never remotely the scale of the Inca state to the south. Spanish conquest in the 1530s folds this territory into the Viceroyalty of New Granada, seated at Bogotá, one of the major administrative units of Spain's American empire.</p>
+  <p class="lede">Independence came bundled with two neighbors, not alone: Simón Bolívar's campaigns of the late 1810s created Gran Colombia, a single republic spanning modern Colombia, Venezuela, Ecuador, and briefly Panama, before regional rivalries pulled it apart within a decade of its founding. Colombia inherited the "New Granada" core and, later, would lose its own Panamanian province to a US-backed 1903 secession tied to canal politics.</p>
+
+  <div class="scope-note">
+    <b>Scope of this page:</b> the territory of present-day Colombia, c. 1st century BCE&ndash;present, six political entities. Panama is treated as Colombian territory through 1903 and as its own separate country after; this page does not attempt Panama's own flag lineage past that split. No internal governing partition exists within Colombia's own modern borders after independence, so the map below traces the whole country rather than an internal partition. Part of a larger atlas &mdash; see the linked pages at the bottom.
+  </div>
+
+
+  <div class="imap-section">
+    <h2>One republic, six eras</h2>
+    <p class="imap-sub">Colombia&rsquo;s own real border, traced whole &mdash; the country&rsquo;s modern territory has never been split between separately governed pieces since independence. Press play, or drag the slider, to watch who held it, era to era.</p>
+    <div class="rule-box">
+      <b>This is a single-region page, not a partition map.</b> Colombia&rsquo;s own borders shifted at the edges &mdash; Panama seceded in 1903, Gran Colombia itself split into three countries in 1830 &mdash; but the territory that is Colombia today was never itself divided between rival governments. What changes here is who held it, and how large the union around it was, not how Colombia&rsquo;s own core was cut up.
+    </div>
+    <div class="imap-frame">
+      <div class="imap-controls">
+        <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="imap-year" id="iYearTag">c. 1st century BCE &amp;ndash; 8th century CE</span>
+        <input type="range" id="iSlider" min="0" max="5" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="imap-svg" viewBox="0 0 218.2 290.0" xmlns="http://www.w3.org/2000/svg">
+        <g class="context-label" pointer-events="none">
+          <text x="55" y="20">PANAMA</text>
+          <text x="185" y="60">VENEZUELA</text>
+          <text x="60" y="268">ECUADOR</text>
+          <text x="14" y="130">PACIFIC</text>
+          <text x="190" y="245">BRAZIL</text>
+        </g>
+        <path id="ireg-co" class="ireg-fill" d="M71.2,210.6 L56.9,201.8 L52.5,204.2 L39.3,202.1 L35.5,195.4 L17.1,186.8 L15.0,181.9 L20.8,180.8 L20.1,173.0 L23.7,167.4 L31.5,166.3 L43.9,148.4 L38.2,144.7 L41.1,135.7 L37.6,121.5 L41.0,117.4 L38.5,104.3 L32.2,96.0 L34.2,88.4 L39.2,89.6 L42.2,84.9 L38.6,75.8 L40.4,73.5 L48.5,74.0 L60.1,63.2 L66.5,61.5 L69.5,43.2 L78.4,36.0 L88.2,35.7 L89.5,32.5 L101.6,33.8 L127.4,15.0 L132.9,16.0 L137.0,20.0 L134.0,25.3 L124.0,27.9 L109.5,45.9 L103.3,66.0 L111.4,67.1 L116.8,77.6 L116.7,92.9 L124.2,99.6 L153.2,100.1 L164.2,113.5 L190.5,110.9 L196.0,113.5 L189.7,127.1 L188.5,138.3 L196.6,156.7 L188.7,164.4 L198.5,173.3 L203.2,188.8 L200.3,190.7 L192.9,176.6 L187.8,181.9 L157.5,181.6 L157.7,191.3 L166.8,192.9 L166.3,198.9 L154.4,199.8 L154.4,211.1 L161.2,216.8 L163.7,225.7 L156.3,275.0 L148.6,266.7 L143.9,266.4 L153.9,250.6 L142.0,243.3 L132.7,244.6 L127.1,241.9 L118.5,246.0 L107.0,244.1 L97.8,227.8 L75.3,209.1 L71.2,210.6 Z"/>
+        <g font-family="IBM Plex Mono, monospace">
+          <text class="ireg-label" id="ilbl-co" x="106.6" y="147.5">COLOMBIA</text>
+        </g>
+      </svg>
+      <div class="imap-head">
+        <div class="imap-name" id="iEraName"></div>
+        <div class="imap-owners" id="iEraOwners"></div>
+      </div>
+      <div class="iflags-row" id="iFlagsRow"></div>
+      <p class="imap-story" id="iEraStory"></p>
+
+      <p class="map-note">Real traced border (johan/world.geo.json) &mdash; no internal partition, per the rule box above.</p>
+      <div class="imap-key" id="iLegend"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <!-- 1 -->
+    <div class="entry" data-n="6" id="era-1861">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="100" fill="#fcd116"/>
+              <rect y="100" width="300" height="50" fill="#003893"/>
+              <rect y="150" width="300" height="50" fill="#ce1126"/>
+            </svg>
+            <div class="flag-caption">yellow-blue-red tricolor, yellow band doubled &mdash; Colombia's own state flag since 1861</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1861 &ndash; present</div>
+            <h3 class="card-title">Republic of Colombia (modern)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Republic, independent</span><span class="tag" tabindex="0" data-tip="President who fixed the state&#x27;s name as the Republic of Colombia and settled its tricolor flag in 1861, after decades of federal and unitary experiments."><span class="dot" style="background:#4a3b78"></span>Tom&#x00e1;s Cipriano de Mosquera</span><span class="tag" tabindex="0" data-tip="Roman Catholicism was the constitutionally established religion of the republic for most of this long era, until the 1991 constitution disestablished the Church and guaranteed religious freedom."><span class="dot" style="background:#8e3b62"></span>Roman Catholic (official until 1991)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Decades of internal armed conflict from the 1980s drive large numbers of Colombians abroad, notably to Venezuela, Ecuador, the United States, and Spain, building sizable diaspora communities in each."><span class="dot" style="background:#a3672f"></span>Emigration: fleeing armed conflict (1980s&ndash;2000s)</span><span class="tag" tabindex="0" data-tip="Colombia takes in by far the largest share of the roughly 7.7 million Venezuelans who have fled Venezuela's economic and political crisis since the mid-2010s, hosting well over 2.8 million by the early 2020s."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#fcd116"/><rect y="4.67" width="20" height="4.67" fill="#003893"/><rect y="9.33" width="20" height="4.67" fill="#cf142b"/><g fill="#fff"><circle cx="7" cy="7" r="0.35"/><circle cx="8.5" cy="6" r="0.35"/><circle cx="10" cy="5.6" r="0.35"/><circle cx="11.5" cy="6" r="0.35"/><circle cx="13" cy="7" r="0.35"/></g></svg>Immigration: Venezuelan migrants &amp; refugees (2015&ndash;)</span></div>
+            <p><span class="label">Who &amp; why:</span> after decades of shifting federal and unitary experiments under names like the Granadine Confederation and the United States of Colombia, the country settles on "Republic of Colombia" and a fixed flag under President Tomás Cipriano de Mosquera in 1861. The republic survives the 1899&ndash;1902 Thousand Days' War, the 1903 loss of Panama (which declares independence with US naval backing after Colombia's senate rejects a canal treaty), and, in recent decades, a long internal armed conflict that a 2016 peace accord with the FARC substantially wound down.</p>
+            <p><span class="label">What it represents:</span> the yellow-blue-red tricolor inherited from Gran Colombia, with the yellow band widened to double the width of blue and red beneath it, a distinction unique to Colombia among the old Gran Colombian states.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Yellow (top half), blue and red (each a quarter) horizontal tricolor, no state arms on the civil flag.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#fcd116"></span><span class="meta"><span class="name">Yellow</span><span class="hex">#FCD116</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#003893"></span><span class="meta"><span class="name">Blue</span><span class="hex">#003893</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#ce1126"></span><span class="meta"><span class="name">Red</span><span class="hex">#CE1126</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="entry" data-n="5" id="era-1830">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#fcd116"/>
+              <rect y="66.7" width="300" height="66.6" fill="#003893"/>
+              <rect y="133.3" width="300" height="66.7" fill="#ce1126"/>
+            </svg>
+            <div class="flag-caption">equal yellow-blue-red bands, New Granada / post-Gran Colombia era</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1830 &ndash; 1861</div>
+            <h3 class="card-title">Republic of New Granada</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Republic, independent</span><span class="tag" tabindex="0" data-tip="Independence general and statesman who became the new republic&#x27;s first constitutional president in 1832, leading New Granada through its early post-Gran Colombia institutions."><span class="dot" style="background:#4a3b78"></span>Francisco de Paula Santander</span><span class="tag" tabindex="0" data-tip="Roman Catholicism remained the constitutionally recognized religion of the new republic, continuing the establishment inherited from Gran Colombia and Spanish colonial rule."><span class="dot" style="background:#8e3b62"></span>Roman Catholic (official)</span></div>
+            <p><span class="label">Who &amp; why:</span> Gran Colombia, weakened by regional rivalries and Bolívar's own declining health, formally dissolves in 1830-31 as Venezuela and Ecuador secede; the remaining core, corresponding roughly to the old Viceroyalty of New Granada plus Panama, reorganizes as the Republic of New Granada. The new state cycles through several constitutional forms &mdash; unitary republic, then the Granadine Confederation from 1858 &mdash; while retaining the tricolor as a shared inheritance from Bolívar's project.</p>
+            <p><span class="label">What it represents:</span> the same yellow-blue-red tricolor as Gran Colombia, at this stage still in equal horizontal bands, before Colombia's own later distinguishing modification to the yellow band's width.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Equal yellow, blue, red horizontal tricolor.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#fcd116"></span><span class="meta"><span class="name">Yellow</span><span class="hex">#FCD116</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#003893"></span><span class="meta"><span class="name">Blue</span><span class="hex">#003893</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#ce1126"></span><span class="meta"><span class="name">Red</span><span class="hex">#CE1126</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="entry" data-n="4" id="era-1819">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#fcd116"/>
+              <rect y="66.7" width="300" height="66.6" fill="#003893"/>
+              <rect y="133.3" width="300" height="66.7" fill="#ce1126"/>
+              <path d="M150,80 l7,20 21,2 -17,14 6,20 -17,-13 -17,13 6,-20 -17,-14 21,-2 Z" fill="#f4efe1"/>
+            </svg>
+            <div class="flag-caption">Gran Colombia's yellow-blue-red tricolor with a central white star</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1819 &ndash; 1830</div>
+            <h3 class="card-title">Gran Colombia</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#c9a13c"></span>Union republic</span><span class="tag" tabindex="0" data-tip="Independence leader whose 1819 victory at Boyac&#x00e1; secured New Granada&#x27;s independence; proclaimed president of the new united republic by the Congress of Angostura that same year."><span class="dot" style="background:#4a3b78"></span>Sim&#x00f3;n Bol&#x00ed;var</span><span class="tag" tabindex="0" data-tip="Gran Colombia&#x27;s constitution maintained Roman Catholicism as the state&#x27;s official religion, continuing the establishment inherited from Spanish colonial rule."><span class="dot" style="background:#8e3b62"></span>Roman Catholic (official)</span></div>
+            <p><span class="label">Who &amp; why:</span> Simón Bolívar's decisive 1819 victory at Boyacá secures New Granada's independence, and the Congress of Angostura that same year proclaims Gran Colombia, formally uniting New Granada (Colombia), Venezuela, and Ecuador into a single republic under Bolívar as president, with Panama joining as well. The union proves fragile &mdash; regional caudillos resist Bogotá's central authority, and Venezuela and Ecuador both secede by 1830, the year Bolívar dies, ending the project he had hoped would anchor a unified Spanish America.</p>
+            <p><span class="label">What it represents:</span> the yellow-blue-red tricolor devised by Francisco de Miranda for earlier Venezuelan independence efforts, adopted as Gran Colombia's own flag and the shared ancestor of Colombia's, Venezuela's, and Ecuador's later national flags alike.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Equal yellow, blue, red horizontal tricolor, single white/silver star centered.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#fcd116"></span><span class="meta"><span class="name">Yellow</span><span class="hex">#FCD116</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#003893"></span><span class="meta"><span class="name">Blue</span><span class="hex">#003893</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#ce1126"></span><span class="meta"><span class="name">Red</span><span class="hex">#CE1126</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="entry" data-n="3" id="era-1550">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#f4efe1"/>
+              <rect width="300" height="200" fill="none" stroke="#a9762f" stroke-width="10"/>
+              <path d="M0,0 L300,0 L300,50 L0,50 Z" fill="#a4302a"/>
+              <circle cx="150" cy="120" r="40" fill="#c9a13c"/>
+            </svg>
+            <div class="flag-caption">Spanish colonial cross-of-Burgundy banner over the Viceroyalty of New Granada, shown schematically</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1550 &ndash; 1819</div>
+            <h3 class="card-title">Viceroyalty of New Granada (Spanish colonial rule)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#6e4a2f"></span>Colonial territory</span><span class="tag" tabindex="0" data-tip="King of Spain and Holy Roman Emperor under whom Spanish administration over the conquered northern Andes was taking shape as this long colonial era opens around 1550."><span class="dot" style="background:#4a3b78"></span>Charles I of Spain (Charles V)</span><span class="tag" tabindex="0" data-tip="Roman Catholicism was the sole established religion of the Spanish Empire, enforced through royal patronage, missionary orders, and the Inquisition across the viceroyalty."><span class="dot" style="background:#8e3b62"></span>Roman Catholic (Spanish colonial)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Cartagena becomes one of the principal ports for the Spanish transatlantic slave trade, with tens of thousands of enslaved Africans forcibly brought through the city over the colonial period to work in mines, plantations, and households."><span class="dot" style="background:#2f7a6b"></span>Immigration: enslaved Africans via Cartagena (forced)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="House of Habsburg, 1538&ndash;1700. Spanish kings from Charles I, under whom Gonzalo Jim&eacute;nez de Quesada founded Santa Fe de Bogot&aacute; in 1538. Arms: the quartered castle of Castile and lion of Le&oacute;n."><svg class="noble-mini" viewBox="0 0 100 120"><defs><clipPath id="colShieldMiniH"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z"/></clipPath></defs><g clip-path="url(#colShieldMiniH)"><rect x="0" y="0" width="50" height="60" fill="#a4302a"/><rect x="50" y="0" width="46" height="60" fill="#f4efe1"/><rect x="0" y="60" width="50" height="56" fill="#f4efe1"/><rect x="50" y="60" width="46" height="56" fill="#a4302a"/><path d="M12,18 h26 v14 h-26 Z M12,32 v10 M38,32 v10" fill="none" stroke="#f4efe1" stroke-width="3"/><path d="M62,80 q10,-16 22,0 q-10,4 -11,10 q-1,-6 -11,-10 Z" fill="#a4302a"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Habsburg</span><span class="tag" tabindex="0" data-tip="House of Bourbon, 1700&ndash;1819. Spanish kings from Philip V, whose reforms elevated Bogot&aacute; to a full viceregal capital in 1739, until Bol&iacute;var&#x27;s victory at Boyac&aacute; ended royal rule in 1819. Arms: the same shield with the Bourbon fleur-de-lis bordure added."><svg class="noble-mini" viewBox="0 0 100 120"><defs><clipPath id="colShieldMiniB"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z"/></clipPath></defs><g clip-path="url(#colShieldMiniB)"><rect x="0" y="0" width="50" height="60" fill="#a4302a"/><rect x="50" y="0" width="46" height="60" fill="#f4efe1"/><rect x="0" y="60" width="50" height="56" fill="#f4efe1"/><rect x="50" y="60" width="46" height="56" fill="#a4302a"/><path d="M12,18 h26 v14 h-26 Z M12,32 v10 M38,32 v10" fill="none" stroke="#f4efe1" stroke-width="3"/><path d="M62,80 q10,-16 22,0 q-10,4 -11,10 q-1,-6 -11,-10 Z" fill="#a4302a"/></g><rect x="2" y="2" width="96" height="116" fill="none" stroke="#1e2f7a" stroke-width="4" stroke-dasharray="6 5"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Bourbon</span></div>
+            
+            <p><span class="label">Who &amp; why:</span> Spain organizes its conquered northern Andean territory first as the Royal Audiencia of Santa Fe de Bogotá under the Viceroyalty of Peru, then elevates it to its own Viceroyalty of New Granada, formally established in 1717/1739, governing what is now Colombia, Venezuela, Ecuador, and Panama from Bogotá. Spanish rule brings colonial administration, the Catholic Church, and forced labor systems over the Muisca and other indigenous populations, while Cartagena becomes a major fortified port on Spain's transatlantic treasure route. Independence movements gather through the 1800s&ndash;10s, culminating in Bolívar's 1819 victory at Boyacá.</p>
+            <p><span class="label">What it represents:</span> Spain flew no single fixed colonial flag across all its American territories; the red saltire (cross of Burgundy) on white was the common Spanish military and naval ensign of the era, shown here schematically alongside the viceregal seal's gold sun to represent Spanish crown authority over the colony, not a specific New Granada banner.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no dedicated colonial territorial flag; shown as a schematic reconstruction of Spanish crown symbols.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="entry" data-n="2" id="era-1450">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#c9a13c"/>
+              <circle cx="150" cy="100" r="46" fill="#8a5a2a"/>
+              <circle cx="150" cy="100" r="30" fill="#c9a13c"/>
+            </svg>
+            <div class="flag-caption">gold disc motif representing Muisca goldwork, shown schematically &mdash; no flag documented</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 1450 &ndash; 1550</div>
+            <h3 class="card-title">Muisca Confederation</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#6b5c4a"></span>Indigenous confederation</span><span class="tag" tabindex="0" data-tip="No single ruler documented &#x2014; the confederation was headed by two paramount chieftains, the zipa of Bacat&#x00e1; and the zaque of Hunza, rather than one unified sovereign."><span class="dot" style="background:#4a3b78"></span>No single ruler documented (zipa and zaque chieftains)</span><span class="tag" tabindex="0" data-tip="The Muisca practiced their own polytheistic, nature-centered religious traditions &#x2014; including sun and moon deities and the gold-offering rituals at Lake Guatavita &#x2014; rather than a single formal state church."><span class="dot" style="background:#8e3b62"></span>Muisca polytheistic traditions (no state church)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Spanish forces under Gonzalo Jim&eacute;nez de Quesada conquer the Muisca heartland in 1537&ndash;38, founding Santa Fe de Bogot&aacute; on the site and ending Muisca political independence."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#fff"/><path d="M0,0 L20,14 M20,0 L0,14" stroke="#c60b1e" stroke-width="2.6"/></svg>Conquered by: Spain (1537&ndash;38)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Zipa of Bacat&aacute; (Muisca Confederation), c.1450&ndash;1540. Hereditary rulers of the southern Muisca, a goldworking confederation whose sun-worshipping rulers gave rise to the &quot;El Dorado&quot; legend, ended by Spanish conquest around 1540. Represented with the Muisca&#x27;s own documented gold solar disc on black."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#241f14"/><circle cx="50" cy="52" r="26" fill="#f9d616"/><g fill="#241f14"><path d="M50,26 l4,10 h-8 Z"/><path d="M50,78 l4,-10 h-8 Z"/><path d="M24,52 l10,4 v-8 Z"/><path d="M76,52 l-10,4 v-8 Z"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Zipa of Bacat&aacute;</span></div>
+            
+            <p><span class="label">Who &amp; why:</span> on the high plateau around modern Bogotá and Tunja, the Muisca people organize into a loose confederation of chiefdoms (zipa and zaque) by the 15th century, sustained by agriculture, salt mining, and renowned goldwork; the Muisca cacique's ritual gold-dusted offerings at Lake Guatavita feed the later Spanish El Dorado legend. Spanish forces under Gonzalo Jiménez de Quesada conquer the Muisca heartland in 1537&ndash;38, founding Santa Fe de Bogotá on the site and beginning colonial rule that formalizes over the following decades.</p>
+            <p><span class="label">What it represents:</span> no flag in the European territorial sense is documented for the Muisca; the gold disc shown here represents their renowned metalwork and ceremonial gold objects, an informed symbolic stand-in rather than an attested banner.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="entry" data-n="1" id="era-100bce">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder &mdash; known through monumental stone statuary, not any banner</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 1st century BCE &ndash; 8th century CE</div>
+            <h3 class="card-title">San Agust&iacute;n culture</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#6b5c4a"></span>Archaeological culture, no unified state documented</span><span class="tag" tabindex="0" data-tip="No individual rulers or dynasties are named in the surviving record; the culture is known entirely through its monumental stone statuary and burial sites, not written or oral political history."><span class="dot" style="background:#4a3b78"></span>No named rulers survive in the record</span><span class="tag" tabindex="0" data-tip="Surviving statuary depicts anthropomorphic and zoomorphic deities, shamanic figures, and funerary guardians, indicating an elaborate religious and mortuary tradition distinct from the later Muisca."><span class="dot" style="background:#8e3b62"></span>Indigenous religious &amp; funerary tradition (no state church)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="The culture's monumental stone-carving tradition declines and its major ceremonial sites are abandoned by around the 8th century CE, for reasons not established in the archaeological record &mdash; centuries before any Spanish contact in the region."><span class="dot" style="background:#6b2c2c"></span>Ceremonial sites abandoned, c. 8th century (cause undocumented)</span></div>
+            <p><span class="label">Who &amp; why:</span> in the highlands of what is now Huila department, in Colombia's southern Andes, a distinct culture known to archaeology as San Agust&iacute;n carves hundreds of monumental stone statues &mdash; anthropomorphic and animal deities, shamanic figures, and tomb guardians &mdash; over roughly nine centuries, leaving South America's largest collection of megalithic religious sculpture and funerary architecture. The culture is geographically and chronologically distinct from the later Muisca Confederation to the north; its major ceremonial centers are abandoned by around the 8th century CE, well before Spanish contact, for reasons the archaeological record does not establish.</p>
+            <p><span class="label">What it represents:</span> no flag or comparable banner survives from San Agust&iacute;n; the culture expressed itself through monumental stone carving and burial architecture rather than any woven or painted standard. Shown here honestly blank rather than invented.</p>
+            <p><span class="label">World context:</span> San Agust&iacute;n's main statuary-carving centuries run alongside the height of the Roman Empire, the rise of Teotihuacan in central Mexico, and the creation of the Nazca Lines on Peru's southern coast, and overlap much of the Classic Maya civilization's peak (c. 250&ndash;900 CE) further north in Mesoamerica.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag or comparable banner.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#6b5c4a"></span><b>Indigenous confederation</b> &mdash; no single unified crown</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#6e4a2f"></span><b>Colonial territory</b> &mdash; ruled from Spain</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#c9a13c"></span><b>Union republic</b> &mdash; joined with other states under one government</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Republic, independent</b> &mdash; sovereign under its own government</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the named ruler most associated with the era's start</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official/established faith, not the population's</div>
+    </div>
+  </div>
+
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for Colombia lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/co/">Search Record Atlas for Colombia &rarr;</a>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This page is one lineage in a larger set. See the other South American countries and the full index:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="south-america-hub.html"><b>South America hub</b><span>Twelve countries, one shared fault line</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are close historical approximations for painting reference; pre-19th-century swatches are informed reconstructions, not official specifications. Map is schematic and not surveyed.
+  </footer>
+
+</div>
+
+
+<script>
+(function () {
+  var IC = { sanagustin:"#5c2a24", muisca:"#6b5c4a", viceroyalty:"#6e4a2f", grancolombia:"#c9a13c", newgranada:"#8a6a2f", modern:"#a9762f" };
+  var INAMES = { sanagustin:"San Agust&iacute;n culture (pre-Muisca)", muisca:"Muisca Confederation", viceroyalty:"Viceroyalty of New Granada (Spanish colonial rule)", grancolombia:"Gran Colombia", newgranada:"Republic of New Granada", modern:"Republic of Colombia (modern)" };
+  var IFLAGS = {
+    sanagustin: "<rect width=\"300\" height=\"200\" fill=\"#5c2a24\"/><rect width=\"300\" height=\"200\" fill=\"none\" stroke=\"#c9a13c\" stroke-width=\"4\" stroke-dasharray=\"8 6\"/><text x=\"150\" y=\"92\" text-anchor=\"middle\" font-family=\"IBM Plex Mono, monospace\" font-size=\"24\" font-weight=\"700\" fill=\"#c9a13c\">NO FLAG</text><text x=\"150\" y=\"122\" text-anchor=\"middle\" font-family=\"IBM Plex Mono, monospace\" font-size=\"24\" font-weight=\"700\" fill=\"#c9a13c\">DOCUMENTED</text>",
+    muisca: "<rect width=\"300\" height=\"200\" fill=\"#c9a13c\"/><circle cx=\"150\" cy=\"100\" r=\"46\" fill=\"#8a5a2a\"/><circle cx=\"150\" cy=\"100\" r=\"30\" fill=\"#c9a13c\"/>",
+    viceroyalty: "<rect width=\"300\" height=\"200\" fill=\"#f4efe1\"/><rect width=\"300\" height=\"200\" fill=\"none\" stroke=\"#a9762f\" stroke-width=\"10\"/><path d=\"M0,0 L300,0 L300,50 L0,50 Z\" fill=\"#a4302a\"/><circle cx=\"150\" cy=\"120\" r=\"40\" fill=\"#c9a13c\"/>",
+    grancolombia: "<rect width=\"300\" height=\"66.7\" fill=\"#fcd116\"/><rect y=\"66.7\" width=\"300\" height=\"66.6\" fill=\"#003893\"/><rect y=\"133.3\" width=\"300\" height=\"66.7\" fill=\"#ce1126\"/><path d=\"M150,80 l7,20 21,2 -17,14 6,20 -17,-13 -17,13 6,-20 -17,-14 21,-2 Z\" fill=\"#f4efe1\"/>",
+    newgranada: "<rect width=\"300\" height=\"66.7\" fill=\"#fcd116\"/><rect y=\"66.7\" width=\"300\" height=\"66.6\" fill=\"#003893\"/><rect y=\"133.3\" width=\"300\" height=\"66.7\" fill=\"#ce1126\"/>",
+    modern: "<rect width=\"300\" height=\"100\" fill=\"#fcd116\"/><rect y=\"100\" width=\"300\" height=\"50\" fill=\"#003893\"/><rect y=\"150\" width=\"300\" height=\"50\" fill=\"#ce1126\"/>"
+  };
+  function iFlagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (IFLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  var iLegendEl = document.getElementById("iLegend");
+  iLegendEl.innerHTML = Object.keys(IC).map(function (k) {
+    return '<span><span class="sw" style="background:' + IC[k] + '"></span>' + INAMES[k] + "</span>";
+  }).join("");
+
+  var ISNAP = [
+    { year:"c. 1st century BCE &ndash; 8th century CE", name:"San Agust&iacute;n culture (pre-Muisca)", t:{ co:IC.sanagustin }, flagKeys:{ co:"sanagustin" },
+      story:"In the highlands of what is now Huila department, in Colombia's southern Andes, the San Agust&iacute;n culture carves hundreds of monumental stone statues &mdash; anthropomorphic and animal deities, shamanic figures, and tomb guardians &mdash; over roughly nine centuries, leaving South America's largest collection of megalithic religious sculpture. No unified state or named rulers are documented; the culture's major ceremonial centers are abandoned by around the 8th century CE, for reasons the archaeological record does not establish, centuries before Spanish contact and well before the later Muisca Confederation forms to the north. No flag or comparable banner survives; the culture expressed itself through stone carving and burial architecture instead." },
+    { year:"c. 1450 &ndash; 1550", name:"Muisca Confederation", t:{ co:IC.muisca }, flagKeys:{ co:"muisca" },
+      story:"On the high plateau around modern Bogot&aacute; and Tunja, the Muisca organize into a loose confederation of chiefdoms (zipa and zaque) by the 15th century, renowned for goldwork whose ritual offerings at Lake Guatavita feed the later Spanish El Dorado legend. Spanish forces conquer the Muisca heartland in 1537&ndash;38. No flag in the European sense is documented; the gold disc shown is a symbolic stand-in for their metalwork, not an attested banner." },
+    { year:"1550 &ndash; 1819", name:"Viceroyalty of New Granada (Spanish colonial rule)", t:{ co:IC.viceroyalty }, flagKeys:{ co:"viceroyalty" },
+      story:"Spain organizes the conquered northern Andes first under the Viceroyalty of Peru, then as its own Viceroyalty of New Granada (1717/1739), governing what is now Colombia, Venezuela, Ecuador, and Panama from Bogot&aacute;. Independence movements gather through the 1800s&ndash;10s, culminating in Sim&oacute;n Bol&iacute;var&rsquo;s 1819 victory at Boyac&aacute;. Spain flew no single fixed colonial flag; the cross of Burgundy and viceregal sun shown here are schematic, not a specific New Granada banner." },
+    { year:"1819 &ndash; 1830", name:"Gran Colombia", t:{ co:IC.grancolombia }, flagKeys:{ co:"grancolombia" },
+      story:"Bol&iacute;var&rsquo;s 1819 victory at Boyac&aacute; secures independence, and the Congress of Angostura proclaims Gran Colombia, uniting New Granada, Venezuela, Ecuador, and Panama into one republic under Bol&iacute;var. Regional caudillos resist Bogot&aacute;&rsquo;s central authority, and Venezuela and Ecuador secede by 1830, the year Bol&iacute;var dies. The yellow-blue-red tricolor, devised by Francisco de Miranda, becomes the shared ancestor of Colombia&rsquo;s, Venezuela&rsquo;s, and Ecuador&rsquo;s later flags." },
+    { year:"1830 &ndash; 1861", name:"Republic of New Granada", t:{ co:IC.newgranada }, flagKeys:{ co:"newgranada" },
+      story:"Gran Colombia dissolves in 1830&ndash;31; the remaining core, roughly the old Viceroyalty of New Granada plus Panama, reorganizes as the Republic of New Granada under Francisco de Paula Santander. The new state cycles through unitary rule and, from 1858, the Granadine Confederation, retaining the tricolor &mdash; still in equal bands &mdash; as a shared inheritance from Bol&iacute;var&rsquo;s project." },
+    { year:"1861 &ndash; present", name:"Republic of Colombia (modern)", t:{ co:IC.modern }, flagKeys:{ co:"modern" },
+      story:"After decades of federal and unitary experiments, the country settles on &ldquo;Republic of Colombia&rdquo; and a fixed flag under President Tom&aacute;s Cipriano de Mosquera in 1861. The republic survives the Thousand Days&rsquo; War, the 1903 loss of Panama, and, in recent decades, a long internal armed conflict substantially wound down by the 2016 FARC peace accord. The tricolor is kept, its yellow band now doubled in width &mdash; a distinction unique to Colombia among the old Gran Colombian states." }
+  ];
+
+  var IREGIONS = ["co"];
+  var IREGION_NAMES = { co:"Colombia" };
+  var IADJ = [];
+
+  function iTextColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+
+  var iYearTag = document.getElementById("iYearTag");
+  var iEraName = document.getElementById("iEraName");
+  var iEraOwners = document.getElementById("iEraOwners");
+  var iEraStory = document.getElementById("iEraStory");
+  var iFlagsRow = document.getElementById("iFlagsRow");
+  var iSlider = document.getElementById("iSlider");
+
+  function iRender(idx) {
+    var era = ISNAP[idx];
+    iYearTag.textContent = era.year;
+    iEraName.textContent = era.name;
+    iEraStory.innerHTML = era.story;
+
+    IREGIONS.forEach(function (id) {
+      document.getElementById("ireg-" + id).setAttribute("fill", era.t[id]);
+      var tcol = iTextColorFor(era.t[id]);
+      var tcolHalo = tcol === "#201a12" ? "#f7f1e3" : "#201a12";
+      var lbl = document.getElementById("ilbl-" + id);
+      if (lbl) { lbl.setAttribute("fill", tcol); lbl.setAttribute("stroke", tcolHalo); }
+      var lbl2 = document.getElementById("ilbl-" + id + "2");
+      if (lbl2) { lbl2.setAttribute("fill", tcol); lbl2.setAttribute("stroke", tcolHalo); }
+    });
+
+    var label = Object.keys(IC).filter(function (k) { return IC[k] === era.t.co; })[0];
+    iEraOwners.innerHTML = "<b>" + INAMES[label] + "</b>: whole country";
+
+    iFlagsRow.innerHTML = IREGIONS.map(function (id) {
+      return '<div class="iflag-chip">' + iFlagSvg(era.flagKeys[id]) + '<div class="ic-label">' + IREGION_NAMES[id] + '</div></div>';
+    }).join("");
+  }
+
+  iSlider.addEventListener("input", function () { iRender(parseInt(iSlider.value, 10)); });
+  iRender(0);
+
+  var iPlaying = false, iPlayTimer = null;
+  var iPlayBtn = document.getElementById("iPlayBtn");
+  function iStepPlay() {
+    var next = parseInt(iSlider.value, 10) + 1;
+    if (next > ISNAP.length - 1) { iStopPlay(); return; }
+    iSlider.value = next;
+    iRender(next);
+  }
+  function iStartPlay() {
+    iPlaying = true;
+    iPlayBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(iSlider.value, 10) >= ISNAP.length - 1) { iSlider.value = 0; iRender(0); }
+    iPlayTimer = setInterval(iStepPlay, 1700);
+  }
+  function iStopPlay() {
+    iPlaying = false;
+    iPlayBtn.innerHTML = "&#9654;";
+    clearInterval(iPlayTimer);
+  }
+  iPlayBtn.addEventListener("click", function () { iPlaying ? iStopPlay() : iStartPlay(); });
+})();
+</script>
+
+<script>
+  document.querySelectorAll(".tag[data-tip]").forEach(function (tag) {
+    tag.addEventListener("click", function (e) {
+      var wasOpen = tag.classList.contains("tip-open");
+      document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+      if (!wasOpen) tag.classList.add("tip-open");
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+  });
+</script>
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var html = '<h4>Genealogical records for this ground</h4>';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>
+
+</body></html>

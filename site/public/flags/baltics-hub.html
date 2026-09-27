@@ -1,0 +1,639 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Flags of the Baltic States</title>
+<meta name="description" content="A hub for the family flag atlas: Lithuania, Latvia, and Estonia, and an interactive map showing eight centuries of medieval divergence followed by four decades of uncannily synchronized shared fate.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    --tile: #ddd0aa; --tile-line: #b7a679; --tile-text: #7a6a45; --tile-sea: #b9d3da;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.2rem, 5.5vw, 3.4rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.1rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .countries { margin-top: 44px; }
+  .countries h2 { font-size: 1.15rem; font-weight: 600; margin: 0 0 16px; }
+  .country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .country-card {
+    display: block; padding: 20px; border: 1px solid var(--card-border); background: var(--card);
+    border-radius: 4px; text-decoration: none; color: var(--ink); position: relative; overflow: hidden;
+  }
+  .country-card .swatch-strip { position: absolute; top: 0; left: 0; right: 0; height: 5px; }
+  .country-card .era { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--brass); margin-bottom: 6px; }
+  .country-card b { display: block; font-family: "Fraunces", serif; font-size: 1.2rem; font-weight: 600; margin-bottom: 6px; }
+  .country-card span.desc { color: var(--muted); font-size: .88rem; line-height: 1.5; }
+
+  .map-section { margin-top: 56px; padding-top: 36px; border-top: 1px solid var(--hair); }
+  .map-section h2 { font-size: 1.5rem; margin: 0 0 8px; }
+  .map-section .map-sub { font-size: .94rem; color: var(--muted); max-width: 64ch; margin: 0 0 22px; }
+  .map-section .rule-box { margin-bottom: 22px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .92rem; }
+  .map-section .rule-box b { color: var(--brick); }
+
+  .viz-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 22px; }
+
+  .controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .play-btn {
+    flex: none; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .play-btn:hover { border-color: var(--brick); }
+  input[type="range"] {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px;
+    background: var(--hair); outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper);
+    box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  .era-tag { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 60px; }
+
+  .era-head { text-align: center; margin-bottom: 16px; }
+  .era-name-inline { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.35rem; transition: opacity .35s ease; }
+  .era-owners { font-size: .86rem; color: var(--muted); max-width: 62ch; margin: 6px auto 0; transition: opacity .35s ease; }
+  .era-owners b { color: var(--ink); }
+  .era-story {
+    margin: 0 auto 22px; font-size: .98rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .35s ease; padding: 14px 18px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  .era-story b { color: var(--brick); }
+
+  .flags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin: 4px auto 18px; max-width: 620px; }
+  .flag-chip { text-align: center; width: 92px; }
+  .flag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-chip .fc-label { font-family: "IBM Plex Mono", monospace; font-size: 9px; color: var(--muted); margin-top: 5px; line-height: 1.3; }
+
+  #map-svg { display: block; margin: 0 auto; width: 100%; max-width: 400px; height: auto; }
+  .region-fill { transition: fill 0.7s ease; }
+  .border-line { transition: stroke-opacity 0.7s ease, stroke-width 0.7s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .context-country { fill: none; stroke: var(--hair); stroke-width: 1; opacity: .55; pointer-events: none; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; pointer-events: none; }
+  .group-label { font-family: "Fraunces", serif; font-weight: 600; transition: opacity .5s ease, font-size .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2.5px; }
+  .sub-label { font-family: "IBM Plex Mono", monospace; font-weight: 700; transition: opacity .5s ease, fill .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+
+  .map-key { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: .8rem; color: var(--muted); justify-content: center; }
+  .map-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .map-key .sw { width: 11px; height: 11px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .map-notes { margin-top: 20px; font-size: .85rem; color: var(--muted); }
+  .map-notes b { color: var(--ink); }
+
+  .subview { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .subview h3 { font-size: 1.2rem; font-weight: 600; margin: 0 0 8px; }
+  .subview .sub-desc { font-size: .9rem; color: var(--muted); max-width: 64ch; margin: 0 0 18px; }
+
+  .gantt-row { display: flex; align-items: center; margin-bottom: 3px; }
+  .gantt-label { width: 90px; flex: none; font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--ink); text-align: right; padding-right: 10px; }
+  .gantt-track { flex: 1; height: 26px; position: relative; background: var(--paper); border-radius: 2px; overflow: hidden; }
+  .gantt-seg { position: absolute; top: 0; bottom: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .gantt-seg span { font-size: 9.5px; font-weight: 600; white-space: nowrap; padding: 0 3px; }
+  .gantt-axis { display: flex; margin-left: 90px; padding-top: 4px; font-family: "IBM Plex Mono", monospace; font-size: 9.5px; color: var(--muted); position: relative; height: 14px; }
+  .gantt-axis span { position: absolute; transform: translateX(-50%); }
+
+  .grid-3x3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 14px; }
+  .grid-cell { text-align: center; }
+  .grid-cell svg { width: 100%; height: auto; display: block; }
+  .grid-cell .cap { font-family: "IBM Plex Mono", monospace; font-size: 10px; color: var(--brass); margin-top: 6px; }
+  .grid-cell .cap b { display: block; font-family: "Fraunces", serif; font-size: .95rem; font-weight: 600; color: var(--ink); margin-top: 1px; }
+  .grid-cell .cap .diff { display: block; font-family: "Source Sans 3", sans-serif; font-size: .74rem; color: var(--brick); margin-top: 3px; font-weight: 600; }
+  .mini-label { font-family: "IBM Plex Mono", monospace; font-size: 7.5px; font-weight: 700; pointer-events: none; }
+
+  .about { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .about h2 { font-size: 1.3rem; margin: 0 0 12px; }
+  .about p { max-width: none; opacity: .88; margin: 0 0 12px; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a></p>
+  <p class="kicker">Family research &middot; Hub &middot; Phase 6 of the world atlas</p>
+  <h1>Flags of the Baltic States</h1>
+  <p class="lede">Lithuania, Latvia, and Estonia &mdash; three small nations with almost opposite medieval stories (one stayed pagan and independent while crusaders conquered the other two) that somehow ended up living the entire twentieth century in lockstep: the same independence year, the same annexation year, the same occupation year, the same restoration year.</p>
+  <p class="lede">Each country's own flag lineage is coming in a later pass. For now, drag the map's slider below to watch eight centuries of divergence collapse into four decades of eerily synchronized fate.</p>
+
+  <div class="countries">
+    <h2>The three lineages</h2>
+    <div class="country-grid">
+      <a class="country-card" href="lithuania-flags.html">
+        <span class="swatch-strip" style="background:#006a44"></span>
+        <span class="era">c. 1150&ndash;present &middot; 9 flags</span>
+        <b>Lithuania</b>
+        <span class="desc">Pagan Europe's last holdout, Mindaugas's crown, a grand duchy that reached the Black Sea, and the modern republic.</span>
+      </a>
+      <a class="country-card" href="latvia-flags.html">
+        <span class="swatch-strip" style="background:#9e3039"></span>
+        <span class="era">c. 1000&ndash;present &middot; 13 flags</span>
+        <b>Latvia</b>
+        <span class="desc">Crusader Terra Mariana, a Courland duchy with colonial ambitions, Swedish and Russian rule, and the republic today.</span>
+      </a>
+      <a class="country-card" href="estonia-flags.html">
+        <span class="swatch-strip" style="background:#1560bd"></span>
+        <span class="era">1227&ndash;present &middot; 7 flags</span>
+        <b>Estonia</b>
+        <span class="desc">Danish and Livonian conquest, the &quot;good old Swedish times,&quot; Tsarist rule, and a flag first raised by students in 1884.</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="map-section">
+    <h2>Eight centuries, one map</h2>
+    <p class="map-sub">A real, traced map &mdash; actual coastlines and borders along the Baltic Sea, not schematic shapes. Drag the slider or press play; each snapshot simplifies a messier reality into the dominant power of the moment.</p>
+    <div class="rule-box">
+      <b>Borders here are data, not decoration.</b> A line between two regions only draws solid when they were actually governed separately. When they weren't &mdash; Latvia and Estonia both answering to the Livonian Order for three centuries, say &mdash; the line dissolves and their names merge into whoever actually ruled them both. Colors blend between eras instead of jump-cutting.
+    </div>
+
+    <div class="viz-frame">
+      <div class="controls">
+        <button class="play-btn" id="playBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="era-tag" id="yearTag">1200</span>
+        <input type="range" id="slider" min="0" max="10" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="map-svg" viewBox="0 0 460 620" xmlns="http://www.w3.org/2000/svg">
+        <path fill="var(--tile-sea)" d="M418.2,63.1 L412.0,50.1 L370.0,52.3 L325.8,40.0 L274.5,50.8 L223.0,71.5 L226.5,114.2 L252.4,140.6 L267.4,131.2 L262.6,175.0 L254.8,232.1 L222.1,233.5 L189.8,178.0 L151.4,203.4 L131.4,250.1 L130.0,306.0 L138.7,368.4 L181.3,381.4 L181.3,620 L0,620 L0,0 L418.2,0 Z"/>
+
+        <path class="context-country" d="M-115.9,671.8 L-132.6,624.4 L-129.5,598.8 L-139.5,559.0 L-154.3,532.6 L-143.0,512.7 L-152.5,474.9 L-124.7,453.1 L-61.1,418.8 L-9.8,393.6 L30.8,406.2 L33.9,424.3 L73.2,425.2 L123.3,433.7 L198.2,432.5 L219.1,440.5 L228.9,463.4 L230.7,496.2 L242.0,524.5 L241.7,554.1 L217.3,569.3 L229.9,603.7 L230.6,636.8 L251.1,701.7 L246.8,722.5 L226.6,731.1 L189.6,792.9 L200.1,826.3 L191.2,822.0 L152.5,793.4 L123.2,803.9 L103.9,796.3 L79.9,812.2 L59.3,785.9 L42.6,796.0 L40.3,791.5 L21.5,754.9 L-8.7,750.4 L-12.6,727.2 L-40.5,718.8 L-46.6,738.0 L-68.7,722.7 L-66.2,702.2 L-96.6,695.8 L-115.9,671.8 Z"/>
+        <path class="context-country" d="M228.9,463.4 L268.3,463.9 L312.5,435.9 L321.9,394.0 L355.3,370.2 L351.5,336.9 L376.3,324.4 L420.0,295.7 L462.9,314.4 L468.7,332.8 L490.0,323.9 L529.9,341.6 L533.8,376.5 L525.1,396.6 L550.7,445.2 L567.2,458.8 L564.8,472.2 L592.2,485.3 L604.0,505.1 L588.1,521.3 L555.3,518.7 L547.4,525.7 L557.0,550.3 L567.0,597.9 L532.0,602.3 L519.5,618.6 L516.9,656.0 L500.7,648.8 L463.9,652.4 L453.2,635.0 L438.0,648.0 L422.7,637.3 L390.6,635.8 L345.1,617.9 L304.0,612.1 L272.4,613.8 L250.1,633.9 L230.6,636.8 L229.9,603.7 L217.3,569.3 L241.7,554.1 L242.0,524.5 L230.7,496.2 L228.9,463.4 Z"/>
+        <path class="context-country" d="M555.3,518.7 L588.1,521.3 L604.0,505.1 L592.2,485.3 L564.8,472.2 L567.2,458.8 L550.7,445.2 L525.1,396.6 L533.8,376.5 L529.9,341.6 L490.0,323.9 L468.7,332.8 L462.9,314.4 L420.0,295.7 L406.9,251.9 L403.4,215.8 L383.8,198.7 L401.3,175.2 L389.2,105.9 L418.2,63.1"/>
+        <g class="context-label">
+          <text x="100" y="505">POLAND</text>
+          <text x="400" y="560">BELARUS</text>
+          <text x="441" y="200">RUSSIA</text>
+        </g>
+
+        <path id="f-lt" class="region-fill" d="M198.2,432.5 L195.0,413.6 L199.3,393.2 L181.3,381.4 L138.7,368.4 L130.0,306.0 L176.6,283.2 L244.9,288.0 L285.0,280.6 L290.7,296.1 L312.3,300.8 L351.5,336.9 L355.3,370.2 L321.9,394.0 L312.5,435.9 L268.3,463.9 L228.9,463.4 L219.1,440.5 Z"/>
+        <path id="f-lv" class="region-fill" d="M130.0,306.0 L131.4,250.1 L151.4,203.4 L189.8,178.0 L222.1,233.5 L254.8,232.1 L262.6,175.0 L297.3,161.9 L315.2,171.0 L350.2,198.6 L383.8,198.7 L403.4,215.8 L406.9,251.9 L420.0,295.7 L376.3,324.4 L351.5,336.9 L312.3,300.8 L290.7,296.1 L285.0,280.6 L244.9,288.0 L176.6,283.2 Z"/>
+        <path id="f-ee" class="region-fill" d="M262.6,175.0 L267.4,131.2 L252.4,140.6 L226.5,114.2 L223.0,71.5 L274.5,50.8 L325.8,40.0 L370.0,52.3 L412.0,50.1 L418.2,63.1 L389.2,105.9 L401.3,175.2 L383.8,198.7 L350.2,198.6 L315.2,171.0 L297.3,161.9 Z"/>
+
+        <g id="borders" stroke-width="1">
+          <path class="border-line" id="b-lt-lv" d="M130.0,306.0 L176.6,283.2 L244.9,288.0 L285.0,280.6 L290.7,296.1 L312.3,300.8 L351.5,336.9"/>
+          <path class="border-line" id="b-lv-ee" d="M262.6,175.0 L297.3,161.9 L315.2,171.0 L350.2,198.6 L383.8,198.7"/>
+        </g>
+
+        <g id="labels"></g>
+      </svg>
+
+      <div class="era-head">
+        <div class="era-name-inline" id="eraName">Baltic and Finnic tribes</div>
+        <div class="era-owners" id="eraOwners"></div>
+      </div>
+      <div class="flags-row" id="flagsRow"></div>
+      <p class="era-story" id="eraStory"></p>
+
+      <p class="map-note">Real traced borders and coastline (simplified). Poland, Belarus, and Russia are now shown faint for context &mdash; real land borders Lithuania, Latvia, and Estonia actually share, not open water &mdash; but tracked only as outlines, not full regions with their own eras; Sweden sits off the western edge of the frame, mentioned in the text but not mapped at all.</p>
+      <div class="map-key" id="legend"></div>
+      <div class="map-notes">
+        <b>Try:</b> drag slowly from 1290 to 1721 and watch Latvia's line to Estonia dissolve first (1290, both under the Livonian Order) while its line to Lithuania stays solid the whole way &mdash; then watch that same Latvia&ndash;Estonia line dissolve <em>again</em> in 1721, for an entirely different reason (both now Russian). Then jump from 1795 to 1991: every line snaps solid at 1918, dissolves completely at 1940, stays dissolved (just recolored) through 1941 and 1945, then snaps solid again in 1991 &mdash; four flips in seventy-three years, all three countries moving together every single time.
+      </div>
+    </div>
+
+    <div class="subview">
+      <h3>The same story, as a timeline</h3>
+      <p class="sub-desc">Maps are bad at showing <em>when</em>; timelines are bad at showing <em>where</em>. This uses real transition years instead of the eleven arbitrary snapshots above &mdash; one horizontal band per country, colored the same way as the map, so you can trace exactly how long each era actually lasted. Watch how ragged the bands are before 1795 and how perfectly they align after 1918.</p>
+      <div class="viz-frame">
+        <div id="gantt"></div>
+        <div class="gantt-axis" id="gantt-axis"></div>
+      </div>
+    </div>
+
+    <div class="subview">
+      <h3>The same story, eleven frames &mdash; only the change lights up</h3>
+      <p class="sub-desc">Every country keeps its true color, but anything unchanged from the previous frame fades to low opacity; only the region(s) that actually changed hands stay bold with a solid outline. A caption under each frame spells out exactly what flipped. Scan left to right, top to bottom &mdash; count how many frames flip all three at once versus just one.</p>
+      <div class="viz-frame">
+        <div class="grid-3x3" id="grid9"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="about">
+    <h2>About this atlas</h2>
+    <p>This started as a family history project: tracing the flags that flew over the lands our ancestors came from, close enough to paint accurately &mdash; correct colors, correct proportions, correct dates. The Baltic states are their own hub because their story runs almost backwards from the rest of the atlas: centuries of genuinely separate, disconnected histories collapsing into one of the most tightly synchronized runs of shared fate anywhere in Europe.</p>
+    <p>Every country page (coming next) will carry its own timeline of flags with paint-ready color specs and a per-era location map. Colors are close historical approximations; pre-heraldic swatches especially are informed reconstructions, not official specifications, and are labeled as such throughout. The regional map above simplifies eight centuries of messy, overlapping, disputed control into eleven snapshots &mdash; useful for orientation, not a substitute for the detail each country's own page will carry.</p>
+  </div>
+
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This hub is one region in a larger set. See the other phases here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="habsburg-hub.html"><b>Habsburg Lands hub</b><span>Seven countries, four centuries</span></a>
+      <a class="link-card" href="germany-hub.html"><b>German Lands hub</b><span>Germany's own east-west split</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Map is schematic and not surveyed.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var C = {
+    pagan_lt:"#7a4a2e", pagan_lv:"#5c6b3f", pagan_ee:"#3f5c6b",
+    gdl:"#7a1f1f", liv:"#44484f", swe:"#1e5288", rus:"#7a2430",
+    ind_lt:"#1c7a3d", ind_lv:"#9e3039", ind_ee:"#1560bd",
+    soviet:"#a4272a", nazi:"#2b2e33"
+  };
+  var NAMES = {
+    pagan_lt:"Lithuanian tribes", pagan_lv:"Latgallian & Livonian tribes", pagan_ee:"Estonian tribes",
+    gdl:"Grand Duchy of Lithuania / Poland-Lithuania", liv:"Livonian Order (Terra Mariana)",
+    swe:"Swedish crown", rus:"Russian Empire",
+    ind_lt:"Republic of Lithuania", ind_lv:"Republic of Latvia", ind_ee:"Republic of Estonia",
+    soviet:"USSR", nazi:"Nazi Germany (Reichskommissariat Ostland)"
+  };
+  var legendEl = document.getElementById("legend");
+  legendEl.innerHTML = Object.keys(C).map(function (k) {
+    return '<span><span class="sw" style="background:' + C[k] + '"></span>' + NAMES[k] + "</span>";
+  }).join("");
+
+  // ---- Real flag graphics, one per distinct historical power (not per map color) ----
+  var FLAGS = {
+    pagan_lt: '<rect width="300" height="200" fill="#7a4a2e"/><g fill="#e8d9a8"><circle cx="150" cy="100" r="34"/></g><path d="M150,66 L150,134 M116,100 L184,100 M126,76 L174,124 M174,76 L126,124" stroke="#7a4a2e" stroke-width="6"/>',
+    pagan_lv: '<rect width="300" height="200" fill="#5c6b3f"/><g fill="none" stroke="#e8d9a8" stroke-width="6"><path d="M150,55 L150,145"/><path d="M110,75 L190,75"/><path d="M105,100 L195,100"/><path d="M110,125 L190,125"/></g>',
+    pagan_ee: '<rect width="300" height="200" fill="#3f5c6b"/><g fill="#e8d9a8"><path d="M150,55 L172,100 L150,145 L128,100 Z"/><path d="M150,75 L162,100 L150,125 L138,100 Z" fill="#3f5c6b"/></g>',
+    livonian: '<rect width="300" height="200" fill="#f4efe1"/><path d="M138,30 h24 v60 h60 v24 h-60 v60 h-24 v-60 h-60 v-24 h60 Z" fill="#201a12"/>',
+    gdl_vytis: '<rect width="300" height="200" fill="#a4302a"/><g fill="#f4efe1"><ellipse cx="150" cy="95" rx="46" ry="52"/></g><path d="M150,60 q-26,10 -22,42 q2,20 22,30 q20,-10 22,-30 q4,-32 -22,-42 Z" fill="#a4302a"/><rect x="140" y="95" width="20" height="34" fill="#f4efe1"/><path d="M120,150 h60 l-8,14 h-44 Z" fill="#f4efe1"/>',
+    plc_union: '<rect width="150" height="200" fill="#a4302a"/><rect x="150" width="150" height="200" fill="#a4302a"/><ellipse cx="75" cy="100" rx="34" ry="40" fill="#f4efe1"/><ellipse cx="225" cy="100" rx="34" ry="40" fill="#f4efe1"/><text x="75" y="112" font-size="30" text-anchor="middle" fill="#a4302a" font-family="serif">&#9813;</text><text x="225" y="112" font-size="26" text-anchor="middle" fill="#a4302a" font-family="serif">&#9822;</text>',
+    sweden: '<rect width="300" height="200" fill="#1e5288"/><rect x="100" width="40" height="200" fill="#f9d616"/><rect y="80" width="300" height="40" fill="#f9d616"/>',
+    russia_imperial: '<rect width="300" height="66.7" fill="#f4efe1"/><rect y="66.7" width="300" height="66.6" fill="#1e5288"/><rect y="133.3" width="300" height="66.7" fill="#a4302a"/>',
+    lithuania_flag: '<rect width="300" height="66.7" fill="#f9d616"/><rect y="66.7" width="300" height="66.6" fill="#1c7a3d"/><rect y="133.3" width="300" height="66.7" fill="#9e2b25"/>',
+    latvia_flag: '<rect width="300" height="80" fill="#9e3039"/><rect y="80" width="300" height="40" fill="#f4efe1"/><rect y="120" width="300" height="80" fill="#9e3039"/>',
+    estonia_flag: '<rect width="300" height="66.7" fill="#1560bd"/><rect y="66.7" width="300" height="66.6" fill="#201a12"/><rect y="133.3" width="300" height="66.7" fill="#f4efe1"/>',
+    soviet: '<rect width="300" height="200" fill="#a4272a"/><g fill="#f9d616"><path d="M60,60 l7,20 21,0 -17,13 6.5,20 -17.5,-12.5 -17.5,12.5 6.5,-20 -17,-13 21,0 Z"/><path d="M75,105 a26,26 0 1 0 34,-34" fill="none" stroke="#f9d616" stroke-width="5"/><path d="M95,68 v22 M85,79 h22" stroke="#f9d616" stroke-width="5"/></g>',
+    nazi: '<rect width="300" height="200" fill="#a4302a"/><circle cx="150" cy="100" r="35" fill="#f4efe1"/><path d="M150,72 v14 M150,114 v14 M122,100 h14 M164,100 h14 M150,86 l10,-10 M150,86 l-10,-10 M150,114 l10,10 M150,114 l-10,10" stroke="#241f14" stroke-width="6"/>'
+  };
+  function flagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (FLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+
+  var SNAP = [
+    { year:"1200", name:"Baltic and Finnic tribes", t:{ lt:C.pagan_lt, lv:C.pagan_lv, ee:C.pagan_ee },
+      story: "On the eve of the Northern Crusades, none of the three future nations exist as states. Lithuanian tribes hold the forested south, loosely organized around local dukes with no central authority yet. To their north, the lands of modern Latvia are split among Latgallians, Selonians, Semigallians, and Livs (a Finnic people whose name Latin chroniclers stretched to cover the whole territory as \"Livonia\"). Further north still, Estonian tribes hold their own patchwork of parishes with no king or unifying crown. All three peoples are pagan, all three are organized as loose confederations rather than kingdoms, and none rules any of the others &mdash; three genuinely separate societies that simply happen to share a coastline, about to be struck by Rome's crusading frontier from three different directions at once." },
+    { year:"1290", name:"Crusader Terra Mariana vs. free Lithuania", t:{ lt:C.gdl, lv:C.liv, ee:C.liv },
+      story: "The Northern Crusades hit Latvia and Estonia hard. Bishop Albert of Riga founded the city in 1201 and the Livonian Brothers of the Sword the year after; a 1237 merger with the Teutonic Order created the Livonian Order proper, and by the 1220s&ndash;30s the conquest of both Latvia and Estonia (with the Danes briefly holding the Estonian north) was largely complete, organized into the crusader confederation of Terra Mariana &mdash; \"Land of Mary.\" Lithuania, by sharp contrast, did the opposite: Duke Mindaugas unified the Lithuanian tribes under his own rule, was crowned King of Lithuania by papal authority in 1253 (a title that didn't outlast him, abandoned after his 1263 assassination), and Grand Duke Traidenis's crushing 1236 victory over the Sword-Brothers at Saule had already shown the crusaders they'd picked the wrong target. By 1290, Lithuania stands as the last major pagan state in Europe &mdash; and the only one of the three Baltic peoples still fully self-governed." },
+    { year:"1386", name:"Union of Krewo", t:{ lt:C.gdl, lv:C.liv, ee:C.liv },
+      story: "A century after resisting conquest outright, Lithuania has become one of Europe's largest states, its borders stretching under Grand Duke Gediminas and his successors all the way to the Black Sea. In 1386, Grand Duke Jogaila married Queen Jadwiga of Poland, converted to Catholicism, and became King Władysław II Jagiełło of Poland while remaining Lithuania's own Grand Duke &mdash; a personal union of crowns, not a merger of governments, that begins the long Polish-Lithuanian relationship later formalized as the Commonwealth in 1569. Lithuania's baptism ends its status as Europe's last pagan realm, but the state itself stays entirely its own, run by its own Grand Duke and nobility. Latvia and Estonia, meanwhile, remain exactly where they were a century earlier: parceled among the Livonian Order, the Archbishopric of Riga, and lesser prince-bishoprics, no closer to Lithuania's independence than in 1290." },
+    { year:"1561", name:"The Livonian Order collapses", t:{ lt:C.gdl, lv:C.gdl, ee:C.swe },
+      story: "Ivan the Terrible's invasion of Livonia in 1558 exposed how hollow the Order's rule had become; unable to defend itself, it dissolved outright in 1561. Its territory split three ways. Sweden and Denmark moved into the north, with the town council of Reval (Tallinn) and the northern Estonian nobility submitting to Swedish protection that same year. In the south, the last Livonian Master, Gotthard Kettler, secularized what remained into the Duchy of Courland and Semigallia &mdash; a hereditary duchy under Kettler's own family, but a vassal of the Polish-Lithuanian crown, while the rest of Livonia (the Riga area and points north, roughly today's central and northern Latvia) came under direct joint Polish-Lithuanian control. That web of vassalage is why Latvia's territory rejoins Lithuania's color here rather than standing apart: both answer, one way or another, to the same Polish-Lithuanian crown, while Estonia peels off toward Stockholm instead." },
+    { year:"1721", name:"Treaty of Nystad", t:{ lt:C.gdl, lv:C.rus, ee:C.rus },
+      story: "The Great Northern War (1700&ndash;1721) broke Swedish power in the Baltic for good. Peter the Great's Russia seized Estonia and Livonia (the larger, northern part of modern Latvia, including Riga, captured in 1710) over the course of the war, formalized by the 1721 Treaty of Nystad &mdash; the acquisition that let Peter proclaim himself Emperor and Russia an empire that same year. The Duchy of Courland, the smaller southern strip of Latvia, is untouched by this treaty: it remains its own semi-autonomous Polish-Lithuanian vassal duchy, even sending colonists to Tobago and Gambia earlier in the century in a brief and largely failed bid at overseas colonies. Lithuania proper, still bound to Poland through the Commonwealth, stays outside Russian control for another seven decades. The map folds Latvia into Russia's color here on the strength of its larger Livonian portion, with Courland's separate, smaller status noted rather than mapped." },
+    { year:"1795", name:"Third Partition of Poland-Lithuania", t:{ lt:C.rus, lv:C.rus, ee:C.rus },
+      story: "The Polish-Lithuanian Commonwealth, weakened by decades of internal paralysis and foreign interference, was carved up by its neighbors in three successive partitions between 1772 and 1795. The third and final partition erased the Commonwealth outright, and with it Lithuania's centuries of self-rule: Russia absorbed the Grand Duchy along with the Duchy of Courland, the last fragment of Polish-Lithuanian sovereignty over Latvian soil. For the first time in history, all three Baltic territories &mdash; Estonia and northern Latvia already Russian since 1721, Lithuania and Courland only now &mdash; answer to a single government. It's a genuinely new condition: eight centuries after the crusades first split their fates apart, Vilnius, Riga, and Tallinn all report, for the first time, to the same capital, St. Petersburg." },
+    { year:"1918", name:"Three declarations of independence", t:{ lt:C.ind_lt, lv:C.ind_lv, ee:C.ind_ee },
+      story: "World War I and the collapse of the Russian Empire gave all three nations their opening within the same nine months. Lithuania's Council declared independence on 16 February 1918; Estonia's followed on 24 February, in the brief window between the retreating Russian army and the arriving Germans; Latvia's Peoples&rsquo; Council waited until 18 November, after the German Empire itself had collapsed. Each then fought its own separate war of independence &mdash; against Bolshevik, German Freikorps, and (for Lithuania) Polish forces &mdash; through 1919&ndash;20 before securing real, internationally recognized borders. Three parliaments, three currencies, three armies: after 123 years under one crown, the Baltic states re-emerge as three fully distinct republics within the same single year, a coincidence of imperial collapse rather than coordination between them." },
+    { year:"1940", name:"Soviet annexation", t:{ lt:C.soviet, lv:C.soviet, ee:C.soviet },
+      story: "The secret protocols of the August 1939 Molotov-Ribbentrop Pact assigned all three Baltic states to the Soviet sphere before a single Soviet soldier had crossed a border. Bases were forced on all three that September and October; then, in June 1940, the Red Army occupied all three simultaneously, rigged elections followed within weeks, and each new \"people's parliament\" duly petitioned to join the USSR &mdash; Lithuania, Latvia, and Estonia were all formally annexed as Soviet Socialist Republics by early August 1940. Twenty-two years of independence, begun within nine months of each other in 1918, end within eight weeks of each other in 1940. Mass deportations to Siberia followed within a year, hitting all three countries on nearly identical schedules." },
+    { year:"1941", name:"Nazi occupation", t:{ lt:C.nazi, lv:C.nazi, ee:C.nazi },
+      story: "Operation Barbarossa, Germany's invasion of the USSR, reached Lithuania and Latvia within its first days in June 1941 and Estonia by late summer. All three were folded into the Reichskommissariat Ostland, a German civilian occupation zone administered from Riga, replacing one occupying power with another in barely a year. The change of ruler is total &mdash; a different flag, a different ideology, a different set of atrocities, most devastatingly the near-total destruction of the region's Jewish population &mdash; but the underlying pattern from 1940 repeats exactly: all three countries change hands together, on the same rough timetable, with no gap opening between any of them the way earlier centuries so often produced." },
+    { year:"1945", name:"Soviet reoccupation", t:{ lt:C.soviet, lv:C.soviet, ee:C.soviet },
+      story: "As the Red Army pushed the Wehrmacht back westward through 1944, it reoccupied all three Baltic republics in the same few months &mdash; Estonia and most of Lithuania by autumn 1944, the last German-held pocket in western Latvia (the \"Courland Pocket\") holding out until Germany's final surrender in May 1945. The Soviet Union never recognized the 1940 annexation as having lapsed at all, treating 1941&ndash;44 as a mere interruption rather than a change of sovereignty; the United States, Britain, and most Western governments, conversely, never recognized the Soviet annexation as legitimate in the first place, maintaining Baltic diplomatic legations in exile throughout. Partisan resistance &mdash; the \"Forest Brothers\" &mdash; fought on in all three countries into the early 1950s, the last fighters holding out into the 1960s." },
+    { year:"1991", name:"Restoration of independence", t:{ lt:C.ind_lt, lv:C.ind_lv, ee:C.ind_ee },
+      story: "The Singing Revolution's mass demonstrations through 1987&ndash;91, capped by the Baltic Way of 23 August 1989 &mdash; two million people forming a single human chain across all three countries, Vilnius to Riga to Tallinn, 675 kilometers &mdash; kept independence squarely on the agenda as Soviet control weakened. Lithuania declared restored independence first, on 11 March 1990, well before the USSR's own collapse and at real risk (Soviet troops stormed Vilnius's TV tower in January 1991, killing fourteen); Estonia and Latvia followed in the tense weeks around the failed August 1991 Moscow coup. All three were recognized internationally and admitted to the UN within the same September 1991 week. Each restored its own 1918-era flag exactly as it had flown before 1940 &mdash; the clearest possible statement that this was a restoration, not a founding." }
+  ];
+
+  var FLAG_SETS = {
+    "1200": [["pagan_lt","Lithuanian tribes (reconstructed)"],["pagan_lv","Latgallian & Livonian tribes (reconstructed)"],["pagan_ee","Estonian tribes (reconstructed)"]],
+    "1290": [["gdl_vytis","Grand Duchy of Lithuania"],["livonian","Livonian Order (Terra Mariana)"]],
+    "1386": [["gdl_vytis","Grand Duchy of Lithuania"],["livonian","Livonian Order"]],
+    "1561": [["plc_union","Poland-Lithuania (Lithuania & Courland/Livonia)"],["sweden","Swedish Estonia"]],
+    "1721": [["plc_union","Poland-Lithuania (Lithuania & Courland)"],["russia_imperial","Russian Empire (Estonia & Livonia)"]],
+    "1795": [["russia_imperial","Russian Empire"]],
+    "1918": [["lithuania_flag","Republic of Lithuania"],["latvia_flag","Republic of Latvia"],["estonia_flag","Republic of Estonia"]],
+    "1940": [["soviet","USSR (annexation)"]],
+    "1941": [["nazi","Nazi Germany (Reichskommissariat Ostland)"]],
+    "1945": [["soviet","USSR (reoccupation)"]],
+    "1991": [["lithuania_flag","Lithuania (restored)"],["latvia_flag","Latvia (restored)"],["estonia_flag","Estonia (restored)"]]
+  };
+
+  var REGIONS = ["lt","lv","ee"];
+  var REGION_NAMES = { lt:"Lithuania", lv:"Latvia", ee:"Estonia" };
+  var REGION_ABBR = { lt:"LT", lv:"LV", ee:"EE" };
+  var REGION_POS = { lt:[245,362], lv:[284,248], ee:[324,112] };
+  var ADJ = [["lt","lv"],["lv","ee"]];
+
+  function textColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+  function ownerName(hex) {
+    for (var k in C) { if (C[k] === hex) return NAMES[k]; }
+    return hex;
+  }
+
+  function groupsFor(t) {
+    var parent = {};
+    REGIONS.forEach(function (r) { parent[r] = r; });
+    function find(x) { return parent[x] === x ? x : (parent[x] = find(parent[x])); }
+    function union(a, b) { var ra = find(a), rb = find(b); if (ra !== rb) parent[ra] = rb; }
+    ADJ.forEach(function (pair) {
+      if (t[pair[0]] === t[pair[1]]) union(pair[0], pair[1]);
+    });
+    var groups = {};
+    REGIONS.forEach(function (r) {
+      var root = find(r);
+      if (!groups[root]) groups[root] = [];
+      groups[root].push(r);
+    });
+    return Object.keys(groups).map(function (k) { return groups[k]; });
+  }
+
+  var svgNS = "http://www.w3.org/2000/svg";
+  var labelsEl = document.getElementById("labels");
+  var yearTag = document.getElementById("yearTag");
+  var eraName = document.getElementById("eraName");
+  var eraOwners = document.getElementById("eraOwners");
+  var eraStory = document.getElementById("eraStory");
+  var flagsRow = document.getElementById("flagsRow");
+  var sliderEl = document.getElementById("slider");
+
+  function render(i) {
+    var era = SNAP[i];
+    yearTag.textContent = era.year;
+    eraName.textContent = era.name;
+    eraStory.innerHTML = era.story || "";
+    flagsRow.innerHTML = (FLAG_SETS[era.year] || []).map(function (f) {
+      return '<div class="flag-chip">' + flagSvg(f[0]) + '<div class="fc-label">' + f[1] + '</div></div>';
+    }).join("");
+
+    REGIONS.forEach(function (id) {
+      var el = document.getElementById("f-" + id);
+      el.setAttribute("fill", era.t[id]);
+    });
+
+    ADJ.forEach(function (pair) {
+      var same = era.t[pair[0]] === era.t[pair[1]];
+      var line = document.getElementById("b-" + pair[0] + "-" + pair[1]);
+      line.setAttribute("stroke-opacity", same ? "0.06" : "0.85");
+      line.setAttribute("stroke-width", same ? "1" : "2.6");
+    });
+
+    var groups = groupsFor(era.t);
+    var seenOwners = {};
+    var ownerParts = [];
+    groups.forEach(function (g) {
+      var label = ownerName(era.t[g[0]]);
+      if (!seenOwners[label]) { seenOwners[label] = []; ownerParts.push(label); }
+      g.forEach(function (id) { seenOwners[label].push(REGION_NAMES[id]); });
+    });
+    eraOwners.innerHTML = ownerParts.map(function (label) {
+      return "<b>" + label + "</b>: " + seenOwners[label].join(", ");
+    }).join(" &middot; ");
+
+    labelsEl.innerHTML = "";
+    function haloFor(txtColor) { return txtColor === "#201a12" ? "#f7f1e3" : "#201a12"; }
+    groups.forEach(function (g) {
+      var cx = g.reduce(function (s, id) { return s + REGION_POS[id][0]; }, 0) / g.length;
+      var cy = g.reduce(function (s, id) { return s + REGION_POS[id][1]; }, 0) / g.length;
+      var fillHex = era.t[g[0]];
+      var txtColor = textColorFor(fillHex);
+      var halo = haloFor(txtColor);
+
+      if (g.length > 1) {
+        var groupText = ownerName(fillHex).toUpperCase();
+        var gl = document.createElementNS(svgNS, "text");
+        gl.setAttribute("x", cx);
+        gl.setAttribute("y", cy);
+        gl.setAttribute("class", "group-label");
+        gl.setAttribute("font-size", groupText.length > 16 ? "10" : "13");
+        gl.setAttribute("fill", txtColor);
+        gl.setAttribute("stroke", halo);
+        gl.textContent = groupText;
+        labelsEl.appendChild(gl);
+        g.forEach(function (id) {
+          var pos = REGION_POS[id];
+          var sl = document.createElementNS(svgNS, "text");
+          sl.setAttribute("x", pos[0]);
+          sl.setAttribute("y", pos[1] + 16);
+          sl.setAttribute("class", "sub-label");
+          sl.setAttribute("font-size", "10");
+          sl.setAttribute("fill", txtColor);
+          sl.setAttribute("stroke", halo);
+          sl.setAttribute("opacity", "0.85");
+          sl.textContent = REGION_ABBR[id];
+          labelsEl.appendChild(sl);
+        });
+      } else {
+        var id = g[0];
+        var pos = REGION_POS[id];
+        var selfGoverning = Object.keys(C).some(function (k) { return k.indexOf("ind_") === 0 && C[k] === fillHex; });
+        var soloText = (selfGoverning ? REGION_NAMES[id] : ownerName(fillHex)).toUpperCase();
+        var sl2 = document.createElementNS(svgNS, "text");
+        sl2.setAttribute("x", pos[0]);
+        sl2.setAttribute("y", pos[1]);
+        sl2.setAttribute("class", "group-label");
+        sl2.setAttribute("font-size", selfGoverning ? "14" : (soloText.length > 16 ? "9.5" : "12"));
+        sl2.setAttribute("fill", txtColor);
+        sl2.setAttribute("stroke", halo);
+        sl2.textContent = soloText;
+        labelsEl.appendChild(sl2);
+        if (!selfGoverning) {
+          var subOnly = document.createElementNS(svgNS, "text");
+          subOnly.setAttribute("x", pos[0]);
+          subOnly.setAttribute("y", pos[1] + 16);
+          subOnly.setAttribute("class", "sub-label");
+          subOnly.setAttribute("font-size", "10");
+          subOnly.setAttribute("fill", txtColor);
+          subOnly.setAttribute("stroke", halo);
+          subOnly.setAttribute("opacity", "0.85");
+          subOnly.textContent = REGION_ABBR[id];
+          labelsEl.appendChild(subOnly);
+        }
+      }
+    });
+  }
+
+  sliderEl.addEventListener("input", function () { render(parseInt(sliderEl.value, 10)); });
+  render(0);
+
+  var playing = false, playTimer = null;
+  var playBtn = document.getElementById("playBtn");
+  function stepPlay() {
+    var next = parseInt(sliderEl.value, 10) + 1;
+    if (next > SNAP.length - 1) { stopPlay(); return; }
+    sliderEl.value = next;
+    render(next);
+  }
+  function startPlay() {
+    playing = true;
+    playBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(sliderEl.value, 10) >= SNAP.length - 1) { sliderEl.value = 0; render(0); }
+    playTimer = setInterval(stepPlay, 1700);
+  }
+  function stopPlay() {
+    playing = false;
+    playBtn.innerHTML = "&#9654;";
+    clearInterval(playTimer);
+  }
+  playBtn.addEventListener("click", function () { playing ? stopPlay() : startPlay(); });
+
+  // ---- Small multiples grid: same eleven snapshots, diff-highlighted ----
+  var gridEl = document.getElementById("grid9");
+  var MINI_PATHS = {
+    lt: "M198.2,432.5 L195.0,413.6 L199.3,393.2 L181.3,381.4 L138.7,368.4 L130.0,306.0 L176.6,283.2 L244.9,288.0 L285.0,280.6 L290.7,296.1 L312.3,300.8 L351.5,336.9 L355.3,370.2 L321.9,394.0 L312.5,435.9 L268.3,463.9 L228.9,463.4 L219.1,440.5 Z",
+    lv: "M130.0,306.0 L131.4,250.1 L151.4,203.4 L189.8,178.0 L222.1,233.5 L254.8,232.1 L262.6,175.0 L297.3,161.9 L315.2,171.0 L350.2,198.6 L383.8,198.7 L403.4,215.8 L406.9,251.9 L420.0,295.7 L376.3,324.4 L351.5,336.9 L312.3,300.8 L290.7,296.1 L285.0,280.6 L244.9,288.0 L176.6,283.2 Z",
+    ee: "M262.6,175.0 L267.4,131.2 L252.4,140.6 L226.5,114.2 L223.0,71.5 L274.5,50.8 L325.8,40.0 L370.0,52.3 L412.0,50.1 L418.2,63.1 L389.2,105.9 L401.3,175.2 L383.8,198.7 L350.2,198.6 L315.2,171.0 L297.3,161.9 Z"
+  };
+  SNAP.forEach(function (era, idx) {
+    var prev = idx > 0 ? SNAP[idx - 1] : null;
+    var changed = [];
+    if (prev) {
+      Object.keys(MINI_PATHS).forEach(function (id) {
+        if (era.t[id] !== prev.t[id]) changed.push(id);
+      });
+    }
+    var cell = document.createElement("div");
+    cell.className = "grid-cell";
+    var svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("viewBox", "0 0 460 500");
+    var sea = document.createElementNS(svgNS, "path");
+    sea.setAttribute("d", "M418.2,63.1 L412.0,50.1 L370.0,52.3 L325.8,40.0 L274.5,50.8 L223.0,71.5 L226.5,114.2 L252.4,140.6 L267.4,131.2 L262.6,175.0 L254.8,232.1 L222.1,233.5 L189.8,178.0 L151.4,203.4 L131.4,250.1 L130.0,306.0 L138.7,368.4 L181.3,381.4 L181.3,500 L0,500 L0,0 L418.2,0 Z");
+    sea.setAttribute("fill", "var(--tile-sea)");
+    svg.appendChild(sea);
+    Object.keys(MINI_PATHS).forEach(function (id) {
+      var isBaseline = !prev;
+      var isChanged = prev && changed.indexOf(id) !== -1;
+      var bold = isBaseline || isChanged;
+      var p = document.createElementNS(svgNS, "path");
+      p.setAttribute("d", MINI_PATHS[id]);
+      p.setAttribute("fill", era.t[id]);
+      if (bold) {
+        p.setAttribute("fill-opacity", "1");
+        p.setAttribute("stroke", "#241f14");
+        p.setAttribute("stroke-width", "2.2");
+      } else {
+        p.setAttribute("fill-opacity", "0.22");
+        p.setAttribute("stroke", "#241f14");
+        p.setAttribute("stroke-width", "0.75");
+        p.setAttribute("stroke-opacity", "0.4");
+      }
+      svg.appendChild(p);
+      var pos = REGION_POS[id];
+      var lbl = document.createElementNS(svgNS, "text");
+      lbl.setAttribute("x", pos[0]);
+      lbl.setAttribute("y", pos[1]);
+      lbl.setAttribute("text-anchor", "middle");
+      lbl.setAttribute("class", "mini-label");
+      lbl.setAttribute("fill", bold ? textColorFor(era.t[id]) : "#8a7d5c");
+      lbl.setAttribute("opacity", bold ? "1" : "0.55");
+      lbl.textContent = REGION_ABBR[id];
+      svg.appendChild(lbl);
+    });
+    cell.appendChild(svg);
+    var cap = document.createElement("div");
+    cap.className = "cap";
+    var diffText = !prev ? "Starting point" : (changed.length ? "→ " + changed.map(function (id) { return REGION_NAMES[id]; }).join(", ") + " change" + (changed.length === 1 ? "s" : "") + " hands" : "→ no change from previous frame");
+    cap.innerHTML = era.year + "<b>" + era.name + "</b><span class=\"diff\">" + diffText + "</span>";
+    cell.appendChild(cap);
+    gridEl.appendChild(cell);
+  });
+
+  // ---- Timeline: same data, real continuous date ranges ----
+  var GANTT_START = 1150, GANTT_END = 2030;
+  var GANTT_DATA = [
+    { id:"lt", segs:[
+      [1150,1253,C.pagan_lt,"Lithuanian tribes"], [1253,1569,C.gdl,"Grand Duchy of Lithuania"],
+      [1569,1795,C.gdl,"Polish-Lithuanian Commonwealth"], [1795,1918,C.rus,"Russian Empire"],
+      [1918,1940,C.ind_lt,"Independent"], [1940,1941,C.soviet,"Soviet annexation"], [1941,1944,C.nazi,"Nazi occupation"],
+      [1944,1991,C.soviet,"Lithuanian SSR"], [1991,2030,C.ind_lt,"Independent"]
+    ]},
+    { id:"lv", segs:[
+      [1150,1201,C.pagan_lv,"Latgallian / Livonian tribes"], [1201,1561,C.liv,"Livonian Order"],
+      [1561,1621,C.gdl,"Polish-Lithuanian Livonia & Courland"], [1621,1721,C.swe,"Swedish Livonia (Courland stays PLC)"],
+      [1721,1795,C.rus,"Russian Livonia (Courland stays PLC)"], [1795,1918,C.rus,"Russian Empire"],
+      [1918,1940,C.ind_lv,"Independent"], [1940,1941,C.soviet,"Soviet annexation"], [1941,1944,C.nazi,"Nazi occupation"],
+      [1944,1991,C.soviet,"Latvian SSR"], [1991,2030,C.ind_lv,"Independent"]
+    ]},
+    { id:"ee", segs:[
+      [1150,1227,C.pagan_ee,"Estonian tribes"], [1227,1346,C.liv,"Livonian Order / Danish Estonia"],
+      [1346,1561,C.liv,"Livonian Order"], [1561,1721,C.swe,"Swedish Estonia"], [1721,1918,C.rus,"Russian Empire"],
+      [1918,1940,C.ind_ee,"Independent"], [1940,1941,C.soviet,"Soviet annexation"], [1941,1944,C.nazi,"Nazi occupation"],
+      [1944,1991,C.soviet,"Estonian SSR"], [1991,2030,C.ind_ee,"Independent"]
+    ]}
+  ];
+  var ganttEl = document.getElementById("gantt");
+  function yearToPct(y) { return (y - GANTT_START) / (GANTT_END - GANTT_START) * 100; }
+  GANTT_DATA.forEach(function (row) {
+    var rowEl = document.createElement("div");
+    rowEl.className = "gantt-row";
+    var label = document.createElement("div");
+    label.className = "gantt-label";
+    label.textContent = REGION_NAMES[row.id];
+    rowEl.appendChild(label);
+    var track = document.createElement("div");
+    track.className = "gantt-track";
+    row.segs.forEach(function (seg) {
+      var left = yearToPct(seg[0]);
+      var width = yearToPct(seg[1]) - left;
+      var segEl = document.createElement("div");
+      segEl.className = "gantt-seg";
+      segEl.style.left = left + "%";
+      segEl.style.width = width + "%";
+      segEl.style.background = seg[2];
+      segEl.title = REGION_NAMES[row.id] + ": " + seg[3] + " (" + seg[0] + "–" + seg[1] + ")";
+      if (width > 4) {
+        var sp = document.createElement("span");
+        sp.textContent = seg[3];
+        sp.style.color = textColorFor(seg[2]);
+        segEl.appendChild(sp);
+      }
+      track.appendChild(segEl);
+    });
+    rowEl.appendChild(track);
+    ganttEl.appendChild(rowEl);
+  });
+  var axisEl = document.getElementById("gantt-axis");
+  [1150, 1300, 1450, 1600, 1750, 1900, 2030].forEach(function (y) {
+    var s = document.createElement("span");
+    s.style.left = yearToPct(y) + "%";
+    s.textContent = y;
+    axisEl.appendChild(s);
+  });
+})();
+</script>
+
+
+</body></html>

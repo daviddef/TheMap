@@ -1,0 +1,798 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+</style></head><body>
+<title>Flags of Iceland</title>
+<meta name="description" content="A chronological, paint-ready atlas of every flag that flew over Iceland, from a self-governing medieval commonwealth with no king to the republic born amid a foreign occupation in 1944.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c; --sea: #b7d3dd;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f; --sea: #1f3742;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f; --sea: #1f3742;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.08rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; font-size: .94rem; color: var(--muted); }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  .legend { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+
+  /* ---------- Timeline ---------- */
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1px; background: var(--hair); }
+  @media (max-width: 560px) { .timeline::before { left: 9px; } }
+  .entry { position: relative; padding-left: 46px; margin-bottom: 46px; }
+  @media (max-width: 560px) { .entry { padding-left: 30px; } }
+  .entry::before {
+    content: attr(data-n);
+    position: absolute; left: 1px; top: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--paper); outline: 1px solid var(--hair);
+    background: var(--card);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--brick); display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) { .entry::before { left: -5px; width: 18px; height: 18px; font-size: 9px; } }
+
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+  .card-head { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  @media (max-width: 620px) { .card-head { flex-direction: column; } }
+  .flag-box { flex: none; width: 168px; }
+  .flag-box svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-caption { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .card-title { font-size: 1.32rem; font-weight: 600; line-height: 1.18; margin: 0 0 10px; text-wrap: balance; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px; border: 1px solid var(--card-border); color: var(--muted);
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  /* Flip tooltip below tags near the top of the viewport so it isn't clipped */
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  /* Keep tooltips from overflowing the left/right edges on narrow screens */
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint { border-top: 1px solid var(--hair); }
+  details.paint > summary {
+    cursor: pointer; list-style: none; padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--adriatic); display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before { content: "+"; font-family: "Fraunces", serif; font-size: 15px; width: 14px; }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row { display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px; }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--card-border); border-radius: 2px; padding: 5px 9px 5px 5px; background: var(--paper); }
+  .swatch .chip { width: 20px; height: 20px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: none; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 88px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 340px; height: auto; }
+  .isea-fill { fill: var(--sea); }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .ireg-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 700; text-anchor: middle; transition: fill .4s ease, stroke .4s ease; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="scandinavia-hub.html">Scandinavia hub</a></p>
+  <p class="kicker">Family research &middot; Phase 6b of the world atlas</p>
+  <h1>Flags of Iceland</h1>
+  <p class="lede">An island settled by Norse chieftains who then spent over three centuries deliberately governing themselves without a king &mdash; the Althing, founded around 930, is among the oldest surviving parliamentary institutions in the world. What follows is a lineage of only seven flags across eleven hundred years: a long self-governing commonwealth with no state banner at all, four centuries under first Norwegian and then Danish crowns, and a national flag design that has not changed once since Iceland first won the right to fly it in 1915.</p>
+  <p class="lede">The republic itself was declared on 17 June 1944 &mdash; during the Nazi occupation of Denmark, whose king Iceland was still nominally united with. Copenhagen, under German occupation, was in no position to object.</p>
+
+  <div class="scope-note">
+    <b>Scope of this page:</b> the island of Iceland, c. 930&ndash;present, seven political entities. No internal regional split is shown below &mdash; Iceland has never been internally partitioned between rival governments at any point in its documented history, so this page follows macedonia-flags.html and slovakia-flags.html in tracing one whole-island border rather than inventing a division that never existed. Part of a larger atlas &mdash; see the map and linked pages at the bottom.
+  </div>
+
+  <div class="imap-section">
+    <h2>One island, seven flags</h2>
+    <p class="imap-sub">Iceland's own real coastline, traced whole &mdash; the same honest choice macedonia-flags.html and slovakia-flags.html made: no internal partition to show, because none genuinely existed. What changes here is only who held sovereignty over the whole island at once. Press play, or drag the slider.</p>
+    <div class="rule-box">
+      <b>Iceland is the one Nordic territory in this atlas with no land border to anyone.</b> Every other country in the Scandinavia hub either shares a frontier with a neighbor or sits close enough across water to be swapped between crowns by treaty. Iceland's isolation in the North Atlantic meant every change of sovereignty here happened by charter, treaty, or referendum &mdash; never by an army crossing a border.
+    </div>
+    <div class="imap-frame">
+      <div class="imap-controls">
+        <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="imap-year" id="iYearTag">930</span>
+        <input type="range" id="iSlider" min="0" max="6" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="imap-svg" viewBox="0 0 380 240" xmlns="http://www.w3.org/2000/svg">
+        <path class="isea-fill" fill-rule="evenodd" d="M0,0 L380,0 L380,240 L0,240 Z M311.1,15.1 L304.0,62.1 L338.6,111.6 L298.8,167.0 L210.3,216.8 L183.9,230.0 L143.5,219.3 L57.9,196.3 L88.1,164.2 L21.4,128.7 L75.7,114.7 L74.4,93.4 L10.0,76.5 L30.7,29.2 L77.2,18.4 L125.0,67.7 L171.6,28.2 L210.2,48.7 L260.2,10.0 L311.1,15.1 Z"/>
+        <path id="ireg-is" class="ireg-fill" d="M311.1,15.1 L304.0,62.1 L338.6,111.6 L298.8,167.0 L210.3,216.8 L183.9,230.0 L143.5,219.3 L57.9,196.3 L88.1,164.2 L21.4,128.7 L75.7,114.7 L74.4,93.4 L10.0,76.5 L30.7,29.2 L77.2,18.4 L125.0,67.7 L171.6,28.2 L210.2,48.7 L260.2,10.0 L311.1,15.1 Z"/>
+        <g font-family="IBM Plex Mono, monospace">
+          <text class="ireg-label" id="ilbl-is" x="190" y="120">ICELAND</text>
+        </g>
+      </svg>
+      <div class="imap-head">
+        <div class="imap-name" id="iEraName">The Icelandic Commonwealth</div>
+        <div class="imap-owners" id="iEraOwners"></div>
+      </div>
+      <div class="iflags-row" id="iFlagsRow"></div>
+      <p class="imap-story" id="iEraStory"></p>
+
+      <p class="map-note">Real traced coastline (johan/world.geo.json), no internal partition &mdash; see the rule box above for why.</p>
+      <div class="imap-key" id="iLegend"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <!-- 1 -->
+    <div class="entry" data-n="7" id="era-1944">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#0246ad"/>
+              <rect x="86" width="26" height="200" fill="#f4efe1"/>
+              <rect y="75" width="300" height="26" fill="#f4efe1"/>
+              <rect x="94" width="10" height="200" fill="#a4302a"/>
+              <rect y="83" width="300" height="10" fill="#a4302a"/>
+            </svg>
+            <div class="flag-caption">the same flag, unchanged since 1915 &mdash; only the state beneath it changed</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1944 &ndash; present</div>
+            <h3 class="card-title">Republic of Iceland</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A fully independent republic proclaimed at Þingvellir on 17 June 1944 while Denmark was under German occupation, formally dissolving the last vestige of the personal union."><span class="dot" style="background:#2f6b4a"></span>Republic</span><span class="tag" tabindex="0" data-tip="Regent since 1941, elected the first President of Iceland when the republic was proclaimed in June 1944, heading the new state through its founding years."><span class="dot" style="background:#4a3b78"></span>Sveinn Björnsson</span><span class="tag" tabindex="0" data-tip="The Evangelical Lutheran Church of Iceland remains the constitutionally established national church today, funded in part through the state, though full religious freedom is guaranteed."><span class="dot" style="background:#8e3b62"></span>Lutheranism (established state church)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="After Iceland joined the European Economic Area in 1994 and especially after Poland's 2004 EU accession opened labor mobility, tens of thousands of Polish workers immigrated to Iceland, who today form the country's largest immigrant community by far."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="7" fill="#fff"/><rect y="7" width="20" height="7" fill="#dc143c"/></svg>Immigration: Polish labor migrants (2004&ndash;)</span><span class="tag" tabindex="0" data-tip="Following Iceland's 2008 banking collapse, thousands of Icelanders emigrated, chiefly to Norway, seeking work as unemployment spiked and the króna lost much of its value."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#ba0c2f"/><rect x="6" width="2.4" height="14" fill="#fff"/><rect y="5.8" width="20" height="2.4" fill="#fff"/><rect x="6.6" width="1.2" height="14" fill="#00205b"/><rect y="6.4" width="20" height="1.2" fill="#00205b"/></svg>Emigration: to Norway after the 2008 financial crash</span></div>
+            <p><span class="label">Who &amp; why:</span> a national referendum on 20&ndash;23 May 1944 votes overwhelmingly (nearly 97%) to dissolve the 1918 union with Denmark and become a republic; independence is formally declared at Þingvellir &mdash; the same site as the medieval Althing &mdash; on 17 June 1944. The date is deliberate: it is the birthday of Jón Sigurðsson, the 19th-century leader of Iceland's independence movement. The timing is also a real historical irony &mdash; Denmark itself is under Nazi occupation at the moment its union with Iceland is dissolved, and Copenhagen, powerless to object, does not.</p>
+            <p><span class="label">What it represents:</span> no new flag is adopted. The blue-white-red cross flag approved for Iceland in 1915 and used as the full state flag since 1918 simply continues, now flying over a republic instead of a kingdom &mdash; the only transition in this whole lineage that changes nothing about the flag itself.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">18:25, off-center Nordic cross.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Blue field; white-fimbriated red cross, arms shifted toward the hoist.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#0246ad"></span><span class="meta"><span class="name">Blue</span><span class="hex">#0246AD</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="entry" data-n="6" id="era-1918">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#0246ad"/>
+              <rect x="86" width="26" height="200" fill="#f4efe1"/>
+              <rect y="75" width="300" height="26" fill="#f4efe1"/>
+              <rect x="94" width="10" height="200" fill="#a4302a"/>
+              <rect y="83" width="300" height="10" fill="#a4302a"/>
+            </svg>
+            <div class="flag-caption">now the full state and merchant flag, not just a coastal-waters flag</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1918 &ndash; 1944</div>
+            <h3 class="card-title">Kingdom of Iceland</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A fully sovereign state under the 1918 Act of Union, sharing only the king and foreign affairs with Denmark, with the union subject to revision or dissolution after 25 years."><span class="dot" style="background:#7a5a9a"></span>Sovereign state, personal union</span><span class="tag" tabindex="0" data-tip="King of Denmark and, from the 1918 Act of Union, separately King of Iceland, reigning over both realms in personal union until Iceland's 1944 republic ended it."><span class="dot" style="background:#4a3b78"></span>Christian X</span><span class="tag" tabindex="0" data-tip="The Church of Iceland continued as the established state church throughout this era of sovereign personal union with the Danish crown."><span class="dot" style="background:#8e3b62"></span>Lutheranism (state church)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Britain militarily occupies officially neutral Iceland in May 1940 to preempt a German seizure; the United States takes over the occupation by mutual agreement in 1941, stationing tens of thousands of troops until the war's end."><span class="dot" style="background:#6b2c2c"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#012169"/><path d="M0,0 L20,14 M20,0 L0,14" stroke="#fff" stroke-width="2"/><path d="M10,0 V14 M0,7 H20" stroke="#fff" stroke-width="3.4"/><path d="M10,0 V14 M0,7 H20" stroke="#c8102e" stroke-width="1.8"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#b22234"/><g fill="#fff"><rect y="1.6" width="20" height="1.6"/><rect y="4.8" width="20" height="1.6"/><rect y="8" width="20" height="1.6"/><rect y="11.2" width="20" height="1.6"/></g><rect width="8" height="7.5" fill="#3c3b6e"/></svg></span>Occupied by: Britain, then the United States (1940&ndash;45)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="A cadet Oldenburg line that inherited the Danish throne in 1863 and held it through Iceland's 1918 sovereignty until the final 1944 separation."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f4efe1"/><path d="M50,32 Q34,36 32,54 Q40,50 44,58 Q50,50 50,60 Q50,50 56,58 Q60,50 68,54 Q66,36 50,32 Z" fill="#2f6b4a"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Glücksburg</span></div>
+            <p><span class="label">Who &amp; why:</span> the Act of Union, signed 1 December 1918, recognizes Iceland as a fully sovereign state &mdash; the Kingdom of Iceland &mdash; sharing only its monarch, King Christian X, with Denmark, in a structure deliberately modeled on the earlier Sweden&ndash;Norway union of 1814&ndash;1905. Iceland gains its own flag at sea, its own neutrality in foreign affairs, and the right to revisit or end the union after 25 years &mdash; the option Iceland exercises at the earliest opportunity, in 1944.</p>
+            <p><span class="label">What it represents:</span> the blue-white-red cross flag, already flown domestically since 1915, becomes Iceland's full state and merchant flag for the first time &mdash; flown internationally at sea rather than confined to Icelandic territorial waters. The design does not change; only its legal status does.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">18:25, off-center Nordic cross.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Blue field; white-fimbriated red cross, arms shifted toward the hoist.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#0246ad"></span><span class="meta"><span class="name">Blue</span><span class="hex">#0246AD</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="entry" data-n="5" id="era-1814">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#a4302a"/>
+              <rect y="66.7" width="300" height="66.6" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#a4302a"/>
+              <rect x="90" width="34" height="200" fill="#f4efe1"/>
+              <rect y="83" width="300" height="34" fill="#f4efe1"/>
+            </svg>
+            <div class="flag-caption">Denmark's own Dannebrog for most of this period &mdash; Iceland's own flag only emerges near its end</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1814 &ndash; 1918</div>
+            <h3 class="card-title">Iceland under Denmark</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A Danish crown possession after Norway itself was ceded to Sweden in 1814, administered from Copenhagen with increasing home rule granted through the 19th century, culminating in the 1874 constitution."><span class="dot" style="background:#9c3b28"></span>Danish possession</span><span class="tag" tabindex="0" data-tip="King of Denmark whose 1814 Treaty of Kiel, ceding Norway to Sweden, left Iceland (along with Greenland and the Faroes) as a direct Danish possession rather than passing to Norway's new crown."><span class="dot" style="background:#4a3b78"></span>Frederick VI</span><span class="tag" tabindex="0" data-tip="The Church of Iceland, established under Danish rule in the 16th-century Reformation, remained the island's official state religion throughout this era."><span class="dot" style="background:#8e3b62"></span>Lutheranism (state church)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Volcanic disasters and grinding poverty drive roughly 15,000&ndash;20,000 Icelanders — about a fifth of the population — to emigrate to North America between the 1870s and 1914, many settling the 'New Iceland' colony in Manitoba, Canada."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="5" height="14" fill="#d52b1e"/><rect x="5" width="10" height="14" fill="#fff"/><rect x="15" width="5" height="14" fill="#d52b1e"/><path d="M10,4 l1,2 2,-0.5 -1,2 1.5,1 -2,0.5 0.3,2 -1.8,-1.3 -1.8,1.3 0.3,-2 -2,-0.5 1.5,-1 -1,-2 2,0.5z" fill="#d52b1e"/></svg>Emigration: to North America (1870s&ndash;1914)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="A cadet Oldenburg line that inherited the Danish throne in 1863 and held it through this era, 1863–1944."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f4efe1"/><path d="M50,32 Q34,36 32,54 Q40,50 44,58 Q50,50 50,60 Q50,50 56,58 Q60,50 68,54 Q66,36 50,32 Z" fill="#2f6b4a"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Glücksburg</span></div>
+            <p><span class="label">Who &amp; why:</span> the January 1814 Treaty of Kiel, forced on Denmark after backing the losing side in the Napoleonic Wars, strips away Norway but explicitly carves out Iceland (with the Faroe Islands and Greenland) as territory Denmark keeps &mdash; Iceland's four-century tie had technically run through the Norwegian crown, but Copenhagen had governed it directly in practice for generations, and Denmark holds onto it while Norway itself is handed to Sweden. Icelandic nationalism grows steadily through the 19th century, led by Jón Sigurðsson; home rule is granted in 1904.</p>
+            <p><span class="label">What it represents:</span> for most of this century, Iceland flies Denmark's own Dannebrog, the world's oldest continuously used national flag, with no distinct Icelandic symbol at all. That changes on 19 June 1915, when King Christian X approves a flag for Iceland's own domestic and territorial-waters use &mdash; a blue field with a white-fimbriated red cross, deliberately distinguished from Greece's similar blue-and-white by adding red. It is the first time in Iceland's history a flag of its own has flown.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">Danish state flag, 3:4 (swallow-tailed variants existed for state use); shown here as a plain rectangle.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red field, off-center white Nordic cross &mdash; the Dannebrog, flown over Iceland as ordinary Danish territory until 1915.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="entry" data-n="4" id="era-1523">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#a4302a"/>
+              <rect y="66.7" width="300" height="66.6" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#a4302a"/>
+              <rect x="90" width="34" height="200" fill="#f4efe1"/>
+              <rect y="83" width="300" height="34" fill="#f4efe1"/>
+            </svg>
+            <div class="flag-caption">the Dannebrog, flown over Iceland under a Danish-led union crown</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1523/1537 &ndash; 1814</div>
+            <h3 class="card-title">Iceland under Denmark&ndash;Norway</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Icelandic territory of the joint Danish-Norwegian crown, subjected to an increasingly centralized royal trade monopoly and absolutist rule from Copenhagen through most of this era."><span class="dot" style="background:#204b5c"></span>Crown territory</span><span class="tag" tabindex="0" data-tip="King who imposed the Lutheran Reformation on Iceland by 1550, having the last Catholic bishop, Jón Arason, and his two sons executed without trial for resisting it."><span class="dot" style="background:#4a3b78"></span>Christian III</span><span class="tag" tabindex="0" data-tip="Christian III's forced Reformation replaced Catholicism with Lutheranism as Iceland's state religion by 1550, following the execution of the island's last Catholic bishop."><span class="dot" style="background:#8e3b62"></span>Lutheranism (state church, imposed 1550)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="In the 1627 'Turkish Abductions,' Barbary corsairs from Salé and Algiers raid Iceland's coasts, killing dozens and carrying off an estimated 400 Icelanders into slavery in North Africa; only a small number were ever ransomed back."><span class="dot" style="background:#a3672f"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#c1272d"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#e30a17"/><circle cx="8" cy="7" r="3.4" fill="#fff"/><circle cx="9" cy="7" r="2.7" fill="#e30a17"/><path d="M12.5,7 l3.5,1.1 -2.2,-1.9 2.2,-1.9z" fill="#fff"/></svg></span>Emigration: captives seized in the 1627 Turkish Abductions</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The Danish royal house that brought Iceland under the Danish crown, imposed the Reformation in 1550, and ran it as a trade monopoly, 1536–1814."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><rect x="4" y="30" width="92" height="10" fill="#f4c940"/><rect x="4" y="54" width="92" height="10" fill="#f4c940"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Oldenburg</span></div>
+            <p><span class="label">Who &amp; why:</span> when Sweden breaks from the Kalmar Union in 1523, Denmark and Norway stay bound together in a narrower union &mdash; Iceland, already tied to the Norwegian crown since 1262, simply continues under the same union, now led firmly from Copenhagen rather than Oslo. The Danish crown formally imposes the Lutheran Reformation on Iceland by 1550, executing the last Catholic bishop, Jón Arason, and by 1602 establishes a harsh royal trade monopoly that damages the Icelandic economy for nearly two centuries.</p>
+            <p><span class="label">What it represents:</span> the Dannebrog, already centuries old, flies over Iceland as part of the broader Denmark&ndash;Norway union &mdash; no distinct Icelandic symbol exists, and Iceland's governance grows steadily more centralized in Copenhagen over these three centuries.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed civil ratio for most of this period.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red field, off-center white Nordic cross.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="entry" data-n="3" id="era-1397">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#c9a13c"/>
+              <rect x="90" width="34" height="200" fill="#a4302a"/>
+              <rect y="83" width="300" height="34" fill="#a4302a"/>
+              <g fill="#f4efe1">
+                <circle cx="150" cy="52" r="10"/>
+                <circle cx="126" cy="152" r="10"/>
+                <circle cx="174" cy="152" r="10"/>
+              </g>
+            </svg>
+            <div class="flag-caption">the union flag &mdash; three crowns for Denmark, Norway, and Sweden together</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1397 &ndash; 1523/1537</div>
+            <h3 class="card-title">Iceland under the Kalmar Union</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Icelandic territory of the Norwegian crown carried into the broader Kalmar Union joining Denmark, Norway, and Sweden, administered as a distant dependency throughout."><span class="dot" style="background:#6e6047"></span>Union member</span><span class="tag" tabindex="0" data-tip="Danish queen who engineered the 1397 Kalmar Union joining Denmark, Norway, and Sweden (and with Norway, Iceland) under a single crown."><span class="dot" style="background:#4a3b78"></span>Margaret I</span><span class="tag" tabindex="0" data-tip="Iceland remained Catholic throughout the union, its bishoprics at Skálholt and Hólar answering to Rome, decades before the Lutheran Reformation reached the island."><span class="dot" style="background:#8e3b62"></span>Roman Catholicism (state religion)</span></div>
+            <p><span class="label">Who &amp; why:</span> Margaret I of Denmark assembles personal control over Denmark, Norway, and Sweden through the 1390s; at Kalmar Castle in June 1397 her great-nephew Eric of Pomerania is crowned king of the combined union. Iceland, already a Norwegian dependency since 1262, is carried into the union as part of Norway's own territory &mdash; it never joins as a separate party, and its day-to-day governance through a royal governor (h&oacute;fuðsmaður) changes little.</p>
+            <p><span class="label">What it represents:</span> the Kalmar Union's own banner &mdash; a gold field with a red Scandinavian cross and three crowns, symbolizing the three united kingdoms &mdash; flies nominally over Iceland as part of Norway's share of the union, though everyday local administration barely registers the change in Reykjav&iacute;k or Sk&aacute;lholt.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio recorded.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Gold field, red Nordic cross, three white crowns.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#c9a13c"></span><span class="meta"><span class="name">Gold</span><span class="hex">#C9A13C</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White (crowns)</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="entry" data-n="2" id="era-1262">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#a4302a"/>
+              <g transform="translate(150,100)">
+                <path d="M-16,58 C-34,42 -32,10 -16,-8 C-8,-18 -4,-30 -8,-44 C2,-52 12,-44 10,-32 C20,-28 26,-14 18,-2 C28,2 32,14 24,24 C32,32 30,46 18,52 C14,58 2,62 -8,58 C-14,64 -20,62 -16,58 Z" fill="#c9a13c" stroke="#7c2e1f" stroke-width="2.5"/>
+                <path d="M-10,-48 l3,-9 3,5 3,-7 3,5 3,-9 3,9 -2,7 z" fill="#c9a13c" stroke="#7c2e1f" stroke-width="1.5"/>
+                <path d="M14,-56 L24,-30 L12,-26 L6,-50 Z" fill="#c9a13c" stroke="#7c2e1f" stroke-width="1.5"/>
+              </g>
+            </svg>
+            <div class="flag-caption">Norway's own royal banner, the crowned lion and axe, stylized</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1262 &ndash; 1397</div>
+            <h3 class="card-title">Iceland under the Norwegian Crown</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Icelandic chieftains submitted to Norwegian royal authority via the 1262 Old Covenant, ending nearly three and a half centuries of self-rule and bringing the island under a foreign crown for the first time."><span class="dot" style="background:#204b5c"></span>Crown territory</span><span class="tag" tabindex="0" data-tip="King of Norway who negotiated the 1262 Old Covenant (Gamli sáttmáli) by which Icelandic chieftains accepted his overlordship, ending the Commonwealth's independence."><span class="dot" style="background:#4a3b78"></span>Haakon IV "the Old"</span><span class="tag" tabindex="0" data-tip="Iceland had been formally Christian since the Althing's own conversion vote in the year 1000, and remained a Catholic territory throughout this era of Norwegian crown rule."><span class="dot" style="background:#8e3b62"></span>Roman Catholicism (state religion)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Icelandic chieftains submitted to King Haakon IV of Norway in 1262, ending the independent Commonwealth; Norway's House of Sverre ruled Iceland until 1380."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><g fill="#f4c940"><path d="M50,30 q-16,-4 -20,14 q10,-4 14,2 q-6,8 2,20 q6,-10 12,-10 q6,0 12,10 q8,-12 2,-20 q4,-6 14,-2 q-4,-18 -20,-14 q-6,4 -8,10 q-2,-6 -8,-10 Z"/></g><rect x="46" y="76" width="4" height="20" fill="#f4c940"/><path d="M40,76 L56,76 L52,86 L44,86 Z" fill="#f4c940"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Sverre</span></div>
+            <p><span class="label">Who &amp; why:</span> after decades of internal violence &mdash; the Age of the Sturlungs, a brutal feud among rival chieftain clans that leaves the Commonwealth ungovernable &mdash; Icelandic chieftains sign the Gamli s&aacute;ttm&aacute;li (the "Old Covenant") in 1262, submitting to King Haakon IV of Norway in exchange for peace and a guarantee that Icelandic law keeps being written and enforced under Icelandic custom.</p>
+            <p><span class="label">What it represents:</span> it is a real loss of sovereignty, but a notably gentle one &mdash; the Althing continues meeting, now under a Norwegian-appointed governor, and Iceland's own law code (later revised as J&oacute;nsb&oacute;k in 1281) stays in force. Norway's own royal banner, the crowned golden lion bearing an axe on a red field, becomes the symbol of the crown Iceland now answers to.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio recorded.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red field, gold crowned lion rampant bearing an axe (shown stylized, not exact heraldry).</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#c9a13c"></span><span class="meta"><span class="name">Gold</span><span class="hex">#C9A13C</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 7 -->
+    <div class="entry" data-n="1" id="era-930">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; pre-heraldic era, no state flag existed</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 930 &ndash; 1262</div>
+            <h3 class="card-title">Icelandic Commonwealth</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A unique stateless society governed by the Althing, one of the world's oldest parliaments (founded 930), and regional chieftains (goðar) rather than any king, until submission to Norway in 1262."><span class="dot" style="background:#a9762f"></span>Commonwealth</span><span class="tag" tabindex="0" data-tip="The Commonwealth had no monarch by design, deliberately rejecting kingship; authority rested with the Althing assembly and the network of local goðar chieftains instead."><span class="dot" style="background:#4a3b78"></span>No single ruler documented</span><span class="tag" tabindex="0" data-tip="Settlers brought Norse polytheism from Norway; the Althing itself voted to adopt Christianity in the year 1000 as a pragmatic compromise to preserve national unity, though private pagan practice was tolerated briefly after."><span class="dot" style="background:#8e3b62"></span>Norse paganism (until 1000)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="During the Age of Settlement (roughly 874&ndash;930), Norse chieftains and settlers, together with Celtic people and thralls from the British Isles, colonize the previously uninhabited island, founding the population and society the Althing was created to govern."><span class="dot" style="background:#2f7a6b"></span>Immigration: Norse &amp; Celtic settlement (c. 874&ndash;930)</span></div>
+            <p><span class="label">Who &amp; why:</span> Norse settlers, arriving from around 874, organize the island's chieftaincies into a shared legal and political order: the Alþingi (Althing), founded at Þingvellir around 930, is a general assembly of chieftains that makes law and settles disputes &mdash; one of the oldest surviving parliamentary institutions in the world. Uniquely among medieval European polities, the Commonwealth has no king and no central executive at all; law-speaking, courts, and enforcement are distributed among the go&eth;ar (chieftains). It ends only when internal feuding among rival chieftain clans &mdash; the Age of the Sturlungs &mdash; makes self-government untenable and the chieftains submit to Norway in 1262.</p>
+            <p><span class="label">What it represents:</span> no securely documented flag survives from this pre-heraldic era, and none would be expected &mdash; heraldic flags as a European institution do not really exist yet even on the continent, let alone in a decentralized commonwealth with no crown to fly one for. Iceland's first flag concept of any kind is centuries away, only emerging in the 1890s as a symbol of the independence movement. Shown here honestly blank rather than invented.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Commonwealth</b> &mdash; self-governing, no king</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#204b5c"></span><b>Crown territory</b> &mdash; ruled directly by a foreign king</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#6e6047"></span><b>Union member</b> &mdash; part of a shared Scandinavian crown</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#9c3b28"></span><b>Danish possession</b> &mdash; administered as Danish crown territory</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#7a5a9a"></span><b>Sovereign kingdom</b> &mdash; independent, in personal union with a foreign king</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#2f6b4a"></span><b>Republic</b> &mdash; fully sovereign, no monarch</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the named ruler most associated with the era's start</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official/established faith, not the population's</div>
+    </div>
+  </div>
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for Iceland lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/is/">Search Record Atlas for Iceland &rarr;</a>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This page is one lineage in a larger set. See the region-wide map and the other countries here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="scandinavia-hub.html"><b>Scandinavia hub</b><span>Five countries, eleven centuries</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are close historical approximations for painting reference; pre-19th-century swatches are informed reconstructions, not official specifications. Map is schematic and not surveyed. Country boundary source data: johan/world.geo.json.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var IC = {
+    commonwealth: "#a9762f", norway_crown: "#204b5c", kalmar: "#6e6047",
+    denmark_norway: "#9c3b28", denmark: "#9c3b28", kingdom_union: "#7a5a9a", republic: "#2f6b4a"
+  };
+  var INAMES = {
+    commonwealth: "Icelandic Commonwealth (Althing)", norway_crown: "Kingdom of Norway (Old Covenant)",
+    kalmar: "Kalmar Union", denmark_norway: "Denmark–Norway", denmark: "Kingdom of Denmark",
+    kingdom_union: "Kingdom of Iceland (personal union)", republic: "Republic of Iceland"
+  };
+  var IFLAGS = {
+    undocumented: '<rect width="300" height="200" fill="#cfc6ae"/><text x="150" y="132" font-size="74" text-anchor="middle" fill="#8a7d5c" font-family="serif">?</text>',
+    norway_lion: '<rect width="300" height="200" fill="#a4302a"/><g transform="translate(150,100)"><path d="M-16,58 C-34,42 -32,10 -16,-8 C-8,-18 -4,-30 -8,-44 C2,-52 12,-44 10,-32 C20,-28 26,-14 18,-2 C28,2 32,14 24,24 C32,32 30,46 18,52 C14,58 2,62 -8,58 C-14,64 -20,62 -16,58 Z" fill="#c9a13c" stroke="#7c2e1f" stroke-width="2.5"/><path d="M-10,-48 l3,-9 3,5 3,-7 3,5 3,-9 3,9 -2,7 z" fill="#c9a13c" stroke="#7c2e1f" stroke-width="1.5"/><path d="M14,-56 L24,-30 L12,-26 L6,-50 Z" fill="#c9a13c" stroke="#7c2e1f" stroke-width="1.5"/></g>',
+    kalmar_union: '<rect width="300" height="200" fill="#c9a13c"/><rect x="90" width="34" height="200" fill="#a4302a"/><rect y="83" width="300" height="34" fill="#a4302a"/><g fill="#f4efe1"><circle cx="150" cy="52" r="10"/><circle cx="126" cy="152" r="10"/><circle cx="174" cy="152" r="10"/></g>',
+    dannebrog: '<rect width="300" height="200" fill="#a4302a"/><rect x="90" width="34" height="200" fill="#f4efe1"/><rect y="83" width="300" height="34" fill="#f4efe1"/>',
+    iceland_modern: '<rect width="300" height="200" fill="#0246ad"/><rect x="86" width="26" height="200" fill="#f4efe1"/><rect y="75" width="300" height="26" fill="#f4efe1"/><rect x="94" width="10" height="200" fill="#a4302a"/><rect y="83" width="300" height="10" fill="#a4302a"/>'
+  };
+  function iFlagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (IFLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  var iLegendEl = document.getElementById("iLegend");
+  iLegendEl.innerHTML = Object.keys(IC).map(function (k) {
+    return '<span><span class="sw" style="background:' + IC[k] + '"></span>' + INAMES[k] + "</span>";
+  }).join("");
+
+  var ISNAP = [
+    { year:"930", name:"The Icelandic Commonwealth", t:{ is:IC.commonwealth }, flagKeys:{ is:"undocumented" },
+      story:"Norse settlers, arriving from around 874, organize the island around a shared legal order rather than a king. The Alþingi, founded at Þingvellir around 930, is a general assembly of chieftains that makes law and settles disputes &mdash; one of the oldest surviving parliaments in the world. No securely documented flag exists; heraldic flags barely exist anywhere in Europe yet, let alone in a decentralized commonwealth with no crown to fly one for." },
+    { year:"1262", name:"Iceland submits to Norway", t:{ is:IC.norway_crown }, flagKeys:{ is:"norway_lion" },
+      story:"Decades of internal feuding among rival chieftain clans &mdash; the Age of the Sturlungs &mdash; leave the Commonwealth ungovernable. In 1262, Icelandic chieftains sign the Gamli s&aacute;ttm&aacute;li (\"Old Covenant\"), submitting to King Haakon IV of Norway in exchange for peace and a guarantee that Icelandic law keeps being enforced under Icelandic custom. The Althing keeps meeting, now under a Norwegian governor; Norway's own crowned-lion banner becomes the symbol Iceland answers to." },
+    { year:"1397", name:"The Kalmar Union", t:{ is:IC.kalmar }, flagKeys:{ is:"kalmar_union" },
+      story:"Margaret I unites Denmark, Norway, and Sweden under one crown at Kalmar in June 1397. Iceland, already a Norwegian dependency since 1262, is carried into the union as part of Norway's own share &mdash; it never joins as a separate party, and everyday governance through a royal governor barely registers the change locally." },
+    { year:"1523/1537", name:"Denmark–Norway, after Sweden's exit", t:{ is:IC.denmark_norway }, flagKeys:{ is:"dannebrog" },
+      story:"Sweden breaks from the Kalmar Union in 1523; Denmark and Norway stay bound together in a narrower union, now led firmly from Copenhagen. Iceland simply continues under the same crown as before, only more centralized &mdash; the Reformation is imposed by 1550 and a harsh royal trade monopoly follows in 1602. The Dannebrog, already centuries old, is the only flag Iceland knows for the next three hundred years." },
+    { year:"1814", name:"Treaty of Kiel &mdash; Iceland stays Danish", t:{ is:IC.denmark }, flagKeys:{ is:"dannebrog" },
+      story:"Denmark, on the losing side of the Napoleonic Wars, is forced to cede Norway to Sweden &mdash; but negotiates hard to keep Iceland, the Faroe Islands, and Greenland explicitly carved out of the transfer. Iceland's centuries-old tie, which had technically run through the Norwegian crown, becomes a direct Danish possession. Icelandic nationalism, led by J&oacute;n Sigurðsson, grows through the century; home rule follows in 1904, and Iceland gets its own domestic flag &mdash; blue, white, and red &mdash; in 1915." },
+    { year:"1918", name:"Kingdom of Iceland, personal union", t:{ is:IC.kingdom_union }, flagKeys:{ is:"iceland_modern" },
+      story:"The Act of Union of 1 December 1918 recognizes Iceland as a fully sovereign state sharing only its monarch, King Christian X, with Denmark &mdash; modeled on the earlier Sweden-Norway union. The 1915 domestic flag becomes Iceland's full state and merchant flag for the first time, flown internationally at sea. The union carries a 25-year review clause, which Iceland exercises at the first opportunity." },
+    { year:"1944", name:"Republic, declared amid occupation", t:{ is:IC.republic }, flagKeys:{ is:"iceland_modern" },
+      story:"A referendum in May 1944 votes nearly unanimously to end the union and become a republic; independence is declared at Þingvellir on 17 June 1944, the birthday of J&oacute;n Sigurðsson. Denmark itself is under Nazi occupation at that exact moment and cannot object. No new flag is adopted &mdash; the 1915 design simply continues, now flying over a republic instead of a kingdom." }
+  ];
+
+  var IREGIONS = ["is"];
+  var IREGION_NAMES = { is:"Iceland" };
+
+  function iTextColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+
+  var iYearTag = document.getElementById("iYearTag");
+  var iEraName = document.getElementById("iEraName");
+  var iEraOwners = document.getElementById("iEraOwners");
+  var iEraStory = document.getElementById("iEraStory");
+  var iFlagsRow = document.getElementById("iFlagsRow");
+  var iSlider = document.getElementById("iSlider");
+
+  function iRender(idx) {
+    var era = ISNAP[idx];
+    iYearTag.textContent = era.year;
+    iEraName.textContent = era.name;
+    iEraStory.innerHTML = era.story;
+
+    IREGIONS.forEach(function (id) {
+      document.getElementById("ireg-" + id).setAttribute("fill", era.t[id]);
+      var tcol = iTextColorFor(era.t[id]);
+      var tcolHalo = tcol === "#201a12" ? "#f7f1e3" : "#201a12";
+      var lbl = document.getElementById("ilbl-" + id);
+      if (lbl) { lbl.setAttribute("fill", tcol); lbl.setAttribute("stroke", tcolHalo); }
+    });
+
+    var label = Object.keys(IC).filter(function (k) { return IC[k] === era.t.is; })[0];
+    iEraOwners.innerHTML = "<b>" + INAMES[label] + "</b>: whole island";
+
+    iFlagsRow.innerHTML = IREGIONS.map(function (id) {
+      return '<div class="iflag-chip">' + iFlagSvg(era.flagKeys[id]) + '<div class="ic-label">' + IREGION_NAMES[id] + '</div></div>';
+    }).join("");
+  }
+
+  iSlider.addEventListener("input", function () { iRender(parseInt(iSlider.value, 10)); });
+  iRender(0);
+
+  var iPlaying = false, iPlayTimer = null;
+  var iPlayBtn = document.getElementById("iPlayBtn");
+  function iStepPlay() {
+    var next = parseInt(iSlider.value, 10) + 1;
+    if (next > ISNAP.length - 1) { iStopPlay(); return; }
+    iSlider.value = next;
+    iRender(next);
+  }
+  function iStartPlay() {
+    iPlaying = true;
+    iPlayBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(iSlider.value, 10) >= ISNAP.length - 1) { iSlider.value = 0; iRender(0); }
+    iPlayTimer = setInterval(iStepPlay, 1700);
+  }
+  function iStopPlay() {
+    iPlaying = false;
+    iPlayBtn.innerHTML = "&#9654;";
+    clearInterval(iPlayTimer);
+  }
+  iPlayBtn.addEventListener("click", function () { iPlaying ? iStopPlay() : iStartPlay(); });
+})();
+
+  // Tap-to-toggle for the pill tag tooltips (hover doesn't work on touch devices).
+  document.querySelectorAll(".tag[data-tip]").forEach(function (tag) {
+    tag.addEventListener("click", function (e) {
+      var wasOpen = tag.classList.contains("tip-open");
+      document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+      if (!wasOpen) tag.classList.add("tip-open");
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+  });
+</script>
+
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var html = '<h4>Genealogical records for this ground</h4>';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>
+
+</body></html>

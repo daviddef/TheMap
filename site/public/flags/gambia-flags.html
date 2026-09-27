@@ -1,0 +1,837 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+</style></head><body>
+<title>Flags of The Gambia</title>
+<meta name="description" content="A chronological, paint-ready atlas of every flag that flew over The Gambia, from the Mali Empire's western reach along the Gambia River to a narrow British river-colony and the modern republic.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.08rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; font-size: .94rem; color: var(--muted); }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  .legend { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+
+  /* ---------- Timeline ---------- */
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1px; background: var(--hair); }
+  @media (max-width: 560px) { .timeline::before { left: 9px; } }
+  .entry { position: relative; padding-left: 46px; margin-bottom: 46px; }
+  @media (max-width: 560px) { .entry { padding-left: 30px; } }
+  .entry::before {
+    content: attr(data-n);
+    position: absolute; left: 1px; top: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--paper); outline: 1px solid var(--hair);
+    background: var(--card);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--brick); display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) { .entry::before { left: -5px; width: 18px; height: 18px; font-size: 9px; } }
+
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+  .card-head { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  @media (max-width: 620px) { .card-head { flex-direction: column; } }
+  .flag-box { flex: none; width: 168px; }
+  .flag-box svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-caption { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .card-title { font-size: 1.32rem; font-weight: 600; line-height: 1.18; margin: 0 0 10px; text-wrap: balance; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px; border: 1px solid var(--card-border); color: var(--muted);
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  /* Flip tooltip below tags near the top of the viewport so it isn't clipped */
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  /* Keep tooltips from overflowing the left/right edges on narrow screens */
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint { border-top: 1px solid var(--hair); }
+  details.paint > summary {
+    cursor: pointer; list-style: none; padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--adriatic); display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before { content: "+"; font-family: "Fraunces", serif; font-size: 15px; width: 14px; }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row { display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px; }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--card-border); border-radius: 2px; padding: 5px 9px 5px 5px; background: var(--paper); }
+  .swatch .chip { width: 20px; height: 20px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: none; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 88px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 380px; height: auto; }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .iborder-line { transition: stroke-opacity 0.6s ease, stroke-width 0.6s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .ireg-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 700; text-anchor: middle; transition: fill .4s ease, stroke .4s ease; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="west-africa-hub.html">West Africa hub</a></p>
+  <p class="kicker">Family research &middot; Phase 11 of the world atlas</p>
+  <h1>Flags of The Gambia</h1>
+  <p class="lede">The Gambia is a geographic oddity before it is anything else: a narrow ribbon of territory hugging both banks of the Gambia River, surrounded on three sides by Senegal, with the border famously said to trace roughly how far a 19th-century British gunboat's cannon could fire from the water. That river valley's own history runs far deeper than any state: for roughly eighteen centuries before Mali's arrival, unknown communities raised more than a thousand laterite stone circles along its banks, a funerary tradition today preserved at Wassu and Kerbatch as a UNESCO World Heritage Site. That shape &mdash; imperial rivalry frozen into a national outline &mdash; runs through the rest of this lineage, from the western fringe of the Mali Empire's reach along the same river, through fragmented Mandinka and Wolof river kingdoms, a British river-colony administered first from Sierra Leone, independence in 1965, and a brief, unusual confederation with the country that surrounds it.</p>
+  <p class="lede">Only one flag has ever flown as Gambia's own national banner: the red-blue-green horizontal bands adopted at independence on 18 February 1965, unchanged through the move to a republic in 1970 and through the Senegambia Confederation of the 1980s.</p>
+
+  <div class="scope-note">
+    <b>Scope of this page:</b> the lands of present-day The Gambia, c. 300 BCE&ndash;present, seven political entities. Because Gambia's own national flag has never changed since its 1965 adoption, later entries track political-system changes (dominion to republic; the Senegambia Confederation) rather than flag changes &mdash; the confederation altered Gambia's diplomatic and defense arrangements but never its flag, so that episode is folded into the surrounding entry's narrative rather than shown as a separate banner. Part of a larger atlas &mdash; see the linked pages at the bottom.
+  </div>
+
+  <div class="imap-section">
+    <h2>Colony and Protectorate, one ribbon</h2>
+    <p class="imap-sub">The Gambia's own real border &mdash; the narrow ribbon along both banks of the Gambia River, hemmed in by Senegal &mdash; split for 77 years into the narrow Colony around Bathurst and the river mouth, run directly by Britain, and the wider Protectorate hinterland further upriver, governed indirectly through existing chiefs. Press play, or drag the slider, to watch who held each piece, era to era.</p>
+    <div class="rule-box">
+      <b>From 1888 to 1965, Britain ran two different Gambias on the same river.</b> The narrow Colony around Bathurst (today's Banjul) and the river mouth was administered directly, British law applying in full; the wider Protectorate along the rest of both riverbanks was governed indirectly, through the same Mandinka and Wolof chiefly authorities the fragmented river kingdoms had left in place. Even the fragmented pre-colonial kingdoms &mdash; Niumi, Baddibu, Niani, Wuli, Kombo, and others &mdash; controlled separate stretches of riverbank rather than occupying today's Gambia as rival halves of one mappable territory, and no borders between them survive to trace, which is why only the Colony/Protectorate line below ever solidifies. It dissolves whenever one government held the whole ribbon, true before 1888 and after independence in 1965.
+    </div>
+    <div class="imap-frame">
+      <div class="imap-controls">
+        <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="imap-year" id="iYearTag">c. 300 BCE</span>
+        <input type="range" id="iSlider" min="0" max="6" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="imap-svg" viewBox="0 0 330 122" xmlns="http://www.w3.org/2000/svg">
+        <g class="context-label" pointer-events="none">
+          <text x="60" y="14">SENEGAL</text>
+          <text x="290" y="14">SENEGAL</text>
+          <text x="170" y="115">SENEGAL</text>
+        </g>
+        <path id="ireg-colony" class="ireg-fill" d="M25.0,94.7 L36.9,52.1 L138.7,49.3 L132.5,83.2 L110.1,96.7 Z"/>
+        <path id="ireg-protect" class="ireg-fill" d="M138.7,49.3 L159.8,26.5 L189.4,25.0 L226.3,48.7 L255.3,49.1 L286.1,32.9 L305.0,60.7 L264.6,82.3 L224.0,80.6 L183.9,60.3 L149.2,82.5 L132.5,83.2 Z"/>
+        <path class="iborder-line" id="ib-colony-protect" d="M138.7,49.3 L132.5,83.2"/>
+        <g font-family="IBM Plex Mono, monospace">
+          <text class="ireg-label" id="ilbl-colony" x="78" y="74">COLONY</text>
+          <text class="ireg-label" id="ilbl-protect" x="218" y="58">PROTECTORATE</text>
+        </g>
+      </svg>
+      <div class="imap-head">
+        <div class="imap-name" id="iEraName">The Senegambian Stone Circle Builders</div>
+        <div class="imap-owners" id="iEraOwners"></div>
+      </div>
+      <div class="iflags-row" id="iFlagsRow"></div>
+      <p class="imap-story" id="iEraStory"></p>
+
+      <p class="map-note">Schematic internal partition on a real traced border &mdash; the Colony/Protectorate dividing line is approximate, marking the river mouth rather than a surveyed boundary.</p>
+      <div class="imap-key" id="iLegend"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <!-- 1 -->
+    <div class="entry" data-n="7" id="era-1970">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#ce1126"/>
+              <rect y="56" width="300" height="8" fill="#ffffff"/>
+              <rect y="64" width="300" height="72" fill="#0c1c8c"/>
+              <rect y="136" width="300" height="8" fill="#ffffff"/>
+              <rect y="144" width="300" height="56" fill="#3a7728"/>
+            </svg>
+            <div class="flag-caption">red-blue-green bands with white fringes &mdash; unchanged since independence, 1965</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1970 &ndash; present</div>
+            <h3 class="card-title">Republic of The Gambia</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#3a7728"></span>Republic, independent</span><span class="tag" tabindex="0" data-tip="Prime minister since independence in 1965 who became The Gambia's first president when it became a republic in 1970, leading the country until a 1994 coup."><span class="dot" style="background:#4a3b78"></span>Dawda Jawara</span><span class="tag" tabindex="0" data-tip="The Gambia's constitution establishes no official church; the population is overwhelmingly Muslim, but the state remains formally secular."><span class="dot" style="background:#8e3b62"></span>No official state religion (secular; predominantly Muslim)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="High youth unemployment drives tens of thousands of young Gambians to attempt the irregular 'backway' migration route to Europe via Senegal, Mali, and Libya during the 2000s and 2010s, giving The Gambia one of the highest per-capita rates of departure on the route to Italy."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="6.67" height="14" fill="#009246"/><rect x="6.67" width="6.67" height="14" fill="#fff"/><rect x="13.33" width="6.67" height="14" fill="#ce2b37"/></svg>Emigration: 'backway' migration to Europe (2000s&ndash;)</span></div>
+            <p><span class="label">Who &amp; why:</span> Gambia becomes a republic within the Commonwealth on 24 April 1970, following a referendum, with Prime Minister Dawda Jawara becoming president. From 1982 to 1989 Gambia enters the Senegambia Confederation with Senegal &mdash; the country that surrounds it on three landward sides &mdash; a real attempt at integrating defense, security, and economic policy after Senegalese troops helped put down a 1981 coup attempt; the confederation dissolves in 1989 without ever merging the two states, and Gambia's own flag and sovereignty are unaffected throughout. A 1994 military coup under Yahya Jammeh is later reversed by a peaceful transfer of power in 2017 after he loses an election and eventually steps down.</p>
+            <p><span class="label">What it represents:</span> the same 1965 flag continues to fly, unaltered by the change to a republic or by the confederation years &mdash; red for the sun and the savanna to the north and south of the river, blue for the Gambia River itself, green for the forests and farmland, and the two thin white fringes for unity and peace between Gambia's peoples.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3, five horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red, thin white fringe, blue (widest band), thin white fringe, green.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#ce1126"></span><span class="meta"><span class="name">Red</span><span class="hex">#CE1126</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#0c1c8c"></span><span class="meta"><span class="name">Blue</span><span class="hex">#0C1C8C</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#3a7728"></span><span class="meta"><span class="name">Green</span><span class="hex">#3A7728</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#ffffff"></span><span class="meta"><span class="name">White fringe</span><span class="hex">#FFFFFF</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="entry" data-n="6" id="era-1965">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#ce1126"/>
+              <rect y="56" width="300" height="8" fill="#ffffff"/>
+              <rect y="64" width="300" height="72" fill="#0c1c8c"/>
+              <rect y="136" width="300" height="8" fill="#ffffff"/>
+              <rect y="144" width="300" height="56" fill="#3a7728"/>
+            </svg>
+            <div class="flag-caption">the new national flag, adopted at independence, 18 February 1965</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1965 &ndash; 1970</div>
+            <h3 class="card-title">Independent Gambia (Commonwealth realm)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Commonwealth realm</span><span class="tag" tabindex="0" data-tip="Prime minister who led The Gambia to independence from Britain in February 1965, initially retaining Queen Elizabeth II as head of state before the 1970 shift to a republic."><span class="dot" style="background:#4a3b78"></span>Dawda Jawara</span><span class="tag" tabindex="0" data-tip="No official church was established at independence; the country remained formally secular despite its predominantly Muslim population."><span class="dot" style="background:#8e3b62"></span>No official state religion (secular; predominantly Muslim)</span></div>
+            <p><span class="label">Who &amp; why:</span> The Gambia gains independence from Britain on 18 February 1965, the smallest country in mainland Africa, still hemmed in on three sides by Senegal. Initially it remains a Commonwealth realm with Queen Elizabeth II as head of state, represented locally by a governor-general, with Dawda Jawara as prime minister. That arrangement lasts five years before the 1970 referendum converts the country into a republic.</p>
+            <p><span class="label">What it represents:</span> the newly designed national flag replaces the colonial Blue Ensign outright at independence &mdash; deliberately avoiding both the British Union Jack and any color associated with a single political party, with blue chosen specifically to mark the Gambia River running the length of the country.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3, five horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red, thin white fringe, blue (widest band), thin white fringe, green.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#ce1126"></span><span class="meta"><span class="name">Red</span><span class="hex">#CE1126</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#0c1c8c"></span><span class="meta"><span class="name">Blue</span><span class="hex">#0C1C8C</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#3a7728"></span><span class="meta"><span class="name">Green</span><span class="hex">#3A7728</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="entry" data-n="5" id="era-1888">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#00247d"/>
+              <clipPath id="canton1"><rect x="0" y="0" width="130" height="86"/></clipPath>
+              <g clip-path="url(#canton1)">
+                <rect width="130" height="86" fill="#00247d"/>
+                <line x1="0" y1="0" x2="130" y2="86" stroke="#ffffff" stroke-width="18"/>
+                <line x1="130" y1="0" x2="0" y2="86" stroke="#ffffff" stroke-width="18"/>
+                <line x1="0" y1="0" x2="130" y2="86" stroke="#cf142b" stroke-width="8"/>
+                <line x1="130" y1="0" x2="0" y2="86" stroke="#cf142b" stroke-width="8"/>
+                <rect x="52" width="26" height="86" fill="#ffffff"/>
+                <rect y="33" width="130" height="20" fill="#ffffff"/>
+                <rect x="58" width="14" height="86" fill="#cf142b"/>
+                <rect y="39" width="130" height="8" fill="#cf142b"/>
+              </g>
+              <circle cx="216" cy="128" r="28" fill="#f4efe1" stroke="#cf142b" stroke-width="2"/>
+              <rect x="196" y="140" width="40" height="10" fill="#0c1c8c"/>
+              <path d="M216,146 l-16,-24 6,2 10,-14 10,14 6,-2 Z" fill="#3a7728"/>
+            </svg>
+            <div class="flag-caption">Blue Ensign with the Gambia colonial badge &mdash; palm trees over the river, informed reconstruction</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1888 &ndash; 1965</div>
+            <h3 class="card-title">Gambia Colony and Protectorate</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#204b5c"></span>Colony and protectorate</span><span class="tag" tabindex="0" data-tip="British colonial Administrator who governed the Gambia colony from 1888, the year it was separated from Sierra Leone's administration and set on the path to formal protectorate rule over the river's interior."><span class="dot" style="background:#4a3b78"></span>Sir Gilbert Thomas Carter</span><span class="tag" tabindex="0" data-tip="Britain established no official church in the colony; the majority of the population along the river remained Muslim throughout, alongside a smaller Christian community around the coastal settlement."><span class="dot" style="background:#8e3b62"></span>No official state religion (predominantly Muslim population)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The Gambia was administered as a British Crown colony and protectorate under the House of Hanover and then Windsor, until independence in 1965, 1821–1965. Arms: the royal quarterings of England's lions, Scotland's lion, and Ireland's harp."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f4efe1"/><rect x="4" y="4" width="46" height="56" fill="#a4302a"/><rect x="50" y="4" width="46" height="56" fill="#f2c14e"/><path d="M4,60 H50 V116 Q4,100 4,64 Z" fill="#1e3a6e"/><path d="M50,60 H96 V116 Q96,100 50,116 Z" fill="#a4302a"/><path d="M14,30 q10,-10 20,0 q-4,10 -10,10 q-6,0 -10,-10 Z" fill="#f2c14e"/><path d="M62,30 q10,-10 20,0 q-4,10 -10,10 q-6,0 -10,-10 Z" fill="#a4302a"/><path d="M16,86 q4,-16 18,-16 v32 q-14,0 -18,-16 Z" fill="#f2c14e"/><path d="M62,88 q10,-10 20,0 q-4,10 -10,10 q-6,0 -10,-10 Z" fill="#f2c14e"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>British Crown (Hanover &amp; Windsor)</span></div>
+            <p><span class="label">Who &amp; why:</span> Britain separates Gambia from the Sierra Leone administration in 1888, creating a distinct colony (the narrow riverine settlement, run directly) and protectorate (the wider hinterland along both banks, governed through indirect rule over existing chiefs) &mdash; formalizing the odd, river-hugging shape that gunboat-range diplomacy with France had already sketched out. The territory remains Britain's smallest, most geographically constrained African possession right up to independence in 1965.</p>
+            <p><span class="label">What it represents:</span> the standard British colonial Blue Ensign, now carrying Gambia's own distinguishing badge in the fly &mdash; a device built around the Gambia River and its oil-palm groves, the colony's principal trade good, set against the same navy field and Union Jack canton used across the empire.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, standard British ensign proportions.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Navy field, Union Jack canton, Gambia colonial badge (palm trees over the river) in the fly.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#00247d"></span><span class="meta"><span class="name">Navy</span><span class="hex">#00247D</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#cf142b"></span><span class="meta"><span class="name">Union red</span><span class="hex">#CF142B</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#3a7728"></span><span class="meta"><span class="name">Badge, palm green</span><span class="hex">#3A7728</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="entry" data-n="4" id="era-1816">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#00247d"/>
+              <clipPath id="canton2"><rect x="0" y="0" width="150" height="100"/></clipPath>
+              <g clip-path="url(#canton2)">
+                <rect width="150" height="100" fill="#00247d"/>
+                <line x1="0" y1="0" x2="150" y2="100" stroke="#ffffff" stroke-width="20"/>
+                <line x1="150" y1="0" x2="0" y2="100" stroke="#ffffff" stroke-width="20"/>
+                <line x1="0" y1="0" x2="150" y2="100" stroke="#cf142b" stroke-width="9"/>
+                <line x1="150" y1="0" x2="0" y2="100" stroke="#cf142b" stroke-width="9"/>
+                <rect x="60" width="30" height="100" fill="#ffffff"/>
+                <rect y="38" width="150" height="24" fill="#ffffff"/>
+                <rect x="67" width="16" height="100" fill="#cf142b"/>
+                <rect y="45" width="150" height="10" fill="#cf142b"/>
+              </g>
+            </svg>
+            <div class="flag-caption">plain British Blue Ensign &mdash; undifferentiated, before a Gambia-specific badge existed</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1816 &ndash; 1888</div>
+            <h3 class="card-title">British settlement of Bathurst (administered from Sierra Leone)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#204b5c"></span>Colonial settlement</span><span class="tag" tabindex="0" data-tip="British army officer who founded the settlement at Bathurst (present-day Banjul) on St Mary's Island in 1816, establishing the toehold from which British authority on the river later grew."><span class="dot" style="background:#4a3b78"></span>Alexander Grant</span><span class="tag" tabindex="0" data-tip="No official church was established at this small trading settlement; the surrounding river kingdoms remained predominantly Muslim or traditional, while the garrison itself was nominally Christian."><span class="dot" style="background:#8e3b62"></span>No official state religion</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="A Mandinka warrior aristocracy, the Nyancho, still held sway over the middle and upper Gambia River valley from Kansala until 1867, 1537–1867."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f2c14e"/><rect x="4" y="50" width="92" height="16" fill="#c8272a"/><g stroke="#1a1a1a" stroke-width="5" stroke-linecap="round"><path d="M18,20 L82,100"/><path d="M82,20 L18,100"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Kaabu Empire (Nyancho Dynasty)</span><span class="tag" tabindex="0" data-tip="The Gambia was administered as a British Crown colony and protectorate under the House of Hanover and then Windsor, 1821–1965. Arms: the royal quarterings of England's lions, Scotland's lion, and Ireland's harp."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f4efe1"/><rect x="4" y="4" width="46" height="56" fill="#a4302a"/><rect x="50" y="4" width="46" height="56" fill="#f2c14e"/><path d="M4,60 H50 V116 Q4,100 4,64 Z" fill="#1e3a6e"/><path d="M50,60 H96 V116 Q96,100 50,116 Z" fill="#a4302a"/><path d="M14,30 q10,-10 20,0 q-4,10 -10,10 q-6,0 -10,-10 Z" fill="#f2c14e"/><path d="M62,30 q10,-10 20,0 q-4,10 -10,10 q-6,0 -10,-10 Z" fill="#a4302a"/><path d="M16,86 q4,-16 18,-16 v32 q-14,0 -18,-16 Z" fill="#f2c14e"/><path d="M62,88 q10,-10 20,0 q-4,10 -10,10 q-6,0 -10,-10 Z" fill="#f2c14e"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>British Crown (Hanover &amp; Windsor)</span></div>
+            <p><span class="label">Who &amp; why:</span> in 1816 Britain establishes a fortified trading post, Bathurst (today's Banjul), on an island at the mouth of the Gambia River, chiefly to suppress the Atlantic slave trade and secure river-borne trade in groundnuts and other goods against French rivals based in Senegal. For most of this period the settlement is administered as part of the British West African Settlements out of Freetown, Sierra Leone, rather than as its own separate colony &mdash; the narrow enclave along the river is already taking the shape that French Senegal's surrounding claims will later lock in.</p>
+            <p><span class="label">What it represents:</span> no Gambia-specific colonial badge yet exists; the settlement flies the generic British Blue Ensign of the period &mdash; navy field, Union Jack canton, no distinguishing device in the fly &mdash; shared with other undifferentiated British possessions until a proper colony is organized in 1888.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, standard British ensign proportions.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Navy field, Union Jack canton, no fly badge.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#00247d"></span><span class="meta"><span class="name">Navy</span><span class="hex">#00247D</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#cf142b"></span><span class="meta"><span class="name">Union red</span><span class="hex">#CF142B</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#ffffff"></span><span class="meta"><span class="name">Union white</span><span class="hex">#FFFFFF</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="entry" data-n="3" id="era-1600">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="120" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; fragmented river kingdoms, no surviving flag</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 1600 &ndash; 1816</div>
+            <h3 class="card-title">Fragmented Mandinka and Wolof river kingdoms</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#6b5c4a"></span>Fragmented kingdoms</span><span class="tag" tabindex="0" data-tip="No single ruler documented — the Gambia River valley in this period was divided among numerous small, competing Mandinka and Wolof kingdoms (such as Niumi, Baddibu, and Kombo) with no unified authority."><span class="dot" style="background:#4a3b78"></span>No single ruler documented</span><span class="tag" tabindex="0" data-tip="Religious practice varied kingdom by kingdom: Islam had spread along the river through Mande trading networks and coexisted with, or in places supplanted, traditional Mandinka and Wolof animist beliefs — no single state religion covered the fragmented valley."><span class="dot" style="background:#8e3b62"></span>Mixed Islam and traditional beliefs (no single state religion)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="From the 1600s through the early 1800s, Portuguese, French, and British trading companies buy captives from the river kingdoms and ship tens of thousands of enslaved people out through the Gambia River, one of West Africa's major Atlantic slave-trade outlets before Britain's 1807 abolition."><span class="dot" style="background:#a3672f"></span>Emigration: Atlantic slave trade (17th&ndash;early 19th c.)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="A Mandinka warrior aristocracy, the Nyancho, ruled the Kaabu empire over the middle and upper Gambia River valley until Kansala fell to a Fula-led jihad in 1867, 1537–1867."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f2c14e"/><rect x="4" y="50" width="92" height="16" fill="#c8272a"/><g stroke="#1a1a1a" stroke-width="5" stroke-linecap="round"><path d="M18,20 L82,100"/><path d="M82,20 L18,100"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Kaabu Empire (Nyancho Dynasty)</span></div>
+            <p><span class="label">Who &amp; why:</span> as Mali's imperial authority over the river fades by the early 1600s, the Gambia River corridor splits into a string of small, independent Mandinka and Wolof kingdoms &mdash; Niumi, Baddibu, Niani, Wuli, Kombo, and others &mdash; each controlling its own stretch of bank and levying tolls on river trade. No single ruler ever again unites the river valley before colonization; European trading companies (Portuguese, then increasingly British and French) deal separately with each riverbank kingdom for slaves, ivory, and later groundnuts, playing them against one another for access and favorable terms.</p>
+            <p><span class="label">What it represents:</span> as with Mali's own western reach, no securely documented territorial flag survives for any of these river kingdoms; authority was marked by royal regalia, drums, and personal banners of individual rulers rather than fixed state flags. Shown here honestly blank rather than invented.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="entry" data-n="2" id="era-1235">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="120" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; Mali's western periphery, no surviving flag</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 1235 &ndash; c. 1600</div>
+            <h3 class="card-title">Mali Empire's western reach along the Gambia River</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#8a6d3b"></span>Imperial periphery</span><span class="tag" tabindex="0" data-tip="Founder of the Mali Empire, who established its rule around 1235 following his victory at the Battle of Kirina; the empire's authority gradually extended westward to the Gambia River basin under his successors."><span class="dot" style="background:#4a3b78"></span>Sundiata Keita</span><span class="tag" tabindex="0" data-tip="Islam was the religion of the Mali Empire's ruling elite, formally embraced and famously displayed by later mansas such as Mansa Musa, though it coexisted early on with traditional Mande beliefs among much of the population, including in this western periphery."><span class="dot" style="background:#8e3b62"></span>Islam (Mali Empire's ruling elite)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="A Mandinka warrior aristocracy, the Nyancho, ruled the Kaabu empire from its capital at Kansala over the middle and upper Gambia River valley, 1537–1867."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f2c14e"/><rect x="4" y="50" width="92" height="16" fill="#c8272a"/><g stroke="#1a1a1a" stroke-width="5" stroke-linecap="round"><path d="M18,20 L82,100"/><path d="M82,20 L18,100"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Kaabu Empire (Nyancho Dynasty)</span></div>
+            <p><span class="label">Who &amp; why:</span> Sundiata Keita founds the Mali Empire around 1235, and over the following century Mali's authority extends west to the Gambia River valley, which becomes a tributary periphery of the empire rather than a core province &mdash; local Mandinka rulers along the river acknowledge Mali's overlordship and trade links (gold, salt, kola) while retaining considerable local autonomy. Mali's own power peaks under Mansa Musa in the 1320s&ndash;30s and then fragments slowly over the following two centuries, with its grip on the distant Gambia periphery loosening well before the imperial core in the Niger valley finally collapses.</p>
+            <p><span class="label">What it represents:</span> no flag is documented for Mali's own imperial court, let alone for its western riverine periphery; medieval West African empires marked authority through regalia, praise-singing griots, and symbolic objects rather than territorial banners. Shown here honestly blank rather than invented.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 7 -->
+    <div class="entry" data-n="1" id="era-300bce">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="120" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; megalith-building culture, no flag or written state record survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 300 BCE &ndash; c. 1235 CE</div>
+            <h3 class="card-title">The Senegambian Stone Circle Builders</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A funerary megalith-building tradition along the Gambia and Senegal river valleys, today preserved at sites such as Wassu and Kerbatch and recognized as a UNESCO World Heritage Site."><span class="dot" style="background:#8a6d3b"></span>Megalith-building culture</span><span class="tag" tabindex="0" data-tip="No individual ruler or dynasty is documented for this tradition; the stone circles mark elite burials, but the builders' own political organization is not recorded in any surviving written source."><span class="dot" style="background:#4a3b78"></span>No single ruler documented</span><span class="tag" tabindex="0" data-tip="The circles are understood as funerary and ancestral monuments; no institutional religion beyond ancestor veneration is documented for this culture."><span class="dot" style="background:#8e3b62"></span>Ancestral/funerary tradition (specifics undocumented)</span></div>
+            <p><span class="label">Who &amp; why:</span> along the middle Gambia River valley, and continuing across the border into Senegal, communities raise more than a thousand laterite stone circles over roughly eighteen centuries &mdash; a funerary tradition marking the graves of what are presumed to be local elites, though the builders left no written record of their own political organization or name for themselves. The tradition begins around the 3rd century BCE and continues, remarkably, right through the era covered by the next entry on this page, into the 16th century, well after Mali's own imperial reach reduces this stretch of the river to a tributary periphery.</p>
+            <p><span class="label">What it represents:</span> no flag, banner, or comparable political symbol survives or is documented for this culture; shown here honestly blank rather than invented. The stone circles themselves &mdash; not a flag &mdash; are the era's real and lasting monument, preserved today at Wassu and Kerbatch as a UNESCO World Heritage Site.</p>
+            <p><span class="label">World context:</span> the earliest stone circles rise at roughly the same time as the Kingdom of Kush's Meroitic period is flourishing in Sudan and Ptolemaic Egypt is ruling from Alexandria; the tradition continues through the entire rise and fall of the Western Roman Empire, the Byzantine centuries, and the rise of the Mali Empire whose own western reach along the Gambia River forms the very next chapter of this timeline.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#8a6d3b"></span><b>Imperial periphery</b> &mdash; tributary zone of a larger empire</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#6b5c4a"></span><b>Fragmented kingdoms</b> &mdash; no single ruler over the river valley</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#204b5c"></span><b>Colonial settlement / Colony and protectorate</b> &mdash; under direct or indirect British rule</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Commonwealth realm</b> &mdash; independent, shared monarch</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#3a7728"></span><b>Republic, independent</b> &mdash; sovereign under its own head of state</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the named ruler most associated with the era's start</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official/established faith, not the population's</div>
+    </div>
+  </div>
+
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for The Gambia lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/gm/">Search Record Atlas for The Gambia &rarr;</a>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This page is one lineage in a larger set. See the region-wide map and the other countries here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="west-africa-hub.html"><b>West Africa hub</b><span>Empires, coasts, and colonies</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are close historical approximations for painting reference; pre-19th-century swatches are informed reconstructions, not official specifications.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var IC = {
+    megaliths:"#5c4a3a", mali:"#8a6d3b", fragmented:"#6b5c4a", bathurst:"#204b5c", colony:"#204b5c", indirect:"#5c8a9c", independent:"#a9762f", republic:"#3a7728"
+  };
+  var INAMES = {
+    megaliths:"The Senegambian Stone Circle Builders",
+    mali:"Mali Empire's western reach along the Gambia River", fragmented:"Fragmented Mandinka and Wolof river kingdoms",
+    bathurst:"British settlement of Bathurst (administered from Sierra Leone)", colony:"Gambia Colony (direct British rule)",
+    indirect:"Gambia Protectorate (indirect rule through chiefs)",
+    independent:"Independent Gambia (Commonwealth realm)", republic:"Republic of The Gambia"
+  };
+  var IFLAGS = {
+    megaliths: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="120" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>',
+    mali: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="120" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>',
+    fragmented: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="120" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>',
+    bathurst: '<rect width="300" height="200" fill="#00247d"/><clipPath id="c2"><rect x="0" y="0" width="150" height="100"/></clipPath><g clip-path="url(#c2)"><rect width="150" height="100" fill="#00247d"/><line x1="0" y1="0" x2="150" y2="100" stroke="#fff" stroke-width="20"/><line x1="150" y1="0" x2="0" y2="100" stroke="#fff" stroke-width="20"/><line x1="0" y1="0" x2="150" y2="100" stroke="#cf142b" stroke-width="9"/><line x1="150" y1="0" x2="0" y2="100" stroke="#cf142b" stroke-width="9"/><rect x="60" width="30" height="100" fill="#fff"/><rect y="38" width="150" height="24" fill="#fff"/><rect x="67" width="16" height="100" fill="#cf142b"/><rect y="45" width="150" height="10" fill="#cf142b"/></g>',
+    colony: '<rect width="300" height="200" fill="#00247d"/><clipPath id="c1"><rect x="0" y="0" width="130" height="86"/></clipPath><g clip-path="url(#c1)"><rect width="130" height="86" fill="#00247d"/><line x1="0" y1="0" x2="130" y2="86" stroke="#fff" stroke-width="18"/><line x1="130" y1="0" x2="0" y2="86" stroke="#fff" stroke-width="18"/><line x1="0" y1="0" x2="130" y2="86" stroke="#cf142b" stroke-width="8"/><line x1="130" y1="0" x2="0" y2="86" stroke="#cf142b" stroke-width="8"/><rect x="52" width="26" height="86" fill="#fff"/><rect y="33" width="130" height="20" fill="#fff"/><rect x="58" width="14" height="86" fill="#cf142b"/><rect y="39" width="130" height="8" fill="#cf142b"/></g><circle cx="216" cy="128" r="28" fill="#f4efe1" stroke="#cf142b" stroke-width="2"/><rect x="196" y="140" width="40" height="10" fill="#0c1c8c"/><path d="M216,146 l-16,-24 6,2 10,-14 10,14 6,-2 Z" fill="#3a7728"/>',
+    indirect: '<rect width="300" height="200" fill="#00247d"/><clipPath id="c3"><rect x="0" y="0" width="130" height="86"/></clipPath><g clip-path="url(#c3)"><rect width="130" height="86" fill="#00247d"/><line x1="0" y1="0" x2="130" y2="86" stroke="#fff" stroke-width="18"/><line x1="130" y1="0" x2="0" y2="86" stroke="#fff" stroke-width="18"/><line x1="0" y1="0" x2="130" y2="86" stroke="#cf142b" stroke-width="8"/><line x1="130" y1="0" x2="0" y2="86" stroke="#cf142b" stroke-width="8"/><rect x="52" width="26" height="86" fill="#fff"/><rect y="33" width="130" height="20" fill="#fff"/><rect x="58" width="14" height="86" fill="#cf142b"/><rect y="39" width="130" height="8" fill="#cf142b"/></g><circle cx="216" cy="128" r="24" fill="#f4efe1" stroke="#cf142b" stroke-width="2"/><path d="M200,140 q16,-16 32,0" fill="none" stroke="#3a7728" stroke-width="4"/>',
+    independent: '<rect width="300" height="200" fill="#ce1126"/><rect y="56" width="300" height="8" fill="#fff"/><rect y="64" width="300" height="72" fill="#0c1c8c"/><rect y="136" width="300" height="8" fill="#fff"/><rect y="144" width="300" height="56" fill="#3a7728"/>',
+    republic: '<rect width="300" height="200" fill="#ce1126"/><rect y="56" width="300" height="8" fill="#fff"/><rect y="64" width="300" height="72" fill="#0c1c8c"/><rect y="136" width="300" height="8" fill="#fff"/><rect y="144" width="300" height="56" fill="#3a7728"/>'
+  };
+  function iFlagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (IFLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  var iLegendEl = document.getElementById("iLegend");
+  iLegendEl.innerHTML = Object.keys(IC).map(function (k) {
+    return '<span><span class="sw" style="background:' + IC[k] + '"></span>' + INAMES[k] + "</span>";
+  }).join("");
+
+  var ISNAP = [
+    { year:"c. 300 BCE", name:"The Senegambian Stone Circle Builders", t:{ colony:IC.megaliths, protect:IC.megaliths }, flagKeys:{ colony:"megaliths", protect:"megaliths" },
+      story:"Along the middle Gambia River valley, and continuing across the border into Senegal, communities raise more than a thousand laterite stone circles over roughly eighteen centuries &mdash; a funerary tradition marking the graves of presumed local elites, preserved today at Wassu and Kerbatch as a UNESCO World Heritage Site. The builders left no written record of their own political organization or name for themselves, and the tradition continues right through Mali's own rise, only fading in the 16th century. No flag or banner survives or is documented for this culture." },
+    { year:"c. 1235", name:"Mali Empire's western reach along the Gambia River", t:{ colony:IC.mali, protect:IC.mali }, flagKeys:{ colony:"mali", protect:"mali" },
+      story:"Sundiata Keita founds the Mali Empire around 1235; over the following century its authority extends west to the Gambia River valley as a tributary periphery, with local Mandinka rulers acknowledging overlordship while keeping local autonomy. No flag is documented for Mali's own court, let alone this distant periphery." },
+    { year:"c. 1600", name:"Fragmented Mandinka and Wolof river kingdoms", t:{ colony:IC.fragmented, protect:IC.fragmented }, flagKeys:{ colony:"fragmented", protect:"fragmented" },
+      story:"As Mali's authority fades, the river corridor splits into small, independent kingdoms &mdash; Niumi, Baddibu, Niani, Wuli, Kombo, and others &mdash; each controlling its own stretch of bank and levying tolls on river trade. No single ruler unites the valley again before colonization, and no territorial flag survives for any of them." },
+    { year:"1816", name:"British settlement of Bathurst (administered from Sierra Leone)", t:{ colony:IC.bathurst, protect:IC.bathurst }, flagKeys:{ colony:"bathurst", protect:"bathurst" },
+      story:"Britain establishes the fortified trading post of Bathurst in 1816 to suppress the slave trade and secure river trade against French rivals in Senegal, administering it from Freetown, Sierra Leone. No Gambia-specific badge yet exists; the generic British Blue Ensign flies undifferentiated over the whole river, with no distinction yet between the future Colony and Protectorate." },
+    { year:"1888", name:"Gambia Colony and Protectorate", t:{ colony:IC.colony, protect:IC.indirect }, flagKeys:{ colony:"colony", protect:"indirect" },
+      story:"Britain separates Gambia from Sierra Leone's administration in 1888, creating a distinct colony (the narrow riverine settlement around Bathurst and the river mouth, run directly) and protectorate (the wider hinterland along both banks, governed through indirect rule over existing chiefs) &mdash; formalizing the odd, river-hugging shape that gunboat-range diplomacy with France had already sketched out. The Colony's Blue Ensign carries Gambia's own badge, built around the river and its oil-palm groves; the Protectorate flies the same Blue Ensign under a simpler, undifferentiated device, reflecting its more indirect, lighter-touch administration through existing chiefly authority." },
+    { year:"1965", name:"Independent Gambia (Commonwealth realm)", t:{ colony:IC.independent, protect:IC.independent }, flagKeys:{ colony:"independent", protect:"independent" },
+      story:"The Gambia gains independence on 18 February 1965, still hemmed in on three sides by Senegal, and the Colony/Protectorate distinction that had governed the river in two different ways for 77 years disappears into one unified administration. The newly designed red-blue-green flag replaces the colonial ensign outright, deliberately avoiding both the Union Jack and any single party's colors." },
+    { year:"1970–present", name:"Republic of The Gambia", t:{ colony:IC.republic, protect:IC.republic }, flagKeys:{ colony:"republic", protect:"republic" },
+      story:"Gambia becomes a republic in 1970. The 1965 flag continues unaltered through the 1982&ndash;89 Senegambia Confederation with the country that surrounds it &mdash; a real attempt at shared defense and economic policy that never touched Gambia's own borders or banner &mdash; and through the coup and peaceful transition of 1994&ndash;2017." }
+  ];
+
+  var IREGIONS = ["colony","protect"];
+  var IREGION_NAMES = { colony:"Gambia Colony", protect:"Gambia Protectorate" };
+  var IADJ = [["colony","protect"]];
+
+  function iTextColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+
+  function iGroupsFor(t) {
+    var parent = {};
+    IREGIONS.forEach(function (r) { parent[r] = r; });
+    function find(x) { return parent[x] === x ? x : (parent[x] = find(parent[x])); }
+    function union(a, b) { var ra = find(a), rb = find(b); if (ra !== rb) parent[ra] = rb; }
+    IADJ.forEach(function (pair) { if (t[pair[0]] === t[pair[1]]) union(pair[0], pair[1]); });
+    var groups = {};
+    IREGIONS.forEach(function (r) { var root = find(r); if (!groups[root]) groups[root] = []; groups[root].push(r); });
+    return Object.keys(groups).map(function (k) { return groups[k]; });
+  }
+
+  var iYearTag = document.getElementById("iYearTag");
+  var iEraName = document.getElementById("iEraName");
+  var iEraOwners = document.getElementById("iEraOwners");
+  var iEraStory = document.getElementById("iEraStory");
+  var iFlagsRow = document.getElementById("iFlagsRow");
+  var iSlider = document.getElementById("iSlider");
+
+  function iRender(idx) {
+    var era = ISNAP[idx];
+    iYearTag.textContent = era.year;
+    iEraName.textContent = era.name;
+    iEraStory.innerHTML = era.story;
+
+    IREGIONS.forEach(function (id) {
+      document.getElementById("ireg-" + id).setAttribute("fill", era.t[id]);
+      var tcol = iTextColorFor(era.t[id]);
+      var tcolHalo = tcol === "#201a12" ? "#f7f1e3" : "#201a12";
+      var lbl = document.getElementById("ilbl-" + id);
+      if (lbl) { lbl.setAttribute("fill", tcol); lbl.setAttribute("stroke", tcolHalo); }
+    });
+
+    IADJ.forEach(function (pair) {
+      var same = era.t[pair[0]] === era.t[pair[1]];
+      var line = document.getElementById("ib-" + pair[0] + "-" + pair[1]);
+      line.setAttribute("stroke-opacity", same ? "0.06" : "0.85");
+      line.setAttribute("stroke-width", same ? "1" : "2.4");
+    });
+
+    var groups = iGroupsFor(era.t);
+    var seen = {}; var parts = [];
+    groups.forEach(function (g) {
+      var label = Object.keys(IC).filter(function (k) { return IC[k] === era.t[g[0]]; })[0];
+      var name = INAMES[label] || era.t[g[0]];
+      if (!seen[name]) { seen[name] = []; parts.push(name); }
+      g.forEach(function (id) { seen[name].push(IREGION_NAMES[id]); });
+    });
+    iEraOwners.innerHTML = parts.map(function (name) { return "<b>" + name + "</b>: " + seen[name].join(", "); }).join(" &middot; ");
+
+    iFlagsRow.innerHTML = IREGIONS.map(function (id) {
+      return '<div class="iflag-chip">' + iFlagSvg(era.flagKeys[id]) + '<div class="ic-label">' + IREGION_NAMES[id] + '</div></div>';
+    }).join("");
+  }
+
+  iSlider.addEventListener("input", function () { iRender(parseInt(iSlider.value, 10)); });
+  iRender(0);
+
+  var iPlaying = false, iPlayTimer = null;
+  var iPlayBtn = document.getElementById("iPlayBtn");
+  function iStepPlay() {
+    var next = parseInt(iSlider.value, 10) + 1;
+    if (next > ISNAP.length - 1) { iStopPlay(); return; }
+    iSlider.value = next;
+    iRender(next);
+  }
+  function iStartPlay() {
+    iPlaying = true;
+    iPlayBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(iSlider.value, 10) >= ISNAP.length - 1) { iSlider.value = 0; iRender(0); }
+    iPlayTimer = setInterval(iStepPlay, 1700);
+  }
+  function iStopPlay() {
+    iPlaying = false;
+    iPlayBtn.innerHTML = "&#9654;";
+    clearInterval(iPlayTimer);
+  }
+  iPlayBtn.addEventListener("click", function () { iPlaying ? iStopPlay() : iStartPlay(); });
+
+  document.querySelectorAll(".tag[data-tip]").forEach(function (tag) {
+    tag.addEventListener("click", function (e) {
+      var wasOpen = tag.classList.contains("tip-open");
+      document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+      if (!wasOpen) tag.classList.add("tip-open");
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+  });
+})();
+</script>
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var html = '<h4>Genealogical records for this ground</h4>';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>
+
+</body></html>

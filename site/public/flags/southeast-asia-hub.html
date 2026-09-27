@@ -1,0 +1,460 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .map-section { margin-top: 56px; padding-top: 36px; border-top: 1px solid var(--hair); }
+  .map-section h2 { font-size: 1.5rem; margin: 0 0 8px; }
+  .map-section .map-sub { font-size: .94rem; color: var(--muted); max-width: 64ch; margin: 0 0 22px; }
+  .map-section .rule-box { margin-bottom: 22px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .92rem; }
+  .map-section .rule-box b { color: var(--brick); }
+
+  .viz-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 22px; }
+
+  .controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .play-btn {
+    flex: none; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .play-btn:hover { border-color: var(--brick); }
+  input[type="range"] {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px;
+    background: var(--hair); outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper);
+    box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  .era-tag { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 62px; }
+
+  .era-head { text-align: center; margin-bottom: 16px; }
+  .era-name-inline { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.35rem; transition: opacity .35s ease; }
+  .era-owners { font-size: .86rem; color: var(--muted); max-width: 62ch; margin: 6px auto 0; transition: opacity .35s ease; }
+  .era-owners b { color: var(--ink); }
+  .era-story {
+    margin: 0 auto 22px; font-size: .98rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .35s ease; padding: 14px 18px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  .era-story b { color: var(--brick); }
+
+  .flags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 4px auto 18px; max-width: 640px; }
+  .flag-chip { text-align: center; width: 78px; }
+  .flag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-chip .fc-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 5px; line-height: 1.3; }
+
+  #map-svg { display: block; margin: 0 auto; width: 100%; max-width: 560px; height: auto; }
+  .region-fill { transition: fill 0.7s ease; }
+  .border-line { transition: stroke-opacity 0.7s ease, stroke-width 0.7s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .group-label { font-family: "Fraunces", serif; font-weight: 600; transition: opacity .5s ease, font-size .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2.5px; }
+  .sub-label { font-family: "IBM Plex Mono", monospace; font-weight: 700; transition: opacity .5s ease, fill .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+
+  .map-key { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: .8rem; color: var(--muted); justify-content: center; }
+  .map-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .map-key .sw { width: 11px; height: 11px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+  .map-notes { margin-top: 20px; font-size: .85rem; color: var(--muted); }
+  .map-notes b { color: var(--ink); }
+</style></head><body>
+<title>Flags of Southeast Asia</title>
+<meta name="description" content="A hub for the family flag atlas: eleven Southeast Asian countries, from the Khmer and Majapahit empires through colonization to independence.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    --tile: #ddd0aa; --tile-line: #b7a679; --tile-text: #7a6a45; --tile-sea: #b9d3da;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.2rem, 5.5vw, 3.4rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.1rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .countries { margin-top: 44px; }
+  .countries h2 { font-size: 1.15rem; font-weight: 600; margin: 0 0 16px; }
+  .country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .country-card {
+    display: block; padding: 20px; border: 1px solid var(--card-border); background: var(--card);
+    border-radius: 4px; text-decoration: none; color: var(--ink); position: relative; overflow: hidden;
+  }
+  .country-card .swatch-strip { position: absolute; top: 0; left: 0; right: 0; height: 5px; }
+  .country-card .era { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--brass); margin-bottom: 6px; }
+  .country-card b { display: block; font-family: "Fraunces", serif; font-size: 1.2rem; font-weight: 600; margin-bottom: 6px; }
+  .country-card span { color: var(--muted); font-size: .88rem; line-height: 1.5; }
+
+  .about { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .about h2 { font-size: 1.3rem; margin: 0 0 12px; }
+  .about p { max-width: none; opacity: .88; margin: 0 0 12px; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a></p>
+  <p class="kicker">Family research &middot; Hub &middot; Phase 17 of the world atlas</p>
+  <h1>Flags of Southeast Asia</h1>
+  <p class="lede">Eleven countries bound together by monsoon trade winds, and shaped long before Europe arrived by their own major civilizations: the Khmer Empire, whose temple-city of Angkor Wat was the largest pre-industrial urban complex on Earth; the Majapahit Empire, which at its height in the 1300s&ndash;1400s held sway over much of the Indonesian archipelago; the Sukhothai and later Ayutthaya kingdoms in what is now Thailand; and the Champa and &Ntilde;i Vi&#7879;t kingdoms contesting the Vietnamese coast. For over a thousand years, Indian Ocean and South China Sea trade routes carried Hinduism and Buddhism deep into the region &mdash; visible today in Angkor's Hindu-turned-Buddhist temples, Bali's Hindu culture, and Theravada Buddhism's hold across the mainland &mdash; alongside centuries of Chinese trade, tribute relationships, and migration.</p>
+  <p class="lede">European colonization arrived in stages and stuck to different powers: the Dutch built a spice-trade empire across the Indonesian archipelago, Spain colonized the Philippines and then ceded it to the United States in 1898, France assembled Vietnam, Cambodia, and Laos into "French Indochina," and Britain took Myanmar, Malaya, Singapore, and Brunei. Thailand stands alone in the region, and among all of Southeast and South Asia, as the one country never colonized by a European power &mdash; a fact its own history credits to skillful diplomacy playing British and French interests off each other. Japan occupied the entire region during World War II, and that occupation's collapse in 1945 opened the door to independence movements that mostly succeeded between the late 1940s and the 1960s. Timor-Leste is the exception: it was colonized by Portugal, invaded and annexed by Indonesia in 1975, and did not win full independence until 2002, after a UN-administered transition.</p>
+
+  <div class="countries">
+    <h2>The 11 countries</h2>
+    <div class="country-grid">
+      <a class="country-card" href="indonesia-flags.html">
+        <span class="swatch-strip" style="background:#ce1126"></span>
+        <b>Indonesia</b>
+        <span>The Majapahit Empire's archipelago-wide reach, over three centuries of Dutch rule as the East Indies, and independence proclaimed by Sukarno in 1945.</span>
+      </a>
+      <a class="country-card" href="philippines-flags.html">
+        <span class="swatch-strip" style="background:#0038a8"></span>
+        <b>Philippines</b>
+        <span>Over 300 years of Spanish rule from 1565, ceded to the United States in 1898, and independence in 1946 after brutal Japanese occupation.</span>
+      </a>
+      <a class="country-card" href="vietnam-flags.html">
+        <span class="swatch-strip" style="background:#da251d"></span>
+        <b>Vietnam</b>
+        <span>The historic Champa and &Ntilde;i Vi&#7879;t kingdoms, French Indochina, division at the 17th parallel in 1954, and a devastating war that ended in reunification in 1975.</span>
+      </a>
+      <a class="country-card" href="thailand-flags.html">
+        <span class="swatch-strip" style="background:#a51931"></span>
+        <b>Thailand</b>
+        <span>The Sukhothai and Ayutthaya kingdoms, and the sole Southeast Asian nation never colonized by a European power, kept independent as Siam through deft diplomacy.</span>
+      </a>
+      <a class="country-card" href="myanmar-flags.html">
+        <span class="swatch-strip" style="background:#fecb00"></span>
+        <b>Myanmar</b>
+        <span>The Bagan, Toungoo, and Konbaung dynasties, British colonization following three Anglo-Burmese wars, and independence in 1948 as Burma.</span>
+      </a>
+      <a class="country-card" href="malaysia-flags.html">
+        <span class="swatch-strip" style="background:#010066"></span>
+        <b>Malaysia</b>
+        <span>The Malacca Sultanate's trading empire, British Malaya, Japanese occupation, and independence in 1957, with Sabah and Sarawak joining in 1963.</span>
+      </a>
+      <a class="country-card" href="singapore-flags.html">
+        <span class="swatch-strip" style="background:#ee2536"></span>
+        <b>Singapore</b>
+        <span>Founded as a British trading post by Stamford Raffles in 1819, occupied by Japan in World War II, and independent since a 1965 split from Malaysia.</span>
+      </a>
+      <a class="country-card" href="cambodia-flags.html">
+        <span class="swatch-strip" style="background:#032ea1"></span>
+        <b>Cambodia</b>
+        <span>The Khmer Empire's Angkor Wat, French colonization, and the Khmer Rouge genocide of 1975&ndash;79, which killed an estimated 1.5&ndash;2 million people, roughly a quarter of the population.</span>
+      </a>
+      <a class="country-card" href="laos-flags.html">
+        <span class="swatch-strip" style="background:#ce1126"></span>
+        <b>Laos</b>
+        <span>The Lan Xang kingdom ("Land of a Million Elephants"), incorporation into French Indochina, and independence in 1953 following a monarchy restored after Japanese occupation.</span>
+      </a>
+      <a class="country-card" href="brunei-flags.html">
+        <span class="swatch-strip" style="background:#fecb00"></span>
+        <b>Brunei</b>
+        <span>A once-powerful Bruneian sultanate that ruled much of Borneo, reduced by later decline to a British protectorate, and full independence in 1984.</span>
+      </a>
+      <a class="country-card" href="timor-leste-flags.html">
+        <span class="swatch-strip" style="background:#dc241f"></span>
+        <b>Timor-Leste</b>
+        <span>Portuguese colonization, Indonesian invasion and annexation in 1975, and full independence in 2002 after a UN-administered transition &mdash; Southeast Asia's youngest nation.</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="about">
+    <h2>About this hub</h2>
+    <p>All eleven Southeast Asian countries have their own full flag-timeline pages, linked from the cards above. This hub also now carries the atlas's usual interactive map &mdash; a real-coastline, era-slider visualization tracing who actually governed each piece of the region across twelve centuries, from the Khmer Empire at Angkor to the present. Vietnam is tracked as two regions (north and south) throughout, since its 1954&ndash;75 partition and reunification is one of the map's defining lines; every other country is tracked as a single region, even where real internal complexity (Malaysia's peninsula and Borneo halves, Indonesia's thousands of islands) is simplified into one shape and one color.</p>
+    <p>Colors on the country cards above are drawn from each country's current national flag, not a historical palette; each country's own page traces its full historical lineage. The map below uses different colors for each historical power, matching the flags shown alongside it.</p>
+  </div>
+
+
+  <div class="map-section">
+    <h2>Twelve centuries, one map</h2>
+    <p class="map-sub">A real, traced map &mdash; actual coastlines, not schematic shapes, covering an archipelago-and-mainland region roughly 5,000 km wide, from Myanmar to Timor-Leste. Drag the slider or press play; each snapshot simplifies a messier reality into the dominant power of the moment. Vietnam is tracked as two regions, north and south, because the real 1954&ndash;75 partition at the 17th parallel is one of this map's most important lines.</p>
+    <div class="rule-box">
+      <b>Borders here are data, not decoration.</b> A line between two regions only draws solid when they were actually governed separately. When they weren't &mdash; North and South Vietnam after 1975, or East Timor once Indonesia annexed it in 1975 &mdash; the line dissolves and their names merge into whoever actually ruled them both. China and India are shown faint, for context only; they are not tracked as full regions here.
+    </div>
+
+    <div class="viz-frame">
+      <div class="controls">
+        <button class="play-btn" id="playBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="era-tag" id="yearTag">c. 1200</span>
+        <input type="range" id="slider" min="0" max="11" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="map-svg" viewBox="0 0 680 560" xmlns="http://www.w3.org/2000/svg">
+        <rect width="680" height="560" fill="var(--tile-sea)"/>
+        <path fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" d="M230.0,121.1 L234.5,118.8 L255.0,121.4 L251.5,128.6 L257.5,137.0 L262.4,133.7 L258.2,129.4 L261.7,124.7 L269.9,121.4 L276.3,120.5 L280.7,116.7 L285.3,118.1 L301.3,111.9 L306.2,108.0 L317.9,106.9 L322.3,104.3 L326.1,105.6 L338.6,102.7 L339.5,99.7 L358.9,86.1 L359.3,81.3 L365.3,81.8 L379.2,64.7 L387.3,49.6 L397.8,34.4 L404.2,33.4 L405.8,22.1 L408.6,13.9 L405.0,12.5 L0.1,12.5 L0.1,34.1 L4.6,37.0 L20.6,38.7 L20.9,41.2 L25.4,41.6 L34.1,38.7 L34.6,36.2 L41.1,30.6 L50.0,27.8 L59.2,21.3 L69.4,24.6 L77.3,19.5 L82.4,24.6 L84.5,32.2 L93.7,35.3 L96.5,31.5 L103.6,36.2 L106.2,43.8 L110.7,43.5 L111.9,53.6 L110.7,64.7 L98.8,76.0 L96.4,83.0 L97.7,90.6 L105.1,87.8 L112.1,87.7 L113.4,99.6 L119.6,100.8 L119.5,108.5 L117.6,113.2 L126.9,114.5 L130.7,121.7 L142.5,120.4 L143.6,124.7 L150.1,125.6 L150.1,117.1 L147.5,111.5 L149.3,108.9 L155.2,109.9 L159.0,105.4 L166.4,109.0 L170.8,105.1 L183.8,105.8 L189.3,103.1 L195.5,97.6 L202.7,103.0 L211.7,103.2 L214.7,104.8 L211.6,109.8 L214.1,114.8 L221.9,119.8 L230.0,121.1 Z M267.3,140.5 L258.0,139.7 L247.1,141.6 L238.6,149.8 L239.2,159.1 L249.7,163.1 L261.7,156.4 L263.2,151.0 L268.8,144.7 L267.3,140.5 Z"/>
+        <path fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" d="M0.1,54.3 L0.1,73.2 L5.7,74.5 L26.4,74.3 L28.9,77.8 L24.1,86.8 L17.6,88.1 L14.9,93.6 L16.9,100.7 L20.8,102.3 L24.9,95.6 L28.8,93.2 L31.9,106.0 L33.0,115.1 L38.0,114.8 L40.5,110.2 L39.4,105.6 L43.1,100.4 L43.7,93.3 L42.4,88.9 L52.8,90.8 L60.3,75.8 L58.3,73.3 L65.7,63.1 L64.8,57.6 L77.6,48.1 L85.3,46.5 L93.9,38.9 L93.7,35.3 L84.5,32.2 L82.4,24.6 L77.3,19.5 L69.4,24.6 L59.2,21.3 L50.0,27.8 L41.1,30.6 L34.6,36.2 L34.1,38.7 L25.4,41.6 L20.9,41.2 L25.5,45.1 L26.4,52.4 L9.5,53.8 L4.5,52.3 L0.1,54.3 Z"/>
+        <g class="context-label"><text x="188" y="45">CHINA</text><text x="35" y="30">INDIA</text></g>
+        <path id="f-mm" class="region-fill" d="M129.5,136.3 L131.1,131.1 L137.6,123.6 L142.5,120.4 L130.7,121.7 L126.9,114.5 L117.6,113.2 L119.5,108.5 L119.6,100.8 L113.4,99.6 L112.1,87.7 L105.1,87.8 L97.7,90.6 L96.4,83.0 L98.8,76.0 L110.7,64.7 L111.9,53.6 L110.7,43.5 L106.2,43.8 L103.6,36.2 L96.5,31.5 L93.7,35.3 L93.9,38.9 L85.3,46.5 L77.6,48.1 L64.8,57.6 L65.7,63.1 L58.3,73.3 L60.3,75.8 L52.8,90.8 L42.4,88.9 L43.7,93.3 L43.1,100.4 L39.4,105.6 L40.5,110.2 L38.0,114.8 L33.0,115.1 L33.7,123.7 L28.0,123.9 L29.8,130.3 L35.1,133.2 L38.4,139.4 L43.7,139.9 L51.2,147.6 L47.5,152.8 L52.1,154.5 L56.8,163.4 L58.8,171.5 L54.0,189.9 L60.0,189.9 L63.3,193.8 L69.0,195.0 L73.8,189.4 L84.8,184.4 L89.3,174.7 L94.4,184.8 L97.5,184.7 L100.0,206.1 L105.6,220.6 L109.8,227.8 L111.9,247.9 L111.0,255.7 L108.4,259.7 L111.4,265.8 L112.1,259.8 L117.6,254.2 L123.0,245.5 L120.4,235.7 L118.0,233.3 L116.9,220.7 L105.6,206.7 L104.8,201.7 L109.6,199.2 L111.2,187.7 L107.9,179.1 L99.7,170.0 L95.8,159.7 L99.0,158.7 L100.1,147.3 L105.5,144.3 L114.1,143.3 L126.6,135.0 L129.5,136.3 Z"/>
+        <path id="f-th" class="region-fill" d="M129.5,136.3 L126.6,135.0 L114.1,143.3 L105.5,144.3 L100.1,147.3 L99.0,158.7 L95.8,159.7 L99.7,170.0 L107.9,179.1 L111.2,187.7 L109.6,199.2 L104.8,201.7 L105.6,206.7 L116.9,220.7 L118.0,233.3 L120.4,235.7 L123.0,245.5 L117.6,254.2 L112.1,259.8 L111.4,265.8 L107.2,277.3 L105.5,288.4 L109.8,289.5 L124.3,305.3 L124.1,308.2 L129.5,313.8 L132.4,312.4 L141.4,316.3 L144.0,322.1 L151.9,321.7 L154.8,316.4 L147.1,308.3 L141.0,308.4 L135.5,304.4 L131.6,290.4 L127.4,285.3 L126.8,279.6 L120.2,278.4 L117.3,271.7 L117.3,264.2 L121.4,256.9 L123.2,249.5 L127.8,240.5 L128.2,225.4 L136.3,223.2 L140.3,224.4 L139.1,233.5 L150.1,233.8 L163.3,242.6 L165.5,246.5 L163.0,241.5 L163.1,237.2 L159.9,234.2 L157.6,223.0 L168.9,212.9 L189.1,211.6 L194.3,212.7 L198.0,210.4 L198.4,199.7 L200.1,195.9 L192.5,189.5 L188.7,183.3 L189.6,174.9 L179.7,163.2 L170.0,160.7 L167.0,165.6 L160.6,166.4 L155.5,163.4 L142.1,172.6 L139.6,171.2 L142.2,165.6 L141.4,160.8 L144.4,153.5 L143.5,146.2 L136.0,146.8 L133.0,143.5 L134.9,139.2 L129.5,136.3 Z"/>
+        <path id="f-la" class="region-fill" d="M155.2,109.9 L149.3,108.9 L147.5,111.5 L150.1,117.1 L150.1,125.6 L143.6,124.7 L142.5,120.4 L137.6,123.6 L131.1,131.1 L129.5,136.3 L134.9,139.2 L133.0,143.5 L136.0,146.8 L143.5,146.2 L144.4,153.5 L141.4,160.8 L142.2,165.6 L139.6,171.2 L142.1,172.6 L155.5,163.4 L160.6,166.4 L167.0,165.6 L170.0,160.7 L179.7,163.2 L189.6,174.9 L188.7,183.3 L192.5,189.5 L200.1,195.9 L198.4,199.7 L198.0,210.4 L194.3,212.7 L195.6,215.0 L206.3,216.5 L204.4,212.8 L211.1,209.7 L215.2,213.1 L224.1,208.1 L225.9,201.0 L219.9,193.6 L222.6,191.0 L213.1,185.2 L208.2,176.0 L200.8,169.3 L197.8,164.0 L188.2,155.7 L177.8,148.9 L179.5,144.6 L186.1,145.4 L191.0,140.1 L186.6,132.1 L179.8,128.3 L174.5,131.5 L167.6,129.0 L164.4,124.2 L165.8,119.6 L155.2,109.9 Z"/>
+        <path id="f-kh" class="region-fill" d="M224.1,208.1 L215.2,213.1 L211.1,209.7 L204.4,212.8 L206.3,216.5 L195.6,215.0 L194.3,212.7 L189.1,211.6 L168.9,212.9 L157.6,223.0 L159.9,234.2 L163.1,237.2 L163.0,241.5 L165.5,246.5 L167.9,249.6 L168.3,256.6 L173.1,253.6 L178.3,260.8 L184.6,263.0 L189.6,261.6 L196.8,256.3 L206.8,255.3 L202.9,251.7 L204.8,245.7 L216.6,241.7 L223.9,238.0 L223.6,229.5 L225.2,224.3 L221.7,215.5 L224.1,208.1 Z"/>
+        <path id="f-vn_n" class="region-fill" d="M230.0,121.1 L221.9,119.8 L214.1,114.8 L211.6,109.8 L214.7,104.8 L211.7,103.2 L202.7,103.0 L195.5,97.6 L189.3,103.1 L183.8,105.8 L170.8,105.1 L166.4,109.0 L159.0,105.4 L155.2,109.9 L165.8,119.6 L164.4,124.2 L167.6,129.0 L174.5,131.5 L179.8,128.3 L186.6,132.1 L191.0,140.1 L186.1,145.4 L179.5,144.6 L177.8,148.9 L188.2,155.7 L197.8,164.0 L200.8,169.3 L208.2,176.0 L209.7,178.8 L218.7,178.8 L210.9,169.5 L211.0,166.6 L203.3,159.5 L199.9,153.6 L204.4,141.2 L211.3,136.7 L214.3,131.0 L219.5,128.2 L222.7,123.9 L230.0,121.1 Z"/>
+        <path id="f-vn_s" class="region-fill" d="M209.7,178.8 L213.1,185.2 L222.6,191.0 L219.9,193.6 L225.9,201.0 L224.1,208.1 L221.7,215.5 L225.2,224.3 L223.6,229.5 L223.9,238.0 L216.6,241.7 L204.8,245.7 L202.9,251.7 L206.8,255.3 L196.8,256.3 L189.6,261.6 L184.6,263.0 L192.3,267.4 L190.0,273.3 L189.6,283.6 L196.0,283.6 L198.3,279.8 L212.0,272.9 L215.1,262.7 L220.8,263.2 L242.9,251.2 L245.6,246.2 L245.8,234.4 L248.5,230.4 L246.6,226.3 L246.2,219.0 L244.2,207.9 L240.8,199.5 L230.6,187.3 L219.8,180.1 L218.7,178.8 L209.7,178.8 Z"/>
+        <path id="f-my" class="region-fill" d="M129.5,313.8 L132.4,319.6 L132.5,324.7 L135.9,336.7 L137.1,345.4 L144.6,354.6 L144.6,359.3 L162.9,372.4 L175.2,377.6 L182.7,377.2 L176.7,363.2 L171.9,358.6 L171.0,347.9 L172.3,340.0 L171.7,334.1 L166.1,325.5 L154.8,316.4 L151.9,321.7 L144.0,322.1 L141.4,316.3 L132.4,312.4 L129.5,313.8 Z M352.8,342.8 L365.1,340.2 L360.5,334.4 L372.6,330.9 L373.2,326.7 L365.8,324.6 L358.2,318.7 L353.3,320.2 L353.7,313.4 L349.1,310.8 L338.9,312.8 L334.4,317.7 L330.0,325.4 L325.1,326.9 L326.5,331.6 L321.6,333.5 L320.2,333.5 L316.6,335.8 L317.7,340.0 L314.8,344.7 L307.8,337.4 L306.1,341.9 L294.7,355.2 L290.9,356.9 L278.0,359.7 L274.3,362.4 L270.6,373.9 L267.9,376.8 L260.3,374.2 L255.6,374.2 L251.1,370.2 L251.4,375.5 L262.3,385.1 L269.9,382.7 L278.5,383.4 L282.5,381.6 L287.5,376.2 L302.2,380.3 L305.8,377.8 L314.0,377.4 L317.7,370.9 L317.1,367.4 L321.7,364.3 L320.9,359.9 L325.6,357.3 L327.0,345.8 L331.3,340.5 L346.6,340.7 L352.8,342.8 Z"/>
+        <path id="f-sg" class="region-fill" d="M178.7,379.1 L176.8,377.7 L174.7,379.2 L176.8,379.9 L178.7,379.1 Z"/>
+        <path id="f-bn" class="region-fill" d="M320.2,333.5 L317.7,332.9 L310.8,337.3 L307.8,337.4 L314.8,344.7 L317.7,340.0 L316.6,335.8 L320.2,333.5 Z"/>
+        <path id="f-id" class="region-fill" d="M446.7,510.6 L440.6,513.7 L435.4,515.7 L431.2,519.2 L429.7,523.6 L433.1,528.5 L440.3,526.0 L448.5,517.9 L446.7,510.6 Z M251.1,370.2 L247.9,371.6 L244.0,377.0 L241.9,386.0 L242.3,391.6 L246.4,395.7 L244.7,401.9 L248.8,407.3 L255.1,411.3 L258.8,433.6 L263.2,433.1 L269.2,435.3 L273.4,433.7 L279.2,435.3 L279.2,441.3 L285.0,438.7 L289.1,439.6 L293.8,437.0 L302.0,437.0 L304.4,440.4 L308.1,438.1 L313.9,440.8 L315.9,449.5 L332.0,442.1 L339.8,425.6 L338.0,422.5 L339.7,415.0 L352.8,405.5 L351.3,400.3 L352.0,393.1 L354.9,386.8 L360.6,385.0 L365.0,385.8 L370.8,383.6 L359.2,374.4 L356.4,370.9 L359.0,366.5 L353.1,357.0 L347.5,350.2 L353.4,349.6 L352.8,342.8 L346.6,340.7 L331.3,340.5 L327.0,345.8 L325.6,357.3 L320.9,359.9 L321.7,364.3 L317.1,367.4 L317.7,370.9 L314.0,377.4 L305.8,377.8 L302.2,380.3 L287.5,376.2 L282.5,381.6 L278.5,383.4 L269.9,382.7 L262.3,385.1 L251.4,375.5 L251.1,370.2 Z M652.0,429.6 L647.5,427.5 L636.9,426.2 L622.2,419.1 L611.5,415.2 L602.7,419.7 L599.2,424.2 L593.4,425.2 L591.5,429.2 L581.8,438.9 L576.1,438.7 L567.4,429.7 L564.8,424.2 L564.1,418.2 L566.1,413.5 L562.5,405.7 L556.0,405.5 L545.2,400.8 L538.8,402.0 L534.7,405.2 L527.7,407.1 L528.2,414.0 L536.3,416.1 L537.5,421.6 L541.1,424.8 L549.5,425.2 L561.8,423.0 L561.6,426.8 L557.8,428.8 L552.5,427.4 L541.7,434.2 L546.9,438.3 L546.9,443.5 L549.6,448.5 L555.1,446.0 L556.7,439.8 L562.5,445.0 L564.6,444.7 L578.1,453.1 L588.1,454.1 L596.3,457.8 L602.3,459.1 L610.9,463.4 L617.1,468.9 L619.5,477.3 L625.0,483.8 L623.5,488.9 L627.9,493.2 L624.9,500.3 L639.3,500.6 L652.0,512.8 L652.0,484.5 L652.0,458.0 L652.0,429.6 Z M95.8,377.4 L94.7,384.1 L100.8,388.1 L101.5,383.7 L95.8,377.4 Z M117.3,418.9 L118.6,417.0 L113.5,407.9 L110.1,411.4 L113.5,417.4 L117.3,418.9 Z M340.8,506.3 L337.8,501.1 L333.4,504.1 L333.5,508.0 L337.4,510.4 L340.8,506.3 Z M325.6,500.4 L313.0,500.0 L314.9,503.3 L324.0,506.4 L328.8,503.7 L325.6,500.4 Z M205.3,417.5 L199.4,415.7 L193.6,422.3 L202.0,424.1 L204.6,432.3 L211.7,435.3 L213.3,430.7 L209.4,427.7 L205.3,417.5 Z M417.6,463.6 L418.3,455.3 L414.0,457.1 L417.6,463.6 Z M232.9,434.5 L231.3,429.3 L226.1,429.0 L225.3,437.2 L232.9,434.5 Z M580.5,404.5 L586.3,410.5 L587.0,405.5 L580.5,404.5 Z M581.7,416.5 L590.8,419.9 L590.9,417.4 L581.7,416.5 Z M522.0,396.2 L521.2,401.9 L527.9,398.1 L522.0,396.2 Z M488.0,417.4 L481.6,413.2 L480.5,418.2 L488.0,417.4 Z M447.3,418.0 L439.8,417.8 L440.3,421.8 L447.3,418.0 Z M528.6,498.4 L533.2,491.3 L531.2,487.8 L525.6,496.7 L528.6,498.4 Z M83.1,329.2 L78.5,328.4 L72.0,324.4 L66.9,325.0 L66.6,328.6 L70.4,335.3 L82.5,347.4 L89.3,350.5 L97.1,359.8 L98.6,366.0 L109.6,371.8 L112.6,377.0 L117.2,391.7 L122.9,394.8 L131.9,406.7 L138.9,420.9 L138.8,423.6 L148.1,436.7 L155.2,442.2 L158.3,446.9 L165.3,453.4 L177.0,461.2 L186.9,471.7 L187.3,466.8 L192.9,469.7 L196.4,467.2 L202.3,468.8 L203.3,460.2 L202.7,442.4 L205.4,437.4 L199.4,428.0 L192.3,426.3 L186.4,420.8 L183.7,409.4 L179.9,409.3 L173.1,405.8 L171.8,398.6 L176.4,395.6 L172.5,390.1 L167.2,389.9 L159.6,386.2 L150.8,375.4 L146.8,374.5 L141.4,367.3 L136.7,369.0 L133.8,367.3 L124.5,355.5 L106.3,343.8 L105.6,339.7 L96.6,329.6 L83.1,329.2 Z M419.3,506.3 L412.7,506.4 L408.9,504.3 L402.9,506.0 L391.6,501.6 L382.7,504.2 L381.2,507.4 L396.3,510.3 L404.9,509.9 L419.3,506.3 Z M383.9,516.1 L373.3,516.2 L372.0,520.3 L378.7,521.2 L385.6,526.6 L389.4,527.8 L394.4,524.5 L390.9,520.5 L383.9,516.1 Z M361.3,502.6 L361.2,506.0 L355.7,507.6 L352.6,503.9 L347.5,503.2 L343.3,505.3 L342.7,511.4 L346.1,512.5 L360.6,509.2 L371.0,508.1 L370.8,502.8 L361.3,502.6 Z M446.3,383.4 L450.7,376.9 L447.5,374.4 L438.5,383.1 L433.0,385.4 L414.9,383.2 L404.1,382.5 L397.5,379.2 L390.3,385.7 L387.2,383.7 L381.3,393.1 L380.8,402.4 L374.9,414.2 L375.0,420.8 L372.1,427.9 L368.2,431.5 L370.9,441.4 L376.3,440.6 L379.0,447.7 L378.8,452.7 L375.8,465.5 L380.2,468.9 L387.7,467.1 L387.3,462.0 L389.1,455.2 L389.4,443.6 L388.1,432.8 L392.1,430.3 L397.2,431.4 L395.4,441.7 L404.4,448.5 L402.8,454.8 L408.3,458.2 L412.0,453.6 L420.8,451.8 L412.6,442.5 L414.4,437.1 L407.3,425.9 L405.8,419.9 L415.9,413.4 L417.8,406.0 L412.9,405.9 L409.0,408.1 L403.2,407.1 L397.0,414.2 L392.2,413.7 L386.7,407.3 L383.9,400.1 L386.2,392.7 L389.6,389.7 L396.7,390.5 L423.2,390.0 L425.6,392.0 L438.5,391.0 L446.3,383.4 Z M222.3,473.0 L218.1,471.7 L215.2,474.1 L205.6,471.8 L198.0,482.9 L211.3,486.4 L212.8,491.0 L221.2,491.7 L229.3,494.9 L236.1,495.9 L239.8,494.2 L254.0,496.3 L263.6,500.4 L275.1,502.4 L290.1,503.7 L297.5,502.2 L314.5,508.3 L311.9,503.7 L312.7,497.1 L307.9,493.8 L297.4,494.9 L291.6,492.8 L288.3,484.7 L282.5,484.3 L275.6,481.2 L270.6,481.4 L265.2,479.0 L261.3,485.0 L249.5,483.3 L239.0,483.0 L234.0,476.3 L226.1,475.7 L222.3,473.0 Z M482.6,385.3 L486.2,379.1 L486.2,374.4 L481.3,372.6 L478.7,380.1 L480.3,389.9 L494.9,391.5 L489.4,386.8 L495.1,382.0 L494.9,376.1 L488.8,378.2 L488.1,381.3 L482.6,385.3 Z M508.5,432.8 L504.3,431.9 L488.7,432.8 L488.4,436.7 L491.4,439.9 L498.4,438.7 L504.8,440.4 L509.6,438.7 L521.9,445.5 L522.6,441.8 L516.5,434.4 L508.5,432.8 Z M471.5,435.7 L460.8,436.7 L462.7,442.0 L469.2,445.1 L476.2,442.6 L476.2,439.5 L471.5,435.7 Z M572.3,469.2 L569.0,466.8 L566.7,473.0 L568.4,477.1 L572.4,475.1 L572.3,469.2 Z M569.6,478.6 L564.3,475.3 L563.6,482.7 L567.3,483.3 L569.6,478.6 Z M620.8,502.0 L626.6,494.6 L623.8,490.7 L617.8,491.3 L614.1,493.9 L609.9,501.8 L617.8,503.7 L620.8,502.0 Z M305.1,487.0 L306.7,484.1 L292.5,484.4 L291.2,487.5 L300.2,488.5 L305.1,487.0 Z"/>
+        <path id="f-ph" class="region-fill" d="M397.8,158.1 L391.4,159.5 L388.3,170.6 L389.0,179.3 L385.8,190.9 L381.5,187.3 L384.7,206.2 L395.1,208.0 L391.6,214.7 L399.1,221.7 L406.4,218.0 L414.1,223.2 L417.0,218.3 L424.2,224.3 L426.1,229.3 L435.6,235.5 L436.7,229.5 L425.0,220.3 L420.3,213.9 L415.6,213.0 L407.4,216.3 L405.4,207.7 L401.5,200.1 L404.1,192.4 L411.0,189.1 L416.0,177.1 L411.3,170.3 L413.1,160.8 L407.3,162.2 L397.8,158.1 Z M349.4,288.3 L363.8,277.8 L368.2,269.4 L373.4,267.5 L379.8,261.9 L377.7,256.1 L374.3,257.5 L373.8,262.2 L358.4,277.7 L349.8,284.7 L349.4,288.3 Z M415.7,247.6 L410.6,247.3 L408.9,257.2 L411.8,260.3 L419.2,257.7 L423.1,252.9 L424.1,248.7 L415.7,247.6 Z M423.7,280.2 L426.2,277.6 L424.2,270.0 L429.3,258.3 L425.4,255.5 L421.9,256.9 L419.8,261.9 L420.3,267.2 L415.3,268.7 L416.5,274.9 L423.7,280.2 Z M442.2,251.1 L445.1,259.5 L444.9,266.2 L450.9,264.9 L447.8,258.2 L446.8,250.7 L442.2,251.1 Z M450.7,235.9 L438.7,235.5 L440.6,240.7 L446.2,245.6 L450.7,253.6 L455.7,253.8 L453.5,243.3 L454.5,240.2 L450.7,235.9 Z M392.8,223.8 L390.3,226.5 L393.5,230.3 L396.1,237.0 L399.6,239.9 L403.4,234.5 L403.2,228.2 L399.1,224.4 L392.8,223.8 Z M460.5,276.9 L454.3,271.3 L454.5,279.3 L446.0,281.4 L444.2,286.6 L440.7,286.1 L437.5,290.9 L427.7,284.9 L421.0,291.8 L413.7,293.5 L411.0,296.3 L427.1,301.4 L428.4,296.3 L434.5,298.1 L437.6,301.5 L434.7,308.4 L437.7,316.4 L453.5,323.7 L456.2,319.7 L455.2,313.4 L452.6,310.6 L458.3,302.4 L461.5,310.0 L468.0,303.5 L467.8,298.0 L464.6,283.0 L460.5,276.9 Z M442.5,271.0 L442.2,267.9 L437.1,266.6 L432.5,270.6 L434.1,273.1 L442.5,271.0 Z"/>
+        <path id="f-tl" class="region-fill" d="M448.5,517.9 L452.9,514.8 L472.2,507.7 L467.3,504.5 L458.0,504.7 L450.0,506.8 L446.7,510.6 L448.5,517.9 Z"/>
+
+        <g id="borders" stroke-width="1">
+          <path class="border-line" id="b-mm-th" d="M111.4,265.8 L112.1,259.8 L117.6,254.2 L123.0,245.5 L120.4,235.7 L118.0,233.3 L116.9,220.7 L105.6,206.7 L104.8,201.7 L109.6,199.2 L111.2,187.7 L107.9,179.1 L99.7,170.0 L95.8,159.7 L99.0,158.7 L100.1,147.3 L105.5,144.3 L114.1,143.3 L126.6,135.0 L129.5,136.3"/>
+          <path class="border-line" id="b-th-la" d="M129.5,136.3 L134.9,139.2 L133.0,143.5 L136.0,146.8 L143.5,146.2 L144.4,153.5 L141.4,160.8 L142.2,165.6 L139.6,171.2 L142.1,172.6 L155.5,163.4 L160.6,166.4 L167.0,165.6 L170.0,160.7 L179.7,163.2 L189.6,174.9 L188.7,183.3 L192.5,189.5 L200.1,195.9 L198.4,199.7 L198.0,210.4 L194.3,212.7"/>
+          <path class="border-line" id="b-th-kh" d="M194.3,212.7 L189.1,211.6 L168.9,212.9 L157.6,223.0 L159.9,234.2 L163.1,237.2 L163.0,241.5 L165.5,246.5"/>
+          <path class="border-line" id="b-th-my" d="M154.8,316.4 L151.9,321.7 L144.0,322.1 L141.4,316.3 L132.4,312.4 L129.5,313.8"/>
+          <path class="border-line" id="b-la-kh" d="M224.1,208.1 L215.2,213.1 L211.1,209.7 L204.4,212.8 L206.3,216.5 L195.6,215.0 L194.3,212.7"/>
+          <path class="border-line" id="b-la-mm" d="M129.5,136.3 L131.1,131.1 L137.6,123.6 L142.5,120.4"/>
+          <path class="border-line" id="b-kh-vn_s" d="M184.6,263.0 L189.6,261.6 L196.8,256.3 L206.8,255.3 L202.9,251.7 L204.8,245.7 L216.6,241.7 L223.9,238.0 L223.6,229.5 L225.2,224.3 L221.7,215.5 L224.1,208.1"/>
+          <path class="border-line" id="b-la-vn_s" d="M224.1,208.1 L225.9,201.0 L219.9,193.6 L222.6,191.0 L213.1,185.2 L209.7,178.8"/>
+          <path class="border-line" id="b-la-vn_n" d="M209.7,178.8 L208.2,176.0 L200.8,169.3 L197.8,164.0 L188.2,155.7 L177.8,148.9 L179.5,144.6 L186.1,145.4 L191.0,140.1 L186.6,132.1 L179.8,128.3 L174.5,131.5 L167.6,129.0 L164.4,124.2 L165.8,119.6 L155.2,109.9"/>
+          <path class="border-line" id="b-my-bn" d="M307.8,337.4 L314.8,344.7 L317.7,340.0 L316.6,335.8 L320.2,333.5"/>
+          <path class="border-line" id="b-my-id" d="M352.8,342.8 L346.6,340.7 L331.3,340.5 L327.0,345.8 L325.6,357.3 L320.9,359.9 L321.7,364.3 L317.1,367.4 L317.7,370.9 L314.0,377.4 L305.8,377.8 L302.2,380.3 L287.5,376.2 L282.5,381.6 L278.5,383.4 L269.9,382.7 L262.3,385.1 L251.4,375.5 L251.1,370.2"/>
+          <path class="border-line" id="b-id-tl" d="M448.5,517.9 L446.7,510.6"/>
+          <path class="border-line" id="b-vn_n-vn_s" d="M209.7,178.8 L218.7,178.8"/>
+        </g>
+
+        <g id="labels"></g>
+      </svg>
+
+      <div class="era-head">
+        <div class="era-name-inline" id="eraName">Angkor&rsquo;s age</div>
+        <div class="era-owners" id="eraOwners"></div>
+      </div>
+      <div class="flags-row" id="flagsRow"></div>
+      <p class="era-story" id="eraStory"></p>
+
+      <p class="map-note">Real traced coastlines (simplified from public domain boundary data). Singapore, Brunei, and Timor-Leste are drawn as smaller, simpler shapes than their mainland neighbors &mdash; appropriate to their size, not to their historical importance.</p>
+      <div class="map-key" id="legend"></div>
+      <div class="map-notes">
+        <b>Try:</b> press play and watch 1942 collapse ten separately-colored countries into one at once, then watch 1946&ndash;54 pull them back apart unevenly as independence arrives on a different year for nearly every one. Then watch Vietnam's own internal line solidify at 1954 and dissolve again at 1975 &mdash; the only line on this map that appears, then disappears, then never reappears. Finally watch Timor-Leste's border with Indonesia do the same thing in reverse: solid through 1954&ndash;74, dissolved in 1975, solid again only in 1999&ndash;2002, nearly a quarter-century later.
+      </div>
+    </div>
+  </div>
+
+
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This hub is one region in a larger set. See the other phases here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="west-africa-hub.html"><b>West Africa hub</b><span>Sixteen countries, deep pre-colonial history</span></a>
+      <a class="link-card" href="arabian-peninsula-hub.html"><b>Arabian Peninsula hub</b><span>Seven countries, tribal to modern states</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica.
+  </footer>
+
+</div>
+
+<script>
+
+(function () {
+  var C = {"pagan": "#a9762f", "khmer": "#7c2e1f", "dai_viet": "#2c6f9a", "champa": "#8c4a2c", "srivijaya": "#2f6b4a", "local_chiefdoms": "#8a8f94", "timor_local": "#9a9280", "majapahit": "#1f5c3f", "ayutthaya": "#9c3b28", "khmer_weak": "#5c2a1c", "lanxang": "#8a742a", "johor": "#3a5a8c", "brunei_height": "#c9a13c", "id_sultanates": "#204b5c", "spanish_ph": "#a4302a", "portuguese_timor": "#5b3a7a", "konbaung": "#ad782f", "thai_state": "#a03d28", "lao_kingdoms": "#8e762a", "malay_sultanates": "#3e5c8c", "dutch_ei": "#244d5c", "british_burma": "#6a4a8a", "french_indochina": "#904c2c", "british_malaya": "#7a5a9a", "us_ph": "#425e8c", "japan_occ": "#3f3f3f", "japan_align": "#5a5a3f", "ph_republic": "#0038a8", "id_revolution": "#ce1126", "drv": "#da251d", "rvn": "#cda33c", "kh_kingdom": "#032ea1", "la_kingdom": "#92782a", "burma_indep": "#fecb00", "id_indep": "#d21326", "my_federation": "#010066", "sg_indep": "#ee2536", "bn_protectorate": "#7e5c9a", "vn_reunified": "#de271d", "khmer_rouge": "#241512", "la_pdr": "#d61526", "bn_indep": "#ffcd00", "kh_prk": "#a4453a", "tl_un": "#5f3c7a", "tl_indep": "#dc241f"};
+  var NAMES = {"pagan": "Pagan (Bagan) Kingdom", "khmer": "Khmer Empire (Angkor)", "dai_viet": "\u0110\u1ea1i Vi\u1ec7t", "champa": "Champa Kingdom", "srivijaya": "Srivijaya (maritime empire)", "local_chiefdoms": "Local chiefdoms / no unifying state", "timor_local": "Local Timorese chiefdoms", "majapahit": "Majapahit Empire", "ayutthaya": "Ayutthaya Kingdom", "khmer_weak": "Khmer Empire (declining)", "lanxang": "Lan Xang (\"Land of a Million Elephants\")", "johor": "Johor Sultanate", "brunei_height": "Bruneian Sultanate (height)", "id_sultanates": "Archipelago sultanates (Aceh, Mataram, Banten)", "spanish_ph": "Spanish East Indies (Philippines)", "portuguese_timor": "Portuguese Timor", "konbaung": "Konbaung Dynasty (Burma)", "thai_state": "Siam / Thailand", "lao_kingdoms": "Lao kingdoms (post-1707 split)", "malay_sultanates": "Malay sultanates", "dutch_ei": "Dutch East Indies", "british_burma": "British Burma", "french_indochina": "French Indochina", "british_malaya": "British Malaya / Borneo", "us_ph": "U.S. Philippines", "japan_occ": "Japanese Empire (occupied)", "japan_align": "Siam (Japanese-aligned, nominally independent)", "ph_republic": "Republic of the Philippines", "id_revolution": "Indonesia (independence declared, Dutch war continues)", "drv": "Democratic Republic of Vietnam (North)", "rvn": "Republic of Vietnam (South)", "kh_kingdom": "Kingdom of Cambodia", "la_kingdom": "Kingdom of Laos", "burma_indep": "Union of Burma", "id_indep": "Republic of Indonesia", "my_federation": "Malaysia", "sg_indep": "Republic of Singapore", "bn_protectorate": "Brunei (British-protected sultanate)", "vn_reunified": "Socialist Republic of Vietnam (reunified)", "khmer_rouge": "Democratic Kampuchea (Khmer Rouge)", "la_pdr": "Lao People's Democratic Republic", "bn_indep": "Brunei Darussalam (fully independent)", "kh_prk": "People's Republic of Kampuchea (Vietnamese-backed)", "tl_un": "UN Transitional Administration (East Timor)", "tl_indep": "Timor-Leste (independent)"};
+  var legendEl = document.getElementById("legend");
+
+  var FLAGS = {"khmer_temple": "<rect width=\"300\" height=\"200\" fill=\"#7c2e1f\"/><path d=\"M150,60 L120,120 L180,120 Z M100,140 h100 v40 h-100 Z\" fill=\"#f4efe1\"/>", "nl_tricolor": "<rect width=\"300\" height=\"66.7\" fill=\"#ae1c28\"/><rect y=\"66.7\" width=\"300\" height=\"66.6\" fill=\"#f4efe1\"/><rect y=\"133.3\" width=\"300\" height=\"66.7\" fill=\"#21468b\"/>", "es_cross": "<rect width=\"300\" height=\"200\" fill=\"#f4efe1\"/><rect y=\"0\" width=\"300\" height=\"40\" fill=\"#a4302a\"/><rect y=\"160\" width=\"300\" height=\"40\" fill=\"#a4302a\"/><path d=\"M0,0 L60,100 L0,200 Z M300,0 L240,100 L300,200 Z\" fill=\"#a4302a\"/>", "pt_shield": "<rect width=\"120\" height=\"200\" fill=\"#006233\"/><rect x=\"120\" width=\"180\" height=\"200\" fill=\"#ce1126\"/><circle cx=\"120\" cy=\"100\" r=\"30\" fill=\"#f9d616\"/>", "fr_tricolor": "<rect width=\"100\" height=\"200\" fill=\"#0055a4\"/><rect x=\"100\" width=\"100\" height=\"200\" fill=\"#f4efe1\"/><rect x=\"200\" width=\"100\" height=\"200\" fill=\"#ce1126\"/>", "uk_jack": "<rect width=\"300\" height=\"200\" fill=\"#012169\"/><path d=\"M0,0 L300,200 M300,0 L0,200\" stroke=\"#f4efe1\" stroke-width=\"24\"/><path d=\"M0,0 L300,200 M300,0 L0,200\" stroke=\"#c8102e\" stroke-width=\"10\"/><path d=\"M150,0 V200 M0,100 H300\" stroke=\"#f4efe1\" stroke-width=\"34\"/><path d=\"M150,0 V200 M0,100 H300\" stroke=\"#c8102e\" stroke-width=\"18\"/>", "us_stars": "<rect y=\"0.00\" width=\"300\" height=\"15.38\" fill=\"#b31942\"/><rect y=\"15.38\" width=\"300\" height=\"15.38\" fill=\"#f4efe1\"/><rect y=\"30.77\" width=\"300\" height=\"15.38\" fill=\"#b31942\"/><rect y=\"46.15\" width=\"300\" height=\"15.38\" fill=\"#f4efe1\"/><rect y=\"61.54\" width=\"300\" height=\"15.38\" fill=\"#b31942\"/><rect y=\"76.92\" width=\"300\" height=\"15.38\" fill=\"#f4efe1\"/><rect y=\"92.31\" width=\"300\" height=\"15.38\" fill=\"#b31942\"/><rect y=\"107.69\" width=\"300\" height=\"15.38\" fill=\"#f4efe1\"/><rect y=\"123.08\" width=\"300\" height=\"15.38\" fill=\"#b31942\"/><rect y=\"138.46\" width=\"300\" height=\"15.38\" fill=\"#f4efe1\"/><rect y=\"153.85\" width=\"300\" height=\"15.38\" fill=\"#b31942\"/><rect y=\"169.23\" width=\"300\" height=\"15.38\" fill=\"#f4efe1\"/><rect y=\"184.62\" width=\"300\" height=\"15.38\" fill=\"#b31942\"/><rect width=\"120\" height=\"107.7\" fill=\"#0a3161\"/>", "jp_hinomaru": "<rect width=\"300\" height=\"200\" fill=\"#f4efe1\"/><circle cx=\"150\" cy=\"100\" r=\"55\" fill=\"#bc002d\"/>", "ph_flag": "<polygon points=\"0,0 130,100 0,200\" fill=\"#f4efe1\"/><rect x=\"130\" width=\"170\" height=\"100\" fill=\"#0038a8\"/><rect x=\"130\" y=\"100\" width=\"170\" height=\"100\" fill=\"#ce1126\"/><circle cx=\"60\" cy=\"100\" r=\"22\" fill=\"#fcd116\"/>", "id_flag": "<rect width=\"300\" height=\"100\" fill=\"#ce1126\"/><rect y=\"100\" width=\"300\" height=\"100\" fill=\"#f4efe1\"/>", "vn_drv_flag": "<rect width=\"300\" height=\"200\" fill=\"#da251d\"/><polygon points=\"150,60 172,124 240,124 184,162 206,196 150,158 94,196 116,162 60,124 128,124\" fill=\"#ffff00\"/>", "vn_rvn_flag": "<rect width=\"300\" height=\"200\" fill=\"#f9d616\"/><rect y=\"55\" width=\"300\" height=\"30\" fill=\"#c9252b\"/><rect y=\"115\" width=\"300\" height=\"30\" fill=\"#c9252b\"/><rect y=\"175\" width=\"300\" height=\"20\" fill=\"#c9252b\"/>", "th_flag": "<rect width=\"300\" height=\"200\" fill=\"#a51931\"/><rect y=\"33.3\" width=\"300\" height=\"133.4\" fill=\"#f4efe1\"/><rect y=\"66.7\" width=\"300\" height=\"66.6\" fill=\"#241f5c\"/>", "mm_flag": "<rect width=\"300\" height=\"66.7\" fill=\"#fecb00\"/><rect y=\"66.7\" width=\"300\" height=\"66.6\" fill=\"#34b233\"/><rect y=\"133.3\" width=\"300\" height=\"66.7\" fill=\"#ea2839\"/><polygon points=\"150,80 165,120 205,120 172,144 184,184 150,160 116,184 128,144 95,120 135,120\" fill=\"#f4efe1\"/>", "my_flag": "<rect width=\"300\" height=\"200\" fill=\"#010066\"/><rect width=\"300\" height=\"14.3\" fill=\"#c8102e\"/><rect y=\"28.6\" width=\"300\" height=\"14.3\" fill=\"#c8102e\"/><rect y=\"57.1\" width=\"300\" height=\"14.3\" fill=\"#c8102e\"/><rect y=\"85.7\" width=\"300\" height=\"14.3\" fill=\"#c8102e\"/><rect y=\"114.3\" width=\"300\" height=\"14.3\" fill=\"#c8102e\"/><rect y=\"142.9\" width=\"300\" height=\"14.3\" fill=\"#c8102e\"/><rect y=\"171.4\" width=\"300\" height=\"14.3\" fill=\"#c8102e\"/><rect width=\"150\" height=\"100\" fill=\"#010066\"/><circle cx=\"55\" cy=\"45\" r=\"30\" fill=\"#fecb00\"/><circle cx=\"65\" cy=\"45\" r=\"25\" fill=\"#010066\"/>", "sg_flag": "<rect width=\"300\" height=\"100\" fill=\"#ee2536\"/><rect y=\"100\" width=\"300\" height=\"100\" fill=\"#f4efe1\"/><circle cx=\"65\" cy=\"50\" r=\"26\" fill=\"#f4efe1\"/>", "kh_flag": "<rect width=\"300\" height=\"200\" fill=\"#032ea1\"/><rect y=\"50\" width=\"300\" height=\"100\" fill=\"#ce1126\"/><rect x=\"115\" y=\"65\" width=\"70\" height=\"70\" fill=\"#f4efe1\"/>", "la_kingdom_flag": "<rect width=\"300\" height=\"200\" fill=\"#ce1126\"/><circle cx=\"150\" cy=\"100\" r=\"60\" fill=\"#f4efe1\"/><circle cx=\"150\" cy=\"100\" r=\"40\" fill=\"none\" stroke=\"#ce1126\" stroke-width=\"4\"/>", "la_pdr_flag": "<rect width=\"300\" height=\"200\" fill=\"#ce1126\"/><rect y=\"50\" width=\"300\" height=\"100\" fill=\"#241f5c\"/><circle cx=\"150\" cy=\"100\" r=\"35\" fill=\"#f4efe1\"/>", "bn_flag": "<rect width=\"300\" height=\"200\" fill=\"#fecb00\"/><path d=\"M0,60 L300,60 L300,80 L0,140 Z\" fill=\"#f4efe1\"/><path d=\"M0,90 L300,110 L300,130 L0,150 Z\" fill=\"#000\"/>", "tl_flag": "<rect width=\"300\" height=\"200\" fill=\"#dc241f\"/><polygon points=\"0,0 170,100 0,200\" fill=\"#ffc726\"/><polygon points=\"0,0 110,100 0,200\" fill=\"#000\"/><polygon points=\"30,90 45,100 30,110 20,100\" fill=\"#f4efe1\"/>", "un_flag": "<rect width=\"300\" height=\"200\" fill=\"#5b92e5\"/><circle cx=\"150\" cy=\"100\" r=\"45\" fill=\"none\" stroke=\"#f4efe1\" stroke-width=\"6\"/>", "srivijaya_glyph": "<rect width=\"300\" height=\"200\" fill=\"#2f6b4a\"/><path d=\"M100,140 h100 v-20 h-30 v-40 h-40 v40 h-30 Z\" fill=\"#f4efe1\"/>", "majapahit_glyph": "<rect width=\"300\" height=\"200\" fill=\"#1f5c3f\"/><rect y=\"0\" width=\"300\" height=\"66.7\" fill=\"#f4efe1\"/><rect y=\"133.3\" width=\"300\" height=\"66.7\" fill=\"#f4efe1\"/>", "pagan_glyph": "<rect width=\"300\" height=\"200\" fill=\"#a9762f\"/><path d=\"M150,50 L110,150 h80 Z\" fill=\"#f4efe1\"/>", "dai_viet_glyph": "<rect width=\"300\" height=\"200\" fill=\"#2c6f9a\"/><circle cx=\"150\" cy=\"100\" r=\"30\" fill=\"#f9d616\"/>", "champa_glyph": "<rect width=\"300\" height=\"200\" fill=\"#8c4a2c\"/><circle cx=\"150\" cy=\"100\" r=\"34\" fill=\"none\" stroke=\"#f4efe1\" stroke-width=\"6\"/>", "ayutthaya_glyph": "<rect width=\"300\" height=\"200\" fill=\"#9c3b28\"/><circle cx=\"150\" cy=\"100\" r=\"26\" fill=\"#f9d616\"/>", "lanxang_glyph": "<rect width=\"300\" height=\"200\" fill=\"#8a742a\"/><path d=\"M150,70 a30,30 0 1,0 0.1,0\" fill=\"none\" stroke=\"#f4efe1\" stroke-width=\"6\"/>", "brunei_height_glyph": "<rect width=\"300\" height=\"200\" fill=\"#c9a13c\"/><path d=\"M150,60 l20,40 h-40 Z\" fill=\"#7c2e1f\"/>", "johor_glyph": "<rect width=\"300\" height=\"200\" fill=\"#3a5a8c\"/><rect y=\"90\" width=\"300\" height=\"20\" fill=\"#f4efe1\"/>", "konbaung_glyph": "<rect width=\"300\" height=\"200\" fill=\"#a9762f\"/><path d=\"M120,130 q30,-70 60,0 Z\" fill=\"#f4efe1\"/>", "burma_indep_flag": "<rect width=\"100\" height=\"200\" fill=\"#fecb00\"/><rect x=\"100\" width=\"100\" height=\"200\" fill=\"#34b233\"/><rect x=\"200\" width=\"100\" height=\"200\" fill=\"#ea2839\"/><circle cx=\"150\" cy=\"100\" r=\"24\" fill=\"#f4efe1\"/>", "us_ph_flag": "<rect width=\"150\" height=\"200\" fill=\"#0038a8\"/><rect x=\"150\" width=\"150\" height=\"200\" fill=\"#b31942\"/><rect width=\"60\" height=\"43\" fill=\"#0a3161\"/>"};
+  function flagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (FLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+
+  var SNAP = [{"year": "c. 1200", "name": "Angkor\u2019s age", "t": {"mm": "#a9762f", "th": "#7c2e1f", "la": "#7c2e1f", "kh": "#7c2e1f", "vn_n": "#2c6f9a", "vn_s": "#8c4a2c", "my": "#2f6b4a", "sg": "#2f6b4a", "bn": "#2f6b4a", "id": "#2f6b4a", "ph": "#8a8f94", "tl": "#9a9280"}, "story": "The <b>Khmer Empire</b>, ruling from the temple-city of Angkor, is the dominant power of the mainland \u2014 at its height the largest pre-industrial urban complex on Earth, its territory reaching across modern Cambodia into Thailand and Laos. To its east, <b>Champa</b> holds the central Vietnamese coast while <b>\u0110\u1ea1i Vi\u1eb7t</b> rules the north. To the west, the <b>Pagan Kingdom</b> unifies Burma and builds the temples of Bagan. Across the archipelago, the maritime empire of <b>Srivijaya</b>, based in Sumatra, has spent centuries taxing and protecting the Malacca and Sunda Strait trade routes, though its power is fading by this point. The Philippines and Timor remain a mosaic of local chiefdoms with no unifying state.", "flags": [["pagan_glyph", "Pagan (Bagan) Kingdom"], ["khmer_temple", "Khmer Empire (Angkor)"], ["dai_viet_glyph", "\u0110\u1ea1i Vi\u1ec7t"], ["champa_glyph", "Champa Kingdom"], ["srivijaya_glyph", "Srivijaya (maritime empire)"]]}, {"year": "c. 1400", "name": "Majapahit and Ayutthaya", "t": {"mm": "#a9762f", "th": "#9c3b28", "la": "#8a742a", "kh": "#5c2a1c", "vn_n": "#2c6f9a", "vn_s": "#8c4a2c", "my": "#1f5c3f", "sg": "#1f5c3f", "bn": "#1f5c3f", "id": "#1f5c3f", "ph": "#8a8f94", "tl": "#9a9280"}, "story": "Java\u2019s <b>Majapahit Empire</b> is now the region\u2019s dominant maritime power, its fourteenth-century reach extending, by its own court poetry\u2019s claim, across most of the archipelago and the Malay peninsula \u2014 the high-water mark of pre-colonial Indonesian influence, though the founding of the trading port of Malacca around 1400 is already sowing its successor. On the mainland, <b>Ayutthaya</b>, founded in 1351, has eclipsed Sukhothai as the Thai center of power and inflicts repeated sieges on a visibly weakening Khmer Angkor. The new kingdom of <b>Lan Xang</b> \u2014 \u201cLand of a Million Elephants\u201d \u2014 unifies Lao-speaking principalities for the first time.", "flags": [["pagan_glyph", "Pagan (Bagan) Kingdom"], ["ayutthaya_glyph", "Ayutthaya Kingdom"], ["lanxang_glyph", "Lan Xang (\"Land of a Million Elephants\")"], ["khmer_temple", "Khmer Empire (declining)"], ["dai_viet_glyph", "\u0110\u1ea1i Vi\u1ec7t"], ["champa_glyph", "Champa Kingdom"], ["majapahit_glyph", "Majapahit Empire"]]}, {"year": "c. 1600", "name": "Sultanates and first Europeans", "t": {"mm": "#ad782f", "th": "#9c3b28", "la": "#8a742a", "kh": "#5c2a1c", "vn_n": "#2c6f9a", "vn_s": "#2c6f9a", "my": "#3a5a8c", "sg": "#3a5a8c", "bn": "#c9a13c", "id": "#204b5c", "ph": "#a4302a", "tl": "#5b3a7a"}, "story": "Europe arrives in force. Portugal seized Malacca outright in 1511, scattering its sultan\u2019s court to found <b>Johor</b> as the peninsula\u2019s new power; Spain colonizes the Philippines from 1565, founding Manila in 1571 as a Catholic, Spanish-speaking outpost unlike anywhere else in the region; and Portuguese traders reach Timor from 1515, though formal colonization stays light for decades. <b>Brunei\u2019s</b> sultanate is at its historic height, its authority reaching across most of Borneo and up into the Philippines\u2019 own Sulu Sea. In Vietnam, centuries of southward conquest (the \u201cNam ti\u1ebfn\u201d) have absorbed most of Champa\u2019s former territory into an expanding \u0110\u1ea1i Vi\u1eb7t, shown here as one color for the first time. Post-Majapahit Java has fragmented into rival sultanates like Aceh, Mataram, and Banten.", "flags": [["konbaung_glyph", "Konbaung Dynasty (Burma)"], ["ayutthaya_glyph", "Ayutthaya Kingdom"], ["lanxang_glyph", "Lan Xang (\"Land of a Million Elephants\")"], ["khmer_temple", "Khmer Empire (declining)"], ["dai_viet_glyph", "\u0110\u1ea1i Vi\u1ec7t"], ["johor_glyph", "Johor Sultanate"], ["brunei_height_glyph", "Bruneian Sultanate (height)"], ["srivijaya_glyph", "Archipelago sultanates (Aceh, Mataram, Banten)"], ["es_cross", "Spanish East Indies (Philippines)"], ["pt_shield", "Portuguese Timor"]]}, {"year": "c. 1800", "name": "Old kingdoms, new pressure", "t": {"mm": "#ad782f", "th": "#a03d28", "la": "#8e762a", "kh": "#5c2a1c", "vn_n": "#2c6f9a", "vn_s": "#2c6f9a", "my": "#3e5c8c", "sg": "#3e5c8c", "bn": "#c9a13c", "id": "#244d5c", "ph": "#a4302a", "tl": "#5b3a7a"}, "story": "Ayutthaya fell to a Burmese army in 1767, and a new Thai capital rose at Bangkok under the Chakri dynasty from 1782 \u2014 the beginning of the modern Thai state, shown here in the same red that will carry, unbroken by colonization, all the way to the present. Lan Xang has splintered since 1707 into three rival Lao kingdoms. The Dutch United East India Company has spent two centuries building a trading empire across the archipelago, and after its 1799 collapse the Dutch state itself takes over directly as the <b>Dutch East Indies</b>. Cambodia, squeezed between an assertive Vietnam and Siam, is reduced to a weak tributary of both. Britain\u2019s first toehold, Penang, is ceded in 1786 \u2014 the opening move of what will become British Malaya.", "flags": [["konbaung_glyph", "Konbaung Dynasty (Burma)"], ["th_flag", "Siam / Thailand"], ["lanxang_glyph", "Lao kingdoms (post-1707 split)"], ["khmer_temple", "Khmer Empire (declining)"], ["dai_viet_glyph", "\u0110\u1ea1i Vi\u1ec7t"], ["johor_glyph", "Malay sultanates"], ["brunei_height_glyph", "Bruneian Sultanate (height)"], ["nl_tricolor", "Dutch East Indies"], ["es_cross", "Spanish East Indies (Philippines)"], ["pt_shield", "Portuguese Timor"]]}, {"year": "1900", "name": "The colonial partition complete", "t": {"mm": "#6a4a8a", "th": "#a03d28", "la": "#904c2c", "kh": "#904c2c", "vn_n": "#904c2c", "vn_s": "#904c2c", "my": "#7a5a9a", "sg": "#7a5a9a", "bn": "#7a5a9a", "id": "#244d5c", "ph": "#425e8c", "tl": "#5b3a7a"}, "story": "By 1900 every mainland and archipelago territory but one has been absorbed into a European or American empire. France has assembled Vietnam, Cambodia, and Laos into <b>French Indochina</b>; Britain holds Burma, Malaya, Singapore, and a Brunei reduced to a British-protected sultanate; the Dutch East Indies now covers essentially the modern borders of Indonesia; Spain\u2019s Philippines was ceded to the United States after the 1898 Spanish-American War. <b>Thailand alone stands apart</b> \u2014 the only Southeast Asian nation, and the only one in South or Southeast Asia, never colonized by a European power, its independence preserved by playing British and French colonial ambitions off each other as a buffer between their territories.", "flags": [["uk_jack", "British Burma"], ["th_flag", "Siam / Thailand"], ["fr_tricolor", "French Indochina"], ["uk_jack", "British Malaya / Borneo"], ["nl_tricolor", "Dutch East Indies"], ["us_ph_flag", "U.S. Philippines"], ["pt_shield", "Portuguese Timor"]]}, {"year": "1942", "name": "Japan\u2019s occupation", "t": {"mm": "#3f3f3f", "th": "#5a5a3f", "la": "#3f3f3f", "kh": "#3f3f3f", "vn_n": "#3f3f3f", "vn_s": "#3f3f3f", "my": "#3f3f3f", "sg": "#3f3f3f", "bn": "#3f3f3f", "id": "#3f3f3f", "ph": "#3f3f3f", "tl": "#3f3f3f"}, "story": "In a matter of months in 1941\u201342, Imperial Japan sweeps every European and American colonial power out of Southeast Asia \u2014 the single most dramatic moment on this whole map, ten separately-ruled territories briefly merging into one color at once. Only Thailand keeps a shade of its own: the Phibun government allies formally with Tokyo and even declares war on the Allies, retaining nominal sovereignty while Japanese troops occupy the country in practice. The occupation is brutal \u2014 forced labor, famine, and massacres across the region \u2014 but its shattering of colonial authority also directly opens the door to the independence movements of the next decade.", "flags": [["jp_hinomaru", "Japanese Empire (occupied)"], ["th_flag", "Siam (Japanese-aligned, nominally independent)"]]}, {"year": "1946", "name": "The wave begins, unevenly", "t": {"mm": "#6a4a8a", "th": "#a03d28", "la": "#904c2c", "kh": "#904c2c", "vn_n": "#da251d", "vn_s": "#904c2c", "my": "#7a5a9a", "sg": "#7a5a9a", "bn": "#7a5a9a", "id": "#ce1126", "ph": "#0038a8", "tl": "#5b3a7a"}, "story": "Japan\u2019s surrender does not simply restore the old order. The <b>Philippines</b> becomes fully independent on 4 July 1946, its colonial relationship with the United States over. In Indonesia, Sukarno proclaims independence within days of the Japanese surrender in August 1945, but the Dutch fight a colonial war to reverse it that runs until 1949. In Vietnam, Ho Chi Minh\u2019s Democratic Republic controls the north from Hanoi while France reasserts control in the south, opening the First Indochina War. Britain and France restore their other colonial administrations largely as before \u2014 for now.", "flags": [["uk_jack", "British Burma"], ["th_flag", "Siam / Thailand"], ["fr_tricolor", "French Indochina"], ["vn_drv_flag", "Democratic Republic of Vietnam (North)"], ["uk_jack", "British Malaya / Borneo"], ["id_flag", "Indonesia (independence declared, Dutch war continues)"], ["ph_flag", "Republic of the Philippines"], ["pt_shield", "Portuguese Timor"]]}, {"year": "1954", "name": "Vietnam splits at the 17th parallel", "t": {"mm": "#fecb00", "th": "#a03d28", "la": "#92782a", "kh": "#032ea1", "vn_n": "#da251d", "vn_s": "#cda33c", "my": "#7a5a9a", "sg": "#7a5a9a", "bn": "#7a5a9a", "id": "#d21326", "ph": "#0038a8", "tl": "#5b3a7a"}, "story": "The 1954 Geneva Accords end the First Indochina War by partitioning Vietnam at the 17th parallel \u2014 shown here as a real border for the first time, splitting a single country into the communist <b>Democratic Republic of Vietnam</b> in the north and the Western-aligned <b>State/Republic of Vietnam</b> in the south, intended as temporary pending elections that never happen. Cambodia and Laos gain full sovereignty in the same 1953 settlement that ends French rule over Indochina. Burma became independent in 1948, and the Netherlands finally recognized Indonesian sovereignty in December 1949. Only Malaya, Singapore, and Brunei remain under Britain.", "flags": [["burma_indep_flag", "Union of Burma"], ["th_flag", "Siam / Thailand"], ["la_kingdom_flag", "Kingdom of Laos"], ["kh_flag", "Kingdom of Cambodia"], ["vn_drv_flag", "Democratic Republic of Vietnam (North)"], ["vn_rvn_flag", "Republic of Vietnam (South)"], ["uk_jack", "British Malaya / Borneo"], ["id_flag", "Republic of Indonesia"], ["ph_flag", "Republic of the Philippines"], ["pt_shield", "Portuguese Timor"]]}, {"year": "1957\u201365", "name": "Malaysia forms, Singapore splits away", "t": {"mm": "#fecb00", "th": "#a03d28", "la": "#92782a", "kh": "#032ea1", "vn_n": "#da251d", "vn_s": "#cda33c", "my": "#010066", "sg": "#ee2536", "bn": "#7e5c9a", "id": "#d21326", "ph": "#0038a8", "tl": "#5b3a7a"}, "story": "The Federation of Malaya becomes independent in 1957; in 1963 it is reorganized as <b>Malaysia</b>, joined by Singapore and the Borneo territories of Sabah and Sarawak \u2014 shown here as Malaysia\u2019s fill spreading across the whole peninsula and northern Borneo at once. The union does not last: racial tension and rivalry between Kuala Lumpur and Singapore\u2019s leadership lead to Singapore\u2019s expulsion in August 1965, immediate full independence, and a new color of its own. Brunei, alone among Malaysia\u2019s neighbors, declines to join in 1963 and remains a separate British-protected sultanate \u2014 the one holdout that will not become fully independent for another two decades.", "flags": [["burma_indep_flag", "Union of Burma"], ["th_flag", "Siam / Thailand"], ["la_kingdom_flag", "Kingdom of Laos"], ["kh_flag", "Kingdom of Cambodia"], ["vn_drv_flag", "Democratic Republic of Vietnam (North)"], ["vn_rvn_flag", "Republic of Vietnam (South)"], ["my_flag", "Malaysia"], ["sg_flag", "Republic of Singapore"], ["uk_jack", "Brunei (British-protected sultanate)"], ["id_flag", "Republic of Indonesia"], ["ph_flag", "Republic of the Philippines"], ["pt_shield", "Portuguese Timor"]]}, {"year": "1975", "name": "Three shocks at once", "t": {"mm": "#fecb00", "th": "#a03d28", "la": "#d61526", "kh": "#241512", "vn_n": "#de271d", "vn_s": "#de271d", "my": "#010066", "sg": "#ee2536", "bn": "#7e5c9a", "id": "#d21326", "ph": "#0038a8", "tl": "#d21326"}, "story": "1975 brings three separate upheavals in a single year. In April, North Vietnamese tanks take Saigon and the country reunifies under Hanoi \u2014 the 17th-parallel line dissolves for the first time since 1954. Also in April, the Khmer Rouge take Phnom Penh and impose <b>Democratic Kampuchea</b>, whose 1975\u201379 genocide will kill an estimated 1.5\u20132 million people, roughly a quarter of Cambodia\u2019s population. In December, newly-independent Portuguese Timor is invaded and annexed by Indonesia \u2014 its border with Indonesia dissolves too, on this map showing an annexation rather than a real union. In Laos, the Pathet Lao take full power that same December, ending the six-century-old monarchy.", "flags": [["burma_indep_flag", "Union of Burma"], ["th_flag", "Siam / Thailand"], ["la_pdr_flag", "Lao People's Democratic Republic"], ["kh_flag", "Democratic Kampuchea (Khmer Rouge)"], ["vn_drv_flag", "Socialist Republic of Vietnam (reunified)"], ["my_flag", "Malaysia"], ["sg_flag", "Republic of Singapore"], ["uk_jack", "Brunei (British-protected sultanate)"], ["id_flag", "Republic of Indonesia"], ["ph_flag", "Republic of the Philippines"]]}, {"year": "1984", "name": "Brunei completes the wave", "t": {"mm": "#fecb00", "th": "#a03d28", "la": "#d61526", "kh": "#a4453a", "vn_n": "#de271d", "vn_s": "#de271d", "my": "#010066", "sg": "#ee2536", "bn": "#ffcd00", "id": "#d21326", "ph": "#0038a8", "tl": "#d21326"}, "story": "On 1 January 1984, <b>Brunei</b> becomes fully independent \u2014 the last Southeast Asian state to do so, nearly forty years after the region\u2019s independence wave began with the Philippines and Indonesia. Its color changes even though its borders do not: it was never merged with British Malaya on this map, only ever loosely protected by London. Cambodia, meanwhile, endures a different foreign hand: Vietnam invaded in 1978\u201379 to topple the Khmer Rouge and installed the People\u2019s Republic of Kampuchea, still propped up by Vietnamese troops through most of the 1980s. East Timor remains under Indonesian occupation, its own independence still fifteen years away.", "flags": [["burma_indep_flag", "Union of Burma"], ["th_flag", "Siam / Thailand"], ["la_pdr_flag", "Lao People's Democratic Republic"], ["kh_flag", "People's Republic of Kampuchea (Vietnamese-backed)"], ["vn_drv_flag", "Socialist Republic of Vietnam (reunified)"], ["my_flag", "Malaysia"], ["sg_flag", "Republic of Singapore"], ["bn_flag", "Brunei Darussalam (fully independent)"], ["id_flag", "Republic of Indonesia"], ["ph_flag", "Republic of the Philippines"]]}, {"year": "1999\u20132002", "name": "Timor-Leste\u2019s long road", "t": {"mm": "#fecb00", "th": "#a03d28", "la": "#d61526", "kh": "#032ea1", "vn_n": "#de271d", "vn_s": "#de271d", "my": "#010066", "sg": "#ee2536", "bn": "#ffcd00", "id": "#d21326", "ph": "#0038a8", "tl": "#dc241f"}, "story": "East Timor\u2019s twenty-four years under Indonesian rule end after a 1999 UN-supervised referendum in which nearly 78% vote for independence, triggering a violent scorched-earth campaign by Indonesian-backed militias before international peacekeepers arrive. A UN transitional administration governs the territory until <b>Timor-Leste</b> becomes fully independent on 20 May 2002 \u2014 Southeast Asia\u2019s youngest nation, its border with Indonesia solid again after 27 years dissolved. Cambodia\u2019s monarchy was restored under a new constitution in 1993. Every territory on this map is now, at last, a sovereign state answering to no other government shown here.", "flags": [["burma_indep_flag", "Union of Burma"], ["th_flag", "Siam / Thailand"], ["la_pdr_flag", "Lao People's Democratic Republic"], ["kh_flag", "Kingdom of Cambodia"], ["vn_drv_flag", "Socialist Republic of Vietnam (reunified)"], ["my_flag", "Malaysia"], ["sg_flag", "Republic of Singapore"], ["bn_flag", "Brunei Darussalam (fully independent)"], ["id_flag", "Republic of Indonesia"], ["ph_flag", "Republic of the Philippines"], ["tl_flag", "Timor-Leste (independent)"]]}];
+
+  var REGIONS = ["mm", "th", "la", "kh", "vn_n", "vn_s", "my", "sg", "bn", "id", "ph", "tl"];
+  var REGION_NAMES = {"mm": "Myanmar", "th": "Thailand", "la": "Laos", "kh": "Cambodia", "vn_n": "North Vietnam", "vn_s": "South Vietnam", "my": "Malaysia", "sg": "Singapore", "bn": "Brunei", "id": "Indonesia", "ph": "Philippines", "tl": "Timor-Leste"};
+  var REGION_ABBR = {"mm": "MM", "th": "TH", "la": "LA", "kh": "KH", "vn_n": "VN-N", "vn_s": "VN-S", "my": "MY", "sg": "SG", "bn": "BN", "id": "ID", "ph": "PH", "tl": "TL"};
+  var REGION_POS = {"mm": [83.2, 124.8], "th": [140.9, 202.9], "la": [175.4, 159.2], "kh": [190.8, 233.2], "vn_n": [196.3, 132.8], "vn_s": [218.0, 231.5], "my": [252.6, 348.0], "sg": [176.7, 378.9], "bn": [314.2, 338.6], "id": [261.1, 492.6], "ph": [406.7, 198.5], "tl": [457.4, 509.5]};
+  var ADJ = [["mm", "th", "b-mm-th"], ["th", "la", "b-th-la"], ["th", "kh", "b-th-kh"], ["th", "my", "b-th-my"], ["la", "kh", "b-la-kh"], ["la", "mm", "b-la-mm"], ["kh", "vn_s", "b-kh-vn_s"], ["la", "vn_s", "b-la-vn_s"], ["la", "vn_n", "b-la-vn_n"], ["my", "bn", "b-my-bn"], ["my", "id", "b-my-id"], ["id", "tl", "b-id-tl"], ["vn_n", "vn_s", "b-vn_n-vn_s"]];
+
+  function textColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+  function ownerName(hex) {
+    for (var k in C) { if (C[k] === hex) return NAMES[k]; }
+    return hex;
+  }
+
+  function groupsFor(t) {
+    var parent = {};
+    REGIONS.forEach(function (r) { parent[r] = r; });
+    function find(x) { return parent[x] === x ? x : (parent[x] = find(parent[x])); }
+    function union(a, b) { var ra = find(a), rb = find(b); if (ra !== rb) parent[ra] = rb; }
+    ADJ.forEach(function (trip) { if (t[trip[0]] === t[trip[1]]) union(trip[0], trip[1]); });
+    var groups = {};
+    REGIONS.forEach(function (r) { var root = find(r); if (!groups[root]) groups[root] = []; groups[root].push(r); });
+    return Object.keys(groups).map(function (k) { return groups[k]; });
+  }
+
+  var svgNS = "http://www.w3.org/2000/svg";
+  var labelsEl = document.getElementById("labels");
+  var yearTag = document.getElementById("yearTag");
+  var eraName = document.getElementById("eraName");
+  var eraOwners = document.getElementById("eraOwners");
+  var eraStory = document.getElementById("eraStory");
+  var flagsRow = document.getElementById("flagsRow");
+  var sliderEl = document.getElementById("slider");
+
+  function updateLegend(t) {
+    var seen = {}, order = [];
+    REGIONS.forEach(function (r) {
+      var hex = t[r];
+      if (!seen[hex]) { seen[hex] = true; order.push(hex); }
+    });
+    legendEl.innerHTML = order.map(function (hex) {
+      return '<span><span class="sw" style="background:' + hex + '"></span>' + ownerName(hex) + "</span>";
+    }).join("");
+  }
+
+  function render(i) {
+    var era = SNAP[i];
+    yearTag.textContent = era.year;
+    eraName.textContent = era.name;
+    eraStory.innerHTML = era.story || "";
+    flagsRow.innerHTML = (era.flags || []).map(function (f) {
+      return '<div class="flag-chip">' + flagSvg(f[0]) + '<div class="fc-label">' + f[1] + '</div></div>';
+    }).join("");
+
+    updateLegend(era.t);
+
+    REGIONS.forEach(function (id) {
+      document.getElementById("f-" + id).setAttribute("fill", era.t[id]);
+    });
+
+    ADJ.forEach(function (trip) {
+      var same = era.t[trip[0]] === era.t[trip[1]];
+      var line = document.getElementById(trip[2]);
+      if (line) {
+        line.setAttribute("stroke-opacity", same ? "0.06" : "0.85");
+        line.setAttribute("stroke-width", same ? "1" : "2.4");
+      }
+    });
+
+    var groups = groupsFor(era.t);
+    var seenOwners = {};
+    var ownerParts = [];
+    groups.forEach(function (g) {
+      var label = ownerName(era.t[g[0]]);
+      if (!seenOwners[label]) { seenOwners[label] = []; ownerParts.push(label); }
+      g.forEach(function (id) { seenOwners[label].push(REGION_NAMES[id]); });
+    });
+    eraOwners.innerHTML = ownerParts.map(function (label) {
+      return "<b>" + label + "</b>: " + seenOwners[label].join(", ");
+    }).join(" &middot; ");
+
+    labelsEl.innerHTML = "";
+    function haloFor(txtColor) { return txtColor === "#201a12" ? "#f7f1e3" : "#201a12"; }
+    groups.forEach(function (g) {
+      var cx = g.reduce(function (s, id) { return s + REGION_POS[id][0]; }, 0) / g.length;
+      var cy = g.reduce(function (s, id) { return s + REGION_POS[id][1]; }, 0) / g.length;
+      var fillHex = era.t[g[0]];
+      var txtColor = textColorFor(fillHex);
+      var halo = haloFor(txtColor);
+
+      if (g.length > 1) {
+        var groupText = ownerName(fillHex).toUpperCase();
+        var gl = document.createElementNS(svgNS, "text");
+        gl.setAttribute("x", cx);
+        gl.setAttribute("y", cy);
+        gl.setAttribute("class", "group-label");
+        gl.setAttribute("font-size", groupText.length > 22 ? "8.5" : (groupText.length > 14 ? "10" : "12"));
+        gl.setAttribute("fill", txtColor);
+        gl.setAttribute("stroke", halo);
+        gl.textContent = groupText;
+        labelsEl.appendChild(gl);
+        g.forEach(function (id) {
+          var pos = REGION_POS[id];
+          var sl = document.createElementNS(svgNS, "text");
+          sl.setAttribute("x", pos[0]);
+          sl.setAttribute("y", pos[1] + 13);
+          sl.setAttribute("class", "sub-label");
+          sl.setAttribute("font-size", "8.5");
+          sl.setAttribute("fill", txtColor);
+          sl.setAttribute("stroke", halo);
+          sl.setAttribute("opacity", "0.85");
+          sl.textContent = REGION_ABBR[id];
+          labelsEl.appendChild(sl);
+        });
+      } else {
+        var id = g[0];
+        var pos = REGION_POS[id];
+        var sl2 = document.createElementNS(svgNS, "text");
+        sl2.setAttribute("x", pos[0]);
+        sl2.setAttribute("y", pos[1]);
+        sl2.setAttribute("class", "group-label");
+        sl2.setAttribute("font-size", "10.5");
+        sl2.setAttribute("fill", txtColor);
+        sl2.setAttribute("stroke", halo);
+        sl2.textContent = REGION_ABBR[id];
+        labelsEl.appendChild(sl2);
+      }
+    });
+  }
+
+  sliderEl.addEventListener("input", function () { render(parseInt(sliderEl.value, 10)); });
+  render(0);
+
+  var playing = false, playTimer = null;
+  var playBtn = document.getElementById("playBtn");
+  function stepPlay() {
+    var next = parseInt(sliderEl.value, 10) + 1;
+    if (next > SNAP.length - 1) { stopPlay(); return; }
+    sliderEl.value = next;
+    render(next);
+  }
+  function startPlay() {
+    playing = true;
+    playBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(sliderEl.value, 10) >= SNAP.length - 1) { sliderEl.value = 0; render(0); }
+    playTimer = setInterval(stepPlay, 2000);
+  }
+  function stopPlay() {
+    playing = false;
+    playBtn.innerHTML = "&#9654;";
+    clearInterval(playTimer);
+  }
+  playBtn.addEventListener("click", function () { playing ? stopPlay() : startPlay(); });
+})();
+
+</script>
+
+</body></html>

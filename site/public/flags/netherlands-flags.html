@@ -1,0 +1,954 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+</style></head><body>
+<title>Flags of the Netherlands</title>
+<meta name="description" content="A chronological, paint-ready atlas of every flag that flew over the Netherlands, from fragmented medieval counties to the modern kingdom — with a real traced map of the country across ten political eras.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #1c1a13; --paper: #ede4d0; --card: #f8f2e2; --card-border: #d9c9a0;
+    --brick: #a3272a; --brick-2: #832020; --brass: #c1781f; --adriatic: #1f4d78; --adriatic-2: #163752;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #1f4d78; --tile-sea: #b9d3da;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #e06e5f; --brick-2: #ea8878; --brass: #e0a24f; --adriatic: #6fa3d8; --adriatic-2: #8fbce8;
+      --muted: #9a9280; --hair: #33393f; --tile-sea: #17303a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #e06e5f; --brick-2: #ea8878; --brass: #e0a24f; --adriatic: #6fa3d8; --adriatic-2: #8fbce8;
+    --muted: #9a9280; --hair: #33393f; --tile-sea: #17303a;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.08rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; font-size: .94rem; color: var(--muted); }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  .legend { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+
+  /* ---------- Timeline ---------- */
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1px; background: var(--hair); }
+  @media (max-width: 560px) { .timeline::before { left: 9px; } }
+  .entry { position: relative; padding-left: 46px; margin-bottom: 46px; }
+  @media (max-width: 560px) { .entry { padding-left: 30px; } }
+  .entry::before {
+    content: attr(data-n);
+    position: absolute; left: 1px; top: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--paper); outline: 1px solid var(--hair);
+    background: var(--card);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--brick); display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) { .entry::before { left: -5px; width: 18px; height: 18px; font-size: 9px; } }
+
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+  .card-head { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  @media (max-width: 620px) { .card-head { flex-direction: column; } }
+  .flag-box { flex: none; width: 168px; }
+  .flag-box svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-caption { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .card-title { font-size: 1.32rem; font-weight: 600; line-height: 1.18; margin: 0 0 10px; text-wrap: balance; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px; border: 1px solid var(--card-border); color: var(--muted);
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  /* Flip tooltip below tags near the top of the viewport so it isn't clipped */
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  /* Keep tooltips from overflowing the left/right edges on narrow screens */
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint { border-top: 1px solid var(--hair); }
+  details.paint > summary {
+    cursor: pointer; list-style: none; padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--adriatic); display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before { content: "+"; font-family: "Fraunces", serif; font-size: 15px; width: 14px; }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row { display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px; }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--card-border); border-radius: 2px; padding: 5px 9px 5px 5px; background: var(--paper); }
+  .swatch .chip { width: 20px; height: 20px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: none; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 88px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 260px; height: auto; }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .ireg-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 700; text-anchor: middle; transition: fill .4s ease, stroke .4s ease; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="low-countries-hub.html">Low Countries hub</a></p>
+  <p class="kicker">Family research &middot; Phase 6b of the world atlas</p>
+  <h1>Flags of the Netherlands</h1>
+  <p class="lede">From Rome-adjacent Batavi and Frisii tribes on the Rhine delta's edge, through a later patchwork of feudal counties with no shared banner, a Burgundian-Habsburg union, an eighty-year war of secession, a genuine Golden Age republic, three distinct Napoleonic-era governments in under twenty years, a treaty-built kingdom that lost its southern half within fifteen years, and a five-year wartime occupation &mdash; eleven political entities, and a red-white-blue tricolor that keeps reappearing, sometimes orange, on the other side of every rupture.</p>
+  <p class="lede">The Dutch tricolor is older than it looks: it started life orange-white-blue (the "Prince's Flag," after William of Orange) during the Revolt, and had faded &mdash; partly by dye chemistry, partly by politics &mdash; to today's red by the mid-17th century, well before the French Revolution gave most of Europe the idea of a national tricolor at all.</p>
+
+  <div class="scope-note">
+    <b>Scope of this page:</b> the lands of present-day Netherlands, c. 50 BCE&ndash;present, eleven political entities. Belgium and Luxembourg &mdash; part of the same Burgundian-Habsburg bloc until 1581, and reunited with the Netherlands twice more after that &mdash; have their own pages; see the shared map and the linked pages at the bottom.
+  </div>
+
+  <div class="imap-section">
+    <h2>One country, ten changes of flag</h2>
+    <p class="imap-sub">Modern Netherlands' own territory, unlike Belgium next door, was never durably split along an internal line after 1581 &mdash; the Union of Utrecht's seven founding provinces and the later "Generality Lands" are a real distinction, but a fiddly and largely administrative one that never produced a solidified internal border worth drawing on a map. So this map is honest about it: one region, the country's real traced outline, changing color only when the government actually ruling it changed. Press play, or drag the slider.</p>
+    <div class="rule-box">
+      <b>No invented internal split.</b> A separate flags-of-the-provinces map would be its own project. What's shown here is the real outline of the Netherlands from public geographic data, recolored at each of the nine moments the ruling authority over the whole territory actually changed &mdash; including three changes of government inside a single twenty-year stretch, 1795&ndash;1815.
+    </div>
+    <div class="imap-frame">
+      <div class="imap-controls">
+        <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="imap-year" id="iYearTag">c. 50 BCE</span>
+        <input type="range" id="iSlider" min="0" max="9" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="imap-svg" viewBox="0 0 280 340" xmlns="http://www.w3.org/2000/svg">
+        <path fill="var(--tile-sea)" pointer-events="none" d="M20.0,243.4 L52.7,215.0 L108.4,63.2 L195.3,20.0 L195.3,0 L0,0 L0,243.4 Z"/>
+        <path fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" pointer-events="none" d="M20.0,243.4 L66.5,251.5 L125.4,230.1 L165.6,275.3 L200.6,299.4 L193.4,369.1 L176.8,373.0 L169.9,430.9 L114.3,383.8 L81.7,391.9 L37.4,343.2 L7.8,301.7 L-21.7,300.0 L-31.0,263.7 Z"/>
+        <path fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" pointer-events="none" d="M439.8,-132.0 L441.0,-92.1 L505.2,-68.0 L504.5,-31.4 L569.1,-50.8 L604.9,-79.0 L676.6,-38.3 L706.6,-5.4 L721.5,47.1 L703.8,74.7 L726.8,111.5 L742.6,166.7 L737.6,202.3 L763.7,268.2 L735.3,279.0 L718.6,267.1 L702.6,286.7 L657.0,306.7 L633.4,332.4 L587.2,354.9 L598.3,385.6 L605.1,429.1 L637.5,453.9 L673.4,498.3 L651.0,545.9 L628.2,559.0 L637.2,626.2 L631.2,643.8 L611.4,622.6 L581.0,619.5 L535.5,638.0 L479.5,633.6 L470.4,660.8 L438.3,632.1 L419.1,637.8 L351.0,606.2 L337.9,628.7 L283.9,627.9 L291.9,554.4 L324.1,483.7 L232.5,464.7 L202.5,437.7 L206.1,392.4 L193.4,369.1 L200.6,299.4 L189.9,191.2 L228.1,191.2 L244.2,152.3 L260.0,57.8 L248.1,22.9 L260.5,1.1 L313.7,-4.5 L325.4,18.2 L368.6,-32.7 L354.1,-71.4 L351.1,-129.9 L399.2,-116.3 Z"/>
+        <g class="context-label" pointer-events="none">
+          <text x="105" y="322">BELGIUM</text>
+          <text x="266" y="108">GERMANY</text>
+        </g>
+        <path id="ireg-nl" class="ireg-fill" d="M195.3,20.0 L248.1,22.9 L260.0,57.8 L244.2,152.3 L228.1,191.2 L189.9,191.2 L200.6,299.4 L165.6,275.2 L125.4,230.1 L66.5,251.5 L20.0,243.4 L52.7,215.0 L108.4,63.2 L195.3,20.0 Z" stroke="#241f14" stroke-width="1.5" stroke-linejoin="round"/>
+        <g font-family="IBM Plex Mono, monospace">
+          <text class="ireg-label" id="ilbl-nl" x="140" y="150">NETHERLANDS</text>
+        </g>
+      </svg>
+      <div class="imap-head">
+        <div class="imap-name" id="iEraName">Batavi &amp; Frisii Tribes of the Rhine Delta</div>
+        <div class="imap-owners" id="iEraOwners"></div>
+      </div>
+      <div class="iflags-row" id="iFlagsRow"></div>
+      <p class="imap-story" id="iEraStory"></p>
+
+      <p class="map-note">Real traced country outline (simplified from public geographic data), recolored by era &mdash; not an internal partition.</p>
+      <div class="imap-key" id="iLegend"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <!-- 1 -->
+    <div class="entry" data-n="11" id="era-1945">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#ae1c28"/>
+              <rect y="66.7" width="300" height="66.6" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#21468b"/>
+            </svg>
+            <div class="flag-caption">red&ndash;white&ndash;blue, the flag as officially fixed in 1937</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1945 &ndash; present</div>
+            <h3 class="card-title">Kingdom of the Netherlands</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A fully sovereign, independent monarchy under its own crown, the status restored when Allied forces liberated the Netherlands in 1945."><span class="dot" style="background:#c9973a"></span>Sovereign kingdom</span><span class="tag" tabindex="0" data-tip="Dutch queen who led the government-in-exile through the war and returned in 1945 to lead the kingdom&#x27;s postwar reconstruction."><span class="dot" style="background:#4a3b78"></span>Wilhelmina</span><span class="tag" tabindex="0" data-tip="The Netherlands maintains no official state religion; church and state are constitutionally separate, with the population divided among Catholic, Protestant, and increasingly secular affiliations."><span class="dot" style="background:#8e3b62"></span>Secular (no state religion)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Following Indonesian independence in 1949, roughly 300,000 Dutch-Indonesians ('repatriates') and, in 1951, about 12,500 Moluccan KNIL soldiers and their families relocate to the Netherlands."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="7" fill="#ce1126"/><rect y="7" width="20" height="7" fill="#fff"/></svg>Immigration: Dutch-Indonesian repatriates &amp; Moluccans (1949&ndash;51)</span><span class="tag" tabindex="0" data-tip="Facing postwar labor shortages, the Netherlands signs recruitment agreements with Turkey (1964) and Morocco (1969), bringing tens of thousands of 'gastarbeiders' (guest workers) who form the core of today's Turkish-Dutch and Moroccan-Dutch communities."><span class="dot" style="background:#2f7a6b"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#e30a17"/><circle cx="8" cy="7" r="3.4" fill="#fff"/><circle cx="9" cy="7" r="2.7" fill="#e30a17"/><path d="M12.5,7 l3.5,1.1 -2.2,-1.9 2.2,-1.9z" fill="#fff"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#c1272d"/><path d="M10,4 l1.05,3.24 3.4,0 -2.76,2 1.05,3.24 -2.74,-2 -2.74,2 1.05,-3.24 -2.76,-2 3.4,0z" fill="none" stroke="#006233" stroke-width="0.6"/></svg></span>Immigration: Turkish &amp; Moroccan guest workers (1960s&ndash;)</span><span class="tag" tabindex="0" data-tip="Around Suriname's 1975 independence, roughly a third of its population &mdash; over 150,000 people &mdash; relocate to the Netherlands rather than remain in the newly independent country."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#377e3f"/><rect y="2.5" width="20" height="1.5" fill="#fff"/><rect y="4" width="20" height="6" fill="#b40a2d"/><rect y="10" width="20" height="1.5" fill="#fff"/><polygon points="10,6 10.6,7.8 12.5,7.8 11,9 11.5,10.8 10,9.7 8.5,10.8 9,9 7.5,7.8 9.4,7.8" fill="#ecc81d"/></svg>Immigration: Surinamese migration around independence (1975)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Queen Wilhelmina's House of Orange-Nassau (Stadtholders since 1544, on the throne since 1815) is restored with liberation in 1945; its descendants still reign today. Arms: azure billeted or, a lion rampant or."><svg class="noble-mini" viewBox="0 0 100 120"><defs><clipPath id="nlOrange-1945"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z"/></clipPath></defs><g clip-path="url(#nlOrange-1945)"><rect x="0" y="0" width="100" height="120" fill="#1e2f7a"/><g fill="#f9d616"><rect x="12" y="14" width="8" height="8"/><rect x="32" y="10" width="8" height="8"/><rect x="52" y="16" width="8" height="8"/><rect x="74" y="12" width="8" height="8"/><rect x="20" y="32" width="8" height="8"/><rect x="42" y="30" width="8" height="8"/><rect x="64" y="34" width="8" height="8"/><rect x="10" y="90" width="8" height="8"/><rect x="70" y="92" width="8" height="8"/></g><path d="M30,64 q0,-22 20,-22 q20,0 20,22 q0,20 -20,34 q-20,-14 -20,-34 Z" fill="#f9d616"/><circle cx="42" cy="52" r="2.4" fill="#1e2f7a"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Orange-Nassau</span></div>
+            <p><span class="label">Who &amp; why:</span> liberation reaches the last occupied Dutch territory in May 1945, restoring the constitutional monarchy under Queen Wilhelmina. The postwar decades bring the loss of Indonesia after a bitter independence war (1945&ndash;49), founding membership of NATO (1949) and the European project from the 1950s onward, and Suriname's independence in 1975 &mdash; the kingdom's overseas map shrinking even as its European core prospers.</p>
+            <p><span class="label">What it represents:</span> the same red-white-blue tricolor flown since the Republic, its exact shade finally standardized by royal decree in 1937 after centuries of the red band drifting between orange-red and true red depending on dye and fashion.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3, three equal horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red top, white middle, blue bottom.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#ae1c28"></span><span class="meta"><span class="name">Red</span><span class="hex">#AE1C28</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#21468b"></span><span class="meta"><span class="name">Blue</span><span class="hex">#21468B</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="entry" data-n="10" id="era-1940">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#ae1c28"/>
+              <circle cx="150" cy="100" r="42" fill="#f4efe1"/>
+              <g transform="translate(150,100)" fill="#1a1a1a">
+                <rect x="-6" y="-34" width="12" height="68"/>
+                <rect x="-34" y="-6" width="68" height="12"/>
+                <path d="M-6,-34 h24 v18 h-18 Z"/>
+                <path d="M6,34 h-24 v-18 h18 Z"/>
+                <path d="M-34,-6 v-24 h18 v18 Z"/>
+                <path d="M34,6 v24 h-18 v-18 Z"/>
+              </g>
+            </svg>
+            <div class="flag-caption">the occupying power's own flag over Dutch soil, not a Dutch flag (schematic, not to exact spec)</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1940 &ndash; 1945</div>
+            <h3 class="card-title">Reichskommissariat Niederlande (German occupation)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Dutch territory under direct Nazi German civilian administration after the May 1940 invasion, with the exiled Dutch government continuing only from London."><span class="dot" style="background:#3f3f3f"></span>Occupied territory</span><span class="tag" tabindex="0" data-tip="Austrian Nazi official appointed by Hitler as Reich Commissioner over the occupied Netherlands in 1940, overseeing the occupation&#x27;s escalating repression and deportations."><span class="dot" style="background:#4a3b78"></span>Arthur Seyss-Inquart</span><span class="tag" tabindex="0" data-tip="The occupation authorities established no official state religion; the Dutch population remained divided among Catholic and Protestant traditions, alongside the Jewish community targeted for deportation."><span class="dot" style="background:#8e3b62"></span>No official state religion</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Nazi Germany occupies the Netherlands from May 1940 to May 1945, installing Reichskommissar Arthur Seyss-Inquart to govern the country directly."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#cc0000"/><circle cx="10" cy="7" r="4.3" fill="#fff"/><g fill="#000"><path d="M10,3 h1.4 v3 h3 v1.4 h-4.4 z"/><path d="M10,3 h1.4 v3 h3 v1.4 h-4.4 z" transform="rotate(90 10 7)"/><path d="M10,3 h1.4 v3 h3 v1.4 h-4.4 z" transform="rotate(180 10 7)"/><path d="M10,3 h1.4 v3 h3 v1.4 h-4.4 z" transform="rotate(270 10 7)"/></g></svg>Occupied by: Nazi Germany (1940&ndash;45)</span><span class="tag" tabindex="0" data-tip="Nearly 102,000 of the roughly 140,000 Jews living in the Netherlands, about 75 percent, are deported to Nazi concentration and extermination camps between 1942 and 1944, one of the highest death tolls of any occupied Western European country."><span class="dot" style="background:#a3672f"></span>Emigration: deportation of Dutch Jews to Nazi camps (1942&ndash;44)</span></div>
+            <p><span class="label">Who &amp; why:</span> Germany invades on 10 May 1940 without a declaration of war; the bombing of Rotterdam on 14 May forces capitulation the next day. Queen Wilhelmina and the government flee to London, while Arthur Seyss-Inquart governs as Reichskommissar. Persecution of the Dutch Jewish population escalates through deportations from 1942; a national railway strike in support of the Allied advance in 1944&ndash;45 triggers a German transport blockade and the "Hunger Winter," which kills roughly 20,000 civilians.</p>
+            <p><span class="label">What it represents:</span> the Dutch tricolor was never formally abolished but its public display was steadily restricted and finally banned outright in 1943; German state buildings and the occupation authority instead flew the flag of Nazi Germany, shown here schematically as the ruling power's own banner rather than any Dutch flag.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">Not applicable &mdash; the occupying power's flag, not a Dutch one.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Shown schematically for historical documentation only.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="entry" data-n="9" id="era-1830">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#ae1c28"/>
+              <rect y="66.7" width="300" height="66.6" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#21468b"/>
+            </svg>
+            <div class="flag-caption">unchanged red&ndash;white&ndash;blue, now flown over a smaller kingdom</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1830 &ndash; 1940</div>
+            <h3 class="card-title">Kingdom of the Netherlands (post-secession)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A fully sovereign kingdom that endured after the 1830&ndash;31 secession of Belgium, retaining its own crown through over a century of constitutional monarchy."><span class="dot" style="background:#c9973a"></span>Sovereign kingdom</span><span class="tag" tabindex="0" data-tip="King who reigned through the 1830 Belgian Revolution and secession, retaining the Dutch crown over the smaller kingdom that remained."><span class="dot" style="background:#4a3b78"></span>William I</span><span class="tag" tabindex="0" data-tip="The kingdom established no official state religion; the Dutch Reformed Church remained historically prominent, but the constitution guaranteed freedom of religion to Catholics and other faiths as well."><span class="dot" style="background:#8e3b62"></span>No official state religion</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="An estimated quarter of a million Dutch citizens emigrate to the United States between the 1840s and the 1920s, chiefly settling in Michigan, Iowa, and other parts of the upper Midwest."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#b22234"/><g fill="#fff"><rect y="1.6" width="20" height="1.6"/><rect y="4.8" width="20" height="1.6"/><rect y="8" width="20" height="1.6"/><rect y="11.2" width="20" height="1.6"/></g><rect width="8" height="7.5" fill="#3c3b6e"/></svg>Emigration: to the United States (1840s&ndash;1920s)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="William I's House of Orange-Nassau (Stadtholders since 1544, on the throne since 1815) retains the crown through the Belgian secession and into his successors' reigns. Arms: azure billeted or, a lion rampant or."><svg class="noble-mini" viewBox="0 0 100 120"><defs><clipPath id="nlOrange-1830"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z"/></clipPath></defs><g clip-path="url(#nlOrange-1830)"><rect x="0" y="0" width="100" height="120" fill="#1e2f7a"/><g fill="#f9d616"><rect x="12" y="14" width="8" height="8"/><rect x="32" y="10" width="8" height="8"/><rect x="52" y="16" width="8" height="8"/><rect x="74" y="12" width="8" height="8"/><rect x="20" y="32" width="8" height="8"/><rect x="42" y="30" width="8" height="8"/><rect x="64" y="34" width="8" height="8"/><rect x="10" y="90" width="8" height="8"/><rect x="70" y="92" width="8" height="8"/></g><path d="M30,64 q0,-22 20,-22 q20,0 20,22 q0,20 -20,34 q-20,-14 -20,-34 Z" fill="#f9d616"/><circle cx="42" cy="52" r="2.4" fill="#1e2f7a"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Orange-Nassau</span></div>
+            <p><span class="label">Who &amp; why:</span> Belgium's August 1830 revolution and the failed Ten Days' Campaign of 1831 cost the kingdom its southern provinces; the 1839 Treaty of London formalizes the new borders, including Luxembourg's partition (see the Low Countries hub). William I abdicates in 1840; his successors preside over a slow shift from royal authority toward parliamentary government &mdash; the constitution of 1848 curbs the crown's power after a wave of European revolutions &mdash; and the country stays neutral through the First World War.</p>
+            <p><span class="label">What it represents:</span> no change to the flag at all; the same tricolor that flew over the larger union keeps flying over the smaller kingdom that remains, the clearest visual sign that the Dutch state itself considered 1830 a loss of territory rather than a rupture in its own continuity.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3, three equal horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red top, white middle, blue bottom.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#ae1c28"></span><span class="meta"><span class="name">Red</span><span class="hex">#AE1C28</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#21468b"></span><span class="meta"><span class="name">Blue</span><span class="hex">#21468B</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="entry" data-n="8" id="era-1813">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#ae1c28"/>
+              <rect y="66.7" width="300" height="66.6" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#21468b"/>
+            </svg>
+            <div class="flag-caption">the same tricolor, now flying over a treaty-built union of three countries</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1813 &ndash; 1830</div>
+            <h3 class="card-title">United Kingdom of the Netherlands</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A fully sovereign kingdom created at the 1815 Congress of Vienna, uniting the former Dutch Republic&#x27;s territory with the Austrian (Southern) Netherlands under one crown."><span class="dot" style="background:#c9973a"></span>Sovereign kingdom</span><span class="tag" tabindex="0" data-tip="First king of the united Netherlands, installed as sovereign prince in 1813 upon the French withdrawal and crowned king in 1815 at the Congress of Vienna."><span class="dot" style="background:#4a3b78"></span>William I</span><span class="tag" tabindex="0" data-tip="The united kingdom established no official state religion, balancing a Protestant north with a largely Catholic south, a tension that contributed to the 1830 Belgian secession."><span class="dot" style="background:#8e3b62"></span>No official state religion</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="William VI of Orange returns from exile in 1813 and is crowned King William I in 1815, restoring his House (Stadtholders since 1544) to the Dutch throne. Arms: azure billeted or, a lion rampant or."><svg class="noble-mini" viewBox="0 0 100 120"><defs><clipPath id="nlOrange-1813"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z"/></clipPath></defs><g clip-path="url(#nlOrange-1813)"><rect x="0" y="0" width="100" height="120" fill="#1e2f7a"/><g fill="#f9d616"><rect x="12" y="14" width="8" height="8"/><rect x="32" y="10" width="8" height="8"/><rect x="52" y="16" width="8" height="8"/><rect x="74" y="12" width="8" height="8"/><rect x="20" y="32" width="8" height="8"/><rect x="42" y="30" width="8" height="8"/><rect x="64" y="34" width="8" height="8"/><rect x="10" y="90" width="8" height="8"/><rect x="70" y="92" width="8" height="8"/></g><path d="M30,64 q0,-22 20,-22 q20,0 20,22 q0,20 -20,34 q-20,-14 -20,-34 Z" fill="#f9d616"/><circle cx="42" cy="52" r="2.4" fill="#1e2f7a"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Orange-Nassau</span></div>
+            <p><span class="label">Who &amp; why:</span> as French power collapses, William VI of Orange returns from exile in England and is proclaimed "Sovereign Prince" on 1 December 1813. The Congress of Vienna then builds a stronger buffer state against France: on its terms, William is crowned King William I in March 1815 and formally merges his realm with the former Austrian Netherlands (Belgium) and Luxembourg that June, creating a single kingdom across all three &mdash; cross-reference the Low Countries hub for the full three-country picture.</p>
+            <p><span class="label">What it represents:</span> the historic Dutch tricolor, unchanged through the transition from French rule to independent principality to enlarged kingdom &mdash; the flag's continuity masking a genuinely new and much larger state underneath it.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3, three equal horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red top, white middle, blue bottom.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#ae1c28"></span><span class="meta"><span class="name">Red</span><span class="hex">#AE1C28</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#21468b"></span><span class="meta"><span class="name">Blue</span><span class="hex">#21468B</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="entry" data-n="7" id="era-1810">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="100" height="200" fill="#002395"/>
+              <rect x="100" width="100" height="200" fill="#f4efe1"/>
+              <rect x="200" width="100" height="200" fill="#ae1c28"/>
+            </svg>
+            <div class="flag-caption">the French tricolor, flown over the whole country outright</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1810 &ndash; 1813</div>
+            <h3 class="card-title">French Empire (direct annexation)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Territory annexed outright into the French Empire in 1810 after Napoleon deposed his own brother&#x27;s client kingdom, administered directly from Paris."><span class="dot" style="background:#1f4d78"></span>Annexed territory</span><span class="tag" tabindex="0" data-tip="French emperor who annexed the Netherlands directly into his empire in 1810, dissolving the client Kingdom of Holland he had created for his brother Louis."><span class="dot" style="background:#4a3b78"></span>Napoleon Bonaparte</span><span class="tag" tabindex="0" data-tip="Napoleon&#x27;s Concordat-based religious settlement recognized Catholic, Protestant, and Jewish worship without establishing any single official state religion over the annexed territory."><span class="dot" style="background:#8e3b62"></span>No official state religion (Concordat toleration)</span></div>
+            <p><span class="label">Who &amp; why:</span> frustrated that his brother Louis was protecting Dutch trade from the Continental System's blockade of Britain, Napoleon forces Louis's abdication and annexes the former Kingdom of Holland directly into the French Empire on 9 July 1810, dividing it into French départements (Zuiderzee, Bouches-de-l'Yssel, Frise, and others). Direct rule ends when Cossack cavalry, part of the wider collapse following Napoleon's Russian campaign, reach the country in November 1813 and the population rises against the French garrison.</p>
+            <p><span class="label">What it represents:</span> no separate Dutch flag at all for these three years &mdash; the French tricolor itself, flown as it was over every other department of the Empire, the only period in this whole timeline when the Netherlands has no flag of its own whatsoever.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3, three equal vertical bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Blue hoist, white middle, red fly.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#002395"></span><span class="meta"><span class="name">Blue</span><span class="hex">#002395</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#ae1c28"></span><span class="meta"><span class="name">Red</span><span class="hex">#AE1C28</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="entry" data-n="6" id="era-1806">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#ae1c28"/>
+              <rect y="66.7" width="300" height="66.6" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#21468b"/>
+              <g transform="translate(150,100)">
+                <rect x="-18" y="-15" width="36" height="30" rx="2" fill="#21468b" stroke="#c9a13c" stroke-width="2"/>
+                <path d="M-10,-15 q10,-12 20,0" fill="none" stroke="#c9a13c" stroke-width="2.5"/>
+              </g>
+            </svg>
+            <div class="flag-caption">the tricolor kept, now under a French-installed king</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1806 &ndash; 1810</div>
+            <h3 class="card-title">Kingdom of Holland</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A monarchy installed by Napoleon for his own family, nominally independent but functioning as a satellite of the French Empire until its outright annexation in 1810."><span class="dot" style="background:#a35a1e"></span>Client kingdom</span><span class="tag" tabindex="0" data-tip="Napoleon&#x27;s younger brother, installed by the emperor as King of Holland in 1806, who governed with more independence from Paris than Napoleon wished before the kingdom&#x27;s 1810 annexation."><span class="dot" style="background:#4a3b78"></span>Louis Bonaparte</span><span class="tag" tabindex="0" data-tip="The Dutch Reformed Church remained the traditionally prominent faith, but the kingdom maintained religious toleration in keeping with French revolutionary-era principles, establishing no single official church."><span class="dot" style="background:#8e3b62"></span>No official state religion</span></div>
+            <p><span class="label">Who &amp; why:</span> Napoleon installs his younger brother Louis Bonaparte as king on 5 June 1806, hoping for a more pliable and useful satellite than the fractious Batavian Commonwealth had proven. Louis surprises Napoleon by governing in genuinely Dutch interests &mdash; learning the language, moving the capital to Amsterdam, and resisting enforcement of the Continental System against Dutch merchants &mdash; earning his own brother's growing fury and eventual removal.</p>
+            <p><span class="label">What it represents:</span> Louis kept the existing red-white-blue tricolor as the kingdom's flag rather than imposing a new French-style design, a deliberate choice to present his rule as continuous with Dutch tradition rather than as a foreign imposition.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3, three equal horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red-white-blue; royal arms centered on state occasions (simplified here).</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#ae1c28"></span><span class="meta"><span class="name">Red</span><span class="hex">#AE1C28</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#21468b"></span><span class="meta"><span class="name">Blue</span><span class="hex">#21468B</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 7 -->
+    <div class="entry" data-n="5" id="era-1795">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#ae1c28"/>
+              <rect y="66.7" width="300" height="66.6" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#21468b"/>
+              <rect x="0" y="0" width="70" height="66.7" fill="#ae1c28"/>
+              <path d="M35,14 a13,13 0 1 0 0.1,0 M28,32 q7,7 14,0 l0,10 -14,0 Z" fill="#f4efe1"/>
+            </svg>
+            <div class="flag-caption">the historic tricolor with a brief revolutionary canton, 1795&ndash;96</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1795 &ndash; 1806</div>
+            <h3 class="card-title">Batavian Republic</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A revolutionary client republic proclaimed in 1795 after French Revolutionary forces and allied Dutch Patriots overthrew the stadtholderate, aligned closely with revolutionary France."><span class="dot" style="background:#2f6b4a"></span>Republic</span><span class="tag" tabindex="0" data-tip="Patriot leader and first chairman of the new National Assembly formed after the 1795 revolution, representing the Patriot movement that helped found the Batavian Republic."><span class="dot" style="background:#4a3b78"></span>Pieter Paulus</span><span class="tag" tabindex="0" data-tip="The Batavian Republic formally ended the privileged public status of the Dutch Reformed Church, establishing legal equality among Christian denominations rather than any single state religion."><span class="dot" style="background:#8e3b62"></span>No official state religion</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Stadtholder William V and thousands of his Orangist supporters flee into exile in Britain and the German states after the 1795 revolution, part of a broader Patriot-versus-Orangist exile pattern that ran in both directions through the preceding decade."><span class="dot" style="background:#a3672f"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#012169"/><path d="M0,0 L20,14 M20,0 L0,14" stroke="#fff" stroke-width="2"/><path d="M10,0 V14 M0,7 H20" stroke="#fff" stroke-width="3.4"/><path d="M10,0 V14 M0,7 H20" stroke="#c8102e" stroke-width="1.8"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#000"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#dd0000"/></svg></span>Emigration: Orangist exiles fleeing to Britain &amp; Germany (1795&ndash;)</span></div>
+            <p><span class="label">Who &amp; why:</span> French Revolutionary troops cross the frozen rivers in January 1795, and Stadtholder William V flees to England as the Patriot movement, radicalized allies of the French, proclaims the Batavian Republic on 19 January 1795. A 1798 constitution creates a unitary state for the first time, ending the old provincial confederation; internal factional strife eventually leads Napoleon to reorganize the government into the more centralized Batavian Commonwealth under Grand Pensionary Rutger Jan Schimmelpenninck from 1805.</p>
+            <p><span class="label">What it represents:</span> the republic kept the historic red-white-blue tricolor to claim continuity with the Dutch nation, briefly adding a small canton with a liberty cap and pole in 1795&ndash;96 to signal its revolutionary, French-aligned politics before dropping the addition and reverting to the plain tricolor.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3, three equal horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red-white-blue; canton with liberty cap used briefly 1795&ndash;96, plain tricolor afterward.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#ae1c28"></span><span class="meta"><span class="name">Red</span><span class="hex">#AE1C28</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#21468b"></span><span class="meta"><span class="name">Blue</span><span class="hex">#21468B</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 8 -->
+    <div class="entry" data-n="4" id="era-1581">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#ae1c28"/>
+              <rect y="66.7" width="300" height="66.6" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#21468b"/>
+            </svg>
+            <div class="flag-caption">the Statenvlag, red-white-blue &mdash; the flag the orange Prince's Flag faded into</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1581 &ndash; 1795</div>
+            <h3 class="card-title">Dutch Republic (United Provinces)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A sovereign confederal republic of seven provinces formed by revolt against Habsburg Spain, with no monarch and power held by the provincial States and a stadtholder."><span class="dot" style="background:#2f6b4a"></span>Republic</span><span class="tag" tabindex="0" data-tip="Prince of Orange who led the revolt against Habsburg Spain that produced the 1581 Act of Abjuration and the republic that followed, though he was assassinated in 1584 before seeing it fully secured."><span class="dot" style="background:#4a3b78"></span>William of Orange (William the Silent)</span><span class="tag" tabindex="0" data-tip="The Dutch Reformed Church held the privileged status of &quot;public church&quot; in the Republic, though considerable practical toleration extended to Catholics, Jews, and other Protestant groups."><span class="dot" style="background:#8e3b62"></span>Dutch Reformed Christianity (public church)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Sephardic Jews fleeing the Iberian Inquisition settle in Amsterdam from the late 16th century onward, establishing one of early modern Europe's largest and most secure Jewish communities under the Republic's relative religious toleration."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#aa151b"/><rect y="3.5" width="20" height="7" fill="#f1bf00"/></svg>Immigration: Sephardic Jewish refugees from Iberia</span><span class="tag" tabindex="0" data-tip="Tens of thousands of French Huguenots flee to the Dutch Republic after Louis XIV's 1685 revocation of the Edict of Fontainebleau outlawed Protestant worship in France, bringing skilled artisans and merchants."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="6.67" height="14" fill="#0055a4"/><rect x="6.67" width="6.67" height="14" fill="#fff"/><rect x="13.33" width="6.67" height="14" fill="#ef4135"/></svg>Immigration: Huguenot refugees from France (post-1685)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="William the Silent led the Dutch Revolt as Stadtholder from the House he inherited in 1544; his descendants have supplied the Netherlands' monarchs since 1815. Arms: azure billeted or, a lion rampant or &mdash; the historic Nassau shield still on the Dutch royal coat of arms."><svg class="noble-mini" viewBox="0 0 100 120"><defs><clipPath id="nlOrange-1581"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z"/></clipPath></defs><g clip-path="url(#nlOrange-1581)"><rect x="0" y="0" width="100" height="120" fill="#1e2f7a"/><g fill="#f9d616"><rect x="12" y="14" width="8" height="8"/><rect x="32" y="10" width="8" height="8"/><rect x="52" y="16" width="8" height="8"/><rect x="74" y="12" width="8" height="8"/><rect x="20" y="32" width="8" height="8"/><rect x="42" y="30" width="8" height="8"/><rect x="64" y="34" width="8" height="8"/><rect x="10" y="90" width="8" height="8"/><rect x="70" y="92" width="8" height="8"/></g><path d="M30,64 q0,-22 20,-22 q20,0 20,22 q0,20 -20,34 q-20,-14 -20,-34 Z" fill="#f9d616"/><circle cx="42" cy="52" r="2.4" fill="#1e2f7a"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Orange-Nassau</span></div>
+            <p><span class="label">Who &amp; why:</span> the northern provinces sign the Union of Utrecht on 23 January 1579 as a mutual-defense pact against Spain, then go further with the Act of Abjuration on 26 July 1581, formally renouncing Philip II. Spain doesn't formally recognize the loss until the Treaty of Münster, part of the Peace of Westphalia, on 30 January 1648. In between comes the Dutch Golden Age &mdash; the VOC founded in 1602, colonial and trading footholds from Batavia to New Amsterdam to Nagasaki, and the art of Rembrandt and Vermeer &mdash; alongside real internal strain, including a First Stadtholderless Period (1650&ndash;72) and the catastrophic French invasion of the 1672 "Rampjaar."</p>
+            <p><span class="label">What it represents:</span> the Revolt's own banner started as the orange-white-blue "Prince's Flag," after William of Orange; by the mid-17th century it had shifted to red-white-blue, partly because orange dye faded unreliably and partly because red suited a republic wary of the House of Orange's own princely ambitions during the stadtholderless years. The red version, the Statenvlag, became the settled national flag for the rest of the Republic's existence.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed civil ratio recorded; roughly 2:3 in practice.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red top, white middle, blue bottom (originally orange-white-blue, 1579&ndash;c.1630s).</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#ae1c28"></span><span class="meta"><span class="name">Red</span><span class="hex">#AE1C28</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#21468b"></span><span class="meta"><span class="name">Blue</span><span class="hex">#21468B</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 9 -->
+    <div class="entry" data-n="3" id="era-1433">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#f4efe1"/>
+              <g stroke="#a3272a" stroke-width="34" stroke-linecap="round">
+                <line x1="20" y1="20" x2="280" y2="180"/>
+                <line x1="280" y1="20" x2="20" y2="180"/>
+              </g>
+            </svg>
+            <div class="flag-caption">the Burgundy Cross (raguly saltire), simplified from the knotted original</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1433 &ndash; 1581</div>
+            <h3 class="card-title">Burgundian / Habsburg Netherlands</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="The Low Countries consolidated under a single dynastic ruler for the first time, first Burgundian then, from 1482, Habsburg, while retaining their own local privileges and institutions."><span class="dot" style="background:#c1781f"></span>Personal union / duchy</span><span class="tag" tabindex="0" data-tip="Duke of Burgundy who united most of the Low Countries under his personal rule beginning with his 1433 acquisition of Holland, Zeeland, and Hainaut."><span class="dot" style="background:#4a3b78"></span>Philip the Good</span><span class="tag" tabindex="0" data-tip="Roman Catholicism was the established religion throughout the Burgundian and Habsburg Netherlands, later contested by the Reformation that helped trigger the Dutch Revolt."><span class="dot" style="background:#8e3b62"></span>Roman Catholicism</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="The Duke of Alba's harsh suppression of Protestant dissent from 1567, including the Council of Troubles' thousands of prosecutions, drives large numbers of Dutch and Flemish Protestants into exile in England and the German territories through the 1560s&ndash;70s."><span class="dot" style="background:#a3672f"></span>Emigration: Protestant refugees fleeing Spanish persecution (1560s&ndash;70s)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Philip the Bold's 1384 marriage into Flanders began the Dukes of Burgundy's assembly of the Low Countries under one ruler, extending to Holland and Zeeland by 1433. Their red saltire, the Cross of Burgundy, later flew over Habsburg Spain's own possessions."><svg class="noble-mini" viewBox="0 0 100 120"><defs><clipPath id="nlBurg"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z"/></clipPath></defs><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f4efe1"/><g stroke="#a4302a" stroke-width="12" clip-path="url(#nlBurg)"><path d="M0,4 L100,116"/><path d="M100,4 L0,116"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Valois-Burgundy</span><span class="tag" tabindex="0" data-tip="Inherited the Burgundian Netherlands through Mary of Burgundy's 1482 marriage; Philip II's rule from Habsburg Spain provoked William of Orange's revolt, ending in the 1581 Act of Abjuration."><svg class="noble-mini" viewBox="0 0 100 120"><defs><clipPath id="nlHabs"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z"/></clipPath></defs><g clip-path="url(#nlHabs)"><rect x="0" y="0" width="50" height="120" fill="#a4302a"/><rect x="50" y="0" width="50" height="120" fill="#f4efe1"/><rect x="0" y="46" width="100" height="24" fill="#f9d616"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Habsburg</span></div>
+            <p><span class="label">Who &amp; why:</span> Philip the Good, Duke of Burgundy, secures Holland, Zeeland, and Hainaut in 1433 after a long conflict with his cousin Jacqueline of Bavaria, folding them into the wider Burgundian bloc that already included Flanders and Brabant (see the Low Countries hub). The line passes to the Habsburgs on Mary of Burgundy's marriage in 1477; her grandson Charles V, born in Ghent in 1500, adds Guelders, Utrecht, Overijssel, Groningen, and Frisia by the 1520s&ndash;40s, then formalizes the whole "Seventeen Provinces" as one indivisible inheritance in the 1549 Pragmatic Sanction. His son Philip II's heavy taxation and religious persecution provoke the revolt that ends this era in 1581.</p>
+            <p><span class="label">What it represents:</span> the Burgundy Cross &mdash; a red diagonal saltire of knotted, raguly branches on white, the personal emblem of the Burgundian dukes &mdash; used across the whole Burgundian-Habsburg realm rather than as a flag specific to the northern provinces alone; the same design that continues over the southern Netherlands (future Belgium) after 1581.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio recorded.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">White field, red diagonal saltire of knotted branches (shown simplified as plain diagonals).</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#a3272a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A3272A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 10 -->
+    <div class="entry" data-n="2" id="era-1000">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; fragmented feudal era, no shared flag existed</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 1000 &ndash; 1433</div>
+            <h3 class="card-title">Fragmented medieval counties</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="No single unified polity &mdash; the medieval Low Countries were divided among numerous counts, dukes, and prince-bishops (Holland, Flanders, Brabant, Utrecht, Guelders) until Burgundian consolidation."><span class="dot" style="background:#c1781f"></span>Feudal patchwork</span><span class="tag" tabindex="0" data-tip="No single ruler documented — the medieval Low Countries were divided among independent counts, dukes, and prince-bishops rather than under one unified monarch."><span class="dot" style="background:#4a3b78"></span>No single ruler documented</span><span class="tag" tabindex="0" data-tip="Roman Catholicism was the established religion of Latin Christendom throughout the medieval Low Countries, administered locally by bishoprics such as Utrecht."><span class="dot" style="background:#8e3b62"></span>Roman Catholicism</span></div>
+            <p><span class="label">Who &amp; why:</span> what is now the Netherlands was a patchwork of separate feudal territories with no shared ruler: the County of Holland (formally named from 1101), the County of Zeeland, the prince-bishopric of Utrecht, the Duchy of Guelders, and the fiercely independent Frisian lands, which recognized no feudal overlord at all under the tradition of "Frisian freedom" until a Saxon conquest in 1498. Each had its own count, bishop, or assembly, its own coinage, and its own local banners.</p>
+            <p><span class="label">What it represents:</span> no single flag existed for this territory because no single polity did; each county or lordship used its own heraldic devices rather than a shared national symbol. Shown here honestly blank rather than invented, ending when Philip the Good began assembling Holland, Zeeland, and Hainaut under one Burgundian hand in 1433.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no single attested flag for the territory as a whole.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 11 -->
+    <div class="entry" data-n="1" id="era-50bce">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder &mdash; no unified banner; tribal standards went unrecorded by Roman writers</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 50 BCE &ndash; 800 CE</div>
+            <h3 class="card-title">Batavi &amp; Frisii Tribes of the Rhine Delta</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#6b5c4a"></span>Fragmented / tribal territories</span><span class="tag" tabindex="0" data-tip="Batavian nobleman, formerly a commander of Roman auxiliary troops, who led a major revolt against Rome in 69&ndash;70 CE during the chaotic &#x27;Year of the Four Emperors,&#x27; briefly threatening the whole Rhine frontier before Roman forces restored control."><span class="dot" style="background:#4a3b78"></span>Gaius Julius Civilis</span><span class="tag" tabindex="0" data-tip="Pre-Christian Germanic paganism was universal among the Batavi and Frisii; Frisian Christianization came late and was actively resisted, only completing under Frankish missionary and military pressure (Willibrord, then Charlemagne) by the late 8th century."><span class="dot" style="background:#8e3b62"></span>Germanic paganism (until 8th c. Christianization)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Rome treats the Batavi, settled on the Rhine 'island' roughly matching the modern Betuwe, as favored allies (foederati) exempt from tribute in exchange for supplying elite auxiliary cavalry cohorts to the legions &mdash; a special status that collapses with the 69&ndash;70 CE revolt."><span class="dot" style="background:#6b2c2c"></span>Allied/subordinated to: Rome (foederati status, then 69 CE revolt)</span><span class="tag" tabindex="0" data-tip="Frisian territory along the North Sea coast, never durably annexed by Rome, is absorbed piecemeal into the Frankish realm over the following centuries; Frankish conquest and forced Christianization of Frisia is completed under Charles Martel and Charlemagne by the late 8th century."><span class="dot" style="background:#a3672f"></span>Absorbed by: Frankish realm (7th&ndash;8th c.)</span></div>
+            <p><span class="label">Who &amp; why:</span> for centuries before medieval Dutch feudal governance, this same delta was home to distinct Germanic tribal peoples on the edge of the Roman world. Julius Caesar's Gallic Wars and Tacitus's Germania and Histories both describe the Batavi, settled on the Rhine's "island" (roughly the modern Betuwe), and the Frisii, along the coast to the north. Rome treats the Batavi as favored allies rather than conquered subjects, exempt from tribute in exchange for supplying elite auxiliary cavalry to the legions; that special status collapses in 69&ndash;70 CE, when the Batavian nobleman Gaius Julius Civilis leads a major revolt against Rome during the "Year of the Four Emperors," briefly threatening the entire Rhine frontier before Roman forces restore control. Frisii territory further north remains only loosely under Roman influence and is never durably annexed; the whole region is absorbed piecemeal into the Frankish realm over the following centuries, with Frisian resistance to Frankish rule and to Christianization only ending under Charles Martel and Charlemagne in the 8th century.</p>
+            <p><span class="label">What it represents:</span> no flag survives from this era, and none is likely to have existed in any modern sense &mdash; Tacitus records Batavian and Frisian war-standards and totems, not woven banners. Shown here honestly blank rather than invented.</p>
+            <p><span class="label">World context:</span> this span runs alongside the height of the Roman Empire from Augustus through Trajan and Hadrian (Rome's borders reaching their greatest extent around 117 CE), the eruption of Vesuvius and destruction of Pompeii in 79 CE, and, by its end, Charlemagne's own 800 coronation as Holy Roman Emperor in Rome &mdash; the same event that closes the parallel Germanic Tribes era covered on this atlas's Germany page, of which the Batavi and Frisii were themselves a part.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested tribal flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#c1781f"></span><b>Personal union / duchy</b> &mdash; feudal or dynastic, foreign overlord</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#2f6b4a"></span><b>Republic</b> &mdash; sovereign or client, no monarch</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a35a1e"></span><b>Client kingdom</b> &mdash; monarch installed by a foreign power</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#1f4d78"></span><b>Annexed territory</b> &mdash; ruled directly from a foreign capital</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#c9973a"></span><b>Sovereign kingdom</b> &mdash; independent monarchy, own crown</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#3f3f3f"></span><b>Occupied territory</b> &mdash; wartime foreign administration</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the named ruler most associated with the era's start</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official/established faith, not the population's</div>
+    </div>
+  </div>
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for Netherlands lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/nl/">Search Record Atlas for Netherlands &rarr;</a>
+    <p style="margin-top:14px;">Records here are filed by historical jurisdiction, not modern borders &mdash; check the region that covers your ancestral town:</p>
+    <div class="record-region-grid">
+      <a href="https://daviddef.github.io/TheMap/region/netherlands/">The Netherlands</a>
+    </div>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This page is one lineage in a larger set. See the region-wide map and the other countries here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="low-countries-hub.html"><b>Low Countries hub</b><span>Belgium, Netherlands, Luxembourg</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are close historical approximations for painting reference; pre-19th-century swatches are informed reconstructions, not official specifications. Map outline is a simplified trace of public geographic data, not surveyed.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var C = {
+    tribal: "#6b5c4a", burgundian: "#8a6a35", dutchrep: "#2f6b4a", batavian: "#4a8f5c",
+    hollandkingdom: "#a35a1e", frenchempire: "#1f4d78", ukn: "#c9973a",
+    kingdomnl: "#c9973a", occupation: "#3f3f3f", modernnl: "#c9973a"
+  };
+  var INAMES = {
+    tribal: "Batavi & Frisii Tribes of the Rhine Delta",
+    burgundian: "Burgundian / Habsburg Netherlands", dutchrep: "Dutch Republic",
+    batavian: "Batavian Republic", hollandkingdom: "Kingdom of Holland",
+    frenchempire: "French Empire (direct rule)", ukn: "United Kingdom of the Netherlands",
+    kingdomnl: "Kingdom of the Netherlands (post-secession)", occupation: "German occupation",
+    modernnl: "Kingdom of the Netherlands (modern)"
+  };
+  var IFLAGS = {
+    tribal: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>',
+    burgundian: '<rect width="300" height="200" fill="#f4efe1"/><g stroke="#a3272a" stroke-width="34" stroke-linecap="round"><line x1="20" y1="20" x2="280" y2="180"/><line x1="280" y1="20" x2="20" y2="180"/></g>',
+    dutchrep: '<rect width="300" height="66.7" fill="#ae1c28"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#21468b"/>',
+    batavian: '<rect width="300" height="66.7" fill="#ae1c28"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#21468b"/><rect width="70" height="66.7" fill="#ae1c28"/>',
+    hollandkingdom: '<rect width="300" height="66.7" fill="#ae1c28"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#21468b"/><g transform="translate(150,100)"><rect x="-18" y="-15" width="36" height="30" rx="2" fill="#21468b" stroke="#c9a13c" stroke-width="2"/></g>',
+    frenchempire: '<rect width="100" height="200" fill="#002395"/><rect x="100" width="100" height="200" fill="#f4efe1"/><rect x="200" width="100" height="200" fill="#ae1c28"/>',
+    ukn: '<rect width="300" height="66.7" fill="#ae1c28"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#21468b"/>',
+    kingdomnl: '<rect width="300" height="66.7" fill="#ae1c28"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#21468b"/>',
+    occupation: '<rect width="300" height="200" fill="#ae1c28"/><circle cx="150" cy="100" r="42" fill="#f4efe1"/><g transform="translate(150,100)" fill="#1a1a1a"><rect x="-6" y="-34" width="12" height="68"/><rect x="-34" y="-6" width="68" height="12"/></g>',
+    modernnl: '<rect width="300" height="66.7" fill="#ae1c28"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#21468b"/>'
+  };
+  function iFlagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (IFLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  var iLegendEl = document.getElementById("iLegend");
+  var seenLegend = {};
+  var legendOrder = ["tribal","burgundian","dutchrep","batavian","hollandkingdom","frenchempire","ukn","occupation"];
+  iLegendEl.innerHTML = legendOrder.map(function (k) {
+    return '<span><span class="sw" style="background:' + C[k] + '"></span>' + INAMES[k] + "</span>";
+  }).join("");
+
+  var ISNAP = [
+    { year:"c. 50 BCE", name:"Batavi & Frisii Tribes of the Rhine Delta", key:"tribal",
+      story:"For roughly eight centuries before Burgundian unification, this delta is home to distinct Germanic tribal peoples on the edge of, and beyond, the Roman world: the Batavi, settled on the Rhine's 'island,' favored by Rome as auxiliary-supplying allies until Julius Civilis's 69&ndash;70 CE revolt, and the Frisii along the North Sea coast, never durably annexed and only absorbed into the Frankish realm and Christianized by the late 8th century. No flag survives from either people, and the whole territory has no single government at all, let alone the unified hand Philip the Good brings in 1433." },
+    { year:"1433", name:"Philip the Good unifies Holland-Zeeland-Hainaut", key:"burgundian",
+      story:"Philip the Good, Duke of Burgundy, secures Holland, Zeeland, and Hainaut in 1433 after a long struggle with his cousin Jacqueline of Bavaria, joining them to the wider Burgundian bloc that already held Flanders and Brabant. The whole territory shown here comes under one dynastic hand for the first time." },
+    { year:"1581", name:"Act of Abjuration — the Dutch Republic begins", key:"dutchrep",
+      story:"After the Union of Utrecht (1579) and the Act of Abjuration on 26 July 1581, the northern provinces formally renounce Philip II. Spain doesn't recognize the loss until the Peace of Westphalia in 1648, but 1581 is the real break — the moment this territory stops being ruled from Madrid or Brussels." },
+    { year:"1795", name:"French invasion — the Batavian Republic", key:"batavian",
+      story:"French Revolutionary troops cross the frozen rivers in January 1795; Stadtholder William V flees to England and the French-aligned Batavian Republic is proclaimed on 19 January. The Republic keeps the historic tricolor but is, in practice, a French client state." },
+    { year:"1806", name:"Napoleon installs his brother as king", key:"hollandkingdom",
+      story:"Napoleon makes his brother Louis Bonaparte King of Holland on 5 June 1806. Louis governs more independently than Napoleon wants — resisting the Continental System's enforcement against Dutch trade — which leads directly to his forced abdication four years later." },
+    { year:"1810", name:"Direct French annexation", key:"frenchempire",
+      story:"Napoleon annexes the Kingdom of Holland outright into the French Empire on 9 July 1810, dividing it into French departments. For three years the territory flies no Dutch flag at all — only the French tricolor — until Cossack cavalry and a popular uprising end French rule in November 1813." },
+    { year:"1813", name:"Liberation — sovereign prince, soon a king", key:"ukn",
+      story:"William VI of Orange returns from exile and is proclaimed \"Sovereign Prince\" on 1 December 1813. The Congress of Vienna then has him crowned King William I in March 1815 and merges his realm with the former Austrian Netherlands and Luxembourg that June, building a stronger buffer state against France." },
+    { year:"1830", name:"Belgium secedes — the kingdom alone", key:"kingdomnl",
+      story:"Belgium's August 1830 revolution and the failed 1831 reconquest cost the kingdom its southern provinces; the 1839 Treaty of London settles the new borders. The Dutch flag itself never changes — only the territory beneath it shrinks." },
+    { year:"1940", name:"German invasion — occupation begins", key:"occupation",
+      story:"Germany invades on 10 May 1940; the bombing of Rotterdam forces capitulation within days. Queen Wilhelmina governs in exile from London while Reichskommissar Seyss-Inquart rules from The Hague until liberation reaches the whole country in May 1945." },
+    { year:"1945", name:"Liberation — the modern kingdom", key:"modernnl",
+      story:"Liberation restores the constitutional monarchy under Wilhelmina. The kingdom loses Indonesia after a bitter independence war (1945–49) and Suriname in 1975, even as it becomes a founding member of NATO and the European project — its historic tricolor, standardized in 1937, unchanged through all of it." }
+  ];
+
+  var iYearTag = document.getElementById("iYearTag");
+  var iEraName = document.getElementById("iEraName");
+  var iEraOwners = document.getElementById("iEraOwners");
+  var iEraStory = document.getElementById("iEraStory");
+  var iFlagsRow = document.getElementById("iFlagsRow");
+  var iSlider = document.getElementById("iSlider");
+  var iRegFill = document.getElementById("ireg-nl");
+  var iLbl = document.getElementById("ilbl-nl");
+
+  function iTextColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+
+  function iRender(idx) {
+    var era = ISNAP[idx];
+    iYearTag.textContent = era.year;
+    iEraName.textContent = era.name;
+    iEraStory.innerHTML = era.story;
+
+    var color = C[era.key];
+    iRegFill.setAttribute("fill", color);
+    var lblColor = iTextColorFor(color);
+    iLbl.setAttribute("fill", lblColor);
+    iLbl.setAttribute("stroke", lblColor === "#201a12" ? "#f7f1e3" : "#201a12");
+
+    iEraOwners.innerHTML = "<b>" + INAMES[era.key] + "</b>: whole territory";
+
+    iFlagsRow.innerHTML = '<div class="iflag-chip">' + iFlagSvg(era.key) + '<div class="ic-label">Netherlands</div></div>';
+  }
+
+  iSlider.addEventListener("input", function () { iRender(parseInt(iSlider.value, 10)); });
+  iRender(0);
+
+  var iPlaying = false, iPlayTimer = null;
+  var iPlayBtn = document.getElementById("iPlayBtn");
+  function iStepPlay() {
+    var next = parseInt(iSlider.value, 10) + 1;
+    if (next > ISNAP.length - 1) { iStopPlay(); return; }
+    iSlider.value = next;
+    iRender(next);
+  }
+  function iStartPlay() {
+    iPlaying = true;
+    iPlayBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(iSlider.value, 10) >= ISNAP.length - 1) { iSlider.value = 0; iRender(0); }
+    iPlayTimer = setInterval(iStepPlay, 1700);
+  }
+  function iStopPlay() {
+    iPlaying = false;
+    iPlayBtn.innerHTML = "&#9654;";
+    clearInterval(iPlayTimer);
+  }
+  iPlayBtn.addEventListener("click", function () { iPlaying ? iStopPlay() : iStartPlay(); });
+})();
+
+  // Tap-to-toggle for the pill tag tooltips (hover doesn't work on touch devices).
+  document.querySelectorAll(".tag[data-tip]").forEach(function (tag) {
+    tag.addEventListener("click", function (e) {
+      var wasOpen = tag.classList.contains("tip-open");
+      document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+      if (!wasOpen) tag.classList.add("tip-open");
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+  });
+</script>
+
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var html = '<h4>Genealogical records for this ground</h4>';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>
+
+</body></html>

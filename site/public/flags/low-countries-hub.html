@@ -1,0 +1,624 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Flags of the Low Countries</title>
+<meta name="description" content="A hub for the family flag atlas: Belgium, the Netherlands, and Luxembourg, and an interactive map showing how one Burgundian bloc split, reunited, and split again across five and a half centuries.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    --tile: #ddd0aa; --tile-line: #b7a679; --tile-text: #7a6a45; --tile-sea: #b9d3da;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.2rem, 5.5vw, 3.4rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.1rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .countries { margin-top: 44px; }
+  .countries h2 { font-size: 1.15rem; font-weight: 600; margin: 0 0 16px; }
+  .country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .country-card {
+    display: block; padding: 20px; border: 1px solid var(--card-border); background: var(--card);
+    border-radius: 4px; text-decoration: none; color: var(--ink); position: relative; overflow: hidden;
+  }
+  .country-card .swatch-strip { position: absolute; top: 0; left: 0; right: 0; height: 5px; }
+  .country-card .era { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--brass); margin-bottom: 6px; }
+  .country-card b { display: block; font-family: "Fraunces", serif; font-size: 1.2rem; font-weight: 600; margin-bottom: 6px; }
+  .country-card span { color: var(--muted); font-size: .88rem; line-height: 1.5; }
+
+  .map-section { margin-top: 56px; padding-top: 36px; border-top: 1px solid var(--hair); }
+  .map-section h2 { font-size: 1.5rem; margin: 0 0 8px; }
+  .map-section .map-sub { font-size: .94rem; color: var(--muted); max-width: 64ch; margin: 0 0 22px; }
+  .map-section .rule-box { margin-bottom: 22px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .92rem; }
+  .map-section .rule-box b { color: var(--brick); }
+
+  .viz-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 22px; }
+
+  .controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .play-btn {
+    flex: none; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .play-btn:hover { border-color: var(--brick); }
+  input[type="range"] {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px;
+    background: var(--hair); outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper);
+    box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  .era-tag { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+
+  .era-head { text-align: center; margin-bottom: 16px; }
+  .era-name-inline { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.35rem; transition: opacity .35s ease; }
+  .era-owners { font-size: .86rem; color: var(--muted); max-width: 62ch; margin: 6px auto 0; transition: opacity .35s ease; }
+  .era-owners b { color: var(--ink); }
+  .era-story {
+    margin: 0 auto 22px; font-size: .98rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .35s ease; padding: 14px 18px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  .era-story b { color: var(--brick); }
+
+  .flags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin: 4px auto 18px; max-width: 620px; }
+  .flag-chip { text-align: center; width: 92px; }
+  .flag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-chip .fc-label { font-family: "IBM Plex Mono", monospace; font-size: 9px; color: var(--muted); margin-top: 5px; line-height: 1.3; }
+
+  #map-svg { display: block; margin: 0 auto; width: 100%; max-width: 360px; height: auto; }
+  .region-fill { transition: fill 0.7s ease; }
+  .border-line { transition: stroke-opacity 0.7s ease, stroke-width 0.7s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .group-label { font-family: "Fraunces", serif; font-weight: 600; transition: opacity .5s ease, font-size .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2.5px; }
+  .sub-label { font-family: "IBM Plex Mono", monospace; font-weight: 700; transition: opacity .5s ease, fill .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+
+  .map-key { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: .8rem; color: var(--muted); justify-content: center; }
+  .map-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .map-key .sw { width: 11px; height: 11px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .map-notes { margin-top: 20px; font-size: .85rem; color: var(--muted); }
+  .map-notes b { color: var(--ink); }
+
+  .subview { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .subview h3 { font-size: 1.2rem; font-weight: 600; margin: 0 0 8px; }
+  .subview .sub-desc { font-size: .9rem; color: var(--muted); max-width: 64ch; margin: 0 0 18px; }
+
+  .gantt-row { display: flex; align-items: center; margin-bottom: 3px; }
+  .gantt-label { width: 100px; flex: none; font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--ink); text-align: right; padding-right: 10px; }
+  .gantt-track { flex: 1; height: 26px; position: relative; background: var(--paper); border-radius: 2px; overflow: hidden; }
+  .gantt-seg { position: absolute; top: 0; bottom: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .gantt-seg span { font-size: 9.5px; font-weight: 600; white-space: nowrap; padding: 0 3px; }
+  .gantt-axis { display: flex; margin-left: 100px; padding-top: 4px; font-family: "IBM Plex Mono", monospace; font-size: 9.5px; color: var(--muted); position: relative; height: 14px; }
+  .gantt-axis span { position: absolute; transform: translateX(-50%); }
+
+  .grid-3x3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .grid-cell { text-align: center; }
+  .grid-cell svg { width: 100%; height: auto; display: block; }
+  .grid-cell .cap { font-family: "IBM Plex Mono", monospace; font-size: 10px; color: var(--brass); margin-top: 6px; }
+  .grid-cell .cap b { display: block; font-family: "Fraunces", serif; font-size: .95rem; font-weight: 600; color: var(--ink); margin-top: 1px; }
+  .grid-cell .cap .diff { display: block; font-family: "Source Sans 3", sans-serif; font-size: .74rem; color: var(--brick); margin-top: 3px; font-weight: 600; }
+  .mini-label { font-family: "IBM Plex Mono", monospace; font-size: 7.5px; font-weight: 700; pointer-events: none; }
+
+  .about { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .about h2 { font-size: 1.3rem; margin: 0 0 12px; }
+  .about p { max-width: none; opacity: .88; margin: 0 0 12px; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a></p>
+  <p class="kicker">Family research &middot; Hub &middot; Phase 6 of the world atlas</p>
+  <h1>Flags of the Low Countries</h1>
+  <p class="lede">Belgium, the Netherlands, and Luxembourg started as one Burgundian bloc in the 1400s, split violently over religion and rebellion in the 1580s, and have been pulled back together and pried apart at least three more times since &mdash; by treaty, by conquest, and by a quirk of royal succession law. Below is one map that traces all of it, six centuries in one slider.</p>
+  <p class="lede">Country pages for Belgium, the Netherlands, and Luxembourg are coming in a later pass &mdash; for now, drag the map's slider to see the region's whole story at a glance.</p>
+
+  <div class="countries">
+    <h2>The three lineages</h2>
+    <div class="country-grid">
+      <a class="country-card" href="belgium-flags.html">
+        <span class="swatch-strip" style="background:#1a1a1a"></span>
+        <span class="era">10 flags &middot; c. 1384&ndash;present</span>
+        <b>Belgium</b>
+        <span>Austrian Netherlands, the 1830 revolution, the black-yellow-red tricolor, the republic&mdash;kingdom&mdash;today.</span>
+      </a>
+      <a class="country-card" href="netherlands-flags.html">
+        <span class="swatch-strip" style="background:#c9762f"></span>
+        <span class="era">10 flags &middot; c. 1000&ndash;present</span>
+        <b>Netherlands</b>
+        <span>The Prince's Flag, the Dutch Republic's Golden Age, the House of Orange-Nassau, the kingdom today.</span>
+      </a>
+      <a class="country-card" href="luxembourg-flags.html">
+        <span class="swatch-strip" style="background:#00a1de"></span>
+        <span class="era">10 flags &middot; c. 963&ndash;present</span>
+        <b>Luxembourg</b>
+        <span>A Burgundian purchase in 1443, a personal union with the Dutch crown, a 1890 split by succession law.</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="map-section">
+    <h2>Six centuries, one map</h2>
+    <p class="map-sub">A real, traced map &mdash; actual coastlines and borders from GeoJSON boundary data, not schematic shapes. Luxembourg is genuinely tiny next to its neighbors, so its shape here is drawn about 35% larger than true relative scale, just enough to stay legible without losing its real outline. Drag the slider or press play; each snapshot simplifies a messier reality into the dominant power of the moment.</p>
+    <div class="rule-box">
+      <b>Borders here are data, not decoration.</b> A line between two regions only draws solid when they were actually governed separately. When they weren't &mdash; Belgium and Luxembourg under the same Habsburg crown for over a century, say &mdash; the line dissolves and their names merge into whoever actually ruled them both. Colors blend between eras instead of jump-cutting.
+    </div>
+
+    <div class="viz-frame">
+      <div class="controls">
+        <button class="play-btn" id="playBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="era-tag" id="yearTag">1450</span>
+        <input type="range" id="slider" min="0" max="10" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="map-svg" viewBox="0 0 420 560" xmlns="http://www.w3.org/2000/svg">
+        <path fill="var(--tile-sea)" d="M30.0,320.3 L91.9,296.1 L131.7,262.3 L199.3,81.5 L304.9,30.0 L304.9,0 L0,0 L0,320.3 Z"/>
+        <path fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" d="M113.0,414.9 L166.9,472.9 L206.5,463.3 L274.1,519.3 L291.3,530.0 L313.6,527.4 L350.1,559.6 L461.3,582.2 L422.3,666.4 L412.5,754.0 L391.3,775.0 L356.1,763.7 L358.6,794.9 L302.1,864.0 L301.0,919.6 L337.9,900.4 L364.4,954.3 L361.2,989.0 L383.9,1035.1 L357.2,1072.6 L377.1,1167.7 L418.9,1183.3 L410.1,1236.6 L340.1,1306.1 L187.9,1272.8 L75.4,1312.7 L66.6,1386.7 L-22.9,1402.6 L-109.8,1347.0 L-137.9,1373.6 L-280.0,1317.7 L-310.8,1269.9 L-270.9,1196.2 L-256.2,951.3 L-335.9,822.3 L-392.8,760.1 L-510.8,712.9 L-518.6,623.2 L-418.5,596.5 L-288.8,628.1 L-313.3,489.0 L-240.4,541.7 L-60.7,445.9 L-37.5,345.1 L30.0,320.3 L41.2,363.5 L77.1,365.6 L113.0,414.9 Z"/>
+        <path fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" d="M602.0,-151.0 L603.4,-103.5 L681.4,-74.9 L680.6,-31.2 L759.1,-54.3 L802.5,-88.0 L889.7,-39.5 L926.1,-0.3 L944.2,62.2 L922.6,95.1 L950.7,138.9 L969.8,204.6 L963.8,247.0 L995.4,325.5 L961.0,338.3 L940.6,324.2 L921.2,347.6 L865.8,371.4 L837.1,402.0 L781.0,428.8 L794.5,465.3 L802.7,517.1 L842.1,546.7 L885.7,599.5 L858.5,656.2 L830.8,671.8 L841.7,751.9 L834.5,772.8 L810.4,747.6 L773.4,743.8 L718.2,765.9 L650.1,760.6 L639.1,793.1 L600.1,758.9 L576.8,765.7 L494.0,728.1 L478.2,754.8 L412.5,754.0 L422.3,666.4 L461.3,582.2 L350.1,559.6 L313.6,527.4 L318.0,473.5 L302.5,445.8 L311.3,362.7 L298.3,233.9 L344.7,233.9 L364.3,187.6 L383.5,75.0 L369.1,33.5 L384.2,7.4 L448.7,0.8 L463.0,27.9 L515.4,-32.7 L497.8,-78.8 L494.2,-148.5 L552.6,-132.3 L602.0,-151.0 Z"/>
+        <g class="context-label">
+          <text x="130" y="553">FRANCE</text>
+          <text x="398" y="148">GERMANY</text>
+        </g>
+
+        <path id="f-nl" class="region-fill" d="M304.9,30.0 L369.1,33.5 L383.5,75.0 L364.3,187.6 L344.7,233.8 L298.3,233.9 L311.3,362.7 L268.9,334.0 L220.0,280.2 L148.4,305.7 L91.9,296.1 L131.7,262.3 L199.3,81.5 L304.9,30.0 Z"/>
+        <path id="f-be" class="region-fill" d="M91.9,296.1 L148.4,305.7 L220.0,280.2 L268.9,334.0 L311.3,362.7 L302.5,445.8 L282.4,450.4 L274.1,519.3 L206.5,463.3 L166.9,472.9 L113.0,414.9 L77.1,365.6 L41.2,363.5 L30.0,320.3 L91.9,296.1 Z"/>
+        <path id="f-lu" class="region-fill" d="M304.2,432.2 L325.0,469.6 L319.1,542.4 L289.1,545.9 L265.7,531.5 L277.0,438.4 L304.2,432.2 Z"/>
+
+        <g id="borders" stroke-width="1">
+          <path class="border-line" id="b-be-nl" d="M311.3,362.7 L268.9,334.0 L220.0,280.2 L148.4,305.7 L91.9,296.1"/>
+          <path class="border-line" id="b-be-lu" d="M302.5,445.8 L289.0,442.0 L277.0,438.4"/>
+        </g>
+
+        <g id="labels"></g>
+      </svg>
+
+      <div class="era-head">
+        <div class="era-name-inline" id="eraName">Burgundian Netherlands</div>
+        <div class="era-owners" id="eraOwners"></div>
+      </div>
+      <div class="flags-row" id="flagsRow"></div>
+      <p class="era-story" id="eraStory"></p>
+
+      <p class="map-note">Real traced borders (simplified from GeoJSON boundary data, current-day coastlines). France and Germany are shown faint for context only, projected through the same coordinate transform as Belgium, the Netherlands, and Luxembourg, but not tracked era by era. Luxembourg's shape is shown at its modern, post-1839 borders throughout, for consistency &mdash; the 1839 partition that shrank it is explained in the story text rather than redrawn geometry.</p>
+      <div class="map-key" id="legend"></div>
+      <div class="map-notes">
+        <b>Try:</b> drag from 1450 to 1549 and watch nothing move &mdash; same Habsburg overlord, only formalized on paper by the Pragmatic Sanction. Then to 1581 and watch the Netherlands break into its own color while Belgium and Luxembourg's shared border with each other stays dissolved the whole time, since both stayed Habsburg. Jump to 1795 and then 1815: all three regions merge into a single color <em>twice</em>, once by French conquest and once by the Congress of Vienna, before 1830 and 1890 peel them apart again for good.
+      </div>
+    </div>
+
+    <div class="subview">
+      <h3>The same story, as a timeline</h3>
+      <p class="sub-desc">Maps are bad at showing <em>when</em>; timelines are bad at showing <em>where</em>. This uses real transition years instead of the eleven arbitrary snapshots above &mdash; one horizontal band per country, colored the same way as the map, so you can trace exactly how long each era actually lasted (watch Luxembourg's extra 75 years tied to the Dutch crown after Belgium leaves in 1830).</p>
+      <div class="viz-frame">
+        <div id="gantt"></div>
+        <div class="gantt-axis" id="gantt-axis"></div>
+      </div>
+    </div>
+
+    <div class="subview">
+      <h3>The same story, eleven frames &mdash; only the change lights up</h3>
+      <p class="sub-desc">Every country keeps its true color, but anything unchanged from the previous frame fades to low opacity; only the country or countries that actually changed hands stay bold with a solid outline. A caption under each frame spells out exactly what flipped. No slider to operate &mdash; scan left to right, top to bottom, and watch the map redraw itself like a flipbook.</p>
+      <div class="viz-frame">
+        <div class="grid-3x3" id="grid11"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="about">
+    <h2>About this atlas</h2>
+    <p>This started as a family history project: tracing the flags that flew over the lands our ancestors came from, close enough to paint accurately &mdash; correct colors, correct proportions, correct dates. The Low Countries earned their own hub because their story is the opposite of most of the atlas so far: instead of one region fragmenting permanently, this is one bloc that keeps getting pulled apart and pushed back together, by war, by treaty, and once by nothing more than a difference in royal succession law.</p>
+    <p>Colors are close historical approximations; pre-19th-century swatches especially are informed reconstructions, not official specifications, and are labeled as such throughout. The regional map above simplifies five and a half centuries of messy, overlapping, disputed control into eleven snapshots &mdash; useful for orientation, not a substitute for the detail each country's own page will carry.</p>
+  </div>
+
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This hub is one region in a larger set. See the other phases here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="habsburg-hub.html"><b>Habsburg Lands hub</b><span>Seven countries, four centuries</span></a>
+      <a class="link-card" href="germany-hub.html"><b>German Lands hub</b><span>Germany's own east-west split</span></a>
+      <a class="link-card" href="index.html"><b>Flags of Former Yugoslavia</b><span>The original nine-snapshot regional map</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Boundary tracing from world.geo.json (BEL, NLD, LUX). Map is schematic and not surveyed.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var C = {
+    bh:"#7c5a2e", dutch:"#c9762f", aus:"#5b3f7a", fr:"#2c5f8a", ukn:"#b8862f",
+    be_indep:"#1a1a1a", lu_indep:"#00a1de", occ:"#2b2e33"
+  };
+  var NAMES = {
+    bh:"Burgundian / Habsburg Netherlands", dutch:"Dutch Republic", aus:"Austrian Netherlands",
+    fr:"French Republic / Empire", ukn:"Kingdom of the Netherlands", be_indep:"Kingdom of Belgium",
+    lu_indep:"Grand Duchy of Luxembourg (independent)", occ:"Nazi occupation"
+  };
+  var legendEl = document.getElementById("legend");
+  legendEl.innerHTML = Object.keys(C).map(function (k) {
+    return '<span><span class="sw" style="background:' + C[k] + '"></span>' + NAMES[k] + "</span>";
+  }).join("");
+
+  // ---- Real flag graphics, one per distinct historical power (not per map color) ----
+  var FLAGS = {
+    burgundy_cross: '<rect width="300" height="200" fill="#f4efe1"/><path d="M0,0 L300,200" stroke="#a4302a" stroke-width="24" stroke-linecap="round"/><path d="M300,0 L0,200" stroke="#a4302a" stroke-width="24" stroke-linecap="round"/><g fill="#7c2e1f"><circle cx="75" cy="50" r="7"/><circle cx="150" cy="100" r="7"/><circle cx="225" cy="150" r="7"/><circle cx="225" cy="50" r="7"/><circle cx="75" cy="150" r="7"/></g>',
+    dutch_princes: '<rect width="300" height="66.7" fill="#c9762f"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#1e3a5f"/>',
+    dutch_tricolor: '<rect width="300" height="66.7" fill="#ae1c28"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#21468b"/>',
+    habsburg_austria: '<rect width="300" height="200" fill="#f4c430"/><g fill="#241f14"><ellipse cx="150" cy="100" rx="28" ry="20"/><path d="M150,82 L108,42 L128,78 Z"/><path d="M150,82 L192,42 L172,78 Z"/><path d="M150,118 L118,163 L138,128 Z"/><path d="M150,118 L182,163 L162,128 Z"/><path d="M150,80 l0,-14 -6,6 6,-6 6,6 Z"/></g>',
+    french_tricolor: '<rect width="100" height="200" fill="#002395"/><rect x="100" width="100" height="200" fill="#f4efe1"/><rect x="200" width="100" height="200" fill="#ed2939"/>',
+    belgium_tricolor: '<rect width="100" height="200" fill="#000000"/><rect x="100" width="100" height="200" fill="#fdda24"/><rect x="200" width="100" height="200" fill="#ef3340"/>',
+    luxembourg_tricolor: '<rect width="300" height="66.7" fill="#ed2939"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#00a1de"/>',
+    nazi_germany: '<rect width="300" height="200" fill="#a4302a"/><circle cx="150" cy="100" r="35" fill="#f4efe1"/><path d="M150,72 v14 M150,114 v14 M122,100 h14 M164,100 h14 M150,86 l10,-10 M150,86 l-10,-10 M150,114 l10,10 M150,114 l-10,10" stroke="#241f14" stroke-width="6"/>'
+  };
+  function flagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (FLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+
+  var SNAP = [
+    { year:"1450", name:"Burgundian Netherlands", t:{ be:C.bh, nl:C.bh, lu:C.bh },
+      story: "Philip the Good, Duke of Burgundy since 1419, spent three decades assembling the Low Countries piece by piece &mdash; Flanders and Artois by inheritance, Namur by purchase in 1421, Brabant and Limburg by inheritance in 1430, Hainaut, Holland, and Zeeland seized from his cousin Jacqueline in the 1420s&ndash;30s, and finally Luxembourg itself, bought from the impoverished Duchess Elisabeth of Görlitz in 1443 and fully secured after her death in 1451. By 1450 he ruled nearly all of it as one personal union under a single Burgundian court at Brussels, even though each territory legally remained its own feudal duchy or county, with its own laws, coinage, and representative Estates. It is a union of convenience and inheritance, not yet a single state &mdash; but the borders between Flanders, Brabant, Holland, and Luxembourg already mean less in practice than the one duke who answers for all of them." },
+    { year:"1549", name:"The Pragmatic Sanction — Seventeen Provinces", t:{ be:C.bh, nl:C.bh, lu:C.bh },
+      story: "The Burgundian line died out with Mary of Burgundy in 1482, passing the whole bloc by marriage to the Habsburgs; her grandson Charles V, born in Ghent in 1500, inherited it along with Spain and the Holy Roman Empire, and spent his reign rounding out the territory further &mdash; Guelders, Utrecht, Overijssel, Groningen, and Frisia were all added under his own campaigns by the 1520s&ndash;40s. On 4 November 1549, Charles issued the Pragmatic Sanction, formally declaring these Seventeen Provinces one indivisible inheritance to pass whole to his son Philip II, rather than being split among heirs as feudal custom would normally allow. Nothing changes on this map from the frame before &mdash; the same Habsburg hand had already been governing all of it &mdash; but 1549 is the moment the union stops being a personal accident of inheritance and becomes a deliberate, permanent administrative fact, at least on paper." },
+    { year:"1581", name:"The Dutch Revolt splits the Low Countries", t:{ be:C.bh, nl:C.dutch, lu:C.bh },
+      story: "Philip II's heavy taxation, religious persecution of Protestants, and reliance on Spanish troops under the Duke of Alba provoked open revolt from 1566 onward, hardening into the Eighty Years' War after 1568. On 23 January 1579 the northern provinces &mdash; Holland, Zeeland, Utrecht, Guelders, and others &mdash; signed the Union of Utrecht as a mutual defense pact against Spain; on 26 July 1581 they went further, issuing the Act of Abjuration, formally renouncing allegiance to Philip II and declaring him to have forfeited his sovereignty. The southern provinces told a different story: Alexander Farnese, Duke of Parma, spent the early 1580s reconquering Flanders and Brabant city by city for Spain, and Luxembourg, always more remote from the rebellion's center, never left Habsburg hands at all. For the first time, a real, solidifying border cuts across the Low Countries &mdash; while Belgium and Luxembourg, both still loyal to Spain, keep no real border between them at all." },
+    { year:"1648", name:"Peace of Westphalia — Dutch independence recognized", t:{ be:C.bh, nl:C.dutch, lu:C.bh },
+      story: "The war the Dutch Revolt started ground on for another six decades after 1581, punctuated by a Twelve Years' Truce (1609&ndash;21) that both sides used to rearm. It finally ended as part of the broader Peace of Westphalia: the Treaty of Münster, signed 30 January 1648, had Spain formally recognize the independence of the Dutch Republic &mdash; the United Provinces &mdash; after eighty years of intermittent war. By this point the Republic is deep into its Golden Age, its ships and capital reaching Batavia, New Amsterdam, and Nagasaki. Nothing changes for Belgium or Luxembourg on this map: the Spanish Netherlands, Luxembourg included, remains exactly what it was in 1581, still answering to Madrid, its border with the newly sovereign north now internationally settled rather than merely fought over." },
+    { year:"1714", name:"Treaty of Utrecht — Austrian Netherlands", t:{ be:C.aus, nl:C.dutch, lu:C.aus },
+      story: "The direct Spanish Habsburg line died out with Charles II in 1700, touching off the War of the Spanish Succession as rival dynasties fought over his empire. The Treaty of Utrecht (1713) and the follow-on Treaty of Rastatt (1714) split the inheritance: the Spanish throne went to a Bourbon, Philip V, but the Spanish Netherlands &mdash; Belgium and Luxembourg together &mdash; passed instead to the Austrian branch of the Habsburgs under Emperor Charles VI, becoming the Austrian Netherlands. The ruling house is still Habsburg, but the crown worn is now Vienna's rather than Madrid's, distinct enough to color differently here. The Dutch Republic, prosperous but past its naval peak, continues untouched on the far side of an already century-old border, its own trajectory now fully separate from whatever happens to its former southern half." },
+    { year:"1795", name:"French Revolutionary & Napoleonic annexation", t:{ be:C.fr, nl:C.fr, lu:C.fr },
+      story: "Revolutionary France overran the Austrian Netherlands after its victory at Fleurus in June 1794 and annexed it outright in October 1795; Luxembourg, besieged for seven months, fell that same year and was folded into France as the Département des Forêts. The Dutch Republic collapsed just as fast: French troops crossed the frozen rivers in January 1795, and what had been the United Provinces became the client Batavian Republic, then Louis Bonaparte's Kingdom of Holland in 1806, before Napoleon simply annexed it directly to the French Empire in 1810, impatient with his own brother's reluctance to enforce the Continental System. By 1810, for the first time since the Burgundian dukes, one government runs the entire map shown here &mdash; a real, if entirely involuntary, reunification, achieved by conquest rather than choice." },
+    { year:"1815", name:"Congress of Vienna — United Kingdom of the Netherlands", t:{ be:C.ukn, nl:C.ukn, lu:C.ukn },
+      story: "Napoleon's defeat brought the great powers to Vienna to redraw the map, and their central worry on this stretch of it was preventing France from ever doing this again. Their solution, finalized through 1814&ndash;15, was to build a stronger buffer state: the United Kingdom of the Netherlands, uniting the former Dutch Republic and the former Austrian Netherlands under King William I of the House of Orange-Nassau. Luxembourg joined the union too, but with an odd double status &mdash; elevated to a Grand Duchy in personal union with William as its ruler, while simultaneously remaining a member state of the German Confederation, its fortress garrisoned by Prussian troops. For the second time in twenty years, all three regions share one government &mdash; this time built by treaty rather than by tanks, though it would prove almost as short-lived." },
+    { year:"1830", name:"Belgian Revolution & the partition of Luxembourg", t:{ be:C.be_indep, nl:C.ukn, lu:C.ukn },
+      story: "The union never really took: the largely Catholic, French- and Flemish-speaking south chafed under a Dutch Protestant king, official Dutch-language policy, and underrepresentation in the government. An August 1830 riot after a performance of the opera <i>La Muette de Portici</i> in Brussels escalated into full revolution; William I's attempt to reconquer the south failed in the Ten Days' Campaign of 1831, and the great powers recognized Belgian independence at the London Conference. The 1839 Treaty of London finally settled the borders, including Luxembourg's: its French-speaking western half was ceded outright to Belgium as the new Belgian province of Luxembourg, while the smaller, German-speaking Grand Duchy that remained stayed in personal union with the Dutch crown, still separate from the new Kingdom of Belgium next door. Belgium breaks the map's oldest color for the first time; the Netherlands&ndash;Luxembourg link, older still, holds for another half-century." },
+    { year:"1890", name:"Luxembourg fully separates from the Dutch crown", t:{ be:C.be_indep, nl:C.ukn, lu:C.lu_indep },
+      story: "The personal union between the Netherlands and the reduced Grand Duchy of Luxembourg survived Belgium's departure by exactly fifty-one years, undone in the end not by war but by a genealogical technicality. King William III of the Netherlands died on 23 November 1890 without a surviving son; Dutch succession law let his ten-year-old daughter Wilhelmina become queen, but the Nassau family pact governing Luxembourg required a male heir in the direct line. The two crowns split for good: Adolphe of Nassau-Weilburg, head of a cadet branch, became Grand Duke, and Luxembourg has had its own separate monarch ever since. Three distinct borders now solidify on this map at once &mdash; the last of the old Burgundian bloc's internal lines to finally lock into place, seventy-five years after Vienna and well over four centuries after Philip the Good first drew them together." },
+    { year:"1940", name:"Nazi occupation — all three invaded", t:{ be:C.occ, nl:C.occ, lu:C.occ },
+      story: "Germany launched Fall Gelb on 10 May 1940, invading the Netherlands, Belgium, and Luxembourg simultaneously and without formal declarations of war, brushing past their declared neutrality. Luxembourg, with no army capable of resistance, was overrun within hours and administered almost as an extension of the Reich itself, its language suppressed and its young men eventually conscripted into the German army. The Netherlands capitulated on 14&ndash;15 May 1940 after the bombing of Rotterdam, placed under a civilian Reich Commissioner; Belgium held out under King Leopold III until 28 May, placed under military administration instead. All three sit under occupation together for the third time in this map's history &mdash; grimly reunified in exactly the way none of them wanted &mdash; until Allied liberation reaches them between September 1944 and May 1945." },
+    { year:"2024", name:"Independent, today", t:{ be:C.be_indep, nl:C.ukn, lu:C.lu_indep },
+      story: "Liberation restored each of the three exactly as it had been before the war: Belgium and the Netherlands as constitutional monarchies, Luxembourg as its own separate Grand Duchy, its border with Belgium unchanged since 1839 and its border with the Netherlands unchanged since 1890. Rather than drifting apart afterward, the three moved to formalize their old economic ties on purpose: the Benelux customs union was agreed in London in 1944 while all three governments were still in exile, and took effect in 1948, the ancestor of the wider European project that followed. All three are founding members of NATO (1949) and of what became the European Union, and Brussels itself &mdash; capital of the country that spent centuries as everyone else's contested borderland &mdash; is now the de facto capital of Europe." }
+  ];
+
+  var FLAG_SETS = {
+    "1450": [["burgundy_cross","Burgundian Netherlands"]],
+    "1549": [["burgundy_cross","Habsburg Seventeen Provinces"]],
+    "1581": [["dutch_princes","Prince's Flag (Dutch rebels)"],["burgundy_cross","Spanish Netherlands"]],
+    "1648": [["dutch_tricolor","Dutch Republic (Statenvlag)"],["burgundy_cross","Spanish Netherlands"]],
+    "1714": [["dutch_tricolor","Dutch Republic"],["habsburg_austria","Austrian Netherlands"]],
+    "1795": [["french_tricolor","French Republic / Empire"]],
+    "1815": [["dutch_tricolor","United Kingdom of the Netherlands"]],
+    "1830": [["belgium_tricolor","Kingdom of Belgium"],["dutch_tricolor","Kingdom of the Netherlands (+ Luxembourg)"]],
+    "1890": [["belgium_tricolor","Belgium"],["dutch_tricolor","Netherlands"],["luxembourg_tricolor","Grand Duchy of Luxembourg"]],
+    "1940": [["nazi_germany","Nazi occupation"]],
+    "2024": [["belgium_tricolor","Belgium"],["dutch_tricolor","Netherlands"],["luxembourg_tricolor","Luxembourg"]]
+  };
+
+  var REGIONS = ["be","nl","lu"];
+  var REGION_NAMES = { be:"Belgium", nl:"Netherlands", lu:"Luxembourg" };
+  var REGION_ABBR = { be:"BE", nl:"NL", lu:"LU" };
+  var REGION_POS = { be:[175,379], nl:[267,196], lu:[298,485] };
+  var ADJ = [["be","nl"],["be","lu"]];
+
+  function textColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+  function ownerName(hex) {
+    for (var k in C) { if (C[k] === hex) return NAMES[k]; }
+    return hex;
+  }
+
+  function groupsFor(t) {
+    var parent = {};
+    REGIONS.forEach(function (r) { parent[r] = r; });
+    function find(x) { return parent[x] === x ? x : (parent[x] = find(parent[x])); }
+    function union(a, b) { var ra = find(a), rb = find(b); if (ra !== rb) parent[ra] = rb; }
+    ADJ.forEach(function (pair) {
+      if (t[pair[0]] === t[pair[1]]) union(pair[0], pair[1]);
+    });
+    var groups = {};
+    REGIONS.forEach(function (r) {
+      var root = find(r);
+      if (!groups[root]) groups[root] = [];
+      groups[root].push(r);
+    });
+    return Object.keys(groups).map(function (k) { return groups[k]; });
+  }
+
+  var svgNS = "http://www.w3.org/2000/svg";
+  var labelsEl = document.getElementById("labels");
+  var yearTag = document.getElementById("yearTag");
+  var eraName = document.getElementById("eraName");
+  var eraOwners = document.getElementById("eraOwners");
+  var eraStory = document.getElementById("eraStory");
+  var flagsRow = document.getElementById("flagsRow");
+  var sliderEl = document.getElementById("slider");
+
+  function render(i) {
+    var era = SNAP[i];
+    yearTag.textContent = era.year;
+    eraName.textContent = era.name;
+    eraStory.innerHTML = era.story || "";
+    flagsRow.innerHTML = (FLAG_SETS[era.year] || []).map(function (f) {
+      return '<div class="flag-chip">' + flagSvg(f[0]) + '<div class="fc-label">' + f[1] + '</div></div>';
+    }).join("");
+
+    REGIONS.forEach(function (id) {
+      var el = document.getElementById("f-" + id);
+      el.setAttribute("fill", era.t[id]);
+    });
+
+    ADJ.forEach(function (pair) {
+      var same = era.t[pair[0]] === era.t[pair[1]];
+      var line = document.getElementById("b-" + pair[0] + "-" + pair[1]);
+      line.setAttribute("stroke-opacity", same ? "0.06" : "0.85");
+      line.setAttribute("stroke-width", same ? "1" : "2.6");
+    });
+
+    var groups = groupsFor(era.t);
+    var seenOwners = {};
+    var ownerParts = [];
+    groups.forEach(function (g) {
+      var label = ownerName(era.t[g[0]]);
+      if (!seenOwners[label]) { seenOwners[label] = []; ownerParts.push(label); }
+      g.forEach(function (id) { seenOwners[label].push(REGION_NAMES[id]); });
+    });
+    eraOwners.innerHTML = ownerParts.map(function (label) {
+      return "<b>" + label + "</b>: " + seenOwners[label].join(", ");
+    }).join(" &middot; ");
+
+    labelsEl.innerHTML = "";
+    function haloFor(txtColor) { return txtColor === "#201a12" ? "#f7f1e3" : "#201a12"; }
+    groups.forEach(function (g) {
+      var cx = g.reduce(function (s, id) { return s + REGION_POS[id][0]; }, 0) / g.length;
+      var cy = g.reduce(function (s, id) { return s + REGION_POS[id][1]; }, 0) / g.length;
+      var fillHex = era.t[g[0]];
+      var txtColor = textColorFor(fillHex);
+      var halo = haloFor(txtColor);
+
+      if (g.length > 1) {
+        var groupText = ownerName(fillHex).toUpperCase();
+        var gl = document.createElementNS(svgNS, "text");
+        gl.setAttribute("x", cx);
+        gl.setAttribute("y", cy);
+        gl.setAttribute("class", "group-label");
+        gl.setAttribute("font-size", groupText.length > 16 ? "11" : "14");
+        gl.setAttribute("fill", txtColor);
+        gl.setAttribute("stroke", halo);
+        gl.textContent = groupText;
+        labelsEl.appendChild(gl);
+        g.forEach(function (id) {
+          var pos = REGION_POS[id];
+          var sl = document.createElementNS(svgNS, "text");
+          sl.setAttribute("x", pos[0]);
+          sl.setAttribute("y", pos[1] + 16);
+          sl.setAttribute("class", "sub-label");
+          sl.setAttribute("font-size", "10");
+          sl.setAttribute("fill", txtColor);
+          sl.setAttribute("stroke", halo);
+          sl.setAttribute("opacity", "0.85");
+          sl.textContent = REGION_ABBR[id];
+          labelsEl.appendChild(sl);
+        });
+      } else {
+        var id = g[0];
+        var pos = REGION_POS[id];
+        var selfGoverning = (fillHex === C.be_indep || fillHex === C.lu_indep);
+        var soloText = (selfGoverning ? REGION_NAMES[id] : ownerName(fillHex)).toUpperCase();
+        var sl2 = document.createElementNS(svgNS, "text");
+        sl2.setAttribute("x", pos[0]);
+        sl2.setAttribute("y", pos[1]);
+        sl2.setAttribute("class", "group-label");
+        sl2.setAttribute("font-size", selfGoverning ? "14" : (soloText.length > 16 ? "10" : "13"));
+        sl2.setAttribute("fill", txtColor);
+        sl2.setAttribute("stroke", halo);
+        sl2.textContent = soloText;
+        labelsEl.appendChild(sl2);
+        if (!selfGoverning) {
+          var subOnly = document.createElementNS(svgNS, "text");
+          subOnly.setAttribute("x", pos[0]);
+          subOnly.setAttribute("y", pos[1] + 16);
+          subOnly.setAttribute("class", "sub-label");
+          subOnly.setAttribute("font-size", "10");
+          subOnly.setAttribute("fill", txtColor);
+          subOnly.setAttribute("stroke", halo);
+          subOnly.setAttribute("opacity", "0.85");
+          subOnly.textContent = REGION_ABBR[id];
+          labelsEl.appendChild(subOnly);
+        }
+      }
+    });
+  }
+
+  sliderEl.addEventListener("input", function () { render(parseInt(sliderEl.value, 10)); });
+  render(0);
+
+  var playing = false, playTimer = null;
+  var playBtn = document.getElementById("playBtn");
+  function stepPlay() {
+    var next = parseInt(sliderEl.value, 10) + 1;
+    if (next > SNAP.length - 1) { stopPlay(); return; }
+    sliderEl.value = next;
+    render(next);
+  }
+  function startPlay() {
+    playing = true;
+    playBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(sliderEl.value, 10) >= SNAP.length - 1) { sliderEl.value = 0; render(0); }
+    playTimer = setInterval(stepPlay, 1700);
+  }
+  function stopPlay() {
+    playing = false;
+    playBtn.innerHTML = "&#9654;";
+    clearInterval(playTimer);
+  }
+  playBtn.addEventListener("click", function () { playing ? stopPlay() : startPlay(); });
+
+  // ---- Small multiples grid: same eleven snapshots, diff-highlighted ----
+  var gridEl = document.getElementById("grid11");
+  var MINI_PATHS = {
+    nl: "M304.9,30.0 L369.1,33.5 L383.5,75.0 L364.3,187.6 L344.7,233.8 L298.3,233.9 L311.3,362.7 L268.9,334.0 L220.0,280.2 L148.4,305.7 L91.9,296.1 L131.7,262.3 L199.3,81.5 L304.9,30.0 Z",
+    be: "M91.9,296.1 L148.4,305.7 L220.0,280.2 L268.9,334.0 L311.3,362.7 L302.5,445.8 L282.4,450.4 L274.1,519.3 L206.5,463.3 L166.9,472.9 L113.0,414.9 L77.1,365.6 L41.2,363.5 L30.0,320.3 L91.9,296.1 Z",
+    lu: "M304.2,432.2 L325.0,469.6 L319.1,542.4 L289.1,545.9 L265.7,531.5 L277.0,438.4 L304.2,432.2 Z"
+  };
+  SNAP.forEach(function (era, idx) {
+    var prev = idx > 0 ? SNAP[idx - 1] : null;
+    var changed = [];
+    if (prev) {
+      Object.keys(MINI_PATHS).forEach(function (id) {
+        if (era.t[id] !== prev.t[id]) changed.push(id);
+      });
+    }
+    var cell = document.createElement("div");
+    cell.className = "grid-cell";
+    var svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("viewBox", "0 0 420 560");
+    var sea = document.createElementNS(svgNS, "path");
+    sea.setAttribute("d", "M30.0,320.3 L91.9,296.1 L131.7,262.3 L199.3,81.5 L304.9,30.0 L304.9,0 L0,0 L0,320.3 Z");
+    sea.setAttribute("fill", "var(--tile-sea)");
+    svg.appendChild(sea);
+    Object.keys(MINI_PATHS).forEach(function (id) {
+      var isBaseline = !prev;
+      var isChanged = prev && changed.indexOf(id) !== -1;
+      var bold = isBaseline || isChanged;
+      var p = document.createElementNS(svgNS, "path");
+      p.setAttribute("d", MINI_PATHS[id]);
+      p.setAttribute("fill", era.t[id]);
+      if (bold) {
+        p.setAttribute("fill-opacity", "1");
+        p.setAttribute("stroke", "#241f14");
+        p.setAttribute("stroke-width", "2.2");
+      } else {
+        p.setAttribute("fill-opacity", "0.22");
+        p.setAttribute("stroke", "#241f14");
+        p.setAttribute("stroke-width", "0.75");
+        p.setAttribute("stroke-opacity", "0.4");
+      }
+      svg.appendChild(p);
+      var pos = REGION_POS[id];
+      var lbl = document.createElementNS(svgNS, "text");
+      lbl.setAttribute("x", pos[0]);
+      lbl.setAttribute("y", pos[1]);
+      lbl.setAttribute("text-anchor", "middle");
+      lbl.setAttribute("class", "mini-label");
+      lbl.setAttribute("fill", bold ? textColorFor(era.t[id]) : "#8a7d5c");
+      lbl.setAttribute("opacity", bold ? "1" : "0.55");
+      lbl.textContent = REGION_ABBR[id];
+      svg.appendChild(lbl);
+    });
+    cell.appendChild(svg);
+    var cap = document.createElement("div");
+    cap.className = "cap";
+    var diffText = !prev ? "Starting point" : (changed.length ? "&rarr; " + changed.map(function (id) { return REGION_NAMES[id]; }).join(", ") + " change" + (changed.length === 1 ? "s" : "") + " hands" : "&rarr; no change from previous frame");
+    cap.innerHTML = era.year + "<b>" + era.name + "</b><span class=\"diff\">" + diffText + "</span>";
+    cell.appendChild(cap);
+    gridEl.appendChild(cell);
+  });
+
+  // ---- Timeline: same data, real continuous date ranges ----
+  var GANTT_START = 1400, GANTT_END = 2024;
+  var GANTT_DATA = [
+    { id:"be", segs:[
+      [1400,1443,"#6e6047","Fragmented duchies/counties"], [1443,1581,C.bh,"Burgundian / Habsburg Netherlands"],
+      [1581,1714,C.bh,"Spanish Netherlands"], [1714,1795,C.aus,"Austrian Netherlands"], [1795,1815,C.fr,"French Republic / Empire"],
+      [1815,1830,C.ukn,"United Kingdom of the Netherlands"], [1830,1940,C.be_indep,"Kingdom of Belgium"],
+      [1940,1944,C.occ,"Nazi occupation"], [1944,2024,C.be_indep,"Kingdom of Belgium"]
+    ]},
+    { id:"nl", segs:[
+      [1400,1581,C.bh,"Burgundian / Habsburg Netherlands"], [1581,1795,C.dutch,"Dutch Republic"],
+      [1795,1815,C.fr,"Batavian Rep. / Kingdom of Holland / France"], [1815,1940,C.ukn,"Kingdom of the Netherlands"],
+      [1940,1945,C.occ,"Nazi occupation"], [1945,2024,C.ukn,"Kingdom of the Netherlands"]
+    ]},
+    { id:"lu", segs:[
+      [1400,1443,"#6e6047","Various local lordship"], [1443,1581,C.bh,"Burgundian / Habsburg Netherlands"],
+      [1581,1714,C.bh,"Spanish Netherlands"], [1714,1795,C.aus,"Austrian Netherlands"],
+      [1795,1815,C.fr,"French Empire (Dépt. des Forêts)"], [1815,1890,C.ukn,"Personal union w/ Dutch crown"],
+      [1890,1940,C.lu_indep,"Independent Grand Duchy"], [1940,1944,C.occ,"Nazi occupation"], [1944,2024,C.lu_indep,"Independent Grand Duchy"]
+    ]}
+  ];
+  var ganttEl = document.getElementById("gantt");
+  function yearToPct(y) { return (y - GANTT_START) / (GANTT_END - GANTT_START) * 100; }
+  GANTT_DATA.forEach(function (row) {
+    var rowEl = document.createElement("div");
+    rowEl.className = "gantt-row";
+    var label = document.createElement("div");
+    label.className = "gantt-label";
+    label.textContent = REGION_NAMES[row.id];
+    rowEl.appendChild(label);
+    var track = document.createElement("div");
+    track.className = "gantt-track";
+    row.segs.forEach(function (seg) {
+      var left = yearToPct(seg[0]);
+      var width = yearToPct(seg[1]) - left;
+      var segEl = document.createElement("div");
+      segEl.className = "gantt-seg";
+      segEl.style.left = left + "%";
+      segEl.style.width = width + "%";
+      segEl.style.background = seg[2];
+      segEl.title = REGION_NAMES[row.id] + ": " + seg[3] + " (" + seg[0] + "–" + seg[1] + ")";
+      if (width > 4) {
+        var sp = document.createElement("span");
+        sp.textContent = seg[3];
+        sp.style.color = textColorFor(seg[2]);
+        segEl.appendChild(sp);
+      }
+      track.appendChild(segEl);
+    });
+    rowEl.appendChild(track);
+    ganttEl.appendChild(rowEl);
+  });
+  var axisEl = document.getElementById("gantt-axis");
+  [1400, 1500, 1600, 1700, 1800, 1900, 2024].forEach(function (y) {
+    var s = document.createElement("span");
+    s.style.left = yearToPct(y) + "%";
+    s.textContent = y;
+    axisEl.appendChild(s);
+  });
+})();
+</script>
+
+</body></html>

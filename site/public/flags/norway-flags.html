@@ -1,0 +1,873 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+</style></head><body>
+<title>Flags of Norway</title>
+<meta name="description" content="A chronological, paint-ready atlas of every flag that flew over Norway, from the fractured Viking-Age coast to the kingdom of today — with a map of each era.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #1b1f1a; --paper: #e9e4d5; --card: #f6f2e5; --card-border: #d5ccae;
+    --brick: #ba0c2f; --brick-2: #8f0a24; --brass: #a9762f; --fjord: #1f4e5f; --fjord-2: #173b48;
+    --muted: #6b6350; --hair: #cec18f; --focus: #1f4e5f; --sea: #b9d3da;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #e7e0c8; --paper: #14181a; --card: #1c2124; --card-border: #333c3c;
+      --brick: #e34a5f; --brick-2: #ef6a7c; --brass: #d1a154; --fjord: #6fb0c4; --fjord-2: #8fc6d6;
+      --muted: #9a9280; --hair: #333c3c; --sea: #17303a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #e7e0c8; --paper: #14181a; --card: #1c2124; --card-border: #333c3c;
+    --brick: #e34a5f; --brick-2: #ef6a7c; --brass: #d1a154; --fjord: #6fb0c4; --fjord-2: #8fc6d6;
+    --muted: #9a9280; --hair: #333c3c; --sea: #17303a;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--fjord); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.08rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; font-size: .94rem; color: var(--muted); }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  .legend { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+
+  /* ---------- Timeline ---------- */
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1px; background: var(--hair); }
+  @media (max-width: 560px) { .timeline::before { left: 9px; } }
+  .entry { position: relative; padding-left: 46px; margin-bottom: 46px; }
+  @media (max-width: 560px) { .entry { padding-left: 30px; } }
+  .entry::before {
+    content: attr(data-n);
+    position: absolute; left: 1px; top: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--paper); outline: 1px solid var(--hair);
+    background: var(--card);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--brick); display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) { .entry::before { left: -5px; width: 18px; height: 18px; font-size: 9px; } }
+
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+  .card-head { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  @media (max-width: 620px) { .card-head { flex-direction: column; } }
+  .flag-box { flex: none; width: 168px; }
+  .flag-box svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-caption { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .card-title { font-size: 1.32rem; font-weight: 600; line-height: 1.18; margin: 0 0 10px; text-wrap: balance; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px; border: 1px solid var(--card-border); color: var(--muted);
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  /* Flip tooltip below tags near the top of the viewport so it isn't clipped */
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  /* Keep tooltips from overflowing the left/right edges on narrow screens */
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint { border-top: 1px solid var(--hair); }
+  details.paint > summary {
+    cursor: pointer; list-style: none; padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--fjord); display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before { content: "+"; font-family: "Fraunces", serif; font-size: 15px; width: 14px; }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row { display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px; }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--card-border); border-radius: 2px; padding: 5px 9px 5px 5px; background: var(--paper); }
+  .swatch .chip { width: 20px; height: 20px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--fjord); }
+
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: none; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 78px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 100px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 240px; height: auto; }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .8; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="scandinavia-hub.html">Scandinavia hub</a></p>
+  <p class="kicker">Family research &middot; Phase 6 of the world atlas</p>
+  <h1>Flags of Norway</h1>
+  <p class="lede">A convoluted, fjord-cut coastline with no obvious internal partition to draw &mdash; Norway's dramatic story runs outward instead, through two long personal unions with its Scandinavian neighbors and a five-year wartime occupation, bookended by a unification cult built around a dead king and a 1905 divorce settled without a shot fired.</p>
+  <p class="lede">Nine entries, newest first: from over a millennium of undocumented Iron Age farming communities, through the Viking-Age patchwork of petty kings, the unified medieval kingdom, four centuries bound to Copenhagen, a century bound to Stockholm, and the modern cross flag that has now flown &mdash; interrupted once, by force &mdash; for well over a hundred years.</p>
+
+  <div class="scope-note">
+    <b>Scope of this page:</b> the lands of present-day mainland Norway, c. 500 BCE&ndash;present, nine political entities. Norway has no clean internal governance split within its own historic territory worth inventing &mdash; unlike Hungary's Royal/Ottoman divide or Yugoslavia's republics, its major ruptures are external unions and their endings, so each era below is shown as a single whole-country color change rather than a partitioned map. Part of a larger atlas &mdash; see the map and linked pages at the bottom.
+  </div>
+
+  <div class="imap-section">
+    <h2>One country, four crowns, c. 500 BCE&ndash;present</h2>
+    <p class="imap-sub">Norway's real traced coastline, colored by whichever crown actually governed it at each snapshot. There is no internal line to draw here &mdash; when Norway's sovereignty changes, the whole country changes color and label at once. Press play, or drag the slider.</p>
+    <div class="rule-box">
+      <b>Norway has spent almost exactly half of the last eleven centuries under someone else's crown.</b> Roughly 420 of the ~910 years since unification (c. 995) were spent in a union where Norway did not control its own foreign policy &mdash; 1397&ndash;1814 under Denmark (with a Kalmar interlude shared with Sweden too), then 1814&ndash;1905 under Sweden. The 1940&ndash;45 occupation is shorter but harsher: the only stretch since the Viking Age when Norway was ruled by neither its own crown nor a fellow Scandinavian one.
+    </div>
+    <div class="imap-frame">
+      <div class="imap-controls">
+        <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="imap-year" id="iYearTag">c. 500 BCE</span>
+        <input type="range" id="iSlider" min="0" max="8" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="imap-svg" viewBox="0 0 420 485" xmlns="http://www.w3.org/2000/svg">
+        <path class="sea-fill" fill="var(--sea)" pointer-events="none" d="M88.9,386.3 L80.1,367.6 L54.3,402.8 L36.9,410.0 L18.8,394.5 L14.1,361.6 L10.0,291.2 L22.0,271.6 L56.6,246.0 L82.4,214.5 L106.3,171.9 L137.7,113.0 L159.6,90.0 L195.6,51.8 L224.3,38.4 L245.8,40.0 L265.7,14.7 L289.5,16.1 L313.0,10.0 L313.0,0 L0,0 L0,485 Z"/>
+        <path class="context-outline" fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" pointer-events="none" d="M232.3,173.9 L221.2,194.4 L226.5,208.9 L182.1,261.9 L178.0,299.0 L208.8,324.1 L200.5,355.0 L186.2,364.3 L184.5,431.8 L166.0,433.6 L161.4,455.0 L144.4,460.1 L99.2,381.0 L112.1,345.6 L111.4,315.6 L99.5,305.4 L92.2,273.0 L97.4,247.7 L112.2,244.7 L108.5,226.7 L140.8,136.4 L155.1,133.2 L156.4,118.6 L185.2,116.0 L184.3,99.4 L241.9,115.0 L256.6,161.0 Z"/>
+        <path class="context-outline" fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" pointer-events="none" d="M311.7,69.8 L312.9,87.5 L338.8,98.6 L328.7,120.3 L351.5,144.2 L345.5,167.6 L362.5,182.7 L359.5,200.1 L384.8,211.8 L344.9,281.7 L270.6,315.8 L243.4,299.7 L230.5,254.3 L245.3,219.8 L283.1,177.9 L249.7,152.7 L241.9,115.0 L193.3,96.2 L200.9,87.7 L220.0,96.8 L256.3,93.3 L272.2,59.5 L293.6,45.8 L314.6,51.1 Z"/>
+        <g class="context-label" pointer-events="none">
+          <text x="163" y="268">SWEDEN</text>
+          <text x="297" y="194">FINLAND</text>
+        </g>
+        <path id="ireg-no" class="ireg-fill" d="M313.0,10.0 L353.9,32.3 L337.1,40.5 L351.4,59.7 L329.1,71.9 L318.6,74.7 L324.1,53.3 L307.3,41.2 L287.0,51.5 L280.6,73.9 L268.2,87.4 L254.1,80.0 L237.0,81.5 L222.5,65.4 L214.7,73.5 L206.6,74.7 L204.6,94.8 L180.0,89.9 L176.5,106.9 L164.0,106.8 L155.4,128.5 L142.3,162.3 L122.0,205.3 L126.7,215.7 L122.2,227.8 L109.2,227.3 L100.7,255.9 L101.5,296.4 L109.9,311.9 L105.6,347.8 L94.7,368.7 L88.9,386.3 L80.1,367.6 L54.3,402.8 L36.9,410.0 L18.8,394.5 L14.1,361.6 L10.0,291.2 L22.0,271.6 L56.6,246.0 L82.4,214.5 L106.3,171.9 L137.7,113.0 L159.6,90.0 L195.6,51.8 L224.3,38.4 L245.8,40.0 L265.7,14.7 L289.5,16.1 L313.0,10.0 Z" stroke="#241f14" stroke-width="1.5" stroke-opacity=".35"/>
+      </svg>
+      <div class="imap-head">
+        <div class="imap-name" id="iEraName">Nordic Iron Age Scandinavia</div>
+        <div class="imap-owners" id="iEraOwners"></div>
+      </div>
+      <div class="iflags-row" id="iFlagsRow"></div>
+      <p class="imap-story" id="iEraStory"></p>
+
+      <p class="map-note">Real traced mainland coastline (simplified &mdash; fjords smoothed rather than traced inlet-by-inlet; Svalbard omitted, as it only became Norwegian territory in 1920, long after every era shown here). Sweden and Finland are shown faint for geographic context only, since Norway shares a long real land border with both; their own territory and history aren't tracked by this map.</p>
+      <div class="imap-key" id="iLegend"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <!-- 1: 1945-present -->
+    <div class="entry" data-n="9" id="era-1945">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#ba0c2f"/>
+              <rect x="95" width="30" height="200" fill="#f4efe1"/>
+              <rect y="85" width="300" height="30" fill="#f4efe1"/>
+              <rect x="104" width="12" height="200" fill="#00205b"/>
+              <rect y="94" width="300" height="12" fill="#00205b"/>
+            </svg>
+            <div class="flag-caption">red field, offset Scandinavian cross, white outline on navy</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1945 &ndash; present</div>
+            <h3 class="card-title">Kingdom of Norway (restored)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A fully independent constitutional monarchy since the 1905 dissolution of the Swedish union, its sovereignty briefly interrupted only by the 1940–45 German occupation."><span class="dot" style="background:#a9762f"></span>Sovereign kingdom</span><span class="tag" tabindex="0" data-tip="King throughout this era, whose 1940 refusal to accept a Nazi-installed government and wartime radio broadcasts from London made him the enduring symbol of Norwegian resistance and continuity."><span class="dot" style="background:#4a3b78"></span>Haakon VII</span><span class="tag" tabindex="0" data-tip="The Church of Norway remained the constitutionally established state church through most of this era, formally disestablished only in 2012, later than Sweden's 2000 but before Denmark, which retains one still."><span class="dot" style="background:#8e3b62"></span>Lutheranism (state church until 2012)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Norway resettles several thousand Vietnamese 'boat people' refugees from 1975 onward, and later takes in tens of thousands of refugees from the Balkan wars of the 1990s and roughly 15,000&ndash;20,000 Syrians fleeing the civil war after 2015."><span class="dot" style="background:#2f7a6b"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#da251d"/><polygon points="10,2.6 11.0,5.625 14.19,5.64 11.62,7.53 12.59,10.56 10,8.7 7.41,10.56 8.38,7.53 5.81,5.64 9.0,5.625" fill="#ff0"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#0033a0"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#d52b1e"/><path d="M10,4 l0.9,2.7 2.8,0 -2.3,1.7 0.9,2.7 -2.3,-1.7 -2.3,1.7 0.9,-2.7 -2.3,-1.7 2.8,0z" fill="#ffd700"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#ce1126"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#000"/><g fill="#007a3d"><path d="M5,5.5 l1.2,2.5 -1.2,2.5 -1.2,-2.5z"/><path d="M8.5,5.5 l1.2,2.5 -1.2,2.5 -1.2,-2.5z"/></g></svg></span>Immigration: Vietnamese, Balkan &amp; Syrian refugees (1975&ndash;)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Haakon VII, of the Schleswig-Holstein-Sonderburg-Glücksburg line, returned from exile in 1945 to continue the reign begun at Norway's 1905 independence; his descendants Olav V, Harald V, and the current heir apparent continue the line today."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#00205b"/><path d="M50,30 L38,52 L50,44 L62,52 Z" fill="#c9a13c"/><circle cx="50" cy="30" r="6" fill="#c9a13c"/><path d="M32,70 H68 V78 H32 Z" fill="#c9a13c"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Glücksburg</span></div>
+            <p><span class="label">Who &amp; why:</span> liberated from German occupation in May 1945, King Haakon VII returns from five years of exile in London to a hero's welcome. Norway becomes a founding NATO member in 1949, discovers North Sea oil in the late 1960s, and twice votes narrowly against joining the European Union (1972, 1994) while remaining in the European Economic Area.</p>
+            <p><span class="label">What it represents:</span> the same cross flag Norway has flown since 1821 &mdash; the occupation changed nothing about the design itself; Norwegians simply resumed flying, openly, the flag the exiled government and resistance had kept flying the whole time.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">22:16 (approx. 8:6), cross arms offset toward the hoist.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red field; white Scandinavian cross; navy-blue cross centered within the white.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#ba0c2f"></span><span class="meta"><span class="name">Red</span><span class="hex">#BA0C2F</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#00205b"></span><span class="meta"><span class="name">Navy blue</span><span class="hex">#00205B</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2: 1940-1945 -->
+    <div class="entry" data-n="8" id="era-1940">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#a4302a"/>
+              <circle cx="150" cy="100" r="35" fill="#f4efe1"/>
+              <path d="M150,72 v14 M150,114 v14 M122,100 h14 M164,100 h14 M150,86 l10,-10 M150,86 l-10,-10 M150,114 l10,10 M150,114 l-10,10" stroke="#241f14" stroke-width="6"/>
+            </svg>
+            <div class="flag-caption">the occupying power's own colors, flown over Norwegian institutions</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1940 &ndash; 1945</div>
+            <h3 class="card-title">German occupation (Reichskommissariat Norwegen)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="German civilian administration imposed after the April 1940 invasion, ruling through a puppet collaborationist government while King Haakon VII and the legal government operated in exile from London."><span class="dot" style="background:#3f3f3f"></span>Occupied territory</span><span class="tag" tabindex="0" data-tip="Reichskommissar appointed by Hitler to govern occupied Norway, ruling alongside the collaborationist figurehead Vidkun Quisling, whose name became a byword for treasonous collaboration."><span class="dot" style="background:#4a3b78"></span>Josef Terboven</span><span class="tag" tabindex="0" data-tip="The Church of Norway remained formally established but split sharply with the occupation: most bishops and clergy resigned their state positions in 1942 in open defiance of Nazification efforts."><span class="dot" style="background:#8e3b62"></span>Lutheranism (state church, nominal)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Germany occupies Norway from 9 April 1940 until liberation in May 1945, administering the country through Reichskommissar Josef Terboven and the collaborationist Quisling government."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#cc0000"/><circle cx="10" cy="7" r="4.3" fill="#fff"/><g fill="#000"><path d="M10,3 h1.4 v3 h3 v1.4 h-4.4 z"/><path d="M10,3 h1.4 v3 h3 v1.4 h-4.4 z" transform="rotate(90 10 7)"/><path d="M10,3 h1.4 v3 h3 v1.4 h-4.4 z" transform="rotate(180 10 7)"/><path d="M10,3 h1.4 v3 h3 v1.4 h-4.4 z" transform="rotate(270 10 7)"/></g></svg>Occupied by: Nazi Germany (1940&ndash;45)</span><span class="tag" tabindex="0" data-tip="Roughly 50,000 Norwegians, including much of the government and resistance, flee to Sweden and Britain during the occupation, while 772 of Norway's approximately 2,100 Jews are deported to Auschwitz in late 1942, of whom only 34 survive."><span class="dot" style="background:#a3672f"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#005293"/><rect y="5" width="20" height="4" fill="#fecc00"/><rect x="6" width="4" height="14" fill="#fecc00"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#012169"/><path d="M0,0 L20,14 M20,0 L0,14" stroke="#fff" stroke-width="2"/><path d="M10,0 V14 M0,7 H20" stroke="#fff" stroke-width="3.4"/><path d="M10,0 V14 M0,7 H20" stroke="#c8102e" stroke-width="1.8"/></svg></span>Emigration: wartime refugees &amp; deportation of Jews</span></div>
+            <p><span class="label">Who &amp; why:</span> Germany invades on 9 April 1940; unlike Denmark's hours-long capitulation, Norwegian and Allied forces resist for two months before King Haakon VII and the government escape to London, where they continue functioning as the legal government-in-exile throughout. Reichskommissar Josef Terboven administers the occupied country directly, while the Norwegian fascist Vidkun Quisling &mdash; whose name became an international byword for "collaborator" &mdash; is installed as puppet minister-president from February 1942.</p>
+            <p><span class="label">What it represents:</span> no distinct Norwegian occupation flag existed; German administration flew the Reich's own colors, while Quisling's Nasjonal Samling party used its own separate gold sun-cross emblem for party purposes. The legitimate Norwegian cross flag was banned from official use domestically but never stopped flying abroad, on Allied ships, and in secret at home.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">Standard German state flag of the period.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red field with central emblem (shown schematically, not rendered exactly, out of respect for the symbol's history).</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3: 1905-1940 -->
+    <div class="entry" data-n="7" id="era-1905">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#ba0c2f"/>
+              <rect x="95" width="30" height="200" fill="#f4efe1"/>
+              <rect y="85" width="300" height="30" fill="#f4efe1"/>
+              <rect x="104" width="12" height="200" fill="#00205b"/>
+              <rect y="94" width="300" height="12" fill="#00205b"/>
+            </svg>
+            <div class="flag-caption">the plain cross flag, now flown by a fully sovereign state</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1905 &ndash; 1940</div>
+            <h3 class="card-title">Kingdom of Norway (independent)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A fully independent kingdom from the peaceful 1905 dissolution of the union with Sweden until the German invasion of April 1940."><span class="dot" style="background:#a9762f"></span>Sovereign kingdom</span><span class="tag" tabindex="0" data-tip="Danish-born prince elected King of Norway in 1905 following the union's dissolution and a popular referendum, founding the modern independent Norwegian monarchy."><span class="dot" style="background:#4a3b78"></span>Haakon VII</span><span class="tag" tabindex="0" data-tip="The Church of Norway remained the kingdom's constitutionally established faith throughout this era of full independence."><span class="dot" style="background:#8e3b62"></span>Lutheranism (state church)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="The tail end of the great 19th-century emigration wave continues into the early 20th century, with Norwegian emigration to the United States running until it is sharply curtailed by American immigration quota laws of the early 1920s."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#b22234"/><g fill="#fff"><rect y="1.6" width="20" height="1.6"/><rect y="4.8" width="20" height="1.6"/><rect y="8" width="20" height="1.6"/><rect y="11.2" width="20" height="1.6"/></g><rect width="8" height="7.5" fill="#3c3b6e"/></svg>Emigration: to the United States (tapering by 1920s)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Prince Carl of Denmark took the throne as Haakon VII in 1905, founding the House of Glücksburg's reign over independent Norway, interrupted only by the 1940 invasion."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#00205b"/><path d="M50,30 L38,52 L50,44 L62,52 Z" fill="#c9a13c"/><circle cx="50" cy="30" r="6" fill="#c9a13c"/><path d="M32,70 H68 V78 H32 Z" fill="#c9a13c"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Glücksburg</span></div>
+            <p><span class="label">Who &amp; why:</span> the Storting unilaterally dissolves the union with Sweden on 7 June 1905; an August referendum returns a near-unanimous vote in favor, and King Oscar II accepts the outcome after negotiations at Karlstad rather than risk war &mdash; a rare peaceful union dissolution in European history. Prince Carl of Denmark is invited to take the throne, choosing the name Haakon VII to deliberately revive Norway's last fully independent medieval king.</p>
+            <p><span class="label">What it represents:</span> the same flag flown since 1821, now finally the flag of a fully sovereign state rather than one partner in a personal union &mdash; the union badge that had marked the previous era's state flag is simply gone, nothing added in its place.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">22:16, cross arms offset toward the hoist.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red field; white Scandinavian cross; navy-blue cross centered within the white.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#ba0c2f"></span><span class="meta"><span class="name">Red</span><span class="hex">#BA0C2F</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#00205b"></span><span class="meta"><span class="name">Navy blue</span><span class="hex">#00205B</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4: 1814-1905 -->
+    <div class="entry" data-n="6" id="era-1814">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#ba0c2f"/>
+              <rect x="95" width="30" height="200" fill="#f4efe1"/>
+              <rect y="85" width="300" height="30" fill="#f4efe1"/>
+              <rect x="104" width="12" height="200" fill="#00205b"/>
+              <rect y="94" width="300" height="12" fill="#00205b"/>
+              <g transform="translate(43,43)">
+                <rect x="-20" y="-13" width="40" height="26" fill="#00205b"/>
+                <rect x="-20" y="-13" width="40" height="9" fill="#f4efe1"/>
+                <rect x="-20" y="4" width="40" height="9" fill="#ba0c2f"/>
+              </g>
+            </svg>
+            <div class="flag-caption">Norway's own cross flag, plus the "herring salad" union badge in the canton</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1814 &ndash; 1905</div>
+            <h3 class="card-title">Union of Sweden and Norway</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A personal union of two separate kingdoms sharing one monarch but each keeping its own constitution, laws, and institutions, forced on Norway by Swedish military pressure in 1814."><span class="dot" style="background:#1f4e5f"></span>Union kingdom</span><span class="tag" tabindex="0" data-tip="Former French Marshal Jean-Baptiste Bernadotte, whose 1814 military campaign forced Norway into union with Sweden as Crown Prince, before becoming king of both realms in 1818."><span class="dot" style="background:#4a3b78"></span>Karl XIV Johan</span><span class="tag" tabindex="0" data-tip="Norway kept its own separate state church, the Church of Norway, distinct from Sweden's Church of Sweden despite the shared crown throughout the union."><span class="dot" style="background:#8e3b62"></span>Lutheranism (state church)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Roughly 750,000 Norwegians emigrate to the United States over the course of the 19th century, driven by land scarcity and rural poverty, one of the highest emigration rates per capita of any European country in this period."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#b22234"/><g fill="#fff"><rect y="1.6" width="20" height="1.6"/><rect y="4.8" width="20" height="1.6"/><rect y="8" width="20" height="1.6"/><rect y="11.2" width="20" height="1.6"/></g><rect width="8" height="7.5" fill="#3c3b6e"/></svg>Emigration: to the United States (19th c.)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Founded by Napoleonic Marshal Jean-Baptiste Bernadotte, crowned Karl XIV Johan in 1818, the House of Bernadotte reigned over the union until Norway's own 1905 secession. Personal arms: azure, a bridge of three arches masonry, an eagle displayed thereon."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1e2f6b"/><path d="M20,66 H80 V72 H20 Z" fill="#c9a13c"/><path d="M28,66 Q28,54 40,54 Q40,64 34,66 Z" fill="#c9a13c"/><path d="M50,66 Q50,50 50,50 Q50,50 50,66 Z" fill="none"/><path d="M40,66 Q50,50 60,66 Z" fill="none" stroke="#c9a13c" stroke-width="3"/><path d="M50,52 q-8,0 -10,8 q6,2 10,-2 q4,4 10,2 q-2,-8 -10,-8 Z" fill="#c9a13c"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Bernadotte</span></div>
+            <p><span class="label">Who &amp; why:</span> the January 1814 Treaty of Kiel forces Denmark &mdash; on the losing side of the Napoleonic Wars &mdash; to cede Norway to Sweden's king. Norwegians did not simply accept the transfer: they convened at Eidsvoll and adopted their own constitution on 17 May 1814, still Norway's constitution today, and briefly declared full independence under a Danish prince. A short war that autumn forced them instead into a narrower personal union with Sweden, one that left Norway its own constitution, laws, and (from 1821) its own flag &mdash; a far looser arrangement than the old bond with Denmark had become. No distinct flag was ever created for that seven-month interlude of self-declared independence between Kiel and the actual union with Sweden; Norway simply kept using its existing (still Dannebrog-derived) colors until the matter of a proper national flag was taken up by the Storting the following years.</p>
+            <p><span class="label">What it represents:</span> Norway designs its own flag in 1821 (Fredrik Meltzer's cross design, still in use today) rather than sharing Sweden's; from 1844 the state and war ensign additionally carries a small combined red-white-blue "union badge," nicknamed sildesalaten ("herring salad") by Norwegians who largely disliked it as a mark of subordination &mdash; the plain civil flag never carried it at all.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">22:16; union badge added 1844&ndash;1898 to state/war ensigns only.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Norway's own cross flag, with a small quartered red/white/blue badge in the canton on state and naval versions.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#ba0c2f"></span><span class="meta"><span class="name">Red</span><span class="hex">#BA0C2F</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#00205b"></span><span class="meta"><span class="name">Navy blue</span><span class="hex">#00205B</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5: 1523-1814 -->
+    <div class="entry" data-n="5" id="era-1523">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#a4302a"/>
+              <rect x="90" width="34" height="200" fill="#f4efe1"/>
+              <rect y="83" width="300" height="34" fill="#f4efe1"/>
+            </svg>
+            <div class="flag-caption">the Dannebrog &mdash; Norway flew Denmark's flag, having none distinct of its own</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1523 &ndash; 1814</div>
+            <h3 class="card-title">Denmark&ndash;Norway (personal union)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A centuries-long personal union in which Norway was governed as a junior partner from Copenhagen, ending when Denmark ceded Norway to Sweden by the 1814 Treaty of Kiel."><span class="dot" style="background:#1f4e5f"></span>Union kingdom</span><span class="tag" tabindex="0" data-tip="King of Denmark and Norway from 1523, whose reign began this configuration of the union after Sweden's final secession from the Kalmar arrangement."><span class="dot" style="background:#4a3b78"></span>Frederick I</span><span class="tag" tabindex="0" data-tip="Christian III's Reformation imposed Lutheranism as the state religion across Denmark-Norway in 1536–37, replacing the Catholic Church that had governed Norway's religious life until then."><span class="dot" style="background:#8e3b62"></span>Lutheranism (state church, from 1537)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Christian IV recruits German mining experts, mainly from Saxony, to found and run the Kongsberg silver mines from 1623, an immigrant technical workforce whose descendants remained part of the local community."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#000"/><rect y="4.67" width="20" height="4.67" fill="#dd0000"/><rect y="9.33" width="20" height="4.67" fill="#ffce00"/></svg>Immigration: German miners at Kongsberg (from 1623)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The House of Oldenburg continued to reign over Denmark&ndash;Norway from Frederick I through this entire union, until Norway was ceded to Sweden by the 1814 Treaty of Kiel. Arms: or, two bars gules."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#c9a13c"/><rect x="4" y="38" width="92" height="14" fill="#a4302a"/><rect x="4" y="62" width="92" height="14" fill="#a4302a"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Oldenburg</span></div>
+            <p><span class="label">Who &amp; why:</span> when Gustav Vasa breaks Sweden out of the Kalmar Union in 1523, Denmark and Norway stay bound together under the same crown &mdash; a narrower union that will run almost three centuries, far outlasting Kalmar itself. Real power sits increasingly in Copenhagen: the 1536&ndash;37 Reformation formally abolishes Norway's separate royal council and Catholic hierarchy, after which Norway is administered, in practice, much like a Danish province, even though it is never legally annexed and keeps a separate law code and the nominal title of a kingdom throughout.</p>
+            <p><span class="label">What it represents:</span> Norway has no flag of its own for this entire span &mdash; the Dannebrog, Denmark's ancient red-and-white cross, serves as the flag over Norwegian territory too, a visible marker of just how thoroughly Copenhagen came to dominate the union's institutions.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed civil ratio for most of this period; roughly 28:37 by tradition.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red field, white Scandinavian cross, arms offset toward the hoist.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6: 1397-1523 -->
+    <div class="entry" data-n="4" id="era-1397">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#c9a13c"/>
+              <rect x="90" width="34" height="200" fill="#a4302a"/>
+              <rect y="83" width="300" height="34" fill="#a4302a"/>
+              <g fill="#f4efe1">
+                <circle cx="150" cy="52" r="10"/>
+                <circle cx="126" cy="152" r="10"/>
+                <circle cx="174" cy="152" r="10"/>
+              </g>
+            </svg>
+            <div class="flag-caption">a gold field and red cross, three crowns marking the three united kingdoms</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1397 &ndash; 1523</div>
+            <h3 class="card-title">Kalmar Union (Denmark, Norway &amp; Sweden)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A personal union joining the crowns of Denmark, Norway, and Sweden under one monarch, dominated in practice by Denmark, until Sweden's final secession in 1523."><span class="dot" style="background:#1f4e5f"></span>Union kingdom</span><span class="tag" tabindex="0" data-tip="Danish queen who engineered the 1397 Kalmar Union, uniting Denmark, Norway, and Sweden under a single crown, and ruled as its de facto architect and power broker."><span class="dot" style="background:#4a3b78"></span>Margaret I</span><span class="tag" tabindex="0" data-tip="All three Kalmar kingdoms, including Norway, were Catholic throughout the union's existence, decades before the Lutheran Reformation reached Scandinavia in the 1530s."><span class="dot" style="background:#8e3b62"></span>Roman Catholicism (state religion)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Christian I founded the House of Oldenburg's rule over the union's crowns from his 1448 election as King of Denmark and Norway, continuing into the sole Denmark&ndash;Norway union after Sweden's 1523 secession. Arms: or, two bars gules."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#c9a13c"/><rect x="4" y="38" width="92" height="14" fill="#a4302a"/><rect x="4" y="62" width="92" height="14" fill="#a4302a"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Oldenburg</span></div>
+            <p><span class="label">Who &amp; why:</span> Margaret I, having spent the 1380s and 1390s assembling personal control over all three Scandinavian crowns, has her great-nephew Eric of Pomerania crowned king of a single union at Kalmar Castle in June 1397, binding Denmark, Norway (with its dependency Iceland), and Sweden (with Finland) under one monarch for the only time in this atlas's history. Each kingdom keeps its own laws and nobility; Swedish resentment of Danish-favored rule builds for over a century until Gustav Vasa's 1523 rebellion breaks Sweden out for good.</p>
+            <p><span class="label">What it represents:</span> the Kalmar Union banner &mdash; not a formally codified flag so much as a widely used device &mdash; is remembered as a gold field bearing a red cross with three crowns, one for each united kingdom; Norway, already the weakest of the three partners by this point, has no separate flag of its own during the union.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio recorded &mdash; a heraldic device more than a standardized flag.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Gold field, red Scandinavian cross, three white/silver crowns (or dots, simplified here).</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#c9a13c"></span><span class="meta"><span class="name">Gold</span><span class="hex">#C9A13C</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White/silver</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 7: 995-1397 -->
+    <div class="entry" data-n="3" id="era-995">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#8a3a2e"/>
+              <g transform="translate(150,105)" fill="#c9a13c" stroke="#3a1810" stroke-width="2" stroke-linejoin="round">
+                <path d="M-8,32 Q-38,18 -34,-12 Q-30,-32 -8,-40 Q14,-46 28,-32 Q40,-18 32,0 Q42,14 30,32 Q12,46 -8,32 Z"/>
+                <rect x="-8" y="30" width="9" height="26" rx="3"/>
+                <rect x="8" y="32" width="9" height="24" rx="3"/>
+                <path d="M-10,26 Q-40,16 -36,-8 Q-34,-20 -20,-18" fill="none" stroke="#c9a13c" stroke-width="5" stroke-linecap="round"/>
+                <circle cx="-20" cy="-18" r="5" stroke="none"/>
+                <path d="M22,-14 Q44,-34 56,-58" fill="none" stroke="#c9a13c" stroke-width="7" stroke-linecap="round"/>
+                <circle cx="16" cy="-42" r="15"/>
+                <g stroke="#c9a13c" stroke-width="4" stroke-linecap="round">
+                  <path d="M3,-50 l-9,-6"/><path d="M5,-58 l-6,-10"/><path d="M13,-62 l-2,-11"/>
+                  <path d="M23,-62 l3,-11"/><path d="M31,-58 l7,-9"/><path d="M35,-50 l9,-5"/>
+                </g>
+                <path d="M4,-63 l3,-9 5,6 4,-10 4,10 5,-6 3,9 z" stroke="#3a1810" stroke-width="1.5"/>
+                <circle cx="20" cy="-44" r="1.6" fill="#3a1810" stroke="none"/>
+              </g>
+              <g transform="translate(203,42) rotate(-32)">
+                <rect x="-2" y="0" width="4" height="52" fill="#c9a13c" stroke="#3a1810" stroke-width="1"/>
+                <path d="M-2,0 L-21,-11 L-17,-23 L4,-13 Z" fill="#e8e2cf" stroke="#3a1810" stroke-width="1.5"/>
+              </g>
+            </svg>
+            <div class="flag-caption">a reconstructed royal banner &mdash; a crowned gold lion bearing the axe of St. Olav, on red</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 995 &ndash; 1397</div>
+            <h3 class="card-title">Kingdom of Norway (medieval, independent)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="An independent medieval kingdom consolidating out of earlier petty kingdoms, ruled by its own kings until absorbed into the Kalmar Union in 1397."><span class="dot" style="background:#a9762f"></span>Sovereign kingdom</span><span class="tag" tabindex="0" data-tip="King whose reign from 995 launched the forceful Christianization of Norway, building churches and compelling chieftains to convert, beginning this era's defining religious transformation."><span class="dot" style="background:#4a3b78"></span>Olav Tryggvason</span><span class="tag" tabindex="0" data-tip="Olav Tryggvason and later Olav Haraldsson (later Saint Olaf) drove Norway's often violent conversion from Norse paganism, establishing Catholic Christianity as the kingdom's religion over the following decades."><span class="dot" style="background:#8e3b62"></span>Roman Catholicism (Christianization from 995)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="German Hanseatic merchants establish a permanent trading post, the Bryggen Kontor, in Bergen from around the 1360s, dominating Norway's fish export trade and forming a resident German merchant community there for centuries."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#000"/><rect y="4.67" width="20" height="4.67" fill="#dd0000"/><rect y="9.33" width="20" height="4.67" fill="#ffce00"/></svg>Immigration: Hanseatic German merchants at Bergen (from c. 1360)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The Fairhair dynasty, claimed by Olav Tryggvason and Olaf II Haraldsson (Saint Olaf) as descendants of Harald Fairhair, ruled through Norway's real consolidation and Christianization until the throne passed by marriage into the Kalmar Union in 1397. Arms: the crowned gold lion bearing St. Olav's axe, Norway's own royal arms attested from the 13th century."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#8a3a2e"/><path d="M42,80 Q30,74 32,58 Q34,44 46,40 Q58,36 66,46 Q72,54 66,64 Q74,68 68,80 Q56,88 42,80 Z" fill="#c9a13c"/><circle cx="50" cy="34" r="7" fill="#c9a13c"/><path d="M50,44 L50,68" stroke="#f4efe1" stroke-width="3"/><path d="M50,44 L58,50 L50,56 Z" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Fairhair</span></div>
+            <p><span class="label">Who &amp; why:</span> unification, built on Harald Fairhair's contested 9th-century legacy, is cemented by kings like Olav Tryggvason (r. 995&ndash;1000) and Olaf II Haraldsson, whose death at the 1030 Battle of Stiklestad &mdash; fighting rebellious chieftains &mdash; gives the new kingdom a unifying royal saint cult that outlasts him by centuries. Norway reaches the height of its medieval power under Haakon IV and Magnus the Lawmender in the mid-13th century, ruling Iceland (from 1262), Greenland, and briefly the Hebrides, before the crown passes by marriage into the Kalmar Union in 1397.</p>
+            <p><span class="label">What it represents:</span> the crowned gold lion rampant, bearing St. Olav's silver axe, on a red field &mdash; Norway's royal arms, attested from the 13th century and still the national coat of arms today, shown here as a reconstructed banner rather than a strictly documented vexillological standard, since medieval Norway (like most of its era) worked primarily through heraldry rather than fixed national flags.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed flag ratio recorded &mdash; shown as a banner of the royal arms.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red field, crowned gold lion rampant bearing a silver-headed axe.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#8a3a2e"></span><span class="meta"><span class="name">Red</span><span class="hex">#8A3A2E</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#c9a13c"></span><span class="meta"><span class="name">Gold</span><span class="hex">#C9A13C</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 8: c.872-995 -->
+    <div class="entry" data-n="2" id="era-872">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#4a1f16"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; pre-heraldic era, no flag survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 872 &ndash; 995</div>
+            <h3 class="card-title">Fragmented petty-kingdoms &amp; chieftaincies</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A patchwork of local petty kingdoms and chieftaincies along the Norwegian coast, without a unified crown, before their forcible consolidation in the late 9th century."><span class="dot" style="background:#5c6b5a"></span>Fragmented chieftaincies</span><span class="tag" tabindex="0" data-tip="Traditionally credited, per the sagas, with defeating rival petty kings at the Battle of Hafrsfjord around 872 and unifying Norway's coastal territories under a single crown for the first time."><span class="dot" style="background:#4a3b78"></span>Harald Fairhair</span><span class="tag" tabindex="0" data-tip="The pre-Christian Norwegian chieftaincies practiced Norse polytheism, with no unified state to formally establish any single faith until Christianization began a century later."><span class="dot" style="background:#8e3b62"></span>Norse paganism</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Norwegian Vikings emigrate in large numbers to settle Iceland from 874, the Faroe Islands, and Shetland and Orkney, while other Norse bands raid and settle parts of Scotland, Ireland (founding Dublin as a Viking settlement), and Normandy, where the Viking leader Rollo founds a lasting duchy in 911."><span class="dot" style="background:#a3672f"></span>Emigration: Viking settlement of Iceland, Faroes &amp; beyond</span></div>
+            <p><span class="label">Who &amp; why:</span> the traditional Battle of Hafrsfjord (c. 872), where Harald Fairhair is said to have first claimed authority over a fragmented coastline, is likely more legend than settled fact this early &mdash; real, durable unification is still over a century away. Regional petty-kings and jarls contest the western fjords and southern lowlands throughout this period even as Norse raiding and settlement fan out across the North Atlantic, including the 874 settlement of Iceland.</p>
+            <p><span class="label">What it represents:</span> no securely documented flag survives from this pre-heraldic, pre-Christian era; any authority was personal and local rather than symbolized by a fixed territorial banner. Shown here honestly blank rather than invented.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 9 -->
+    <div class="entry" data-n="1" id="era-500bce">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#4a1f16"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; pre-Viking Iron Age, no flag survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 500 BCE &ndash; 793 CE</div>
+            <h3 class="card-title">Nordic Iron Age Scandinavia</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Norway's Iron Age population lived in small farming and fishing communities under local chieftains, with no written record and no political unit resembling a kingdom anywhere on the Norwegian coast."><span class="dot" style="background:#5c6b5a"></span>Fragmented chieftaincies</span><span class="tag" tabindex="0" data-tip="No individual ruler is named or documented anywhere in Norwegian territory for this entire span; the earliest named Norwegian kings belong to the following, later era."><span class="dot" style="background:#4a3b78"></span>No single ruler documented</span><span class="tag" tabindex="0" data-tip="Pre-Christian Norse polytheism, later systematized in medieval Icelandic sources like the Poetic and Prose Eddas, was already the region's religious tradition throughout this Iron Age span, though its earlier practice is known mainly through burial and votive archaeology rather than text."><span class="dot" style="background:#8e3b62"></span>Norse paganism</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Roman-era trade networks reach Norwegian elites indirectly via Continental Europe: imported Roman bronze vessels, glassware, and coins turn up in high-status Norwegian graves of the Roman Iron Age (c. 1&ndash;400 CE), evidence of long-distance exchange rather than any direct Roman presence this far north."><span class="dot" style="background:#6b2c2c"></span>Contact: Roman-era trade goods reach Norway (c. 1st&ndash;4th c. CE)</span></div>
+            <p><span class="label">Who &amp; why:</span> for well over a millennium before the traditional 872 date for Harald Fairhair's unification, Norway's coast is home only to scattered farming and fishing communities under local chieftains &mdash; the Pre-Roman, Roman, and Migration-period Iron Age. The earliest known runic inscription in the Elder Futhark alphabet anywhere, carved into an iron spearhead found at &Oslash;vre Stabu, dates to around 180 CE, direct physical evidence that Norwegian society had already developed a distinct writing system centuries before the Viking Age most associate with runes. The conventional start of that Viking Age itself &mdash; the 793 raid on Lindisfarne monastery in Northumbria, carried out by raiders including Norwegians &mdash; marks this entry's own end point.</p>
+            <p><span class="label">What it represents:</span> no flag or comparable territorial banner is attested from this era; the only surviving symbolic record is burial goods, votive deposits, and the earliest runic carvings, none of which constitute anything resembling a flag. Shown here honestly blank rather than invented.</p>
+            <p><span class="label">World context:</span> this span runs alongside the classical Greek and Hellenistic worlds, the Roman Republic's rise and its transformation into an empire under Augustus, and, much closer to its end, Charlemagne's Frankish empire and the 793 Lindisfarne raid that conventionally opens the Viking Age across Western Europe &mdash; a reminder that Iron Age Norway, though undocumented in its own words, was never disconnected from the trade networks and, eventually, the raiding that tied it to the wider ancient and early medieval world.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#5c6b5a"></span><b>Fragmented chieftaincies</b> &mdash; no single crown yet</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Sovereign kingdom</b> &mdash; independent, own crown</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#1f4e5f"></span><b>Union kingdom</b> &mdash; crown shared with a neighbor</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#3f3f3f"></span><b>Occupied territory</b> &mdash; ruled from a foreign capital</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the named ruler most associated with the era's start</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official/established faith, not the population's</div>
+    </div>
+  </div>
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for Norway lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/no/">Search Record Atlas for Norway &rarr;</a>
+    <p style="margin-top:14px;">Records here are filed by historical jurisdiction, not modern borders &mdash; check the region that covers your ancestral town:</p>
+    <div class="record-region-grid">
+      <a href="https://daviddef.github.io/TheMap/region/norway/">Norway</a>
+    </div>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This page is one lineage in a larger set. See the region-wide map and the other countries here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="scandinavia-hub.html"><b>Scandinavia hub</b><span>Five countries, eleven centuries</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are close historical approximations for painting reference; pre-19th-century swatches are informed reconstructions, not official specifications. Map is schematic and not surveyed.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var IC = {
+    frag: "#5c6b5a", norway_med: "#8a3a2e", kalmar: "#c9a13c", denmark_norway: "#9c3b28",
+    sweden_norway: "#3a5a9c", independent: "#ba0c2f", occupied: "#3f3f3f"
+  };
+  var INAMES = {
+    frag: "Fragmented chieftaincies", norway_med: "Kingdom of Norway (medieval)",
+    kalmar: "Kalmar Union", denmark_norway: "Denmark–Norway",
+    sweden_norway: "Union with Sweden", independent: "Kingdom of Norway (sovereign)",
+    occupied: "German occupation"
+  };
+  var IFLAGS = {
+    frag: '<rect width="300" height="200" fill="#4a1f16"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="6" stroke-dasharray="10 8"/><text x="150" y="108" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#c9a13c">NO FLAG</text>',
+    norway_med: '<rect width="300" height="200" fill="#8a3a2e"/><g transform="translate(150,110)" fill="#c9a13c"><path d="M-8,32 Q-38,18 -34,-12 Q-30,-32 -8,-40 Q14,-46 28,-32 Q40,-18 32,0 Q42,14 30,32 Q12,46 -8,32 Z"/><circle cx="16" cy="-42" r="15"/></g>',
+    kalmar: '<rect width="300" height="200" fill="#c9a13c"/><rect x="90" width="34" height="200" fill="#a4302a"/><rect y="83" width="300" height="34" fill="#a4302a"/><g fill="#f4efe1"><circle cx="150" cy="52" r="10"/><circle cx="126" cy="152" r="10"/><circle cx="174" cy="152" r="10"/></g>',
+    denmark_norway: '<rect width="300" height="200" fill="#a4302a"/><rect x="90" width="34" height="200" fill="#f4efe1"/><rect y="83" width="300" height="34" fill="#f4efe1"/>',
+    sweden_norway: '<rect width="300" height="200" fill="#ba0c2f"/><rect x="95" width="30" height="200" fill="#f4efe1"/><rect y="85" width="300" height="30" fill="#f4efe1"/><rect x="104" width="12" height="200" fill="#00205b"/><rect y="94" width="300" height="12" fill="#00205b"/><g transform="translate(43,43)"><rect x="-20" y="-13" width="40" height="26" fill="#00205b"/><rect x="-20" y="-13" width="40" height="9" fill="#f4efe1"/><rect x="-20" y="4" width="40" height="9" fill="#ba0c2f"/></g>',
+    independent: '<rect width="300" height="200" fill="#ba0c2f"/><rect x="95" width="30" height="200" fill="#f4efe1"/><rect y="85" width="300" height="30" fill="#f4efe1"/><rect x="104" width="12" height="200" fill="#00205b"/><rect y="94" width="300" height="12" fill="#00205b"/>',
+    occupied: '<rect width="300" height="200" fill="#a4302a"/><circle cx="150" cy="100" r="35" fill="#f4efe1"/><path d="M150,72 v14 M150,114 v14 M122,100 h14 M164,100 h14" stroke="#241f14" stroke-width="6"/>'
+  };
+  function iFlagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (IFLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  var iLegendEl = document.getElementById("iLegend");
+  iLegendEl.innerHTML = Object.keys(IC).map(function (k) {
+    return '<span><span class="sw" style="background:' + IC[k] + '"></span>' + INAMES[k] + "</span>";
+  }).join("");
+
+  var ISNAP = [
+    { year:"c. 500 BCE–793 CE", name:"Nordic Iron Age Scandinavia", owner:"frag",
+      story:"For well over a millennium before Harald Fairhair's traditional 872 unification, Norway's coast is home only to scattered farming and fishing communities under local chieftains, with no political unit resembling a kingdom anywhere on the coast. The earliest known runic inscription anywhere, carved into an iron spearhead found at Øvre Stabu, dates to around 180 CE. No flag or comparable territorial banner is attested from this era, and the 793 raid on Lindisfarne — which conventionally opens the Viking Age — marks this entry's own end point." },
+    { year:"c. 872–995", name:"Fragmented petty-kingdoms & chieftaincies", owner:"frag",
+      story:"The traditional Battle of Hafrsfjord (c. 872), where Harald Fairhair is said to have first claimed authority over a fragmented coastline, is likely more legend than settled fact this early — real, durable unification is still over a century away. Regional petty-kings and jarls contest the western fjords and southern lowlands throughout this period even as Norse raiding and settlement fan out across the North Atlantic. No securely documented flag survives from this pre-heraldic, pre-Christian era, shown here honestly blank rather than invented." },
+    { year:"c. 995", name:"Unification", owner:"norway_med",
+      story:"Olav Tryggvason and Olaf II complete the unification of Norway's coast by the early 11th century, building on Harald Fairhair's contested legacy. Olaf II's death at the 1030 Battle of Stiklestad gives the new kingdom a unifying royal saint cult that will outlast him by centuries." },
+    { year:"1397", name:"The Kalmar Union", owner:"kalmar",
+      story:"Margaret I has her great-nephew Eric of Pomerania crowned king of a single union at Kalmar Castle, binding Denmark, Norway, and Sweden under one monarch for the only time in this history. Each kingdom keeps its own laws and nobility, ruling in parallel rather than merging outright." },
+    { year:"1523", name:"Denmark–Norway", owner:"denmark_norway",
+      story:"Gustav Vasa breaks Sweden out of the Kalmar Union for good, but Denmark and Norway stay bound together — a narrower union that will run almost three centuries. Norway's separate royal council is abolished after the 1536–37 Reformation, and real power increasingly sits in Copenhagen." },
+    { year:"1814", name:"Treaty of Kiel — to Sweden", owner:"sweden_norway",
+      story:"Denmark, on the losing side of the Napoleonic Wars, is forced to cede Norway to Sweden's king. Norwegians briefly declare full independence at Eidsvoll in May 1814, adopting the constitution still in force today, before a short war forces a looser personal union with Sweden instead." },
+    { year:"1905", name:"Peaceful independence", owner:"independent",
+      story:"The Storting unilaterally dissolves the union on 7 June 1905; an August referendum returns a near-unanimous vote in favor, and King Oscar II accepts the outcome rather than risk war. Prince Carl of Denmark becomes King Haakon VII, reviving the name of Norway's last independent medieval king." },
+    { year:"1940", name:"German occupation", owner:"occupied",
+      story:"Germany invades on 9 April 1940; King Haakon VII and the government escape to London and continue as the legal government-in-exile throughout. Reichskommissar Josef Terboven administers the country directly, with Vidkun Quisling installed as puppet minister-president from 1942." },
+    { year:"1945–present", name:"Kingdom restored", owner:"independent",
+      story:"Liberation in May 1945 restores the same sovereign kingdom and the same flag flown since 1821 — the occupation is now the only interruption to Norwegian self-rule since the Viking Age pettykingdoms gave way to a single crown over a thousand years ago." }
+  ];
+
+  var iYearTag = document.getElementById("iYearTag");
+  var iEraName = document.getElementById("iEraName");
+  var iEraOwners = document.getElementById("iEraOwners");
+  var iEraStory = document.getElementById("iEraStory");
+  var iFlagsRow = document.getElementById("iFlagsRow");
+  var iSlider = document.getElementById("iSlider");
+  var iRegPath = document.getElementById("ireg-no");
+
+  function iRender(idx) {
+    var era = ISNAP[idx];
+    iYearTag.textContent = era.year;
+    iEraName.textContent = era.name;
+    iEraStory.innerHTML = era.story;
+    iRegPath.setAttribute("fill", IC[era.owner]);
+    iEraOwners.innerHTML = "<b>" + INAMES[era.owner] + "</b>";
+    iFlagsRow.innerHTML = '<div class="iflag-chip">' + iFlagSvg(era.owner) + '<div class="ic-label">Norway</div></div>';
+  }
+
+  iSlider.addEventListener("input", function () { iRender(parseInt(iSlider.value, 10)); });
+  iRender(0);
+
+  var iPlaying = false, iPlayTimer = null;
+  var iPlayBtn = document.getElementById("iPlayBtn");
+  function iStepPlay() {
+    var next = parseInt(iSlider.value, 10) + 1;
+    if (next > ISNAP.length - 1) { iStopPlay(); return; }
+    iSlider.value = next;
+    iRender(next);
+  }
+  function iStartPlay() {
+    iPlaying = true;
+    iPlayBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(iSlider.value, 10) >= ISNAP.length - 1) { iSlider.value = 0; iRender(0); }
+    iPlayTimer = setInterval(iStepPlay, 1700);
+  }
+  function iStopPlay() {
+    iPlaying = false;
+    iPlayBtn.innerHTML = "&#9654;";
+    clearInterval(iPlayTimer);
+  }
+  iPlayBtn.addEventListener("click", function () { iPlaying ? iStopPlay() : iStartPlay(); });
+})();
+
+  // Tap-to-toggle for the pill tag tooltips (hover doesn't work on touch devices).
+  document.querySelectorAll(".tag[data-tip]").forEach(function (tag) {
+    tag.addEventListener("click", function (e) {
+      var wasOpen = tag.classList.contains("tip-open");
+      document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+      if (!wasOpen) tag.classList.add("tip-open");
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+  });
+</script>
+
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var html = '<h4>Genealogical records for this ground</h4>';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>
+
+</body></html>

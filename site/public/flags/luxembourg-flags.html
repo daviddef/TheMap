@@ -1,0 +1,955 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+</style></head><body>
+<title>Flags of Luxembourg</title>
+<meta name="description" content="A chronological, paint-ready atlas of every flag that flew over Luxembourg, from a 10th-century riverside fortress to today's Grand Duchy — with a map of each era.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.08rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; font-size: .94rem; color: var(--muted); }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  .legend { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+
+  /* ---------- Timeline ---------- */
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1px; background: var(--hair); }
+  @media (max-width: 560px) { .timeline::before { left: 9px; } }
+  .entry { position: relative; padding-left: 46px; margin-bottom: 46px; }
+  @media (max-width: 560px) { .entry { padding-left: 30px; } }
+  .entry::before {
+    content: attr(data-n);
+    position: absolute; left: 1px; top: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--paper); outline: 1px solid var(--hair);
+    background: var(--card);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--brick); display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) { .entry::before { left: -5px; width: 18px; height: 18px; font-size: 9px; } }
+
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+  .card-head { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  @media (max-width: 620px) { .card-head { flex-direction: column; } }
+  .flag-box { flex: none; width: 168px; }
+  .flag-box svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-caption { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .card-title { font-size: 1.32rem; font-weight: 600; line-height: 1.18; margin: 0 0 10px; text-wrap: balance; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px; border: 1px solid var(--card-border); color: var(--muted);
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  /* Flip tooltip below tags near the top of the viewport so it isn't clipped */
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  /* Keep tooltips from overflowing the left/right edges on narrow screens */
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint { border-top: 1px solid var(--hair); }
+  details.paint > summary {
+    cursor: pointer; list-style: none; padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--adriatic); display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before { content: "+"; font-family: "Fraunces", serif; font-size: 15px; width: 14px; }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row { display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px; }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--card-border); border-radius: 2px; padding: 5px 9px 5px 5px; background: var(--paper); }
+  .swatch .chip { width: 20px; height: 20px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: none; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 88px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 320px; height: auto; overflow: hidden; }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .ireg-label { font-family: "IBM Plex Mono", monospace; font-size: 13px; font-weight: 700; text-anchor: middle; transition: fill .4s ease, stroke .4s ease; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2.5px; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="low-countries-hub.html">Low Countries hub</a></p>
+  <p class="kicker">Family research &middot; Phase 6 of the world atlas</p>
+  <h1>Flags of Luxembourg</h1>
+  <p class="lede">Europe's last Grand Duchy sits on a millennium of Roman and Frankish rule before it existed as its own state at all &mdash; Julius Caesar's Gallic Wars brought the native Treveri under Rome by 53 BCE, and the region passed through Frankish kingdoms and Charlemagne's Carolingian Empire before Siegfried I's own fortress purchase in 963 &mdash; a single riverside site bought and traded between Frankish lords that grew into the county which spent three and a half centuries as one province among many inside the same Burgundian-then-Habsburg bloc that also ruled Belgium, lost more than half its territory and population to a treaty in 1839, and finally became a fully sovereign country in 1890 &mdash; not by war or revolution, but because a Dutch princess couldn't legally inherit a title tied to a five-century-old family succession pact.</p>
+  <p class="lede">The modern tricolor's red, white, and light blue trace back to the Grand Duchy's own coat of arms, worn by the House of Nassau &mdash; a deliberately different shade of blue from the Dutch flag it otherwise resembles, adopted informally after 1830 specifically so the two could be told apart.</p>
+
+  <div class="scope-note">
+    <b>Scope of this page:</b> the lands of present-day Luxembourg, c. 53 BCE&ndash;present, eleven entries. Part of a larger atlas &mdash; see the map and linked pages at the bottom.
+  </div>
+
+  <div class="imap-section">
+    <h2>One border, eleven rulers</h2>
+    <p class="imap-sub">Luxembourg's own real border, traced whole &mdash; like North Macedonia and Slovakia elsewhere in this atlas, this is a page without a genuine internal split to show honestly. Luxembourg has no historic region that was ever governed apart from the rest of it the way Royal Hungary and Ottoman Hungary once were, or the way the 1839 partition split the old Duchy from the outside. Press play, or drag the slider, to watch who held all of it, era to era.</p>
+    <div class="rule-box">
+      <b>The border shown here is the small, modern one.</b> Before 1839 the historic Duchy of Luxembourg was roughly twice this size, reaching west to include Arlon, Bastogne, and Thionville-adjacent country that is Belgian or French today. Rather than redraw the geometry for each era, this map keeps the modern outline throughout and explains the territorial loss in the story text &mdash; the same approach the Low Countries hub map takes with this same country.
+    </div>
+    <div class="imap-frame">
+      <div class="imap-controls">
+        <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="imap-year" id="iYearTag">53 BCE&ndash;963</span>
+        <input type="range" id="iSlider" min="0" max="10" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="imap-svg" viewBox="0 0 320 360" xmlns="http://www.w3.org/2000/svg">
+        <g pointer-events="none">
+          <path fill="none" stroke="var(--hair)" stroke-width="1" opacity=".55" d="M-594.6,-531.6 L-383.6,-493.0 L-114.2,-581.6 L65.5,-382.8 L222.6,-275.7 L184.9,26.0 L109.3,41.7 L73.8,292.1 L-175.6,84.0 L-324.5,116.4 L-522.7,-97.8 L-654.1,-279.6 L-788.3,-289.1 L-827.6,-447.1 L-594.6,-531.6 Z"/>
+          <path fill="none" stroke="var(--hair)" stroke-width="1" opacity=".55" d="M-522.7,-97.8 L-324.5,116.4 L-175.6,84.0 L73.8,292.1 L137.8,332.0 L221.4,323.9 L355.8,443.2 L770.9,532.4 L619.8,836.4 L577.9,1154.5 L497.3,1229.6 L366.3,1186.3 L373.8,1300.1 L158.3,1548.0 L150.7,1750.5 L289.8,1682.6 L385.9,1880.4 L371.9,2006.6 L454.2,2176.0 L351.8,2310.6 L420.6,2657.9 L576.3,2717.3 L540.0,2910.9 L274.1,3159.3 L-293.9,3028.9 L-717.2,3167.1 L-754.6,3436.0 L-1090.6,3488.5 L-1412.4,3280.8 L-1519.1,3375.8 L-2047.7,3163.8 L-2160.0,2988.0 L-2006.2,2722.1 L-1936.6,1831.8 L-2227.1,1357.4 L-2436.5,1127.6 L-2875.4,948.3 L-2899.1,621.6 L-2522.9,530.5 L-2039.5,653.5 L-2122.8,145.6 L-1853.1,342.0 L-1174.6,4.2 L-1081.8,-361.0 L-827.6,-447.1 L-788.3,-289.1 L-654.1,-279.6 L-522.7,-97.8 Z"/>
+          <path fill="none" stroke="var(--hair)" stroke-width="1" opacity=".55" d="M1341.3,-2127.5 L1343.6,-1954.5 L1633.9,-1845.5 L1628.2,-1686.8 L1923.4,-1766.0 L2087.9,-1885.8 L2411.3,-1703.8 L2545.4,-1559.1 L2609.2,-1330.4 L2526.7,-1212.3 L2629.0,-1051.2 L2696.6,-810.7 L2671.5,-656.9 L2785.3,-369.3 L2655.6,-324.7 L2580.2,-377.4 L2506.4,-293.4 L2297.4,-210.2 L2188.3,-100.5 L1976.7,-6.5 L2025.1,127.3 L2052.6,316.4 L2198.3,426.4 L2358.3,621.3 L2253.1,825.9 L2148.3,881.0 L2184.5,1173.2 L2156.3,1248.7 L2067.7,1155.7 L1929.4,1139.7 L1721.5,1216.5 L1466.9,1193.3 L1423.8,1310.6 L1279.6,1184.0 L1192.0,1207.3 L884.6,1065.4 L823.7,1161.6 L577.9,1154.5 L619.8,836.4 L770.9,532.4 L355.8,443.2 L221.4,323.9 L240.9,128.0 L184.9,26.0 L222.6,-275.7 L181.8,-745.2 L355.4,-742.6 L431.4,-909.8 L510.1,-1318.2 L458.5,-1470.3 L516.5,-1564.1 L758.5,-1584.5 L810.4,-1485.0 L1010.3,-1702.3 L947.0,-1871.1 L937.8,-2125.0 L1155.3,-2062.4 L1341.3,-2127.5 Z"/>
+          <g class="context-label">
+            <text x="16" y="150">BELGIUM</text>
+            <text x="205" y="350">FRANCE</text>
+            <text x="298" y="140">GERMANY</text>
+          </g>
+        </g>
+        <path id="ireg-lu" class="ireg-fill" d="M190.8,40.0 L272.3,132.3 L249.3,311.4 L131.4,320.0 L40.0,284.5 L84.3,55.4 L190.8,40.0 Z"/>
+        <g font-family="IBM Plex Mono, monospace">
+          <text class="ireg-label" id="ilbl-lu" x="160" y="185">LUXEMBOURG</text>
+        </g>
+      </svg>
+      <div class="imap-head">
+        <div class="imap-name" id="iEraName">Treveri, Roman Belgica &amp; Frankish Lotharingia</div>
+        <div class="imap-owners" id="iEraOwners"></div>
+      </div>
+      <div class="iflags-row" id="iFlagsRow"></div>
+      <p class="imap-story" id="iEraStory"></p>
+
+      <p class="map-note">Real traced border (drawn about 35% larger than true relative scale for legibility, matching the Low Countries hub map), no internal partition &mdash; see the rule box above for why.</p>
+      <div class="imap-key" id="iLegend"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <!-- 1 -->
+    <div class="entry" data-n="11" id="era-1944">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#ed2939"/>
+              <rect y="66.7" width="300" height="66.6" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#00a1de"/>
+            </svg>
+            <div class="flag-caption">red&ndash;white&ndash;light blue, restored after liberation</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1944/45 &ndash; present</div>
+            <h3 class="card-title">Grand Duchy of Luxembourg (restored)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#00a1de"></span>Sovereign grand duchy</span><span class="tag" tabindex="0" data-tip="Grand Duchess who broadcast to her occupied country from exile through the war and returned to lead Luxembourg's liberation-era restoration in 1945."><span class="dot" style="background:#4a3b78"></span>Charlotte</span><span class="tag" tabindex="0" data-tip="Luxembourg formally recognizes and financially supported several faiths, chiefly Roman Catholicism, under a state-religion agreement that lasted until full separation of church and state in 2015."><span class="dot" style="background:#8e3b62"></span>Roman Catholicism (state-recognized; secular since 2015)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="From the 1960s onward, tens of thousands of Portuguese workers immigrate to Luxembourg for construction and service jobs; by the early 21st century Luxembourg has the highest share of Portuguese-born residents of any country in the European Union."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="8" height="14" fill="#046a38"/><rect x="8" width="12" height="14" fill="#da291c"/><circle cx="8" cy="7" r="2.5" fill="#ffd700"/></svg>Immigration: Portuguese workers (1960s&ndash;)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The reigning House of Nassau-Weilburg, restored with Grand Duchess Charlotte's return from exile in 1945, 1890&ndash;present. Arms: azure billeted or, a lion rampant or."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1e3a8c"/><g fill="#f2b705"><rect x="14" y="16" width="8" height="14"/><rect x="34" y="16" width="8" height="14"/><rect x="54" y="16" width="8" height="14"/><rect x="74" y="16" width="8" height="14"/><rect x="24" y="36" width="8" height="14"/><rect x="44" y="36" width="8" height="14"/><rect x="64" y="36" width="8" height="14"/><rect x="14" y="56" width="8" height="14"/><rect x="34" y="56" width="8" height="14"/><rect x="54" y="56" width="8" height="14"/><rect x="74" y="56" width="8" height="14"/></g><path d="M50,58 q15,-6 15,15 q0,13 -9,19 l7,13 l-8,4 l-5,-11 l-5,11 l-8,-4 l7,-13 q-9,-6 -9,-19 q0,-21 15,-15 Z" fill="#f2b705"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Nassau-Weilburg</span></div>
+            <p><span class="label">Who &amp; why:</span> Luxembourg City is liberated by US troops on 10 September 1944, though the Battle of the Bulge pushes back into the country's northern Ardennes corner that December, and full liberation isn't complete until January&ndash;February 1945. Grand Duchess Charlotte, who spent the occupation broadcasting to her country from exile in London and Montreal, returns in April 1945. Luxembourg abandons its 19th-century neutrality for good, becoming a founding member of NATO in 1949 and, from the 1952 European Coal and Steel Community onward, one of the six founding states of what becomes the European Union &mdash; the country's capital now also hosting major EU institutions.</p>
+            <p><span class="label">What it represents:</span> the same red-white-light-blue tricolor resumes without alteration &mdash; unlike Hungary or Poland nearby in this atlas, no emblem is added or removed after the war. The flag is given its first full legal description in 1848 and its precise 1:1:2 proportions and exact shade of blue fixed only in 1972, formalizing a design already a century old by then.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, three equal horizontal bands (a longer, narrower flag than the similar-looking Dutch tricolor).</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red top, white middle, light blue bottom.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#ed2939"></span><span class="meta"><span class="name">Red</span><span class="hex">#ED2939</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#00a1de"></span><span class="meta"><span class="name">Light blue</span><span class="hex">#00A1DE</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="entry" data-n="10" id="era-1940">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#a4302a"/>
+              <circle cx="150" cy="100" r="35" fill="#f4efe1"/>
+              <path d="M150,72 v14 M150,114 v14 M122,100 h14 M164,100 h14 M150,86 l10,-10 M150,86 l-10,-10 M150,114 l10,10 M150,114 l-10,10" stroke="#241f14" stroke-width="6"/>
+            </svg>
+            <div class="flag-caption">the Reich's own banner &mdash; stylized here rather than reproduced exactly</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1940 &ndash; 1944/45</div>
+            <h3 class="card-title">German occupation (Gau Moselland)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#2b2e33"></span>Occupied / annexed territory</span><span class="tag" tabindex="0" data-tip="Nazi Gauleiter who administered Luxembourg from 1940 and formally annexed it into the German Gau Moselland in 1942, banning its language and civic symbols."><span class="dot" style="background:#4a3b78"></span>Gustav Simon</span><span class="tag" tabindex="0" data-tip="The Nazi administration established no official state religion; it suppressed Luxembourgish civic and national symbols but did not formally disestablish the Catholic Church."><span class="dot" style="background:#8e3b62"></span>No official state religion (Nazi administration)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="German forces invade and occupy Luxembourg from 10 May 1940, formally annexing it into the Nazi Gau Moselland in August 1942."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#000"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#dd0000"/></svg>Conquered by: Nazi Germany</span><span class="tag" tabindex="0" data-tip="Of roughly 3,700 Jews living in Luxembourg in 1940, most flee or are deported to Nazi camps after the occupation begins; only about a third survive the war."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#000"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#dd0000"/></svg>Emigration: Jewish flight &amp; deportation (1940&ndash;44)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The reigning House of Nassau-Weilburg, its Grand Duchess in exile through the German occupation, 1890&ndash;present. Arms: azure billeted or, a lion rampant or."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1e3a8c"/><g fill="#f2b705"><rect x="14" y="16" width="8" height="14"/><rect x="34" y="16" width="8" height="14"/><rect x="54" y="16" width="8" height="14"/><rect x="74" y="16" width="8" height="14"/><rect x="24" y="36" width="8" height="14"/><rect x="44" y="36" width="8" height="14"/><rect x="64" y="36" width="8" height="14"/><rect x="14" y="56" width="8" height="14"/><rect x="34" y="56" width="8" height="14"/><rect x="54" y="56" width="8" height="14"/><rect x="74" y="56" width="8" height="14"/></g><path d="M50,58 q15,-6 15,15 q0,13 -9,19 l7,13 l-8,4 l-5,-11 l-5,11 l-8,-4 l7,-13 q-9,-6 -9,-19 q0,-21 15,-15 Z" fill="#f2b705"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Nassau-Weilburg</span></div>
+            <p><span class="label">Who &amp; why:</span> German forces invade on 10 May 1940, the same day as the Netherlands and Belgium, overrunning a country with almost no army to resist; Grand Duchess Charlotte and her government flee into exile. Gauleiter Gustav Simon administers Luxembourg first as a civil administration, then formally annexes it into the Nazi Gau Moselland in August 1942, banning the French language and Luxembourgish civic symbols and conscripting young Luxembourgish men directly into the German army. A general strike against that forced conscription breaks out at the end of August 1942 &mdash; brutally suppressed, but among the most significant civilian acts of resistance anywhere in occupied Western Europe.</p>
+            <p><span class="label">What it represents:</span> the national tricolor and coat of arms are suppressed outright; the swastika flag of the Reich flies in their place, over a country the Nazi administration treated not as occupied territory but as reclaimed German land. Shown here in a stylized, non-literal form rather than reproducing the historical symbol exactly.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed civil ratio recorded for this administration.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">The flag of Nazi Germany, shown schematically.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="entry" data-n="9" id="era-1890">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#ed2939"/>
+              <rect y="66.7" width="300" height="66.6" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#00a1de"/>
+            </svg>
+            <div class="flag-caption">the tricolor, now flying over a fully sovereign country</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1890 &ndash; 1940</div>
+            <h3 class="card-title">Grand Duchy of Luxembourg (independent)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#00a1de"></span>Sovereign grand duchy</span><span class="tag" tabindex="0" data-tip="Head of the Nassau-Weilburg cadet branch who became Grand Duke in 1890 when Luxembourg's male-line succession rule split the crown from the Dutch throne."><span class="dot" style="background:#4a3b78"></span>Adolphe of Nassau-Weilburg</span><span class="tag" tabindex="0" data-tip="Roman Catholicism remained the dominant, state-recognized faith of the newly fully independent grand duchy, continuing the same religious arrangement carried over from Dutch personal union."><span class="dot" style="background:#8e3b62"></span>Roman Catholicism (dominant, state-recognized)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="The rapid growth of Luxembourg's iron and steel industry, especially after ARBED's 1911 founding, draws thousands of Italian and German laborers to the country's southern mining basin in the early 20th century."><span class="dot" style="background:#2f7a6b"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="6.67" height="14" fill="#009246"/><rect x="6.67" width="6.67" height="14" fill="#fff"/><rect x="13.33" width="6.67" height="14" fill="#ce2b37"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#000"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#dd0000"/></svg></span>Immigration: Italian &amp; German steelworkers (1900s&ndash;30s)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Adolphe of Nassau-Weilburg became Grand Duke in 1890 when the Dutch-Luxembourg union ended under Salic-law succession; the reigning line still descends from it, 1890&ndash;present. Arms: azure billeted or, a lion rampant or."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1e3a8c"/><g fill="#f2b705"><rect x="14" y="16" width="8" height="14"/><rect x="34" y="16" width="8" height="14"/><rect x="54" y="16" width="8" height="14"/><rect x="74" y="16" width="8" height="14"/><rect x="24" y="36" width="8" height="14"/><rect x="44" y="36" width="8" height="14"/><rect x="64" y="36" width="8" height="14"/><rect x="14" y="56" width="8" height="14"/><rect x="34" y="56" width="8" height="14"/><rect x="54" y="56" width="8" height="14"/><rect x="74" y="56" width="8" height="14"/></g><path d="M50,58 q15,-6 15,15 q0,13 -9,19 l7,13 l-8,4 l-5,-11 l-5,11 l-8,-4 l7,-13 q-9,-6 -9,-19 q0,-21 15,-15 Z" fill="#f2b705"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Nassau-Weilburg</span></div>
+            <p><span class="label">Who &amp; why:</span> King William III of the Netherlands dies on 23 November 1890 without a surviving son. Dutch succession law lets his ten-year-old daughter Wilhelmina become queen, but the centuries-old Nassau Family Pact governing Luxembourg required a male heir in the direct line &mdash; a difference rooted in Salic-law-style succession rules that the Dutch crown itself had already abandoned. The two crowns split for good: Adolphe of Nassau-Weilburg, head of a cadet branch, becomes Grand Duke, followed by Guillaume IV (1905), then briefly Grand Duchess Marie-Adélaïde, who abdicates in January 1919 over perceived wartime collaboration with the occupying Germans, and finally her sister Charlotte, whose 45-year reign (1919&ndash;64) spans the Second World War.</p>
+            <p><span class="label">What it represents:</span> the same tricolor, but now flying over the first fully independent Luxembourgish state since 1443 &mdash; no foreign monarch shares the crown, no personal union links it to a larger kingdom, for the first time in nearly 450 years.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, three equal horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red top, white middle, light blue bottom.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#ed2939"></span><span class="meta"><span class="name">Red</span><span class="hex">#ED2939</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#00a1de"></span><span class="meta"><span class="name">Light blue</span><span class="hex">#00A1DE</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="entry" data-n="8" id="era-1839">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#ed2939"/>
+              <rect y="66.7" width="300" height="66.6" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#00a1de"/>
+            </svg>
+            <div class="flag-caption">the same colors, now a smaller country</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1839 &ndash; 1890</div>
+            <h3 class="card-title">Grand Duchy of Luxembourg (personal union, reduced)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#b8862f"></span>Personal union</span><span class="tag" tabindex="0" data-tip="King of the Netherlands and Grand Duke of Luxembourg in personal union when the 1839 Treaty of London settled the borders, ceding the territory's western half to Belgium; he abdicated the following year."><span class="dot" style="background:#4a3b78"></span>William I</span><span class="tag" tabindex="0" data-tip="Roman Catholicism remained the faith of the great majority of the Luxembourgish population, even though the ruling House of Orange-Nassau, sharing the crown, was itself Dutch Protestant."><span class="dot" style="background:#8e3b62"></span>Roman Catholicism (population dominant; ruling house Protestant)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Rural poverty and land scarcity drive an estimated 72,000 Luxembourgers &mdash; at times a third of the country's population &mdash; to emigrate to the United States between the 1840s and the 1890s, chiefly to Illinois, Wisconsin, and Iowa."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#b22234"/><g fill="#fff"><rect y="1.6" width="20" height="1.6"/><rect y="4.8" width="20" height="1.6"/><rect y="8" width="20" height="1.6"/><rect y="11.2" width="20" height="1.6"/></g><rect width="8" height="7.5" fill="#3c3b6e"/></svg>Emigration: to the United States (1840s&ndash;90s)</span></div>
+            <p><span class="label">Who &amp; why:</span> the 1839 Treaty of London finally settles the borders left unresolved by the 1830 Belgian Revolution: Luxembourg's western, French-speaking half &mdash; more than half its territory and population, including Arlon &mdash; is ceded outright to Belgium as the new Belgian province of Luxembourg. The smaller, German-speaking remainder stays a Grand Duchy in personal union with the Dutch crown, still legally separate from the Kingdom of the Netherlands itself. It also remains a member of the German Confederation until that body dissolves in 1866, and joins the German customs union (Zollverein) in 1842; the 1867 Treaty of London, resolving a war scare between France and Prussia over the country, declares Luxembourg permanently neutral and has the Prussian garrison withdraw from its fortress.</p>
+            <p><span class="label">What it represents:</span> the same red-white-light-blue tricolor, its colors drawn from the ducal coat of arms and increasingly used informally through the 1830s and 1840s to visually distinguish Luxembourg from the similar-looking Belgian and Dutch flags on either side of it.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No single fixed ratio yet; first legally described 1848.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red top, white middle, light blue bottom.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#ed2939"></span><span class="meta"><span class="name">Red</span><span class="hex">#ED2939</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#00a1de"></span><span class="meta"><span class="name">Light blue</span><span class="hex">#00A1DE</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="entry" data-n="7" id="era-1815">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#ed2939"/>
+              <rect y="66.7" width="300" height="66.6" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#00a1de"/>
+            </svg>
+            <div class="flag-caption">a new title, a larger territory, an emerging tricolor</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1815 &ndash; 1839</div>
+            <h3 class="card-title">Grand Duchy of Luxembourg (personal union, undivided)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#b8862f"></span>Personal union</span><span class="tag" tabindex="0" data-tip="King of the Netherlands who received the newly created Grand Duchy of Luxembourg as his own personal possession from the 1815 Congress of Vienna, compensation for lost Nassau lands in Germany."><span class="dot" style="background:#4a3b78"></span>William I</span><span class="tag" tabindex="0" data-tip="Roman Catholicism remained the faith of the great majority of the Luxembourgish population under this new personal union, even though the ruling House of Orange-Nassau was itself Dutch Protestant."><span class="dot" style="background:#8e3b62"></span>Roman Catholicism (population dominant; ruling house Protestant)</span></div>
+            <p><span class="label">Who &amp; why:</span> the 1815 Congress of Vienna creates the Grand Duchy of Luxembourg as compensation for William I of the Netherlands, who had just lost his family's ancestral Nassau territories in Germany to Prussia. William rules Luxembourg in personal union &mdash; not as part of his Kingdom of the Netherlands, but as his own separate possession &mdash; while the Grand Duchy is simultaneously enrolled in the German Confederation, its fortress garrisoned by Prussian troops. When the 1830 Belgian Revolution breaks out, most of Luxembourg (outside the fortress city itself, which the Prussian garrison holds for William) sides with the rebels and is administered as part of Belgium in practice for nine years, until the 1839 treaty formally divides it.</p>
+            <p><span class="label">What it represents:</span> the earliest period in which Luxembourg's own tricolor is believed to emerge, drawn from the red lion and blue-and-white bars of the ducal coat of arms, though its use is not yet consistent or official this early &mdash; shown here as the same design that solidifies over the following decades, with that caveat.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio recorded; earliest, least securely attested use of the tricolor.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red top, white middle, light blue bottom (as later formalized).</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#ed2939"></span><span class="meta"><span class="name">Red</span><span class="hex">#ED2939</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#00a1de"></span><span class="meta"><span class="name">Light blue</span><span class="hex">#00A1DE</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="entry" data-n="6" id="era-1795">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="100" height="200" fill="#002395"/>
+              <rect x="100" width="100" height="200" fill="#f4efe1"/>
+              <rect x="200" width="100" height="200" fill="#ed2939"/>
+            </svg>
+            <div class="flag-caption">the French tricolor, flown over annexed territory</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1795 &ndash; 1815</div>
+            <h3 class="card-title">French Republic / Empire annexation</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#2c5f8a"></span>Annexed territory</span><span class="tag" tabindex="0" data-tip="No single ruler is named for the exact 1795 annexation; Revolutionary France was governed by its collective National Convention, giving way to the Directory later that year, before Napoleon's later rule."><span class="dot" style="background:#4a3b78"></span>No single ruler documented</span><span class="tag" tabindex="0" data-tip="Revolutionary France's anti-clerical secularism left the newly annexed Département des Forêts with no official religion until Napoleon's 1801 Concordat restored recognition, though not establishment, of the Catholic Church."><span class="dot" style="background:#8e3b62"></span>No official state religion (Revolutionary secularism)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Revolutionary France besieges and captures Luxembourg's fortress after a seven-month siege, annexing the country outright in 1795 and dissolving its separate institutions for the first time since 1443."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="6.67" height="14" fill="#0055a4"/><rect x="6.67" width="6.67" height="14" fill="#fff"/><rect x="13.33" width="6.67" height="14" fill="#ef4135"/></svg>Conquered by: Revolutionary France</span></div>
+            <p><span class="label">Who &amp; why:</span> Revolutionary France besieges Luxembourg's fortress &mdash; then among the strongest in Europe, nicknamed the "Gibraltar of the North" &mdash; for seven months before it surrenders in June 1795, part of the same wider French sweep across the Low Countries covered on the region's hub page. Luxembourg is annexed outright and reorganized as the Département des Forêts, its own institutions dissolved entirely rather than merely placed under a new overlord as in previous centuries. French conscription and anti-clerical policy provoke the Klëppelkrich ("Cudgel War") peasant uprising in 1798, crushed within weeks.</p>
+            <p><span class="label">What it represents:</span> the French tricolor, flown here for the first time not as one power replacing another as feudal overlord, but as direct incorporation into the French state itself &mdash; no separate Luxembourgish administration survives this period at all.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3, three equal vertical bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Blue hoist, white middle, red fly.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#002395"></span><span class="meta"><span class="name">Blue</span><span class="hex">#002395</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#ed2939"></span><span class="meta"><span class="name">Red</span><span class="hex">#ED2939</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 7 -->
+    <div class="entry" data-n="5" id="era-1714">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#f4c430"/>
+              <g fill="#241f14">
+                <ellipse cx="150" cy="100" rx="28" ry="20"/>
+                <path d="M150,82 L108,42 L128,78 Z"/>
+                <path d="M150,82 L192,42 L172,78 Z"/>
+                <path d="M150,118 L118,163 L138,128 Z"/>
+                <path d="M150,118 L182,163 L162,128 Z"/>
+                <path d="M150,80 l0,-14 -6,6 6,-6 6,6 Z"/>
+              </g>
+            </svg>
+            <div class="flag-caption">the Austrian Habsburgs' own yellow-and-black double eagle</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1714 &ndash; 1795</div>
+            <h3 class="card-title">Austrian Netherlands (Duchy of Luxembourg)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#5b3f7a"></span>Netherlands overlordship</span><span class="tag" tabindex="0" data-tip="Habsburg emperor who received the Spanish Netherlands, Luxembourg included, under the 1713&ndash;14 Treaties of Utrecht and Rastatt that ended the War of the Spanish Succession."><span class="dot" style="background:#4a3b78"></span>Charles VI</span><span class="tag" tabindex="0" data-tip="Roman Catholicism was the Austrian Habsburg dynasty's own established faith, continuing the Counter-Reformation religious order the Spanish branch of the family had enforced across the same territory."><span class="dot" style="background:#8e3b62"></span>Roman Catholicism (Habsburg state religion)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Austrian Habsburgs ruled Luxembourg as the Duchy within the Austrian Netherlands until the French Revolutionary conquest, 1477&ndash;1794. Arms: gules, a fess argent (the Bindenschild)."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><rect x="4" y="46" width="92" height="24" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Habsburg</span></div>
+            <p><span class="label">Who &amp; why:</span> the direct Spanish Habsburg line dies out in 1700, touching off the War of the Spanish Succession; the 1713&ndash;14 Treaties of Utrecht and Rastatt split the inheritance, sending the Spanish Netherlands &mdash; Belgium and Luxembourg together &mdash; to the Austrian branch of the Habsburgs under Emperor Charles VI rather than to the new Bourbon king in Madrid. Luxembourg's fortress continues to be rebuilt and strengthened through this period, cementing its reputation as one of the most heavily fortified places in Europe. The same overlordship changes tracked on Belgium's own page apply here in lockstep &mdash; the two duchies share the identical sequence of rulers throughout this entire 350-year span.</p>
+            <p><span class="label">What it represents:</span> the Habsburg dynasty's own double-headed eagle on gold, distinct from the Burgundian cross flown by the same family's earlier Spanish-era administration &mdash; the ruling house is unchanged, but the crown worn is now Vienna's rather than Madrid's.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed civil ratio recorded for this era.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Gold field, black double-headed eagle.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#f4c430"></span><span class="meta"><span class="name">Gold</span><span class="hex">#F4C430</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#241f14"></span><span class="meta"><span class="name">Black</span><span class="hex">#241F14</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 8 -->
+    <div class="entry" data-n="4" id="era-1581">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#f4efe1"/>
+              <path d="M0,0 L300,200" stroke="#a4302a" stroke-width="24" stroke-linecap="round"/>
+              <path d="M300,0 L0,200" stroke="#a4302a" stroke-width="24" stroke-linecap="round"/>
+              <g fill="#7c2e1f">
+                <circle cx="75" cy="50" r="7"/><circle cx="150" cy="100" r="7"/><circle cx="225" cy="150" r="7"/><circle cx="225" cy="50" r="7"/><circle cx="75" cy="150" r="7"/>
+              </g>
+            </svg>
+            <div class="flag-caption">the same Cross of Burgundy, now under a Spanish Habsburg crown</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1581 &ndash; 1714</div>
+            <h3 class="card-title">Spanish Netherlands (Duchy of Luxembourg)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#7c5a2e"></span>Netherlands overlordship</span><span class="tag" tabindex="0" data-tip="Spanish Habsburg king whose rule the northern provinces renounced in 1581; Luxembourg, more remote from the revolt's center, remained in his hands throughout."><span class="dot" style="background:#4a3b78"></span>Philip II</span><span class="tag" tabindex="0" data-tip="Roman Catholicism was the militant, Counter-Reformation state religion of the Spanish Habsburg crown, enforced across the Spanish Netherlands including Luxembourg throughout this era."><span class="dot" style="background:#8e3b62"></span>Roman Catholicism (Spanish Habsburg state religion)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="French forces under Louis XIV besiege and seize Luxembourg's fortress in 1684, holding it until it is returned to Spain by the 1697 Treaty of Ryswick."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#002395"/><g fill="#ffd700"><circle cx="6" cy="4" r="1"/><circle cx="14" cy="4" r="1"/><circle cx="6" cy="10" r="1"/><circle cx="14" cy="10" r="1"/><circle cx="10" cy="7" r="1"/></g></svg>Conquered by: France (1684&ndash;97)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Spanish, then Austrian, Habsburgs ruled Luxembourg as part of the Habsburg Netherlands throughout this era, 1477&ndash;1794. Arms: gules, a fess argent (the Bindenschild)."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><rect x="4" y="46" width="92" height="24" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Habsburg</span></div>
+            <p><span class="label">Who &amp; why:</span> when the northern provinces renounce Philip II's rule in the 1581 Act of Abjuration, Luxembourg &mdash; always more remote from the revolt's center in Holland and Flanders &mdash; never leaves Habsburg hands at all. It remains part of the Spanish Netherlands, governed from Brussels on Madrid's behalf, through the Eighty Years' War and its confirmation at the 1648 Peace of Westphalia. The fortress changes hands briefly to France under Louis XIV (1684&ndash;97) before reverting to Spain by treaty, foreshadowing the far more permanent French annexation still a century away.</p>
+            <p><span class="label">What it represents:</span> the same red saltire-and-firesteel Cross of Burgundy flown across the Spanish Netherlands as a whole &mdash; the flag doesn't change at 1581 the way the Dutch Republic's does, because Luxembourg's own overlordship doesn't change either.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio recorded for this era.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">White field, red saltire (diagonal cross) with stylized firesteel sparks.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 9 -->
+    <div class="entry" data-n="3" id="era-1443">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#f4efe1"/>
+              <path d="M0,0 L300,200" stroke="#a4302a" stroke-width="24" stroke-linecap="round"/>
+              <path d="M300,0 L0,200" stroke="#a4302a" stroke-width="24" stroke-linecap="round"/>
+              <g fill="#7c2e1f">
+                <circle cx="75" cy="50" r="7"/><circle cx="150" cy="100" r="7"/><circle cx="225" cy="150" r="7"/><circle cx="225" cy="50" r="7"/><circle cx="75" cy="150" r="7"/>
+              </g>
+            </svg>
+            <div class="flag-caption">the Duchy of Burgundy's own cross, adopted across the whole bloc</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1443 &ndash; 1581</div>
+            <h3 class="card-title">Burgundian / Habsburg Netherlands (Duchy of Luxembourg)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#7c5a2e"></span>Netherlands overlordship</span><span class="tag" tabindex="0" data-tip="Duke of Burgundy who bought Luxembourg in 1443, the last major piece of the Burgundian Netherlands he spent three decades assembling."><span class="dot" style="background:#4a3b78"></span>Philip the Good</span><span class="tag" tabindex="0" data-tip="Roman Catholicism was the established faith of the Burgundian dukes and the whole of Latin Christendom, unquestioned as the territory's religion throughout this era."><span class="dot" style="background:#8e3b62"></span>Roman Catholicism</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Philip the Good seized Luxembourg in 1443, folding it into the Burgundian State, 1443&ndash;1477. Arms: the ancient Burgundy bend, or bendy azure and or within a bordure gules."><svg class="noble-mini" viewBox="0 0 100 120"><defs><clipPath id="luxClip1443a"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z"/></clipPath></defs><g clip-path="url(#luxClip1443a)"><rect x="0" y="0" width="100" height="120" fill="#f2b705"/><g fill="#1e3a8c"><path d="M-20,-10 L0,-10 L100,110 L100,130 Z"/><path d="M20,-10 L40,-10 L100,70 L100,90 Z"/><path d="M60,-10 L80,-10 L100,30 L100,50 Z"/><path d="M-20,30 L-20,10 L60,130 L40,130 Z"/><path d="M-20,70 L-20,50 L20,130 L0,130 Z"/></g></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#a4302a" stroke-width="6"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Valois-Burgundy</span><span class="tag" tabindex="0" data-tip="Inherited via Mary of Burgundy's marriage to Maximilian I; ruled Luxembourg from 1477 as part of the Spanish, then Austrian, Habsburg Netherlands until 1794. Arms: gules, a fess argent (the Bindenschild)."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><rect x="4" y="46" width="92" height="24" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Habsburg</span></div>
+            <p><span class="label">Who &amp; why:</span> Philip the Good, Duke of Burgundy, buys Luxembourg from the impoverished Duchess Elisabeth of Görlitz in 1443, fully securing it after her death in 1451 &mdash; the last major piece of the Burgundian Netherlands he spent three decades assembling. The Burgundian line dies out with Mary of Burgundy in 1482, passing the whole bloc by marriage to the Habsburgs; her grandson Charles V, born in Ghent in 1500, later declares the Seventeen Provinces, Luxembourg among them, one indivisible inheritance under the 1549 Pragmatic Sanction. Luxembourg's own institutions &mdash; its Estates, its laws, its own coinage &mdash; continue throughout, governed as one duchy among many rather than absorbed into a single state.</p>
+            <p><span class="label">What it represents:</span> the Cross of Burgundy &mdash; a red saltire on white, associated firesteel sparks recalling the Order of the Golden Fleece &mdash; the shared banner of the whole Burgundian and later Habsburg Netherlands, the same flag covered on Belgium's and the Low Countries hub's own pages.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio recorded for this era.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">White field, red saltire (diagonal cross) with stylized firesteel sparks.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 10 -->
+    <div class="entry" data-n="2" id="era-963">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; pre-heraldic era, no flag survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">963 &ndash; 1443</div>
+            <h3 class="card-title">County / Duchy of Luxembourg (independent)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Independent county / duchy</span><span class="tag" tabindex="0" data-tip="Count of Ardennes who acquired the &quot;Lucilinburhuc&quot; fortress site in 963, traditionally reckoned the founding act of Luxembourg."><span class="dot" style="background:#4a3b78"></span>Siegfried I</span><span class="tag" tabindex="0" data-tip="Roman Catholicism was the established faith of medieval Latin Christendom, unquestioned as the county and later duchy's religion from its founding onward."><span class="dot" style="background:#8e3b62"></span>Roman Catholicism</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Counts, then Dukes, of Luxembourg from Siegfried's fortress on the Bock, and four times Holy Roman Emperors, 963&ndash;1443. Arms: barry argent and azure, a lion rampant gules."><svg class="noble-mini" viewBox="0 0 100 120"><defs><clipPath id="luxClip963"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z"/></clipPath></defs><g clip-path="url(#luxClip963)"><rect x="0" y="0" width="100" height="120" fill="#f4efe1"/><g fill="#2a5ca8"><rect x="0" y="4" width="100" height="10"/><rect x="0" y="24" width="100" height="10"/><rect x="0" y="44" width="100" height="10"/><rect x="0" y="64" width="100" height="10"/><rect x="0" y="84" width="100" height="10"/><rect x="0" y="104" width="100" height="10"/></g><path d="M50,34 q13,-5 13,13 q0,10 -7,16 l6,12 l-7,4 l-5,-11 l-5,11 l-7,-4 l6,-12 q-7,-6 -7,-16 q0,-18 13,-13 Z" fill="#a4302a"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Luxembourg</span></div>
+            <p><span class="label">Who &amp; why:</span> Siegfried I, Count of Ardennes, acquires the rocky outcrop known as the "Lucilinburhuc" ("little fortress") from the Abbey of St. Maximin in Trier in 963, traditionally reckoned the founding of Luxembourg; a settlement grows around the fortress he builds there. His descendants expand the County of Luxembourg over the following centuries, reaching a high point under Henry VII, who becomes Holy Roman Emperor in 1312, and his grandson Charles IV, who as emperor elevates the county to a Duchy in 1354 for his own half-brother, Wenceslaus I. The Duchy passes through several hands, including a stretch under Bohemian and then Habsburg-adjacent control, before its final owner, Duchess Elisabeth of Görlitz, sells it on to Burgundy in 1443.</p>
+            <p><span class="label">What it represents:</span> no securely documented flag survives from either the pre-heraldic County or the early Duchy period; medieval Luxembourgish counts and dukes used personal and dynastic seals rather than a fixed territorial banner. Shown here honestly blank rather than invented.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 11 -->
+    <div class="entry" data-n="1" id="era-53bce">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="120" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; no unified banner; Roman provincial and Frankish rule, no independent Luxembourgish state</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 53 BCE &ndash; 963 CE</div>
+            <h3 class="card-title">Treveri, Roman Belgica &amp; Frankish Lotharingia</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="No independent Luxembourgish polity existed; this millennium runs from a Celtic tribal territory through a Roman province to a Frankish kingdom's border march, with the region ruled throughout as part of something larger."><span class="dot" style="background:#6b5c4a"></span>Roman / Frankish rule &mdash; no independent state</span><span class="tag" tabindex="0" data-tip="Julius Caesar's Gallic Wars campaigns bring the Treveri, the Celtic tribe native to the Moselle valley including present-day Luxembourg, under Roman control by 53 BCE, ending their independence."><span class="dot" style="background:#4a3b78"></span>Julius Caesar (Roman conquest)</span><span class="tag" tabindex="0" data-tip="Gallo-Roman polytheism, later blended with the cult of Roman emperors, was practiced until Christianity spread through the region from the 4th century, becoming the settled faith by the Frankish period."><span class="dot" style="background:#8e3b62"></span>Gallo-Roman polytheism (Christianized 4th&ndash;6th c.)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Julius Caesar's legions subdue the Treveri and the wider Belgic tribal coalition during the Gallic Wars, incorporating the region into the new Roman province of Gallia Belgica by the 50s BCE; nearby Augusta Treverorum (modern Trier) grows into one of the Western Empire's great cities."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#8b0000"/><path d="M10,3 L13,7 L11,7 L11,11 L9,11 L9,7 L7,7 Z" fill="#d4af37"/></svg>Conquered by: Rome (Julius Caesar, 50s BCE)</span><span class="tag" tabindex="0" data-tip="As Roman authority collapses in the 5th century, Frankish tribes settle and take control of the region, which becomes part of the Merovingian and then Carolingian Frankish kingdoms; the 843 Treaty of Verdun places it within Lotharingia, a middle kingdom later absorbed into the East Frankish/German sphere."><span class="dot" style="background:#a3672f"></span>Settlement: Frankish tribes (5th c.)</span></div>
+            <p><span class="label">Who &amp; why:</span> Julius Caesar's Gallic Wars bring the Treveri, the Celtic tribe native to the Moselle valley, under Roman rule by 53 BCE, and the region becomes part of Gallia Belgica with nearby Augusta Treverorum (Trier) growing into a major Western Roman capital and later an imperial residence. As Roman authority in the west collapses, Frankish tribes settle the area from the 5th century; it passes through the Merovingian and Carolingian Frankish kingdoms, and the 843 Treaty of Verdun places it in the middle kingdom of Lotharingia. By the 10th century this territory sits within the Holy Roman Empire's German-speaking sphere, setting the stage for Siegfried I's 963 acquisition of the Lucilinburhuc fortress.</p>
+            <p><span class="label">What it represents:</span> no flag or banner from Treveri, Roman, or Frankish rule survives specifically attached to this territory; none of these powers used a fixed territorial flag for it, since no independent Luxembourgish state yet existed. Shown here honestly blank rather than invented.</p>
+            <p><span class="label">World context:</span> this millennium runs alongside the building of Rome's Colosseum (70&ndash;80 CE) and the height of the Pax Romana, the Western Roman Empire's collapse in 476 CE, and Charlemagne's 800 coronation as Holy Roman Emperor in Rome &mdash; the same Carolingian revival whose 843 partition among his grandsons first draws the Verdun-era borders this region would sit within for the following century.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#6b5c4a"></span><b>Roman / Frankish rule</b> &mdash; no independent Luxembourgish state</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Independent county / duchy</b> &mdash; medieval sovereign state</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#7c5a2e"></span><b>Netherlands overlordship</b> &mdash; Burgundian, Habsburg, or Spanish administration</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#5b3f7a"></span><b>Netherlands overlordship</b> &mdash; Austrian Habsburg administration</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#2c5f8a"></span><b>Annexed territory</b> &mdash; direct French rule</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#b8862f"></span><b>Personal union</b> &mdash; own institutions, a shared foreign monarch</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#00a1de"></span><b>Sovereign grand duchy</b> &mdash; fully independent, own dynasty</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#2b2e33"></span><b>Occupied / annexed territory</b> &mdash; Nazi administration</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the named ruler most associated with the era's start</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official/established faith, not the population's</div>
+    </div>
+  </div>
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for Luxembourg lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/lu/">Search Record Atlas for Luxembourg &rarr;</a>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This page is one lineage in a larger set. See the region-wide map and the other countries here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="low-countries-hub.html"><b>Low Countries hub</b><span>Belgium, the Netherlands, Luxembourg</span></a>
+      <a class="link-card" href="habsburg-hub.html"><b>Habsburg Lands hub</b><span>Seven countries, four centuries</span></a>
+      <a class="link-card" href="germany-hub.html"><b>German Lands hub</b><span>Germany's own east-west split</span></a>
+      <a class="link-card" href="index.html"><b>Flags of Former Yugoslavia</b><span>The original nine-snapshot regional map</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are close historical approximations for painting reference; pre-19th-century swatches are informed reconstructions, not official specifications. Map is schematic and not surveyed.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var IC = {
+    roman_frank: "#6b5c4a", indep: "#a9762f", bh: "#7c5a2e", aus: "#5b3f7a", fr: "#2c5f8a", ukn: "#b8862f", lu_indep: "#00a1de", occ: "#2b2e33"
+  };
+  var INAMES = {
+    roman_frank: "Treveri / Roman Belgica / Frankish Lotharingia (no independent state)",
+    indep: "County / Duchy of Luxembourg (independent)", bh: "Burgundian / Habsburg Netherlands",
+    aus: "Austrian Netherlands", fr: "French Republic / Empire", ukn: "Personal union with the Dutch crown",
+    lu_indep: "Grand Duchy of Luxembourg (independent)", occ: "German occupation (Gau Moselland)"
+  };
+  var IFLAGS = {
+    roman_frank: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>',
+    indep: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>',
+    bh: '<rect width="300" height="200" fill="#f4efe1"/><path d="M0,0 L300,200" stroke="#a4302a" stroke-width="24" stroke-linecap="round"/><path d="M300,0 L0,200" stroke="#a4302a" stroke-width="24" stroke-linecap="round"/><g fill="#7c2e1f"><circle cx="75" cy="50" r="7"/><circle cx="150" cy="100" r="7"/><circle cx="225" cy="150" r="7"/><circle cx="225" cy="50" r="7"/><circle cx="75" cy="150" r="7"/></g>',
+    aus: '<rect width="300" height="200" fill="#f4c430"/><g fill="#241f14"><ellipse cx="150" cy="100" rx="28" ry="20"/><path d="M150,82 L108,42 L128,78 Z"/><path d="M150,82 L192,42 L172,78 Z"/><path d="M150,118 L118,163 L138,128 Z"/><path d="M150,118 L182,163 L162,128 Z"/><path d="M150,80 l0,-14 -6,6 6,-6 6,6 Z"/></g>',
+    fr: '<rect width="100" height="200" fill="#002395"/><rect x="100" width="100" height="200" fill="#f4efe1"/><rect x="200" width="100" height="200" fill="#ed2939"/>',
+    ukn: '<rect width="300" height="66.7" fill="#ed2939"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#00a1de"/>',
+    lu_indep: '<rect width="300" height="66.7" fill="#ed2939"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#00a1de"/>',
+    occ: '<rect width="300" height="200" fill="#a4302a"/><circle cx="150" cy="100" r="35" fill="#f4efe1"/><path d="M150,72 v14 M150,114 v14 M122,100 h14 M164,100 h14 M150,86 l10,-10 M150,86 l-10,-10 M150,114 l10,10 M150,114 l-10,10" stroke="#241f14" stroke-width="6"/>'
+  };
+  function iFlagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (IFLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  var iLegendEl = document.getElementById("iLegend");
+  iLegendEl.innerHTML = Object.keys(IC).map(function (k) {
+    return '<span><span class="sw" style="background:' + IC[k] + '"></span>' + INAMES[k] + "</span>";
+  }).join("");
+
+  var ISNAP = [
+    { year:"53 BCE–963", name:"Treveri, Roman Belgica & Frankish Lotharingia", t:{ lu:IC.roman_frank }, flagKeys:{ lu:"roman_frank" },
+      story:"Julius Caesar's Gallic Wars bring the Treveri, the Celtic tribe native to the Moselle valley, under Roman rule by 53 BCE; the region becomes part of Gallia Belgica, with nearby Augusta Treverorum (Trier) growing into a major Western Roman capital. As Roman authority collapses, Frankish tribes settle the area from the 5th century, and it passes through the Merovingian and Carolingian kingdoms; the 843 Treaty of Verdun places it in the middle kingdom of Lotharingia. No independent Luxembourgish polity exists at any point in this millennium, and no flag is documented for any of it." },
+    { year:"963", name:"Siegfried acquires the Lucilinburhuc", t:{ lu:IC.indep }, flagKeys:{ lu:"indep" },
+      story:"Siegfried I, Count of Ardennes, acquires a small rocky fortress on the Alzette river from the Abbey of St. Maximin in Trier in 963 &mdash; traditionally reckoned the founding of Luxembourg. No securely documented flag survives from this pre-heraldic era." },
+    { year:"1443", name:"Burgundian acquisition", t:{ lu:IC.bh }, flagKeys:{ lu:"bh" },
+      story:"Philip the Good, Duke of Burgundy, buys the by-then-Duchy of Luxembourg from Duchess Elisabeth of Görlitz in 1443, the last major piece of his assembled Burgundian Netherlands. The Cross of Burgundy becomes the shared banner across the whole bloc, Luxembourg included." },
+    { year:"1581", name:"Dutch Revolt — Luxembourg stays Habsburg", t:{ lu:IC.bh }, flagKeys:{ lu:"bh" },
+      story:"When the northern provinces renounce Philip II in 1581, Luxembourg never leaves Habsburg hands at all, remaining part of the Spanish Netherlands governed from Brussels &mdash; the same Cross of Burgundy continues to fly." },
+    { year:"1714", name:"Austrian Netherlands", t:{ lu:IC.aus }, flagKeys:{ lu:"aus" },
+      story:"The Treaties of Utrecht and Rastatt send the Spanish Netherlands, Luxembourg included, to the Austrian branch of the Habsburgs rather than the new Bourbon king in Madrid. The ruling family is unchanged; the crown worn is now Vienna's, flown on gold with the black double eagle." },
+    { year:"1795", name:"French annexation", t:{ lu:IC.fr }, flagKeys:{ lu:"fr" },
+      story:"After a seven-month siege of its famous fortress, France annexes Luxembourg outright in 1795, reorganizing it as the Département des Forêts &mdash; its own separate institutions dissolved for the first time since 1443." },
+    { year:"1815", name:"Grand Duchy created, personal union", t:{ lu:IC.ukn }, flagKeys:{ lu:"ukn" },
+      story:"The Congress of Vienna creates the Grand Duchy of Luxembourg as compensation for William I of the Netherlands, ruled in personal union rather than as part of his Dutch kingdom, while also belonging to the German Confederation." },
+    { year:"1839", name:"Treaty of London — territory halved", t:{ lu:IC.ukn }, flagKeys:{ lu:"ukn" },
+      story:"The Treaty of London cedes Luxembourg's larger, French-speaking western half to Belgium outright. The smaller eastern remainder shown on this map stays in personal union with the Dutch crown for another half-century." },
+    { year:"1890", name:"Full independence", t:{ lu:IC.lu_indep }, flagKeys:{ lu:"lu_indep" },
+      story:"King William III of the Netherlands dies without a son; Nassau Family Pact succession rules bar his daughter Wilhelmina from also inheriting Luxembourg. Adolphe of Nassau-Weilburg becomes Grand Duke &mdash; the country's own separate monarchy, unbroken since." },
+    { year:"1940", name:"German occupation begins", t:{ lu:IC.occ }, flagKeys:{ lu:"occ" },
+      story:"Germany invades on 10 May 1940; Grand Duchess Charlotte flees into exile. The country is administered as Nazi Gau Moselland from 1942, its flag and language banned, until liberation in 1944&ndash;45." },
+    { year:"1944/45–present", name:"Grand Duchy restored", t:{ lu:IC.lu_indep }, flagKeys:{ lu:"lu_indep" },
+      story:"Luxembourg City is liberated in September 1944; full liberation follows the Battle of the Bulge in early 1945. The Grand Duchy resumes under Charlotte, its tricolor unaltered, becoming a founding NATO and European Union member." }
+  ];
+
+  var IREGIONS = ["lu"];
+  var IREGION_NAMES = { lu:"Luxembourg" };
+
+  function iTextColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+
+  var iYearTag = document.getElementById("iYearTag");
+  var iEraName = document.getElementById("iEraName");
+  var iEraOwners = document.getElementById("iEraOwners");
+  var iEraStory = document.getElementById("iEraStory");
+  var iFlagsRow = document.getElementById("iFlagsRow");
+  var iSlider = document.getElementById("iSlider");
+
+  function iRender(idx) {
+    var era = ISNAP[idx];
+    iYearTag.textContent = era.year;
+    iEraName.textContent = era.name;
+    iEraStory.innerHTML = era.story;
+
+    IREGIONS.forEach(function (id) {
+      document.getElementById("ireg-" + id).setAttribute("fill", era.t[id]);
+      var tcol = iTextColorFor(era.t[id]);
+      var tcolHalo = tcol === "#201a12" ? "#f7f1e3" : "#201a12";
+      var lbl = document.getElementById("ilbl-" + id);
+      if (lbl) { lbl.setAttribute("fill", tcol); lbl.setAttribute("stroke", tcolHalo); }
+    });
+
+    var label = Object.keys(IC).filter(function (k) { return IC[k] === era.t.lu; })[0];
+    iEraOwners.innerHTML = "<b>" + INAMES[label] + "</b>: whole country";
+
+    iFlagsRow.innerHTML = IREGIONS.map(function (id) {
+      return '<div class="iflag-chip">' + iFlagSvg(era.flagKeys[id]) + '<div class="ic-label">' + IREGION_NAMES[id] + '</div></div>';
+    }).join("");
+  }
+
+  iSlider.addEventListener("input", function () { iRender(parseInt(iSlider.value, 10)); });
+  iRender(0);
+
+  var iPlaying = false, iPlayTimer = null;
+  var iPlayBtn = document.getElementById("iPlayBtn");
+  function iStepPlay() {
+    var next = parseInt(iSlider.value, 10) + 1;
+    if (next > ISNAP.length - 1) { iStopPlay(); return; }
+    iSlider.value = next;
+    iRender(next);
+  }
+  function iStartPlay() {
+    iPlaying = true;
+    iPlayBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(iSlider.value, 10) >= ISNAP.length - 1) { iSlider.value = 0; iRender(0); }
+    iPlayTimer = setInterval(iStepPlay, 1700);
+  }
+  function iStopPlay() {
+    iPlaying = false;
+    iPlayBtn.innerHTML = "&#9654;";
+    clearInterval(iPlayTimer);
+  }
+  iPlayBtn.addEventListener("click", function () { iPlaying ? iStopPlay() : iStartPlay(); });
+})();
+
+  // Tap-to-toggle for the pill tag tooltips (hover doesn't work on touch devices).
+  document.querySelectorAll(".tag[data-tip]").forEach(function (tag) {
+    tag.addEventListener("click", function (e) {
+      var wasOpen = tag.classList.contains("tip-open");
+      document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+      if (!wasOpen) tag.classList.add("tip-open");
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+  });
+</script>
+
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var html = '<h4>Genealogical records for this ground</h4>';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>
+
+</body></html>

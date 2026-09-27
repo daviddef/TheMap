@@ -1,0 +1,834 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+</style></head><body>
+<title>Flags of Israel</title>
+<meta name="description" content="A chronological, paint-ready atlas of every flag that flew over the land of Israel, from ancient and biblical history through Roman-era Judea, centuries of diaspora, Ottoman and British Mandate rule, and the 1948 declaration of statehood.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.08rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; font-size: .94rem; color: var(--muted); }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  .legend { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+
+  /* ---------- Timeline ---------- */
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1px; background: var(--hair); }
+  @media (max-width: 560px) { .timeline::before { left: 9px; } }
+  .entry { position: relative; padding-left: 46px; margin-bottom: 46px; }
+  @media (max-width: 560px) { .entry { padding-left: 30px; } }
+  .entry::before {
+    content: attr(data-n);
+    position: absolute; left: 1px; top: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--paper); outline: 1px solid var(--hair);
+    background: var(--card);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--brick); display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) { .entry::before { left: -5px; width: 18px; height: 18px; font-size: 9px; } }
+
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+  .card-head { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  @media (max-width: 620px) { .card-head { flex-direction: column; } }
+  .flag-box { flex: none; width: 168px; }
+  .flag-box svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-caption { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .card-title { font-size: 1.32rem; font-weight: 600; line-height: 1.18; margin: 0 0 10px; text-wrap: balance; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px; border: 1px solid var(--card-border); color: var(--muted);
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  /* Flip tooltip below tags near the top of the viewport so it isn't clipped */
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  /* Keep tooltips from overflowing the left/right edges on narrow screens */
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint { border-top: 1px solid var(--hair); }
+  details.paint > summary {
+    cursor: pointer; list-style: none; padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--adriatic); display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before { content: "+"; font-family: "Fraunces", serif; font-size: 15px; width: 14px; }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row { display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px; }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--card-border); border-radius: 2px; padding: 5px 9px 5px 5px; background: var(--paper); }
+  .swatch .chip { width: 20px; height: 20px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: none; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 88px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 340px; height: auto; }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .iborder-line { transition: stroke-opacity 0.6s ease, stroke-width 0.6s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .ireg-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 700; text-anchor: middle; transition: fill .4s ease, stroke .4s ease; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="levant-hub.html">Levant hub</a></p>
+  <p class="kicker">Family research &middot; Phase 7 of the world atlas &middot; the Levant</p>
+  <h1>Flags of Israel</h1>
+  <p class="lede">From Bronze Age Canaan's Egyptian-ruled city-states, through the ancient Israelite and Judahite kingdoms and the Second Temple period, Roman-era Judea, centuries of diaspora, Crusader Jerusalem, Mamluk and Ottoman rule, and a British Mandate, to the 1948 declaration of the State of Israel &mdash; eight entries across roughly thirty-four centuries.</p>
+  <p class="lede">This is the atlas's most politically sensitive page. Every date and event below is drawn from the well-documented historical record, and the account stops at the 1949 armistice agreements &mdash; it deliberately does not extend into, or characterize, the Israeli-Palestinian conflict as it has continued since. Where the record touches contested history, it sticks to dates, names, and documents rather than taking a side.</p>
+
+  <div class="scope-note">
+    <b>Scope of this page:</b> the land of present-day Israel, c. 1550 BCE&ndash;present, eight political entities. The map below traces Israel's own whole-country boundary across its own seven most recent eras (the added Bronze Age Canaan entry predates the map's own coverage) &mdash; there is no internal partition to show here, the same single-region treatment used elsewhere in this atlas where a territory has no genuinely separate internal region to carve out honestly. Part of a larger atlas &mdash; see the linked pages at the bottom.
+  </div>
+
+  <div class="imap-section">
+    <h2>One border, eight eras</h2>
+    <p class="imap-sub">Israel's own real border, traced whole &mdash; the same single-region treatment used elsewhere in this atlas for a territory with no genuinely separate internal region to carve out honestly. Press play, or drag the slider, to move through the same eight eras as the timeline below.</p>
+    <div class="rule-box">
+      <b>No internal partition is being characterized here.</b> The path traced is the outer boundary recorded for "Israel" in a standard public open geographic boundary dataset, shown for illustrative context only. It does not characterize, and should not be read as characterizing, the status of any disputed territory &mdash; see this page's own timeline text above and below for the neutral, source-based account of each era, including its more sensitive periods.
+    </div>
+    <div class="imap-frame">
+      <div class="imap-controls">
+        <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="imap-year" id="iYearTag">c.1550 BCE</span>
+        <input type="range" id="iSlider" min="0" max="7" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="imap-svg" viewBox="0 0 100 205" xmlns="http://www.w3.org/2000/svg">
+        <g style="pointer-events:none" class="context-label">
+          <text x="16" y="97">MED.</text>
+          <text x="16" y="106">SEA</text>
+          <text x="86" y="60">JORDAN</text>
+          <text x="24" y="185">EGYPT</text>
+        </g>
+        <path id="ireg-is" class="ireg-fill" d="M68.5,35.7 L61.3,51.0 L46.2,44.3 L37.5,76.7 L48.0,82.2 L37.3,88.9 L35.5,101.8 L55.1,95.1 L56.1,114.1 L35.3,192.0 L8.0,108.3 L20.1,92.2 L17.3,89.5 L28.3,66.7 L36.7,29.9 L42.7,17.6 L57.7,17.2 L61.5,8.6 L72.7,8.0 L73.3,27.9 L68.5,35.7 Z"/>
+        <g font-family="IBM Plex Mono, monospace">
+          <text class="ireg-label" id="ilbl-is" x="45" y="69" style="font-size:8px">ISRAEL</text>
+        </g>
+      </svg>
+      <div class="imap-head">
+        <div class="imap-name" id="iEraName">Bronze Age Canaan</div>
+        <div class="imap-owners" id="iEraOwners"></div>
+      </div>
+      <div class="iflags-row" id="iFlagsRow"></div>
+      <p class="imap-story" id="iEraStory"></p>
+
+      <p class="map-note">Boundary as recorded in a standard public open geographic boundary dataset, shown for illustrative context only &mdash; not a statement on the status of any disputed territory.</p>
+      <div class="imap-key" id="iLegend"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <!-- 1 -->
+    <div class="entry" data-n="8" id="era-1948">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#f4efe1"/>
+              <rect y="22" width="300" height="18" fill="#0038b8"/>
+              <rect y="160" width="300" height="18" fill="#0038b8"/>
+              <g stroke="#0038b8" stroke-width="6" fill="none">
+                <path d="M150,68 L112,132 L188,132 Z"/>
+                <path d="M150,128 L112,64 L188,64 Z"/>
+              </g>
+            </svg>
+            <div class="flag-caption">white field, two blue stripes, blue Star of David &mdash; adopted 1948</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1948 &ndash; present</div>
+            <h3 class="card-title">State of Israel</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A sovereign parliamentary republic, its independence declared as the British Mandate ended on 14 May 1948 and recognized through UN membership in 1949."><span class="dot" style="background:#0038b8"></span>Republic, independent</span><span class="tag" tabindex="0" data-tip="Head of the Jewish Agency who declared the establishment of the State of Israel in Tel Aviv on 14 May 1948, becoming its first prime minister."><span class="dot" style="background:#4a3b78"></span>David Ben-Gurion</span><span class="tag" tabindex="0" data-tip="Israel has no single constitutionally established state religion; it has no single written constitution at all, and matters of personal status (marriage, divorce) are instead handled through separate recognized religious courts for Jewish, Muslim, Christian, and Druze communities."><span class="dot" style="background:#8e3b62"></span>No single constitutionally established state religion</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Israel's 1950 Law of Return grants Jews worldwide the right to immigrate, and roughly 850,000 Jews leave Middle Eastern and North African countries between 1948 and 1972, most settling in Israel, alongside major later waves from the former Soviet Union in the 1990s and from Ethiopia via airlifts in 1984&ndash;85 and 1991."><span class="dot" style="background:#2f7a6b"></span>Immigration: Jewish immigration under the Law of Return (1948&ndash;)</span><span class="tag" tabindex="0" data-tip="During the 1947&ndash;49 war, an estimated 700,000 or more Palestinian Arabs left or were displaced from the territory that became Israel, a documented population movement Palestinians call the Nakba; most were not permitted to return, and their status remains a central unresolved issue in the conflict."><span class="dot" style="background:#a3672f"></span>Emigration: Palestinian displacement (1947&ndash;49)</span></div>
+            <p><span class="label">Who &amp; why:</span> on 29 November 1947, the UN General Assembly adopted Resolution 181, recommending that Mandatory Palestine be partitioned into a Jewish state, an Arab state, and an internationally administered Jerusalem; the Jewish Agency accepted the plan, the Arab League and the Arab Higher Committee rejected it, and fighting began between Jewish and Arab communities inside Palestine. The British Mandate formally ended on 14 May 1948, and that same day David Ben-Gurion declared the establishment of the State of Israel in Tel Aviv. The next day, Egypt, Transjordan, Syria, Lebanon, and Iraq entered the war. Armistice agreements, negotiated on the island of Rhodes, were signed between Israel and each of its neighbors through 1949.</p>
+            <p><span class="label">What it represents:</span> a white field with two horizontal blue stripes and a central blue Star of David, adopted in 1948, based on the pattern of the tallit (Jewish prayer shawl) and on the flag the Zionist movement had itself used since the late 19th century.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">8:11.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">White field, two horizontal blue stripes near top and bottom, blue six-pointed Star of David centered.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#0038b8"></span><span class="meta"><span class="name">Blue</span><span class="hex">#0038B8</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="entry" data-n="7" id="era-1917">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#0b1f6b"/>
+              <path d="M0,0 L300,200 M300,0 L0,200" stroke="#f4efe1" stroke-width="26"/>
+              <path d="M0,0 L300,200 M300,0 L0,200" stroke="#a4302a" stroke-width="10"/>
+              <rect x="125" y="0" width="50" height="200" fill="#f4efe1"/>
+              <rect y="75" width="300" height="50" fill="#f4efe1"/>
+              <rect x="137" width="26" height="200" fill="#a4302a"/>
+              <rect y="87" width="300" height="26" fill="#a4302a"/>
+            </svg>
+            <div class="flag-caption">the Union Flag, mandatory power's flag over Palestine</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1917 &ndash; 1948</div>
+            <h3 class="card-title">British Mandate for Palestine</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Territory administered by Britain under a League of Nations mandate, formalized at the 1920 San Remo Conference and governed from Jerusalem until 14 May 1948."><span class="dot" style="background:#5c3a8a"></span>Mandate</span><span class="tag" tabindex="0" data-tip="Commander of British forces that took Jerusalem from Ottoman control in December 1917, the year the mandate era&#x27;s British presence in the region began."><span class="dot" style="background:#4a3b78"></span>Edmund Allenby</span><span class="tag" tabindex="0" data-tip="The Mandate administration established no official state religion, continuing the recognized religious court systems (for Muslim, Jewish, and Christian communities) inherited from Ottoman practice for matters of personal status."><span class="dot" style="background:#8e3b62"></span>No established state religion</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Britain occupies Palestine after taking Jerusalem from Ottoman forces in December 1917 and administers it as a League of Nations mandate from 1920, formalized at the San Remo Conference."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#012169"/><path d="M0,0 L20,14 M20,0 L0,14" stroke="#fff" stroke-width="2"/><path d="M10,0 V14 M0,7 H20" stroke="#fff" stroke-width="3.4"/><path d="M10,0 V14 M0,7 H20" stroke="#c8102e" stroke-width="1.8"/></svg>Occupied by: Britain</span><span class="tag" tabindex="0" data-tip="Following the 1917 Balfour Declaration's support for a Jewish national home, successive waves of Jewish immigration (the Fourth and Fifth Aliyah) bring roughly 250,000 immigrants into Mandatory Palestine between 1919 and 1939, with numbers rising sharply after 1933 as Jews fled Nazi persecution in Europe."><span class="dot" style="background:#2f7a6b"></span>Immigration: Jewish Aliyah waves (1919&ndash;39)</span></div>
+            <p><span class="label">Who &amp; why:</span> British forces took the region from Ottoman control in 1917, the same year the British government issued the Balfour Declaration, stating its support for "the establishment in Palestine of a national home for the Jewish people," while also stating that nothing should "prejudice the civil and religious rights of existing non-Jewish communities in Palestine." The League of Nations Mandate for Palestine was formalized at the April 1920 San Remo Conference and administered from Jerusalem. The Mandate ended on 14 May 1948, giving way to the State of Israel above.</p>
+            <p><span class="label">What it represents:</span> the British Union Flag flew as the mandatory power's flag over Mandatory Palestine throughout this period.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2 (Union Flag).</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Dark blue field, red and white diagonal and cross bands.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#0b1f6b"></span><span class="meta"><span class="name">Blue</span><span class="hex">#0B1F6B</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="entry" data-n="6" id="era-1517">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#a4302a"/>
+              <path d="M120,70 A38,38 0 1 0 172,102 A28,28 0 1 1 120,70 Z" fill="#f4efe1"/>
+              <path d="M200,84 l5,15 16,0 -13,10 5,15 -13,-9 -13,9 5,-15 -13,-10 16,0 Z" fill="#f4efe1"/>
+            </svg>
+            <div class="flag-caption">Ottoman state flag, part of Ottoman Syria</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1517 &ndash; 1917</div>
+            <h3 class="card-title">Ottoman Empire</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="The region absorbed into Ottoman Syria&#x27;s provincial system after the 1516&ndash;17 conquest, with no separate administrative unit corresponding to modern Israel&#x27;s borders."><span class="dot" style="background:#a4302a"></span>Empire province</span><span class="tag" tabindex="0" data-tip="Ottoman sultan whose 1516&ndash;17 conquest of the Levant and Egypt, defeating the Mamluk Sultanate, brought the region under Ottoman rule."><span class="dot" style="background:#4a3b78"></span>Selim I</span><span class="tag" tabindex="0" data-tip="Sunni Islam was the Ottoman Empire&#x27;s official state religion, administered through Islamic law and imperial religious institutions across its provinces, including this one."><span class="dot" style="background:#8e3b62"></span>Sunni Islam (Ottoman)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Ottoman sultan Selim I's 1516&ndash;17 campaign defeats the Mamluk Sultanate and brings the Levant, including this region, under nearly four centuries of Ottoman rule."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#e30a17"/><circle cx="8" cy="7" r="3.4" fill="#fff"/><circle cx="9" cy="7" r="2.7" fill="#e30a17"/><path d="M12.5,7 l3.5,1.1 -2.2,-1.9 2.2,-1.9z" fill="#fff"/></svg>Conquered by: Ottoman Empire</span><span class="tag" tabindex="0" data-tip="From 1882, the First and Second Aliyah bring roughly 65,000 Jewish immigrants, mostly from Russia and Eastern Europe, into Ottoman Palestine as part of the emerging Zionist movement, founding early agricultural settlements."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#fff"/><rect y="4.67" width="20" height="4.67" fill="#0039a6"/><rect y="9.33" width="20" height="4.67" fill="#d52b1e"/></svg>Immigration: early Zionist Aliyah (1882&ndash;1914)</span></div>
+            <p><span class="label">Who &amp; why:</span> Ottoman conquest in 1516&ndash;17 absorbed the region into the wider provincial system of Ottoman Syria (organized in part as the Sanjak of Jerusalem), without a separate administrative unit corresponding to modern Israel's borders. Four centuries of Ottoman rule followed, ending when British forces took the region during World War I in 1917.</p>
+            <p><span class="label">What it represents:</span> the Ottoman state flag, a red field with a white crescent and star, flown across all Ottoman provincial territory.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3, plain rectangle shown here.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red field, white crescent and five-pointed star.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="entry" data-n="5" id="era-1291">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#a9762f"/>
+              <path d="M150,58 q-32,10 -38,42 q18,-8 24,6 q-16,6 -8,22 q18,-12 20,8 q2,-20 20,-8 q8,-16 -8,-22 q6,-14 24,-6 q-6,-32 -38,-42 Z" fill="#241f14"/>
+            </svg>
+            <div class="flag-caption">Mamluk gold field with a simplified eagle blazon</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1291 &ndash; 1517</div>
+            <h3 class="card-title">Mamluk Sultanate</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A sultanate ruled from Cairo, administering the region through provincial governors after ending the last Crusader mainland presence in 1291."><span class="dot" style="background:#a9762f"></span>Sultanate</span><span class="tag" tabindex="0" data-tip="Mamluk sultan whose forces took Acre in 1291, ending the Crusader Kingdom of Jerusalem&#x27;s mainland presence and opening this era of Mamluk rule."><span class="dot" style="background:#4a3b78"></span>al-Ashraf Khalil</span><span class="tag" tabindex="0" data-tip="Sunni Islam was the Mamluk Sultanate&#x27;s official state religion, with Cairo serving as a major center of Sunni religious scholarship and authority during this period."><span class="dot" style="background:#8e3b62"></span>Sunni Islam</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Mamluk sultan al-Ashraf Khalil's forces take Acre in 1291, ending the last mainland Crusader presence and bringing the region under Mamluk rule administered from Cairo."><span class="dot" style="background:#6b2c2c"></span>Conquered by: Mamluk Sultanate</span></div>
+            <p><span class="label">Who &amp; why:</span> the Mamluks, ruling from Cairo, took Acre &mdash; the last mainland stronghold of the Kingdom of Jerusalem &mdash; in 1291, ending Crusader presence in the region, and administered it through provincial governors until the Ottoman conquest of 1516&ndash;17.</p>
+            <p><span class="label">What it represents:</span> Mamluk heraldry used gold and other emblematic blazons tied to individual sultans and officers rather than one fixed state flag; the design here is an informed reconstruction, not a documented single national banner.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio recorded &mdash; informed reconstruction.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Gold field, dark emblematic device.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#a9762f"></span><span class="meta"><span class="name">Gold</span><span class="hex">#A9762F</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="entry" data-n="4" id="era-1099">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#f4efe1"/>
+              <g fill="#c9a13c">
+                <rect x="132" y="55" width="36" height="90"/>
+                <rect x="105" y="82" width="90" height="36"/>
+                <rect x="118" y="38" width="18" height="18"/>
+                <rect x="118" y="144" width="18" height="18"/>
+                <rect x="180" y="66" width="18" height="18"/>
+                <rect x="180" y="116" width="18" height="18"/>
+              </g>
+            </svg>
+            <div class="flag-caption">the Jerusalem cross banner of the Crusader kingdom</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1099 &ndash; 1291</div>
+            <h3 class="card-title">Kingdom of Jerusalem (Crusader)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A Latin Christian kingdom established after the First Crusade took Jerusalem in 1099, reduced to a shrinking coastal strip after Saladin&#x27;s 1187 reconquest of the city itself."><span class="dot" style="background:#8a1f2b"></span>Crusader state</span><span class="tag" tabindex="0" data-tip="Frankish nobleman and First Crusade leader who became the new Kingdom of Jerusalem&#x27;s first ruler in 1099."><span class="dot" style="background:#4a3b78"></span>Godfrey of Bouillon</span><span class="tag" tabindex="0" data-tip="Roman Catholicism, under the authority of the Latin Church, was the kingdom&#x27;s established state religion, distinct from the region&#x27;s Eastern Orthodox Christian, Muslim, and Jewish communities."><span class="dot" style="background:#8e3b62"></span>Roman Catholicism (Latin Church)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="The First Crusade captures Jerusalem in 1099, killing much of the city's Muslim and Jewish population, and establishes a Latin Christian kingdom that draws thousands of European settlers, knights, and clergy into the region over the following two centuries."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#fff"/><rect x="8.5" y="2" width="3" height="10" fill="#f9d616"/><rect x="5" y="5.5" width="10" height="3" fill="#f9d616"/><circle cx="4" cy="4" r="0.9" fill="#f9d616"/><circle cx="16" cy="4" r="0.9" fill="#f9d616"/><circle cx="4" cy="10" r="0.9" fill="#f9d616"/><circle cx="16" cy="10" r="0.9" fill="#f9d616"/></svg>Conquered by: First Crusade</span><span class="tag" tabindex="0" data-tip="Frankish and other Western European settlers immigrate into the Crusader states through the 12th and 13th centuries, establishing feudal estates, fortified towns, and coastal trading colonies for Italian merchant republics."><span class="dot" style="background:#2f7a6b"></span>Immigration: European Frankish settlers</span></div>
+            <p><span class="label">Who &amp; why:</span> the First Crusade took Jerusalem in July 1099, and Godfrey of Bouillon became the new Kingdom of Jerusalem's first ruler. Saladin's Ayyubid forces retook Jerusalem itself in 1187, reducing the kingdom to a shrinking coastal strip; the kingdom's mainland presence ended with the fall of Acre to the Mamluks in 1291.</p>
+            <p><span class="label">What it represents:</span> the "Jerusalem cross" &mdash; one large cross with four smaller crosses in its quarters, gold on white &mdash; is the kingdom's well-documented heraldic banner.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio recorded.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">White field, gold "Jerusalem cross."</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#c9a13c"></span><span class="meta"><span class="name">Gold</span><span class="hex">#C9A13C</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="entry" data-n="3" id="era-636">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#f4efe1"/>
+              <rect width="300" height="200" fill="none" stroke="#c9b98a" stroke-width="3"/>
+            </svg>
+            <div class="flag-caption">plain white, most commonly associated Umayyad color; Fatimid rule later used green</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">636 &ndash; 1099</div>
+            <h3 class="card-title">Early Islamic rule / Fatimid Palestine</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="The region organized as Jund Filastin, a military-administrative district under successive Islamic caliphates, before passing to Fatimid Egypt in the 10th century."><span class="dot" style="background:#7c6a2e"></span>Caliphate</span><span class="tag" tabindex="0" data-tip="Second Rashidun caliph, who personally received the surrender of Jerusalem in 637 following the Rashidun conquest of the region that opened this era."><span class="dot" style="background:#4a3b78"></span>Caliph Umar ibn al-Khattab</span><span class="tag" tabindex="0" data-tip="Sunni Islam was the state religion under the Umayyad and Abbasid caliphates that governed the region for most of this span; Fatimid Egypt, which took control from the 10th century, was instead officially Shi&#x27;a Ismaili &mdash; no single sect spans the whole era."><span class="dot" style="background:#8e3b62"></span>Sunni Islam (Fatimids Shi&#x27;a Ismaili)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Rashidun forces under Caliph Umar conquer the region from the Byzantine Empire, receiving the surrender of Jerusalem in 637 and bringing the region under Islamic caliphal rule for the first time."><span class="dot" style="background:#6b2c2c"></span>Conquered by: Rashidun Caliphate</span></div>
+            <p><span class="label">Who &amp; why:</span> following the Rashidun conquest of the 630s, the region was organized as Jund Filastin ("the Palestine district"), a military-administrative district centered on Ramla and Jerusalem under the Umayyad and then Abbasid caliphates. Fatimid Egypt took control in the 10th century and held the region, with interruptions, until the First Crusade in 1099. This span is treated here as one honest bridging entry.</p>
+            <p><span class="label">What it represents:</span> no single fixed flag is documented across this whole span; plain white (the color most consistently associated with Umayyad banners) is shown here as representative of the earlier part of it, with Fatimid rule later associated with green.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no fixed ratio documented.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Plain white field.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 7 -->
+    <div class="entry" data-n="2" id="era-636-1">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="120" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; pre-heraldic antiquity</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">antiquity &ndash; 636</div>
+            <h3 class="card-title">Ancient &amp; biblical Israel through Roman Judea</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A span covering the biblical Israelite and Judahite kingdoms, Persian and Hellenistic rule, the Hasmonean and Herodian periods, direct Roman and then Byzantine provincial administration, and the Jewish diaspora that followed the Roman-era revolts."><span class="dot" style="background:#6e6047"></span>No flag documented</span><span class="tag" tabindex="0" data-tip="No single ruler documented &mdash; this entry deliberately spans many distinct kingdoms, client states, and foreign administrations across more than a thousand years rather than one founding figure."><span class="dot" style="background:#4a3b78"></span>No single ruler documented</span><span class="tag" tabindex="0" data-tip="Religious establishment varied sharply across this long span: the Israelite and Judahite kingdoms, and later Hasmonean and Herodian rule, were organized around the religion of ancient Israel (Second Temple Judaism); direct Roman provincial rule instead upheld the Roman state cult, and Byzantine rule from the 4th century established Christianity &mdash; no single faith spans the whole era."><span class="dot" style="background:#8e3b62"></span>Varied (Judaism under local kingdoms)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Roman forces destroy the Second Temple in Jerusalem in 70 CE while suppressing the Great Revolt, and after crushing the Bar Kokhba revolt in 135 CE, kill or expel large numbers of Jews from Judea, accelerating a Jewish diaspora that spread across the Mediterranean and Mesopotamia."><span class="dot" style="background:#a3672f"></span>Emigration: Jewish diaspora after the Roman revolts (70&ndash;135 CE)</span><span class="tag" tabindex="0" data-tip="The region was successively conquered by the Neo-Babylonian Empire (586 BCE, which exiled much of the Judahite population to Babylon), the Persian Achaemenid Empire, Alexander's Macedonian empire, and finally Rome, whose general Pompey took Jerusalem in 63 BCE."><span class="dot" style="background:#6b2c2c"></span>Conquered by: Babylon, Persia, then Rome</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The biblical royal line of the united and then Judahite kingdom, ruling from Jerusalem, c.1000–587 BCE. Emblem: the Lion of Judah, gold on blue."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#0038b8"/><path d="M28,70 q4,-24 22,-24 q18,0 22,24 q-6,8 -22,8 q-16,0 -22,-8 Z" fill="#f9d616"/><path d="M40,46 l4,10 -8,0 Z M60,46 l4,10 -8,0 Z" fill="#f9d616"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of David</span><span class="tag" tabindex="0" data-tip="Priestly-royal line founded after the Maccabean revolt, ruling an independent Judean kingdom, 140–37 BCE. Emblem: the seven-branched menorah, the dynasty's own documented Temple symbol."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f4efe1"/><path d="M46,30 h8 v50 h-8 Z" fill="#204b5c"/><path d="M24,80 q26,18 52,0 v10 q-26,18 -52,0 Z" fill="#204b5c"/><path d="M30,80 v-40 M40,80 v-46 M60,80 v-46 M70,80 v-40" stroke="#204b5c" stroke-width="5"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Hasmonean dynasty</span><span class="tag" tabindex="0" data-tip="Rome-appointed client kings, most notably Herod the Great, who rebuilt the Second Temple, 37 BCE–92 CE. Emblem: the golden eagle Herod placed over the Temple gate, recorded by Josephus."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#5c2a5c"/><path d="M50,26 q-16,0 -20,16 q4,-2 10,-2 q-6,6 -6,14 q6,-4 10,-4 q-2,8 2,16 q4,-8 2,-16 q4,0 10,4 q0,-8 -6,-14 q6,0 10,2 q-4,-16 -20,-16 Z" fill="#f9d616"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Herodian dynasty</span></div>
+            <p><span class="label">Who &amp; why:</span> this span covers the Israelite and Judahite kingdoms of the biblical period; the First and Second Temple periods in Jerusalem; Roman-era Judea, first as a Herodian client kingdom and then as a direct Roman province; the Jewish revolts against Roman rule in 66&ndash;73 CE and 132&ndash;135 CE (the latter led by Bar Kokhba); and the centuries of Jewish diaspora that followed those revolts, alongside continued Jewish presence in the land. Byzantine rule followed Rome's, lasting until the Muslim conquest of 636.</p>
+            <p><span class="label">What it represents:</span> no securely documented flag survives from this span; national and civic flags as a concept postdate it entirely. Shown here honestly blank rather than invented.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 8 -->
+    <div class="entry" data-n="1" id="era-1550bce">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="120" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; Bronze Age city-states, no flag survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 1550 &ndash; 1200 BCE</div>
+            <h3 class="card-title">Bronze Age Canaan</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Canaan was a patchwork of independent city-states &mdash; Hazor, Megiddo, Gezer, Lachish, and Jerusalem (Urusalim) among them &mdash; rather than a single kingdom, each ruled by its own local king."><span class="dot" style="background:#6e6047"></span>Fragmented city-states</span><span class="tag" tabindex="0" data-tip="No single ruler documented &mdash; local Canaanite city-state kings, themselves Egyptian vassals, corresponded individually with the Pharaoh, as recorded in the 14th-century BCE Amarna letters."><span class="dot" style="background:#4a3b78"></span>No single ruler documented</span><span class="tag" tabindex="0" data-tip="Canaanite polytheism &mdash; the god El, the storm-god Baal, and the goddess Asherah among the chief deities &mdash; documented through Canaanite and neighboring Ugaritic religious texts."><span class="dot" style="background:#8e3b62"></span>Canaanite polytheism</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Pharaoh Thutmose III defeats a coalition of Canaanite city-states at the Battle of Megiddo, traditionally dated to around 1457 BCE, bringing Canaan under Egyptian New Kingdom suzerainty for roughly the next three centuries."><span class="dot" style="background:#6b2c2c"></span>Conquered by: Egypt (New Kingdom)</span></div>
+            <p><span class="label">Who &amp; why:</span> Canaan in this period is a patchwork of independent city-states rather than a single kingdom; Pharaoh Thutmose III's victory at Megiddo (c. 1457 BCE) brings the region under Egyptian New Kingdom suzerainty, and local vassal kings' correspondence with the Egyptian court survives in the 14th-century BCE Amarna letters. Egyptian control recedes amid the wider Late Bronze Age collapse around 1200 BCE; the Merneptah Stele, an Egyptian inscription conventionally dated to about 1208 BCE, records a campaign against a people called "Israel" already settled in the highlands &mdash; the earliest known reference to that name outside the Hebrew Bible itself.</p>
+            <p><span class="label">What it represents:</span> no flag survives from Bronze Age Canaan, and the concept of a national or civic flag postdates this era entirely; individual city-states used their own seals and emblems on correspondence and pottery instead. Shown here honestly blank rather than invented.</p>
+            <p><span class="label">World context:</span> this span runs alongside the height of the Egyptian New Kingdom itself &mdash; the great temple complexes at Karnak and Luxor, and the burial of Tutankhamun (c. 1323 BCE) &mdash; as well as the Hittite Empire in Anatolia and Mycenaean Greece; all three contract or collapse within decades of one another around 1200 BCE, in the wider Late Bronze Age collapse that also ends Egyptian control over Canaan.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#6e6047"></span><b>No flag documented</b> &mdash; pre-heraldic antiquity</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#7c6a2e"></span><b>Caliphate</b> &mdash; Umayyad/Abbasid/Fatimid rule</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8a1f2b"></span><b>Crusader state</b> &mdash; Kingdom of Jerusalem</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Sultanate</b> &mdash; Mamluk rule from Cairo</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a4302a"></span><b>Empire province</b> &mdash; Ottoman rule</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#5c3a8a"></span><b>Mandate</b> &mdash; British Mandate for Palestine</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#0038b8"></span><b>Republic, independent</b> &mdash; State of Israel</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the named ruler most associated with the era's start</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official/established faith, not the population's</div>
+    </div>
+  </div>
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for Israel lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/il/">Search Record Atlas for Israel &rarr;</a>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This page is one lineage in a larger set. See the region-wide hub and the other countries here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="levant-hub.html"><b>Levant hub</b><span>Syria, Lebanon, Jordan, Israel</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are close historical approximations for painting reference; pre-19th-century swatches are informed reconstructions, not official specifications.
+  </footer>
+
+</div>
+
+<script>
+  document.querySelectorAll(".tag[data-tip]").forEach(function (tag) {
+    tag.addEventListener("click", function (e) {
+      var wasOpen = tag.classList.contains("tip-open");
+      document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+      if (!wasOpen) tag.classList.add("tip-open");
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+  });
+</script>
+
+<script>
+(function () {
+  var IC = {
+    canaan:"#584b38", ancient:"#6e6047", early_islamic:"#7c6a2e", crusader:"#8a1f2b", mamluk:"#a9762f",
+    ottoman:"#a4302a", mandate:"#5c3a8a", modern:"#0038b8"
+  };
+  var INAMES = {
+    canaan:"Bronze Age Canaan", ancient:"Ancient & biblical Israel through Roman Judea", early_islamic:"Early Islamic rule / Fatimid Palestine",
+    crusader:"Kingdom of Jerusalem (Crusader)", mamluk:"Mamluk Sultanate", ottoman:"Ottoman Empire",
+    mandate:"British Mandate for Palestine", modern:"State of Israel"
+  };
+  var IFLAGS = {
+    canaan: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="120" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>',
+    ancient: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="120" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>',
+    early_islamic: '<rect width="300" height="200" fill="#f4efe1"/><rect width="300" height="200" fill="none" stroke="#c9b98a" stroke-width="3"/>',
+    crusader: '<rect width="300" height="200" fill="#f4efe1"/><g fill="#c9a13c"><rect x="132" y="55" width="36" height="90"/><rect x="105" y="82" width="90" height="36"/><rect x="118" y="38" width="18" height="18"/><rect x="118" y="144" width="18" height="18"/><rect x="180" y="66" width="18" height="18"/><rect x="180" y="116" width="18" height="18"/></g>',
+    mamluk: '<rect width="300" height="200" fill="#a9762f"/><path d="M150,58 q-32,10 -38,42 q18,-8 24,6 q-16,6 -8,22 q18,-12 20,8 q2,-20 20,-8 q8,-16 -8,-22 q6,-14 24,-6 q-6,-32 -38,-42 Z" fill="#241f14"/>',
+    ottoman: '<rect width="300" height="200" fill="#a4302a"/><path d="M120,70 A38,38 0 1 0 172,102 A28,28 0 1 1 120,70 Z" fill="#f4efe1"/><path d="M200,84 l5,15 16,0 -13,10 5,15 -13,-9 -13,9 5,-15 -13,-10 16,0 Z" fill="#f4efe1"/>',
+    mandate: '<rect width="300" height="200" fill="#0b1f6b"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#f4efe1" stroke-width="26"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#a4302a" stroke-width="10"/><rect x="125" y="0" width="50" height="200" fill="#f4efe1"/><rect y="75" width="300" height="50" fill="#f4efe1"/><rect x="137" width="26" height="200" fill="#a4302a"/><rect y="87" width="300" height="26" fill="#a4302a"/>',
+    modern: '<rect width="300" height="200" fill="#f4efe1"/><rect y="22" width="300" height="18" fill="#0038b8"/><rect y="160" width="300" height="18" fill="#0038b8"/><g stroke="#0038b8" stroke-width="6" fill="none"><path d="M150,68 L112,132 L188,132 Z"/><path d="M150,128 L112,64 L188,64 Z"/></g>'
+  };
+  function iFlagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (IFLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  var iLegendEl = document.getElementById("iLegend");
+  iLegendEl.innerHTML = Object.keys(IC).map(function (k) {
+    return '<span><span class="sw" style="background:' + IC[k] + '"></span>' + INAMES[k] + "</span>";
+  }).join("");
+
+  var ISNAP = [
+    { year:"c.1550 BCE", name:"Bronze Age Canaan", t:{ is:IC.canaan }, flagKeys:{ is:"canaan" },
+      story:"Canaan in this period was a patchwork of independent city-states &mdash; Hazor, Megiddo, Gezer, Lachish, and Jerusalem (Urusalim) among them &mdash; rather than a single kingdom. Pharaoh Thutmose III's victory at Megiddo (c. 1457 BCE) brought the region under Egyptian New Kingdom suzerainty, and local vassal kings' correspondence with the Egyptian court survives in the 14th-century BCE Amarna letters. Egyptian control receded amid the wider Late Bronze Age collapse around 1200 BCE; the Merneptah Stele, an Egyptian inscription conventionally dated to about 1208 BCE, records a campaign against a people called \"Israel\" already settled in the highlands. No flag survives from Bronze Age Canaan &mdash; the concept postdates this era entirely &mdash; so it is shown honestly blank." },
+    { year:"antiquity", name:"Ancient & biblical Israel through Roman Judea", t:{ is:IC.ancient }, flagKeys:{ is:"ancient" },
+      story:"This span covers the Israelite and Judahite kingdoms of the biblical period, the First and Second Temple periods, Roman-era Judea, the Jewish revolts of 66&ndash;73 CE and 132&ndash;135 CE, and the centuries of Jewish diaspora that followed, alongside continued Jewish presence in the land. No securely documented flag survives from this span &mdash; national flags as a concept postdate it entirely, so it is shown honestly blank." },
+    { year:"636", name:"Early Islamic rule / Fatimid Palestine", t:{ is:IC.early_islamic }, flagKeys:{ is:"early_islamic" },
+      story:"Following the Rashidun conquest of the 630s, the region was organized as Jund Filastin under the Umayyad and then Abbasid caliphates, with Fatimid Egypt taking control in the 10th century until the First Crusade in 1099. No single fixed flag is documented across this span; plain white, the color most consistently associated with Umayyad banners, is shown here as representative of its earlier part, with Fatimid rule later associated with green." },
+    { year:"1099", name:"Kingdom of Jerusalem (Crusader)", t:{ is:IC.crusader }, flagKeys:{ is:"crusader" },
+      story:"The First Crusade took Jerusalem in July 1099, and Godfrey of Bouillon became the Kingdom of Jerusalem's first ruler. Saladin's forces retook Jerusalem itself in 1187, reducing the kingdom to a shrinking coastal strip; its mainland presence ended with the fall of Acre to the Mamluks in 1291. The kingdom's well-documented heraldic banner was the gold-on-white \"Jerusalem cross.\"" },
+    { year:"1291", name:"Mamluk Sultanate", t:{ is:IC.mamluk }, flagKeys:{ is:"mamluk" },
+      story:"The Mamluks, ruling from Cairo, took Acre in 1291, ending Crusader presence in the region, and administered it through provincial governors until the Ottoman conquest of 1516&ndash;17. Mamluk heraldry used gold and other emblematic blazons tied to individual sultans and officers rather than one fixed state flag; the design shown is an informed reconstruction, not a documented single national banner." },
+    { year:"1517", name:"Ottoman Empire", t:{ is:IC.ottoman }, flagKeys:{ is:"ottoman" },
+      story:"Ottoman conquest in 1516&ndash;17 absorbed the region into the wider provincial system of Ottoman Syria, without a separate administrative unit corresponding to modern Israel's borders. Four centuries of Ottoman rule followed, ending when British forces took the region during World War I in 1917. The Ottoman state flag &mdash; red field, white crescent and star &mdash; flew across all Ottoman provincial territory." },
+    { year:"1917", name:"British Mandate for Palestine", t:{ is:IC.mandate }, flagKeys:{ is:"mandate" },
+      story:"British forces took the region from Ottoman control in 1917, the same year of the Balfour Declaration. The League of Nations Mandate for Palestine was formalized at the 1920 San Remo Conference and administered from Jerusalem until 14 May 1948. The British Union Flag flew as the mandatory power's flag throughout this period." },
+    { year:"1948–present", name:"State of Israel", t:{ is:IC.modern }, flagKeys:{ is:"modern" },
+      story:"The British Mandate ended on 14 May 1948, and that day David Ben-Gurion declared the establishment of the State of Israel in Tel Aviv; war with neighboring states followed, ending in armistice agreements negotiated on Rhodes through 1949. The flag adopted in 1948 &mdash; a white field, two blue stripes, and a central blue Star of David &mdash; is based on the tallit and the flag the Zionist movement had used since the late 19th century." }
+  ];
+
+  var IREGIONS = ["is"];
+  var IREGION_NAMES = { is:"Israel" };
+  var IADJ = [];
+
+  function iTextColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+
+  var iYearTag = document.getElementById("iYearTag");
+  var iEraName = document.getElementById("iEraName");
+  var iEraOwners = document.getElementById("iEraOwners");
+  var iEraStory = document.getElementById("iEraStory");
+  var iFlagsRow = document.getElementById("iFlagsRow");
+  var iSlider = document.getElementById("iSlider");
+
+  function isRender(idx) {
+    var era = ISNAP[idx];
+    iYearTag.textContent = era.year;
+    iEraName.textContent = era.name;
+    iEraStory.innerHTML = era.story;
+
+    IREGIONS.forEach(function (id) {
+      document.getElementById("ireg-" + id).setAttribute("fill", era.t[id]);
+      var tcol = iTextColorFor(era.t[id]);
+      var tcolHalo = tcol === "#201a12" ? "#f7f1e3" : "#201a12";
+      var lbl = document.getElementById("ilbl-" + id);
+      if (lbl) { lbl.setAttribute("fill", tcol); lbl.setAttribute("stroke", tcolHalo); }
+      var lbl2 = document.getElementById("ilbl-" + id + "2");
+      if (lbl2) { lbl2.setAttribute("fill", tcol); lbl2.setAttribute("stroke", tcolHalo); }
+    });
+
+    var label = Object.keys(IC).filter(function (k) { return IC[k] === era.t.is; })[0];
+    iEraOwners.innerHTML = "<b>" + INAMES[label] + "</b>: whole country";
+
+    iFlagsRow.innerHTML = IREGIONS.map(function (id) {
+      return '<div class="iflag-chip">' + iFlagSvg(era.flagKeys[id]) + '<div class="ic-label">' + IREGION_NAMES[id] + '</div></div>';
+    }).join("");
+  }
+
+  iSlider.addEventListener("input", function () { isRender(parseInt(iSlider.value, 10)); });
+  isRender(0);
+
+  var isPlaying = false, isPlayTimer = null;
+  var isPlayBtn = document.getElementById("iPlayBtn");
+  function isStepPlay() {
+    var next = parseInt(iSlider.value, 10) + 1;
+    if (next > ISNAP.length - 1) { isStopPlay(); return; }
+    iSlider.value = next;
+    isRender(next);
+  }
+  function isStartPlay() {
+    isPlaying = true;
+    isPlayBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(iSlider.value, 10) >= ISNAP.length - 1) { iSlider.value = 0; isRender(0); }
+    isPlayTimer = setInterval(isStepPlay, 1700);
+  }
+  function isStopPlay() {
+    isPlaying = false;
+    isPlayBtn.innerHTML = "&#9654;";
+    clearInterval(isPlayTimer);
+  }
+  isPlayBtn.addEventListener("click", function () { isPlaying ? isStopPlay() : isStartPlay(); });
+})();
+</script>
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var html = '<h4>Genealogical records for this ground</h4>';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>
+
+</body></html>

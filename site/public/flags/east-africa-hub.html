@@ -1,0 +1,567 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+
+<meta charset="UTF-8">
+<title>Flags of East Africa</title>
+<meta name="description" content="A hub for the family flag atlas: eleven East African country lineages, from Ethiopia's ancient unbroken statehood to South Sudan's 2011 independence.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    --tile: #ddd0aa; --tile-line: #b7a679; --tile-text: #7a6a45; --tile-sea: #b9d3da;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 980px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.2rem, 5.5vw, 3.4rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.1rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .countries { margin-top: 44px; }
+  .countries h2 { font-size: 1.15rem; font-weight: 600; margin: 0 0 16px; }
+  .country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .country-card {
+    display: block; padding: 20px; border: 1px solid var(--card-border); background: var(--card);
+    border-radius: 4px; text-decoration: none; color: var(--ink); position: relative; overflow: hidden;
+  }
+  .country-card .swatch-strip { position: absolute; top: 0; left: 0; right: 0; height: 5px; }
+  .country-card .era { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--brass); margin-bottom: 6px; }
+  .country-card b { display: block; font-family: "Fraunces", serif; font-size: 1.2rem; font-weight: 600; margin-bottom: 6px; }
+  .country-card span { color: var(--muted); font-size: .88rem; line-height: 1.5; }
+
+  .map-section { margin-top: 56px; padding-top: 36px; border-top: 1px solid var(--hair); }
+  .map-section h2 { font-size: 1.5rem; margin: 0 0 8px; }
+  .map-section .map-sub { font-size: .94rem; color: var(--muted); max-width: 64ch; margin: 0 0 22px; }
+  .map-section .rule-box { margin-bottom: 22px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .92rem; }
+  .map-section .rule-box b { color: var(--brick); }
+
+  .viz-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 22px; }
+
+  .controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .play-btn {
+    flex: none; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .play-btn:hover { border-color: var(--brick); }
+  input[type="range"] {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px;
+    background: var(--hair); outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper);
+    box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  .era-tag { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+
+  .era-head { text-align: center; margin-bottom: 16px; }
+  .era-name-inline { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.35rem; transition: opacity .35s ease; }
+  .era-owners { font-size: .86rem; color: var(--muted); max-width: 62ch; margin: 6px auto 0; transition: opacity .35s ease; }
+  .era-owners b { color: var(--ink); }
+  .era-story {
+    margin: 0 auto 22px; font-size: .98rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .35s ease; padding: 14px 18px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  .era-story b { color: var(--brick); }
+
+  .flags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin: 4px auto 18px; max-width: 680px; }
+  .flag-chip { text-align: center; width: 84px; }
+  .flag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-chip .fc-label { font-family: "IBM Plex Mono", monospace; font-size: 9px; color: var(--muted); margin-top: 5px; line-height: 1.3; }
+
+  #map-svg { display: block; margin: 0 auto; width: 100%; max-width: 500px; height: auto; }
+  .region-fill { transition: fill 0.7s ease; }
+  .border-line { transition: stroke-opacity 0.7s ease, stroke-width 0.7s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .group-label { font-family: "Fraunces", serif; font-weight: 600; transition: opacity .5s ease, font-size .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2.5px; }
+  .sub-label { font-family: "IBM Plex Mono", monospace; font-weight: 700; transition: opacity .5s ease, fill .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+
+  .map-key { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: .8rem; color: var(--muted); justify-content: center; }
+  .map-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .map-key .sw { width: 11px; height: 11px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+  .map-notes { margin-top: 20px; font-size: .85rem; color: var(--muted); }
+  .map-notes b { color: var(--ink); }
+
+  .about { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .about h2 { font-size: 1.3rem; margin: 0 0 12px; }
+  .about p { max-width: none; opacity: .88; margin: 0 0 12px; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a></p>
+  <p class="kicker">Family research &middot; Hub &middot; Phase 12 of the world atlas</p>
+  <h1>Flags of East Africa</h1>
+  <p class="lede">Eleven countries with some of the most distinctive statehoods on the continent. Ethiopia is Africa's oldest continuously independent state &mdash; the Aksumite Kingdom, then the Ethiopian Empire, never colonized except a brief 1936&ndash;41 Italian occupation. Along the coast, the Sultanate of Zanzibar and Swahili city-states like Kilwa and Mombasa built a real, distinct Indian Ocean trading civilization, linking East Africa to Arabia, Persia, and India centuries before Europeans arrived.</p>
+  <p class="lede">Everywhere else, the 1880s&ndash;1900s "Scramble for Africa" carved the region among Britain, Germany, Italy, and France. Most of the region won independence in the early-to-mid 1960s, but two moments came much later and stand on their own: Eritrea's 1993 independence from Ethiopia after a thirty-year war, and South Sudan's 2011 independence from Sudan &mdash; the world's newest country. Individual country pages, with full flag timelines like the rest of the atlas, are publishing next.</p>
+
+  <div class="countries">
+    <h2>The eleven lineages</h2>
+    <div class="country-grid">
+      <a class="country-card" href="kenya-flags.html">
+        <span class="swatch-strip" style="background:#a4302a"></span>
+        <span class="era">before c. 1800&ndash;present</span>
+        <b>Kenya</b>
+        <span>The Mau Mau uprising against British rule, independence in 1963 under Jomo Kenyatta, and a coast shaped by Swahili trading city-states.</span>
+      </a>
+      <a class="country-card" href="tanzania-flags.html">
+        <span class="swatch-strip" style="background:#1e824c"></span>
+        <span class="era">before c. 1700&ndash;present</span>
+        <b>Tanzania</b>
+        <span>German East Africa, then British Tanganyika, uniting with the island Sultanate of Zanzibar in 1964 to form modern Tanzania.</span>
+      </a>
+      <a class="country-card" href="ethiopia-flags.html">
+        <span class="swatch-strip" style="background:#c9a13c"></span>
+        <span class="era">c. 100&ndash;present</span>
+        <b>Ethiopia</b>
+        <span>Africa's oldest continuously independent state &mdash; the Aksumite Kingdom through the Ethiopian Empire, never colonized except a 1936&ndash;41 Italian occupation.</span>
+      </a>
+      <a class="country-card" href="uganda-flags.html">
+        <span class="swatch-strip" style="background:#7a4a1f"></span>
+        <span class="era">before c. 1700&ndash;present</span>
+        <b>Uganda</b>
+        <span>The Kingdom of Buganda's precolonial power, a British protectorate from 1894, and independence in 1962.</span>
+      </a>
+      <a class="country-card" href="rwanda-flags.html">
+        <span class="swatch-strip" style="background:#1e2f96"></span>
+        <span class="era">c. 1600&ndash;present</span>
+        <b>Rwanda</b>
+        <span>The old Kingdom of Rwanda, Belgian trusteeship after the First World War, and the 1994 genocide against the Tutsi the country has spent three decades rebuilding from.</span>
+      </a>
+      <a class="country-card" href="burundi-flags.html">
+        <span class="swatch-strip" style="background:#8a2f5c"></span>
+        <span class="era">c. 1600&ndash;present</span>
+        <b>Burundi</b>
+        <span>A centuries-old kingdom, joined with Rwanda under Belgian rule as Ruanda-Urundi, independence in 1962, and its own monarchy dissolved in 1966.</span>
+      </a>
+      <a class="country-card" href="somalia-flags.html">
+        <span class="swatch-strip" style="background:#4a90d9"></span>
+        <span class="era">before c. 1285&ndash;present</span>
+        <b>Somalia</b>
+        <span>British and Italian Somaliland united at independence in 1960; central state authority collapsed after 1991, and the country has been rebuilding it since.</span>
+      </a>
+      <a class="country-card" href="eritrea-flags.html">
+        <span class="swatch-strip" style="background:#6b7a2e"></span>
+        <span class="era">before 1890&ndash;present</span>
+        <b>Eritrea</b>
+        <span>Italy's first African colony from the 1880s, later federated with and then annexed by Ethiopia, and a thirty-year war that won independence in 1993.</span>
+      </a>
+      <a class="country-card" href="djibouti-flags.html">
+        <span class="swatch-strip" style="background:#6fa3b8"></span>
+        <span class="era">before 1896&ndash;present</span>
+        <b>Djibouti</b>
+        <span>French Somaliland at the mouth of the Red Sea, held onto by France through the region's wave of decolonization, independent only in 1977.</span>
+      </a>
+      <a class="country-card" href="south-sudan-flags.html">
+        <span class="swatch-strip" style="background:#2b2e33"></span>
+        <span class="era">before c. 1821&ndash;present</span>
+        <b>South Sudan</b>
+        <span>Decades of civil war against Khartoum ended in a 2011 referendum that made it the world's newest country.</span>
+      </a>
+      <a class="country-card" href="madagascar-flags.html">
+        <span class="swatch-strip" style="background:#5a8a6b"></span>
+        <span class="era">c. 500&ndash;present</span>
+        <b>Madagascar</b>
+        <span>An Austronesian-heritage population unlike its African neighbors, the Kingdom of Imerina's unification of the island, and French colonization from 1897.</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="map-section">
+    <h2>Ten centuries, one map</h2>
+    <p class="map-sub">A real, traced map &mdash; actual coastlines and borders pulled from real geographic data, not schematic shapes &mdash; covering all eleven countries from Aksumite Ethiopia to South Sudan's 2011 independence. Madagascar sits far enough offshore that it's shown as an inset, not at true relative distance. Drag the slider or press play; each snapshot simplifies a messier reality into the dominant power of the moment.</p>
+    <div class="rule-box">
+      <b>Borders here are data, not decoration.</b> A line between two regions only draws solid when they were actually governed separately. When they weren't &mdash; Rwanda and Burundi both administered as one Belgian trust territory, say &mdash; the line dissolves and their names merge into whoever actually ruled them both. Colors blend between eras instead of jump-cutting. Watch Eritrea especially: its border with Ethiopia dissolves completely in 1963 (annexed as a province) and snaps back solid in 1993 (independence after a thirty-year war).
+    </div>
+
+    <div class="viz-frame">
+      <div class="controls">
+        <button class="play-btn" id="playBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="era-tag" id="yearTag">c.150</span>
+        <input type="range" id="slider" min="0" max="9" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="map-svg" viewBox="0 0 620 610" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="0" width="620" height="610" fill="var(--tile-sea)"/>
+        <path fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" d="M229.6,200.8 L225.0,184.6 L215.4,177.1 L215.4,149.6 L206.6,148.4 L205.3,152.6 L194.0,153.5 L200.2,170.3 L180.5,194.3 L170.8,196.2 L155.0,185.2 L135.6,202.1 L100.7,197.5 L93.9,200.8 L75.8,183.0 L62.3,185.6 L52.2,211.1 L40.0,216.7 L31.9,210.4 L33.7,189.0 L22.9,177.2 L9.9,140.9 L3.3,141.9 L10.1,127.2 L7.9,119.4 L14.1,113.6 L10.2,109.2 L23.8,83.7 L40.0,85.0 L39.3,2.3 L60.9,2.2 L60.9,0 L284.2,0 L295.8,28.4 L313.2,40.0 L303.7,50.8 L289.9,53.9 L283.9,59.6 L274.0,99.8 L273.0,123.6 L244.0,173.6 L235.1,178.8 L229.6,200.8 Z"/>
+        <path fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" d="M170.7,313.0 L169.6,335.1 L177.1,337.6 L163.8,349.3 L152.7,367.9 L147.1,404.4 L141.7,409.7 L136.7,432.6 L141.4,441.2 L144.1,491.1 L168.9,536.3 L136.3,537.6 L125.8,551.8 L120.3,560.1 L117.0,296.1 L125.5,298.4 L149.7,292.4 L170.7,313.0 Z"/>
+        <path fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" d="M589.8,65.4 L576.2,70.4 L572.1,85.2 L523.3,102.0 L506.5,115.3 L492.5,115.2 L481.5,123.0 L449.0,128.7 L437.0,139.8 L421.7,142.0 L408.7,141.0 L403.8,130.0 L404.3,119.7 L392.2,92.5 L395.9,91.6 L395.5,71.1 L403.7,65.1 L401.8,57.1 L406.8,47.9 L414.5,52.8 L441.3,50.6 L470.2,53.5 L474.9,59.8 L483.6,56.6 L497.1,36.8 L514.7,28.3 L568.9,21.1 L589.8,65.4 Z"/>
+        <g class="context-label">
+          <text x="115" y="95">SUDAN</text>
+          <text x="118" y="330">DR CONGO</text>
+          <text x="480" y="95">YEMEN</text>
+        </g>
+
+        <path id="f-ke" class="region-fill" d="M361.8,395.3 L373.0,410.9 L359.8,418.4 L355.2,426.2 L348.1,427.6 L345.4,440.9 L339.4,448.5 L335.7,461.0 L328.2,467.3 L301.1,448.4 L299.9,437.5 L228.5,397.0 L228.3,377.1 L242.9,357.0 L249.8,343.2 L239.3,312.1 L230.4,299.1 L254.7,275.4 L264.5,278.6 L264.5,289.1 L270.9,295.3 L284.0,295.3 L307.8,311.3 L318.2,311.0 L322.3,313.2 L334.9,314.7 L340.4,306.8 L357.6,298.9 L365.2,305.3 L378.1,305.3 L361.6,326.7 L361.8,395.3 Z"/>
+        <path id="f-tz" class="region-fill" d="M228.5,397.0 L299.9,437.5 L301.1,448.4 L328.2,467.3 L319.5,490.5 L320.6,501.2 L332.6,508.0 L333.2,512.9 L328.0,524.3 L327.9,539.0 L342.2,569.4 L349.1,573.5 L334.2,584.5 L313.6,591.8 L302.3,591.5 L295.6,597.1 L282.5,597.6 L277.6,600.0 L255.0,594.7 L240.8,596.2 L235.5,570.6 L225.4,556.6 L206.9,553.1 L168.9,536.3 L158.8,512.6 L147.9,502.0 L144.1,491.1 L146.0,481.3 L142.6,463.9 L150.4,463.0 L169.2,442.4 L169.0,436.3 L164.9,432.0 L163.9,424.6 L169.3,422.2 L170.4,411.2 L162.9,400.5 L169.5,398.3 L228.5,397.0 Z"/>
+        <path id="f-et" class="region-fill" d="M303.8,97.3 L315.2,105.8 L326.2,101.4 L330.8,105.3 L343.7,105.5 L360.0,113.1 L364.9,119.6 L373.2,125.7 L387.4,142.8 L374.4,160.0 L376.2,170.9 L391.2,169.9 L395.4,173.2 L391.3,179.9 L405.2,199.4 L412.4,206.1 L473.9,228.5 L489.7,228.3 L436.6,284.9 L412.0,285.7 L395.3,299.0 L383.2,299.4 L378.1,305.3 L365.2,305.3 L357.6,298.9 L340.4,306.8 L334.9,314.7 L318.2,311.0 L307.8,311.3 L284.0,295.3 L270.9,295.3 L264.5,289.1 L264.5,278.6 L254.7,275.4 L243.6,254.9 L235.0,250.5 L231.7,243.0 L222.2,233.8 L210.6,232.5 L217.0,221.7 L227.0,221.3 L229.8,215.5 L229.6,198.6 L235.1,178.8 L244.0,173.6 L245.9,165.9 L254.0,151.5 L265.3,142.1 L273.0,123.6 L276.0,107.4 L297.9,111.3 L303.8,97.3 Z"/>
+        <path id="f-ug" class="region-fill" d="M190.1,398.5 L169.5,398.3 L162.9,400.5 L151.7,406.3 L147.1,404.4 L147.3,390.2 L151.6,383.0 L152.7,367.9 L156.6,359.1 L163.8,349.3 L171.1,344.3 L177.1,337.6 L169.6,335.1 L170.7,313.0 L178.4,307.9 L190.4,312.1 L205.6,307.7 L218.8,307.7 L230.4,299.1 L239.3,312.1 L241.5,321.6 L249.8,343.2 L242.9,357.0 L228.3,377.1 L228.5,397.0 L190.1,398.5 Z"/>
+        <path id="f-rw" class="region-fill" d="M162.9,400.5 L170.4,411.2 L169.3,422.2 L163.9,424.6 L153.9,423.4 L148.1,434.1 L136.7,432.6 L138.4,422.3 L141.0,420.9 L141.7,409.7 L147.1,404.4 L151.7,406.3 L162.9,400.5 Z"/>
+        <path id="f-bi" class="region-fill" d="M142.6,463.9 L141.4,441.2 L136.7,432.6 L148.1,434.1 L153.9,423.4 L163.9,424.6 L164.9,432.0 L169.0,436.3 L169.2,442.4 L164.5,446.4 L157.2,456.2 L150.4,463.0 L142.6,463.9 Z"/>
+        <path id="f-so" class="region-fill" d="M526.2,161.0 L536.2,159.1 L545.1,152.6 L552.2,152.6 L551.0,178.6 L547.0,185.4 L541.7,205.8 L532.6,226.9 L521.0,250.9 L504.9,278.5 L466.7,325.3 L402.2,373.6 L381.6,396.5 L377.2,406.4 L373.0,410.9 L361.8,395.3 L361.6,326.7 L383.2,299.4 L395.3,299.0 L412.0,285.7 L436.6,284.9 L489.7,228.3 L511.3,201.0 L511.4,164.4 L526.2,161.0 Z"/>
+        <path id="f-er" class="region-fill" d="M387.4,142.8 L381.0,136.7 L373.2,125.7 L364.9,119.6 L360.0,113.1 L343.7,105.5 L330.8,105.3 L326.2,101.4 L315.2,105.8 L303.8,97.3 L297.9,111.3 L276.0,107.4 L274.0,99.8 L282.1,72.2 L283.9,59.6 L289.9,53.9 L303.7,50.8 L313.2,40.0 L324.2,61.8 L329.4,79.1 L339.7,88.3 L365.4,106.1 L391.9,134.2 L401.1,139.8 L395.5,144.4 L387.4,142.8 Z"/>
+        <path id="f-dj" class="region-fill" d="M401.1,139.8 L405.6,145.7 L405.0,153.5 L394.3,158.0 L402.3,163.2 L395.4,173.2 L391.2,169.9 L386.7,171.2 L376.2,170.9 L375.9,165.2 L374.4,160.0 L387.4,142.8 L395.5,144.4 L401.1,139.8 Z"/>
+        <path id="f-ss" class="region-fill" d="M229.6,200.8 L229.8,215.5 L227.0,221.3 L217.0,221.7 L210.6,232.5 L222.2,233.8 L231.7,243.0 L235.0,250.5 L243.6,254.9 L254.7,275.4 L218.8,307.7 L205.6,307.7 L190.4,312.1 L178.4,307.9 L170.7,313.0 L154.1,300.5 L149.7,292.4 L139.2,296.4 L130.5,295.2 L125.5,298.4 L117.0,296.1 L102.6,274.5 L88.5,267.1 L83.8,255.8 L63.3,237.8 L63.1,231.7 L40.0,216.7 L52.2,211.1 L57.1,194.3 L62.3,185.6 L75.8,183.0 L88.7,199.1 L93.9,200.8 L100.7,197.5 L114.3,198.2 L116.8,202.1 L135.6,202.1 L136.2,198.2 L145.9,194.6 L147.8,189.1 L155.0,185.2 L170.8,196.2 L180.5,194.3 L189.8,180.7 L200.2,170.3 L198.6,159.0 L194.0,153.5 L205.3,152.6 L206.6,148.4 L215.4,149.6 L213.1,163.6 L215.4,177.1 L225.0,184.6 L227.3,191.1 L227.0,200.4 L229.6,200.8 Z"/>
+
+        <g id="mada-inset" transform="translate(500,390)">
+          <path id="f-md" class="region-fill" d="M83.4,6.0 L86.9,12.0 L90.2,21.2 L92.3,38.1 L95.8,44.6 L94.5,51.4 L92.1,55.5 L87.6,47.3 L85.1,51.4 L87.6,61.8 L86.5,67.7 L82.8,71.0 L82.0,82.8 L62.0,145.0 L56.9,164.5 L50.9,180.8 L40.2,184.1 L28.6,190.0 L10.4,181.4 L6.8,174.0 L5.9,161.6 L1.2,150.4 L0.0,140.3 L2.4,130.2 L8.5,127.8 L8.5,123.2 L14.9,112.5 L16.0,103.6 L10.5,88.1 L9.4,75.2 L14.0,67.4 L15.8,58.5 L22.4,58.0 L34.7,52.6 L40.6,52.4 L48.1,44.4 L59.0,35.8 L63.0,28.7 L61.2,22.7 L66.8,24.4 L74.1,14.7 L74.4,6.3 L78.8,0.0 L83.4,6.0 Z"/>
+          <text x="47" y="-8" class="context-label" font-size="9">MADAGASCAR (inset)</text>
+        </g>
+
+        <g id="borders" stroke-width="1">
+          <path class="border-line" id="b-ke-tz" d="M335.7,461.0 L328.2,467.3 L301.1,448.4 L299.9,437.5 L228.5,397.0"/>
+          <path class="border-line" id="b-ke-ug" d="M228.5,397.0 L228.3,377.1 L242.9,357.0 L249.8,343.2 L239.3,312.1 L230.4,299.1"/>
+          <path class="border-line" id="b-ke-et" d="M254.7,275.4 L264.5,278.6 L264.5,289.1 L270.9,295.3 L284.0,295.3 L307.8,311.3 L318.2,311.0 L322.3,313.2 L334.9,314.7 L340.4,306.8 L357.6,298.9 L365.2,305.3 L378.1,305.3"/>
+          <path class="border-line" id="b-ke-so" d="M378.1,305.3 L361.6,326.7 L361.8,395.3 L373.0,410.9 L359.8,418.4"/>
+          <path class="border-line" id="b-ke-ss" d="M230.4,299.1 L254.7,275.4 L264.5,278.6"/>
+          <path class="border-line" id="b-tz-ug" d="M170.4,411.2 L162.9,400.5 L169.5,398.3 L228.5,397.0"/>
+          <path class="border-line" id="b-tz-rw" d="M169.0,436.3 L164.9,432.0 L163.9,424.6 L169.3,422.2 L170.4,411.2 L162.9,400.5 L169.5,398.3"/>
+          <path class="border-line" id="b-tz-bi" d="M142.6,463.9 L150.4,463.0 L169.2,442.4 L169.0,436.3 L164.9,432.0 L163.9,424.6 L169.3,422.2 L170.4,411.2"/>
+          <path class="border-line" id="b-ug-rw" d="M169.5,398.3 L162.9,400.5 L151.7,406.3 L147.1,404.4 L147.3,390.2"/>
+          <path class="border-line" id="b-ug-ss" d="M170.7,313.0 L178.4,307.9 L190.4,312.1 L205.6,307.7 L218.8,307.7 L230.4,299.1"/>
+          <path class="border-line" id="b-rw-bi" d="M170.4,411.2 L169.3,422.2 L163.9,424.6 L153.9,423.4 L148.1,434.1 L136.7,432.6 L138.4,422.3 L141.0,420.9"/>
+          <path class="border-line" id="b-et-so" d="M473.9,228.5 L489.7,228.3 L436.6,284.9 L412.0,285.7 L395.3,299.0 L383.2,299.4 L378.1,305.3"/>
+          <path class="border-line" id="b-et-er" d="M276.0,107.4 L297.9,111.3 L303.8,97.3 L315.2,105.8 L326.2,101.4 L330.8,105.3 L343.7,105.5 L360.0,113.1 L364.9,119.6 L373.2,125.7 L387.4,142.8"/>
+          <path class="border-line" id="b-et-dj" d="M387.4,142.8 L374.4,160.0 L376.2,170.9 L391.2,169.9 L395.4,173.2 L391.3,179.9"/>
+          <path class="border-line" id="b-et-ss" d="M264.5,278.6 L254.7,275.4 L243.6,254.9 L235.0,250.5 L231.7,243.0 L222.2,233.8 L210.6,232.5 L217.0,221.7 L227.0,221.3 L229.8,215.5 L229.6,198.6 L235.1,178.8"/>
+          <path class="border-line" id="b-er-dj" d="M391.9,134.2 L401.1,139.8 L395.5,144.4 L387.4,142.8 L381.0,136.7"/>
+        </g>
+
+        <g id="labels"></g>
+      </svg>
+
+      <div class="era-head">
+        <div class="era-name-inline" id="eraName">The Aksumite Kingdom</div>
+        <div class="era-owners" id="eraOwners"></div>
+      </div>
+      <div class="flags-row" id="flagsRow"></div>
+      <p class="era-story" id="eraStory"></p>
+
+      <p class="map-note">Real traced borders (simplified from public domain geographic data). Sudan, DR Congo, and Yemen shown faint for context only. Madagascar, roughly 400km offshore, is drawn as a same-scale inset rather than at its true relative position &mdash; the ocean gap between it and the mainland isn't to scale.</p>
+      <div class="map-key" id="legend"></div>
+      <div class="map-notes">
+        <b>Try:</b> drag slowly from c.150 to c.1500 and watch every region except Ethiopia stay merged under one "local kingdoms" color &mdash; Aksum's Christian, literate, coin-minting state had no real peer here yet. Then jump to 1885: nine separate colonial or imperial powers appear across the map at once, except Ethiopia, which stays its own color straight through &mdash; the one border on this map that Europe's partition never touched. Finally watch Eritrea specifically: its line with Ethiopia dissolves completely at 1963 (full annexation) and snaps back solid at 1993, the only region whose independence is won, lost, and won again on this map.
+      </div>
+    </div>
+  </div>
+
+  <div class="about">
+    <h2>About this atlas</h2>
+    <p>This started as a family history project: tracing the flags that flew over the lands our ancestors came from, close enough to paint accurately &mdash; correct colors, correct proportions, correct dates. East Africa joins the atlas as its own hub because its history stands apart from the rest of the project so far: one country here, Ethiopia, was never colonized in any lasting sense, while a Swahili-coast trading civilization linked this region to the Indian Ocean world centuries before the European "Scramble for Africa" arrived.</p>
+    <p>The map above traces real coastlines and borders across ten snapshots, from the Aksumite Kingdom through the Berlin Conference partition to South Sudan's 2011 independence &mdash; the same real-map, dissolving-border template built for the Former Yugoslavia and German Lands hubs. Colors above in the country grid are provisional swatches pending each country's own dedicated flag-timeline page; the map's own flag graphics are close historical approximations, and pre-colonial swatches especially are informed reconstructions, not official specifications, labeled as such throughout.</p>
+  </div>
+
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This hub is one region in a larger set. See the rest of the atlas here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are provisional placeholders pending each country's dedicated page.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var C = {
+    aksum:"#8a5a2e", local:"#7a6a45",
+    solomonic:"#2f6b3f", swahili:"#1f8a8a", ajuran:"#9a5a3a", adal:"#3f7a4a",
+    zanzibar:"#a4302a", eth_princes:"#c9a13c", so_sultanates:"#4a90d9", ottoman_egypt:"#8a2f2f",
+    buganda:"#7a4a1f", rwanda_kingdom:"#3a4a9a", burundi_kingdom:"#8a2f5c", imerina:"#5a8a6b",
+    british_ea:"#2c5f8a", german_ea:"#3a3a3a", italian_col:"#3a7a4a", french_col:"#2447c4",
+    belgian_rw_ur:"#d4a017", mahdist:"#241f14", anglo_eg_sudan:"#4a6f8a",
+    ethiopian_empire:"#c9a13c", so_partition:"#6f8fae", british_tang:"#3a6f9a",
+    kenya_ind:"#a4302a", tanganyika_ind:"#1e824c", uganda_ind:"#7a4a1f", rwanda_ind:"#1e2f96",
+    burundi_kingdom_ind:"#8a2f5c", somalia_ind:"#4a90d9", sudan_ind:"#2f7a8a", madagascar_ind:"#5a8a6b",
+    eritrea_ind:"#6b7a2e", ethiopia_federal:"#b8903a", tanzania_united:"#1e824c", burundi_republic:"#8a2f5c",
+    somalia_collapse:"#5c6f7a", djibouti_ind:"#6fa3b8", south_sudan_ind:"#2b2e33", somalia_modern:"#4a90d9"
+  };
+  var NAMES = {
+    aksum:"Aksumite Kingdom", local:"Local kingdoms & peoples (unrecorded centralized states)",
+    solomonic:"Solomonic Ethiopian Empire", swahili:"Swahili coastal city-states", ajuran:"Ajuran Sultanate", adal:"Adal Sultanate",
+    zanzibar:"Sultanate of Zanzibar (Oman)", eth_princes:"Ethiopian Empire (Zemene Mesafint)", so_sultanates:"Somali sultanates & clans", ottoman_egypt:"Ottoman-Egyptian Red Sea coast",
+    buganda:"Kingdom of Buganda", rwanda_kingdom:"Kingdom of Rwanda", burundi_kingdom:"Kingdom of Burundi", imerina:"Kingdom of Madagascar (Imerina)",
+    british_ea:"British East Africa", german_ea:"German East Africa", italian_col:"Italian colony", french_col:"French colony",
+    belgian_rw_ur:"Belgian Ruanda-Urundi", mahdist:"Mahdist State", anglo_eg_sudan:"Anglo-Egyptian Sudan",
+    ethiopian_empire:"Ethiopian Empire", so_partition:"British & Italian Somaliland", british_tang:"British Tanganyika (mandate)",
+    kenya_ind:"Republic of Kenya", tanganyika_ind:"Tanganyika (independent)", uganda_ind:"Republic of Uganda", rwanda_ind:"Republic of Rwanda",
+    burundi_kingdom_ind:"Kingdom of Burundi (independent)", somalia_ind:"Somali Republic", sudan_ind:"Republic of Sudan", madagascar_ind:"Republic of Madagascar",
+    eritrea_ind:"State of Eritrea", ethiopia_federal:"Federal Democratic Republic of Ethiopia", tanzania_united:"United Republic of Tanzania", burundi_republic:"Republic of Burundi",
+    somalia_collapse:"Somalia (state collapse)", djibouti_ind:"Republic of Djibouti", south_sudan_ind:"Republic of South Sudan", somalia_modern:"Federal Republic of Somalia"
+  };
+  var legendEl = document.getElementById("legend");
+  legendEl.innerHTML = Object.keys(C).map(function (k) {
+    return '<span><span class="sw" style="background:' + C[k] + '"></span>' + NAMES[k] + "</span>";
+  }).join("");
+
+  // ---- Flag graphics: real designs where documented, informed reconstructions (labeled) otherwise ----
+  var FLAGS = {
+    aksum: '<rect width="300" height="200" fill="#8a5a2e"/><rect x="138" y="30" width="24" height="140" fill="#e8dfc4" stroke="#5c3e1e" stroke-width="2"/><rect x="128" y="30" width="44" height="10" fill="#e8dfc4" stroke="#5c3e1e" stroke-width="2"/><text x="150" y="188" font-size="11" text-anchor="middle" fill="#e8dfc4" font-family="serif">reconstruction</text>',
+    local: '<rect width="300" height="200" fill="#7a6a45"/><g fill="none" stroke="#c9bb92" stroke-width="2" stroke-dasharray="6 6"><rect x="10" y="10" width="280" height="180"/></g><text x="150" y="105" font-size="13" text-anchor="middle" fill="#e8dfc4">no flag</text><text x="150" y="122" font-size="13" text-anchor="middle" fill="#e8dfc4">recorded</text>',
+    solomonic: '<rect width="300" height="66.7" fill="#2f6b3f"/><rect y="66.7" width="300" height="66.6" fill="#f9d616"/><rect y="133.3" width="300" height="66.7" fill="#a4302a"/><path d="M150,80 q-18,10 -14,34 q2,14 14,18 q12,-4 14,-18 q4,-24 -14,-34 Z" fill="#241f14"/>',
+    swahili: '<rect width="300" height="200" fill="#1f8a8a"/><path d="M120,90 A38,38 0 1 0 160,116 A28,28 0 1 1 120,90 Z" fill="#f4efe1"/><path d="M195,84 l5,15 16,0 -13,10 5,15 -13,-9 -13,9 5,-15 -13,-10 16,0 Z" fill="#f4efe1"/>',
+    ajuran: '<rect width="300" height="200" fill="#9a5a3a"/><path d="M150,72 l10.8,33.2 34.9,0 -28.2,20.5 10.8,33.2 -28.3,-20.5 -28.3,20.5 10.8,-33.2 -28.2,-20.5 34.9,0 Z" fill="#f4efe1"/>',
+    adal: '<rect width="300" height="200" fill="#3f7a4a"/><path d="M120,70 A38,38 0 1 0 172,102 A28,28 0 1 1 120,70 Z" fill="#f4efe1"/>',
+    zanzibar: '<rect width="300" height="200" fill="#a4302a"/>',
+    eth_princes: '<rect width="300" height="66.7" fill="#2f6b3f"/><rect y="66.7" width="300" height="66.6" fill="#f9d616"/><rect y="133.3" width="300" height="66.7" fill="#a4302a"/>',
+    so_sultanates: '<rect width="300" height="200" fill="#4a90d9"/><path d="M150,76 l10.8,33.2 34.9,0 -28.2,20.5 10.8,33.2 -28.3,-20.5 -28.3,20.5 10.8,-33.2 -28.2,-20.5 34.9,0 Z" fill="#f4efe1"/>',
+    ottoman_egypt: '<rect width="300" height="200" fill="#8a2f2f"/><path d="M120,70 A38,38 0 1 0 172,102 A28,28 0 1 1 120,70 Z" fill="#f4efe1"/><path d="M200,84 l5,15 16,0 -13,10 5,15 -13,-9 -13,9 5,-15 -13,-10 16,0 Z" fill="#f4efe1"/>',
+    buganda: '<rect width="300" height="200" fill="#7a4a1f"/><g fill="#241f14" opacity="0.5"><rect x="0" y="0" width="37.5" height="25"/><rect x="75" y="0" width="37.5" height="25"/><rect x="150" y="0" width="37.5" height="25"/><rect x="225" y="0" width="37.5" height="25"/><rect x="37.5" y="25" width="37.5" height="25"/><rect x="112.5" y="25" width="37.5" height="25"/><rect x="187.5" y="25" width="37.5" height="25"/></g><circle cx="150" cy="130" r="30" fill="#f4efe1"/><text x="150" y="138" font-size="11" text-anchor="middle" fill="#7a4a1f">reconstruction</text>',
+    rwanda_kingdom: '<rect width="300" height="200" fill="#3a4a9a"/><g fill="#f4efe1" opacity="0.85"><rect x="0" y="0" width="30" height="30"/><rect x="60" y="0" width="30" height="30"/><rect x="120" y="0" width="30" height="30"/><rect x="180" y="0" width="30" height="30"/><rect x="240" y="0" width="30" height="30"/><rect x="30" y="30" width="30" height="30"/><rect x="90" y="30" width="30" height="30"/><rect x="150" y="30" width="30" height="30"/><rect x="210" y="30" width="30" height="30"/></g><text x="150" y="180" font-size="11" text-anchor="middle" fill="#f4efe1">reconstruction</text>',
+    burundi_kingdom: '<rect width="300" height="200" fill="#8a2f5c"/><circle cx="150" cy="100" r="34" fill="none" stroke="#f4efe1" stroke-width="4"/><circle cx="150" cy="100" r="14" fill="#f4efe1"/><text x="150" y="180" font-size="11" text-anchor="middle" fill="#f4efe1">reconstruction</text>',
+    imerina: '<rect width="150" height="200" fill="#f4efe1"/><rect x="150" width="150" height="200" fill="#a4302a"/>',
+    british_ea: '<rect width="300" height="200" fill="#00247d"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#fff" stroke-width="22"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#cf142b" stroke-width="8"/><path d="M150,0 V200 M0,100 H300" stroke="#fff" stroke-width="34"/><path d="M150,0 V200 M0,100 H300" stroke="#cf142b" stroke-width="14"/>',
+    german_ea: '<rect width="300" height="66.7" fill="#241f14"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#a4302a"/>',
+    italian_col: '<rect width="100" height="200" fill="#009246"/><rect x="100" width="100" height="200" fill="#f4efe1"/><rect x="200" width="100" height="200" fill="#ce2b37"/>',
+    french_col: '<rect width="100" height="200" fill="#0055a4"/><rect x="100" width="100" height="200" fill="#f4efe1"/><rect x="200" width="100" height="200" fill="#ef4135"/>',
+    belgian_rw_ur: '<rect width="100" height="200" fill="#241f14"/><rect x="100" width="100" height="200" fill="#f9d616"/><rect x="200" width="100" height="200" fill="#a4302a"/>',
+    mahdist: '<rect width="300" height="200" fill="#1a1712"/><text x="150" y="105" font-size="12" text-anchor="middle" fill="#d4a017">reconstruction</text><text x="150" y="122" font-size="10" text-anchor="middle" fill="#d4a017">(no verified design)</text>',
+    anglo_eg_sudan: '<rect width="150" height="200" fill="#00247d"/><path d="M0,0 L150,200 M150,0 L0,200" stroke="#fff" stroke-width="16"/><path d="M0,0 L150,200 M150,0 L0,200" stroke="#cf142b" stroke-width="6"/><rect x="150" width="150" height="66.7" fill="#f4efe1"/><rect x="150" y="66.7" width="150" height="66.6" fill="#241f14"/><rect x="150" y="133.3" width="150" height="66.7" fill="#f4efe1"/>',
+    kenya_flag: '<rect width="300" height="200" fill="#f4efe1"/><rect y="0" width="300" height="40" fill="#241f14"/><rect y="40" width="300" height="10" fill="#a4302a"/><rect y="80" width="300" height="40" fill="#a4302a"/><rect y="160" width="300" height="10" fill="#a4302a"/><rect y="120" width="300" height="10" fill="#1e824c"/><rect y="170" width="300" height="30" fill="#1e824c"/><path d="M150,70 l-30,60 h60 Z" fill="#241f14"/><path d="M150,70 l-30,60 h60 Z" fill="#a4302a" transform="scale(0.75) translate(50,25)"/>',
+    tanganyika_flag: '<rect width="300" height="200" fill="#1e824c"/><rect y="70" width="300" height="60" fill="#241f14"/>',
+    uganda_flag: '<rect width="300" height="33.3" fill="#241f14"/><rect y="33.3" width="300" height="33.3" fill="#f9d616"/><rect y="66.6" width="300" height="33.4" fill="#a4302a"/><rect y="100" width="300" height="33.3" fill="#241f14"/><rect y="133.3" width="300" height="33.3" fill="#f9d616"/><rect y="166.6" width="300" height="33.4" fill="#a4302a"/><circle cx="150" cy="100" r="32" fill="#f4efe1"/><path d="M150,75 q10,10 3,25 q-3,7 -3,15 q0,-8 -3,-15 q-7,-15 3,-25 Z" fill="#a4302a"/>',
+    rwanda_revolution_flag: '<rect width="100" height="200" fill="#a4302a"/><rect x="100" width="100" height="200" fill="#f9d616"/><rect x="200" width="100" height="200" fill="#1e824c"/><text x="150" y="120" font-size="60" text-anchor="middle" fill="#241f14" font-family="serif" font-weight="bold">R</text>',
+    somalia_flag: '<rect width="300" height="200" fill="#4a90d9"/><path d="M150,76 l10.8,33.2 34.9,0 -28.2,20.5 10.8,33.2 -28.3,-20.5 -28.3,20.5 10.8,-33.2 -28.2,-20.5 34.9,0 Z" fill="#f4efe1"/>',
+    sudan_flag_1956: '<rect width="300" height="66.7" fill="#1e5288"/><rect y="66.7" width="300" height="66.6" fill="#f9d616"/><rect y="133.3" width="300" height="66.7" fill="#1e824c"/>',
+    madagascar_flag: '<rect width="100" height="200" fill="#f4efe1"/><rect x="100" width="200" height="100" fill="#a4302a"/><rect x="100" y="100" width="200" height="100" fill="#1e824c"/>',
+    eritrea_flag: '<rect width="300" height="200" fill="#12ad2b"/><path d="M0,0 L300,0 L0,200 Z" fill="#3e7ec1"/><path d="M300,0 L300,200 L0,200 Z" fill="#d4a017" opacity="0"/><path d="M0,0 L300,100 L0,200 Z" fill="#ce1126"/><circle cx="110" cy="100" r="20" fill="none" stroke="#d4a017" stroke-width="3"/><path d="M110,84 v32 M98,100 h24" stroke="#d4a017" stroke-width="3"/>',
+    ethiopia_federal_flag: '<rect width="300" height="66.7" fill="#2f6b3f"/><rect y="66.7" width="300" height="66.6" fill="#f9d616"/><rect y="133.3" width="300" height="66.7" fill="#a4302a"/>',
+    ethiopia_modern_flag: '<rect width="300" height="66.7" fill="#2f6b3f"/><rect y="66.7" width="300" height="66.6" fill="#f9d616"/><rect y="133.3" width="300" height="66.7" fill="#a4302a"/><circle cx="150" cy="100" r="30" fill="#3e7ec1"/><path d="M150,78 l6.5,20 21,0 -17,13 6.5,20 -17,-12.5 -17,12.5 6.5,-20 -17,-13 21,0 Z" fill="#f9d616"/>',
+    tanzania_flag: '<rect width="300" height="200" fill="#1e824c"/><path d="M0,0 L300,200 M0,200 L300,0" stroke="#000" stroke-width="0"/><polygon points="0,0 300,200 300,150 40,0" fill="#f9d616" opacity="0"/><polygon points="0,50 260,200 300,200 0,0" fill="#f9d616"/><polygon points="0,66 280,200 300,166 0,0" fill="none"/><polygon points="0,55 270,200 300,190 0,10" fill="#241f14"/><polygon points="0,0 300,150 300,200 260,200 0,60" fill="#1e824c"/><polygon points="0,140 300,0 0,0" fill="#3e7ec1"/>',
+    burundi_republic_flag: '<rect width="300" height="200" fill="#f4efe1"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#a4302a" stroke-width="26"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#1e824c" stroke-width="26" stroke-dasharray="1 1" opacity="0"/><polygon points="150,0 300,100 150,200 0,100" fill="#f4efe1"/><circle cx="150" cy="100" r="34" fill="#f4efe1" stroke="#a4302a" stroke-width="3"/><g fill="#a4302a"><path d="M150,76 l4,12 13,0 -10.5,7.6 4,12 -10.5,-7.6 -10.5,7.6 4,-12 -10.5,-7.6 13,0 Z"/></g>',
+    djibouti_flag: '<rect width="300" height="100" fill="#6fa3b8"/><rect y="100" width="300" height="100" fill="#1e824c"/><polygon points="0,0 130,100 0,200" fill="#f4efe1"/><path d="M60,85 l4,12 13,0 -10.5,7.6 4,12 -10.5,-7.6 -10.5,7.6 4,-12 -10.5,-7.6 13,0 Z" fill="#a4302a"/>',
+    south_sudan_flag: '<rect width="300" height="40" fill="#241f14"/><rect y="40" width="300" height="8" fill="#f4efe1"/><rect y="48" width="300" height="40" fill="#a4302a"/><rect y="88" width="300" height="8" fill="#f4efe1"/><rect y="96" width="300" height="8" fill="#a4302a" opacity="0"/><rect y="96" width="300" height="40" fill="#1e824c"/><rect y="136" width="300" height="8" fill="#f4efe1"/><rect y="144" width="300" height="56" fill="#a4302a"/><polygon points="0,0 140,100 0,200" fill="#3e7ec1"/><path d="M60,80 l5,15 16,0 -13,10 5,15 -13,-9 -13,9 5,-15 -13,-10 16,0 Z" fill="#f9d616"/>',
+    rwanda_flag_modern: '<rect width="300" height="130" fill="#3e7ec1"/><rect y="130" width="300" height="35" fill="#f9d616"/><rect y="165" width="300" height="35" fill="#1e824c"/><circle cx="230" cy="45" r="22" fill="#f9d616"/>'
+  };
+  function flagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (FLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+
+  var SNAP = [
+    { year:"c.150", name:"The Aksumite Kingdom", t:{ ke:C.local, tz:C.local, et:C.aksum, ug:C.local, rw:C.local, bi:C.local, so:C.local, er:C.local, dj:C.local, ss:C.local, md:C.local },
+      story:"Aksum, in Ethiopia's northern highlands, is already one of the great trading powers of the ancient world &mdash; the third-century Persian prophet Mani ranked it alongside Rome, Persia, and China. Its merchants trade ivory, gold, and incense through the Red Sea port of Adulis, reaching Rome, Arabia, and India; its kings mint their own gold, silver, and bronze coinage, one of the only African states in antiquity to do so. Around 330 CE, under King Ezana, Aksum becomes the first state anywhere in Africa &mdash; and one of the first in the world &mdash; to adopt Christianity as an official religion, decades before Rome itself. Aksum's script, Ge'ez, is still the liturgical language of the Ethiopian Orthodox Church today. Everywhere else on this map, states are smaller, oral rather than epigraphic, and left too thin a documentary record to name individually here &mdash; which is a gap in the historical record, not a judgment about the societies themselves." },
+    { year:"c.1500", name:"Solomonic Ethiopia & the Swahili Coast", t:{ ke:C.swahili, tz:C.swahili, et:C.solomonic, ug:C.local, rw:C.local, bi:C.local, so:C.ajuran, er:C.local, dj:C.adal, ss:C.local, md:C.local },
+      story:"Ethiopia's Solomonic dynasty, restored in 1270 by Yekuno Amlak on a claimed descent from King Solomon and the Queen of Sheba, now rules a large Christian highland empire with its own centuries-deep literary and artistic tradition. Along the Indian Ocean coast, a string of independent Swahili city-states &mdash; Mombasa, Malindi, Kilwa, Lamu &mdash; run a wealthy Muslim trading civilization linking East Africa to Arabia, Persia, and India, built on gold, ivory, and textiles; Portuguese ships under Vasco da Gama first reach this coast in 1498, and will spend the next century trying to break it. Inland, the Ajuran Sultanate dominates south-central Somalia's river valleys, while the Adal Sultanate, based at Zeila near modern Djibouti, is Ethiopia's chief Muslim rival &mdash; within a generation its general Ahmad ibn Ibrahim al-Ghazi, known as Gragn, will invade and nearly conquer the Ethiopian highlands outright (1529&ndash;43)." },
+    { year:"1840", name:"Height of Omani Zanzibar", t:{ ke:C.zanzibar, tz:C.zanzibar, et:C.eth_princes, ug:C.buganda, rw:C.rwanda_kingdom, bi:C.burundi_kingdom, so:C.so_sultanates, er:C.ottoman_egypt, dj:C.local, ss:C.local, md:C.imerina },
+      story:"In 1840, Sultan Said bin Sultan of Oman moves his entire capital from Muscat to Zanzibar, building the island into the center of a booming clove-plantation and slave-trading economy that dominates the whole Swahili coast, from Mogadishu to Mozambique. Inland, the Kingdom of Buganda is the strongest power around Lake Victoria, its royal court trading ivory and slaves for Zanzibari cloth and firearms; the Kingdoms of Rwanda and Burundi run their own tightly centralized cattle-and-clientship states in the highlands to the west. Ethiopia, by contrast, is at a historic low point: the Zemene Mesafint (\"Age of Princes\"), a century of regional warlords ruling in the Solomonic emperor's name while the throne itself holds little real power &mdash; a fragmentation Emperor Tewodros II will start reversing by force in 1855. On the coast, Egypt (nominally Ottoman) is extending its reach down the Red Sea toward Massawa, and on Madagascar, the Kingdom of Imerina under Queen Ranavalona I is completing the unification of the island by force, while turning increasingly hostile to the European missionaries who had earlier been welcomed." },
+    { year:"1885", name:"The Berlin Conference partition", t:{ ke:C.british_ea, tz:C.german_ea, ug:C.british_ea, rw:C.german_ea, bi:C.german_ea, so:C.so_partition, er:C.italian_col, dj:C.french_col, et:C.ethiopian_empire, ss:C.mahdist, md:C.imerina },
+      story:"The Berlin Conference of November 1884 to February 1885 divides African territory among fourteen European and American powers without a single African representative present, setting the rules for the \"Scramble for Africa\" already underway. Carl Peters' company treaties become German East Africa (Tanganyika, Rwanda, Burundi); British claims further north become British East Africa (Kenya) and the still-forming protectorate over Uganda. Italy, having bought a foothold at Assab in 1869 and taken Massawa in 1885 itself, is building the colony that becomes Eritrea; France holds the port of Obock, the seed of French Somaliland. Ethiopia, under the newly crowned Emperor Menelik II, is the one African state actively expanding rather than being carved up, doubling its own territory southward even as Europeans circle its edges. Meanwhile the interior of what becomes South Sudan has just fallen to a very different force entirely: the Mahdist uprising captures Khartoum in January 1885, killing British general Charles Gordon and ending Egyptian rule across the whole Sudanese interior for over a decade." },
+    { year:"1896", name:"Adwa — Ethiopia stays independent", t:{ et:C.ethiopian_empire, er:C.italian_col, so:C.so_partition, dj:C.french_col, ke:C.british_ea, ug:C.british_ea, tz:C.german_ea, rw:C.german_ea, bi:C.german_ea, ss:C.mahdist, md:C.french_col },
+      story:"On 1 March 1896, at Adwa in northern Ethiopia, Emperor Menelik II's forces &mdash; well over 100,000 strong, armed partly with rifles bought from the same European powers now invading &mdash; inflict a decisive defeat on Italy's colonial army. It is the only time during the entire Scramble for Africa that an African state defeats a European power decisively enough to force full recognition of its independence: the Treaty of Addis Ababa later that year voids Italy's earlier claim to a protectorate over the whole country. Adwa becomes one of the defining events of Pan-African history. Madagascar's story runs the opposite way this same year: after a second, harder war, France annexes the island outright as a colony (1896), and by 1897 Queen Ranavalona III is deposed and exiled, ending nearly a century of Merina rule." },
+    { year:"1919", name:"WWI's spoils — German East Africa reassigned", t:{ tz:C.british_tang, rw:C.belgian_rw_ur, bi:C.belgian_rw_ur, ke:C.british_ea, ug:C.british_ea, so:C.so_partition, er:C.italian_col, dj:C.french_col, et:C.ethiopian_empire, ss:C.anglo_eg_sudan, md:C.french_col },
+      story:"Germany's defeat in World War I ends German East Africa outright. The League of Nations hands its bulk to Britain as the mandate territory of Tanganyika; the smaller northwestern corner, Ruanda-Urundi, goes instead to Belgium, administered jointly with the neighboring Belgian Congo &mdash; the start of the identity-card ethnic classification system Belgian administrators will later impose on Rwanda and Burundi's Hutu and Tutsi populations, with catastrophic long-term consequences. Ethiopia remains independent under Empress Zewditu, with the young Ras Tafari Makonnen &mdash; the future Emperor Haile Selassie &mdash; already the power behind the throne as regent. In the Sudanese interior, the Anglo-Egyptian Condominium, re-established after Britain's 1898 reconquest of the Mahdist State, governs the territory that includes the future South Sudan jointly (if unequally) between Britain and Egypt." },
+    { year:"1940", name:"Italian East Africa", t:{ et:C.italian_col, er:C.italian_col, so:C.italian_col, ke:C.british_ea, ug:C.british_ea, tz:C.british_tang, rw:C.belgian_rw_ur, bi:C.belgian_rw_ur, ss:C.anglo_eg_sudan, dj:C.french_col, md:C.french_col },
+      story:"Mussolini's invasion of 1935&ndash;36 conquers Ethiopia and ends its fifty-year run as the exception to European colonization; Italy folds it together with Eritrea and Italian Somaliland into a single colony, Africa Orientale Italiana. In August 1940, with Britain distracted early in World War II, Italian forces push further still, briefly overrunning British Somaliland &mdash; the only moment on this map when the entire Horn of Africa answers to one government. It does not last: Commonwealth forces, joined by Ethiopian patriot fighters under Haile Selassie himself, reconquer the whole region within a year, and Ethiopia's independence is restored by May 1941, the occupation lasting only five years in total." },
+    { year:"1963", name:"The independence wave", t:{ ke:C.kenya_ind, tz:C.tanganyika_ind, ug:C.uganda_ind, rw:C.rwanda_ind, bi:C.burundi_kingdom_ind, so:C.somalia_ind, et:C.ethiopian_empire, er:C.ethiopian_empire, dj:C.french_col, ss:C.sudan_ind, md:C.madagascar_ind },
+      story:"Independence arrives across the region in a five-year rush: Madagascar (1960), Somalia (1960, uniting the former British and Italian territories into one state), Tanganyika (1961), Uganda (1962), and both Rwanda and Burundi in July 1962 &mdash; Rwanda abolishing its monarchy in a Hutu-led revolution that had already begun in 1959, Burundi keeping its Mwami king for four more years. Kenya is last, in December 1963, under Jomo Kenyatta. Sudan has been independent since 1956, but a civil war between the Arab-Muslim north and the African-Christian and traditionalist south &mdash; the future South Sudan &mdash; is already underway. Eritrea's line runs backward: federated with Ethiopia by UN resolution in 1952 with its own parliament and flag, its autonomy is stripped away piece by piece until outright annexation as an ordinary Ethiopian province in 1962 &mdash; the act that starts its own thirty-year war for independence, shown here as its border with Ethiopia fully dissolving. Djibouti, still French Somaliland, is the one holdout in the region, staying French for another fourteen years." },
+    { year:"1993", name:"Eritrea's independence", t:{ er:C.eritrea_ind, et:C.ethiopia_federal, ke:C.kenya_ind, tz:C.tanzania_united, ug:C.uganda_ind, rw:C.rwanda_ind, bi:C.burundi_republic, so:C.somalia_collapse, dj:C.djibouti_ind, ss:C.sudan_ind, md:C.madagascar_ind },
+      story:"Thirty years of war (1961&ndash;91) between Eritrean independence fighters and the Ethiopian state end when the Eritrean People's Liberation Front, allied with Ethiopian rebel forces, topples the Marxist Derg dictatorship in Addis Ababa in 1991. A UN-supervised referendum in April 1993 returns a 99.8% vote for independence, and Eritrea becomes the newest state in Africa &mdash; its border with Ethiopia, dissolved on this map since 1963, solid again for the first time in three decades. Ethiopia itself has just emerged from seventeen brutal years of Derg rule into a new federal republic. Somalia has gone the opposite direction: its central government collapsed entirely in January 1991, and 1993 is the year of the UN's disastrous intervention and the Battle of Mogadishu, with no single authority controlling the country shown on this map. Burundi, its monarchy abolished back in 1966, remains a fragile republic sliding toward its own civil war, which will begin later this same year." },
+    { year:"2011–present", name:"South Sudan, the world's newest country", t:{ ss:C.south_sudan_ind, et:C.ethiopia_federal, er:C.eritrea_ind, ke:C.kenya_ind, tz:C.tanzania_united, ug:C.uganda_ind, rw:C.rwanda_ind, bi:C.burundi_republic, so:C.somalia_modern, dj:C.djibouti_ind, md:C.madagascar_ind },
+      story:"Decades of war between Khartoum and the south &mdash; the First Sudanese Civil War (1955&ndash;72) and the far bloodier Second (1983&ndash;2005), which killed an estimated two million people &mdash; end with the 2005 Comprehensive Peace Agreement and a promised referendum on southern self-determination. On 9 July 2011, South Sudan becomes independent by a 98.83% vote, the newest country in the world and the first new UN member state since Montenegro in 2006. Every other border on this map has been settled for decades: Rwanda adopted an entirely new flag and national symbols in 2001, deliberately breaking with anything associated with the 1994 genocide; Somalia has had a recognized federal government again since 2012, still rebuilding state authority; and the rest of the region's flags and governments are the same ones flying today." }
+  ];
+
+  var FLAG_SETS = {
+    "c.150": [["aksum","Aksumite Kingdom"],["local","Everywhere else — local kingdoms & peoples"]],
+    "c.1500": [["solomonic","Solomonic Ethiopia"],["swahili","Swahili city-states"],["ajuran","Ajuran Sultanate"],["adal","Adal Sultanate"]],
+    "1840": [["zanzibar","Sultanate of Zanzibar"],["eth_princes","Ethiopia (Zemene Mesafint)"],["buganda","Kingdom of Buganda"],["rwanda_kingdom","Kingdom of Rwanda"],["burundi_kingdom","Kingdom of Burundi"],["so_sultanates","Somali sultanates"],["ottoman_egypt","Ottoman-Egyptian coast"],["imerina","Kingdom of Madagascar"]],
+    "1885": [["british_ea","British East Africa"],["german_ea","German East Africa"],["italian_col","Italy (Eritrea)"],["french_col","France (Somaliland)"],["ethiopian_empire","Ethiopian Empire"],["mahdist","Mahdist State"],["imerina","Kingdom of Madagascar"]],
+    "1896": [["ethiopian_empire","Ethiopian Empire (victorious)"],["italian_col","Italy (Eritrea)"],["british_ea","British East Africa"],["german_ea","German East Africa"],["mahdist","Mahdist State"],["french_col","France (Madagascar & Somaliland)"]],
+    "1919": [["british_ea","British East Africa"],["belgian_rw_ur","Belgian Ruanda-Urundi"],["italian_col","Italy (Eritrea)"],["french_col","France (Djibouti/Madagascar)"],["ethiopian_empire","Ethiopian Empire"],["anglo_eg_sudan","Anglo-Egyptian Sudan"]],
+    "1940": [["italian_col","Italian East Africa"],["british_ea","British East Africa"],["belgian_rw_ur","Belgian Ruanda-Urundi"],["anglo_eg_sudan","Anglo-Egyptian Sudan"],["french_col","France (Djibouti/Madagascar)"]],
+    "1963": [["kenya_flag","Kenya"],["tanganyika_flag","Tanganyika"],["uganda_flag","Uganda"],["rwanda_revolution_flag","Rwanda"],["burundi_kingdom","Burundi (kingdom)"],["somalia_flag","Somali Republic"],["ethiopia_modern_flag","Ethiopia (incl. annexed Eritrea)"],["sudan_flag_1956","Sudan"],["madagascar_flag","Madagascar"],["french_col","Djibouti (still French)"]],
+    "1993": [["eritrea_flag","Eritrea"],["ethiopia_federal_flag","Ethiopia (federal, transitional)"],["kenya_flag","Kenya"],["tanzania_flag","Tanzania"],["uganda_flag","Uganda"],["rwanda_revolution_flag","Rwanda"],["burundi_republic_flag","Burundi"],["somalia_flag","Somalia (state collapse)"],["djibouti_flag","Djibouti"],["sudan_flag_1956","Sudan"],["madagascar_flag","Madagascar"]],
+    "2011–present": [["south_sudan_flag","South Sudan"],["ethiopia_modern_flag","Ethiopia"],["eritrea_flag","Eritrea"],["kenya_flag","Kenya"],["tanzania_flag","Tanzania"],["uganda_flag","Uganda"],["rwanda_flag_modern","Rwanda"],["burundi_republic_flag","Burundi"],["somalia_flag","Somalia"],["djibouti_flag","Djibouti"],["madagascar_flag","Madagascar"]]
+  };
+
+  var REGIONS = ["ke","tz","et","ug","rw","bi","so","er","dj","ss","md"];
+  var REGION_NAMES = { ke:"Kenya", tz:"Tanzania", et:"Ethiopia", ug:"Uganda", rw:"Rwanda", bi:"Burundi", so:"Somalia", er:"Eritrea", dj:"Djibouti", ss:"South Sudan", md:"Madagascar" };
+  var REGION_ABBR = { ke:"KEN", tz:"TZA", et:"ETH", ug:"UGA", rw:"RWA", bi:"BDI", so:"SOM", er:"ERI", dj:"DJI", ss:"SSD", md:"MDG" };
+  var REGION_POS = { ke:[311,359], tz:[241,503], et:[320,208], ug:[189,355], rw:[153,416], bi:[154,443], so:[470,260], er:[336,102], dj:[392,157], ss:[163,224], md:[550,470] };
+  var ADJ = [["ke","tz"],["ke","ug"],["ke","et"],["ke","so"],["ke","ss"],["tz","ug"],["tz","rw"],["tz","bi"],["ug","rw"],["ug","ss"],["rw","bi"],["et","so"],["et","er"],["et","dj"],["et","ss"],["er","dj"]];
+
+  function textColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+  function ownerName(hex) {
+    for (var k in C) { if (C[k] === hex) return NAMES[k]; }
+    return hex;
+  }
+
+  function groupsFor(t) {
+    var parent = {};
+    REGIONS.forEach(function (r) { parent[r] = r; });
+    function find(x) { return parent[x] === x ? x : (parent[x] = find(parent[x])); }
+    function union(a, b) { var ra = find(a), rb = find(b); if (ra !== rb) parent[ra] = rb; }
+    ADJ.forEach(function (pair) { if (t[pair[0]] === t[pair[1]]) union(pair[0], pair[1]); });
+    var groups = {};
+    REGIONS.forEach(function (r) { var root = find(r); if (!groups[root]) groups[root] = []; groups[root].push(r); });
+    return Object.keys(groups).map(function (k) { return groups[k]; });
+  }
+
+  var svgNS = "http://www.w3.org/2000/svg";
+  var labelsEl = document.getElementById("labels");
+  var yearTag = document.getElementById("yearTag");
+  var eraName = document.getElementById("eraName");
+  var eraOwners = document.getElementById("eraOwners");
+  var eraStory = document.getElementById("eraStory");
+  var flagsRow = document.getElementById("flagsRow");
+  var sliderEl = document.getElementById("slider");
+
+  function render(i) {
+    var era = SNAP[i];
+    yearTag.textContent = era.year;
+    eraName.textContent = era.name;
+    eraStory.innerHTML = era.story || "";
+    flagsRow.innerHTML = (FLAG_SETS[era.year] || []).map(function (f) {
+      return '<div class="flag-chip">' + flagSvg(f[0]) + '<div class="fc-label">' + f[1] + '</div></div>';
+    }).join("");
+
+    REGIONS.forEach(function (id) {
+      var el = document.getElementById("f-" + id);
+      if (el) el.setAttribute("fill", era.t[id]);
+    });
+
+    ADJ.forEach(function (pair) {
+      var same = era.t[pair[0]] === era.t[pair[1]];
+      var line = document.getElementById("b-" + pair[0] + "-" + pair[1]);
+      if (line) {
+        line.setAttribute("stroke-opacity", same ? "0.06" : "0.85");
+        line.setAttribute("stroke-width", same ? "1" : "2.6");
+      }
+    });
+
+    var groups = groupsFor(era.t);
+    var seenOwners = {};
+    var ownerParts = [];
+    groups.forEach(function (g) {
+      var label = ownerName(era.t[g[0]]);
+      if (!seenOwners[label]) { seenOwners[label] = []; ownerParts.push(label); }
+      g.forEach(function (id) { seenOwners[label].push(REGION_NAMES[id]); });
+    });
+    eraOwners.innerHTML = ownerParts.map(function (label) {
+      return "<b>" + label + "</b>: " + seenOwners[label].join(", ");
+    }).join(" &middot; ");
+
+    labelsEl.innerHTML = "";
+    function haloFor(txtColor) { return txtColor === "#201a12" ? "#f7f1e3" : "#201a12"; }
+    groups.forEach(function (g) {
+      var cx = g.reduce(function (s, id) { return s + REGION_POS[id][0]; }, 0) / g.length;
+      var cy = g.reduce(function (s, id) { return s + REGION_POS[id][1]; }, 0) / g.length;
+      var fillHex = era.t[g[0]];
+      var txtColor = textColorFor(fillHex);
+      var halo = haloFor(txtColor);
+
+      if (g.length > 1) {
+        var groupText = ownerName(fillHex).toUpperCase();
+        var gl = document.createElementNS(svgNS, "text");
+        gl.setAttribute("x", cx);
+        gl.setAttribute("y", cy);
+        gl.setAttribute("class", "group-label");
+        gl.setAttribute("font-size", groupText.length > 20 ? "9" : (groupText.length > 14 ? "11" : "13"));
+        gl.setAttribute("fill", txtColor);
+        gl.setAttribute("stroke", halo);
+        gl.textContent = groupText;
+        labelsEl.appendChild(gl);
+        g.forEach(function (id) {
+          var pos = REGION_POS[id];
+          var sl = document.createElementNS(svgNS, "text");
+          sl.setAttribute("x", pos[0]);
+          sl.setAttribute("y", pos[1] + 13);
+          sl.setAttribute("class", "sub-label");
+          sl.setAttribute("font-size", "8.5");
+          sl.setAttribute("fill", txtColor);
+          sl.setAttribute("stroke", halo);
+          sl.setAttribute("opacity", "0.85");
+          sl.textContent = REGION_ABBR[id];
+          labelsEl.appendChild(sl);
+        });
+      } else {
+        var id = g[0];
+        var pos = REGION_POS[id];
+        var soloText = REGION_NAMES[id].toUpperCase();
+        var sl2 = document.createElementNS(svgNS, "text");
+        sl2.setAttribute("x", pos[0]);
+        sl2.setAttribute("y", pos[1]);
+        sl2.setAttribute("class", "group-label");
+        sl2.setAttribute("font-size", "10.5");
+        sl2.setAttribute("fill", txtColor);
+        sl2.setAttribute("stroke", halo);
+        sl2.textContent = soloText;
+        labelsEl.appendChild(sl2);
+      }
+    });
+  }
+
+  sliderEl.addEventListener("input", function () { render(parseInt(sliderEl.value, 10)); });
+  render(0);
+
+  var playing = false, playTimer = null;
+  var playBtn = document.getElementById("playBtn");
+  function stepPlay() {
+    var next = parseInt(sliderEl.value, 10) + 1;
+    if (next > SNAP.length - 1) { stopPlay(); return; }
+    sliderEl.value = next;
+    render(next);
+  }
+  function startPlay() {
+    playing = true;
+    playBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(sliderEl.value, 10) >= SNAP.length - 1) { sliderEl.value = 0; render(0); }
+    playTimer = setInterval(stepPlay, 1900);
+  }
+  function stopPlay() {
+    playing = false;
+    playBtn.innerHTML = "&#9654;";
+    clearInterval(playTimer);
+  }
+  playBtn.addEventListener("click", function () { playing ? stopPlay() : startPlay(); });
+})();
+</script>
+
+</body></html>

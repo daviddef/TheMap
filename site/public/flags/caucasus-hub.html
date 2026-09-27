@@ -1,0 +1,665 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#f2e6d0;color:#231710}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Flags of the Caucasus</title>
+<meta name="description" content="A hub for the family flag atlas: Georgia, Armenia, and Azerbaijan, and an interactive map showing who ruled the Caucasus at nine points across a thousand years.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #231710; --paper: #f2e6d0; --card: #faf1de; --card-border: #ddc79c;
+    --brick: #9c2b3a; --brick-2: #7a1f2c; --brass: #b8862f; --adriatic: #1f6f6f; --adriatic-2: #155050;
+    --muted: #7a6a52; --hair: #d3bd94; --focus: #1f6f6f;
+    --tile: #ddd0aa; --tile-line: #b7a679; --tile-text: #7a6a45; --tile-sea: #b9d8da;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #efe2c8; --paper: #161311; --card: #201c17; --card-border: #3a332a;
+      --brick: #e05a6a; --brick-2: #e8798a; --brass: #d9ad5a; --adriatic: #5fb8b8; --adriatic-2: #7fd0d0;
+      --muted: #a89c82; --hair: #3a332a; --tile: #2a251d; --tile-line: #463d2f; --tile-text: #8f8468; --tile-sea: #173a3c;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #efe2c8; --paper: #161311; --card: #201c17; --card-border: #3a332a;
+    --brick: #e05a6a; --brick-2: #e8798a; --brass: #d9ad5a; --adriatic: #5fb8b8; --adriatic-2: #7fd0d0;
+    --muted: #a89c82; --hair: #3a332a; --tile: #2a251d; --tile-line: #463d2f; --tile-text: #8f8468; --tile-sea: #173a3c;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.2rem, 5.5vw, 3.4rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.1rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .countries { margin-top: 44px; }
+  .countries h2 { font-size: 1.15rem; font-weight: 600; margin: 0 0 16px; }
+  .country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .country-card {
+    display: block; padding: 20px; border: 1px solid var(--card-border); background: var(--card);
+    border-radius: 4px; text-decoration: none; color: var(--ink); position: relative; overflow: hidden;
+  }
+  .country-card .swatch-strip { position: absolute; top: 0; left: 0; right: 0; height: 5px; }
+  .country-card .era { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--brass); margin-bottom: 6px; }
+  .country-card b { display: block; font-family: "Fraunces", serif; font-size: 1.2rem; font-weight: 600; margin-bottom: 6px; }
+  .country-card span { color: var(--muted); font-size: .88rem; line-height: 1.5; }
+  .country-card.placeholder { cursor: default; opacity: .82; }
+  .country-card .soon { display: inline-block; margin-top: 8px; font-family: "IBM Plex Mono", monospace; font-size: 9.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--adriatic); border: 1px dashed var(--card-border); padding: 3px 7px; border-radius: 3px; }
+
+  .map-section { margin-top: 56px; padding-top: 36px; border-top: 1px solid var(--hair); }
+  .map-section h2 { font-size: 1.5rem; margin: 0 0 8px; }
+  .map-section .map-sub { font-size: .94rem; color: var(--muted); max-width: 64ch; margin: 0 0 22px; }
+  .map-section .rule-box { margin-bottom: 22px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .92rem; }
+  .map-section .rule-box b { color: var(--brick); }
+
+  .viz-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 22px; }
+
+  .controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .play-btn {
+    flex: none; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .play-btn:hover { border-color: var(--brick); }
+  input[type="range"] {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px;
+    background: var(--hair); outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper);
+    box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  .era-tag { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+
+  .era-head { text-align: center; margin-bottom: 16px; }
+  .era-name-inline { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.35rem; transition: opacity .35s ease; }
+  .era-owners { font-size: .86rem; color: var(--muted); max-width: 62ch; margin: 6px auto 0; transition: opacity .35s ease; }
+  .era-owners b { color: var(--ink); }
+  .era-story {
+    margin: 0 auto 22px; font-size: .98rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .35s ease; padding: 14px 18px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  .era-story b { color: var(--brick); }
+
+  .flags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin: 4px auto 18px; max-width: 620px; }
+  .flag-chip { text-align: center; width: 92px; }
+  .flag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-chip .fc-label { font-family: "IBM Plex Mono", monospace; font-size: 9px; color: var(--muted); margin-top: 5px; line-height: 1.3; }
+
+  #map-svg { display: block; margin: 0 auto; width: 100%; max-width: 520px; height: auto; }
+  .region-fill { transition: fill 0.7s ease; }
+  .border-line { transition: stroke-opacity 0.7s ease, stroke-width 0.7s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .group-label { font-family: "Fraunces", serif; font-weight: 600; transition: opacity .5s ease, font-size .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2.5px; }
+  .sub-label { font-family: "IBM Plex Mono", monospace; font-weight: 700; transition: opacity .5s ease, fill .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .context-line { fill: none; stroke: var(--hair); stroke-width: 1; opacity: .55; pointer-events: none; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600; letter-spacing: .06em; fill: var(--muted); opacity: .65; pointer-events: none; text-anchor: middle; }
+
+  .map-key { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: .8rem; color: var(--muted); justify-content: center; }
+  .map-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .map-key .sw { width: 11px; height: 11px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .map-notes { margin-top: 20px; font-size: .85rem; color: var(--muted); }
+  .map-notes b { color: var(--ink); }
+
+  .subview { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .subview h3 { font-size: 1.2rem; font-weight: 600; margin: 0 0 8px; }
+  .subview .sub-desc { font-size: .9rem; color: var(--muted); max-width: 64ch; margin: 0 0 18px; }
+
+  .gantt-row { display: flex; align-items: center; margin-bottom: 3px; }
+  .gantt-label { width: 112px; flex: none; font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--ink); text-align: right; padding-right: 10px; }
+  .gantt-track { flex: 1; height: 26px; position: relative; background: var(--paper); border-radius: 2px; overflow: hidden; }
+  .gantt-seg { position: absolute; top: 0; bottom: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .gantt-seg span { font-size: 9.5px; font-weight: 600; white-space: nowrap; padding: 0 3px; }
+  .gantt-axis { display: flex; margin-left: 112px; padding-top: 4px; font-family: "IBM Plex Mono", monospace; font-size: 9.5px; color: var(--muted); position: relative; height: 14px; }
+  .gantt-axis span { position: absolute; transform: translateX(-50%); }
+
+  .grid-3x3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .grid-cell { text-align: center; }
+  .grid-cell svg { width: 100%; height: auto; display: block; }
+  .grid-cell .cap { font-family: "IBM Plex Mono", monospace; font-size: 10px; color: var(--brass); margin-top: 6px; }
+  .grid-cell .cap b { display: block; font-family: "Fraunces", serif; font-size: .95rem; font-weight: 600; color: var(--ink); margin-top: 1px; }
+  .grid-cell .cap .diff { display: block; font-family: "Source Sans 3", sans-serif; font-size: .74rem; color: var(--brick); margin-top: 3px; font-weight: 600; }
+  .mini-label { font-family: "IBM Plex Mono", monospace; font-size: 7.5px; font-weight: 700; pointer-events: none; }
+
+  .about { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .about h2 { font-size: 1.3rem; margin: 0 0 12px; }
+  .about p { max-width: none; opacity: .88; margin: 0 0 12px; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a></p>
+  <p class="kicker">Family research &middot; Hub &middot; Phase 7 of the world atlas</p>
+  <h1>Flags of the Caucasus</h1>
+  <p class="lede">Georgia, Armenia, and Azerbaijan &mdash; three countries wedged between the Black Sea and the Caspian, each with a real medieval kingdom or dynasty behind it, and each conquered, partitioned, and reborn on a strikingly similar schedule: Mongol, then Ottoman-versus-Persian, then Russian, then briefly free, then Soviet, then free again.</p>
+  <p class="lede">This is Phase 7 of the atlas &mdash; the first hub outside Europe. Dedicated country pages for all three are now live; drag the map's slider below to see a thousand years of the region change hands, one era at a time.</p>
+
+  <div class="countries">
+    <h2>The three lineages</h2>
+    <div class="country-grid">
+      <a class="country-card" href="georgia-flags.html">
+        <span class="swatch-strip" style="background:#9c1f3a"></span>
+        <span class="era">c. 600 BCE&ndash;present</span>
+        <b>Georgia</b>
+        <span>The Bagrationi kingdom, division between Ottoman and Persian spheres, Russian and Soviet rule, the five-cross flag of 2004.</span>
+      </a>
+      <a class="country-card" href="armenia-flags.html">
+        <span class="swatch-strip" style="background:#d68a2f"></span>
+        <span class="era">c. 321 BCE&ndash;present</span>
+        <b>Armenia</b>
+        <span>The Bagratid kingdom of Ani, centuries split between empires, the 1918 tricolor, still flying today.</span>
+      </a>
+      <a class="country-card" href="azerbaijan-flags.html">
+        <span class="swatch-strip" style="background:#2f6f8a"></span>
+        <span class="era">c. 861&ndash;present</span>
+        <b>Azerbaijan</b>
+        <span>The long-lived Shirvanshahs, Safavid and Russian rule, the Muslim world's first secular republic in 1918.</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="map-section">
+    <h2>A thousand years, one map</h2>
+    <p class="map-sub">A real, traced map &mdash; actual coastlines on the Black Sea and the Caspian (the world's largest lake, though it's shown here as water like any sea), actual borders, not schematic shapes. Faint gray context lines trace the edges of Turkey, Iran, and Russia, the three neighbors that have fought over or absorbed this region again and again. Drag the slider or press play; each snapshot simplifies a messier reality into the dominant power of the moment.</p>
+    <div class="rule-box">
+      <b>Borders here are data, not decoration.</b> A line between two regions only draws solid when they were actually governed separately. When they weren't &mdash; all three under a single Russian or Soviet administration, say &mdash; the line dissolves and their names merge into whoever actually ruled them all. Colors blend between eras instead of jump-cutting.
+    </div>
+
+    <div class="viz-frame">
+      <div class="controls">
+        <button class="play-btn" id="playBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="era-tag" id="yearTag">1000</span>
+        <input type="range" id="slider" min="0" max="8" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="map-svg" viewBox="0 0 640 460" xmlns="http://www.w3.org/2000/svg">
+        <path id="sea-black" fill="var(--tile-sea)" d="M176.8,233.4 L183.7,206.9 L172.1,164.6 L145.1,141.8 L119.3,134.6 L102.3,115.6 L108.0,108.3 L60,70 L0,70 L0,260 L150,260 Z"/>
+        <path id="sea-caspian" fill="var(--tile-sea)" d="M447.8,253.0 L468.4,257.2 L476.4,241.4 L504.2,216.5 L528.7,249.1 L552.4,293.1 L574.1,296.0 L588.5,312.7 L640,320 L640,170 L440,170 Z"/>
+
+        <g id="context">
+          <path class="context-line" d="M-39.4,245.8 L27.4,269.8 L81.7,260.2 L121.8,265.8 L176.8,233.4 L226.4,230.4 L271.2,260.9 L279.2,282.7 L274.7,312.9 L309.3,328.3 L295.8,364.1"/>
+          <path class="context-line" d="M326.7,504.0 L301.2,454.4 L310.3,435.2 L295.8,364.1 L327.7,346.4 L335.1,369.8 L358.6,398.4 L390.5,406.6 L407.4,404.8 L462.3,359.1 L479.8,354.5 L493.6,372.7 L477.5,403.4 L506.5,435.8 L518.1,432.7 L532.9,478.5 L577.0,491.4 L609.4,522.5"/>
+          <path class="context-line" d="M415.6,42.8 L457.9,101.7 L453.4,143.4 L504.2,216.4 L476.4,241.4 L468.4,257.2 L447.8,253.0 L415.8,215.3 L402.7,213.2 L373.4,198.9 L359.2,173.4 L315.7,160.5 L287.5,170.2 L279.3,158.7 L215.9,128.9 L147.3,118.9 L108.0,108.3 L102.3,115.6 L42.9,63.2 L-10.3,39.9"/>
+          <text class="context-label" x="58" y="296">TURKEY</text>
+          <text class="context-label" x="430" y="466">IRAN</text>
+          <text class="context-label" x="235" y="52">RUSSIA</text>
+        </g>
+
+        <path id="f-ge" class="region-fill" d="M176.8,233.4 L183.7,206.9 L172.1,164.6 L145.1,141.8 L119.3,134.6 L102.3,115.6 L108.0,108.3 L147.3,118.9 L215.9,128.9 L279.3,158.7 L287.5,170.2 L315.7,160.5 L359.2,173.4 L373.4,198.9 L402.7,213.2 L390.6,221.8 L413.6,255.3 L407.2,262.6 L382.1,258.9 L347.4,241.1 L336.0,251.2 L271.2,260.9 L226.4,230.4 L176.8,233.4 Z"/>
+        <path id="f-am" class="region-fill" d="M271.2,260.9 L336.0,251.2 L345.6,267.5 L363.4,278.2 L354.0,293.8 L378.8,315.1 L365.7,334.8 L385.4,351.7 L406.4,361.8 L407.4,404.8 L390.5,406.6 L371.5,370.8 L371.7,361.2 L351.1,361.4 L337.4,344.7 L327.7,346.4 L309.3,328.3 L274.7,312.9 L279.2,282.7 L271.2,260.9 Z"/>
+        <path id="f-az-main" class="region-fill" d="M447.8,253.0 L468.4,257.2 L476.4,241.4 L504.2,216.5 L528.7,249.1 L552.4,293.1 L574.1,296.0 L588.5,312.7 L550.1,317.7 L542.0,365.8 L534.0,387.5 L516.9,402.0 L518.1,432.7 L506.5,435.8 L477.5,403.4 L493.6,372.7 L479.8,354.5 L462.3,359.1 L407.4,404.8 L406.4,361.8 L385.4,351.7 L365.7,334.8 L378.8,315.1 L354.0,293.8 L363.4,278.2 L345.6,267.5 L336.0,251.2 L347.4,241.1 L382.1,258.9 L407.2,262.6 L413.6,255.3 L390.6,221.8 L402.7,213.2 L415.8,215.3 L447.8,253.0 Z"/>
+        <path id="f-az-nakh" class="region-fill" d="M337.4,344.7 L351.1,361.4 L371.7,361.2 L371.5,370.8 L390.5,406.6 L358.6,398.4 L335.1,369.8 L327.7,346.4 L337.4,344.7 Z"/>
+
+        <g id="borders" stroke-width="1">
+          <path class="border-line" id="b-ge-am" d="M271.2,260.9 L336.0,251.2"/>
+          <path class="border-line" id="b-ge-az" d="M336.0,251.2 L347.4,241.1 L382.1,258.9 L407.2,262.6 L413.6,255.3 L390.6,221.8 L402.7,213.2 L415.8,215.3"/>
+          <path class="border-line" id="b-am-az" d="M336.0,251.2 L345.6,267.5 L363.4,278.2 L354.0,293.8 L378.8,315.1 L365.7,334.8 L385.4,351.7 L406.4,361.8"/>
+          <path class="border-line" id="b-am-aznakh" d="M406.4,361.8 L390.5,406.6 L371.5,370.8 L371.7,361.2 L351.1,361.4 L337.4,344.7 L327.7,346.4"/>
+        </g>
+
+        <text class="context-label" x="353" y="392" style="font-size:8px;opacity:.8">NAKHCHIVAN</text>
+
+        <g id="labels"></g>
+      </svg>
+
+      <div class="era-head">
+        <div class="era-name-inline" id="eraName">Independent medieval kingdoms</div>
+        <div class="era-owners" id="eraOwners"></div>
+      </div>
+      <div class="flags-row" id="flagsRow"></div>
+      <p class="era-story" id="eraStory"></p>
+
+      <p class="map-note">Real traced borders and coastlines (simplified). Azerbaijan's Nakhchivan exclave &mdash; separated from the rest of the country by Armenian territory since the 1920s &mdash; is drawn and colored as part of Azerbaijan throughout, since the two have shared a ruler in every era on this map.</p>
+      <div class="map-key" id="legend"></div>
+      <div class="map-notes">
+        <b>Try:</b> drag from 1250 to 1828 and watch all three regions repeatedly fuse into one merged label &mdash; Ilkhanate, then briefly separate, then Russian Empire &mdash; each time a single outside power ruled the whole region at once. Then jump to 1918: all three snap apart into distinct colors for the only stretch before 1991 when Georgia, Armenia, and Azerbaijan were each fully sovereign. Watch 1922 fuse them again under the Transcaucasian SFSR, then 1936 split them back into three separate, distinctly colored Soviet republics without any of them leaving Soviet rule at all.
+      </div>
+    </div>
+
+    <div class="subview">
+      <h3>The same story, as a timeline</h3>
+      <p class="sub-desc">Maps are bad at showing <em>when</em>; timelines are bad at showing <em>where</em>. This uses real transition years instead of the nine arbitrary snapshots above &mdash; one horizontal band per country, colored the same way as the map, so you can trace exactly how long each era actually lasted and compare all three directly.</p>
+      <div class="viz-frame">
+        <div id="gantt"></div>
+        <div class="gantt-axis" id="gantt-axis"></div>
+      </div>
+    </div>
+
+    <div class="subview">
+      <h3>The same story, nine frames &mdash; only the change lights up</h3>
+      <p class="sub-desc">Every region keeps its true color, but anything unchanged from the previous frame fades to low opacity; only the region(s) that actually changed hands stay bold with a solid outline. A caption under each frame spells out exactly what flipped. No slider to operate &mdash; scan left to right, top to bottom, and watch the map redraw itself like a flipbook.</p>
+      <div class="viz-frame">
+        <div class="grid-3x3" id="grid9"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="about">
+    <h2>About this atlas</h2>
+    <p>This started as a family history project: tracing the flags that flew over the lands our ancestors came from, close enough to paint accurately &mdash; correct colors, correct proportions, correct dates. The Balkans came first; the Caucasus is the atlas's first step outside Europe, chosen because the three countries' histories run on such a similar clock that none of them really makes sense without the other two.</p>
+    <p>Colors are close historical approximations; pre-19th-century swatches especially are informed reconstructions, not official specifications, and are labeled as such throughout. The Soviet-era republics all flew red flags in reality &mdash; the three different reddish shades used on this map are a map-reading convenience, not a claim about the real vexillology, and the flag chips above the story text show the real, mostly-red designs. The regional map simplifies a millennium of messy, overlapping, disputed control into nine snapshots &mdash; useful for orientation, not a substitute for the detail each country's own future page will carry.</p>
+  </div>
+
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This hub is one region in a larger set. See the other phases here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="yugoslavia-hub.html"><b>Former Yugoslavia hub</b><span>Nine countries, nine centuries</span></a>
+      <a class="link-card" href="habsburg-hub.html"><b>Habsburg Lands hub</b><span>Seven countries, four centuries</span></a>
+      <a class="link-card" href="germany-hub.html"><b>German Lands hub</b><span>Germany's own east-west split</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Map is schematic and not surveyed.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var C = {
+    bagrat_ge:"#7a2f4a", bagrat_am:"#2f4a7a", az_local:"#a9762f", mongol:"#6e6047",
+    contested:"#8a5a3a", safavid:"#1f6f6f", qajar:"#2a8a8a", rus_emp:"#7a8a3a",
+    ge_1918:"#8f3a4a", am_1918:"#d68a2f", az_1918:"#2f6f8a",
+    tsfsr:"#a4302a", ssr_ge:"#8a2f3a", ssr_am:"#7a4a2f", ssr_az:"#2f6f5a",
+    ge_modern:"#9c1f3a", am_modern:"#d68a2f", az_modern:"#2f6f8a"
+  };
+  var NAMES = {
+    bagrat_ge:"Kingdom of Georgia (Bagrationi)", bagrat_am:"Bagratid Armenian Kingdom", az_local:"Shirvanshahs & local emirates",
+    mongol:"Ilkhanate (Mongol)", contested:"Ottoman–Safavid contested zone", safavid:"Safavid Persia", qajar:"Qajar Persia",
+    rus_emp:"Russian Empire", ge_1918:"Democratic Republic of Georgia", am_1918:"First Republic of Armenia", az_1918:"Azerbaijan Democratic Republic",
+    tsfsr:"Transcaucasian SFSR", ssr_ge:"Georgian SSR", ssr_am:"Armenian SSR", ssr_az:"Azerbaijan SSR",
+    ge_modern:"Republic of Georgia", am_modern:"Republic of Armenia", az_modern:"Republic of Azerbaijan"
+  };
+  var legendEl = document.getElementById("legend");
+  legendEl.innerHTML = Object.keys(C).map(function (k) {
+    return '<span><span class="sw" style="background:' + C[k] + '"></span>' + NAMES[k] + "</span>";
+  }).join("");
+
+  // ---- Real flag graphics ----
+  var FLAGS = {
+    bagrat_ge: '<rect width="300" height="200" fill="#7a2f4a"/><path d="M150,45 v110 M95,100 h110" stroke="#d4af37" stroke-width="14"/>',
+    bagrat_am: '<rect width="300" height="200" fill="#2f4a7a"/><path d="M150,45 v110 M95,100 h110" stroke="#d4af37" stroke-width="14"/><circle cx="150" cy="100" r="11" fill="#d4af37"/>',
+    az_local: '<rect width="300" height="200" fill="#0b7a3d"/><path d="M120,70 A38,38 0 1 0 172,102 A28,28 0 1 1 120,70 Z" fill="#f4efe1"/>',
+    mongol: '<rect width="300" height="200" fill="#6e6047"/><circle cx="150" cy="100" r="45" fill="none" stroke="#f4efe1" stroke-width="6"/><circle cx="150" cy="100" r="11" fill="#f4efe1"/>',
+    ottoman: '<rect width="300" height="200" fill="#a4302a"/><path d="M120,70 A38,38 0 1 0 172,102 A28,28 0 1 1 120,70 Z" fill="#f4efe1"/><path d="M200,84 l5,15 16,0 -13,10 5,15 -13,-9 -13,9 5,-15 -13,-10 16,0 Z" fill="#f4efe1"/>',
+    safavid: '<rect width="300" height="200" fill="#1f6f6f"/><circle cx="150" cy="100" r="32" fill="#d4af37"/>',
+    qajar: '<rect width="300" height="200" fill="#2a8a8a"/><circle cx="150" cy="92" r="22" fill="#d4af37"/><path d="M108,138 q42,-32 84,0" stroke="#d4af37" stroke-width="6" fill="none"/>',
+    rus_emp: '<rect width="300" height="66.7" fill="#241f14"/><rect y="66.7" width="300" height="66.6" fill="#d4af37"/><rect y="133.3" width="300" height="66.7" fill="#f4efe1"/>',
+    ge_1918: '<rect width="300" height="200" fill="#8f3a4a"/><rect x="0" y="0" width="92" height="60" fill="#f4efe1"/><rect x="0" y="0" width="92" height="20" fill="#241f14"/><rect x="0" y="40" width="92" height="20" fill="#241f14"/>',
+    am_1918: '<rect width="300" height="66.7" fill="#c9372c"/><rect y="66.7" width="300" height="66.6" fill="#2f4a8a"/><rect y="133.3" width="300" height="66.7" fill="#e8a33d"/>',
+    az_1918: '<rect width="300" height="66.7" fill="#3f9fd1"/><rect y="66.7" width="300" height="66.6" fill="#c9372c"/><rect y="133.3" width="300" height="66.7" fill="#3f9f5f"/><path d="M160,80 A20,20 0 1 0 178,116 A15,15 0 1 1 160,80 Z" fill="#f4efe1"/><path d="M195,90 l3,8 8.5,0.3 -6.5,5.5 2,8.3 -7,-4.8 -7,4.8 2,-8.3 -6.5,-5.5 8.5,-0.3 Z" fill="#f4efe1"/>',
+    tsfsr: '<rect width="300" height="200" fill="#a4302a"/><g fill="#d4af37" transform="translate(60,55)"><rect x="0" y="18" width="40" height="8"/><rect x="16" y="0" width="8" height="40"/></g>',
+    ssr_ge: '<rect width="300" height="200" fill="#a4302a"/><rect x="0" y="150" width="300" height="10" fill="#2f6f9f"/><rect x="0" y="164" width="300" height="8" fill="#f4efe1"/><rect x="0" y="176" width="300" height="10" fill="#2f6f9f"/><g fill="#d4af37" transform="translate(30,25)"><rect x="0" y="13" width="30" height="6"/><rect x="12" y="0" width="6" height="30"/></g>',
+    ssr_am: '<rect width="300" height="200" fill="#a4302a"/><rect x="0" y="172" width="300" height="14" fill="#2f4a8a"/><g fill="#d4af37" transform="translate(30,25)"><rect x="0" y="13" width="30" height="6"/><rect x="12" y="0" width="6" height="30"/></g>',
+    ssr_az: '<rect width="300" height="200" fill="#a4302a"/><rect x="0" y="172" width="300" height="14" fill="#3f9fd1"/><g fill="#d4af37" transform="translate(30,25)"><rect x="0" y="13" width="30" height="6"/><rect x="12" y="0" width="6" height="30"/></g>',
+    ge_modern: '<rect width="300" height="200" fill="#f4efe1"/><rect x="128" y="0" width="44" height="200" fill="#9c1f3a"/><rect x="0" y="78" width="300" height="44" fill="#9c1f3a"/><g fill="#9c1f3a"><g transform="translate(65,40)"><rect x="-10" y="-3" width="20" height="6"/><rect x="-3" y="-10" width="6" height="20"/></g><g transform="translate(235,40)"><rect x="-10" y="-3" width="20" height="6"/><rect x="-3" y="-10" width="6" height="20"/></g><g transform="translate(65,160)"><rect x="-10" y="-3" width="20" height="6"/><rect x="-3" y="-10" width="6" height="20"/></g><g transform="translate(235,160)"><rect x="-10" y="-3" width="20" height="6"/><rect x="-3" y="-10" width="6" height="20"/></g></g>',
+    am_modern: '<rect width="300" height="66.7" fill="#c9372c"/><rect y="66.7" width="300" height="66.6" fill="#2f4a8a"/><rect y="133.3" width="300" height="66.7" fill="#e8a33d"/>',
+    az_modern: '<rect width="300" height="66.7" fill="#3f9fd1"/><rect y="66.7" width="300" height="66.6" fill="#c9372c"/><rect y="133.3" width="300" height="66.7" fill="#3f9f5f"/><path d="M160,80 A20,20 0 1 0 178,116 A15,15 0 1 1 160,80 Z" fill="#f4efe1"/><path d="M195,90 l3,8 8.5,0.3 -6.5,5.5 2,8.3 -7,-4.8 -7,4.8 2,-8.3 -6.5,-5.5 8.5,-0.3 Z" fill="#f4efe1"/>'
+  };
+  function flagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (FLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+
+  var SNAP = [
+    { year:"1000", name:"Independent medieval kingdoms", t:{ ge:C.bagrat_ge, am:C.bagrat_am, az:C.az_local },
+      story: "By the year 1000, three very different political worlds occupy the Caucasus. King Bagrat III (r. 978&ndash;1014) is completing the unification of Georgia's fractured principalities &mdash; Abkhazia, Kartli, Tao-Klarjeti &mdash; into a single Kingdom of Georgia, a project his line, the Bagrationi dynasty, had been building toward for generations; his coronation around 1008 is usually treated as the moment a unified Georgian crown exists at all. Armenia's own kingdom carries the same dynastic name by coincidence rather than kinship: the Bagratid dynasty (Armenian: Bagratuni) that Ashot I founded in 885 with Ani as its glittering capital is a wholly separate lineage that just happens to share a name with Georgia's ruling house &mdash; the two \"Bagrat\" lines never rule each other's territory. Ani, self-styled the \"city of a thousand and one churches,\" is near its medieval height. To the southeast, no single Azerbaijani state exists yet by that name: the lands are held by a patchwork of local Muslim dynasties, most durably the Shirvanshahs, who have ruled from Shamakhi in some form since the ninth century and will go on doing so, remarkably, for another five hundred years." },
+    { year:"1250", name:"Mongol conquest — the Ilkhanate", t:{ ge:C.mongol, am:C.mongol, az:C.mongol },
+      story: "The Mongol storm that broke over the Caucasus in the 1220s reached its final form by mid-century. Georgian forces met the first Mongol raiding parties as early as 1221 and were beaten badly; full conquest followed through the 1230s, and by 1243 Queen Rusudan had submitted to Mongol overlordship, agreeing to pay tribute and supply troops. Armenia's Bagratid kingdom was already two centuries gone by this point &mdash; Ani fell to Byzantium in 1045 and then passed through Seljuk hands &mdash; so what the Mongols absorbed here was a landscape of local Armenian and Georgian nobility rather than a crowned kingdom. Hulagu Khan's establishment of the Ilkhanate after 1256 formalized Mongol rule across the whole region as a single administrative sphere answering first to Karakorum and then to Tabriz. Georgian and Armenian princes kept much of their local authority as tributary vassals, but the era of fully independent Caucasian kingdoms was, for the moment, over." },
+    { year:"1500", name:"Ottoman–Safavid rivalry", t:{ ge:C.contested, am:C.contested, az:C.safavid },
+      story: "Mongol authority collapsed through the later fourteenth century, battered further by Timur's devastating campaigns through the Caucasus in the 1380s&ndash;90s. What followed was fragmentation, not any new unity. Georgia's briefly reunified kingdom under Giorgi V \"the Brilliant\" (r. 1299&ndash;1346) had itself splintered again by 1490 into three rival kingdoms &mdash; Kartli, Kakheti, Imereti &mdash; plus several smaller principalities, a division that would hold for three more centuries. Armenia, with no kingdom of its own since 1045, was parceled between the Turkic Kara Koyunlu and Ak Koyunlu confederations through the 1400s before the new Ottoman&ndash;Safavid rivalry took over. By 1500 that rivalry defines the whole region: Shah Ismail I has just founded the Safavid dynasty in Persia (1501), converting the empire to Twelver Shia Islam and, within a generation, extinguishing the long-ruling Shirvanshahs (1538) to absorb their lands directly &mdash; giving Safavid Persia control of most of what becomes Azerbaijan. Georgia and Armenia are both, more literally than this single color can show, split down the middle by the same rivalry: the 1555 Treaty of Amasya will soon formalize western Georgia and western Armenia as Ottoman spheres and eastern Georgia and eastern Armenia as Persian ones, a partition renewed by later treaties for the next 250 years." },
+    { year:"1813", name:"Russia annexes Georgia and Azerbaijan", t:{ ge:C.rus_emp, am:C.qajar, az:C.rus_emp },
+      story: "The nineteenth century opens with Russia moving into the vacuum left by a weakening Ottoman Empire and Qajar Persia. Tsar Paul I annexed the eastern Georgian kingdom of Kartli-Kakheti outright in 1801, overriding the 1783 Treaty of Georgievsk that had only promised Russian protection; the western Georgian kingdoms and principalities were absorbed piecemeal over the following decade, with Imereti's monarchy ending in 1810. Further east, the First Russo-Persian War (1804&ndash;13) settled the fate of the Azerbaijani khanates: the 1813 Treaty of Gulistan forced Qajar Persia, under Fath-Ali Shah, to cede Baku, Ganja, Shirvan, Karabakh, and most of the other khanates north of the Aras River to Russia outright &mdash; the territorial basis of modern Azerbaijan. Armenia, by contrast, is still Persian: the Yerevan and Nakhchivan khanates remain under Qajar control in 1813, and will stay that way for another fifteen years." },
+    { year:"1828", name:"Treaty of Turkmenchay — Russia completes the conquest", t:{ ge:C.rus_emp, am:C.rus_emp, az:C.rus_emp },
+      story: "A second Russo-Persian War (1826&ndash;28) finished what the first had started. Russian forces under General Ivan Paskevich took Yerevan in October 1827, and the Treaty of Turkmenchay, signed in February 1828, forced Persia to cede the Yerevan and Nakhchivan khanates outright &mdash; the last pieces of the modern Caucasus still outside Russian control. For the first time since antiquity, Georgia, Armenia, and Azerbaijan's territory all answer to a single government. The treaty also encouraged resettlement of ethnic Armenians from Persia and the Ottoman Empire into the newly Russian Armenian provinces, reshaping the region's demographics for the century that followed." },
+    { year:"1918", name:"Brief independence — three republics", t:{ ge:C.ge_1918, am:C.am_1918, az:C.az_1918 },
+      story: "The Russian Empire's collapse in 1917 opened the door the Caucasus had been waiting for since 1801. A short-lived Transcaucasian Democratic Federative Republic, declared in April 1918 by the old Transcaucasian Commissariat, tried to hold Georgia, Armenia, and Azerbaijan together as one state &mdash; but it lasted barely a month, torn apart by disagreements over whether to keep fighting the advancing Ottoman army. It dissolved on 26 May 1918, and within two days all three declared separate independence: the Democratic Republic of Georgia under Noe Zhordania's Menshevik government on 26 May, the First Republic of Armenia on 28 May, and the Azerbaijan Democratic Republic, also on 28 May &mdash; the first secular parliamentary republic ever established in the Muslim world, which extended the vote to women that same year, ahead of many European states. All three republics were poor, embattled, and short of everything, fighting border wars with each other and with Ottoman and White Russian forces simultaneously; none would survive much past 1920." },
+    { year:"1922", name:"Soviet conquest — the Transcaucasian SFSR", t:{ ge:C.tsfsr, am:C.tsfsr, az:C.tsfsr },
+      story: "The Red Army ended each republic's independence in turn rather than all at once. Azerbaijan fell first: the 11th Red Army marched into Baku in April 1920, barely resisted. Armenia held out longer, weakened by war with Turkey, and was sovietized in November&ndash;December 1920 after the Treaty of Alexandropol. Georgia's Menshevik government, despite a May 1920 treaty in which Soviet Russia had formally recognized its independence, was invaded anyway in February 1921 and fell within weeks, its leaders fleeing into exile in Paris. On 30 December 1922, the three now-Soviet republics were combined into the Transcaucasian Socialist Federative Soviet Republic &mdash; one of the four founding republics of the USSR itself, alongside Russia, Ukraine, and Byelorussia &mdash; erasing the internal borders between them at the very moment the wider Soviet Union came into being." },
+    { year:"1936", name:"Three separate Soviet republics", t:{ ge:C.ssr_ge, am:C.ssr_am, az:C.ssr_az },
+      story: "The Transcaucasian SFSR's decade and a half of existence ended with the 1936 \"Stalin Constitution,\" which replaced it with three separate Union Republics answering directly to Moscow: the Georgian SSR, the Armenian SSR, and the Azerbaijan SSR. The change was administrative more than substantive &mdash; the region was no less firmly under central Soviet control after 1936 than before &mdash; but it restored the internal boundary lines between the three countries for the first time since 1921: broadly the same borders, with a few Soviet-era adjustments around Nagorno-Karabakh and Nakhchivan's status, that reemerge as international borders in 1991." },
+    { year:"1991", name:"Independent states, today", t:{ ge:C.ge_modern, am:C.am_modern, az:C.az_modern },
+      story: "As the USSR dissolved through 1991, all three republics returned to independence in quick succession: Georgia declared restoration of independence on 9 April 1991, months before the Soviet collapse was even final; Armenia followed with a referendum on 21 September; Azerbaijan on 18 October. None of the transitions were peaceful. Armenia and Azerbaijan fought a war over Nagorno-Karabakh, a mostly Armenian-populated region inside Soviet Azerbaijan's borders, from 1988 into a 1994 ceasefire that left it a de facto independent, Armenian-backed enclave for nearly three decades &mdash; until Azerbaijan retook the territory in a 2020 war and a further 2023 offensive, ending the enclave outright. Georgia, meanwhile, lost effective control of Abkhazia and South Ossetia in wars fought in the early 1990s and again in a brief 2008 war with Russia; both regions remain de facto independent today, recognized by very few states, in a status broadly similar to Transnistria's. Despite all of this, two of the three flags flying today have direct 1918 roots: Armenia's and Azerbaijan's are essentially the same tricolors their short-lived first republics flew, readopted almost unchanged in 1990&ndash;91; Georgia's five-cross flag is a newer 2004 design, though one drawing on much older medieval Georgian heraldic tradition." }
+  ];
+
+  var FLAG_SETS = {
+    "1000": [["bagrat_ge","Kingdom of Georgia"],["bagrat_am","Bagratid Armenia"],["az_local","Shirvanshahs & local emirates"]],
+    "1250": [["mongol","Ilkhanate (Mongol)"]],
+    "1500": [["ottoman","Ottoman Empire"],["safavid","Safavid Persia"]],
+    "1813": [["rus_emp","Russian Empire"],["qajar","Qajar Persia"]],
+    "1828": [["rus_emp","Russian Empire"]],
+    "1918": [["ge_1918","Dem. Republic of Georgia"],["am_1918","First Republic of Armenia"],["az_1918","Azerbaijan Dem. Republic"]],
+    "1922": [["tsfsr","Transcaucasian SFSR"]],
+    "1936": [["ssr_ge","Georgian SSR"],["ssr_am","Armenian SSR"],["ssr_az","Azerbaijan SSR"]],
+    "1991": [["ge_modern","Georgia"],["am_modern","Armenia"],["az_modern","Azerbaijan"]]
+  };
+
+  var REGIONS = ["ge","am","az"];
+  var REGION_NAMES = { ge:"Georgia", am:"Armenia", az:"Azerbaijan" };
+  var REGION_ABBR = { ge:"GEO", am:"ARM", az:"AZE" };
+  var REGION_POS = { ge:[230,175], am:[345,300], az:[478,278] };
+  var ADJ = [["ge","am"],["ge","az"],["am","az"]];
+
+  function textColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+  function ownerName(hex) {
+    for (var k in C) { if (C[k] === hex) return NAMES[k]; }
+    return hex;
+  }
+
+  function groupsFor(t) {
+    var parent = {};
+    REGIONS.forEach(function (r) { parent[r] = r; });
+    function find(x) { return parent[x] === x ? x : (parent[x] = find(parent[x])); }
+    function union(a, b) { var ra = find(a), rb = find(b); if (ra !== rb) parent[ra] = rb; }
+    ADJ.forEach(function (pair) {
+      if (t[pair[0]] === t[pair[1]]) union(pair[0], pair[1]);
+    });
+    var groups = {};
+    REGIONS.forEach(function (r) {
+      var root = find(r);
+      if (!groups[root]) groups[root] = [];
+      groups[root].push(r);
+    });
+    return Object.keys(groups).map(function (k) { return groups[k]; });
+  }
+
+  var svgNS = "http://www.w3.org/2000/svg";
+  var labelsEl = document.getElementById("labels");
+  var yearTag = document.getElementById("yearTag");
+  var eraName = document.getElementById("eraName");
+  var eraOwners = document.getElementById("eraOwners");
+  var eraStory = document.getElementById("eraStory");
+  var flagsRow = document.getElementById("flagsRow");
+  var sliderEl = document.getElementById("slider");
+
+  function render(i) {
+    var era = SNAP[i];
+    yearTag.textContent = era.year;
+    eraName.textContent = era.name;
+    eraStory.innerHTML = era.story || "";
+    flagsRow.innerHTML = (FLAG_SETS[era.year] || []).map(function (f) {
+      return '<div class="flag-chip">' + flagSvg(f[0]) + '<div class="fc-label">' + f[1] + '</div></div>';
+    }).join("");
+
+    REGIONS.forEach(function (id) {
+      var el = document.getElementById("f-" + id);
+      if (el) el.setAttribute("fill", era.t[id]);
+    });
+    document.getElementById("f-az-main").setAttribute("fill", era.t.az);
+    document.getElementById("f-az-nakh").setAttribute("fill", era.t.az);
+
+    ADJ.forEach(function (pair) {
+      var same = era.t[pair[0]] === era.t[pair[1]];
+      var line = document.getElementById("b-" + pair[0] + "-" + pair[1]);
+      line.setAttribute("stroke-opacity", same ? "0.06" : "0.85");
+      line.setAttribute("stroke-width", same ? "1" : "2.6");
+    });
+    var sameAmAz = era.t.am === era.t.az;
+    var nakhLine = document.getElementById("b-am-aznakh");
+    nakhLine.setAttribute("stroke-opacity", sameAmAz ? "0.06" : "0.85");
+    nakhLine.setAttribute("stroke-width", sameAmAz ? "1" : "2.6");
+
+    var groups = groupsFor(era.t);
+    var seenOwners = {};
+    var ownerParts = [];
+    groups.forEach(function (g) {
+      var label = ownerName(era.t[g[0]]);
+      if (!seenOwners[label]) { seenOwners[label] = []; ownerParts.push(label); }
+      g.forEach(function (id) { seenOwners[label].push(REGION_NAMES[id]); });
+    });
+    eraOwners.innerHTML = ownerParts.map(function (label) {
+      return "<b>" + label + "</b>: " + seenOwners[label].join(", ");
+    }).join(" &middot; ");
+
+    labelsEl.innerHTML = "";
+    function haloFor(txtColor) { return txtColor === "#201a12" ? "#f7f1e3" : "#201a12"; }
+    groups.forEach(function (g) {
+      var cx = g.reduce(function (s, id) { return s + REGION_POS[id][0]; }, 0) / g.length;
+      var cy = g.reduce(function (s, id) { return s + REGION_POS[id][1]; }, 0) / g.length;
+      var fillHex = era.t[g[0]];
+      var txtColor = textColorFor(fillHex);
+      var halo = haloFor(txtColor);
+
+      if (g.length > 1) {
+        var groupText = ownerName(fillHex).toUpperCase();
+        var gl = document.createElementNS(svgNS, "text");
+        gl.setAttribute("x", cx);
+        gl.setAttribute("y", cy);
+        gl.setAttribute("class", "group-label");
+        gl.setAttribute("font-size", groupText.length > 18 ? "12" : "15");
+        gl.setAttribute("fill", txtColor);
+        gl.setAttribute("stroke", halo);
+        gl.textContent = groupText;
+        labelsEl.appendChild(gl);
+        g.forEach(function (id) {
+          var pos = REGION_POS[id];
+          var sl = document.createElementNS(svgNS, "text");
+          sl.setAttribute("x", pos[0]);
+          sl.setAttribute("y", pos[1] + 16);
+          sl.setAttribute("class", "sub-label");
+          sl.setAttribute("font-size", "10");
+          sl.setAttribute("fill", txtColor);
+          sl.setAttribute("stroke", halo);
+          sl.setAttribute("opacity", "0.85");
+          sl.textContent = REGION_ABBR[id];
+          labelsEl.appendChild(sl);
+        });
+      } else {
+        var id = g[0];
+        var pos = REGION_POS[id];
+        var selfGoverning = fillHex === C.ge_modern || fillHex === C.am_modern || fillHex === C.az_modern ||
+          fillHex === C.ge_1918 || fillHex === C.am_1918 || fillHex === C.az_1918;
+        var soloText = (selfGoverning ? REGION_NAMES[id] : ownerName(fillHex)).toUpperCase();
+        var sl2 = document.createElementNS(svgNS, "text");
+        sl2.setAttribute("x", pos[0]);
+        sl2.setAttribute("y", pos[1]);
+        sl2.setAttribute("class", "group-label");
+        sl2.setAttribute("font-size", selfGoverning ? "14" : (soloText.length > 16 ? "10.5" : "13"));
+        sl2.setAttribute("fill", txtColor);
+        sl2.setAttribute("stroke", halo);
+        sl2.textContent = soloText;
+        labelsEl.appendChild(sl2);
+        if (!selfGoverning) {
+          var subOnly = document.createElementNS(svgNS, "text");
+          subOnly.setAttribute("x", pos[0]);
+          subOnly.setAttribute("y", pos[1] + 16);
+          subOnly.setAttribute("class", "sub-label");
+          subOnly.setAttribute("font-size", "10");
+          subOnly.setAttribute("fill", txtColor);
+          subOnly.setAttribute("stroke", halo);
+          subOnly.setAttribute("opacity", "0.85");
+          subOnly.textContent = REGION_ABBR[id];
+          labelsEl.appendChild(subOnly);
+        }
+      }
+    });
+  }
+
+  sliderEl.addEventListener("input", function () { render(parseInt(sliderEl.value, 10)); });
+  render(0);
+
+  var playing = false, playTimer = null;
+  var playBtn = document.getElementById("playBtn");
+  function stepPlay() {
+    var next = parseInt(sliderEl.value, 10) + 1;
+    if (next > SNAP.length - 1) { stopPlay(); return; }
+    sliderEl.value = next;
+    render(next);
+  }
+  function startPlay() {
+    playing = true;
+    playBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(sliderEl.value, 10) >= SNAP.length - 1) { sliderEl.value = 0; render(0); }
+    playTimer = setInterval(stepPlay, 1700);
+  }
+  function stopPlay() {
+    playing = false;
+    playBtn.innerHTML = "&#9654;";
+    clearInterval(playTimer);
+  }
+  playBtn.addEventListener("click", function () { playing ? stopPlay() : startPlay(); });
+
+  // ---- Small multiples grid: same nine snapshots, diff-highlighted ----
+  var gridEl = document.getElementById("grid9");
+  var MINI_PATHS = {
+    ge: "M176.8,233.4 L183.7,206.9 L172.1,164.6 L145.1,141.8 L119.3,134.6 L102.3,115.6 L108.0,108.3 L147.3,118.9 L215.9,128.9 L279.3,158.7 L287.5,170.2 L315.7,160.5 L359.2,173.4 L373.4,198.9 L402.7,213.2 L390.6,221.8 L413.6,255.3 L407.2,262.6 L382.1,258.9 L347.4,241.1 L336.0,251.2 L271.2,260.9 L226.4,230.4 L176.8,233.4 Z",
+    am: "M271.2,260.9 L336.0,251.2 L345.6,267.5 L363.4,278.2 L354.0,293.8 L378.8,315.1 L365.7,334.8 L385.4,351.7 L406.4,361.8 L407.4,404.8 L390.5,406.6 L371.5,370.8 L371.7,361.2 L351.1,361.4 L337.4,344.7 L327.7,346.4 L309.3,328.3 L274.7,312.9 L279.2,282.7 L271.2,260.9 Z",
+    az_main: "M447.8,253.0 L468.4,257.2 L476.4,241.4 L504.2,216.5 L528.7,249.1 L552.4,293.1 L574.1,296.0 L588.5,312.7 L550.1,317.7 L542.0,365.8 L534.0,387.5 L516.9,402.0 L518.1,432.7 L506.5,435.8 L477.5,403.4 L493.6,372.7 L479.8,354.5 L462.3,359.1 L407.4,404.8 L406.4,361.8 L385.4,351.7 L365.7,334.8 L378.8,315.1 L354.0,293.8 L363.4,278.2 L345.6,267.5 L336.0,251.2 L347.4,241.1 L382.1,258.9 L407.2,262.6 L413.6,255.3 L390.6,221.8 L402.7,213.2 L415.8,215.3 L447.8,253.0 Z",
+    az_nakh: "M337.4,344.7 L351.1,361.4 L371.7,361.2 L371.5,370.8 L390.5,406.6 L358.6,398.4 L335.1,369.8 L327.7,346.4 L337.4,344.7 Z"
+  };
+  var MINI_REGION = { ge:"ge", am:"am", az_main:"az", az_nakh:"az" };
+  SNAP.forEach(function (era, idx) {
+    var prev = idx > 0 ? SNAP[idx - 1] : null;
+    var changed = [];
+    if (prev) {
+      REGIONS.forEach(function (id) {
+        if (era.t[id] !== prev.t[id]) changed.push(id);
+      });
+    }
+    var cell = document.createElement("div");
+    cell.className = "grid-cell";
+    var svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("viewBox", "0 0 640 460");
+    var sea1 = document.createElementNS(svgNS, "path");
+    sea1.setAttribute("d", "M176.8,233.4 L183.7,206.9 L172.1,164.6 L145.1,141.8 L119.3,134.6 L102.3,115.6 L108.0,108.3 L60,70 L0,70 L0,260 L150,260 Z");
+    sea1.setAttribute("fill", "var(--tile-sea)");
+    svg.appendChild(sea1);
+    var sea2 = document.createElementNS(svgNS, "path");
+    sea2.setAttribute("d", "M447.8,253.0 L468.4,257.2 L476.4,241.4 L504.2,216.5 L528.7,249.1 L552.4,293.1 L574.1,296.0 L588.5,312.7 L640,320 L640,170 L440,170 Z");
+    sea2.setAttribute("fill", "var(--tile-sea)");
+    svg.appendChild(sea2);
+    Object.keys(MINI_PATHS).forEach(function (mid) {
+      var id = MINI_REGION[mid];
+      var isBaseline = !prev;
+      var isChanged = prev && changed.indexOf(id) !== -1;
+      var bold = isBaseline || isChanged;
+      var p = document.createElementNS(svgNS, "path");
+      p.setAttribute("d", MINI_PATHS[mid]);
+      p.setAttribute("fill", era.t[id]);
+      if (bold) {
+        p.setAttribute("fill-opacity", "1");
+        p.setAttribute("stroke", "#241f14");
+        p.setAttribute("stroke-width", "2.2");
+      } else {
+        p.setAttribute("fill-opacity", "0.22");
+        p.setAttribute("stroke", "#241f14");
+        p.setAttribute("stroke-width", "0.75");
+        p.setAttribute("stroke-opacity", "0.4");
+      }
+      svg.appendChild(p);
+    });
+    REGIONS.forEach(function (id) {
+      var bold = !prev || changed.indexOf(id) !== -1;
+      var pos = REGION_POS[id];
+      var lbl = document.createElementNS(svgNS, "text");
+      lbl.setAttribute("x", pos[0]);
+      lbl.setAttribute("y", pos[1]);
+      lbl.setAttribute("text-anchor", "middle");
+      lbl.setAttribute("class", "mini-label");
+      lbl.setAttribute("fill", bold ? textColorFor(era.t[id]) : "#8a7d5c");
+      lbl.setAttribute("opacity", bold ? "1" : "0.55");
+      lbl.textContent = REGION_ABBR[id];
+      svg.appendChild(lbl);
+    });
+    cell.appendChild(svg);
+    var cap = document.createElement("div");
+    cap.className = "cap";
+    var diffText = !prev ? "Starting point" : (changed.length ? "→ " + changed.map(function (id) { return REGION_NAMES[id]; }).join(", ") + " change" + (changed.length === 1 ? "s" : "") + " hands" : "→ no change from previous frame");
+    cap.innerHTML = era.year + "<b>" + era.name + "</b><span class=\"diff\">" + diffText + "</span>";
+    cell.appendChild(cap);
+    gridEl.appendChild(cell);
+  });
+
+  // ---- Timeline: same data, real continuous date ranges ----
+  var GANTT_START = 900, GANTT_END = 2026;
+  var GANTT_DATA = [
+    { id:"ge", segs:[
+      [900,1008,"#6e6047","(various principalities)"], [1008,1245,C.bagrat_ge,"Kingdom of Georgia"],
+      [1245,1360,C.mongol,"Mongol / Ilkhanate suzerainty"], [1360,1490,C.bagrat_ge,"Reunified kingdom (Bagrationi)"],
+      [1490,1801,C.contested,"Fragmented kingdoms, Ottoman–Persian contest"], [1801,1918,C.rus_emp,"Russian Empire"],
+      [1918,1921,C.ge_1918,"Democratic Republic"], [1921,1936,C.tsfsr,"Transcaucasian SFSR"],
+      [1936,1991,C.ssr_ge,"Georgian SSR"], [1991,2026,C.ge_modern,"Independent"]
+    ]},
+    { id:"am", segs:[
+      [900,1045,C.bagrat_am,"Bagratid Armenian kingdom"], [1045,1236,"#6e6047","Byzantine / Seljuk contest"],
+      [1236,1360,C.mongol,"Mongol / Ilkhanate suzerainty"], [1360,1500,"#6e6047","Turkic confederations"],
+      [1500,1828,C.contested,"Ottoman–Safavid / Qajar contest"], [1828,1918,C.rus_emp,"Russian Empire"],
+      [1918,1920,C.am_1918,"First Republic"], [1920,1936,C.tsfsr,"Soviet / Transcaucasian SFSR"],
+      [1936,1991,C.ssr_am,"Armenian SSR"], [1991,2026,C.am_modern,"Independent"]
+    ]},
+    { id:"az", segs:[
+      [900,1500,C.az_local,"Shirvanshahs & local emirates"], [1500,1813,C.safavid,"Safavid / Qajar Persia"],
+      [1813,1918,C.rus_emp,"Russian Empire"], [1918,1920,C.az_1918,"Azerbaijan Democratic Republic"],
+      [1920,1936,C.tsfsr,"Soviet / Transcaucasian SFSR"], [1936,1991,C.ssr_az,"Azerbaijan SSR"],
+      [1991,2026,C.az_modern,"Independent"]
+    ]}
+  ];
+  var ganttEl = document.getElementById("gantt");
+  function yearToPct(y) { return (y - GANTT_START) / (GANTT_END - GANTT_START) * 100; }
+  GANTT_DATA.forEach(function (row) {
+    var rowEl = document.createElement("div");
+    rowEl.className = "gantt-row";
+    var label = document.createElement("div");
+    label.className = "gantt-label";
+    label.textContent = REGION_NAMES[row.id];
+    rowEl.appendChild(label);
+    var track = document.createElement("div");
+    track.className = "gantt-track";
+    row.segs.forEach(function (seg) {
+      var left = yearToPct(seg[0]);
+      var width = yearToPct(seg[1]) - left;
+      var segEl = document.createElement("div");
+      segEl.className = "gantt-seg";
+      segEl.style.left = left + "%";
+      segEl.style.width = width + "%";
+      segEl.style.background = seg[2];
+      segEl.title = REGION_NAMES[row.id] + ": " + seg[3] + " (" + seg[0] + "–" + seg[1] + ")";
+      if (width > 4) {
+        var sp = document.createElement("span");
+        sp.textContent = seg[3];
+        sp.style.color = textColorFor(seg[2]);
+        segEl.appendChild(sp);
+      }
+      track.appendChild(segEl);
+    });
+    rowEl.appendChild(track);
+    ganttEl.appendChild(rowEl);
+  });
+  var axisEl = document.getElementById("gantt-axis");
+  [900, 1100, 1300, 1500, 1700, 1900, 2026].forEach(function (y) {
+    var s = document.createElement("span");
+    s.style.left = yearToPct(y) + "%";
+    s.textContent = y;
+    axisEl.appendChild(s);
+  });
+})();
+</script>
+
+</body></html>

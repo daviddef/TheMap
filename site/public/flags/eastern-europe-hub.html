@@ -1,0 +1,636 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Flags of Eastern Europe</title>
+<meta name="description" content="A hub for the family flag atlas: Ukraine, Belarus, and Moldova, and an interactive map showing who ruled each land across ten points spanning eleven centuries.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    --tile: #ddd0aa; --tile-line: #b7a679; --tile-text: #7a6a45; --tile-sea: #b9d3da;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.2rem, 5.5vw, 3.4rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.1rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .countries { margin-top: 44px; }
+  .countries h2 { font-size: 1.15rem; font-weight: 600; margin: 0 0 16px; }
+  .country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .country-card {
+    display: block; padding: 20px; border: 1px solid var(--card-border); background: var(--card);
+    border-radius: 4px; text-decoration: none; color: var(--ink); position: relative; overflow: hidden;
+  }
+  .country-card .swatch-strip { position: absolute; top: 0; left: 0; right: 0; height: 5px; }
+  .country-card .era { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--brass); margin-bottom: 6px; }
+  .country-card b { display: block; font-family: "Fraunces", serif; font-size: 1.2rem; font-weight: 600; margin-bottom: 6px; }
+  .country-card span { color: var(--muted); font-size: .88rem; line-height: 1.5; }
+
+  .map-section { margin-top: 56px; padding-top: 36px; border-top: 1px solid var(--hair); }
+  .map-section h2 { font-size: 1.5rem; margin: 0 0 8px; }
+  .map-section .map-sub { font-size: .94rem; color: var(--muted); max-width: 64ch; margin: 0 0 22px; }
+  .map-section .rule-box { margin-bottom: 22px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .92rem; }
+  .map-section .rule-box b { color: var(--brick); }
+
+  .viz-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 22px; }
+
+  .controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .play-btn {
+    flex: none; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .play-btn:hover { border-color: var(--brick); }
+  input[type="range"] {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px;
+    background: var(--hair); outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper);
+    box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  .era-tag { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+
+  .era-head { text-align: center; margin-bottom: 16px; }
+  .era-name-inline { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.35rem; transition: opacity .35s ease; }
+  .era-owners { font-size: .86rem; color: var(--muted); max-width: 62ch; margin: 6px auto 0; transition: opacity .35s ease; }
+  .era-owners b { color: var(--ink); }
+  .era-story {
+    margin: 0 auto 22px; font-size: .98rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .35s ease; padding: 14px 18px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  .era-story b { color: var(--brick); }
+
+  .flags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin: 4px auto 18px; max-width: 620px; }
+  .flag-chip { text-align: center; width: 92px; }
+  .flag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-chip .fc-label { font-family: "IBM Plex Mono", monospace; font-size: 9px; color: var(--muted); margin-top: 5px; line-height: 1.3; }
+
+  #map-svg { display: block; margin: 0 auto; width: 100%; max-width: 460px; height: auto; }
+  .region-fill { transition: fill 0.7s ease; }
+  .border-line { transition: stroke-opacity 0.7s ease, stroke-width 0.7s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .group-label { font-family: "Fraunces", serif; font-weight: 600; transition: opacity .5s ease, font-size .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2.5px; }
+  .sub-label { font-family: "IBM Plex Mono", monospace; font-weight: 700; transition: opacity .5s ease, fill .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+
+  .map-key { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: .8rem; color: var(--muted); justify-content: center; }
+  .map-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .map-key .sw { width: 11px; height: 11px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .map-notes { margin-top: 20px; font-size: .85rem; color: var(--muted); }
+  .map-notes b { color: var(--ink); }
+
+  .subview { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .subview h3 { font-size: 1.2rem; font-weight: 600; margin: 0 0 8px; }
+  .subview .sub-desc { font-size: .9rem; color: var(--muted); max-width: 64ch; margin: 0 0 18px; }
+
+  .gantt-row { display: flex; align-items: center; margin-bottom: 3px; }
+  .gantt-label { width: 100px; flex: none; font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--ink); text-align: right; padding-right: 10px; }
+  .gantt-track { flex: 1; height: 26px; position: relative; background: var(--paper); border-radius: 2px; overflow: hidden; }
+  .gantt-seg { position: absolute; top: 0; bottom: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .gantt-seg span { font-size: 9.5px; font-weight: 600; white-space: nowrap; padding: 0 3px; }
+  .gantt-axis { display: flex; margin-left: 100px; padding-top: 4px; font-family: "IBM Plex Mono", monospace; font-size: 9.5px; color: var(--muted); position: relative; height: 14px; }
+  .gantt-axis span { position: absolute; transform: translateX(-50%); }
+
+  .grid-3x3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .grid-cell { text-align: center; }
+  .grid-cell svg { width: 100%; height: auto; display: block; }
+  .grid-cell .cap { font-family: "IBM Plex Mono", monospace; font-size: 10px; color: var(--brass); margin-top: 6px; }
+  .grid-cell .cap b { display: block; font-family: "Fraunces", serif; font-size: .95rem; font-weight: 600; color: var(--ink); margin-top: 1px; }
+  .grid-cell .cap .diff { display: block; font-family: "Source Sans 3", sans-serif; font-size: .74rem; color: var(--brick); margin-top: 3px; font-weight: 600; }
+  .mini-label { font-family: "IBM Plex Mono", monospace; font-size: 7.5px; font-weight: 700; pointer-events: none; }
+
+  .about { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .about h2 { font-size: 1.3rem; margin: 0 0 12px; }
+  .about p { max-width: none; opacity: .88; margin: 0 0 12px; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a></p>
+  <p class="kicker">Family research &middot; Hub &middot; Phase 6 of the world atlas</p>
+  <h1>Flags of Eastern Europe</h1>
+  <p class="lede">Ukraine, Belarus, and Moldova &mdash; three lands that share a common medieval ancestor in Kievan Rus', then spend the next thousand years pulled apart by Lithuania, Poland, the Ottomans, Russia, and the Soviet Union before landing on three separate flags in 1991.</p>
+  <p class="lede">Country pages are coming in a later pass. For now, drag the map's slider below to see the whole region's story at a glance &mdash; ten snapshots, eleven centuries.</p>
+
+  <div class="countries">
+    <h2>Three lineages, publishing soon</h2>
+    <div class="country-grid">
+      <a class="country-card" href="ukraine-flags.html">
+        <span class="swatch-strip" style="background:#0057b7"></span>
+        <span class="era">own page &rarr;</span>
+        <b>Ukraine</b>
+        <span>Kievan Rus', Galicia-Volhynia, the Cossack Hetmanate, the Holodomor, and independence restored in 1991.</span>
+      </a>
+      <a class="country-card" href="belarus-flags.html">
+        <span class="swatch-strip" style="background:#4a9d6f"></span>
+        <span class="era">c. 862&ndash;present &middot; own page</span>
+        <b>Belarus</b>
+        <span>Polotsk's old princes, centuries as Lithuania's own heartland, the chaos of 1918&ndash;21, and the same authoritarian leader since 1994.</span>
+      </a>
+      <a class="country-card" href="moldova-flags.html">
+        <span class="swatch-strip" style="background:#b0562f"></span>
+        <span class="era">c. 1359&ndash;present &middot; own page</span>
+        <b>Moldova</b>
+        <span>The eastern half of historic Moldavia, a Russian province called Bessarabia, and a Soviet republic bolted together in 1940 &mdash; now covering Transnistria's unresolved 1992 split too.</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="map-section">
+    <h2>Eleven centuries, one map</h2>
+    <p class="map-sub">A real, traced map &mdash; actual borders, not schematic shapes. Drag the slider or press play; each snapshot simplifies a messier reality into the dominant power of the moment. Poland, Romania, and the western edge of Russia are now sketched in faint for geographic context; Russia's own vast territory is otherwise excluded and tracked as "off-map" whenever it's the ruling power &mdash; Russia gets its own future phase.</p>
+    <div class="rule-box">
+      <b>Borders here are data, not decoration.</b> A line between two lands only draws solid when they were actually governed separately. When they weren't &mdash; Ukraine and Belarus under the same Grand Duchy of Lithuania for two centuries, say &mdash; the line dissolves and their names merge into whoever actually ruled them both.
+    </div>
+
+    <div class="viz-frame">
+      <div class="controls">
+        <button class="play-btn" id="playBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="era-tag" id="yearTag">950</span>
+        <input type="range" id="slider" min="0" max="9" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="map-svg" viewBox="0 0 560 540" xmlns="http://www.w3.org/2000/svg">
+        <path fill="var(--tile-sea)" d="M488.4,366.2 L463.3,369.2 L449.9,380.5 L449.1,398.6 L428.3,401.8 L411.0,415.0 L386.7,417.1 L364.4,432.3 L365.9,457.6 L378.6,467.4 L405.1,464.9 L400.0,479.4 L371.6,486.5 L336.3,510.0 L321.9,501.7 L327.6,482.6 L299.2,470.7 L303.8,462.9 L328.7,449.4 L321.2,440.1 L280.8,429.8 L279.0,414.7 L255.0,419.7 L245.3,442.1 L225.2,472.1 L213.4,465.1 L201.2,471.7 L189.6,464.2 L189.6,540 L560,540 L560,366.2 Z"/>
+        <path fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" d="M-153.6,235.8 L-164.2,209.8 L-162.2,195.8 L-168.6,174.1 L-178.0,159.6 L-170.8,148.7 L-176.9,128.1 L-159.1,116.1 L-118.6,97.3 L-85.9,83.6 L-60.0,90.4 L-58.0,100.3 L-33.0,100.9 L-1.0,105.5 L46.8,104.9 L60.1,109.2 L66.3,121.7 L67.4,139.7 L74.6,155.2 L74.5,171.4 L58.9,179.7 L66.9,198.5 L67.4,216.6 L80.5,252.1 L77.7,263.5 L64.8,268.2 L41.2,302.1 L47.9,320.3 L42.3,317.9 L17.6,302.3 L-1.1,308.1 L-13.4,303.9 L-28.7,312.6 L-41.8,298.2 L-52.5,303.7 L-54.0,301.3 L-65.9,281.2 L-85.2,278.8 L-87.7,266.1 L-105.5,261.5 L-109.4,272.0 L-123.5,263.6 L-121.8,252.4 L-141.3,248.9 L-153.6,235.8 Z"/>
+        <path fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" d="M46.2,366.9 L57.4,358.2 L73.5,362.7 L90.1,362.8 L102.2,372.8 L111.1,366.5 L130.2,362.6 L136.8,353.1 L147.7,353.1 L155.6,357.1 L163.7,369.1 L171.9,386.3 L186.9,410.4 L187.7,428.3 L185.0,445.6 L189.6,464.2 L201.2,471.7 L213.4,465.1 L225.2,472.1 L225.8,482.6 L213.2,491.3 L205.3,487.5 L198.1,536.6 L182.8,532.3 L163.9,517.5 L133.3,527.0 L120.5,537.4 L82.3,535.2 L62.4,528.9 L52.3,531.9 L44.8,515.1 L40.1,508.1 L46.1,501.2 L39.7,496.1 L31.5,505.2 L16.4,493.4 L14.4,476.7 L-1.5,467.1 L-4.4,454.2 L-18.5,438.2 L2.4,430.5 L18.1,403.0 L30.4,375.4 L46.2,366.9 Z"/>
+        <path fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" d="M597.3,583.4 L557.4,556.4 L494.0,547.7 L408.9,474.1 L427.8,467.6 L449.3,433.6 L434.8,417.5 L473.1,400.9 L449.1,398.6 L449.9,380.5 L488.4,366.2 L497.0,297.0 L374.6,257.3 L365.9,231.7 L345.2,229.7 L349.6,208.9 L333.0,185.9 L281.9,195.3 L269.4,155.8 L305.5,144.5 L255.2,85.2 L258.2,55.1 L188.2,30.0"/>
+        <g class="context-label">
+          <text x="20" y="110">POLAND</text>
+          <text x="100" y="500">ROMANIA</text>
+          <text x="518" y="340">RUSSIA</text>
+        </g>
+        <path id="f-ua" class="region-fill" d="M281.9,195.3 L291.6,197.0 L298.1,187.7 L306.0,189.8 L333.0,185.9 L349.6,208.9 L343.1,217.1 L345.2,229.7 L365.9,231.7 L375.2,249.3 L374.6,257.3 L407.6,271.6 L427.5,265.2 L443.5,284.2 L458.7,283.8 L497.0,297.0 L497.3,308.9 L486.7,330.2 L492.5,352.6 L488.4,366.2 L463.3,369.2 L449.9,380.5 L449.1,398.6 L428.3,401.8 L411.0,415.0 L386.7,417.1 L364.4,432.3 L365.9,457.6 L378.6,467.4 L405.1,464.9 L400.0,479.4 L371.6,486.5 L336.3,510.0 L321.9,501.7 L327.6,482.6 L299.2,470.7 L303.8,462.9 L328.7,449.4 L321.2,440.1 L280.8,429.8 L279.0,414.7 L255.0,419.7 L245.3,442.1 L225.2,472.1 L213.4,465.1 L201.2,471.7 L189.6,464.2 L196.2,459.8 L200.7,445.8 L207.8,432.9 L206.0,425.6 L211.4,422.3 L214.0,428.0 L229.3,429.2 L236.2,426.2 L231.3,422.0 L233.1,416.0 L224.1,405.6 L220.3,388.6 L210.9,382.0 L212.7,368.2 L201.0,357.3 L190.3,355.8 L171.2,343.1 L153.9,347.1 L147.7,353.1 L136.8,353.1 L130.2,362.6 L111.1,366.5 L102.2,372.8 L90.2,362.8 L73.5,362.7 L57.4,358.2 L46.2,366.9 L44.4,356.0 L30.0,344.9 L35.1,328.5 L42.3,318.0 L47.9,320.3 L41.2,302.1 L64.8,268.2 L77.7,263.5 L80.5,252.1 L67.4,216.6 L79.8,215.0 L94.1,204.0 L114.2,203.1 L140.4,206.3 L169.4,216.1 L189.9,216.9 L199.6,222.7 L209.4,215.7 L216.2,225.2 L239.6,223.2 L249.9,227.1 L251.6,206.7 L259.6,197.8 L281.9,195.3 Z"/>
+        <path id="f-by" class="region-fill" d="M66.3,121.7 L91.4,122.0 L119.6,106.7 L125.6,83.7 L146.9,70.7 L144.5,52.5 L160.3,45.7 L188.2,30.0 L215.5,40.2 L219.2,50.3 L232.8,45.4 L258.2,55.1 L260.7,74.2 L255.2,85.2 L271.5,111.8 L282.0,119.2 L280.5,126.6 L298.0,133.7 L305.5,144.5 L295.4,153.4 L274.4,152.0 L269.4,155.8 L275.5,169.3 L281.9,195.3 L259.6,197.8 L251.6,206.7 L249.9,227.1 L239.6,223.2 L216.2,225.2 L209.4,215.7 L199.6,222.7 L189.9,216.9 L169.4,216.1 L140.4,206.3 L114.2,203.1 L94.1,204.0 L79.8,215.0 L67.4,216.6 L66.9,198.5 L58.9,179.7 L74.5,171.4 L74.6,155.2 L67.4,139.7 L66.3,121.7 Z"/>
+        <path id="f-md" class="region-fill" d="M147.7,353.1 L153.9,347.1 L171.2,343.1 L190.3,355.8 L201.0,357.3 L212.7,368.2 L210.9,382.0 L220.3,388.6 L224.1,405.6 L233.1,416.0 L231.3,422.0 L236.2,426.2 L229.3,429.2 L214.0,428.0 L211.4,422.3 L206.0,425.6 L207.8,432.9 L200.7,445.8 L196.2,459.8 L189.6,464.2 L185.0,445.6 L187.7,428.3 L186.9,410.4 L171.9,386.3 L163.7,369.1 L155.6,357.1 L147.7,353.1 Z"/>
+
+        <g id="borders" stroke-width="1">
+          <path class="border-line" id="b-ua-by" d="M67.4,216.6 L79.8,215.0 L94.1,204.0 L114.2,203.1 L140.4,206.3 L169.4,216.1 L189.9,216.9 L199.6,222.7 L209.4,215.7 L216.2,225.2 L239.6,223.2 L249.9,227.1 L251.6,206.7 L259.6,197.8 L281.9,195.3"/>
+          <path class="border-line" id="b-ua-md" d="M189.6,464.2 L196.2,459.8 L200.7,445.8 L207.8,432.9 L206.0,425.6 L211.4,422.3 L214.0,428.0 L229.3,429.2 L236.2,426.2 L231.3,422.0 L233.1,416.0 L224.1,405.6 L220.3,388.6 L210.9,382.0 L212.7,368.2 L201.0,357.3 L190.3,355.8 L171.2,343.1 L153.9,347.1 L147.7,353.1"/>
+        </g>
+
+        <g id="labels"></g>
+      </svg>
+
+      <div class="era-head">
+        <div class="era-name-inline" id="eraName">Kievan Rus' at its height</div>
+        <div class="era-owners" id="eraOwners"></div>
+      </div>
+      <div class="flags-row" id="flagsRow"></div>
+      <p class="era-story" id="eraStory"></p>
+
+      <p class="map-note">Real traced borders (simplified). Poland, Romania, and Russia's near border are shown faint for context only &mdash; Russia itself is otherwise left uncolored beyond this map's frame: when Russia is the ruling power, the region is labeled as such, but Russia's own territory isn't drawn or tracked here.</p>
+      <div class="map-key" id="legend"></div>
+      <div class="map-notes">
+        <b>Try:</b> drag slowly from 1392 to 1795 and watch the Ukraine&ndash;Belarus line dissolve at 1392 (both Lithuania) then solidify again at 1569 (Union of Lublin splits them) then dissolve once more at 1795 (both to Russia). Then jump to 1812: for the only moment on this whole map, all three lands share one ruler and every border disappears at once. By 1918, all three lines are solid again &mdash; three separate, competing bids for independence within months of each other.
+      </div>
+    </div>
+
+    <div class="subview">
+      <h3>The same story, as a timeline</h3>
+      <p class="sub-desc">Maps are bad at showing <em>when</em>; timelines are bad at showing <em>where</em>. This uses real transition years instead of the ten arbitrary snapshots above &mdash; one horizontal band per land, colored the same way as the map, so you can trace exactly how long each era actually lasted and compare all three directly.</p>
+      <div class="viz-frame">
+        <div id="gantt"></div>
+        <div class="gantt-axis" id="gantt-axis"></div>
+      </div>
+    </div>
+
+    <div class="subview">
+      <h3>The same story, ten frames &mdash; only the change lights up</h3>
+      <p class="sub-desc">Every land keeps its true color, but anything unchanged from the previous frame fades to low opacity; only the land(s) that actually changed hands stay bold with a solid outline. A caption under each frame spells out exactly what flipped. No slider to operate &mdash; scan left to right, top to bottom, and watch the map redraw itself like a flipbook.</p>
+      <div class="viz-frame">
+        <div class="grid-3x3" id="grid9"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="about">
+    <h2>About this atlas</h2>
+    <p>This started as a family history project: tracing the flags that flew over the lands our ancestors came from, close enough to paint accurately &mdash; correct colors, correct proportions, correct dates. This hub deliberately stops short of Russia itself: its scale and complexity earn it a dedicated future phase rather than a corner of this map.</p>
+    <p>Every country page (coming in a later pass for Ukraine, Belarus, and Moldova) will carry its own timeline of flags with paint-ready color specs and a per-era location map. Colors are close historical approximations; pre-19th-century swatches especially are informed reconstructions, not official specifications, and are labeled as such throughout. Where this map touches on well-documented, ongoing 21st-century disputes &mdash; Crimea, the 2022 invasion &mdash; it states only widely-reported facts and stays out of the map's own slider entirely, since those events fall outside the historical snapshots covered here.</p>
+  </div>
+
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This hub is one region in a larger set. See the rest here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Map is schematic and not surveyed. Country boundary data traced from johan/world.geo.json (public domain-style source data).
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var C = {
+    rus:"#6a3f9e", steppe:"#9c8a5a", mongol_ukr:"#8a5a2e", rus_succ_blr:"#6e4fa0", golden_horde_md:"#b34a2a",
+    ltu:"#2f5c8a", moldavia_ind:"#3f7a52", poland:"#c9a13c", ottoman_vassal_md:"#9c5a2f", cossack:"#c9453a",
+    rus_emp:"#7a2e44", upr:"#1f5fa8", bnr:"#a83f3f", romania_kingdom:"#3f6f9e", ussr:"#b8262a",
+    ind_ua:"#0057b7", ind_by:"#4a9d6f", ind_md:"#b0562f"
+  };
+  var NAMES = {
+    rus:"Kievan Rus'", steppe:"Contested steppe (no settled state)", mongol_ukr:"Rus' successor states / Mongol tributary (Galicia-Volhynia)",
+    rus_succ_blr:"Rus' successor principalities (Polotsk)", golden_horde_md:"Golden Horde / Cuman steppe",
+    ltu:"Grand Duchy of Lithuania", moldavia_ind:"Principality of Moldavia (independent)", poland:"Kingdom of Poland",
+    ottoman_vassal_md:"Moldavia (Ottoman vassal)", cossack:"Cossack Hetmanate (Russian protectorate)", rus_emp:"Russian Empire",
+    upr:"Ukrainian People's Republic", bnr:"Belarusian People's Republic", romania_kingdom:"Kingdom of Romania",
+    ussr:"Soviet Union", ind_ua:"Ukraine", ind_by:"Belarus", ind_md:"Moldova"
+  };
+  var legendEl = document.getElementById("legend");
+  legendEl.innerHTML = Object.keys(C).map(function (k) {
+    return '<span><span class="sw" style="background:' + C[k] + '"></span>' + NAMES[k] + "</span>";
+  }).join("");
+
+  // ---- Real flag graphics, one per distinct historical power ----
+  var FLAGS = {
+    rurikid: '<rect width="300" height="200" fill="#7a1f2f"/><g transform="translate(150,100) scale(0.6)" fill="#d4a017"><path d="M-40,80 L-40,-10 Q-40,-50 -70,-75 Q-45,-55 -25,-30 L-25,-70 L-10,-70 L-10,-30 Q10,-55 35,-75 Q5,-50 5,-10 L5,80 Z"/></g><text x="150" y="185" font-size="11" text-anchor="middle" fill="#d4a017" font-family="monospace">RURIKID TAMGA (RECON.)</text>',
+    mongol_tugh: '<rect width="300" height="200" fill="#201a14"/><rect x="145" y="20" width="10" height="160" fill="#c9a13c"/><path d="M150,20 Q120,50 130,90 Q100,70 105,110 Q80,95 90,135 Q150,150 210,135 Q220,95 195,110 Q200,70 170,90 Q180,50 150,20 Z" fill="#f4efe1" opacity="0.9"/>',
+    galicia_lion: '<rect width="300" height="200" fill="#1e2f96"/><ellipse cx="150" cy="105" rx="42" ry="46" fill="#c9a13c"/><text x="150" y="122" font-size="46" text-anchor="middle" fill="#1e2f96" font-family="serif">&#129409;</text>',
+    polotsk_banner: '<rect width="300" height="200" fill="#7a1f2f"/><rect x="125" y="55" width="50" height="90" fill="#f4efe1" stroke="#d4a017" stroke-width="3"/><path d="M150,60 v80 M115,100 h70" stroke="#7a1f2f" stroke-width="10"/>',
+    pahonia: '<rect width="300" height="200" fill="#a4302a"/><g transform="translate(150,100)"><ellipse cx="10" cy="20" rx="38" ry="22" fill="#f4efe1"/><rect x="-45" y="0" width="55" height="22" rx="8" fill="#f4efe1"/><rect x="-55" y="-10" width="18" height="45" rx="6" fill="#f4efe1"/><path d="M-15,-15 L5,-45 L15,-40 L0,-10 Z" fill="#f4efe1"/><rect x="30" y="-38" width="8" height="34" fill="#c9a13c"/><path d="M34,-38 L20,-25 L34,-20 L48,-25 Z" fill="#c9a13c"/></g>',
+    moldavia_ox: '<rect width="300" height="200" fill="#8a2f2f"/><g transform="translate(150,105)" fill="none" stroke="#201a14" stroke-width="4"><path d="M-35,10 Q0,-25 35,10 L28,35 Q0,20 -28,35 Z" fill="#c9a13c"/><path d="M-30,-5 Q-55,-35 -45,-55" /><path d="M30,-5 Q55,-35 45,-55" /></g><circle cx="150" cy="35" r="5" fill="#f4efe1"/>',
+    poland_eagle: '<rect width="300" height="200" fill="#a4302a"/><g transform="translate(150,100) scale(0.85)" fill="#f4efe1"><ellipse cx="0" cy="0" rx="22" ry="26"/><path d="M-18,-10 Q-60,-30 -85,-5 Q-55,-8 -35,10 Q-55,5 -75,25 Q-45,15 -22,22 Z"/><path d="M18,-10 Q60,-30 85,-5 Q55,-8 35,10 Q55,5 75,25 Q45,15 22,22 Z"/><path d="M-8,22 L-14,45 L-2,38 L0,50 L2,38 L14,45 L8,22 Z"/></g>',
+    ottoman: '<rect width="300" height="200" fill="#a4302a"/><path d="M120,70 A38,38 0 1 0 172,102 A28,28 0 1 1 120,70 Z" fill="#f4efe1"/><path d="M200,84 l5,15 16,0 -13,10 5,15 -13,-9 -13,9 5,-15 -13,-10 16,0 Z" fill="#f4efe1"/>',
+    cossack_flag: '<rect width="300" height="200" fill="#7a1f2f"/><path d="M150,45 v110 M105,100 h90" stroke="#f4efe1" stroke-width="12"/><circle cx="150" cy="45" r="10" fill="#f4efe1"/>',
+    rus_emp_flag: '<rect width="300" height="66.7" fill="#f4efe1"/><rect y="66.7" width="300" height="66.6" fill="#1e2f96"/><rect y="133.3" width="300" height="66.7" fill="#a4302a"/>',
+    upr_flag: '<rect width="300" height="100" fill="#1e5fa8"/><rect y="100" width="300" height="100" fill="#ffd200"/>',
+    bnr_flag: '<rect width="300" height="66.7" fill="#f4efe1"/><rect y="66.7" width="300" height="66.6" fill="#a4302a"/><rect y="133.3" width="300" height="66.7" fill="#f4efe1"/>',
+    romania_flag: '<rect width="100" height="200" fill="#002b7f"/><rect x="100" width="100" height="200" fill="#fcd116"/><rect x="200" width="100" height="200" fill="#ce1126"/>',
+    ussr_flag: '<rect width="300" height="200" fill="#c8102e"/><g fill="#ffd200" transform="translate(55,45)"><path d="M0,0 L7,20 28,20 11,32 17,52 0,40 -17,52 -11,32 -28,20 -7,20 Z"/><rect x="30" y="35" width="3" height="26" transform="rotate(35 30 35)"/><path d="M20,58 a18,18 0 1 1 22,-10" fill="none" stroke="#ffd200" stroke-width="3"/></g>',
+    ukraine_modern: '<rect width="300" height="100" fill="#0057b7"/><rect y="100" width="300" height="100" fill="#ffd700"/>',
+    belarus_1991: '<rect width="300" height="66.7" fill="#f4efe1"/><rect y="66.7" width="300" height="66.6" fill="#a4302a"/><rect y="133.3" width="300" height="66.7" fill="#f4efe1"/>',
+    moldova_modern: '<rect width="100" height="200" fill="#003da5"/><rect x="100" width="100" height="200" fill="#ffd200"/><rect x="200" width="100" height="200" fill="#ce1126"/><circle cx="150" cy="100" r="24" fill="#a4302a" stroke="#ffd200" stroke-width="2"/>'
+  };
+  function flagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (FLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+
+  var SNAP = [
+    { year:"950", name:"Kievan Rus' at its height", t:{ ua:C.rus, by:C.rus, md:C.steppe },
+      story: "By the mid-10th century, Kievan Rus' &mdash; centered on Kyiv, founded as a Varangian-and-Slavic trade-route state along the Dnieper &mdash; is the common ancestor claimed by three modern nations: Ukraine, Belarus, and Russia alike trace their origins to this one polity. <b>Sviatoslav I</b> (r. 945&ndash;972) is its most aggressively expansionist ruler, campaigning as far as the Volga Bulgars and the Khazar Khaganate and briefly threatening Byzantium itself before dying in an ambush by Pecheneg raiders in 972. Polotsk, in what's now Belarus, is already one of Rus's oldest secondary power centers, first mentioned in the chronicles in 862 and increasingly self-directed under its own line of princes even while nominally part of the same Rurikid realm as Kyiv &mdash; hence the dissolved border here. Further south and west, the territory that will one day become Moldova lies entirely outside Rus': open steppe frontier, contested among Pecheneg nomads, remnants of Bulgar power, and eventually incoming Cumans, with no settled state of any kind and centuries still to go before the Principality of Moldavia is founded." },
+    { year:"1240", name:"The Mongols destroy Kiev", t:{ ua:C.mongol_ukr, by:C.rus_succ_blr, md:C.golden_horde_md },
+      story: "Rus' had already been fragmenting into competing principalities for a century before the Mongols arrived &mdash; the 1097 Council of Liubech had formalized a system of separate hereditary lands rather than one unified state. Batu Khan's forces stormed and burned Kiev in December 1240, a catastrophe chroniclers describe in apocalyptic terms, ending the city's centuries-long primacy. In the southwest, the principality of Galicia-Volhynia &mdash; under Danylo of Galicia, crowned \"King of Rus'\" by a papal legate in 1253 &mdash; survives as the most substantial successor state on the territory of modern Ukraine, though even it pays tribute to the Golden Horde for decades. Further north, Polotsk and the other Belarusian-lands principalities escape the worst of the Mongol devastation (the westward advance largely bypassed the forested north) and begin drifting instead toward the newly consolidating Grand Duchy of Lithuania, founded around 1236 under Mindaugas. The steppe that will become Moldova remains outside any settled state altogether, passing from Cuman to Mongol Golden Horde domination as the frontier's nomadic overlords change." },
+    { year:"1392", name:"Lithuania and Poland absorb the Rus' lands; Moldavia is founded", t:{ ua:C.ltu, by:C.ltu, md:C.moldavia_ind },
+      story: "Galicia-Volhynia's own line of rulers dies out by 1340, and its territory is fought over for decades; by 1349 King Casimir III of Poland has secured Galicia for the Polish crown, while Volhynia and the rest of the old Rus' lands are absorbed piece by piece into the fast-expanding Grand Duchy of Lithuania &mdash; Kyiv itself falls under Lithuanian control after Grand Duke Algirdas's victory at the Battle of Blue Waters in 1362. By 1392, under Vytautas the Great, Lithuania rules nearly all of modern Belarus and most of modern Ukraine as one realm (this simplified map, which can't show Galicia's separate Polish sliver, colors the whole region Lithuanian for this reason &mdash; the border between Ukraine and Belarus dissolves accordingly). To the south, a genuinely new state appears: <b>Bogdan I</b> throws off Hungarian overlordship around 1359 to found the independent Principality of Moldavia, the earliest ancestor of the modern country &mdash; though historic Moldavia's own territory sprawls well beyond today's Moldova, covering much of what is now northeastern Romania too; the modern Republic of Moldova corresponds only to Moldavia's eastern portion, between the Prut and Dniester rivers." },
+    { year:"1569", name:"The Union of Lublin: Ukraine transfers to Poland", t:{ ua:C.poland, by:C.ltu, md:C.ottoman_vassal_md },
+      story: "The 1569 Union of Lublin merges the Kingdom of Poland and the Grand Duchy of Lithuania into a single Polish-Lithuanian Commonwealth &mdash; but not as an equal merger of territory. As part of the union's terms, the Lithuanian-ruled lands of Ukraine (Volhynia, Podolia, Kyiv itself) transfer directly to the Polish Crown's own administration, while Belarus remains under the Grand Duchy of Lithuania, now the Commonwealth's junior partner. That's a real, specific administrative split &mdash; the border here solidifies for the first time since the 14th century, even though both halves now answer to the same monarch and the same Sejm. Polish colonization and the spread of serfdom into Ukraine's steppe frontier over the following decades helps drive the rise of the Cossacks &mdash; free warrior-settlers organizing around the Zaporozhian Sich &mdash; who will upend this arrangement within a century. To the south, Moldavia has been a tribute-paying vassal of the Ottoman Empire since the late 1400s&ndash;early 1500s, retaining its own princes (hospodars) and institutions but no independent foreign policy." },
+    { year:"1654", name:"Pereyaslav: the Cossack Hetmanate turns to Russia", t:{ ua:C.cossack, by:C.ltu, md:C.ottoman_vassal_md },
+      story: "Bohdan Khmelnytsky's 1648 Cossack uprising against Polish rule and its harsh treatment of Orthodox peasants and Cossacks alike escalates into a full-scale war that shatters Commonwealth control over the Ukrainian steppe. Unable to win lasting security alone, Khmelnytsky turns to Muscovy: the January 1654 Treaty (Council) of Pereyaslav places the Cossack Hetmanate under the protection of the Tsar of Russia &mdash; historians still debate whether this was meant as full incorporation, a personal union, or a temporary military alliance, and the ambiguity itself shaped centuries of later argument. What's clear on the ground is more limited than this map can show at this scale: it's specifically the Hetmanate's core territory east of the Dnieper (plus Kyiv) that comes under Russian protection, while western Ukraine, including Galicia, remains firmly Polish-Lithuanian for well over a century yet &mdash; the whole region is colored as the Hetmanate here as a simplification. Belarus, still the Grand Duchy of Lithuania's own territory within the same Commonwealth, is untouched by any of this. Moldavia continues as before, an Ottoman vassal principality with its own princes." },
+    { year:"1795", name:"The Partitions of Poland-Lithuania", t:{ ua:C.rus_emp, by:C.rus_emp, md:C.ottoman_vassal_md },
+      story: "Three successive partitions between 1772 and 1795, carried out by Russia, Prussia, and Austria against a Commonwealth too weakened by internal gridlock to resist, erase the Polish-Lithuanian state from the map entirely. The 1795 Third Partition is the one that matters most here: it delivers the whole of Belarus and the great majority of Ukraine &mdash; everything the Cossack Hetmanate hadn't already ceded, plus the rest of the old Commonwealth's eastern lands &mdash; into the Russian Empire outright, dissolving the border between them that had held since 1569. One significant exception this simplified map can't show directly: Galicia, in westernmost Ukraine, doesn't go to Russia at all &mdash; it was already seized by Austria back in the First Partition of 1772, and stays under Habsburg rule for over a century, giving western Ukraine a noticeably different 19th-century experience &mdash; more religious and political freedom, a Ukrainian national revival tolerated rather than suppressed &mdash; from the Russian-ruled east. Moldavia, still an Ottoman vassal in 1795, is untouched by any of this; its own partition is still 17 years away." },
+    { year:"1812", name:"Russia annexes Bessarabia — one empire, three lands", t:{ ua:C.rus_emp, by:C.rus_emp, md:C.rus_emp },
+      story: "The 1806&ndash;12 Russo-Turkish War ends with the Treaty of Bucharest, in which the Ottoman Empire cedes the eastern half of the old Principality of Moldavia &mdash; the land between the Prut and Dniester rivers &mdash; to Russia. Renamed <b>Bessarabia</b>, it becomes a Russian province in its own right; the western remainder of historic Moldavia stays under Ottoman suzerainty and eventually unites with Wallachia to form modern Romania. For the only time on this whole map's eleven centuries, all three of Ukraine, Belarus, and Bessarabia/Moldova answer to a single government at once &mdash; every border here dissolves. It won't last: each region experiences the following century of Russian imperial rule differently. Ukraine sees the harshest cultural suppression, including the 1876 Ems Ukaz banning Ukrainian-language publishing outright; Belarus, with a less developed sense of separate national identity at this point, is treated more as generic \"western Russia\"; Bessarabia keeps a distinct regional character shaped by its Romanian-speaking majority and mixed Ottoman-era institutions even under the Tsar." },
+    { year:"1918", name:"Empires collapse — three separate bids for independence", t:{ ua:C.upr, by:C.bnr, md:C.romania_kingdom },
+      story: "The First World War brings down the Russian Empire in 1917 and leaves a power vacuum that each region fills on its own, in its own way, within months of each other. In Kyiv, the <b>Ukrainian People's Republic</b> declares full independence on 22 January 1918, adopting the blue-and-yellow flag still flown today &mdash; but it's immediately squeezed between Bolshevik Russia, a German-backed government, and a chaotic civil war, and survives only into 1920&ndash;21 in any coherent form. In Minsk, the <b>Belarusian People's Republic</b> declares independence on 25 March 1918 under German occupation, the first modern attempt at a Belarusian state &mdash; but with no army of its own and no international recognition, it never controls its claimed territory and collapses within the year, surviving since only as a government-in-exile. To the south, Bessarabia's own representative council, the Sfatul Țării, votes on 27 March 1918 to unite with the Kingdom of Romania &mdash; a decision Romania treats as settled and permanent, and the Soviet Union never accepts as legitimate, a dispute that simmers unresolved for the next twenty-two years." },
+    { year:"1922", name:"The Soviet Union is formed", t:{ ua:C.ussr, by:C.ussr, md:C.romania_kingdom },
+      story: "By 1921&ndash;22 the Red Army has fought its way through the chaos of the Russian Civil War and imposed Bolshevik control over both Ukraine and Belarus; on 30 December 1922 they become two of the four founding republics of the Union of Soviet Socialist Republics, alongside Russia and the Transcaucasian SFSR. Both republics get a formal Soviet institutional identity &mdash; an Academy, a flag, a nominal \"right to secede\" that means nothing in practice &mdash; but also full exposure to Moscow's coming political violence. The worst of it falls on Ukraine: forced collectivization and grain requisitioning trigger the <b>Holodomor</b>, the engineered famine of 1932&ndash;33 that killed an estimated 3.5 to 5 million people in Soviet Ukraine, a catastrophe increasingly recognized internationally as a genocide targeting the Ukrainian peasantry specifically. Bessarabia, meanwhile, stays part of Romania throughout this period &mdash; the USSR never stops disputing the 1918 union, but has no way to reverse it until 1940, when the secret protocols of the Molotov-Ribbentrop Pact hand it back: the Red Army occupies Bessarabia that June, and the Moldavian Soviet Socialist Republic is created that August, finally bringing all three lands under one Soviet roof shortly before the wider devastation of the Second World War reaches all of them." },
+    { year:"1991", name:"Independence, restored", t:{ ua:C.ind_ua, by:C.ind_by, md:C.ind_md },
+      story: "The USSR's final collapse plays out fast at the end of 1991. Ukraine's referendum on 1 December 1991 returns a decisive 92% in favor of independence &mdash; including majorities in every region, Crimea and the industrial east included &mdash; and effectively seals the Soviet Union's fate; the USSR formally dissolves three weeks later. Belarus declares independence on 25 August 1991, and Moldova follows on 27 August 1991, though a breakaway Transnistria region on Moldova's eastern bank of the Dniester, backed by Russian forces, fights a short war for its own separation in 1992 and remains unresolved territory to this day. All three adopt new (or, for Ukraine, restored) national flags: Ukraine's blue-and-yellow bicolor, unchanged since 1918; Belarus's white-red-white tricolor at first, though a contested 1995 referendum under President Alexander Lukashenko restores a red-and-green flag closely modeled on the Soviet-era design, which remains Belarus's official flag today; and Moldova's blue-yellow-red tricolor with its own coat of arms &mdash; an eagle bearing the aurochs head that traces, remarkably, all the way back to the Principality of Moldavia founded in 1359. For the historical record: Ukraine's internationally recognized borders as of 1991 included Crimea, transferred from the Russian SFSR to the Ukrainian SSR in 1954; Russia's 2014 annexation of Crimea and its 2022 invasion of the rest of Ukraine are widely documented, ongoing disputes over that same territory, well outside this map's historical scope." }
+  ];
+
+  var FLAG_SETS = {
+    "950": [["rurikid","Rurikid princely banner"]],
+    "1240": [["mongol_tugh","Mongol / Golden Horde banner"],["galicia_lion","Galicia-Volhynia (Leo of Galicia)"],["polotsk_banner","Polotsk (reconstruction)"]],
+    "1392": [["pahonia","Grand Duchy of Lithuania (Vytis / Pahonia)"],["moldavia_ox","Principality of Moldavia (aurochs head)"]],
+    "1569": [["poland_eagle","Kingdom of Poland (White Eagle)"],["pahonia","Grand Duchy of Lithuania"],["ottoman","Ottoman Empire (suzerain)"]],
+    "1654": [["cossack_flag","Zaporozhian Host / Cossack Hetmanate"],["pahonia","Grand Duchy of Lithuania"],["ottoman","Ottoman Empire (suzerain)"]],
+    "1795": [["rus_emp_flag","Russian Empire"],["ottoman","Ottoman Empire (Moldavia, vassal)"]],
+    "1812": [["rus_emp_flag","Russian Empire"]],
+    "1918": [["upr_flag","Ukrainian People's Republic"],["bnr_flag","Belarusian People's Republic"],["romania_flag","Kingdom of Romania (Bessarabia unites)"]],
+    "1922": [["ussr_flag","Soviet Union"],["romania_flag","Kingdom of Romania (Bessarabia, until 1940)"]],
+    "1991": [["ukraine_modern","Ukraine"],["belarus_1991","Belarus (1991–95 flag)"],["moldova_modern","Moldova"]]
+  };
+
+  var REGIONS = ["ua","by","md"];
+  var REGION_NAMES = { ua:"Ukraine", by:"Belarus", md:"Moldova" };
+  var REGION_ABBR = { ua:"UKR", by:"BLR", md:"MDA" };
+  var REGION_POS = { ua:[271,300], by:[183,138], md:[194,394] };
+  var ADJ = [["ua","by"],["ua","md"]];
+
+  function textColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+  function ownerName(hex) {
+    for (var k in C) { if (C[k] === hex) return NAMES[k]; }
+    return hex;
+  }
+
+  function groupsFor(t) {
+    var parent = {};
+    REGIONS.forEach(function (r) { parent[r] = r; });
+    function find(x) { return parent[x] === x ? x : (parent[x] = find(parent[x])); }
+    function union(a, b) { var ra = find(a), rb = find(b); if (ra !== rb) parent[ra] = rb; }
+    ADJ.forEach(function (pair) {
+      if (t[pair[0]] === t[pair[1]]) union(pair[0], pair[1]);
+    });
+    var groups = {};
+    REGIONS.forEach(function (r) {
+      var root = find(r);
+      if (!groups[root]) groups[root] = [];
+      groups[root].push(r);
+    });
+    return Object.keys(groups).map(function (k) { return groups[k]; });
+  }
+
+  var svgNS = "http://www.w3.org/2000/svg";
+  var labelsEl = document.getElementById("labels");
+  var yearTag = document.getElementById("yearTag");
+  var eraName = document.getElementById("eraName");
+  var eraOwners = document.getElementById("eraOwners");
+  var eraStory = document.getElementById("eraStory");
+  var flagsRow = document.getElementById("flagsRow");
+  var sliderEl = document.getElementById("slider");
+
+  function render(i) {
+    var era = SNAP[i];
+    yearTag.textContent = era.year;
+    eraName.textContent = era.name;
+    eraStory.innerHTML = era.story || "";
+    flagsRow.innerHTML = (FLAG_SETS[era.year] || []).map(function (f) {
+      return '<div class="flag-chip">' + flagSvg(f[0]) + '<div class="fc-label">' + f[1] + '</div></div>';
+    }).join("");
+
+    REGIONS.forEach(function (id) {
+      var el = document.getElementById("f-" + id);
+      el.setAttribute("fill", era.t[id]);
+    });
+
+    ADJ.forEach(function (pair) {
+      var same = era.t[pair[0]] === era.t[pair[1]];
+      var line = document.getElementById("b-" + pair[0] + "-" + pair[1]);
+      line.setAttribute("stroke-opacity", same ? "0.06" : "0.85");
+      line.setAttribute("stroke-width", same ? "1" : "2.6");
+    });
+
+    var groups = groupsFor(era.t);
+    var seenOwners = {};
+    var ownerParts = [];
+    groups.forEach(function (g) {
+      var label = ownerName(era.t[g[0]]);
+      if (!seenOwners[label]) { seenOwners[label] = []; ownerParts.push(label); }
+      g.forEach(function (id) { seenOwners[label].push(REGION_NAMES[id]); });
+    });
+    eraOwners.innerHTML = ownerParts.map(function (label) {
+      return "<b>" + label + "</b>: " + seenOwners[label].join(", ");
+    }).join(" &middot; ");
+
+    labelsEl.innerHTML = "";
+    function haloFor(txtColor) { return txtColor === "#201a12" ? "#f7f1e3" : "#201a12"; }
+    groups.forEach(function (g) {
+      var cx = g.reduce(function (s, id) { return s + REGION_POS[id][0]; }, 0) / g.length;
+      var cy = g.reduce(function (s, id) { return s + REGION_POS[id][1]; }, 0) / g.length;
+      var fillHex = era.t[g[0]];
+      var txtColor = textColorFor(fillHex);
+      var halo = haloFor(txtColor);
+
+      if (g.length > 1) {
+        var groupText = ownerName(fillHex).toUpperCase();
+        var gl = document.createElementNS(svgNS, "text");
+        gl.setAttribute("x", cx);
+        gl.setAttribute("y", cy);
+        gl.setAttribute("class", "group-label");
+        gl.setAttribute("font-size", groupText.length > 16 ? "10.5" : "13");
+        gl.setAttribute("fill", txtColor);
+        gl.setAttribute("stroke", halo);
+        gl.textContent = groupText;
+        labelsEl.appendChild(gl);
+        g.forEach(function (id) {
+          var pos = REGION_POS[id];
+          var sl = document.createElementNS(svgNS, "text");
+          sl.setAttribute("x", pos[0]);
+          sl.setAttribute("y", pos[1] + 16);
+          sl.setAttribute("class", "sub-label");
+          sl.setAttribute("font-size", "9.5");
+          sl.setAttribute("fill", txtColor);
+          sl.setAttribute("stroke", halo);
+          sl.setAttribute("opacity", "0.85");
+          sl.textContent = REGION_ABBR[id];
+          labelsEl.appendChild(sl);
+        });
+      } else {
+        var id = g[0];
+        var pos = REGION_POS[id];
+        var selfGoverning = Object.keys(C).some(function (k) { return k.indexOf("ind_") === 0 && C[k] === fillHex; });
+        var soloText = (selfGoverning ? REGION_NAMES[id] : ownerName(fillHex)).toUpperCase();
+        var sl2 = document.createElementNS(svgNS, "text");
+        sl2.setAttribute("x", pos[0]);
+        sl2.setAttribute("y", pos[1]);
+        sl2.setAttribute("class", "group-label");
+        sl2.setAttribute("font-size", selfGoverning ? "13" : (soloText.length > 20 ? "9" : (soloText.length > 14 ? "10.5" : "12")));
+        sl2.setAttribute("fill", txtColor);
+        sl2.setAttribute("stroke", halo);
+        sl2.textContent = soloText;
+        labelsEl.appendChild(sl2);
+        if (!selfGoverning) {
+          var subOnly = document.createElementNS(svgNS, "text");
+          subOnly.setAttribute("x", pos[0]);
+          subOnly.setAttribute("y", pos[1] + 16);
+          subOnly.setAttribute("class", "sub-label");
+          subOnly.setAttribute("font-size", "9.5");
+          subOnly.setAttribute("fill", txtColor);
+          subOnly.setAttribute("stroke", halo);
+          subOnly.setAttribute("opacity", "0.85");
+          subOnly.textContent = REGION_ABBR[id];
+          labelsEl.appendChild(subOnly);
+        }
+      }
+    });
+  }
+
+  sliderEl.addEventListener("input", function () { render(parseInt(sliderEl.value, 10)); });
+  render(0);
+
+  var playing = false, playTimer = null;
+  var playBtn = document.getElementById("playBtn");
+  function stepPlay() {
+    var next = parseInt(sliderEl.value, 10) + 1;
+    if (next > SNAP.length - 1) { stopPlay(); return; }
+    sliderEl.value = next;
+    render(next);
+  }
+  function startPlay() {
+    playing = true;
+    playBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(sliderEl.value, 10) >= SNAP.length - 1) { sliderEl.value = 0; render(0); }
+    playTimer = setInterval(stepPlay, 1700);
+  }
+  function stopPlay() {
+    playing = false;
+    playBtn.innerHTML = "&#9654;";
+    clearInterval(playTimer);
+  }
+  playBtn.addEventListener("click", function () { playing ? stopPlay() : startPlay(); });
+
+  // ---- Small multiples grid: same ten snapshots, diff-highlighted ----
+  var gridEl = document.getElementById("grid9");
+  var MINI_PATHS = {
+    ua: document.getElementById("f-ua").getAttribute("d"),
+    by: document.getElementById("f-by").getAttribute("d"),
+    md: document.getElementById("f-md").getAttribute("d")
+  };
+  var MINI_SEA = "M488.4,366.2 L463.3,369.2 L449.9,380.5 L449.1,398.6 L428.3,401.8 L411.0,415.0 L386.7,417.1 L364.4,432.3 L365.9,457.6 L378.6,467.4 L405.1,464.9 L400.0,479.4 L371.6,486.5 L336.3,510.0 L321.9,501.7 L327.6,482.6 L299.2,470.7 L303.8,462.9 L328.7,449.4 L321.2,440.1 L280.8,429.8 L279.0,414.7 L255.0,419.7 L245.3,442.1 L225.2,472.1 L213.4,465.1 L201.2,471.7 L189.6,464.2 L189.6,540 L560,540 L560,366.2 Z";
+  SNAP.forEach(function (era, idx) {
+    var prev = idx > 0 ? SNAP[idx - 1] : null;
+    var changed = [];
+    if (prev) {
+      Object.keys(MINI_PATHS).forEach(function (id) {
+        if (era.t[id] !== prev.t[id]) changed.push(id);
+      });
+    }
+    var cell = document.createElement("div");
+    cell.className = "grid-cell";
+    var svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("viewBox", "0 0 560 540");
+    var sea = document.createElementNS(svgNS, "path");
+    sea.setAttribute("d", MINI_SEA);
+    sea.setAttribute("fill", "var(--tile-sea)");
+    svg.appendChild(sea);
+    Object.keys(MINI_PATHS).forEach(function (id) {
+      var isBaseline = !prev;
+      var isChanged = prev && changed.indexOf(id) !== -1;
+      var bold = isBaseline || isChanged;
+      var p = document.createElementNS(svgNS, "path");
+      p.setAttribute("d", MINI_PATHS[id]);
+      p.setAttribute("fill", era.t[id]);
+      if (bold) {
+        p.setAttribute("fill-opacity", "1");
+        p.setAttribute("stroke", "#241f14");
+        p.setAttribute("stroke-width", "2.2");
+      } else {
+        p.setAttribute("fill-opacity", "0.22");
+        p.setAttribute("stroke", "#241f14");
+        p.setAttribute("stroke-width", "0.75");
+        p.setAttribute("stroke-opacity", "0.4");
+      }
+      svg.appendChild(p);
+      var pos = REGION_POS[id];
+      var lbl = document.createElementNS(svgNS, "text");
+      lbl.setAttribute("x", pos[0]);
+      lbl.setAttribute("y", pos[1]);
+      lbl.setAttribute("text-anchor", "middle");
+      lbl.setAttribute("class", "mini-label");
+      lbl.setAttribute("fill", bold ? textColorFor(era.t[id]) : "#8a7d5c");
+      lbl.setAttribute("opacity", bold ? "1" : "0.55");
+      lbl.textContent = REGION_ABBR[id];
+      svg.appendChild(lbl);
+    });
+    cell.appendChild(svg);
+    var cap = document.createElement("div");
+    cap.className = "cap";
+    var diffText = !prev ? "Starting point" : (changed.length ? "&rarr; " + changed.map(function (id) { return REGION_NAMES[id]; }).join(", ") + " change" + (changed.length === 1 ? "s" : "") + " hands" : "&rarr; no change from previous frame");
+    cap.innerHTML = era.year + "<b>" + era.name + "</b><span class=\"diff\">" + diffText + "</span>";
+    cell.appendChild(cap);
+    gridEl.appendChild(cell);
+  });
+
+  // ---- Timeline: same data, real continuous date ranges ----
+  var GANTT_START = 900, GANTT_END = 2020;
+  var GANTT_DATA = [
+    { id:"ua", segs:[
+      [900,1240,C.rus,"Kievan Rus'"], [1240,1392,C.mongol_ukr,"Galicia-Volhynia / Mongol tributary"],
+      [1392,1569,C.ltu,"Grand Duchy of Lithuania"], [1569,1654,C.poland,"Poland (Crown lands)"],
+      [1654,1795,C.cossack,"Cossack Hetmanate / Russian protectorate"], [1795,1918,C.rus_emp,"Russian Empire"],
+      [1918,1921,C.upr,"Ukrainian People's Republic"], [1921,1922,"#5c6047","Civil war / contested"],
+      [1922,1991,C.ussr,"Soviet Ukraine"], [1991,2020,C.ind_ua,"Independent"]
+    ]},
+    { id:"by", segs:[
+      [900,1240,C.rus,"Kievan Rus'"], [1240,1392,C.rus_succ_blr,"Rus' successor principalities (Polotsk)"],
+      [1392,1795,C.ltu,"Grand Duchy of Lithuania"], [1795,1918,C.rus_emp,"Russian Empire"],
+      [1918,1919,C.bnr,"Belarusian People's Republic"], [1919,1922,"#5c6047","Polish-Soviet war / contested"],
+      [1922,1991,C.ussr,"Soviet Belarus"], [1991,2020,C.ind_by,"Independent"]
+    ]},
+    { id:"md", segs:[
+      [900,1240,C.steppe,"Contested steppe (no state)"], [1240,1359,C.golden_horde_md,"Golden Horde / Cuman steppe"],
+      [1359,1456,C.moldavia_ind,"Principality of Moldavia (independent)"], [1456,1812,C.ottoman_vassal_md,"Ottoman vassal principality"],
+      [1812,1918,C.rus_emp,"Bessarabia (Russian Empire)"], [1918,1940,C.romania_kingdom,"Kingdom of Romania"],
+      [1940,1991,C.ussr,"Moldavian SSR"], [1991,2020,C.ind_md,"Independent"]
+    ]}
+  ];
+  var ganttEl = document.getElementById("gantt");
+  function yearToPct(y) { return (y - GANTT_START) / (GANTT_END - GANTT_START) * 100; }
+  GANTT_DATA.forEach(function (row) {
+    var rowEl = document.createElement("div");
+    rowEl.className = "gantt-row";
+    var label = document.createElement("div");
+    label.className = "gantt-label";
+    label.textContent = REGION_NAMES[row.id];
+    rowEl.appendChild(label);
+    var track = document.createElement("div");
+    track.className = "gantt-track";
+    row.segs.forEach(function (seg) {
+      var left = yearToPct(seg[0]);
+      var width = yearToPct(seg[1]) - left;
+      var segEl = document.createElement("div");
+      segEl.className = "gantt-seg";
+      segEl.style.left = left + "%";
+      segEl.style.width = width + "%";
+      segEl.style.background = seg[2];
+      segEl.title = REGION_NAMES[row.id] + ": " + seg[3] + " (" + seg[0] + "–" + seg[1] + ")";
+      if (width > 4) {
+        var sp = document.createElement("span");
+        sp.textContent = seg[3];
+        sp.style.color = textColorFor(seg[2]);
+        segEl.appendChild(sp);
+      }
+      track.appendChild(segEl);
+    });
+    rowEl.appendChild(track);
+    ganttEl.appendChild(rowEl);
+  });
+  var axisEl = document.getElementById("gantt-axis");
+  [900, 1100, 1300, 1500, 1700, 1900, 2020].forEach(function (y) {
+    var s = document.createElement("span");
+    s.style.left = yearToPct(y) + "%";
+    s.textContent = y;
+    axisEl.appendChild(s);
+  });
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,842 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#f2ecd8;color:#1a1e14}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+</style></head><body>
+<title>Flags of Saudi Arabia</title>
+<meta name="description" content="A chronological, paint-ready atlas of every flag that flew over the lands of Saudi Arabia, from the birthplace of Islam through the First and Second Saudi States to Ibn Saud's 1932 kingdom.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #1a1e14; --paper: #f2ecd8; --card: #faf6e9; --card-border: #d8cfa8;
+    --brick: #0f5c33; --brick-2: #0b4527; --brass: #a9762f; --sea: #7a5a1a; --sea-2: #5c4313;
+    --muted: #6e6a47; --hair: #cfc394; --focus: #0f5c33;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #e6e4c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #3fa876; --brick-2: #5cc192; --brass: #d1a154; --sea: #c9a95a; --sea-2: #dcc07a;
+      --muted: #9a9280; --hair: #33393f;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #e6e4c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #3fa876; --brick-2: #5cc192; --brass: #d1a154; --sea: #c9a95a; --sea-2: #dcc07a;
+    --muted: #9a9280; --hair: #33393f;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--sea); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.08rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; font-size: .94rem; color: var(--muted); }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  .legend { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1px; background: var(--hair); }
+  @media (max-width: 560px) { .timeline::before { left: 9px; } }
+  .entry { position: relative; padding-left: 46px; margin-bottom: 46px; }
+  @media (max-width: 560px) { .entry { padding-left: 30px; } }
+  .entry::before {
+    content: attr(data-n);
+    position: absolute; left: 1px; top: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--paper); outline: 1px solid var(--hair);
+    background: var(--card);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--brick); display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) { .entry::before { left: -5px; width: 18px; height: 18px; font-size: 9px; } }
+
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+  .card-head { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  @media (max-width: 620px) { .card-head { flex-direction: column; } }
+  .flag-box { flex: none; width: 168px; }
+  .flag-box svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-caption { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .card-title { font-size: 1.32rem; font-weight: 600; line-height: 1.18; margin: 0 0 10px; text-wrap: balance; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px; border: 1px solid var(--card-border); color: var(--muted);
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  /* Flip tooltip below tags near the top of the viewport so it isn't clipped */
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  /* Keep tooltips from overflowing the left/right edges on narrow screens */
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint { border-top: 1px solid var(--hair); }
+  details.paint > summary {
+    cursor: pointer; list-style: none; padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--sea); display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before { content: "+"; font-family: "Fraunces", serif; font-size: 15px; width: 14px; }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row { display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px; }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--card-border); border-radius: 2px; padding: 5px 9px 5px 5px; background: var(--paper); }
+  .swatch .chip { width: 20px; height: 20px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--sea); }
+
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: 64ch; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 88px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 380px; height: auto; }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .iborder-line { transition: stroke-opacity 0.6s ease, stroke-width 0.6s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .ireg-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 700; text-anchor: middle; transition: fill .4s ease, stroke .4s ease; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="arabian-peninsula-hub.html">Arabian Peninsula hub</a></p>
+  <p class="kicker">Family research &middot; Phase 7 of the world atlas</p>
+  <h1>Flags of Saudi Arabia</h1>
+  <p class="lede">From more than a millennium of Thamudic tribes, the Lihyanite kingdom, and Nabataean traders carving the monumental tombs of Hegra, through the birthplace of Islam in 7th-century Mecca and Medina, centuries of fragmented emirates and Ottoman suzerainty over parts of the peninsula, the 18th-century religious-political alliance that produced the First Saudi State, its destruction and a Second Saudi State's rise and fall, to Abdulaziz ibn Saud's reconquest and the 1932 unification &mdash; one family's green banner, carrying the shahada and later a sword, running through the more recent half of it.</p>
+  <p class="lede">The shahada (the Islamic declaration of faith) has marked Saudi banners since the 18th-century Wahhabi movement; the sword beneath it, a later addition marking Ibn Saud's own reconquest, has stayed distinctive and unchanged in spirit even as the kingdom itself was built, lost, and rebuilt twice over.</p>
+
+  <div class="scope-note">
+    <b>Scope of this page:</b> the lands of present-day Saudi Arabia, c. 1000 BCE&ndash;present, eight political entities. Part of a larger atlas &mdash; see the map and linked pages at the bottom.
+  </div>
+
+  <div class="imap-section">
+    <h2>One interior, eight flags</h2>
+    <p class="imap-sub">Saudi Arabia's own real border, traced whole &mdash; there is no internal split to draw. The Hejaz, Najd, and Asir were absorbed one after another into a single Al Saud state rather than governed as separate pieces at the same time. Press play, or drag the slider.</p>
+    <div class="rule-box">
+      <b>Every era on this map is the same lineage, not a partition.</b> Unlike several other pages in this atlas, present-day Saudi Arabia was never split between two rulers at once for any sustained period covered here &mdash; the shifting flag reflects one family's rise, fall, and reconquest of the same interior, not a divided territory.
+    </div>
+    <div class="imap-frame">
+      <div class="imap-controls">
+        <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="imap-year" id="iYearTag"></span>
+        <input type="range" id="iSlider" min="0" max="7" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="imap-svg" viewBox="0 0 340 300" xmlns="http://www.w3.org/2000/svg">
+        <g class="context-label" pointer-events="none">
+      <text x="153.8" y="29.3">IRAQ</text>
+      <text x="58.8" y="43.9">JORDAN</text>
+      <text x="161.2" y="285.2">YEMEN</text>
+      <text x="66.1" y="212.1">RED SEA</text>
+      <text x="256.2" y="117.0">PERSIAN GULF</text>
+      <text x="329.3" y="204.8">OMAN</text>
+        </g>
+        <path id="ireg-sa" class="ireg-fill" d="M50.7,133.0 L50.0,133.7 L48.2,131.7 L48.9,132.3 L50.3,132.7 L50.1,133.2 L50.7,133.0 Z M48.1,131.6 L46.8,130.9 L47.5,130.7 L49.7,132.5 L48.1,131.6 Z M49.0,130.8 L49.4,130.7 L49.5,131.0 L49.1,131.1 L49.0,130.8 Z M50.1,130.2 L50.4,130.3 L50.4,131.4 L50.0,130.9 L50.1,130.2 Z M46.5,130.9 L44.6,130.3 L44.2,129.3 L44.8,128.7 L44.5,129.4 L46.5,130.9 Z M44.8,127.3 L45.0,126.7 L45.5,126.4 L45.0,127.3 L45.7,128.7 L44.8,128.3 L44.8,127.3 Z M127.2,261.3 L126.9,262.0 L125.7,261.3 L126.3,260.9 L125.9,260.4 L123.9,260.8 L121.4,258.7 L121.0,257.5 L123.9,259.9 L125.1,260.1 L125.3,258.7 L126.1,259.0 L127.3,260.3 L127.2,261.3 Z M122.3,257.7 L123.6,256.6 L122.3,255.9 L123.4,256.1 L124.4,258.1 L123.7,258.6 L124.6,259.4 L122.3,257.7 Z M255.9,145.3 L260.1,144.5 L260.7,144.7 L260.6,146.0 L262.0,144.4 L263.5,145.1 L261.1,147.0 L260.3,149.1 L262.2,148.9 L264.5,149.9 L264.9,152.5 L279.0,169.1 L316.2,173.8 L317.4,172.6 L324.0,183.1 L314.4,212.2 L270.5,226.8 L227.5,232.9 L214.7,239.2 L206.3,249.2 L204.0,254.6 L200.1,256.7 L197.3,256.6 L193.5,251.9 L187.8,252.7 L174.8,251.4 L170.9,249.7 L156.0,250.0 L155.1,250.9 L153.9,250.6 L152.6,251.5 L152.2,250.8 L149.9,250.8 L147.7,248.9 L145.3,248.3 L141.6,251.2 L142.9,252.0 L141.5,252.9 L141.0,254.7 L140.9,257.3 L142.3,258.9 L141.9,260.9 L140.5,260.7 L139.7,262.7 L136.1,265.1 L135.0,259.9 L133.0,258.4 L132.6,255.9 L131.1,255.2 L129.8,253.3 L129.9,255.6 L129.0,249.3 L122.7,244.0 L121.5,243.8 L118.2,238.6 L117.2,238.1 L116.3,234.5 L113.0,231.1 L113.6,229.1 L112.0,227.6 L112.6,225.7 L111.0,224.9 L110.5,222.8 L109.3,221.7 L109.2,219.3 L106.5,217.8 L107.0,217.9 L107.0,216.6 L106.2,215.3 L104.9,215.1 L105.0,215.6 L103.1,213.4 L103.2,212.6 L96.6,208.0 L93.9,207.6 L94.5,208.3 L91.8,207.0 L89.0,203.8 L89.4,203.5 L87.9,201.8 L88.1,201.2 L86.9,200.8 L87.3,200.0 L85.1,198.6 L83.3,195.9 L83.2,194.7 L81.9,192.9 L83.2,191.6 L83.1,190.0 L82.1,189.0 L82.3,186.5 L81.7,186.9 L79.7,182.8 L80.8,182.8 L81.3,179.4 L82.8,176.9 L81.8,177.5 L81.9,174.8 L80.5,172.3 L80.9,171.6 L79.9,170.7 L80.3,171.9 L79.3,170.5 L78.6,169.1 L79.5,170.2 L80.2,170.1 L79.2,168.7 L77.8,168.2 L77.8,166.0 L76.2,164.2 L74.9,159.9 L74.3,160.0 L74.8,160.6 L74.0,160.3 L72.7,156.8 L65.2,151.6 L65.9,151.2 L65.2,151.2 L65.4,150.6 L64.9,151.4 L64.1,151.4 L61.4,149.3 L60.7,150.0 L59.1,149.7 L57.8,148.2 L58.2,147.1 L54.8,142.8 L54.8,141.9 L53.7,141.2 L55.2,140.9 L55.0,136.4 L53.0,134.3 L50.6,129.5 L48.8,127.9 L48.5,128.4 L47.1,127.6 L46.5,126.1 L47.0,124.0 L44.4,122.7 L37.3,111.1 L35.6,109.7 L33.7,106.3 L30.4,103.1 L27.0,96.9 L24.6,95.0 L25.4,94.3 L23.0,93.4 L20.0,94.1 L19.9,93.4 L19.4,94.1 L19.6,93.5 L18.9,93.8 L18.0,93.1 L17.1,93.7 L17.4,94.1 L16.6,94.7 L16.0,93.5 L17.2,92.6 L19.4,87.4 L19.0,85.4 L21.5,75.3 L37.9,77.6 L43.8,73.3 L47.5,68.0 L58.4,65.9 L61.0,61.0 L65.8,58.6 L50.9,44.1 L80.2,36.7 L83.0,34.9 L100.8,37.5 L125.7,50.1 L164.0,77.5 L188.3,79.6 L190.9,79.1 L204.0,80.6 L206.2,85.9 L207.5,87.3 L218.7,87.2 L219.6,87.8 L219.8,89.0 L219.2,89.5 L220.2,89.2 L220.0,90.5 L221.4,91.9 L221.1,93.0 L221.9,94.4 L223.9,95.0 L223.2,95.7 L225.2,97.6 L225.1,98.5 L224.6,99.1 L224.9,98.0 L224.1,98.7 L224.2,97.6 L223.7,99.2 L224.2,98.9 L224.2,99.7 L225.2,99.7 L225.1,100.8 L224.5,100.8 L225.1,100.9 L225.5,100.5 L225.4,101.1 L225.7,101.4 L226.5,100.7 L227.8,101.9 L230.5,101.8 L231.5,103.2 L228.7,103.3 L230.8,103.7 L230.2,104.9 L231.5,104.7 L231.7,106.7 L233.0,106.8 L232.4,107.6 L234.6,107.8 L234.1,107.2 L235.3,106.9 L235.3,108.2 L237.2,110.3 L241.2,112.0 L243.9,114.6 L241.4,113.8 L242.0,117.1 L244.4,118.5 L244.7,119.6 L243.6,123.8 L242.0,121.4 L241.2,122.3 L241.4,124.3 L241.9,123.8 L243.2,124.7 L243.3,126.3 L245.2,129.0 L245.3,129.7 L243.7,128.3 L243.7,128.7 L246.7,131.9 L247.0,132.2 L247.1,131.5 L248.5,132.6 L249.8,138.2 L252.2,140.7 L252.7,142.8 L253.4,142.7 L255.9,145.3 Z M52.0,133.0 L50.7,132.5 L50.8,132.1 L51.7,132.3 L52.0,133.0 Z M236.8,105.2 L235.2,105.4 L234.7,104.7 L233.6,105.1 L234.7,104.4 L236.8,105.2 Z"/>
+        <g font-family="IBM Plex Mono, monospace">
+          <text class="ireg-label" id="ilbl-sa" x="0" y="0">SAUDI ARABIA</text>
+        </g>
+      </svg>
+      <div class="imap-head">
+        <div class="imap-name" id="iEraName"></div>
+        <div class="imap-owners" id="iEraOwners"></div>
+      </div>
+      <div class="iflags-row" id="iFlagsRow"></div>
+      <p class="imap-story" id="iEraStory"></p>
+
+      <p class="map-note">Real traced border (Natural Earth 10m); neighboring-country labels are placed at their real geographic positions using the same projection.</p>
+      <div class="imap-key" id="iLegend"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <!-- 1 -->
+    <div class="entry" data-n="8" id="era-1973">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#0f5c33"/>
+              <text x="150" y="88" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" fill="#f4efe1">&#1604;&#1575; &#1573;&#1604;&#1607; &#1573;&#1604;&#1575; &#1575;&#1604;&#1604;&#1607;</text>
+              <text x="150" y="112" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" fill="#f4efe1">&#1605;&#1581;&#1605;&#1583; &#1585;&#1587;&#1608;&#1604; &#1575;&#1604;&#1604;&#1607;</text>
+              <g stroke="#f4efe1" stroke-width="5" stroke-linecap="round" fill="none">
+                <line x1="80" y1="135" x2="210" y2="135"/>
+                <line x1="205" y1="128" x2="216" y2="135"/>
+                <line x1="205" y1="142" x2="216" y2="135"/>
+                <line x1="90" y1="127" x2="90" y2="143"/>
+              </g>
+            </svg>
+            <div class="flag-caption">green field, white shahada and sword &mdash; standardized 1973</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1973 &ndash; present</div>
+            <h3 class="card-title">Kingdom of Saudi Arabia (standardized)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Kingdom, independent</span><span class="tag" tabindex="0" data-tip="Son of the kingdom's founder who reigned as king from 1964 to 1975, overseeing the 1973 royal decree that fixed the flag's exact proportions and design, still in use today."><span class="dot" style="background:#4a3b78"></span>Faisal</span><span class="tag" tabindex="0" data-tip="Sunni Islam in its Wahhabi/Salafi interpretation is the kingdom's compulsory established religion, with the Quran and Sunnah serving as the constitution and Sharia as the basis of law."><span class="dot" style="background:#8e3b62"></span>Sunni Islam (Wahhabi, established)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Rapid oil-fueled development draws millions of foreign workers into the kingdom from South and Southeast Asia, Egypt, and elsewhere in the Arab world; by the early 21st century, foreign nationals make up roughly a third of Saudi Arabia's total population."><span class="dot" style="background:#2f7a6b"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#ff9933"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#138808"/><circle cx="10" cy="7" r="1.5" fill="none" stroke="#000080" stroke-width="0.4"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="7" fill="#0038a8"/><rect y="7" width="20" height="7" fill="#ce1126"/><path d="M0,0 L8,7 L0,14 Z" fill="#fff"/><circle cx="3" cy="7" r="1.3" fill="#fcd116"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#ce1126"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#000"/><path d="M9,5.5 l1,2 -1,2 -1,-2z" fill="#c09300"/></svg></span>Immigration: foreign labor migration (1970s&ndash;)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Kings of Saudi Arabia, ruling continuously since the 1932 unification. Emblem: green field bearing a palm tree above two crossed swords, later formalized as the kingdom's national emblem."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#0f5c33"/><g stroke="#f4efe1" stroke-width="6" stroke-linecap="round" fill="none"><line x1="30" y1="90" x2="70" y2="60"/><line x1="70" y1="90" x2="30" y2="60"/></g><path d="M50,30 L50,55 M40,35 Q50,20 60,35 M42,40 Q50,28 58,40" stroke="#f4efe1" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Saud</span></div>
+            <p><span class="label">Who &amp; why:</span> a 1973 royal decree fixes the flag's precise proportions, calligraphy, and sword design in law, formalizing a banner the family had already flown for decades. The kingdom becomes a founding OPEC member, the world's largest oil exporter through the later 20th century, and host to Islam's two holiest cities, Mecca and Medina &mdash; a role its rulers style themselves "Custodian of the Two Holy Mosques" to reflect from 1986 onward.</p>
+            <p><span class="label">What it represents:</span> the same green field, shahada, and sword carried since the reconquest era, now specified precisely enough that the flag is never lowered to half-mast and never printed on disposable items, out of respect for the religious text it bears.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3, fixed by the 1973 decree.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Green field; white shahada in Thuluth script above a white horizontal sword (point toward the hoist on the reverse side, so the text always reads correctly).</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#0f5c33"></span><span class="meta"><span class="name">Green</span><span class="hex">#0F5C33</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="entry" data-n="7" id="era-1932">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#0f5c33"/>
+              <text x="150" y="88" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" fill="#f4efe1">&#1604;&#1575; &#1573;&#1604;&#1607; &#1573;&#1604;&#1575; &#1575;&#1604;&#1604;&#1607;</text>
+              <text x="150" y="112" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" fill="#f4efe1">&#1605;&#1581;&#1605;&#1583; &#1585;&#1587;&#1608;&#1604; &#1575;&#1604;&#1604;&#1607;</text>
+              <g stroke="#f4efe1" stroke-width="5" stroke-linecap="round" fill="none">
+                <line x1="80" y1="135" x2="210" y2="135"/>
+                <line x1="205" y1="128" x2="216" y2="135"/>
+                <line x1="205" y1="142" x2="216" y2="135"/>
+                <line x1="90" y1="127" x2="90" y2="143"/>
+              </g>
+            </svg>
+            <div class="flag-caption">the same design, before 1973 standardized its proportions</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1932 &ndash; 1973</div>
+            <h3 class="card-title">Kingdom of Saudi Arabia (unification)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Kingdom, independent</span><span class="tag" tabindex="0" data-tip="Founder of the modern Saudi state, who merged his Kingdom of Hejaz and Nejd into the unified Kingdom of Saudi Arabia on 23 September 1932, ruling as its first king until his death in 1953."><span class="dot" style="background:#4a3b78"></span>Abdulaziz ibn Saud</span><span class="tag" tabindex="0" data-tip="Sunni Islam in its Wahhabi interpretation, the guiding ideology of the Al Saud dynasty since its 18th-century founding alliance, became the new unified kingdom's established religion and legal foundation."><span class="dot" style="background:#8e3b62"></span>Sunni Islam (Wahhabi, established)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Following the 1938 discovery of oil at Dammam, American engineers and workers from the Arabian American Oil Company (Aramco) begin arriving in significant numbers to develop the kingdom's petroleum industry."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#b22234"/><g fill="#fff"><rect y="1.6" width="20" height="1.6"/><rect y="4.8" width="20" height="1.6"/><rect y="8" width="20" height="1.6"/><rect y="11.2" width="20" height="1.6"/></g><rect width="8" height="7.5" fill="#3c3b6e"/></svg>Immigration: American Aramco oil workers (from 1938)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Kings of the newly unified Kingdom of Saudi Arabia, proclaimed 1932. Emblem: green field bearing a palm tree above two crossed swords."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#0f5c33"/><g stroke="#f4efe1" stroke-width="6" stroke-linecap="round" fill="none"><line x1="30" y1="90" x2="70" y2="60"/><line x1="70" y1="90" x2="30" y2="60"/></g><path d="M50,30 L50,55 M40,35 Q50,20 60,35 M42,40 Q50,28 58,40" stroke="#f4efe1" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Saud</span></div>
+            <p><span class="label">Who &amp; why:</span> Abdulaziz ibn Saud, having reconquered Riyadh in 1902 and steadily absorbed Nejd, Hejaz, and Asir, proclaims the unified Kingdom of Saudi Arabia on 23 September 1932 &mdash; still celebrated as the kingdom's national day. Oil is discovered at Dammam in 1938, transforming a poor desert kingdom into one of the world's most consequential energy producers within a generation.</p>
+            <p><span class="label">What it represents:</span> the green shahada-and-sword banner, already flown over Nejd and then Hejaz-Nejd, becomes the flag of the single unified state, though its exact calligraphy and proportions still vary somewhat from print to print until the 1973 decree.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No single fixed ratio before 1973; shown at 2:3.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Green field, white shahada above a white sword.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#0f5c33"></span><span class="meta"><span class="name">Green</span><span class="hex">#0F5C33</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="entry" data-n="6" id="era-1926">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#0f5c33"/>
+              <text x="150" y="88" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" fill="#f4efe1">&#1604;&#1575; &#1573;&#1604;&#1607; &#1573;&#1604;&#1575; &#1575;&#1604;&#1604;&#1607;</text>
+              <text x="150" y="112" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" fill="#f4efe1">&#1605;&#1581;&#1605;&#1583; &#1585;&#1587;&#1608;&#1604; &#1575;&#1604;&#1604;&#1607;</text>
+            </svg>
+            <div class="flag-caption">the dual kingdom's banner, before the sword was carried over</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1926 &ndash; 1932</div>
+            <h3 class="card-title">Kingdom of Hejaz and Nejd</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Kingdom, independent</span><span class="tag" tabindex="0" data-tip="Al Saud leader who conquered the Hejaz from the Hashemites in 1925 and took the title King of Hejaz in January 1926 while remaining Sultan of Nejd, personally uniting the two crowns before their formal merger in 1932."><span class="dot" style="background:#4a3b78"></span>Abdulaziz ibn Saud</span><span class="tag" tabindex="0" data-tip="Sunni Islam, in the Wahhabi form dominant in Nejd and the broader Sunni tradition of the Hejaz's holy cities, was the state's established religion, unifying the two regions' religious character under Al Saud rule."><span class="dot" style="background:#8e3b62"></span>Sunni Islam (Wahhabi, established)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Kings of Hejaz and Sultans of Nejd in personal union, 1926&ndash;1932, ahead of the two crowns' formal merger. Emblem: green field bearing a palm tree above two crossed swords."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#0f5c33"/><g stroke="#f4efe1" stroke-width="6" stroke-linecap="round" fill="none"><line x1="30" y1="90" x2="70" y2="60"/><line x1="70" y1="90" x2="30" y2="60"/></g><path d="M50,30 L50,55 M40,35 Q50,20 60,35 M42,40 Q50,28 58,40" stroke="#f4efe1" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Saud</span></div>
+            <p><span class="label">Who &amp; why:</span> Ibn Saud captures Mecca and Medina from the Hashemite Kingdom of Hejaz in 1924&ndash;25, and is proclaimed King of Hejaz in January 1926 while keeping his older title as Sultan of Nejd &mdash; the two realms administered under one crown but not yet formally merged into a single kingdom, a transitional arrangement that lasts six years.</p>
+            <p><span class="label">What it represents:</span> Nejd's own green shahada banner carries over as the union's flag, a visible sign that this was Ibn Saud's state expanding outward rather than a genuinely new creation.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio recorded.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Green field, white shahada; sword not yet a fixed element of this particular banner's prints.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#0f5c33"></span><span class="meta"><span class="name">Green</span><span class="hex">#0F5C33</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="entry" data-n="5" id="era-1902">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#0f5c33"/>
+              <text x="150" y="88" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" fill="#f4efe1">&#1604;&#1575; &#1573;&#1604;&#1607; &#1573;&#1604;&#1575; &#1575;&#1604;&#1604;&#1607;</text>
+              <text x="150" y="112" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" fill="#f4efe1">&#1605;&#1581;&#1605;&#1583; &#1585;&#1587;&#1608;&#1604; &#1575;&#1604;&#1604;&#1607;</text>
+              <g stroke="#f4efe1" stroke-width="5" stroke-linecap="round" fill="none">
+                <line x1="80" y1="135" x2="210" y2="135"/>
+                <line x1="205" y1="128" x2="216" y2="135"/>
+                <line x1="205" y1="142" x2="216" y2="135"/>
+                <line x1="90" y1="127" x2="90" y2="143"/>
+              </g>
+            </svg>
+            <div class="flag-caption">the reconquest-era banner, sword added to mark Riyadh's retaking</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1902 &ndash; 1926</div>
+            <h3 class="card-title">Emirate / Sultanate of Nejd (Al Saud reconquest)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Emirate / Sultanate</span><span class="tag" tabindex="0" data-tip="Al Saud claimant who recaptured the family's ancestral capital of Riyadh from the Rashidis in a daring 1902 night raid, launching the decades-long reconquest that would eventually produce modern Saudi Arabia."><span class="dot" style="background:#4a3b78"></span>Abdulaziz ibn Saud</span><span class="tag" tabindex="0" data-tip="Sunni Islam in its Wahhabi interpretation, the founding ideology of Al Saud rule since the 18th century, was restored as the reconquered emirate's established religion as the family retook its former territories."><span class="dot" style="background:#8e3b62"></span>Sunni Islam (Wahhabi, established)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Emirs, then Sultans, of Nejd, reconquering Riyadh in 1902 and expanding across central Arabia, 1902&ndash;1926. Emblem: green field bearing a palm tree above two crossed swords."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#0f5c33"/><g stroke="#f4efe1" stroke-width="6" stroke-linecap="round" fill="none"><line x1="30" y1="90" x2="70" y2="60"/><line x1="70" y1="90" x2="30" y2="60"/></g><path d="M50,30 L50,55 M40,35 Q50,20 60,35 M42,40 Q50,28 58,40" stroke="#f4efe1" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Saud</span></div>
+            <p><span class="label">Who &amp; why:</span> the young Abdulaziz ibn Saud, exiled in Kuwait since the Rashidis drove his family from Riyadh, retakes the city in a night raid in January 1902, beginning the third and final Al Saud restoration. He formally upgrades his title from Emir to Sultan of Nejd in 1921 as his territory expands across central Arabia.</p>
+            <p><span class="label">What it represents:</span> a sword is added beneath the shahada around this reconquest, a visible mark of the campaign that rebuilt the family's rule after a Rashidi-Ottoman interlude &mdash; the same combination of text and blade that the modern kingdom's flag still carries.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio recorded.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Green field, white shahada above a white sword, introduced in this era.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#0f5c33"></span><span class="meta"><span class="name">Green</span><span class="hex">#0F5C33</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="entry" data-n="4" id="era-1818">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#c9a13c">CONTESTED /</text>
+              <text x="150" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#c9a13c">NO SINGLE FLAG</text>
+            </svg>
+            <div class="flag-caption">fragmented interior &mdash; Ottoman-Egyptian occupation, Second Saudi State, Rashidi rule</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1818 &ndash; 1902</div>
+            <h3 class="card-title">Fragmented Najd: Ottoman-Egyptian occupation, Second Saudi State, Rashidi Ha'il</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#6b5c4a"></span>Fragmented / contested</span><span class="tag" tabindex="0" data-tip="Al Saud leader who founded the Second Saudi State in 1824 at Riyadh, restoring the family's rule in central Najd after Ottoman-Egyptian forces under Ibrahim Pasha had destroyed the First Saudi State in 1818."><span class="dot" style="background:#4a3b78"></span>Turki bin Abdullah</span><span class="tag" tabindex="0" data-tip="Sunni Islam in its Wahhabi form remained the Second Saudi State's established religion in the territory it controlled, even as this fragmented era also saw Ottoman-Egyptian occupation and rival Rashidi rule elsewhere in Najd."><span class="dot" style="background:#8e3b62"></span>Sunni Islam (Wahhabi, per the Second Saudi State)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="An Ottoman-Egyptian expeditionary force under Ibrahim Pasha invades Najd and destroys the Al Saud capital of Diriyah in 1818, ending the First Saudi State and occupying the region for several years afterward."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#e30a17"/><circle cx="8" cy="7" r="3.4" fill="#fff"/><circle cx="9" cy="7" r="2.7" fill="#e30a17"/><path d="M12.5,7 l3.5,1.1 -2.2,-1.9 2.2,-1.9z" fill="#fff"/></svg>Conquered by: Ottoman-Egyptian forces (1818)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Al Saud rebuilt the Second Saudi State around Riyadh, 1824&ndash;1891, before a succession dispute let the rival Rashidis take Najd. Emblem: green field bearing a palm tree above two crossed swords."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#0f5c33"/><g stroke="#f4efe1" stroke-width="6" stroke-linecap="round" fill="none"><line x1="30" y1="90" x2="70" y2="60"/><line x1="70" y1="90" x2="30" y2="60"/></g><path d="M50,30 L50,55 M40,35 Q50,20 60,35 M42,40 Q50,28 58,40" stroke="#f4efe1" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Saud</span><span class="tag" tabindex="0" data-tip="Emirs of Jabal Shammar (Ha'il), rivals of the Al Saud who dominated Najd from 1891 until Ibn Saud's 1902 reconquest of Riyadh (the dynasty itself was finally extinguished in 1921). Banner: a plain red field, without an elaborate blazon, per regional Ottoman-vassal practice."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Rashid</span></div>
+            <p><span class="label">Who &amp; why:</span> an Ottoman-Egyptian army destroys Diriyah in 1818, ending the First Saudi State. The Al Saud rebuild a smaller Second Saudi State around Riyadh from 1824, but it fractures under a succession dispute and finally falls to the rival Al Rashid emirate of Ha'il in 1891, which dominates Najd until Ibn Saud's 1902 reconquest. One honest bridging entry rather than three invented sub-flags, since no single banner can be attributed with confidence across this fractured, contested 84-year span.</p>
+            <p><span class="label">What it represents:</span> the Al Saud's own green shahada banner persists in local use during the Second Saudi State's decades, but no single flag governs this whole span &mdash; shown here as a plain placeholder rather than an invented design.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no single attested flag across this fragmented span.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="entry" data-n="3" id="era-1744">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#0f5c33"/>
+              <text x="150" y="105" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#f4efe1">&#1604;&#1575; &#1573;&#1604;&#1607; &#1573;&#1604;&#1575; &#1575;&#1604;&#1604;&#1607;</text>
+            </svg>
+            <div class="flag-caption">plain green banner with the shahada &mdash; informed reconstruction, no sword yet</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1744 &ndash; 1818</div>
+            <h3 class="card-title">First Saudi State (Emirate of Diriyah)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Emirate</span><span class="tag" tabindex="0" data-tip="Ruler of Diriyah who allied with religious reformer Muhammad ibn Abd al-Wahhab in 1744, founding the first Saudi state on a combined political-religious basis that defines Al Saud rule to this day."><span class="dot" style="background:#4a3b78"></span>Muhammad ibn Saud</span><span class="tag" tabindex="0" data-tip="Sunni Islam in the puritanical Wahhabi reform movement, born from the 1744 Ibn Saud&ndash;Ibn Abd al-Wahhab alliance itself, was established as the new emirate's state religion from its very founding."><span class="dot" style="background:#8e3b62"></span>Sunni Islam (Wahhabi, founded here)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Founding Emirs of Diriyah in alliance with the Wahhabi reform movement, 1744&ndash;1818. Emblem: green field bearing a palm tree above two crossed swords, the later national emblem of Saudi Arabia."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#0f5c33"/><g stroke="#f4efe1" stroke-width="6" stroke-linecap="round" fill="none"><line x1="30" y1="90" x2="70" y2="60"/><line x1="70" y1="90" x2="30" y2="60"/></g><path d="M50,30 L50,55 M40,35 Q50,20 60,35 M42,40 Q50,28 58,40" stroke="#f4efe1" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Saud</span></div>
+            <p><span class="label">Who &amp; why:</span> in 1744 the ruler of the small oasis town of Diriyah, Muhammad ibn Saud, allies with the religious reformer Muhammad ibn Abd al-Wahhab, combining political and religious authority in a pact that founds the Al Saud dynasty's first state. It expands across most of the Arabian interior by the early 1800s, including a 1803 capture of Mecca, before an Ottoman-Egyptian invasion crushes it in 1818.</p>
+            <p><span class="label">What it represents:</span> a plain green banner bearing the shahada, tied to the Wahhabi movement's own religious identity, is the earliest form of what becomes the enduring Saudi flag tradition &mdash; shown here as an informed reconstruction rather than a documented period specimen.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no fixed period flag; shown as a reconstruction.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Green field, white shahada, no sword yet.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#0f5c33"></span><span class="meta"><span class="name">Green</span><span class="hex">#0F5C33</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 7 -->
+    <div class="entry" data-n="2" id="era-630">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; caliphal and emirate era, no flag survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 630 &ndash; 1744</div>
+            <h3 class="card-title">Caliphal and emirate-era Arabia (Hejaz and Najd)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#6b5c4a"></span>Fragmented / caliphal suzerainty</span><span class="tag" tabindex="0" data-tip="First caliph after the Prophet Muhammad's 632 death, whose Rashidun Caliphate began the era of Arabian rule from Medina that this long span opens with, before authority later passed through Umayyad, Abbasid, and local dynasties."><span class="dot" style="background:#4a3b78"></span>Abu Bakr</span><span class="tag" tabindex="0" data-tip="Sunni Islam was the predominant religion across the many caliphates and local emirates that ruled the Hejaz and Najd over this millennium-long span, with the Hejaz's holy cities anchoring its centrality throughout."><span class="dot" style="background:#8e3b62"></span>Islam (Sunni predominant)</span></div>
+            <p><span class="label">Who &amp; why:</span> the Hejaz, home to Mecca and Medina, is the birthplace of Islam in the early 7th century and the seat of the earliest caliphates before authority shifts to Damascus and then Baghdad; the wider Arabian interior, including Najd, remains a patchwork of local emirates and tribal rule for most of this span, with the Ottomans asserting suzerainty over parts of the peninsula's edges from the 16th century onward without ever governing the deep interior directly.</p>
+            <p><span class="label">What it represents:</span> no flag in the modern sense exists across this millennium-long span; various caliphates and local dynasties used banners and seals rather than fixed territorial flags, and none can be attributed to this specific territory with confidence. Shown here honestly blank rather than invented.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <div class="entry" data-n="1" id="era-1000bce">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; Thamudic, Lihyanite &amp; Nabataean Arabia, no flag survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 1000 BCE &ndash; c. 630 CE</div>
+            <h3 class="card-title">Ancient Thamudic, Lihyanite &amp; Nabataean Arabia</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Fragmented / tribal kingdoms &amp; caravan cities</span><span class="tag" tabindex="0" data-tip="No single ruler documented across this millennium-and-a-half span; the northwestern Hejaz was home in succession to Thamudic tribal groups, the Lihyanite kingdom centered on Dedan (al-'Ula), and finally the Nabataean kingdom, whose southern capital at Hegra (Mada'in Salih) is Saudi Arabia's first UNESCO World Heritage Site."><span class="dot" style="background:#4a3b78"></span>No single ruler documented</span><span class="tag" tabindex="0" data-tip="Pre-Islamic Arabian polytheism, honoring deities such as al-L&#257;t, al-'Uzz&#257;, and Man&#257;t alongside various tribal and Nabataean gods, predominated across this era until Islam's rise from 610 CE onward."><span class="dot" style="background:#8e3b62"></span>Pre-Islamic Arabian polytheism</span></div>
+            <p><span class="label">Who &amp; why:</span> more than a millennium before Islam, the northwestern Arabian Peninsula is already home to literate, city-building societies documented in inscriptions and monumental architecture: Thamudic tribal groups, attested from the early 1st millennium BCE in rock inscriptions across the Hejaz; the Lihyanite kingdom, centered on the oasis of Dedan (modern al-'Ula) from roughly the 6th century BCE; and the Nabataean kingdom, whose traders controlled the incense and spice routes linking Arabia to the Mediterranean and who, from around the 1st century BCE, carved the monumental tombs of Hegra (Mada'in Salih) &mdash; the largest Nabataean site south of Petra itself, and Saudi Arabia's first UNESCO World Heritage-listed site. Rome annexes the Nabataean kingdom outright in 106 CE, and the wider Hejaz and Najd remain a patchwork of tribes and caravan cities until the rise of Islam in the early 7th century.</p>
+            <p><span class="label">What it represents:</span> no flag in the modern territorial sense survives from any of these societies; Nabataean and Lihyanite authority was expressed through royal inscriptions, coinage, and monumental tomb facades rather than a woven banner. Shown here honestly blank rather than invented.</p>
+            <p><span class="label">World context:</span> this span runs alongside the height of the Assyrian and Babylonian empires and the building of Babylon's own famed walls, the classical Greek and Hellenistic worlds from Athens to Alexander the Great, the Roman Republic's rise into empire and its 106 CE annexation of the Nabataean kingdom itself, and, at this era's close, the birth of Islam in Mecca in the early 7th century &mdash; a span long enough to run from the Iron Age Near East to the eve of the Islamic conquests.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#6b5c4a"></span><b>Fragmented / contested</b> &mdash; no single unified ruler</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Emirate / Sultanate</b> &mdash; Al Saud rule, pre-kingdom titles</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the named ruler most associated with the era's start</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official/established faith, not the population's</div>
+    </div>
+  </div>
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for Saudi Arabia lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/sa/">Search Record Atlas for Saudi Arabia &rarr;</a>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This page is one lineage in a larger set. See the region-wide hub and the other countries here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="arabian-peninsula-hub.html"><b>Arabian Peninsula hub</b><span>Seven countries of the Gulf and Red Sea coast</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are close historical approximations for painting reference; pre-20th-century swatches are informed reconstructions, not official specifications.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var IC = {
+    ancient:"#7a4a3a",
+    caliphal:"#6b5c4a",
+    first_saudi:"#3a7350",
+    fragmented:"#7a6a52",
+    reconquest:"#a9762f",
+    hejaz_najd:"#8f6a2e",
+    unification:"#0f5c33",
+    standardized:"#0b4527"
+  };
+  var INAMES = {
+    ancient:"Ancient Thamudic, Lihyanite & Nabataean Arabia",
+    caliphal:"Caliphal & emirate-era Arabia",
+    first_saudi:"First Saudi State (Diriyah)",
+    fragmented:"Fragmented Najd (occupation, 2nd Saudi State, Rashidis)",
+    reconquest:"Emirate/Sultanate of Nejd (reconquest)",
+    hejaz_najd:"Kingdom of Hejaz and Nejd",
+    unification:"Kingdom of Saudi Arabia (unification)",
+    standardized:"Kingdom of Saudi Arabia (standardized)"
+  };
+  var IFLAGS = {
+    ancient: "<rect width=\"300\" height=\"200\" fill=\"#5c2a24\"/><rect width=\"300\" height=\"200\" fill=\"none\" stroke=\"#c9a13c\" stroke-width=\"4\" stroke-dasharray=\"8 6\"/><text x=\"150\" y=\"92\" text-anchor=\"middle\" font-family=\"IBM Plex Mono, monospace\" font-size=\"26\" font-weight=\"700\" fill=\"#c9a13c\">NO FLAG</text><text x=\"150\" y=\"122\" text-anchor=\"middle\" font-family=\"IBM Plex Mono, monospace\" font-size=\"26\" font-weight=\"700\" fill=\"#c9a13c\">DOCUMENTED</text>",
+    caliphal: "<rect width=\"300\" height=\"200\" fill=\"#5c2a24\"/><rect width=\"300\" height=\"200\" fill=\"none\" stroke=\"#c9a13c\" stroke-width=\"4\" stroke-dasharray=\"8 6\"/><text x=\"150\" y=\"92\" text-anchor=\"middle\" font-family=\"IBM Plex Mono, monospace\" font-size=\"26\" font-weight=\"700\" fill=\"#c9a13c\">NO FLAG</text><text x=\"150\" y=\"122\" text-anchor=\"middle\" font-family=\"IBM Plex Mono, monospace\" font-size=\"26\" font-weight=\"700\" fill=\"#c9a13c\">DOCUMENTED</text>",
+    first_saudi: "<rect width=\"300\" height=\"200\" fill=\"#0f5c33\"/><text x=\"150\" y=\"105\" text-anchor=\"middle\" font-family=\"Arial, sans-serif\" font-size=\"15\" fill=\"#f4efe1\">&#1604;&#1575; &#1573;&#1604;&#1607; &#1573;&#1604;&#1575; &#1575;&#1604;&#1604;&#1607;</text>",
+    fragmented: "<rect width=\"300\" height=\"200\" fill=\"#5c2a24\"/><rect width=\"300\" height=\"200\" fill=\"none\" stroke=\"#c9a13c\" stroke-width=\"4\" stroke-dasharray=\"8 6\"/><text x=\"150\" y=\"92\" text-anchor=\"middle\" font-family=\"IBM Plex Mono, monospace\" font-size=\"22\" font-weight=\"700\" fill=\"#c9a13c\">CONTESTED /</text><text x=\"150\" y=\"118\" text-anchor=\"middle\" font-family=\"IBM Plex Mono, monospace\" font-size=\"22\" font-weight=\"700\" fill=\"#c9a13c\">NO SINGLE FLAG</text>",
+    reconquest: "<rect width=\"300\" height=\"200\" fill=\"#0f5c33\"/><text x=\"150\" y=\"88\" text-anchor=\"middle\" font-family=\"Arial, sans-serif\" font-size=\"17\" fill=\"#f4efe1\">&#1604;&#1575; &#1573;&#1604;&#1607; &#1573;&#1604;&#1575; &#1575;&#1604;&#1604;&#1607;</text><text x=\"150\" y=\"112\" text-anchor=\"middle\" font-family=\"Arial, sans-serif\" font-size=\"17\" fill=\"#f4efe1\">&#1605;&#1581;&#1605;&#1583; &#1585;&#1587;&#1608;&#1604; &#1575;&#1604;&#1604;&#1607;</text><g stroke=\"#f4efe1\" stroke-width=\"5\" stroke-linecap=\"round\" fill=\"none\"><line x1=\"80\" y1=\"135\" x2=\"210\" y2=\"135\"/><line x1=\"205\" y1=\"128\" x2=\"216\" y2=\"135\"/><line x1=\"205\" y1=\"142\" x2=\"216\" y2=\"135\"/><line x1=\"90\" y1=\"127\" x2=\"90\" y2=\"143\"/></g>",
+    hejaz_najd: "<rect width=\"300\" height=\"200\" fill=\"#0f5c33\"/><text x=\"150\" y=\"88\" text-anchor=\"middle\" font-family=\"Arial, sans-serif\" font-size=\"17\" fill=\"#f4efe1\">&#1604;&#1575; &#1573;&#1604;&#1607; &#1573;&#1604;&#1575; &#1575;&#1604;&#1604;&#1607;</text><text x=\"150\" y=\"112\" text-anchor=\"middle\" font-family=\"Arial, sans-serif\" font-size=\"17\" fill=\"#f4efe1\">&#1605;&#1581;&#1605;&#1583; &#1585;&#1587;&#1608;&#1604; &#1575;&#1604;&#1604;&#1607;</text>",
+    unification: "<rect width=\"300\" height=\"200\" fill=\"#0f5c33\"/><text x=\"150\" y=\"88\" text-anchor=\"middle\" font-family=\"Arial, sans-serif\" font-size=\"17\" fill=\"#f4efe1\">&#1604;&#1575; &#1573;&#1604;&#1607; &#1573;&#1604;&#1575; &#1575;&#1604;&#1604;&#1607;</text><text x=\"150\" y=\"112\" text-anchor=\"middle\" font-family=\"Arial, sans-serif\" font-size=\"17\" fill=\"#f4efe1\">&#1605;&#1581;&#1605;&#1583; &#1585;&#1587;&#1608;&#1604; &#1575;&#1604;&#1604;&#1607;</text><g stroke=\"#f4efe1\" stroke-width=\"5\" stroke-linecap=\"round\" fill=\"none\"><line x1=\"80\" y1=\"135\" x2=\"210\" y2=\"135\"/><line x1=\"205\" y1=\"128\" x2=\"216\" y2=\"135\"/><line x1=\"205\" y1=\"142\" x2=\"216\" y2=\"135\"/><line x1=\"90\" y1=\"127\" x2=\"90\" y2=\"143\"/></g>",
+    standardized: "<rect width=\"300\" height=\"200\" fill=\"#0f5c33\"/><text x=\"150\" y=\"88\" text-anchor=\"middle\" font-family=\"Arial, sans-serif\" font-size=\"17\" fill=\"#f4efe1\">&#1604;&#1575; &#1573;&#1604;&#1607; &#1573;&#1604;&#1575; &#1575;&#1604;&#1604;&#1607;</text><text x=\"150\" y=\"112\" text-anchor=\"middle\" font-family=\"Arial, sans-serif\" font-size=\"17\" fill=\"#f4efe1\">&#1605;&#1581;&#1605;&#1583; &#1585;&#1587;&#1608;&#1604; &#1575;&#1604;&#1604;&#1607;</text><g stroke=\"#f4efe1\" stroke-width=\"5\" stroke-linecap=\"round\" fill=\"none\"><line x1=\"80\" y1=\"135\" x2=\"210\" y2=\"135\"/><line x1=\"205\" y1=\"128\" x2=\"216\" y2=\"135\"/><line x1=\"205\" y1=\"142\" x2=\"216\" y2=\"135\"/><line x1=\"90\" y1=\"127\" x2=\"90\" y2=\"143\"/></g>"
+  };
+  function iFlagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (IFLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  var iLegendEl = document.getElementById("iLegend");
+  iLegendEl.innerHTML = Object.keys(IC).map(function (k) {
+    return '<span><span class="sw" style="background:' + IC[k] + '"></span>' + INAMES[k] + "</span>";
+  }).join("");
+
+  document.getElementById("ilbl-sa").setAttribute("x","161.6"); document.getElementById("ilbl-sa").setAttribute("y","151.8");
+
+  var ISNAP = [
+    { year:"c. 1000 BCE – c. 630 CE", name:"Ancient Thamudic, Lihyanite & Nabataean Arabia", t:{sa:IC.ancient}, flagKeys:{sa:"ancient"}, story:"More than a millennium before Islam, the northwestern Arabian Peninsula is home to literate, city-building societies: Thamudic tribal groups, the Lihyanite kingdom centered on Dedan (al-'Ula), and finally the Nabataean kingdom, whose traders controlled the incense and spice routes and who carved the monumental tombs of Hegra (Mada'in Salih) — Saudi Arabia's first UNESCO World Heritage Site. Rome annexes the Nabataean kingdom in 106 CE, and the wider Hejaz and Najd remain a patchwork of tribes and caravan cities until Islam's rise in the early 7th century. No flag in the modern sense survives from any of these societies, so this entry is shown honestly blank." },
+    { year:"c. 630 – 1744", name:"Caliphal & emirate-era Arabia (Hejaz and Najd)", t:{sa:IC.caliphal}, flagKeys:{sa:"caliphal"}, story:"The Hejaz, home to Mecca and Medina, is the birthplace of Islam in the early 7th century and the seat of the earliest caliphates before authority shifts to Damascus and then Baghdad; the wider Arabian interior remains a patchwork of local emirates and tribal rule for most of this span. No flag in the modern sense exists across this millennium-long stretch, so this entry is shown honestly blank." },
+    { year:"1744 – 1818", name:"First Saudi State (Emirate of Diriyah)", t:{sa:IC.first_saudi}, flagKeys:{sa:"first_saudi"}, story:"In 1744 the ruler of the oasis town of Diriyah, Muhammad ibn Saud, allies with religious reformer Muhammad ibn Abd al-Wahhab, founding the Al Saud dynasty's first state. It expands across most of the Arabian interior, including a 1803 capture of Mecca, before an Ottoman-Egyptian invasion crushes it in 1818. A plain green banner bearing the shahada is the earliest form of the enduring Saudi flag tradition, shown here as an informed reconstruction." },
+    { year:"1818 – 1902", name:"Fragmented Najd (occupation, Second Saudi State, Rashidis)", t:{sa:IC.fragmented}, flagKeys:{sa:"fragmented"}, story:"An Ottoman-Egyptian army destroys Diriyah in 1818. The Al Saud rebuild a smaller Second Saudi State around Riyadh from 1824, but it fractures under a succession dispute and finally falls to the rival Al Rashid emirate of Ha'il in 1891. No single banner can be attributed with confidence across this fractured, contested 84-year span, so it is shown as one honest bridging entry." },
+    { year:"1902 – 1926", name:"Emirate / Sultanate of Nejd (Al Saud reconquest)", t:{sa:IC.reconquest}, flagKeys:{sa:"reconquest"}, story:"The young Abdulaziz ibn Saud, exiled in Kuwait, retakes Riyadh in a night raid in January 1902, beginning the third and final Al Saud restoration. He upgrades his title from Emir to Sultan of Nejd in 1921. A sword is added beneath the shahada around this reconquest, the same combination the modern kingdom's flag still carries." },
+    { year:"1926 – 1932", name:"Kingdom of Hejaz and Nejd", t:{sa:IC.hejaz_najd}, flagKeys:{sa:"hejaz_najd"}, story:"Ibn Saud captures Mecca and Medina from the Hashemite Kingdom of Hejaz in 1924–25 and is proclaimed King of Hejaz in January 1926 while keeping his older title as Sultan of Nejd — the two realms administered under one crown but not yet formally merged. Nejd's own green shahada banner carries over as the union's flag." },
+    { year:"1932 – 1973", name:"Kingdom of Saudi Arabia (unification)", t:{sa:IC.unification}, flagKeys:{sa:"unification"}, story:"Abdulaziz ibn Saud proclaims the unified Kingdom of Saudi Arabia on 23 September 1932, still celebrated as the kingdom's national day. Oil is discovered at Dammam in 1938. The green shahada-and-sword banner becomes the flag of the single unified state, though its exact calligraphy and proportions still vary from print to print until 1973." },
+    { year:"1973 – present", name:"Kingdom of Saudi Arabia (standardized)", t:{sa:IC.standardized}, flagKeys:{sa:"standardized"}, story:"A 1973 royal decree fixes the flag's precise proportions, calligraphy, and sword design in law. The kingdom becomes a founding OPEC member and host to Islam's two holiest cities — a role its rulers style themselves \"Custodian of the Two Holy Mosques\" to reflect from 1986 onward. The flag is never lowered to half-mast, out of respect for the religious text it bears." }
+  ];
+
+  var IREGIONS = ["sa"];
+  var IREGION_NAMES = {sa:"Saudi Arabia"};
+  var IADJ = [];
+
+  function iTextColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+
+  var iYearTag = document.getElementById("iYearTag");
+  var iEraName = document.getElementById("iEraName");
+  var iEraOwners = document.getElementById("iEraOwners");
+  var iEraStory = document.getElementById("iEraStory");
+  var iFlagsRow = document.getElementById("iFlagsRow");
+  var iSlider = document.getElementById("iSlider");
+
+  function iRender(idx) {
+    var era = ISNAP[idx];
+    iYearTag.textContent = era.year;
+    iEraName.textContent = era.name;
+    iEraStory.innerHTML = era.story;
+
+    IREGIONS.forEach(function (id) {
+      document.getElementById("ireg-" + id).setAttribute("fill", era.t[id]);
+      var tcol = iTextColorFor(era.t[id]);
+      var tcolHalo = tcol === "#201a12" ? "#f7f1e3" : "#201a12";
+      ["", "2", "3", "4"].forEach(function (suf) {
+        var lbl = document.getElementById("ilbl-" + id + suf);
+        if (lbl) { lbl.setAttribute("fill", tcol); lbl.setAttribute("stroke", tcolHalo); }
+      });
+    });
+
+    if (IREGIONS.length === 1) {
+      var id0 = IREGIONS[0];
+      var label = Object.keys(IC).filter(function (k) { return IC[k] === era.t[id0]; })[0];
+      iEraOwners.innerHTML = "<b>" + (INAMES[label] || "") + "</b>: whole territory";
+    } else {
+      iEraOwners.innerHTML = IREGIONS.map(function (id) {
+        var label = Object.keys(IC).filter(function (k) { return IC[k] === era.t[id]; })[0];
+        return "<b>" + IREGION_NAMES[id] + "</b>: " + (INAMES[label] || "");
+      }).join(" &middot; ");
+    }
+
+    iFlagsRow.innerHTML = IREGIONS.map(function (id) {
+      return '<div class="iflag-chip">' + iFlagSvg(era.flagKeys[id]) + '<div class="ic-label">' + IREGION_NAMES[id] + '</div></div>';
+    }).join("");
+  }
+
+  iSlider.addEventListener("input", function () { iRender(parseInt(iSlider.value, 10)); });
+  iRender(0);
+
+  var iPlaying = false, iPlayTimer = null;
+  var iPlayBtn = document.getElementById("iPlayBtn");
+  function iStepPlay() {
+    var next = parseInt(iSlider.value, 10) + 1;
+    if (next > ISNAP.length - 1) { iStopPlay(); return; }
+    iSlider.value = next;
+    iRender(next);
+  }
+  function iStartPlay() {
+    iPlaying = true;
+    iPlayBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(iSlider.value, 10) >= ISNAP.length - 1) { iSlider.value = 0; iRender(0); }
+    iPlayTimer = setInterval(iStepPlay, 1700);
+  }
+  function iStopPlay() {
+    iPlaying = false;
+    iPlayBtn.innerHTML = "&#9654;";
+    clearInterval(iPlayTimer);
+  }
+  iPlayBtn.addEventListener("click", function () { iPlaying ? iStopPlay() : iStartPlay(); });
+})();
+  document.querySelectorAll(".tag[data-tip]").forEach(function (tag) {
+    tag.addEventListener("click", function (e) {
+      var wasOpen = tag.classList.contains("tip-open");
+      document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+      if (!wasOpen) tag.classList.add("tip-open");
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+  });
+</script>
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var html = '<h4>Genealogical records for this ground</h4>';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>
+
+</body></html>

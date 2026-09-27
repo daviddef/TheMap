@@ -1,0 +1,858 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#f2e6d0;color:#231710}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+</style></head><body>
+<title>Flags of Azerbaijan</title>
+<meta name="description" content="A chronological, paint-ready atlas of every flag that flew over Azerbaijan, from the long-lived Shirvanshahs through Safavid and Qajar Persian rule, Russian imperial annexation, the first secular democratic republic in the Muslim world, Soviet rule, and the modern republic.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #231710; --paper: #f2e6d0; --card: #faf1de; --card-border: #ddc79c;
+    --brick: #9c2b3a; --brick-2: #7a1f2c; --brass: #b8862f; --adriatic: #1f6f6f; --adriatic-2: #155050;
+    --muted: #7a6a52; --hair: #d3bd94; --focus: #1f6f6f;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #efe2c8; --paper: #161311; --card: #201c17; --card-border: #3a332a;
+      --brick: #e05a6a; --brick-2: #e8798a; --brass: #d9ad5a; --adriatic: #5fb8b8; --adriatic-2: #7fd0d0;
+      --muted: #a89c82; --hair: #3a332a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #efe2c8; --paper: #161311; --card: #201c17; --card-border: #3a332a;
+    --brick: #e05a6a; --brick-2: #e8798a; --brass: #d9ad5a; --adriatic: #5fb8b8; --adriatic-2: #7fd0d0;
+    --muted: #a89c82; --hair: #3a332a;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.08rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; font-size: .94rem; color: var(--muted); }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  .legend { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- Timeline ---------- */
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1px; background: var(--hair); }
+  @media (max-width: 560px) { .timeline::before { left: 9px; } }
+  .entry { position: relative; padding-left: 46px; margin-bottom: 46px; }
+  @media (max-width: 560px) { .entry { padding-left: 30px; } }
+  .entry::before {
+    content: attr(data-n);
+    position: absolute; left: 1px; top: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--paper); outline: 1px solid var(--hair);
+    background: var(--card);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--brick); display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) { .entry::before { left: -5px; width: 18px; height: 18px; font-size: 9px; } }
+
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+  .card-head { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  @media (max-width: 620px) { .card-head { flex-direction: column; } }
+  .flag-box { flex: none; width: 168px; }
+  .flag-box svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-caption { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .card-title { font-size: 1.32rem; font-weight: 600; line-height: 1.18; margin: 0 0 10px; text-wrap: balance; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px; border: 1px solid var(--card-border); color: var(--muted);
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  /* Flip tooltip below tags near the top of the viewport so it isn't clipped */
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  /* Keep tooltips from overflowing the left/right edges on narrow screens */
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint { border-top: 1px solid var(--hair); }
+  details.paint > summary {
+    cursor: pointer; list-style: none; padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--adriatic); display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before { content: "+"; font-family: "Fraunces", serif; font-size: 15px; width: 14px; }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row { display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px; }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--card-border); border-radius: 2px; padding: 5px 9px 5px 5px; background: var(--paper); }
+  .swatch .chip { width: 20px; height: 20px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: none; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 88px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 340px; height: auto; }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .iborder-line { transition: stroke-opacity 0.6s ease, stroke-width 0.6s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .ireg-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 700; text-anchor: middle; transition: fill .4s ease, stroke .4s ease; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="caucasus-hub.html">Caucasus hub</a></p>
+  <p class="kicker">Family research &middot; Phase 7 of the world atlas</p>
+  <h1>Flags of Azerbaijan</h1>
+  <p class="lede">From ancient Caucasian Albania, a Christian kingdom under Sassanid Persian and then Arab overlordship, through the long-lived Shirvanshahs of Shamakhi, who ruled some form of their own state from the 9th century to 1538 &mdash; one of the longest-running dynasties in this atlas &mdash; through absorption into Safavid and then Qajar Persia, a two-stage Russian imperial conquest, the first secular, democratic, parliamentary republic ever established in the Muslim world in 1918 (which extended the vote to women that same year), seven decades of Soviet rule, and independence again in 1991 &mdash; eight flags for a country whose modern blue-red-green tricolor with its crescent and star is, like Armenia's, essentially the same flag its short-lived first republic raised.</p>
+  <p class="lede">Azerbaijan's story runs on nearly the same clock as its neighbors Georgia and Armenia &mdash; Persian-and-then-Russian domination, a brief 1918 independence, Soviet incorporation, and a 1991 return &mdash; but its deepest roots are Persian rather than Byzantine or Ottoman, a distinction this page's flags trace directly.</p>
+
+  <div class="scope-note">
+    <b>Scope of this page:</b> the lands of present-day Azerbaijan, c. 4th century BCE&ndash;present, eight political entities. This page is a flag timeline only &mdash; no interactive map of internal regional splits is included here; that layer is deferred to a future phase of the atlas, project-wide. See the Caucasus hub for a regional map covering Azerbaijan alongside Georgia and Armenia.
+  </div>
+
+    <div class="imap-section">
+    <h2>One border, and one lasting internal split: Nagorno-Karabakh</h2>
+    <p class="imap-sub">Azerbaijan's own real border, traced whole, with one schematic internal region carved out: Nagorno-Karabakh, administered separately from Baku for roughly three decades. The 18th-century fragmentation into some twenty local khanates under weakening Persian suzerainty was real too, but never a clean two- or three-way partition this atlas can responsibly map, so that period is still shown as a single region. Press play, or drag the slider, to watch who held it, era to era.</p>
+    <div class="rule-box">
+      <b>The 18th-century khanate period was a real fragmentation, but into roughly twenty small polities, not the kind of clean two- or three-way split this atlas maps elsewhere.</b> Baku, Ganja, Shirvan, Karabakh, Quba, and over a dozen other khanates each ruled their own small territory under nominal Persian suzerainty &mdash; too many, and too irregularly bounded, to responsibly reconstruct as a small handful of honest regions, so this page shows one border and one dominant power at a time for that era. The 1988&ndash;2023 Nagorno-Karabakh period is different: for most of that span, a self-declared, Armenian-backed authority administered the territory separately from the government in Baku, a real and mappable administrative split shown here as its own traced region. This map describes who controlled the territory when, not who was right to.
+    </div>
+    <div class="imap-frame">
+      <div class="imap-controls">
+        <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="imap-year" id="iYearTag">c. 4th c. BCE</span>
+        <input type="range" id="iSlider" min="0" max="9" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="imap-svg" viewBox="0 0 300 280" xmlns="http://www.w3.org/2000/svg">
+        <path id="ireg-az0" class="ireg-fill" d="M140.57,75.35 L159.53,79.18 L166.88,64.93 L192.48,42.35 L215.02,71.85 L236.83,111.58 L256.80,114.20 L270.00,129.30 L234.69,133.81 L227.24,177.31 L219.86,196.92 L204.15,210.02 L205.29,237.76 L194.62,240.55 L167.89,211.22 L182.67,183.51 L145,155 L95,130 L54.23,112.22 L62.85,98.17 L46.53,88.48 L37.65,73.76 L48.15,64.61 L80.09,80.72 L103.20,84.05 L109.04,77.48 L87.93,47.17 L99.06,39.45 L111.11,41.33 Z M38.92,158.23 L51.61,173.26 L70.55,173.13 L70.35,181.77 L87.85,214.18 L58.45,206.73 L36.80,180.88 L30.00,159.75 L38.92,158.23 Z"/>
+        <path id="ireg-nk" class="ireg-fill" d="M182.67,183.51 L170.01,167.07 L153.93,171.21 L103.38,212.53 L102.42,173.68 L83.18,164.51 L64.98,149.27 L77.06,131.43 L54.23,112.22 L95,130 L145,155 Z"/>
+        <path class="iborder-line" id="ib-az0-nk" d="M182.67,183.51 L145,155 L95,130 L54.23,112.22"/>
+        <g font-family="IBM Plex Mono, monospace">
+          <text class="ireg-label" id="ilbl-az0" x="180" y="90">AZERBAIJAN</text>
+          <text class="ireg-label" id="ilbl-nk" x="118" y="160">NAGORNO-</text>
+          <text class="ireg-label" id="ilbl-nk2" x="118" y="171">KARABAKH</text>
+        </g>
+      </svg>
+      <div class="imap-head">
+        <div class="imap-name" id="iEraName">Caucasian Albania and the Sassanid/Arab conquest</div>
+        <div class="imap-owners" id="iEraOwners"></div>
+      </div>
+      <div class="iflags-row" id="iFlagsRow"></div>
+      <p class="imap-story" id="iEraStory"></p>
+
+      <p class="map-note">Real traced border (modern frontier); the Nagorno-Karabakh dividing line is a schematic approximation of the region's rough location and extent, not a surveyed border. See the rule box above for the fragmented khanate period this map still simplifies to a single region.</p>
+      <div class="imap-key" id="iLegend"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <!-- 1: 1991-present -->
+    <div class="entry" data-n="8" id="era-1991">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#3f9fd1"/>
+              <rect y="66.7" width="300" height="66.6" fill="#c9372c"/>
+              <rect y="133.3" width="300" height="66.7" fill="#3f9f5f"/>
+              <path d="M160,80 A20,20 0 1 0 178,116 A15,15 0 1 1 160,80 Z" fill="#f4efe1"/>
+              <path d="M195,90 l3,8 8.5,0.3 -6.5,5.5 2,8.3 -7,-4.8 -7,4.8 2,-8.3 -6.5,-5.5 8.5,-0.3 Z" fill="#f4efe1"/>
+            </svg>
+            <div class="flag-caption">the tricolor of the Democratic Republic, readopted in 1991</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1991 &ndash; present</div>
+            <h3 class="card-title">Republic of Azerbaijan (modern)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A sovereign parliamentary republic under its own constitution — the status Azerbaijan regained on 18 October 1991 as the Soviet Union dissolved."><span class="dot" style="background:#b8862f"></span>Republic, independent</span><span class="tag" tabindex="0" data-tip="Former Communist Party first secretary who became independent Azerbaijan's first president at the moment of the 1991 declaration, before being driven from office in 1992 amid early setbacks in the Nagorno-Karabakh war."><span class="dot" style="background:#4a3b78"></span>Ayaz Mutalibov</span><span class="tag" tabindex="0" data-tip="The 1995 constitution establishes a secular state with no official religion, even though the large majority of the population is Shi'a Muslim."><span class="dot" style="background:#8e3b62"></span>Secular (no state religion)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Roughly 700,000 ethnic Azerbaijanis are displaced into Azerbaijan from Armenia and from Nagorno-Karabakh and its surrounding districts during the 1988&ndash;94 First Nagorno-Karabakh War."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#d90012"/><rect y="4.67" width="20" height="4.67" fill="#0033a0"/><rect y="9.33" width="20" height="4.67" fill="#f2a800"/></svg>Immigration: Azerbaijani refugees from Armenia &amp; Karabakh (1988&ndash;94)</span><span class="tag" tabindex="0" data-tip="Nearly all of Azerbaijan's ethnic Armenian population, over 300,000 people, leaves the country amid inter-ethnic violence and the outbreak of war with Armenia over Nagorno-Karabakh between 1988 and the early 1990s."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#d90012"/><rect y="4.67" width="20" height="4.67" fill="#0033a0"/><rect y="9.33" width="20" height="4.67" fill="#f2a800"/></svg>Emigration: ethnic Armenians (1988&ndash;early 1990s)</span><span class="tag" tabindex="0" data-tip="Following Azerbaijan's September 2023 military operation that dissolved the breakaway Nagorno-Karabakh authorities, nearly the entire ethnic Armenian population of the region, more than 100,000 people, departs for Armenia within days."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#d90012"/><rect y="4.67" width="20" height="4.67" fill="#0033a0"/><rect y="9.33" width="20" height="4.67" fill="#f2a800"/></svg>Emigration: ethnic Armenians from Karabakh (2023)</span></div>
+            <p><span class="label">Who &amp; why:</span> Azerbaijan declares independence on 18 October 1991 as the Soviet Union dissolves. The republic fights a war with Armenia over Nagorno-Karabakh, a mostly Armenian-populated enclave inside its Soviet-era borders, losing effective control of it after a 1994 ceasefire; Azerbaijan retakes the territory in a 2020 war and a further 2023 offensive, ending nearly three decades of de facto Armenian-backed separation.</p>
+            <p><span class="label">What it represents:</span> the blue-red-green tricolor with a white crescent and eight-pointed star is readopted from the 1918 Democratic Republic's own flag, officially explained as blue for Turkic heritage, red for progress and modernity, and green for Islam, with the crescent and star further symbolizing Islam and the eight branches of the Turkic peoples.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Three equal horizontal bands: blue, red, green; white crescent and eight-pointed star centered on the red band.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#3f9fd1"></span><span class="meta"><span class="name">Blue</span><span class="hex">#3F9FD1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#c9372c"></span><span class="meta"><span class="name">Red</span><span class="hex">#C9372C</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#3f9f5f"></span><span class="meta"><span class="name">Green</span><span class="hex">#3F9F5F</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2: 1920-1991 -->
+    <div class="entry" data-n="7" id="era-1920">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#a4302a"/>
+              <rect x="0" y="172" width="300" height="14" fill="#3f9fd1"/>
+              <g fill="#d4af37" transform="translate(30,25)"><rect x="0" y="13" width="30" height="6"/><rect x="12" y="0" width="6" height="30"/></g>
+            </svg>
+            <div class="flag-caption">Azerbaijan SSR &mdash; red field, gold hammer-and-sickle, light blue stripe</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1920 &ndash; 1991</div>
+            <h3 class="card-title">Soviet Azerbaijan</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A constituent republic of the USSR with no independent foreign policy, governed through the Communist Party rather than its own sovereign institutions — the status imposed on Azerbaijan by the 11th Red Army's April 1920 entry into Baku."><span class="dot" style="background:#9c2b3a"></span>Soviet republic</span><span class="tag" tabindex="0" data-tip="Azerbaijani Bolshevik and physician who led the Revolutionary Committee that declared Soviet power in Baku in April 1920 and became the first head of the Soviet Azerbaijani government."><span class="dot" style="background:#4a3b78"></span>Nariman Narimanov</span><span class="tag" tabindex="0" data-tip="The Soviet state actively promoted atheism and suppressed organized religion across the republic; mosques were closed or repurposed and clergy faced persecution, though Islam was never formally outlawed."><span class="dot" style="background:#8e3b62"></span>State atheism</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="The Baku oil boom draws large numbers of Russian, Armenian, and other migrant laborers into the city through the early Soviet decades, building on a wave of settlement that had begun under the tsarist oil industry."><span class="dot" style="background:#2f7a6b"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#cc0000"/><path d="M4,3 l1,2.5 2.6,0 -2.1,1.6 0.8,2.5 -2.3,-1.5 -2.3,1.5 0.8,-2.5 -2.1,-1.6 2.6,0z" fill="#ffd700"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#d90012"/><rect y="4.67" width="20" height="4.67" fill="#0033a0"/><rect y="9.33" width="20" height="4.67" fill="#f2a800"/></svg></span>Immigration: laborers into the Baku oil industry</span><span class="tag" tabindex="0" data-tip="Soviet forces attack Armenian and Azerbaijani neighborhoods of Baku in the January 1990 Black January crackdown, and inter-ethnic violence in Baku and Sumgait between 1988 and 1990 drives most of Azerbaijan's ethnic Armenian population to flee toward Armenia."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#d90012"/><rect y="4.67" width="20" height="4.67" fill="#0033a0"/><rect y="9.33" width="20" height="4.67" fill="#f2a800"/></svg>Emigration: ethnic Armenians amid Sumgait &amp; Baku violence (1988&ndash;90)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Turkic dynasty that consolidated power in Persia from 1789, ruling Azerbaijani khanates until Russian conquest, 1789–1925 (surviving in Iran until 1925). Emblem: the Lion and Sun (Shir-o-Khorshid)."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><circle cx="60" cy="42" r="16" fill="#f9d616"/><path d="M22,74 q14,-18 34,-10 q-6,12 -18,16 q-10,-2 -16,-6 Z" fill="#f9d616"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Qajar dynasty</span></div>
+            <p><span class="label">Who &amp; why:</span> the 11th Red Army marches into Baku in April 1920, ending the Democratic Republic with barely a fight. Azerbaijan is folded into the Transcaucasian SFSR alongside Georgia and Armenia from December 1922 until the 1936 "Stalin Constitution" splits it out as its own Azerbaijan SSR. Baku's oil fields make the republic an industrial priority for Moscow throughout the Soviet period, and Nagorno-Karabakh is established as an autonomous oblast inside the republic's borders in 1923, a decision whose consequences outlast the Soviet Union itself.</p>
+            <p><span class="label">What it represents:</span> the standard Soviet red banner with gold hammer and sickle, distinguished by a horizontal light-blue stripe near the bottom edge, a version adopted in 1952 and flown until the USSR's collapse.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, standard Soviet republic ratio.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red field, gold hammer-and-sickle with gold-bordered red star (simplified here), horizontal light-blue stripe near the bottom edge.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#d4af37"></span><span class="meta"><span class="name">Gold</span><span class="hex">#D4AF37</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#3f9fd1"></span><span class="meta"><span class="name">Stripe blue</span><span class="hex">#3F9FD1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3: 1918-1920 -->
+    <div class="entry" data-n="6" id="era-1918">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#3f9fd1"/>
+              <rect y="66.7" width="300" height="66.6" fill="#c9372c"/>
+              <rect y="133.3" width="300" height="66.7" fill="#3f9f5f"/>
+              <path d="M160,80 A20,20 0 1 0 178,116 A15,15 0 1 1 160,80 Z" fill="#f4efe1"/>
+              <path d="M195,90 l3,8 8.5,0.3 -6.5,5.5 2,8.3 -7,-4.8 -7,4.8 2,-8.3 -6.5,-5.5 8.5,-0.3 Z" fill="#f4efe1"/>
+            </svg>
+            <div class="flag-caption">the Democratic Republic's tricolor &mdash; blue, red, green with crescent and star</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1918 &ndash; 1920</div>
+            <h3 class="card-title">Azerbaijan Democratic Republic</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A sovereign parliamentary republic under its own constitution — the status the Azerbaijan Democratic Republic held for not quite two years, from its May 1918 declaration to the Red Army's April 1920 entry into Baku."><span class="dot" style="background:#b8862f"></span>Republic, independent</span><span class="tag" tabindex="0" data-tip="Founder and leading figure of the Azerbaijan Democratic Republic, chairman of its National Council, widely regarded as the father of Azerbaijani statehood and the architect of its secular, parliamentary design."><span class="dot" style="background:#4a3b78"></span>Mammad Amin Rasulzade</span><span class="tag" tabindex="0" data-tip="As the first secular, democratic, parliamentary republic ever established in the Muslim world, the government established no official religion, separating state authority from Islam despite the population's overwhelmingly Muslim makeup."><span class="dot" style="background:#8e3b62"></span>Secular (no state religion)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Thousands of Azerbaijanis are killed and many others displaced in Baku's March 1918 intercommunal violence between Bolshevik-aligned Armenian forces and Azerbaijani residents, followed by reprisal violence against Armenians when Ottoman and Azerbaijani forces retake the city that September."><span class="dot" style="background:#a3672f"></span>Emigration: displacement amid Baku's 1918 intercommunal violence</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Turkic dynasty that consolidated power in Persia from 1789, ruling Azerbaijani khanates until Russian conquest, 1789–1925. Emblem: the Lion and Sun (Shir-o-Khorshid)."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><circle cx="60" cy="42" r="16" fill="#f9d616"/><path d="M22,74 q14,-18 34,-10 q-6,12 -18,16 q-10,-2 -16,-6 Z" fill="#f9d616"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Qajar dynasty</span></div>
+            <p><span class="label">Who &amp; why:</span> declared on 28 May 1918 after a short-lived Transcaucasian federation collapses, the Azerbaijan Democratic Republic is the first secular, democratic, parliamentary republic ever established anywhere in the Muslim world. Its parliament extends the vote to women that same year, ahead of many European states including, notably, the United Kingdom and the United States. The republic is poor and embattled, fighting border conflicts with Armenia, before the Red Army takes Baku in April 1920 with little resistance.</p>
+            <p><span class="label">What it represents:</span> a blue-red-green tricolor with a white crescent moon and eight-pointed star, adopted in November 1918, blending pan-Turkic blue, modernizing red, and Islamic green with traditional Islamic crescent-and-star imagery &mdash; the same flag the modern republic readopts in 1991.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Three equal horizontal bands: blue, red, green; white crescent and eight-pointed star centered on the red band.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#3f9fd1"></span><span class="meta"><span class="name">Blue</span><span class="hex">#3F9FD1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#c9372c"></span><span class="meta"><span class="name">Red</span><span class="hex">#C9372C</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#3f9f5f"></span><span class="meta"><span class="name">Green</span><span class="hex">#3F9F5F</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4: 1813-1918 -->
+    <div class="entry" data-n="5" id="era-1813">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#241f14"/>
+              <rect y="66.7" width="300" height="66.6" fill="#d4af37"/>
+              <rect y="133.3" width="300" height="66.7" fill="#f4efe1"/>
+            </svg>
+            <div class="flag-caption">the Russian imperial tricolor flown over Azerbaijani territory</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1813 &ndash; 1918</div>
+            <h3 class="card-title">Russian imperial rule</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Absorbed outright into the Russian Empire's administrative structure with no separate sovereignty — the fate of Baku, Ganja, Shirvan, Karabakh, and the other khanates ceded by Persia in 1813 and 1828."><span class="dot" style="background:#7a6a52"></span>Annexed</span><span class="tag" tabindex="0" data-tip="Russian emperor under whom the 1813 Treaty of Gulistan forced Qajar Persia to cede Baku, Ganja, Shirvan, Karabakh, and most of the other khanates north of the Aras River outright to Russia."><span class="dot" style="background:#4a3b78"></span>Alexander I of Russia</span><span class="tag" tabindex="0" data-tip="Russian Orthodoxy was the empire's established state religion; Islam, the faith of most of the local population, was tolerated under Russian administration but held no official establishment."><span class="dot" style="background:#8e3b62"></span>Russian Orthodoxy (state church); Islam tolerated, not established</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Following the 1828 Treaty of Turkmenchay, Russia encourages the resettlement of Armenians from Qajar Persia and later the Ottoman Empire into the South Caucasus, including areas of present-day Azerbaijan, reshaping the region's ethnic map over the following decades."><span class="dot" style="background:#2f7a6b"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#1a7a3c"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#c8102e"/><circle cx="10" cy="7" r="1.6" fill="#f4c430"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#e30a17"/><circle cx="8" cy="7" r="3.4" fill="#fff"/><circle cx="9" cy="7" r="2.7" fill="#e30a17"/><path d="M12.5,7 l3.5,1.1 -2.2,-1.9 2.2,-1.9z" fill="#fff"/></svg></span>Immigration: Armenian resettlement after 1828</span><span class="tag" tabindex="0" data-tip="Baku's oil boom from the 1870s onward, centered on the Nobel and Rothschild-backed refineries, draws tens of thousands of Russian, Armenian, and Persian laborers into the city, which becomes one of the world's largest oil-producing centers by 1900."><span class="dot" style="background:#2f7a6b"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#fff"/><rect y="4.67" width="20" height="4.67" fill="#0039a6"/><rect y="9.33" width="20" height="4.67" fill="#d52b1e"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#d90012"/><rect y="4.67" width="20" height="4.67" fill="#0033a0"/><rect y="9.33" width="20" height="4.67" fill="#f2a800"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#1a7a3c"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#c8102e"/><circle cx="10" cy="7" r="1.6" fill="#f4c430"/></svg></span>Immigration: Baku oil-boom laborers (1870s&ndash;)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Turkic dynasty from Azerbaijan's own Qajar tribe that ruled Persia (including Azerbaijani khanates until their 1813 cession to Russia), 1789–1925. Emblem: the Lion and Sun (Shir-o-Khorshid)."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><circle cx="60" cy="42" r="16" fill="#f9d616"/><path d="M22,74 q14,-18 34,-10 q-6,12 -18,16 q-10,-2 -16,-6 Z" fill="#f9d616"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Qajar dynasty</span></div>
+            <p><span class="label">Who &amp; why:</span> Russia's conquest of Azerbaijani territory happens in two stages. The First Russo-Persian War (1804&ndash;13) ends with the Treaty of Gulistan, which forces Qajar Persia to cede Baku, Ganja, Shirvan, Karabakh, and most of the other khanates north of the Aras River outright. The Nakhchivan khanate, further south, remains Persian until the Second Russo-Persian War ends with the February 1828 Treaty of Turkmenchay, completing Russian control of the whole territory that becomes modern Azerbaijan. Baku's oil boom from the 1870s onward makes it one of the Russian Empire's most important industrial cities.</p>
+            <p><span class="label">What it represents:</span> the black-gold-white tricolor used as an unofficial "imperial" flag across the Russian Empire's territories from the mid-19th century, including its Azerbaijani provinces.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Three equal horizontal bands: black, gold (yellow), white.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#241f14"></span><span class="meta"><span class="name">Black</span><span class="hex">#241F14</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#d4af37"></span><span class="meta"><span class="name">Gold</span><span class="hex">#D4AF37</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5: 1747-1813 -->
+    <div class="entry" data-n="4" id="era-1747">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#2a8a8a"/>
+              <circle cx="150" cy="92" r="22" fill="#d4af37"/>
+              <path d="M108,138 q42,-32 84,0" stroke="#d4af37" stroke-width="6" fill="none"/>
+            </svg>
+            <div class="flag-caption">a generic Persian-suzerain representation for the era of local khanates</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1747 &ndash; 1813</div>
+            <h3 class="card-title">Vassal khanates under Persian suzerainty</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Local rulers under Persian suzerainty — after Nader Shah's 1747 assassination fragmented central authority, a patchwork of semi-autonomous khans across Azerbaijani territory each ruled locally while paying nominal tribute to Persia."><span class="dot" style="background:#8a5a3a"></span>Vassal khanates</span><span class="tag" tabindex="0" data-tip="No single ruler documented: this era's defining feature is fragmentation itself — Baku, Ganja, Shirvan, Karabakh, Quba, Sheki, Nakhchivan, and other khanates each had their own khan, with no single figure ruling the territory as a whole."><span class="dot" style="background:#4a3b78"></span>No single ruler documented</span><span class="tag" tabindex="0" data-tip="Twelver Shi'a Islam, established as Persia's state religion under the Safavids from 1501, remained the region's inherited religious establishment through the khanate period, even as central Persian political authority fragmented."><span class="dot" style="background:#8e3b62"></span>Twelver Shi'a Islam (state religion, inherited from Safavid rule)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Turkic dynasty from Azerbaijan's own Qajar tribe, consolidating power over Persia's fragmented khanates from 1789, 1789–1925. Emblem: the Lion and Sun (Shir-o-Khorshid)."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><circle cx="60" cy="42" r="16" fill="#f9d616"/><path d="M22,74 q14,-18 34,-10 q-6,12 -18,16 q-10,-2 -16,-6 Z" fill="#f9d616"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Qajar dynasty</span></div>
+            <p><span class="label">Who &amp; why:</span> the 1747 assassination of Nader Shah, who had briefly reunited Persia by force, fragments Persian authority and allows a patchwork of semi-autonomous local khanates &mdash; Baku, Ganja, Shirvan, Karabakh, Quba, Sheki, Nakhchivan, and others &mdash; to emerge across Azerbaijani territory, each ruled by its own khan but paying nominal tribute to whichever Persian dynasty holds the throne. The Qajar dynasty consolidates power in Persia from 1789, tightening (without fully restoring) control over these khanates, until Russian conquest begins in 1804.</p>
+            <p><span class="label">What it represents:</span> no single flag unites these many rival khanates; the field shown is a generic, informed representation of Persian suzerain authority during this fragmented era, not a documented banner of any one khanate.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no single flag for this fragmented era; shown as a generic device.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Teal field, gold disc and stylized arc motif (informed generic reconstruction of Persian-suzerain imagery).</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#2a8a8a"></span><span class="meta"><span class="name">Teal</span><span class="hex">#2A8A8A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#d4af37"></span><span class="meta"><span class="name">Gold</span><span class="hex">#D4AF37</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6: 1538-1747 -->
+    <div class="entry" data-n="3" id="era-1538">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#1f6f6f"/>
+              <circle cx="150" cy="100" r="32" fill="#d4af37"/>
+            </svg>
+            <div class="flag-caption">Safavid Persia &mdash; teal field, gold roundel</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1538 &ndash; 1747</div>
+            <h3 class="card-title">Safavid Persia</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Local rulers under Persian suzerainty — Azerbaijani territory was governed directly as Safavid provinces for two centuries after the 1538 conquest, contested at the margins with the rival Ottoman Empire."><span class="dot" style="background:#1f6f6f"></span>Vassal khanates</span><span class="tag" tabindex="0" data-tip="Safavid shah whose forces conquered Shirvan in 1538, deposing the last Shirvanshah and absorbing his lands directly into the Safavid Persian Empire."><span class="dot" style="background:#4a3b78"></span>Shah Tahmasp I</span><span class="tag" tabindex="0" data-tip="Shah Ismail I converted Persia to Twelver Shi'a Islam upon founding the Safavid dynasty in 1501, and it became the empire's enforced state religion across its provinces, including the newly absorbed Shirvan."><span class="dot" style="background:#8e3b62"></span>Twelver Shi'a Islam (state religion)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Founded by Shah Ismail I from the Safavid Sufi order of Ardabil, 1501–1736. Banners traditionally green bearing a gold sun disc."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1a6b3a"/><circle cx="50" cy="56" r="22" fill="#f9d616"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Safavid dynasty</span></div>
+            <p><span class="label">Who &amp; why:</span> Shah Ismail I founds the Safavid dynasty in 1501, converting Persia to Twelver Shia Islam, and within a generation the Safavids extinguish the long-ruling Shirvanshahs outright in 1538, absorbing their lands directly into the empire. Most of what becomes Azerbaijan is governed as Safavid provinces for the following two centuries, contested at the margins with the rival Ottoman Empire, until the dynasty collapses amid Afghan invasion in the 1720s and, after an interregnum, Nader Shah's 1747 assassination opens the way to local khanates.</p>
+            <p><span class="label">What it represents:</span> a teal field with a gold roundel, representative of Safavid dynastic and religious imagery associated with the period's coinage and court banners across the empire's provinces, including Shirvan.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio recorded; shown at 3:2.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Teal field, gold roundel at center.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#1f6f6f"></span><span class="meta"><span class="name">Teal</span><span class="hex">#1F6F6F</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#d4af37"></span><span class="meta"><span class="name">Gold</span><span class="hex">#D4AF37</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 7: 861-1538 -->
+    <div class="entry" data-n="2" id="era-861">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#0b7a3d"/>
+              <path d="M120,70 A38,38 0 1 0 172,102 A28,28 0 1 1 120,70 Z" fill="#f4efe1"/>
+            </svg>
+            <div class="flag-caption">an informed representation of Shirvanshah-era heraldry &mdash; green field, white crescent</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 861 &ndash; 1538</div>
+            <h3 class="card-title">Shirvanshahs and local emirates</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Sovereign under its own crown — the Shirvanshahs ruled some form of their own state from Shamakhi, later Baku, for nearly seven centuries, one of the longest-lived dynasties anywhere in this atlas."><span class="dot" style="background:#b8862f"></span>Kingdom, independent</span><span class="tag" tabindex="0" data-tip="Earliest attested ruler of the Yazidid line of Shirvanshahs, documented from around 861, marking the start of the long dynastic lineage that would rule Shirvan until the Safavid conquest of 1538."><span class="dot" style="background:#4a3b78"></span>Haytham ibn Khalid</span><span class="tag" tabindex="0" data-tip="The Shirvanshahs ruled as a Sunni Muslim dynasty following the region's Islamization under earlier Arab conquest, with Sunni Islam remaining the established faith of the Shirvan state until the Shi'a Safavids' 1538 conquest."><span class="dot" style="background:#8e3b62"></span>Sunni Islam (state religion of the Shirvanshahs)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Persianate dynasty ruling Shirvan from Shamakhi, then Baku, c.861–1538, among the longest-lived Islamic dynasties anywhere. Emblem: an eight-pointed star and geometric knotwork."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1a3b2e"/><g fill="#c9a227"><path d="M50,26 L58,46 L80,46 L62,58 L70,80 L50,66 L30,80 L38,58 L20,46 L42,46 Z"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Shirvanshahs</span><span class="tag" tabindex="0" data-tip="Founded by Shah Ismail I from the Safavid Sufi order of Ardabil, extinguishing the Shirvanshahs in 1538; 1501–1736. Banners traditionally green bearing a gold sun disc."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1a6b3a"/><circle cx="50" cy="56" r="22" fill="#f9d616"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Safavid dynasty</span></div>
+            <p><span class="label">Who &amp; why:</span> the Shirvanshahs, ruling from Shamakhi (later Baku) in what is now northeastern Azerbaijan, are attested from the 9th century and go on ruling, remarkably, in some form for nearly seven centuries &mdash; through Mongol invasion, Timur's campaigns, and constant pressure from larger neighbors &mdash; making them one of the longest-lived dynasties anywhere in this atlas. Other parts of Azerbaijani territory in this long span pass through various local Muslim dynasties and, briefly, Mongol Ilkhanate overlordship in the 13th&ndash;14th centuries. The line finally ends in 1538, when the Safavids depose the last Shirvanshah and absorb his lands directly.</p>
+            <p><span class="label">What it represents:</span> no single Shirvanshah state flag is documented with certainty; the green field and white crescent shown here are an informed representation drawing on general Islamic dynastic heraldic conventions of the era, not a specific surviving banner.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no documented flag; shown as an informed reconstruction.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Green field, white crescent.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#0b7a3d"></span><span class="meta"><span class="name">Green</span><span class="hex">#0B7A3D</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <div class="entry" data-n="1" id="era-4bce">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; ancient Caucasian Albania, no flag survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 4th century BCE &ndash; 861 CE</div>
+            <h3 class="card-title">Caucasian Albania and the Sassanid/Arab conquest</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="An ancient kingdom in the eastern Caucasus, roughly overlapping modern Azerbaijan, attested from the 4th century BCE and ruled as a semi-autonomous Christian kingdom under Sassanid Persian, then early Islamic, overlordship until 705 CE."><span class="dot" style="background:#8a5a3a"></span>Kingdom, then Sassanid/Arab province</span><span class="tag" tabindex="0" data-tip="King of Caucasian Albania, c.4th century, who converts to Christianity around 370 CE under Armenian ecclesiastical influence, beginning the kingdom's centuries as a Christian state under Persian suzerainty."><span class="dot" style="background:#4a3b78"></span>Urnayr of Albania</span><span class="tag" tabindex="0" data-tip="Zoroastrian and pagan cults give way to Armenian-influenced Christianity from the late 4th century; the Umayyad conquest completed by 705 CE begins the region's gradual Islamization, which the Shirvanshahs inherit as an established Sunni state by 861."><span class="dot" style="background:#8e3b62"></span>Zoroastrian/pagan, then Christian (4th&ndash;8th c.)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="The Umayyad Caliphate completes its conquest of the Caucasus by 705 CE, ending Caucasian Albania's political autonomy and beginning the Islamization that the Shirvanshahs inherit as an established Sunni polity within two centuries."><span class="dot" style="background:#6b2c2c"></span>Conquered by: Umayyad Caliphate (705 CE)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Dynasty ruling Caucasian Albania as kings and later princes under Sassanid, then Arab, overlordship, c.4th&ndash;8th centuries. Known through Armenian and Georgian chronicles rather than surviving heraldry."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1a3b2e"/><circle cx="50" cy="56" r="20" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Arranshahik dynasty</span></div>
+            <p><span class="label">Who &amp; why:</span> Caucasian Albania, a kingdom in the eastern Caucasus roughly overlapping modern Azerbaijan, is attested from the 4th century BCE and survives for the better part of a millennium as a shifting client of Rome, Parthia, and above all Sassanid Persia. King Urnayr's conversion to Christianity around 370 CE, under Armenian ecclesiastical influence, opens centuries of semi-autonomous Christian rule by the Arranshahik dynasty even as Sassanid Persia dominates the kingdom's foreign policy. The Umayyad Caliphate's conquest of the Caucasus, completed by 705 CE, ends this autonomy for good; the fractured, gradually Islamizing local dynasties that follow &mdash; including the Shirvanshahs, attested from 861 &mdash; inherit post-Albanian Shirvan directly.</p>
+            <p><span class="label">What it represents:</span> no flag survives from Caucasian Albania; its kings are known through Armenian and Georgian chronicles, Sassanid-era inscriptions, and archaeology, not through any vexillological record. Shown here honestly blank rather than invented.</p>
+            <p><span class="label">World context:</span> this span runs alongside the Parthian and Sassanid empires' long wars with Rome, the construction of the Sassanid palace at Ctesiphon, and the rapid 7th-century Arab conquests that end the Sassanid Empire itself in 651 CE &mdash; the same conquest wave that reaches Caucasian Albania barely a generation later, in 705.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#b8862f"></span><b>Kingdom, independent</b> &mdash; sovereign under its own crown</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8a5a3a"></span><b>Vassal khanates</b> &mdash; local rulers under Persian suzerainty</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#7a6a52"></span><b>Annexed</b> &mdash; absorbed into an outside empire</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#b8862f"></span><b>Republic, independent</b> &mdash; sovereign parliamentary or constitutional republic</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#9c2b3a"></span><b>Soviet republic</b> &mdash; constituent republic of the USSR</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the named ruler most associated with the era's start</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official/established faith, not the population's</div>
+    </div>
+  </div>
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for Azerbaijan lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/az/">Search Record Atlas for Azerbaijan &rarr;</a>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This page is one lineage in a larger set. See the region-wide map and the other countries here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="caucasus-hub.html"><b>Caucasus hub</b><span>Georgia, Armenia, and Azerbaijan together</span></a>
+      <a class="link-card" href="georgia-flags.html"><b>Flags of Georgia</b><span>The Bagrationi lineage</span></a>
+      <a class="link-card" href="armenia-flags.html"><b>Flags of Armenia</b><span>The Bagratid lineage</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are close historical approximations for painting reference; pre-19th-century swatches are informed reconstructions, not official specifications.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var IC = { antiquity:"#5c2a24", shirvan:"#0b7a3d", safavid:"#1f6f6f", khanates:"#2a8a8a", russian:"#241f14", adr:"#3f9fd1", soviet:"#a4302a", modern:"#3f9fd1", karabakh:"#b3552b" };
+  var INAMES = { antiquity:"Caucasian Albania and the Sassanid/Arab conquest", shirvan:"Shirvanshahs and local emirates", safavid:"Safavid Persia", khanates:"Vassal khanates under Persian suzerainty", russian:"Russian imperial rule", adr:"Azerbaijan Democratic Republic", soviet:"Soviet Azerbaijan", modern:"Republic of Azerbaijan (modern)", karabakh:"Self-declared Republic of Nagorno-Karabakh / Artsakh (de facto, Armenian-backed, not internationally recognized)" };
+  var IFLAGS = {
+    antiquity: "<rect width=\"300\" height=\"200\" fill=\"#5c2a24\"/>\n              <rect width=\"300\" height=\"200\" fill=\"none\" stroke=\"#c9a13c\" stroke-width=\"4\" stroke-dasharray=\"8 6\"/>\n              <text x=\"150\" y=\"92\" text-anchor=\"middle\" font-family=\"IBM Plex Mono, monospace\" font-size=\"24\" font-weight=\"700\" fill=\"#c9a13c\">NO FLAG</text>\n              <text x=\"150\" y=\"122\" text-anchor=\"middle\" font-family=\"IBM Plex Mono, monospace\" font-size=\"24\" font-weight=\"700\" fill=\"#c9a13c\">DOCUMENTED</text>",
+    shirvan: "<rect width=\"300\" height=\"200\" fill=\"#0b7a3d\"/>\n              <path d=\"M120,70 A38,38 0 1 0 172,102 A28,28 0 1 1 120,70 Z\" fill=\"#f4efe1\"/>",
+    safavid: "<rect width=\"300\" height=\"200\" fill=\"#1f6f6f\"/>\n              <circle cx=\"150\" cy=\"100\" r=\"32\" fill=\"#d4af37\"/>",
+    khanates: "<rect width=\"300\" height=\"200\" fill=\"#2a8a8a\"/>\n              <circle cx=\"150\" cy=\"92\" r=\"22\" fill=\"#d4af37\"/>\n              <path d=\"M108,138 q42,-32 84,0\" stroke=\"#d4af37\" stroke-width=\"6\" fill=\"none\"/>",
+    russian: "<rect width=\"300\" height=\"66.7\" fill=\"#241f14\"/>\n              <rect y=\"66.7\" width=\"300\" height=\"66.6\" fill=\"#d4af37\"/>\n              <rect y=\"133.3\" width=\"300\" height=\"66.7\" fill=\"#f4efe1\"/>",
+    adr: "<rect width=\"300\" height=\"66.7\" fill=\"#3f9fd1\"/>\n              <rect y=\"66.7\" width=\"300\" height=\"66.6\" fill=\"#c9372c\"/>\n              <rect y=\"133.3\" width=\"300\" height=\"66.7\" fill=\"#3f9f5f\"/>\n              <path d=\"M160,80 A20,20 0 1 0 178,116 A15,15 0 1 1 160,80 Z\" fill=\"#f4efe1\"/>\n              <path d=\"M195,90 l3,8 8.5,0.3 -6.5,5.5 2,8.3 -7,-4.8 -7,4.8 2,-8.3 -6.5,-5.5 8.5,-0.3 Z\" fill=\"#f4efe1\"/>",
+    soviet: "<rect width=\"300\" height=\"200\" fill=\"#a4302a\"/>\n              <rect x=\"0\" y=\"172\" width=\"300\" height=\"14\" fill=\"#3f9fd1\"/>\n              <g fill=\"#d4af37\" transform=\"translate(30,25)\"><rect x=\"0\" y=\"13\" width=\"30\" height=\"6\"/><rect x=\"12\" y=\"0\" width=\"6\" height=\"30\"/></g>",
+    modern: "<rect width=\"300\" height=\"66.7\" fill=\"#3f9fd1\"/>\n              <rect y=\"66.7\" width=\"300\" height=\"66.6\" fill=\"#c9372c\"/>\n              <rect y=\"133.3\" width=\"300\" height=\"66.7\" fill=\"#3f9f5f\"/>\n              <path d=\"M160,80 A20,20 0 1 0 178,116 A15,15 0 1 1 160,80 Z\" fill=\"#f4efe1\"/>\n              <path d=\"M195,90 l3,8 8.5,0.3 -6.5,5.5 2,8.3 -7,-4.8 -7,4.8 2,-8.3 -6.5,-5.5 8.5,-0.3 Z\" fill=\"#f4efe1\"/>",
+    karabakh: "<rect width=\"300\" height=\"66.7\" fill=\"#c9372c\"/>\n              <rect y=\"66.7\" width=\"300\" height=\"66.6\" fill=\"#3f9fd1\"/>\n              <rect y=\"133.3\" width=\"300\" height=\"66.7\" fill=\"#f2a800\"/>\n              <path d=\"M0,66.7 L40,66.7 L40,133.3 L0,133.3 Z\" fill=\"#f4efe1\"/>\n              <path d=\"M0,72 h40 M6,78 h28 M0,84 h40 M6,90 h28 M0,96 h40 M6,102 h28 M0,108 h40 M6,114 h28 M0,120 h40 M6,126 h28\" stroke=\"#c9372c\" stroke-width=\"1.6\"/>"
+  };
+  function iFlagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (IFLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  var iLegendEl = document.getElementById("iLegend");
+  iLegendEl.innerHTML = Object.keys(IC).map(function (k) {
+    return '<span><span class="sw" style="background:' + IC[k] + '"></span>' + INAMES[k] + "</span>";
+  }).join("");
+
+  var ISNAP = [
+    { year:"c. 4th c. BCE", name:"Caucasian Albania and the Sassanid/Arab conquest", t:{ az0:IC.antiquity, nk:IC.antiquity }, flagKeys:{ az0:"antiquity", nk:"antiquity" },
+      story:"Caucasian Albania, a kingdom in the eastern Caucasus roughly overlapping modern Azerbaijan, is attested from the 4th century BCE and survives for the better part of a millennium as a shifting client of Rome, Parthia, and above all Sassanid Persia. King Urnayr's conversion to Christianity around 370 CE opens centuries of semi-autonomous Christian rule by the Arranshahik dynasty under Sassanid suzerainty, ended for good by the Umayyad Caliphate's conquest of the Caucasus, completed by 705 CE. No flag survives from Caucasian Albania; shown here honestly blank until the Shirvanshahs emerge as a distinct local dynasty by 861." },
+    { year:"c. 861", name:"Shirvanshahs and local emirates", t:{ az0:IC.shirvan, nk:IC.shirvan }, flagKeys:{ az0:"shirvan", nk:"shirvan" },
+      story:"The Shirvanshahs, a local Persianate dynasty centered on Shamakhi and later Baku, rule much of what is now Azerbaijan from the 9th century, alongside various other local emirates, through Seljuk, Mongol, and Timurid overlordship that never fully extinguishes their own local rule." },
+    { year:"1538", name:"Safavid Persia", t:{ az0:IC.safavid, nk:IC.safavid }, flagKeys:{ az0:"safavid", nk:"safavid" },
+      story:"Shah Ismail I, founder of the Safavid dynasty, conquers Shirvan and incorporates it fully into Safavid Persia by 1538, ending the Shirvanshahs' centuries of local rule and folding the territory into an empire that also establishes Twelver Shi'a Islam across the region." },
+    { year:"1747", name:"Vassal khanates under Persian suzerainty", t:{ az0:IC.khanates, nk:IC.khanates }, flagKeys:{ az0:"khanates", nk:"khanates" },
+      story:"As Safavid central authority weakens through the 18th century, the territory fragments into some twenty semi-independent khanates (Baku, Ganja, Shirvan, Karabakh, Quba, and others) &mdash; each locally ruled but still nominally owing allegiance to Persia, now under the Afsharid and then Qajar dynasties. The Karabakh khanate, centered on Shusha, is one of these &mdash; a local polity in its own right, but not yet the separately administered enclave the same ground becomes in the 20th century." },
+    { year:"1813", name:"Russian imperial rule", t:{ az0:IC.russian, nk:IC.russian }, flagKeys:{ az0:"russian", nk:"russian" },
+      story:"Russia annexes the northern khanates through the 1813 Treaty of Gulistan and the 1828 Treaty of Turkmenchay, ending Persian suzerainty for good and incorporating the territory, including the former Karabakh khanate, into the Russian Empire, where the Baku oil boom later makes it one of the world's most important oil-producing regions." },
+    { year:"1918", name:"Azerbaijan Democratic Republic", t:{ az0:IC.adr, nk:IC.adr }, flagKeys:{ az0:"adr", nk:"adr" },
+      story:"The Azerbaijan Democratic Republic declares independence on 28 May 1918 amid the Russian Empire's collapse, becoming the first secular democratic republic in the Muslim world and extending suffrage to women before Britain or the United States &mdash; a fragile 23-month experiment that claims Karabakh as part of its own territory throughout, alongside the rest of the republic." },
+    { year:"1920", name:"Soviet Azerbaijan", t:{ az0:IC.soviet, nk:IC.soviet }, flagKeys:{ az0:"soviet", nk:"soviet" },
+      story:"The Red Army invades in April 1920, ending the Democratic Republic; Soviet Azerbaijan is established, later formalized as a full union republic within the USSR in 1936, governed from Moscow for seven decades. Nagorno-Karabakh is established as an autonomous oblast inside the republic's borders in 1923, a decision whose consequences outlast the Soviet Union itself &mdash; but for now it remains an internal Soviet administrative unit, not a separately governed territory." },
+    { year:"1991", name:"Independence, and war over Nagorno-Karabakh", t:{ az0:IC.modern, nk:IC.karabakh }, flagKeys:{ az0:"modern", nk:"karabakh" },
+      story:"Azerbaijan declares independence on 30 August 1991 as the USSR collapses, restoring the Democratic Republic's own 1918 tricolor. Nagorno-Karabakh's own local authorities had already declared a separate republic days earlier, and Azerbaijan fights a war with Armenia over the territory, a mostly Armenian-populated enclave inside its Soviet-era borders, losing effective control of it after a 1994 ceasefire. From this point, the self-declared Republic of Nagorno-Karabakh (Artsakh), backed by Armenia but not recognized by any UN member state including Armenia itself, administers the enclave separately from the government in Baku." },
+    { year:"2020", name:"Second Nagorno-Karabakh War", t:{ az0:IC.modern, nk:IC.karabakh }, flagKeys:{ az0:"modern", nk:"karabakh" },
+      story:"A six-week war in the autumn of 2020 lets Azerbaijan retake much of the territory it lost in the 1990s, including large parts of Nagorno-Karabakh itself and all of the surrounding districts, under a Russian-brokered ceasefire. A shrunken self-declared Republic of Nagorno-Karabakh (Artsakh) continues administering the remaining, Armenian-populated core of the enclave for three more years, still separately from Baku." },
+    { year:"2023", name:"Reincorporation", t:{ az0:IC.modern, nk:IC.modern }, flagKeys:{ az0:"modern", nk:"modern" },
+      story:"Azerbaijan's September 2023 military operation dissolves the breakaway Nagorno-Karabakh authorities outright, ending nearly three decades of de facto Armenian-backed separation; nearly the entire ethnic Armenian population of the region, more than 100,000 people, departs for Armenia within days. Nagorno-Karabakh is administered directly from Baku for the first time since the Soviet Union's collapse." }
+  ];
+
+  var IREGIONS = ["az0","nk"];
+  var IREGION_NAMES = { az0:"Rest of Azerbaijan (Baku-governed)", nk:"Nagorno-Karabakh" };
+  var IADJ = [["az0","nk"]];
+
+  function iTextColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+
+  function iGroupsFor(t) {
+    var parent = {};
+    IREGIONS.forEach(function (r) { parent[r] = r; });
+    function find(x) { return parent[x] === x ? x : (parent[x] = find(parent[x])); }
+    function union(a, b) { var ra = find(a), rb = find(b); if (ra !== rb) parent[ra] = rb; }
+    IADJ.forEach(function (pair) { if (t[pair[0]] === t[pair[1]]) union(pair[0], pair[1]); });
+    var groups = {};
+    IREGIONS.forEach(function (r) { var root = find(r); if (!groups[root]) groups[root] = []; groups[root].push(r); });
+    return Object.keys(groups).map(function (k) { return groups[k]; });
+  }
+
+  var iYearTag = document.getElementById("iYearTag");
+  var iEraName = document.getElementById("iEraName");
+  var iEraOwners = document.getElementById("iEraOwners");
+  var iEraStory = document.getElementById("iEraStory");
+  var iFlagsRow = document.getElementById("iFlagsRow");
+  var iSlider = document.getElementById("iSlider");
+
+  function iRender(idx) {
+    var era = ISNAP[idx];
+    iYearTag.textContent = era.year;
+    iEraName.textContent = era.name;
+    iEraStory.innerHTML = era.story;
+
+    IREGIONS.forEach(function (id) {
+      var el = document.getElementById("ireg-" + id);
+      if (el) el.setAttribute("fill", era.t[id]);
+      var tcol = iTextColorFor(era.t[id]);
+      var tcolHalo = tcol === "#201a12" ? "#f7f1e3" : "#201a12";
+      for (var i = 0; i < 4; i++) {
+        var lbl = document.getElementById("ilbl-" + id + (i === 0 ? "" : (i+1)));
+        if (lbl) { lbl.setAttribute("fill", tcol); lbl.setAttribute("stroke", tcolHalo); }
+      }
+    });
+
+    IADJ.forEach(function (pair) {
+      var same = era.t[pair[0]] === era.t[pair[1]];
+      var line = document.getElementById("ib-" + pair[0] + "-" + pair[1]);
+      if (line) {
+        line.setAttribute("stroke-opacity", same ? "0.06" : "0.85");
+        line.setAttribute("stroke-width", same ? "1" : "2.4");
+      }
+    });
+
+    var groups = iGroupsFor(era.t);
+    var seen = {}; var parts = [];
+    groups.forEach(function (g) {
+      var label = INAMES[Object.keys(IC).filter(function (k) { return IC[k] === era.t[g[0]]; })[0]] || era.t[g[0]];
+      if (!seen[label]) { seen[label] = []; parts.push(label); }
+      g.forEach(function (id) { seen[label].push(IREGION_NAMES[id]); });
+    });
+    iEraOwners.innerHTML = parts.map(function (label) { return "<b>" + label + "</b>: " + seen[label].join(", "); }).join(" &middot; ");
+
+    iFlagsRow.innerHTML = IREGIONS.map(function (id) {
+      return '<div class="iflag-chip">' + iFlagSvg(era.flagKeys[id]) + '<div class="ic-label">' + IREGION_NAMES[id] + '</div></div>';
+    }).join("");
+  }
+
+  iSlider.addEventListener("input", function () { iRender(parseInt(iSlider.value, 10)); });
+  iRender(0);
+
+  var iPlaying = false, iPlayTimer = null;
+  var iPlayBtn = document.getElementById("iPlayBtn");
+  function iStepPlay() {
+    var next = parseInt(iSlider.value, 10) + 1;
+    if (next > ISNAP.length - 1) { iStopPlay(); return; }
+    iSlider.value = next;
+    iRender(next);
+  }
+  function iStartPlay() {
+    iPlaying = true;
+    iPlayBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(iSlider.value, 10) >= ISNAP.length - 1) { iSlider.value = 0; iRender(0); }
+    iPlayTimer = setInterval(iStepPlay, 1700);
+  }
+  function iStopPlay() {
+    iPlaying = false;
+    iPlayBtn.innerHTML = "&#9654;";
+    clearInterval(iPlayTimer);
+  }
+  iPlayBtn.addEventListener("click", function () { iPlaying ? iStopPlay() : iStartPlay(); });
+})();
+</script>
+
+<script>
+  document.querySelectorAll(".tag[data-tip]").forEach(function (tag) {
+    tag.addEventListener("click", function (e) {
+      var wasOpen = tag.classList.contains("tip-open");
+      document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+      if (!wasOpen) tag.classList.add("tip-open");
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+  });
+</script>
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var html = '<h4>Genealogical records for this ground</h4>';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>
+
+</body></html>

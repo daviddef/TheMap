@@ -1,0 +1,716 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+</style></head><body>
+<title>Flags of Ethiopia</title>
+<meta name="description" content="A chronological, paint-ready atlas of every flag that flew over Ethiopia, from the ancient Kingdom of Aksum through the Solomonic empire, the brief Italian occupation, the Derg, and the modern federal republic.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.08rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; font-size: .94rem; color: var(--muted); }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  .legend { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+
+  /* ---------- Timeline ---------- */
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1px; background: var(--hair); }
+  @media (max-width: 560px) { .timeline::before { left: 9px; } }
+  .entry { position: relative; padding-left: 46px; margin-bottom: 46px; }
+  @media (max-width: 560px) { .entry { padding-left: 30px; } }
+  .entry::before {
+    content: attr(data-n);
+    position: absolute; left: 1px; top: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--paper); outline: 1px solid var(--hair);
+    background: var(--card);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--brick); display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) { .entry::before { left: -5px; width: 18px; height: 18px; font-size: 9px; } }
+
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+  .card-head { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  @media (max-width: 620px) { .card-head { flex-direction: column; } }
+  .flag-box { flex: none; width: 168px; }
+  .flag-box svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-caption { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .card-title { font-size: 1.32rem; font-weight: 600; line-height: 1.18; margin: 0 0 10px; text-wrap: balance; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px; border: 1px solid var(--card-border); color: var(--muted);
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  /* Flip tooltip below tags near the top of the viewport so it isn't clipped */
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  /* Keep tooltips from overflowing the left/right edges on narrow screens */
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint { border-top: 1px solid var(--hair); }
+  details.paint > summary {
+    cursor: pointer; list-style: none; padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--adriatic); display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before { content: "+"; font-family: "Fraunces", serif; font-size: 15px; width: 14px; }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row { display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px; }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--card-border); border-radius: 2px; padding: 5px 9px 5px 5px; background: var(--paper); }
+  .swatch .chip { width: 20px; height: 20px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: 64ch; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 88px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 380px; height: auto; }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .iborder-line { transition: stroke-opacity 0.6s ease, stroke-width 0.6s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .ireg-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 700; text-anchor: middle; transition: fill .4s ease, stroke .4s ease; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="east-africa-hub.html">East Africa hub</a></p>
+  <p class="kicker">Family research &middot; Phase 12 of the world atlas</p>
+  <h1>Flags of Ethiopia</h1>
+  <p class="lede">Ethiopia stands apart from every other country in this hub: it is Africa's oldest continuously independent state, tracing an unbroken thread of statehood back through the medieval Solomonic empire to the ancient Kingdom of Aksum, interrupted by real foreign rule only once, briefly, when Mussolini's Italy occupied the country from 1936 to 1941. Its history since is no less consequential &mdash; a modernizing but autocratic emperor, a Marxist military junta whose years in power included a well-documented famine, and a federal republic still finding its shape since 1991.</p>
+  <p class="lede">Ethiopia's green-yellow-red tricolor, in use in some form since the 1890s, is one of the oldest national color schemes in Africa and the direct inspiration for the "pan-African colors" adopted by many other African flags after independence &mdash; not the other way around.</p>
+
+  <div class="scope-note">
+    <b>Scope of this page:</b> the Ethiopian highlands and their successive states, c. 100&ndash;present, five political entries. Aksum's own flag is not documented in the modern sense; its entry represents the kingdom's real historical footprint honestly, without inventing a banner. Part of a larger atlas &mdash; see the linked pages at the bottom.
+  </div>
+
+  <div class="imap-section">
+    <h2>One border, five eras</h2>
+    <p class="imap-sub">Ethiopia's own real border, traced whole &mdash; today's landlocked outline, current since Eritrea's 1993 independence. Press play, or drag the slider, across five eras of Africa's oldest continuously independent state.</p>
+    <div class="rule-box">
+      <b>Ethiopia has no genuine internal governing split to show within this border.</b> Its foreign rule is a single, brief exception rather than a lasting partition: Mussolini's Italy occupied the country from 1936 to 1941, and Ethiopian sovereignty was restored over the whole territory, not divided among it. The map's modern outline reflects today's post-1993 borders; some eras shown here also governed territory now part of independent Eritrea, covered on its own page.
+    </div>
+    <div class="imap-frame">
+      <div class="imap-controls">
+        <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="imap-year" id="iYearTag">before c. 100</span>
+        <input type="range" id="iSlider" min="0" max="4" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="imap-svg" viewBox="0 0 340 300" xmlns="http://www.w3.org/2000/svg">
+        <g class="context-label" pointer-events="none">
+          <text x="100" y="45">SUDAN</text>
+          <text x="270" y="40">ERITREA</text>
+          <text x="290" y="200">SOMALIA</text>
+          <text x="130" y="270">KENYA</text>
+        </g>
+        <path id="ireg-et" class="ireg-fill" d="M124.79,42.86 L135.92,51.29 L146.67,46.92 L151.09,50.80 L163.66,51.03 L179.62,58.47 L184.36,64.89 L192.49,70.85 L200.03,81.74 L206.30,87.75 L199.85,95.97 L193.65,104.67 L195.08,109.80 L195.37,115.45 L205.61,115.76 L210.03,114.44 L214.10,117.75 L210.10,124.33 L216.87,134.56 L223.63,143.50 L230.63,150.13 L290.58,172.17 L306.00,172.06 L254.19,227.81 L230.30,228.62 L213.96,241.72 L202.21,242.06 L197.20,247.91 L184.67,247.91 L177.27,241.63 L160.52,249.40 L155.10,257.14 L142.88,255.68 L138.82,253.54 L134.53,254.05 L128.73,253.86 L105.52,238.09 L92.76,238.09 L86.50,231.98 L86.50,221.55 L76.97,218.44 L66.14,198.23 L57.76,193.92 L54.55,186.49 L45.26,177.44 L34.00,176.11 L40.25,165.53 L49.98,165.07 L52.72,159.40 L52.47,142.70 L57.90,123.27 L66.58,118.06 L68.42,110.47 L76.29,96.28 L87.34,87.08 L94.80,68.79 L97.72,52.84 L119.07,56.72 L124.79,42.86 Z"/>
+        <g font-family="IBM Plex Mono, monospace">
+          <text class="ireg-label" id="ilbl-et" x="150" y="160">ETHIOPIA</text>
+        </g>
+      </svg>
+      <div class="imap-head">
+        <div class="imap-name" id="iEraName">Pre-Aksumite highland peoples</div>
+        <div class="imap-owners" id="iEraOwners"></div>
+      </div>
+      <div class="iflags-row" id="iFlagsRow"></div>
+      <p class="imap-story" id="iEraStory"></p>
+
+      <p class="map-note">Real traced border (johan/world.geo.json, ETH; modern post-1993 outline), no internal partition &mdash; see the rule box above for why.</p>
+      <div class="imap-key" id="iLegend"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <!-- 1 -->
+    <div class="entry" data-n="5" id="era-1991">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#1e7a4a"/>
+              <rect y="66.7" width="300" height="66.6" fill="#f9d616"/>
+              <rect y="133.3" width="300" height="66.7" fill="#a4302a"/>
+              <circle cx="150" cy="100" r="30" fill="#1a3a6b"/>
+              <path d="M150,78 l5,14 15,2 -11,10 3,15 -12,-8 -12,8 3,-15 -11,-10 15,-2 Z" fill="#f9d616"/>
+            </svg>
+            <div class="flag-caption">green-yellow-red tricolor, blue disc with the gold Star of Unity at center</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1991 &ndash; present</div>
+            <h3 class="card-title">Federal Democratic Republic of Ethiopia</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#1e7a4a"></span>Republic, independent</span><span class="tag" tabindex="0" data-tip="Rebel leader whose EPRDF coalition toppled the Derg in 1991; he became transitional head of government that year and dominated Ethiopian politics as president and then prime minister until his death in 2012."><span class="dot" style="background:#4a3b78"></span>Meles Zenawi</span><span class="tag" tabindex="0" data-tip="The 1995 constitution establishes a strict separation of state and religion, with no official church — a deliberate break from the Orthodox Christian establishment of the imperial era."><span class="dot" style="background:#8e3b62"></span>No official state religion (secular)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Ethiopia hosts one of Africa's largest refugee populations, with hundreds of thousands of Somalis, South Sudanese, and Eritreans fleeing conflict and repression in their own countries settling in camps across the country."><span class="dot" style="background:#2f7a6b"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#4189dd"/><path d="M10,4 l1.2,2.6 -1.2,2.6 -1.2,-2.6z" fill="#fff"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#fff"/><rect width="20" height="4" y="0" fill="#000"/><rect width="20" height="4" y="5" fill="#d21034"/><rect width="20" height="4" y="10" fill="#078930"/><polygon points="0,0 8,7 0,14" fill="#0f47af"/><path d="M3,5.7 l0.6,1.3 -0.6,1.3 -0.6,-1.3z" fill="#fcdd09"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><polygon points="0,0 20,0 0,7" fill="#12ad2b"/><polygon points="0,14 20,14 0,7" fill="#0069a4"/><polygon points="0,0 0,14 11,7" fill="#ea0437"/><circle cx="5" cy="7" r="1.3" fill="none" stroke="#fbb500" stroke-width="0.5"/></svg></span>Immigration: Somali, South Sudanese &amp; Eritrean refugees</span><span class="tag" tabindex="0" data-tip="The 2020&ndash;2022 Tigray war displaces millions internally and drives tens of thousands of refugees across the border into Sudan, part of a broader pattern of conflict-driven displacement in the federal era."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#d21034"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#000"/><polygon points="0,0 7,7 0,14" fill="#007229"/></svg>Emigration: Tigray war refugees to Sudan (2020&ndash;22)</span></div>
+            <p><span class="label">Who &amp; why:</span> the Derg falls in 1991 as EPRDF-led rebel forces (a coalition dominated by the Tigrayan People's Liberation Front) take Addis Ababa, ending Mengistu's rule. A transitional government gives way to a new federal constitution in 1995, organizing Ethiopia into ethnically based regional states, with Eritrea's own independence formally recognized separately in 1993 after its decades-long war. Ethiopia has continued as a federal republic since, including a change of ruling coalition in 2018 under Abiy Ahmed and a devastating internal Tigray war from 2020-2022, though the flag and constitutional structure have remained the same throughout.</p>
+            <p><span class="label">What it represents:</span> the same green-yellow-red tricolor carried since the 1890s, now centered on a new emblem adopted in 1996 &mdash; a blue disc (representing peace) bearing a gold five-pointed star with rays (the "Star of Unity," standing for the equality and unity of Ethiopia's nations and peoples) &mdash; replacing the Lion of Judah of the imperial era and the Derg's own socialist emblem.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Green-yellow-red horizontal bands; centered blue disc with a gold five-pointed star and radiating rays.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#1e7a4a"></span><span class="meta"><span class="name">Green</span><span class="hex">#1E7A4A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f9d616"></span><span class="meta"><span class="name">Yellow</span><span class="hex">#F9D616</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#1a3a6b"></span><span class="meta"><span class="name">Emblem blue</span><span class="hex">#1A3A6B</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="entry" data-n="4" id="era-1974">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#1e7a4a"/>
+              <rect y="66.7" width="300" height="66.6" fill="#f9d616"/>
+              <rect y="133.3" width="300" height="66.7" fill="#a4302a"/>
+              <path d="M150,72 l14,16 20,4 -14,15 3,20 -23,-9 -23,9 3,-20 -14,-15 20,-4 Z" fill="#a4302a" stroke="#f9d616" stroke-width="2"/>
+              <path d="M138,92 l6,16 4,2 4,-2 6,-16" fill="#1a3a6b"/>
+            </svg>
+            <div class="flag-caption">green-yellow-red tricolor with the Derg's socialist emblem (gold star and plough, simplified)</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1974 &ndash; 1991</div>
+            <h3 class="card-title">Provisional Military Government (the Derg)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#7c2e1f"></span>Military / one-party rule</span><span class="tag" tabindex="0" data-tip="Military officer who rose within the Derg junta to become its unchallenged strongman, eliminating rival members in its early years and formally chairing the regime from 1977 until its 1991 collapse."><span class="dot" style="background:#4a3b78"></span>Mengistu Haile Mariam</span><span class="tag" tabindex="0" data-tip="The Marxist-Leninist Derg regime disestablished the Ethiopian Orthodox Church, confiscated church lands, and promoted official state atheism in line with Soviet-aligned doctrine."><span class="dot" style="background:#8e3b62"></span>State atheism (Marxist-Leninist)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Israel airlifts thousands of Ethiopia's ancient Beta Israel (Ethiopian Jewish) community out of the country in covert operations, chiefly Operation Moses (1984&ndash;85) via Sudan and Operation Solomon (1991), amid famine and civil war."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#fff"/><rect y="1.5" width="20" height="1.3" fill="#0038b8"/><rect y="11.2" width="20" height="1.3" fill="#0038b8"/><path d="M10,5 L11.7,8 H8.3 Z M10,9 L8.3,6 H11.7 Z" fill="none" stroke="#0038b8" stroke-width="0.5"/></svg>Emigration: Beta Israel airlifted to Israel (1984&ndash;91)</span><span class="tag" tabindex="0" data-tip="The 1983&ndash;1985 famine and the ongoing civil war against Eritrean and Tigrayan insurgents drive hundreds of thousands of Ethiopians across the border into Sudan and Somalia seeking refuge and food aid."><span class="dot" style="background:#a3672f"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#d21034"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#000"/><polygon points="0,0 7,7 0,14" fill="#007229"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#4189dd"/><path d="M10,4 l1.2,2.6 -1.2,2.6 -1.2,-2.6z" fill="#fff"/></svg></span>Emigration: famine &amp; war refugees to Sudan (1983&ndash;85)</span></div>
+            <p><span class="label">Who &amp; why:</span> a committee of junior military officers, the Derg, deposes the aging Haile Selassie in a 1974 coup amid famine, inflation, and unrest, and by 1975 abolishes the monarchy outright, later executing the former emperor. Mengistu Haile Mariam consolidates control by the late 1970s and declares a Marxist-Leninist state (the People's Democratic Republic of Ethiopia from 1987), fighting a long civil war against regional insurgencies including Eritrean and Tigrayan rebels. The period includes the Red Terror political purges of the late 1970s and the well-documented 1983-1985 famine, worsened by drought, war, and government policy, in which hundreds of thousands of Ethiopians die &mdash; a defining and tragic chapter of this era, stated here factually. The regime collapses in 1991 as rebel forces take the capital.</p>
+            <p><span class="label">What it represents:</span> the same green-yellow-red tricolor is kept, but the imperial Lion of Judah is replaced with a socialist state emblem (a gold star over a stylized plough and gear, representing workers, peasants, and the revolution) centered on the flag.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Green-yellow-red horizontal bands; centered socialist emblem (star, plough, gear), simplified here.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#1e7a4a"></span><span class="meta"><span class="name">Green</span><span class="hex">#1E7A4A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f9d616"></span><span class="meta"><span class="name">Yellow</span><span class="hex">#F9D616</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="entry" data-n="3" id="era-1270">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#1e7a4a"/>
+              <rect y="66.7" width="300" height="66.6" fill="#f9d616"/>
+              <rect y="133.3" width="300" height="66.7" fill="#a4302a"/>
+              <rect x="128" y="76" width="44" height="48" fill="#f9d616" stroke="#a4302a" stroke-width="2"/>
+              <path d="M136,120 q14,-30 28,0" fill="none" stroke="#a4302a" stroke-width="3"/>
+            </svg>
+            <div class="flag-caption">green-yellow-red tricolor with the Lion of Judah bearing a cross-tipped staff (simplified)</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 1270 &ndash; 1974</div>
+            <h3 class="card-title">Ethiopian Empire (Solomonic dynasty)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Kingdom / Sultanate, independent</span><span class="tag" tabindex="0" data-tip="Founder of the Solomonic dynasty, who claimed descent from King Solomon and the Queen of Sheba and took the imperial throne in 1270, restoring rule to a line that would govern Ethiopia for seven centuries."><span class="dot" style="background:#4a3b78"></span>Yekuno Amlak</span><span class="tag" tabindex="0" data-tip="Ethiopian Orthodox Tewahedo Christianity, adopted by Aksum in the 4th century, remained the empire's official established church throughout the Solomonic era, closely bound to the dynasty's own legitimacy."><span class="dot" style="background:#8e3b62"></span>Ethiopian Orthodox (Tewahedo) Christianity</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Mussolini's Italy invades in 1935&ndash;36 and occupies Ethiopia from 1936 to 1941, sending Emperor Haile Selassie into exile, before British-assisted Ethiopian forces liberate the country and restore him to the throne."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="6.67" height="14" fill="#008C45"/><rect x="6.67" width="6.67" height="14" fill="#fff"/><rect x="13.33" width="6.67" height="14" fill="#CD212A"/></svg>Occupied by: Italy (1936&ndash;41)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Restored in 1270 on a claimed descent from Solomon and Sheba, ruling almost continuously until the Derg deposed Haile Selassie in 1974. Arms: the Lion of Judah, standing and bearing a cross-topped staff."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1a6b3a"/><g fill="#f2c14e"><ellipse cx="46" cy="66" rx="18" ry="12"/><circle cx="66" cy="52" r="11"/><path d="M60,42 L66,52 L58,52 Z M66,40 L72,50 L64,50 Z M72,44 L76,54 L68,52 Z"/><rect x="30" y="72" width="6" height="22"/><rect x="52" y="72" width="6" height="22"/><path d="M20,78 q-14,-2 -12,-16 q8,2 10,14 Z"/><rect x="38" y="20" width="4" height="26"/><path d="M32,22 L48,22 L40,14 Z"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Solomonic dynasty</span></div>
+            <p><span class="label">Who &amp; why:</span> the Solomonic dynasty, claiming descent from King Solomon and the Queen of Sheba (the Kebra Nagast legend), takes the imperial throne in 1270 and rules the Ethiopian Empire, with interruptions, for seven centuries. Ethiopia's independence is broken only once in this whole span: Mussolini's Italy invades in 1935-36 and occupies the country from 1936 to 1941, with Emperor Haile Selassie in exile and appealing personally to the League of Nations, before British-assisted Ethiopian forces liberate the country in 1941 and restore him to the throne. Haile Selassie (reigning 1930-1974) modernizes the state's institutions and becomes internationally influential as a founding figure of the Organisation of African Unity, while also being revered as a messianic figure by the Rastafari movement that emerges in Jamaica during his reign. Growing unrest over famine, inequality, and slow reform brings his rule to an end in the 1974 coup.</p>
+            <p><span class="label">What it represents:</span> the green-yellow-red tricolor is adopted in this form around 1897 (building on earlier plain colored pennants used from the mid-19th century) and formalized under Haile Selassie with the imperial coat of arms &mdash; the Lion of Judah, a Solomonic dynastic symbol, bearing a cross-tipped staff and flag &mdash; centered on the field.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio before the 20th century; roughly 1:2 under Haile Selassie.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Green-yellow-red horizontal bands; centered Lion of Judah emblem bearing a cross-tipped staff, simplified here.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#1e7a4a"></span><span class="meta"><span class="name">Green</span><span class="hex">#1E7A4A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f9d616"></span><span class="meta"><span class="name">Yellow</span><span class="hex">#F9D616</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="entry" data-n="2" id="era-100">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#7a4a1f"/>
+              <rect x="130" y="30" width="14" height="140" fill="#c9a13c"/>
+              <rect x="80" y="60" width="14" height="80" fill="#c9a13c"/>
+              <rect x="180" y="45" width="14" height="110" fill="#c9a13c"/>
+              <rect x="230" y="70" width="14" height="70" fill="#c9a13c"/>
+            </svg>
+            <div class="flag-caption">no national flag &mdash; shown here as the carved obelisks (stelae) of Aksum, its real historical signature</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 100 &ndash; 940</div>
+            <h3 class="card-title">Kingdom of Aksum</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Kingdom / Sultanate, independent</span><span class="tag" tabindex="0" data-tip="Earliest Aksumite ruler attested by name in outside sources, described in the 1st-century Greek trading manual the Periplus of the Erythraean Sea as governing the kingdom's coastal territory."><span class="dot" style="background:#4a3b78"></span>Zoskales</span><span class="tag" tabindex="0" data-tip="At this era's start, Aksum followed a polytheistic South Arabian-influenced pantheon (deities such as Astar and Mahrem); the kingdom did not adopt Christianity as its official religion until King Ezana's conversion around 330 AD, later in this same era."><span class="dot" style="background:#8e3b62"></span>Polytheistic Aksumite pantheon (pre-Christian)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Sabaean and other South Arabian traders and settlers cross the Red Sea to Aksum's port of Adulis and the highland capital over these centuries, part of the long-standing exchange that shaped Aksumite language, religion, and material culture."><span class="dot" style="background:#2f7a6b"></span>Immigration: South Arabian traders &amp; settlers</span></div>
+            <p><span class="label">Who &amp; why:</span> the Kingdom of Aksum, centered in what is now northern Ethiopia and Eritrea, grows into one of the major trading powers of the ancient world by the early centuries AD, linking the Roman Mediterranean and Persia to India across the Red Sea. Under King Ezana, around 330 AD, Aksum becomes one of the first states anywhere to adopt Christianity as an official religion, a mark of its early sophistication and a faith Ethiopia has kept continuously since. Aksum's power fades gradually from the 7th century as trade routes shift and regional rivals rise, with successor dynasties eventually giving way to the Solomonic line by 1270.</p>
+            <p><span class="label">What it represents:</span> no flag survives from Aksum in the modern sense; its best-documented visual legacy is the massive carved granite stelae (obelisks) that marked royal burial sites at the capital, shown here as an honest stand-in rather than an invented banner.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag; shown as the kingdom's carved stelae.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#7a4a1f"></span><span class="meta"><span class="name">Stone brown</span><span class="hex">#7A4A1F</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#c9a13c"></span><span class="meta"><span class="name">Carved gold</span><span class="hex">#C9A13C</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="entry" data-n="1" id="era-100-1">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="120" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; pre-Aksumite highland peoples, no flag survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">before c. 100</div>
+            <h3 class="card-title">Pre-Aksumite highland peoples</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#6b5c4a"></span>Fragmented / pre-state</span><span class="tag" tabindex="0" data-tip="No single ruler documented — the D'mt kingdom and other early highland polities of this period are known mainly from fragmentary inscriptions and archaeology, with no securely attested unified leadership."><span class="dot" style="background:#4a3b78"></span>No single ruler documented</span><span class="tag" tabindex="0" data-tip="Indigenous polytheistic beliefs, likely influenced by South Arabian religious traditions, are inferred from surviving inscriptions and altars; no unified state religion is documented for this fragmented period."><span class="dot" style="background:#8e3b62"></span>Indigenous polytheistic beliefs (no unified state religion)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Archaeological and inscriptional evidence points to early Sabaean (South Arabian) cultural and possibly demographic influence on the D'mt kingdom in the early first millennium BC, part of the deep Red Sea contacts that predate Aksum."><span class="dot" style="background:#2f7a6b"></span>Immigration: early Sabaean (South Arabian) contact</span></div>
+            <p><span class="label">Who &amp; why:</span> before Aksum's rise, the Ethiopian highlands hold earlier states and cultures, including the D'mt kingdom of the early first millennium BC, whose own political organization and territorial extent remain only partly understood. This is the deepest, least documented layer of Ethiopia's own timeline, included here for completeness rather than as a claim of any single governing flag.</p>
+            <p><span class="label">What it represents:</span> no securely documented flag survives from this era. Shown here honestly blank rather than invented.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#6b5c4a"></span><b>Fragmented / pre-state</b> &mdash; no single ruling authority</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Kingdom / Sultanate, independent</b> &mdash; sovereign under its own crown</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#7c2e1f"></span><b>Military / one-party rule</b> &mdash; an authoritarian military or single-party regime</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#1e7a4a"></span><b>Republic, independent</b> &mdash; modern sovereign republic</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the named ruler most associated with the era's start</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official/established faith, not the population's</div>
+    </div>
+  </div>
+
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for Ethiopia lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/et/">Search Record Atlas for Ethiopia &rarr;</a>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This page is one lineage in a larger set. See the region-wide hub and the other countries here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="east-africa-hub.html"><b>East Africa hub</b><span>Eleven countries, one region</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are close historical approximations for painting reference; pre-19th-century swatches are informed reconstructions, not official specifications. Map is schematic and not surveyed.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var IC = { prestate: "#6b5c4a", kingdom: "#a9762f", derg: "#7c2e1f", republic: "#1e7a4a" };
+  var INAMES = {
+    prestate: "Pre-Aksumite highland peoples", kingdom: "Kingdom of Aksum / Ethiopian Empire",
+    derg: "Provisional Military Government (the Derg)", republic: "Federal Democratic Republic of Ethiopia"
+  };
+  var IFLAGS = {
+    noflag: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="120" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>',
+    stelae: '<rect width="300" height="200" fill="#7a4a1f"/><rect x="130" y="30" width="14" height="140" fill="#c9a13c"/><rect x="80" y="60" width="14" height="80" fill="#c9a13c"/><rect x="180" y="45" width="14" height="110" fill="#c9a13c"/><rect x="230" y="70" width="14" height="70" fill="#c9a13c"/>',
+    lion: '<rect width="300" height="66.7" fill="#1e7a4a"/><rect y="66.7" width="300" height="66.6" fill="#f9d616"/><rect y="133.3" width="300" height="66.7" fill="#a4302a"/><rect x="128" y="76" width="44" height="48" fill="#f9d616" stroke="#a4302a" stroke-width="2"/><path d="M136,120 q14,-30 28,0" fill="none" stroke="#a4302a" stroke-width="3"/>',
+    dergflag: '<rect width="300" height="66.7" fill="#1e7a4a"/><rect y="66.7" width="300" height="66.6" fill="#f9d616"/><rect y="133.3" width="300" height="66.7" fill="#a4302a"/><path d="M150,72 l14,16 20,4 -14,15 3,20 -23,-9 -23,9 3,-20 -14,-15 20,-4 Z" fill="#a4302a" stroke="#f9d616" stroke-width="2"/>',
+    modern: '<rect width="300" height="66.7" fill="#1e7a4a"/><rect y="66.7" width="300" height="66.6" fill="#f9d616"/><rect y="133.3" width="300" height="66.7" fill="#a4302a"/><circle cx="150" cy="100" r="30" fill="#1a3a6b"/><path d="M150,78 l5,14 15,2 -11,10 3,15 -12,-8 -12,8 3,-15 -11,-10 15,-2 Z" fill="#f9d616"/>'
+  };
+  function iFlagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (IFLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  var iLegendEl = document.getElementById("iLegend");
+  iLegendEl.innerHTML = Object.keys(IC).map(function (k) {
+    return '<span><span class="sw" style="background:' + IC[k] + '"></span>' + INAMES[k] + "</span>";
+  }).join("");
+
+  var ISNAP = [
+    { year:"before c. 100", name:"Pre-Aksumite highland peoples", t:{ et:IC.prestate }, flagKeys:{ et:"noflag" },
+      story:"Before Aksum's rise, the Ethiopian highlands hold earlier states and cultures, including the D'mt kingdom of the early first millennium BC. No securely documented flag survives from this deepest, least-documented layer of the timeline." },
+    { year:"c. 100", name:"Kingdom of Aksum", t:{ et:IC.kingdom }, flagKeys:{ et:"stelae" },
+      story:"Aksum grows into one of the major trading powers of the ancient world, linking the Roman Mediterranean and Persia to India. Under King Ezana, around 330 AD, it becomes one of the first states anywhere to adopt Christianity officially. No flag survives; its best-documented legacy is its carved granite stelae." },
+    { year:"1270", name:"Ethiopian Empire (Solomonic dynasty)", t:{ et:IC.kingdom }, flagKeys:{ et:"lion" },
+      story:"The Solomonic dynasty takes the imperial throne in 1270 and rules for seven centuries, interrupted only by Mussolini's 1936–41 occupation. Haile Selassie modernizes the state and becomes a founding figure of the Organisation of African Unity before growing unrest ends his rule in 1974." },
+    { year:"1974", name:"Provisional Military Government (the Derg)", t:{ et:IC.derg }, flagKeys:{ et:"dergflag" },
+      story:"A committee of junior military officers deposes Haile Selassie in 1974. Mengistu Haile Mariam consolidates control and declares a Marxist-Leninist state, fighting a long civil war that includes the well-documented 1983-1985 famine, before the regime collapses in 1991." },
+    { year:"1991–present", name:"Federal Democratic Republic of Ethiopia", t:{ et:IC.republic }, flagKeys:{ et:"modern" },
+      story:"EPRDF-led rebel forces take Addis Ababa in 1991, ending Mengistu's rule; a 1995 federal constitution organizes Ethiopia into ethnically based regional states, with Eritrea's independence recognized separately in 1993." }
+  ];
+
+  var IREGIONS = ["et"];
+  var IREGION_NAMES = { et:"Ethiopia" };
+  var IADJ = [];
+
+  function iTextColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+
+  var iYearTag = document.getElementById("iYearTag");
+  var iEraName = document.getElementById("iEraName");
+  var iEraOwners = document.getElementById("iEraOwners");
+  var iEraStory = document.getElementById("iEraStory");
+  var iFlagsRow = document.getElementById("iFlagsRow");
+  var iSlider = document.getElementById("iSlider");
+
+  function iRender(idx) {
+    var era = ISNAP[idx];
+    iYearTag.textContent = era.year;
+    iEraName.innerHTML = era.name;
+    iEraStory.innerHTML = era.story;
+
+    IREGIONS.forEach(function (id) {
+      document.getElementById("ireg-" + id).setAttribute("fill", era.t[id]);
+      var tcol = iTextColorFor(era.t[id]);
+      var tcolHalo = tcol === "#201a12" ? "#f7f1e3" : "#201a12";
+      var lbl = document.getElementById("ilbl-" + id);
+      if (lbl) { lbl.setAttribute("fill", tcol); lbl.setAttribute("stroke", tcolHalo); }
+    });
+
+    var label = Object.keys(IC).filter(function (k) { return IC[k] === era.t.et; })[0];
+    iEraOwners.innerHTML = "<b>" + INAMES[label] + "</b>: whole country";
+
+    iFlagsRow.innerHTML = IREGIONS.map(function (id) {
+      return '<div class="iflag-chip">' + iFlagSvg(era.flagKeys[id]) + '<div class="ic-label">' + IREGION_NAMES[id] + '</div></div>';
+    }).join("");
+  }
+
+  iSlider.addEventListener("input", function () { iRender(parseInt(iSlider.value, 10)); });
+  iRender(0);
+
+  var iPlaying = false, iPlayTimer = null;
+  var iPlayBtn = document.getElementById("iPlayBtn");
+  function iStepPlay() {
+    var next = parseInt(iSlider.value, 10) + 1;
+    if (next > ISNAP.length - 1) { iStopPlay(); return; }
+    iSlider.value = next;
+    iRender(next);
+  }
+  function iStartPlay() {
+    iPlaying = true;
+    iPlayBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(iSlider.value, 10) >= ISNAP.length - 1) { iSlider.value = 0; iRender(0); }
+    iPlayTimer = setInterval(iStepPlay, 1700);
+  }
+  function iStopPlay() {
+    iPlaying = false;
+    iPlayBtn.innerHTML = "&#9654;";
+    clearInterval(iPlayTimer);
+  }
+  iPlayBtn.addEventListener("click", function () { iPlaying ? iStopPlay() : iStartPlay(); });
+})();
+</script>
+<script>
+  document.querySelectorAll(".tag[data-tip]").forEach(function (tag) {
+    tag.addEventListener("click", function (e) {
+      var wasOpen = tag.classList.contains("tip-open");
+      document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+      if (!wasOpen) tag.classList.add("tip-open");
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+  });
+</script>
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var html = '<h4>Genealogical records for this ground</h4>';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>
+
+</body></html>

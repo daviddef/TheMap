@@ -1,0 +1,799 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#f2e8d5;color:#241a12}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+</style></head><body>
+<title>Flags of Oman</title>
+<meta name="description" content="A chronological, paint-ready atlas of every flag that flew over Oman, from the 8th-century Ibadi Imamate through the maritime empire that once controlled Zanzibar, to the Al Said dynasty's modern sultanate.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #241a12; --paper: #f2e8d5; --card: #faf3e3; --card-border: #dcc99a;
+    --brick: #8a2f1f; --brick-2: #6b2317; --brass: #a9762f; --sea: #1f6b6b; --sea-2: #164f4f;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #8a2f1f;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #e0785f; --brick-2: #ec9276; --brass: #d1a154; --sea: #4fa3a3; --sea-2: #6fbcbc;
+      --muted: #9a9280; --hair: #33393f;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #e0785f; --brick-2: #ec9276; --brass: #d1a154; --sea: #4fa3a3; --sea-2: #6fbcbc;
+    --muted: #9a9280; --hair: #33393f;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--sea); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.08rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; font-size: .94rem; color: var(--muted); }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  .legend { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1px; background: var(--hair); }
+  @media (max-width: 560px) { .timeline::before { left: 9px; } }
+  .entry { position: relative; padding-left: 46px; margin-bottom: 46px; }
+  @media (max-width: 560px) { .entry { padding-left: 30px; } }
+  .entry::before {
+    content: attr(data-n);
+    position: absolute; left: 1px; top: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--paper); outline: 1px solid var(--hair);
+    background: var(--card);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--brick); display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) { .entry::before { left: -5px; width: 18px; height: 18px; font-size: 9px; } }
+
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+  .card-head { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  @media (max-width: 620px) { .card-head { flex-direction: column; } }
+  .flag-box { flex: none; width: 168px; }
+  .flag-box svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-caption { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .card-title { font-size: 1.32rem; font-weight: 600; line-height: 1.18; margin: 0 0 10px; text-wrap: balance; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px; border: 1px solid var(--card-border); color: var(--muted);
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  /* Flip tooltip below tags near the top of the viewport so it isn't clipped */
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  /* Keep tooltips from overflowing the left/right edges on narrow screens */
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint { border-top: 1px solid var(--hair); }
+  details.paint > summary {
+    cursor: pointer; list-style: none; padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--sea); display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before { content: "+"; font-family: "Fraunces", serif; font-size: 15px; width: 14px; }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row { display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px; }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--card-border); border-radius: 2px; padding: 5px 9px 5px 5px; background: var(--paper); }
+  .swatch .chip { width: 20px; height: 20px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--sea); }
+
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: 64ch; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 88px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 380px; height: auto; }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .iborder-line { transition: stroke-opacity 0.6s ease, stroke-width 0.6s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .ireg-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 700; text-anchor: middle; transition: fill .4s ease, stroke .4s ease; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="arabian-peninsula-hub.html">Arabian Peninsula hub</a></p>
+  <p class="kicker">Family research &middot; Phase 7 of the world atlas</p>
+  <h1>Flags of Oman</h1>
+  <p class="lede">One of the oldest continuously independent states in the Arab world: an Ibadi Imamate founded in 751 in the interior, Portuguese-held coastal ports from 1507, a Ya'ariba dynasty that expelled them and built the beginnings of a maritime empire, the Al Said dynasty ruling without interruption since 1744, a 19th-century empire that once controlled Zanzibar and stretches of the East African coast, and rapid modernization under Sultan Qaboos from 1970.</p>
+  <p class="lede">Oman's flags carry the region's oldest visual thread here &mdash; a plain red field flown by Muscat's own ships for centuries before any emblem was added &mdash; and the modern white-red-green tricolor, adopted only in 1970, is a comparatively recent innovation layered onto that much older maritime tradition. The timeline's deepest root, though, predates any Omani flag or even Omani text: Bronze Age Magan, the copper-trading land Sumer and Akkad wrote about, but that never wrote about itself.</p>
+
+  <div class="scope-note">
+    <b>Scope of this page:</b> the lands of present-day Oman, c. 3000 BCE&ndash;present, seven political entries. Part of a larger atlas &mdash; see the map and linked pages at the bottom.
+  </div>
+
+  <div class="imap-section">
+    <h2>Coast and interior, 1507&ndash;1624 &amp; 1856&ndash;1959</h2>
+    <p class="imap-sub">Oman's own real border, split into the two spans where it genuinely was two separately-governed pieces: Portuguese-held coastal forts and trading ports (Muscat, Sohar, Sur, and others along the Gulf of Oman and Arabian Sea coast) against the older Ibadi Imamate's interior in 1507&ndash;1624; and again in 1856&ndash;1959, when the interior Imamate periodically reasserted its own separate rule against the coastal Sultanate of Muscat before full reabsorption. Press play, or drag the slider.</p>
+    <div class="rule-box">
+      <b>This border below solidifies twice, not once.</b> Before 1507 and after 1624 (with one later exception), one authority held the whole territory (however loosely) &mdash; the line hardens for the 117 years the Portuguese Estado da &Iacute;ndia held the ports while a separate Ibadi imam ruled the interior, and dissolves again the moment the Ya'ariba imams retake Muscat in 1650 (folded into this one bridging era for simplicity). It resurfaces once more from 1856 to 1959: the interior Ibadi Imamate periodically reasserts its own separate rule against the coastal Sultanate of Muscat and Oman, only fully re-merging by 1959.
+    </div>
+    <div class="imap-frame">
+      <div class="imap-controls">
+        <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="imap-year" id="iYearTag">c. 3000 BCE</span>
+        <input type="range" id="iSlider" min="0" max="7" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="imap-svg" viewBox="0 0 410 433" xmlns="http://www.w3.org/2000/svg">
+        <g class="context-label" pointer-events="none">
+          <text x="60" y="60">SAUDI ARABIA</text>
+          <text x="330" y="30">UAE</text>
+          <text x="30" y="330">YEMEN</text>
+          <text x="385" y="230">GULF OF OMAN</text>
+        </g>
+        <path id="ireg-coast" class="ireg-fill" d="M348.9,200.5 L330.8,233.8 L308.7,231.2 L298.6,242.8 L290.7,267.5 L296.7,300.1 L292.1,306.0 L269.7,305.9 L239.3,324.1 L234.6,347.8 L223.5,358.0 L193.2,357.7 L174.1,369.9 L174.4,389.6 L150.8,403.1 L124.0,398.5 L91.4,414.9 L69.0,417.7 Z"/>
+        <path id="ireg-interior" class="ireg-fill" d="M53.1,383.7 L15.0,303.3 L161.0,254.7 L193.4,157.3 L171.1,122.9 L172.4,103.3 L186.6,83.1 L186.7,63.2 L208.8,53.7 L200.1,46.9 L204.1,15.2 L229.0,15.0 L250.8,48.2 L278.0,65.9 L313.7,72.3 L342.5,81.1 L364.5,109.0 L377.6,125.2 L395.0,131.4 L394.9,142.2 L377.2,171.2 L369.4,184.9 L348.9,200.5 Z"/>
+        <path class="iborder-line" id="ib-coast-interior" d="M69.0,417.7 L348.9,200.5"/>
+        <g font-family="IBM Plex Mono, monospace">
+          <text class="ireg-label" id="ilbl-coast" x="228" y="326">COASTAL PORTS</text>
+          <text class="ireg-label" id="ilbl-interior" x="252" y="128">INTERIOR IMAMATE</text>
+        </g>
+      </svg>
+      <div class="imap-head">
+        <div class="imap-name" id="iEraName">Magan (Bronze Age copper-trading land)</div>
+        <div class="imap-owners" id="iEraOwners"></div>
+      </div>
+      <div class="iflags-row" id="iFlagsRow"></div>
+      <p class="imap-story" id="iEraStory"></p>
+
+      <p class="map-note">Schematic internal partition on a real traced border (simplified from public coastal-vertex data) &mdash; the coast/interior dividing line is approximate, not a surveyed frontier; it dissolves outside the 1507&ndash;1624 and 1856&ndash;1959 spans.</p>
+      <div class="imap-key" id="iLegend"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <!-- 1 -->
+    <div class="entry" data-n="7" id="era-1970">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#a4302a"/>
+              <rect width="90" height="200" fill="#f4efe1"/>
+              <rect width="90" height="66.7" fill="#0f5c33"/>
+              <g fill="#f4efe1" transform="translate(45,100)">
+                <path d="M-14,-6 h28 M-10,-6 L-10,10 M10,-6 L10,10 M-14,10 h28" stroke="#f4efe1" stroke-width="3" fill="none"/>
+              </g>
+            </svg>
+            <div class="flag-caption">white-red-green with the khanjar and crossed swords, adopted 1970</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1970 &ndash; present</div>
+            <h3 class="card-title">Sultanate of Oman (modern)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Sultanate, independent</span><span class="tag" tabindex="0" data-tip="Sultan who took power from his father in a 1970 palace coup and ruled for nearly five decades, driving Oman's rapid modernization and international opening."><span class="dot" style="background:#4a3b78"></span>Sultan Qaboos bin Said</span><span class="tag" tabindex="0" data-tip="Islam is Oman's official state religion, with the Ibadi school &mdash; a distinct branch found almost nowhere else in large numbers &mdash; historically favored by the ruling dynasty and state institutions."><span class="dot" style="background:#8e3b62"></span>Ibadi Islam (state-favored)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Oman's oil-funded development draws large numbers of South Asian migrant workers, mainly from India, Pakistan, and Bangladesh, who by the 2010s make up roughly 40&#37; of the country's total population."><span class="dot" style="background:#2f7a6b"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#ff9933"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#138808"/><circle cx="10" cy="7" r="1.2" fill="none" stroke="#000080" stroke-width="0.3"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#01411c"/><rect width="5" height="14" fill="#fff"/><circle cx="13" cy="7" r="2.6" fill="#fff"/><circle cx="13.8" cy="7" r="2.1" fill="#01411c"/><path d="M16,5.2 l1.1,1.8 -1.1,1.8z" fill="#fff"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#006a4e"/><circle cx="9" cy="7" r="4" fill="#f42a41"/></svg></span>Immigration: South Asian labor migration (1970s&ndash;)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Founded by Ahmad bin Said al-Busaidi in 1744, the Al Said (Busaidi) dynasty has ruled Oman continuously into the present, one of the longest unbroken royal lines in the Arab world, 1744&ndash;present. No Western-style blazon exists; shown with the khanjar and crossed swords, the dynasty's own traditional mark of authority, later carried onto the 1970 national flag."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><path d="M28,82 L72,42" stroke="#c9a13c" stroke-width="4"/><path d="M72,82 L28,42" stroke="#c9a13c" stroke-width="4"/><path d="M50,86 C38,76 38,58 45,46 C42,40 42,34 47,29 C50,36 49,42 52,47 C57,55 55,68 50,86 Z" fill="#c9a13c"/><rect x="45" y="27" width="10" height="5" rx="2" fill="#c9a13c"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Al Said (Busaidi) Dynasty</span></div>
+            <p><span class="label">Who &amp; why:</span> Sultan Qaboos bin Said deposes his own father in a palace coup on 23 July 1970 and launches a rapid modernization program, opening what had been one of the most isolated countries in the world to schools, hospitals, and paved roads within a generation. The country is officially renamed from "Muscat and Oman" to simply "Oman," and Qaboos rules until his death in 2020, succeeded by his cousin Haitham bin Tariq.</p>
+            <p><span class="label">What it represents:</span> a new national flag adopted in 1970 (its canton emblem refined in 1995) places the khanjar &mdash; Oman's traditional curved dagger &mdash; crossed with swords in the canton, over a white-red-green tricolor, layered onto the older plain red field that had flown over Muscat for centuries before.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, canton one-third the width.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Vertical white canton bearing the national emblem (khanjar and crossed swords, simplified here); red field with a green horizontal band along the top.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#0f5c33"></span><span class="meta"><span class="name">Green</span><span class="hex">#0F5C33</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="entry" data-n="6" id="era-1856">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#a4302a"/>
+            </svg>
+            <div class="flag-caption">plain red field &mdash; Muscat's traditional maritime color</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1856 &ndash; 1970</div>
+            <h3 class="card-title">Sultanate of Muscat and Oman</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Sultanate, British-influenced</span><span class="tag" tabindex="0" data-tip="Sultan of Muscat following the 1856 split from the Zanzibar branch of the family after Said bin Sultan's death, ruling the Omani homeland under growing British influence."><span class="dot" style="background:#4a3b78"></span>Sultan Thuwaini bin Said</span><span class="tag" tabindex="0" data-tip="Islam remained the state religion, with the Ibadi school favored by the ruling Al Said dynasty even as the sultanate's economy and foreign relations grew increasingly tied to British interests."><span class="dot" style="background:#8e3b62"></span>Ibadi Islam (state-favored)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Following the violent 1964 Zanzibar Revolution, which overthrew the Arab-led sultanate there and killed thousands, several thousand Omani Arabs flee Zanzibar and resettle in Oman."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#a71930"/></svg>Immigration: Omani Arabs returning from Zanzibar (1964)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The Al Said (Busaidi) dynasty, founded 1744, continued ruling the reduced Muscat sultanate after the 1856 split from the Zanzibar branch, into the modern era, 1744&ndash;present. Represented by the khanjar and crossed swords, its traditional mark of authority."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><path d="M28,82 L72,42" stroke="#c9a13c" stroke-width="4"/><path d="M72,82 L28,42" stroke="#c9a13c" stroke-width="4"/><path d="M50,86 C38,76 38,58 45,46 C42,40 42,34 47,29 C50,36 49,42 52,47 C57,55 55,68 50,86 Z" fill="#c9a13c"/><rect x="45" y="27" width="10" height="5" rx="2" fill="#c9a13c"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Al Said (Busaidi) Dynasty</span></div>
+            <p><span class="label">Who &amp; why:</span> upon Said bin Sultan's death in 1856, his sprawling maritime empire splits between two sons &mdash; one inherits Zanzibar and the East African holdings, the other keeps Muscat and the Omani homeland &mdash; ending direct Omani rule over Zanzibar for good. The much-reduced sultanate leans increasingly on British treaties and subsidies through the 19th and 20th centuries while the interior Ibadi Imamate periodically reasserts itself, fully reabsorbed into the sultanate only by 1959.</p>
+            <p><span class="label">What it represents:</span> the plain red flag, already a maritime tradition of long standing among Muscat's own ships, continues as the sultanate's flag through this entire span, without a national emblem.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio recorded.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Plain red field, no emblem.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="entry" data-n="5" id="era-1744">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#a4302a"/>
+            </svg>
+            <div class="flag-caption">plain red field &mdash; the empire's maritime ensign</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1744 &ndash; 1856</div>
+            <h3 class="card-title">Al Said Dynasty &amp; the Omani (maritime) Empire</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Sultanate / Imamate, expanding</span><span class="tag" tabindex="0" data-tip="Founder of the Al Said dynasty, elected leader in 1744 after driving out Persian occupiers, establishing the ruling house that still reigns in Oman today."><span class="dot" style="background:#4a3b78"></span>Ahmad bin Said Al Said</span><span class="tag" tabindex="0" data-tip="Ibadi Islam remained the state's founding faith under the new dynasty, as the Omani maritime empire expanded its trading and political reach across the western Indian Ocean."><span class="dot" style="background:#8e3b62"></span>Ibadi Islam (state-favored)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Omani Arab settlers, merchants, and administrators emigrate to colonize Zanzibar and the East African coast in growing numbers through the early 19th century, especially after Said bin Sultan moves his own capital to Zanzibar in 1832."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#a71930"/></svg>Emigration: Omani settlers to Zanzibar &amp; East Africa</span><span class="tag" tabindex="0" data-tip="As Zanzibar's clove economy grows under Omani rule, tens of thousands of enslaved East Africans are trafficked each year through Zanzibar's slave market, with many brought onward to Oman and the wider Persian Gulf before British pressure forces gradual abolition from the 1840s onward."><span class="dot" style="background:#2f7a6b"></span>Immigration: enslaved East Africans trafficked to Oman</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Founded by Ahmad bin Said al-Busaidi in 1744 after expelling occupying Persian forces, the still-reigning Al Said (Busaidi) dynasty built the maritime empire that briefly controlled Zanzibar, 1744&ndash;present. Represented by the khanjar and crossed swords, its traditional mark of authority."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><path d="M28,82 L72,42" stroke="#c9a13c" stroke-width="4"/><path d="M72,82 L28,42" stroke="#c9a13c" stroke-width="4"/><path d="M50,86 C38,76 38,58 45,46 C42,40 42,34 47,29 C50,36 49,42 52,47 C57,55 55,68 50,86 Z" fill="#c9a13c"/><rect x="45" y="27" width="10" height="5" rx="2" fill="#c9a13c"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Al Said (Busaidi) Dynasty</span></div>
+            <p><span class="label">Who &amp; why:</span> Ahmad bin Said al-Busaidi, having helped expel a Persian occupying force, founds the Al Said dynasty in 1744 &mdash; the same family that still rules Oman today, one of the longest unbroken royal lines in the Arab world. Under Said bin Sultan in the early 19th century, Omani power reaches its peak: a real maritime empire controlling Zanzibar and stretches of the East African coast, with Said relocating his own capital to Zanzibar in 1832 to oversee a lucrative clove and trade economy.</p>
+            <p><span class="label">What it represents:</span> the plain red flag, Muscat's own maritime color for generations, flies over both the Omani homeland and the African holdings throughout this era of expansion, no separate emblem yet distinguishing the empire's reach.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio recorded.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Plain red field, no emblem.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="entry" data-n="4" id="era-1624">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#a4302a"/>
+            </svg>
+            <div class="flag-caption">plain red field &mdash; informed reconstruction of Ya'ariba-era maritime color</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1624 &ndash; 1744</div>
+            <h3 class="card-title">Ya'ariba Imamate</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Imamate</span><span class="tag" tabindex="0" data-tip="Founder of the Ya'ariba dynasty, elected Imam in 1624, who unified Oman's interior and began the campaign that eventually expelled the Portuguese from the coast."><span class="dot" style="background:#4a3b78"></span>Nasir bin Murshid Al Ya'arubi</span><span class="tag" tabindex="0" data-tip="Ibadi Islam, the religious and legal basis of the imamate itself, was the state's founding and unifying faith throughout this dynasty's rule."><span class="dot" style="background:#8e3b62"></span>Ibadi Islam</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="A succession dispute among Ya'ariba claimants after 1718 leads rival factions to invite Persian intervention; Persian forces under Nader Shah occupy Muscat and other coastal towns from 1737 until they are expelled in 1744 by Ahmad bin Said, founder of the Al Said dynasty."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#8b1a1a"/><circle cx="10" cy="7" r="2.2" fill="#f4c430"/></svg>Occupied by: Persia (1737&ndash;44)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Founded by Imam Nasir bin Murshid in 1624, the Ya'ariba dynasty drove Portugal from the coast and built the naval strength behind Oman's later maritime power, ruling until eclipsed by the Al Said in 1744. No Western-style blazon is documented; shown with the khanjar, the curved dagger long used as a mark of authority among Omani rulers."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><path d="M50,86 C38,76 38,58 45,46 C42,40 42,34 47,29 C50,36 49,42 52,47 C57,55 55,68 50,86 Z" fill="#c9a13c"/><rect x="45" y="27" width="10" height="5" rx="2" fill="#c9a13c"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Ya'ariba Dynasty</span></div>
+            <p><span class="label">Who &amp; why:</span> the Ya'ariba dynasty unifies the Ibadi Imamate under Nasir bin Murshid in 1624 and, over the following decades, drives the Portuguese entirely out of Muscat (1650) and the wider Omani coast, building the naval strength that becomes the foundation of Oman's later maritime empire. A succession dispute after 1718 weakens the dynasty and eventually opens the door to Persian intervention, which the young Al Said dynasty ends in 1744.</p>
+            <p><span class="label">What it represents:</span> no single specific banner is well attested for this era; plain red, the color already tied to Omani/Muscat shipping in this region for generations, is shown here as an informed reconstruction rather than a documented period specimen.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no fixed period flag; shown as a reconstruction.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="entry" data-n="3" id="era-1507">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#c9a13c">CONTESTED /</text>
+              <text x="150" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#c9a13c">NO SINGLE FLAG</text>
+            </svg>
+            <div class="flag-caption">Portuguese coastal ports alongside the interior Nabhani-Ibadi Imamate</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1507 &ndash; 1624</div>
+            <h3 class="card-title">Portuguese-held ports &amp; the interior Imamate</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#6b5c4a"></span>Fragmented / contested</span><span class="tag" tabindex="0" data-tip="Coastal Muscat and other ports were held directly by Portugal's Estado da India, while the interior remained under separate, often rival, Ibadi imams &mdash; no single ruler governed all of Oman in this period."><span class="dot" style="background:#4a3b78"></span>No single ruler documented</span><span class="tag" tabindex="0" data-tip="Religious authority was as split as political authority: Portuguese-held ports were administered under Roman Catholic colonial rule, while the interior imamate remained governed under Ibadi Islam."><span class="dot" style="background:#8e3b62"></span>Roman Catholic (ports), Ibadi Islam (interior)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Portuguese forces under Afonso de Albuquerque capture Muscat and other Omani coastal ports from 1507, holding them as fortified outposts of the Estado da India for over a century until finally expelled by Ya'ariba forces in 1650."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="8" height="14" fill="#046a38"/><rect x="8" width="12" height="14" fill="#da291c"/></svg>Conquered by: Portugal (coastal ports, from 1507)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Hereditary Nabhani rulers (Muluk) continued governing the interior alongside the Ibadi imamate structure through this contested span, until eclipsed by the Ya'ariba unification of 1624, c.1154&ndash;1624. No Western-style armorial tradition survives; shown with the crescent and star traditional to regional Arab banners of the period."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#5c2a24"/><path d="M62,60 A22,22 0 1 1 40,40 A16,16 0 1 0 62,60 Z" fill="#c9a13c"/><path d="M70,38 l2,5 5,1 -4,4 1,5 -4,-3 -4,3 1,-5 -4,-4 5,-1 Z" fill="#c9a13c"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Nabhani Dynasty</span></div>
+            <p><span class="label">Who &amp; why:</span> Portuguese forces under Afonso de Albuquerque seize Muscat and other coastal ports in 1507 to secure the sea route to India, holding them as fortified trading posts for over a century while the Ibadi Imamate, under the older Nabhani dynasty's fading authority, continues to govern the interior separately. This is a genuinely split, contested span &mdash; coast and interior under two different powers &mdash; rather than one Oman under one flag.</p>
+            <p><span class="label">What it represents:</span> the Portuguese fly their own maritime ensigns over the coastal forts; the interior Imamate's own banner tradition is poorly attested for this specific period. One honest bridging entry rather than an invented shared flag.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no single Omani national flag in this contested period.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="entry" data-n="2" id="era-700">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; Ibadi Imamate's founding era, no flag survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 700 &ndash; 1507</div>
+            <h3 class="card-title">Ibadi Imamate of Oman (founding era)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Imamate</span><span class="tag" tabindex="0" data-tip="Traditionally regarded as the first elected Ibadi Imam of Oman, chosen in the mid-8th century, establishing the elective imamate model that defined Omani governance for centuries."><span class="dot" style="background:#4a3b78"></span>Julanda bin Mas'ud</span><span class="tag" tabindex="0" data-tip="Ibadi Islam, a distinct branch of Islam that survives today mainly in Oman, was the founding faith of this imamate and remains central to Omani religious identity."><span class="dot" style="background:#8e3b62"></span>Ibadi Islam</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Ibadi Islam, which originated among Kharijite-era dissenters in Basra, southern Iraq, is carried to Oman by migrating scholars and adherents from the 8th century onward, becoming the territory's dominant and distinguishing faith."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#000"/></svg>Immigration: Ibadi scholars from Basra (8th c.&ndash;)</span><span class="tag" tabindex="0" data-tip="Omani coastal towns fall under the tributary influence of the Hormuz-based sultanate, which dominates trade across the Strait of Hormuz, for stretches of the 14th and 15th centuries before Portugal's arrival in 1507."><span class="dot" style="background:#6b2c2c"></span>Conquered by: Kingdom of Hormuz (14th&ndash;15th c., coastal towns)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The Nabhani dynasty dominated the Ibadi Imamate's temporal authority over the interior from around 1154 until the Portuguese arrival on the coast in 1507. Emblem: the crescent of Islamic sovereignty, as used by this Ibadi Arabian dynasty."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#5c2a24"/><path d="M62,30 a20,20 0 1,0 0,40 a15,15 0 1,1 0,-40 Z" fill="#c9a13c"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Nabhani dynasty</span></div>
+            <p><span class="label">Who &amp; why:</span> Ibadi Islam, a distinct branch tracing to the earliest Kharijite-era disputes over leadership of the Muslim community, takes root in Oman, and the Ibadi Imamate is formally established in 751 &mdash; one of the oldest continuously significant political-religious institutions in the Arab world. The Nabhani dynasty comes to dominate the Imamate's temporal authority from around 1154, ruling most of the interior until Portuguese arrival on the coast in 1507.</p>
+            <p><span class="label">What it represents:</span> no flag in the modern territorial sense survives from this era; the Imamate used religious and tribal insignia rather than a fixed national banner. Shown here honestly blank rather than invented.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 7 -->
+    <div class="entry" data-n="1" id="era-3000bce">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder &mdash; Bronze Age Magan, no flag or Omani-side text survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 3000 &ndash; 1300 BCE</div>
+            <h3 class="card-title">Magan (Bronze Age copper-trading land)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Magan is known almost entirely from Sumerian and Akkadian cuneiform records naming it as a source of copper and diorite; no Magan-side written record has been identified, and its own internal political structure is reconstructed only from archaeology (notably the Umm an-Nar culture's settlements and tombs)."><span class="dot" style="background:#6b5c4a"></span>Ancient trading land, known via Mesopotamian records</span><span class="tag" tabindex="0" data-tip="No Magan ruler's name survives; the Akkadian king Naram-Sin claims a military campaign against Magan in his own inscriptions, but no Omani-side ruler or dynasty is documented."><span class="dot" style="background:#4a3b78"></span>No single ruler documented</span><span class="tag" tabindex="0" data-tip="No religious or state structure can be reconstructed for Magan; surviving material culture includes circular Umm an-Nar tombs, but their religious meaning is inferred rather than textually confirmed."><span class="dot" style="background:#8e3b62"></span>Religious practice unknown</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Sumerian and later Akkadian cuneiform texts record Magan, generally identified by modern archaeologists with the Oman peninsula, as a major supplier of copper and diorite stone to Mesopotamia across the 3rd millennium BCE; the Akkadian king Naram-Sin (r. c. 2254&ndash;2218 BCE) claims to have campaigned against and captured a Magan ruler in his own royal inscriptions."><span class="dot" style="background:#6b2c2c"></span>Contact &amp; conflict: Sumer &amp; Akkad (copper trade; Naram-Sin's claimed campaign, c. 23rd c. BCE)</span></div>
+            <p><span class="label">Who &amp; why:</span> long before the Ibadi Imamate, the Oman peninsula is identified by most archaeologists with "Magan," a land named repeatedly in Sumerian and Akkadian cuneiform texts as a source of copper and diorite &mdash; goods that reached Mesopotamian cities via Gulf maritime trade, and that also moved onward to the Indus Valley Civilization's own trading network. The archaeological Umm an-Nar culture, named for an island site near modern Abu Dhabi, provides the material record: fortified settlements, circular tombs, and extensive evidence of copper smelting across this same span, even as no Magan-side text or royal name has ever been recovered.</p>
+            <p><span class="label">What it represents:</span> no flag or comparable banner survives or is credibly attested for Magan &mdash; everything known about it comes from the outside, through Mesopotamian eyes, not its own. Shown here honestly blank rather than invented.</p>
+            <p><span class="label">World context:</span> Magan's copper trade runs alongside the building of the Great Pyramid of Giza in Egypt (c. 2560 BCE), the rise of Sumerian city-states and then Sargon of Akkad's empire (founded c. 2334 BCE, the first empire in recorded history), and the early urban Indus Valley Civilization further east, whose own cities also drew on Gulf copper &mdash; Bronze Age Oman sat at a genuine crossroads linking Mesopotamia, the Gulf, and South Asia's earliest cities.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag; known only through Mesopotamian cuneiform records and Umm an-Nar archaeology.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#6b5c4a"></span><b>Fragmented / contested</b> &mdash; no single unified ruler</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Sultanate / Imamate</b> &mdash; sovereign under its own ruler</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the named ruler most associated with the era's start</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official/established faith, not the population's</div>
+    </div>
+  </div>
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for Oman lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/om/">Search Record Atlas for Oman &rarr;</a>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This page is one lineage in a larger set. See the region-wide hub and the other countries here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="arabian-peninsula-hub.html"><b>Arabian Peninsula hub</b><span>Seven countries of the Gulf and Red Sea coast</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are close historical approximations for painting reference; pre-20th-century swatches are informed reconstructions, not official specifications.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var IC = {
+    magan:"#6b5c4a", imamate_early:"#5c2a24", contested:"#6b5c4a", yariba:"#a4302a", alsaid:"#a4302a",
+    muscat_oman:"#a4302a", imamate_reassert:"#5c2a24", modern:"#a9762f"
+  };
+  var INAMES = {
+    magan:"Magan (Bronze Age copper-trading land)",
+    imamate_early:"Ibadi Imamate of Oman (founding era)", contested:"Portuguese ports / interior Imamate (contested)",
+    yariba:"Ya'ariba Imamate", alsaid:"Al Said Dynasty & the Omani (maritime) Empire",
+    muscat_oman:"Sultanate of Muscat and Oman", imamate_reassert:"Ibadi Imamate (reasserted in the interior, 1856–1959)",
+    modern:"Sultanate of Oman (modern)"
+  };
+  var IFLAGS = {
+    noflag: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>',
+    portuguese: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" fill="#c9a13c">PORTUGUESE</text><text x="150" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" fill="#c9a13c">PORTS</text>',
+    interior_imamate: '<rect width="300" height="200" fill="#a4302a"/>',
+    red: '<rect width="300" height="200" fill="#a4302a"/>',
+    modern: '<rect width="300" height="200" fill="#a4302a"/><rect width="90" height="200" fill="#f4efe1"/><rect width="90" height="66.7" fill="#0f5c33"/><g fill="#f4efe1" transform="translate(45,100)"><path d="M-14,-6 h28 M-10,-6 L-10,10 M10,-6 L10,10 M-14,10 h28" stroke="#f4efe1" stroke-width="3" fill="none"/></g>'
+  };
+  function iFlagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (IFLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  var iLegendEl = document.getElementById("iLegend");
+  iLegendEl.innerHTML = Object.keys(IC).map(function (k) {
+    return '<span><span class="sw" style="background:' + IC[k] + '"></span>' + INAMES[k] + "</span>";
+  }).join("");
+
+  var ISNAP = [
+    { year:"c. 3000 – 1300 BCE", name:INAMES.magan, t:{ coast:IC.magan, interior:IC.magan }, flagKeys:{ coast:"noflag", interior:"noflag" },
+      story:"Long before the Ibadi Imamate, the Oman peninsula is identified by most archaeologists with \"Magan,\" a land named repeatedly in Sumerian and Akkadian cuneiform texts as a source of copper and diorite that reached Mesopotamian cities via Gulf maritime trade. The archaeological Umm an-Nar culture provides the material record of fortified settlements, circular tombs, and copper smelting, even as no Magan-side text or royal name has ever been recovered. No flag survives from either side of this era, and there is no coast/interior line to draw yet across the whole, still-undivided territory." },
+    { year:"c. 700 – 1507", name:INAMES.imamate_early, t:{ coast:IC.imamate_early, interior:IC.imamate_early }, flagKeys:{ coast:"noflag", interior:"noflag" },
+      story:"Ibadi Islam takes root and the Imamate is formally established in 751, one of the oldest continuously significant political-religious institutions in the Arab world; the Nabhani dynasty dominates its temporal authority from around 1154. No flag in the modern territorial sense survives from this era — shown honestly blank across the whole, still-unified territory." },
+    { year:"1507 – 1624", name:INAMES.contested, t:{ coast:IC.contested, interior:"#a4302a" }, flagKeys:{ coast:"portuguese", interior:"interior_imamate" },
+      story:"Portuguese forces under Afonso de Albuquerque seize Muscat and other coastal ports in 1507 to secure the sea route to India, holding them as fortified trading posts for over a century while the fading Nabhani-era Ibadi Imamate continues to govern the interior separately — a genuinely split, contested span, coast and interior under two different powers, rather than one Oman under one flag. The Ya'ariba imams complete the Portuguese expulsion from Muscat by 1650, folded into this one bridging entry for simplicity; the border shown here does not resurface after 1624." },
+    { year:"1624 – 1744", name:INAMES.yariba, t:{ coast:IC.yariba, interior:IC.yariba }, flagKeys:{ coast:"red", interior:"red" },
+      story:"The Ya'ariba dynasty unifies the Ibadi Imamate under Nasir bin Murshid in 1624 and drives the Portuguese entirely out of Muscat by 1650, building the naval strength behind Oman's later maritime empire — coast and interior now one territory again. No single banner is well attested; plain red, already tied to Omani shipping, is shown as an informed reconstruction." },
+    { year:"1744 – 1856", name:INAMES.alsaid, t:{ coast:IC.alsaid, interior:IC.alsaid }, flagKeys:{ coast:"red", interior:"red" },
+      story:"Ahmad bin Said al-Busaidi founds the Al Said dynasty in 1744 after expelling a Persian occupying force — the same family that still rules Oman today. Under Said bin Sultan, Omani power peaks as a real maritime empire controlling Zanzibar and stretches of the East African coast. The plain red flag flies over the whole homeland and the African holdings alike." },
+    { year:"1856 – 1959", name:"Interior Imamate reasserted", t:{ coast:IC.muscat_oman, interior:IC.imamate_reassert }, flagKeys:{ coast:"red", interior:"noflag" },
+      names:{ coast:INAMES.muscat_oman, interior:INAMES.imamate_reassert },
+      story:"Said bin Sultan's death in 1856 splits the empire between two sons — one keeps Zanzibar, the other Muscat and the Omani homeland. The much-reduced coastal sultanate leans increasingly on British treaties and subsidies, while the interior Ibadi Imamate periodically reasserts itself as a genuinely separate authority through this span rather than staying folded into Muscat's rule. No specific flag is documented for this reasserted interior imamate, shown honestly blank rather than invented; the coastal sultanate continues flying its plain red field." },
+    { year:"1959 – 1970", name:"Interior fully reabsorbed", t:{ coast:IC.muscat_oman, interior:IC.muscat_oman }, flagKeys:{ coast:"red", interior:"red" },
+      story:"By 1959 the interior Ibadi Imamate's separate rule is fully reabsorbed into the Sultanate of Muscat and Oman, ending the recurring split traced above. The plain red flag flies, without interruption or a national emblem, across the whole reunited territory until the 1970 palace coup and the tricolor that follows." },
+    { year:"1970–present", name:INAMES.modern, t:{ coast:IC.modern, interior:IC.modern }, flagKeys:{ coast:"modern", interior:"modern" },
+      story:"Sultan Qaboos bin Said deposes his own father in a 1970 palace coup and launches rapid modernization; the country is renamed simply \"Oman.\" A new flag places the khanjar and crossed swords in a white canton over a white-red-green tricolor, layered onto the older plain red field — flown, as ever, over one unified territory." }
+  ];
+
+  var IREGIONS = ["coast","interior"];
+  var IREGION_NAMES = { coast:"Coastal ports", interior:"Interior" };
+  var IADJ = [["coast","interior"]];
+
+  function iTextColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+
+  function iGroupsFor(t) {
+    var parent = {};
+    IREGIONS.forEach(function (r) { parent[r] = r; });
+    function find(x) { return parent[x] === x ? x : (parent[x] = find(parent[x])); }
+    function union(a, b) { var ra = find(a), rb = find(b); if (ra !== rb) parent[ra] = rb; }
+    IADJ.forEach(function (pair) { if (t[pair[0]] === t[pair[1]]) union(pair[0], pair[1]); });
+    var groups = {};
+    IREGIONS.forEach(function (r) { var root = find(r); if (!groups[root]) groups[root] = []; groups[root].push(r); });
+    return Object.keys(groups).map(function (k) { return groups[k]; });
+  }
+
+  var iYearTag = document.getElementById("iYearTag");
+  var iEraName = document.getElementById("iEraName");
+  var iEraOwners = document.getElementById("iEraOwners");
+  var iEraStory = document.getElementById("iEraStory");
+  var iFlagsRow = document.getElementById("iFlagsRow");
+  var iSlider = document.getElementById("iSlider");
+
+  function iRender(idx) {
+    var era = ISNAP[idx];
+    iYearTag.textContent = era.year;
+    iEraName.textContent = era.name;
+    iEraStory.innerHTML = era.story;
+
+    IREGIONS.forEach(function (id) {
+      document.getElementById("ireg-" + id).setAttribute("fill", era.t[id]);
+      var lbl = document.getElementById("ilbl-" + id);
+      if (lbl) {
+        var lblColor = iTextColorFor(era.t[id]);
+        lbl.setAttribute("fill", lblColor);
+        lbl.setAttribute("stroke", lblColor === "#201a12" ? "#f7f1e3" : "#201a12");
+      }
+    });
+
+    IADJ.forEach(function (pair) {
+      var same = era.t[pair[0]] === era.t[pair[1]];
+      var line = document.getElementById("ib-" + pair[0] + "-" + pair[1]);
+      line.setAttribute("stroke-opacity", same ? "0.06" : "0.85");
+      line.setAttribute("stroke-width", same ? "1" : "2.4");
+    });
+
+    var groups = iGroupsFor(era.t);
+    var seen = {}; var parts = [];
+    groups.forEach(function (g) {
+      var label = (era.names && era.names[g[0]]) || era.name;
+      if (!seen[label]) { seen[label] = []; parts.push(label); }
+      g.forEach(function (id) { seen[label].push(IREGION_NAMES[id]); });
+    });
+    iEraOwners.innerHTML = parts.map(function (label) { return "<b>" + label + "</b>: " + seen[label].join(", "); }).join(" &middot; ");
+
+    iFlagsRow.innerHTML = IREGIONS.map(function (id) {
+      return '<div class="iflag-chip">' + iFlagSvg(era.flagKeys[id]) + '<div class="ic-label">' + IREGION_NAMES[id] + '</div></div>';
+    }).join("");
+  }
+
+  iSlider.addEventListener("input", function () { iRender(parseInt(iSlider.value, 10)); });
+  iRender(0);
+
+  var iPlaying = false, iPlayTimer = null;
+  var iPlayBtn = document.getElementById("iPlayBtn");
+  function iStepPlay() {
+    var next = parseInt(iSlider.value, 10) + 1;
+    if (next > ISNAP.length - 1) { iStopPlay(); return; }
+    iSlider.value = next;
+    iRender(next);
+  }
+  function iStartPlay() {
+    iPlaying = true;
+    iPlayBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(iSlider.value, 10) >= ISNAP.length - 1) { iSlider.value = 0; iRender(0); }
+    iPlayTimer = setInterval(iStepPlay, 1700);
+  }
+  function iStopPlay() {
+    iPlaying = false;
+    iPlayBtn.innerHTML = "&#9654;";
+    clearInterval(iPlayTimer);
+  }
+  iPlayBtn.addEventListener("click", function () { iPlaying ? iStopPlay() : iStartPlay(); });
+})();
+  document.querySelectorAll(".tag[data-tip]").forEach(function (tag) {
+    tag.addEventListener("click", function (e) {
+      var wasOpen = tag.classList.contains("tip-open");
+      document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+      if (!wasOpen) tag.classList.add("tip-open");
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+  });
+</script>
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var html = '<h4>Genealogical records for this ground</h4>';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>
+
+</body></html>

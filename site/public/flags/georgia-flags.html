@@ -1,0 +1,917 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#f2e6d0;color:#231710}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+</style></head><body>
+<title>Flags of Georgia</title>
+<meta name="description" content="A chronological, paint-ready atlas of every flag that flew over Georgia, from the ancient kingdoms of Colchis and Iberia through the medieval Bagrationi crown, Mongol and Ottoman-Persian rule, Russian and Soviet annexation, to the modern republic's five-cross flag.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #231710; --paper: #f2e6d0; --card: #faf1de; --card-border: #ddc79c;
+    --brick: #9c2b3a; --brick-2: #7a1f2c; --brass: #b8862f; --adriatic: #1f6f6f; --adriatic-2: #155050;
+    --muted: #7a6a52; --hair: #d3bd94; --focus: #1f6f6f;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #efe2c8; --paper: #161311; --card: #201c17; --card-border: #3a332a;
+      --brick: #e05a6a; --brick-2: #e8798a; --brass: #d9ad5a; --adriatic: #5fb8b8; --adriatic-2: #7fd0d0;
+      --muted: #a89c82; --hair: #3a332a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #efe2c8; --paper: #161311; --card: #201c17; --card-border: #3a332a;
+    --brick: #e05a6a; --brick-2: #e8798a; --brass: #d9ad5a; --adriatic: #5fb8b8; --adriatic-2: #7fd0d0;
+    --muted: #a89c82; --hair: #3a332a;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.08rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; font-size: .94rem; color: var(--muted); }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  .legend { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- Timeline ---------- */
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1px; background: var(--hair); }
+  @media (max-width: 560px) { .timeline::before { left: 9px; } }
+  .entry { position: relative; padding-left: 46px; margin-bottom: 46px; }
+  @media (max-width: 560px) { .entry { padding-left: 30px; } }
+  .entry::before {
+    content: attr(data-n);
+    position: absolute; left: 1px; top: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--paper); outline: 1px solid var(--hair);
+    background: var(--card);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--brick); display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) { .entry::before { left: -5px; width: 18px; height: 18px; font-size: 9px; } }
+
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+  .card-head { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  @media (max-width: 620px) { .card-head { flex-direction: column; } }
+  .flag-box { flex: none; width: 168px; }
+  .flag-box svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-caption { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .card-title { font-size: 1.32rem; font-weight: 600; line-height: 1.18; margin: 0 0 10px; text-wrap: balance; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px; border: 1px solid var(--card-border); color: var(--muted);
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  /* Flip tooltip below tags near the top of the viewport so it isn't clipped */
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  /* Keep tooltips from overflowing the left/right edges on narrow screens */
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint { border-top: 1px solid var(--hair); }
+  details.paint > summary {
+    cursor: pointer; list-style: none; padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--adriatic); display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before { content: "+"; font-family: "Fraunces", serif; font-size: 15px; width: 14px; }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row { display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px; }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--card-border); border-radius: 2px; padding: 5px 9px 5px 5px; background: var(--paper); }
+  .swatch .chip { width: 20px; height: 20px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: none; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 88px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 380px; height: auto; }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .iborder-line { transition: stroke-opacity 0.6s ease, stroke-width 0.6s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .ireg-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 700; text-anchor: middle; transition: fill .4s ease, stroke .4s ease; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="caucasus-hub.html">Caucasus hub</a></p>
+  <p class="kicker">Family research &middot; Phase 7 of the world atlas</p>
+  <h1>Flags of Georgia</h1>
+  <p class="lede">Georgia's own name for its history begins earlier than most Georgians themselves ever recorded it: Assyrian and Urartian inscriptions name a highland kingdom, Diauehi, paying tribute and resisting invasion as early as the 12th century BCE &mdash; centuries before Greek writers first mention Colchis, home of the Golden Fleece myth, on the same stretch of Black Sea coast. From those ancient kingdoms of Colchis and Iberia, through a Bagrationi crown unified around 1008 and its Golden Age under Queen Tamar, Mongol conquest, a fracture into three rival kingdoms squeezed between the Ottoman and Persian empires, a century of Russian imperial rule, a brief and fiercely remembered independence, seven decades under Soviet rule, and finally a return to sovereignty in 1991 &mdash; ten flags for a country whose modern banner deliberately revives a cross pattern first carried on medieval Georgian coins and manuscripts.</p>
+  <p class="lede">No single flag survives from Georgia's ancient or early medieval past; the continuous thread here is not a banner but the Bagrationi dynasty's own maroon-and-gold cross, attested from the unified kingdom onward and knowingly revived, in a new five-cross form, when the modern republic adopted its current flag in January 2004.</p>
+
+  <div class="scope-note">
+    <b>Scope of this page:</b> the lands of present-day Georgia, c. 1200 BCE&ndash;present, ten political entities. See the Caucasus hub for a regional map covering Georgia alongside Armenia and Azerbaijan.
+  </div>
+
+  <div class="imap-section">
+    <h2>Abkhazia and South Ossetia's de facto split, 1991&ndash;present</h2>
+    <p class="imap-sub">Georgia's own real border, with the one internal split its post-Soviet history genuinely supports &mdash; the two breakaway regions that fought their way out of Tbilisi's control in the early 1990s and remain, decades later, outside it. Press play, or drag the slider.</p>
+    <div class="rule-box">
+      <b>Both splits are real, geographically stable, and still unresolved.</b> South Ossetia's 1991&ndash;92 war ends with a ceasefire that has never been reversed; Abkhazia's 1992&ndash;93 war ends with every Georgian government institution physically expelled from the territory. Russia's 2008 recognition of both as "independent" states is itself recognized by only a handful of other governments &mdash; Georgia, the UN, and nearly every other country still draw the national border exactly where it was before 1991. The internal line below is schematic, not a surveyed administrative boundary.
+    </div>
+    <div class="imap-frame">
+      <div class="imap-controls">
+        <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="imap-year" id="iYearTag">1991</span>
+        <input type="range" id="iSlider" min="0" max="3" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="imap-svg" viewBox="0 0 440 251" xmlns="http://www.w3.org/2000/svg">
+        <g class="context-label" pointer-events="none">
+          <text x="220" y="14">RUSSIA</text>
+          <text x="60" y="14">RUSSIA (Black Sea coast)</text>
+          <text x="380" y="60">AZERBAIJAN</text>
+          <text x="340" y="235">ARMENIA</text>
+          <text x="170" y="240">TURKEY</text>
+        </g>
+        <path id="ireg-core" class="ireg-fill" d="M120.9,185.1 L129.4,152.3 L115.2,99.8 L82.3,71.5 L50.8,62.6 L30.0,39.1 L36.9,30.0 L85.0,43.1 L168.7,55.6 L246.1,92.5 L256.1,106.7 L290.6,94.7 L343.6,110.8 L361.0,142.3 L396.8,160.1 L382.0,170.7 L410.0,212.3 L402.3,221.4 L371.6,216.8 L329.2,194.7 L315.3,207.2 L236.3,219.2 L181.5,181.5 L120.9,185.1 Z"/>
+        <path id="ireg-abkhazia" class="ireg-fill" d="M30.0,39.1 L36.9,30.0 L85.0,43.1 L95.0,75.0 L60.0,100.0 L50.8,62.6 Z"/>
+        <path id="ireg-ossetia" class="ireg-fill" d="M110.0,50.0 L168.7,55.6 L200.0,70.0 L175.0,105.0 L130.0,100.0 L105.0,80.0 Z"/>
+        <path class="iborder-line" id="ib-core-abkhazia" d="M85.0,43.1 L95.0,75.0 L60.0,100.0"/>
+        <path class="iborder-line" id="ib-core-ossetia" d="M110.0,50.0 L105.0,80.0 L130.0,100.0 L175.0,105.0 L200.0,70.0"/>
+        <g font-family="IBM Plex Mono, monospace">
+          <text class="ireg-label" id="ilbl-abkhazia" x="60" y="65" style="font-size:8px">ABKHAZIA</text>
+          <text class="ireg-label" id="ilbl-ossetia" x="150" y="85" style="font-size:7.5px">S. OSSETIA</text>
+          <text class="ireg-label" id="ilbl-core" x="260" y="160">REST OF GEORGIA</text>
+        </g>
+      </svg>
+      <div class="imap-head">
+        <div class="imap-name" id="iEraName">Georgia declares independence</div>
+        <div class="imap-owners" id="iEraOwners"></div>
+      </div>
+      <div class="iflags-row" id="iFlagsRow"></div>
+      <p class="imap-story" id="iEraStory"></p>
+
+      <p class="map-note">Schematic internal partition on a real traced border &mdash; the Abkhazia/South Ossetia lines are approximate, not surveyed administrative boundaries.</p>
+      <div class="imap-key" id="iLegend"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <!-- 1: 1991-present -->
+    <div class="entry" data-n="10" id="era-1991">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#f4efe1"/>
+              <rect x="128" width="44" height="200" fill="#9c1f3a"/>
+              <rect y="78" width="300" height="44" fill="#9c1f3a"/>
+              <g fill="#9c1f3a">
+                <g transform="translate(65,40)"><rect x="-10" y="-3" width="20" height="6"/><rect x="-3" y="-10" width="6" height="20"/></g>
+                <g transform="translate(235,40)"><rect x="-10" y="-3" width="20" height="6"/><rect x="-3" y="-10" width="6" height="20"/></g>
+                <g transform="translate(65,160)"><rect x="-10" y="-3" width="20" height="6"/><rect x="-3" y="-10" width="6" height="20"/></g>
+                <g transform="translate(235,160)"><rect x="-10" y="-3" width="20" height="6"/><rect x="-3" y="-10" width="6" height="20"/></g>
+              </g>
+            </svg>
+            <div class="flag-caption">the "Five Cross Flag" &mdash; a central St. George's cross with four bolnur-katskhuri crosses</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1991 &ndash; present</div>
+            <h3 class="card-title">Republic of Georgia (modern)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A sovereign parliamentary republic under its own constitution — the status Georgia regained on 9 April 1991 as the Soviet Union dissolved, and has held, despite the loss of Abkhazia and South Ossetia, ever since."><span class="dot" style="background:#b8862f"></span>Republic, independent</span><span class="tag" tabindex="0" data-tip="Dissident-turned-nationalist scholar who became independent Georgia's first president in 1991, before being ousted in a coup within the year amid the country's turbulent early post-Soviet politics."><span class="dot" style="background:#4a3b78"></span>Zviad Gamsakhurdia</span><span class="tag" tabindex="0" data-tip="The 1995 constitution is formally secular but grants the Georgian Orthodox Church a specially recognized status, formalized in a 2002 concordat, reflecting the church's central role in national identity."><span class="dot" style="background:#8e3b62"></span>Georgian Orthodoxy (constitutionally recognized)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Following the August 2008 Russo-Georgian War, Russian forces occupy and Russia recognizes the independence of the breakaway regions of Abkhazia and South Ossetia, which remain outside the Georgian government's control."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#fff"/><rect y="4.67" width="20" height="4.67" fill="#0039a6"/><rect y="9.33" width="20" height="4.67" fill="#d52b1e"/></svg>Occupied by: Russia (Abkhazia &amp; South Ossetia, 2008&ndash;)</span><span class="tag" tabindex="0" data-tip="Economic hardship after the Soviet collapse drives roughly a million Georgians &mdash; close to a quarter of the population &mdash; to emigrate for work to Russia, Greece, and elsewhere in Europe from the 1990s onward."><span class="dot" style="background:#a3672f"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#fff"/><rect y="4.67" width="20" height="4.67" fill="#0039a6"/><rect y="9.33" width="20" height="4.67" fill="#d52b1e"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#0d5eaf"/><g fill="#fff"><rect y="1.56" width="20" height="1.56"/><rect y="4.67" width="20" height="1.56"/><rect y="7.78" width="20" height="1.56"/><rect y="10.89" width="20" height="1.56"/></g><rect width="8" height="8" fill="#0d5eaf"/><path d="M2,4 h4 M4,2 v4" stroke="#fff" stroke-width="1"/></svg></span>Emigration: economic migration abroad (1990s&ndash;)</span></div>
+            <p><span class="label">Who &amp; why:</span> Georgia declares restoration of independence on 9 April 1991 as the Soviet Union unravels. The 1990s bring civil conflict and the de facto loss of Abkhazia and South Ossetia; the bloodless 2003 Rose Revolution, led by Mikheil Saakashvili, unseats the post-Soviet government and pushes the country toward the West. A brief war with Russia over South Ossetia follows in 2008.</p>
+            <p><span class="label">What it represents:</span> the "Five Cross Flag" is formally adopted on 14 January 2004, days after Saakashvili's inauguration. It revives a medieval Georgian design &mdash; a central St. George's cross flanked by four smaller bolnur-katskhuri crosses &mdash; attested on coins, manuscripts, and church art since at least the 5th century and closely associated with the Bagrationi royal house.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3, fixed by law in 2004.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">White field, red St. George's cross reaching the edges, one small red bolnur-katskhuri cross in each of the four quarters.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#9c1f3a"></span><span class="meta"><span class="name">Red</span><span class="hex">#9C1F3A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2: 1921-1991 -->
+    <div class="entry" data-n="9" id="era-1921">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#a4302a"/>
+              <rect x="0" y="150" width="300" height="10" fill="#2f6f9f"/>
+              <rect x="0" y="164" width="300" height="8" fill="#f4efe1"/>
+              <rect x="0" y="176" width="300" height="10" fill="#2f6f9f"/>
+              <g fill="#d4af37" transform="translate(30,25)"><rect x="0" y="13" width="30" height="6"/><rect x="12" y="0" width="6" height="30"/></g>
+            </svg>
+            <div class="flag-caption">Georgian SSR &mdash; red field, gold hammer-and-sickle, blue-white-blue stripe</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1921 &ndash; 1991</div>
+            <h3 class="card-title">Soviet Georgia</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A constituent republic of the USSR with no independent foreign policy, governed through the Communist Party rather than its own sovereign institutions — the status imposed on Georgia by the Red Army's 1921 invasion and held until 1991."><span class="dot" style="background:#9c2b3a"></span>Soviet republic</span><span class="tag" tabindex="0" data-tip="Georgian-born Bolshevik and close Stalin ally who commanded the Red Army's 1921 invasion of Georgia and oversaw its forcible sovietization, later heading the Transcaucasian Communist Party organization."><span class="dot" style="background:#4a3b78"></span>Sergo Ordzhonikidze</span><span class="tag" tabindex="0" data-tip="The Soviet state actively promoted atheism and suppressed organized religion; the Georgian Orthodox Church lost most of its property and clergy faced persecution, though it was never formally outlawed."><span class="dot" style="background:#8e3b62"></span>State atheism</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="On Stalin's orders, Soviet authorities forcibly deport nearly the entire Meskhetian Turk population of southern Georgia's Meskheti region &mdash; around 100,000 people &mdash; to Central Asia in November 1944; they were never allowed to return en masse."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#cc0000"/><path d="M3,2 l0.5,1.4 1.4,0 -1.1,0.9 0.4,1.4 -1.2,-0.8 -1.2,0.8 0.4,-1.4 -1.1,-0.9 1.4,0z" fill="#ffde00"/><path d="M2.3,6.3 L5.5,4.2 M2.3,4.2 a1.2,1.2 0 1,0 2.4,1.6" stroke="#ffde00" stroke-width="0.5" fill="none"/></svg>Emigration: Meskhetian Turks deported (1944)</span></div>
+            <p><span class="label">Who &amp; why:</span> despite a May 1920 treaty in which Soviet Russia formally recognized Georgian independence, the Red Army invades in February 1921 and the Menshevik government falls within weeks, its leaders fleeing to Paris. Georgia is folded into the Transcaucasian SFSR alongside Armenia and Azerbaijan from December 1922 until the 1936 "Stalin Constitution" splits it out as its own Georgian SSR. Stalin and his security chief Lavrentiy Beria are both Georgian-born, a fact often noted about the republic's outsized role in Soviet politics.</p>
+            <p><span class="label">What it represents:</span> the standard Soviet red banner with gold hammer and sickle, distinguished from Armenia's and Azerbaijan's versions by a horizontal blue-white-blue stripe near the bottom, a design adopted in 1951 and flown until the USSR's collapse.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, standard Soviet republic ratio.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red field, gold hammer-and-sickle with gold-bordered red star (simplified here), horizontal blue-white-blue stripe near the fly-side bottom edge.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#d4af37"></span><span class="meta"><span class="name">Gold</span><span class="hex">#D4AF37</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#2f6f9f"></span><span class="meta"><span class="name">Stripe blue</span><span class="hex">#2F6F9F</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3: 1918-1921 -->
+    <div class="entry" data-n="8" id="era-1918">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#8f3a4a"/>
+              <rect x="0" y="0" width="92" height="60" fill="#f4efe1"/>
+              <rect x="0" y="0" width="92" height="20" fill="#241f14"/>
+              <rect x="0" y="40" width="92" height="20" fill="#241f14"/>
+            </svg>
+            <div class="flag-caption">the wine-maroon flag of the Democratic Republic of Georgia</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1918 &ndash; 1921</div>
+            <h3 class="card-title">Democratic Republic of Georgia</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A sovereign parliamentary republic under its own constitution — the status the Democratic Republic of Georgia held for not quite three years, from its May 1918 declaration to the Red Army's February 1921 invasion."><span class="dot" style="background:#b8862f"></span>Republic, independent</span><span class="tag" tabindex="0" data-tip="Social Democratic (Menshevik) leader who headed the Democratic Republic of Georgia's government for almost its entire existence, fleeing to Paris after the 1921 Soviet invasion to lead a government-in-exile."><span class="dot" style="background:#4a3b78"></span>Noe Zhordania</span><span class="tag" tabindex="0" data-tip="The Georgian Orthodox Church restored its autocephaly, lost under Russian rule, in March 1917; the Menshevik-led republic that followed was secular in orientation but the church remained the de facto national faith."><span class="dot" style="background:#8e3b62"></span>Georgian Orthodoxy (national church, no formal establishment)</span></div>
+            <p><span class="label">Who &amp; why:</span> a short-lived Transcaucasian federation collapses after barely a month, and Georgia declares independence on 26 May 1918 under Noe Zhordania's Social Democratic (Menshevik) government &mdash; the first modern Georgian state in over a century. The young republic fights border conflicts with Armenia and Azerbaijan and a war with Soviet Russia before falling to the Red Army invasion of February 1921.</p>
+            <p><span class="label">What it represents:</span> a deep wine-maroon field with a black-and-white canton, a genuinely new design for the new republic rather than a revival of Bagrationi heraldry, chosen to mark a break from both Russian imperial and old dynastic symbolism.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No single fixed ratio in surviving records; shown at 3:2.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Wine-maroon field, black-white-black horizontal canton in the upper hoist.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#8f3a4a"></span><span class="meta"><span class="name">Wine maroon</span><span class="hex">#8F3A4A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#241f14"></span><span class="meta"><span class="name">Black</span><span class="hex">#241F14</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4: 1801-1918 -->
+    <div class="entry" data-n="7" id="era-1801">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#241f14"/>
+              <rect y="66.7" width="300" height="66.6" fill="#d4af37"/>
+              <rect y="133.3" width="300" height="66.7" fill="#f4efe1"/>
+            </svg>
+            <div class="flag-caption">the Russian imperial tricolor flown over Georgian territory</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1801 &ndash; 1918</div>
+            <h3 class="card-title">Russian imperial rule</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Absorbed outright into the Russian Empire's administrative structure with no separate sovereignty — the fate of Kartli-Kakheti in 1801 and, piecemeal, the rest of Georgian territory over the following decades."><span class="dot" style="background:#7a6a52"></span>Annexed</span><span class="tag" tabindex="0" data-tip="Russian emperor who unilaterally annexed the eastern Georgian kingdom of Kartli-Kakheti in 1801, overriding the 1783 Treaty of Georgievsk that had promised only Russian protection, not absorption."><span class="dot" style="background:#4a3b78"></span>Paul I of Russia</span><span class="tag" tabindex="0" data-tip="Russian Orthodoxy was the empire's established state religion; in 1811 the autocephalous Georgian Orthodox Church was abolished as an independent institution and subordinated to the Russian Holy Synod as an exarchate."><span class="dot" style="background:#8e3b62"></span>Russian Orthodoxy (state church); Georgian Church subordinated</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="At Tsar Alexander I's invitation, several thousand German colonists settle in the South Caucasus from 1817&ndash;18, founding villages near Tbilisi such as Elisabethtal (Asureti) and Katharinenfeld (Bolnisi), a community that persists into the 20th century."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#000"/><rect y="4.67" width="20" height="4.67" fill="#dd0000"/><rect y="9.33" width="20" height="4.67" fill="#ffce00"/></svg>Immigration: German colonists (1817&ndash;18)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The last Bagrationi kings held Kartli-Kakheti until Russian annexation in 1801 and Imereti's monarchy until 1810, c.780s–1801/1810. Arms: the maroon field and gold cross attested on their own coinage and seals."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#7a2f4a"/><path d="M50,10 V108 M12,58 H88" stroke="#d4af37" stroke-width="10"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Bagrationi Dynasty</span><span class="tag" tabindex="0" data-tip="Tsar Paul I annexed Kartli-Kakheti outright in 1801, and Russian imperial rule under the Romanovs absorbed the remaining Georgian principalities until the 1917 revolutions, 1801–1917. Arms: the imperial black double-headed eagle on gold, bearing St. George on a red shield."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f2c14e"/><g fill="#1a1a1a"><path d="M50,26 L58,40 L50,54 L42,40 Z"/><path d="M42,40 L10,20 L20,44 L4,50 L42,52 Z"/><path d="M58,40 L90,20 L80,44 L96,50 L58,52 Z"/><circle cx="40" cy="30" r="4"/><circle cx="60" cy="30" r="4"/></g><rect x="42" y="82" width="16" height="22" fill="#a4302a" stroke="#f4efe1" stroke-width="1.5"/><path d="M50,86 V102" stroke="#f4efe1" stroke-width="2.5"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Romanov</span></div>
+            <p><span class="label">Who &amp; why:</span> Tsar Paul I annexes the eastern kingdom of Kartli-Kakheti outright in 1801, overriding the 1783 Treaty of Georgievsk, which had only promised Russian protection. The western kingdoms and principalities &mdash; Imereti's monarchy ends in 1810, with Guria, Mingrelia, and Abkhazia absorbed piecemeal over the following decades &mdash; are folded in one by one until Russian control of the whole territory is complete. Russian rule lasts until the empire's collapse amid the 1917 revolutions.</p>
+            <p><span class="label">What it represents:</span> the black-gold-white tricolor used as an unofficial "imperial" flag across the Russian Empire's territories from the mid-19th century, including Georgia, alongside the Romanov dynasty's own arms on official occasions.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Three equal horizontal bands: black, gold (yellow), white.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#241f14"></span><span class="meta"><span class="name">Black</span><span class="hex">#241F14</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#d4af37"></span><span class="meta"><span class="name">Gold</span><span class="hex">#D4AF37</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5: 1490-1801 -->
+    <div class="entry" data-n="6" id="era-1490">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#7a2f4a"/>
+              <path d="M150,45 v110 M95,100 h110" stroke="#d4af37" stroke-width="14"/>
+            </svg>
+            <div class="flag-caption">the old Bagrationi cross, still used locally across the rival kingdoms</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1490 &ndash; 1801</div>
+            <h3 class="card-title">Fragmented kingdoms: Kartli, Kakheti, Imereti</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="No single crown ruling all Georgian lands — after 1490 the once-unified kingdom split permanently into Kartli, Kakheti, and Imereti, each under its own Bagrationi-descended line and increasingly squeezed between the Ottoman and Persian empires."><span class="dot" style="background:#8a5a3a"></span>Fragmented kingdoms</span><span class="tag" tabindex="0" data-tip="The last king to hold even nominal authority over a unified Georgia; during his reign, from 1478 to 1505, the realm split permanently into the separate kingdoms of Kartli, Kakheti, and Imereti."><span class="dot" style="background:#4a3b78"></span>Constantine II</span><span class="tag" tabindex="0" data-tip="Despite the political fragmentation, Georgian Orthodox Christianity remained the established religion in Kartli, Kakheti, and Imereti alike, continuing the faith adopted under the earlier unified Bagrationi crown."><span class="dot" style="background:#8e3b62"></span>Georgian Orthodoxy (state church in all three kingdoms)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Safavid Persia repeatedly invades and, under Shah Abbas I in the early 1600s, forcibly deports tens of thousands of Georgians from Kakheti to Persia, where many are resettled as soldiers, artisans, and courtiers, founding communities that survive in Iran today."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#00843d"/><circle cx="10" cy="7" r="2.2" fill="#f4c430"/><path d="M7,8.5 q3,-2 6,0" stroke="#f4c430" stroke-width="0.8" fill="none"/></svg>Conquered by: Safavid Persia (repeated invasions)</span><span class="tag" tabindex="0" data-tip="In 1795 the Persian ruler Agha Mohammad Khan sacks Tbilisi and marches off a large part of its population &mdash; estimates run to tens of thousands &mdash; as captives to Persia, one of the era's most devastating single episodes of forced deportation from Georgian soil."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#239f40"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#da0000"/><circle cx="10" cy="7" r="1.6" fill="#f4c430"/><path d="M8.5,8.2 q1.5,-1 3,0" stroke="#f4c430" stroke-width="0.5" fill="none"/></svg>Emigration: Tbilisi captives deported to Persia (1795)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Rival Bagrationi-descended lines held the separate crowns of Kartli, Kakheti, and Imereti after the kingdom's 1490 split, until Russian annexation, c.780s–1801/1810. Arms: the maroon field and gold cross attested on their own coinage and seals."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#7a2f4a"/><path d="M50,10 V108 M12,58 H88" stroke="#d4af37" stroke-width="10"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Bagrationi Dynasty</span></div>
+            <p><span class="label">Who &amp; why:</span> Georgia's last full reunification, under Giorgi V "the Brilliant" (r. 1299&ndash;1346), does not survive Timur's devastating invasions of the 1380s&ndash;90s; by 1490 the kingdom has split permanently into Kartli, Kakheti, and Imereti, plus smaller principalities such as Guria, Mingrelia, and Samtskhe. The 1555 Treaty of Amasya formalizes an Ottoman-Persian partition of the region, with western Georgian lands falling into the Ottoman sphere and eastern lands into the Persian one &mdash; a division renewed by later treaties for the next two and a half centuries, even as local Bagrationi-descended dynasties keep nominal rule throughout.</p>
+            <p><span class="label">What it represents:</span> no single state flag exists for this fractured era; the maroon-and-gold cross of the old unified kingdom remains in local heraldic and ecclesiastical use across the rival courts, shown here as an informed representative reconstruction rather than a single documented banner.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no fixed state flag for this era.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Maroon field, gold cross reaching the edges (continuation of Bagrationi heraldry).</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#7a2f4a"></span><span class="meta"><span class="name">Maroon</span><span class="hex">#7A2F4A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#d4af37"></span><span class="meta"><span class="name">Gold</span><span class="hex">#D4AF37</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6: 1243-1490 -->
+    <div class="entry" data-n="5" id="era-1243">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#6e6047"/>
+              <circle cx="150" cy="100" r="45" fill="none" stroke="#f4efe1" stroke-width="6"/>
+              <circle cx="150" cy="100" r="11" fill="#f4efe1"/>
+            </svg>
+            <div class="flag-caption">Mongol overlordship &mdash; a generic Ilkhanate-era representation</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1243 &ndash; 1490</div>
+            <h3 class="card-title">Mongol overlordship and the last reunification</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Tributary vassal status under Ilkhanate overlordship — Georgian kings kept local authority and their own courts but paid tribute and supplied troops to Mongol rulers rather than governing as fully sovereign monarchs."><span class="dot" style="background:#6e6047"></span>Mongol suzerainty</span><span class="tag" tabindex="0" data-tip="Queen of Georgia who submitted to Mongol overlordship in 1243 after years of devastating raids, accepting tributary vassal status to preserve the Bagrationi dynasty's rule over what remained of the kingdom."><span class="dot" style="background:#4a3b78"></span>Rusudan</span><span class="tag" tabindex="0" data-tip="The Mongol Ilkhanate generally tolerated subject peoples' religions, and Georgian Orthodox Christianity continued unbroken as the kingdom's established faith throughout this tributary period."><span class="dot" style="background:#8e3b62"></span>Georgian Orthodoxy (state church, tolerated by Mongol rule)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Mongol armies invade Georgia repeatedly from 1220, and by 1243 Queen Rusudan submits to Mongol overlordship, reducing the kingdom to a tribute-paying vassal within what becomes the Ilkhanate."><span class="dot" style="background:#6b2c2c"></span>Conquered by: Mongol Empire (1220s&ndash;1243)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Queen Rusudan and her Bagrationi successors kept local authority as tributary vassals under Mongol overlordship, c.780s–1801/1810. Arms: the maroon field and gold cross attested on their own coinage and seals."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#7a2f4a"/><path d="M50,10 V108 M12,58 H88" stroke="#d4af37" stroke-width="10"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Bagrationi Dynasty</span></div>
+            <p><span class="label">Who &amp; why:</span> Georgian forces first meet Mongol raiders in 1221 and are beaten badly; by 1243 Queen Rusudan has submitted to Mongol overlordship, paying tribute and supplying troops to what becomes the Ilkhanate after 1256. Georgian kings keep local authority as tributary vassals, and Giorgi V "the Brilliant" even manages one last full reunification of the kingdom (r. 1299&ndash;1346) as Mongol power fades &mdash; the final period before Georgia splinters for good.</p>
+            <p><span class="label">What it represents:</span> no distinct Georgian state flag is attested for this vassal period; the field shown is a generic, informed representation of Ilkhanate-era Mongol authority, not a documented Georgian banner.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag; shown as a generic device.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Grey-brown field, concentric rings (informed generic reconstruction of Mongol-era imagery).</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#6e6047"></span><span class="meta"><span class="name">Grey-brown</span><span class="hex">#6E6047</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 7: 1008-1243 -->
+    <div class="entry" data-n="4" id="era-1008">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#7a2f4a"/>
+              <path d="M150,45 v110 M95,100 h110" stroke="#d4af37" stroke-width="14"/>
+            </svg>
+            <div class="flag-caption">the Bagrationi cross &mdash; maroon field, gold cross, from seals and coinage</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1008 &ndash; 1243</div>
+            <h3 class="card-title">Kingdom of Georgia (Bagrationi, unified)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Sovereign under its own crown — the unified Kingdom of Georgia forged by Bagrat III in 1008 and ruled independently, with no outside overlord, until Mongol invasions began in the 1220s."><span class="dot" style="background:#b8862f"></span>Kingdom, independent</span><span class="tag" tabindex="0" data-tip="First king to unify Georgia's fractured principalities — Abkhazia, Kartli, and Tao-Klarjeti — into a single Bagrationi crown, crowned around 1008 after generations of dynastic groundwork by his predecessors."><span class="dot" style="background:#4a3b78"></span>Bagrat III</span><span class="tag" tabindex="0" data-tip="Georgian Orthodox Christianity, established as Iberia's state religion centuries earlier under King Mirian III, remained the unified kingdom's official church throughout the Bagrationi era, reaching a cultural peak under Queen Tamar."><span class="dot" style="background:#8e3b62"></span>Georgian Orthodoxy (state church)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The dynasty that unified Georgia under Bagrat III around 1008, reaching its Golden Age under Queen Tamar (r.1184–1213), c.780s–1801/1810. Arms: the maroon field and gold cross attested on their own coinage and seals."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#7a2f4a"/><path d="M50,10 V108 M12,58 H88" stroke="#d4af37" stroke-width="10"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Bagrationi Dynasty</span></div>
+            <p><span class="label">Who &amp; why:</span> Bagrat III completes the unification of Georgia's fractured principalities &mdash; Abkhazia, Kartli, Tao-Klarjeti &mdash; into a single crown, a project his Bagrationi dynasty had built toward for generations; his coronation around 1008 marks the first time a unified Georgian kingdom exists. The kingdom reaches its "Golden Age" under Queen Tamar (r. 1184&ndash;1213), whose armies push Georgian influence across much of the Caucasus and whose reign is remembered as the medieval kingdom's cultural and territorial peak. Mongol invasions beginning in the 1220s end this era of full independence.</p>
+            <p><span class="label">What it represents:</span> a maroon field with a gold cross reaching the edges, drawn from the Bagrationi dynasty's own heraldic tradition attested on coinage, seals, and church donor portraits &mdash; the same cross pattern the modern republic later revives in 2004.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio recorded; shown at 3:2.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Maroon field, gold cross reaching the edges.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#7a2f4a"></span><span class="meta"><span class="name">Maroon</span><span class="hex">#7A2F4A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#d4af37"></span><span class="meta"><span class="name">Gold</span><span class="hex">#D4AF37</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 8: 330-1008 -->
+    <div class="entry" data-n="3" id="era-330">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="120" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder field &mdash; Christianization and fragmented principalities, no flag survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 330 &ndash; 1008</div>
+            <h3 class="card-title">Christianization and fragmented principalities</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="No single crown ruling all Georgian lands during this long stretch — Byzantine and Sasanian overlordship, a Muslim Arab emirate at Tbilisi, and a patchwork of Georgian principalities each under their own local nobility."><span class="dot" style="background:#8a5a3a"></span>Fragmented principalities</span><span class="tag" tabindex="0" data-tip="King of Iberia (Kartli) traditionally credited with adopting Christianity as the kingdom's religion around 326-337 CE, guided by St. Nino, making Iberia one of the very first states in the world to do so."><span class="dot" style="background:#4a3b78"></span>Mirian III</span><span class="tag" tabindex="0" data-tip="The kingdom of Iberia adopted Christianity as its state religion under King Mirian III around 326-337 CE, one of the earliest official adoptions anywhere, and Georgian Orthodoxy has remained the country's dominant faith ever since."><span class="dot" style="background:#8e3b62"></span>Georgian Orthodoxy (state religion from c. 326-337)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The Bagrationi dynasty's early princely lines, which would unify Georgia under Bagrat III around 1008, c.780s–1801/1810. Arms: the maroon field and gold cross attested on their own coinage and seals."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#7a2f4a"/><path d="M50,10 V108 M12,58 H88" stroke="#d4af37" stroke-width="10"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Bagrationi Dynasty</span></div>
+            <p><span class="label">Who &amp; why:</span> the kingdom of Iberia (Kartli) adopts Christianity as its state religion around 326&ndash;337, traditionally credited to St. Nino, making it one of the earliest Christian states in the world. The following centuries bring Byzantine and Sasanian Persian overlordship, a Muslim Arab emirate centered on Tbilisi from the 7th century, and a patchwork of Georgian principalities &mdash; Abkhazia, Tao-Klarjeti, Kakheti, Kartli &mdash; each ruled by its own branch of local nobility, none commanding the whole territory until the Bagrationi unification of 1008.</p>
+            <p><span class="label">What it represents:</span> no securely documented flag survives from this long, fragmented, pre-heraldic period; local principalities used dynastic and ecclesiastical emblems rather than fixed territorial banners. Shown here honestly blank rather than invented.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 9: c.600 BCE-330 CE -->
+    <div class="entry" data-n="2" id="era-600bce">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="120" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder field &mdash; ancient era, pre-heraldic, no flag survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 600 BCE &ndash; 330 CE</div>
+            <h3 class="card-title">Kingdoms of Colchis and Iberia</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A pre-heraldic sovereign polity — the ancient kingdoms of Colchis and Iberia, known through Greek and Roman written sources, coinage, and archaeology rather than any surviving flag or state symbol."><span class="dot" style="background:#b8862f"></span>Ancient kingdom</span><span class="tag" tabindex="0" data-tip="No single ruler documented: Colchis and Iberia are known mainly through Greek and Roman sources and archaeology, and while later Iberian kings such as Pharnavaz I are traditionally named, no single founder or head of this early period is reliably documented, so none is asserted here."><span class="dot" style="background:#4a3b78"></span>No single ruler documented</span><span class="tag" tabindex="0" data-tip="Pre-Christian Colchis and Iberia practiced local pagan cults with Zoroastrian and Hellenistic influences; no single, formally established state religion is documented for these ancient kingdoms."><span class="dot" style="background:#8e3b62"></span>Local polytheism (no unified state religion documented)</span></div>
+            <p><span class="label">Who &amp; why:</span> the ancient kingdom of Colchis, on the eastern Black Sea coast, is the setting of the Greek myth of Jason and the Golden Fleece and one of the earliest recorded polities on Georgian soil, flourishing from roughly the 6th century BCE. To its east and south, the kingdom of Iberia (Kartli) emerges around the 4th&ndash;3rd century BCE, later absorbing Colchis's territory and becoming the dominant local power, contested between the Roman and Parthian, then Byzantine and Sasanian Persian, spheres of influence.</p>
+            <p><span class="label">What it represents:</span> no flag or fixed heraldic banner survives from this pre-heraldic antiquity; these kingdoms are known through Greek and Roman written sources, coinage, and archaeology rather than surviving vexillology. Shown here honestly blank rather than invented.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 10 -->
+    <div class="entry" data-n="1" id="era-1200bce">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="120" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder field &mdash; earliest attested Kartvelian tribal kingdom, no flag survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 1200 &ndash; 600 BCE</div>
+            <h3 class="card-title">Diauehi and Early Kartvelian Tribal Kingdoms</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A tribal kingdom in the Georgian highlands, attested in Assyrian and Urartian inscriptions rather than any Georgian source of its own — the earliest named Kartvelian-associated polity in the historical record."><span class="dot" style="background:#b8862f"></span>Tribal kingdom (foreign-attested)</span><span class="tag" tabindex="0" data-tip="No single ruler of Diauehi is reliably named across its recorded span; Urartian and Assyrian inscriptions record campaigns against and tribute from the kingdom without preserving a continuous king list."><span class="dot" style="background:#4a3b78"></span>No single ruler documented</span><span class="tag" tabindex="0" data-tip="Local Bronze and Iron Age polytheistic cult practice, known mainly through archaeology; no unified state religion is documented."><span class="dot" style="background:#8e3b62"></span>Local polytheism (specifics undocumented)</span></div>
+            <div class="migro-row"><span class="migro-label">Recorded by:</span><span class="tag" tabindex="0" data-tip="Diauehi (also transliterated Diaokhi) appears repeatedly in Urartian royal inscriptions of the 9th&ndash;8th centuries BCE, and in an earlier form in Assyrian records associated with the 12th century BCE, as a powerful highland kingdom that Urartu's own kings repeatedly campaign against and extract tribute (gold, silver, cattle) from."><span class="dot" style="background:#6b2c2c"></span>Assyrian &amp; Urartian royal inscriptions (9th&ndash;8th c. BCE)</span></div>
+            <p><span class="label">Who &amp; why:</span> the earliest polity associated with Kartvelian-speaking peoples known to history is not recorded by Georgians themselves but by their neighbors: Diauehi, a highland kingdom in what is now northeastern Turkey and southwestern Georgia, appears in Assyrian sources as early as the 12th century BCE and repeatedly in the Kingdom of Urartu's own royal inscriptions through the 9th and 8th centuries BCE, which describe campaigns against it and tribute extracted from it. Many scholars regard Diauehi, and the related tribal confederation Colcha named in the same Urartian texts, as ancestral to the later, better-known kingdoms of Colchis and Iberia that follow directly in this timeline. Bronze Age archaeological cultures in the wider Caucasus &mdash; walled settlements, elaborate kurgan burials, and early metalworking &mdash; corroborate a settled, organized society here well before Greek writers ever mention Colchis by name.</p>
+            <p><span class="label">What it represents:</span> no flag or heraldic symbol of any kind survives from this pre-heraldic Bronze and early Iron Age era; Diauehi is known only through the inscriptions of its rivals and through archaeology. Shown here honestly blank rather than invented.</p>
+            <p><span class="label">World context:</span> this span opens around the traditional date of the Trojan War and the wider Bronze Age Collapse convulsing the eastern Mediterranean, runs through the rise of the Assyrian Empire and its highland rival Urartu (the very powers whose own inscriptions preserve Diauehi's name), and closes as Greek colonists are first establishing trading posts on the Black Sea coast that will soon give the world the myth of Jason, the Argonauts, and the Golden Fleece &mdash; set, not coincidentally, in Colchis, Diauehi's own likely successor.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#b8862f"></span><b>Ancient kingdom</b> &mdash; pre-heraldic sovereign polity</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8a5a3a"></span><b>Fragmented principalities / kingdoms</b> &mdash; no single crown ruling all Georgian lands</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#b8862f"></span><b>Kingdom, independent</b> &mdash; sovereign under its own crown</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#6e6047"></span><b>Mongol suzerainty</b> &mdash; tributary vassal under Ilkhanate overlordship</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#7a6a52"></span><b>Annexed</b> &mdash; absorbed into an outside empire</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#b8862f"></span><b>Republic, independent</b> &mdash; sovereign parliamentary or constitutional republic</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#9c2b3a"></span><b>Soviet republic</b> &mdash; constituent republic of the USSR</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the named ruler most associated with the era's start</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official/established faith, not the population's</div>
+    </div>
+  </div>
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for Georgia lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/ge/">Search Record Atlas for Georgia &rarr;</a>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This page is one lineage in a larger set. See the region-wide map and the other countries here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="caucasus-hub.html"><b>Caucasus hub</b><span>Georgia, Armenia, and Azerbaijan together</span></a>
+      <a class="link-card" href="armenia-flags.html"><b>Flags of Armenia</b><span>The neighboring Bagratid lineage</span></a>
+      <a class="link-card" href="azerbaijan-flags.html"><b>Flags of Azerbaijan</b><span>The Shirvanshahs and beyond</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are close historical approximations for painting reference; pre-19th-century swatches are informed reconstructions, not official specifications.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var IC = {
+    unified:"#8f3a4a", modern:"#9c1f3a", abkhazia:"#2f6f47", ossetia:"#b8862f"
+  };
+  var INAMES = {
+    unified:"Republic of Georgia (whole territory)", modern:"Republic of Georgia (Tbilisi-controlled core)",
+    abkhazia:"Abkhazia (de facto independent, unrecognized)", ossetia:"South Ossetia (de facto independent, unrecognized)"
+  };
+  var IFLAGS = {
+    georgia_old: '<rect width="300" height="200" fill="#8f3a4a"/><rect x="0" y="0" width="92" height="60" fill="#f4efe1"/><rect x="0" y="0" width="92" height="20" fill="#241f14"/><rect x="0" y="40" width="92" height="20" fill="#241f14"/>',
+    georgia_modern: '<rect width="300" height="200" fill="#f4efe1"/><rect x="128" width="44" height="200" fill="#9c1f3a"/><rect y="78" width="300" height="44" fill="#9c1f3a"/><g fill="#9c1f3a"><g transform="translate(65,40)"><rect x="-10" y="-3" width="20" height="6"/><rect x="-3" y="-10" width="6" height="20"/></g><g transform="translate(235,40)"><rect x="-10" y="-3" width="20" height="6"/><rect x="-3" y="-10" width="6" height="20"/></g><g transform="translate(65,160)"><rect x="-10" y="-3" width="20" height="6"/><rect x="-3" y="-10" width="6" height="20"/></g><g transform="translate(235,160)"><rect x="-10" y="-3" width="20" height="6"/><rect x="-3" y="-10" width="6" height="20"/></g></g>',
+    abkhazia_flag: '<rect width="300" height="200" fill="#fff"/><rect y="0" width="300" height="28.6" fill="#5aa02c"/><rect y="57.1" width="300" height="28.6" fill="#5aa02c"/><rect y="114.3" width="300" height="28.6" fill="#5aa02c"/><rect y="171.4" width="300" height="28.6" fill="#5aa02c"/><rect x="0" y="0" width="100" height="100" fill="#a4302a"/><circle cx="50" cy="50" r="26" fill="#fff"/>',
+    ossetia_flag: '<rect width="300" height="66.7" fill="#fff"/><rect y="66.7" width="300" height="66.6" fill="#c1272d"/><rect y="133.3" width="300" height="66.7" fill="#f9d616"/>'
+  };
+  function iFlagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (IFLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  var iLegendEl = document.getElementById("iLegend");
+  iLegendEl.innerHTML = Object.keys(IC).map(function (k) {
+    return '<span><span class="sw" style="background:' + IC[k] + '"></span>' + INAMES[k] + "</span>";
+  }).join("");
+
+  var ISNAP = [
+    { year:"1991", name:"Georgia declares independence", t:{ core:IC.unified, abkhazia:IC.unified, ossetia:IC.unified }, flagKeys:{ core:"georgia_old", abkhazia:"georgia_old", ossetia:"georgia_old" },
+      story:"Georgia declares restoration of independence on 9 April 1991, nominally reuniting the whole territory shown here under Tbilisi. Conflict in South Ossetia had already flared that January, and the fragile unity shown at this snapshot does not last the year." },
+    { year:"1992", name:"South Ossetia's war ends in de facto split", t:{ core:IC.unified, abkhazia:IC.unified, ossetia:IC.ossetia }, flagKeys:{ core:"georgia_old", abkhazia:"georgia_old", ossetia:"ossetia_flag" },
+      story:"The 1991&ndash;92 South Ossetia War ends with a June 1992 ceasefire, brokered with Russian involvement, that has never been reversed. South Ossetia governs itself with its own institutions and flag &mdash; a white-red-yellow tricolor &mdash; recognized by almost no one, including Georgia." },
+    { year:"1993", name:"Abkhazia's war ends in de facto split", t:{ core:IC.unified, abkhazia:IC.abkhazia, ossetia:IC.ossetia }, flagKeys:{ core:"georgia_old", abkhazia:"abkhazia_flag", ossetia:"ossetia_flag" },
+      story:"The 1992&ndash;93 War in Abkhazia ends that September with every Georgian government institution expelled from the territory and a mass displacement of ethnic Georgian residents. Abkhazia's own green-and-white striped flag, with a red canton, flies over a region no Georgian government has controlled since." },
+    { year:"2008–present", name:"Russian recognition freezes the split", t:{ core:IC.modern, abkhazia:IC.abkhazia, ossetia:IC.ossetia }, flagKeys:{ core:"georgia_modern", abkhazia:"abkhazia_flag", ossetia:"ossetia_flag" },
+      story:"Georgia adopts its current five-cross flag in January 2004. The brief August 2008 Russo-Georgian War over South Ossetia ends with Russia formally recognizing both Abkhazia and South Ossetia as independent states &mdash; a recognition joined by only a handful of other governments. The line on this map has not moved since." }
+  ];
+
+  var IREGIONS = ["core","abkhazia","ossetia"];
+  var IREGION_NAMES = { core:"Rest of Georgia", abkhazia:"Abkhazia", ossetia:"South Ossetia" };
+  var IADJ = [["core","abkhazia"],["core","ossetia"]];
+
+  function iTextColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+
+  function iGroupsFor(t) {
+    var parent = {};
+    IREGIONS.forEach(function (r) { parent[r] = r; });
+    function find(x) { return parent[x] === x ? x : (parent[x] = find(parent[x])); }
+    function union(a, b) { var ra = find(a), rb = find(b); if (ra !== rb) parent[ra] = rb; }
+    IADJ.forEach(function (pair) { if (t[pair[0]] === t[pair[1]]) union(pair[0], pair[1]); });
+    var groups = {};
+    IREGIONS.forEach(function (r) { var root = find(r); if (!groups[root]) groups[root] = []; groups[root].push(r); });
+    return Object.keys(groups).map(function (k) { return groups[k]; });
+  }
+
+  var iYearTag = document.getElementById("iYearTag");
+  var iEraName = document.getElementById("iEraName");
+  var iEraOwners = document.getElementById("iEraOwners");
+  var iEraStory = document.getElementById("iEraStory");
+  var iFlagsRow = document.getElementById("iFlagsRow");
+  var iSlider = document.getElementById("iSlider");
+
+  function iRender(idx) {
+    var era = ISNAP[idx];
+    iYearTag.textContent = era.year;
+    iEraName.textContent = era.name;
+    iEraStory.innerHTML = era.story;
+
+    IREGIONS.forEach(function (id) {
+      document.getElementById("ireg-" + id).setAttribute("fill", era.t[id]);
+      var lbl = document.getElementById("ilbl-" + id);
+      if (lbl) {
+        var lblColor = iTextColorFor(era.t[id]);
+        lbl.setAttribute("fill", lblColor);
+        lbl.setAttribute("stroke", lblColor === "#201a12" ? "#f7f1e3" : "#201a12");
+      }
+    });
+
+    IADJ.forEach(function (pair) {
+      var same = era.t[pair[0]] === era.t[pair[1]];
+      var line = document.getElementById("ib-" + pair[0] + "-" + pair[1]);
+      line.setAttribute("stroke-opacity", same ? "0.06" : "0.85");
+      line.setAttribute("stroke-width", same ? "1" : "2.4");
+    });
+
+    var groups = iGroupsFor(era.t);
+    var seen = {}; var parts = [];
+    groups.forEach(function (g) {
+      var label = INAMES[Object.keys(IC).filter(function (k) { return IC[k] === era.t[g[0]]; })[0]] || era.t[g[0]];
+      if (!seen[label]) { seen[label] = []; parts.push(label); }
+      g.forEach(function (id) { seen[label].push(IREGION_NAMES[id]); });
+    });
+    iEraOwners.innerHTML = parts.map(function (label) { return "<b>" + label + "</b>: " + seen[label].join(", "); }).join(" &middot; ");
+
+    iFlagsRow.innerHTML = IREGIONS.map(function (id) {
+      return '<div class="iflag-chip">' + iFlagSvg(era.flagKeys[id]) + '<div class="ic-label">' + IREGION_NAMES[id] + '</div></div>';
+    }).join("");
+  }
+
+  iSlider.addEventListener("input", function () { iRender(parseInt(iSlider.value, 10)); });
+  iRender(0);
+
+  var iPlaying = false, iPlayTimer = null;
+  var iPlayBtn = document.getElementById("iPlayBtn");
+  function iStepPlay() {
+    var next = parseInt(iSlider.value, 10) + 1;
+    if (next > ISNAP.length - 1) { iStopPlay(); return; }
+    iSlider.value = next;
+    iRender(next);
+  }
+  function iStartPlay() {
+    iPlaying = true;
+    iPlayBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(iSlider.value, 10) >= ISNAP.length - 1) { iSlider.value = 0; iRender(0); }
+    iPlayTimer = setInterval(iStepPlay, 1700);
+  }
+  function iStopPlay() {
+    iPlaying = false;
+    iPlayBtn.innerHTML = "&#9654;";
+    clearInterval(iPlayTimer);
+  }
+  iPlayBtn.addEventListener("click", function () { iPlaying ? iStopPlay() : iStartPlay(); });
+
+  document.querySelectorAll(".tag[data-tip]").forEach(function (tag) {
+    tag.addEventListener("click", function (e) {
+      var wasOpen = tag.classList.contains("tip-open");
+      document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+      if (!wasOpen) tag.classList.add("tip-open");
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+  });
+})();
+</script>
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var html = '<h4>Genealogical records for this ground</h4>';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>
+
+</body></html>

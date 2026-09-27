@@ -1,0 +1,967 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+</style></head><body>
+<title>Flags of China</title>
+<meta name="description" content="A chronological, paint-ready atlas of every flag and dynastic banner associated with China, from the Qin unification through the Qing, the 1911-12 fall of imperial rule, and the People's Republic of China proclaimed in 1949.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.08rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; font-size: .94rem; color: var(--muted); }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  .legend { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+
+  /* ---------- Timeline ---------- */
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1px; background: var(--hair); }
+  @media (max-width: 560px) { .timeline::before { left: 9px; } }
+  .entry { position: relative; padding-left: 46px; margin-bottom: 46px; }
+  @media (max-width: 560px) { .entry { padding-left: 30px; } }
+  .entry::before {
+    content: attr(data-n);
+    position: absolute; left: 1px; top: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--paper); outline: 1px solid var(--hair);
+    background: var(--card);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--brick); display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) { .entry::before { left: -5px; width: 18px; height: 18px; font-size: 9px; } }
+
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+  .card-head { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  @media (max-width: 620px) { .card-head { flex-direction: column; } }
+  .flag-box { flex: none; width: 168px; }
+  .flag-box svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-caption { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .card-title { font-size: 1.32rem; font-weight: 600; line-height: 1.18; margin: 0 0 10px; text-wrap: balance; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px; border: 1px solid var(--card-border); color: var(--muted);
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  /* Flip tooltip below tags near the top of the viewport so it isn't clipped */
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  /* Keep tooltips from overflowing the left/right edges on narrow screens */
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint { border-top: 1px solid var(--hair); }
+  details.paint > summary {
+    cursor: pointer; list-style: none; padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--adriatic); display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before { content: "+"; font-family: "Fraunces", serif; font-size: 15px; width: 14px; }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row { display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px; }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--card-border); border-radius: 2px; padding: 5px 9px 5px 5px; background: var(--paper); }
+  .swatch .chip { width: 20px; height: 20px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: 64ch; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 88px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 340px; height: auto; }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .iborder-line { transition: stroke-opacity 0.6s ease, stroke-width 0.6s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .ireg-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 700; text-anchor: middle; transition: fill .4s ease, stroke .4s ease; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="east-asia-hub.html">East Asia hub</a></p>
+  <p class="kicker">Family research &middot; Phase 18 of the world atlas</p>
+  <h1>Flags of China</h1>
+  <p class="lede">China's dynastic history is among the longest continuously documented state traditions on earth, opening (by tradition, and with genuinely debated historicity) with the Xia around 2070 BCE, running through the archaeologically confirmed Shang and the philosophically formative Zhou, the Qin unification of 221 BCE, and two thousand more years of dynastic rule to the fall of the last emperor in 1912. But none of it used a national flag in the modern sense &mdash; that idea only arrives with the late Qing's contact with Western and Japanese naval powers in the 1860s&ndash;80s. This page treats the deep dynastic span honestly: dynasty-associated colors and devices where the historical record supports them, clearly marked as not being flags, and Xia's disputed historicity flagged as such, followed by the real flags of the 1889 Qing dragon banner, the 1912 Republic, and the People's Republic of China proclaimed in 1949.</p>
+  <p class="lede">This is the mainland Chinese lineage: the People's Republic of China (1949&ndash;present) and everything that came before it on the mainland. Taiwan's own page in this atlas covers the Republic of China's continued flag lineage after its 1949 relocation there, and the Yuan Dynasty (1271&ndash;1368) is only briefly noted here &mdash; it was the Mongol Empire's rule over China, and its deeper history belongs to this atlas's <a href="mongol-empire-flags.html">Mongol Empire page</a>.</p>
+
+  <div class="scope-note">
+    <b>Scope of this page:</b> the Chinese mainland, c. 2070 BCE (traditional; the Xia dynasty's historicity is genuinely debated) to the present, twelve political periods. Taiwan's political status is disputed: the People's Republic of China (founded 1949, this page's current entry) claims Taiwan as its own territory, while Taiwan has been self-governing under the Republic of China's government since 1949, with its own military, elections, and currency. This page states that dispute as a live, unresolved fact without taking a position on which claim is correct &mdash; see <a href="taiwan-flags.html">Taiwan's own page</a> for the Republic of China's side of the story since 1949. Part of a larger atlas &mdash; see the linked pages at the bottom.
+  </div>
+
+
+  <div class="imap-section">
+    <h2>One realm, eleven periods</h2>
+    <p class="imap-sub">China&rsquo;s own real border, traced whole &mdash; this page&rsquo;s eleven mainland periods (Xia/Shang/Zhou through the People&rsquo;s Republic) are dynastic and regime changes over essentially the same national territory, not a partition into separately governed pieces. Press play, or drag the slider, to watch who held it, era to era.</p>
+    <div class="rule-box">
+      <b>This is a single-region page, not a partition map.</b> Genuine internal fragmentations exist in Chinese history &mdash; the Warring States, the Three Kingdoms, the Northern/Southern Song split &mdash; but this page&rsquo;s own timeline doesn&rsquo;t carry those as separate tracked entities; it moves dynasty to dynasty across the same broad territory. So the map traces the whole country rather than inventing a partition the timeline itself doesn&rsquo;t use. The Yuan (Mongol) period is deliberately brief here &mdash; see the linked Mongol Empire page for that empire&rsquo;s own fuller story.
+    </div>
+    <div class="imap-frame">
+      <div class="imap-controls">
+        <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="imap-year" id="iYearTag">c. 2070 &amp;ndash; 221 BCE</span>
+        <input type="range" id="iSlider" min="0" max="10" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="imap-svg" viewBox="0 0 290.0 170.6" xmlns="http://www.w3.org/2000/svg">
+        <g class="context-label" pointer-events="none">
+          <text x="150" y="8">RUSSIA / MONGOLIA</text>
+          <text x="55" y="45">KAZAKHSTAN</text>
+          <text x="60" y="130">INDIA / MYANMAR</text>
+          <text x="255" y="100">PACIFIC OCEAN</text>
+        </g>
+        <path id="ireg-cn" class="ireg-fill" d="M243.8,30.7 L251.1,32.0 L256.2,35.0 L257.9,39.0 L264.3,39.0 L268.0,37.4 L275.0,36.1 L271.1,41.5 L269.7,46.1 L266.8,50.2 L261.7,49.5 L258.0,51.0 L259.2,54.6 L258.6,59.6 L256.4,59.7 L256.4,61.9 L253.7,59.4 L252.0,61.8 L245.4,63.6 L246.1,65.8 L242.4,65.7 L240.4,64.3 L237.5,67.3 L229.4,72.3 L223.5,73.6 L220.4,75.6 L215.8,76.7 L218.0,74.7 L217.2,73.1 L220.5,70.2 L218.3,68.0 L209.8,72.5 L207.2,75.2 L203.0,75.4 L200.9,77.4 L203.1,80.3 L206.6,80.9 L206.7,82.9 L210.1,84.1 L214.8,81.1 L221.3,82.8 L222.0,85.0 L216.0,86.2 L214.0,88.5 L209.9,90.6 L207.7,93.6 L212.3,95.9 L213.9,100.1 L219.4,107.2 L219.3,110.4 L216.7,111.6 L217.7,113.8 L220.2,115.1 L218.5,121.9 L216.1,122.3 L205.6,137.5 L193.9,145.0 L189.1,145.5 L186.5,147.4 L185.1,146.0 L182.7,148.1 L172.3,150.9 L170.8,155.4 L168.5,155.6 L167.4,152.5 L168.4,150.9 L156.4,149.1 L154.4,147.4 L155.1,145.0 L151.2,144.2 L149.1,142.6 L145.5,144.8 L138.0,145.3 L133.6,147.0 L134.2,151.8 L131.9,151.7 L131.4,149.0 L128.3,150.2 L123.3,147.8 L124.6,144.3 L121.9,143.5 L120.9,139.6 L116.4,140.3 L116.9,135.3 L120.9,131.7 L121.0,125.0 L119.1,124.0 L117.7,121.5 L110.7,121.2 L112.1,119.4 L110.1,116.7 L107.1,118.5 L103.5,117.5 L94.8,123.3 L91.4,123.9 L84.2,121.6 L79.2,125.9 L78.8,122.5 L76.2,123.4 L66.5,122.0 L59.7,119.3 L58.3,117.3 L51.7,113.9 L48.3,112.6 L46.5,113.6 L40.6,110.7 L36.5,108.0 L35.3,103.3 L38.3,103.9 L38.5,101.7 L36.8,99.6 L37.2,96.1 L32.6,91.1 L25.7,89.4 L24.4,86.2 L20.5,83.0 L20.0,78.9 L16.1,78.4 L15.0,74.4 L16.2,73.5 L15.6,72.5 L19.7,70.5 L22.6,69.7 L27.1,70.2 L28.7,67.5 L34.1,67.0 L35.6,65.3 L42.3,63.0 L42.6,59.7 L45.5,58.6 L41.7,51.2 L52.2,48.6 L55.3,41.0 L63.7,42.4 L66.0,40.5 L66.2,36.2 L69.8,35.8 L74.7,32.6 L75.8,35.6 L79.3,37.8 L85.4,39.4 L88.3,42.8 L86.7,47.8 L88.2,49.6 L98.9,51.0 L106.7,54.1 L111.1,60.5 L124.5,61.3 L130.1,60.7 L140.6,64.0 L145.7,64.0 L147.6,65.3 L152.5,63.0 L170.7,59.9 L176.7,56.2 L174.7,53.1 L176.9,50.4 L183.6,51.7 L187.8,49.4 L194.3,47.8 L200.4,43.8 L209.9,43.7 L210.4,42.2 L203.1,37.9 L199.9,39.4 L193.3,39.3 L192.2,37.6 L197.2,30.1 L202.3,31.7 L208.3,29.1 L208.3,27.2 L214.4,21.3 L214.4,19.0 L212.1,18.0 L215.6,15.9 L226.5,15.0 L236.5,17.8 L242.2,26.5 L243.8,30.7 Z"/>
+        <g font-family="IBM Plex Mono, monospace">
+          <text class="ireg-label" id="ilbl-cn" x="152.2" y="87.1">CHINA</text>
+        </g>
+      </svg>
+      <div class="imap-head">
+        <div class="imap-name" id="iEraName"></div>
+        <div class="imap-owners" id="iEraOwners"></div>
+      </div>
+      <div class="iflags-row" id="iFlagsRow"></div>
+      <p class="imap-story" id="iEraStory"></p>
+
+      <p class="map-note">Real traced border (johan/world.geo.json) &mdash; no internal partition, per the rule box above.</p>
+      <div class="imap-key" id="iLegend"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <!-- 1: PRC -->
+    <div class="entry" data-n="12" id="era-1949">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#de2910"/>
+              <g fill="#ffde00">
+                <path d="M50,35 l8,22 23,1 -18,15 6,22 -19,-13 -19,13 6,-22 -18,-15 23,-1 Z" transform="scale(1.15) translate(-5,-3)"/>
+                <path d="M96,24 l3,8 8,0.5 -6,5.5 2,8 -7,-4.5 -7,4.5 2,-8 -6,-5.5 8,-0.5 Z"/>
+                <path d="M110,44 l3,8 8,0.5 -6,5.5 2,8 -7,-4.5 -7,4.5 2,-8 -6,-5.5 8,-0.5 Z"/>
+                <path d="M108,68 l3,8 8,0.5 -6,5.5 2,8 -7,-4.5 -7,4.5 2,-8 -6,-5.5 8,-0.5 Z"/>
+                <path d="M92,82 l3,8 8,0.5 -6,5.5 2,8 -7,-4.5 -7,4.5 2,-8 -6,-5.5 8,-0.5 Z"/>
+              </g>
+            </svg>
+            <div class="flag-caption">the Five-Starred Red Flag &mdash; unchanged since 1949</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1949 &ndash; present</div>
+            <h3 class="card-title">People's Republic of China</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#c9372c"></span>Communist one-party state</span><span class="tag" tabindex="0" data-tip="Chairman of the Chinese Communist Party who led it to victory in the civil war and proclaimed the People&#x27;s Republic in Beijing on 1 October 1949, remaining its paramount leader until his death in 1976."><span class="dot" style="background:#4a3b78"></span>Mao Zedong</span><span class="tag" tabindex="0" data-tip="The People&#x27;s Republic has no official state religion; the Communist Party's own ideology is officially atheist, while the constitution guarantees citizens freedom of religious belief within party-supervised limits."><span class="dot" style="background:#8e3b62"></span>No state religion (officially atheist party)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Roughly a million or more people flee mainland China for Hong Kong in waves through the 1950s, cresting in the 1962 &quot;Great Exodus&quot; as refugees escape the famine following the Great Leap Forward."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#de2910"/><g fill="#fff"><ellipse cx="10" cy="4.5" rx="1.3" ry="2.2"/><ellipse cx="13" cy="6" rx="1.3" ry="2.2" transform="rotate(72 13 6)"/><ellipse cx="11.8" cy="9.3" rx="1.3" ry="2.2" transform="rotate(144 11.8 9.3)"/><ellipse cx="8.2" cy="9.3" rx="1.3" ry="2.2" transform="rotate(216 8.2 9.3)"/><ellipse cx="7" cy="6" rx="1.3" ry="2.2" transform="rotate(288 7 6)"/></g></svg>Emigration: refugees fleeing to Hong Kong (1950s&ndash;62)</span><span class="tag" tabindex="0" data-tip="Tens of thousands of North Koreans cross into China's northeastern border provinces as unauthorized migrants and refugees, particularly since the famine of the 1990s, seeking to escape economic hardship and political repression."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#fff"/><rect y="1" width="20" height="1" fill="#024fa2"/><rect y="2" width="20" height="10" fill="#ed1c27"/><rect y="11" width="20" height="1" fill="#024fa2"/><circle cx="5" cy="7" r="2" fill="#fff"/><path d="M5,5.2 l0.6,1.4 1.5,0.15 -1.1,1 0.35,1.45 -1.35,-0.8 -1.35,0.8 0.35,-1.45 -1.1,-1 1.5,-0.15z" fill="#ed1c27"/></svg>Immigration: North Korean refugees (1990s&ndash;)</span></div>
+            <p><span class="label">Who &amp; why:</span> the Chinese Communist Party, led by Mao Zedong, wins the Chinese Civil War against the Nationalist Kuomintang and proclaims the People's Republic in Beijing on 1 October 1949, while the defeated Nationalist government relocates to Taiwan (see Taiwan's own page). The PRC governs the mainland continuously since, through the Great Leap Forward, the Cultural Revolution, Deng Xiaoping's post-1978 market reforms, and its emergence as the world's second-largest economy. The PRC claims Taiwan as part of its own territory, a claim Taiwan's government disputes; this remains an unresolved, live political question.</p>
+            <p><span class="label">What it represents:</span> designed by Zeng Liansong and adopted just before the founding declaration, the large gold star stands for the Communist Party's leadership, the four smaller stars for the social classes (workers, peasants, urban petty bourgeoisie, and national capitalists) the party claimed to unite. Red is the color of revolution and of Han Chinese tradition alike.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">3:2.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red field; one large five-pointed gold star in the upper hoist, arced by four smaller gold stars each pointing toward the large star's center.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#de2910"></span><span class="meta"><span class="name">Red</span><span class="hex">#DE2910</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#ffde00"></span><span class="meta"><span class="name">Gold</span><span class="hex">#FFDE00</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2: ROC Nationalist mainland -->
+    <div class="entry" data-n="11" id="era-1928">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#fe0000"/>
+              <rect width="130" height="108" fill="#000095"/>
+              <circle cx="65" cy="54" r="30" fill="#000095" stroke="#f4efe1" stroke-width="5"/>
+              <circle cx="65" cy="54" r="11" fill="#000095"/>
+              <g fill="#f4efe1"><rect x="61" y="14" width="8" height="80" transform="rotate(0 65 54)"/><rect x="61" y="14" width="8" height="80" transform="rotate(30 65 54)"/><rect x="61" y="14" width="8" height="80" transform="rotate(60 65 54)"/><rect x="61" y="14" width="8" height="80" transform="rotate(90 65 54)"/><rect x="61" y="14" width="8" height="80" transform="rotate(120 65 54)"/><rect x="61" y="14" width="8" height="80" transform="rotate(150 65 54)"/></g>
+            </svg>
+            <div class="flag-caption">Blue Sky, White Sun, and a Wholly Red Earth</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1928 &ndash; 1949</div>
+            <h3 class="card-title">Republic of China (Nationalist government, mainland)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Republic, one-party dominant</span><span class="tag" tabindex="0" data-tip="Nationalist (Kuomintang) military and political leader who completed the Northern Expedition in 1928, unifying the Nationalist government under one-party rule and heading it through 1949."><span class="dot" style="background:#4a3b78"></span>Chiang Kai-shek</span><span class="tag" tabindex="0" data-tip="The Nationalist government established no official state religion, maintaining constitutional religious freedom amid a religiously diverse population of Buddhists, Daoists, Christians, and others."><span class="dot" style="background:#8e3b62"></span>No official state religion</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Imperial Japan invades in July 1937 and occupies large parts of eastern and coastal China, including Beijing, Shanghai, and Nanjing, until its 1945 surrender ends World War II in the Pacific."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#fff"/><circle cx="10" cy="7" r="4" fill="#bc002d"/></svg>Occupied by: Japan (1937&ndash;45)</span></div>
+            <p><span class="label">Who &amp; why:</span> Chiang Kai-shek's Nationalist Kuomintang completes the Northern Expedition against regional warlords in 1928 and adopts this flag &mdash; already the Kuomintang's own party banner since 1917&ndash;25 &mdash; as the national flag, ending the Beiyang era. The government fights a brutal, if intermittently paused, civil war against the Communist Party from 1927 almost continuously to 1949, interrupted by the full-scale Japanese invasion of 1937&ndash;45 (part of World War II in the Pacific), before losing the mainland to the Communists in 1949 and relocating to Taiwan, where this same flag continues today &mdash; see Taiwan's own page.</p>
+            <p><span class="label">What it represents:</span> the white 12-rayed sun on blue (Blue Sky with a White Sun) was Kuomintang founder Sun Yat-sen's own revolutionary emblem; the rays stand for the twelve traditional double-hours of the day, urging constant progress. Red for the field completes "Blue Sky, White Sun, and a Wholly Red Earth."</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red field; blue canton with a white sun bearing twelve triangular rays.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#fe0000"></span><span class="meta"><span class="name">Red</span><span class="hex">#FE0000</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#000095"></span><span class="meta"><span class="name">Blue</span><span class="hex">#000095</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3: Beiyang -->
+    <div class="entry" data-n="10" id="era-1912">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="40" fill="#de2910"/>
+              <rect y="40" width="300" height="40" fill="#ffde00"/>
+              <rect y="80" width="300" height="40" fill="#1e2f96"/>
+              <rect y="120" width="300" height="40" fill="#f4efe1"/>
+              <rect y="160" width="300" height="40" fill="#241f14"/>
+            </svg>
+            <div class="flag-caption">the Five Races Under One Union flag</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1912 &ndash; 1928</div>
+            <h3 class="card-title">Republic of China (Beiyang government)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Republic, fragmented</span><span class="tag" tabindex="0" data-tip="Former Qing general who became the Republic&#x27;s first formal president in 1912 and dominated the early Beiyang government until his death in 1916, before it fragmented further among rival warlord factions."><span class="dot" style="background:#4a3b78"></span>Yuan Shikai</span><span class="tag" tabindex="0" data-tip="The new Republic established no official state religion, ending imperial Confucian orthodoxy and formally guaranteeing religious freedom across its fragmented warlord-era governments."><span class="dot" style="background:#8e3b62"></span>No official state religion</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Roughly 140,000 Chinese laborers, the Chinese Labour Corps, are recruited to France and Belgium between 1916 and 1918 to support the Allied war effort behind the front lines of World War I."><span class="dot" style="background:#a3672f"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="6.67" height="14" fill="#0055a4"/><rect x="6.67" width="6.67" height="14" fill="#fff"/><rect x="13.33" width="6.67" height="14" fill="#ef4135"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="6.67" height="14" fill="#000"/><rect x="6.67" width="6.67" height="14" fill="#fae042"/><rect x="13.33" width="6.67" height="14" fill="#ed2939"/></svg></span>Emigration: Chinese Labour Corps to WWI Europe (1916&ndash;18)</span></div>
+            <p><span class="label">Who &amp; why:</span> the Xinhai Revolution, beginning with the Wuchang Uprising in October 1911, topples the last Qing emperor, six-year-old Puyi, who formally abdicates in February 1912, ending over two thousand years of imperial rule. The republic that follows is nominally unified but in practice runs through competing Beiyang Army warlord factions and a series of weak central governments in Beijing, until the Kuomintang's Northern Expedition brings the country under one nationalist government by 1928.</p>
+            <p><span class="label">What it represents:</span> five horizontal stripes for the "five races" the new republic claimed to unite &mdash; Han (red), Manchu (yellow), Mongol (blue), Hui/Muslim (white), and Tibetan (black) &mdash; a deliberate break from the dynastic dragon banner toward an inclusive multi-ethnic republic.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">5:8.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Five equal horizontal stripes: red, yellow, blue, white, black (top to bottom).</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#de2910"></span><span class="meta"><span class="name">Red</span><span class="hex">#DE2910</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#ffde00"></span><span class="meta"><span class="name">Yellow</span><span class="hex">#FFDE00</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#1e2f96"></span><span class="meta"><span class="name">Blue</span><span class="hex">#1E2F96</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#241f14"></span><span class="meta"><span class="name">Black</span><span class="hex">#241F14</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4: Qing dragon flag -->
+    <div class="entry" data-n="9" id="era-1644">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#ffde00"/>
+              <path d="M60,60 q40,-30 90,-15 q50,15 60,50 q10,35 -20,55 q-15,-10 -10,-25 q-25,10 -45,-5 q-25,-18 -15,-40 q-30,5 -60,-20 Z" fill="none" stroke="#1e2f96" stroke-width="6"/>
+              <circle cx="230" cy="70" r="7" fill="#de2910"/>
+            </svg>
+            <div class="flag-caption">the Yellow Dragon Flag &mdash; China's first true national flag</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1644 &ndash; 1912 <span style="opacity:.7">(national flag from 1889)</span></div>
+            <h3 class="card-title">Qing Dynasty</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Imperial dynasty</span><span class="tag" tabindex="0" data-tip="Manchu prince regent who led the 1644 conquest of Beijing on behalf of the child Shunzhi Emperor, establishing Qing rule over China proper at this era&#x27;s start."><span class="dot" style="background:#4a3b78"></span>Dorgon (Prince Regent)</span><span class="tag" tabindex="0" data-tip="Confucianism remained the empire&#x27;s state orthodoxy and basis of civil examinations, while the Qing imperial house also gave prominent patronage to Tibetan Buddhism and retained Manchu shamanist court rites."><span class="dot" style="background:#8e3b62"></span>Confucianism (state orthodoxy), with imperial patronage of Tibetan Buddhism</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Manchu forces under Prince Regent Dorgon take Beijing in 1644 and go on to conquer the rest of Ming China over the following decades, establishing the Manchu Qing Dynasty over the Han Chinese population."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#fedd00"/><circle cx="15" cy="4" r="1.3" fill="#e02020"/><path d="M4,10 Q6,4 10,6 Q13,7 12,10 Q10,12 7,11 Q5,10.5 4,10Z" fill="#1c3f94"/></svg>Conquered by: Manchu Qing (from 1644)</span><span class="tag" tabindex="0" data-tip="Following the mid-19th-century Opium Wars and under grinding poverty, hundreds of thousands of Chinese laborers emigrate abroad under often coercive &quot;coolie&quot; contract-labor systems to build railroads and work plantations across the Americas and Southeast Asia."><span class="dot" style="background:#a3672f"></span>Emigration: contract-labor emigrants (19th c., Americas &amp; SE Asia)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="House of Aisin Gioro (Qing Dynasty), 1636&ndash;1912. The Manchu clan that conquered the Ming and ruled until Puyi&#x27;s 1912 abdication. Its 1889 dragon banner &mdash; azure dragon chasing a flaming pearl on imperial yellow &mdash; is reproduced here directly."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#ffde00"/><path d="M30,80 Q26,50 40,34 Q46,44 44,54 Q56,44 58,30 Q68,46 62,62 Q72,58 78,66 Q64,90 42,88 Q34,86 30,80 Z" fill="#1e2f96"/><circle cx="76" cy="30" r="6" fill="#de2910"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Aisin Gioro</span></div>
+            
+            <p><span class="label">Who &amp; why:</span> the Manchu-led Qing conquer Beijing in 1644 and rule China for nearly 270 years, China's last imperial dynasty. Facing Western and Japanese naval powers that all sailed under national flags, the Qing court adopts a triangular yellow dragon banner for its navy in the 1860s&ndash;70s and formalizes a rectangular version as the empire's first official national flag in 1889. The dynasty's final decades bring the Opium Wars, the Taiping Rebellion, and mounting foreign pressure, ending with the 1911 Xinhai Revolution and Puyi's 1912 abdication.</p>
+            <p><span class="label">What it represents:</span> the azure five-clawed dragon, an imperial emblem used for centuries before it ever appeared on a flag, chasing a flaming red pearl across a field of imperial yellow &mdash; the dynasty's own color. This is the flag's late, most standardized 1889 form; earlier Qing use was informal and mostly naval.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3 (1889 rectangular civil/state version).</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Imperial yellow field, blue five-clawed dragon, red flaming pearl toward the upper hoist.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#ffde00"></span><span class="meta"><span class="name">Imperial yellow</span><span class="hex">#FFDE00</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#1e2f96"></span><span class="meta"><span class="name">Dragon blue</span><span class="hex">#1E2F96</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#de2910"></span><span class="meta"><span class="name">Pearl red</span><span class="hex">#DE2910</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5: Ming -->
+    <div class="entry" data-n="8" id="era-1368">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#8a1f1f"/>
+              <rect width="300" height="200" fill="none" stroke="#ffde00" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#ffde00">NO NATIONAL</text>
+              <text x="150" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#ffde00">FLAG YET</text>
+            </svg>
+            <div class="flag-caption">dynastic red and gold &mdash; imperial banners, not a state flag</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1368 &ndash; 1644</div>
+            <h3 class="card-title">Ming Dynasty</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Imperial dynasty</span><span class="tag" tabindex="0" data-tip="Peasant rebel leader who overthrew the Yuan and founded the Ming Dynasty in 1368, reigning as the Hongwu Emperor and reestablishing native Han Chinese imperial rule."><span class="dot" style="background:#4a3b78"></span>Hongwu Emperor (Zhu Yuanzhang)</span><span class="tag" tabindex="0" data-tip="Confucianism was restored as the state orthodoxy underpinning the civil examination system, with Buddhism and Daoism also widely practiced and periodically patronized by the court."><span class="dot" style="background:#8e3b62"></span>Confucianism (state orthodoxy)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="After the Ming overthrow the Yuan in 1368, the defeated Mongol court and much of its ruling elite retreat north to the Mongolian steppe, continuing as the rump &quot;Northern Yuan&quot; regime beyond Ming borders."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#003893"/><circle cx="10" cy="7" r="1.8" fill="#f4c430"/></svg>Emigration: Mongol court retreats to the steppe (1368)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="House of Zhu (Ming Dynasty), 1368&ndash;1644. Founded by the peasant-rebel Zhu Yuanzhang after driving out the Mongol Yuan; built the Forbidden City. Dark red and imperial gold are the dynasty&#x27;s documented colors."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#8a1f1f"/><path d="M30,80 Q26,50 40,34 Q46,44 44,54 Q56,44 58,30 Q68,46 62,62 Q72,58 78,66 Q64,90 42,88 Q34,86 30,80 Z" fill="#ffde00"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Zhu</span></div>
+            
+            <p><span class="label">Who &amp; why:</span> Zhu Yuanzhang, a former peasant and monk, leads the rebellion that drives out the Mongol Yuan Dynasty and founds the Ming in 1368, restoring native Han Chinese rule. The Ming build the Forbidden City, send Zheng He's treasure fleets across the Indian Ocean, and complete much of the Great Wall's surviving stone construction, before falling to peasant rebellion and the invading Manchu in 1644.</p>
+            <p><span class="label">What it represents:</span> no flag in the vexillological sense exists yet anywhere in Chinese governance; imperial authority is marked instead through dragon-embroidered banners, yellow as the emperor's reserved color, and elaborate court regalia. Shown here honestly as undocumented rather than invented, with the dynasty's own red-and-gold palette as a reference only.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested national flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6: Yuan (Mongol) -->
+    <div class="entry" data-n="7" id="era-1271">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#241f14"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#c9a13c">NO NATIONAL</text>
+              <text x="150" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#c9a13c">FLAG YET</text>
+            </svg>
+            <div class="flag-caption">Mongol imperial black &mdash; see the Mongol Empire page for its own banners</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1271 &ndash; 1368</div>
+            <h3 class="card-title">Yuan Dynasty (Mongol rule)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#6b5c4a"></span>Foreign imperial dynasty</span><span class="tag" tabindex="0" data-tip="Grandson of Genghis Khan who completed the conquest of Song China and proclaimed the Yuan Dynasty in 1271, ruling as both Great Khan of the Mongol Empire and Emperor of China."><span class="dot" style="background:#4a3b78"></span>Kublai Khan</span><span class="tag" tabindex="0" data-tip="Kublai Khan personally favored Tibetan Buddhism, elevating the Sakya lama Phagpa as a religious authority at court, while the Yuan state broadly tolerated Confucian, Daoist, Muslim, and Christian communities without a single exclusive establishment."><span class="dot" style="background:#8e3b62"></span>Tibetan Buddhism (court-favored, amid broad tolerance)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Kublai Khan's Mongol forces complete the conquest of Southern Song China by 1279, bringing the entire country under Mongol Yuan rule as part of the wider Mongol Empire."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#003893"/><circle cx="10" cy="7" r="1.8" fill="#f4c430"/></svg>Conquered by: Mongol Empire (1271&ndash;79)</span><span class="tag" tabindex="0" data-tip="The Yuan court recruits large numbers of Central Asian and Persian administrators, the privileged &quot;Semu&quot; class, to help govern China, ranking them above the Han Chinese population in the dynasty's ethnic hierarchy."><span class="dot" style="background:#2f7a6b"></span>Immigration: Central Asian &amp; Persian administrators (Semu)</span></div>
+            <p><span class="label">Who &amp; why:</span> Kublai Khan, grandson of Genghis Khan, completes the conquest of Song China and proclaims the Yuan Dynasty in 1271, ruling China as one part of the wider Mongol Empire's fractured successor khanates. Yuan rule ends in 1368 when Ming rebellion drives the Mongol court back to the steppe. This page keeps the Yuan entry brief on purpose: the Mongol Empire's own formation, conquests, and banners are covered in far greater depth on this atlas's dedicated <a href="mongol-empire-flags.html">Mongol Empire page</a>, and Mongolia's own later national history is covered on its own page too.</p>
+            <p><span class="label">What it represents:</span> no fixed Yuan state flag is documented; Mongol military and court banners of this era are treated fully on the Mongol Empire page rather than duplicated here.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; see the Mongol Empire page.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 7: Song -->
+    <div class="entry" data-n="6" id="era-960">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#a4302a"/>
+              <rect width="300" height="200" fill="none" stroke="#f4efe1" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#f4efe1">NO NATIONAL</text>
+              <text x="150" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#f4efe1">FLAG YET</text>
+            </svg>
+            <div class="flag-caption">dynastic red &mdash; imperial banners, not a state flag</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">960 &ndash; 1279</div>
+            <h3 class="card-title">Song Dynasty</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Imperial dynasty</span><span class="tag" tabindex="0" data-tip="General who founded the Song Dynasty in 960 after seizing the throne of the preceding Later Zhou, reigning as Emperor Taizu and reunifying most of China."><span class="dot" style="background:#4a3b78"></span>Emperor Taizu (Zhao Kuangyin)</span><span class="tag" tabindex="0" data-tip="Confucianism, reinforced by the new Neo-Confucian synthesis, remained the state orthodoxy and basis of the civil service examinations, alongside widely practiced Buddhism and Daoism."><span class="dot" style="background:#8e3b62"></span>Confucianism (state orthodoxy)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Arab and Persian Muslim merchants settle in growing numbers in Song-era southern port cities such as Guangzhou and Quanzhou, forming lasting Muslim merchant communities that helped found China's later Hui Muslim population."><span class="dot" style="background:#2f7a6b"></span>Immigration: Arab &amp; Persian Muslim merchants (southern ports)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="House of Zhao (Song Dynasty), 960&ndash;1279. Founded by Zhao Kuangyin; presided over a commercial and technological golden age before Mongol conquest in 1279. Red is the dynasty&#x27;s documented ceremonial-color reference."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><circle cx="50" cy="58" r="24" fill="none" stroke="#f4efe1" stroke-width="4"/><path d="M50,34 A24,24 0 0 1 50,82 A12,12 0 0 1 50,58 A12,12 0 0 0 50,34 Z" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Zhao</span></div>
+            
+            <p><span class="label">Who &amp; why:</span> Zhao Kuangyin reunifies most of China after the chaotic Five Dynasties and Ten Kingdoms period, founding the Song in 960. The dynasty presides over a commercial and technological golden age &mdash; movable type, gunpowder weapons, paper money &mdash; but never fully controls the north, losing it to the Jurchen Jin in 1127 (the Northern/Southern Song divide) before the remaining Southern Song is finally conquered by Kublai Khan's Mongols in 1279, absorbed into the Yuan.</p>
+            <p><span class="label">What it represents:</span> as with the Ming, no state flag exists yet; red is the dynasty's associated ceremonial color under traditional five-elements cosmology, shown here as a color reference rather than a documented banner.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested national flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 8: Tang -->
+    <div class="entry" data-n="5" id="era-618">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#c9a13c"/>
+              <rect width="300" height="200" fill="none" stroke="#5c2a24" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#5c2a24">NO NATIONAL</text>
+              <text x="150" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#5c2a24">FLAG YET</text>
+            </svg>
+            <div class="flag-caption">dynastic gold &mdash; imperial banners, not a state flag</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">618 &ndash; 907</div>
+            <h3 class="card-title">Tang Dynasty</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Imperial dynasty</span><span class="tag" tabindex="0" data-tip="Sui general who founded the Tang Dynasty in 618, reigning as Emperor Gaozu and beginning what became one of imperial China&#x27;s most powerful and cosmopolitan eras."><span class="dot" style="background:#4a3b78"></span>Emperor Gaozu (Li Yuan)</span><span class="tag" tabindex="0" data-tip="The Tang imperial house claimed descent from the sage Laozi and gave Daoism prominent court patronage, while Confucian orthodoxy governed the state examination system and Buddhism also flourished widely."><span class="dot" style="background:#8e3b62"></span>Daoism (imperial patronage) alongside Confucian orthodoxy</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="At the height of Silk Road trade, thousands of Persian, Sogdian, Arab, Japanese, and Korean merchants, students, and diplomats settle in cosmopolitan Tang capitals like Chang'an, then likely the world's largest and most ethnically diverse city."><span class="dot" style="background:#2f7a6b"></span>Immigration: foreign merchants &amp; students in Chang'an</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="House of Li (Tang Dynasty), 618&ndash;907. Founded by Li Yuan; presided over a cosmopolitan golden age of poetry and Silk Road trade. Gold, the dynasty&#x27;s documented ceremonial color, shown as reference."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#c9a13c"/><path d="M30,80 Q26,50 40,34 Q46,44 44,54 Q56,44 58,30 Q68,46 62,62 Q72,58 78,66 Q64,90 42,88 Q34,86 30,80 Z" fill="#5c2a24"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Li</span></div>
+            
+            <p><span class="label">Who &amp; why:</span> the Li family founds the Tang in 618 after the short, harsh Sui Dynasty's collapse, presiding over what is widely regarded as a high point of premodern Chinese civilization &mdash; cosmopolitan Chang'an (then likely the world's largest city), the flourishing of Tang poetry, and Silk Road trade at its peak. The dynasty weakens after the An Lushan Rebellion (755&ndash;63) and finally collapses in 907, opening the fractured Five Dynasties and Ten Kingdoms period that the Song later reunifies.</p>
+            <p><span class="label">What it represents:</span> again, no flag survives from this period; the placeholder gold reflects the dynasty's imperial and Buddhist-influenced court palette rather than any attested banner.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested national flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 9: Han -->
+    <div class="entry" data-n="4" id="era-206bce">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#9c3b28"/>
+              <rect width="300" height="200" fill="none" stroke="#f4efe1" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#f4efe1">NO NATIONAL</text>
+              <text x="150" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#f4efe1">FLAG YET</text>
+            </svg>
+            <div class="flag-caption">dynastic red &mdash; the Han people's own name-giving dynasty</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">206 BCE &ndash; 220 CE</div>
+            <h3 class="card-title">Han Dynasty</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Imperial dynasty</span><span class="tag" tabindex="0" data-tip="Peasant-born rebel leader who defeated rival Xiang Yu in the Chu-Han contention and founded the Han Dynasty in 206 BCE, reigning as Emperor Gaozu."><span class="dot" style="background:#4a3b78"></span>Emperor Gaozu (Liu Bang)</span><span class="tag" tabindex="0" data-tip="Confucianism was formally established as state orthodoxy under Emperor Wu of Han in the 2nd century BCE, becoming the basis of official ideology and administration for the rest of the dynasty."><span class="dot" style="background:#8e3b62"></span>Confucianism (established as state orthodoxy)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Emperor Wu's opening of Silk Road trade routes in the 2nd century BCE draws Central Asian traders, notably Sogdian merchants, into Han China's western frontier towns and, in smaller numbers, its interior cities."><span class="dot" style="background:#2f7a6b"></span>Immigration: Central Asian traders via the Silk Road</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="House of Liu (Han Dynasty), 206 BCE&ndash;220 CE. Founded by commoner-turned-emperor Liu Bang; China&#x27;s majority ethnic group still calls itself &quot;Han&quot; today. Red (fire element) and the imperial dragon shown as cultural reference, not a coat of arms."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#9c3b28"/><path d="M30,80 Q26,50 40,34 Q46,44 44,54 Q56,44 58,30 Q68,46 62,62 Q72,58 78,66 Q64,90 42,88 Q34,86 30,80 Z" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Liu</span></div>
+            
+            <p><span class="label">Who &amp; why:</span> Liu Bang founds the Han after the short-lived Qin's collapse, ruling (with the brief Wang Mang interregnum splitting it into Western and Eastern Han) for roughly four centuries &mdash; a span so long and so formative that China's majority ethnic group still calls itself Han today. The dynasty expands the empire's borders, opens the Silk Road under Emperor Wu, and standardizes Confucian state ideology, before regional warlordism ends it in 220 CE, opening the Three Kingdoms period.</p>
+            <p><span class="label">What it represents:</span> no national flag exists this early; red, associated with the fire element that Han cosmology assigned the dynasty, is shown here as an informed color reference only.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested national flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 10: Qin -->
+    <div class="entry" data-n="3" id="era-221bce">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#241f14"/>
+              <rect width="300" height="200" fill="none" stroke="#a9762f" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#a9762f">NO NATIONAL</text>
+              <text x="150" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#a9762f">FLAG YET</text>
+            </svg>
+            <div class="flag-caption">dynastic black &mdash; the Qin's own water-element color, first unification</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">221 &ndash; 206 BCE</div>
+            <h3 class="card-title">Qin Dynasty</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Imperial dynasty</span><span class="tag" tabindex="0" data-tip="King of Qin who conquered the rival Warring States and proclaimed himself First Emperor in 221 BCE, unifying China under a single imperial state for the first time."><span class="dot" style="background:#4a3b78"></span>Qin Shi Huang</span><span class="tag" tabindex="0" data-tip="The Qin state adopted Legalism as its governing philosophy and administrative doctrine rather than establishing a religious institution; it had no official state religion in the traditional sense."><span class="dot" style="background:#8e3b62"></span>Legalism (state ideology); no established state religion</span></div>
+            <p><span class="label">Who &amp; why:</span> King Zheng of the state of Qin conquers the last of the rival Warring States and proclaims himself Qin Shi Huang, the "First Emperor," in 221 BCE &mdash; the moment this page treats as China's first unified imperial state, and the origin of the very name "China" in most Western languages. His famously short but transformative fifteen-year dynasty standardizes writing, currency, and cart-axle widths, links early wall fortifications into what becomes the Great Wall's first version, and builds the terracotta army; it collapses into civil war within four years of his death, giving way to the Han.</p>
+            <p><span class="label">What it represents:</span> no flag exists in this era; Qin state ideology, following the Five Elements theory, formally favored black as the color of the water element the dynasty claimed to rule under &mdash; a documented historical detail shown here as a color reference, not an invented flag.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested national flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 11: Zhou -->
+    <div class="entry" data-n="2" id="era-1046bce">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#9c3b28"/>
+              <rect width="300" height="200" fill="none" stroke="#f4efe1" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#f4efe1">NO NATIONAL</text>
+              <text x="150" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#f4efe1">FLAG YET</text>
+            </svg>
+            <div class="flag-caption">dynastic red &mdash; the Zhou's own fire-element color, longest-reigning dynasty</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1046 &ndash; 221 BCE</div>
+            <h3 class="card-title">Zhou Dynasty</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Imperial dynasty, later fragmented</span><span class="tag" tabindex="0" data-tip="Ruler of the Zhou state who defeated the last Shang king at the Battle of Muye in 1046 BCE, founding the Zhou dynasty and articulating the 'Mandate of Heaven' doctrine still influential in Chinese political thought."><span class="dot" style="background:#4a3b78"></span>King Wu of Zhou</span><span class="tag" tabindex="0" data-tip="No single established state religion; ancestor veneration and Heaven-worship (Tian) underpinned royal legitimacy, while the Eastern Zhou's Spring and Autumn and Warring States periods produced Confucius, Laozi, Mozi, and other foundational philosophers."><span class="dot" style="background:#8e3b62"></span>Heaven-worship &amp; ancestor veneration (no single church)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="After the Western Zhou court is driven from its capital in 771 BCE by an alliance of rebellious nobles and non-Zhou peoples, royal authority weakens permanently, fragmenting into the many competing states of the Spring and Autumn and Warring States periods."><span class="dot" style="background:#6b2c2c"></span>Fragmented into rival states after 771 BCE</span></div>
+            <p><span class="label">Who &amp; why:</span> King Wu of Zhou overthrows the last Shang king at the Battle of Muye in 1046 BCE, founding a dynasty that formally lasts longer than any other in Chinese history. Royal authority is real but limited under the Western Zhou (1046&ndash;771 BCE); after the court is forced east in 771 BCE, the Eastern Zhou kings reign as figureheads while real power shifts to competing regional states through the Spring and Autumn period (770&ndash;476 BCE) and the escalating warfare of the Warring States period (475&ndash;221 BCE). Confucius, Laozi, Mozi, Mencius, and Sun Tzu all live and write during this fragmented Eastern Zhou span. The state of Qin, one of the Warring States' eventual victors, deposes the last Zhou king in 256 BCE and completes China's unification in 221 BCE.</p>
+            <p><span class="label">What it represents:</span> no national flag exists this early; red, the fire-element color Han-era cosmologists later retrospectively assigned the Zhou within the Five Elements scheme, is shown here as an informed color reference only, not an attested banner.</p>
+            <p><span class="label">World context:</span> the Zhou's eight centuries span the traditional founding of Rome (753 BCE), the rise of classical Greece and the Parthenon's construction (447&ndash;432 BCE), the Persian Achaemenid Empire under Cyrus the Great and Darius I, and the roughly contemporaneous lives of the Buddha in India and Confucius in China during the 6th&ndash;5th centuries BCE &mdash; a span later historians call the Axial Age for its parallel flowering of philosophy and religion across Eurasia.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested national flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 12: Xia/Shang -->
+    <div class="entry" data-n="1" id="era-2070bce">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder &mdash; no banner from either dynasty; Shang known through oracle bones, not flags</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 2070 &ndash; 1046 BCE</div>
+            <h3 class="card-title">Xia (traditional) and Shang Dynasties</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Imperial dynasty (Shang; Xia's historicity debated)</span><span class="tag" tabindex="0" data-tip="Traditional founder of the Xia dynasty in Chinese historical chronicles; the Xia's existence as an actual state, as opposed to a later legendary construction, remains debated among historians and archaeologists, with the Erlitou culture its most-cited possible archaeological match."><span class="dot" style="background:#4a3b78"></span>Yu the Great (Xia, traditional/legendary)</span><span class="tag" tabindex="0" data-tip="No single established state religion; Shang kings practiced ancestor worship and divination by heating cracks into ox scapulae and turtle shells, recording questions and answers in the oracle bone script that is the earliest confirmed Chinese writing."><span class="dot" style="background:#8e3b62"></span>Ancestor worship &amp; oracle-bone divination (Shang)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="King Wu of the Zhou state defeats the last Shang king, traditionally recorded as the tyrannical Di Xin, at the Battle of Muye in 1046 BCE, ending Shang rule and founding the Zhou dynasty."><span class="dot" style="background:#6b2c2c"></span>Conquered by: Zhou, 1046 BCE</span></div>
+            <p><span class="label">Who &amp; why:</span> Chinese historical tradition, first recorded centuries later, describes a Xia dynasty founded by the legendary Yu the Great around 2070 BCE; its existence as an actual centralized state, rather than a later legendary elaboration, remains genuinely debated among historians, with the Bronze Age Erlitou culture the most-cited possible archaeological match, though the identification is not settled. The Shang dynasty that follows from roughly 1600 BCE is different in kind: it is the first period of Chinese history directly confirmed by contemporary written evidence, thanks to oracle bone inscriptions excavated at Anyang (the late Shang capital, Yinxu) alongside sophisticated cast bronze ritual vessels. Shang rule ends in 1046 BCE when the Zhou state's King Wu defeats the last Shang king at the Battle of Muye.</p>
+            <p><span class="label">What it represents:</span> no flag or comparable banner is attested for either dynasty; Shang authority is documented instead through oracle bone divination records and bronze ritual vessels, and nothing at all is documented, in the modern sense, for the disputed Xia. Shown here honestly blank rather than invented.</p>
+            <p><span class="label">World context:</span> this span runs alongside ancient Egypt's Middle and New Kingdoms &mdash; including the construction of Karnak's great temple complex and, later, Abu Simbel under Ramesses II &mdash; Babylon's Code of Hammurabi (c. 1754 BCE), and the Mycenaean Greek civilization of the traditional Trojan War era, placing Shang China's oracle-bone script among the world's earliest writing systems, alongside Egyptian hieroglyphs and Mesopotamian cuneiform.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag from either dynasty.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Imperial dynasty</b> &mdash; sovereign under its own emperor</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#6b5c4a"></span><b>Foreign imperial dynasty</b> &mdash; China ruled by an outside power's dynasty</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#c9372c"></span><b>Communist one-party state</b> &mdash; sovereign under Communist Party rule</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the named ruler most associated with the era's start</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official/established faith, not the population's</div>
+    </div>
+  </div>
+
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for China lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/cn/">Search Record Atlas for China &rarr;</a>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This page is one lineage in a larger set. See the region-wide hub and the related pages here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="east-asia-hub.html"><b>East Asia hub</b><span>Six countries, dynasties to modern states</span></a>
+      <a class="link-card" href="taiwan-flags.html"><b>Taiwan</b><span>The Republic of China's flag lineage since 1949</span></a>
+      <a class="link-card" href="mongol-empire-flags.html"><b>Mongol Empire</b><span>The Yuan Dynasty's own wider empire</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are close historical approximations for painting reference; pre-1889 swatches are informed color references for eras with no documented flag, not official specifications. Map is schematic and not surveyed.
+  </footer>
+
+</div>
+
+
+<script>
+(function () {
+  var IC = { ancient:"#5c2a24", qin:"#241f14", han:"#9c3b28", tang:"#c9a13c", song:"#7c2e1f", yuan:"#4a4238", ming:"#8a1f1f", qing:"#d9b23c", beiyang:"#1e2f96", nationalist:"#12315c", prc:"#de2910" };
+  var INAMES = { ancient:"Xia, Shang, and Zhou dynasties (pre-imperial)", qin:"Qin Dynasty", han:"Han Dynasty", tang:"Tang Dynasty", song:"Song Dynasty", yuan:"Yuan Dynasty (Mongol rule)", ming:"Ming Dynasty", qing:"Qing Dynasty", beiyang:"Republic of China (Beiyang government)", nationalist:"Republic of China (Nationalist government, mainland)", prc:"People's Republic of China" };
+  var IFLAGS = {
+    ancient: "<rect width=\"300\" height=\"200\" fill=\"#5c2a24\"/><rect width=\"300\" height=\"200\" fill=\"none\" stroke=\"#c9a13c\" stroke-width=\"4\" stroke-dasharray=\"8 6\"/><text x=\"150\" y=\"92\" text-anchor=\"middle\" font-family=\"IBM Plex Mono, monospace\" font-size=\"22\" font-weight=\"700\" fill=\"#c9a13c\">NO FLAG</text><text x=\"150\" y=\"118\" text-anchor=\"middle\" font-family=\"IBM Plex Mono, monospace\" font-size=\"22\" font-weight=\"700\" fill=\"#c9a13c\">DOCUMENTED</text>",
+    qin: "<rect width=\"300\" height=\"200\" fill=\"#241f14\"/><rect width=\"300\" height=\"200\" fill=\"none\" stroke=\"#a9762f\" stroke-width=\"4\" stroke-dasharray=\"8 6\"/><text x=\"150\" y=\"92\" text-anchor=\"middle\" font-family=\"IBM Plex Mono, monospace\" font-size=\"22\" font-weight=\"700\" fill=\"#a9762f\">NO NATIONAL</text><text x=\"150\" y=\"118\" text-anchor=\"middle\" font-family=\"IBM Plex Mono, monospace\" font-size=\"22\" font-weight=\"700\" fill=\"#a9762f\">FLAG YET</text>",
+    han: "<rect width=\"300\" height=\"200\" fill=\"#9c3b28\"/><rect width=\"300\" height=\"200\" fill=\"none\" stroke=\"#f4efe1\" stroke-width=\"4\" stroke-dasharray=\"8 6\"/><text x=\"150\" y=\"92\" text-anchor=\"middle\" font-family=\"IBM Plex Mono, monospace\" font-size=\"22\" font-weight=\"700\" fill=\"#f4efe1\">NO NATIONAL</text><text x=\"150\" y=\"118\" text-anchor=\"middle\" font-family=\"IBM Plex Mono, monospace\" font-size=\"22\" font-weight=\"700\" fill=\"#f4efe1\">FLAG YET</text>",
+    tang: "<rect width=\"300\" height=\"200\" fill=\"#c9a13c\"/><rect width=\"300\" height=\"200\" fill=\"none\" stroke=\"#5c2a24\" stroke-width=\"4\" stroke-dasharray=\"8 6\"/><text x=\"150\" y=\"92\" text-anchor=\"middle\" font-family=\"IBM Plex Mono, monospace\" font-size=\"22\" font-weight=\"700\" fill=\"#5c2a24\">NO NATIONAL</text><text x=\"150\" y=\"118\" text-anchor=\"middle\" font-family=\"IBM Plex Mono, monospace\" font-size=\"22\" font-weight=\"700\" fill=\"#5c2a24\">FLAG YET</text>",
+    song: "<rect width=\"300\" height=\"200\" fill=\"#a4302a\"/><rect width=\"300\" height=\"200\" fill=\"none\" stroke=\"#f4efe1\" stroke-width=\"4\" stroke-dasharray=\"8 6\"/><text x=\"150\" y=\"92\" text-anchor=\"middle\" font-family=\"IBM Plex Mono, monospace\" font-size=\"22\" font-weight=\"700\" fill=\"#f4efe1\">NO NATIONAL</text><text x=\"150\" y=\"118\" text-anchor=\"middle\" font-family=\"IBM Plex Mono, monospace\" font-size=\"22\" font-weight=\"700\" fill=\"#f4efe1\">FLAG YET</text>",
+    yuan: "<rect width=\"300\" height=\"200\" fill=\"#241f14\"/><rect width=\"300\" height=\"200\" fill=\"none\" stroke=\"#c9a13c\" stroke-width=\"4\" stroke-dasharray=\"8 6\"/><text x=\"150\" y=\"92\" text-anchor=\"middle\" font-family=\"IBM Plex Mono, monospace\" font-size=\"22\" font-weight=\"700\" fill=\"#c9a13c\">NO NATIONAL</text><text x=\"150\" y=\"118\" text-anchor=\"middle\" font-family=\"IBM Plex Mono, monospace\" font-size=\"22\" font-weight=\"700\" fill=\"#c9a13c\">FLAG YET</text>",
+    ming: "<rect width=\"300\" height=\"200\" fill=\"#8a1f1f\"/><rect width=\"300\" height=\"200\" fill=\"none\" stroke=\"#ffde00\" stroke-width=\"4\" stroke-dasharray=\"8 6\"/><text x=\"150\" y=\"92\" text-anchor=\"middle\" font-family=\"IBM Plex Mono, monospace\" font-size=\"22\" font-weight=\"700\" fill=\"#ffde00\">NO NATIONAL</text><text x=\"150\" y=\"118\" text-anchor=\"middle\" font-family=\"IBM Plex Mono, monospace\" font-size=\"22\" font-weight=\"700\" fill=\"#ffde00\">FLAG YET</text>",
+    qing: "<rect width=\"300\" height=\"200\" fill=\"#ffde00\"/><path d=\"M60,60 q40,-30 90,-15 q50,15 60,50 q10,35 -20,55 q-15,-10 -10,-25 q-25,10 -45,-5 q-25,-18 -15,-40 q-30,5 -60,-20 Z\" fill=\"none\" stroke=\"#1e2f96\" stroke-width=\"6\"/><circle cx=\"230\" cy=\"70\" r=\"7\" fill=\"#de2910\"/>",
+    beiyang: "<rect width=\"300\" height=\"40\" fill=\"#de2910\"/><rect y=\"40\" width=\"300\" height=\"40\" fill=\"#ffde00\"/><rect y=\"80\" width=\"300\" height=\"40\" fill=\"#1e2f96\"/><rect y=\"120\" width=\"300\" height=\"40\" fill=\"#f4efe1\"/><rect y=\"160\" width=\"300\" height=\"40\" fill=\"#241f14\"/>",
+    nationalist: "<rect width=\"300\" height=\"200\" fill=\"#fe0000\"/><rect width=\"130\" height=\"108\" fill=\"#000095\"/><circle cx=\"65\" cy=\"54\" r=\"30\" fill=\"#000095\" stroke=\"#f4efe1\" stroke-width=\"5\"/><circle cx=\"65\" cy=\"54\" r=\"11\" fill=\"#000095\"/><g fill=\"#f4efe1\"><rect x=\"61\" y=\"14\" width=\"8\" height=\"80\" transform=\"rotate(0 65 54)\"/><rect x=\"61\" y=\"14\" width=\"8\" height=\"80\" transform=\"rotate(30 65 54)\"/><rect x=\"61\" y=\"14\" width=\"8\" height=\"80\" transform=\"rotate(60 65 54)\"/><rect x=\"61\" y=\"14\" width=\"8\" height=\"80\" transform=\"rotate(90 65 54)\"/><rect x=\"61\" y=\"14\" width=\"8\" height=\"80\" transform=\"rotate(120 65 54)\"/><rect x=\"61\" y=\"14\" width=\"8\" height=\"80\" transform=\"rotate(150 65 54)\"/></g>",
+    prc: "<rect width=\"300\" height=\"200\" fill=\"#de2910\"/><g fill=\"#ffde00\"><path d=\"M50,35 l8,22 23,1 -18,15 6,22 -19,-13 -19,13 6,-22 -18,-15 23,-1 Z\" transform=\"scale(1.15) translate(-5,-3)\"/><path d=\"M96,24 l3,8 8,0.5 -6,5.5 2,8 -7,-4.5 -7,4.5 2,-8 -6,-5.5 8,-0.5 Z\"/><path d=\"M110,44 l3,8 8,0.5 -6,5.5 2,8 -7,-4.5 -7,4.5 2,-8 -6,-5.5 8,-0.5 Z\"/><path d=\"M108,68 l3,8 8,0.5 -6,5.5 2,8 -7,-4.5 -7,4.5 2,-8 -6,-5.5 8,-0.5 Z\"/><path d=\"M92,82 l3,8 8,0.5 -6,5.5 2,8 -7,-4.5 -7,4.5 2,-8 -6,-5.5 8,-0.5 Z\"/></g>"
+  };
+  function iFlagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (IFLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  var iLegendEl = document.getElementById("iLegend");
+  iLegendEl.innerHTML = Object.keys(IC).map(function (k) {
+    return '<span><span class="sw" style="background:' + IC[k] + '"></span>' + INAMES[k] + "</span>";
+  }).join("");
+
+  var ISNAP = [
+    { year:"c. 2070 &ndash; 221 BCE", name:"Xia, Shang, and Zhou dynasties (pre-imperial)", t:{ cn:IC.ancient }, flagKeys:{ cn:"ancient" },
+      story:"Chinese tradition places Yu the Great&rsquo;s founding of the Xia dynasty around 2070 BCE, though whether it was an actual centralized state or a later legendary construction remains genuinely debated; the Bronze Age Erlitou culture is the most-cited possible match, unconfirmed. The Shang dynasty from roughly 1600 BCE is the first period directly confirmed by contemporary writing, via oracle bone divination records. King Wu of Zhou topples the Shang in 1046 BCE and founds the Zhou, which rules in name for centuries before fragmenting into rival states during the Spring and Autumn and Warring States periods; that fragmentation ends only when Qin conquers the last rival state in 221 BCE. No flag or comparable banner survives from any of these three dynasties &mdash; vexillology as a concept doesn&rsquo;t yet exist &mdash; so this whole 1,800-year span is shown honestly blank rather than invented." },
+    { year:"221 &ndash; 206 BCE", name:"Qin Dynasty", t:{ cn:IC.qin }, flagKeys:{ cn:"qin" },
+      story:"King Zheng of Qin conquers the last Warring States and proclaims himself Qin Shi Huang, the &ldquo;First Emperor,&rdquo; in 221 BCE &mdash; China&rsquo;s first unified imperial state. No flag exists in this era; Qin ideology favored black, the water element&rsquo;s color, shown here as a reference only." },
+    { year:"206 BCE &ndash; 220 CE", name:"Han Dynasty", t:{ cn:IC.han }, flagKeys:{ cn:"han" },
+      story:"Liu Bang founds the Han after Qin&rsquo;s collapse, ruling roughly four centuries &mdash; long enough that China&rsquo;s majority ethnic group still calls itself Han today. The Silk Road opens under Emperor Wu; regional warlordism ends the dynasty in 220 CE. No flag survives; red, the fire element&rsquo;s color, is an informed reference only." },
+    { year:"618 &ndash; 907", name:"Tang Dynasty", t:{ cn:IC.tang }, flagKeys:{ cn:"tang" },
+      story:"The Li family founds the Tang in 618, presiding over a high point of premodern Chinese civilization &mdash; cosmopolitan Chang&rsquo;an, Tang poetry, and Silk Road trade at its peak. The An Lushan Rebellion weakens it fatally; it collapses in 907. No flag survives from this period; the gold shown is a court-palette reference only." },
+    { year:"960 &ndash; 1279", name:"Song Dynasty", t:{ cn:IC.song }, flagKeys:{ cn:"song" },
+      story:"Zhao Kuangyin reunifies most of China after the Five Dynasties chaos, founding the Song in 960 &mdash; a commercial and technological golden age of movable type, gunpowder, and paper money. The dynasty never fully controls the north, losing it to the Jurchen Jin in 1127, before Kublai Khan&rsquo;s Mongols conquer the remaining Southern Song in 1279. No state flag exists yet; red is a ceremonial-color reference only." },
+    { year:"1271 &ndash; 1368", name:"Yuan Dynasty (Mongol rule)", t:{ cn:IC.yuan }, flagKeys:{ cn:"yuan" },
+      story:"Kublai Khan, grandson of Genghis Khan, completes the conquest of Song China and proclaims the Yuan in 1271, ruling China as part of the wider, fractured Mongol Empire. Ming rebellion drives the Mongol court back to the steppe in 1368. Kept brief here on purpose &mdash; the Mongol Empire&rsquo;s own banners are covered on this atlas&rsquo;s dedicated Mongol Empire page." },
+    { year:"1368 &ndash; 1644", name:"Ming Dynasty", t:{ cn:IC.ming }, flagKeys:{ cn:"ming" },
+      story:"Zhu Yuanzhang, a former peasant and monk, drives out the Mongol Yuan and founds the Ming in 1368, restoring native Han rule. The Ming build the Forbidden City and send Zheng He&rsquo;s treasure fleets across the Indian Ocean, before falling to peasant rebellion and the invading Manchu in 1644. No flag exists yet; red-and-gold is the dynasty&rsquo;s own palette, shown as reference only." },
+    { year:"1644 &ndash; 1912", name:"Qing Dynasty", t:{ cn:IC.qing }, flagKeys:{ cn:"qing" },
+      story:"The Manchu-led Qing conquer Beijing in 1644 and rule for nearly 270 years, China&rsquo;s last imperial dynasty. Facing Western and Japanese naval powers that all flew national flags, the court adopts the Yellow Dragon banner for its navy in the 1860s&ndash;70s, formalized as the empire&rsquo;s first official national flag in 1889. The dynasty falls with the 1911 Xinhai Revolution and Puyi&rsquo;s 1912 abdication." },
+    { year:"1912 &ndash; 1928", name:"Republic of China (Beiyang government)", t:{ cn:IC.beiyang }, flagKeys:{ cn:"beiyang" },
+      story:"The Xinhai Revolution topples the last Qing emperor, six-year-old Puyi, who abdicates in February 1912, ending over two thousand years of imperial rule. The nominally unified republic runs in practice through competing Beiyang warlord factions until the Kuomintang&rsquo;s Northern Expedition in 1928. Five stripes stand for the &ldquo;five races&rdquo; the republic claimed to unite: Han, Manchu, Mongol, Hui, and Tibetan." },
+    { year:"1928 &ndash; 1949", name:"Republic of China (Nationalist government, mainland)", t:{ cn:IC.nationalist }, flagKeys:{ cn:"nationalist" },
+      story:"Chiang Kai-shek&rsquo;s Nationalist Kuomintang completes the Northern Expedition in 1928 and adopts its own party banner &mdash; Blue Sky, White Sun, and a Wholly Red Earth &mdash; as the national flag. A brutal civil war against the Communist Party runs almost continuously from 1927, interrupted by Japan&rsquo;s full invasion of 1937&ndash;45, before the Nationalists lose the mainland in 1949 and relocate to Taiwan, where this same flag continues today." },
+    { year:"1949 &ndash; present", name:"People's Republic of China", t:{ cn:IC.prc }, flagKeys:{ cn:"prc" },
+      story:"The Chinese Communist Party, led by Mao Zedong, wins the civil war and proclaims the People&rsquo;s Republic in Beijing on 1 October 1949, while the defeated Nationalists relocate to Taiwan. The PRC claims Taiwan as its own territory, a claim Taiwan&rsquo;s government disputes &mdash; an unresolved, live political question, covered from Taiwan&rsquo;s side on its own page. The five-star flag: one large star for Communist Party leadership, four smaller stars for the social classes the party claimed to unite." }
+  ];
+
+  var IREGIONS = ["cn"];
+  var IREGION_NAMES = { cn:"China" };
+  var IADJ = [];
+
+  function iTextColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+
+  var iYearTag = document.getElementById("iYearTag");
+  var iEraName = document.getElementById("iEraName");
+  var iEraOwners = document.getElementById("iEraOwners");
+  var iEraStory = document.getElementById("iEraStory");
+  var iFlagsRow = document.getElementById("iFlagsRow");
+  var iSlider = document.getElementById("iSlider");
+
+  function iRender(idx) {
+    var era = ISNAP[idx];
+    iYearTag.textContent = era.year;
+    iEraName.textContent = era.name;
+    iEraStory.innerHTML = era.story;
+
+    IREGIONS.forEach(function (id) {
+      document.getElementById("ireg-" + id).setAttribute("fill", era.t[id]);
+      var tcol = iTextColorFor(era.t[id]);
+      var tcolHalo = tcol === "#201a12" ? "#f7f1e3" : "#201a12";
+      var lbl = document.getElementById("ilbl-" + id);
+      if (lbl) { lbl.setAttribute("fill", tcol); lbl.setAttribute("stroke", tcolHalo); }
+      var lbl2 = document.getElementById("ilbl-" + id + "2");
+      if (lbl2) { lbl2.setAttribute("fill", tcol); lbl2.setAttribute("stroke", tcolHalo); }
+    });
+
+    var label = Object.keys(IC).filter(function (k) { return IC[k] === era.t.cn; })[0];
+    iEraOwners.innerHTML = "<b>" + INAMES[label] + "</b>: whole country";
+
+    iFlagsRow.innerHTML = IREGIONS.map(function (id) {
+      return '<div class="iflag-chip">' + iFlagSvg(era.flagKeys[id]) + '<div class="ic-label">' + IREGION_NAMES[id] + '</div></div>';
+    }).join("");
+  }
+
+  iSlider.addEventListener("input", function () { iRender(parseInt(iSlider.value, 10)); });
+  iRender(0);
+
+  var iPlaying = false, iPlayTimer = null;
+  var iPlayBtn = document.getElementById("iPlayBtn");
+  function iStepPlay() {
+    var next = parseInt(iSlider.value, 10) + 1;
+    if (next > ISNAP.length - 1) { iStopPlay(); return; }
+    iSlider.value = next;
+    iRender(next);
+  }
+  function iStartPlay() {
+    iPlaying = true;
+    iPlayBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(iSlider.value, 10) >= ISNAP.length - 1) { iSlider.value = 0; iRender(0); }
+    iPlayTimer = setInterval(iStepPlay, 1700);
+  }
+  function iStopPlay() {
+    iPlaying = false;
+    iPlayBtn.innerHTML = "&#9654;";
+    clearInterval(iPlayTimer);
+  }
+  iPlayBtn.addEventListener("click", function () { iPlaying ? iStopPlay() : iStartPlay(); });
+})();
+</script>
+
+<script>
+  document.querySelectorAll(".tag[data-tip]").forEach(function (tag) {
+    tag.addEventListener("click", function (e) {
+      var wasOpen = tag.classList.contains("tip-open");
+      document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+      if (!wasOpen) tag.classList.add("tip-open");
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+  });
+</script>
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var html = '<h4>Genealogical records for this ground</h4>';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>
+
+</body></html>

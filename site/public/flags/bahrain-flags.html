@@ -1,0 +1,790 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#f2e8d5;color:#241a12}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+</style></head><body>
+<title>Flags of Bahrain</title>
+<meta name="description" content="A chronological, paint-ready atlas of every flag that flew over Bahrain, from the ancient Dilmun trading civilization through a medieval Arab emirate, Portuguese and Persian occupation, the Al Khalifa dynasty since 1783, and the first Gulf state to discover oil.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #241a12; --paper: #f2e8d5; --card: #faf3e3; --card-border: #dcc99a;
+    --brick: #d1453a; --brick-2: #a3352c; --brass: #a9762f; --sea: #1f6b6b; --sea-2: #164f4f;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #d1453a;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #ff8574; --brick-2: #ff9f92; --brass: #d1a154; --sea: #4fa3a3; --sea-2: #6fbcbc;
+      --muted: #9a9280; --hair: #33393f;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #ff8574; --brick-2: #ff9f92; --brass: #d1a154; --sea: #4fa3a3; --sea-2: #6fbcbc;
+    --muted: #9a9280; --hair: #33393f;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--sea); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.08rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; font-size: .94rem; color: var(--muted); }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  .legend { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1px; background: var(--hair); }
+  @media (max-width: 560px) { .timeline::before { left: 9px; } }
+  .entry { position: relative; padding-left: 46px; margin-bottom: 46px; }
+  @media (max-width: 560px) { .entry { padding-left: 30px; } }
+  .entry::before {
+    content: attr(data-n);
+    position: absolute; left: 1px; top: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--paper); outline: 1px solid var(--hair);
+    background: var(--card);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--brick); display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) { .entry::before { left: -5px; width: 18px; height: 18px; font-size: 9px; } }
+
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+  .card-head { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  @media (max-width: 620px) { .card-head { flex-direction: column; } }
+  .flag-box { flex: none; width: 168px; }
+  .flag-box svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-caption { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .card-title { font-size: 1.32rem; font-weight: 600; line-height: 1.18; margin: 0 0 10px; text-wrap: balance; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px; border: 1px solid var(--card-border); color: var(--muted);
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  /* Flip tooltip below tags near the top of the viewport so it isn't clipped */
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  /* Keep tooltips from overflowing the left/right edges on narrow screens */
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint { border-top: 1px solid var(--hair); }
+  details.paint > summary {
+    cursor: pointer; list-style: none; padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--sea); display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before { content: "+"; font-family: "Fraunces", serif; font-size: 15px; width: 14px; }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row { display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px; }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--card-border); border-radius: 2px; padding: 5px 9px 5px 5px; background: var(--paper); }
+  .swatch .chip { width: 20px; height: 20px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--sea); }
+
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: 64ch; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 88px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 340px; height: auto; }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .iborder-line { transition: stroke-opacity 0.6s ease, stroke-width 0.6s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .ireg-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 700; text-anchor: middle; transition: fill .4s ease, stroke .4s ease; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="arabian-peninsula-hub.html">Arabian Peninsula hub</a></p>
+  <p class="kicker">Family research &middot; Phase 7 of the world atlas</p>
+  <h1>Flags of Bahrain</h1>
+  <p class="lede">One of the Persian Gulf's earliest and most continuously significant trading hubs, home to the ancient Bronze Age civilization of Dilmun and its Hellenistic and Sassanid successors Tylos and Mishmahig, through a medieval Arab emirate, Portuguese occupation of the island in 1521, over a century and a half of Persian Safavid rule, the Al Khalifa dynasty's 1783 conquest that still rules today, British protection through the 19th and 20th centuries, and the first Gulf state to strike oil, in 1932, giving it a head start on diversifying beyond it.</p>
+  <p class="lede">Bahrain's red-and-white serrated flag traces the same plain-red maritime tradition shared across this whole coast; the white serrated border, required by 19th-century British treaty to distinguish it from neighboring red flags, is the flag's oldest distinguishing mark, though the exact number of serrations shifted for decades before being fixed at five points only in 2002.</p>
+
+  <div class="scope-note">
+    <b>Scope of this page:</b> the island of Bahrain, c. 3000 BCE&ndash;present, eight political entries. Part of a larger atlas &mdash; see the linked pages at the bottom.
+  </div>
+
+  <div class="imap-section">
+    <h2>One island, eight rulers</h2>
+    <p class="imap-sub">Bahrain's own coastline, traced whole &mdash; a small island with no internal governing split to show. Press play, or drag the slider, across eight eras from ancient Dilmun to today's kingdom.</p>
+    <div class="rule-box">
+      <b>Why no internal split.</b> Every ruler covered here &mdash; caliph, dynasty, occupier, or king &mdash; held the whole island at once; there is no genuinely separate internal region on Bahrain to carve out honestly. A region-wide Arabian Peninsula map, showing Bahrain alongside its neighbors, is planned for a future phase.
+    </div>
+    <div class="imap-frame">
+      <div class="imap-controls">
+        <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="imap-year" id="iYearTag"></span>
+        <input type="range" id="iSlider" min="0" max="7" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="imap-svg" viewBox="0 0 348.0 585.2" xmlns="http://www.w3.org/2000/svg">
+        <path id="ireg-bh" class="ireg-fill" d="M140.8,94.8 L170.3,120.5 L177.2,109.6 L187.4,101.4 L191.8,112.8 L196.2,130.8 L205.0,131.6 L198.1,140.2 L197.7,154.4 L183.9,157.9 L187.9,202.0 L186.4,269.0 L176.3,352.7 L170.1,369.3 L150.3,401.9 L150.2,402.1 L145.6,379.1 L137.8,353.9 L127.0,329.4 L113.4,308.3 L83.6,274.5 L78.6,253.4 L91.9,227.9 L95.6,216.9 L99.4,205.8 L95.5,177.2 L85.1,149.1 L73.5,128.7 L70.7,119.5 L71.1,107.1 L79.1,71.2 L84.1,62.4 L92.9,58.1 L93.0,58.1 L93.7,58.1 L108.3,58.5 L116.8,60.3 L127.7,65.3 L136.6,69.3 L136.6,69.3 L164.8,58.1 L169.3,61.1 L172.1,71.0 L177.1,77.9 L178.6,81.0 L180.1,84.1 L176.3,92.2 L169.8,94.0 L150.4,91.2 L140.8,94.8 Z M292.9,453.6 L298.5,454.6 L304.1,450.2 L311.0,446.4 L311.0,451.2 L309.3,457.9 L304.1,465.6 L298.9,472.3 L302.4,475.7 L307.6,481.5 L305.0,485.3 L296.8,483.4 L292.9,486.3 L287.3,491.6 L284.7,494.4 L287.7,504.5 L292.9,511.7 L294.2,516.6 L289.4,518.5 L286.8,523.3 L286.0,529.5 L289.9,532.4 L292.9,536.7 L288.6,541.1 L284.7,547.8 L281.2,554.5 L282.9,559.3 L280.8,561.2 L273.0,557.4 L267.8,549.2 L270.4,542.0 L275.6,530.0 L275.2,522.8 L275.2,512.2 L269.1,505.5 L269.6,498.8 L270.4,489.6 L273.0,479.6 L279.9,468.5 L289.0,457.4 L292.9,453.6 Z M175.0,30.5 L196.2,24.0 L211.6,32.2 L212.4,43.6 L212.4,55.0 L222.6,69.6 L231.4,73.7 L227.8,84.3 L224.1,88.4 L213.1,81.9 L210.2,71.3 L206.5,60.7 L197.0,58.2 L188.2,56.6 L182.3,59.0 L173.5,42.7 L175.0,30.5 Z M35.7,109.6 L43.1,112.0 L50.4,116.1 L50.4,129.1 L51.9,139.7 L53.3,151.1 L40.9,147.9 L27.7,148.7 L24.0,136.5 L25.5,121.0 L35.7,109.6 Z M305.9,506.5 L310.2,506.9 L318.4,508.4 L321.8,512.2 L321.0,518.0 L318.4,521.8 L315.8,520.9 L312.3,519.9 L307.6,520.9 L304.1,522.8 L301.1,516.6 L302.4,512.7 L300.2,509.3 L301.5,506.0 L305.9,506.5 Z M313.6,485.8 L324.0,486.3 L321.8,493.5 L316.2,497.3 L313.2,493.0 L311.9,489.2 L313.6,485.8 Z"/>
+        <g font-family="IBM Plex Mono, monospace">
+          <text class="ireg-label" id="ilbl-bh" x="139.7" y="158.4">BAHRAIN</text>
+        </g>
+      </svg>
+      <div class="imap-head">
+        <div class="imap-name" id="iEraName"></div>
+        <div class="imap-owners" id="iEraOwners"></div>
+      </div>
+      <div class="iflags-row" id="iFlagsRow"></div>
+      <p class="imap-story" id="iEraStory"></p>
+
+      <p class="map-note">Real traced coastline, no internal partition.</p>
+      <div class="imap-key" id="iLegend"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <!-- 1 -->
+    <div class="entry" data-n="8" id="era-2002">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#d1453a"/>
+              <polygon points="0,0 90,0 60,40 90,80 60,120 90,160 60,200 0,200" fill="#f4efe1"/>
+            </svg>
+            <div class="flag-caption">red field, five-point white serrated band &mdash; fixed 2002</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">2002 &ndash; present</div>
+            <h3 class="card-title">Kingdom of Bahrain</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Kingdom, independent</span><span class="tag" tabindex="0" data-tip="Emir who upgraded Bahrain to a kingdom in February 2002 and styled himself king as part of a wider constitutional reform package following a 2001 referendum."><span class="dot" style="background:#4a3b78"></span>Hamad bin Isa Al Khalifa</span><span class="tag" tabindex="0" data-tip="Bahrain’s constitution names Islam the state religion, with Sharia a principal source of legislation, even though the ruling Al Khalifa family is Sunni while most citizens are Shia."><span class="dot" style="background:#8e3b62"></span>Islam (state religion)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Migrant workers, overwhelmingly from India, Pakistan, Bangladesh, and the Philippines, make up more than half of Bahrain's total population and the large majority of its private-sector workforce, employed mainly in construction, domestic work, and services."><span class="dot" style="background:#2f7a6b"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#ff9933"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#138808"/><circle cx="10" cy="7" r="1.2" fill="none" stroke="#000080" stroke-width="0.3"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#01411c"/><rect width="5" height="14" fill="#fff"/><circle cx="13" cy="7" r="2.6" fill="#fff"/><circle cx="13.8" cy="7" r="2.1" fill="#01411c"/><path d="M16,5.2 l1.1,1.8 -1.1,1.8z" fill="#fff"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#006a4e"/><circle cx="9" cy="7" r="4" fill="#f42a41"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="7" fill="#0038a8"/><rect y="7" width="20" height="7" fill="#ce1126"/><path d="M0,0 L8,7 L0,14 Z" fill="#fff"/><circle cx="3.5" cy="7" r="1.4" fill="#fcd116"/></svg></span>Immigration: South Asian &amp; Filipino migrant labor</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Rulers of Bahrain since the Bani Utbah conquest of 1783, styled Hakim, then Emir from 1971, then King from 2002, 1783–present. Emblem: a red-and-white serrated shield echoed in Bahrain's own flag."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><path d="M4,4 L20,4 L14,14 L20,24 L14,34 L20,44 L14,54 L20,64 L14,74 L18,84 L13,92 L16,100 L11,108 L15,116 Q9,110 4,100 Z" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Al Khalifa</span></div>
+            <p><span class="label">Who &amp; why:</span> Sheikh Hamad bin Isa Al Khalifa upgrades Bahrain from an emirate to a kingdom in February 2002, styling himself king as part of a wider constitutional reform package following a 2001 referendum. Bahrain becomes an early adopter of Gulf financial diversification, building a regional banking hub that lessens its dependence on its now-modest oil reserves, first tapped back in 1932.</p>
+            <p><span class="label">What it represents:</span> the same red-and-white serrated flag continues, its number of white serrations formally fixed at five in 2002 to symbolize the Five Pillars of Islam &mdash; ending decades of inconsistent serration counts on earlier prints.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">3:5.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red field, white serrated band (exactly five points) along the hoist.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#d1453a"></span><span class="meta"><span class="name">Red</span><span class="hex">#D1453A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="entry" data-n="7" id="era-1971">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#d1453a"/>
+              <polygon points="0,0 90,0 65,25 90,50 65,75 90,100 65,125 90,150 65,175 90,200 0,200" fill="#f4efe1"/>
+            </svg>
+            <div class="flag-caption">red-and-white serrated flag, before the point count was fixed</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1971 &ndash; 2002</div>
+            <h3 class="card-title">State of Bahrain (independent, pre-kingdom)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Emirate, independent</span><span class="tag" tabindex="0" data-tip="Emir of Bahrain who declared independence on 15 August 1971, choosing not to join the federation that became the UAE."><span class="dot" style="background:#4a3b78"></span>Isa bin Salman Al Khalifa</span><span class="tag" tabindex="0" data-tip="The newly independent state’s 1973 constitution named Islam the state religion, continuing the Al Khalifa dynasty’s traditional Sunni Islamic legal framework."><span class="dot" style="background:#8e3b62"></span>Islam (state religion, per 1973 constitution)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Bahrain's oil-driven modernization from the 1930s onward, and the broader Gulf construction boom after independence, draws large numbers of Indian, Pakistani, and other South Asian laborers into the country's expanding workforce."><span class="dot" style="background:#2f7a6b"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#ff9933"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#138808"/><circle cx="10" cy="7" r="1.2" fill="none" stroke="#000080" stroke-width="0.3"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#01411c"/><rect width="5" height="14" fill="#fff"/><circle cx="13" cy="7" r="2.6" fill="#fff"/><circle cx="13.8" cy="7" r="2.1" fill="#01411c"/><path d="M16,5.2 l1.1,1.8 -1.1,1.8z" fill="#fff"/></svg></span>Immigration: South Asian labor migration (oil-boom era)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Rulers of Bahrain since the Bani Utbah conquest of 1783, styled Hakim, then Emir from 1971, then King from 2002, 1783–present. Emblem: a red-and-white serrated shield echoed in Bahrain's own flag."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><path d="M4,4 L20,4 L14,14 L20,24 L14,34 L20,44 L14,54 L20,64 L14,74 L18,84 L13,92 L16,100 L11,108 L15,116 Q9,110 4,100 Z" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Al Khalifa</span></div>
+            <p><span class="label">Who &amp; why:</span> Bahrain declares independence on 15 August 1971, choosing to go it alone rather than join the federation that becomes the UAE, after a United Nations survey the same year confirms Bahraini preference for independence over a rival Iranian claim to the island dating back centuries. Bahrain uses its early oil-era head start to diversify into finance and services well ahead of most of its neighbors.</p>
+            <p><span class="label">What it represents:</span> the red-and-white serrated flag continues from the protectorate era, its number of white points still varying somewhat from print to print &mdash; commonly eight, sometimes twenty-eight &mdash; until the 2002 fix at five.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio until later specification.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red field, white serrated band (point count varied) along the hoist.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#d1453a"></span><span class="meta"><span class="name">Red</span><span class="hex">#D1453A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="entry" data-n="6" id="era-1783">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#d1453a"/>
+              <rect width="50" height="200" fill="#f4efe1"/>
+            </svg>
+            <div class="flag-caption">red field with a plain white hoist band, British-treaty era</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1783 &ndash; 1971</div>
+            <h3 class="card-title">Al Khalifa dynasty (British-protected sheikhdom from the 19th c.)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#6b5c4a"></span>Sheikhdom / protectorate</span><span class="tag" tabindex="0" data-tip="Leader of the Bani Utbah’s Al Khalifa branch who conquered Bahrain from its Persian-aligned rulers in 1783, founding the dynasty that still rules the kingdom today."><span class="dot" style="background:#4a3b78"></span>Ahmed bin Muhammad Al Khalifa</span><span class="tag" tabindex="0" data-tip="The conquering Al Khalifa rulers were Sunni Muslims and held the seat of power, even as most of the island’s population remained adherents of Shia Islam."><span class="dot" style="background:#8e3b62"></span>Sunni Islam (ruling dynasty; Shia majority population)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="The Bani Utbah tribal confederation, migrating from the Arabian mainland via Kuwait and Qatar, conquers Bahrain from its Persian-aligned rulers in 1783, installing the Al Khalifa dynasty that still rules the country today."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#ce1126"/></svg>Conquered by: Bani Utbah Arabs (1783)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Rulers of Bahrain since the Bani Utbah conquest of 1783, styled Hakim, then Emir from 1971, then King from 2002, 1783–present. Emblem: a red-and-white serrated shield echoed in Bahrain's own flag."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><path d="M4,4 L20,4 L14,14 L20,24 L14,34 L20,44 L14,54 L20,64 L14,74 L18,84 L13,92 L16,100 L11,108 L15,116 Q9,110 4,100 Z" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Al Khalifa</span></div>
+            <p><span class="label">Who &amp; why:</span> the Bani Utbah tribal confederation's Al Khalifa branch conquers Bahrain from its Persian-aligned rulers in 1783, founding the dynasty that still rules the kingdom today. Britain and Bahrain sign a series of treaties through the 19th century (1861, 1880, 1892) formalizing British protection over the sheikhdom's foreign affairs, and Bahrain becomes the first place in the Gulf to strike oil, at Jabal Dukhan in 1932, prompting the region's earliest moves toward economic diversification beyond it.</p>
+            <p><span class="label">What it represents:</span> the plain red flag, this coast's shared maritime color, gains a white band at the hoist under British treaty requirements meant to distinguish Bahrain's ships from other red-flagged neighbors &mdash; the serration itself develops gradually over the following century.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio recorded for most of this era.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red field, plain white band at hoist (serration develops later).</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#d1453a"></span><span class="meta"><span class="name">Red</span><span class="hex">#D1453A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="entry" data-n="5" id="era-1602">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; Persian Safavid/Afsharid rule, no flag survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1602 &ndash; 1783</div>
+            <h3 class="card-title">Persian (Safavid, later Afsharid) rule</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#6b5c4a"></span>Persian suzerainty</span><span class="tag" tabindex="0" data-tip="Safavid shah under whose reign Persian forces expelled the Portuguese from Bahrain in 1602, bringing the island under direct or governor-administered Safavid rule."><span class="dot" style="background:#4a3b78"></span>Shah Abbas I</span><span class="tag" tabindex="0" data-tip="Twelver Shia Islam was the Safavid Empire’s official established religion, imposed as state doctrine across its territories including Bahrain."><span class="dot" style="background:#8e3b62"></span>Twelver Shia Islam (Safavid state religion)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Safavid Persian forces under Shah Abbas I expel the Portuguese garrison from Bahrain in 1602, bringing the island under direct or governor-administered Persian rule for the next 180 years."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#1a7a3c"/><circle cx="10" cy="7" r="2.8" fill="#f4c430"/></svg>Conquered by: Safavid Persia (1602)</span></div>
+            <p><span class="label">Who &amp; why:</span> Safavid Persia expels the Portuguese from Bahrain in 1602, ruling the island directly or through local governors for most of the following 180 years, with a brief interlude of Omani Ya'ariba control in the 1720s before Nader Shah's Afsharid Persia reasserts authority. Persian rule ends for good when the Bani Utbah's Al Khalifa branch conquers the island in 1783.</p>
+            <p><span class="label">What it represents:</span> no distinctly Bahraini flag is attested under direct Persian administration in this period; various Persian provincial and dynastic banners would have applied instead. Shown here honestly blank rather than invented.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested Bahraini flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="entry" data-n="4" id="era-1521">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; Portuguese occupation, no distinct flag survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1521 &ndash; 1602</div>
+            <h3 class="card-title">Portuguese occupation</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#6b5c4a"></span>Occupation</span><span class="tag" tabindex="0" data-tip="Portuguese commander who led the 1521 seizure of Bahrain as part of the wider push to control Gulf and Indian Ocean trade routes, building Bahrain Fort as the occupying garrison’s stronghold."><span class="dot" style="background:#4a3b78"></span>António Correia</span><span class="tag" tabindex="0" data-tip="Roman Catholicism was the Portuguese Crown’s official faith, though the occupying garrison ruled over a population that remained overwhelmingly Muslim throughout."><span class="dot" style="background:#8e3b62"></span>Roman Catholic (Portuguese Crown); population remained Muslim</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Portuguese forces under António Correia seize Bahrain in 1521 as part of their wider campaign to control Gulf and Indian Ocean trade routes, garrisoning the island from Bahrain Fort until the Persian expulsion of 1602."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#fff"/><rect x="8.5" width="3" height="14" fill="#c8102e"/><rect y="5.5" width="20" height="3" fill="#c8102e"/></svg>Occupied by: Portugal (1521&ndash;1602)</span></div>
+            <p><span class="label">Who &amp; why:</span> Portuguese forces seize Bahrain in 1521 as part of their wider push to control Gulf and Indian Ocean trade routes, building Bahrain Fort (Qal'at al-Bahrain, on the site of the ancient Dilmun capital) as their stronghold. Portuguese control ends in 1602 when the island's own governor, backed by Safavid Persia, expels the garrison.</p>
+            <p><span class="label">What it represents:</span> the Portuguese fly their own maritime ensigns over the fort rather than any distinctly Bahraini banner; no local flag is attested for this occupation period. Shown here honestly blank rather than invented.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested Bahraini flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="entry" data-n="3" id="era-899">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#c9a13c">CONTESTED /</text>
+              <text x="150" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#c9a13c">NO SINGLE FLAG</text>
+            </svg>
+            <div class="flag-caption">Qarmatian state, Uyunid, Usfurid, and Jarwanid dynasties in succession</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">899 &ndash; 1521</div>
+            <h3 class="card-title">Medieval Arab emirate (Qarmatian, Uyunid, Usfurid, Jarwanid)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#6b5c4a"></span>Fragmented / successive dynasties</span><span class="tag" tabindex="0" data-tip="Founder of the Qarmatian state, who led the radical Ismaili sect’s seizure of the wider Bahrain region in 899, ruling it as a distinctive and controversial polity until the Uyunids overthrew it in 1076."><span class="dot" style="background:#4a3b78"></span>Abu Sa'id al-Jannabi</span><span class="tag" tabindex="0" data-tip="The Qarmatians practiced a radical, egalitarian strand of Ismaili Shia Islam at this era’s start; the Uyunid, Usfurid, and Jarwanid dynasties that followed were mostly Sunni or mainstream Shia, with no single confession spanning all four."><span class="dot" style="background:#8e3b62"></span>Ismaili Islam (Qarmatian, at start); later dynasties mixed Sunni/Shia</span></div>
+            <p><span class="label">Who &amp; why:</span> the Qarmatians, a radical Ismaili sect, seize control of the wider Bahrain region (then a name covering the whole eastern Arabian coast, not just the island) in 899, ruling as a distinctive and controversial state until the Uyunid dynasty overthrows them in 1076. The Uyunids, then the Usfurids, then the Jarwanids govern the region in succession through the following centuries &mdash; real, datable medieval Arab dynasties, but no single flag can be attributed with confidence across four different ruling houses over six centuries, so this is one honest bridging entry.</p>
+            <p><span class="label">What it represents:</span> these medieval Arab dynasties used seals, banners, and religious symbols rather than fixed territorial flags in the modern sense; none is well enough attested to reconstruct with confidence. Shown here honestly blank rather than invented.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no single attested flag across four successive dynasties.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 7 -->
+    <div class="entry" data-n="2" id="era-700">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; ancient Dilmun's legacy, early Islamic era, no flag survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 700 &ndash; 899</div>
+            <h3 class="card-title">Early Islamic Bahrain, on Dilmun's ancient trading foundations</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#6b5c4a"></span>Caliphal suzerainty</span><span class="tag" tabindex="0" data-tip="Umayyad caliph reigning at this era’s start, ruling Bahrain as part of the wider Islamic caliphate following the island’s early conversion during Muhammad’s lifetime."><span class="dot" style="background:#4a3b78"></span>Abd al-Malik (Umayyad Caliph)</span><span class="tag" tabindex="0" data-tip="Islam, as professed by the ruling Umayyad and later Abbasid caliphs, governed Bahrain’s religious life following one of the faith’s earliest conversions outside the Hejaz."><span class="dot" style="background:#8e3b62"></span>Islam (Umayyad, then Abbasid caliphal authority)</span></div>
+            <p><span class="label">Who &amp; why:</span> Bahrain converts to Islam during Muhammad's own lifetime in the 7th century, one of the faith's earliest conversions outside the Hejaz, and comes under successive caliphal authority. The island sits on the legacy of the ancient Dilmun civilization, a major Bronze Age trading hub linking Mesopotamia and the Indus Valley millennia earlier, a continuity of trade significance this small island has held for roughly four thousand years running.</p>
+            <p><span class="label">What it represents:</span> no flag in the modern territorial sense survives from this era; the region's rulers used caliphal and provincial insignia rather than a fixed local banner. Shown here honestly blank rather than invented.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <div class="entry" data-n="1" id="era-3000bce">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; Dilmun, Tylos &amp; Sassanid Mishmahig, no flag survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 3000 BCE &ndash; 700 CE</div>
+            <h3 class="card-title">Dilmun, Tylos &amp; Sassanid Mishmahig</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Bahrain begins as Dilmun, an independent Bronze Age trading kingdom, before passing under successive Achaemenid Persian, Seleucid, Parthian, and Sassanid Persian control from the 6th century BCE onward."><span class="dot" style="background:#a9762f"></span>Kingdom, later Persian/Hellenistic province</span><span class="tag" tabindex="0" data-tip="Dilmun's own kings are recorded paying tribute to Sargon of Akkad and later Assyrian rulers, but no continuous named dynasty of Dilmun, Tylos, or Sassanid Mishmahig survives across this nearly four-thousand-year span."><span class="dot" style="background:#4a3b78"></span>No single ruler documented</span><span class="tag" tabindex="0" data-tip="Dilmun worshipped its own patron god Inzak within a broader Sumerian-influenced pantheon; Zoroastrianism arrives with Achaemenid and Sassanid administration, and small Christian communities take root under Sassanid tolerance shortly before Bahrain's conversion to Islam."><span class="dot" style="background:#8e3b62"></span>Polytheistic (cult of Inzak), later Zoroastrian</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Achaemenid Persia absorbs the Gulf coast including Dilmun/Tylos from the 6th century BCE, beginning nearly twelve centuries of successive Persian and Hellenistic overlordship that ends only with the 7th-century Islamic conquest."><span class="dot" style="background:#6b2c2c"></span>Conquered by: Achaemenid Persia (6th c. BCE)</span></div>
+            <p><span class="label">Who &amp; why:</span> Bahrain's known history opens with Dilmun, a major Bronze Age trading civilization first attested in Sumerian cuneiform tablets by the late 3rd millennium BCE, linking Mesopotamia to the Indus Valley civilization through Gulf maritime trade; Sargon of Akkad and later Assyrian kings record tribute from Dilmun's own rulers. Achaemenid Persian control from the 6th century BCE draws the island &mdash; known to Greek geographers as Tylos &mdash; into successive Achaemenid, Seleucid, and Parthian orbits, and Sassanid Persia renames and garrisons it as Mishmahig by the 3rd century CE. Small Christian communities take root under Sassanid tolerance in late antiquity, shortly before the island's conversion to Islam during Muhammad's own lifetime opens the era covered in the following entry.</p>
+            <p><span class="label">What it represents:</span> no flag in the modern territorial sense survives from Dilmun, Tylos, or Sassanid Mishmahig; this deep history is known through Sumerian and Akkadian cuneiform tablets, Greek geographic texts, and archaeology, not through any vexillological record. Shown here honestly blank rather than invented.</p>
+            <p><span class="label">World context:</span> this span runs alongside the building of Egypt's pyramids at Giza (Dilmun's earliest cuneiform attestations are roughly contemporary with Egypt's Old Kingdom), Babylon's Hanging Gardens under Nebuchadnezzar II, Alexander the Great's own admiral Nearchus surveying the Gulf coast after the Indian campaign, and the Sassanid Empire's own collapse in the same 7th-century Arab conquests that bring Islam to Bahrain itself.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#6b5c4a"></span><b>Fragmented / occupied</b> &mdash; no independent Bahraini ruler</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Kingdom / emirate</b> &mdash; sovereign under its own ruler</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the named ruler most associated with the era's start</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official/established faith, not the population's</div>
+    </div>
+  </div>
+
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for Bahrain lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/bh/">Search Record Atlas for Bahrain &rarr;</a>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This page is one lineage in a larger set. See the region-wide hub and the other countries here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="arabian-peninsula-hub.html"><b>Arabian Peninsula hub</b><span>Seven countries of the Gulf and Red Sea coast</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are close historical approximations for painting reference; pre-20th-century swatches are informed reconstructions, not official specifications.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var IC = {
+    ancient:"#5c2a24", e0:"#6b5c4a", e1:"#6b5c4a", e2:"#6b5c4a", e3:"#6b5c4a", e4:"#a9762f", e5:"#a9762f", e6:"#a9762f"
+  };
+  var INAMES = {
+    ancient:"Dilmun, Tylos &amp; Sassanid Mishmahig", e0:"Early Islamic Bahrain", e1:"Medieval Arab emirate (Qarmatian &amp; successors)", e2:"Portuguese occupation", e3:"Persian (Safavid, later Afsharid) rule", e4:"Al Khalifa dynasty (British-protected)", e5:"State of Bahrain (independent, pre-kingdom)", e6:"Kingdom of Bahrain"
+  };
+  var IFLAGS = {
+    ancient: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>',
+    e0: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>',
+    e1: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#c9a13c">CONTESTED /</text><text x="150" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#c9a13c">NO SINGLE FLAG</text>',
+    e2: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>',
+    e3: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>',
+    e4: '<rect width="300" height="200" fill="#d1453a"/><rect width="50" height="200" fill="#f4efe1"/>',
+    e5: '<rect width="300" height="200" fill="#d1453a"/><polygon points="0,0 90,0 65,25 90,50 65,75 90,100 65,125 90,150 65,175 90,200 0,200" fill="#f4efe1"/>',
+    e6: '<rect width="300" height="200" fill="#d1453a"/><polygon points="0,0 90,0 60,40 90,80 60,120 90,160 60,200 0,200" fill="#f4efe1"/>'
+  };
+  function iFlagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (IFLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  var iLegendEl = document.getElementById("iLegend");
+  iLegendEl.innerHTML = Object.keys(IC).map(function (k) {
+    return '<span><span class="sw" style="background:' + IC[k] + '"></span>' + INAMES[k] + "</span>";
+  }).join("");
+
+  var ISNAP = [
+    { year:"c. 3000 BCE–700 CE", name:"Dilmun, Tylos &amp; Sassanid Mishmahig", t:{ bh:IC.ancient }, flagKeys:{ bh:"ancient" },
+      story:"Bahrain's known history opens with Dilmun, a major Bronze Age trading civilization first attested in Sumerian cuneiform tablets by the late 3rd millennium BCE, linking Mesopotamia to the Indus Valley through Gulf maritime trade. Achaemenid Persian control from the 6th century BCE draws the island &mdash; known to Greek geographers as Tylos &mdash; into successive Achaemenid, Seleucid, and Parthian orbits, and Sassanid Persia renames and garrisons it as Mishmahig by the 3rd century CE. No flag in the modern territorial sense survives from this nearly four-thousand-year span; shown here honestly blank." },
+    { year:"c. 700–899", name:"Early Islamic Bahrain", t:{ bh:IC.e0 }, flagKeys:{ bh:"e0" },
+      story:"Bahrain converts to Islam during Muhammad's own lifetime, one of the faith's earliest conversions outside the Hejaz, and comes under successive caliphal authority, sitting atop the ancient Dilmun civilization's roughly four-thousand-year trading legacy. No flag in the modern territorial sense survives; caliphal and provincial insignia stood in its place." },
+    { year:"899–1521", name:"Medieval Arab emirate (Qarmatian &amp; successors)", t:{ bh:IC.e1 }, flagKeys:{ bh:"e1" },
+      story:"The Qarmatians, a radical Ismaili sect, seize the wider Bahrain region in 899, ruled in turn by the Uyunid, Usfurid, and Jarwanid dynasties over the following six centuries &mdash; real, datable Arab dynasties, but no single flag can be attributed with confidence across four ruling houses, so this stands as one honest bridging entry." },
+    { year:"1521–1602", name:"Portuguese occupation", t:{ bh:IC.e2 }, flagKeys:{ bh:"e2" },
+      story:"Portuguese forces seize Bahrain in 1521 to control Gulf and Indian Ocean trade routes, building Bahrain Fort on the site of the ancient Dilmun capital. Portugal flew its own maritime ensigns over the fort; no local flag is attested for this occupation." },
+    { year:"1602–1783", name:"Persian (Safavid, later Afsharid) rule", t:{ bh:IC.e3 }, flagKeys:{ bh:"e3" },
+      story:"Safavid Persia expels the Portuguese in 1602, ruling directly or through governors for most of the following 180 years, with a brief 1720s Omani interlude before Nader Shah's Afsharid Persia reasserts authority. No distinctly Bahraini flag is attested; Persian provincial and dynastic banners applied instead." },
+    { year:"1783–1971", name:"Al Khalifa dynasty (British-protected)", t:{ bh:IC.e4 }, flagKeys:{ bh:"e4" },
+      story:"The Bani Utbah's Al Khalifa branch conquers Bahrain from its Persian-aligned rulers in 1783, founding the dynasty that still rules today. Britain's 19th-century treaties (1861, 1880, 1892) formalize protection over foreign affairs, and Bahrain strikes the Gulf's first oil at Jabal Dukhan in 1932. The plain red maritime flag of this coast gains a white hoist band under British treaty requirement, distinguishing it from neighboring red flags." },
+    { year:"1971–2002", name:"State of Bahrain (independent, pre-kingdom)", t:{ bh:IC.e5 }, flagKeys:{ bh:"e5" },
+      story:"Bahrain declares independence on 15 August 1971, choosing not to join the federation that becomes the UAE, after a UN survey confirms Bahraini preference over a rival Iranian claim. The red-and-white serrated flag continues, its number of white points still varying print to print &mdash; commonly eight, sometimes twenty-eight &mdash; until fixed in 2002." },
+    { year:"2002–present", name:"Kingdom of Bahrain", t:{ bh:IC.e6 }, flagKeys:{ bh:"e6" },
+      story:"Sheikh Hamad bin Isa Al Khalifa upgrades Bahrain to a kingdom in February 2002, part of a wider constitutional reform package. The serration count is formally fixed at five, symbolizing the Five Pillars of Islam, ending decades of inconsistent prints." }
+  ];
+
+  var IREGIONS = ["bh"];
+  var IREGION_NAMES = { bh:"Bahrain" };
+  var IADJ = [];
+
+  function iTextColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+
+  var iYearTag = document.getElementById("iYearTag");
+  var iEraName = document.getElementById("iEraName");
+  var iEraOwners = document.getElementById("iEraOwners");
+  var iEraStory = document.getElementById("iEraStory");
+  var iFlagsRow = document.getElementById("iFlagsRow");
+  var iSlider = document.getElementById("iSlider");
+
+  function iRender(idx) {
+    var era = ISNAP[idx];
+    iYearTag.textContent = era.year;
+    iEraName.textContent = era.name;
+    iEraStory.innerHTML = era.story;
+
+    IREGIONS.forEach(function (id) {
+      document.getElementById("ireg-" + id).setAttribute("fill", era.t[id]);
+      var tcol = iTextColorFor(era.t[id]);
+      var tcolHalo = tcol === "#201a12" ? "#f7f1e3" : "#201a12";
+      var lbl = document.getElementById("ilbl-" + id);
+      if (lbl) { lbl.setAttribute("fill", tcol); lbl.setAttribute("stroke", tcolHalo); }
+    });
+
+    var label = Object.keys(IC).filter(function (k) { return IC[k] === era.t.bh; })[0];
+    iEraOwners.innerHTML = "<b>" + INAMES[label] + "</b>: whole country";
+
+    iFlagsRow.innerHTML = IREGIONS.map(function (id) {
+      return '<div class="iflag-chip">' + iFlagSvg(era.flagKeys[id]) + '<div class="ic-label">' + IREGION_NAMES[id] + "</div></div>";
+    }).join("");
+  }
+
+  iSlider.addEventListener("input", function () { iRender(parseInt(iSlider.value, 10)); });
+  iRender(0);
+
+  var iPlaying = false, iPlayTimer = null;
+  var iPlayBtn = document.getElementById("iPlayBtn");
+  function iStepPlay() {
+    var next = parseInt(iSlider.value, 10) + 1;
+    if (next > ISNAP.length - 1) { iStopPlay(); return; }
+    iSlider.value = next;
+    iRender(next);
+  }
+  function iStartPlay() {
+    iPlaying = true;
+    iPlayBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(iSlider.value, 10) >= ISNAP.length - 1) { iSlider.value = 0; iRender(0); }
+    iPlayTimer = setInterval(iStepPlay, 1700);
+  }
+  function iStopPlay() {
+    iPlaying = false;
+    iPlayBtn.innerHTML = "&#9654;";
+    clearInterval(iPlayTimer);
+  }
+  iPlayBtn.addEventListener("click", function () { iPlaying ? iStopPlay() : iStartPlay(); });
+})();
+</script>
+<script>
+  document.querySelectorAll(".tag[data-tip]").forEach(function (tag) {
+    tag.addEventListener("click", function (e) {
+      var wasOpen = tag.classList.contains("tip-open");
+      document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+      if (!wasOpen) tag.classList.add("tip-open");
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+  });
+</script>
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var html = '<h4>Genealogical records for this ground</h4>';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>
+
+</body></html>

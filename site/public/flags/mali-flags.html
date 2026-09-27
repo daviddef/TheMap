@@ -1,0 +1,759 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+</style></head><body>
+<title>Flags of Mali</title>
+<meta name="description" content="A chronological, paint-ready atlas of every flag that flew over Mali, from Mansa Musa's legendary medieval empire through the Songhai Empire, French Sudan, and the short-lived Mali Federation to modern independence.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.08rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; font-size: .94rem; color: var(--muted); }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  .legend { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+
+  /* ---------- Timeline ---------- */
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1px; background: var(--hair); }
+  @media (max-width: 560px) { .timeline::before { left: 9px; } }
+  .entry { position: relative; padding-left: 46px; margin-bottom: 46px; }
+  @media (max-width: 560px) { .entry { padding-left: 30px; } }
+  .entry::before {
+    content: attr(data-n);
+    position: absolute; left: 1px; top: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--paper); outline: 1px solid var(--hair);
+    background: var(--card);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--brick); display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) { .entry::before { left: -5px; width: 18px; height: 18px; font-size: 9px; } }
+
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+  .card-head { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  @media (max-width: 620px) { .card-head { flex-direction: column; } }
+  .flag-box { flex: none; width: 168px; }
+  .flag-box svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-caption { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .card-title { font-size: 1.32rem; font-weight: 600; line-height: 1.18; margin: 0 0 10px; text-wrap: balance; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px; border: 1px solid var(--card-border); color: var(--muted);
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  /* Flip tooltip below tags near the top of the viewport so it isn't clipped */
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  /* Keep tooltips from overflowing the left/right edges on narrow screens */
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint { border-top: 1px solid var(--hair); }
+  details.paint > summary {
+    cursor: pointer; list-style: none; padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--adriatic); display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before { content: "+"; font-family: "Fraunces", serif; font-size: 15px; width: 14px; }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row { display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px; }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--card-border); border-radius: 2px; padding: 5px 9px 5px 5px; background: var(--paper); }
+  .swatch .chip { width: 20px; height: 20px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: 64ch; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 88px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 400px; height: auto; }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .iborder-line { transition: stroke-opacity 0.6s ease, stroke-width 0.6s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .ireg-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 700; text-anchor: middle; transition: fill .4s ease, stroke .4s ease; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="west-africa-hub.html">West Africa hub</a></p>
+  <p class="kicker">Family research &middot; Phase 11 of the world atlas</p>
+  <h1>Flags of Mali</h1>
+  <p class="lede">Few countries in this atlas carry pre-colonial history as globally famous as Mali's, and it runs deeper than the Mali Empire itself: the Ghana Empire (Wagadou), a Soninke trading power described in detail by Arab geographers from the 8th century, controlled the same trans-Saharan gold-salt trade for half a millennium before Sundiata Keita's rise. The Mali Empire that absorbed it, at its height under Mansa Musa in the 1320s&ndash;30s, was one of the wealthiest states on Earth &mdash; Musa's 1324 pilgrimage to Mecca, with a caravan reportedly carrying tons of gold, is still cited by historians as a benchmark for medieval wealth, and reportedly disrupted gold prices across the Mediterranean for years afterward. The Songhai Empire that succeeded it carried the same trading and scholarly centers, above all Timbuktu, into the 16th century before Moroccan invasion broke its power.</p>
+  <p class="lede">French colonization from the late 19th century folded this territory into French Sudan, part of French West Africa. Independence came in two steps: a short-lived federation with Senegal in 1960, then a separate Republic of Mali later that same year, flying a Pan-African tricolor that has kept its green-gold-red bands, minus one removed central emblem, ever since.</p>
+
+  <div class="scope-note">
+    <b>Scope of this page:</b> the lands of present-day Mali, c. 300 CE&ndash;present, from the early Ghana Empire through the medieval Mali Empire, the Songhai Empire, French colonial rule, and the brief Mali Federation to the modern republic, six political entities. No single flag survives from the Ghana, Mali, or Songhai empires; this page uses an honest, clearly labeled reconstruction rather than an invented banner. Part of a larger atlas &mdash; see the map and linked pages at the bottom.
+  </div>
+
+  <div class="imap-section">
+    <h2>One border, six eras</h2>
+    <p class="imap-sub">Mali's own real border, traced whole. Press play, or drag the slider, to watch who held it, era to era.</p>
+    <div class="rule-box">
+      <b>This page doesn't split internally, and the timeline itself has a gap.</b> The Mali and Songhai empires never divided this territory into lasting, separately-governed pieces &mdash; only their reach expanded and contracted. And between Songhai's collapse at Tondibi in 1591 and French conquest completed in 1892, this territory fragmented among the Bambara kingdoms of Ségou and Kaarta, the Tuareg-dominated Niger Bend, and later the Toucouleur Empire and Samory Touré's resistance state &mdash; a genuinely unsettled three centuries the page's own timeline doesn't carry a dedicated card for. The map below is honest about that: its slider jumps straight from Songhai to French Sudan, the same gap the timeline leaves.
+    </div>
+    <div class="imap-frame">
+      <div class="imap-controls">
+        <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="imap-year" id="iYearTag">c. 300&ndash;1235</span>
+        <input type="range" id="iSlider" min="0" max="5" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="imap-svg" viewBox="0 0 380 300" xmlns="http://www.w3.org/2000/svg">
+        <g class="context-label" pointer-events="none">
+          <text x="246" y="46">ALGERIA</text>
+          <text x="304" y="163">NIGER</text>
+          <text x="209" y="209">BURKINA FASO</text>
+          <text x="176" y="252">C&Ocirc;TE D'IVOIRE</text>
+          <text x="129" y="226">GUINEA</text>
+          <text x="99" y="190">SENEGAL</text>
+          <text x="135" y="114">MAURITANIA</text>
+        </g>
+        <path id="ireg-ml" class="ireg-fill" d="M119.3,176.3 L122.2,174.7 L123.7,169.4 L126.4,169.1 L132.4,171.7 L137.3,169.9 L140.6,170.5 L141.9,168.5 L176.4,168.3 L178.3,162.0 L176.8,160.9 L168.5,83.1 L181.6,82.9 L239.6,122.3 L241.7,126.5 L251.0,130.5 L251.1,136.3 L260.6,135.4 L260.7,156.2 L256.0,162.2 L255.2,167.7 L247.6,169.2 L235.9,169.9 L232.7,173.1 L221.7,173.5 L219.5,171.8 L214.8,173.1 L206.8,176.8 L205.1,179.6 L198.4,183.7 L197.3,186.0 L193.7,187.8 L189.5,186.6 L187.2,188.8 L185.9,195.0 L179.1,202.5 L179.3,205.5 L176.9,209.4 L177.5,214.6 L171.9,217.1 L170.6,213.2 L168.1,214.2 L166.7,214.0 L165.1,216.7 L158.4,216.6 L156.1,215.2 L154.9,216.1 L152.3,213.5 L152.8,210.8 L151.7,209.7 L149.9,210.6 L150.2,207.7 L152.0,205.4 L148.4,201.6 L147.4,199.1 L145.5,197.1 L143.8,196.9 L138.9,199.4 L136.6,201.3 L132.9,200.6 L130.5,198.3 L129.1,198.0 L126.8,199.2 L125.5,199.2 L125.0,195.9 L125.4,193.1 L124.6,189.6 L121.4,187.1 L119.7,181.9 L119.3,176.3 Z"/>
+        <g font-family="IBM Plex Mono, monospace">
+          <text class="ireg-label" id="ilbl-ml" x="196" y="150">MALI</text>
+        </g>
+      </svg>
+      <div class="imap-head">
+        <div class="imap-name" id="iEraName">Ghana Empire (Wagadou)</div>
+        <div class="imap-owners" id="iEraOwners"></div>
+      </div>
+      <div class="iflags-row" id="iFlagsRow"></div>
+      <p class="imap-story" id="iEraStory"></p>
+
+      <p class="map-note">Real traced border, no internal partition &mdash; see the rule box above for why, including the timeline's own 1591&ndash;1892 gap.</p>
+      <div class="imap-key" id="iLegend"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <!-- 1 -->
+    <div class="entry" data-n="6" id="era-1961">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="100" height="200" fill="#14b53a"/>
+              <rect x="100" width="100" height="200" fill="#fcd116"/>
+              <rect x="200" width="100" height="200" fill="#ce1126"/>
+            </svg>
+            <div class="flag-caption">green, gold, red &mdash; the plain Pan-African tricolor, unchanged since 1961</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1961 &ndash; present</div>
+            <h3 class="card-title">Republic of Mali (modern)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A modern sovereign state under a republican constitution, declared when the former Sudanese Republic renamed itself Mali in September 1960."><span class="dot" style="background:#a9762f"></span>Republic, independent</span><span class="tag" tabindex="0" data-tip="Independence leader who became the Republic of Mali's first president in 1960, pursuing socialist policies and one-party rule until his overthrow in a 1968 military coup."><span class="dot" style="background:#4a3b78"></span>Modibo Keïta</span><span class="tag" tabindex="0" data-tip="Mali's constitution establishes a secular state with no official religion, despite the population's overwhelming Muslim majority."><span class="dot" style="background:#8e3b62"></span>Secular (no state religion)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Since the 1960s, hundreds of thousands of Malians emigrate as labor migrants to France and, especially, to the cocoa and coffee plantations of neighboring C&ocirc;te d'Ivoire, among West Africa's largest and longest-running labor migration routes."><span class="dot" style="background:#a3672f"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="6.67" height="14" fill="#0055a4"/><rect x="6.67" width="6.67" height="14" fill="#fff"/><rect x="13.33" width="6.67" height="14" fill="#ef4135"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="6.67" height="14" fill="#f77f00"/><rect x="6.67" width="6.67" height="14" fill="#fff"/><rect x="13.33" width="6.67" height="14" fill="#009e60"/></svg></span>Emigration: labor migrants to France &amp; C&ocirc;te d'Ivoire</span><span class="tag" tabindex="0" data-tip="Jihadist insurgency and Tuareg rebellion in the north since 2012 drive hundreds of thousands of Malians to flee as refugees into Mauritania, Niger, and Burkina Faso."><span class="dot" style="background:#a3672f"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#00a95c"/><path d="M10,4 l1,2.5 2.6,0 -2.1,1.6 0.8,2.5 -2.3,-1.5 -2.3,1.5 0.8,-2.5 -2.1,-1.6 2.6,0z" fill="#ffc400"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#e05206"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#0db02b"/><circle cx="10" cy="7" r="1.8" fill="#e05206"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="7" fill="#d21034"/><rect y="7" width="20" height="7" fill="#009e49"/><path d="M10,5 l0.9,2.1 2.3,0 -1.9,1.4 0.7,2.1 -2,-1.3 -2,1.3 0.7,-2.1 -1.9,-1.4 2.3,0z" fill="#ffd700"/></svg></span>Emigration: refugees fleeing conflict (2012&ndash;)</span></div>
+            <p><span class="label">Who &amp; why:</span> after the Mali Federation dissolves in August 1960, the former French Sudan declares itself the Republic of Mali on 22 September 1960 under President Modibo Keïta, taking its name from the medieval empire as a deliberate statement of pre-colonial heritage. Mali later passes through a long period of military and one-party rule (1968&ndash;91) before multiparty democracy is restored, and endures a serious Tuareg-led rebellion and jihadist insurgency in the north from 2012 onward &mdash; noted here factually as part of its recent history.</p>
+            <p><span class="label">What it represents:</span> the same green-gold-red vertical tricolor adopted for the 1959 Mali Federation, with the black kanaga figure (a stylized human form, an important Dogon cultural symbol) removed from the gold band in 1961 at Senegal's request, since the two countries' flags had become confusingly similar after the federation split.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Three equal vertical bands: green (hoist), gold, red (fly).</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#14b53a"></span><span class="meta"><span class="name">Green</span><span class="hex">#14B53A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#fcd116"></span><span class="meta"><span class="name">Gold</span><span class="hex">#FCD116</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#ce1126"></span><span class="meta"><span class="name">Red</span><span class="hex">#CE1126</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="entry" data-n="5" id="era-1959">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="100" height="200" fill="#14b53a"/>
+              <rect x="100" width="100" height="200" fill="#fcd116"/>
+              <rect x="200" width="100" height="200" fill="#ce1126"/>
+              <g fill="#141413">
+                <circle cx="150" cy="80" r="7"/>
+                <path d="M150,87 l0,65 M130,110 l40,0 M135,152 l-12,20 M165,152 l12,20 M150,152 l0,20" stroke="#141413" stroke-width="4" fill="none"/>
+              </g>
+            </svg>
+            <div class="flag-caption">the 1959&ndash;61 flag with the black kanaga figure on the gold band</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1959 &ndash; 1961</div>
+            <h3 class="card-title">Mali Federation</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A short-lived union joining French Sudan and Senegal into a single self-governing, then independent, federal state."><span class="dot" style="background:#c9a13c"></span>Federation</span><span class="tag" tabindex="0" data-tip="Leader of the Sudanese Republic side of the federation who headed its government from formation in 1959 and went on to lead independent Mali after the split."><span class="dot" style="background:#4a3b78"></span>Modibo Keïta</span><span class="tag" tabindex="0" data-tip="The federation, moving toward independence within the French Community, established no official religion, keeping the secular constitutional model France applied across its territories."><span class="dot" style="background:#8e3b62"></span>Secular (no state religion)</span></div>
+            <p><span class="label">Who &amp; why:</span> French Sudan and Senegal, both moving toward independence within the French Community, join as the Mali Federation on 4 April 1959, hoping to unite more of former French West Africa around them; only these two territories actually join. The federation becomes fully independent on 20 June 1960, but internal political tension between its two halves brings a rapid collapse: Senegal secedes on 20 August 1960, and the remaining Sudanese Republic renames itself the Republic of Mali the following month.</p>
+            <p><span class="label">What it represents:</span> a green-gold-red vertical tricolor carrying a black kanaga figure, a Dogon cultural symbol, centered on the gold band &mdash; the design both federation partners initially shared before the split.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Three equal vertical bands: green, gold, red, with a black kanaga figure on the gold band.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#14b53a"></span><span class="meta"><span class="name">Green</span><span class="hex">#14B53A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#fcd116"></span><span class="meta"><span class="name">Gold</span><span class="hex">#FCD116</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#ce1126"></span><span class="meta"><span class="name">Red</span><span class="hex">#CE1126</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="entry" data-n="4" id="era-1892">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#00247d"/>
+              <path d="M0,0 L300,200 M300,0 L0,200" stroke="#f4efe1" stroke-width="34"/>
+              <path d="M0,0 L300,200 M300,0 L0,200" stroke="#cf142b" stroke-width="14"/>
+              <rect x="125" width="50" height="200" fill="#f4efe1"/>
+              <rect y="75" width="300" height="50" fill="#f4efe1"/>
+              <rect x="137" width="26" height="200" fill="#cf142b"/>
+              <rect y="87" width="300" height="26" fill="#cf142b"/>
+            </svg>
+            <div class="flag-caption">placeholder Union Flag, standing in for the Tricolore under French administration</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1892 &ndash; 1959</div>
+            <h3 class="card-title">French Sudan (colonial territory)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Territory administered directly by France as a colony within French West Africa, following military conquest."><span class="dot" style="background:#204b5c"></span>Colony</span><span class="tag" tabindex="0" data-tip="French colonel who led the key 1880s-90s military campaigns that broke Tukulor and other resistance and completed French conquest of the Sudan region."><span class="dot" style="background:#4a3b78"></span>Louis Archinard</span><span class="tag" tabindex="0" data-tip="France established no official church over its colonies, applying its own secular administrative tradition, even as the territory's population remained overwhelmingly Muslim."><span class="dot" style="background:#8e3b62"></span>No official state religion (secular French colonial rule)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="French military conquest, completed through the 1880s&ndash;90s against Tukulor and Wassoulou resistance under leaders including Samory Tour&eacute;, subjugates the territory and consolidates it as French Sudan by 1892."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="6.67" height="14" fill="#0055a4"/><rect x="6.67" width="6.67" height="14" fill="#fff"/><rect x="13.33" width="6.67" height="14" fill="#ef4135"/></svg>Conquered by: France</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Umar Tall's Toucouleur jihad state was overrun by French conquest just before this era began, 1861&ndash;1893. Banner: green, the documented color of his Islamic state."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#2f6b4a"/><path d="M50,26 a16,16 0 1,0 0,32 a13,13 0 1,1 0,-32 Z" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Tall dynasty</span></div>
+            <p><span class="label">Who &amp; why:</span> French military conquest, completed through the 1880s&ndash;90s against resistance from Tukulor and Wassoulou forces (including Samory Touré), consolidates the territory as French Sudan (Soudan français) from 1892, administered as part of French West Africa (AOF) from 1904 with its capital eventually at Bamako. French Sudan gains growing autonomy through the 1946 French Union and 1956 loi-cadre reforms before moving toward the Mali Federation in 1959.</p>
+            <p><span class="label">What it represents:</span> the French Tricolore flew as the sovereign flag across French West Africa; no distinct territorial flag existed for French Sudan itself. Shown here as a placeholder Union Flag pattern matching this atlas's convention for unrepresented colonial-era sovereign flags &mdash; swap for the Tricolore (blue-white-red vertical bands) when painting.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3 (French Tricolore).</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Vertical blue-white-red bands (Tricolore) &mdash; no distinct colonial territorial flag existed.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#00247d"></span><span class="meta"><span class="name">Blue</span><span class="hex">#00247D</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#cf142b"></span><span class="meta"><span class="name">Red</span><span class="hex">#CF142B</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="entry" data-n="3" id="era-1464">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#7a5a2e"/>
+              <circle cx="150" cy="100" r="55" fill="#c9a13c"/>
+              <path fill="#5c2a24" d="M150,60 l40,80 -80,0 Z"/>
+            </svg>
+            <div class="flag-caption">reconstructed motif &mdash; sun and river forms recalling Songhai river-trade wealth; no flag documented</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 1464 &ndash; 1591</div>
+            <h3 class="card-title">Songhai Empire</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A sovereign Sahelian empire under its own ruling dynasty, controlling the trans-Saharan gold and salt trade at its height."><span class="dot" style="background:#6b5c4a"></span>Empire, independent</span><span class="tag" tabindex="0" data-tip="Ruler who expanded the Songhai state from its base at Gao beginning in 1464, laying the military foundation for the empire's later dominance of the western Sahel."><span class="dot" style="background:#4a3b78"></span>Sonni Ali</span><span class="tag" tabindex="0" data-tip="Sonni Ali blended Islam with continued traditional Songhai practices; his successor Askia Muhammad more fully centralized Sunni Islam as the empire's official religion from 1493, making Timbuktu a major center of Islamic scholarship."><span class="dot" style="background:#8e3b62"></span>Sunni Islam (blended with traditional practice under Sonni Ali)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="A Moroccan army armed with firearms crosses the Sahara and shatters Songhai power at the 1591 Battle of Tondibi, ending centralized Songhai rule and briefly extending Moroccan control over Timbuktu and the Niger Bend."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#c1272d"/><path d="M10,4.5 l0.9,2.1 2.3,0 -1.9,1.4 0.7,2.1 -2,-1.3 -2,1.3 0.7,-2.1 -1.9,-1.4 2.3,0z" fill="none" stroke="#006233" stroke-width="0.5"/></svg>Conquered by: Morocco (1591)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The Keita dynasty's power gradually declined through the 15th century as Songhai rose in its place, c.1235&ndash;c.1610. Colors: gold, with the lion of Sundiata's own name."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f2b705"/><path d="M30,70 Q30,52 50,52 Q70,52 70,70 Q70,84 58,90 L64,104 L54,104 L50,92 L46,104 L36,104 L42,90 Q30,84 30,70 Z" fill="#3a2a1a"/><circle cx="42" cy="66" r="3" fill="#f2b705"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Keita dynasty</span><span class="tag" tabindex="0" data-tip="Founded when Askia Muhammad overthrew the Sonni line, ruling from Gao and turning Timbuktu into a center of Islamic scholarship, 1493&ndash;1591. Colors: blue for the Niger, with the crescent of his Islamic reforms."><svg class="noble-mini" viewBox="0 0 100 120"><defs><clipPath id="mlClip1464"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z"/></clipPath></defs><g clip-path="url(#mlClip1464)"><rect x="0" y="0" width="100" height="120" fill="#1e3a8c"/><path d="M-10,30 Q20,20 50,30 Q80,40 110,30 L110,50 Q80,60 50,50 Q20,40 -10,50 Z" fill="#4a7fc9"/><path d="M-10,70 Q20,60 50,70 Q80,80 110,70 L110,90 Q80,100 50,90 Q20,80 -10,90 Z" fill="#4a7fc9"/></g><path d="M50,16 a10,10 0 1,0 0,20 a8,8 0 1,1 0,-20 Z" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Askia dynasty</span></div>
+            <p><span class="label">Who &amp; why:</span> Sonni Ali expands the Songhai state from its base at Gao from 1464, and under Askia Muhammad (from 1493) it becomes the dominant power of the western Sahel, absorbing Timbuktu and Djenné and controlling the trans-Saharan gold and salt trade at its height. Timbuktu flourishes as a center of Islamic scholarship, home to the Sankoré madrasa and thousands of manuscripts. A Moroccan army armed with firearms crosses the Sahara and shatters Songhai power at the 1591 Battle of Tondibi, ending centralized imperial rule in the region.</p>
+            <p><span class="label">What it represents:</span> no flag survives from the Songhai Empire; medieval Sahelian states used banners, drums, and royal regalia rather than fixed territorial flags in the European sense. Shown here as an honest, clearly labeled reconstruction evoking the empire's Niger River trade wealth, not a documented banner.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Reconstructed motif only, not a documented design.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#7a5a2e"></span><span class="meta"><span class="name">Ochre</span><span class="hex">#7A5A2E</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#c9a13c"></span><span class="meta"><span class="name">Gold</span><span class="hex">#C9A13C</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="entry" data-n="2" id="era-1235">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#c9a13c"/>
+              <circle cx="150" cy="100" r="50" fill="#5c2a24"/>
+              <path fill="#c9a13c" d="M150,60 l12,32 34,3 -26,23 8,33 -28,-18 -28,18 8,-33 -26,-23 34,-3 Z"/>
+            </svg>
+            <div class="flag-caption">reconstructed motif honoring Mansa Musa's legendary gold wealth; no flag documented</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 1235 &ndash; 1464</div>
+            <h3 class="card-title">Mali Empire</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A sovereign Sahelian empire under the Keita dynasty, controlling the West African gold trade at its source."><span class="dot" style="background:#6b5c4a"></span>Empire, independent</span><span class="tag" tabindex="0" data-tip="Founder of the Mali Empire around 1235 after defeating the Sosso kingdom, celebrated in the Epic of Sundiata as the dynasty's founding hero."><span class="dot" style="background:#4a3b78"></span>Sundiata Keita</span><span class="tag" tabindex="0" data-tip="The Keita court professed Islam from the empire's founding, blended with traditional Mande beliefs; Mansa Musa's famous 1324-25 pilgrimage to Mecca is the era's best-documented expression of that Islamic faith."><span class="dot" style="background:#8e3b62"></span>Islam (blended with traditional Mande belief)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="The Mali Empire's control of the trans-Saharan gold trade draws North African Arab and Berber merchant families to settle in Timbuktu, Gao, and Djenn&eacute;, establishing lasting scholarly and trading communities in the empire's great cities."><span class="dot" style="background:#2f7a6b"></span>Immigration: North African Arab &amp; Berber traders</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Founded by Sundiata Keita, whose empire built its wealth on the trans-Saharan gold trade, c.1235&ndash;c.1610. Colors: gold, with the lion of Sundiata's own name."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f2b705"/><path d="M30,70 Q30,52 50,52 Q70,52 70,70 Q70,84 58,90 L64,104 L54,104 L50,92 L46,104 L36,104 L42,90 Q30,84 30,70 Z" fill="#3a2a1a"/><circle cx="42" cy="66" r="3" fill="#f2b705"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Keita dynasty</span></div>
+            <p><span class="label">Who &amp; why:</span> Sundiata Keita founds the Mali Empire around 1235 after defeating the Sosso kingdom, building a state that controls the West African gold trade at its source. Under Mansa Musa (reigned c. 1312&ndash;37), Mali reaches its peak: his 1324&ndash;25 pilgrimage to Mecca, traveling with a vast retinue and reportedly distributing so much gold along the way that it depressed gold prices in Cairo and the Mediterranean for years, remains one of the best-documented displays of wealth in medieval history and put Mali on European maps of the era. Mali's power gradually declines through the 15th century as Songhai rises in its place.</p>
+            <p><span class="label">What it represents:</span> no flag survives from the Mali Empire itself; medieval Sahelian states are not known to have used fixed territorial flags. Shown here as an honest, clearly labeled reconstruction referencing the empire's legendary gold wealth, not a documented banner.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Reconstructed motif only, not a documented design.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#c9a13c"></span><span class="meta"><span class="name">Gold</span><span class="hex">#C9A13C</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#5c2a24"></span><span class="meta"><span class="name">Earth brown</span><span class="hex">#5C2A24</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="entry" data-n="1" id="era-300">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="120" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; pre-heraldic era, no flag survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 300 &ndash; 1235</div>
+            <h3 class="card-title">Ghana Empire (Wagadou)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A sovereign Soninke-ruled Sahelian empire, the trans-Saharan gold trade's first great documented West African power, predating and later absorbed into the Mali Empire."><span class="dot" style="background:#6b5c4a"></span>Empire, independent</span><span class="tag" tabindex="0" data-tip="No individual founder is confidently documented; Ghana's rulers held the hereditary title &quot;Ghana&quot; (war chief) within the Cissé/Sisse dynastic line, first described in detail by Arab geographers only from the 8th century onward."><span class="dot" style="background:#4a3b78"></span>No single founder documented (Cissé/Sisse dynasty)</span><span class="tag" tabindex="0" data-tip="Ghana's kings retained traditional Soninke ancestral religion at court even as Muslim traders and scholars settled in a separate quarter of the capital, Koumbi Saleh, from around the 8th century; no single state religion held across the whole empire."><span class="dot" style="background:#8e3b62"></span>Traditional Soninke belief (Islam present among traders from 8th c.)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Berber and Arab merchant families from the Sahara and Maghreb settle in a separate quarter of Ghana's capital, Koumbi Saleh, from around the 8th century, drawn by the empire's control of the gold-salt trade and described in detail by the Andalusian geographer al-Bakri in 1068."><span class="dot" style="background:#2f7a6b"></span>Immigration: Berber &amp; Arab Saharan traders</span><span class="tag" tabindex="0" data-tip="Almoravid Berber forces from the Sahara campaign against Ghana in the 1050s&ndash;70s, and though the once-assumed 1076 &quot;sack&quot; of the capital is now disputed by historians, the pressure contributes to the empire's gradual political fragmentation over the following century and a half."><span class="dot" style="background:#6b2c2c"></span>Weakened by: Almoravid pressure (11th c.)</span></div>
+            <p><span class="label">Who &amp; why:</span> centered on the Soninke people of the western Sahel, the Ghana Empire (called Wagadou by its own people; "Ghana" was originally the ruler's title, later mistakenly attached by Europeans to the modern nation far to the south) is the first sub-Saharan West African state described in detail by outside writers, above all the Andalusian geographer al-Bakri in 1068, who records a capital at Koumbi Saleh split between a royal town and a separate Muslim merchants' quarter. Built on control of the trans-Saharan gold-salt trade rather than gold deposits it held directly, Ghana's political power fragments gradually from the 11th century under Almoravid pressure and rival Soninke and Malinké polities; Sundiata Keita's Mali Empire absorbs its remaining territory and trade networks after 1235.</p>
+            <p><span class="label">What it represents:</span> no flag or banner survives from Ghana; medieval Sahelian states are not known to have used fixed territorial flags, and later "reconstructions" circulating online are speculative, not attested history. Shown here honestly blank rather than invented.</p>
+            <p><span class="label">World context:</span> Ghana's documented peak in the 9th&ndash;11th centuries runs alongside the height of the Abbasid Caliphate's Islamic Golden Age in Baghdad, Charlemagne's Carolingian Empire and its aftermath in Europe, the Tang-to-Song transition in China, and the construction of the earliest great temples at Angkor in Cambodia &mdash; a genuinely global medieval world that traded gold, salt, and ideas across the Sahara as readily as across the Silk Road.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#6b5c4a"></span><b>Empire, independent</b> &mdash; sovereign under its own rulers</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#204b5c"></span><b>Colony</b> &mdash; under French colonial administration</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#c9a13c"></span><b>Federation</b> &mdash; joined in a short-lived union with another territory</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Republic, independent</b> &mdash; sovereign modern statehood</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the named ruler most associated with the era's start</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official/established faith, not the population's</div>
+    </div>
+  </div>
+
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for Mali lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/ml/">Search Record Atlas for Mali &rarr;</a>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This page is one lineage in a larger set. See the region-wide hub and the other countries here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="west-africa-hub.html"><b>West Africa hub</b><span>Sixteen countries, from empire to independence</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are close historical approximations for painting reference; pre-19th-century swatches are informed reconstructions, not official specifications.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var IC = {
+    ghana:"#6b5c4a", maliempire:"#c9a13c", songhai:"#7a5a2e", frenchsudan:"#00247d", federation:"#14b53a", modern:"#14b53a"
+  };
+  var INAMES = {
+    ghana:"Ghana Empire (Wagadou)",
+    maliempire:"Mali Empire", songhai:"Songhai Empire", frenchsudan:"French Sudan (colonial territory)",
+    federation:"Mali Federation", modern:"Republic of Mali (modern)"
+  };
+  var IFLAGS = {
+    ghana: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="120" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>',
+    maliempire: '<rect width="300" height="200" fill="#c9a13c"/><circle cx="150" cy="100" r="50" fill="#5c2a24"/><path fill="#c9a13c" d="M150,60 l12,32 34,3 -26,23 8,33 -28,-18 -28,18 8,-33 -26,-23 34,-3 Z"/>',
+    songhai: '<rect width="300" height="200" fill="#7a5a2e"/><circle cx="150" cy="100" r="55" fill="#c9a13c"/><path fill="#5c2a24" d="M150,60 l40,80 -80,0 Z"/>',
+    frenchsudan: '<rect width="300" height="200" fill="#00247d"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#f4efe1" stroke-width="34"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#cf142b" stroke-width="14"/><rect x="125" width="50" height="200" fill="#f4efe1"/><rect y="75" width="300" height="50" fill="#f4efe1"/><rect x="137" width="26" height="200" fill="#cf142b"/><rect y="87" width="300" height="26" fill="#cf142b"/>',
+    federation: '<rect width="100" height="200" fill="#14b53a"/><rect x="100" width="100" height="200" fill="#fcd116"/><rect x="200" width="100" height="200" fill="#ce1126"/><g fill="#141413"><circle cx="150" cy="80" r="7"/><path d="M150,87 l0,65 M130,110 l40,0 M135,152 l-12,20 M165,152 l12,20 M150,152 l0,20" stroke="#141413" stroke-width="4" fill="none"/></g>',
+    modern: '<rect width="100" height="200" fill="#14b53a"/><rect x="100" width="100" height="200" fill="#fcd116"/><rect x="200" width="100" height="200" fill="#ce1126"/>'
+  };
+  function iFlagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (IFLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  var iLegendEl = document.getElementById("iLegend");
+  iLegendEl.innerHTML = Object.keys(IC).map(function (k) {
+    return '<span><span class="sw" style="background:' + IC[k] + '"></span>' + INAMES[k] + "</span>";
+  }).join("");
+
+  var ISNAP = [
+    { year:"c. 300–1235", name:"Ghana Empire (Wagadou)", t:{ ml:IC.ghana }, flagKeys:{ ml:"ghana" },
+      story:"Centered on the Soninke people of the western Sahel, the Ghana Empire (called Wagadou by its own people) is the first sub-Saharan West African state described in detail by outside writers, above all the Andalusian geographer al-Bakri in 1068, who records a capital at Koumbi Saleh split between a royal town and a separate Muslim merchants' quarter. Built on control of the trans-Saharan gold-salt trade, Ghana's power fragments gradually from the 11th century under Almoravid pressure and rival Soninke and Malink&eacute; polities; Sundiata Keita's Mali Empire absorbs its remaining territory after 1235. No flag or banner survives from Ghana; medieval Sahelian states are not known to have used fixed territorial flags." },
+    { year:"c. 1235", name:"Mali Empire", t:{ ml:IC.maliempire }, flagKeys:{ ml:"maliempire" },
+      story:"Sundiata Keita founds the Mali Empire around 1235 after defeating the Sosso kingdom, building a state that controls the West African gold trade at its source. Under Mansa Musa (c. 1312&ndash;37), Mali reaches its peak &mdash; his 1324&ndash;25 pilgrimage to Mecca remains one of the best-documented displays of wealth in medieval history. No flag survives; shown here as an honest reconstruction of the empire's legendary gold wealth." },
+    { year:"c. 1464", name:"Songhai Empire", t:{ ml:IC.songhai }, flagKeys:{ ml:"songhai" },
+      story:"Sonni Ali expands the Songhai state from Gao starting in 1464, and under Askia Muhammad (from 1493) it becomes the dominant power of the western Sahel, absorbing Timbuktu and Djenné. A Moroccan army shatters Songhai power at the 1591 Battle of Tondibi. No flag survives from the empire; shown here as a reconstruction evoking its Niger River trade wealth." },
+    { year:"1892", name:"French Sudan (colonial territory)", t:{ ml:IC.frenchsudan }, flagKeys:{ ml:"frenchsudan" },
+      story:"French military conquest, completed through the 1880s&ndash;90s against Tukulor and Wassoulou resistance, consolidates the territory as French Sudan from 1892, part of French West Africa from 1904. The French Tricolore flies as the sovereign flag; no distinct territorial flag existed. Growing autonomy through the 1940s&ndash;50s leads toward the Mali Federation in 1959." },
+    { year:"1959", name:"Mali Federation", t:{ ml:IC.federation }, flagKeys:{ ml:"federation" },
+      story:"French Sudan and Senegal join as the Mali Federation on 4 April 1959, hoping to unite more of former French West Africa around them; only these two territories actually join. Independent from 20 June 1960, internal tension brings rapid collapse: Senegal secedes that August, and the Sudanese Republic renames itself Mali the following month." },
+    { year:"1961–present", name:"Republic of Mali (modern)", t:{ ml:IC.modern }, flagKeys:{ ml:"modern" },
+      story:"The former French Sudan declares itself the Republic of Mali on 22 September 1960 under President Modibo Keïta, taking its name from the medieval empire as a deliberate statement of pre-colonial heritage. The black kanaga figure is removed from the gold band in 1961 at Senegal's request, since the two countries' flags had become confusingly similar." }
+  ];
+
+  var IREGIONS = ["ml"];
+  var IREGION_NAMES = { ml:"Mali" };
+
+  function iTextColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+
+  var iYearTag = document.getElementById("iYearTag");
+  var iEraName = document.getElementById("iEraName");
+  var iEraOwners = document.getElementById("iEraOwners");
+  var iEraStory = document.getElementById("iEraStory");
+  var iFlagsRow = document.getElementById("iFlagsRow");
+  var iSlider = document.getElementById("iSlider");
+
+  function iRender(idx) {
+    var era = ISNAP[idx];
+    iYearTag.textContent = era.year;
+    iEraName.innerHTML = era.name;
+    iEraStory.innerHTML = era.story;
+
+    IREGIONS.forEach(function (id) {
+      document.getElementById("ireg-" + id).setAttribute("fill", era.t[id]);
+      var tcol = iTextColorFor(era.t[id]);
+      var tcolHalo = tcol === "#201a12" ? "#f7f1e3" : "#201a12";
+      var lbl = document.getElementById("ilbl-" + id);
+      if (lbl) { lbl.setAttribute("fill", tcol); lbl.setAttribute("stroke", tcolHalo); }
+    });
+
+    iEraOwners.innerHTML = "<b>" + era.name + "</b>: whole country";
+
+    iFlagsRow.innerHTML = IREGIONS.map(function (id) {
+      return '<div class="iflag-chip">' + iFlagSvg(era.flagKeys[id]) + '<div class="ic-label">' + IREGION_NAMES[id] + '</div></div>';
+    }).join("");
+  }
+
+  iSlider.addEventListener("input", function () { iRender(parseInt(iSlider.value, 10)); });
+  iRender(0);
+
+  var iPlaying = false, iPlayTimer = null;
+  var iPlayBtn = document.getElementById("iPlayBtn");
+  function iStepPlay() {
+    var next = parseInt(iSlider.value, 10) + 1;
+    if (next > ISNAP.length - 1) { iStopPlay(); return; }
+    iSlider.value = next;
+    iRender(next);
+  }
+  function iStartPlay() {
+    iPlaying = true;
+    iPlayBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(iSlider.value, 10) >= ISNAP.length - 1) { iSlider.value = 0; iRender(0); }
+    iPlayTimer = setInterval(iStepPlay, 1700);
+  }
+  function iStopPlay() {
+    iPlaying = false;
+    iPlayBtn.innerHTML = "&#9654;";
+    clearInterval(iPlayTimer);
+  }
+  iPlayBtn.addEventListener("click", function () { iPlaying ? iStopPlay() : iStartPlay(); });
+})();
+
+  document.querySelectorAll(".tag[data-tip]").forEach(function (tag) {
+    tag.addEventListener("click", function (e) {
+      var wasOpen = tag.classList.contains("tip-open");
+      document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+      if (!wasOpen) tag.classList.add("tip-open");
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+  });
+</script>
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var html = '<h4>Genealogical records for this ground</h4>';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>
+
+</body></html>

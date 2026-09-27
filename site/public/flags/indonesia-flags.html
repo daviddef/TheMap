@@ -1,0 +1,862 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+</style></head><body>
+<title>Flags of Indonesia</title>
+<meta name="description" content="A chronological, paint-ready atlas of every flag that flew over Indonesia, from the maritime empire of Srivijaya to the modern republic — with the real dates of Dutch rule, occupation, and the fight for independence.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.08rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; font-size: .94rem; color: var(--muted); }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  .legend { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+
+  /* ---------- Timeline ---------- */
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1px; background: var(--hair); }
+  @media (max-width: 560px) { .timeline::before { left: 9px; } }
+  .entry { position: relative; padding-left: 46px; margin-bottom: 46px; }
+  @media (max-width: 560px) { .entry { padding-left: 30px; } }
+  .entry::before {
+    content: attr(data-n);
+    position: absolute; left: 1px; top: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--paper); outline: 1px solid var(--hair);
+    background: var(--card);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--brick); display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) { .entry::before { left: -5px; width: 18px; height: 18px; font-size: 9px; } }
+
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+  .card-head { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  @media (max-width: 620px) { .card-head { flex-direction: column; } }
+  .flag-box { flex: none; width: 168px; }
+  .flag-box svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-caption { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .card-title { font-size: 1.32rem; font-weight: 600; line-height: 1.18; margin: 0 0 10px; text-wrap: balance; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px; border: 1px solid var(--card-border); color: var(--muted);
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  /* Flip tooltip below tags near the top of the viewport so it isn't clipped */
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  /* Keep tooltips from overflowing the left/right edges on narrow screens */
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint { border-top: 1px solid var(--hair); }
+  details.paint > summary {
+    cursor: pointer; list-style: none; padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--adriatic); display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before { content: "+"; font-family: "Fraunces", serif; font-size: 15px; width: 14px; }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row { display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px; }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--card-border); border-radius: 2px; padding: 5px 9px 5px 5px; background: var(--paper); }
+  .swatch .chip { width: 20px; height: 20px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: none; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 88px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 340px; height: auto; }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .iborder-line { transition: stroke-opacity 0.6s ease, stroke-width 0.6s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .ireg-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 700; text-anchor: middle; transition: fill .4s ease, stroke .4s ease; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="southeast-asia-hub.html">Southeast Asia hub</a></p>
+  <p class="kicker">Family research &middot; Southeast Asia atlas</p>
+  <h1>Flags of Indonesia</h1>
+  <p class="lede">From the archipelago's earliest attested kingdoms at Kutai and Tarumanagara, through the maritime trading empire of Srivijaya, Java's great Majapahit Empire, three and a half centuries of Dutch commercial and colonial rule, brutal Japanese wartime occupation, and a proclaimed 1945 independence that had to be won again over four more years of armed and diplomatic struggle &mdash; nine flags across the world's largest archipelagic nation.</p>
+  <p class="lede">Indonesia's own red-and-white national colors are not a modern invention: they echo the striped red-and-white war banner traditionally associated with the Majapahit Empire, deliberately revived by nationalists in the twentieth century to root the new republic in a pre-colonial past.</p>
+
+  <div class="scope-note">
+    <b>Scope of this page:</b> the lands of present-day Indonesia, c. 350&ndash;present, nine political entities, opening with the earliest attested Hindu kingdoms at Kutai and Tarumanagara. Pre-colonial Indonesia was never a single unbroken state &mdash; Srivijaya and Majapahit were the two dominant maritime powers, but neither held the entire archipelago continuously, and a fragmented sultanate era separates them from Dutch arrival. Part of a larger atlas &mdash; see the linked pages at the bottom.
+  </div>
+
+  <div class="imap-section">
+    <h2>One border, nine rulers</h2>
+    <p class="imap-sub">Indonesia's own real archipelago, traced whole &mdash; the world's largest archipelagic nation shown as a single territory rather than an invented internal split. Press play, or drag the slider, to watch who held all of it, era to era.</p>
+    <div class="rule-box">
+      <b>This page shows Indonesia as one region, not split.</b> Indonesia is a vast archipelago of thousands of islands, but there is no single clean, genuinely internal partition that this page's own timeline supports showing as a split &mdash; Dutch commercial and colonial rule, Japanese occupation, and the revolution all applied to the archipelago as a whole, island by island, rather than dividing it into two lasting halves. What changes here is only who ruled all of it at once.
+    </div>
+    <div class="imap-frame">
+      <div class="imap-controls">
+        <button class="imap-play" id="idnPlayBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="imap-year" id="idnYearTag">c. 350</span>
+        <input type="range" id="idnSlider" min="0" max="8" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="idn-imap-svg" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+        <g class="context-label">
+          <text x="128" y="66">MALAYSIA</text>
+          <text x="283" y="119">PAPUA NEW GUINEA</text>
+          <text x="150" y="197">AUSTRALIA</text>
+        </g>
+        <path id="ireg-id" class="ireg-fill" d="M165.8,191.3 L163.2,191.4 L155.0,187.0 L160.8,185.8 L164.0,187.7 L166.2,189.6 L165.8,191.3 Z M188.9,190.6 L183.6,192.0 L182.9,191.3 L183.4,189.1 L186.1,185.4 L192.3,182.9 L192.9,184.1 L193.0,186.0 L188.9,190.6 Z M148.4,177.9 L150.6,179.6 L154.4,179.1 L156.0,181.7 L144.5,183.8 L141.2,183.8 L143.3,180.2 L146.7,180.1 L148.4,177.9 Z M179.4,177.9 L178.5,181.4 L169.2,183.1 L160.9,182.4 L160.9,180.1 L165.8,178.8 L169.7,180.7 L173.9,180.2 L179.4,177.9 Z M90.8,169.7 L102.7,170.4 L104.0,167.8 L115.5,170.8 L117.8,174.8 L127.1,175.9 L134.7,179.6 L127.7,182.0 L120.8,179.5 L115.2,179.7 L108.8,179.2 L103.0,178.1 L95.8,175.7 L91.2,175.1 L88.6,175.9 L77.3,173.3 L76.2,170.7 L70.5,170.2 L74.8,164.3 L82.3,164.6 L87.3,167.1 L89.9,167.5 L90.8,169.7 Z M252.8,166.2 L249.6,170.5 L249.0,165.8 L251.4,161.5 L252.8,163.3 L252.8,166.2 Z M206.4,149.1 L204.1,151.2 L199.8,150.0 L198.6,147.4 L204.9,147.1 L206.4,149.1 Z M226.4,146.8 L228.7,151.6 L223.4,149.0 L218.2,148.5 L214.7,148.9 L210.4,148.7 L211.9,145.3 L219.6,145.0 L226.4,146.8 Z M249.2,134.8 L251.0,144.8 L257.4,148.5 L262.6,142.0 L269.7,138.2 L275.2,138.2 L285.1,142.6 L291.8,143.8 L292.0,184.3 L286.5,179.2 L280.2,177.9 L278.6,179.7 L270.8,179.9 L273.4,174.8 L277.3,173.1 L275.7,166.4 L272.7,161.1 L260.7,155.9 L255.6,155.4 L246.2,149.6 L244.4,152.6 L242.0,153.2 L240.6,150.9 L240.6,148.2 L235.8,145.1 L242.5,142.9 L247.0,143.0 L246.4,141.4 L237.4,141.4 L234.9,137.7 L229.3,136.5 L226.7,133.4 L235.1,131.9 L238.3,129.9 L248.2,132.5 L249.2,134.8 Z M193.9,118.8 L189.0,125.0 L184.3,126.2 L178.3,124.9 L168.0,125.2 L162.5,126.1 L161.7,130.8 L167.2,136.4 L170.6,133.6 L182.1,131.4 L181.6,134.3 L178.9,133.4 L176.2,137.0 L170.8,139.5 L176.6,147.4 L175.5,149.6 L181.1,156.7 L181.0,160.8 L177.7,162.6 L175.3,160.4 L178.3,155.4 L172.2,157.8 L170.7,156.0 L171.5,153.6 L167.0,150.0 L167.4,143.9 L163.3,145.8 L164.1,162.0 L160.1,162.9 L157.5,161.1 L159.3,155.3 L158.3,149.3 L155.7,149.3 L153.8,145.0 L156.3,141.0 L157.2,136.0 L160.3,126.7 L161.6,124.1 L166.9,119.5 L171.8,121.3 L179.6,122.2 L186.7,121.9 L192.9,117.4 L193.9,118.8 Z M215.3,120.6 L215.0,126.0 L211.8,125.4 L210.9,129.2 L213.4,132.5 L211.7,133.2 L209.2,129.3 L207.3,121.3 L208.6,116.4 L210.7,114.1 L211.1,117.5 L214.8,118.0 L215.3,120.6 Z M148.2,116.3 L155.2,122.0 L147.8,122.7 L145.7,127.0 L146.0,132.6 L140.0,136.9 L139.9,143.1 L137.5,152.6 L136.6,150.3 L129.5,153.1 L127.1,149.3 L122.6,149.0 L119.5,147.0 L112.2,149.2 L109.9,146.2 L105.8,146.6 L100.7,145.9 L99.8,137.5 L96.7,135.8 L93.7,130.5 L92.8,125.0 L93.5,119.3 L97.2,115.1 L98.3,119.3 L102.5,122.8 L106.5,121.5 L110.5,122.0 L114.1,118.9 L117.1,118.3 L122.9,120.1 L128.0,118.7 L131.2,110.1 L133.6,107.9 L135.7,100.9 L142.9,100.9 L148.3,101.9 L144.7,107.5 L149.3,113.4 L148.2,116.3 Z M73.3,164.0 L66.5,164.1 L61.2,158.9 L53.3,153.8 L50.6,150.1 L45.9,145.0 L42.8,140.4 L38.1,131.7 L32.7,126.5 L30.8,121.1 L28.5,116.3 L22.9,112.4 L19.7,107.1 L15.0,103.6 L8.5,96.7 L8.0,93.6 L21.6,95.0 L27.1,101.1 L31.9,105.3 L35.3,107.9 L41.2,114.6 L47.5,114.7 L52.7,118.9 L56.3,124.1 L61.1,127.0 L58.6,132.0 L62.1,134.2 L64.4,134.4 L65.4,138.7 L67.6,142.2 L72.1,142.7 L75.2,146.6 L73.6,154.4 L73.3,164.0 Z"/>
+        <g font-family="IBM Plex Mono, monospace">
+          <text class="ireg-label" id="ilbl-id" x="150" y="140" style="font-size:11px">INDONESIA</text>
+        </g>
+      </svg>
+      <div class="imap-head">
+        <div class="imap-name" id="idnEraName">Kutai &amp; Tarumanagara (Early Hindu Kingdoms)</div>
+        <div class="imap-owners" id="idnEraOwners"></div>
+      </div>
+      <div class="iflags-row" id="idnFlagsRow"></div>
+      <p class="imap-story" id="idnEraStory"></p>
+
+      <p class="map-note">Real traced border (island outlines simplified from public GeoJSON boundary data), no internal partition &mdash; see the rule box above for why.</p>
+      <div class="imap-key" id="idnLegend"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <!-- 1 -->
+    <div class="entry" data-n="9" id="era-1949">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="100" fill="#ce1126"/>
+              <rect y="100" width="300" height="100" fill="#f4efe1"/>
+            </svg>
+            <div class="flag-caption">Sang Saka Merah Putih &mdash; red over white, unchanged since 1945</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1949 &ndash; present</div>
+            <h3 class="card-title">Republic of Indonesia (sovereignty recognized)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A fully sovereign republic, internationally recognized after the Netherlands formally transferred authority in December 1949, and governed since 1998 as a multiparty democracy."><span class="dot" style="background:#a9762f"></span>Republic, independent</span><span class="tag" tabindex="0" data-tip="Co-proclaimer of independence in 1945 and Indonesia&#x27;s first president, serving from the revolution through the transfer of sovereignty in 1949 and into the following decade."><span class="dot" style="background:#4a3b78"></span>Sukarno</span><span class="tag" tabindex="0" data-tip="Indonesia establishes no official state church; its founding Pancasila principles require belief in God generally and officially recognize six faiths (Islam, Protestantism, Catholicism, Hinduism, Buddhism, Confucianism) without establishing any one of them as the state religion."><span class="dot" style="background:#8e3b62"></span>Pancasila (no established church)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Roughly 300,000 Dutch citizens and Indo-Europeans ('Indische Nederlanders') left Indonesia for the Netherlands during the 1950s and early 1960s, unwilling or unable to remain after independence."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#ae1c28"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#21468b"/></svg>Emigration: Dutch &amp; Indo-European repatriation (1950s)</span><span class="tag" tabindex="0" data-tip="Since the 1980s, millions of Indonesians have gone abroad as contract labor migrants ('TKI'), chiefly to Malaysia, Saudi Arabia, and other Gulf states, making Indonesia one of the world's largest sources of migrant domestic and construction workers."><span class="dot" style="background:#a3672f"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#fff"/><g fill="#cc0001"><rect y="0" width="20" height="1"/><rect y="2" width="20" height="1"/><rect y="4" width="20" height="1"/><rect y="6" width="20" height="1"/><rect y="8" width="20" height="1"/><rect y="10" width="20" height="1"/><rect y="12" width="20" height="1"/></g><rect width="10" height="7" fill="#010066"/><circle cx="4.2" cy="3.5" r="1.6" fill="#ffcc00"/><circle cx="4.8" cy="3.5" r="1.3" fill="#010066"/><path d="M6.5,2 l0.7,1.5 -0.7,1.5 -0.7,-1.5z" fill="#ffcc00"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="4" height="14" fill="#ce1126"/><rect x="4" width="16" height="4.67" fill="#00732f"/><rect x="4" y="4.67" width="16" height="4.67" fill="#fff"/><rect x="4" y="9.33" width="16" height="4.67" fill="#000"/></svg></span>Emigration: migrant workers to Malaysia &amp; the Gulf (1980s&ndash;)</span></div>
+            <p><span class="label">Who &amp; why:</span> after four years of guerrilla warfare and international diplomatic pressure following the 1945 proclamation, the Netherlands formally transfers sovereignty at the Hague Round Table Conference on 27 December 1949. Indonesia goes on to absorb Dutch New Guinea in 1963 and East Timor in 1975&ndash;76 (the latter relinquished in 1999&ndash;2002), and transitions from Suharto's three-decade authoritarian "New Order" to multiparty democracy after his 1998 resignation.</p>
+            <p><span class="label">What it represents:</span> the same red-white bicolor flown since the 1945 proclamation, now internationally recognized rather than merely declared.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3, two equal horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Plain red over white, no charge.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#ce1126"></span><span class="meta"><span class="name">Red</span><span class="hex">#CE1126</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="entry" data-n="8" id="era-1945">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="100" fill="#ce1126"/>
+              <rect y="100" width="300" height="100" fill="#f4efe1"/>
+            </svg>
+            <div class="flag-caption">the same red-white bicolor, flown before it was recognized</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1945 &ndash; 1949</div>
+            <h3 class="card-title">Proclaimed Republic of Indonesia (National Revolution)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Independence proclaimed unilaterally on 17 August 1945 and defended through guerrilla warfare, but not accepted by the Netherlands until the Hague Round Table Conference of December 1949."><span class="dot" style="background:#7c2e1f"></span>Republic, contested</span><span class="tag" tabindex="0" data-tip="Nationalist leader who, with Mohammad Hatta, proclaimed Indonesian independence on 17 August 1945 and led the revolutionary republic through the ensuing four-year struggle against Dutch reoccupation."><span class="dot" style="background:#4a3b78"></span>Sukarno</span><span class="tag" tabindex="0" data-tip="The proclaimed republic&#x27;s 1945 constitution adopted the Pancasila principle of belief in one God without establishing any single official faith, in a population that was then, as now, overwhelmingly Muslim."><span class="dot" style="background:#8e3b62"></span>Pancasila (no established church)</span></div>
+            <p><span class="label">Who &amp; why:</span> Sukarno and Mohammad Hatta proclaim independence on 17 August 1945, two days after Japan's surrender, before the Dutch can reoccupy the archipelago. The Netherlands refuses to accept the proclamation and launches two large "police actions" (1947, 1948&ndash;49) to reassert colonial control; the republic survives through guerrilla resistance and mounting international pressure, particularly from the United States and the United Nations, until the Dutch relent.</p>
+            <p><span class="label">What it represents:</span> the red-white flag, raised at the moment of proclamation in Jakarta, deliberately revives the red-white war banner attributed to the Majapahit Empire &mdash; a symbolic claim to pre-colonial legitimacy.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3, two equal horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Plain red over white, no charge.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#ce1126"></span><span class="meta"><span class="name">Red</span><span class="hex">#CE1126</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="entry" data-n="7" id="era-1942">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#f4efe1"/>
+              <circle cx="150" cy="100" r="55" fill="#a4302a"/>
+            </svg>
+            <div class="flag-caption">Japanese military administration ensign</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1942 &ndash; 1945</div>
+            <h3 class="card-title">Japanese military occupation</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Direct wartime rule by the Imperial Japanese military, which overran the Dutch East Indies in early 1942 and administered it as occupied territory until Japan&#x27;s August 1945 surrender."><span class="dot" style="background:#5c2a24"></span>Occupation (Japan)</span><span class="tag" tabindex="0" data-tip="Commander of the Japanese Sixteenth Army, which conquered Java in 1942 and headed the military administration that ruled the occupied Indies from Batavia."><span class="dot" style="background:#4a3b78"></span>Hitoshi Imamura</span><span class="tag" tabindex="0" data-tip="Japan did not extend its own State Shinto to the overwhelmingly Muslim population it occupied; the military administration instead tolerated and courted local Islamic and nationalist sentiment as a wartime expedient."><span class="dot" style="background:#8e3b62"></span>No state religion imposed</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Imperial Japan conquers the Dutch East Indies in a matter of weeks in early 1942, ending over three centuries of Dutch colonial presence and ruling the archipelago directly until its August 1945 surrender."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#fff"/><circle cx="10" cy="7" r="3" fill="#bc002d"/><g stroke="#bc002d" stroke-width="0.6"><line x1="10" y1="7" x2="10" y2="0"/><line x1="10" y1="7" x2="10" y2="14"/><line x1="10" y1="7" x2="3" y2="7"/><line x1="10" y1="7" x2="17" y2="7"/><line x1="10" y1="7" x2="5" y2="2"/><line x1="10" y1="7" x2="15" y2="2"/><line x1="10" y1="7" x2="5" y2="12"/><line x1="10" y1="7" x2="15" y2="12"/></g></svg>Conquered by: Imperial Japan (1942&ndash;45)</span><span class="tag" tabindex="0" data-tip="The Japanese occupation forcibly conscripts an estimated four to ten million Indonesian romusha laborers, many transported to other occupied territories such as the Burma-Thailand railway, where large numbers died from starvation, disease, and mistreatment."><span class="dot" style="background:#a3672f"></span>Emigration: romusha forced laborers sent abroad</span></div>
+            <p><span class="label">Who &amp; why:</span> Japanese forces overrun the Dutch East Indies in early 1942, ending Dutch rule within months and interning Dutch civilians and soldiers. Japan initially courts Indonesian nationalists, permitting limited use of the red-white flag and the Indonesian language late in the occupation as the war turns, and it is Japan's own August 1945 surrender that creates the opening Sukarno and Hatta use to proclaim independence.</p>
+            <p><span class="label">What it represents:</span> the Japanese naval and military ensign, flown over the occupied archipelago; no genuine Indonesian state flag flew during this period.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">White field, centered red disc.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="entry" data-n="6" id="era-1800">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#ae1c28"/>
+              <rect y="66.7" width="300" height="66.6" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#21468b"/>
+            </svg>
+            <div class="flag-caption">Dutch tricolor, flown as the colonial state ensign</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1800 &ndash; 1942</div>
+            <h3 class="card-title">Dutch East Indies</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Direct rule by the Dutch state after the bankrupt VOC was nationalized in 1800, expanding over the nineteenth century into control of nearly the whole archipelago."><span class="dot" style="background:#21468b"></span>Colonial (Netherlands)</span><span class="tag" tabindex="0" data-tip="Governor-General who took charge of the Dutch East Indies just after the Company&#x27;s 1800 nationalization, heading the new colonial state administration in its earliest years."><span class="dot" style="background:#4a3b78"></span>Johannes Siberg</span><span class="tag" tabindex="0" data-tip="The Dutch colonial administration itself favored Dutch Reformed Protestantism among its officials and missionaries, but did not impose an official state religion on the overwhelmingly Muslim population it governed."><span class="dot" style="background:#8e3b62"></span>Dutch Reformed (colonial administration)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Dutch colonial policy actively encourages Chinese immigration into the East Indies through the 19th and early 20th centuries to fill roles as traders, laborers, and revenue farmers, substantially growing the archipelago's ethnic Chinese population."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#f7d117"/><circle cx="4" cy="4" r="1.8" fill="#dc143c"/><path d="M6,10 q3,-4 6,-2 q3,2 6,-3" stroke="#1e3a8a" stroke-width="1.5" fill="none"/></svg>Immigration: Chinese settlers (19th&ndash;early 20th c.)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Islamic sultans of Aceh in northern Sumatra, resisting Dutch colonial conquest until 1903. Emblem: the Alam Peudeueng banner combining crescent, star, sword, and crown."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><path d="M36,42 Q30,54 38,64 Q34,54 40,46 Q40,58 50,62 Q44,52 48,42 Q54,52 48,62 Q58,58 58,46 Q64,54 60,64 Q68,54 62,42 Q50,34 36,42 Z" fill="#f4efe1"/><circle cx="70" cy="38" r="6" fill="#f4efe1"/><path d="M50,80 L44,100 L56,100 Z" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Aceh Sultanate</span></div>
+            <p><span class="label">Who &amp; why:</span> the bankrupt Dutch East India Company (VOC) is dissolved on 31 December 1799 and its territories nationalized as a formal Dutch colony on 1 January 1800. The colonial state expands over the nineteenth century into direct control of nearly the entire archipelago, run under the exploitative "Cultivation System" from the 1830s and later a nominally more liberal "Ethical Policy," while a broad nationalist movement builds through the early twentieth century.</p>
+            <p><span class="label">What it represents:</span> the plain Dutch tricolor, the colonial state's own flag, with no distinct East Indies national symbol.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3, three equal horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red, white, blue horizontal tricolor.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#ae1c28"></span><span class="meta"><span class="name">Red</span><span class="hex">#AE1C28</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#21468b"></span><span class="meta"><span class="name">Blue</span><span class="hex">#21468B</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="entry" data-n="5" id="era-1602">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#ae1c28"/>
+              <rect y="66.7" width="300" height="66.6" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#21468b"/>
+              <text x="150" y="112" text-anchor="middle" font-family="serif" font-size="30" font-weight="700" fill="#21468b">VOC</text>
+            </svg>
+            <div class="flag-caption">Dutch tricolor with the VOC company monogram</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1602 &ndash; 1800</div>
+            <h3 class="card-title">Dutch East India Company (VOC) rule</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Commercial rule by the Dutch East India Company, chartered in 1602 with quasi-sovereign powers to wage war, sign treaties, and administer territory in pursuit of the spice trade."><span class="dot" style="background:#a9762f"></span>Colonial (Dutch company)</span><span class="tag" tabindex="0" data-tip="First Governor-General of the Dutch East India Company, appointed in 1610 to consolidate the Company&#x27;s scattered trading posts under unified command."><span class="dot" style="background:#4a3b78"></span>Pieter Both</span><span class="tag" tabindex="0" data-tip="The VOC promoted Dutch Reformed Protestantism as the faith of its own personnel and colonial church, without imposing it as an official religion on the archipelago&#x27;s largely Muslim and Hindu-Buddhist population."><span class="dot" style="background:#8e3b62"></span>Dutch Reformed (VOC church)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="The VOC forcibly transports enslaved people into its Batavia headquarters from across and beyond the archipelago — including Bali, Nias, Sulawesi, and the Indian subcontinent's Coromandel and Bengal coasts — making enslaved people a majority of the city's population through much of the 17th and 18th centuries."><span class="dot" style="background:#2f7a6b"></span>Immigration: enslaved people brought to Batavia (forced)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Islamic sultans of Aceh in northern Sumatra, resisting Dutch commercial encroachment, 1496–1903. Emblem: the Alam Peudeueng banner combining crescent, star, sword, and crown."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><path d="M36,42 Q30,54 38,64 Q34,54 40,46 Q40,58 50,62 Q44,52 48,42 Q54,52 48,62 Q58,58 58,46 Q64,54 60,64 Q68,54 62,42 Q50,34 36,42 Z" fill="#f4efe1"/><circle cx="70" cy="38" r="6" fill="#f4efe1"/><path d="M50,80 L44,100 L56,100 Z" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Aceh Sultanate</span></div>
+            <p><span class="label">Who &amp; why:</span> the Dutch East India Company, chartered in 1602 with quasi-sovereign powers to wage war and administer territory, gradually displaces Portuguese traders and local sultanates from the spice trade, establishing Batavia (modern Jakarta) in 1619 as its administrative and military headquarters. Company rule is commercial rather than fully territorial at first, tightening its grip archipelago by archipelago over two centuries before collapsing under debt and mismanagement in 1799.</p>
+            <p><span class="label">What it represents:</span> the Dutch tricolor bearing the Company's own interlocking VOC monogram, flown over trading posts and forts rather than a unified colony.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3, three equal horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red, white, blue tricolor with the VOC monogram centered.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#ae1c28"></span><span class="meta"><span class="name">Red</span><span class="hex">#AE1C28</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#21468b"></span><span class="meta"><span class="name">Blue</span><span class="hex">#21468B</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="entry" data-n="4" id="era-1527">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO SINGLE</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">FLAG</text>
+            </svg>
+            <div class="flag-caption">placeholder &mdash; many competing sultanates, no shared banner</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1527 &ndash; 1602</div>
+            <h3 class="card-title">Fragmented sultanates (post-Majapahit)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="After Majapahit&#x27;s collapse, power fragmented among rival coastal sultanates &mdash; Demak and later Mataram on Java, Aceh in Sumatra, Banten in the west &mdash; none of which reunified the archipelago."><span class="dot" style="background:#6b5c4a"></span>Fragmented sultanates</span><span class="tag" tabindex="0" data-tip="No single ruler documented &mdash; the era was divided among multiple independent sultans (Demak, Aceh, Banten, and others) rather than one figure who dominated its start."><span class="dot" style="background:#4a3b78"></span>No single ruler documented</span><span class="tag" tabindex="0" data-tip="The rival coastal states of this era were Islamic sultanates, reflecting Islam&#x27;s spread through the archipelago via trade networks as Majapahit&#x27;s Hindu-Buddhist authority receded."><span class="dot" style="background:#8e3b62"></span>Sunni Islam (sultanate states)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Muslim traders from Arabia, Gujarat in India, and southern China settle in growing numbers at the archipelago's coastal trading ports during this period, intermarrying with local communities and driving the spread of Islam that produced these rival sultanates."><span class="dot" style="background:#2f7a6b"></span>Immigration: Muslim traders from Arabia, India &amp; China</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Hindu-Buddhist Rajasa dynasty, ruling Majapahit until its collapse, 1293–1527. Emblem: the Surya Majapahit, a radiating sun disc."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><circle cx="50" cy="58" r="14" fill="#f4c940"/><g stroke="#f4c940" stroke-width="4"><line x1="50" y1="26" x2="50" y2="38"/><line x1="50" y1="78" x2="50" y2="90"/><line x1="18" y1="58" x2="30" y2="58"/><line x1="70" y1="58" x2="82" y2="58"/><line x1="27" y1="35" x2="35" y2="43"/><line x1="65" y1="73" x2="73" y2="81"/><line x1="73" y1="35" x2="65" y2="43"/><line x1="35" y1="73" x2="27" y2="81"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Rajasa Dynasty (Majapahit)</span><span class="tag" tabindex="0" data-tip="Islamic sultans of Aceh in northern Sumatra, 1496–1903. Emblem: the Alam Peudeueng banner combining crescent, star, sword, and crown."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><path d="M36,42 Q30,54 38,64 Q34,54 40,46 Q40,58 50,62 Q44,52 48,42 Q54,52 48,62 Q58,58 58,46 Q64,54 60,64 Q68,54 62,42 Q50,34 36,42 Z" fill="#f4efe1"/><circle cx="70" cy="38" r="6" fill="#f4efe1"/><path d="M50,80 L44,100 L56,100 Z" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Aceh Sultanate</span></div>
+            <p><span class="label">Who &amp; why:</span> Majapahit's authority collapses in the early sixteenth century as Islam spreads through the archipelago via trade networks, and power fragments among rival coastal sultanates &mdash; Demak, later Mataram, on Java; Aceh in northern Sumatra; Banten in the west &mdash; none of which reunifies the whole archipelago before Dutch traders arrive.</p>
+            <p><span class="label">What it represents:</span> no single flag can honestly represent this genuinely fragmented span; each sultanate kept its own banners and none achieved archipelago-wide reach, so this entry is shown deliberately blank rather than inventing a false unifying symbol.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no single attested flag for this fragmented era.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 7 -->
+    <div class="entry" data-n="3" id="era-1293">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="22.2" fill="#ce1126"/>
+              <rect y="22.2" width="300" height="22.2" fill="#f4efe1"/>
+              <rect y="44.4" width="300" height="22.2" fill="#ce1126"/>
+              <rect y="66.6" width="300" height="22.2" fill="#f4efe1"/>
+              <rect y="88.8" width="300" height="22.2" fill="#ce1126"/>
+              <rect y="111" width="300" height="22.2" fill="#f4efe1"/>
+              <rect y="133.2" width="300" height="22.2" fill="#ce1126"/>
+              <rect y="155.4" width="300" height="22.2" fill="#f4efe1"/>
+              <rect y="177.6" width="300" height="22.4" fill="#ce1126"/>
+            </svg>
+            <div class="flag-caption">Gula Kelapa &mdash; the nine-striped red-white war banner attributed to Majapahit</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 1293 &ndash; 1527</div>
+            <h3 class="card-title">Majapahit Empire</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="The most powerful pre-colonial state in Indonesian history, claiming influence over much of the archipelago and parts of the wider Malay world at its height in the mid-1300s."><span class="dot" style="background:#a9762f"></span>Empire</span><span class="tag" tabindex="0" data-tip="Founder of the Majapahit Empire in 1293, building it on the ruins of a failed Mongol invasion and establishing the dynasty that would dominate the archipelago for over two centuries."><span class="dot" style="background:#4a3b78"></span>Raden Wijaya</span><span class="tag" tabindex="0" data-tip="Majapahit&#x27;s court patronized a syncretic Hindu-Buddhist tradition (Shiva-Buddha), officially favored by the empire even as diverse local and folk religious practices continued alongside it."><span class="dot" style="background:#8e3b62"></span>Hindu-Buddhist (Shiva-Buddha)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Hindu-Buddhist Rajasa dynasty founded by Raden Wijaya, ruling the Majapahit Empire, 1293–1527. Emblem: the Surya Majapahit, a radiating sun disc."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><circle cx="50" cy="58" r="14" fill="#f4c940"/><g stroke="#f4c940" stroke-width="4"><line x1="50" y1="26" x2="50" y2="38"/><line x1="50" y1="78" x2="50" y2="90"/><line x1="18" y1="58" x2="30" y2="58"/><line x1="70" y1="58" x2="82" y2="58"/><line x1="27" y1="35" x2="35" y2="43"/><line x1="65" y1="73" x2="73" y2="81"/><line x1="73" y1="35" x2="65" y2="43"/><line x1="35" y1="73" x2="27" y2="81"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Rajasa Dynasty (Majapahit)</span><span class="tag" tabindex="0" data-tip="Islamic sultans of Aceh in northern Sumatra, 1496–1903. Emblem: the Alam Peudeueng banner combining crescent, star, sword, and crown."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><path d="M36,42 Q30,54 38,64 Q34,54 40,46 Q40,58 50,62 Q44,52 48,42 Q54,52 48,62 Q58,58 58,46 Q64,54 60,64 Q68,54 62,42 Q50,34 36,42 Z" fill="#f4efe1"/><circle cx="70" cy="38" r="6" fill="#f4efe1"/><path d="M50,80 L44,100 L56,100 Z" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Aceh Sultanate</span></div>
+            <p><span class="label">Who &amp; why:</span> founded in 1293 by Raden Wijaya on the ruins of a failed Mongol invasion, Majapahit becomes the most powerful pre-colonial state in Indonesian history, claiming influence over much of the archipelago and parts of the wider Malay world at its height under Hayam Wuruk and his minister Gajah Mada in the mid-1300s. Its later fifteenth- and early sixteenth-century decline, hastened by succession conflicts and the rise of Islamic coastal trading states, opens the door to the fragmented sultanate era that follows.</p>
+            <p><span class="label">What it represents:</span> the Gula Kelapa ("sugar and coconut") banner, nine alternating red and white stripes, is the war flag traditionally attributed to Majapahit in Javanese chronicles &mdash; and the direct historical inspiration for the plain red-white flag Indonesia adopted in 1945.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio recorded; shown at 3:2.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Nine alternating horizontal red and white stripes.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#ce1126"></span><span class="meta"><span class="name">Red</span><span class="hex">#CE1126</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 8 -->
+    <div class="entry" data-n="2" id="era-650">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder &mdash; no attested Srivijayan flag survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 650 &ndash; 1293</div>
+            <h3 class="card-title">Srivijaya</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A Buddhist maritime and trading empire centered on Sumatra, controlling the Strait of Malacca and much of the archipelago&#x27;s sea trade for over six centuries."><span class="dot" style="background:#a9762f"></span>Empire</span><span class="tag" tabindex="0" data-tip="Founding ruler named in the empire&#x27;s Kedukan Bukit inscription (682 CE), traditionally credited with establishing Srivijaya&#x27;s power at Palembang."><span class="dot" style="background:#4a3b78"></span>Dapunta Hyang Sri Jayanasa</span><span class="tag" tabindex="0" data-tip="Srivijaya was a major center of Mahayana Buddhist learning, patronized by its rulers and visited by Chinese pilgrim-scholars such as Yijing, who documented its large monastic community."><span class="dot" style="background:#8e3b62"></span>Mahayana Buddhism</span></div>
+            <p><span class="label">Who &amp; why:</span> centered on Sumatra near modern Palembang, Srivijaya rises in the mid-600s as a Buddhist maritime and trading empire, controlling the Strait of Malacca and much of the surrounding archipelago's sea trade for over six centuries. Its influence fades from the eleventh century under pressure from South Indian Chola raids and rising regional rivals, and its remaining territory is absorbed into the ascendant Majapahit sphere by the late 1200s.</p>
+            <p><span class="label">What it represents:</span> no securely documented flag or banner survives from Srivijaya; its power was expressed through temple inscriptions, tribute relationships, and naval control of trade routes rather than a fixed territorial symbol. Shown here honestly blank rather than invented.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 9 -->
+    <div class="entry" data-n="1" id="era-350">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder &mdash; no attested banner for either early Hindu kingdom</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 350 &ndash; 650 CE</div>
+            <h3 class="card-title">Kutai &amp; Tarumanagara (Early Hindu Kingdoms)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="The archipelago's two earliest epigraphically attested kingdoms — Kutai in East Kalimantan (Borneo) and Tarumanagara in West Java — ruled separately and were never politically unified."><span class="dot" style="background:#a9762f"></span>Early kingdoms (unconnected)</span><span class="tag" tabindex="0" data-tip="King of Kutai named in the Yupa inscriptions (Sanskrit, sacrificial stone posts dated to roughly 400 CE) commemorating a lavish gift of cattle to Brahmins — Southeast Asia's oldest known inscriptions naming a specific ruler. Tarumanagara's own King Purnawarman is separately named on West Java's Ciaruteun and other inscriptions of the mid-5th century."><span class="dot" style="background:#4a3b78"></span>Mulawarman (Kutai)</span><span class="tag" tabindex="0" data-tip="Both kingdoms' surviving inscriptions record Hindu (Shaivite and Vishnu-associated) ritual and royal patronage of Brahmins, the earliest securely attested religious practice anywhere in the archipelago."><span class="dot" style="background:#8e3b62"></span>Hinduism (Shaivism)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Indian traders, Brahmin priests, and Hindu-Buddhist religious and courtly culture spread into the archipelago via maritime trade routes from around the 1st&ndash;4th centuries CE, a slow cultural diffusion process (sometimes called 'Indianization') rather than a conquest, giving rise to the region's earliest inscribed kingdoms."><span class="dot" style="background:#a3672f"></span>Cultural diffusion: Indian Hindu-Buddhist influence via maritime trade</span></div>
+            <p><span class="label">Who &amp; why:</span> the archipelago's earliest kingdoms to leave their own written record are Kutai, on the Mahakam River in East Kalimantan, and Tarumanagara, in West Java, both taking shape as Indian Hindu-Buddhist religious and political culture spreads through maritime trade networks rather than conquest. Kutai's ruler Mulawarman is named on Yupa inscriptions dated to roughly 400 CE, commemorating gifts to Brahmin priests; Tarumanagara's King Purnawarman is separately attested a few decades later on inscriptions including the Ciaruteun stone near Bogor. Neither kingdom is politically connected to the other or to Srivijaya, which rises on Sumatra by the mid-600s as the archipelago's first genuinely dominant maritime power.</p>
+            <p><span class="label">What it represents:</span> no flag or comparable state banner is attested for either kingdom; their authority is recorded through stone inscriptions and ritual endowments, not vexillology. Shown here honestly blank rather than invented.</p>
+            <p><span class="label">World context:</span> Kutai's c. 400 CE inscriptions fall within the twilight years of India's own Gupta Empire, the classical civilization whose Sanskrit learning and Hindu religious culture this same maritime diffusion carries eastward across the Bay of Bengal; in the wider world, the same decades see the Western Roman Empire's final crisis (Rome itself sacked by the Visigoths in 410, the last western emperor deposed in 476) and the early rise of the Mekong-delta kingdom of Funan, another Indianized Southeast Asian state whose own trade networks overlapped with Tarumanagara's.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested Kutai or Tarumanagara flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Empire</b> &mdash; a dominant pre-colonial power</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#6b5c4a"></span><b>Fragmented sultanates</b> &mdash; no single ruling power</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Colonial (Dutch company)</b> &mdash; VOC commercial rule</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#21468b"></span><b>Colonial (Netherlands)</b> &mdash; direct Dutch state rule</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#5c2a24"></span><b>Occupation (Japan)</b> &mdash; wartime military rule</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#7c2e1f"></span><b>Republic, contested</b> &mdash; sovereignty declared but not recognized</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Republic, independent</b> &mdash; sovereign and recognized</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the named ruler most associated with the era's start</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official/established faith, not the population's</div>
+    </div>
+  </div>
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for Indonesia lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/id/">Search Record Atlas for Indonesia &rarr;</a>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This page is one lineage in a larger set. See the region-wide hub and the other countries here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="southeast-asia-hub.html"><b>Southeast Asia hub</b><span>Eleven countries, thirteen centuries</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are close historical approximations for painting reference; pre-19th-century swatches are informed reconstructions, not official specifications. Map is schematic and not surveyed.
+  </footer>
+
+</div>
+
+<script>
+  document.querySelectorAll(".tag[data-tip]").forEach(function (tag) {
+    tag.addEventListener("click", function (e) {
+      var wasOpen = tag.classList.contains("tip-open");
+      document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+      if (!wasOpen) tag.classList.add("tip-open");
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+  });
+</script>
+
+<script>
+(function () {
+  var IC = {
+    kutai:"#6b5c4a", srivijaya:"#a9762f", majapahit:"#a9762f", fragmented:"#6b5c4a", voc:"#a9762f",
+    dutch:"#21468b", japan:"#5c2a24", proclaimed:"#7c2e1f", republic:"#a9762f"
+  };
+  var INAMES = {
+    kutai:"Kutai & Tarumanagara (Early Hindu Kingdoms)", srivijaya:"Srivijaya", majapahit:"Majapahit Empire", fragmented:"Fragmented Sultanates (post-Majapahit)",
+    voc:"Dutch East India Company (VOC) rule", dutch:"Dutch East Indies", japan:"Japanese military occupation",
+    proclaimed:"Proclaimed Republic of Indonesia (National Revolution)", republic:"Republic of Indonesia"
+  };
+  var IFLAGS = {
+    kutai: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>',
+    srivijaya: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>',
+    majapahit: '<rect width="300" height="22.2" fill="#ce1126"/><rect y="22.2" width="300" height="22.2" fill="#f4efe1"/><rect y="44.4" width="300" height="22.2" fill="#ce1126"/><rect y="66.6" width="300" height="22.2" fill="#f4efe1"/><rect y="88.8" width="300" height="22.2" fill="#ce1126"/><rect y="111" width="300" height="22.2" fill="#f4efe1"/><rect y="133.2" width="300" height="22.2" fill="#ce1126"/><rect y="155.4" width="300" height="22.2" fill="#f4efe1"/><rect y="177.6" width="300" height="22.4" fill="#ce1126"/>',
+    fragmented: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO SINGLE</text><text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">FLAG</text>',
+    voc: '<rect width="300" height="66.7" fill="#ae1c28"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#21468b"/><text x="150" y="112" text-anchor="middle" font-family="serif" font-size="30" font-weight="700" fill="#21468b">VOC</text>',
+    dutch: '<rect width="300" height="66.7" fill="#ae1c28"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#21468b"/>',
+    japan: '<rect width="300" height="200" fill="#f4efe1"/><circle cx="150" cy="100" r="55" fill="#a4302a"/>',
+    proclaimed: '<rect width="300" height="100" fill="#ce1126"/><rect y="100" width="300" height="100" fill="#f4efe1"/>',
+    republic: '<rect width="300" height="100" fill="#ce1126"/><rect y="100" width="300" height="100" fill="#f4efe1"/>'
+  };
+  function idnFlagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (IFLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  var idnLegendEl = document.getElementById("idnLegend");
+  idnLegendEl.innerHTML = Object.keys(IC).map(function (k) {
+    return '<span><span class="sw" style="background:' + IC[k] + '"></span>' + INAMES[k] + "</span>";
+  }).join("");
+
+  var ISNAP = [
+    { year:"c. 350", name:"Kutai & Tarumanagara (Early Hindu Kingdoms)", owner:"Kutai & Tarumanagara", t:{ id:IC.kutai }, flagKeys:{ id:"kutai" },
+      story:"The archipelago's earliest kingdoms to leave their own written record are Kutai, on the Mahakam River in East Kalimantan, and Tarumanagara, in West Java, both taking shape as Indian Hindu-Buddhist religious and political culture spreads through maritime trade networks rather than conquest. Kutai's ruler Mulawarman is named on Yupa inscriptions dated to roughly 400 CE; Tarumanagara's King Purnawarman is separately attested a few decades later. Neither kingdom is politically connected to the other or to Srivijaya, which rises on Sumatra by the mid-600s. No flag or comparable state banner is attested for either." },
+    { year:"c. 650", name:"Srivijaya", owner:"Srivijaya", t:{ id:IC.srivijaya }, flagKeys:{ id:"srivijaya" },
+      story:"Centered on Sumatra near modern Palembang, Srivijaya rises in the mid-600s as a Buddhist maritime and trading empire, controlling the Strait of Malacca and much of the surrounding archipelago's sea trade for over six centuries. Its influence fades from the eleventh century, and its remaining territory is absorbed into the ascendant Majapahit sphere by the late 1200s. No securely documented flag survives &mdash; shown honestly blank rather than invented." },
+    { year:"c. 1293", name:"Majapahit Empire", owner:"Majapahit Empire", t:{ id:IC.majapahit }, flagKeys:{ id:"majapahit" },
+      story:"Founded in 1293 by Raden Wijaya on the ruins of a failed Mongol invasion, Majapahit becomes the most powerful pre-colonial state in Indonesian history, claiming influence over much of the archipelago and parts of the wider Malay world at its height under Hayam Wuruk and his minister Gajah Mada in the mid-1300s. The Gula Kelapa (\"sugar and coconut\") banner, nine alternating red and white stripes, is the war flag traditionally attributed to Majapahit &mdash; the direct historical inspiration for the plain red-white flag Indonesia adopted in 1945." },
+    { year:"1527", name:"Fragmented Sultanates (post-Majapahit)", owner:"Fragmented sultanates", t:{ id:IC.fragmented }, flagKeys:{ id:"fragmented" },
+      story:"Majapahit's authority collapses in the early sixteenth century as Islam spreads through the archipelago via trade networks, and power fragments among rival coastal sultanates &mdash; Demak, later Mataram, on Java; Aceh in northern Sumatra; Banten in the west &mdash; none of which reunifies the whole archipelago before Dutch traders arrive. No single flag can honestly represent this genuinely fragmented span, so this entry is shown deliberately blank." },
+    { year:"1602", name:"Dutch East India Company (VOC) rule", owner:"VOC (Dutch East India Company)", t:{ id:IC.voc }, flagKeys:{ id:"voc" },
+      story:"The Dutch East India Company, chartered in 1602 with quasi-sovereign powers to wage war and administer territory, gradually displaces Portuguese traders and local sultanates from the spice trade, establishing Batavia (modern Jakarta) in 1619 as its administrative and military headquarters. Company rule tightens its grip archipelago by archipelago over two centuries before collapsing under debt and mismanagement in 1799." },
+    { year:"1800", name:"Dutch East Indies", owner:"Kingdom of the Netherlands (colonial)", t:{ id:IC.dutch }, flagKeys:{ id:"dutch" },
+      story:"The bankrupt VOC is dissolved on 31 December 1799 and its territories nationalized as a formal Dutch colony on 1 January 1800. The colonial state expands over the nineteenth century into direct control of nearly the entire archipelago, run under the exploitative \"Cultivation System\" from the 1830s and later a nominally more liberal \"Ethical Policy,\" while a broad nationalist movement builds through the early twentieth century." },
+    { year:"1942", name:"Japanese military occupation", owner:"Empire of Japan (occupation)", t:{ id:IC.japan }, flagKeys:{ id:"japan" },
+      story:"Japanese forces overrun the Dutch East Indies in early 1942, ending Dutch rule within months and interning Dutch civilians and soldiers. Japan initially courts Indonesian nationalists, permitting limited use of the red-white flag late in the occupation as the war turns, and it is Japan's own August 1945 surrender that creates the opening Sukarno and Hatta use to proclaim independence." },
+    { year:"1945", name:"Proclaimed Republic of Indonesia (National Revolution)", owner:"Republic of Indonesia (proclaimed, contested)", t:{ id:IC.proclaimed }, flagKeys:{ id:"proclaimed" },
+      story:"Sukarno and Mohammad Hatta proclaim independence on 17 August 1945, two days after Japan's surrender, before the Dutch can reoccupy the archipelago. The Netherlands refuses to accept the proclamation and launches two large \"police actions\" to reassert colonial control; the republic survives through guerrilla resistance and mounting international pressure until the Dutch relent." },
+    { year:"1949–present", name:"Republic of Indonesia", owner:"Republic of Indonesia (sovereign)", t:{ id:IC.republic }, flagKeys:{ id:"republic" },
+      story:"After four years of guerrilla warfare and international diplomatic pressure following the 1945 proclamation, the Netherlands formally transfers sovereignty at the Hague Round Table Conference on 27 December 1949. Indonesia goes on to absorb Dutch New Guinea in 1963 and East Timor in 1975&ndash;76, and transitions from Suharto's three-decade authoritarian \"New Order\" to multiparty democracy after his 1998 resignation." }
+  ];
+
+  var IREGIONS = ["id"];
+  var IREGION_NAMES = { id:"Indonesia" };
+  var IADJ = [];
+
+  function idnTextColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+
+  var idnYearTag = document.getElementById("idnYearTag");
+  var idnEraName = document.getElementById("idnEraName");
+  var idnEraOwners = document.getElementById("idnEraOwners");
+  var idnEraStory = document.getElementById("idnEraStory");
+  var idnFlagsRow = document.getElementById("idnFlagsRow");
+  var idnSlider = document.getElementById("idnSlider");
+
+  function idnRender(idx) {
+    var era = ISNAP[idx];
+    idnYearTag.textContent = era.year;
+    idnEraName.textContent = era.name;
+    idnEraStory.innerHTML = era.story;
+
+    IREGIONS.forEach(function (id) {
+      document.getElementById("ireg-" + id).setAttribute("fill", era.t[id]);
+      var tcol = idnTextColorFor(era.t[id]);
+      var tcolHalo = tcol === "#201a12" ? "#f7f1e3" : "#201a12";
+      var lbl = document.getElementById("ilbl-" + id);
+      if (lbl) { lbl.setAttribute("fill", tcol); lbl.setAttribute("stroke", tcolHalo); }
+      var lbl2 = document.getElementById("ilbl-" + id + "2");
+      if (lbl2) { lbl2.setAttribute("fill", tcol); lbl2.setAttribute("stroke", tcolHalo); }
+    });
+
+    idnEraOwners.innerHTML = "<b>" + era.owner + "</b>: whole archipelago";
+
+    idnFlagsRow.innerHTML = IREGIONS.map(function (id) {
+      return '<div class="iflag-chip">' + idnFlagSvg(era.flagKeys[id]) + '<div class="ic-label">' + IREGION_NAMES[id] + '</div></div>';
+    }).join("");
+  }
+
+  idnSlider.addEventListener("input", function () { idnRender(parseInt(idnSlider.value, 10)); });
+  idnRender(0);
+
+  var idnPlaying = false, idnPlayTimer = null;
+  var idnPlayBtn = document.getElementById("idnPlayBtn");
+  function idnStepPlay() {
+    var next = parseInt(idnSlider.value, 10) + 1;
+    if (next > ISNAP.length - 1) { idnStopPlay(); return; }
+    idnSlider.value = next;
+    idnRender(next);
+  }
+  function idnStartPlay() {
+    idnPlaying = true;
+    idnPlayBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(idnSlider.value, 10) >= ISNAP.length - 1) { idnSlider.value = 0; idnRender(0); }
+    idnPlayTimer = setInterval(idnStepPlay, 1700);
+  }
+  function idnStopPlay() {
+    idnPlaying = false;
+    idnPlayBtn.innerHTML = "&#9654;";
+    clearInterval(idnPlayTimer);
+  }
+  idnPlayBtn.addEventListener("click", function () { idnPlaying ? idnStopPlay() : idnStartPlay(); });
+})();
+</script>
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var html = '<h4>Genealogical records for this ground</h4>';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,703 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Flags of the Caribbean</title>
+<meta name="description" content="A hub for the family flag atlas: thirteen Caribbean island nations &mdash; seven traced in an interactive map across nine snapshots, c. 1400 to today, plus six more Eastern Caribbean states profiled alongside them.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #1a2420; --paper: #f5f0e3; --card: #fdf8ec; --card-border: #ddd2b0;
+    --brick: #d9662f; --brick-2: #c14f1d; --brass: #c9962c; --adriatic: #1f7a7a; --adriatic-2: #145c5c;
+    --muted: #6e6551; --hair: #ddd2b0; --focus: #1f7a7a;
+    --tile: #d8cfa8; --tile-line: #b3a679; --tile-text: #7a6a45; --tile-sea: #bfe3e0;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #eef0e2; --paper: #10181a; --card: #16211f; --card-border: #2a3a35;
+      --brick: #ef9a5c; --brick-2: #f2ac78; --brass: #e0bb6e; --adriatic: #4fc2c2; --adriatic-2: #7fd6d6;
+      --muted: #93a29a; --hair: #2a3a35; --tile: #223330; --tile-line: #35473f; --tile-text: #8a9a90; --tile-sea: #123338;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #eef0e2; --paper: #10181a; --card: #16211f; --card-border: #2a3a35;
+    --brick: #ef9a5c; --brick-2: #f2ac78; --brass: #e0bb6e; --adriatic: #4fc2c2; --adriatic-2: #7fd6d6;
+    --muted: #93a29a; --hair: #2a3a35; --tile: #223330; --tile-line: #35473f; --tile-text: #8a9a90; --tile-sea: #123338;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.2rem, 5.5vw, 3.4rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.1rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .countries { margin-top: 44px; }
+  .countries h2 { font-size: 1.15rem; font-weight: 600; margin: 0 0 16px; }
+  .country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .country-card {
+    display: block; padding: 20px; border: 1px solid var(--card-border); background: var(--card);
+    border-radius: 4px; text-decoration: none; color: var(--ink); position: relative; overflow: hidden;
+  }
+  .country-card .swatch-strip { position: absolute; top: 0; left: 0; right: 0; height: 5px; }
+  .country-card .era { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--brass); margin-bottom: 6px; }
+  .country-card b { display: block; font-family: "Fraunces", serif; font-size: 1.2rem; font-weight: 600; margin-bottom: 6px; }
+  .country-card span { color: var(--muted); font-size: .88rem; line-height: 1.5; }
+
+  .map-section { margin-top: 56px; padding-top: 36px; border-top: 1px solid var(--hair); }
+  .map-section h2 { font-size: 1.5rem; margin: 0 0 8px; }
+  .map-section .map-sub { font-size: .94rem; color: var(--muted); max-width: 64ch; margin: 0 0 22px; }
+  .map-section .rule-box { margin-bottom: 22px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .92rem; }
+  .map-section .rule-box b { color: var(--brick); }
+
+  .viz-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 22px; }
+
+  .controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .play-btn {
+    flex: none; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .play-btn:hover { border-color: var(--brick); }
+  input[type="range"] {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px;
+    background: var(--hair); outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper);
+    box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  .era-tag { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+
+  .era-head { text-align: center; margin-bottom: 16px; }
+  .era-name-inline { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.35rem; transition: opacity .35s ease; }
+  .era-owners { font-size: .86rem; color: var(--muted); max-width: 62ch; margin: 6px auto 0; transition: opacity .35s ease; }
+  .era-owners b { color: var(--ink); }
+  .era-story {
+    margin: 0 auto 22px; font-size: .98rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .35s ease; padding: 14px 18px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  .era-story b { color: var(--brick); }
+
+  .flags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin: 4px auto 18px; max-width: 620px; }
+  .flag-chip { text-align: center; width: 92px; }
+  .flag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-chip .fc-label { font-family: "IBM Plex Mono", monospace; font-size: 9px; color: var(--muted); margin-top: 5px; line-height: 1.3; }
+
+  #map-svg { display: block; margin: 0 auto; width: 100%; max-width: 620px; height: auto; }
+  .region-fill { transition: fill 0.7s ease; }
+  .border-line { transition: stroke-opacity 0.7s ease, stroke-width 0.7s ease; fill: none; stroke: #1a2420; stroke-linecap: round; }
+  .group-label { font-family: "Fraunces", serif; font-weight: 600; transition: opacity .5s ease, font-size .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2.5px; }
+  .sub-label { font-family: "IBM Plex Mono", monospace; font-weight: 700; transition: opacity .5s ease, fill .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+
+  .map-key { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: .8rem; color: var(--muted); justify-content: center; }
+  .map-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .map-key .sw { width: 11px; height: 11px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .map-notes { margin-top: 20px; font-size: .85rem; color: var(--muted); }
+  .map-notes b { color: var(--ink); }
+
+  .subview { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .subview h3 { font-size: 1.2rem; font-weight: 600; margin: 0 0 8px; }
+  .subview .sub-desc { font-size: .9rem; color: var(--muted); max-width: 64ch; margin: 0 0 18px; }
+
+  .gantt-row { display: flex; align-items: center; margin-bottom: 3px; }
+  .gantt-label { width: 120px; flex: none; font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--ink); text-align: right; padding-right: 10px; }
+  .gantt-track { flex: 1; height: 26px; position: relative; background: var(--paper); border-radius: 2px; overflow: hidden; }
+  .gantt-seg { position: absolute; top: 0; bottom: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .gantt-seg span { font-size: 9.5px; font-weight: 600; white-space: nowrap; padding: 0 3px; }
+  .gantt-axis { display: flex; margin-left: 120px; padding-top: 4px; font-family: "IBM Plex Mono", monospace; font-size: 9.5px; color: var(--muted); position: relative; height: 14px; }
+  .gantt-axis span { position: absolute; transform: translateX(-50%); }
+
+  .grid-3x3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .grid-cell { text-align: center; }
+  .grid-cell svg { width: 100%; height: auto; display: block; }
+  .grid-cell .cap { font-family: "IBM Plex Mono", monospace; font-size: 10px; color: var(--brass); margin-top: 6px; }
+  .grid-cell .cap b { display: block; font-family: "Fraunces", serif; font-size: .95rem; font-weight: 600; color: var(--ink); margin-top: 1px; }
+  .grid-cell .cap .diff { display: block; font-family: "Source Sans 3", sans-serif; font-size: .74rem; color: var(--brick); margin-top: 3px; font-weight: 600; }
+  .mini-label { font-family: "IBM Plex Mono", monospace; font-size: 7.5px; font-weight: 700; pointer-events: none; }
+
+  .about { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .about h2 { font-size: 1.3rem; margin: 0 0 12px; }
+  .about p { max-width: none; opacity: .88; margin: 0 0 12px; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a></p>
+  <p class="kicker">Family research &middot; Hub &middot; Phase 10 of the world atlas</p>
+  <h1>Flags of the Caribbean</h1>
+  <p class="lede">Thirteen island nations, each with its own flag lineage &mdash; seven traced in one interactive map below that shows how they changed hands across five centuries, one slider-turn at a time, plus six more Eastern Caribbean ministates profiled alongside them. Every one is coastal, insular, and surrounded by open water &mdash; this hub is mostly sea.</p>
+  <p class="lede">Every deep dive is linked below (future pages, not yet built). Drag the map's slider first to see the seven-country story at a glance, or press play and watch it run.</p>
+
+  <div class="countries">
+    <h2>The seven lineages</h2>
+    <div class="country-grid">
+      <a class="country-card" href="cuba-flags.html">
+        <span class="swatch-strip" style="background:#3a7fc1"></span>
+        <span class="era">5 flags &middot; 1492&ndash;present</span>
+        <b>Cuba</b>
+        <span>The Cross of Burgundy, an 1849 exile-designed Lone Star, US military occupation, and the republic of 1902.</span>
+      </a>
+      <a class="country-card" href="jamaica-flags.html">
+        <span class="swatch-strip" style="background:#0a8a3e"></span>
+        <span class="era">4 flags &middot; 1509&ndash;present</span>
+        <b>Jamaica</b>
+        <span>Spanish Santiago de la Vega, three centuries under the Union Jack, and 1962's black, green, and gold.</span>
+      </a>
+      <a class="country-card" href="haiti-flags.html">
+        <span class="swatch-strip" style="background:#1b3a76"></span>
+        <span class="era">6 flags &middot; 1492&ndash;present</span>
+        <b>Haiti</b>
+        <span>Saint-Domingue's white fleur-de-lis, Dessalines' torn tricolor, a short-lived kingdom, the republic today.</span>
+      </a>
+      <a class="country-card" href="dominican-republic-flags.html">
+        <span class="swatch-strip" style="background:#b6303c"></span>
+        <span class="era">5 flags &middot; 1492&ndash;present</span>
+        <b>Dominican Republic</b>
+        <span>Santo Domingo's Spanish centuries, 22 years of Haitian unification, and the white cross Duarte's movement raised in 1844.</span>
+      </a>
+      <a class="country-card" href="bahamas-flags.html">
+        <span class="swatch-strip" style="background:#00a9b7"></span>
+        <span class="era">3 flags &middot; 1492&ndash;present</span>
+        <b>Bahamas</b>
+        <span>Lucayan depopulation, two centuries of British colonial ensigns, and 1973's black, gold, and aquamarine.</span>
+      </a>
+      <a class="country-card" href="trinidad-and-tobago-flags.html">
+        <span class="swatch-strip" style="background:#8c1c3f"></span>
+        <span class="era">4 flags &middot; 1498&ndash;present</span>
+        <b>Trinidad &amp; Tobago</b>
+        <span>Spanish neglect, an 1797 British capture, Tobago's own separate colonial history, and 1962's red, black, and white.</span>
+      </a>
+      <a class="country-card" href="barbados-flags.html">
+        <span class="swatch-strip" style="background:#00267f"></span>
+        <span class="era">3 flags &middot; 1627&ndash;present</span>
+        <b>Barbados</b>
+        <span>Uninterrupted British rule from 1627 to 1966, then the trident and ultramarine of independence.</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="countries">
+    <h2>Six more islands in this hub</h2>
+    <p style="font-size:.94rem;color:var(--muted);max-width:64ch;margin:-6px 0 16px;">The Eastern Caribbean's Lesser Antilles ministates &mdash; mostly former British colonies, independent between 1974 and 1983. They aren't yet traced in the interactive map above (that would take real GeoJSON work this hub hasn't done), but they belong in this hub and are profiled here.</p>
+    <div class="country-grid">
+      <a class="country-card" href="antigua-and-barbuda-flags.html">
+        <span class="swatch-strip" style="background:#ce1126"></span>
+        <span class="era">Independence 1981</span>
+        <b>Antigua &amp; Barbuda</b>
+        <span>British colony from 1632 (Antigua), a sugar-plantation economy built on enslaved labor, part of the short-lived West Indies Federation (1958&ndash;62), independence in 1981.</span>
+      </a>
+      <a class="country-card" href="dominica-flags.html">
+        <span class="swatch-strip" style="background:#006b3d"></span>
+        <span class="era">Independence 1978</span>
+        <b>Dominica</b>
+        <span>Sighted by Columbus on a Sunday in 1493, giving it its name, and fiercely contested between France and Britain for over a century; one of the last Caribbean islands where the indigenous Kalinago (Carib) retain a territory today.</span>
+      </a>
+      <a class="country-card" href="grenada-flags.html">
+        <span class="swatch-strip" style="background:#f7d117"></span>
+        <span class="era">Independence 1974</span>
+        <b>Grenada</b>
+        <span>French colonial control ceded to Britain in 1763. Independence came in 1974, before the 1979 Grenada Revolution led by Maurice Bishop's New Jewel Movement and the 1983 US-led invasion that followed Bishop's execution.</span>
+      </a>
+      <a class="country-card" href="saint-kitts-and-nevis-flags.html">
+        <span class="swatch-strip" style="background:#111"></span>
+        <span class="era">Independence 1983</span>
+        <b>Saint Kitts &amp; Nevis</b>
+        <span>Site of the first permanent English (1623) and French Caribbean colonies, a sugar economy, and the smallest sovereign state in the Americas by both area and population &mdash; the last former British Caribbean territory to gain independence.</span>
+      </a>
+      <a class="country-card" href="saint-lucia-flags.html">
+        <span class="swatch-strip" style="background:#66cceb"></span>
+        <span class="era">Independence 1979</span>
+        <b>Saint Lucia</b>
+        <span>Changed hands between Britain and France fourteen times &mdash; more than any other Caribbean island &mdash; before settling as a British possession from 1814 until independence in 1979.</span>
+      </a>
+      <a class="country-card" href="saint-vincent-and-the-grenadines-flags.html">
+        <span class="swatch-strip" style="background:#0072ce"></span>
+        <span class="era">Independence 1979</span>
+        <b>Saint Vincent &amp; the Grenadines</b>
+        <span>Home to the Garifuna, descendants of West African and indigenous Kalinago ancestry, exiled by the British to Central America in 1797; a British colony until independence in 1979.</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="map-section">
+    <h2>Five centuries, one map</h2>
+    <p class="map-sub">A real, traced map &mdash; actual coastlines projected from GeoJSON border data, not schematic shapes &mdash; spanning the Bahamas in the north to Trinidad in the south, with faint context shapes for the tip of Florida and Venezuela's Paria coast. Drag the slider or press play; each snapshot simplifies a messier reality into the dominant power of the moment.</p>
+    <div class="rule-box">
+      <b>Borders here are data, not decoration.</b> This is an archipelago: of the seven, only Haiti and the Dominican Republic share actual land, on Hispaniola. Their shared border is the only line on this map &mdash; solid whenever they were governed separately, dissolved for the one stretch (1822&ndash;1844) when Haiti ruled the whole island. Every other territory here is its own island or island group, with open sea, not a drawn border, between it and its neighbors.
+    </div>
+
+    <div class="viz-frame">
+      <div class="controls">
+        <button class="play-btn" id="playBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="era-tag" id="yearTag">1400</span>
+        <input type="range" id="slider" min="0" max="8" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="map-svg" viewBox="0 0 734.5 557.8" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="0" width="734.5" height="557.8" fill="var(--tile-sea)"/>
+        <path class="context-shape" fill="var(--tile)" stroke="var(--tile-line)" stroke-width="1" opacity="0.55" d="M164.1,85.8 L156.1,106.3 L150.5,111.4 L139.5,117.9 L122.6,122.0 L121.1,120.1 L131.6,111.4 L144.4,97.9 L152.0,85.8 Z"/>
+        <path class="context-shape" fill="var(--tile)" stroke="var(--tile-line)" stroke-width="1" opacity="0.55" d="M629.7,494.8 L619.4,495.9 L609.7,498.9 L585.3,511.6 L569.5,502.4 L569.5,517.8 L629.7,517.8 Z"/>
+
+        <path id="f-cu" class="region-fill" d="M109.3,159.0 L151.6,161.2 L175.6,170.4 L185.8,180.3 L209.7,177.3 L256.4,212.5 L264.9,212.1 L280.1,217.6 L278.3,225.2 L297.1,226.3 L316.5,237.4 L313.5,243.7 L296.4,247.1 L279.2,248.5 L261.6,246.4 L224.9,249.0 L242.1,233.9 L231.6,226.9 L215.1,225.1 L206.3,217.3 L200.2,201.9 L185.7,203.0 L161.8,195.7 L154.1,190.1 L120.8,185.9 L111.8,180.6 L121.4,173.9 L96.3,172.5 L77.9,186.5 L67.3,186.9 L63.6,193.5 L51.0,196.4 L40.0,193.9 L53.5,185.5 L59.1,175.8 L70.6,169.8 L83.7,164.5 L103.1,162.0 Z"/>
+        <path id="f-jm" class="region-fill" d="M229.6,285.8 L246.9,288.3 L260.5,294.7 L264.7,302.1 L246.7,302.6 L238.9,307.1 L224.6,302.8 L210.0,293.0 L213.0,286.8 L223.8,284.9 Z"/>
+        <path id="f-ht" class="region-fill" d="M341.8,247.4 L357.4,248.5 L379.6,252.8 L381.9,267.5 L379.9,277.9 L373.7,282.4 L380.3,290.5 L379.7,297.9 L362.7,293.3 L350.7,295.1 L335.0,293.2 L323.0,298.2 L309.3,289.8 L311.6,281.1 L354.5,287.0 L363.7,281.0 L352.0,269.3 L352.2,259.0 L336.0,254.8 Z"/>
+        <path id="f-do" class="region-fill" d="M379.6,252.8 L382.8,248.2 L402.8,248.3 L418.0,255.3 L424.8,254.6 L429.4,264.2 L443.4,263.6 L442.6,271.7 L454.0,272.6 L466.6,282.6 L457.1,293.5 L444.9,287.7 L433.1,288.8 L424.7,287.5 L420.1,292.4 L410.3,294.1 L406.4,287.6 L397.9,291.4 L387.6,309.9 L381.0,305.6 L379.7,297.9 L380.3,290.5 L373.7,282.4 L379.9,277.9 L381.9,267.5 Z"/>
+        <path id="f-bs" class="region-fill" d="M230.5,143.6 L224.3,144.9 L217.8,129.4 L208.2,121.5 L213.7,104.4 L221.4,105.5 L230.4,127.9 Z M223.2,67.4 L195.3,71.7 L193.5,61.8 L205.6,59.6 L222.5,60.4 Z M244.2,67.1 L239.8,86.3 L235.1,82.9 L235.5,68.8 L224.1,58.1 L224.0,55.0 Z"/>
+        <path id="f-tt" class="region-fill" d="M636.6,494.6 L651.3,491.0 L656.7,492.0 L655.6,512.1 L634.3,515.1 L629.7,512.6 L637.1,505.2 Z M666.2,479.4 L665.6,479.7 L662.7,480.2 L661.7,480.8 L658.3,483.4 L658.2,483.9 L658.8,483.9 L664.2,482.1 L665.4,481.3 L666.1,480.5 Z"/>
+        <path id="f-bb" class="region-fill" d="M689.5,425.0 L688.8,425.3 L688.5,425.9 L688.7,430.1 L689.1,431.6 L689.4,431.6 L689.5,432.0 L691.3,432.5 L691.5,432.9 L692.1,432.9 L693.5,431.8 L694.5,430.0 L691.8,428.2 L691.0,427.1 L690.5,425.9 Z"/>
+
+        <g id="borders" stroke-width="1">
+          <path class="border-line" id="b-ht-do" d="M379.6,252.8 L381.9,267.5 L379.9,277.9 L373.7,282.4 L380.3,290.5 L379.7,297.9"/>
+        </g>
+
+        <g id="labels"></g>
+      </svg>
+
+      <div class="era-head">
+        <div class="era-name-inline" id="eraName">Before Columbus</div>
+        <div class="era-owners" id="eraOwners"></div>
+      </div>
+      <div class="flags-row" id="flagsRow"></div>
+      <p class="era-story" id="eraStory"></p>
+
+      <p class="map-note">Real traced coastlines (simplified from public GeoJSON border data), projected onto a single shared grid so every island sits at its correct position relative to the others. Faint gray-gold shapes near the Bahamas and Trinidad are the southern tip of Florida and Venezuela's Paria coast &mdash; context only, not tracked regions.</p>
+      <div class="map-key" id="legend"></div>
+      <div class="map-notes">
+        <b>Try:</b> watch the Haiti&ndash;Dominican Republic line vanish exactly once, between 1822 and 1844, when Haiti's President Boyer ruled the whole island &mdash; then watch it snap back solid the moment Duarte's movement declares independence in 1844. Every other line on this map is sea, not a border, the entire time: none of the other six territories ever shared land with a neighbor, so no other line here can dissolve or resolidify at all.
+      </div>
+    </div>
+
+    <div class="subview">
+      <h3>The same story, as a timeline</h3>
+      <p class="sub-desc">Maps are bad at showing <em>when</em>; timelines are bad at showing <em>where</em>. This uses real transition years instead of the nine arbitrary snapshots above &mdash; one horizontal band per territory, colored the same way as the map, so you can trace exactly how long each era actually lasted (watch how much longer Barbados stayed continuously British than any other island here).</p>
+      <div class="viz-frame">
+        <div id="gantt"></div>
+        <div class="gantt-axis" id="gantt-axis"></div>
+      </div>
+    </div>
+
+    <div class="subview">
+      <h3>The same story, nine frames &mdash; only the change lights up</h3>
+      <p class="sub-desc">Every territory keeps its true color, but anything unchanged from the previous frame fades to low opacity; only the region(s) that actually changed hands stay bold with a solid outline. A caption under each frame spells out exactly what flipped. No slider to operate &mdash; scan left to right, top to bottom, and watch the map redraw itself like a flipbook.</p>
+      <div class="viz-frame">
+        <div class="grid-3x3" id="grid9"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="about">
+    <h2>About this atlas</h2>
+    <p>This started as a family history project: tracing the flags that flew over the lands our ancestors came from, close enough to paint accurately &mdash; correct colors, correct proportions, correct dates. The Caribbean hub is the atlas's first fully insular region: thirteen separate island nations that, with one exception, never shared a land border with each other at all. The interactive map below traces the first seven in detail; the six Eastern Caribbean ministates above are profiled but not yet mapped.</p>
+    <p>Every country page (linked above, not yet built) will carry its own timeline of flags with paint-ready color specs and a per-era location map. Colors are close historical approximations; pre-19th-century swatches especially are informed reconstructions, not official specifications, and are labeled as such throughout. The regional map above simplifies five centuries of messy, overlapping, disputed control into nine snapshots &mdash; useful for orientation, not a substitute for the detail each country's own page will eventually carry.</p>
+  </div>
+
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This hub is one region in a larger set. See the other phases here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="iberia-hub.html"><b>Iberia hub</b><span>Spain and Portugal, the colonizing crown</span></a>
+      <a class="link-card" href="levant-hub.html"><b>Levant hub</b><span>Four countries, Ottoman centuries, 1948</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Coastlines traced from public GeoJSON border data (johan/world.geo.json, georgique/world-geojson) and simplified; map is not surveyed.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var C = {
+    taino:"#7f8f4e", kalinago:"#4f7f6a", spain:"#c9432c", britain:"#2c5f8a", france:"#7a5aa5",
+    ind_ht:"#1b3a76", ind_do:"#b6303c", ind_cu:"#3a7fc1", ind_jm:"#0a8a3e", ind_tt:"#8c1c3f", ind_bb:"#00267f", ind_bs:"#00a9b7"
+  };
+  var NAMES = {
+    taino:"Taíno / Lucayan peoples", kalinago:"Kalinago (Carib) peoples", spain:"Spanish Empire",
+    britain:"British Empire (England pre-1707)", france:"Kingdom of France",
+    ind_ht:"Haiti", ind_do:"Dominican Republic", ind_cu:"Cuba", ind_jm:"Jamaica",
+    ind_tt:"Trinidad and Tobago", ind_bb:"Barbados", ind_bs:"Bahamas"
+  };
+  var legendEl = document.getElementById("legend");
+  legendEl.innerHTML = Object.keys(C).map(function (k) {
+    return '<span><span class="sw" style="background:' + C[k] + '"></span>' + NAMES[k] + "</span>";
+  }).join("");
+
+  // ---- Real flag graphics, simplified plain SVG (no images) ----
+  var FLAGS = {
+    no_flag: '<rect width="300" height="200" fill="#cfc9b8"/><text x="150" y="100" font-size="18" text-anchor="middle" fill="#5c5540" font-family="monospace">no flag</text><text x="150" y="122" font-size="11" text-anchor="middle" fill="#5c5540" font-family="monospace">documented</text>',
+    cross_burgundy: '<rect width="300" height="200" fill="#f4efe1"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#c9432c" stroke-width="26"/>',
+    st_george: '<rect width="300" height="200" fill="#f4efe1"/><rect y="86" width="300" height="28" fill="#c9432c"/><rect x="136" width="28" height="200" fill="#c9432c"/>',
+    union_jack: '<rect width="300" height="200" fill="#1b3a76"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#f4efe1" stroke-width="24"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#c9432c" stroke-width="10"/><rect y="80" width="300" height="40" fill="#f4efe1"/><rect x="130" width="40" height="200" fill="#f4efe1"/><rect y="88" width="300" height="24" fill="#c9432c"/><rect x="138" width="24" height="200" fill="#c9432c"/>',
+    france_bourbon: '<rect width="300" height="200" fill="#f4efe1"/><text x="150" y="122" font-size="70" text-anchor="middle" fill="#1e2f96" font-family="serif">⚜</text>',
+    haiti_1804: '<rect width="300" height="100" fill="#1b3a76"/><rect y="100" width="300" height="100" fill="#b6303c"/><circle cx="150" cy="100" r="26" fill="#f4efe1" stroke="#8a6a1f" stroke-width="2"/>',
+    dr_flag: '<rect width="300" height="200" fill="#f4efe1"/><rect width="130" height="86" fill="#1b3a76"/><rect x="170" width="130" height="86" fill="#b6303c"/><rect y="114" width="130" height="86" fill="#b6303c"/><rect x="170" y="114" width="130" height="86" fill="#1b3a76"/><circle cx="150" cy="100" r="20" fill="#f4efe1" stroke="#8a6a1f" stroke-width="2"/>',
+    cuba_flag: '<rect width="300" height="200" fill="#3a7fc1"/><rect y="40" width="300" height="40" fill="#f4efe1"/><rect y="120" width="300" height="40" fill="#f4efe1"/><path d="M0,0 L130,100 L0,200 Z" fill="#c1272d"/><path d="M45,86 l5,15 16,0 -13,10 5,15 -13,-9 -13,9 5,-15 -13,-10 16,0 Z" fill="#f4efe1"/>',
+    jamaica_flag: '<rect width="300" height="200" fill="#0a8a3e"/><path d="M0,0 L120,0 L0,80 Z" fill="#111"/><path d="M300,0 L180,0 L300,80 Z" fill="#111"/><path d="M0,200 L120,200 L0,120 Z" fill="#111"/><path d="M300,200 L180,200 L300,120 Z" fill="#111"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#f9d616" stroke-width="30"/>',
+    tt_flag: '<rect width="300" height="200" fill="#c1272d"/><path d="M0,0 L300,200" stroke="#f4efe1" stroke-width="46"/><path d="M0,0 L300,200" stroke="#111" stroke-width="30"/>',
+    barbados_flag: '<rect width="100" height="200" fill="#00267f"/><rect x="100" width="100" height="200" fill="#f9d616"/><rect x="200" width="100" height="200" fill="#00267f"/><path d="M150,55 L150,150 M138,66 Q150,50 162,66 M132,82 Q150,62 168,82 M150,150 L136,172 M150,150 L164,172" stroke="#111" stroke-width="6" fill="none"/>',
+    bahamas_flag: '<rect width="300" height="66.7" fill="#00a9b7"/><rect y="66.7" width="300" height="66.6" fill="#f9d616"/><rect y="133.3" width="300" height="66.7" fill="#00a9b7"/><path d="M0,0 L110,100 L0,200 Z" fill="#111"/>'
+  };
+  function flagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (FLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+
+  var SNAP = [
+    { year:"1400", name:"Before Columbus", t:{ cu:C.taino, jm:C.taino, ht:C.taino, do:C.taino, bs:C.taino, tt:C.kalinago, bb:C.kalinago },
+      story: "Long before European contact, the northern islands &mdash; Cuba, Jamaica, Hispaniola, the Bahamas &mdash; were home to Taíno and Lucayan peoples, organized into cacicazgos (chiefdoms) with their own agriculture, ball courts, and cemi religious iconography. Trinidad, close enough to South America to be reached by canoe, held a mix of Arawakan and Cariban-speaking groups; the Kalinago (Island Carib), moving north through the Lesser Antilles, are documented in the region though Barbados itself may have been lightly settled or empty by the time Europeans arrived. None of these societies used heraldic banners in the European sense &mdash; there is no flag to show here, and pretending otherwise would misrepresent them. That gap is the honest starting point for everything that follows." },
+    { year:"1520", name:"Spanish claim", t:{ cu:C.spain, jm:C.spain, ht:C.spain, do:C.spain, bs:C.spain, tt:C.spain, bb:C.spain },
+      story: "Columbus's first landfall on 12 October 1492 was San Salvador in the Bahamas; Hispaniola was settled within months, and Santo Domingo (founded 1496&ndash;98) became the oldest continuously inhabited European-founded city in the Americas. Diego Velázquez conquered Cuba between 1511 and 1515; Jamaica was colonized from 1509. Spain's claim, under the Treaty of Tordesillas, covered the entire region &mdash; but claim was not the same as control. The Bahamas were raided for enslaved labor rather than settled, and left effectively depopulated and abandoned within a generation; Trinidad and Barbados saw no real Spanish settlement at all. Across the islands Spain did occupy, the encómienda system and epidemic disease devastated the Taíno population within decades." },
+    { year:"1697", name:"Three powers divide the islands", t:{ cu:C.spain, jm:C.britain, ht:C.france, do:C.spain, bs:C.britain, tt:C.spain, bb:C.britain },
+      story: "England took Barbados in 1627 (uninhabited at the time of settlement) and seized Jamaica from Spain in 1655 during Cromwell's \"Western Design\"; English settlers reached the Bahamas from 1648. Meanwhile French buccaneers and planters, based on Tortuga since the 1620s&ndash;40s, spread across the western third of Hispaniola; the Treaty of Ryswick in 1697 formally ceded that strip to France as Saint-Domingue, while Spain kept Santo Domingo in the east. Spain still held Cuba and a barely colonized Trinidad. Four flags now fly over seven islands &mdash; the fragmentation that will define the region for the next century." },
+    { year:"1804", name:"Haitian independence", t:{ cu:C.spain, jm:C.britain, ht:C.ind_ht, do:C.spain, bs:C.britain, tt:C.britain, bb:C.britain },
+      story: "The Haitian Revolution (1791&ndash;1804) is the only successful slave revolt in history to found a state. Toussaint Louverture built the movement into a real army and government before being seized by French forces and dying in captivity in 1803; Jean-Jacques Dessalines then led the final campaign against Napoleon's expeditionary force and declared independence on 1 January 1804, renaming Saint-Domingue \"Haiti\" &mdash; the second republic in the Americas after the United States. In the same decade, Trinidad changed hands too: a British naval force captured it from Spain in 1797, formalized by the 1802 Treaty of Amiens. England's 1707 union with Scotland has, on paper, made Jamaica, Barbados, and the Bahamas British rather than English possessions, though nothing changed for them on the ground. Spain still holds Cuba and Santo Domingo." },
+    { year:"1830", name:"Haiti unifies Hispaniola", t:{ cu:C.spain, jm:C.britain, ht:C.ind_ht, do:C.ind_ht, bs:C.britain, tt:C.britain, bb:C.britain },
+      story: "Santo Domingo's path after 1804 stayed unstable: Spain reasserted control in 1809 (the \"España Boba\" period), before Dominican elites declared a short-lived independent state in late 1821. Haitian president Jean-Pierre Boyer, wary of a European slaveholding power re-establishing itself next door, marched in and occupied the entire island in February 1822 &mdash; unifying all of Hispaniola under Port-au-Prince for the next 22 years. This is the only stretch on this map where the Haiti&ndash;Dominican Republic border dissolves: one government, one island, one flag. Cuba remains Spain's most valuable Caribbean possession, its plantation economy leaning ever harder on slavery even as Haiti has abolished it outright." },
+    { year:"1844", name:"Dominican independence", t:{ cu:C.spain, jm:C.britain, ht:C.ind_ht, do:C.ind_do, bs:C.britain, tt:C.britain, bb:C.britain },
+      story: "On 27 February 1844, Dominican nationalists led by Juan Pablo Duarte &mdash; with Ramón Matias Mella and Francisco del Rosario Sánchez &mdash; seized the Ozama fortress in Santo Domingo and declared independence from Haitian rule, founding the Dominican Republic. The border across Hispaniola resolidifies here, splitting the island's two nations for good (a brief 1861&ndash;65 Spanish re-annexation of the Dominican Republic followed but isn't shown on this simplified map). Cuba remains Spanish; the four British Caribbean territories are unchanged from the previous snapshot." },
+    { year:"1902", name:"Cuban independence", t:{ cu:C.ind_cu, jm:C.britain, ht:C.ind_ht, do:C.ind_do, bs:C.britain, tt:C.britain, bb:C.britain },
+      story: "The Cuban War of Independence, underway since 1895, drew in the United States after the USS Maine sank in Havana harbor in 1898; the brief Spanish-American War that followed ended nearly four centuries of Spanish rule in the Caribbean within months. Cuba was placed under US military occupation until 20 May 1902, when the Republic of Cuba was formally inaugurated &mdash; though the Platt Amendment, written into Cuba's own constitution at US insistence, constrained its sovereignty (including a US right of intervention and the Guantánamo Bay lease) until its repeal in 1934; that nuance doesn't show up as a separate color here, only in this text. Puerto Rico, Spain's other Caribbean colony, passed directly to US control the same year and isn't tracked on this seven-country map. Jamaica, Barbados, the Bahamas, and Trinidad remain British." },
+    { year:"1962", name:"Jamaica and Trinidad independent", t:{ cu:C.ind_cu, jm:C.ind_jm, ht:C.ind_ht, do:C.ind_do, bs:C.britain, tt:C.ind_tt, bb:C.britain },
+      story: "Postwar decolonization reached the British Caribbean in stages. Jamaica and Trinidad and Tobago both left the short-lived West Indies Federation (1958&ndash;62) and became independent within weeks of each other in August 1962. Barbados and the Bahamas remain colonies for now. Cuba, meanwhile, has just been transformed by the 1959 revolution that brought Fidel Castro to power and ended the US-aligned republic of 1902 &mdash; a change of government, not of flag: Cuba keeps the banner adopted in 1902 to this day. Haiti (under François Duvalier's dictatorship since 1957) and the Dominican Republic (recently free of the 1930&ndash;61 Trujillo dictatorship) are both unchanged on this map." },
+    { year:"1973", name:"Independent states, today", t:{ cu:C.ind_cu, jm:C.ind_jm, ht:C.ind_ht, do:C.ind_do, bs:C.ind_bs, tt:C.ind_tt, bb:C.ind_bb },
+      story: "Barbados followed its neighbors into independence on 30 November 1966; the Bahamas, whose 1968 constitution already carried substantial self-government, completed the wave on 10 July 1973 &mdash; an eleven-year gap after Jamaica and Trinidad first broke away. All seven flags on this map are the ones flown today. Cuba's single-party government, in power since 1959, and its long confrontation with the United States &mdash; the 1961 Bay of Pigs invasion, the 1962 missile crisis, a US embargo in place since 1960 &mdash; are among the best-documented modern histories in the hemisphere; nothing about that ongoing relationship is characterized here beyond the historical record through the dates given." }
+  ];
+
+  var FLAG_SETS = {
+    "1400": [["no_flag","Pre-Columbian Caribbean — none documented"]],
+    "1520": [["cross_burgundy","Spanish Empire (Cross of Burgundy)"]],
+    "1697": [["cross_burgundy","Spain: Cuba, Santo Domingo, Trinidad"],["st_george","England: Jamaica, Barbados, Bahamas"],["france_bourbon","France: Saint-Domingue"]],
+    "1804": [["haiti_1804","Haiti (1804 bicolor)"],["union_jack","Britain: Jamaica, Barbados, Bahamas, Trinidad"],["cross_burgundy","Spain: Cuba, Santo Domingo"]],
+    "1830": [["haiti_1804","Haiti (rules all Hispaniola)"],["union_jack","Britain: Jamaica, Barbados, Bahamas, Trinidad"],["cross_burgundy","Spain: Cuba"]],
+    "1844": [["dr_flag","Dominican Republic (1844)"],["haiti_1804","Haiti"],["union_jack","Britain: Jamaica, Barbados, Bahamas, Trinidad"],["cross_burgundy","Spain: Cuba"]],
+    "1902": [["cuba_flag","Cuba (1902)"],["dr_flag","Dominican Republic"],["haiti_1804","Haiti"],["union_jack","Britain: Jamaica, Barbados, Bahamas, Trinidad"]],
+    "1962": [["jamaica_flag","Jamaica (1962)"],["tt_flag","Trinidad and Tobago (1962)"],["union_jack","Britain: Barbados, Bahamas"],["cuba_flag","Cuba"],["dr_flag","Dominican Republic"],["haiti_1804","Haiti"]],
+    "1973": [["cuba_flag","Cuba"],["jamaica_flag","Jamaica"],["haiti_1804","Haiti"],["dr_flag","Dominican Republic"],["bahamas_flag","Bahamas (1973)"],["tt_flag","Trinidad and Tobago"],["barbados_flag","Barbados (1966)"]]
+  };
+
+  var REGIONS = ["cu","jm","ht","do","bs","tt","bb"];
+  var REGION_NAMES = { cu:"Cuba", jm:"Jamaica", ht:"Haiti", do:"Dominican Republic", bs:"Bahamas", tt:"Trinidad & Tobago", bb:"Barbados" };
+  var REGION_ABBR = { cu:"CUB", jm:"JAM", ht:"HTI", do:"DOM", bs:"BHS", tt:"T&T", bb:"BRB" };
+  var REGION_POS = { cu:[178,204], jm:[237,296], ht:[346,273], do:[420,279], bs:[219,125], tt:[643,503], bb:[691,429] };
+  var ADJ = [["ht","do"]];
+
+  function textColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#1a2420" : "#f7f4e8";
+  }
+  function ownerName(hex) {
+    for (var k in C) { if (C[k] === hex) return NAMES[k]; }
+    return hex;
+  }
+
+  function groupsFor(t) {
+    var parent = {};
+    REGIONS.forEach(function (r) { parent[r] = r; });
+    function find(x) { return parent[x] === x ? x : (parent[x] = find(parent[x])); }
+    function union(a, b) { var ra = find(a), rb = find(b); if (ra !== rb) parent[ra] = rb; }
+    ADJ.forEach(function (pair) {
+      if (t[pair[0]] === t[pair[1]]) union(pair[0], pair[1]);
+    });
+    var groups = {};
+    REGIONS.forEach(function (r) {
+      var root = find(r);
+      if (!groups[root]) groups[root] = [];
+      groups[root].push(r);
+    });
+    return Object.keys(groups).map(function (k) { return groups[k]; });
+  }
+
+  var svgNS = "http://www.w3.org/2000/svg";
+  var labelsEl = document.getElementById("labels");
+  var yearTag = document.getElementById("yearTag");
+  var eraName = document.getElementById("eraName");
+  var eraOwners = document.getElementById("eraOwners");
+  var eraStory = document.getElementById("eraStory");
+  var flagsRow = document.getElementById("flagsRow");
+  var sliderEl = document.getElementById("slider");
+
+  function render(i) {
+    var era = SNAP[i];
+    yearTag.textContent = era.year;
+    eraName.textContent = era.name;
+    eraStory.innerHTML = era.story || "";
+    flagsRow.innerHTML = (FLAG_SETS[era.year] || []).map(function (f) {
+      return '<div class="flag-chip">' + flagSvg(f[0]) + '<div class="fc-label">' + f[1] + '</div></div>';
+    }).join("");
+
+    REGIONS.forEach(function (id) {
+      var el = document.getElementById("f-" + id);
+      el.setAttribute("fill", era.t[id]);
+    });
+
+    ADJ.forEach(function (pair) {
+      var same = era.t[pair[0]] === era.t[pair[1]];
+      var line = document.getElementById("b-" + pair[0] + "-" + pair[1]);
+      line.setAttribute("stroke-opacity", same ? "0.06" : "0.85");
+      line.setAttribute("stroke-width", same ? "1" : "2.6");
+    });
+
+    var groups = groupsFor(era.t);
+    var seenOwners = {};
+    var ownerParts = [];
+    groups.forEach(function (g) {
+      var label = ownerName(era.t[g[0]]);
+      if (!seenOwners[label]) { seenOwners[label] = []; ownerParts.push(label); }
+      g.forEach(function (id) { seenOwners[label].push(REGION_NAMES[id]); });
+    });
+    eraOwners.innerHTML = ownerParts.map(function (label) {
+      return "<b>" + label + "</b>: " + seenOwners[label].join(", ");
+    }).join(" &middot; ");
+
+    labelsEl.innerHTML = "";
+    function haloFor(txtColor) { return txtColor === "#1a2420" ? "#f7f4e8" : "#1a2420"; }
+    groups.forEach(function (g) {
+      var cx = g.reduce(function (s, id) { return s + REGION_POS[id][0]; }, 0) / g.length;
+      var cy = g.reduce(function (s, id) { return s + REGION_POS[id][1]; }, 0) / g.length;
+      var fillHex = era.t[g[0]];
+      var txtColor = textColorFor(fillHex);
+      var halo = haloFor(txtColor);
+
+      if (g.length > 1) {
+        var groupText = ownerName(fillHex).toUpperCase();
+        var gl = document.createElementNS(svgNS, "text");
+        gl.setAttribute("x", cx);
+        gl.setAttribute("y", cy - 6);
+        gl.setAttribute("class", "group-label");
+        gl.setAttribute("font-size", groupText.length > 16 ? "12" : "14");
+        gl.setAttribute("fill", txtColor);
+        gl.setAttribute("stroke", halo);
+        gl.textContent = groupText;
+        labelsEl.appendChild(gl);
+        g.forEach(function (id) {
+          var pos = REGION_POS[id];
+          var sl = document.createElementNS(svgNS, "text");
+          sl.setAttribute("x", pos[0]);
+          sl.setAttribute("y", pos[1] + 16);
+          sl.setAttribute("class", "sub-label");
+          sl.setAttribute("font-size", "9.5");
+          sl.setAttribute("fill", txtColor);
+          sl.setAttribute("stroke", halo);
+          sl.setAttribute("opacity", "0.85");
+          sl.textContent = REGION_ABBR[id];
+          labelsEl.appendChild(sl);
+        });
+      } else {
+        var id = g[0];
+        var pos = REGION_POS[id];
+        var selfGoverning = Object.keys(C).some(function (k) { return k.indexOf("ind_") === 0 && C[k] === fillHex; });
+        var soloText = (selfGoverning ? REGION_NAMES[id] : ownerName(fillHex)).toUpperCase();
+        var sl2 = document.createElementNS(svgNS, "text");
+        sl2.setAttribute("x", pos[0]);
+        sl2.setAttribute("y", pos[1] - 4);
+        sl2.setAttribute("class", "group-label");
+        sl2.setAttribute("font-size", selfGoverning ? "12" : (soloText.length > 16 ? "9" : "11"));
+        sl2.setAttribute("fill", txtColor);
+        sl2.setAttribute("stroke", halo);
+        sl2.textContent = soloText;
+        labelsEl.appendChild(sl2);
+        if (!selfGoverning) {
+          var subOnly = document.createElementNS(svgNS, "text");
+          subOnly.setAttribute("x", pos[0]);
+          subOnly.setAttribute("y", pos[1] + 12);
+          subOnly.setAttribute("class", "sub-label");
+          subOnly.setAttribute("font-size", "9.5");
+          subOnly.setAttribute("fill", txtColor);
+          subOnly.setAttribute("stroke", halo);
+          subOnly.setAttribute("opacity", "0.85");
+          subOnly.textContent = REGION_ABBR[id];
+          labelsEl.appendChild(subOnly);
+        }
+      }
+    });
+  }
+
+  sliderEl.addEventListener("input", function () { render(parseInt(sliderEl.value, 10)); });
+  render(0);
+
+  var playing = false, playTimer = null;
+  var playBtn = document.getElementById("playBtn");
+  function stepPlay() {
+    var next = parseInt(sliderEl.value, 10) + 1;
+    if (next > SNAP.length - 1) { stopPlay(); return; }
+    sliderEl.value = next;
+    render(next);
+  }
+  function startPlay() {
+    playing = true;
+    playBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(sliderEl.value, 10) >= SNAP.length - 1) { sliderEl.value = 0; render(0); }
+    playTimer = setInterval(stepPlay, 1700);
+  }
+  function stopPlay() {
+    playing = false;
+    playBtn.innerHTML = "&#9654;";
+    clearInterval(playTimer);
+  }
+  playBtn.addEventListener("click", function () { playing ? stopPlay() : startPlay(); });
+
+  // ---- Small multiples grid: same nine snapshots, diff-highlighted ----
+  var gridEl = document.getElementById("grid9");
+  var MINI_PATHS = {
+    cu: "M109.3,159.0 L151.6,161.2 L175.6,170.4 L185.8,180.3 L209.7,177.3 L256.4,212.5 L264.9,212.1 L280.1,217.6 L278.3,225.2 L297.1,226.3 L316.5,237.4 L313.5,243.7 L296.4,247.1 L279.2,248.5 L261.6,246.4 L224.9,249.0 L242.1,233.9 L231.6,226.9 L215.1,225.1 L206.3,217.3 L200.2,201.9 L185.7,203.0 L161.8,195.7 L154.1,190.1 L120.8,185.9 L111.8,180.6 L121.4,173.9 L96.3,172.5 L77.9,186.5 L67.3,186.9 L63.6,193.5 L51.0,196.4 L40.0,193.9 L53.5,185.5 L59.1,175.8 L70.6,169.8 L83.7,164.5 L103.1,162.0 Z",
+    jm: "M229.6,285.8 L246.9,288.3 L260.5,294.7 L264.7,302.1 L246.7,302.6 L238.9,307.1 L224.6,302.8 L210.0,293.0 L213.0,286.8 L223.8,284.9 Z",
+    ht: "M341.8,247.4 L357.4,248.5 L379.6,252.8 L381.9,267.5 L379.9,277.9 L373.7,282.4 L380.3,290.5 L379.7,297.9 L362.7,293.3 L350.7,295.1 L335.0,293.2 L323.0,298.2 L309.3,289.8 L311.6,281.1 L354.5,287.0 L363.7,281.0 L352.0,269.3 L352.2,259.0 L336.0,254.8 Z",
+    do: "M379.6,252.8 L382.8,248.2 L402.8,248.3 L418.0,255.3 L424.8,254.6 L429.4,264.2 L443.4,263.6 L442.6,271.7 L454.0,272.6 L466.6,282.6 L457.1,293.5 L444.9,287.7 L433.1,288.8 L424.7,287.5 L420.1,292.4 L410.3,294.1 L406.4,287.6 L397.9,291.4 L387.6,309.9 L381.0,305.6 L379.7,297.9 L380.3,290.5 L373.7,282.4 L379.9,277.9 L381.9,267.5 Z",
+    bs: "M230.5,143.6 L224.3,144.9 L217.8,129.4 L208.2,121.5 L213.7,104.4 L221.4,105.5 L230.4,127.9 Z M223.2,67.4 L195.3,71.7 L193.5,61.8 L205.6,59.6 L222.5,60.4 Z M244.2,67.1 L239.8,86.3 L235.1,82.9 L235.5,68.8 L224.1,58.1 L224.0,55.0 Z",
+    tt: "M636.6,494.6 L651.3,491.0 L656.7,492.0 L655.6,512.1 L634.3,515.1 L629.7,512.6 L637.1,505.2 Z M666.2,479.4 L665.6,479.7 L662.7,480.2 L661.7,480.8 L658.3,483.4 L658.2,483.9 L658.8,483.9 L664.2,482.1 L665.4,481.3 L666.1,480.5 Z",
+    bb: "M689.5,425.0 L688.8,425.3 L688.5,425.9 L688.7,430.1 L689.1,431.6 L689.4,431.6 L689.5,432.0 L691.3,432.5 L691.5,432.9 L692.1,432.9 L693.5,431.8 L694.5,430.0 L691.8,428.2 L691.0,427.1 L690.5,425.9 Z"
+  };
+  SNAP.forEach(function (era, idx) {
+    var prev = idx > 0 ? SNAP[idx - 1] : null;
+    var changed = [];
+    if (prev) {
+      REGIONS.forEach(function (id) {
+        if (era.t[id] !== prev.t[id]) changed.push(id);
+      });
+    }
+    var cell = document.createElement("div");
+    cell.className = "grid-cell";
+    var svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("viewBox", "0 0 734.5 557.8");
+    var sea = document.createElementNS(svgNS, "rect");
+    sea.setAttribute("x", "0"); sea.setAttribute("y", "0");
+    sea.setAttribute("width", "734.5"); sea.setAttribute("height", "557.8");
+    sea.setAttribute("fill", "var(--tile-sea)");
+    svg.appendChild(sea);
+    REGIONS.forEach(function (id) {
+      var isBaseline = !prev;
+      var isChanged = prev && changed.indexOf(id) !== -1;
+      var bold = isBaseline || isChanged;
+      var p = document.createElementNS(svgNS, "path");
+      p.setAttribute("d", MINI_PATHS[id]);
+      p.setAttribute("fill", era.t[id]);
+      if (bold) {
+        p.setAttribute("fill-opacity", "1");
+        p.setAttribute("stroke", "#1a2420");
+        p.setAttribute("stroke-width", "2.2");
+      } else {
+        p.setAttribute("fill-opacity", "0.22");
+        p.setAttribute("stroke", "#1a2420");
+        p.setAttribute("stroke-width", "0.75");
+        p.setAttribute("stroke-opacity", "0.4");
+      }
+      svg.appendChild(p);
+      var pos = REGION_POS[id];
+      var lbl = document.createElementNS(svgNS, "text");
+      lbl.setAttribute("x", pos[0]);
+      lbl.setAttribute("y", pos[1]);
+      lbl.setAttribute("text-anchor", "middle");
+      lbl.setAttribute("class", "mini-label");
+      lbl.setAttribute("fill", bold ? textColorFor(era.t[id]) : "#8a7d5c");
+      lbl.setAttribute("opacity", bold ? "1" : "0.55");
+      lbl.textContent = REGION_ABBR[id];
+      svg.appendChild(lbl);
+    });
+    cell.appendChild(svg);
+    var cap = document.createElement("div");
+    cap.className = "cap";
+    var diffText = !prev ? "Starting point" : (changed.length ? "→ " + changed.map(function (id) { return REGION_NAMES[id]; }).join(", ") + " change" + (changed.length === 1 ? "s" : "") + " hands" : "→ no change from previous frame");
+    cap.innerHTML = era.year + "<b>" + era.name + "</b><span class=\"diff\">" + diffText + "</span>";
+    cell.appendChild(cap);
+    gridEl.appendChild(cell);
+  });
+
+  // ---- Timeline: same data, real continuous date ranges ----
+  var GANTT_START = 1000, GANTT_END = 2020;
+  var GANTT_DATA = [
+    { id:"cu", segs:[
+      [1000,1492,C.taino,"Taíno (pre-contact)"], [1492,1898,C.spain,"Spanish colony"],
+      [1898,1902,"#6e6047","US military occupation"], [1902,2020,C.ind_cu,"Republic of Cuba"]
+    ]},
+    { id:"jm", segs:[
+      [1000,1509,C.taino,"Taíno (pre-contact)"], [1509,1655,C.spain,"Spanish colony"],
+      [1655,1962,C.britain,"English/British colony"], [1962,2020,C.ind_jm,"Independent Jamaica"]
+    ]},
+    { id:"ht", segs:[
+      [1000,1492,C.taino,"Taíno (pre-contact)"], [1492,1697,C.spain,"Spanish Hispaniola"],
+      [1697,1804,C.france,"Saint-Domingue (French)"], [1804,2020,C.ind_ht,"Republic / Empire of Haiti"]
+    ]},
+    { id:"do", segs:[
+      [1000,1492,C.taino,"Taíno (pre-contact)"], [1492,1795,C.spain,"Santo Domingo (Spanish)"],
+      [1795,1809,C.france,"Ceded to France (Basel)"], [1809,1822,C.spain,"España Boba (Spanish)"],
+      [1822,1844,C.ind_ht,"Haitian unification"], [1844,2020,C.ind_do,"Dominican Republic"]
+    ]},
+    { id:"bs", segs:[
+      [1000,1492,C.taino,"Lucayan Taíno (pre-contact)"], [1492,1648,C.spain,"Spanish claim (unsettled)"],
+      [1648,1973,C.britain,"English/British colony"], [1973,2020,C.ind_bs,"Independent Bahamas"]
+    ]},
+    { id:"tt", segs:[
+      [1000,1498,C.kalinago,"Amerindian (pre-contact)"], [1498,1797,C.spain,"Spanish colony"],
+      [1797,1962,C.britain,"British colony"], [1962,2020,C.ind_tt,"Independent Trinidad & Tobago"]
+    ]},
+    { id:"bb", segs:[
+      [1000,1627,C.kalinago,"Amerindian (largely depopulated by 1620s)"], [1627,1966,C.britain,"English/British colony"],
+      [1966,2020,C.ind_bb,"Independent Barbados"]
+    ]}
+  ];
+  var ganttEl = document.getElementById("gantt");
+  function yearToPct(y) { return (y - GANTT_START) / (GANTT_END - GANTT_START) * 100; }
+  GANTT_DATA.forEach(function (row) {
+    var rowEl = document.createElement("div");
+    rowEl.className = "gantt-row";
+    var label = document.createElement("div");
+    label.className = "gantt-label";
+    label.textContent = REGION_NAMES[row.id];
+    rowEl.appendChild(label);
+    var track = document.createElement("div");
+    track.className = "gantt-track";
+    row.segs.forEach(function (seg) {
+      var left = yearToPct(seg[0]);
+      var width = yearToPct(seg[1]) - left;
+      var segEl = document.createElement("div");
+      segEl.className = "gantt-seg";
+      segEl.style.left = left + "%";
+      segEl.style.width = width + "%";
+      segEl.style.background = seg[2];
+      segEl.title = REGION_NAMES[row.id] + ": " + seg[3] + " (" + seg[0] + "–" + seg[1] + ")";
+      if (width > 4) {
+        var sp = document.createElement("span");
+        sp.textContent = seg[3];
+        sp.style.color = textColorFor(seg[2]);
+        segEl.appendChild(sp);
+      }
+      track.appendChild(segEl);
+    });
+    rowEl.appendChild(track);
+    ganttEl.appendChild(rowEl);
+  });
+  var axisEl = document.getElementById("gantt-axis");
+  [1000, 1200, 1400, 1600, 1800, 1900, 2020].forEach(function (y) {
+    var s = document.createElement("span");
+    s.style.left = yearToPct(y) + "%";
+    s.textContent = y;
+    axisEl.appendChild(s);
+  });
+})();
+</script>
+</body></html>

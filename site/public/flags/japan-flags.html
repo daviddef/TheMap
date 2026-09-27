@@ -1,0 +1,839 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+</style></head><body>
+<title>Flags of Japan</title>
+<meta name="description" content="A chronological, paint-ready atlas of Japan's flag and banner history, from the Yamato period and centuries of shogunate rule through the Meiji Restoration, the WWII era, and the Hinomaru's formal 1999 adoption as national flag.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.08rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; font-size: .94rem; color: var(--muted); }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  .legend { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+
+  /* ---------- Timeline ---------- */
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1px; background: var(--hair); }
+  @media (max-width: 560px) { .timeline::before { left: 9px; } }
+  .entry { position: relative; padding-left: 46px; margin-bottom: 46px; }
+  @media (max-width: 560px) { .entry { padding-left: 30px; } }
+  .entry::before {
+    content: attr(data-n);
+    position: absolute; left: 1px; top: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--paper); outline: 1px solid var(--hair);
+    background: var(--card);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--brick); display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) { .entry::before { left: -5px; width: 18px; height: 18px; font-size: 9px; } }
+
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+  .card-head { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  @media (max-width: 620px) { .card-head { flex-direction: column; } }
+  .flag-box { flex: none; width: 168px; }
+  .flag-box svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-caption { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .card-title { font-size: 1.32rem; font-weight: 600; line-height: 1.18; margin: 0 0 10px; text-wrap: balance; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px; border: 1px solid var(--card-border); color: var(--muted);
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  /* Flip tooltip below tags near the top of the viewport so it isn't clipped */
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  /* Keep tooltips from overflowing the left/right edges on narrow screens */
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint { border-top: 1px solid var(--hair); }
+  details.paint > summary {
+    cursor: pointer; list-style: none; padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--adriatic); display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before { content: "+"; font-family: "Fraunces", serif; font-size: 15px; width: 14px; }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row { display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px; }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--card-border); border-radius: 2px; padding: 5px 9px 5px 5px; background: var(--paper); }
+  .swatch .chip { width: 20px; height: 20px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: none; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 88px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 340px; height: auto; }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .iborder-line { transition: stroke-opacity 0.6s ease, stroke-width 0.6s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .ireg-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 700; text-anchor: middle; transition: fill .4s ease, stroke .4s ease; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="east-asia-hub.html">East Asia hub</a></p>
+  <p class="kicker">Family research &middot; Phase 18 of the world atlas</p>
+  <h1>Flags of Japan</h1>
+  <p class="lede">Japan's political history runs from the rice-farming Yayoi chiefdoms known mainly through Chinese chronicles, through the early Yamato court's consolidation of the home islands, more than six centuries in which real power sat not with the emperor but with a series of shogunates &mdash; military governments that kept the imperial line as a ceremonial and religious figurehead while they actually ruled &mdash; to the 1868 Meiji Restoration's rapid modernization, the WWII-era empire, and the pacifist constitution written under postwar American occupation. The Hinomaru sun-disc has ancient roots in Japanese art and religious symbolism, and was already in wide informal and naval use for centuries, but it was only formally written into law as Japan's national flag in 1999 &mdash; a detail worth noting on its own.</p>
+  <p class="lede">This page states Japan's World War II-era conduct &mdash; its invasion and occupation of large parts of Asia and the Pacific, and its eventual defeat &mdash; factually and without dwelling on it beyond what a flag-history page needs.</p>
+
+  <div class="scope-note">
+    <b>Scope of this page:</b> the Japanese home islands, from the Yayoi period (c. 300 BCE) to the present, nine political periods. No internal governing split exists within Japan's own modern territory, so this page carries no internal-partition map. Part of a larger atlas &mdash; see the linked pages at the bottom.
+  </div>
+
+  <div class="imap-section">
+    <h2>One coastline, nine eras</h2>
+    <p class="imap-sub">Japan's own real coastline, traced whole &mdash; the archipelago from Hokkaido down through Honshu, Shikoku, and Kyushu to Okinawa. Press play, or drag the slider, to watch who held it, era to era.</p>
+    <div class="rule-box">
+      <b>This page doesn't show an internal partition for Japan.</b> Real internal fragmentation happened here &mdash; the Sengoku ("Warring States") period's rival daimyo domains, with contested han (domain) borders shifting across the 15th&ndash;16th centuries &mdash; but it isn't shown here as a traceable internal split, because no reliable traced boundary dataset for those historical han/domain borders was available in this session. That's different from Hungary's Royal Hungary vs. Ottoman Hungary split elsewhere in this atlas, which follows a real documented, traceable 16th&ndash;17th-century frontier; lacking an equivalent traced source for Sengoku-era Japan, this map shows only the modern country's real outer coastline, era by era, rather than fabricate an internal boundary from guesswork.
+    </div>
+    <div class="imap-frame">
+      <div class="imap-controls">
+        <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="imap-year" id="iYearTag">c. 300 BCE</span>
+        <input type="range" id="iSlider" min="0" max="8" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="imap-svg" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+        <g class="context-label">
+          <text x="35" y="60">SEA OF JAPAN</text>
+          <text x="205" y="115">PACIFIC OCEAN</text>
+        </g>
+        <path id="ireg-jp" class="ireg-fill" d="M60.0,152.5 L61.3,156.8 L55.7,164.5 L51.6,160.4 L46.5,163.4 L43.9,170.8 L37.4,167.2 L37.5,161.2 L43.0,153.6 L48.6,155.1 L52.7,149.7 L60.0,152.5 Z M123.0,114.6 L119.3,124.7 L121.0,131.0 L115.8,139.9 L103.1,145.9 L85.7,146.7 L71.5,161.1 L64.8,156.3 L64.4,146.8 L47.1,149.6 L35.3,155.6 L23.7,155.8 L33.8,165.1 L27.1,186.7 L20.7,192.0 L15.9,187.1 L18.3,175.7 L12.0,172.0 L8.0,163.3 L17.4,159.4 L22.6,151.4 L32.6,144.9 L39.9,136.2 L59.7,132.4 L70.3,135.0 L80.8,112.5 L87.4,118.5 L107.6,100.9 L113.9,85.5 L112.2,71.2 L116.4,63.2 L126.9,60.9 L132.4,78.4 L132.1,88.7 L122.9,101.5 L123.0,114.6 Z M152.2,25.5 L159.2,28.2 L166.2,22.8 L168.5,37.0 L153.7,40.5 L145.0,53.1 L129.4,44.4 L123.9,58.3 L112.9,58.5 L111.5,45.9 L116.4,36.1 L127.1,35.4 L130.0,17.9 L132.9,8.0 L144.6,21.2 L152.2,25.5 Z"/>
+        <text class="ireg-label" id="ilbl-jp" x="80" y="120" style="font-size:10px">JAPAN</text>
+      </svg>
+      <div class="imap-head">
+        <div class="imap-name" id="iEraName">Yayoi period</div>
+        <div class="imap-owners" id="iEraOwners"></div>
+      </div>
+      <div class="iflags-row" id="iFlagsRow"></div>
+      <p class="imap-story" id="iEraStory"></p>
+
+      <p class="map-note">Real traced modern coastline, no internal partition shown &mdash; see the rule box above for why.</p>
+      <div class="imap-key" id="iLegend"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <!-- 1: Postwar -->
+    <div class="entry" data-n="9" id="era-1947">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#f4efe1"/>
+              <circle cx="150" cy="100" r="60" fill="#bc002d"/>
+            </svg>
+            <div class="flag-caption">the Hinomaru &mdash; ancient roots, formal law only since 1999</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1947 &ndash; present</div>
+            <h3 class="card-title">Japan (postwar constitutional era)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A sovereign parliamentary state under a written constitution, with the emperor reduced to a symbolic head of state with no political power since 1947."><span class="dot" style="background:#a9762f"></span>Constitutional monarchy</span><span class="tag" tabindex="0" data-tip="Prime Minister of Japan when the postwar constitution took effect in May 1947, guiding the country through the early years of its new constitutional order."><span class="dot" style="background:#4a3b78"></span>Shigeru Yoshida</span><span class="tag" tabindex="0" data-tip="Article 20 of the 1947 constitution guarantees freedom of religion and separates religion from the state, ending State Shinto&#x27;s official status as the wartime empire&#x27;s established faith."><span class="dot" style="background:#8e3b62"></span>No state religion</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Revisions to Japan's immigration law in 1990 grant special residency status to Nikkei (ethnic Japanese) descendants abroad, drawing tens of thousands of Japanese-Brazilians and Japanese-Peruvians to Japan through the 1990s to fill factory labor shortages."><span class="dot" style="background:#2f7a6b"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#009c3b"/><path d="M10,2 L18,7 L10,12 L2,7 Z" fill="#ffdf00"/><circle cx="10" cy="7" r="2.6" fill="#002776"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="6.67" height="14" fill="#d91023"/><rect x="6.67" width="6.67" height="14" fill="#fff"/><rect x="13.33" width="6.67" height="14" fill="#d91023"/></svg></span>Immigration: Nikkei Brazilian &amp; Peruvian return migration (1990s)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The world's oldest continuous hereditary monarchy, ruling as ceremonial or actual sovereign throughout Japanese history, c.660 BCE (traditional)–present. Mon: the 16-petal gold chrysanthemum."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><g fill="#f9d616"><circle cx="50" cy="50" r="9"/><path d="M50,10 L56,32 L44,32 Z"/><path d="M50,90 L56,68 L44,68 Z"/><path d="M10,50 L32,44 L32,56 Z"/><path d="M90,50 L68,44 L68,56 Z"/><path d="M22,22 L40,38 L32,42 Z"/><path d="M78,22 L60,38 L68,42 Z"/><path d="M22,78 L40,62 L32,58 Z"/><path d="M78,78 L60,62 L68,58 Z"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Imperial House of Japan</span></div>
+            <p><span class="label">Who &amp; why:</span> Japan's new postwar constitution, drafted under Allied occupation authority and taking effect in May 1947, renounces war as a sovereign right (Article 9) and reduces the emperor to a symbolic head of state with no political power, ending the wartime imperial system. Full sovereignty returns with the 1952 San Francisco Peace Treaty, and Japan rebuilds into one of the world's largest economies over the following decades. The Hinomaru continues in everyday use throughout, but only receives formal legal status as the national flag &mdash; alongside "Kimigayo" as the national anthem &mdash; under the 1999 Act on National Flag and Anthem, following decades in which it carried no explicit statutory basis at all.</p>
+            <p><span class="label">What it represents:</span> a red sun disc on white, referencing Japan's own name (Nihon, "origin of the sun") and centuries of use on ships, temple banners, and military standards long before any law formalized it.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3 (fixed by the 1999 law; earlier informal use varied).</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">White field, red disc centered (fixed at exactly center by the 1999 law; earlier practice sometimes shifted it slightly toward the hoist).</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#bc002d"></span><span class="meta"><span class="name">Red</span><span class="hex">#BC002D</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2: Occupation -->
+    <div class="entry" data-n="8" id="era-1945">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#f4efe1"/>
+              <circle cx="150" cy="100" r="60" fill="#bc002d"/>
+              <rect width="300" height="200" fill="none" stroke="#204b5c" stroke-width="4" stroke-dasharray="8 6"/>
+            </svg>
+            <div class="flag-caption">the Hinomaru, flown under Allied occupation restrictions</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1945 &ndash; 1947</div>
+            <h3 class="card-title">Allied occupation of Japan</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Japan under American-led Allied occupation authority following its August 1945 surrender, its institutions demilitarized and democratized ahead of the 1947 constitutional settlement."><span class="dot" style="background:#6b5c4a"></span>Occupied territory</span><span class="tag" tabindex="0" data-tip="Supreme Commander for the Allied Powers, governing occupied Japan and overseeing the drafting of its new postwar constitution."><span class="dot" style="background:#4a3b78"></span>Douglas MacArthur</span><span class="tag" tabindex="0" data-tip="The occupation&#x27;s 1945 Shinto Directive formally disestablished State Shinto, ending its official status and government financial support, ahead of the constitutional separation of religion and state that followed in 1947."><span class="dot" style="background:#8e3b62"></span>No state religion (State Shinto disestablished)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="American-led Allied forces occupy Japan following its August 1945 surrender, governing the country under the Supreme Commander for the Allied Powers until sovereignty is restored in 1952."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#b22234"/><g fill="#fff"><rect y="1.6" width="20" height="1.6"/><rect y="4.8" width="20" height="1.6"/><rect y="8" width="20" height="1.6"/><rect y="11.2" width="20" height="1.6"/></g><rect width="8" height="7.5" fill="#3c3b6e"/></svg>Occupied by: Allied powers (US-led)</span><span class="tag" tabindex="0" data-tip="Roughly 6.6 million Japanese soldiers and civilian settlers are repatriated to Japan from the former empire's territories in Korea, Manchuria, Taiwan, and elsewhere between 1945 and 1947, one of the largest population transfers of the postwar period."><span class="dot" style="background:#2f7a6b"></span>Immigration: mass repatriation from the former empire</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The world's oldest continuous hereditary monarchy, ruling as ceremonial or actual sovereign throughout Japanese history, c.660 BCE (traditional)–present. Mon: the 16-petal gold chrysanthemum."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><g fill="#f9d616"><circle cx="50" cy="50" r="9"/><path d="M50,10 L56,32 L44,32 Z"/><path d="M50,90 L56,68 L44,68 Z"/><path d="M10,50 L32,44 L32,56 Z"/><path d="M90,50 L68,44 L68,56 Z"/><path d="M22,22 L40,38 L32,42 Z"/><path d="M78,22 L60,38 L68,42 Z"/><path d="M22,78 L40,62 L32,58 Z"/><path d="M78,78 L60,62 L68,58 Z"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Imperial House of Japan</span></div>
+            <p><span class="label">Who &amp; why:</span> Japan surrenders on 15 August 1945 after the atomic bombings of Hiroshima and Nagasaki and the Soviet Union's entry into the Pacific War, ending World War II. American-led Allied occupation authorities under General Douglas MacArthur govern the country, restrict civilian use of the Hinomaru in the occupation's early years, demilitarize and democratize Japanese institutions, and oversee the drafting of the new constitution that takes effect in 1947.</p>
+            <p><span class="label">What it represents:</span> the same Hinomaru, its use curtailed but not abolished, pending the postwar constitutional settlement.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Same as above.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3: Empire of Japan -->
+    <div class="entry" data-n="7" id="era-1868">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#f4efe1"/>
+              <circle cx="150" cy="100" r="45" fill="#bc002d"/>
+              <g stroke="#bc002d" stroke-width="6"><line x1="150" y1="100" x2="150" y2="6"/><line x1="150" y1="100" x2="150" y2="194"/><line x1="150" y1="100" x2="48" y2="100"/><line x1="150" y1="100" x2="252" y2="100"/><line x1="150" y1="100" x2="76" y2="26"/><line x1="150" y1="100" x2="224" y2="26"/><line x1="150" y1="100" x2="76" y2="174"/><line x1="150" y1="100" x2="224" y2="174"/></g>
+            </svg>
+            <div class="flag-caption">the Rising Sun ensign, flown alongside the Hinomaru</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1868 &ndash; 1945</div>
+            <h3 class="card-title">Empire of Japan (Meiji through Sh&#333;wa)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A sovereign empire under a written constitution (from 1889), with the emperor as head of state pursuing rapid modernization, territorial expansion, and, from the 1930s, militarist war."><span class="dot" style="background:#a9762f"></span>Constitutional empire</span><span class="tag" tabindex="0" data-tip="Emperor whose 1868 restoration ended the Tokugawa shogunate and returned formal political authority to the throne, launching the era of rapid modernization that bears his name."><span class="dot" style="background:#4a3b78"></span>Emperor Meiji</span><span class="tag" tabindex="0" data-tip="State Shinto was established as the empire&#x27;s official ideology and religion, centered on the emperor&#x27;s divine status and enforced through government-run shrines, until the postwar occupation disestablished it."><span class="dot" style="background:#8e3b62"></span>State Shinto</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Beginning with the 1885 government-sponsored kanyaku imin program, hundreds of thousands of Japanese emigrate to Hawaii, the US mainland, and later Brazil and Peru to work on plantations, laying the foundation for today's large Japanese diaspora communities in the Americas."><span class="dot" style="background:#a3672f"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#b22234"/><g fill="#fff"><rect y="1.6" width="20" height="1.6"/><rect y="4.8" width="20" height="1.6"/><rect y="8" width="20" height="1.6"/><rect y="11.2" width="20" height="1.6"/></g><rect width="8" height="7.5" fill="#3c3b6e"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#009c3b"/><path d="M10,2 L18,7 L10,12 L2,7 Z" fill="#ffdf00"/><circle cx="10" cy="7" r="2.6" fill="#002776"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="6.67" height="14" fill="#d91023"/><rect x="6.67" width="6.67" height="14" fill="#fff"/><rect x="13.33" width="6.67" height="14" fill="#d91023"/></svg></span>Emigration: to Hawaii, the Americas (1885&ndash;1920s)</span><span class="tag" tabindex="0" data-tip="After annexing Korea in 1910, Japan brings hundreds of thousands of Korean laborers into the home islands, a flow that becomes forced wartime conscription from 1939, ultimately bringing over 700,000 Koreans to work in Japanese mines and factories by 1945."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#fff"/><path d="M10,4 a3,3 0 0 1 0,6 a1.5,1.5 0 0 1 0,-3 a1.5,1.5 0 0 0 0,-3z" fill="#c60c30"/><path d="M10,4 a3,3 0 0 0 0,6 a1.5,1.5 0 0 0 0,-3 a1.5,1.5 0 0 1 0,-3z" fill="#003478"/><g stroke="#000" stroke-width="0.5"><path d="M3,3 h2 M3,4 h2 M3,5 h2"/><path d="M15,3 h2 M15,4.5 h2 M15,5.5 h1 M16.3,5.5 h0.7"/></g></svg>Immigration: Korean laborers, later forced conscription (1910&ndash;45)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The world's oldest continuous hereditary monarchy, ruling as ceremonial or actual sovereign throughout Japanese history, c.660 BCE (traditional)–present. Mon: the 16-petal gold chrysanthemum."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><g fill="#f9d616"><circle cx="50" cy="50" r="9"/><path d="M50,10 L56,32 L44,32 Z"/><path d="M50,90 L56,68 L44,68 Z"/><path d="M10,50 L32,44 L32,56 Z"/><path d="M90,50 L68,44 L68,56 Z"/><path d="M22,22 L40,38 L32,42 Z"/><path d="M78,22 L60,38 L68,42 Z"/><path d="M22,78 L40,62 L32,58 Z"/><path d="M78,78 L60,62 L68,58 Z"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Imperial House of Japan</span></div>
+            <p><span class="label">Who &amp; why:</span> the 1868 Meiji Restoration abolishes the Tokugawa shogunate, formally returns political authority to Emperor Meiji, and launches rapid industrial and military modernization along Western lines. Japan defeats Qing China (1894&ndash;95) and Russia (1904&ndash;05), annexes Korea (1910) and Taiwan (1895), and, under the Sh&#333;wa emperor from 1926, pursues militarist expansion across China from 1931 and into the wider Pacific War from 1941 as part of World War II, a period of invasion, occupation, and mass casualties across the region stated here factually, ending in Japan's 1945 defeat.</p>
+            <p><span class="label">What it represents:</span> the plain Hinomaru serves as national flag throughout, formally specified for merchant shipping as early as 1870; the naval and military Rising Sun ensign, with sixteen rays radiating from an off-center sun, flies alongside it for the Imperial Japanese Navy and Army.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3 (Hinomaru, per an 1870 merchant-marine ordinance); military ensign 2:3 also.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Rising Sun ensign: white field, red disc slightly toward the hoist, sixteen red rays radiating to the edges.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#bc002d"></span><span class="meta"><span class="name">Red</span><span class="hex">#BC002D</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4: Edo/Tokugawa -->
+    <div class="entry" data-n="6" id="era-1603">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#241f14"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" fill="#c9a13c">NO NATIONAL</text>
+              <text x="150" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" fill="#c9a13c">FLAG YET</text>
+            </svg>
+            <div class="flag-caption">Tokugawa black and gold &mdash; clan mon, not a national flag</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1603 &ndash; 1868</div>
+            <h3 class="card-title">Tokugawa Shogunate (Edo period)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A military government ruling in the emperor&#x27;s name from Edo for two and a half centuries, while the emperor himself remained a largely powerless ceremonial figure in Kyoto."><span class="dot" style="background:#a9762f"></span>Shogunate (military government)</span><span class="tag" tabindex="0" data-tip="Warlord who won the decisive Battle of Sekigahara in 1600 and was named shogun in 1603, founding the dynasty that ruled Japan for the next two and a half centuries."><span class="dot" style="background:#4a3b78"></span>Tokugawa Ieyasu</span><span class="tag" tabindex="0" data-tip="The shogunate required every household to register with a Buddhist temple (the danka system) as a tool of social control, while banning Christianity outright &mdash; a de facto Buddhist establishment rather than a single formally proclaimed state religion."><span class="dot" style="background:#8e3b62"></span>Buddhism (temple registration system)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The world's oldest continuous hereditary monarchy, ruling as ceremonial or actual sovereign throughout Japanese history, c.660 BCE (traditional)–present. Mon: the 16-petal gold chrysanthemum."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><g fill="#f9d616"><circle cx="50" cy="50" r="9"/><path d="M50,10 L56,32 L44,32 Z"/><path d="M50,90 L56,68 L44,68 Z"/><path d="M10,50 L32,44 L32,56 Z"/><path d="M90,50 L68,44 L68,56 Z"/><path d="M22,22 L40,38 L32,42 Z"/><path d="M78,22 L60,38 L68,42 Z"/><path d="M22,78 L40,62 L32,58 Z"/><path d="M78,78 L60,62 L68,58 Z"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Imperial House of Japan</span><span class="tag" tabindex="0" data-tip="Ruled the Edo Shogunate, unifying Japan under 250 years of enforced peace and isolation, 1603–1868. Mon: the triple hollyhock leaf (mitsuba aoi)."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f4efe1"/><g fill="#2f6b4a"><path d="M50,34 q-14,10 -8,28 q4,10 8,10 q4,0 8,-10 q6,-18 -8,-28 Z"/><path d="M50,34 q-14,10 -8,28 q4,10 8,10 q4,0 8,-10 q6,-18 -8,-28 Z" transform="rotate(120 50 62)"/><path d="M50,34 q-14,10 -8,28 q4,10 8,10 q4,0 8,-10 q6,-18 -8,-28 Z" transform="rotate(240 50 62)"/></g><circle cx="50" cy="62" r="4" fill="#2f6b4a"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Tokugawa clan</span></div>
+            <p><span class="label">Who &amp; why:</span> Tokugawa Ieyasu wins the decisive Battle of Sekigahara in 1600 and is named shogun in 1603, founding a military government that rules Japan for two and a half centuries from Edo (modern Tokyo) while the emperor remains a largely powerless court figure in Kyoto. The shogunate enforces a strict class system, near-total national seclusion (sakoku) from the 1630s, and over two centuries of internal peace, before American Commodore Perry's 1853 arrival forces Japan open and triggers the crisis that ends shogunate rule in 1868.</p>
+            <p><span class="label">What it represents:</span> no single national flag exists under the Tokugawa; ships and processions instead flew clan mon (heraldic crests), most famously the Tokugawa family's own triple hollyhock crest, shown here only as a color reference rather than an invented national banner.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested national flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5: Ashikaga/Muromachi -->
+    <div class="entry" data-n="5" id="era-1336">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#3f5c3a"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" fill="#c9a13c">NO NATIONAL</text>
+              <text x="150" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" fill="#c9a13c">FLAG YET</text>
+            </svg>
+            <div class="flag-caption">no attested national flag, a fragmented military era</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1336 &ndash; 1573</div>
+            <h3 class="card-title">Ashikaga Shogunate (Muromachi period)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A shogunate governing from Kyoto whose central authority steadily weakened, collapsing outright into the Sengoku period of near-constant regional warfare among competing daimyo."><span class="dot" style="background:#6b5c4a"></span>Shogunate, fragmented</span><span class="tag" tabindex="0" data-tip="Warlord who established the second shogunate in 1336 after fighting a rival imperial court, governing from Kyoto&#x27;s Muromachi district."><span class="dot" style="background:#4a3b78"></span>Ashikaga Takauji</span><span class="tag" tabindex="0" data-tip="The Ashikaga shoguns were strong patrons of Zen Buddhism, particularly the Rinzai school, which shaped the era&#x27;s art and culture, even as no single sect was ever formally proclaimed the state religion."><span class="dot" style="background:#8e3b62"></span>Zen Buddhism (shogunal patronage)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The world's oldest continuous hereditary monarchy, ruling as ceremonial or actual sovereign throughout Japanese history, c.660 BCE (traditional)–present. Mon: the 16-petal gold chrysanthemum."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><g fill="#f9d616"><circle cx="50" cy="50" r="9"/><path d="M50,10 L56,32 L44,32 Z"/><path d="M50,90 L56,68 L44,68 Z"/><path d="M10,50 L32,44 L32,56 Z"/><path d="M90,50 L68,44 L68,56 Z"/><path d="M22,22 L40,38 L32,42 Z"/><path d="M78,22 L60,38 L68,42 Z"/><path d="M22,78 L40,62 L32,58 Z"/><path d="M78,78 L60,62 L68,58 Z"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Imperial House of Japan</span><span class="tag" tabindex="0" data-tip="Ran the Muromachi Shogunate for over two centuries, 1338–1573. Mon: two horizontal bars within a circle (futatsubiki)."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f4efe1"/><circle cx="50" cy="55" r="34" fill="none" stroke="#1a1a1a" stroke-width="5"/><path d="M22,45 H78" stroke="#1a1a1a" stroke-width="7"/><path d="M22,65 H78" stroke="#1a1a1a" stroke-width="7"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Ashikaga clan</span></div>
+            <p><span class="label">Who &amp; why:</span> Ashikaga Takauji establishes a second shogunate in 1336 after brief imperial-restoration fighting (including a rival Southern Court that persists until 1392), governing from Kyoto's Muromachi district. Central authority weakens steadily, collapsing outright into the Sengoku ("Warring States") period of near-constant regional warfare among competing daimyo lords from roughly 1467 until Oda Nobunaga's rise begins reunifying the country in the 1560s&ndash;70s, a process the succeeding Tokugawa complete.</p>
+            <p><span class="label">What it represents:</span> no unified national flag exists through this fragmented era; regional warlords flew their own clan banners and mon rather than any single Japanese symbol.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested national flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6: Kamakura -->
+    <div class="entry" data-n="4" id="era-1185">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" fill="#c9a13c">NO NATIONAL</text>
+              <text x="150" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" fill="#c9a13c">FLAG YET</text>
+            </svg>
+            <div class="flag-caption">no attested national flag, Japan's first shogunate</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1185 &ndash; 1333</div>
+            <h3 class="card-title">Kamakura Shogunate</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Japan&#x27;s first shogunate, establishing the pattern of an emperor kept as ceremonial head of state in Kyoto while a military government actually ruled from elsewhere."><span class="dot" style="background:#a9762f"></span>Shogunate (military government)</span><span class="tag" tabindex="0" data-tip="Warrior who won the Genpei War and was named Japan&#x27;s first shogun in 1192, with his government effectively established from 1185, founding the shogunate system itself."><span class="dot" style="background:#4a3b78"></span>Minamoto no Yoritomo</span><span class="tag" tabindex="0" data-tip="No single sect was formally established, but this era saw new, widely influential Buddhist schools founded (Pure Land, Zen, Nichiren) alongside the continuing Shinto rites of the imperial court &mdash; a genuinely mixed religious landscape."><span class="dot" style="background:#8e3b62"></span>Buddhism and Shinto (no single establishment)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The world's oldest continuous hereditary monarchy, ruling as ceremonial or actual sovereign throughout Japanese history, c.660 BCE (traditional)–present. Mon: the 16-petal gold chrysanthemum."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><g fill="#f9d616"><circle cx="50" cy="50" r="9"/><path d="M50,10 L56,32 L44,32 Z"/><path d="M50,90 L56,68 L44,68 Z"/><path d="M10,50 L32,44 L32,56 Z"/><path d="M90,50 L68,44 L68,56 Z"/><path d="M22,22 L40,38 L32,42 Z"/><path d="M78,22 L60,38 L68,42 Z"/><path d="M22,78 L40,62 L32,58 Z"/><path d="M78,78 L60,62 L68,58 Z"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Imperial House of Japan</span><span class="tag" tabindex="0" data-tip="Imperial-descended warrior clan whose leader founded the Kamakura Shogunate in 1192, c.850–1200s. Mon: sasa rindo, bamboo leaves with gentian flowers."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f4efe1"/><g fill="#2f6b4a"><path d="M40,30 v34 M46,26 v40 M52,26 v40 M58,30 v34" stroke="#2f6b4a" stroke-width="4"/></g><g fill="#5c3a8a"><path d="M50,74 q-8,-10 0,-18 q8,8 0,18 Z"/><path d="M40,80 q-6,-8 2,-15 q6,7 -2,15 Z"/><path d="M60,80 q6,-8 -2,-15 q-6,7 2,15 Z"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Minamoto clan</span></div>
+            <p><span class="label">Who &amp; why:</span> Minamoto no Yoritomo wins the Genpei War and is named the first shogun in 1192 (with his government effectively established from 1185), founding the pattern that will govern Japan on and off for the next six-plus centuries: an emperor kept as ceremonial and religious head of state in Kyoto while a military government actually rules from elsewhere, here Kamakura. The shogunate famously repels two attempted Mongol invasions (1274 and 1281), aided by typhoons later mythologized as the "kamikaze" (divine wind), before internal strain and the costs of those invasions weaken it into collapse in 1333.</p>
+            <p><span class="label">What it represents:</span> no national flag exists yet; samurai clans fly their own war banners (sashimono and uma-jirushi) rather than any unified Japanese symbol.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested national flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 7: Heian -->
+    <div class="entry" data-n="3" id="era-794">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c1f2e"/>
+              <rect width="300" height="200" fill="none" stroke="#f4efe1" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" fill="#f4efe1">NO NATIONAL</text>
+              <text x="150" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" fill="#f4efe1">FLAG YET</text>
+            </svg>
+            <div class="flag-caption">imperial court era, no attested national flag</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">794 &ndash; 1185</div>
+            <h3 class="card-title">Heian period (imperial court rule)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="The last era before military shogunates took over, when the imperial court, and the powerful Fujiwara regents who dominated much of it, still governed Japan directly."><span class="dot" style="background:#a9762f"></span>Imperial court rule</span><span class="tag" tabindex="0" data-tip="Emperor who moved the capital to Heian-ky&#333; in 794, opening the nearly four centuries of direct court rule that give this era its name."><span class="dot" style="background:#4a3b78"></span>Emperor Kanmu</span><span class="tag" tabindex="0" data-tip="The Heian court heavily patronized Buddhism, especially the Tendai and Shingon schools introduced early in the period, alongside continuing Shinto court ritual &mdash; the two coexisted without either being an exclusive state establishment."><span class="dot" style="background:#8e3b62"></span>Buddhism and Shinto (court-patronized)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The world's oldest continuous hereditary monarchy, ruling as ceremonial or actual sovereign throughout Japanese history, c.660 BCE (traditional)–present. Mon: the 16-petal gold chrysanthemum."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><g fill="#f9d616"><circle cx="50" cy="50" r="9"/><path d="M50,10 L56,32 L44,32 Z"/><path d="M50,90 L56,68 L44,68 Z"/><path d="M10,50 L32,44 L32,56 Z"/><path d="M90,50 L68,44 L68,56 Z"/><path d="M22,22 L40,38 L32,42 Z"/><path d="M78,22 L60,38 L68,42 Z"/><path d="M22,78 L40,62 L32,58 Z"/><path d="M78,78 L60,62 L68,58 Z"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Imperial House of Japan</span><span class="tag" tabindex="0" data-tip="Imperial-descended warrior clan whose leader founded the Kamakura Shogunate in 1192, c.850–1200s. Mon: sasa rindo, bamboo leaves with gentian flowers."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f4efe1"/><g fill="#2f6b4a"><path d="M40,30 v34 M46,26 v40 M52,26 v40 M58,30 v34" stroke="#2f6b4a" stroke-width="4"/></g><g fill="#5c3a8a"><path d="M50,74 q-8,-10 0,-18 q8,8 0,18 Z"/><path d="M40,80 q-6,-8 2,-15 q6,7 -2,15 Z"/><path d="M60,80 q6,-8 -2,-15 q-6,7 2,15 Z"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Minamoto clan</span></div>
+            <p><span class="label">Who &amp; why:</span> Emperor Kanmu moves the capital to Heian-ky&#333; (modern Kyoto) in 794, opening nearly four centuries in which the imperial court, and the powerful Fujiwara regents who dominate it for much of the period, still governs directly &mdash; the last era before military shogunates take over that role. Heian Japan produces a celebrated flowering of court literature and aesthetics, including "The Tale of Genji," often cited as the world's first novel, before rising samurai clan power culminates in the Genpei War and the Kamakura shogunate's founding in 1185.</p>
+            <p><span class="label">What it represents:</span> no flag exists in this era; imperial authority is expressed through court ritual, regalia, and the chrysanthemum symbolism later associated with the throne, not through any territorial banner.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested national flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 8: Yamato -->
+    <div class="entry" data-n="2" id="era-250">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#3f3020"/>
+              <rect width="300" height="200" fill="none" stroke="#bc002d" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#bc002d">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#bc002d">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder field &mdash; Yamato consolidation, no flag survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 250 &ndash; 794</div>
+            <h3 class="card-title">Yamato period (early imperial Japan)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="The Yamato court gradually consolidated authority over other clan groupings across the Japanese home islands, a process completed only by the end of this span."><span class="dot" style="background:#6b5c4a"></span>Fragmented, consolidating</span><span class="tag" tabindex="0" data-tip="No single ruler documented &mdash; the era&#x27;s early centuries are known mainly through archaeology, and the traditional imperial line tracing back to a legendary Emperor Jimmu is itself legendary rather than historically documented."><span class="dot" style="background:#4a3b78"></span>No single ruler documented</span><span class="tag" tabindex="0" data-tip="Indigenous Shinto kami-worship was the religion of early Yamato Japan; Buddhism arrived from Korea and China in the 6th century and spread widely thereafter, so no single faith spans the whole five-century era."><span class="dot" style="background:#8e3b62"></span>Shinto, then Buddhism (6th century)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Waves of toraijin ('people who crossed over') &mdash; scholars, artisans, and Buddhist monks from the Korean kingdoms of Baekje and Silla and from China &mdash; settle in Yamato Japan from the 4th century onward, bringing writing, metalworking, and Buddhism itself; a further wave of Baekje refugees arrives after Japan's defeated intervention at the 663 Battle of Baekgang."><span class="dot" style="background:#2f7a6b"></span>Immigration: Korean &amp; Chinese toraijin settlers (4th&ndash;7th c.)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="The world's oldest continuous hereditary monarchy, ruling as ceremonial or actual sovereign throughout Japanese history, c.660 BCE (traditional)–present. Mon: the 16-petal gold chrysanthemum."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><g fill="#f9d616"><circle cx="50" cy="50" r="9"/><path d="M50,10 L56,32 L44,32 Z"/><path d="M50,90 L56,68 L44,68 Z"/><path d="M10,50 L32,44 L32,56 Z"/><path d="M90,50 L68,44 L68,56 Z"/><path d="M22,22 L40,38 L32,42 Z"/><path d="M78,22 L60,38 L68,42 Z"/><path d="M22,78 L40,62 L32,58 Z"/><path d="M78,78 L60,62 L68,58 Z"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Imperial House of Japan</span></div>
+            <p><span class="label">Who &amp; why:</span> the Yamato court, centered in the Kinai region around modern Nara and Osaka, gradually consolidates authority over other clan groupings across the Japanese home islands from around the 3rd century CE onward, traditionally (and legendarily, not historically) tracing the imperial line back to 660 BCE. This span includes the Kofun period's monumental tomb-building, the 6th-century introduction of Buddhism from Korea and China, and the Nara period's (710&ndash;94) construction of a permanent capital and centralized law codes modeled on Tang China, before the court relocates to Heian-ky&#333; in 794.</p>
+            <p><span class="label">What it represents:</span> no securely documented flag survives from this pre-heraldic era; shown here honestly blank rather than invented, with a neutral placeholder field only.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 9: Yayoi -->
+    <div class="entry" data-n="1" id="era-300bce">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#3f3020"/>
+              <rect width="300" height="200" fill="none" stroke="#bc002d" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#bc002d">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#bc002d">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder field &mdash; rice-farming chiefdoms known mainly from archaeology and Chinese chronicles</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 300 BCE &ndash; 250 CE</div>
+            <h3 class="card-title">Yayoi period</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Dozens of small rice-farming chiefdoms and walled settlements across western and central Japan, known mainly through archaeology and Chinese chronicles rather than any native Japanese record, since writing had not yet reached the islands."><span class="dot" style="background:#6b5c4a"></span>Fragmented, pre-Yamato</span><span class="tag" tabindex="0" data-tip="Ruler of Yamataikoku recorded in the Chinese Records of the Three Kingdoms (San Guo Zhi) as sending an embassy to the Wei court in 238 CE and receiving the title &#x27;Queen of Wa, Friendly to Wei&#x27; &mdash; the earliest named ruler in the Japanese islands documented in any surviving text."><span class="dot" style="background:#4a3b78"></span>Himiko (per Chinese chronicles)</span><span class="tag" tabindex="0" data-tip="Yayoi religious practice is known only through archaeology &mdash; ritual bronze bells (d&#333;taku) and mirrors, and burial customs &mdash; predating any written record of Shinto or Buddhism in Japan."><span class="dot" style="background:#8e3b62"></span>Unrecorded (pre-Shinto, archaeological only)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Migrants and cultural influence from the Korean peninsula and mainland Asia bring wet-rice paddy agriculture, bronze and iron toolmaking, to the Japanese islands from around the 3rd century BCE, transforming the preceding Jomon hunter-gatherer culture into settled farming communities."><span class="dot" style="background:#2f7a6b"></span>Immigration: rice-farming &amp; metalworking migrants from Korea/mainland Asia</span></div>
+            <p><span class="label">Who &amp; why:</span> wet-rice paddy agriculture and bronze and iron toolmaking arrive in the Japanese islands from the Korean peninsula and mainland Asia from around the 3rd century BCE, ending roughly ten thousand years of the preceding Jomon hunter-gatherer culture and giving rise to dozens of small, competing farming chiefdoms across western and central Japan. Japan itself had no writing of its own in this era; almost everything known about named rulers comes from Chinese dynastic chronicles, most notably the Wei Zhi's account of Himiko, ruler of a polity called Yamataikoku, who sends an embassy to the Chinese Wei court in 238 CE. The Yayoi period gradually gives way to the Kofun period's monumental tomb-building and the Yamato court's own consolidation (see the entry above).</p>
+            <p><span class="label">What it represents:</span> no flag survives from Yayoi Japan, and no written Japanese record of this era exists at all; shown here honestly blank rather than invented, with a neutral placeholder field only.</p>
+            <p><span class="label">World context:</span> this span runs alongside the Qin and Han dynasties' unification and consolidation of China, the Silk Road's opening overland trade between China and the Mediterranean world, and, at its far end, the Roman Empire's own height under the Pax Romana &mdash; a reminder that Himiko's 238 CE embassy to the Wei court sits closer in time to the fall of the Han dynasty than to the Yamato court that would eventually succeed her polity.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#6b5c4a"></span><b>Fragmented</b> &mdash; no single national authority yet</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Imperial court rule</b> &mdash; the emperor's own court governs directly</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Shogunate</b> &mdash; a military government rules, emperor ceremonial</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Constitutional empire / monarchy</b> &mdash; sovereign under a written constitution</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the named ruler most associated with the era's start</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official/established faith, not the population's</div>
+    </div>
+  </div>
+
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for Japan lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/jp/">Search Record Atlas for Japan &rarr;</a>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This page is one lineage in a larger set. See the region-wide hub and the related pages here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="east-asia-hub.html"><b>East Asia hub</b><span>Six countries, dynasties to modern states</span></a>
+      <a class="link-card" href="south-korea-flags.html"><b>South Korea</b><span>Annexed by Japan 1910&ndash;45</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are close historical approximations for painting reference; pre-modern swatches are informed color references for eras with no documented flag, not official specifications. Map is schematic and not surveyed.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var IC = {
+    yayoi:"#6b5c4a", yamato:"#3f3020", heian:"#5c1f2e", kamakura:"#5c2a24", ashikaga:"#3f5c3a",
+    tokugawa:"#241f14", empire:"#7c2e1f", occupation:"#204b5c", postwar:"#bc002d"
+  };
+  var INAMES = {
+    yayoi:"Yayoi period", yamato:"Yamato Period", heian:"Heian Period (Imperial Court Rule)", kamakura:"Kamakura Shogunate",
+    ashikaga:"Ashikaga Shogunate (Muromachi Period)", tokugawa:"Tokugawa Shogunate (Edo Period)",
+    empire:"Empire of Japan", occupation:"Allied Occupation of Japan", postwar:"Japan (Postwar Constitutional Era)"
+  };
+  var IFLAGS = {
+    yayoi: '<rect width="300" height="200" fill="#3f3020"/><rect width="300" height="200" fill="none" stroke="#bc002d" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#bc002d">NO FLAG</text><text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#bc002d">DOCUMENTED</text>',
+    yamato: '<rect width="300" height="200" fill="#3f3020"/><rect width="300" height="200" fill="none" stroke="#bc002d" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#bc002d">NO FLAG</text><text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#bc002d">DOCUMENTED</text>',
+    heian: '<rect width="300" height="200" fill="#5c1f2e"/><rect width="300" height="200" fill="none" stroke="#f4efe1" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" fill="#f4efe1">NO NATIONAL</text><text x="150" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" fill="#f4efe1">FLAG YET</text>',
+    kamakura: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" fill="#c9a13c">NO NATIONAL</text><text x="150" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" fill="#c9a13c">FLAG YET</text>',
+    ashikaga: '<rect width="300" height="200" fill="#3f5c3a"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" fill="#c9a13c">NO NATIONAL</text><text x="150" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" fill="#c9a13c">FLAG YET</text>',
+    tokugawa: '<rect width="300" height="200" fill="#241f14"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" fill="#c9a13c">NO NATIONAL</text><text x="150" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" fill="#c9a13c">FLAG YET</text>',
+    empire: '<rect width="300" height="200" fill="#f4efe1"/><circle cx="150" cy="100" r="45" fill="#bc002d"/><g stroke="#bc002d" stroke-width="6"><line x1="150" y1="100" x2="150" y2="6"/><line x1="150" y1="100" x2="150" y2="194"/><line x1="150" y1="100" x2="48" y2="100"/><line x1="150" y1="100" x2="252" y2="100"/><line x1="150" y1="100" x2="76" y2="26"/><line x1="150" y1="100" x2="224" y2="26"/><line x1="150" y1="100" x2="76" y2="174"/><line x1="150" y1="100" x2="224" y2="174"/></g>',
+    occupation: '<rect width="300" height="200" fill="#f4efe1"/><circle cx="150" cy="100" r="60" fill="#bc002d"/><rect width="300" height="200" fill="none" stroke="#204b5c" stroke-width="4" stroke-dasharray="8 6"/>',
+    postwar: '<rect width="300" height="200" fill="#f4efe1"/><circle cx="150" cy="100" r="60" fill="#bc002d"/>'
+  };
+  function iFlagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (IFLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  var iLegendEl = document.getElementById("iLegend");
+  iLegendEl.innerHTML = Object.keys(IC).map(function (k) {
+    return '<span><span class="sw" style="background:' + IC[k] + '"></span>' + INAMES[k] + "</span>";
+  }).join("");
+
+  var ISNAP = [
+    { year:"c. 300 BCE", name:"Yayoi period", t:{ jp:IC.yayoi }, flagKeys:{ jp:"yayoi" },
+      story:"Wet-rice paddy agriculture and bronze and iron toolmaking arrive in the Japanese islands from the Korean peninsula and mainland Asia from around the 3rd century BCE, ending the preceding Jomon hunter-gatherer culture and giving rise to dozens of small, competing farming chiefdoms across western and central Japan. Japan had no writing of its own in this era; almost everything known about named rulers, such as Himiko of Yamataikoku, comes from Chinese dynastic chronicles. No flag survives from Yayoi Japan, shown here honestly blank." },
+    { year:"c. 250", name:"Yamato Period", t:{ jp:IC.yamato }, flagKeys:{ jp:"yamato" },
+      story:"The Yamato court, centered around modern Nara and Osaka, gradually consolidates authority over other clan groupings across the Japanese home islands from around the 3rd century CE, through the Kofun period's tomb-building and the 6th-century arrival of Buddhism, into the Nara period's centralized law codes. No securely documented flag survives from this pre-heraldic era, shown here honestly blank." },
+    { year:"794", name:"Heian Period (Imperial Court Rule)", t:{ jp:IC.heian }, flagKeys:{ jp:"heian" },
+      story:"Emperor Kanmu moves the capital to Heian-kyō (modern Kyoto) in 794, opening nearly four centuries in which the imperial court, and the powerful Fujiwara regents who dominate much of it, governs directly &mdash; the last era before military shogunates take over. No flag exists in this era; imperial authority is expressed through court ritual and regalia, not any territorial banner." },
+    { year:"1185", name:"Kamakura Shogunate", t:{ jp:IC.kamakura }, flagKeys:{ jp:"kamakura" },
+      story:"Minamoto no Yoritomo wins the Genpei War and is named the first shogun in 1192 (government effectively established 1185), founding the pattern that will govern Japan on and off for six-plus centuries: an emperor kept ceremonial in Kyoto while a military government actually rules from Kamakura. No national flag exists yet; samurai clans fly their own war banners." },
+    { year:"1336", name:"Ashikaga Shogunate (Muromachi Period)", t:{ jp:IC.ashikaga }, flagKeys:{ jp:"ashikaga" },
+      story:"Ashikaga Takauji establishes a second shogunate in 1336, governing from Kyoto's Muromachi district; central authority weakens steadily, collapsing outright into the Sengoku (\"Warring States\") period of near-constant regional warfare among competing daimyo lords from roughly 1467. No unified national flag exists through this fragmented era; regional warlords fly their own clan banners and mon rather than any single Japanese symbol." },
+    { year:"1603", name:"Tokugawa Shogunate (Edo Period)", t:{ jp:IC.tokugawa }, flagKeys:{ jp:"tokugawa" },
+      story:"Tokugawa Ieyasu wins the decisive Battle of Sekigahara in 1600 and is named shogun in 1603, founding a military government that rules Japan for two and a half centuries from Edo while the emperor remains a powerless court figure in Kyoto. No single national flag exists under the Tokugawa; ships and processions instead fly clan mon, most famously the Tokugawa family's own hollyhock crest." },
+    { year:"1868", name:"Empire of Japan", t:{ jp:IC.empire }, flagKeys:{ jp:"empire" },
+      story:"The 1868 Meiji Restoration abolishes the Tokugawa shogunate and returns political authority to Emperor Meiji, launching rapid modernization, territorial expansion, and, from the 1930s, militarist war across Asia and the Pacific &mdash; conduct stated here factually, ending in Japan's 1945 defeat. The plain Hinomaru serves as national flag throughout; the military Rising Sun ensign flies alongside it for the Imperial Japanese Navy and Army." },
+    { year:"1945", name:"Allied Occupation of Japan", t:{ jp:IC.occupation }, flagKeys:{ jp:"occupation" },
+      story:"Japan surrenders on 15 August 1945 after the atomic bombings of Hiroshima and Nagasaki and the Soviet Union's entry into the Pacific War, ending World War II. American-led Allied occupation authorities under General Douglas MacArthur govern the country and restrict, but do not abolish, civilian use of the Hinomaru, pending the constitutional settlement that takes effect in 1947." },
+    { year:"1947–present", name:"Japan (Postwar Constitutional Era)", t:{ jp:IC.postwar }, flagKeys:{ jp:"postwar" },
+      story:"Japan's new postwar constitution, drafted under Allied occupation authority, takes effect in May 1947, renouncing war as a sovereign right and reducing the emperor to a symbolic head of state with no political power. The Hinomaru continues in everyday use throughout, but only receives formal legal status as the national flag under the 1999 Act on National Flag and Anthem." }
+  ];
+
+  var IREGIONS = ["jp"];
+  var IREGION_NAMES = { jp:"Japan" };
+  var IADJ = [];
+
+  function iTextColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+
+  var iYearTag = document.getElementById("iYearTag");
+  var iEraName = document.getElementById("iEraName");
+  var iEraOwners = document.getElementById("iEraOwners");
+  var iEraStory = document.getElementById("iEraStory");
+  var iFlagsRow = document.getElementById("iFlagsRow");
+  var iSlider = document.getElementById("iSlider");
+
+  function iRender(idx) {
+    var era = ISNAP[idx];
+    iYearTag.textContent = era.year;
+    iEraName.textContent = era.name;
+    iEraStory.innerHTML = era.story;
+
+    IREGIONS.forEach(function (id) {
+      document.getElementById("ireg-" + id).setAttribute("fill", era.t[id]);
+      var tcol = iTextColorFor(era.t[id]);
+      var tcolHalo = tcol === "#201a12" ? "#f7f1e3" : "#201a12";
+      var lbl = document.getElementById("ilbl-" + id);
+      if (lbl) { lbl.setAttribute("fill", tcol); lbl.setAttribute("stroke", tcolHalo); }
+      var lbl2 = document.getElementById("ilbl-" + id + "2");
+      if (lbl2) { lbl2.setAttribute("fill", tcol); lbl2.setAttribute("stroke", tcolHalo); }
+    });
+
+    var label = Object.keys(IC).filter(function (k) { return IC[k] === era.t.jp; })[0];
+    iEraOwners.innerHTML = "<b>" + INAMES[label] + "</b>: whole country";
+
+    iFlagsRow.innerHTML = IREGIONS.map(function (id) {
+      return '<div class="iflag-chip">' + iFlagSvg(era.flagKeys[id]) + '<div class="ic-label">' + IREGION_NAMES[id] + '</div></div>';
+    }).join("");
+  }
+
+  iSlider.addEventListener("input", function () { iRender(parseInt(iSlider.value, 10)); });
+  iRender(0);
+
+  var iPlaying = false, iPlayTimer = null;
+  var iPlayBtn = document.getElementById("iPlayBtn");
+  function iStepPlay() {
+    var next = parseInt(iSlider.value, 10) + 1;
+    if (next > ISNAP.length - 1) { iStopPlay(); return; }
+    iSlider.value = next;
+    iRender(next);
+  }
+  function iStartPlay() {
+    iPlaying = true;
+    iPlayBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(iSlider.value, 10) >= ISNAP.length - 1) { iSlider.value = 0; iRender(0); }
+    iPlayTimer = setInterval(iStepPlay, 1700);
+  }
+  function iStopPlay() {
+    iPlaying = false;
+    iPlayBtn.innerHTML = "&#9654;";
+    clearInterval(iPlayTimer);
+  }
+  iPlayBtn.addEventListener("click", function () { iPlaying ? iStopPlay() : iStartPlay(); });
+})();
+</script>
+<script>
+  document.querySelectorAll(".tag[data-tip]").forEach(function (tag) {
+    tag.addEventListener("click", function (e) {
+      var wasOpen = tag.classList.contains("tip-open");
+      document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+      if (!wasOpen) tag.classList.add("tip-open");
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+  });
+</script>
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var html = '<h4>Genealogical records for this ground</h4>';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,857 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+</style></head><body>
+<title>Flags of the Belarusian Lands</title>
+<meta name="description" content="A chronological, paint-ready atlas of every flag that flew over Belarus, from the princes of Polotsk to the republic of today — with a map of each era.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.08rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; font-size: .94rem; color: var(--muted); }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  .legend { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+
+  /* ---------- Timeline ---------- */
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1px; background: var(--hair); }
+  @media (max-width: 560px) { .timeline::before { left: 9px; } }
+  .entry { position: relative; padding-left: 46px; margin-bottom: 46px; }
+  @media (max-width: 560px) { .entry { padding-left: 30px; } }
+  .entry::before {
+    content: attr(data-n);
+    position: absolute; left: 1px; top: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--paper); outline: 1px solid var(--hair);
+    background: var(--card);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--brick); display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) { .entry::before { left: -5px; width: 18px; height: 18px; font-size: 9px; } }
+
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+  .card-head { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  @media (max-width: 620px) { .card-head { flex-direction: column; } }
+  .flag-box { flex: none; width: 168px; }
+  .flag-box svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-caption { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .card-title { font-size: 1.32rem; font-weight: 600; line-height: 1.18; margin: 0 0 10px; text-wrap: balance; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px; border: 1px solid var(--card-border); color: var(--muted);
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  /* Flip tooltip below tags near the top of the viewport so it isn't clipped */
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  /* Keep tooltips from overflowing the left/right edges on narrow screens */
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint { border-top: 1px solid var(--hair); }
+  details.paint > summary {
+    cursor: pointer; list-style: none; padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--adriatic); display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before { content: "+"; font-family: "Fraunces", serif; font-size: 15px; width: 14px; }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row { display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px; }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--card-border); border-radius: 2px; padding: 5px 9px 5px 5px; background: var(--paper); }
+  .swatch .chip { width: 20px; height: 20px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: none; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 88px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 340px; height: auto; }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .ireg-label { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 700; text-anchor: middle; transition: fill .4s ease, stroke .4s ease; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="eastern-europe-hub.html">Eastern Europe hub</a></p>
+  <p class="kicker">Family research &middot; Phase 6 of the world atlas</p>
+  <h1>Flags of the Belarusian Lands</h1>
+  <p class="lede">From the early East Slavic and Baltic tribes of the forests and river valleys, through the semi-independent princes of Polotsk, five centuries as the demographic and linguistic heartland of the Grand Duchy of Lithuania, a partition-era absorption into the Russian Empire, a chaotic five years of civil war and foreign occupation, seven decades as a Soviet republic, and a republic of its own since 1991 &mdash; a white-red-white tricolor that keeps getting displaced by a red-and-green design modeled on the Soviet era.</p>
+  <p class="lede">Unlike its neighbors Ukraine and Lithuania, Belarus never had a durable internal east&ndash;west or north&ndash;south split of its own: from Polotsk onward it was consistently governed as one piece, whoever held it. This page traces who held all of it, era by era.</p>
+
+  <div class="scope-note">
+    <b>Scope of this page:</b> the lands of present-day Belarus, c. 6th century&ndash;present, nine political entities. Part of a larger atlas &mdash; see the map and linked pages at the bottom.
+  </div>
+
+  <div class="imap-section">
+    <h2>One border, nine rulers</h2>
+    <p class="imap-sub">Belarus's own real border, traced whole &mdash; another page in this atlas without an internal split to show. Press play, or drag the slider, to watch who held all of it, era to era.</p>
+    <div class="rule-box">
+      <b>Belarus doesn't split internally the way Ukraine does.</b> Its lands were consistently held as one piece &mdash; a core, heavily-populated part of the Grand Duchy of Lithuania, then absorbed whole into the Russian Empire, then governed as a single Soviet republic. There's no genuinely separate internal region here to carve out honestly; what changes is only who ruled all of it at once.
+    </div>
+    <div class="imap-frame">
+      <div class="imap-controls">
+        <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="imap-year" id="iYearTag">c. 6th c.</span>
+        <input type="range" id="iSlider" min="0" max="6" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="imap-svg" viewBox="0 0 300 230" xmlns="http://www.w3.org/2000/svg">
+        <path id="ireg-by" class="ireg-fill" d="M22.2,110.2 L49.8,110.4 L80.9,99.6 L87.6,83.4 L111.1,74.2 L108.4,61.4 L125.8,56.6 L156.6,45.5 L186.8,52.7 L190.8,59.8 L205.9,56.4 L233.9,63.2 L236.7,76.7 L230.5,84.4 L248.5,103.2 L260.2,108.4 L258.4,113.6 L277.7,118.6 L286.0,126.3 L274.9,132.5 L251.7,131.5 L246.2,134.2 L252.9,143.7 L260.0,162.1 L235.4,163.8 L226.6,170.0 L224.7,184.5 L213.3,181.7 L187.5,183.1 L180.0,176.4 L169.2,181.4 L158.5,177.2 L135.9,176.7 L103.9,169.8 L75.0,167.5 L52.8,168.2 L37.1,175.9 L23.4,177.1 L22.8,164.3 L14.0,151.0 L31.2,145.2 L31.3,133.8 L23.4,122.9 L22.2,110.2 Z"/>
+        <g font-family="IBM Plex Mono, monospace">
+          <text class="ireg-label" id="ilbl-by" x="150" y="118">BELARUS</text>
+        </g>
+      </svg>
+      <div class="imap-head">
+        <div class="imap-name" id="iEraName">Early East Slavic and Baltic tribes</div>
+        <div class="imap-owners" id="iEraOwners"></div>
+      </div>
+      <div class="iflags-row" id="iFlagsRow"></div>
+      <p class="imap-story" id="iEraStory"></p>
+
+      <p class="map-note">Real traced border (from public domain GeoJSON), no internal partition &mdash; see the rule box above for why.</p>
+      <div class="imap-key" id="iLegend"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <!-- 1 -->
+    <div class="entry" data-n="9" id="era-1995">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="133.3" fill="#c8302a"/>
+              <rect y="133.3" width="300" height="66.7" fill="#1a7a3d"/>
+              <g transform="translate(0,0)">
+                <rect width="34" height="200" fill="#f4efe1"/>
+                <g fill="#c8302a">
+                  <rect x="4" y="8" width="6" height="6"/><rect x="14" y="8" width="6" height="6"/><rect x="24" y="8" width="6" height="6"/>
+                  <rect x="9" y="16" width="6" height="6"/><rect x="19" y="16" width="6" height="6"/>
+                  <rect x="4" y="24" width="6" height="6"/><rect x="14" y="24" width="6" height="6"/><rect x="24" y="24" width="6" height="6"/>
+                </g>
+              </g>
+            </svg>
+            <div class="flag-caption">red &amp; green with a white-red national ornament, current design</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1995 &ndash; present</div>
+            <h3 class="card-title">Republic of Belarus (current flag)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="An internationally recognized, self-governing state since the 1991 Soviet collapse, though closely bound to Russia through political, economic, and military ties ever since."><span class="dot" style="background:#2f6b4a"></span>Sovereign state</span><span class="tag" tabindex="0" data-tip="President since 1994, who restored a Soviet-style red-and-green state flag by referendum in 1995 and has ruled Belarus as an authoritarian strongman ever since."><span class="dot" style="background:#4a3b78"></span>Alexander Lukashenko</span><span class="tag" tabindex="0" data-tip="Belarus's constitution establishes no state church; the population is majority Orthodox Christian, with a significant Roman Catholic minority, especially in the west."><span class="dot" style="background:#8e3b62"></span>Secular (no state religion)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Tens of thousands of Belarusians flee into exile in Poland, Lithuania, and elsewhere in the EU following the government's violent crackdown on mass protests after the disputed August 2020 presidential election."><span class="dot" style="background:#a3672f"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="7" fill="#fff"/><rect y="7" width="20" height="7" fill="#dc143c"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#fdb913"/><rect y="4.67" width="20" height="4.67" fill="#006a44"/><rect y="9.33" width="20" height="4.67" fill="#c1272d"/></svg></span>Emigration: political exiles after the 2020 crackdown</span></div>
+            <p><span class="label">Who &amp; why:</span> a contested May 1995 referendum, held under President Alexander Lukashenko &mdash; in office continuously since his election in July 1994, making him one of the longest-serving heads of state anywhere in the world &mdash; replaces the 1991 white-red-white tricolor with a red-and-green design closely modeled on the Soviet-era Byelorussian SSR flag, minus the hammer and sickle. A minor 2012 update simplified the hoist-side ornament pattern.</p>
+            <p><span class="label">What it represents:</span> red for the historic banner and for wartime sacrifice, green for the country's forests and fields; the white-on-red ornament pattern along the hoist is adapted from a traditional folk textile design, one of the few elements the government kept from pre-Soviet symbolism.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, red band (2/3) over green band (1/3), white-red ornament band at hoist (simplified here).</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Horizontal red-over-green with vertical ornamental strip at the hoist.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#c8302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#C8302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#1a7a3d"></span><span class="meta"><span class="name">Green</span><span class="hex">#1A7A3D</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White (ornament)</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="entry" data-n="8" id="era-1991">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#f4efe1"/>
+              <rect y="66.7" width="300" height="66.6" fill="#c8302a"/>
+              <rect y="133.3" width="300" height="66.7" fill="#f4efe1"/>
+            </svg>
+            <div class="flag-caption">white-red-white, first independence flag, revived from 1918</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1991 &ndash; 1995</div>
+            <h3 class="card-title">Republic of Belarus (first flag)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A newly independent state after the 1991 Soviet collapse, briefly flying a white-red-white flag rooted in the short-lived 1918 Belarusian People's Republic before it was replaced in 1995."><span class="dot" style="background:#2f6b4a"></span>Sovereign state</span><span class="tag" tabindex="0" data-tip="Physicist and chairman of the Supreme Council who signed the December 1991 Belovezha Accords dissolving the USSR, becoming independent Belarus's first head of state."><span class="dot" style="background:#4a3b78"></span>Stanislau Shushkevich</span><span class="tag" tabindex="0" data-tip="The newly independent republic's constitution established no state church, continuing the officially secular framework inherited from the late Soviet period."><span class="dot" style="background:#8e3b62"></span>Secular (no state religion)</span></div>
+            <p><span class="label">Who &amp; why:</span> Belarus declares independence on 25 August 1991 as the USSR collapses, and adopts the white-red-white tricolor first used by the short-lived Belarusian People's Republic in 1918 &mdash; a deliberate act of continuity with that earlier, thwarted attempt at statehood. The 1995 referendum ends this flag's official use after less than four years.</p>
+            <p><span class="label">What it represents:</span> the same design flown in 1918 and again by wartime and post-war Belarusian emigre and resistance groups who never accepted Soviet rule &mdash; adopted in 1991 as a symbol explicitly disconnected from the communist era, which is precisely why it was replaced in 1995.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, three horizontal bands in a 1:2:1 ratio.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">White top, red middle (double width), white bottom.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#c8302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#C8302A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="entry" data-n="7" id="era-1922">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="170" fill="#c8302a"/>
+              <rect y="170" width="300" height="30" fill="#1a7a3d"/>
+              <rect width="34" height="200" fill="#f4efe1"/>
+              <path d="M40,26 l6,18 19,0 -15.5,11.2 6,18 -15.5,-11.3 -15.5,11.3 6,-18 -15.5,-11.2 19,0 Z" fill="#c9a13c" stroke="#8c6a1f" stroke-width="1.5"/>
+              <path d="M22,50 h36 M22,58 h36" stroke="#c9a13c" stroke-width="3"/>
+            </svg>
+            <div class="flag-caption">red field, hammer-and-sickle canton, green stripe added late in the era</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1922 &ndash; 1991</div>
+            <h3 class="card-title">Byelorussian Soviet Socialist Republic</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A founding union republic of the USSR from December 1922, governed through the local Communist Party under Moscow's direction for nearly seven decades."><span class="dot" style="background:#8c2f2f"></span>Communist state</span><span class="tag" tabindex="0" data-tip="First Secretary of the Communist Party of Belarus from 1965 to 1980, widely remembered as the era's most prominent leader for his relatively popular postwar reconstruction-era rule."><span class="dot" style="background:#4a3b78"></span>Pyotr Masherov</span><span class="tag" tabindex="0" data-tip="Soviet doctrine suppressed both the historically dominant Orthodox Church and the significant Catholic minority, closing churches and persecuting clergy for most of this seven-decade period."><span class="dot" style="background:#8e3b62"></span>State atheism</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Nazi Germany occupies Soviet Belarus from 1941 to 1944, a period in which roughly a quarter of the republic's population dies, including the near-total destruction of its Jewish community in the Minsk ghetto and other mass-murder sites."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#cc0000"/><circle cx="10" cy="7" r="4.3" fill="#fff"/><g fill="#000"><path d="M10,3 h1.4 v3 h3 v1.4 h-4.4 z"/><path d="M10,3 h1.4 v3 h3 v1.4 h-4.4 z" transform="rotate(90 10 7)"/><path d="M10,3 h1.4 v3 h3 v1.4 h-4.4 z" transform="rotate(180 10 7)"/><path d="M10,3 h1.4 v3 h3 v1.4 h-4.4 z" transform="rotate(270 10 7)"/></g></svg>Occupied by: Nazi Germany (1941&ndash;44)</span><span class="tag" tabindex="0" data-tip="Tens of thousands of Belarusians, including so-called kulaks and members of the Polish minority, are deported to Siberia and Central Asia during Stalinist collectivization and the late-1930s purges."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#cc0000"/><path d="M4,3 l1,2.5 2.6,0 -2.1,1.6 0.8,2.5 -2.3,-1.5 -2.3,1.5 0.8,-2.5 -2.1,-1.6 2.6,0z" fill="#ffd700"/></svg>Emigration: Stalinist deportations to Siberia (1930s)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Magnate family with estates around Nyasvizh and Mir, dispossessed under Soviet rule by 1939, c.1450–1939. Arms &quot;Trzy Trąby&quot;: three black hunting horns on gold."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f9d616"/><g fill="#241f14"><path d="M30,36 q-6,16 6,26 q6,4 12,-2 q-10,-6 -10,-18 q0,-6 -8,-6 Z"/><path d="M70,36 q6,16 -6,26 q-6,4 -12,-2 q10,-6 10,-18 q0,-6 8,-6 Z"/><path d="M50,58 q-8,12 0,26 q4,6 12,0 q-8,-10 -6,-20 q1,-6 -6,-6 Z"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Radziwiłł</span><span class="tag" tabindex="0" data-tip="Magnate family holding estates around Ruzhany and Slonim, dispossessed under Soviet rule by 1939, c.1450–1939. Arms &quot;Lis&quot;: a silver horseshoe pierced by an arrow, cross above, on blue."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1e2f7a"/><path d="M30,46 a20,20 0 0 1 40,0 v6 h-9 v-6 a11,11 0 0 0 -22,0 v6 h-9 Z" fill="#f4efe1"/><line x1="26" y1="70" x2="70" y2="34" stroke="#f4efe1" stroke-width="4"/><path d="M66,32 l8,-4 l0,10 Z" fill="#f4efe1"/><rect x="46" y="80" width="8" height="16" fill="#f4efe1"/><rect x="40" y="82" width="20" height="5" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Sapieha</span></div>
+            <p><span class="label">Who &amp; why:</span> the BSSR is one of the four founding republics of the USSR on 30 December 1922, its flag simplifying over the decades from a plain red banner with gold lettering to the 1951 design shown here, which added the green stripe and hoist-side ornament that the modern flag still echoes. World War II devastates the republic more than almost any other Soviet territory: Nazi occupation from 1941&ndash;44 and the brutal partisan war fought against it cost Belarus an estimated quarter of its entire pre-war population, one of the highest per-capita losses of any country in the war.</p>
+            <p><span class="label">What it represents:</span> the standard Soviet republican formula &mdash; red field, gold hammer, sickle and star &mdash; personalized after 1951 with a green stripe (the republic's forests) and a white-on-red ornament pattern directly inherited, ironically, from the same folk-textile tradition the anti-Soviet 1918 tricolor also drew from.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2 (1951 version); earlier plain-red version had no fixed ratio.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red field with gold hammer, sickle and star canton; green stripe and white-red ornament added 1951 (simplified here).</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#c8302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#C8302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#1a7a3d"></span><span class="meta"><span class="name">Green</span><span class="hex">#1A7A3D</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#c9a13c"></span><span class="meta"><span class="name">Gold</span><span class="hex">#C9A13C</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="entry" data-n="6" id="era-1919">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#c8302a"/>
+              <path d="M120,80 l6,18 19,0 -15.5,11.2 6,18 -15.5,-11.3 -15.5,11.3 6,-18 -15.5,-11.2 19,0 Z" fill="#c9a13c" stroke="#8c6a1f" stroke-width="1.5"/>
+              <rect width="300" height="200" fill="none" stroke="#5c2a24" stroke-width="4" stroke-dasharray="9 7"/>
+            </svg>
+            <div class="flag-caption">plain early Soviet red banner, flown over a country split by war</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1919 &ndash; 1922</div>
+            <h3 class="card-title">Byelorussian SSR amid the Polish-Soviet War</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A Soviet republic proclaimed amid the chaos of the Russian Civil War, its territory then fought over and ultimately split by the Polish-Soviet War, formalized in the 1921 Treaty of Riga."><span class="dot" style="background:#8c5a2e"></span>Contested / civil war</span><span class="tag" tabindex="0" data-tip="Bolshevik leader who headed the Belarusian Soviet government through the Polish-Soviet War, before the 1921 Treaty of Riga divided Belarusian territory between Poland and Soviet Russia."><span class="dot" style="background:#4a3b78"></span>Alexander Myasnikyan</span><span class="tag" tabindex="0" data-tip="The Bolshevik government's atheist doctrine began suppressing the historically dominant Orthodox Church and Catholic minority from its earliest days, even amid the chaos of war."><span class="dot" style="background:#8e3b62"></span>State atheism</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Magnate family with estates around Nyasvizh and Mir, landholding until dispossessed by 1939. Arms &quot;Trzy Trąby&quot;: three black hunting horns on gold."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f9d616"/><g fill="#241f14"><path d="M30,36 q-6,16 6,26 q6,4 12,-2 q-10,-6 -10,-18 q0,-6 -8,-6 Z"/><path d="M70,36 q6,16 -6,26 q-6,4 -12,-2 q10,-6 10,-18 q0,-6 8,-6 Z"/><path d="M50,58 q-8,12 0,26 q4,6 12,0 q-8,-10 -6,-20 q1,-6 -6,-6 Z"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Radziwiłł</span><span class="tag" tabindex="0" data-tip="Magnate family holding estates around Ruzhany and Slonim, landholding until dispossessed by 1939. Arms &quot;Lis&quot;: a silver horseshoe pierced by an arrow, cross above, on blue."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1e2f7a"/><path d="M30,46 a20,20 0 0 1 40,0 v6 h-9 v-6 a11,11 0 0 0 -22,0 v6 h-9 Z" fill="#f4efe1"/><line x1="26" y1="70" x2="70" y2="34" stroke="#f4efe1" stroke-width="4"/><path d="M66,32 l8,-4 l0,10 Z" fill="#f4efe1"/><rect x="46" y="80" width="8" height="16" fill="#f4efe1"/><rect x="40" y="82" width="20" height="5" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Sapieha</span></div>
+            <p><span class="label">Who &amp; why:</span> the Bolsheviks proclaim the Byelorussian Soviet Socialist Republic on 1 January 1919 in Minsk, but the republic's borders exist mostly on paper for the next three years: the wider Polish-Soviet War (1919&ndash;21) is fought substantially across Belarusian territory, with Minsk itself changing hands twice. The March 1921 Treaty of Riga ends the war by splitting Belarusian lands outright &mdash; the western half becomes part of the Second Polish Republic (administered as the "Kresy Wschodnie"), while the eastern half remains this reduced Soviet republic, its territory and population sharply diminished from what the Belarusian People's Republic had claimed only three years earlier.</p>
+            <p><span class="label">What it represents:</span> a plain red field with gold lettering or a simple hammer-and-sickle emblem &mdash; the generic early-Soviet republican banner, adopted before any distinctly Belarusian ornamentation was added; shown here with a broken border to mark a republic whose actual territory was still being fought over and cut in half even as the flag flew.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio recorded for this early period.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Plain red field, gold hammer-and-sickle emblem (design varied).</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#c8302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#C8302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#c9a13c"></span><span class="meta"><span class="name">Gold</span><span class="hex">#C9A13C</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="entry" data-n="5" id="era-1918">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#f4efe1"/>
+              <rect y="66.7" width="300" height="66.6" fill="#c8302a"/>
+              <rect y="133.3" width="300" height="66.7" fill="#f4efe1"/>
+            </svg>
+            <div class="flag-caption">white-red-white, the first modern Belarusian flag, never controlled its own claimed territory</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1918 &ndash; 1919</div>
+            <h3 class="card-title">Belarusian People's Republic</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A short-lived, never fully sovereign republic proclaimed under German occupation in 1918, lacking real territorial control and soon overtaken by the advancing Red Army and Polish-Soviet War."><span class="dot" style="background:#8c5a2e"></span>Contested / civil war</span><span class="tag" tabindex="0" data-tip="Chairman of the Rada who presided over the March 1918 proclamation of the Belarusian People's Republic, the first modern attempt at an independent Belarusian state."><span class="dot" style="background:#4a3b78"></span>Jan Sierada</span><span class="tag" tabindex="0" data-tip="The short-lived republic's government established no state church, reflecting both its brief existence and the religious diversity of Orthodox and Catholic Belarusians it claimed to represent."><span class="dot" style="background:#8e3b62"></span>Secular (no state religion)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Magnate family with vast Belarusian estates around Nyasvizh and Mir, still landholding into the interwar years, c.1450–1939. Arms &quot;Trzy Trąby&quot;: three black hunting horns on gold."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f9d616"/><g fill="#241f14"><path d="M30,36 q-6,16 6,26 q6,4 12,-2 q-10,-6 -10,-18 q0,-6 -8,-6 Z"/><path d="M70,36 q6,16 -6,26 q-6,4 -12,-2 q10,-6 10,-18 q0,-6 8,-6 Z"/><path d="M50,58 q-8,12 0,26 q4,6 12,0 q-8,-10 -6,-20 q1,-6 -6,-6 Z"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Radziwiłł</span><span class="tag" tabindex="0" data-tip="Magnate family holding estates around Ruzhany and Slonim, still landholding into the interwar years, c.1450–1939. Arms &quot;Lis&quot;: a silver horseshoe pierced by an arrow, cross above, on blue."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1e2f7a"/><path d="M30,46 a20,20 0 0 1 40,0 v6 h-9 v-6 a11,11 0 0 0 -22,0 v6 h-9 Z" fill="#f4efe1"/><line x1="26" y1="70" x2="70" y2="34" stroke="#f4efe1" stroke-width="4"/><path d="M66,32 l8,-4 l0,10 Z" fill="#f4efe1"/><rect x="46" y="80" width="8" height="16" fill="#f4efe1"/><rect x="40" y="82" width="20" height="5" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Sapieha</span></div>
+            <p><span class="label">Who &amp; why:</span> as the Russian Empire collapses, a Belarusian national council declares the Belarusian People's Republic (BNR) in Minsk on 25 March 1918, under German occupation following the Eastern Front's collapse. It is the first modern attempt at a Belarusian state &mdash; but with no army of its own, no international recognition, and German forces (soon replaced by advancing Bolsheviks) actually controlling the ground, it never exercises effective governance over the territory it claims. Minsk falls to the Red Army by the end of the year, and the BNR survives afterward only as a government-in-exile, a status it technically retains to this day.</p>
+            <p><span class="label">What it represents:</span> the white-red-white tricolor, based on the historic heraldic colors of the medieval Grand Duchy of Lithuania's Belarusian lands, adopted here as a national flag for the first time &mdash; the same design independent Belarus would revive in 1991, and that opposition and diaspora movements continue to fly today.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, three horizontal bands in a 1:2:1 ratio.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">White top, red middle (double width), white bottom.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#c8302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#C8302A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="entry" data-n="4" id="era-1795">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#f4efe1"/>
+              <rect y="66.7" width="300" height="66.6" fill="#1e2f96"/>
+              <rect y="133.3" width="300" height="66.7" fill="#c8302a"/>
+            </svg>
+            <div class="flag-caption">the imperial civil tricolor, flown over a territory renamed "the Northwest Region"</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1795 &ndash; 1918</div>
+            <h3 class="card-title">Russian Empire rule</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Belarusian lands absorbed into the Russian Empire through the late-18th-century partitions of Poland-Lithuania, administered as western provinces and subjected to sustained Russification."><span class="dot" style="background:#204b5c"></span>Imperial territory</span><span class="tag" tabindex="0" data-tip="Russian empress whose armies carried out the partitions of the Polish-Lithuanian Commonwealth, bringing Belarusian lands under direct Russian imperial rule by 1795."><span class="dot" style="background:#4a3b78"></span>Catherine II "the Great"</span><span class="tag" tabindex="0" data-tip="Orthodoxy was the empire's established faith; authorities forcibly abolished the Greek Catholic (Uniate) Church in 1839, absorbing its large Belarusian following into the Russian Orthodox Church."><span class="dot" style="background:#8e3b62"></span>Russian Orthodoxy (imperial state church)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Hundreds of thousands of Jews from Belarusian towns within the Russian Pale of Settlement emigrate to the United States and elsewhere between the 1880s and 1914, driven by legal restrictions, poverty, and waves of pogroms."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#b22234"/><g fill="#fff"><rect y="1.6" width="20" height="1.6"/><rect y="4.8" width="20" height="1.6"/><rect y="8" width="20" height="1.6"/><rect y="11.2" width="20" height="1.6"/></g><rect width="8" height="7.5" fill="#3c3b6e"/></svg>Emigration: Jewish emigration from the Pale of Settlement</span><span class="tag" tabindex="0" data-tip="Tsarist resettlement programs, including the early-20th-century Stolypin reforms, relocate large numbers of Belarusian peasants to Siberia and the Russian Far East in search of available farmland."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#fff"/><rect y="4.67" width="20" height="4.67" fill="#0039a6"/><rect y="9.33" width="20" height="4.67" fill="#d52b1e"/></svg>Emigration: peasant resettlement to Siberia (early 1900s)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Wealthiest magnate family of the former Grand Duchy, holding vast Belarusian estates centered on Nyasvizh and Mir under the Russian Empire, c.1450–1939. Arms &quot;Trzy Trąby&quot;: three black hunting horns on gold."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f9d616"/><g fill="#241f14"><path d="M30,36 q-6,16 6,26 q6,4 12,-2 q-10,-6 -10,-18 q0,-6 -8,-6 Z"/><path d="M70,36 q6,16 -6,26 q-6,4 -12,-2 q10,-6 10,-18 q0,-6 8,-6 Z"/><path d="M50,58 q-8,12 0,26 q4,6 12,0 q-8,-10 -6,-20 q1,-6 -6,-6 Z"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Radziwiłł</span><span class="tag" tabindex="0" data-tip="Leading Lithuanian-Belarusian magnate family holding estates around Ruzhany and Slonim under the Russian Empire, c.1450–1939. Arms &quot;Lis&quot;: a silver horseshoe pierced by an arrow, cross above, on blue."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1e2f7a"/><path d="M30,46 a20,20 0 0 1 40,0 v6 h-9 v-6 a11,11 0 0 0 -22,0 v6 h-9 Z" fill="#f4efe1"/><line x1="26" y1="70" x2="70" y2="34" stroke="#f4efe1" stroke-width="4"/><path d="M66,32 l8,-4 l0,10 Z" fill="#f4efe1"/><rect x="46" y="80" width="8" height="16" fill="#f4efe1"/><rect x="40" y="82" width="20" height="5" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Sapieha</span></div>
+            <p><span class="label">Who &amp; why:</span> the 1795 Third Partition of the Polish-Lithuanian Commonwealth delivers the whole of Belarus, along with most of Ukraine, into the Russian Empire outright &mdash; see the Eastern Europe hub map for the wider partition story. Imperial policy actively discourages a distinct Belarusian identity, administering the territory simply as the "Northwest Region" (Severo-Zapadny Krai) and, after the failed 1863 uprising led locally by Kastuś Kalinoŭski, banning Belarusian-language printing outright for decades.</p>
+            <p><span class="label">What it represents:</span> the standard Russian imperial civil tricolor, flown across the empire with no distinct regional or Belarusian variant &mdash; itself a reflection of a governing policy that treated the territory as generic Russian land rather than a place with its own separate character.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3, three equal horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">White top, blue middle, red bottom.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#1e2f96"></span><span class="meta"><span class="name">Blue</span><span class="hex">#1E2F96</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#c8302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#C8302A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 7 -->
+    <div class="entry" data-n="3" id="era-1392">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#c8302a"/>
+              <g transform="translate(150,100)">
+                <ellipse cx="0" cy="-5" rx="46" ry="52" fill="#f4efe1"/>
+                <path d="M0,-40 q-26,10 -22,42 q2,20 22,30 q20,-10 22,-30 q4,-32 -22,-42 Z" fill="#c8302a"/>
+                <rect x="-10" y="-5" width="20" height="34" fill="#f4efe1"/>
+                <path d="M-30,45 h60 l-8,14 h-44 Z" fill="#f4efe1"/>
+              </g>
+            </svg>
+            <div class="flag-caption">Pahonia / Vytis &mdash; the mounted knight, the Grand Duchy's own banner</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1392 &ndash; 1795</div>
+            <h3 class="card-title">Grand Duchy of Lithuania (Belarusian lands)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Belarusian lands formed the demographic and administrative core of the Grand Duchy, whose chancery language was a form of Old Belarusian, until union and later absorption into Poland and Russia."><span class="dot" style="background:#a9762f"></span>Grand duchy</span><span class="tag" tabindex="0" data-tip="Grand Duke whose late-14th and early-15th-century reign expanded and consolidated the duchy at its height, with Belarusian lands forming its core territory and administrative language."><span class="dot" style="background:#4a3b78"></span>Vytautas the Great</span><span class="tag" tabindex="0" data-tip="The pagan and later Catholic Lithuanian grand dukes ruled over a largely Orthodox Belarusian population, generally tolerating and employing Orthodox institutions and local elites throughout."><span class="dot" style="background:#8e3b62"></span>Eastern Orthodoxy (tolerated)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Grand dukes of Lithuania invite Jewish settlement into Belarusian towns from the 14th century onward, granting charters of protection that laid the foundation for the large Jewish communities that would characterize the region for centuries."><span class="dot" style="background:#2f7a6b"></span>Immigration: Jewish settlement (from the 14th c.)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Grand Dukes of Lithuania descended from Gediminas, ruling most of present-day Belarus, later reigning jointly as Kings of Poland, c.1285–1572. Badge: the Pillars of Gediminas in silver on red."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><g fill="#f4efe1"><rect x="28" y="24" width="10" height="60"/><rect x="45" y="24" width="10" height="60"/><rect x="62" y="24" width="10" height="60"/><rect x="26" y="80" width="48" height="10"/><rect x="24" y="20" width="14" height="8"/><rect x="41" y="20" width="18" height="8"/><rect x="58" y="20" width="18" height="8"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Gediminid dynasty</span><span class="tag" tabindex="0" data-tip="Wealthiest magnate family of the Grand Duchy of Lithuania, holding vast Belarusian estates centered on Nyasvizh and Mir, c.1450–1939. Arms &quot;Trzy Trąby&quot;: three black hunting horns on gold."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#f9d616"/><g fill="#241f14"><path d="M30,36 q-6,16 6,26 q6,4 12,-2 q-10,-6 -10,-18 q0,-6 -8,-6 Z"/><path d="M70,36 q6,16 -6,26 q-6,4 -12,-2 q10,-6 10,-18 q0,-6 8,-6 Z"/><path d="M50,58 q-8,12 0,26 q4,6 12,0 q-8,-10 -6,-20 q1,-6 -6,-6 Z"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Radziwiłł</span><span class="tag" tabindex="0" data-tip="Leading Lithuanian-Belarusian magnate family holding the Grand Hetmanship and estates around Ruzhany and Slonim, c.1450–1939. Arms &quot;Lis&quot;: a silver horseshoe pierced by an arrow, cross above, on blue."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1e2f7a"/><path d="M30,46 a20,20 0 0 1 40,0 v6 h-9 v-6 a11,11 0 0 0 -22,0 v6 h-9 Z" fill="#f4efe1"/><line x1="26" y1="70" x2="70" y2="34" stroke="#f4efe1" stroke-width="4"/><path d="M66,32 l8,-4 l0,10 Z" fill="#f4efe1"/><rect x="46" y="80" width="8" height="16" fill="#f4efe1"/><rect x="40" y="82" width="20" height="5" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Sapieha</span></div>
+            <p><span class="label">Who &amp; why:</span> Lithuanian expansion into the former Rus' principalities is gradual through the 14th century &mdash; Gediminas's forces take Polotsk around 1307 &mdash; but by 1392, under Vytautas the Great, the Grand Duchy of Lithuania rules essentially all of modern Belarus as its demographic and cultural core, far more populous and economically developed than ethnic Lithuania itself. The 1569 Union of Lublin merges Lithuania with the Kingdom of Poland into a single Commonwealth, but keeps Belarus specifically under the Grand Duchy's own administration (unlike Ukraine's lands, transferred directly to the Polish Crown that same year) all the way through the Commonwealth's 1795 dissolution.</p>
+            <p><span class="label">What it represents:</span> the Pahonia (Belarusian) or Vytis (Lithuanian) &mdash; a white armored knight on a rearing horse on a red field &mdash; the Grand Duchy's own state emblem for four centuries. Notably, the Grand Duchy's official chancery language for most of this period was a form of Old Belarusian (Ruthenian), not Lithuanian, reflecting how central these lands were to the state's own administration.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed civil ratio recorded for this era.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red field, white armored knight on a rearing white horse (simplified here), facing the hoist.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#c8302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#C8302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 8 -->
+    <div class="entry" data-n="2" id="era-862">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; pre-heraldic era, no flag survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 862 &ndash; 1392</div>
+            <h3 class="card-title">Principality of Polotsk and the early East Slavic lands</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="The earliest East Slavic state on Belarusian territory, an early and often independent-minded rival to Kyiv among the Rus' principalities, before absorption into the Grand Duchy of Lithuania."><span class="dot" style="background:#a9762f"></span>Principality</span><span class="tag" tabindex="0" data-tip="Earliest named prince of Polotsk recorded in the chronicles, ruling in the mid-10th century before the principality's forcible incorporation into the wider Kievan Rus' realm under Vladimir the Great."><span class="dot" style="background:#4a3b78"></span>Rogvolod</span><span class="tag" tabindex="0" data-tip="Polotsk adopted Christianity alongside the rest of Kievan Rus' following Vladimir the Great's 988 conversion, establishing Orthodoxy as the principality's religion for the rest of this era."><span class="dot" style="background:#8e3b62"></span>Eastern Orthodoxy (from 988)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Grand Dukes of Lithuania descended from Gediminas, ruling most of present-day Belarus from Vilnius and Navahrudak, c.1285–1572. Badge: the Pillars of Gediminas in silver on red."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><g fill="#f4efe1"><rect x="28" y="24" width="10" height="60"/><rect x="45" y="24" width="10" height="60"/><rect x="62" y="24" width="10" height="60"/><rect x="26" y="80" width="48" height="10"/><rect x="24" y="20" width="14" height="8"/><rect x="41" y="20" width="18" height="8"/><rect x="58" y="20" width="18" height="8"/></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>Gediminid dynasty</span></div>
+            <p><span class="label">Who &amp; why:</span> Polotsk, first mentioned in the chronicles in 862, is already one of the oldest and most self-directed power centers of the wider Kievan Rus' world by the 10th century, often ruled by its own line of princes even while nominally part of the same Rurikid realm as Kyiv &mdash; see the Eastern Europe hub map for that shared origin. The 1240 Mongol destruction of Kiev largely bypasses Polotsk and the other forested Belarusian-lands principalities, which instead drift gradually toward the newly consolidating Grand Duchy of Lithuania, founded around 1236, over the following century and a half.</p>
+            <p><span class="label">What it represents:</span> no securely documented flag survives from this pre-heraldic era; medieval Rus' principalities used princely seals and banners with religious imagery rather than a fixed territorial flag in the later heraldic sense. Shown here honestly blank rather than invented.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <div class="entry" data-n="1" id="era-500">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; pre-state tribal era, no flag survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 6th century &ndash; 862 CE</div>
+            <h3 class="card-title">Early East Slavic and Baltic tribes</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="No single state existed; the Krivichi, Dregovichi, and Radimichi tribal groupings settle the forests and river valleys of present-day Belarus during the broader Slavic migrations, organized around fortified hillforts rather than any unified authority."><span class="dot" style="background:#6b5c4a"></span>Fragmented / tribal confederations</span><span class="tag" tabindex="0" data-tip="No named ruler is documented for this tribal era; the first individually named prince on Belarusian territory, Rogvolod of Polotsk, does not appear in the chronicles until the following entry's 10th century."><span class="dot" style="background:#4a3b78"></span>No single ruler documented</span><span class="tag" tabindex="0" data-tip="Slavic and Baltic polytheism, centered on deities such as Perun and Veles, remained the dominant tradition until Christianity arrived with Vladimir the Great's 988 conversion of Kievan Rus', which Polotsk adopted soon after."><span class="dot" style="background:#8e3b62"></span>Slavic/Baltic paganism (until 988 Christianization)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Slavic tribes migrate north and east from the Vistula and Dnieper basins during the broader 6th&ndash;8th century Slavic migrations, gradually absorbing or displacing the region's earlier Baltic-speaking inhabitants."><span class="dot" style="background:#a3672f"></span>Migration: Slavic tribes into Baltic-inhabited lands (6th&ndash;8th c.)</span></div>
+            <p><span class="label">Who &amp; why:</span> archaeological and linguistic evidence places the arrival of Slavic tribes &mdash; the Krivichi in the north, the Dregovichi in the center, and the Radimichi in the east &mdash; into the forests and river valleys of present-day Belarus during the broader Slavic migrations of the 6th to 8th centuries, gradually absorbing or displacing the region's earlier Baltic-speaking inhabitants. These East Slavic tribal groupings, organized around fortified hillforts rather than a unified state, form the direct demographic and linguistic ancestors of the Rus' principalities that follow; Polotsk's own first chronicle mention in 862 marks the point where a named political center finally emerges from this tribal landscape.</p>
+            <p><span class="label">What it represents:</span> no flag survives from this pre-state tribal era; the Slavic and Baltic peoples of this period are known through archaeology, place names, and later chronicle references to their tribal names, not through any vexillological record. Shown here honestly blank rather than invented.</p>
+            <p><span class="label">World context:</span> this span runs alongside the Byzantine Empire's construction of Constantinople's Hagia Sophia under Justinian (completed 537), the founding and rapid 7th-century expansion of Islam, Charlemagne's 800 coronation as Holy Roman Emperor in the west, and the opening of the Viking Age &mdash; whose Varangian river traders would soon travel these same waterways to link Scandinavia with Byzantium through the Rus' lands.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Principality / grand duchy</b> &mdash; medieval or early modern polity</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#204b5c"></span><b>Imperial territory</b> &mdash; ruled from a foreign capital</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8c5a2e"></span><b>Contested / civil war</b> &mdash; no single government in effective control</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8c2f2f"></span><b>Communist state</b> &mdash; one-party, Soviet-aligned</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#2f6b4a"></span><b>Republic</b> &mdash; sovereign, independent statehood</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the named ruler most associated with the era's start</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official/established faith, not the population's</div>
+    </div>
+  </div>
+
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for Belarus lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/by/">Search Record Atlas for Belarus &rarr;</a>
+    <p style="margin-top:14px;">Records here are filed by historical jurisdiction, not modern borders &mdash; check the region that covers your ancestral town:</p>
+    <div class="record-region-grid">
+      <a href="https://daviddef.github.io/TheMap/region/congress-poland/">Congress Poland — the Russian partition</a>
+    </div>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This page is one lineage in a larger set. See the region-wide map and the other countries here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="eastern-europe-hub.html"><b>Eastern Europe hub</b><span>Ukraine, Belarus, Moldova</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are close historical approximations for painting reference; pre-19th-century swatches are informed reconstructions, not official specifications. Map traced from public domain GeoJSON border data and is schematic, not surveyed.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var IC = {
+    tribal: "#6b5c4a", rus: "#7a5a3f", ltu: "#a4302a", rusemp: "#1e2f96", bnr: "#c8302a", bssr: "#8c2f2f", modern: "#2f6b4a"
+  };
+  var INAMES = {
+    tribal: "Early East Slavic and Baltic tribes", rus: "Kievan Rus' / Polotsk (no flag documented)", ltu: "Grand Duchy of Lithuania", rusemp: "Russian Empire",
+    bnr: "Belarusian People's Republic", bssr: "Byelorussian SSR (Soviet Union)", modern: "Republic of Belarus"
+  };
+  var IFLAGS = {
+    tribal: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>',
+    rus: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="6" stroke-dasharray="10 8"/>',
+    ltu: '<rect width="300" height="200" fill="#c8302a"/><g transform="translate(150,100)"><ellipse cx="0" cy="-5" rx="46" ry="52" fill="#f4efe1"/><path d="M0,-40 q-26,10 -22,42 q2,20 22,30 q20,-10 22,-30 q4,-32 -22,-42 Z" fill="#c8302a"/></g>',
+    rusemp: '<rect width="300" height="66.7" fill="#f4efe1"/><rect y="66.7" width="300" height="66.6" fill="#1e2f96"/><rect y="133.3" width="300" height="66.7" fill="#c8302a"/>',
+    bnr: '<rect width="300" height="66.7" fill="#f4efe1"/><rect y="66.7" width="300" height="66.6" fill="#c8302a"/><rect y="133.3" width="300" height="66.7" fill="#f4efe1"/>',
+    bssr: '<rect width="300" height="170" fill="#c8302a"/><rect y="170" width="300" height="30" fill="#1a7a3d"/><path d="M40,26 l6,18 19,0 -15.5,11.2 6,18 -15.5,-11.3 -15.5,11.3 6,-18 -15.5,-11.2 19,0 Z" fill="#c9a13c"/>',
+    modern: '<rect width="300" height="133.3" fill="#c8302a"/><rect y="133.3" width="300" height="66.7" fill="#1a7a3d"/><rect width="34" height="200" fill="#f4efe1"/>'
+  };
+  function iFlagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (IFLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  var iLegendEl = document.getElementById("iLegend");
+  iLegendEl.innerHTML = Object.keys(IC).map(function (k) {
+    return '<span><span class="sw" style="background:' + IC[k] + '"></span>' + INAMES[k] + "</span>";
+  }).join("");
+
+  var ISNAP = [
+    { year:"c. 6th c.", name:"Early East Slavic and Baltic tribes", t:{ by:IC.tribal }, flagKeys:{ by:"tribal" },
+      story:"Slavic tribes &mdash; the Krivichi in the north, the Dregovichi in the center, and the Radimichi in the east &mdash; settle the forests and river valleys of present-day Belarus during the broader Slavic migrations of the 6th to 8th centuries, gradually absorbing or displacing the region's earlier Baltic-speaking inhabitants. Organized around fortified hillforts rather than a unified state, these tribal groupings form the direct demographic and linguistic ancestors of the Rus' principalities that follow; Polotsk's first chronicle mention in 862 marks the point where a named political center finally emerges. No flag survives from this pre-state era." },
+    { year:"c. 900", name:"Polotsk and the Rus' world", t:{ by:IC.rus }, flagKeys:{ by:"rus" },
+      story:"Polotsk, first mentioned in the chronicles in 862, is already one of Kievan Rus's oldest and most self-directed power centers, often ruled by its own line of princes even while nominally part of the same Rurikid realm as Kyiv. No securely documented flag survives from this pre-heraldic era." },
+    { year:"1392", name:"Grand Duchy of Lithuania", t:{ by:IC.ltu }, flagKeys:{ by:"ltu" },
+      story:"Lithuanian expansion into the Belarusian-lands principalities is gradual through the 14th century; by 1392, under Vytautas the Great, the Grand Duchy of Lithuania rules essentially all of modern Belarus as its demographic and cultural core &mdash; and for most of this period, the Grand Duchy's own chancery language is a form of Old Belarusian." },
+    { year:"1795", name:"The Partitions of Poland-Lithuania", t:{ by:IC.rusemp }, flagKeys:{ by:"rusemp" },
+      story:"The 1795 Third Partition delivers the whole of Belarus into the Russian Empire outright, administered as the generic \"Northwest Region\" with no recognized distinct Belarusian identity &mdash; a policy that hardens further after the failed 1863 uprising." },
+    { year:"1918", name:"Belarusian People's Republic declared", t:{ by:IC.bnr }, flagKeys:{ by:"bnr" },
+      story:"As the Russian Empire collapses, a national council declares the Belarusian People's Republic in Minsk on 25 March 1918 under German occupation &mdash; the first modern Belarusian state, but one that never controls the territory it claims before the Red Army takes Minsk by year's end." },
+    { year:"1922", name:"Byelorussian SSR, within the USSR", t:{ by:IC.bssr }, flagKeys:{ by:"bssr" },
+      story:"After the chaos of the Polish-Soviet War and the 1921 Treaty of Riga's territorial split, the reduced Byelorussian SSR becomes one of the four founding republics of the USSR on 30 December 1922. World War II devastates the republic more than almost any other Soviet territory: an estimated quarter of its pre-war population is lost." },
+    { year:"1991–present", name:"Independence, restored", t:{ by:IC.modern }, flagKeys:{ by:"modern" },
+      story:"Belarus declares independence on 25 August 1991, briefly reviving the 1918 white-red-white tricolor before a contested 1995 referendum under President Alexander Lukashenko &mdash; in office continuously since 1994 &mdash; restores a red-and-green design closely modeled on the Soviet-era flag, which remains Belarus's official flag today." }
+  ];
+
+  var IREGIONS = ["by"];
+
+  var iYearTag = document.getElementById("iYearTag");
+  var iEraName = document.getElementById("iEraName");
+  var iEraOwners = document.getElementById("iEraOwners");
+  var iEraStory = document.getElementById("iEraStory");
+  var iFlagsRow = document.getElementById("iFlagsRow");
+  var iSlider = document.getElementById("iSlider");
+
+  function iRender(idx) {
+    var era = ISNAP[idx];
+    iYearTag.textContent = era.year;
+    iEraName.textContent = era.name;
+    iEraStory.innerHTML = era.story;
+
+    IREGIONS.forEach(function (id) {
+      document.getElementById("ireg-" + id).setAttribute("fill", era.t[id]);
+      var lbl = document.getElementById("ilbl-" + id);
+      if (lbl) {
+        var lblColor = "#f7f1e3";
+        lbl.setAttribute("fill", lblColor);
+        lbl.setAttribute("stroke", "#201a12");
+      }
+    });
+
+    iEraOwners.innerHTML = "<b>" + INAMES[Object.keys(IC).filter(function (k) { return IC[k] === era.t.by; })[0]] + "</b>";
+
+    iFlagsRow.innerHTML = IREGIONS.map(function (id) {
+      return '<div class="iflag-chip">' + iFlagSvg(era.flagKeys[id]) + '<div class="ic-label">Belarus</div></div>';
+    }).join("");
+  }
+
+  iSlider.addEventListener("input", function () { iRender(parseInt(iSlider.value, 10)); });
+  iRender(0);
+
+  var iPlaying = false, iPlayTimer = null;
+  var iPlayBtn = document.getElementById("iPlayBtn");
+  function iStepPlay() {
+    var next = parseInt(iSlider.value, 10) + 1;
+    if (next > ISNAP.length - 1) { iStopPlay(); return; }
+    iSlider.value = next;
+    iRender(next);
+  }
+  function iStartPlay() {
+    iPlaying = true;
+    iPlayBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(iSlider.value, 10) >= ISNAP.length - 1) { iSlider.value = 0; iRender(0); }
+    iPlayTimer = setInterval(iStepPlay, 1700);
+  }
+  function iStopPlay() {
+    iPlaying = false;
+    iPlayBtn.innerHTML = "&#9654;";
+    clearInterval(iPlayTimer);
+  }
+  iPlayBtn.addEventListener("click", function () { iPlaying ? iStopPlay() : iStartPlay(); });
+})();
+
+  // Tap-to-toggle for the pill tag tooltips (hover doesn't work on touch devices).
+  document.querySelectorAll(".tag[data-tip]").forEach(function (tag) {
+    tag.addEventListener("click", function (e) {
+      var wasOpen = tag.classList.contains("tip-open");
+      document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+      if (!wasOpen) tag.classList.add("tip-open");
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+  });
+</script>
+
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var html = '<h4>Genealogical records for this ground</h4>';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>
+
+</body></html>

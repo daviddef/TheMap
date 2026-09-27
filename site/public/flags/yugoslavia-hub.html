@@ -1,0 +1,723 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Flags of Former Yugoslavia</title>
+<meta name="description" content="A hub for the family flag atlas: six country lineages, and an interactive map showing who ruled each region at nine points across nine centuries.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    --tile: #ddd0aa; --tile-line: #b7a679; --tile-text: #7a6a45; --tile-sea: #b9d3da;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.2rem, 5.5vw, 3.4rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.1rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .countries { margin-top: 44px; }
+  .countries h2 { font-size: 1.15rem; font-weight: 600; margin: 0 0 16px; }
+  .country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .country-card {
+    display: block; padding: 20px; border: 1px solid var(--card-border); background: var(--card);
+    border-radius: 4px; text-decoration: none; color: var(--ink); position: relative; overflow: hidden;
+  }
+  .country-card .swatch-strip { position: absolute; top: 0; left: 0; right: 0; height: 5px; }
+  .country-card .era { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--brass); margin-bottom: 6px; }
+  .country-card b { display: block; font-family: "Fraunces", serif; font-size: 1.2rem; font-weight: 600; margin-bottom: 6px; }
+  .country-card span { color: var(--muted); font-size: .88rem; line-height: 1.5; }
+
+  .map-section { margin-top: 56px; padding-top: 36px; border-top: 1px solid var(--hair); }
+  .map-section h2 { font-size: 1.5rem; margin: 0 0 8px; }
+  .map-section .map-sub { font-size: .94rem; color: var(--muted); max-width: 64ch; margin: 0 0 22px; }
+  .map-section .rule-box { margin-bottom: 22px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .92rem; }
+  .map-section .rule-box b { color: var(--brick); }
+
+  .viz-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 22px; }
+
+  .controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .play-btn {
+    flex: none; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .play-btn:hover { border-color: var(--brick); }
+  input[type="range"] {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px;
+    background: var(--hair); outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper);
+    box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  .era-tag { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+
+  .era-head { text-align: center; margin-bottom: 16px; }
+  .era-name-inline { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.35rem; transition: opacity .35s ease; }
+  .era-owners { font-size: .86rem; color: var(--muted); max-width: 62ch; margin: 6px auto 0; transition: opacity .35s ease; }
+  .era-owners b { color: var(--ink); }
+  .era-story {
+    margin: 0 auto 22px; font-size: .98rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .35s ease; padding: 14px 18px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  .era-story b { color: var(--brick); }
+
+  .flags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin: 4px auto 18px; max-width: 620px; }
+  .flag-chip { text-align: center; width: 92px; }
+  .flag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-chip .fc-label { font-family: "IBM Plex Mono", monospace; font-size: 9px; color: var(--muted); margin-top: 5px; line-height: 1.3; }
+
+  #map-svg { display: block; margin: 0 auto; width: 100%; max-width: 460px; height: auto; }
+  .region-fill { transition: fill 0.7s ease; }
+  .border-line { transition: stroke-opacity 0.7s ease, stroke-width 0.7s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .group-label { font-family: "Fraunces", serif; font-weight: 600; transition: opacity .5s ease, font-size .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2.5px; }
+  .sub-label { font-family: "IBM Plex Mono", monospace; font-weight: 700; transition: opacity .5s ease, fill .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+
+  .map-key { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: .8rem; color: var(--muted); justify-content: center; }
+  .map-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .map-key .sw { width: 11px; height: 11px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .map-notes { margin-top: 20px; font-size: .85rem; color: var(--muted); }
+  .map-notes b { color: var(--ink); }
+
+  .subview { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .subview h3 { font-size: 1.2rem; font-weight: 600; margin: 0 0 8px; }
+  .subview .sub-desc { font-size: .9rem; color: var(--muted); max-width: 64ch; margin: 0 0 18px; }
+
+  .gantt-row { display: flex; align-items: center; margin-bottom: 3px; }
+  .gantt-label { width: 100px; flex: none; font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--ink); text-align: right; padding-right: 10px; }
+  .gantt-track { flex: 1; height: 26px; position: relative; background: var(--paper); border-radius: 2px; overflow: hidden; }
+  .gantt-seg { position: absolute; top: 0; bottom: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .gantt-seg span { font-size: 9.5px; font-weight: 600; white-space: nowrap; padding: 0 3px; }
+  .gantt-axis { display: flex; margin-left: 100px; padding-top: 4px; font-family: "IBM Plex Mono", monospace; font-size: 9.5px; color: var(--muted); position: relative; height: 14px; }
+  .gantt-axis span { position: absolute; transform: translateX(-50%); }
+
+  .grid-3x3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .grid-cell { text-align: center; }
+  .grid-cell svg { width: 100%; height: auto; display: block; }
+  .grid-cell .cap { font-family: "IBM Plex Mono", monospace; font-size: 10px; color: var(--brass); margin-top: 6px; }
+  .grid-cell .cap b { display: block; font-family: "Fraunces", serif; font-size: .95rem; font-weight: 600; color: var(--ink); margin-top: 1px; }
+  .grid-cell .cap .diff { display: block; font-family: "Source Sans 3", sans-serif; font-size: .74rem; color: var(--brick); margin-top: 3px; font-weight: 600; }
+  .mini-label { font-family: "IBM Plex Mono", monospace; font-size: 7.5px; font-weight: 700; pointer-events: none; }
+
+  .about { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .about h2 { font-size: 1.3rem; margin: 0 0 12px; }
+  .about p { max-width: none; opacity: .88; margin: 0 0 12px; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a></p>
+  <p class="kicker">Family research &middot; Hub &middot; Phase 1&ndash;2 of the world atlas</p>
+  <h1>Flags of Former Yugoslavia</h1>
+  <p class="lede">Six countries, each with its own flag lineage from the medieval period to today &mdash; and, below, one map that shows how the same territory changed hands across nine centuries, one slider-turn at a time.</p>
+  <p class="lede">Every deep dive is linked below. Start with Croatia if you're following the family line, or drag the map's slider first to see the whole region's story at a glance.</p>
+
+  <div class="countries">
+    <h2>The six lineages</h2>
+    <div class="country-grid">
+      <a class="country-card" href="croatia-flags.html">
+        <span class="swatch-strip" style="background:#a4302a"></span>
+        <span class="era">16 flags &middot; c. 925&ndash;present</span>
+        <b>Croatia</b>
+        <span>Ragusa, Venetian Dalmatia, the &scaron;ahovnica, two Yugoslavias, the republic today.</span>
+      </a>
+      <a class="country-card" href="slovenia-flags.html">
+        <span class="swatch-strip" style="background:#1e2f96"></span>
+        <span class="era">9 flags &middot; c. 700&ndash;present</span>
+        <b>Slovenia</b>
+        <span>Carantania, the Duchy of Carniola, a wartime three-way partition, the Alpine republic.</span>
+      </a>
+      <a class="country-card" href="serbia-flags.html">
+        <span class="swatch-strip" style="background:#6a3f8f"></span>
+        <span class="era">11 flags &middot; c. 1166&ndash;present</span>
+        <b>Serbia</b>
+        <span>The Nemanjić kingdom, Dušan's short-lived empire, four Ottoman centuries, the republic today.</span>
+      </a>
+      <a class="country-card" href="bosnia-flags.html">
+        <span class="swatch-strip" style="background:#c9a13c"></span>
+        <span class="era">9 flags &middot; c. 1154&ndash;present</span>
+        <b>Bosnia &amp; Herzegovina</b>
+        <span>The Kotromanić lilies, four Ottoman centuries, and a flag imposed by a Spanish diplomat.</span>
+      </a>
+      <a class="country-card" href="montenegro-flags.html">
+        <span class="swatch-strip" style="background:#7c2e1f"></span>
+        <span class="era">8 flags &middot; c. 1451&ndash;present</span>
+        <b>Montenegro</b>
+        <span>The eagle of Zeta, prince-bishops of Cetinje, a kingdom, and a 2006 return to independence.</span>
+      </a>
+      <a class="country-card" href="macedonia-flags.html">
+        <span class="swatch-strip" style="background:#c9a13c"></span>
+        <span class="era">9 flags &middot; c. 840s&ndash;present</span>
+        <b>North Macedonia</b>
+        <span>Dušan's capital at Skopje, the Kruševo Republic's red flag, a flag redesigned by treaty.</span>
+      </a>
+      <a class="country-card" href="bulgaria-flags.html">
+        <span class="swatch-strip" style="background:#9a5a3a"></span>
+        <span class="era">11 flags &middot; c. 681&ndash;present</span>
+        <b>Bulgaria</b>
+        <span>A pre-heraldic khanate, five Ottoman centuries, a 1878&ndash;85 split with Eastern Rumelia, the republic today.</span>
+      </a>
+      <a class="country-card" href="albania-flags.html">
+        <span class="swatch-strip" style="background:#c9603c"></span>
+        <span class="era">12 flags &middot; c. 1190&ndash;present</span>
+        <b>Albania</b>
+        <span>Skanderbeg's own banner, four and a half Ottoman centuries, Hoxha's isolated Communist state, the republic today.</span>
+      </a>
+      <a class="country-card" href="greece-flags.html">
+        <span class="swatch-strip" style="background:#2c5f8a"></span>
+        <span class="era">12 flags &middot; c. 1204&ndash;present</span>
+        <b>Greece</b>
+        <span>Crusader Frankokratia, four Ottoman centuries, the 1916 National Schism, a colonels' junta, the republic today.</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="map-section">
+    <h2>Nine centuries, one map</h2>
+    <p class="map-sub">A real, traced map &mdash; actual coastlines and borders, not schematic shapes, now covering the whole Balkan peninsula: the original six former-Yugoslav countries plus Bulgaria, Albania, and Greece. Drag the slider or press play; each snapshot simplifies a messier reality into the dominant power of the moment.</p>
+    <div class="rule-box">
+      <b>Borders here are data, not decoration.</b> A line between two regions only draws solid when they were actually governed separately. When they weren't &mdash; Slovenia and Croatia under the same Habsburg crown for centuries, say &mdash; the line dissolves and their names merge into whoever actually ruled them both. Colors blend between eras instead of jump-cutting.
+    </div>
+
+    <div class="viz-frame">
+      <div class="controls">
+        <button class="play-btn" id="playBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="era-tag" id="yearTag">1200</span>
+        <input type="range" id="slider" min="0" max="8" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="map-svg" viewBox="0 0 610 590" xmlns="http://www.w3.org/2000/svg">
+        <path fill="var(--tile-sea)" d="M0,60 L20.9,91.9 L20.0,110.2 L31.3,127.8 L43.0,105.1 L67.7,113.4 L68.4,131.1 L85.9,153.3 L78.1,157.2 L110.3,195.9 L145.4,211.5 L167.6,230.4 L203.6,249.9 L220.1,260.3 L230.9,277.5 L238.9,281.6 L245.3,289.9 L240.1,306.2 L236.9,342.0 L240.2,367.1 L262.2,396.3 L268.7,400.0 L271.3,415.0 L290.9,445.0 L305.9,469.1 L312.6,504.1 L327.0,546.2 L358.4,569.1 L383.8,568.4 L369.3,522.0 L393.6,516.5 L382.3,489.7 L417.8,503.6 L417.2,473.9 L398.2,458.6 L376.9,434.4 L391.3,422.9 L372.2,398.2 L363.6,366.8 L370.8,355.3 L391.1,382.3 L412.4,382.3 L431.9,373.7 L405.3,344.2 L451.7,330.5 L471.7,335.5 L495.1,337.0 L504.2,331.1 L516.0,298.2 L610,298.2 L610,590 L0,590 L0,400 Z"/>
+        <path fill="var(--tile)" stroke="var(--tile-line)" stroke-width="1" opacity="0.6" d="M285.6,282.7 L280.7,300.6 L286.1,323.2 L302.0,336.0 L301.3,349.8 L288.8,357.4 L286.5,374.5 L268.7,400.0 L262.2,396.3 L261.4,384.8 L240.2,367.1 L236.9,342.0 L240.1,306.2 L245.3,289.9 L238.9,281.6 L236.3,264.8 L252.9,238.9 L255.4,248.8 L265.7,244.2 L273.8,258.3 L283.0,263.7 L285.6,282.7 Z"/>
+        <path id="f-si" class="region-fill" d="M25.7,38.0 L57.4,42.1 L76.7,30.2 L110.2,28.9 L117.5,20.0 L123.9,20.6 L131.4,38.3 L100.9,52.3 L97.2,73.5 L83.9,78.9 L84.0,93.6 L69.0,92.6 L55.9,84.0 L48.9,92.9 L22.2,91.1 L30.7,86.3 L21.6,63.9 L25.7,38.0 Z"/>
+        <path id="f-hr" class="region-fill" d="M218.1,69.6 L227.4,90.0 L239.6,105.0 L224.9,124.7 L207.5,113.1 L181.1,113.8 L148.1,105.1 L130.2,106.3 L121.9,117.2 L108.2,105.1 L100.2,126.9 L118.9,151.5 L127.2,167.8 L144.8,187.4 L159.4,199.1 L173.9,221.0 L207.8,241.0 L203.6,249.9 L167.6,230.4 L145.4,211.5 L110.3,195.9 L78.1,157.2 L85.9,153.3 L68.4,131.1 L67.7,113.4 L43.0,105.1 L31.3,127.8 L20.0,110.2 L20.9,91.9 L22.2,91.1 L48.9,92.9 L55.9,84.0 L69.0,92.6 L84.0,93.6 L83.9,78.9 L97.2,73.5 L100.9,52.3 L131.4,38.3 L143.5,44.8 L172.2,67.4 L203.8,77.5 L218.1,69.6 Z"/>
+        <path id="f-ba" class="region-fill" d="M224.9,124.7 L238.8,124.6 L229.2,147.7 L247.6,167.9 L242.0,192.7 L233.0,195.0 L225.9,199.8 L213.4,212.0 L207.8,241.0 L173.9,221.0 L159.4,199.1 L144.8,187.4 L127.2,167.8 L118.9,151.5 L100.2,126.9 L108.2,105.1 L121.9,117.2 L130.2,106.3 L148.1,105.1 L181.1,113.8 L207.5,113.1 L224.9,124.7 Z"/>
+        <path id="f-rs" class="region-fill" d="M296.4,95.5 L319.8,107.9 L322.8,129.5 L345.1,144.8 L357.1,133.0 L366.6,139.6 L357.7,148.5 L364.7,157.6 L355.3,169.5 L358.7,188.8 L377.3,211.4 L362.7,227.9 L356.3,244.6 L360.4,250.9 L354.1,258.3 L336.4,259.2 L323.3,262.2 L322.1,258.3 L326.7,252.0 L330.9,239.2 L325.5,239.5 L318.1,229.8 L311.8,227.3 L306.8,218.9 L299.6,215.7 L294.2,208.2 L287.3,211.2 L282.0,228.6 L272.8,232.4 L276.0,227.9 L261.4,217.0 L248.8,211.3 L243.2,204.0 L233.0,195.0 L242.0,192.7 L247.6,167.9 L229.2,147.7 L238.8,124.6 L224.9,124.7 L239.6,105.0 L227.4,90.0 L218.1,69.6 L247.5,55.8 L271.4,58.1 L292.2,78.8 L296.4,95.5 Z"/>
+        <path id="f-me" class="region-fill" d="M255.4,248.8 L252.9,238.9 L236.3,264.8 L238.9,281.6 L230.9,277.5 L220.1,260.3 L203.6,249.9 L207.8,241.0 L213.4,212.0 L225.9,199.8 L233.0,195.0 L243.2,204.0 L248.8,211.3 L261.4,217.0 L276.0,227.9 L272.8,232.4 L265.7,244.2 L255.4,248.8 Z"/>
+        <path id="f-xk" class="region-fill" d="M294.3,210.8 L293.6,214.6 L305.7,217.8 L311.2,229.0 L317.8,230.0 L315.6,236.6 L331.6,241.5 L324.8,255.5 L321.2,256.2 L324.0,262.1 L316.1,263.5 L313.2,270.2 L304.9,264.8 L294.5,270.3 L291.0,275.7 L293.1,282.3 L284.8,286.5 L287.0,277.2 L283.0,264.5 L272.6,258.2 L269.3,248.6 L264.2,246.3 L265.7,241.2 L262.2,236.5 L282.4,229.5 L280.5,226.0 L288.1,218.2 L284.3,212.8 L294.3,210.8 Z"/>
+        <path id="f-mk" class="region-fill" d="M285.6,282.7 L290.4,283.2 L292.2,272.4 L314.8,264.3 L323.3,262.2 L336.4,259.2 L354.1,258.3 L373.3,275.2 L376.0,309.9 L368.7,311.7 L362.4,320.8 L341.7,319.8 L327.1,331.3 L302.0,336.0 L286.1,323.2 L280.7,300.6 L285.6,282.7 Z"/>
+        <path id="f-bg" class="region-fill" d="M364.8,157.6 L375.8,179.2 L390.7,175.4 L420.1,183.6 L476.4,186.3 L495.4,172.9 L540.5,160.7 L568.4,179.8 L590.9,185.3 L571.0,207.1 L557.0,244.7 L569.4,274.7 L536.4,267.7 L497.4,284.2 L496.9,310.4 L462.1,315.4 L435.1,297.0 L404.4,311.5 L376.1,309.9 L373.4,275.2 L354.2,258.3 L360.5,250.9 L356.3,244.6 L362.8,227.9 L377.4,211.4 L358.8,188.7 L355.3,169.5 Z"/>
+        <path id="f-al" class="region-fill" d="M285.6,282.7 L280.7,300.6 L286.2,323.2 L302.1,336.0 L301.3,349.8 L288.8,357.4 L286.5,374.5 L268.7,400.0 L262.2,396.3 L261.4,384.8 L240.2,367.1 L236.9,342.1 L240.1,306.2 L245.3,289.9 L238.9,281.6 L236.3,264.8 L252.9,238.9 L255.4,248.8 L265.7,244.2 L273.8,258.3 L283.0,263.7 Z"/>
+        <path id="f-gr" class="region-fill" d="M516.0,298.2 L504.2,331.1 L495.1,337.0 L471.7,335.5 L451.7,330.5 L405.3,344.2 L431.9,373.7 L412.4,382.3 L391.1,382.3 L370.8,355.3 L363.6,366.8 L372.2,398.2 L391.3,422.9 L376.9,434.4 L398.2,458.6 L417.2,473.9 L417.8,503.6 L382.3,489.7 L393.6,516.5 L369.3,522.0 L383.8,568.4 L358.4,569.1 L327.0,546.2 L312.6,504.1 L305.9,469.1 L290.9,445.0 L271.3,415.0 L268.7,400.0 L286.5,374.5 L288.8,357.4 L301.3,349.8 L302.1,336.0 L327.1,331.3 L341.7,319.8 L362.5,320.9 L368.8,311.7 L376.1,309.9 L404.4,311.5 L435.1,297.0 L462.1,315.4 L496.9,310.4 L497.4,284.2 Z"/>
+
+        <g id="borders" stroke-width="1">
+          <path class="border-line" id="b-si-hr" d="M131.4,38.3 L100.9,52.3 L97.2,73.5 L83.9,78.9 L84.0,93.6 L69.0,92.6 L55.9,84.0 L48.9,92.9 L22.2,91.1"/>
+          <path class="border-line" id="b-hr-ba" d="M224.9,124.7 L207.5,113.1 L181.1,113.8 L148.1,105.1 L130.2,106.3 L121.9,117.2 L108.2,105.1 L100.2,126.9 L118.9,151.5 L127.2,167.8 L144.8,187.4 L159.4,199.1 L173.9,221.0 L207.8,241.0"/>
+          <path class="border-line" id="b-rs-me" d="M233.0,195.0 L243.2,204.0 L248.8,211.3 L261.4,217.0 L276.0,227.9 L272.8,232.4"/>
+          <path class="border-line" id="b-hr-rs" d="M224.9,124.7 L239.6,105.0 L227.4,90.0 L218.1,69.6"/>
+          <path class="border-line" id="b-ba-rs" d="M224.9,124.7 L238.8,124.6 L229.2,147.7 L247.6,167.9 L242.0,192.7 L233.0,195.0"/>
+          <path class="border-line" id="b-ba-me" d="M233.0,195.0 L225.9,199.8 L213.4,212.0 L207.8,241.0"/>
+          <path class="border-line" id="b-rs-xk" d="M284.3,212.8 L294.3,210.8 L293.6,214.6 L305.7,217.8 L311.2,229.0"/>
+          <path class="border-line" id="b-rs-mk" d="M336.4,259.2 L323.3,262.2"/>
+          <path class="border-line" id="b-me-xk" d="M284.8,286.5 L287.0,277.2 L283.0,264.5 L272.6,258.2 L269.3,248.6 L264.2,246.3 L265.7,241.2 L262.2,236.5 L282.4,229.5 L280.5,226.0 L288.1,218.2 L284.3,212.8"/>
+          <path class="border-line" id="b-xk-mk" d="M311.2,229.0 L317.8,230.0 L315.6,236.6 L331.6,241.5 L324.8,255.5 L321.2,256.2 L324.0,262.1 L316.1,263.5 L313.2,270.2 L304.9,264.8 L294.5,270.3 L291.0,275.7 L293.1,282.3 L284.8,286.5"/>
+          <path class="border-line" id="b-bg-rs" d="M354.2,258.3 L360.5,250.9 L356.3,244.6 L362.8,227.9 L377.4,211.4 L358.8,188.7 L355.3,169.5 L364.8,157.6"/>
+          <path class="border-line" id="b-bg-mk" d="M376.1,309.9 L373.4,275.2 L354.2,258.3"/>
+          <path class="border-line" id="b-bg-gr" d="M497.4,284.2 L496.9,310.4 L462.1,315.4 L435.1,297.0 L404.4,311.5 L376.1,309.9"/>
+          <path class="border-line" id="b-al-me" d="M238.9,281.6 L236.3,264.8 L252.9,238.9 L255.4,248.8 L265.7,244.2"/>
+          <path class="border-line" id="b-al-mk" d="M285.6,282.7 L280.7,300.6 L286.2,323.2 L302.1,336.0"/>
+          <path class="border-line" id="b-al-gr" d="M302.1,336.0 L301.3,349.8 L288.8,357.4 L286.5,374.5 L268.7,400.0"/>
+          <path class="border-line" id="b-gr-mk" d="M302.1,336.0 L327.1,331.3 L341.7,319.8 L362.5,320.9 L368.8,311.7 L376.1,309.9"/>
+        </g>
+
+        <g id="labels"></g>
+      </svg>
+
+      <div class="era-head">
+        <div class="era-name-inline" id="eraName">Medieval kingdoms</div>
+        <div class="era-owners" id="eraOwners"></div>
+      </div>
+      <div class="flags-row" id="flagsRow"></div>
+      <p class="era-story" id="eraStory"></p>
+
+      <p class="map-note">Real traced borders (simplified). Bulgaria, Albania, and Greece are now tracked as full regions with their own real colors and borders, not just faint context, to complete the Balkan picture &mdash; the map now extends well east and south of the original six-country footprint.</p>
+      <div class="map-key" id="legend"></div>
+      <div class="map-notes">
+        <b>Try:</b> drag slowly from 1200 to 1878 and watch the Slovenia&ndash;Croatia line stay dissolved the whole way &mdash; same crown, no real boundary, the entire time &mdash; while Bulgaria and North Macedonia's line dissolves too in 1943, since Bulgaria itself annexed Macedonia rather than a separate occupier doing it. Then jump to 1920: every internal line among the six former-Yugoslav regions disappears at once, while Bulgaria, Albania, and Greece each stay their own separate color the whole time, never part of that kingdom. At 2008, watch all seventeen possible lines snap solid at once &mdash; ten fully independent countries, none of them answering to any of the others.
+      </div>
+    </div>
+
+    <div class="subview">
+      <h3>The same story, as a timeline</h3>
+      <p class="sub-desc">Maps are bad at showing <em>when</em>; timelines are bad at showing <em>where</em>. This uses real transition years instead of the nine arbitrary snapshots above &mdash; one horizontal band per region, colored the same way as the map, so you can trace exactly how long each era actually lasted and compare regions directly (watch Bosnia and Serbia turn Ottoman-red in the same decades).</p>
+      <div class="viz-frame">
+        <div id="gantt"></div>
+        <div class="gantt-axis" id="gantt-axis"></div>
+      </div>
+    </div>
+
+    <div class="subview">
+      <h3>The same story, nine frames &mdash; only the change lights up</h3>
+      <p class="sub-desc">Every region keeps its true color, but anything unchanged from the previous frame fades to low opacity; only the region(s) that actually changed hands stay bold with a solid outline. A caption under each frame spells out exactly what flipped. No slider to operate &mdash; scan left to right, top to bottom, and watch the map redraw itself like a flipbook.</p>
+      <div class="viz-frame">
+        <div class="grid-3x3" id="grid9"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="about">
+    <h2>About this atlas</h2>
+    <p>This started as a family history project: tracing the flags that flew over the lands our ancestors came from, close enough to paint accurately &mdash; correct colors, correct proportions, correct dates. Croatia came first; the rest of former Yugoslavia followed because the histories are so tightly interwoven that none of the six really makes sense alone.</p>
+    <p>Every country page carries its own timeline of flags with paint-ready color specs and a per-era location map. Colors are close historical approximations; pre-19th-century swatches especially are informed reconstructions, not official specifications, and are labeled as such throughout. The regional map above simplifies nine centuries of messy, overlapping, disputed control into nine snapshots &mdash; useful for orientation, not a substitute for the detail in each country's own page.</p>
+  </div>
+
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This hub is one region in a larger set. See the other phases here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="habsburg-hub.html"><b>Habsburg Lands hub</b><span>Seven countries, four centuries</span></a>
+      <a class="link-card" href="germany-hub.html"><b>German Lands hub</b><span>Germany's own east-west split</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Map is schematic and not surveyed.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var C = {
+    hung:"#d4a017", ott:"#d1453a", yu_king:"#2447c4", sfry:"#b83a6b", byz:"#8a5a2e", serb_med:"#7a4fb5", ven:"#1f8a8a",
+    ind_ba:"#2f8f5b", ind_hr:"#4a9d6f", ind_rs:"#1f7a52", ind_me:"#3fa88a", ind_si:"#6faa4f", ind_xk:"#8a9e5f", ind_mk:"#5c8f3f",
+    bgr_med:"#9a5a3a", skanderbeg:"#c9603c", bg_auto:"#a9762f", gr_ind:"#2c5f8a", bg_kingdom:"#7a3a2a", al_ind:"#8a2f3a",
+    bg_axis:"#9a7a3a", al_comm:"#4a3a6b", gr_nato:"#2c6f9a", bg_comm:"#5c3a8a", bg_modern:"#3f7a5c", al_modern:"#6b8a3a"
+  };
+  var NAMES = {
+    hung:"Hungarian / Habsburg crown", ott:"Ottoman Empire", yu_king:"Kingdom of Yugoslavia", sfry:"SFR Yugoslavia",
+    byz:"Byzantine Empire", serb_med:"Serbian medieval crown", ven:"Venice",
+    ind_ba:"Bosnia", ind_hr:"Croatia", ind_rs:"Serbia", ind_me:"Montenegro", ind_si:"Slovenia", ind_xk:"Kosovo (contested)", ind_mk:"N. Macedonia",
+    bgr_med:"Second Bulgarian Empire", skanderbeg:"League of Lezhë (Skanderbeg)", bg_auto:"Autonomous Principality of Bulgaria",
+    gr_ind:"Kingdom of Greece", bg_kingdom:"Kingdom of Bulgaria", al_ind:"Principality/Republic of Albania",
+    bg_axis:"Bulgaria (Axis ally)", al_comm:"People's Socialist Republic of Albania", gr_nato:"Hellenic Republic",
+    bg_comm:"People's Republic of Bulgaria", bg_modern:"Republic of Bulgaria", al_modern:"Republic of Albania"
+  };
+  var legendEl = document.getElementById("legend");
+  legendEl.innerHTML = Object.keys(C).map(function (k) {
+    return '<span><span class="sw" style="background:' + C[k] + '"></span>' + NAMES[k] + "</span>";
+  }).join("");
+
+  // ---- Real flag graphics, one per distinct historical power (not per map color) ----
+  var FLAGS = {
+    arpad: '<rect width="300" height="200" fill="#f4efe1"/><g fill="#a4302a"><rect y="0" width="300" height="25"/><rect y="50" width="300" height="25"/><rect y="100" width="300" height="25"/><rect y="150" width="300" height="25"/></g>',
+    kotromanic: '<rect width="300" height="200" fill="#f4efe1"/><rect x="105" y="50" width="90" height="90" fill="#1e2f96" stroke="#241f14" stroke-width="2"/><path d="M105,50 L195,140" stroke="#f4efe1" stroke-width="16"/><g fill="#c9a13c"><circle cx="128" cy="72" r="7"/><circle cx="150" cy="95" r="7"/><circle cx="172" cy="117" r="7"/><circle cx="172" cy="72" r="7"/><circle cx="128" cy="117" r="7"/></g>',
+    nemanjic: '<rect width="300" height="200" fill="#a4302a"/><ellipse cx="150" cy="100" rx="55" ry="45" fill="#f4efe1"/><text x="150" y="112" font-size="34" text-anchor="middle" fill="#a4302a" font-family="serif">⚜</text>',
+    dusan: '<rect width="300" height="200" fill="#a4302a"/><ellipse cx="150" cy="95" rx="55" ry="45" fill="#f4efe1"/><text x="150" y="107" font-size="34" text-anchor="middle" fill="#a4302a" font-family="serif">⚜</text><rect x="132" y="122" width="36" height="30" fill="#a4302a" stroke="#c9a13c" stroke-width="2"/>',
+    byzantine: '<rect width="300" height="200" fill="#c9a13c"/><ellipse cx="150" cy="100" rx="55" ry="45" fill="#241f14"/><text x="150" y="112" font-size="34" text-anchor="middle" fill="#c9a13c" font-family="serif">⚜</text>',
+    ottoman: '<rect width="300" height="200" fill="#a4302a"/><path d="M120,70 A38,38 0 1 0 172,102 A28,28 0 1 1 120,70 Z" fill="#f4efe1"/><path d="M200,84 l5,15 16,0 -13,10 5,15 -13,-9 -13,9 5,-15 -13,-10 16,0 Z" fill="#f4efe1"/>',
+    zeta: '<rect width="300" height="200" fill="#a4302a"/><ellipse cx="150" cy="100" rx="52" ry="42" fill="#c9a13c"/><text x="150" y="112" font-size="32" text-anchor="middle" fill="#a4302a" font-family="serif">⚜</text>',
+    venice: '<rect width="300" height="200" fill="#a4302a"/><ellipse cx="150" cy="105" rx="60" ry="35" fill="#c9a13c"/><rect x="120" y="95" width="40" height="26" rx="2" fill="#f4efe1" stroke="#8a6a1f" stroke-width="1.5"/>',
+    montenegro_principality: '<rect width="300" height="66.7" fill="#a4302a"/><rect y="66.7" width="300" height="66.6" fill="#1e2f96"/><rect y="133.3" width="300" height="66.7" fill="#f4efe1"/><ellipse cx="150" cy="100" rx="30" ry="24" fill="#f4efe1" stroke="#8a6a1f" stroke-width="1.5"/><text x="150" y="109" font-size="20" text-anchor="middle" fill="#a4302a" font-family="serif">⚜</text>',
+    serbia_kingdom: '<rect width="300" height="66.7" fill="#a4302a"/><rect y="66.7" width="300" height="66.6" fill="#1e2f96"/><rect y="133.3" width="300" height="66.7" fill="#f4efe1"/><rect x="128" y="72" width="44" height="56" rx="3" fill="#a4302a" stroke="#c9a13c" stroke-width="2"/><path d="M150,85 v30 M138,100 h24" stroke="#f4efe1" stroke-width="4"/>',
+    croatia_slavonia: '<rect width="300" height="66.7" fill="#a4302a"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#1e2f96"/><g transform="translate(150,100) scale(0.5)"><rect x="-45" y="-45" width="90" height="90" fill="#f4efe1" stroke="#5c4a1a" stroke-width="2"/><g fill="#a4302a"><rect x="-45" y="-45" width="18" height="18"/><rect x="-9" y="-45" width="18" height="18"/><rect x="27" y="-45" width="18" height="18"/><rect x="-27" y="-27" width="18" height="18"/><rect x="9" y="-27" width="18" height="18"/><rect x="-45" y="-9" width="18" height="18"/><rect x="-9" y="-9" width="18" height="18"/><rect x="27" y="-9" width="18" height="18"/><rect x="-27" y="9" width="18" height="18"/><rect x="9" y="9" width="18" height="18"/><rect x="-45" y="27" width="18" height="18"/><rect x="-9" y="27" width="18" height="18"/><rect x="27" y="27" width="18" height="18"/></g></g>',
+    yugoslav_kingdom: '<rect width="300" height="66.7" fill="#1e2f96"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#a4302a"/>',
+    nazi_germany: '<rect width="300" height="200" fill="#a4302a"/><circle cx="150" cy="100" r="35" fill="#f4efe1"/><path d="M150,72 v14 M150,114 v14 M122,100 h14 M164,100 h14 M150,86 l10,-10 M150,86 l-10,-10 M150,114 l10,10 M150,114 l-10,10" stroke="#241f14" stroke-width="6"/>',
+    ndh: '<rect width="300" height="66.7" fill="#a4302a"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#1e2f96"/><g transform="translate(150,100) scale(0.5)"><rect x="-45" y="-45" width="90" height="90" fill="#f4efe1" stroke="#241f14" stroke-width="2"/><g fill="#a4302a"><rect x="-45" y="-45" width="18" height="18"/><rect x="-9" y="-45" width="18" height="18"/><rect x="27" y="-45" width="18" height="18"/><rect x="-27" y="-27" width="18" height="18"/><rect x="9" y="-27" width="18" height="18"/><rect x="-45" y="-9" width="18" height="18"/><rect x="-9" y="-9" width="18" height="18"/><rect x="27" y="-9" width="18" height="18"/><rect x="-27" y="9" width="18" height="18"/><rect x="9" y="9" width="18" height="18"/><rect x="-45" y="27" width="18" height="18"/><rect x="-9" y="27" width="18" height="18"/><rect x="27" y="27" width="18" height="18"/></g></g><text x="70" y="55" font-size="26" text-anchor="middle" fill="#241f14" font-family="serif">U</text>',
+    italy_kingdom: '<rect width="100" height="200" fill="#0b7a3d"/><rect x="100" width="100" height="200" fill="#f4efe1"/><rect x="200" width="100" height="200" fill="#a4302a"/>',
+    bulgaria_kingdom: '<rect width="300" height="66.7" fill="#f4efe1"/><rect y="66.7" width="300" height="66.6" fill="#0b7a3d"/><rect y="133.3" width="300" height="66.7" fill="#a4302a"/>',
+    sfry: '<rect width="300" height="66.7" fill="#1e2f96"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#a4302a"/><path d="M150,76 l10.8,33.2 34.9,0 -28.2,20.5 10.8,33.2 -28.3,-20.5 -28.3,20.5 10.8,-33.2 -28.2,-20.5 34.9,0 Z" fill="#a4302a" stroke="#c9a13c" stroke-width="4"/>',
+    slovenia_modern: '<rect width="300" height="66.7" fill="#f4efe1"/><rect y="66.7" width="300" height="66.6" fill="#1e2f96"/><rect y="133.3" width="300" height="66.7" fill="#a4302a"/><rect x="38" y="30" width="64" height="60" fill="#1e2f96" stroke="#c9a13c" stroke-width="2"/>',
+    croatia_modern: '<rect width="300" height="66.7" fill="#a4302a"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#1e2f96"/><g transform="translate(150,100) scale(0.5)"><rect x="-45" y="-45" width="90" height="90" fill="#f4efe1" stroke="#5c4a1a" stroke-width="2"/><g fill="#a4302a"><rect x="-45" y="-45" width="18" height="18"/><rect x="-9" y="-45" width="18" height="18"/><rect x="27" y="-45" width="18" height="18"/><rect x="-27" y="-27" width="18" height="18"/><rect x="9" y="-27" width="18" height="18"/><rect x="-45" y="-9" width="18" height="18"/><rect x="-9" y="-9" width="18" height="18"/><rect x="27" y="-9" width="18" height="18"/><rect x="-27" y="9" width="18" height="18"/><rect x="9" y="9" width="18" height="18"/><rect x="-45" y="27" width="18" height="18"/><rect x="-9" y="27" width="18" height="18"/><rect x="27" y="27" width="18" height="18"/></g></g>',
+    bosnia_modern: '<rect width="300" height="200" fill="#0018a8"/><path d="M0,0 L120,0 L300,200 L300,150 L60,0 Z" fill="#fecb00"/><g fill="#f4efe1"><path d="M195,25 l3,7 7.5,0.5 -5.7,5 1.8,7.4 -6.6,-4.2 -6.6,4.2 1.8,-7.4 -5.7,-5 7.5,-0.5 Z"/><path d="M220,60 l3,7 7.5,0.5 -5.7,5 1.8,7.4 -6.6,-4.2 -6.6,4.2 1.8,-7.4 -5.7,-5 7.5,-0.5 Z"/><path d="M245,95 l3,7 7.5,0.5 -5.7,5 1.8,7.4 -6.6,-4.2 -6.6,4.2 1.8,-7.4 -5.7,-5 7.5,-0.5 Z"/><path d="M270,130 l3,7 7.5,0.5 -5.7,5 1.8,7.4 -6.6,-4.2 -6.6,4.2 1.8,-7.4 -5.7,-5 7.5,-0.5 Z"/></g>',
+    serbia_modern: '<rect width="300" height="66.7" fill="#a4302a"/><rect y="66.7" width="300" height="66.6" fill="#1e2f96"/><rect y="133.3" width="300" height="66.7" fill="#f4efe1"/><ellipse cx="108" cy="100" rx="34" ry="28" fill="#f4efe1" stroke="#8a6a1f" stroke-width="1.5"/><text x="108" y="110" font-size="22" text-anchor="middle" fill="#a4302a" font-family="serif">⚜</text>',
+    montenegro_modern: '<rect width="300" height="200" fill="#c9a13c"/><rect x="10" y="10" width="280" height="180" fill="#a4302a"/><ellipse cx="150" cy="100" rx="45" ry="38" fill="#c9a13c"/><text x="150" y="112" font-size="28" text-anchor="middle" fill="#a4302a" font-family="serif">⚜</text>',
+    kosovo_modern: '<rect width="300" height="200" fill="#1e2f96"/><path d="M110,80 h60 v10 h20 v50 h-100 v-50 h20 Z" fill="#c9a13c" opacity="0.9"/><g fill="#f4efe1"><circle cx="110" cy="60" r="4"/><circle cx="140" cy="52" r="4"/><circle cx="170" cy="52" r="4"/><circle cx="190" cy="60" r="4"/><circle cx="125" cy="45" r="4"/><circle cx="160" cy="45" r="4"/></g>',
+    macedonia_modern: '<rect width="300" height="200" fill="#ce2028"/><g fill="#f9d616"><circle cx="150" cy="100" r="20"/><path d="M150,100 L150,10 M150,100 L228,55 M150,100 L228,145 M150,100 L150,190 M150,100 L72,145 M150,100 L72,55" stroke="#f9d616" stroke-width="14"/></g>',
+    bgr_med: '<rect width="300" height="200" fill="#c9a13c"/><path d="M150,150 q-30,-10 -22,-50 q4,-24 26,-30 q-10,10 2,20 q6,-16 26,-8 q-4,14 10,16 q10,20 -8,34 q-4,16 -34,18 Z" fill="#7a1f1f"/>',
+    skanderbeg: '<rect width="300" height="200" fill="#a4302a"/><g transform="translate(150,100) scale(0.09)"><path d="M0,-420 C-210,-380 -350,-260 -350,-100 C-350,100 -180,280 0,380 C180,280 350,100 350,-100 C350,-260 210,-380 0,-420 Z" fill="#241f14"/><path d="M-160,-40 q-60,-140 40,-220 q60,50 20,90 q80,-30 120,10 q60,-20 90,40 q60,10 30,80 q40,60 -30,100 q-80,70 -270,-100 Z" fill="#241f14"/><path d="M160,-40 q60,-140 -40,-220 q-60,50 -20,90 q-80,-30 -120,10 q-60,-20 -90,40 q-60,10 -30,80 q-40,60 30,100 q80,70 270,-100 Z" fill="#241f14"/></g>',
+    bg_auto: '<rect width="300" height="66.7" fill="#f4efe1"/><rect y="66.7" width="300" height="66.6" fill="#0b7a3d"/><rect y="133.3" width="300" height="66.7" fill="#a4302a"/>',
+    gr_ind: '<rect width="300" height="200" fill="#1e5288"/><g fill="#f4efe1"><rect y="0" width="300" height="22"/><rect y="44" width="300" height="22"/><rect y="88" width="300" height="22"/><rect y="132" width="300" height="22"/><rect y="176" width="300" height="22"/></g><rect width="110" height="110" fill="#1e5288"/><rect x="42" y="0" width="26" height="110" fill="#f4efe1"/><rect x="0" y="42" width="110" height="26" fill="#f4efe1"/>',
+    bg_kingdom: '<rect width="300" height="66.7" fill="#f4efe1"/><rect y="66.7" width="300" height="66.6" fill="#0b7a3d"/><rect y="133.3" width="300" height="66.7" fill="#a4302a"/><rect x="130" y="80" width="40" height="40" fill="#a4302a" stroke="#c9a13c" stroke-width="2"/>',
+    al_ind: '<rect width="300" height="200" fill="#a4302a"/><g transform="translate(150,100) scale(0.09)"><path d="M0,-420 C-210,-380 -350,-260 -350,-100 C-350,100 -180,280 0,380 C180,280 350,100 350,-100 C350,-260 210,-380 0,-420 Z" fill="#241f14"/><path d="M-160,-40 q-60,-140 40,-220 q60,50 20,90 q80,-30 120,10 q60,-20 90,40 q60,10 30,80 q40,60 -30,100 q-80,70 -270,-100 Z" fill="#241f14"/><path d="M160,-40 q60,-140 -40,-220 q-60,50 -20,90 q-80,-30 -120,10 q-60,-20 -90,40 q-60,10 -30,80 q-40,60 30,100 q80,70 270,-100 Z" fill="#241f14"/></g>',
+    al_comm: '<rect width="300" height="200" fill="#a4302a"/><g transform="translate(150,110) scale(0.08)"><path d="M0,-420 C-210,-380 -350,-260 -350,-100 C-350,100 -180,280 0,380 C180,280 350,100 350,-100 C350,-260 210,-380 0,-420 Z" fill="#241f14"/><path d="M-160,-40 q-60,-140 40,-220 q60,50 20,90 q80,-30 120,10 q60,-20 90,40 q60,10 30,80 q40,60 -30,100 q-80,70 -270,-100 Z" fill="#241f14"/><path d="M160,-40 q60,-140 -40,-220 q-60,50 -20,90 q-80,-30 -120,10 q-60,-20 -90,40 q-60,10 -30,80 q-40,60 30,100 q80,70 270,-100 Z" fill="#241f14"/></g><path d="M150,32 l6,18 19,0 -15.5,11.2 6,18 -15.5,-11.3 -15.5,11.3 6,-18 -15.5,-11.2 19,0 Z" fill="#f9d616"/>',
+    gr_nato: '<rect width="300" height="200" fill="#1e5288"/><g fill="#f4efe1"><rect y="0" width="300" height="22"/><rect y="44" width="300" height="22"/><rect y="88" width="300" height="22"/><rect y="132" width="300" height="22"/><rect y="176" width="300" height="22"/></g><rect width="110" height="110" fill="#1e5288"/><rect x="42" y="0" width="26" height="110" fill="#f4efe1"/><rect x="0" y="42" width="110" height="26" fill="#f4efe1"/>',
+    bg_comm: '<rect width="300" height="66.7" fill="#f4efe1"/><rect y="66.7" width="300" height="66.6" fill="#0b7a3d"/><rect y="133.3" width="300" height="66.7" fill="#a4302a"/><path d="M150,76 l10.8,33.2 34.9,0 -28.2,20.5 10.8,33.2 -28.3,-20.5 -28.3,20.5 10.8,-33.2 -28.2,-20.5 34.9,0 Z" fill="#a4302a" stroke="#c9a13c" stroke-width="4"/>',
+    bg_modern: '<rect width="300" height="66.7" fill="#f4efe1"/><rect y="66.7" width="300" height="66.6" fill="#0b7a3d"/><rect y="133.3" width="300" height="66.7" fill="#a4302a"/>',
+    al_modern: '<rect width="300" height="200" fill="#a4302a"/><g transform="translate(150,100) scale(0.09)"><path d="M0,-420 C-210,-380 -350,-260 -350,-100 C-350,100 -180,280 0,380 C180,280 350,100 350,-100 C350,-260 210,-380 0,-420 Z" fill="#241f14"/><path d="M-160,-40 q-60,-140 40,-220 q60,50 20,90 q80,-30 120,10 q60,-20 90,40 q60,10 30,80 q40,60 -30,100 q-80,70 -270,-100 Z" fill="#241f14"/><path d="M160,-40 q60,-140 -40,-220 q-60,50 -20,90 q-80,-30 -120,10 q-60,-20 -90,40 q-60,10 -30,80 q-40,60 30,100 q80,70 270,-100 Z" fill="#241f14"/></g>'
+  };
+  function flagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (FLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+
+  var SNAP = [
+    { year:"1200", name:"Medieval kingdoms", t:{ si:C.hung, hr:C.hung, ba:C.ind_ba, rs:C.serb_med, me:C.serb_med, xk:C.serb_med, mk:C.byz, bg:C.bgr_med, al:C.byz, gr:C.byz },
+      story: "Croatia has been ruled in personal union with the Hungarian crown since King Coloman's coronation at Biograd in 1102 &mdash; governed by a royally appointed Ban rather than its own king. In Bosnia, Ban Kulin (r. 1180&ndash;1204) plays Hungary and Byzantium off each other to hold a real, if precarious, independence; his 1189 charter with Dubrovnik is one of the oldest surviving documents written in a Slavic vernacular. To the east, Stefan Nemanja has built the foundations of a durable Serbian state around Raška, abdicating in 1196 to become a monk (he was later canonized) and handing power to his son Stefan Nemanjić &mdash; the dynasty that will dominate the next century and a half. Byzantium, still recovering from the trauma of the Fourth Crusade's 1204 sack of Constantinople, is losing its grip on Macedonia to Bulgarian and local rivals. Further east, the Asen brothers' 1185 uprising has just restored a fully independent Second Bulgarian Empire after nearly 170 years of Byzantine rule, while Albania and Greece remain contested Byzantine ground, fragmenting fast." },
+    { year:"1355", name:"Dušan's Serbian Empire", t:{ si:C.hung, hr:C.hung, ba:C.ind_ba, rs:C.serb_med, me:C.serb_med, xk:C.serb_med, mk:C.serb_med, bg:C.bgr_med, al:C.serb_med, gr:C.byz },
+      story: "Stefan Dušan seized the Serbian throne from his own father, Stefan Dečanski, in 1331, then spent the next decade and a half conquering Macedonia, Albania, Epirus, and Thessaly from a Byzantine Empire paralyzed by civil war. In 1346 he crowned himself \"Emperor of the Serbs and Greeks\" at Skopje, elevated the Serbian church to a Patriarchate, and issued the Zakonik, one of medieval Europe's most sophisticated law codes. His empire &mdash; the strongest power in southeastern Europe, stretching from the Danube to the Gulf of Corinth &mdash; was built almost entirely on Dušan's own military success rather than lasting institutions. Croatia and Bosnia, still oriented toward Hungary, lay outside his reach. The Second Bulgarian Empire, weakened by its own internal fragmentation, stays a separate and sometimes rival power throughout, never absorbed into Dušan's realm; what remains of Byzantium clings to a shrunken core around the Greek south." },
+    { year:"1463", name:"Ottoman conquest", t:{ si:C.hung, hr:C.hung, ba:C.ott, rs:C.ott, me:C.serb_med, xk:C.ott, mk:C.ott, bg:C.ott, al:C.skanderbeg, gr:C.ott },
+      story: "Dušan's empire outlived him by barely a generation, fracturing among rival lords with no heir capable of holding it together &mdash; just as the Ottoman Turks were crossing into Europe. The 1389 Battle of Kosovo, where Prince Lazar and Sultan Murad I both died, became the era's defining catastrophe in later memory, though organized Serbian resistance actually continued for decades afterward. Constantinople itself fell in 1453. A decade later, in 1463, Ottoman forces took the fortress of Jajce and captured King Stephen Tomašević, ending the Kingdom of Bosnia outright. Only Montenegro's mountainous core, under the Crnojević princes retreating to Cetinje, held out beyond direct Ottoman rule. Bulgaria fell far earlier, in 1396; Greece's Byzantine remnants are being mopped up piece by piece through the 1460s. Albania alone is still actively resisting: Gjergj Kastrioti, known as Skanderbeg, has held the League of Lezhë together against repeated Ottoman invasions since 1444, and will keep doing so until his death in 1468." },
+    { year:"1500", name:"Ottoman height, Venetian coast", t:{ si:C.hung, hr:C.ven, ba:C.ott, rs:C.ott, me:C.ind_me, xk:C.ott, mk:C.ott, bg:C.ott, al:C.ott, gr:C.ott },
+      story: "By 1500, Ottoman administration was consolidating across the interior, organized into sanjaks answering to Constantinople. The Republic of Venice, fighting a centuries-long rearguard action for control of the Adriatic, held the Dalmatian coastal cities &mdash; Zadar, Split, Šibenik &mdash; as a maritime trading empire, though Ragusa (Dubrovnik) preserved its own independence by paying tribute directly to the Sultan. Montenegro's highlanders, too poor and too rugged to be worth the cost of full conquest, kept real autonomy under only nominal Ottoman suzerainty, setting the pattern for the self-governing Prince-Bishopric that would formalize a generation later. Albanian resistance collapsed within a decade of Skanderbeg's 1468 death, and by 1500 the whole Balkan interior &mdash; Bulgaria, Albania, Greece included &mdash; answers to Constantinople, Venice's scattered coastal and island holdings the only real exception." },
+    { year:"1878", name:"Austro-Hungarian expansion", t:{ si:C.hung, hr:C.hung, ba:C.hung, rs:C.ind_rs, me:C.ind_me, xk:C.ott, mk:C.ott, bg:C.bg_auto, al:C.ott, gr:C.gr_ind },
+      story: "Centuries of slow Ottoman decline came to a head in the Great Eastern Crisis of 1875&ndash;78: uprisings in Bosnia-Herzegovina, brutal Ottoman reprisals, and a Russian intervention that nearly redrew the whole Balkan map on its own. The Congress of Berlin, chaired by Bismarck in the summer of 1878, imposed a settlement instead: Prince Milan Obrenović's Serbia and Prince Nikola Petrović-Njegoš's Montenegro both won full, internationally recognized independence after centuries of struggle, and the same congress created an autonomous Principality of Bulgaria, still under nominal Ottoman suzerainty but self-governing in practice. Austria-Hungary, as compensation for staying out of the fighting, was awarded the right to occupy and administer Bosnia-Herzegovina &mdash; formally annexed in 1908 &mdash; extending Habsburg authority to the very edge of what remained of Ottoman Macedonia and Albania. Greece, independent since the 1821&ndash;32 War of Independence, is already a half-century-old kingdom by this point, and watching the 1878 settlement closely for its own next territorial claims." },
+    { year:"1920", name:"Kingdom of Yugoslavia", t:{ si:C.yu_king, hr:C.yu_king, ba:C.yu_king, rs:C.yu_king, me:C.yu_king, xk:C.yu_king, mk:C.yu_king, bg:C.bg_kingdom, al:C.al_ind, gr:C.gr_ind },
+      story: "World War I destroyed the old order outright. As Austria-Hungary disintegrated in October and November 1918, South Slav leaders raced to unite before Italy could claim the Adriatic coast under the secret 1915 Treaty of London. On 1 December 1918, Serbia's Prince Regent Alexander Karađorđević proclaimed the Kingdom of Serbs, Croats and Slovenes in Belgrade, merging the Kingdom of Serbia &mdash; exhausted but victorious &mdash; with Montenegro and the fragile new State of Slovenes, Croats and Serbs carved from Austria-Hungary's collapse. For the first time in history, one government ruled continuously from the Julian Alps to the Macedonian border with Greece. Bulgaria, on the losing Central Powers side, keeps its own kingdom but loses territory at the 1919 Treaty of Neuilly; Albania, independent since 1912 but barely functioning as a state, holds its founding Congress of Lushnjë this same year; and Greece's kingdom, expanded by the WWI settlement, is about to overreach catastrophically in the 1919&ndash;22 war with Turkey." },
+    { year:"1943", name:"Axis occupation — five powers", t:{ si:"#2b2e33", hr:"#6b3f4a", ba:"#6b3f4a", rs:"#2b2e33", me:"#5c6f7a", xk:"#5c6f7a", mk:"#9a7a3a", bg:"#9a7a3a", al:"#5c6f7a", gr:"#2b2e33" },
+      story: "The kingdom's promise soured badly under King Alexander I's 1929 royal dictatorship and the deepening Croat-Serb rift it never resolved. When the government wavered on joining the Axis in March 1941, Hitler ordered an immediate invasion; the kingdom collapsed in eleven days. The victors carved it up: Ante Pavelić's fascist Ustaše ran a nominally independent \"Greater Croatia\" (the NDH) that absorbed Bosnia whole; Germany annexed and occupied Slovenia and Serbia directly; Italy took Montenegro and much of the coast; Bulgaria annexed Macedonia outright &mdash; and Bulgaria itself, a willing Axis ally rather than an occupied territory, is the same government doing the annexing, which is why Macedonia and Bulgaria share one color here. Italy had already annexed Albania outright back in April 1939, two years before the wider invasion, folding it into the same occupation zone as Montenegro; Greece, invaded in April 1941 after repelling an earlier Italian attack, ends up under direct German administration in its most strategic areas, alongside Italian and Bulgarian occupation zones elsewhere in the country." },
+    { year:"1980", name:"SFR Yugoslavia", t:{ si:C.sfry, hr:C.sfry, ba:C.sfry, rs:C.sfry, me:C.sfry, xk:C.sfry, mk:C.sfry, bg:C.bg_comm, al:C.al_comm, gr:C.gr_nato },
+      story: "Tito's Partisans, formally recognized by the Allies at the November 1943 Tehran Conference, liberated most of the country by their own effort &mdash; a rare achievement in occupied Europe, and the basis for the independence Tito showed almost immediately afterward. His 1948 break with Stalin was the first crack in the assumed unity of world communism; in its place he built a distinctive \"self-managed\" socialism and co-founded the Non-Aligned Movement, balancing deliberately between both Cold War blocs. Six republics &mdash; Slovenia, Croatia, Bosnia, Serbia, Montenegro, Macedonia &mdash; were held together under his personal authority as much as any institution. 1980, the year of his death, is the system at its most stable, just before the debt, inflation, and unpoliced nationalism it had suppressed began to resurface. Bulgaria, by contrast, is a conventional Warsaw Pact state under Todor Zhivkov, closely aligned with Moscow; Albania under Enver Hoxha has gone further still, breaking with the USSR in 1961 and with China itself in 1978 to become the most isolated country in Europe; and Greece, after seven years of military junta rule (1967&ndash;74), has just restored democracy as the Third Hellenic Republic, firmly inside NATO." },
+    { year:"2008", name:"Independent states, today", t:{ si:C.ind_si, hr:C.ind_hr, ba:C.ind_ba, rs:C.ind_rs, me:C.ind_me, xk:C.ind_xk, mk:C.ind_mk, bg:C.bg_modern, al:C.al_modern, gr:C.gr_nato },
+      story: "Tito's death in 1980 removed the one figure whose personal authority had kept the federation's rival nationalisms in check. As communism collapsed across Eastern Europe in 1989&ndash;91, Slobodan Milošević's centralizing turn in Serbia &mdash; including the 1989 revocation of Kosovo's autonomy &mdash; alarmed the other republics; Slovenia and Croatia declared independence in June 1991, and the Yugoslav Wars began within days. Bosnia's 1992 declaration brought the worst of the violence, including the Srebrenica genocide of 1995 and the years-long siege of Sarajevo, ended only by the Dayton Agreement. Montenegro's 2006 referendum and Kosovo's contested 2008 declaration completed the fragmentation: one flag, flying continuously from 1918 (with a wartime interruption) to 1991, is seven today. Bulgaria and Albania both exited communism the same window (1989&ndash;91) and, like their former-Yugoslav neighbors, are now on largely parallel tracks into the EU and NATO; Greece, never part of the communist bloc at all, has been there since the 1950s&ndash;80s and keeps the same flag and government it had in 1980." }
+  ];
+
+  var FLAG_SETS = {
+    "1200": [["arpad","Hungarian crown"],["kotromanic","Independent Bosnia"],["nemanjic","Nemanjić kingdom"],["byzantine","Byzantine Empire"],["bgr_med","Second Bulgarian Empire"]],
+    "1355": [["arpad","Hungarian crown"],["kotromanic","Independent Bosnia"],["dusan","Dušan's Serbian Empire"],["bgr_med","Second Bulgarian Empire"],["byzantine","Byzantine Empire (Greece)"]],
+    "1463": [["arpad","Hungarian crown"],["ottoman","Ottoman Empire"],["zeta","Zeta (Montenegro)"],["skanderbeg","League of Lezhë (Albania)"]],
+    "1500": [["arpad","Hungarian crown"],["venice","Venice"],["ottoman","Ottoman Empire"],["zeta","Autonomous Montenegro"]],
+    "1878": [["croatia_slavonia","Austro-Hungarian Croatia-Slavonia"],["serbia_kingdom","Kingdom of Serbia"],["montenegro_principality","Principality of Montenegro"],["ottoman","Ottoman Empire"],["bg_auto","Autonomous Bulgaria"],["gr_ind","Kingdom of Greece"]],
+    "1920": [["yugoslav_kingdom","Kingdom of Yugoslavia"],["bg_kingdom","Kingdom of Bulgaria"],["al_ind","Albania"],["gr_ind","Kingdom of Greece"]],
+    "1943": [["nazi_germany","Nazi Germany"],["ndh","NDH (Croatian puppet state)"],["italy_kingdom","Kingdom of Italy"],["bulgaria_kingdom","Kingdom of Bulgaria"]],
+    "1980": [["sfry","SFR Yugoslavia"],["bg_comm","Communist Bulgaria"],["al_comm","Isolated Communist Albania"],["gr_nato","Hellenic Republic (Greece)"]],
+    "2008": [["slovenia_modern","Slovenia"],["croatia_modern","Croatia"],["bosnia_modern","Bosnia & Herzegovina"],["serbia_modern","Serbia"],["montenegro_modern","Montenegro"],["kosovo_modern","Kosovo"],["macedonia_modern","N. Macedonia"],["bg_modern","Bulgaria"],["al_modern","Albania"],["gr_nato","Greece"]]
+  };
+  var WW2NAMES = { "#2b2e33":"Nazi Germany (direct rule)", "#6b3f4a":"NDH (Croatian puppet state)", "#5c6f7a":"Italy (occupation)", "#9a7a3a":"Bulgaria (occupation)" };
+
+  var REGIONS = ["si","hr","ba","rs","me","xk","mk","bg","al","gr"];
+  var REGION_NAMES = { si:"Slovenia", hr:"Croatia", ba:"Bosnia", rs:"Serbia", me:"Montenegro", xk:"Kosovo", mk:"N. Macedonia", bg:"Bulgaria", al:"Albania", gr:"Greece" };
+  var REGION_ABBR = { si:"SLO", hr:"CRO", ba:"BiH", rs:"SRB", me:"MNE", xk:"KOS", mk:"MKD", bg:"BGR", al:"ALB", gr:"GRC" };
+  var REGION_POS = { si:[71,59], hr:[165,110], ba:[182,157], rs:[301,179], me:[241,236], xk:[296,246], mk:[324,294], bg:[445,231], al:[262,318], gr:[383,393] };
+  var ADJ = [["si","hr"],["hr","ba"],["hr","rs"],["ba","rs"],["ba","me"],["rs","me"],["rs","xk"],["rs","mk"],["me","xk"],["xk","mk"],["bg","rs"],["bg","mk"],["bg","gr"],["al","me"],["al","mk"],["al","gr"],["gr","mk"]];
+
+  function textColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+  function ownerName(hex) {
+    for (var k in C) { if (C[k] === hex) return NAMES[k]; }
+    return WW2NAMES[hex] || hex;
+  }
+
+  function groupsFor(t) {
+    var parent = {};
+    REGIONS.forEach(function (r) { parent[r] = r; });
+    function find(x) { return parent[x] === x ? x : (parent[x] = find(parent[x])); }
+    function union(a, b) { var ra = find(a), rb = find(b); if (ra !== rb) parent[ra] = rb; }
+    ADJ.forEach(function (pair) {
+      if (t[pair[0]] === t[pair[1]]) union(pair[0], pair[1]);
+    });
+    var groups = {};
+    REGIONS.forEach(function (r) {
+      var root = find(r);
+      if (!groups[root]) groups[root] = [];
+      groups[root].push(r);
+    });
+    return Object.keys(groups).map(function (k) { return groups[k]; });
+  }
+
+  var svgNS = "http://www.w3.org/2000/svg";
+  var labelsEl = document.getElementById("labels");
+  var yearTag = document.getElementById("yearTag");
+  var eraName = document.getElementById("eraName");
+  var eraOwners = document.getElementById("eraOwners");
+  var eraStory = document.getElementById("eraStory");
+  var flagsRow = document.getElementById("flagsRow");
+  var sliderEl = document.getElementById("slider");
+
+  function render(i) {
+    var era = SNAP[i];
+    yearTag.textContent = era.year;
+    eraName.textContent = era.name;
+    eraStory.innerHTML = era.story || "";
+    flagsRow.innerHTML = (FLAG_SETS[era.year] || []).map(function (f) {
+      return '<div class="flag-chip">' + flagSvg(f[0]) + '<div class="fc-label">' + f[1] + '</div></div>';
+    }).join("");
+
+    REGIONS.forEach(function (id) {
+      var el = document.getElementById("f-" + id);
+      el.setAttribute("fill", era.t[id]);
+    });
+
+    ADJ.forEach(function (pair) {
+      var same = era.t[pair[0]] === era.t[pair[1]];
+      var line = document.getElementById("b-" + pair[0] + "-" + pair[1]);
+      line.setAttribute("stroke-opacity", same ? "0.06" : "0.85");
+      line.setAttribute("stroke-width", same ? "1" : "2.6");
+    });
+
+    var groups = groupsFor(era.t);
+    var seenOwners = {};
+    var ownerParts = [];
+    groups.forEach(function (g) {
+      var label = ownerName(era.t[g[0]]);
+      if (!seenOwners[label]) { seenOwners[label] = []; ownerParts.push(label); }
+      g.forEach(function (id) { seenOwners[label].push(REGION_NAMES[id]); });
+    });
+    eraOwners.innerHTML = ownerParts.map(function (label) {
+      return "<b>" + label + "</b>: " + seenOwners[label].join(", ");
+    }).join(" &middot; ");
+
+    labelsEl.innerHTML = "";
+    function haloFor(txtColor) { return txtColor === "#201a12" ? "#f7f1e3" : "#201a12"; }
+    groups.forEach(function (g) {
+      var cx = g.reduce(function (s, id) { return s + REGION_POS[id][0]; }, 0) / g.length;
+      var cy = g.reduce(function (s, id) { return s + REGION_POS[id][1]; }, 0) / g.length;
+      var fillHex = era.t[g[0]];
+      var txtColor = textColorFor(fillHex);
+      var halo = haloFor(txtColor);
+
+      if (g.length > 1) {
+        var groupText = ownerName(fillHex).toUpperCase();
+        var gl = document.createElementNS(svgNS, "text");
+        gl.setAttribute("x", cx);
+        gl.setAttribute("y", cy);
+        gl.setAttribute("class", "group-label");
+        gl.setAttribute("font-size", groupText.length > 16 ? "11" : "14");
+        gl.setAttribute("fill", txtColor);
+        gl.setAttribute("stroke", halo);
+        gl.textContent = groupText;
+        labelsEl.appendChild(gl);
+        g.forEach(function (id) {
+          var pos = REGION_POS[id];
+          var sl = document.createElementNS(svgNS, "text");
+          sl.setAttribute("x", pos[0]);
+          sl.setAttribute("y", pos[1] + 14);
+          sl.setAttribute("class", "sub-label");
+          sl.setAttribute("font-size", "9.5");
+          sl.setAttribute("fill", txtColor);
+          sl.setAttribute("stroke", halo);
+          sl.setAttribute("opacity", "0.85");
+          sl.textContent = REGION_ABBR[id];
+          labelsEl.appendChild(sl);
+        });
+      } else {
+        var id = g[0];
+        var pos = REGION_POS[id];
+        var selfGoverning = Object.keys(C).some(function (k) { return k.indexOf("ind_") === 0 && C[k] === fillHex; });
+        var soloText = (selfGoverning ? REGION_NAMES[id] : ownerName(fillHex)).toUpperCase();
+        var sl2 = document.createElementNS(svgNS, "text");
+        sl2.setAttribute("x", pos[0]);
+        sl2.setAttribute("y", pos[1]);
+        sl2.setAttribute("class", "group-label");
+        sl2.setAttribute("font-size", selfGoverning ? "13" : (soloText.length > 16 ? "9.5" : "12"));
+        sl2.setAttribute("fill", txtColor);
+        sl2.setAttribute("stroke", halo);
+        sl2.textContent = soloText;
+        labelsEl.appendChild(sl2);
+        if (!selfGoverning) {
+          var subOnly = document.createElementNS(svgNS, "text");
+          subOnly.setAttribute("x", pos[0]);
+          subOnly.setAttribute("y", pos[1] + 14);
+          subOnly.setAttribute("class", "sub-label");
+          subOnly.setAttribute("font-size", "9.5");
+          subOnly.setAttribute("fill", txtColor);
+          subOnly.setAttribute("stroke", halo);
+          subOnly.setAttribute("opacity", "0.85");
+          subOnly.textContent = REGION_ABBR[id];
+          labelsEl.appendChild(subOnly);
+        }
+      }
+    });
+  }
+
+  sliderEl.addEventListener("input", function () { render(parseInt(sliderEl.value, 10)); });
+  render(0);
+
+  var playing = false, playTimer = null;
+  var playBtn = document.getElementById("playBtn");
+  function stepPlay() {
+    var next = parseInt(sliderEl.value, 10) + 1;
+    if (next > SNAP.length - 1) { stopPlay(); return; }
+    sliderEl.value = next;
+    render(next);
+  }
+  function startPlay() {
+    playing = true;
+    playBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(sliderEl.value, 10) >= SNAP.length - 1) { sliderEl.value = 0; render(0); }
+    playTimer = setInterval(stepPlay, 1700);
+  }
+  function stopPlay() {
+    playing = false;
+    playBtn.innerHTML = "&#9654;";
+    clearInterval(playTimer);
+  }
+  playBtn.addEventListener("click", function () { playing ? stopPlay() : startPlay(); });
+
+  // ---- Small multiples grid: same nine snapshots, diff-highlighted ----
+  var gridEl = document.getElementById("grid9");
+  var MINI_PATHS = {
+    si: "M25.7,38.0 L57.4,42.1 L76.7,30.2 L110.2,28.9 L117.5,20.0 L123.9,20.6 L131.4,38.3 L100.9,52.3 L97.2,73.5 L83.9,78.9 L84.0,93.6 L69.0,92.6 L55.9,84.0 L48.9,92.9 L22.2,91.1 L30.7,86.3 L21.6,63.9 L25.7,38.0 Z",
+    hr: "M218.1,69.6 L227.4,90.0 L239.6,105.0 L224.9,124.7 L207.5,113.1 L181.1,113.8 L148.1,105.1 L130.2,106.3 L121.9,117.2 L108.2,105.1 L100.2,126.9 L118.9,151.5 L127.2,167.8 L144.8,187.4 L159.4,199.1 L173.9,221.0 L207.8,241.0 L203.6,249.9 L167.6,230.4 L145.4,211.5 L110.3,195.9 L78.1,157.2 L85.9,153.3 L68.4,131.1 L67.7,113.4 L43.0,105.1 L31.3,127.8 L20.0,110.2 L20.9,91.9 L22.2,91.1 L48.9,92.9 L55.9,84.0 L69.0,92.6 L84.0,93.6 L83.9,78.9 L97.2,73.5 L100.9,52.3 L131.4,38.3 L143.5,44.8 L172.2,67.4 L203.8,77.5 L218.1,69.6 Z",
+    ba: "M224.9,124.7 L238.8,124.6 L229.2,147.7 L247.6,167.9 L242.0,192.7 L233.0,195.0 L225.9,199.8 L213.4,212.0 L207.8,241.0 L173.9,221.0 L159.4,199.1 L144.8,187.4 L127.2,167.8 L118.9,151.5 L100.2,126.9 L108.2,105.1 L121.9,117.2 L130.2,106.3 L148.1,105.1 L181.1,113.8 L207.5,113.1 L224.9,124.7 Z",
+    rs: "M296.4,95.5 L319.8,107.9 L322.8,129.5 L345.1,144.8 L357.1,133.0 L366.6,139.6 L357.7,148.5 L364.7,157.6 L355.3,169.5 L358.7,188.8 L377.3,211.4 L362.7,227.9 L356.3,244.6 L360.4,250.9 L354.1,258.3 L336.4,259.2 L323.3,262.2 L322.1,258.3 L326.7,252.0 L330.9,239.2 L325.5,239.5 L318.1,229.8 L311.8,227.3 L306.8,218.9 L299.6,215.7 L294.2,208.2 L287.3,211.2 L282.0,228.6 L272.8,232.4 L276.0,227.9 L261.4,217.0 L248.8,211.3 L243.2,204.0 L233.0,195.0 L242.0,192.7 L247.6,167.9 L229.2,147.7 L238.8,124.6 L224.9,124.7 L239.6,105.0 L227.4,90.0 L218.1,69.6 L247.5,55.8 L271.4,58.1 L292.2,78.8 L296.4,95.5 Z",
+    me: "M255.4,248.8 L252.9,238.9 L236.3,264.8 L238.9,281.6 L230.9,277.5 L220.1,260.3 L203.6,249.9 L207.8,241.0 L213.4,212.0 L225.9,199.8 L233.0,195.0 L243.2,204.0 L248.8,211.3 L261.4,217.0 L276.0,227.9 L272.8,232.4 L265.7,244.2 L255.4,248.8 Z",
+    xk: "M294.3,210.8 L293.6,214.6 L305.7,217.8 L311.2,229.0 L317.8,230.0 L315.6,236.6 L331.6,241.5 L324.8,255.5 L321.2,256.2 L324.0,262.1 L316.1,263.5 L313.2,270.2 L304.9,264.8 L294.5,270.3 L291.0,275.7 L293.1,282.3 L284.8,286.5 L287.0,277.2 L283.0,264.5 L272.6,258.2 L269.3,248.6 L264.2,246.3 L265.7,241.2 L262.2,236.5 L282.4,229.5 L280.5,226.0 L288.1,218.2 L284.3,212.8 L294.3,210.8 Z",
+    mk: "M285.6,282.7 L290.4,283.2 L292.2,272.4 L314.8,264.3 L323.3,262.2 L336.4,259.2 L354.1,258.3 L373.3,275.2 L376.0,309.9 L368.7,311.7 L362.4,320.8 L341.7,319.8 L327.1,331.3 L302.0,336.0 L286.1,323.2 L280.7,300.6 L285.6,282.7 Z"
+  };
+  SNAP.forEach(function (era, idx) {
+    var prev = idx > 0 ? SNAP[idx - 1] : null;
+    var changed = [];
+    if (prev) {
+      Object.keys(MINI_PATHS).forEach(function (id) {
+        if (era.t[id] !== prev.t[id]) changed.push(id);
+      });
+    }
+    var cell = document.createElement("div");
+    cell.className = "grid-cell";
+    var svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("viewBox", "0 0 440 420");
+    var sea = document.createElementNS(svgNS, "path");
+    sea.setAttribute("d", "M0,60 L20.9,91.9 L20.0,110.2 L31.3,127.8 L43.0,105.1 L67.7,113.4 L68.4,131.1 L85.9,153.3 L78.1,157.2 L110.3,195.9 L145.4,211.5 L167.6,230.4 L203.6,249.9 L220.1,260.3 L230.9,277.5 L238.9,281.6 L245.3,289.9 L240.1,306.2 L236.9,342.0 L240.2,367.1 L262.2,396.3 L268.7,400.0 L0,400 Z");
+    sea.setAttribute("fill", "var(--tile-sea)");
+    svg.appendChild(sea);
+    Object.keys(MINI_PATHS).forEach(function (id) {
+      var isBaseline = !prev;
+      var isChanged = prev && changed.indexOf(id) !== -1;
+      var bold = isBaseline || isChanged;
+      var p = document.createElementNS(svgNS, "path");
+      p.setAttribute("d", MINI_PATHS[id]);
+      p.setAttribute("fill", era.t[id]);
+      if (bold) {
+        p.setAttribute("fill-opacity", "1");
+        p.setAttribute("stroke", "#241f14");
+        p.setAttribute("stroke-width", "2.2");
+      } else {
+        p.setAttribute("fill-opacity", "0.22");
+        p.setAttribute("stroke", "#241f14");
+        p.setAttribute("stroke-width", "0.75");
+        p.setAttribute("stroke-opacity", "0.4");
+      }
+      svg.appendChild(p);
+      var pos = REGION_POS[id];
+      var lbl = document.createElementNS(svgNS, "text");
+      lbl.setAttribute("x", pos[0]);
+      lbl.setAttribute("y", pos[1]);
+      lbl.setAttribute("text-anchor", "middle");
+      lbl.setAttribute("class", "mini-label");
+      lbl.setAttribute("fill", bold ? textColorFor(era.t[id]) : "#8a7d5c");
+      lbl.setAttribute("opacity", bold ? "1" : "0.55");
+      lbl.textContent = REGION_ABBR[id];
+      svg.appendChild(lbl);
+    });
+    cell.appendChild(svg);
+    var cap = document.createElement("div");
+    cap.className = "cap";
+    var diffText = !prev ? "Starting point" : (changed.length ? "→ " + changed.map(function (id) { return REGION_NAMES[id]; }).join(", ") + " change" + (changed.length === 1 ? "s" : "") + " hands" : "→ no change from previous frame");
+    cap.innerHTML = era.year + "<b>" + era.name + "</b><span class=\"diff\">" + diffText + "</span>";
+    cell.appendChild(cap);
+    gridEl.appendChild(cell);
+  });
+
+  // ---- Timeline: same data, real continuous date ranges ----
+  var GANTT_START = 900, GANTT_END = 2020;
+  var GANTT_DATA = [
+    { id:"si", segs:[
+      [900,1918,C.hung,"HRE / Habsburg"], [1918,1941,C.yu_king,"Kingdom of Yugoslavia"],
+      [1941,1945,"#2b2e33","Axis partition"], [1945,1991,C.sfry,"SFR Yugoslavia"], [1991,2020,C.ind_si,"Independent"]
+    ]},
+    { id:"hr", segs:[
+      [900,1102,C.ind_hr,"Indep. kingdom"], [1102,1918,C.hung,"Hungarian / Habsburg"], [1918,1941,C.yu_king,"Kingdom of Yugoslavia"],
+      [1941,1945,"#6b3f4a","NDH"], [1945,1991,C.sfry,"SFR Yugoslavia"], [1991,2020,C.ind_hr,"Independent"]
+    ]},
+    { id:"ba", segs:[
+      [900,1154,"#6e6047","(various)"], [1154,1463,C.ind_ba,"Banate / Kingdom"], [1463,1878,C.ott,"Ottoman"],
+      [1878,1918,C.hung,"Austro-Hungarian"], [1918,1941,C.yu_king,"Kingdom of Yugoslavia"], [1941,1945,"#6b3f4a","NDH"],
+      [1945,1992,C.sfry,"SFR Yugoslavia"], [1992,2020,C.ind_ba,"Independent"]
+    ]},
+    { id:"rs", segs:[
+      [900,1166,C.byz,"Byzantine sphere"], [1166,1346,C.serb_med,"Nemanjić kingdom"], [1346,1371,C.serb_med,"Serbian Empire"],
+      [1371,1459,C.serb_med,"Despotate"], [1459,1804,C.ott,"Ottoman"], [1804,1878,C.ind_rs,"Autonomous principality"],
+      [1878,1918,C.ind_rs,"Kingdom of Serbia"], [1918,1941,C.yu_king,"Kingdom of Yugoslavia"], [1941,1945,"#2b2e33","German occupation"],
+      [1945,1992,C.sfry,"SFR Yugoslavia"], [1992,2006,C.yu_king,"FRY / Serbia-Mont."], [2006,2020,C.ind_rs,"Independent"]
+    ]},
+    { id:"me", segs:[
+      [900,1516,C.serb_med,"Zeta (Serbian)"], [1516,1852,C.ind_me,"Prince-Bishopric"], [1852,1918,C.ind_me,"Principality / Kingdom"],
+      [1918,1941,C.yu_king,"Kingdom of Yugoslavia"], [1941,1945,"#5c6f7a","Italian occupation"], [1945,1992,C.sfry,"SFR Yugoslavia"],
+      [1992,2006,C.yu_king,"FRY / Serbia-Mont."], [2006,2020,C.ind_me,"Independent"]
+    ]},
+    { id:"xk", segs:[
+      [900,1180,C.byz,"Byzantine"], [1180,1455,C.serb_med,"Serbian kingdom / empire"], [1455,1912,C.ott,"Ottoman"],
+      [1912,1918,C.ind_rs,"Kingdom of Serbia"], [1918,1941,C.yu_king,"Kingdom of Yugoslavia"], [1941,1945,"#5c6f7a","Italian-Albanian zone"],
+      [1945,1999,C.sfry,"SFR Yugoslavia / FRY"], [1999,2008,"#6e6047","UN administration"], [2008,2020,C.ind_xk,"Independent (contested)"]
+    ]},
+    { id:"mk", segs:[
+      [900,1018,C.byz,"Bulgarian Empire"], [1018,1230,C.byz,"Byzantine"], [1230,1371,C.serb_med,"Serbian control"],
+      [1371,1912,C.ott,"Ottoman"], [1912,1918,C.ind_rs,"Kingdom of Serbia"], [1918,1941,C.yu_king,"Kingdom of Yugoslavia"],
+      [1941,1944,"#9a7a3a","Bulgarian occupation"], [1945,1991,C.sfry,"SFR Yugoslavia"], [1991,2020,C.ind_mk,"Independent"]
+    ]}
+  ];
+  var ganttEl = document.getElementById("gantt");
+  function yearToPct(y) { return (y - GANTT_START) / (GANTT_END - GANTT_START) * 100; }
+  GANTT_DATA.forEach(function (row) {
+    var rowEl = document.createElement("div");
+    rowEl.className = "gantt-row";
+    var label = document.createElement("div");
+    label.className = "gantt-label";
+    label.textContent = REGION_NAMES[row.id];
+    rowEl.appendChild(label);
+    var track = document.createElement("div");
+    track.className = "gantt-track";
+    row.segs.forEach(function (seg) {
+      var left = yearToPct(seg[0]);
+      var width = yearToPct(seg[1]) - left;
+      var segEl = document.createElement("div");
+      segEl.className = "gantt-seg";
+      segEl.style.left = left + "%";
+      segEl.style.width = width + "%";
+      segEl.style.background = seg[2];
+      segEl.title = REGION_NAMES[row.id] + ": " + seg[3] + " (" + seg[0] + "–" + seg[1] + ")";
+      if (width > 4) {
+        var sp = document.createElement("span");
+        sp.textContent = seg[3];
+        sp.style.color = textColorFor(seg[2]);
+        segEl.appendChild(sp);
+      }
+      track.appendChild(segEl);
+    });
+    rowEl.appendChild(track);
+    ganttEl.appendChild(rowEl);
+  });
+  var axisEl = document.getElementById("gantt-axis");
+  [900, 1100, 1300, 1500, 1700, 1900, 2020].forEach(function (y) {
+    var s = document.createElement("span");
+    s.style.left = yearToPct(y) + "%";
+    s.textContent = y;
+    axisEl.appendChild(s);
+  });
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,154 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Empires of the Atlas</title>
+<meta name="description" content="A hub for the family flag atlas: eight major transnational empires — Ancient Egypt, Rome, Persia, the Ottomans, the Mongols, the Mughals, Britain, and Spain — told as their own coherent stories instead of scattered mentions across dozens of country pages.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    --tile: #ddd0aa; --tile-line: #b7a679; --tile-text: #7a6a45; --tile-sea: #b9d3da;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.2rem, 5.5vw, 3.4rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.1rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .countries { margin-top: 44px; }
+  .countries h2 { font-size: 1.15rem; font-weight: 600; margin: 0 0 16px; }
+  .country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .country-card {
+    display: block; padding: 20px; border: 1px solid var(--card-border); background: var(--card);
+    border-radius: 4px; text-decoration: none; color: var(--ink); position: relative; overflow: hidden;
+  }
+  .country-card .swatch-strip { position: absolute; top: 0; left: 0; right: 0; height: 5px; }
+  .country-card .era { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--brass); margin-bottom: 6px; }
+  .country-card b { display: block; font-family: "Fraunces", serif; font-size: 1.2rem; font-weight: 600; margin-bottom: 6px; }
+  .country-card span { color: var(--muted); font-size: .88rem; line-height: 1.5; }
+
+  .about { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .about h2 { font-size: 1.3rem; margin: 0 0 12px; }
+  .about p { max-width: none; opacity: .88; margin: 0 0 12px; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a></p>
+  <p class="kicker">Family research &middot; Empires hub &middot; a different kind of hub</p>
+  <h1>Empires of the Atlas</h1>
+  <p class="lede">Every other hub in this atlas groups modern countries by geography &mdash; the Balkans, West Africa, the Caribbean. This hub is different. It groups eight major transnational empires that each, at their height, spanned dozens of today's modern countries: Ancient Egypt, Rome, Persia, the Ottomans, the Mongols, the Mughals, Britain, and Spain. Until now, each of these has appeared in this atlas only as brief ruling-context mentions scattered across many separate country pages &mdash; the Mongol Empire alone shows up as a passing reference on roughly twenty different pages, but never once as its own story. Here, each empire finally gets a real, full-depth timeline of its own, on its own page, the same paint-ready format as every country page in this atlas.</p>
+  <p class="lede">These pages cross-link both ways: each empire page links forward to whichever modern country continues or descends from its story (Ottoman &rarr; Turkey, Persian &rarr; Iran, Egyptian &rarr; modern Egypt), and this hub links out to all eight. Four are live now; the other four are being built in parallel and will go live shortly &mdash; their cards below already point to the right pages.</p>
+
+  <div class="countries">
+    <h2>The 8 empires</h2>
+    <div class="country-grid">
+      <a class="country-card" href="ancient-egypt-flags.html">
+        <span class="swatch-strip" style="background:#c9a13c"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Ancient Egypt</b>
+        <span>Narmer's c. 3100 BCE unification, the pyramid-building Old Kingdom, the imperial New Kingdom, and the Ptolemaic dynasty ending with Cleopatra VII and Roman annexation in 30 BCE.</span>
+      </a>
+      <a class="country-card" href="roman-empire-flags.html">
+        <span class="swatch-strip" style="background:#7c2e1f"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Roman Empire</b>
+        <span>753 BCE's legendary founding through the Republic's SPQR, Augustus's Empire, the 395 CE East/West split, Rome's 476 CE fall, and Byzantium's survival to 1453.</span>
+      </a>
+      <a class="country-card" href="persian-empire-flags.html">
+        <span class="swatch-strip" style="background:#1a3a6b"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Persian Empire (ancient)</b>
+        <span>Cyrus the Great's 550 BCE Achaemenid founding, Alexander's conquest, the Seleucid and Parthian successors, and the Sasanian Empire's fall to Arab-Islamic conquest in 651 CE.</span>
+      </a>
+      <a class="country-card" href="ottoman-empire-flags.html">
+        <span class="swatch-strip" style="background:#e30a17"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Ottoman Empire</b>
+        <span>Osman I's c. 1299 founding, the 1453 conquest of Constantinople, Suleiman the Magnificent's height, and the 1922&ndash;23 abolition that opened the way for modern Turkey.</span>
+      </a>
+      <a class="country-card" href="mongol-empire-flags.html">
+        <span class="swatch-strip" style="background:#8a2f2f"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Mongol Empire</b>
+        <span>Genghis Khan's 1206 unification of the steppe tribes and the largest contiguous land empire in history, splitting into the Yuan, Golden Horde, Chagatai, and Ilkhanate.</span>
+      </a>
+      <a class="country-card" href="mughal-empire-flags.html">
+        <span class="swatch-strip" style="background:#1e7a4a"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Mughal Empire</b>
+        <span>Babur's 1526 founding after the First Battle of Panipat, Akbar's religious tolerance, Aurangzeb's territorial peak, and a long decline into British paramountcy.</span>
+      </a>
+      <a class="country-card" href="british-empire-flags.html">
+        <span class="swatch-strip" style="background:#00247d"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>British Empire</b>
+        <span>From early North American and Caribbean colonies through "the empire on which the sun never sets," the Raj, and 20th-century decolonization into the modern Commonwealth.</span>
+      </a>
+      <a class="country-card" href="spanish-empire-flags.html">
+        <span class="swatch-strip" style="background:#aa151b"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Spanish Empire</b>
+        <span>1492's opening voyage, conquest of the Aztec and Inca empires, a global territorial reach at its height, and 19th-century Latin American independence wars.</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="about">
+    <h2>About this hub</h2>
+    <p>Why a separate hub at all? Every regional hub in this atlas &mdash; the Balkans, the Caucasus, West Africa &mdash; is built around modern political geography: the countries that exist on today's map, grouped by where they sit. Empires don't fit that model. The Ottoman Empire alone shaped the ruling history of the Balkans, the Levant, the Arabian Peninsula, the Caucasus, Egypt, and North Africa all at once; the Mongol Empire touched pages from Eastern Europe to East Asia to Central Asia. Splitting each empire's story into fragments scattered across a dozen country pages does a disservice to how genuinely transnational these powers were &mdash; so this hub tells each one once, properly, as its own throughline, and links out to the modern countries that continue or descend from it.</p>
+    <p>Each empire page below follows this atlas's full-depth format: a newest-first timeline of real flags and reconstructed royal emblems where no flag survives, a paint guide with hex swatches for every entry, and a "Reading the tags" legend. Four empires are live now (Ancient Egypt, Rome, Persia, the Ottomans); the Mongol, Mughal, British, and Spanish empires are being built in parallel and will go live at their linked filenames shortly.</p>
+  </div>
+
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This hub is one phase in a larger set. See the region-wide hubs and the index here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="maghreb-nile-hub.html"><b>Maghreb &amp; Nile hub</b><span>Egypt's modern-day neighbors</span></a>
+      <a class="link-card" href="persia-mesopotamia-anatolia-hub.html"><b>Persia, Mesopotamia &amp; Anatolia</b><span>Iran, Iraq, Turkey &mdash; where three of these empires land</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica.
+  </footer>
+
+</div>
+
+</body></html>

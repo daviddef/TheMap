@@ -1,0 +1,511 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Flags of the Pacific</title>
+<meta name="description" content="A hub for the family flag atlas: fourteen Pacific and Oceania nations, from millennia of Austronesian and Polynesian seafaring migration through European contact and colonization to independence.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    --tile: #ddd0aa; --tile-line: #b7a679; --tile-text: #7a6a45; --tile-sea: #b9d3da;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.2rem, 5.5vw, 3.4rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.1rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .countries { margin-top: 44px; }
+  .countries h2 { font-size: 1.15rem; font-weight: 600; margin: 0 0 16px; }
+  .country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .country-card {
+    display: block; padding: 20px; border: 1px solid var(--card-border); background: var(--card);
+    border-radius: 4px; text-decoration: none; color: var(--ink); position: relative; overflow: hidden;
+  }
+  .country-card .swatch-strip { position: absolute; top: 0; left: 0; right: 0; height: 5px; }
+  .country-card .era { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--brass); margin-bottom: 6px; }
+  .country-card b { display: block; font-family: "Fraunces", serif; font-size: 1.2rem; font-weight: 600; margin-bottom: 6px; }
+  .country-card span { color: var(--muted); font-size: .88rem; line-height: 1.5; }
+
+  .map-section { margin-top: 56px; padding-top: 36px; border-top: 1px solid var(--hair); }
+  .map-section h2 { font-size: 1.5rem; margin: 0 0 8px; }
+  .map-section .map-sub { font-size: .94rem; color: var(--muted); max-width: 68ch; margin: 0 0 22px; }
+  .map-section .rule-box { margin-bottom: 22px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .92rem; }
+  .map-section .rule-box b { color: var(--brick); }
+
+  .viz-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 22px; }
+
+  .controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .play-btn {
+    flex: none; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .play-btn:hover { border-color: var(--brick); }
+  input[type="range"] {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px;
+    background: var(--hair); outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper);
+    box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  .era-tag { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+
+  .era-head { text-align: center; margin-bottom: 16px; }
+  .era-name-inline { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.35rem; transition: opacity .35s ease; }
+  .era-owners { font-size: .86rem; color: var(--muted); max-width: 66ch; margin: 6px auto 0; transition: opacity .35s ease; }
+  .era-owners b { color: var(--ink); }
+  .era-story {
+    margin: 0 auto 22px; font-size: .98rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .35s ease; padding: 14px 18px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  .era-story b { color: var(--brick); }
+
+  .flags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin: 4px auto 18px; max-width: 680px; }
+  .flag-chip { text-align: center; width: 88px; }
+  .flag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-chip .fc-label { font-family: "IBM Plex Mono", monospace; font-size: 9px; color: var(--muted); margin-top: 5px; line-height: 1.3; }
+
+  #map-svg { display: block; margin: 0 auto; width: 100%; max-width: 640px; height: auto; }
+  .region-fill { transition: fill 0.7s ease; }
+  .marker-dot { transition: fill 0.7s ease; stroke: #241f14; stroke-width: 1; }
+  .place-label { font-family: "IBM Plex Mono", monospace; font-weight: 700; transition: opacity .5s ease, fill .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2.5px; pointer-events: none; }
+  .place-label-big { font-family: "Fraunces", serif; font-weight: 600; transition: opacity .5s ease, fill .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 3px; pointer-events: none; }
+
+  .map-key { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: .8rem; color: var(--muted); justify-content: center; }
+  .map-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .map-key .sw { width: 11px; height: 11px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .map-notes { margin-top: 20px; font-size: .85rem; color: var(--muted); }
+  .map-notes b { color: var(--ink); }
+
+  .about { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .about h2 { font-size: 1.3rem; margin: 0 0 12px; }
+  .about p { max-width: none; opacity: .88; margin: 0 0 12px; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a></p>
+  <p class="kicker">Family research &middot; Hub &middot; Phase 14 of the world atlas</p>
+  <h1>Flags of the Pacific</h1>
+  <p class="lede">No region in this atlas is more geographically dispersed. Long before any European ship entered the Pacific, Austronesian-speaking peoples had already settled it &mdash; a millennia-long expansion out of island Southeast Asia that carried Melanesian, Micronesian, and finally Polynesian voyagers across open ocean using wayfinding: reading stars, swells, currents, and bird flight without instruments. Polynesian navigators reached New Zealand, Hawai'i, and Rapa Nui (Easter Island), the three points of the "Polynesian Triangle," centuries before Columbus crossed the Atlantic &mdash; one of the great, underrecognized feats of human exploration.</p>
+  <p class="lede">European contact came late and slowly: Magellan crossed the Pacific in 1521, Abel Tasman charted parts of Australia, Tasmania, and New Zealand in the 1640s, and James Cook's three voyages (1768&ndash;1779) mapped much of the region in detail. Britain founded a penal colony at Sydney in 1788 that became Australia, and in 1840 signed the Treaty of Waitangi with Māori chiefs, still New Zealand's founding constitutional document. Germany, France, and the United States carved up most of the remaining islands as coaling stations, plantations, and strategic outposts. The great wave of independence came late too, mostly the 1960s&ndash;1980s, and several islands remain constitutionally tied to the powers that once colonized them.</p>
+
+  <div class="countries">
+    <h2>The 14 countries</h2>
+    <div class="country-grid">
+      <a class="country-card" href="australia-flags.html">
+        <span class="swatch-strip" style="background:#00247D"></span>
+        <span class="era">pre-1788 &ndash; present</span>
+        <b>Australia</b>
+        <span>Home to Aboriginal and Torres Strait Islander peoples and the world's oldest continuous living culture, tens of thousands of years old, then a British penal colony from 1788 and a federated nation since 1901.</span>
+      </a>
+      <a class="country-card" href="new-zealand-flags.html">
+        <span class="swatch-strip" style="background:#00247D"></span>
+        <span class="era">c. 1300 &ndash; present</span>
+        <b>New Zealand</b>
+        <span>Settled by Polynesian voyagers who became Māori, bound to Britain by the 1840 Treaty of Waitangi, and self-governing within the Commonwealth since 1907.</span>
+      </a>
+      <a class="country-card" href="papua-new-guinea-flags.html">
+        <span class="swatch-strip" style="background:#CE1126"></span>
+        <span class="era">pre-1884 &ndash; present</span>
+        <b>Papua New Guinea</b>
+        <span>The world's most linguistically diverse country, with over 800 languages among its highland and coastal peoples, split between German and British/Australian rule before 1975 independence.</span>
+      </a>
+      <a class="country-card" href="fiji-flags.html">
+        <span class="swatch-strip" style="background:#68BFE5"></span>
+        <span class="era">pre-1871 &ndash; present</span>
+        <b>Fiji</b>
+        <span>A British colony from 1874 built on indentured Indian labor brought to work sugar plantations, leaving a lasting Indo-Fijian community, independent since 1970.</span>
+      </a>
+      <a class="country-card" href="samoa-flags.html">
+        <span class="swatch-strip" style="background:#002B7F"></span>
+        <span class="era">pre-1900 &ndash; present</span>
+        <b>Samoa</b>
+        <span>A Polynesian seat of the ancient fa'amatai chiefly system, divided between Germany and the United States in 1899, independent (Western Samoa) since 1962.</span>
+      </a>
+      <a class="country-card" href="tonga-flags.html">
+        <span class="swatch-strip" style="background:#C10000"></span>
+        <span class="era">pre-1845 &ndash; present</span>
+        <b>Tonga</b>
+        <span>The only Pacific nation never formally colonized, ruled by an unbroken line of monarchs from the ancient Tu'i Tonga to the modern Tupou dynasty founded in 1845.</span>
+      </a>
+      <a class="country-card" href="vanuatu-flags.html">
+        <span class="swatch-strip" style="background:#000000"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Vanuatu</b>
+        <span>Melanesian island group first called the New Hebrides, uniquely ruled as an Anglo-French Condominium from 1906, independent under its current name since 1980.</span>
+      </a>
+      <a class="country-card" href="solomon-islands-flags.html">
+        <span class="swatch-strip" style="background:#215B33"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Solomon Islands</b>
+        <span>Melanesian islands named by a Spanish explorer in 1568 for a rumored biblical gold, a British protectorate from 1893, and a fierce WWII Pacific battleground, independent since 1978.</span>
+      </a>
+      <a class="country-card" href="kiribati-flags.html">
+        <span class="swatch-strip" style="background:#CE1126"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Kiribati</b>
+        <span>Micronesian atolls once the Gilbert Islands under British rule, straddling the equator and every line of longitude, and among the countries most threatened by rising seas.</span>
+      </a>
+      <a class="country-card" href="tuvalu-flags.html">
+        <span class="swatch-strip" style="background:#009EDB"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Tuvalu</b>
+        <span>A tiny Polynesian nation, formerly the Ellice Islands under Britain, that split from Kiribati's Gilbert Islands in 1975 and became independent in 1978.</span>
+      </a>
+      <a class="country-card" href="nauru-flags.html">
+        <span class="swatch-strip" style="background:#002B7F"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Nauru</b>
+        <span>The world's smallest island nation, whose phosphate deposits (fossilized seabird guano) made it briefly one of the richest countries per capita before the reserves ran out.</span>
+      </a>
+      <a class="country-card" href="palau-flags.html">
+        <span class="swatch-strip" style="background:#4AADD6"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Palau</b>
+        <span>Micronesian islands passed from Spain to Germany to Japan and then a U.S.-administered UN Trust Territory, independent since 1994 under a Compact of Free Association.</span>
+      </a>
+      <a class="country-card" href="marshall-islands-flags.html">
+        <span class="swatch-strip" style="background:#003893"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Marshall Islands</b>
+        <span>Micronesian atolls, a former U.S. nuclear test site at Bikini and Enewetak, independent since 1986 under a Compact of Free Association with the United States.</span>
+      </a>
+      <a class="country-card" href="micronesia-flags.html">
+        <span class="swatch-strip" style="background:#75B2DD"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Micronesia</b>
+        <span>A federation of four island states (Yap, Chuuk, Pohnpei, Kosrae) with a shared colonial path through Spain, Germany, and Japan, independent since 1986.</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="map-section">
+    <h2>Seven eras across the world's largest ocean</h2>
+    <p class="map-sub">A real, traced map, sharing one projection across the whole Pacific: honest coastlines for the three large landmasses &mdash; Australia, New Zealand, and Papua New Guinea &mdash; and honest labeled position-markers for the eleven smaller island nations, whose true relative distances are too vast to trace as coastline at this scale without losing all three large countries to illegibility. Drag the slider or press play; each snapshot compresses a messier reality into whoever actually held power at that moment.</p>
+    <div class="rule-box">
+      <b>Colors here are shared rule, not decoration.</b> When two or more territories &mdash; however far apart across the ocean &mdash; answered to the very same flag, they take the very same color, and the caption below the map merges them into one named power. Tonga keeps one persistent red from the moment it first appears here, because it is the one Pacific nation that never took another color at all &mdash; it was never formally colonized.
+    </div>
+
+    <div class="viz-frame">
+      <div class="controls">
+        <button class="play-btn" id="playBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="era-tag" id="yearTag">pre-1788</span>
+        <input type="range" id="slider" min="0" max="6" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="map-svg" viewBox="0 0 800 590" xmlns="http://www.w3.org/2000/svg">
+        <rect width="800" height="590" fill="var(--tile-sea)"/>
+
+        <path id="f-au" class="region-fill" d="M337.8,225.7 L366.2,276.0 L375.8,304.5 L421.4,342.5 L441.3,380.5 L438.4,409.0 L421.4,445.1 L409.0,475.5 L361.5,489.8 L322.6,487.8 L293.1,457.4 L256.1,428.0 L209.5,423.2 L142.1,446.1 L104.1,456.5 L83.2,428.0 L72.7,390.0 L67.0,333.0 L110.7,316.8 L144.9,294.1 L179.1,261.8 L226.6,241.8 L283.6,238.0 L304.5,276.0 L332.1,238.0 Z"/>
+        <path id="f-au-tas" class="region-fill" d="M358.6,508.8 L392.9,513.5 L392.9,530.6 L378.6,538.2 L363.4,531.5 L358.6,515.4 Z"/>
+        <path id="f-nz-n" class="region-fill" d="M624.6,450.8 L644.6,473.6 L665.5,497.3 L657.9,516.3 L644.6,516.3 L637.9,499.2 L641.8,469.8 Z"/>
+        <path id="f-nz-s" class="region-fill" d="M635.1,511.6 L638.9,518.2 L624.6,538.2 L593.3,566.7 L580.0,567.6 L579.1,548.6 L610.4,527.8 L624.6,516.3 Z"/>
+        <path id="f-pg" class="region-fill" d="M323.5,147.8 L348.2,157.2 L369.1,175.3 L380.5,182.0 L391.9,202.8 L382.4,214.2 L351.1,207.6 L323.5,193.3 Z"/>
+        <path id="f-pg-nb" class="region-fill" d="M422.3,165.8 L429.9,176.2 L408.1,185.8 L396.6,173.4 Z"/>
+        <path id="f-pg-boug" class="region-fill" d="M452.7,175.3 L459.4,184.8 L455.6,189.5 L448.9,180.0 Z"/>
+
+        <circle id="f-fj" class="marker-dot" cx="675.0" cy="292.1" r="6"/>
+        <circle id="f-ws" class="marker-dot" cx="770.0" cy="255.1" r="6"/>
+        <circle id="f-to" class="marker-dot" cx="739.6" cy="324.4" r="6"/>
+        <circle id="f-vu" class="marker-dot" cx="579.1" cy="278.9" r="6"/>
+        <circle id="f-sb" class="marker-dot" cx="505.9" cy="215.2" r="6"/>
+        <circle id="f-ki" class="marker-dot" cx="627.5" cy="111.6" r="6"/>
+        <circle id="f-tv" class="marker-dot" cx="686.4" cy="204.8" r="6"/>
+        <circle id="f-nr" class="marker-dot" cx="569.6" cy="128.8" r="6"/>
+        <circle id="f-pw" class="marker-dot" cx="262.7" cy="52.8" r="6"/>
+        <circle id="f-mh" class="marker-dot" cx="612.3" cy="56.6" r="6"/>
+        <circle id="f-fm" class="marker-dot" cx="486.9" cy="58.4" r="6"/>
+
+        <g id="labels"></g>
+      </svg>
+
+      <div class="era-head">
+        <div class="era-name-inline" id="eraName"></div>
+        <div class="era-owners" id="eraOwners"></div>
+      </div>
+      <div class="flags-row" id="flagsRow"></div>
+      <p class="era-story" id="eraStory"></p>
+
+      <p class="map-note">Real relative positions, one shared projection. The three large landmasses (Australia, New Zealand, Papua New Guinea) carry traced &mdash; simplified &mdash; coastlines; the eleven smaller island nations are honest position-markers rather than forced, illegible micro-polygons, placed at their true approximate location and bearing relative to the large countries and each other.</p>
+      <div class="map-key" id="legend"></div>
+      <div class="map-notes">
+        <b>Try:</b> drag to 1901 and watch Nauru, Palau, the Marshall Islands, and Micronesia all snap to the very same color and merge into one caption &mdash; "German Empire" &mdash; despite being thousands of miles apart, because a shared flag, not shared geography, is what this map is tracking. Then drag to 1980 and watch Palau, the Marshall Islands, and Micronesia stay a US trust-territory color while Vanuatu, right then, becomes the very last of the decade's wave to turn its own independent color &mdash; the same year as the snapshot itself.
+      </div>
+    </div>
+  </div>
+
+  <div class="about">
+    <h2>About this hub</h2>
+    <p>The map above uses one shared Pacific-wide projection: real, simplified traced coastlines for the three large landmasses, and honest position-markers &mdash; not forced coastline polygons &mdash; for the eleven small and scattered island nations, since coastline-tracing atolls thousands of miles apart at this scale would either be illegible or would force the three large countries off the map entirely. Regions here don't share physical borders the way adjacent countries do in the atlas's other hubs, so instead of a border dissolving between neighbors, this map dissolves <em>labels</em>: any two or more territories under the identical flag in a given era merge into one named caption beneath the map, no matter how far apart they actually sit.</p>
+    <p>Colors on the country cards above are drawn from each country's current national flag, not a historical palette, since no per-country flag lineage exists yet for most of these fourteen. Once a country's own page publishes, its card here will link out.</p>
+  </div>
+
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This hub is one region in a larger set. See the other phases here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="southern-africa-hub.html"><b>Southern Africa hub</b><span>Ten countries, colonial to post-apartheid</span></a>
+      <a class="link-card" href="south-america-hub.html"><b>South America hub</b><span>Twelve countries, independence to today</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Map is schematic and not surveyed; small-island positions are approximate.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var C = {
+    ind:"#8a8f7a", gb:"#1e3a6b", de:"#2b2b2b", jp:"#8c1a2b", us_trust:"#33447a",
+    au_dom:"#22467d", nz_col:"#2f6a91", au_trust:"#3f6b3a", pg_split:"#5a3d7a",
+    to_kingdom:"#c10000", condo:"#6b4a8a",
+    au_ind:"#00247d", nz_ind:"#012169", pg_ind:"#ce1126", fj_ind:"#68bfe5", ws_ind:"#002b7f",
+    vu_ind:"#000000", sb_ind:"#215b33", ki_ind:"#d21034", tv_ind:"#009edb", nr_ind:"#0033a0",
+    pw_ind:"#4aadd6", mh_ind:"#003893", fm_ind:"#75b2dd"
+  };
+  var NAMES = {
+    ind:"Indigenous societies (no flags documented)", gb:"British Empire", de:"German Empire",
+    jp:"Empire of Japan (occupied)", us_trust:"US-administered UN Trust Territory",
+    au_dom:"Commonwealth of Australia", nz_col:"Colony/Dominion of New Zealand",
+    au_trust:"Australian-administered UN Trust Territory", pg_split:"German & British New Guinea (split colony)",
+    to_kingdom:"Kingdom of Tonga (never colonized)", condo:"New Hebrides (Anglo-French Condominium)",
+    au_ind:"Australia", nz_ind:"New Zealand", pg_ind:"Papua New Guinea", fj_ind:"Fiji", ws_ind:"Samoa",
+    vu_ind:"Vanuatu", sb_ind:"Solomon Islands", ki_ind:"Kiribati", tv_ind:"Tuvalu", nr_ind:"Nauru",
+    pw_ind:"Palau", mh_ind:"Marshall Islands", fm_ind:"Micronesia"
+  };
+  var legendEl = document.getElementById("legend");
+  legendEl.innerHTML = Object.keys(C).map(function (k) {
+    return '<span><span class="sw" style="background:' + C[k] + '"></span>' + NAMES[k] + "</span>";
+  }).join("");
+
+  // ---- Real flag graphics, one per distinct historical power / country ----
+  var FLAGS = {
+    no_flag: '<rect width="300" height="200" fill="#9a9a8a"/><line x1="30" y1="30" x2="270" y2="170" stroke="#6e6047" stroke-width="7"/><line x1="270" y1="30" x2="30" y2="170" stroke="#6e6047" stroke-width="7"/>',
+    union_jack: '<rect width="300" height="200" fill="#00247d"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#fff" stroke-width="26"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#cf142b" stroke-width="10"/><rect x="125" width="50" height="200" fill="#fff"/><rect y="80" width="300" height="40" fill="#fff"/><rect x="135" width="30" height="200" fill="#cf142b"/><rect y="90" width="300" height="20" fill="#cf142b"/>',
+    german_empire: '<rect width="300" height="66.7" fill="#1a1a1a"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#a4302a"/>',
+    tonga_flag: '<rect width="300" height="200" fill="#c10000"/><rect width="130" height="86.7" fill="#f4efe1"/><path d="M50,20 h30 v25 h25 v30 h-25 v25 h-30 v-25 h-25 v-30 h25 Z" fill="#c10000"/>',
+    french_tricolor: '<rect width="100" height="200" fill="#0055a4"/><rect x="100" width="100" height="200" fill="#fff"/><rect x="200" width="100" height="200" fill="#ef4135"/>',
+    japan_flag: '<rect width="300" height="200" fill="#f4efe1"/><circle cx="150" cy="100" r="55" fill="#bc002d"/>',
+    us_flag: '<rect width="300" height="200" fill="#fff"/><g fill="#b22234"><rect y="0" width="300" height="15.4"/><rect y="30.8" width="300" height="15.4"/><rect y="61.6" width="300" height="15.4"/><rect y="92.4" width="300" height="15.4"/><rect y="123.2" width="300" height="15.4"/><rect y="154" width="300" height="15.4"/><rect y="184.6" width="300" height="15.4"/></g><rect width="120" height="107.7" fill="#3c3b6e"/>',
+    un_trust: '<rect width="300" height="200" fill="#5b92e5"/><circle cx="150" cy="100" r="45" fill="none" stroke="#fff" stroke-width="6"/><circle cx="150" cy="100" r="10" fill="#fff"/>',
+    au_modern: '<rect width="300" height="200" fill="#00247d"/><rect width="150" height="100" fill="#00247d"/><path d="M0,0 L150,100 M150,0 L0,100" stroke="#fff" stroke-width="12"/><rect x="62" width="26" height="100" fill="#fff"/><rect y="38" width="150" height="24" fill="#fff"/><rect x="70" width="10" height="100" fill="#cf142b"/><rect y="45" width="150" height="10" fill="#cf142b"/><g fill="#fff"><circle cx="230" cy="50" r="8"/><circle cx="250" cy="90" r="8"/><circle cx="230" cy="140" r="8"/><circle cx="200" cy="110" r="8"/><circle cx="190" cy="70" r="6"/></g>',
+    nz_modern: '<rect width="300" height="200" fill="#00247d"/><rect width="150" height="100" fill="#00247d"/><path d="M0,0 L150,100 M150,0 L0,100" stroke="#fff" stroke-width="12"/><rect x="62" width="26" height="100" fill="#fff"/><rect y="38" width="150" height="24" fill="#fff"/><rect x="70" width="10" height="100" fill="#cf142b"/><rect y="45" width="150" height="10" fill="#cf142b"/><g fill="#cf142b" stroke="#fff" stroke-width="2"><circle cx="230" cy="45" r="9"/><circle cx="255" cy="90" r="11"/><circle cx="220" cy="130" r="9"/><circle cx="195" cy="80" r="7"/></g>',
+    pg_modern: '<path d="M0,0 L300,0 L0,200 Z" fill="#000"/><path d="M300,0 L300,200 L0,200 Z" fill="#c8102e"/><g fill="#fcd116"><circle cx="230" cy="55" r="4"/><circle cx="255" cy="90" r="5"/><circle cx="230" cy="125" r="4"/><circle cx="205" cy="95" r="3"/></g><path d="M60,60 q20,-20 40,0 q-10,20 -40,0" fill="#fcd116"/>',
+    fj_modern: '<rect width="300" height="200" fill="#68bfe5"/><rect width="150" height="100" fill="#00247d"/><path d="M0,0 L150,100 M150,0 L0,100" stroke="#fff" stroke-width="10"/><rect x="62" width="26" height="100" fill="#fff"/><rect y="38" width="150" height="24" fill="#fff"/><rect x="70" width="10" height="100" fill="#cf142b"/><rect y="45" width="150" height="10" fill="#cf142b"/><rect x="200" y="110" width="60" height="70" fill="#fce8b0" stroke="#241f14" stroke-width="2"/>',
+    ws_modern: '<rect width="300" height="200" fill="#c10000"/><rect width="130" height="100" fill="#002b7f"/><g fill="#fff"><circle cx="30" cy="25" r="5"/><circle cx="60" cy="55" r="6"/><circle cx="95" cy="25" r="5"/><circle cx="30" cy="80" r="5"/><circle cx="95" cy="80" r="4"/></g>',
+    vu_modern: '<rect width="300" height="200" fill="#000"/><rect y="130" width="300" height="70" fill="#009543"/><rect y="60" width="300" height="14" fill="#d21034"/><rect y="126" width="300" height="14" fill="#d21034"/><path d="M0,0 L170,100 L0,74 Z M0,200 L170,100 L0,126 Z" fill="#fcd116"/><circle cx="55" cy="100" r="15" fill="#fcd116"/>',
+    sb_modern: '<path d="M0,0 L300,200 L300,150 L50,0 Z" fill="#0051ba"/><path d="M300,200 L0,0 L0,50 L250,200 Z" fill="#215b33"/><path d="M0,60 L300,160" stroke="#fcd116" stroke-width="18"/><g fill="#fff"><circle cx="60" cy="40" r="5"/><circle cx="90" cy="30" r="5"/><circle cx="110" cy="55" r="5"/><circle cx="85" cy="65" r="5"/><circle cx="60" cy="60" r="5"/></g>',
+    ki_modern: '<rect width="300" height="100" fill="#d21034"/><rect y="100" width="300" height="100" fill="#003f87"/><path d="M0,120 q37,-15 75,0 q37,15 75,0 q37,-15 75,0 q37,15 75,0" stroke="#fff" stroke-width="6" fill="none"/><path d="M0,150 q37,-15 75,0 q37,15 75,0 q37,-15 75,0 q37,15 75,0" stroke="#fff" stroke-width="6" fill="none"/><path d="M100,90 q50,-70 100,0 Z" fill="#fcd116"/><circle cx="150" cy="35" r="8" fill="#fcd116"/>',
+    tv_modern: '<rect width="300" height="200" fill="#5ba4d6"/><rect width="150" height="100" fill="#00247d"/><path d="M0,0 L150,100 M150,0 L0,100" stroke="#fff" stroke-width="10"/><rect x="62" width="26" height="100" fill="#fff"/><rect y="38" width="150" height="24" fill="#fff"/><g fill="#fcd116"><circle cx="200" cy="40" r="4"/><circle cx="230" cy="55" r="4"/><circle cx="255" cy="80" r="4"/><circle cx="265" cy="110" r="4"/><circle cx="255" cy="140" r="4"/><circle cx="225" cy="160" r="4"/><circle cx="195" cy="165" r="4"/><circle cx="175" cy="140" r="4"/><circle cx="180" cy="105" r="4"/></g>',
+    nr_modern: '<rect width="300" height="200" fill="#002b7f"/><rect y="95" width="300" height="10" fill="#fcd116"/><path d="M80,150 l6,18 19,0 -15.5,11.2 6,18 -15.5,-11.3 -15.5,11.3 6,-18 -15.5,-11.2 19,0 Z" fill="#fff"/>',
+    pw_modern: '<rect width="300" height="200" fill="#4aadd6"/><circle cx="130" cy="95" r="55" fill="#fcd116"/>',
+    mh_modern: '<rect width="300" height="200" fill="#003893"/><path d="M0,200 L300,0" stroke="#fff" stroke-width="16"/><path d="M0,190 L290,0" stroke="#dd7500" stroke-width="16"/><path d="M60,60 l6,16 17,0 -14,10 5,16 -14,-10 -14,10 5,-16 -14,-10 17,0 Z" fill="#fff"/>',
+    fm_modern: '<rect width="300" height="200" fill="#75b2dd"/><g fill="#fff"><circle cx="110" cy="70" r="10"/><circle cx="190" cy="70" r="10"/><circle cx="110" cy="130" r="10"/><circle cx="190" cy="130" r="10"/></g>'
+  };
+  function flagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (FLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+
+  var g = C; // shorthand for era table below
+  var SNAP = [
+    { year:"pre-1788", name:"Indigenous societies, before European contact", t:{ au:g.ind, nz:g.ind, pg:g.ind, fj:g.ind, ws:g.ind, to:g.ind, vu:g.ind, sb:g.ind, ki:g.ind, tv:g.ind, nr:g.ind, pw:g.ind, mh:g.ind, fm:g.ind },
+      flags: [["no_flag","No flags — see note"]],
+      story: "This era predates flags entirely, and this map says so plainly rather than inventing symbols that never existed. Aboriginal and Torres Strait Islander peoples had lived across Australia for at least 65,000 years, organized into hundreds of distinct nations and language groups with their own law, art, and deep connection to Country &mdash; the world's oldest continuous living culture. Papua New Guinea's highland and coastal peoples, speaking what would become over 800 languages, had farmed and traded independently for millennia. Melanesian, Micronesian, and Polynesian voyagers had already carried out one of history's great feats of exploration: settling nearly every habitable island across this ocean using wayfinding &mdash; reading stars, swells, and currents without instruments &mdash; and reaching New Zealand, the last major landmass on Earth to be settled by people, by around 1300 CE. Tonga's Tu'i Tonga dynasty, founded by tradition around the 10th century, already commanded a maritime tribute network across much of the western Pacific. None of these societies organized themselves under anything resembling a European heraldic flag; every color on this map from here forward belongs to a colonizing or post-colonial state, not to the peoples who were here first." },
+    { year:"1840", name:"British colonization begins", t:{ au:g.gb, nz:g.gb, pg:g.ind, fj:g.ind, ws:g.ind, to:g.ind, vu:g.ind, sb:g.ind, ki:g.ind, tv:g.ind, nr:g.ind, pw:g.ind, mh:g.ind, fm:g.ind },
+      flags: [["union_jack","British Empire"],["no_flag","Still uncolonized"]],
+      story: "Britain founded a penal colony at Sydney Cove in January 1788, the start of permanent European settlement of Australia and the beginning of a long, still-unresolved reckoning with the Aboriginal and Torres Strait Islander nations already there. Half a century later, on 6 February 1840, the Treaty of Waitangi was signed between the British Crown and Māori chiefs at the Bay of Islands &mdash; New Zealand's founding constitutional document, still central to its politics and law today, though its promises and its two language versions (English and Māori) have been disputed and litigated ever since. Everywhere else on this map remains outside any colonial flag in 1840: Tonga's Tu'i Kanokupolu line is only a few years from unifying under Taufa'ahau, the future King George Tupou I (1845), and Fiji, Samoa, and the small Micronesian and Melanesian islands are still governed entirely by their own chiefs and clans, decades from the colonial partition to come." },
+    { year:"1901", name:"Colonial partition, Australian Federation", t:{ au:g.au_dom, nz:g.nz_col, pg:g.pg_split, fj:g.gb, ws:g.de, to:g.to_kingdom, vu:g.condo, sb:g.gb, ki:g.gb, tv:g.gb, nr:g.de, pw:g.de, mh:g.de, fm:g.de },
+      flags: [["au_modern","Commonwealth of Australia"],["union_jack","British Empire (colonies)"],["german_empire","German Empire"],["french_tricolor","France (New Hebrides)"],["tonga_flag","Kingdom of Tonga"]],
+      story: "On 1 January 1901 six British colonies federated into the self-governing Commonwealth of Australia, while neighboring New Zealand stayed a separate Crown colony (it would become a dominion in its own right in 1907). Everywhere else, the 1880s&ndash;1900s partition had already carved up the smaller islands: Germany, Britain, and Australia's predecessor colonies split New Guinea in 1884 (German in the north, British in the south, transferred to Australia in 1906); Fiji became a British Crown colony in 1874; Britain's Gilbert & Ellice Islands Protectorate (today's Kiribati and Tuvalu) and British Solomon Islands Protectorate followed in 1892&ndash;93; Germany annexed Nauru in 1888 and bought the Caroline and Marshall Islands (today's Micronesia, Palau, and the Marshall Islands) from a cash-strapped Spain in 1899, the same year it split Samoa with the United States, taking the western islands. Vanuatu, then the New Hebrides, became a unique Anglo-French Condominium in 1906 &mdash; two colonial powers jointly ruling one territory, an arrangement found nowhere else in the Pacific. Tonga alone kept its own crown: an 1900 Treaty of Friendship made it a British-protected state, never a colony, its King still head of an unbroken line running back centuries &mdash; the one Pacific nation genuinely never formally colonized." },
+    { year:"1942", name:"Japanese expansion & the Pacific War", t:{ au:g.au_dom, nz:g.nz_col, pg:g.jp, fj:g.gb, ws:g.nz_col, to:g.to_kingdom, vu:g.condo, sb:g.jp, ki:g.jp, tv:g.gb, nr:g.jp, pw:g.jp, mh:g.jp, fm:g.jp },
+      flags: [["au_modern","Commonwealth of Australia"],["japan_flag","Empire of Japan"],["union_jack","British Empire (colonies)"],["tonga_flag","Kingdom of Tonga"]],
+      story: "Japan had already held the former German Micronesia &mdash; Palau, the Marshall Islands, and today's Micronesia &mdash; since seizing it in 1914 and formalizing it as a League of Nations mandate in 1920; by 1942 those islands were fortified Japanese bases (Truk Lagoon, Peleliu, Kwajalein) and the front line of the war had moved onto them. That front kept advancing south through 1942: Japanese forces occupied most of Papua New Guinea (fought back at Kokoda by Australian troops defending Port Moresby), took Nauru, and seized the Gilbert Islands, including Tarawa &mdash; but never quite reached the neighboring Ellice Islands (today's Tuvalu), which stayed British and became an Allied air base instead, splitting one colonial administration in two by fortune of war. The Solomon Islands became the site of the brutal Guadalcanal campaign (Aug. 1942&ndash;Feb. 1943), the war's first major Allied land offensive against Japan. Australia itself was bombed at Darwin but never invaded; New Zealand, the New Hebrides, Fiji, and Tonga stayed rear-area Allied territory throughout, Tonga's own small defense force even fighting alongside the Allies." },
+    { year:"1955", name:"Post-war UN trusteeship", t:{ au:g.au_dom, nz:g.nz_col, pg:g.au_trust, fj:g.gb, ws:g.nz_col, to:g.to_kingdom, vu:g.condo, sb:g.gb, ki:g.gb, tv:g.gb, nr:g.au_trust, pw:g.us_trust, mh:g.us_trust, fm:g.us_trust },
+      flags: [["au_modern","Commonwealth of Australia"],["un_trust","UN Trust Territories"],["us_flag","United States (administering)"],["union_jack","British Empire (colonies)"],["tonga_flag","Kingdom of Tonga"]],
+      story: "The postwar settlement replaced conquered Japanese territory with a new, formally UN-supervised arrangement rather than simple annexation. The United States became administrator of the Trust Territory of the Pacific Islands in 1947, covering Palau, the Marshall Islands, and Micronesia under the new United Nations trusteeship system. Australia picked up matching UN trusteeships over Papua & New Guinea (a merger of its former colony and mandate) and over Nauru, administered jointly with Britain and New Zealand but run in practice from Canberra. New Zealand held its own UN Trust Territory over Western Samoa, granted after WWI and carried through the new postwar system. Everywhere still directly colonial in 1901 mostly stayed that way through the 1950s: Fiji, the Solomons, and the reunified Gilbert & Ellice Islands Colony remained ordinary British Crown colonies, the New Hebrides remained the unique Anglo-French Condominium, and Tonga remained the one Pacific nation under neither colonial rule nor UN trusteeship &mdash; still its own kingdom, still only British-protected." },
+    { year:"1980", name:"The independence wave", t:{ au:g.au_ind, nz:g.nz_ind, pg:g.pg_ind, fj:g.fj_ind, ws:g.ws_ind, to:g.to_kingdom, vu:g.vu_ind, sb:g.sb_ind, ki:g.ki_ind, tv:g.tv_ind, nr:g.nr_ind, pw:g.us_trust, mh:g.us_trust, fm:g.us_trust },
+      flags: [["ws_modern","Samoa (1962)"],["nr_modern","Nauru (1968)"],["fj_modern","Fiji (1970)"],["pg_modern","Papua New Guinea (1975)"],["sb_modern","Solomon Islands (1978)"],["tv_modern","Tuvalu (1978)"],["ki_modern","Kiribati (1979)"],["vu_modern","Vanuatu (1980)"],["tonga_flag","Tonga (sovereign since 1970)"],["us_flag","US Trust Territory (still)"]],
+      story: "Independence came to the Pacific in one long, staggered wave rather than a single year, and 1980 sits right in the middle of it. Samoa led the way in 1962, the first Pacific island nation to become independent in the postwar era. Nauru followed in 1968, Fiji and Tonga (whose 1970 treaty ended British protection and left it fully sovereign, though it had never truly been anyone's colony) in 1970, Papua New Guinea in 1975, the Solomon Islands and Tuvalu (splitting from the old Gilbert & Ellice colony) both in 1978, Kiribati in 1979, and Vanuatu &mdash; ending the unique Anglo-French Condominium &mdash; on this very snapshot year, 30 July 1980. But the wave was far from finished: Palau, the Marshall Islands, and Micronesia remain a US-administered UN Trust Territory in 1980, still years from their own Compact of Free Association independence, a reminder that this staggered timeline runs all the way from 1962 to 1994." },
+    { year:"2024", name:"Fourteen independent states, today", t:{ au:g.au_ind, nz:g.nz_ind, pg:g.pg_ind, fj:g.fj_ind, ws:g.ws_ind, to:g.to_kingdom, vu:g.vu_ind, sb:g.sb_ind, ki:g.ki_ind, tv:g.tv_ind, nr:g.nr_ind, pw:g.pw_ind, mh:g.mh_ind, fm:g.fm_ind },
+      flags: [["au_modern","Australia"],["nz_modern","New Zealand"],["pg_modern","Papua New Guinea"],["fj_modern","Fiji"],["ws_modern","Samoa"],["tonga_flag","Tonga"],["vu_modern","Vanuatu"],["sb_modern","Solomon Islands"],["ki_modern","Kiribati"],["tv_modern","Tuvalu"],["nr_modern","Nauru"],["pw_modern","Palau"],["mh_modern","Marshall Islands"],["fm_modern","Micronesia"]],
+      story: "The wave finally finished with the Marshall Islands and Micronesia in 1986 and Palau in 1994, each becoming independent under its own Compact of Free Association with the United States &mdash; sovereign states, but with defense and some funding still tied to Washington. Every other nation on this map has now been independent for decades, and the fourteen colors here are each country's own flag, chosen at independence and unchanged since: Australia and New Zealand's Union-Jack-cantoned ensigns, largely unchanged since federation and dominion status; Papua New Guinea's bird of paradise and Southern Cross; and Tonga's red field, the one color on this entire map that has never once represented anyone but Tonga itself, in an unbroken run stretching back to the very first era this map can put a flag to at all." }
+  ];
+
+  var REGIONS = ["au","nz","pg","fj","ws","to","vu","sb","ki","tv","nr","pw","mh","fm"];
+  var REGION_NAMES = { au:"Australia", nz:"New Zealand", pg:"Papua New Guinea", fj:"Fiji", ws:"Samoa", to:"Tonga", vu:"Vanuatu", sb:"Solomon Islands", ki:"Kiribati", tv:"Tuvalu", nr:"Nauru", pw:"Palau", mh:"Marshall Islands", fm:"Micronesia" };
+  var REGION_ABBR = { au:"AUS", nz:"NZ", pg:"PNG", fj:"FJI", ws:"SAM", to:"TON", vu:"VAN", sb:"SOL", ki:"KIR", tv:"TUV", nr:"NAU", pw:"PLW", mh:"MHL", fm:"FSM" };
+  // polygon regions get multiple sub-path ids; marker regions get one circle id
+  var POLY_IDS = { au:["f-au","f-au-tas"], nz:["f-nz-n","f-nz-s"], pg:["f-pg","f-pg-nb","f-pg-boug"] };
+  var MARKERS = ["fj","ws","to","vu","sb","ki","tv","nr","pw","mh","fm"];
+  var LABEL_POS = { au:[240,375], nz:[652,486], pg:[358,172] };
+
+  function textColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g2 = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g2 + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+  function ownerName(hex) {
+    for (var k in C) { if (C[k] === hex) return NAMES[k]; }
+    return hex;
+  }
+  // "Dissolve" mechanic adapted for a scattered, non-adjacent map: instead of merging
+  // shared borders, we merge shared captions. Any regions painted the identical color
+  // in a given era — however far apart — are grouped into one named power below the map.
+  function groupsByColor(t) {
+    var byColor = {};
+    REGIONS.forEach(function (r) {
+      var hex = t[r];
+      if (!byColor[hex]) byColor[hex] = [];
+      byColor[hex].push(r);
+    });
+    return Object.keys(byColor).map(function (hex) { return { hex: hex, ids: byColor[hex] }; });
+  }
+
+  var svgNS = "http://www.w3.org/2000/svg";
+  var labelsEl = document.getElementById("labels");
+  var yearTag = document.getElementById("yearTag");
+  var eraName = document.getElementById("eraName");
+  var eraOwners = document.getElementById("eraOwners");
+  var eraStory = document.getElementById("eraStory");
+  var flagsRow = document.getElementById("flagsRow");
+  var sliderEl = document.getElementById("slider");
+
+  function render(i) {
+    var era = SNAP[i];
+    yearTag.textContent = era.year;
+    eraName.textContent = era.name;
+    eraStory.innerHTML = era.story || "";
+    flagsRow.innerHTML = (era.flags || []).map(function (f) {
+      return '<div class="flag-chip">' + flagSvg(f[0]) + '<div class="fc-label">' + f[1] + '</div></div>';
+    }).join("");
+
+    REGIONS.forEach(function (id) {
+      var hex = era.t[id];
+      if (POLY_IDS[id]) {
+        POLY_IDS[id].forEach(function (pid) {
+          var el = document.getElementById(pid);
+          if (el) el.setAttribute("fill", hex);
+        });
+      } else {
+        var el2 = document.getElementById("f-" + id);
+        if (el2) el2.setAttribute("fill", hex);
+      }
+    });
+
+    var groups = groupsByColor(era.t);
+    eraOwners.innerHTML = groups.map(function (grp) {
+      var label = ownerName(grp.hex);
+      var names = grp.ids.map(function (id) { return REGION_NAMES[id]; }).join(", ");
+      return "<b>" + label + "</b>: " + names;
+    }).join(" &middot; ");
+
+    labelsEl.innerHTML = "";
+    function haloFor(txtColor) { return txtColor === "#201a12" ? "#f7f1e3" : "#201a12"; }
+
+    REGIONS.forEach(function (id) {
+      var hex = era.t[id];
+      var txtColor = textColorFor(hex);
+      var halo = haloFor(txtColor);
+      var isPoly = !!POLY_IDS[id];
+      var pos = LABEL_POS[id] || null;
+
+      if (isPoly && pos) {
+        var big = document.createElementNS(svgNS, "text");
+        big.setAttribute("x", pos[0]);
+        big.setAttribute("y", pos[1]);
+        big.setAttribute("class", "place-label-big");
+        big.setAttribute("font-size", "15");
+        big.setAttribute("fill", txtColor);
+        big.setAttribute("stroke", halo);
+        big.textContent = REGION_ABBR[id];
+        labelsEl.appendChild(big);
+      } else {
+        var mk = document.getElementById("f-" + id);
+        if (mk) {
+          mk.setAttribute("fill", hex);
+          var cx = parseFloat(mk.getAttribute("cx")), cy = parseFloat(mk.getAttribute("cy"));
+          var lbl = document.createElementNS(svgNS, "text");
+          lbl.setAttribute("x", cx);
+          lbl.setAttribute("y", cy - 10);
+          lbl.setAttribute("class", "place-label");
+          lbl.setAttribute("font-size", "10");
+          lbl.setAttribute("fill", txtColor === "#f7f1e3" ? "#201a12" : "#201a12");
+          lbl.setAttribute("stroke", "#f7f1e3");
+          lbl.textContent = REGION_ABBR[id];
+          labelsEl.appendChild(lbl);
+        }
+      }
+    });
+  }
+
+  sliderEl.addEventListener("input", function () { render(parseInt(sliderEl.value, 10)); });
+  render(0);
+
+  var playBtn = document.getElementById("playBtn");
+  var playing = false, playTimer = null;
+  playBtn.addEventListener("click", function () {
+    playing = !playing;
+    playBtn.innerHTML = playing ? "&#10074;&#10074;" : "&#9654;";
+    if (playing) {
+      playTimer = setInterval(function () {
+        var next = parseInt(sliderEl.value, 10) + 1;
+        if (next > parseInt(sliderEl.max, 10)) { next = 0; }
+        sliderEl.value = next;
+        render(next);
+        if (next === parseInt(sliderEl.max, 10)) {
+          clearInterval(playTimer); playing = false; playBtn.innerHTML = "&#9654;";
+        }
+      }, 2200);
+    } else {
+      clearInterval(playTimer);
+    }
+  });
+})();
+</script>
+
+</body></html>

@@ -757,6 +757,17 @@ header.site nav.topnav{display:flex;align-items:center;gap:1px;flex-wrap:nowrap}
   border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;
   transform:translateY(-2px) rotate(45deg);opacity:.55}
 .topnav summary:hover{color:var(--ink);background:var(--panel-2)}
+/* A DIRECT NAV LINK, dressed exactly like a disclosure minus its arrow.
+   The Flags section has one front door, so its menu item is the door rather
+   than a disclosure holding a single item. It has to sit at the same size,
+   colour, padding and radius as its neighbours or it reads as something
+   bolted on — which, being 245 pages copied in from another site, it must
+   not. No ::after arrow, because there is nothing to open. */
+.topnav .menulink{font-family:var(--sans);font-size:12.5px;color:var(--ink-2);
+  padding:6px 9px;border-radius:999px;white-space:nowrap;text-decoration:none;
+  border:1px solid transparent;display:inline-block;line-height:1.35}
+.topnav .menulink:hover{color:var(--ink);background:var(--panel-2)}
+.topnav .menulink.on{color:var(--ink);border-color:var(--rule-strong)}
 .topnav details[open] summary{color:var(--accent);background:var(--accent-wash);border-color:var(--rule)}
 .topnav .panel{position:absolute;top:calc(100% + 8px);left:0;min-width:210px;z-index:70;
   background:var(--panel);border:1px solid var(--rule-strong);border-radius:12px;

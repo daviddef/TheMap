@@ -1,0 +1,520 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Flags of the German Lands</title>
+<meta name="description" content="A hub for the family flag atlas: Germany's own east-west split traced as two real regions, Austria crossing over from the Habsburg hub, across six eras from 1815 to today.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c; --tile-sea: #b9d3da;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f; --tile-sea: #17303a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f; --tile-sea: #17303a;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.2rem, 5.5vw, 3.4rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.1rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+
+  .legend { margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  .countries { margin-top: 44px; }
+  .countries h2 { font-size: 1.15rem; font-weight: 600; margin: 0 0 16px; }
+  .country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .country-card {
+    display: block; padding: 20px; border: 1px solid var(--card-border); background: var(--card);
+    border-radius: 4px; text-decoration: none; color: var(--ink); position: relative; overflow: hidden;
+  }
+  .country-card .swatch-strip { position: absolute; top: 0; left: 0; right: 0; height: 5px; }
+  .country-card .era { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--brass); margin-bottom: 6px; }
+  .country-card b { display: block; font-family: "Fraunces", serif; font-size: 1.2rem; font-weight: 600; margin-bottom: 6px; }
+  .country-card span { color: var(--muted); font-size: .88rem; line-height: 1.5; }
+
+  .map-section { margin-top: 56px; padding-top: 36px; border-top: 1px solid var(--hair); }
+  .map-section h2 { font-size: 1.5rem; margin: 0 0 8px; }
+  .map-section .map-sub { font-size: .94rem; color: var(--muted); max-width: 64ch; margin: 0 0 22px; }
+  .map-section .rule-box { margin-bottom: 22px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .92rem; }
+  .map-section .rule-box b { color: var(--brick); }
+
+  .viz-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 22px; }
+
+  .map-flanked { display: flex; align-items: flex-start; gap: 16px; }
+  .side-panel { flex: none; width: 128px; padding-top: 6px; }
+  .side-panel h3 {
+    font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--muted); margin: 0 0 10px; text-align: center;
+  }
+  .side-panel .flag-chip { width: 100%; margin-bottom: 12px; }
+  .side-panel .fc-context { font-size: 9px; color: var(--muted); line-height: 1.35; margin-top: 3px; }
+  .side-panel .side-empty {
+    font-size: 10.5px; color: var(--muted); text-align: center; font-style: italic;
+    padding: 10px 6px; border: 1px dashed var(--card-border); border-radius: 4px;
+  }
+  .map-flanked .map-center { flex: 1; min-width: 0; }
+  @media (max-width: 760px) {
+    .map-flanked { flex-direction: column; }
+    .side-panel { width: 100%; }
+    .side-panel .flag-chip { display: inline-block; width: 92px; margin-right: 10px; }
+  }
+
+  .controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .play-btn {
+    flex: none; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .play-btn:hover { border-color: var(--brick); }
+  input[type="range"] {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px;
+    background: var(--hair); outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper);
+    box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  .era-tag { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+
+  .era-head { text-align: center; margin-bottom: 16px; }
+  .era-name-inline { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.35rem; transition: opacity .35s ease; }
+  .era-owners { font-size: .86rem; color: var(--muted); max-width: 62ch; margin: 6px auto 0; transition: opacity .35s ease; }
+  .era-owners b { color: var(--ink); }
+  .era-story {
+    margin: 0 auto 22px; font-size: .98rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .35s ease; padding: 14px 18px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  .era-story b { color: var(--brick); }
+
+  .flags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin: 4px auto 18px; max-width: 620px; }
+  .flag-chip { text-align: center; width: 92px; }
+  .flag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-chip .fc-label { font-family: "IBM Plex Mono", monospace; font-size: 9px; color: var(--muted); margin-top: 5px; line-height: 1.3; }
+
+  #map-svg { display: block; margin: 0 auto; width: 100%; max-width: 460px; height: auto; }
+  .region-fill { transition: fill 0.7s ease; }
+  .border-line { transition: stroke-opacity 0.7s ease, stroke-width 0.7s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .group-label { font-family: "Fraunces", serif; font-weight: 600; transition: opacity .5s ease, font-size .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2.5px; }
+  .sub-label { font-family: "IBM Plex Mono", monospace; font-weight: 700; transition: opacity .5s ease, fill .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+
+  .map-key { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: .8rem; color: var(--muted); justify-content: center; }
+  .map-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .map-key .sw { width: 11px; height: 11px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+  .map-note a { color: var(--adriatic); }
+  .map-notes { margin-top: 20px; font-size: .85rem; color: var(--muted); }
+  .map-notes b { color: var(--ink); }
+
+  .about { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .about h2 { font-size: 1.3rem; margin: 0 0 12px; }
+  .about p { max-width: none; opacity: .88; margin: 0 0 12px; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="habsburg-hub.html">Habsburg Lands hub</a></p>
+  <p class="kicker">Family research &middot; Hub &middot; Phase 4 of the world atlas</p>
+  <h1>Flags of the German Lands</h1>
+  <p class="lede">One country that has been governed as two, three, and once even four separate pieces within living memory &mdash; traced here as two real regions, western and eastern Germany, that merge and split on this map exactly when they did in real life. Austria crosses over from the Habsburg hub, sharing a government with Germany twice: loosely from 1815 to 1866, and completely (if brutally) from 1938 to 1945.</p>
+  <p class="lede">Below is one real, traced map showing who actually governed each piece at six points between 1815 and today. Both countries now have their own full flag timelines &mdash; Austria's in the Habsburg hub, Germany's own ten-entry page linked above and below.</p>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#7a5a9a"></span><b>Confederal union</b> &mdash; loose league of sovereign states</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#3a5a8c"></span><b>Empire / republic</b> &mdash; unified sovereign German state</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#3f3f3f"></span><b>Nazi Germany</b> &mdash; totalitarian one-party state</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#2c6f9a"></span><b>Cold War West</b> &mdash; NATO-aligned democracy</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a4302a"></span><b>Cold War East</b> &mdash; Soviet-aligned one-party state</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#2f6b4a"></span><b>Modern republic</b> &mdash; today's reunified/sovereign state</div>
+    </div>
+  </div>
+
+  <div class="countries">
+    <h2>The lineages</h2>
+    <div class="country-grid">
+      <a class="country-card" href="germany-flags.html">
+        <span class="swatch-strip" style="background:#2f6b4a"></span>
+        <span class="era">10 flags &middot; c. 962&ndash;present</span>
+        <b>Germany</b>
+        <span>Holy Roman Empire to Confederation to Empire to Weimar to the Reich to two republics to one again.</span>
+      </a>
+      <a class="country-card" href="austria-flags.html">
+        <span class="swatch-strip" style="background:#7a5a9a"></span>
+        <span class="era">12 flags &middot; c. 976&ndash;present</span>
+        <b>Austria</b>
+        <span>The Habsburg core &mdash; own full flag timeline, crosses over from the Habsburg Lands hub too.</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="map-section">
+    <h2>Six eras, one map</h2>
+    <p class="map-sub">A real, traced map &mdash; actual borders, not schematic shapes, with Germany itself split into its real western and eastern halves so the Cold War division shows up as an actual border, not just a caption. Drag the slider or press play.</p>
+    <div class="rule-box">
+      <b>Borders here are data, not decoration.</b> Western and eastern Germany only show a solid line between them when they were actually governed apart &mdash; which is most of this map's own history, not the exception. Austria's border with Germany does the same: solid almost throughout, then completely gone for the seven years of the Anschluss.
+    </div>
+
+    <div class="rule-box">
+      <b>Two new panels, piloted here first:</b> the column on the left shows real, documented waves of immigration <i>into</i> Germany for that era (not every era has one &mdash; some eras were dominated by emigration <i>out</i> instead, and 1938&ndash;45 is left honestly blank, since that era is defined by forced deportation, not migration). The column on the right shows any outside power actually conquering or occupying part of the map that era, distinct from the self-governing German states shown on the map itself.
+    </div>
+
+    <div class="viz-frame">
+      <div class="controls">
+        <button class="play-btn" id="playBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="era-tag" id="yearTag">1815</span>
+        <input type="range" id="slider" min="0" max="5" step="1" value="0" aria-label="Select era">
+      </div>
+      <div class="map-flanked">
+        <div class="side-panel" id="migrationPanel">
+          <h3>Migration in</h3>
+          <div id="migrationBody"></div>
+        </div>
+        <div class="map-center">
+      <svg id="map-svg" viewBox="0 0 600 495" xmlns="http://www.w3.org/2000/svg">
+        <path fill="var(--tile-sea)" d="M25.2,225.3 L20.0,173.8 L38.7,173.8 L46.6,155.3 L54.3,110.3 L48.5,93.7 L54.6,83.3 L80.6,80.6 L86.3,91.5 L107.5,67.3 L25.2,225.3 Z"/>
+        <path fill="var(--tile-sea)" d="M142.3,20.0 L142.9,39.0 L174.3,50.4 L174.0,67.9 L205.6,58.6 L223.1,45.2 L258.2,64.6 L272.9,80.2 L280.2,105.2 L142.3,20.0 Z"/>
+        <path fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" d="M300.8,210.4 L288.1,179.0 L290.5,162.1 L282.8,135.8 L271.5,118.3 L280.2,105.2 L272.9,80.2 L294.2,65.8 L342.7,43.1 L381.9,26.5 L412.9,34.8 L415.3,46.7 L445.3,47.4 L483.6,52.9 L540.8,52.2 L556.7,57.5 L564.2,72.6 L565.5,94.3 L574.2,113.0 L574.0,132.6 L555.3,142.6 L564.9,165.4 L565.5,187.2 L581.2,230.1 L577.8,243.9 L562.4,249.6 L534.1,290.4 L542.2,312.5 L535.4,309.7 L505.8,290.8 L483.4,297.7 L468.7,292.7 L450.4,303.2 L434.7,285.8 L421.9,292.5 L420.1,289.5 L405.8,265.3 L382.7,262.3 L379.7,247.0 L358.4,241.5 L353.8,254.2 L336.9,244.0 L338.8,230.5 L315.6,226.2 Z"/>
+        <path fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" d="M361.3,333.7 L346.9,324.4 L332.3,326.9 L308.2,311.9 L297.2,315.6 L279.7,335.7 L256.6,319.9 L239.1,298.8 L223.2,287.0 L219.9,266.3 L214.4,251.7 L237.0,241.0 L248.6,228.7 L270.9,219.2 L278.7,209.9 L286.9,215.5 L300.8,210.4 L315.6,226.2 L338.8,230.5 L336.9,244.0 L353.8,254.2 L358.4,241.5 L379.7,247.0 L382.7,262.3 L405.8,265.3 L420.1,289.5 L410.9,289.5 L406.0,298.4 L398.9,300.5 L396.9,311.7 L390.9,314.0 L390.1,318.6 L379.4,323.7 L365.7,322.9 Z"/>
+        <path fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" d="M132.1,386.3 L133.4,395.0 L128.6,407.0 L142.7,416.0 L158.5,417.3 L156.1,437.5 L142.4,445.7 L119.4,439.6 L112.6,459.4 L97.8,461.0 L92.4,453.2 L75.0,469.8 L60.0,472.2 L46.6,461.6 L35.9,440.1 L21.1,447.8 L21.5,425.6 L44.3,398.0 L43.3,385.5 L57.4,390.0 L66.0,381.6 L92.4,382.0 L98.8,371.3 Z"/>
+        <g class="context-label">
+          <text x="480" y="150">POLAND</text>
+          <text x="330" y="285">CZECHIA</text>
+          <text x="90" y="425">SWITZERLAND</text>
+        </g>
+
+        <path id="f-de_e" class="region-fill" d="M174.0,67.9 L205.6,58.6 L223.1,45.2 L258.2,64.6 L272.9,80.2 L280.2,105.2 L271.5,118.3 L282.8,135.8 L290.5,162.1 L288.1,179.0 L300.8,210.4 L286.9,215.5 L278.7,209.9 L270.9,219.2 L248.6,228.7 L237.0,241.0 L214.4,251.7 L210,200 L200,150 L174.0,67.9 Z"/>
+        <path id="f-de_w" class="region-fill" d="M214.4,251.7 L219.9,266.3 L223.2,287.0 L239.1,298.8 L256.6,319.9 L245.6,342.5 L234.5,348.8 L238.9,380.8 L236.0,389.1 L226.3,379.1 L211.4,377.6 L189.1,386.4 L161.7,384.3 L157.3,397.2 L141.5,383.6 L132.1,386.3 L98.8,371.3 L92.4,382.0 L66.0,381.6 L69.9,346.6 L85.6,313.0 L40.8,303.9 L26.1,291.1 L27.9,269.5 L21.7,258.5 L25.2,225.3 L20.0,173.8 L38.7,173.8 L46.6,155.3 L54.3,110.3 L48.5,93.7 L54.6,83.3 L80.6,80.6 L86.3,91.5 L107.5,67.3 L100.4,48.9 L98.9,21.0 L122.4,27.5 L142.3,20.0 L142.9,39.0 L174.3,50.4 L174.0,67.9 L200,150 L210,200 L214.4,251.7 Z"/>
+        <path id="f-aut" class="region-fill" d="M361.9,356.9 L359.5,377.0 L342.0,377.1 L348.0,387.7 L337.7,419.3 L331.8,427.6 L304.6,428.9 L288.9,440.0 L263.2,436.2 L218.7,423.5 L211.7,406.4 L181.0,415.0 L177.4,424.3 L158.5,417.3 L142.7,416.0 L128.6,407.0 L133.4,395.0 L132.1,386.3 L141.5,383.6 L157.3,397.2 L161.7,384.3 L189.1,386.4 L211.4,377.6 L226.3,379.1 L236.0,389.1 L238.9,380.8 L234.5,348.8 L245.6,342.5 L256.6,319.9 L279.7,335.7 L297.2,315.6 L308.2,311.9 L332.3,326.9 L346.9,324.4 L361.3,333.7 L358.8,339.9 Z"/>
+
+        <g id="borders" stroke-width="1">
+          <path class="border-line" id="b-dew-dee" d="M174.0,67.9 L200,150 L210,200 L214.4,251.7"/>
+          <path class="border-line" id="b-dew-aut" d="M256.6,319.9 L245.6,342.5 L234.5,348.8 L238.9,380.8 L236.0,389.1 L226.3,379.1 L211.4,377.6 L189.1,386.4 L161.7,384.3 L157.3,397.2 L141.5,383.6 L132.1,386.3"/>
+        </g>
+
+        <g id="labels"></g>
+      </svg>
+
+      <div class="era-head">
+        <div class="era-name-inline" id="eraName">German Confederation</div>
+        <div class="era-owners" id="eraOwners"></div>
+      </div>
+      <div class="flags-row" id="flagsRow"></div>
+      <p class="era-story" id="eraStory"></p>
+        </div>
+        <div class="side-panel" id="conquerorPanel">
+          <h3>Conquerors</h3>
+          <div id="conquerorBody"></div>
+        </div>
+      </div>
+
+      <p class="map-note">Real traced borders (simplified). Poland, Czechia, and Switzerland shown faint for context only &mdash; Poland and Czechia are tracked in full in the <a href="yugoslavia-hub.html">Former Yugoslavia hub</a>'s Balkan map and the <a href="habsburg-hub.html">Habsburg Lands hub</a> respectively.</p>
+      <div class="map-key" id="legend"></div>
+      <div class="map-notes">
+        <b>Try:</b> drag slowly from 1815 to 1866 and watch the west&ndash;east German line stay dissolved &mdash; both halves in the same loose Confederation, Austria included. Then 1871: the line stays dissolved as the two halves unify into the German Empire, but Austria pulls away for the first time, excluded from the new state on purpose. Jump to 1938 and watch all three regions &mdash; west, east, and Austria &mdash; merge into a single color at once, the only moment on this map when that happens. Then 1949: the same three regions split three ways simultaneously, the sharpest break on the whole map. Finally 1990: west and east dissolve back into one Germany, while Austria stays its own color, exactly as it still is today.
+      </div>
+    </div>
+  </div>
+
+  <div class="about">
+    <h2>About this atlas</h2>
+    <p>This is the fourth phase of a family-research project tracing the flags that flew over the lands our ancestors came from, close enough to paint accurately &mdash; correct colors, correct proportions, correct dates. Former Yugoslavia came first, then the Habsburg lands; Germany follows because its own east-west split is the clearest possible demonstration of this atlas's central idea &mdash; that a border is real only when two governments actually ruled apart, and a map should show that directly rather than describe it in a caption.</p>
+    <p>A full Germany flag timeline, with paint-ready color specs for all ten eras, now lives on its own page &mdash; linked above and in the roadmap below. Austria's own timeline already lives in the Habsburg Lands hub. The map above simplifies well over a century of shifting alliances, occupations, and divided sovereignty into six snapshots &mdash; useful for orientation, not a substitute for the detail the dedicated Germany page carries.</p>
+  </div>
+
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This hub is one region in a larger set. See the other phases here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="germany-flags.html"><b>Germany</b><span>Ten flags, Holy Roman Empire to today</span></a>
+      <a class="link-card" href="austria-flags.html"><b>Austria</b><span>Red-white-red since Leopold V</span></a>
+      <a class="link-card" href="yugoslavia-hub.html"><b>Former Yugoslavia hub</b><span>Nine countries, nine centuries</span></a>
+      <a class="link-card" href="habsburg-hub.html"><b>Habsburg Lands hub</b><span>Seven countries, four centuries</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are close historical approximations for painting reference; pre-19th-century swatches are informed reconstructions, not official specifications. Map is schematic and not surveyed.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var C = {
+    confederation:"#7a5a9a", prussia_empire:"#3a5a8c", austria_hungary:"#7a3a5a", weimar:"#4a6b8c",
+    austria_republic1:"#5b3a7a", nazi_germany:"#3f3f3f", frg:"#2c6f9a", gdr:"#a4302a",
+    austria_occupied:"#6a8fa0", germany_modern:"#2f6b4a", austria_modern:"#4a6fa5"
+  };
+  var NAMES = {
+    confederation:"German Confederation", prussia_empire:"German Empire", austria_hungary:"Austro-Hungarian Empire",
+    weimar:"Weimar Republic", austria_republic1:"Republic of German-Austria / First Austrian Republic",
+    nazi_germany:"Nazi Germany (Greater German Reich)", frg:"Federal Republic of Germany (West)",
+    gdr:"German Democratic Republic (East)", austria_occupied:"Allied-occupied / neutral Austria",
+    germany_modern:"Federal Republic of Germany (reunified)", austria_modern:"Republic of Austria"
+  };
+  var legendEl = document.getElementById("legend");
+  legendEl.innerHTML = Object.keys(C).map(function (k) {
+    return '<span><span class="sw" style="background:' + C[k] + '"></span>' + NAMES[k] + "</span>";
+  }).join("");
+
+  var FLAGS = {
+    tricolor: '<rect width="300" height="66.7" fill="#241f14"/><rect y="66.7" width="300" height="66.6" fill="#a4302a"/><rect y="133.3" width="300" height="66.7" fill="#f9d616"/>',
+    empire_flag: '<rect width="300" height="66.7" fill="#241f14"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#a4302a"/>',
+    habsburg: '<rect width="300" height="100" fill="#f4efe1"/><rect y="100" width="300" height="100" fill="#a4302a"/><g transform="translate(150,100)"><path d="M-20,-24 h40 v34 q0,20 -20,26 q-20,-6 -20,-26 Z" fill="#241f14"/><path d="M0,-16 l4,4 h10 l-8,7 3,10 -9,-6 -9,6 3,-10 -8,-7 h10 Z" fill="#f4efe1"/></g>',
+    austria_plain: '<rect width="300" height="66.7" fill="#a4302a"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#a4302a"/>',
+    reich: '<rect width="300" height="200" fill="#a4302a"/><circle cx="150" cy="100" r="45" fill="#f4efe1"/><path d="M150,58 v18 M150,124 v18 M108,100 h18 M174,100 h18 M150,76 l12,-12 M150,76 l-12,-12 M150,124 l12,12 M150,124 l-12,12" stroke="#241f14" stroke-width="7"/>',
+    gdr_flag: '<rect width="300" height="66.7" fill="#241f14"/><rect y="66.7" width="300" height="66.6" fill="#a4302a"/><rect y="133.3" width="300" height="66.7" fill="#f9d616"/><circle cx="150" cy="100" r="22" fill="#f9d616" stroke="#241f14" stroke-width="2"/><path d="M150,88 l4,10 -8,0 Z M150,112 l-4,-10 8,0 Z" fill="#241f14"/>',
+    austria_occupied_flag: '<rect width="300" height="66.7" fill="#a4302a"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#a4302a"/><rect width="300" height="200" fill="none" stroke="#241f14" stroke-width="5" stroke-dasharray="9 7"/>',
+    poland_flag: '<rect width="300" height="100" fill="#f4efe1"/><rect y="100" width="300" height="100" fill="#dc143c"/>',
+    turkey_flag: '<rect width="300" height="200" fill="#e30a17"/><circle cx="120" cy="100" r="42" fill="#f4efe1"/><circle cx="132" cy="100" r="34" fill="#e30a17"/><path d="M165,100 l14,-4.5 -8.7,12 8.7,12 -14,-4.5 Z" fill="#f4efe1"/>',
+    italy_flag: '<rect width="100" height="200" fill="#009246"/><rect x="100" width="100" height="200" fill="#f4efe1"/><rect x="200" width="100" height="200" fill="#ce2b37"/>',
+    syria_flag: '<rect width="300" height="66.7" fill="#ce1126"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#000000"/><polygon points="112,88 118,100 112,112 124,105 136,112 130,100 136,88 124,95" fill="#007a3d"/><polygon points="164,88 170,100 164,112 176,105 188,112 182,100 188,88 176,95" fill="#007a3d"/>',
+    ussr_flag: '<rect width="300" height="200" fill="#cc0000"/><rect x="20" y="20" width="55" height="40" fill="none" stroke="#f9d616" stroke-width="2"/><circle cx="47" cy="30" r="7" fill="#f9d616"/>',
+    western_allies_flag: '<rect y="0.00" width="300" height="15.38" fill="#b31942"/><rect y="15.38" width="300" height="15.38" fill="#f4efe1"/><rect y="30.77" width="300" height="15.38" fill="#b31942"/><rect y="46.15" width="300" height="15.38" fill="#f4efe1"/><rect y="61.54" width="300" height="15.38" fill="#b31942"/><rect y="76.92" width="300" height="15.38" fill="#f4efe1"/><rect y="92.31" width="300" height="15.38" fill="#b31942"/><rect y="107.69" width="300" height="15.38" fill="#f4efe1"/><rect y="123.08" width="300" height="15.38" fill="#b31942"/><rect y="138.46" width="300" height="15.38" fill="#f4efe1"/><rect y="153.85" width="300" height="15.38" fill="#b31942"/><rect y="169.23" width="300" height="15.38" fill="#f4efe1"/><rect y="184.62" width="300" height="15.38" fill="#b31942"/><rect width="120" height="107.7" fill="#0a3161"/>'
+  };
+
+  var MIGRATION_SETS = {
+    "1871": [["poland_flag","Polish \u201cRuhr Poles\u201d","From the 1870s\u20131890s, hundreds of thousands of ethnic Poles from Prussia's own eastern provinces (and Russian/Austrian Poland) moved west to work the coal mines and steel mills of the industrializing Ruhr valley \u2014 one of the largest internal migrations in the new Empire."]],
+    "1949": [["turkey_flag","Turkish \u201cGastarbeiter\u201d","West Germany's 1961 labor recruitment treaty with Turkey (following earlier 1955\u201360 treaties with Italy, Spain, Greece) brought in millions of \u201cguest workers\u201d for its postwar industrial boom \u2014 many settled permanently, founding today's large Turkish-German community."],["italy_flag","Italian \u201cGastarbeiter\u201d","West Germany's first labor-recruitment treaty, signed with Italy in 1955, brought the earliest large wave of postwar \u201cguest workers\u201d into West German factories and mines."]],
+    "1990\u2013present": [["syria_flag","Syrian refugees (2015)","Around 890,000 people sought asylum in Germany in 2015 alone, most fleeing the Syrian civil war \u2014 the largest single-year refugee intake of any EU country in the modern era, under Chancellor Angela Merkel's \u201cWir schaffen das\u201d policy."]]
+  };
+  var CONQUEROR_SETS = {
+    "1938": [["reich","Nazi Germany conquers Austria","The March 1938 Anschluss was an armed annexation, not a merger of equals \u2014 German troops crossed the border and absorbed Austria's own government by force, backed by a rigged referendum weeks later."]],
+    "1949": [["ussr_flag","Soviet Union occupies the East","The Soviet occupation zone became the German Democratic Republic in October 1949, installed and backed by Moscow rather than freely self-governing."],["western_allies_flag","Western Allies occupy the West","The American, British, and French occupation zones merged into the Federal Republic in May 1949 \u2014 sovereign in practice quickly, but still under Allied oversight in its earliest years."]]
+  };
+  var MIGRATION_EMPTY = {
+    "1938": "No migration shown \u2014 this era is defined by forced deportation and the Holocaust, not immigration"
+  };
+  function sidePanelHtml(entries, emptyMsg) {
+    if (!entries || !entries.length) {
+      return '<div class="side-empty">' + emptyMsg + '</div>';
+    }
+    return entries.map(function (f) {
+      return '<div class="flag-chip">' + flagSvg(f[0]) + '<div class="fc-label">' + f[1] + '</div><div class="fc-context">' + f[2] + '</div></div>';
+    }).join("");
+  }
+  function flagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (FLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+
+  var SNAP = [
+    { year:"1815", name:"German Confederation", t:{ de_w:C.confederation, de_e:C.confederation, aut:C.confederation },
+      story:"After Napoleon dissolves the thousand-year-old Holy Roman Empire in 1806, the 1815 Congress of Vienna replaces it with the German Confederation &mdash; a loose league of 39 sovereign states, from tiny principalities to the two giants, Austria and Prussia, sharing a federal diet at Frankfurt but no real central government. Austria, as the traditional leading power, presides over it. The black-red-gold tricolor first appears in these decades too, adopted by student fraternities and 1848 revolutionaries as a symbol of liberal German unity the Confederation itself never delivers." },
+    { year:"1871", name:"Empire, without Austria", t:{ de_w:C.prussia_empire, de_e:C.prussia_empire, aut:C.austria_hungary },
+      story:"Prussia's decisive 1866 victory over Austria at Königgrätz ends the Confederation and, crucially, ends any question of Austria joining a unified Germany. Otto von Bismarck deliberately builds the \"small German\" solution instead: after defeating France in 1871, he proclaims the German Empire at Versailles with the Prussian king as Kaiser &mdash; Austria pointedly excluded, forced instead to reorganize its own multinational empire as Austria-Hungary in 1867. Two would-be leaders of \"Germany,\" now permanently separate states." },
+    { year:"1918", name:"Weimar and the first Republic", t:{ de_w:C.weimar, de_e:C.weimar, aut:C.austria_republic1 },
+      story:"Defeat in World War I topples both monarchies within days of each other in November 1918. The new Weimar Republic revives the old black-red-gold tricolor as a deliberate statement of liberal, democratic continuity with 1848. In Vienna, the rump Republic of German-Austria's own parliament votes to join Germany outright &mdash; and the Allied powers explicitly forbid it in the Treaty of Saint-Germain, worried about a Germany even larger than the one they'd just defeated. The two states that wanted to merge are kept apart by outside force, the mirror image of 1871." },
+    { year:"1938", name:"Anschluss — merged by force", t:{ de_w:C.nazi_germany, de_e:C.nazi_germany, aut:C.nazi_germany },
+      story:"What Versailles forbade, Adolf Hitler simply does: German troops cross into Austria on 12 March 1938, and the Anschluss is proclaimed the next day, absorbing Austria whole into the Greater German Reich. A rigged referendum weeks later claims over 99% approval. For the only time on this map, western Germany, eastern Germany, and Austria are all the same government at once &mdash; not a voluntary union of equals, but total absorption enforced by the Wehrmacht and the Gestapo alike." },
+    { year:"1949", name:"Three ways at once", t:{ de_w:C.frg, de_e:C.gdr, aut:C.austria_occupied },
+      story:"Total defeat in 1945 splits the map three ways simultaneously &mdash; the sharpest single break shown anywhere in this atlas. The Western Allies' occupation zones merge into the Federal Republic of Germany in May 1949; the Soviet zone becomes the German Democratic Republic that October, adopting the same black-red-gold tricolor at first (a state emblem is added only in 1959, once reunification looks less likely). Austria, occupied by all four Allied powers like Germany itself, is treated differently: the 1955 State Treaty restores full Austrian sovereignty in exchange for permanent neutrality, a full decade before West and East Germany get any equivalent settlement." },
+    { year:"1990–present", name:"Reunified, Austria apart", t:{ de_w:C.germany_modern, de_e:C.germany_modern, aut:C.austria_modern },
+      story:"East Germans force the issue themselves: mass protests through 1989, the fall of the Berlin Wall on 9 November, and formal reunification under the Federal Republic's constitution on 3 October 1990 &mdash; German Unity Day, chosen deliberately over any date tied to 1871 or 1933. The same black-red-gold tricolor, essentially unbroken in design since the 1848 revolutionaries first raised it, flies over a single Germany again. Austria, sovereign and neutral since 1955, stays its own country throughout &mdash; the one boundary on this entire map that hasn't moved since 1945." }
+  ];
+
+  var FLAG_SETS = {
+    "1815": [["tricolor","German Confederation (Frankfurt)"],["habsburg","Austria (presiding power)"]],
+    "1871": [["empire_flag","German Empire"],["habsburg","Austria-Hungary"]],
+    "1918": [["tricolor","Weimar Republic"],["austria_plain","Republic of German-Austria"]],
+    "1938": [["reich","Greater German Reich"]],
+    "1949": [["tricolor","Federal Republic of Germany (West)"],["gdr_flag","German Democratic Republic (East)"],["austria_occupied_flag","Occupied Austria"]],
+    "1990–present": [["tricolor","Federal Republic of Germany"],["austria_plain","Republic of Austria"]]
+  };
+
+  var REGIONS = ["de_w","de_e","aut"];
+  var REGION_NAMES = { de_w:"West Germany", de_e:"East Germany", aut:"Austria" };
+  var REGION_ABBR = { de_w:"WGER", de_e:"EGER", aut:"AUT" };
+  var REGION_POS = { de_w:[110,240], de_e:[240,150], aut:[240,380] };
+  var ADJ = [["de_w","de_e"],["de_w","aut"]];
+
+  function textColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+  function ownerName(hex) {
+    for (var k in C) { if (C[k] === hex) return NAMES[k]; }
+    return hex;
+  }
+
+  function groupsFor(t) {
+    var parent = {};
+    REGIONS.forEach(function (r) { parent[r] = r; });
+    function find(x) { return parent[x] === x ? x : (parent[x] = find(parent[x])); }
+    function union(a, b) { var ra = find(a), rb = find(b); if (ra !== rb) parent[ra] = rb; }
+    ADJ.forEach(function (pair) { if (t[pair[0]] === t[pair[1]]) union(pair[0], pair[1]); });
+    var groups = {};
+    REGIONS.forEach(function (r) { var root = find(r); if (!groups[root]) groups[root] = []; groups[root].push(r); });
+    return Object.keys(groups).map(function (k) { return groups[k]; });
+  }
+
+  var svgNS = "http://www.w3.org/2000/svg";
+  var labelsEl = document.getElementById("labels");
+  var yearTag = document.getElementById("yearTag");
+  var eraName = document.getElementById("eraName");
+  var eraOwners = document.getElementById("eraOwners");
+  var eraStory = document.getElementById("eraStory");
+  var flagsRow = document.getElementById("flagsRow");
+  var sliderEl = document.getElementById("slider");
+
+  function render(i) {
+    var era = SNAP[i];
+    yearTag.textContent = era.year;
+    eraName.textContent = era.name;
+    eraStory.innerHTML = era.story || "";
+    flagsRow.innerHTML = (FLAG_SETS[era.year] || []).map(function (f) {
+      return '<div class="flag-chip">' + flagSvg(f[0]) + '<div class="fc-label">' + f[1] + '</div></div>';
+    }).join("");
+
+    document.getElementById("migrationBody").innerHTML = sidePanelHtml(
+      MIGRATION_SETS[era.year], MIGRATION_EMPTY[era.year] || "No major inbound wave documented this era (net emigration, if anything)"
+    );
+    document.getElementById("conquerorBody").innerHTML = sidePanelHtml(
+      CONQUEROR_SETS[era.year], "Self-governed \u2014 no outside power occupying/conquering this era"
+    );
+
+    REGIONS.forEach(function (id) {
+      document.getElementById("f-" + id).setAttribute("fill", era.t[id]);
+    });
+
+    ADJ.forEach(function (pair) {
+      var same = era.t[pair[0]] === era.t[pair[1]];
+      var line = document.getElementById("b-" + pair[0].replace("_","") + "-" + pair[1].replace("_",""));
+      if (!line) line = document.getElementById("b-" + pair[0] + "-" + pair[1]);
+      if (line) {
+        line.setAttribute("stroke-opacity", same ? "0.06" : "0.85");
+        line.setAttribute("stroke-width", same ? "1" : "2.6");
+      }
+    });
+
+    var groups = groupsFor(era.t);
+    var seenOwners = {};
+    var ownerParts = [];
+    groups.forEach(function (g) {
+      var label = ownerName(era.t[g[0]]);
+      if (!seenOwners[label]) { seenOwners[label] = []; ownerParts.push(label); }
+      g.forEach(function (id) { seenOwners[label].push(REGION_NAMES[id]); });
+    });
+    eraOwners.innerHTML = ownerParts.map(function (label) {
+      return "<b>" + label + "</b>: " + seenOwners[label].join(", ");
+    }).join(" &middot; ");
+
+    labelsEl.innerHTML = "";
+    function haloFor(txtColor) { return txtColor === "#201a12" ? "#f7f1e3" : "#201a12"; }
+    groups.forEach(function (g) {
+      var cx = g.reduce(function (s, id) { return s + REGION_POS[id][0]; }, 0) / g.length;
+      var cy = g.reduce(function (s, id) { return s + REGION_POS[id][1]; }, 0) / g.length;
+      var fillHex = era.t[g[0]];
+      var txtColor = textColorFor(fillHex);
+      var halo = haloFor(txtColor);
+
+      if (g.length > 1) {
+        var groupText = ownerName(fillHex).toUpperCase();
+        var gl = document.createElementNS(svgNS, "text");
+        gl.setAttribute("x", cx);
+        gl.setAttribute("y", cy);
+        gl.setAttribute("class", "group-label");
+        gl.setAttribute("font-size", groupText.length > 16 ? "10.5" : "13");
+        gl.setAttribute("fill", txtColor);
+        gl.setAttribute("stroke", halo);
+        gl.textContent = groupText;
+        labelsEl.appendChild(gl);
+        g.forEach(function (id) {
+          var pos = REGION_POS[id];
+          var sl = document.createElementNS(svgNS, "text");
+          sl.setAttribute("x", pos[0]);
+          sl.setAttribute("y", pos[1] + 14);
+          sl.setAttribute("class", "sub-label");
+          sl.setAttribute("font-size", "9.5");
+          sl.setAttribute("fill", txtColor);
+          sl.setAttribute("stroke", halo);
+          sl.setAttribute("opacity", "0.85");
+          sl.textContent = REGION_ABBR[id];
+          labelsEl.appendChild(sl);
+        });
+      } else {
+        var id = g[0];
+        var pos = REGION_POS[id];
+        var sl2 = document.createElementNS(svgNS, "text");
+        sl2.setAttribute("x", pos[0]);
+        sl2.setAttribute("y", pos[1]);
+        sl2.setAttribute("class", "group-label");
+        sl2.setAttribute("font-size", "12");
+        sl2.setAttribute("fill", txtColor);
+        sl2.setAttribute("stroke", halo);
+        sl2.textContent = REGION_NAMES[id].toUpperCase();
+        labelsEl.appendChild(sl2);
+      }
+    });
+  }
+
+  sliderEl.addEventListener("input", function () { render(parseInt(sliderEl.value, 10)); });
+  render(0);
+
+  var playing = false, playTimer = null;
+  var playBtn = document.getElementById("playBtn");
+  function stepPlay() {
+    var next = parseInt(sliderEl.value, 10) + 1;
+    if (next > SNAP.length - 1) { stopPlay(); return; }
+    sliderEl.value = next;
+    render(next);
+  }
+  function startPlay() {
+    playing = true;
+    playBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(sliderEl.value, 10) >= SNAP.length - 1) { sliderEl.value = 0; render(0); }
+    playTimer = setInterval(stepPlay, 1700);
+  }
+  function stopPlay() {
+    playing = false;
+    playBtn.innerHTML = "&#9654;";
+    clearInterval(playTimer);
+  }
+  playBtn.addEventListener("click", function () { playing ? stopPlay() : startPlay(); });
+})();
+</script>
+
+</body></html>

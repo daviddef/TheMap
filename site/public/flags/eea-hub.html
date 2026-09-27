@@ -1,0 +1,312 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>The European Economic Area</title>
+<meta name="description" content="A hub for the family flag atlas: the European Economic Area, the 30-member single market that extends the EU's four freedoms to Iceland, Liechtenstein, and Norway — a fourth, distinct list of countries alongside the EU, Schengen, and EFTA.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    --tile: #ddd0aa; --tile-line: #b7a679; --tile-text: #7a6a45; --tile-sea: #b9d3da;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.2rem, 5.5vw, 3.4rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.1rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .callout { margin: 24px 0; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .95rem; }
+  .callout b { color: var(--brick); }
+  .callout table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: .88rem; }
+  .callout th, .callout td { text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid var(--hair); vertical-align: top; }
+  .callout th { font-family: "IBM Plex Mono", monospace; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: var(--brass); }
+  .callout tr:last-child td { border-bottom: none; }
+
+  .countries { margin-top: 44px; }
+  .countries h2 { font-size: 1.15rem; font-weight: 600; margin: 0 0 4px; }
+  .countries .sub { color: var(--muted); font-size: .9rem; margin: 0 0 16px; }
+  .country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .country-card {
+    display: block; padding: 20px; border: 1px solid var(--card-border); background: var(--card);
+    border-radius: 4px; text-decoration: none; color: var(--ink); position: relative; overflow: hidden;
+  }
+  .country-card .swatch-strip { position: absolute; top: 0; left: 0; right: 0; height: 5px; }
+  .country-card .era { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--brass); margin-bottom: 6px; }
+  .country-card .era.pending { color: var(--muted); }
+  .country-card b { display: block; font-family: "Fraunces", serif; font-size: 1.2rem; font-weight: 600; margin-bottom: 6px; }
+  .country-card span.desc { color: var(--muted); font-size: .88rem; line-height: 1.5; display: block; }
+
+  .about { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .about h2 { font-size: 1.3rem; margin: 0 0 12px; }
+  .about p { max-width: none; opacity: .88; margin: 0 0 12px; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a></p>
+  <p class="kicker">Family research &middot; Hub &middot; Phase 27 of the world atlas</p>
+  <h1>The European Economic Area</h1>
+  <p class="lede">Like the EU and Schengen hubs, this one isn't a sovereignty story &mdash; it's another voluntary institutional membership layered on top of fully self-governing countries. The European Economic Area extends the EU's own single market &mdash; the "four freedoms" of free movement for goods, services, capital, and people &mdash; out beyond the EU's own borders, to a handful of European countries that wanted that market access without full EU political membership. The mechanism is the 1992 EEA Agreement, signed in Oporto, Portugal, and in force since 1 January 1994.</p>
+  <p class="lede">The EEA is, in practice, simple arithmetic: it's the EU's 27 member states, plus three countries that are <em>not</em> EU members at all &mdash; Iceland, Liechtenstein, and Norway. Those three joined through the European Free Trade Association (EFTA), a rival trade bloc founded in 1960 by countries that wanted a common market without the EU's deeper political integration. EFTA itself was once much larger &mdash; its founding members in 1960 were the United Kingdom, Denmark, Norway, Sweden, Austria, Portugal, and Switzerland &mdash; but it steadily emptied out as most of those countries left for full EU membership over the following decades. Today EFTA has only four members left: Iceland, Liechtenstein, and Norway, all three of whom also joined the EEA, plus Switzerland, the one EFTA member that stayed out of it.</p>
+  <p class="lede">That last point is the hinge of the whole story. Swiss voters rejected EEA membership in a December 1992 referendum, so Switzerland never joined. Instead of the EEA's single treaty framework, Switzerland built its own dense web of separate bilateral agreements with the EU over the following years, achieving much of the same market access country by country and topic by topic rather than through one overarching agreement. Switzerland is consequently absent from the country list below &mdash; it belongs to EFTA, but not the EEA.</p>
+
+  <div class="callout">
+    <b>How to read this hub &mdash; and how the EEA differs from the EU, Schengen, and EFTA.</b> This is genuinely confusing territory: four overlapping European groupings, each with its own membership list, and none of the four lists match. The table below is the fastest way to keep them straight.
+    <table>
+      <tr><th>Grouping</th><th>What it's for</th><th>Who's in it that the others aren't</th></tr>
+      <tr><td><b>European Union</b> (27)</td><td>Full political and economic union</td><td>The baseline 27 &mdash; every EEA and Schengen member that <em>is</em> an EU member starts here</td></tr>
+      <tr><td><b>EEA</b> (30)</td><td>Single market only (the "four freedoms")</td><td>All 27 EU members, plus Iceland, Liechtenstein, and Norway</td></tr>
+      <tr><td><b>Schengen Area</b> (29)</td><td>No internal passport/border checks</td><td>Most EU members plus Iceland, Liechtenstein, Norway, <em>and Switzerland</em> &mdash; but not Ireland or Cyprus, both EU members that stayed outside it</td></tr>
+      <tr><td><b>EFTA</b> (4)</td><td>Free trade among its own members</td><td>Iceland, Liechtenstein, Norway, and Switzerland &mdash; the last surviving members of a bloc that once included the UK, Denmark, Sweden, Austria, and Portugal</td></tr>
+    </table>
+    <p style="margin:12px 0 0;">So: the EU is a subset of the EEA (every EU member is automatically an EEA member too, since EEA membership for EU states is bundled into EU accession). But the EEA and Schengen are <em>not</em> the same list, even though they sound like they should be &mdash; Schengen includes Switzerland (not in the EEA) and excludes Ireland (which is in the EEA, as an EU member). And EFTA today is really just "Switzerland plus the three non-EU EEA members," a shell of the seven-country bloc it started as in 1960.</p>
+  </div>
+
+  <div class="countries">
+    <h2>The 30 members</h2>
+    <p class="sub">The EU's 27 member states, in their order of EU/EEA accession, plus Iceland, Liechtenstein, and Norway at the end &mdash; EEA members since the Agreement's 1994 entry into force (Liechtenstein followed in 1995) but never EU members at all. Where a country already has its own flag-history page elsewhere in the atlas, its card links there; the rest are placeholders for pages not yet written.</p>
+    <div class="country-grid">
+
+      <a class="country-card" href="#" onclick="return false;">
+        <span class="swatch-strip" style="background:#0055a4"></span>
+        <span class="era">EEA founding member &middot; 1994 (EU since 1958)</span>
+        <b>France</b>
+        <span class="desc">One of the six original signatories of the 1951 Treaty of Paris; in the single market from its earliest form, and in the EEA from the Agreement's 1994 launch.</span>
+      </a>
+      <a class="country-card" href="germany-flags.html">
+        <span class="swatch-strip" style="background:#2f6b4a"></span>
+        <span class="era">EEA founding member &middot; 1994 (EU since 1958)</span>
+        <b>Germany</b>
+        <span class="desc">Founding EEC member; carried that single-market membership straight into the EEA at its 1994 start.</span>
+      </a>
+      <a class="country-card" href="belgium-flags.html">
+        <span class="swatch-strip" style="background:#1a1a1a"></span>
+        <span class="era">EEA founding member &middot; 1994 (EU since 1958)</span>
+        <b>Belgium</b>
+        <span class="desc">Founding EEC member and host to much of the EU's institutional machinery; an EEA member from the outset.</span>
+      </a>
+      <a class="country-card" href="netherlands-flags.html">
+        <span class="swatch-strip" style="background:#c9762f"></span>
+        <span class="era">EEA founding member &middot; 1994 (EU since 1958)</span>
+        <b>Netherlands</b>
+        <span class="desc">One of the Benelux three among the six EEC founders; in the EEA since its 1994 entry into force.</span>
+      </a>
+      <a class="country-card" href="luxembourg-flags.html">
+        <span class="swatch-strip" style="background:#00a1de"></span>
+        <span class="era">EEA founding member &middot; 1994 (EU since 1958)</span>
+        <b>Luxembourg</b>
+        <span class="desc">Founding EEC member; an EEA member from 1994 alongside its fellow founders.</span>
+      </a>
+      <a class="country-card" href="italy-flags.html">
+        <span class="swatch-strip" style="background:#0b7a3d"></span>
+        <span class="era">EEA founding member &middot; 1994 (EU since 1958)</span>
+        <b>Italy</b>
+        <span class="desc">Founding EEC member; single-market membership extended automatically into the EEA in 1994.</span>
+      </a>
+      <a class="country-card" href="denmark-flags.html">
+        <span class="swatch-strip" style="background:#a4302a"></span>
+        <span class="era">EEA founding member &middot; 1994 (EU since 1973)</span>
+        <b>Denmark</b>
+        <span class="desc">Joined the EEC in 1973 in the first enlargement wave; an EEA member from the Agreement's 1994 start.</span>
+      </a>
+      <a class="country-card" href="ireland-flags.html">
+        <span class="swatch-strip" style="background:#1f7a52"></span>
+        <span class="era">EEA founding member &middot; 1994 (EU since 1973)</span>
+        <b>Ireland</b>
+        <span class="desc">Joined the EEC in 1973 alongside Denmark; in the EEA since 1994, though notably still outside Schengen.</span>
+      </a>
+      <a class="country-card" href="greece-flags.html">
+        <span class="swatch-strip" style="background:#2c5f8a"></span>
+        <span class="era">EEA founding member &middot; 1994 (EU since 1981)</span>
+        <b>Greece</b>
+        <span class="desc">Joined the EEC in 1981; single-market membership carried into the EEA at its 1994 launch.</span>
+      </a>
+      <a class="country-card" href="spain-flags.html">
+        <span class="swatch-strip" style="background:#aa151b"></span>
+        <span class="era">EEA founding member &middot; 1994 (EU since 1986)</span>
+        <b>Spain</b>
+        <span class="desc">Joined the EEC in 1986; an EEA member from the Agreement's 1994 entry into force.</span>
+      </a>
+      <a class="country-card" href="portugal-flags.html">
+        <span class="swatch-strip" style="background:#0b6e3f"></span>
+        <span class="era">EEA founding member &middot; 1994 (EU since 1986)</span>
+        <b>Portugal</b>
+        <span class="desc">Joined the EEC in 1986 alongside Spain, and hosted the 1992 signing of the EEA Agreement itself, in Oporto.</span>
+      </a>
+      <a class="country-card" href="austria-flags.html">
+        <span class="swatch-strip" style="background:#7a5a9a"></span>
+        <span class="era">EEA founding member &middot; 1994 (EU since 1995)</span>
+        <b>Austria</b>
+        <span class="desc">Entered the EEA in 1994 as an EFTA member, then joined the EU outright the following year.</span>
+      </a>
+      <a class="country-card" href="finland-flags.html">
+        <span class="swatch-strip" style="background:#1a3a6b"></span>
+        <span class="era">EEA founding member &middot; 1994 (EU since 1995)</span>
+        <b>Finland</b>
+        <span class="desc">Also entered the EEA in 1994 via EFTA before joining the EU in 1995, the same year as Austria and Sweden.</span>
+      </a>
+      <a class="country-card" href="sweden-flags.html">
+        <span class="swatch-strip" style="background:#1e2f96"></span>
+        <span class="era">EEA founding member &middot; 1994 (EU since 1995)</span>
+        <b>Sweden</b>
+        <span class="desc">Entered the EEA in 1994 through EFTA, then completed the move into full EU membership in 1995.</span>
+      </a>
+      <a class="country-card" href="#" onclick="return false;">
+        <span class="swatch-strip" style="background:#b5651d"></span>
+        <span class="era">EEA/EU member since 2004</span>
+        <b>Cyprus</b>
+        <span class="desc">Joined the EU (and with it, the EEA) in the large 2004 enlargement wave; still outside Schengen.</span>
+      </a>
+      <a class="country-card" href="czechia-flags.html">
+        <span class="swatch-strip" style="background:#1e2f96"></span>
+        <span class="era">EEA/EU member since 2004</span>
+        <b>Czechia</b>
+        <span class="desc">Joined the EU and EEA together in the 2004 eastern enlargement wave.</span>
+      </a>
+      <a class="country-card" href="estonia-flags.html">
+        <span class="swatch-strip" style="background:#0072ce"></span>
+        <span class="era">EEA/EU member since 2004</span>
+        <b>Estonia</b>
+        <span class="desc">Part of the 2004 wave; EU accession brought automatic EEA membership with it.</span>
+      </a>
+      <a class="country-card" href="hungary-flags.html">
+        <span class="swatch-strip" style="background:#b8863f"></span>
+        <span class="era">EEA/EU member since 2004</span>
+        <b>Hungary</b>
+        <span class="desc">Joined the EU and EEA together in 2004, alongside the rest of the eastern enlargement cohort.</span>
+      </a>
+      <a class="country-card" href="latvia-flags.html">
+        <span class="swatch-strip" style="background:#9e3039"></span>
+        <span class="era">EEA/EU member since 2004</span>
+        <b>Latvia</b>
+        <span class="desc">Joined the EU and EEA together in the 2004 wave, alongside its Baltic neighbors.</span>
+      </a>
+      <a class="country-card" href="lithuania-flags.html">
+        <span class="swatch-strip" style="background:#1c7a3d"></span>
+        <span class="era">EEA/EU member since 2004</span>
+        <b>Lithuania</b>
+        <span class="desc">Joined the EU and EEA together in 2004.</span>
+      </a>
+      <a class="country-card" href="#" onclick="return false;">
+        <span class="swatch-strip" style="background:#ce1126"></span>
+        <span class="era">EEA/EU member since 2004</span>
+        <b>Malta</b>
+        <span class="desc">Joined the EU and EEA together in 2004, the smallest member state in both.</span>
+      </a>
+      <a class="country-card" href="poland-flags.html">
+        <span class="swatch-strip" style="background:#1f8a8a"></span>
+        <span class="era">EEA/EU member since 2004</span>
+        <b>Poland</b>
+        <span class="desc">Joined the EU and EEA together in the 2004 enlargement wave.</span>
+      </a>
+      <a class="country-card" href="slovakia-flags.html">
+        <span class="swatch-strip" style="background:#d4924a"></span>
+        <span class="era">EEA/EU member since 2004</span>
+        <b>Slovakia</b>
+        <span class="desc">Joined the EU and EEA together in 2004, alongside fellow former-Czechoslovak neighbor Czechia.</span>
+      </a>
+      <a class="country-card" href="slovenia-flags.html">
+        <span class="swatch-strip" style="background:#1e2f96"></span>
+        <span class="era">EEA/EU member since 2004</span>
+        <b>Slovenia</b>
+        <span class="desc">Joined the EU and EEA together in 2004, the first former Yugoslav republic to do so.</span>
+      </a>
+      <a class="country-card" href="bulgaria-flags.html">
+        <span class="swatch-strip" style="background:#9a5a3a"></span>
+        <span class="era">EEA/EU member since 2007</span>
+        <b>Bulgaria</b>
+        <span class="desc">Joined the EU and EEA together in the 2007 enlargement.</span>
+      </a>
+      <a class="country-card" href="romania-flags.html">
+        <span class="swatch-strip" style="background:#8c2f6b"></span>
+        <span class="era">EEA/EU member since 2007</span>
+        <b>Romania</b>
+        <span class="desc">Joined the EU and EEA together in 2007, alongside Bulgaria.</span>
+      </a>
+      <a class="country-card" href="croatia-flags.html">
+        <span class="swatch-strip" style="background:#a4302a"></span>
+        <span class="era">EEA/EU member since 2013</span>
+        <b>Croatia</b>
+        <span class="desc">The most recent EU accession, in 2013, and with it the most recent addition to the EEA.</span>
+      </a>
+      <a class="country-card" href="iceland-flags.html">
+        <span class="swatch-strip" style="background:#2f6b8a"></span>
+        <span class="era">EEA founding member &middot; 1994 (EFTA, non-EU)</span>
+        <b>Iceland</b>
+        <span class="desc">Never an EU member; joined the EEA at its 1994 launch through EFTA, gaining single-market access without EU political membership.</span>
+      </a>
+      <a class="country-card" href="#" onclick="return false;">
+        <span class="swatch-strip" style="background:#002b7f"></span>
+        <span class="era">EEA member since 1995 (EFTA, non-EU)</span>
+        <b>Liechtenstein</b>
+        <span class="desc">Also never an EU member; its EEA accession was delayed a year past the 1994 launch by its customs union with non-EEA Switzerland, and took effect in May 1995.</span>
+      </a>
+      <a class="country-card" href="norway-flags.html">
+        <span class="swatch-strip" style="background:#c0392b"></span>
+        <span class="era">EEA founding member &middot; 1994 (EFTA, non-EU)</span>
+        <b>Norway</b>
+        <span class="desc">Norwegian voters rejected EU membership twice, in 1972 and 1994, but Norway has been in the EEA via EFTA since the Agreement's 1994 start.</span>
+      </a>
+
+    </div>
+  </div>
+
+  <div class="about">
+    <h2>About this hub</h2>
+    <p>Like the EU and Schengen hubs, this page deliberately skips the atlas's usual real-map, era-slider visualization built to dissolve borders wherever the same government ruled both sides of them. The EEA, like those other two institutional-membership hubs, isn't a sovereignty story at all &mdash; every member state here kept its own government, laws, and borders throughout; all that changed was market access. A genuinely accurate visualization for voluntary treaty memberships like this is deferred atlas-wide to a later phase, not improvised here. This page ships instead as a lighter placeholder: real accession history above, one card per member, each linking to that country's own flag-history page where one already exists elsewhere in the atlas.</p>
+    <p>Dates above reflect EEA and EU accession as commonly reported. The EEA Agreement was signed at Oporto, Portugal on 2 May 1992 and entered into force on 1 January 1994; Liechtenstein's own accession was delayed to 1 May 1995 pending resolution of its customs union with Switzerland.</p>
+  </div>
+
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This hub is one region in a larger set. See related hubs here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="european-union-hub.html"><b>European Union hub</b><span>The 27-member core the EEA is built on</span></a>
+      <a class="link-card" href="schengen-hub.html"><b>Schengen Area hub</b><span>A different 29-country list again &mdash; includes Switzerland, excludes Ireland</span></a>
+      <a class="link-card" href="european-independents-hub.html"><b>Europe's Independents</b><span>Switzerland, in EFTA but outside the EEA</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, the EFTA Secretariat's official EEA documentation, and the European Commission.
+  </footer>
+
+</div>
+
+</body></html>

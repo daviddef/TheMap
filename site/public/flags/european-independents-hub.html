@@ -1,0 +1,485 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Flags of Europe's Independents</title>
+<meta name="description" content="A hub for the family flag atlas: Switzerland, Cyprus, and Malta &mdash; three European states that don't share a clean regional identity, from medieval confederacies and crusader kingdoms to modern independence.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    --tile: #ddd0aa; --tile-line: #b7a679; --tile-text: #7a6a45; --tile-sea: #b9d3da;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.2rem, 5.5vw, 3.4rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.1rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .countries { margin-top: 44px; }
+  .countries h2 { font-size: 1.15rem; font-weight: 600; margin: 0 0 16px; }
+  .country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .country-card {
+    display: block; padding: 20px; border: 1px solid var(--card-border); background: var(--card);
+    border-radius: 4px; text-decoration: none; color: var(--ink); position: relative; overflow: hidden;
+  }
+  .country-card .swatch-strip { position: absolute; top: 0; left: 0; right: 0; height: 5px; }
+  .country-card .era { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--brass); margin-bottom: 6px; }
+  .country-card b { display: block; font-family: "Fraunces", serif; font-size: 1.2rem; font-weight: 600; margin-bottom: 6px; }
+  .country-card span { color: var(--muted); font-size: .88rem; line-height: 1.5; }
+
+  .map-section { margin-top: 56px; padding-top: 36px; border-top: 1px solid var(--hair); }
+  .map-section h2 { font-size: 1.5rem; margin: 0 0 8px; }
+  .map-section .map-sub { font-size: .94rem; color: var(--muted); max-width: 66ch; margin: 0 0 22px; }
+  .map-section .rule-box { margin-bottom: 26px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .92rem; }
+  .map-section .rule-box b { color: var(--brick); }
+
+  .country-map { margin-bottom: 40px; }
+  .country-map h3 { font-size: 1.15rem; font-weight: 600; margin: 0 0 6px; }
+  .country-map .cm-sub { font-size: .88rem; color: var(--muted); max-width: 62ch; margin: 0 0 14px; }
+
+  .viz-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 22px; }
+
+  .controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .play-btn {
+    flex: none; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .play-btn:hover { border-color: var(--brick); }
+  input[type="range"] {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px;
+    background: var(--hair); outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper);
+    box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  .era-tag { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+
+  .era-head { text-align: center; margin-bottom: 16px; }
+  .era-name-inline { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.3rem; transition: opacity .35s ease; }
+  .era-owners { font-size: .85rem; color: var(--muted); max-width: 62ch; margin: 6px auto 0; transition: opacity .35s ease; }
+  .era-owners b { color: var(--ink); }
+  .era-story {
+    margin: 0 auto 22px; font-size: .96rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .35s ease; padding: 14px 18px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  .era-story b { color: var(--brick); }
+
+  .flags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin: 4px auto 18px; max-width: 620px; }
+  .flag-chip { text-align: center; width: 84px; }
+  .flag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-chip .fc-label { font-family: "IBM Plex Mono", monospace; font-size: 9px; color: var(--muted); margin-top: 5px; line-height: 1.3; }
+
+  .cmap-svg { display: block; margin: 0 auto; width: 100%; max-width: 340px; height: auto; }
+  .region-fill { transition: fill 0.7s ease, opacity 0.7s ease; }
+  .border-line { transition: stroke-opacity 0.7s ease, stroke-width 0.7s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .dot-fill { transition: fill 0.6s ease, opacity 0.6s ease, r 0.6s ease; }
+  .group-label { font-family: "Fraunces", serif; font-weight: 600; transition: opacity .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2.5px; }
+  .sub-label { font-family: "IBM Plex Mono", monospace; font-weight: 700; transition: opacity .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+
+  .map-key { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .map-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .map-key .sw { width: 11px; height: 11px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .map-notes { margin-top: 20px; font-size: .84rem; color: var(--muted); }
+  .map-notes b { color: var(--ink); }
+
+  .about { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .about h2 { font-size: 1.3rem; margin: 0 0 12px; }
+  .about p { max-width: none; opacity: .88; margin: 0 0 12px; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a></p>
+  <p class="kicker">Family research &middot; Hub &middot; Phase 26 of the world atlas</p>
+  <h1>Flags of Europe's Independents</h1>
+  <p class="lede">Switzerland, Cyprus, and Malta don't share a clean regional identity &mdash; one is a landlocked Alpine confederation at the heart of Central Europe, the other two are Mediterranean islands hundreds of miles apart. What groups them here is simpler: each built a distinctive, self-contained national story that doesn't fit neatly into any of this atlas's other regional hubs, and each has gone unrepresented in the atlas so far except as faint background territory on other hubs' maps.</p>
+  <p class="lede">Switzerland's path runs from a 1291 defensive pact among three forest cantons to a permanently neutral federal state guaranteed by the Great Powers of Europe. Cyprus and Malta share a different pattern: both are small Mediterranean islands whose strategic position made them prizes fought over and passed between an unusually long chain of outside powers &mdash; Phoenician, Roman, Byzantine, Arab, Norman, crusader, and Ottoman or British rule in various sequence &mdash; before each reached independence in the twentieth century.</p>
+
+  <div class="countries">
+    <h2>The 3 countries</h2>
+    <div class="country-grid">
+      <a class="country-card" href="switzerland-flags.html">
+        <span class="swatch-strip" style="background:#a4302a"></span>
+        <span class="era">own page &rarr;</span>
+        <b>Switzerland</b>
+        <span>1291&ndash;present: the R&uuml;tli Oath, Westphalia's 1648 independence, the Napoleonic Helvetic Republic, and permanent neutrality guaranteed in 1815.</span>
+      </a>
+      <a class="country-card" href="cyprus-flags.html">
+        <span class="swatch-strip" style="background:#d57800"></span>
+        <span class="era">own page &rarr;</span>
+        <b>Cyprus</b>
+        <span>c. 330&ndash;present: Byzantine rule, the Lusignan crusader kingdom, Venetian and Ottoman control, British rule from 1878, and independence in 1960.</span>
+      </a>
+      <a class="country-card" href="malta-flags.html">
+        <span class="swatch-strip" style="background:#a4302a"></span>
+        <span class="era">own page &rarr;</span>
+        <b>Malta</b>
+        <span>c. 700 BCE&ndash;present: the Knights Hospitaller from 1530, French and British rule, the 1942 George Cross, and independence in 1964.</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="map-section">
+    <h2>Three separate maps, one page</h2>
+    <p class="map-sub">Switzerland, Cyprus, and Malta don't sit anywhere near each other &mdash; an Alpine interior and two Mediterranean islands hundreds of miles apart &mdash; so instead of forcing them onto one shared geography, each gets its own small real-shaped map and its own era slider below.</p>
+    <div class="rule-box">
+      <b>Borders here are data, not decoration.</b> Switzerland's map tracks which of the historic cantons had actually joined the confederacy at each point &mdash; a dot lights up only once real accession happened. Cyprus's map uses the same dissolve mechanic as the regional hubs: its north and south share one color and one label until 1974, when the line between them turns solid for the first time.
+    </div>
+
+    <div class="country-map">
+      <h3>Switzerland: from a 1291 pact to permanent neutrality</h3>
+      <p class="cm-sub">Thirteen historic cantons, plotted at roughly their real positions inside the confederation's outline. Each dot turns solid only in the year that canton actually joined &mdash; the confederation grew for over five centuries before the borders below stopped moving.</p>
+      <div class="viz-frame">
+        <div class="controls">
+          <button class="play-btn" id="chPlay" type="button" aria-label="Play">&#9654;</button>
+          <span class="era-tag" id="chYear">1291</span>
+          <input type="range" id="chSlider" min="0" max="7" step="1" value="0" aria-label="Select era">
+        </div>
+        <svg id="chSvg" class="cmap-svg" viewBox="0 0 240 190" xmlns="http://www.w3.org/2000/svg">
+          <path id="ch-shape" fill="var(--tile)" stroke="#241f14" stroke-width="1.4" d="M96,18 L138,14 L164,28 L182,46 L172,66 L188,82 L176,104 L182,128 L156,148 L128,142 L104,158 L78,150 L60,166 L44,140 L52,112 L38,90 L54,66 L48,42 L70,26 Z"/>
+          <g id="ch-borderline"></g>
+          <g id="ch-dots"></g>
+          <g id="ch-labels"></g>
+        </svg>
+        <div class="era-head">
+          <div class="era-name-inline" id="chName">The R&uuml;tli Oath</div>
+          <div class="era-owners" id="chOwners"></div>
+        </div>
+        <div class="flags-row" id="chFlags"></div>
+        <p class="era-story" id="chStory"></p>
+        <div class="map-key" id="chLegend"></div>
+      </div>
+    </div>
+
+    <div class="country-map">
+      <h3>Cyprus: Byzantine, Lusignan, Venetian, Ottoman, British &mdash; then a divided island</h3>
+      <p class="cm-sub">One island, one color, for most of its history under a long chain of outside rulers. In 1974 the map splits for the first time and stays split: a Greek Cypriot-administered south, recognized internationally as the Republic of Cyprus, and a Turkish Cypriot-administered north that declared itself the Turkish Republic of Northern Cyprus in 1983, recognized only by Turkey. Both facts are stated here neutrally.</p>
+      <div class="viz-frame">
+        <div class="controls">
+          <button class="play-btn" id="cyPlay" type="button" aria-label="Play">&#9654;</button>
+          <span class="era-tag" id="cyYear">965</span>
+          <input type="range" id="cySlider" min="0" max="6" step="1" value="0" aria-label="Select era">
+        </div>
+        <svg id="cySvg" class="cmap-svg" viewBox="0 0 240 130" xmlns="http://www.w3.org/2000/svg">
+          <path id="f-cy_n" class="region-fill" d="M18,52 L46,38 L82,32 L120,30 L156,36 L192,32 L216,44 L206,56 L176,50 L140,52 L100,50 L62,56 L30,64 Z"/>
+          <path id="f-cy_s" class="region-fill" d="M18,52 L30,64 L62,56 L100,50 L140,52 L176,50 L206,56 L216,44 L224,58 L214,78 L190,92 L160,98 L128,94 L96,100 L66,92 L40,80 L16,66 Z"/>
+          <g id="cy-borders"><path class="border-line" id="b-cy_n-cy_s" d="M18,52 L30,64 L62,56 L100,50 L140,52 L176,50 L206,56 L216,44"/></g>
+          <g id="cy-labels"></g>
+        </svg>
+        <div class="era-head">
+          <div class="era-name-inline" id="cyName"></div>
+          <div class="era-owners" id="cyOwners"></div>
+        </div>
+        <div class="flags-row" id="cyFlags"></div>
+        <p class="era-story" id="cyStory"></p>
+        <div class="map-key" id="cyLegend"></div>
+      </div>
+    </div>
+
+    <div class="country-map">
+      <h3>Malta: at the center of the Mediterranean</h3>
+      <p class="cm-sub">One small island whose harbors made it worth fighting over for three thousand years. The map below starts with the Knights Hospitaller's 1530 arrival, the era Malta's own flag lineage begins in earnest, and notes the much older Phoenician-Roman-Arab-Norman layers in the story text.</p>
+      <div class="viz-frame">
+        <div class="controls">
+          <button class="play-btn" id="mtPlay" type="button" aria-label="Play">&#9654;</button>
+          <span class="era-tag" id="mtYear">870</span>
+          <input type="range" id="mtSlider" min="0" max="5" step="1" value="0" aria-label="Select era">
+        </div>
+        <svg id="mtSvg" class="cmap-svg" viewBox="0 0 200 110" xmlns="http://www.w3.org/2000/svg">
+          <path id="f-mt" class="region-fill" d="M40,46 L58,38 L86,36 L112,42 L134,40 L158,48 L166,58 L150,66 L130,62 L104,68 L78,66 L52,70 L32,62 L28,52 Z"/>
+          <path id="f-mt2" class="region-fill" d="M108,76 L120,73 L128,78 L120,83 L110,82 Z" opacity="0.9"/>
+          <g id="mt-labels"></g>
+        </svg>
+        <div class="era-head">
+          <div class="era-name-inline" id="mtName"></div>
+          <div class="era-owners" id="mtOwners"></div>
+        </div>
+        <div class="flags-row" id="mtFlags"></div>
+        <p class="era-story" id="mtStory"></p>
+        <div class="map-key" id="mtLegend"></div>
+      </div>
+    </div>
+    <p class="map-notes"><b>Simplifications:</b> all three shapes are hand-simplified approximations of real coastlines/outlines, not traced GeoJSON, at a scale meant for legibility rather than survey accuracy. Malta's map includes a small second shape for Gozo. Cyprus's north/south split is drawn along an approximate Green Line, not the actual buffer zone geometry.</p>
+  </div>
+
+  <div class="about">
+    <h2>About this hub</h2>
+    <p>Switzerland's origins sit as much in myth as in record. The 1291 Federal Charter among the cantons of Uri, Schwyz, and Unterwalden &mdash; traditionally tied to the legendary R&uuml;tli Oath and the tale of William Tell &mdash; is the founding document of the Old Swiss Confederacy, a loose defensive league that expanded over the following centuries as more cantons joined or were conquered. The Confederacy's independence from the Holy Roman Empire was formalized only in 1648, at the Peace of Westphalia, after Swiss forces had already secured de facto autonomy through military victories over Habsburg and Burgundian armies. Napoleon's invasion imposed the centralized Helvetic Republic from 1798 to 1803, an unpopular interruption of the old confederal structure; after Napoleon's fall, the 1815 Congress of Vienna restored Switzerland's cantonal borders and, crucially, guaranteed its permanent neutrality &mdash; a status the country has maintained through both World Wars. The modern federal state dates to the 1848 constitution, drafted after a brief civil war (the Sonderbund War), which created a unified nation while preserving an unusual degree of direct democracy and cantonal autonomy. Switzerland has no single ethnic or linguistic identity: it recognizes four national languages (German, French, Italian, and Romansh) and is held together by shared institutions and history rather than a common ethnicity.</p>
+    <p>Cyprus has passed through one of the longest chains of outside rule of any Mediterranean island. After antiquity and a long Byzantine period, the Frankish Lusignan dynasty ruled Cyprus as a crusader-era kingdom from 1192 to 1489, followed by nearly a century of Venetian control. The Ottoman Empire conquered the island in 1571 and held it for three centuries, until Britain assumed administration in 1878 and formally annexed it in 1914. Cyprus became independent in 1960, with a constitution designed to balance its Greek Cypriot majority and Turkish Cypriot minority. That balance broke down, and in 1974 a coup aiming at union with Greece was followed by a Turkish military intervention; the island has remained de facto divided since, with a Greek Cypriot-administered south recognized internationally as the Republic of Cyprus and a Turkish Cypriot-administered north that declared itself the Turkish Republic of Northern Cyprus in 1983, recognized only by Turkey. This dispute remains unresolved and is treated here only as a documented historical and political fact, without taking a position on its outcome.</p>
+    <p>Malta's small size belied its outsized strategic value at the center of the Mediterranean. Phoenician and later Carthaginian and Roman rule gave way to Byzantine control, then Arab rule beginning in 870, which left a lasting linguistic imprint still audible in Maltese today. The Normans conquered the island in 1091, after which it passed through a succession of crowns, including Aragon and Habsburg Spain. In 1530, Emperor Charles V granted Malta to the Knights Hospitaller (the Knights of Malta), a crusading military order driven from Rhodes by the Ottomans; the Knights ruled the island as a sovereign state, famously withstanding the Great Siege of 1565, until Napoleon seized it in 1798. Britain took control in 1800, formalized in 1814, and Malta became a critical naval base &mdash; a role that made it a relentless target during World War II, when the entire population was collectively awarded the George Cross for its endurance under siege. Malta gained independence in 1964 and became a republic in 1974.</p>
+  </div>
+
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This hub is one region in a larger set. See the other phases here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="microstates-hub.html"><b>Europe's Microstates hub</b><span>Vatican City, San Marino, Monaco, Liechtenstein, Andorra</span></a>
+      <a class="link-card" href="levant-hub.html"><b>Levant hub</b><span>Four countries, another contested-borders region</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var svgNS = "http://www.w3.org/2000/svg";
+  function textColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+  function haloFor(txtColor) { return txtColor === "#201a12" ? "#f7f1e3" : "#201a12"; }
+  function flagSvg(defs, key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (defs[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  function wirePlay(sliderEl, playBtn, max, render) {
+    sliderEl.addEventListener("input", function () { render(parseInt(sliderEl.value, 10)); });
+    render(0);
+    var playing = false, timer = null;
+    function step() {
+      var next = parseInt(sliderEl.value, 10) + 1;
+      if (next > max) { stop(); return; }
+      sliderEl.value = next; render(next);
+    }
+    function start() {
+      playing = true; playBtn.innerHTML = "&#10074;&#10074;";
+      if (parseInt(sliderEl.value, 10) >= max) { sliderEl.value = 0; render(0); }
+      timer = setInterval(step, 1700);
+    }
+    function stop() { playing = false; playBtn.innerHTML = "&#9654;"; clearInterval(timer); }
+    playBtn.addEventListener("click", function () { playing ? stop() : start(); });
+  }
+
+  // ================= SWITZERLAND =================
+  var CH_FLAGS = {
+    hre_eagle: '<rect width="300" height="200" fill="#d4a017"/><text x="150" y="140" font-size="120" text-anchor="middle" font-family="serif" fill="#241f14">&#9924;</text>',
+    swiss_cross: '<rect width="300" height="200" fill="#a4302a"/><rect x="128" y="60" width="44" height="80" fill="#f4efe1"/><rect x="98" y="90" width="104" height="20" fill="#f4efe1"/>',
+    helvetic: '<rect width="100" height="200" fill="#1e5288"/><rect x="100" width="100" height="200" fill="#f4efe1"/><rect x="200" width="100" height="200" fill="#0b7a3d"/>',
+    swiss_modern: '<rect width="300" height="200" fill="#a4302a"/><rect x="126" y="58" width="48" height="84" fill="#f4efe1"/><rect x="96" y="88" width="108" height="24" fill="#f4efe1"/>'
+  };
+  var CH_POS = {
+    uri:[118,95], schwyz:[131,80], unterwalden:[100,107], luzern:[92,68],
+    zurich:[112,45], glarus:[150,90], zug:[100,58], bern:[64,97],
+    fribourg:[70,72], solothurn:[80,54], basel:[80,28], schaffhausen:[152,32], appenzell:[172,60],
+    stgallen:[152,50], graubunden:[168,112], aargau:[86,42], thurgau:[142,40], ticino:[122,150], vaud:[62,132],
+    valais:[90,142], neuchatel:[54,80], geneva:[50,152]
+  };
+  var CH_LABEL = { uri:"UR", schwyz:"SZ", unterwalden:"UW", luzern:"LU", zurich:"ZH", glarus:"GL", zug:"ZG", bern:"BE",
+    fribourg:"FR", solothurn:"SO", basel:"BS", schaffhausen:"SH", appenzell:"AI", stgallen:"SG", graubunden:"GR",
+    aargau:"AG", thurgau:"TG", ticino:"TI", vaud:"VD", valais:"VS", neuchatel:"NE", geneva:"GE" };
+  var CH_ALL = Object.keys(CH_POS);
+  var CH_SNAP = [
+    { year:"1291", name:"The Rütli Oath", add:["uri","schwyz","unterwalden"], sovereign:false, fill:"var(--tile)",
+      story:"Three forest communities &mdash; Uri, Schwyz, and Unterwalden &mdash; swear a mutual defense pact, traditionally dated to August 1291 and later tied to the legendary Rütli meadow and William Tell. All three remain, on paper, subjects of the Holy Roman Empire; the pact is defensive, not a declaration of independence." },
+    { year:"1332", name:"Lucerne joins", add:["luzern"], sovereign:false, fill:"var(--tile)",
+      story:"Lucerne, a town controlled by Habsburg Austria, allies with the three forest cantons in 1332 &mdash; the confederacy's first expansion beyond its founding core, and its first step toward controlling the roads over the Alpine passes." },
+    { year:"1353", name:"The Eight Old Cantons", add:["zurich","glarus","zug","bern"], sovereign:false, fill:"var(--tile)",
+      story:"Zürich (1351), Glarus and Zug (1352), and Bern (1353) all join within two years, each looking for protection against Habsburg pressure. Victories at Morgarten (1315) and Sempach (1386) prove the confederacy can beat Habsburg armies outright &mdash; on paper it is still Imperial territory, but in practice Habsburg authority over these eight cantons is close to nominal." },
+    { year:"1513", name:"Thirteen Cantons", add:["fribourg","solothurn","basel","schaffhausen","appenzell"], sovereign:false, fill:"var(--tile)",
+      story:"Fribourg and Solothurn join in 1481, Basel and Schaffhausen in 1501, Appenzell in 1513. In between, the 1499 Swabian War ends in a decisive Swiss victory over Emperor Maximilian I &mdash; the confederacy is now de facto independent of the Empire, even though no treaty says so yet." },
+    { year:"1648", name:"Peace of Westphalia — independence recognized", add:[], sovereign:true, fill:"var(--brick)",
+      story:"The treaties ending the Thirty Years' War formally recognize the Swiss Confederacy's full independence from the Holy Roman Empire &mdash; a century and a half after the Swabian War made it true in practice. The thirteen cantons are now, on paper as well as in fact, their own sovereign union." },
+    { year:"1798", name:"Napoleon's Helvetic Republic", add:[], sovereign:true, fill:"#1e5288",
+      story:"French revolutionary armies invade in 1798 and impose the centralized, unpopular Helvetic Republic, sweeping away the old cantonal system in favor of a single French-client state. It is the one period in this timeline when Switzerland is not really self-governing, and it collapses into near civil war within five years." },
+    { year:"1803", name:"Act of Mediation", add:["stgallen","graubunden","aargau","thurgau","ticino","vaud"], sovereign:true, fill:"var(--brick)",
+      story:"Napoleon, needing a stable and cooperative Switzerland rather than a resentful one, restores a federal cantonal structure with his 1803 Act of Mediation &mdash; and folds in six former subject territories and allies as full cantons: St. Gallen, Graubünden, Aargau, Thurgau, Ticino, and Vaud. Nineteen cantons now sit at the table." },
+    { year:"1815", name:"Congress of Vienna — permanent neutrality", add:["valais","neuchatel","geneva"], sovereign:true, fill:"var(--brick)",
+      story:"After Napoleon's fall, the Congress of Vienna admits Valais, Neuchâtel, and Geneva as the confederacy's final three cantons &mdash; twenty-two in total &mdash; and, crucially, the Great Powers jointly guarantee Switzerland's permanent neutrality, a status it keeps through both World Wars. The 1848 federal constitution later unifies these twenty-two cantons into the modern state, still standing today with the same borders and the same neutral footing." }
+  ];
+  var CH_FLAGSETS = [
+    [["hre_eagle","Holy Roman Empire (overlord)"],["swiss_cross","Confederate banner"]],
+    [["hre_eagle","Holy Roman Empire (overlord)"],["swiss_cross","Confederate banner"]],
+    [["hre_eagle","Holy Roman Empire (overlord)"],["swiss_cross","Confederate banner"]],
+    [["hre_eagle","Holy Roman Empire (nominal)"],["swiss_cross","Confederate banner"]],
+    [["swiss_cross","Confederate banner"]],
+    [["helvetic","Helvetic Republic (French client)"]],
+    [["swiss_cross","Restored confederate banner"]],
+    [["swiss_modern","Switzerland today"]]
+  ];
+  (function () {
+    var shape = document.getElementById("ch-shape");
+    var dotsG = document.getElementById("ch-dots");
+    var labelsG = document.getElementById("ch-labels");
+    var yearTag = document.getElementById("chYear"), nameEl = document.getElementById("chName"),
+        ownersEl = document.getElementById("chOwners"), storyEl = document.getElementById("chStory"),
+        flagsEl = document.getElementById("chFlags"), legendEl = document.getElementById("chLegend");
+    dotsG.innerHTML = CH_ALL.map(function (k) {
+      var p = CH_POS[k];
+      return '<circle class="dot-fill" id="ch-dot-' + k + '" cx="' + p[0] + '" cy="' + p[1] + '" r="4" fill="var(--card-border)" opacity="0.5"/>';
+    }).join("");
+    function render(i) {
+      var era = CH_SNAP[i];
+      var joined = {};
+      for (var k = 0; k <= i; k++) { (CH_SNAP[k].add || []).forEach(function (c) { joined[c] = true; }); }
+      yearTag.textContent = era.year;
+      nameEl.textContent = era.name;
+      storyEl.innerHTML = era.story;
+      shape.setAttribute("fill", era.fill);
+      shape.setAttribute("stroke-dasharray", era.sovereign ? "none" : "4,3");
+      flagsEl.innerHTML = CH_FLAGSETS[i].map(function (f) {
+        return '<div class="flag-chip">' + flagSvg(CH_FLAGS, f[0]) + '<div class="fc-label">' + f[1] + '</div></div>';
+      }).join("");
+      var n = Object.keys(joined).length;
+      ownersEl.innerHTML = "<b>" + n + " of 22</b> historic cantons in the confederacy · " + (era.sovereign ? "sovereign, independent of the Empire" : "still nominally within the Holy Roman Empire");
+      CH_ALL.forEach(function (k) {
+        var d = document.getElementById("ch-dot-" + k);
+        if (joined[k]) { d.setAttribute("fill", "#f4efe1"); d.setAttribute("opacity","1"); d.setAttribute("r","4.5"); }
+        else { d.setAttribute("fill", "var(--card-border)"); d.setAttribute("opacity","0.4"); d.setAttribute("r","3"); }
+      });
+      labelsG.innerHTML = CH_ALL.filter(function (k) { return joined[k]; }).map(function (k) {
+        var p = CH_POS[k];
+        return '<text x="' + p[0] + '" y="' + (p[1]-7) + '" class="sub-label" font-size="6.5" fill="#f4efe1" stroke="#241f14">' + CH_LABEL[k] + '</text>';
+      }).join("");
+    }
+    document.getElementById("chSlider").addEventListener("input", function(){});
+    wirePlay(document.getElementById("chSlider"), document.getElementById("chPlay"), CH_SNAP.length - 1, render);
+  })();
+
+  // ================= CYPRUS =================
+  var CY_FLAGS = {
+    byzantine: '<rect width="300" height="200" fill="#c9a13c"/><ellipse cx="150" cy="100" rx="55" ry="45" fill="#241f14"/><text x="150" y="112" font-size="34" text-anchor="middle" fill="#c9a13c" font-family="serif">&#10022;</text>',
+    lusignan: '<rect width="300" height="200" fill="#f4efe1"/><path d="M150,40 v120 M90,100 h120" stroke="#a4302a" stroke-width="18"/>',
+    venice: '<rect width="300" height="200" fill="#a4302a"/><ellipse cx="150" cy="105" rx="60" ry="35" fill="#c9a13c"/><rect x="120" y="95" width="40" height="26" rx="2" fill="#f4efe1" stroke="#8a6a1f" stroke-width="1.5"/>',
+    ottoman: '<rect width="300" height="200" fill="#a4302a"/><path d="M120,70 A38,38 0 1 0 172,102 A28,28 0 1 1 120,70 Z" fill="#f4efe1"/><path d="M200,84 l5,15 16,0 -13,10 5,15 -13,-9 -13,9 5,-15 -13,-10 16,0 Z" fill="#f4efe1"/>',
+    british: '<rect width="300" height="200" fill="#1e2f6e"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#f4efe1" stroke-width="22"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#a4302a" stroke-width="10"/><path d="M150,0 v200 M0,100 h300" stroke="#f4efe1" stroke-width="34"/><path d="M150,0 v200 M0,100 h300" stroke="#a4302a" stroke-width="18"/>',
+    cy1960: '<rect width="300" height="200" fill="#f4efe1"/><path d="M110,70 h20 l30,-24 v100 l-30,-14 h-40 l-20,10 v-62 Z" fill="#d57800"/><path d="M110,140 q20,10 40,0" stroke="#4a7a2c" stroke-width="6" fill="none"/><path d="M130,140 q20,10 40,0" stroke="#4a7a2c" stroke-width="6" fill="none"/>',
+    trnc: '<rect width="300" height="200" fill="#a4302a"/><rect x="30" y="30" width="240" height="140" fill="#f4efe1"/><path d="M120,70 A38,38 0 1 0 172,102 A28,28 0 1 1 120,70 Z" fill="#a4302a"/><path d="M200,84 l5,15 16,0 -13,10 5,15 -13,-9 -13,9 5,-15 -13,-10 16,0 Z" fill="#a4302a"/>'
+  };
+  var CY_SNAP = [
+    { year:"965", name:"Byzantine reconquest", t:{n:"#c9a13c", s:"#c9a13c"}, flags:[["byzantine","Byzantine Empire"]],
+      story:"After nearly three centuries of contested Arab-Byzantine condominium following the 7th-century Arab raids, Byzantine Emperor Nikephoros II Phokas fully reasserts direct imperial control over Cyprus in 965. The island becomes a firmly Greek Orthodox Byzantine province, a religious and cultural identity that outlasts every ruler that follows." },
+    { year:"1192", name:"The Lusignan kingdom", t:{n:"#f4efe1", s:"#f4efe1"}, flags:[["lusignan","Kingdom of Cyprus (Lusignan)"]],
+      story:"Richard the Lionheart seizes Cyprus during the Third Crusade in 1191, sells it to the Knights Templar, and after a local revolt sells it again in 1192 to Guy of Lusignan, the deposed king of Jerusalem. The Lusignan dynasty rules Cyprus as a French-speaking crusader kingdom for nearly three centuries, one of the longest-lived Latin states in the eastern Mediterranean." },
+    { year:"1489", name:"Venetian Cyprus", t:{n:"#a4302a", s:"#a4302a"}, flags:[["venice","Republic of Venice"]],
+      story:"The last Lusignan queen, Catherine Cornaro, is pressured into ceding Cyprus to Venice in 1489, which had already dominated the island's trade for decades. Venice fortifies Nicosia and Famagusta heavily against the growing Ottoman threat, but the defenses ultimately buy less than a century." },
+    { year:"1571", name:"Ottoman conquest", t:{n:"#a4302a", s:"#a4302a"}, flags:[["ottoman","Ottoman Empire"]],
+      story:"An Ottoman invasion in 1570 culminates in the brutal ten-month siege and fall of Famagusta in August 1571, ending Venetian rule. The Ottomans hold Cyprus for three full centuries, reintroducing a significant Muslim Turkish Cypriot population alongside the Greek Orthodox majority &mdash; the demographic split that shapes the island's politics ever after." },
+    { year:"1878", name:"British administration", t:{n:"#1e2f6e", s:"#1e2f6e"}, flags:[["british","United Kingdom"]],
+      story:"Britain takes over Cyprus's administration in 1878 under the Cyprus Convention, still nominally Ottoman territory, and formally annexes the island outright in 1914 once the Ottoman Empire enters WWI on the opposing side; it becomes a formal Crown Colony in 1925. British rule lasts until independence." },
+    { year:"1960", name:"Independence", t:{n:"#d57800", s:"#d57800"}, flags:[["cy1960","Republic of Cyprus"]],
+      story:"Cyprus becomes independent in 1960 after a 1955–59 guerrilla campaign by Greek Cypriot EOKA against British rule. The new constitution builds in careful power-sharing between the Greek Cypriot majority (about 80%) and the Turkish Cypriot minority (about 18%) &mdash; a balance that proves difficult to sustain." },
+    { year:"1974", name:"Division", t:{n:"#a4302a", s:"#d57800"}, flags:[["cy1960","Republic of Cyprus (south)"],["trnc","Turkish-administered north (unrecognized)"]],
+      story:"A 1974 coup backed by Greece's military junta, aiming at union (enosis) with Greece, triggers a Turkish military intervention days later. The island has remained de facto divided ever since: the Greek Cypriot-administered south is recognized internationally as the Republic of Cyprus, while the Turkish Cypriot-administered north declared itself the Turkish Republic of Northern Cyprus in 1983, recognized only by Turkey. This account states both facts neutrally, without taking a position on the dispute." }
+  ];
+  (function () {
+    var yearTag = document.getElementById("cyYear"), nameEl = document.getElementById("cyName"),
+        ownersEl = document.getElementById("cyOwners"), storyEl = document.getElementById("cyStory"),
+        flagsEl = document.getElementById("cyFlags"), legendEl = document.getElementById("cyLegend"),
+        labelsG = document.getElementById("cy-labels");
+    var fN = document.getElementById("f-cy_n"), fS = document.getElementById("f-cy_s"),
+        border = document.getElementById("b-cy_n-cy_s");
+    function render(i) {
+      var era = CY_SNAP[i];
+      yearTag.textContent = era.year;
+      nameEl.textContent = era.name;
+      storyEl.innerHTML = era.story;
+      fN.setAttribute("fill", era.t.n); fS.setAttribute("fill", era.t.s);
+      var same = era.t.n === era.t.s;
+      border.setAttribute("stroke-opacity", same ? "0.05" : "0.9");
+      border.setAttribute("stroke-width", same ? "1" : "2.4");
+      flagsEl.innerHTML = era.flags.map(function (f) {
+        return '<div class="flag-chip">' + flagSvg(CY_FLAGS, f[0]) + '<div class="fc-label">' + f[1] + '</div></div>';
+      }).join("");
+      ownersEl.innerHTML = same ? "One island, one ruler" : "<b>Divided since 1974:</b> south and north administered separately";
+      labelsG.innerHTML = same
+        ? '<text x="120" y="65" class="group-label" font-size="13" fill="' + textColorFor(era.t.n) + '" stroke="' + haloFor(textColorFor(era.t.n)) + '">CYPRUS</text>'
+        : '<text x="120" y="42" class="sub-label" font-size="10" fill="' + textColorFor(era.t.n) + '" stroke="' + haloFor(textColorFor(era.t.n)) + '">NORTH</text>'
+        + '<text x="120" y="82" class="sub-label" font-size="10" fill="' + textColorFor(era.t.s) + '" stroke="' + haloFor(textColorFor(era.t.s)) + '">SOUTH</text>';
+    }
+    wirePlay(document.getElementById("cySlider"), document.getElementById("cyPlay"), CY_SNAP.length - 1, render);
+  })();
+
+  // ================= MALTA =================
+  var MT_FLAGS = {
+    ancient: '<rect width="300" height="200" fill="#c9a13c"/><text x="150" y="130" font-size="70" text-anchor="middle" font-family="serif" fill="#7a1f1f">&#9765;</text>',
+    knights: '<rect width="300" height="200" fill="#a4302a"/><path d="M150,40 v120 M90,100 h120" stroke="#f4efe1" stroke-width="22"/>',
+    french: '<rect width="100" height="200" fill="#1e2f6e"/><rect x="100" width="100" height="200" fill="#f4efe1"/><rect x="200" width="100" height="200" fill="#a4302a"/>',
+    british: '<rect width="300" height="200" fill="#1e2f6e"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#f4efe1" stroke-width="22"/><path d="M0,0 L300,200 M300,0 L0,200" stroke="#a4302a" stroke-width="10"/><path d="M150,0 v200 M0,100 h300" stroke="#f4efe1" stroke-width="34"/><path d="M150,0 v200 M0,100 h300" stroke="#a4302a" stroke-width="18"/>',
+    malta_modern: '<rect width="150" height="200" fill="#f4efe1"/><rect x="150" width="150" height="200" fill="#a4302a"/><rect x="14" y="14" width="40" height="40" fill="#7c2e1f"/><text x="34" y="42" font-size="20" text-anchor="middle" fill="#f4efe1" font-family="serif">GC</text>'
+  };
+  var MT_SNAP = [
+    { year:"c. 870", name:"Phoenician, Roman, Byzantine, then Arab rule", fill:"#c9a13c", flags:[["ancient","Pre-Knights layers"]],
+      story:"Malta's harbors made it a waypoint for almost every Mediterranean power: Phoenician and Carthaginian settlement from around the 8th century BCE, Roman rule from 218 BCE, then Byzantine control after Rome's fall. Arab rule begins with the 870 conquest and leaves a lasting linguistic imprint still audible in the Maltese language today, before Norman forces take the island in 1091 and fold it into the kingdom of Sicily's slow rotation through Aragonese and Habsburg Spanish hands." },
+    { year:"1530", name:"The Knights Hospitaller", fill:"#a4302a", flags:[["knights","Knights Hospitaller"]],
+      story:"In 1530, Holy Roman Emperor Charles V grants Malta to the Knights Hospitaller (the Knights of Malta), a crusading military order driven from Rhodes by the Ottomans. The Knights rule Malta as a sovereign state for nearly 270 years, most famously withstanding the four-month Great Siege of 1565 against a massive Ottoman invasion force." },
+    { year:"1798", name:"French occupation", fill:"#1e2f6e", flags:[["french","French Republic"]],
+      story:"Napoleon seizes Malta from the Knights almost without a fight in June 1798, ending their rule outright. French occupation proves deeply unpopular and short-lived: a local uprising, backed by British and Neapolitan naval forces, blockades the French garrison until its surrender in 1800." },
+    { year:"1800", name:"British Malta", fill:"#1e2f6e", flags:[["british","United Kingdom"]],
+      story:"Britain takes control in 1800 at local invitation and formalizes it under the 1814 Treaty of Paris. Malta becomes one of the Royal Navy's most important Mediterranean bases &mdash; a role that makes it a relentless target in World War II, when the whole population endures roughly two years of siege and bombardment, commemorated by King George VI's 1942 award of the George Cross to the entire island." },
+    { year:"1964", name:"Independence", fill:"#a4302a", flags:[["malta_modern","Malta (independence)"]],
+      story:"Malta becomes independent within the Commonwealth on 21 September 1964, after a referendum on the terms of self-government. The new flag keeps the white-and-red bicolor associated with the Knights' cross and adds the George Cross in the canton, honoring the wartime siege directly in the national symbol." },
+    { year:"1974", name:"Republic, today", fill:"#a4302a", flags:[["malta_modern","Republic of Malta"]],
+      story:"Malta becomes a republic within the Commonwealth in 1974, replacing the British monarch as head of state with a Maltese president while keeping the same flag. It later joins the EU in 2004 and adopts the euro in 2008, its harbors now serving trade and tourism rather than fleets." }
+  ];
+  (function () {
+    var yearTag = document.getElementById("mtYear"), nameEl = document.getElementById("mtName"),
+        ownersEl = document.getElementById("mtOwners"), storyEl = document.getElementById("mtStory"),
+        flagsEl = document.getElementById("mtFlags"), labelsG = document.getElementById("mt-labels");
+    var f1 = document.getElementById("f-mt"), f2 = document.getElementById("f-mt2");
+    function render(i) {
+      var era = MT_SNAP[i];
+      yearTag.textContent = era.year;
+      nameEl.textContent = era.name;
+      storyEl.innerHTML = era.story;
+      f1.setAttribute("fill", era.fill); f2.setAttribute("fill", era.fill);
+      ownersEl.textContent = "";
+      flagsEl.innerHTML = era.flags.map(function (f) {
+        return '<div class="flag-chip">' + flagSvg(MT_FLAGS, f[0]) + '<div class="fc-label">' + f[1] + '</div></div>';
+      }).join("");
+      var tc = textColorFor(era.fill);
+      labelsG.innerHTML = '<text x="97" y="53" class="group-label" font-size="10" fill="' + tc + '" stroke="' + haloFor(tc) + '">MALTA</text>'
+        + '<text x="119" y="79" class="sub-label" font-size="6" fill="' + tc + '" stroke="' + haloFor(tc) + '">GOZO</text>';
+    }
+    wirePlay(document.getElementById("mtSlider"), document.getElementById("mtPlay"), MT_SNAP.length - 1, render);
+  })();
+})();
+</script>
+
+</body></html>

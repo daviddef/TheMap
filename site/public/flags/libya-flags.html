@@ -1,0 +1,833 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+</style></head><body>
+<title>Flags of Libya</title>
+<meta name="description" content="A chronological, paint-ready atlas of every flag that flew over Libya, from Ottoman rule through Italian colonization, the UN's first-ever created state, the Gaddafi era, and the 2011 revolution.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.08rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; font-size: .94rem; color: var(--muted); }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  .legend { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+
+  /* ---------- Timeline ---------- */
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1px; background: var(--hair); }
+  @media (max-width: 560px) { .timeline::before { left: 9px; } }
+  .entry { position: relative; padding-left: 46px; margin-bottom: 46px; }
+  @media (max-width: 560px) { .entry { padding-left: 30px; } }
+  .entry::before {
+    content: attr(data-n);
+    position: absolute; left: 1px; top: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--paper); outline: 1px solid var(--hair);
+    background: var(--card);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--brick); display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) { .entry::before { left: -5px; width: 18px; height: 18px; font-size: 9px; } }
+
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+  .card-head { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  @media (max-width: 620px) { .card-head { flex-direction: column; } }
+  .flag-box { flex: none; width: 168px; }
+  .flag-box svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-caption { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .card-title { font-size: 1.32rem; font-weight: 600; line-height: 1.18; margin: 0 0 10px; text-wrap: balance; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px; border: 1px solid var(--card-border); color: var(--muted);
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  /* Flip tooltip below tags near the top of the viewport so it isn't clipped */
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  /* Keep tooltips from overflowing the left/right edges on narrow screens */
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint { border-top: 1px solid var(--hair); }
+  details.paint > summary {
+    cursor: pointer; list-style: none; padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--adriatic); display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before { content: "+"; font-family: "Fraunces", serif; font-size: 15px; width: 14px; }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row { display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px; }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--card-border); border-radius: 2px; padding: 5px 9px 5px 5px; background: var(--paper); }
+  .swatch .chip { width: 20px; height: 20px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: 64ch; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 88px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 420px; height: auto; }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .iborder-line { transition: stroke-opacity 0.6s ease, stroke-width 0.6s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .ireg-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 700; text-anchor: middle; transition: fill .4s ease, stroke .4s ease; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="maghreb-nile-hub.html">Maghreb &amp; Nile hub</a></p>
+  <p class="kicker">Family research &middot; Phase 8 of the world atlas</p>
+  <h1>Flags of Libya</h1>
+  <p class="lede">Libya's modern flag history is defined by two remarkable bookends: in 1951 it became the first country ever brought to independence directly by the United Nations, and in 2011 it became the only country in this atlas whose national revolution was fought, in part, to bring back a flag &mdash; the tricolor of the 1951 kingdom, hauled out of exile as the banner of the uprising against Muammar Gaddafi. Between Ottoman rule, Italian colonization, a brief Allied military administration, a monarchy, and Gaddafi's 42-year Jamahiriya, this page traces eight eras.</p>
+  <p class="lede">Gaddafi's 1969 coup eventually produced the only national flag in modern history to be a single plain color with no design of any kind &mdash; a solid green field flown from 1977 to 2011, representing his political philosophy rather than any traditional heraldic device. The page's own roots run further back still, to the two genuinely ancient civilizations that first put this coastline on the map: Greek Cyrenaica in the east, founded from the island of Thera in 631 BCE, and the Phoenician-Carthaginian trading cities of Tripolitania in the west, ancestors of Tripoli's own name.</p>
+
+  <div class="scope-note">
+    <b>Scope of this page:</b> the lands of present-day Libya, c. 630 BCE&ndash;present, eight political entities. Part of a larger atlas &mdash; see the map and linked pages at the bottom.
+  </div>
+
+  <div class="imap-section">
+    <h2>One border, eight rulers</h2>
+    <p class="imap-sub">Libya's own real border, traced whole. Press play, or drag the slider, to watch who held all of it, era to era &mdash; and read the 1943&ndash;51 note below for the one honest exception.</p>
+    <div class="rule-box">
+      <b>This page doesn't split internally, even though Libya's own history would support it.</b> Tripolitania, Cyrenaica, and Fezzan were governed separately for long stretches &mdash; including the 1943&ndash;51 Allied administration, when Britain ran the first two regions and France ran Fezzan under entirely different flags. But no single Libyan flag existed for any of those separately-run pieces; the division was administrative, not symbolic, so a map split would invent borders no flag ever marked. The story below flags that exception honestly instead.
+    </div>
+    <div class="imap-frame">
+      <div class="imap-controls">
+        <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="imap-year" id="iYearTag">c. 630 BCE</span>
+        <input type="range" id="iSlider" min="0" max="7" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="imap-svg" viewBox="0 0 380 300" xmlns="http://www.w3.org/2000/svg">
+        <g class="context-label" pointer-events="none">
+          <text x="122" y="66">TUNISIA</text>
+          <text x="46" y="132">ALGERIA</text>
+          <text x="112" y="248">NIGER</text>
+          <text x="202" y="270">CHAD</text>
+          <text x="308" y="262">SUDAN</text>
+          <text x="316" y="142">EGYPT</text>
+        </g>
+        <path id="ireg-ly" class="ireg-fill" d="M168.8,184.6 L162.5,188.3 L157.5,182.8 L143.5,178.6 L139.6,172.4 L132.6,167.8 L128.5,169.6 L125.3,164.1 L125.0,159.8 L119.8,152.6 L123.3,148.5 L122.5,142.3 L123.6,136.8 L123.0,132.3 L124.6,124.3 L124.1,119.7 L121.2,110.9 L125.5,108.6 L126.3,104.5 L125.4,100.4 L131.4,96.6 L134.2,93.4 L138.5,90.5 L139.0,82.9 L149.4,86.3 L153.1,85.5 L160.5,87.1 L172.3,91.6 L176.5,100.4 L184.4,102.3 L196.9,106.4 L206.3,111.3 L210.7,108.8 L214.9,104.2 L212.9,96.6 L215.6,91.8 L222.0,87.2 L228.1,85.8 L240.1,87.9 L243.1,92.3 L246.4,92.3 L249.3,94.0 L258.1,95.2 L260.2,98.5 L257.0,103.2 L258.4,107.4 L256.1,113.5 L258.8,121.5 L258.8,212.9 L248.6,212.9 L248.5,217.1 L177.8,179.2 L168.8,184.6 Z"/>
+        <g font-family="IBM Plex Mono, monospace">
+          <text class="ireg-label" id="ilbl-ly" x="196" y="148">LIBYA</text>
+        </g>
+      </svg>
+      <div class="imap-head">
+        <div class="imap-name" id="iEraName">Greek Cyrenaica &amp; Phoenician-Carthaginian Tripolitania</div>
+        <div class="imap-owners" id="iEraOwners"></div>
+      </div>
+      <div class="iflags-row" id="iFlagsRow"></div>
+      <p class="imap-story" id="iEraStory"></p>
+
+      <p class="map-note">Real traced border, no internal partition &mdash; see the rule box above for why.</p>
+      <div class="imap-key" id="iLegend"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <!-- 1 -->
+    <div class="entry" data-n="8" id="era-2011">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="90" height="200" fill="#e70013"/>
+              <rect x="90" width="120" height="200" fill="#000000"/>
+              <rect x="210" width="90" height="200" fill="#239e46"/>
+              <path fill="#f4efe1" d="M150,70 a34,34 0 1,0 0,60 a27,27 0 1,1 0,-60 Z"/>
+              <path fill="#f4efe1" d="M150,68 l6,17 18,1 -14.4,11.3 5.3,17.2 -14.9,-10.8 -14.9,10.8 5.3,-17.2 -14.4,-11.3 18,-1 Z"/>
+            </svg>
+            <div class="flag-caption">the 1951 independence tricolor, restored as the flag of the 2011 revolution</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">2011 &ndash; present</div>
+            <h3 class="card-title">Libya (post-revolution)</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Republic, independent</span><span class="tag" tabindex="0" data-tip="Former justice minister who defected to lead the National Transitional Council, the revolution's internationally recognized governing authority during and after the 2011 uprising."><span class="dot" style="background:#4a3b78"></span>Mustafa Abdul Jalil</span><span class="tag" tabindex="0" data-tip="Successive Libyan constitutional declarations since independence have named Islam the religion of the state, a designation the post-2011 transitional order has continued."><span class="dot" style="background:#8e3b62"></span>Sunni Islam (constitutional state religion)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Post-2011 state collapse turns Libya's Mediterranean coast into the principal launching point for irregular migration to Europe, with hundreds of thousands of Sub-Saharan African migrants and refugees transiting or becoming stranded in the country each year, often held in widely documented detention conditions."><span class="dot" style="background:#2f7a6b"></span>Immigration: transit hub for African migrants (2011&ndash;)</span><span class="tag" tabindex="0" data-tip="Ongoing civil conflict since 2011, including the 2014&ndash;20 war between rival governments, has internally displaced hundreds of thousands of Libyans and driven many others, including much of the country's Tawergha population expelled from their town in 2011, to seek refuge abroad."><span class="dot" style="background:#a3672f"></span>Emigration: conflict-driven displacement</span></div>
+            <p><span class="label">Who &amp; why:</span> protests beginning in February 2011, part of the wider Arab Spring, escalate into a full civil war; NATO intervenes under a UN mandate, and Gaddafi is captured and killed near Sirte in October 2011, ending his 42-year rule. Libya has since struggled with fragmented governance and recurring conflict between rival authorities, a genuine and difficult aftermath stated here factually.</p>
+            <p><span class="label">What it represents:</span> revolutionaries deliberately readopt the 1951 kingdom's red-black-green tricolor with its white crescent and star as their banner from the earliest days of the uprising, and it becomes Libya's official flag again upon the fall of Gaddafi's government.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Horizontal triband: red, black (double width), green; white crescent and star centered on the black band.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#e70013"></span><span class="meta"><span class="name">Red</span><span class="hex">#E70013</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#000000"></span><span class="meta"><span class="name">Black</span><span class="hex">#000000</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#239e46"></span><span class="meta"><span class="name">Green</span><span class="hex">#239E46</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="entry" data-n="7" id="era-1977">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#239e46"/>
+            </svg>
+            <div class="flag-caption">plain green &mdash; the only national flag ever flown with no design at all</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1977 &ndash; 2011</div>
+            <h3 class="card-title">Great Socialist People's Libyan Arab Jamahiriya</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#7c2e1f"></span>Personalist rule</span><span class="tag" tabindex="0" data-tip="Self-styled &quot;Brother Leader and Guide of the Revolution&quot; who ruled Libya from 1969 until 2011 and declared the Jamahiriya system in 1977 under his own Third International Theory."><span class="dot" style="background:#4a3b78"></span>Muammar Gaddafi</span><span class="tag" tabindex="0" data-tip="Libya's constitutional framework continued to name Islam the state religion even under the Jamahiriya, though Gaddafi imposed his own idiosyncratic reinterpretations of Islamic doctrine through the Green Book."><span class="dot" style="background:#8e3b62"></span>Sunni Islam (constitutional state religion)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Pursuing his pan-African vision from the 1990s, Gaddafi opens Libya's borders and oil-funded labor market to migrant workers from across Sub-Saharan Africa, drawing in an estimated one to two million by the 2000s."><span class="dot" style="background:#2f7a6b"></span>Immigration: Sub-Saharan African labor migrants</span></div>
+            <p><span class="label">Who &amp; why:</span> Muammar Gaddafi seizes power in a September 1969 coup against King Idris, and by 1977 declares Libya a "Jamahiriya" (state of the masses) under his idiosyncratic "Third International Theory," ruling for 42 years until the 2011 revolution ends his government.</p>
+            <p><span class="label">What it represents:</span> a plain green field, adopted in 1977 as a deliberate break from all traditional flag design and a reference to Gaddafi's political manifesto, the Green Book &mdash; the only national flag in modern history to carry no emblem, pattern, or additional color whatsoever.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Plain green field, no emblem.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#239e46"></span><span class="meta"><span class="name">Green</span><span class="hex">#239E46</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="entry" data-n="6" id="era-1969">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="100" height="200" fill="#a4302a"/>
+              <rect x="100" width="100" height="200" fill="#f4efe1"/>
+              <rect x="200" width="100" height="200" fill="#1a1a1a"/>
+              <path fill="#c9a13c" d="M150,72 l16,44 h-32 Z"/>
+            </svg>
+            <div class="flag-caption">transitional post-coup banners, republic then short-lived Arab federation</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1969 &ndash; 1977</div>
+            <h3 class="card-title">Libyan Arab Republic / Federation of Arab Republics</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#7c2e1f"></span>Personalist rule</span><span class="tag" tabindex="0" data-tip="Led the September 1969 coup against King Idris and chaired the Revolutionary Command Council through the republic and federation years before declaring the Jamahiriya in 1977."><span class="dot" style="background:#4a3b78"></span>Muammar Gaddafi</span><span class="tag" tabindex="0" data-tip="The 1969 constitutional proclamation named Islam the state religion, a designation carried over from the deposed kingdom's own constitution."><span class="dot" style="background:#8e3b62"></span>Sunni Islam (state religion)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Gaddafi expels virtually all of Libya's remaining Italian settler community in October 1970, seizing their property on an anniversary he later declared a national holiday, ending Italy's colonial-era demographic presence in the country."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="6.67" height="14" fill="#009246"/><rect x="6.67" width="6.67" height="14" fill="#fff"/><rect x="13.33" width="6.67" height="14" fill="#ce2b37"/></svg>Emigration: expulsion of Italian settlers (1970)</span></div>
+            <p><span class="label">Who &amp; why:</span> Gaddafi's Revolutionary Command Council replaces the monarchy's flag with a red-white-black tricolor (mirroring Egypt's own republican flag) after the 1969 coup, then briefly joins the 1972&ndash;77 Federation of Arab Republics, a loose and short-lived pan-Arab union with Egypt and Syria that shared a common hawk-emblem flag before dissolving.</p>
+            <p><span class="label">What it represents:</span> a period of rapid, symbolically pan-Arab flag changes bridging the monarchy's fall and Gaddafi's later, more idiosyncratic green banner &mdash; shown here as one honest bridging entry rather than several thinly-documented sub-flags.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3, varying by sub-period.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Horizontal red-white-black tricolor, golden hawk-of-Quraish emblem during the federation years.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#1a1a1a"></span><span class="meta"><span class="name">Black</span><span class="hex">#1A1A1A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="entry" data-n="5" id="era-1951">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="90" height="200" fill="#e70013"/>
+              <rect x="90" width="120" height="200" fill="#000000"/>
+              <rect x="210" width="90" height="200" fill="#239e46"/>
+              <path fill="#f4efe1" d="M150,70 a34,34 0 1,0 0,60 a27,27 0 1,1 0,-60 Z"/>
+              <path fill="#f4efe1" d="M150,68 l6,17 18,1 -14.4,11.3 5.3,17.2 -14.9,-10.8 -14.9,10.8 5.3,-17.2 -14.4,-11.3 18,-1 Z"/>
+            </svg>
+            <div class="flag-caption">the first-ever UN-created state's own flag, adopted at independence</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1951 &ndash; 1969</div>
+            <h3 class="card-title">Kingdom of Libya</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#a9762f"></span>Kingdom, independent</span><span class="tag" tabindex="0" data-tip="Head of the Senussi order who became Libya's first and only king at independence in 1951, ruling until Gaddafi's 1969 coup ended the monarchy."><span class="dot" style="background:#4a3b78"></span>Idris I</span><span class="tag" tabindex="0" data-tip="The 1951 independence constitution declared Islam the religion of the state, a designation continued by every Libyan government since."><span class="dot" style="background:#8e3b62"></span>Islam (constitutional state religion)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="The 1959 discovery of major oil fields at Zelten draws the first wave of foreign oil-company technicians and workers to Libya in the kingdom's final decade, the start of the petroleum-driven labor immigration that would grow dramatically after 1969."><span class="dot" style="background:#2f7a6b"></span>Immigration: early oil-industry workers (1959&ndash;)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Founded as a religious and tribal order in Cyrenaica in 1837, the Senussi became hereditary Emirs of Cyrenaica and, under King Idris I, the royal house of the independent Kingdom of Libya from 1951 until the 1969 coup, 1837&ndash;1969. Emblem: a gold hawk and a white crescent and star on red."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><path d="M30,40 Q50,20 70,40 Q66,52 50,56 Q34,52 30,40 Z" fill="#e8c04a"/><path d="M50,56 Q30,58 24,72 Q28,66 38,64 M50,56 Q70,58 76,72 Q72,66 62,64" fill="none" stroke="#e8c04a" stroke-width="3"/><path d="M28,86 A22,22 0 1 1 66,92 A17,17 0 1 0 28,86 Z" fill="#f4efe1"/><path d="M74,84 l4,-9 l4,9 l-4,-3 Z" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Senussi</span></div>
+            <p><span class="label">Who &amp; why:</span> the United Nations General Assembly resolves in 1949 to grant Libya independence, and on 24 December 1951 it becomes fully sovereign under King Idris &mdash; the first country ever brought to independence by the UN, unifying Tripolitania, Cyrenaica, and Fezzan into a single federal (later unitary) kingdom. Oil discoveries in the late 1950s transform its economy before Gaddafi's 1969 coup ends the monarchy.</p>
+            <p><span class="label">What it represents:</span> a new tricolor designed for independence, based on the flag of the wartime Cyrenaican resistance, with a white crescent and star recalling the Sanussi order's own banner &mdash; the flag Libya's 2011 revolutionaries would later revive.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Horizontal triband: red, black (double width), green; white crescent and star on black band.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#e70013"></span><span class="meta"><span class="name">Red</span><span class="hex">#E70013</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#000000"></span><span class="meta"><span class="name">Black</span><span class="hex">#000000</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#239e46"></span><span class="meta"><span class="name">Green</span><span class="hex">#239E46</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="entry" data-n="4" id="era-1943">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="150" height="100" fill="#00247d"/>
+              <rect y="100" width="150" height="100" fill="#f4efe1"/>
+              <rect x="150" width="150" height="100" fill="#f4efe1"/>
+              <rect x="150" y="100" width="150" height="100" fill="#002395"/>
+              <rect x="0" width="300" height="200" fill="none" stroke="#a9762f" stroke-width="3" stroke-dasharray="6 5"/>
+            </svg>
+            <div class="flag-caption">split administration &mdash; British zones alongside French-run Fezzan</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1943 &ndash; 1951</div>
+            <h3 class="card-title">Allied Military Administration</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#204b5c"></span>Occupation / administration</span><span class="tag" tabindex="0" data-tip="No single ruler governed this split territory; Britain administered Tripolitania and Cyrenaica while France separately administered Fezzan, each under its own military command."><span class="dot" style="background:#4a3b78"></span>No single ruler documented</span><span class="tag" tabindex="0" data-tip="Neither the British nor French military administrations established an official religion; the population remained overwhelmingly Sunni Muslim throughout."><span class="dot" style="background:#8e3b62"></span>No official state religion (Sunni Islam predominant)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Founded as a religious and tribal order in Cyrenaica in 1837, the Senussi became hereditary Emirs of Cyrenaica and, under King Idris I, the royal house of the independent Kingdom of Libya from 1951 until the 1969 coup, 1837&ndash;1969. Emblem: a gold hawk and a white crescent and star on red."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><path d="M30,40 Q50,20 70,40 Q66,52 50,56 Q34,52 30,40 Z" fill="#e8c04a"/><path d="M50,56 Q30,58 24,72 Q28,66 38,64 M50,56 Q70,58 76,72 Q72,66 62,64" fill="none" stroke="#e8c04a" stroke-width="3"/><path d="M28,86 A22,22 0 1 1 66,92 A17,17 0 1 0 28,86 Z" fill="#f4efe1"/><path d="M74,84 l4,-9 l4,9 l-4,-3 Z" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Senussi</span></div>
+            <p><span class="label">Who &amp; why:</span> Allied forces expel Italy from Libya in 1943; Britain administers Tripolitania and Cyrenaica while France separately administers the southern Fezzan region, an honestly split arrangement that persists until UN-sponsored independence talks conclude in 1951.</p>
+            <p><span class="label">What it represents:</span> no single Libyan flag exists in this transitional period &mdash; British and French administrative authority is exercised under their own respective flags region by region, shown here honestly as a divided administration rather than one invented banner.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no unified Libyan flag; British and French administrative flags flown regionally.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="entry" data-n="3" id="era-1911">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="100" height="200" fill="#009246"/>
+              <rect x="100" width="100" height="200" fill="#f4efe1"/>
+              <rect x="200" width="100" height="200" fill="#ce2b37"/>
+            </svg>
+            <div class="flag-caption">the Italian Tricolor, flown over colonial Libya</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1911 &ndash; 1943</div>
+            <h3 class="card-title">Italian Libya</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#204b5c"></span>Colonial rule</span><span class="tag" tabindex="0" data-tip="King of Italy at the time of the 1911 invasion of Ottoman Tripolitania and Cyrenaica, in whose name the colony was governed for over three decades."><span class="dot" style="background:#4a3b78"></span>Victor Emmanuel III</span><span class="tag" tabindex="0" data-tip="Italy did not impose its own Roman Catholic state religion on the colony; the Libyan population remained Sunni Muslim throughout, with no separate religious establishment declared for the territory."><span class="dot" style="background:#8e3b62"></span>No official state religion imposed (Sunni Islam predominant)</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Italy invades and conquers Ottoman Tripolitania and Cyrenaica beginning in 1911, ruling the territory as a colony for over three decades."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="6.67" height="14" fill="#009246"/><rect x="6.67" width="6.67" height="14" fill="#fff"/><rect x="13.33" width="6.67" height="14" fill="#ce2b37"/></svg>Conquered by: Italy</span><span class="tag" tabindex="0" data-tip="Italy settles roughly 110,000 Italian colonists on expropriated agricultural land in Libya by the early 1940s under Mussolini's &quot;Fourth Shore&quot; program, the largest planned colonial settlement scheme in Italy's empire."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="6.67" height="14" fill="#009246"/><rect x="6.67" width="6.67" height="14" fill="#fff"/><rect x="13.33" width="6.67" height="14" fill="#ce2b37"/></svg>Immigration: Italian colonial settlers</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Founded as a religious and tribal order in Cyrenaica in 1837, the Senussi became hereditary Emirs of Cyrenaica and, under King Idris I, the royal house of the independent Kingdom of Libya from 1951 until the 1969 coup, 1837&ndash;1969. Emblem: a gold hawk and a white crescent and star on red."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><path d="M30,40 Q50,20 70,40 Q66,52 50,56 Q34,52 30,40 Z" fill="#e8c04a"/><path d="M50,56 Q30,58 24,72 Q28,66 38,64 M50,56 Q70,58 76,72 Q72,66 62,64" fill="none" stroke="#e8c04a" stroke-width="3"/><path d="M28,86 A22,22 0 1 1 66,92 A17,17 0 1 0 28,86 Z" fill="#f4efe1"/><path d="M74,84 l4,-9 l4,9 l-4,-3 Z" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Senussi</span></div>
+            <p><span class="label">Who &amp; why:</span> Italy invades Ottoman Tripolitania and Cyrenaica in 1911, formally annexing the territory in 1912 and consolidating it under the name "Libya" from 1934 &mdash; the first use of that name for the unified territory in modern times. Italian rule includes brutal suppression of Sanussi-led resistance in Cyrenaica through the 1920s&ndash;30s before Allied forces end it in 1943.</p>
+            <p><span class="label">What it represents:</span> the Italian Tricolor, flown as the colony's sole official flag throughout Italian rule.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Vertical tricolor: green, white, red.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#009246"></span><span class="meta"><span class="name">Green</span><span class="hex">#009246</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#ce2b37"></span><span class="meta"><span class="name">Red</span><span class="hex">#CE2B37</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 7 -->
+    <div class="entry" data-n="2" id="era-900">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#a4302a"/>
+              <g fill="#f4efe1">
+                <path d="M150,70 a34,34 0 1,0 0,60 a27,27 0 1,1 0,-60 Z"/>
+                <path d="M150,68 l6,17 18,1 -14.4,11.3 5.3,17.2 -14.9,-10.8 -14.9,10.8 5.3,-17.2 -14.4,-11.3 18,-1 Z"/>
+              </g>
+            </svg>
+            <div class="flag-caption">Ottoman red, white crescent and star &mdash; direct and Karamanli-era rule</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 900 &ndash; 1911</div>
+            <h3 class="card-title">Ottoman Tripolitania, Cyrenaica &amp; Fezzan</h3>
+            <div class="tag-row"><span class="tag"><span class="dot" style="background:#c9a13c"></span>Ottoman rule</span><span class="tag" tabindex="0" data-tip="No single ruler spans this millennium-long era of shifting Berber, Arab, Knights-of-Malta, and Ottoman rule, including the semi-autonomous Karamanli dynasty's 1711&ndash;1835 vassal rule."><span class="dot" style="background:#4a3b78"></span>No single ruler documented</span><span class="tag" tabindex="0" data-tip="Sunni Islam was the established faith of the region's Muslim dynasties throughout this long span, continuing under both direct Ottoman rule and the Karamanli vassal period."><span class="dot" style="background:#8e3b62"></span>Sunni Islam (established, across this Islamic-era span)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Founded as a religious and tribal order in Cyrenaica in 1837, the Senussi became hereditary Emirs of Cyrenaica and, under King Idris I, the royal house of the independent Kingdom of Libya from 1951 until the 1969 coup, 1837&ndash;1969. Emblem: a gold hawk and a white crescent and star on red."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><path d="M30,40 Q50,20 70,40 Q66,52 50,56 Q34,52 30,40 Z" fill="#e8c04a"/><path d="M50,56 Q30,58 24,72 Q28,66 38,64 M50,56 Q70,58 76,72 Q72,66 62,64" fill="none" stroke="#e8c04a" stroke-width="3"/><path d="M28,86 A22,22 0 1 1 66,92 A17,17 0 1 0 28,86 Z" fill="#f4efe1"/><path d="M74,84 l4,-9 l4,9 l-4,-3 Z" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Senussi</span></div>
+            <p><span class="label">Who &amp; why:</span> earlier medieval rule by various Berber and Arab dynasties, and a brief 16th-century period under the Knights of Malta and Spain at Tripoli, gives way to direct Ottoman conquest in 1551. From 1711 to 1835 the local Karamanli dynasty rules as a largely autonomous Ottoman vassal before direct Ottoman control is reimposed until the 1911 Italian invasion.</p>
+            <p><span class="label">What it represents:</span> the standard Ottoman red field with white crescent and star, flown across this territory&rsquo;s long Ottoman period, including through the semi-autonomous Karamanli years.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio recorded for this era.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red field, white crescent and five-pointed star.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 8 -->
+    <div class="entry" data-n="1" id="era-630bce">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder &mdash; no flag in the modern sense existed in the ancient Mediterranean</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 630 BCE &ndash; c. 900 CE</div>
+            <h3 class="card-title">Greek Cyrenaica &amp; Phoenician-Carthaginian Tripolitania</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Two separately founded ancient regions on Libya's own coast &mdash; Greek Cyrenaica in the east and Phoenician, later Carthaginian and Roman, Tripolitania in the west &mdash; each governed on its own terms for over a millennium before either was called by the name Libya."><span class="dot" style="background:#c9a13c"></span>Ancient colonies &amp; provinces</span><span class="tag" tabindex="0" data-tip="Led the Greek colonists from the island of Thera who founded Cyrene around 631 BCE, becoming the city's first king and founder of its ruling Battiad dynasty."><span class="dot" style="background:#4a3b78"></span>Battus I (founder of Cyrene)</span><span class="tag" tabindex="0" data-tip="Cyrenaica followed Greek polytheism and Tripolitania Phoenician/Punic religion under Carthage, both later folded into Roman state religion once the coast became Roman provinces; Christianity spread from the 2nd&ndash;3rd century CE, well before the region's Arab-era conversion to Islam."><span class="dot" style="background:#8e3b62"></span>Greek &amp; Punic polytheism, later Roman religion</span></div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Greek settlers from the Aegean island of Thera found the city of Cyrene around 631 BCE on the advice of the Delphic oracle, the first of the five cities of the Cyrenaican Pentapolis."><span class="dot" style="background:#2f7a6b"></span>Immigration: Greek colonists from Thera (c. 631 BCE)</span><span class="tag" tabindex="0" data-tip="Phoenician traders, later governed from Carthage, establish the coastal trading posts of Oea, Sabratha, and Leptis Magna in the west from around the 7th century BCE &mdash; the three cities that give Tripolitania (&quot;land of the three cities&quot;) its name."><span class="dot" style="background:#2f7a6b"></span>Immigration: Phoenician &amp; Carthaginian settlers</span></div>
+            <p><span class="label">Who &amp; why:</span> in the east, Greek colonists from Thera found Cyrene around 631 BCE on the advice of the Delphic oracle; it grows into one of the leading cities of the Greek world under Battus I's own Battiad dynasty, later passing to Ptolemaic Egypt and then becoming the Roman province of Cyrenaica in 74 BCE. In the west, Phoenician traders establish Oea (modern Tripoli), Sabratha, and Leptis Magna from around the 7th century BCE; the region falls under Carthaginian control before Rome absorbs it after the Punic Wars, and Leptis Magna itself becomes the birthplace of Roman Emperor Septimius Severus (r. 193&ndash;211 CE). Vandal invaders take the coast in the 5th century CE, a Byzantine reconquest under Justinian follows in the 6th, and Arab armies complete the conquest of the region by the 640s&ndash;660s CE, opening the centuries of Berber and Arab rule that the page's next entry picks up.</p>
+            <p><span class="label">What it represents:</span> no flag in the modern territorial sense existed anywhere in the ancient or classical Mediterranean world; cities and empires used civic emblems, coinage, and military standards rather than a fixed banner. Shown here honestly blank rather than invented.</p>
+            <p><span class="label">World context:</span> Cyrene's founding in 631 BCE comes a generation before Solon's reforms in Athens (594 BCE); Leptis Magna and Sabratha's Phoenician origins predate Carthage's own rise to Mediterranean power. The height of Roman rule over both regions runs alongside the building of Rome's Colosseum (70&ndash;80 CE) and Pantheon (126 CE) and the reign of Leptis Magna's own native son Septimius Severus; the Vandal conquest of the 5th century coincides with the wider collapse of the Western Roman Empire (476 CE), and the Arab conquest of the 640s&ndash;660s follows within decades of the life of Muhammad and the founding of Islam.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag from the ancient or classical era.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#c9a13c"></span><b>Ottoman rule</b> &mdash; direct or vassal, under the Sultan</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#204b5c"></span><b>Colonial rule / occupation</b> &mdash; governed by a foreign power</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Kingdom / Republic, independent</b> &mdash; sovereign under its own government</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#7c2e1f"></span><b>Personalist rule</b> &mdash; single-leader regime, revolutionary legitimacy</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the named ruler most associated with the era's start</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official/established faith, not the population's</div>
+    </div>
+  </div>
+
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for Libya lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/ly/">Search Record Atlas for Libya &rarr;</a>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This page is one lineage in a larger set. See the region-wide hub and the other countries here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="maghreb-nile-hub.html"><b>Maghreb &amp; Nile hub</b><span>Six countries, fourteen centuries</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Colors are close historical approximations for painting reference; pre-19th-century swatches are informed reconstructions, not official specifications. Map is schematic and not surveyed.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var IC = {
+    ancient:"#c9a13c", ottoman:"#a4302a", italy:"#009246", allied:"#204b5c", kingdom:"#e70013",
+    republic:"#a4302a", jamahiriya:"#239e46", modern:"#e70013"
+  };
+  var INAMES = {
+    ancient:"Greek Cyrenaica &amp; Phoenician-Carthaginian Tripolitania",
+    ottoman:"Ottoman Tripolitania, Cyrenaica &amp; Fezzan", italy:"Italian Libya",
+    allied:"Allied Military Administration", kingdom:"Kingdom of Libya",
+    republic:"Libyan Arab Republic / Federation of Arab Republics",
+    jamahiriya:"Great Socialist People's Libyan Arab Jamahiriya",
+    modern:"Libya (post-revolution)"
+  };
+  var IFLAGS = {
+    ancient: '<rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="6" stroke-dasharray="10 8"/>',
+    ottoman: '<rect width="300" height="200" fill="#a4302a"/><g fill="#f4efe1"><path d="M150,70 a34,34 0 1,0 0,60 a27,27 0 1,1 0,-60 Z"/><path d="M150,68 l6,17 18,1 -14.4,11.3 5.3,17.2 -14.9,-10.8 -14.9,10.8 5.3,-17.2 -14.4,-11.3 18,-1 Z"/></g>',
+    italy: '<rect width="100" height="200" fill="#009246"/><rect x="100" width="100" height="200" fill="#f4efe1"/><rect x="200" width="100" height="200" fill="#ce2b37"/>',
+    allied: '<rect width="150" height="100" fill="#00247d"/><rect y="100" width="150" height="100" fill="#f4efe1"/><rect x="150" width="150" height="100" fill="#f4efe1"/><rect x="150" y="100" width="150" height="100" fill="#002395"/><rect x="0" width="300" height="200" fill="none" stroke="#a9762f" stroke-width="3" stroke-dasharray="6 5"/>',
+    kingdom: '<rect width="90" height="200" fill="#e70013"/><rect x="90" width="120" height="200" fill="#000000"/><rect x="210" width="90" height="200" fill="#239e46"/><path fill="#f4efe1" d="M150,70 a34,34 0 1,0 0,60 a27,27 0 1,1 0,-60 Z"/><path fill="#f4efe1" d="M150,68 l6,17 18,1 -14.4,11.3 5.3,17.2 -14.9,-10.8 -14.9,10.8 5.3,-17.2 -14.4,-11.3 18,-1 Z"/>',
+    republic: '<rect width="100" height="200" fill="#a4302a"/><rect x="100" width="100" height="200" fill="#f4efe1"/><rect x="200" width="100" height="200" fill="#1a1a1a"/><path fill="#c9a13c" d="M150,72 l16,44 h-32 Z"/>',
+    jamahiriya: '<rect width="300" height="200" fill="#239e46"/>',
+    modern: '<rect width="90" height="200" fill="#e70013"/><rect x="90" width="120" height="200" fill="#000000"/><rect x="210" width="90" height="200" fill="#239e46"/><path fill="#f4efe1" d="M150,70 a34,34 0 1,0 0,60 a27,27 0 1,1 0,-60 Z"/><path fill="#f4efe1" d="M150,68 l6,17 18,1 -14.4,11.3 5.3,17.2 -14.9,-10.8 -14.9,10.8 5.3,-17.2 -14.4,-11.3 18,-1 Z"/>'
+  };
+  function iFlagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (IFLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  var iLegendEl = document.getElementById("iLegend");
+  iLegendEl.innerHTML = Object.keys(IC).map(function (k) {
+    return '<span><span class="sw" style="background:' + IC[k] + '"></span>' + INAMES[k] + "</span>";
+  }).join("");
+
+  var ISNAP = [
+    { year:"c. 630 BCE", name:"Greek Cyrenaica &amp; Phoenician-Carthaginian Tripolitania", t:{ ly:IC.ancient }, flagKeys:{ ly:"ancient" },
+      story:"Greek colonists from Thera found Cyrene around 631 BCE in the east, growing into a leading Greek city under Battus I's Battiad dynasty before passing to Ptolemaic Egypt and then Rome in 74 BCE. In the west, Phoenician traders founded Oea, Sabratha, and Leptis Magna from around the 7th century BCE, later ruled by Carthage and then Rome; Leptis Magna became the birthplace of Emperor Septimius Severus. Vandals took the coast in the 5th century CE, Byzantines reconquered it under Justinian in the 6th, and Arab armies completed its conquest by the 640s&ndash;660s CE. No flag in the modern sense existed anywhere in this world; shown here honestly blank until Ottoman rule begins." },
+    { year:"c. 900", name:"Ottoman Tripolitania, Cyrenaica &amp; Fezzan", t:{ ly:IC.ottoman }, flagKeys:{ ly:"ottoman" },
+      story:"Direct Ottoman conquest is completed by 1551, with the semi-autonomous local Karamanli dynasty ruling as a largely independent Ottoman vassal from 1711 to 1835. The standard Ottoman red field with white crescent and star flies across the whole territory throughout, right up to the 1911 Italian invasion." },
+    { year:"1911", name:"Italian Libya", t:{ ly:IC.italy }, flagKeys:{ ly:"italy" },
+      story:"Italy invades in 1911, formally annexes the territory in 1912, and consolidates it under the name \"Libya\" from 1934 &mdash; the first use of that name for the unified territory in modern times. The Italian Tricolor flies as the colony's sole official flag until Allied forces expel Italy in 1943." },
+    { year:"1943", name:"Allied Military Administration", t:{ ly:IC.allied }, flagKeys:{ ly:"allied" },
+      story:"Britain administers Tripolitania and Cyrenaica while France separately administers the southern Fezzan region &mdash; an honestly split arrangement, shown here with a dashed border, that persists until UN-sponsored independence talks conclude in 1951. No single Libyan flag exists in this transitional period." },
+    { year:"1951", name:"Kingdom of Libya", t:{ ly:IC.kingdom }, flagKeys:{ ly:"kingdom" },
+      story:"On 24 December 1951 Libya becomes fully sovereign under King Idris &mdash; the first country ever brought to independence by the United Nations, unifying Tripolitania, Cyrenaica, and Fezzan into a single kingdom. A new tricolor is designed for independence, based on the wartime Cyrenaican resistance flag." },
+    { year:"1969", name:"Libyan Arab Republic / Federation of Arab Republics", t:{ ly:IC.republic }, flagKeys:{ ly:"republic" },
+      story:"Gaddafi's Revolutionary Command Council replaces the monarchy's flag with a red-white-black tricolor mirroring Egypt's own after the 1969 coup, then briefly joins the 1972&ndash;77 Federation of Arab Republics, a loose pan-Arab union with Egypt and Syria, before Gaddafi's own idiosyncratic banner replaces it." },
+    { year:"1977", name:"Great Socialist People's Libyan Arab Jamahiriya", t:{ ly:IC.jamahiriya }, flagKeys:{ ly:"jamahiriya" },
+      story:"Gaddafi declares Libya a \"Jamahiriya\" (state of the masses) in 1977 under his own \"Third International Theory,\" adopting a plain green field &mdash; the only national flag in modern history to carry no emblem, pattern, or additional color whatsoever &mdash; and rules for 42 years until the 2011 revolution." },
+    { year:"2011–present", name:"Libya (post-revolution)", t:{ ly:IC.modern }, flagKeys:{ ly:"modern" },
+      story:"Revolutionaries readopt the 1951 kingdom's red-black-green tricolor as their banner from the earliest days of the 2011 uprising; it becomes Libya's official flag again upon the fall of Gaddafi's government that October. Libya has since struggled with fragmented governance and recurring conflict between rival authorities." }
+  ];
+
+  var IREGIONS = ["ly"];
+  var IREGION_NAMES = { ly:"Libya" };
+
+  function iTextColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+
+  var iYearTag = document.getElementById("iYearTag");
+  var iEraName = document.getElementById("iEraName");
+  var iEraOwners = document.getElementById("iEraOwners");
+  var iEraStory = document.getElementById("iEraStory");
+  var iFlagsRow = document.getElementById("iFlagsRow");
+  var iSlider = document.getElementById("iSlider");
+
+  function iRender(idx) {
+    var era = ISNAP[idx];
+    iYearTag.textContent = era.year;
+    iEraName.innerHTML = era.name;
+    iEraStory.innerHTML = era.story;
+
+    IREGIONS.forEach(function (id) {
+      document.getElementById("ireg-" + id).setAttribute("fill", era.t[id]);
+      var tcol = iTextColorFor(era.t[id]);
+      var tcolHalo = tcol === "#201a12" ? "#f7f1e3" : "#201a12";
+      var lbl = document.getElementById("ilbl-" + id);
+      if (lbl) { lbl.setAttribute("fill", tcol); lbl.setAttribute("stroke", tcolHalo); }
+    });
+
+    var label = Object.keys(IC).filter(function (k) { return IC[k] === era.t.ly; })[0];
+    iEraOwners.innerHTML = "<b>" + INAMES[label] + "</b>: whole country";
+
+    iFlagsRow.innerHTML = IREGIONS.map(function (id) {
+      return '<div class="iflag-chip">' + iFlagSvg(era.flagKeys[id]) + '<div class="ic-label">' + IREGION_NAMES[id] + '</div></div>';
+    }).join("");
+  }
+
+  iSlider.addEventListener("input", function () { iRender(parseInt(iSlider.value, 10)); });
+  iRender(0);
+
+  var iPlaying = false, iPlayTimer = null;
+  var iPlayBtn = document.getElementById("iPlayBtn");
+  function iStepPlay() {
+    var next = parseInt(iSlider.value, 10) + 1;
+    if (next > ISNAP.length - 1) { iStopPlay(); return; }
+    iSlider.value = next;
+    iRender(next);
+  }
+  function iStartPlay() {
+    iPlaying = true;
+    iPlayBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(iSlider.value, 10) >= ISNAP.length - 1) { iSlider.value = 0; iRender(0); }
+    iPlayTimer = setInterval(iStepPlay, 1700);
+  }
+  function iStopPlay() {
+    iPlaying = false;
+    iPlayBtn.innerHTML = "&#9654;";
+    clearInterval(iPlayTimer);
+  }
+  iPlayBtn.addEventListener("click", function () { iPlaying ? iStopPlay() : iStartPlay(); });
+})();
+
+  document.querySelectorAll(".tag[data-tip]").forEach(function (tag) {
+    tag.addEventListener("click", function (e) {
+      var wasOpen = tag.classList.contains("tip-open");
+      document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+      if (!wasOpen) tag.classList.add("tip-open");
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+  });
+</script>
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var html = '<h4>Genealogical records for this ground</h4>';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>
+
+</body></html>

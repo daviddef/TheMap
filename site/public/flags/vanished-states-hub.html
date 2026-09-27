@@ -1,0 +1,148 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Vanished States</title>
+<meta name="description" content="A hub for the family flag atlas: five real, internationally recognized sovereign states — Hawaii, Ryukyu, Sikkim, Tannu Tuva, and Newfoundland — completely absorbed by larger powers, with no surviving successor state today.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.2rem, 5.5vw, 3.4rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.1rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .countries { margin-top: 44px; }
+  .countries h2 { font-size: 1.15rem; font-weight: 600; margin: 0 0 16px; }
+  .country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .country-card {
+    display: block; padding: 20px; border: 1px solid var(--card-border); background: var(--card);
+    border-radius: 4px; text-decoration: none; color: var(--ink); position: relative; overflow: hidden;
+  }
+  .country-card .swatch-strip { position: absolute; top: 0; left: 0; right: 0; height: 5px; }
+  .country-card .era { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--brass); margin-bottom: 6px; }
+  .country-card b { display: block; font-family: "Fraunces", serif; font-size: 1.2rem; font-weight: 600; margin-bottom: 6px; }
+  .country-card span { color: var(--muted); font-size: .88rem; line-height: 1.5; }
+
+  .about { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .about h2 { font-size: 1.3rem; margin: 0 0 12px; }
+  .about h3 { font-size: 1.05rem; margin: 26px 0 10px; }
+  .about p { max-width: none; opacity: .88; margin: 0 0 12px; }
+  .about ul { margin: 0 0 12px; padding-left: 22px; opacity: .88; }
+  .about li { margin-bottom: 8px; }
+  .about li b { color: var(--ink); }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a></p>
+  <p class="kicker">Family research &middot; Hub &middot; Vanished States</p>
+  <h1>Vanished States</h1>
+  <p class="lede">Every other hub in this atlas covers a region of countries that still exist today, in some recognizable form. This one is different: five real, internationally-documented sovereign states &mdash; kingdoms and one dominion &mdash; that were genuinely absorbed, whole, by a larger power, and have no surviving successor state anywhere on the map. These aren't old colonial names for a country that's still around under new management; they're places that had their own crown, their own capital, and their own flag, and then simply stopped being sovereign, for good.</p>
+  <p class="lede">That distinguishes this hub from the atlas's Microstates hub, which covers tiny states that are still independent today (Monaco, San Marino, Liechtenstein, and the rest). It's also distinct from the ordinary case of a country changing its name or government while remaining, legally and territorially, the same continuing state &mdash; that kind of change is handled through each country's own page and its searchable <code>alts</code> field elsewhere in this atlas, not through a dedicated hub. The five states below are the real thing: sovereignty, then absorption, then nothing left to search for under their own name except history.</p>
+
+  <div class="countries">
+    <h2>The 5 vanished states</h2>
+    <div class="country-grid">
+      <a class="country-card" href="hawaii-flags.html">
+        <span class="swatch-strip" style="background:#cc142b"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Kingdom of Hawaii</b>
+        <span>Unified by Kamehameha I in 1795, overthrown in an 1893 coup backed by US Marines, briefly a "republic," annexed by the US in 1898, and the 50th state since 1959.</span>
+      </a>
+      <a class="country-card" href="ryukyu-kingdom-flags.html">
+        <span class="swatch-strip" style="background:#9c3b28"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Ryukyu Kingdom</b>
+        <span>Unified in 1429, a genuine dual tributary state answering to both China and Japan's Satsuma Domain at once from 1609, abolished and annexed by Japan as Okinawa Prefecture in 1879.</span>
+      </a>
+      <a class="country-card" href="sikkim-flags.html">
+        <span class="swatch-strip" style="background:#7c2e1f"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Kingdom of Sikkim</b>
+        <span>The Namgyal dynasty's Himalayan kingdom from 1642, a British then Indian protectorate, absorbed into India as its 22nd state after a 1975 referendum.</span>
+      </a>
+      <a class="country-card" href="tannu-tuva-flags.html">
+        <span class="swatch-strip" style="background:#1a3a6b"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Tannu Tuva</b>
+        <span>The Tuvan People's Republic, nominally independent from 1921 and recognized by almost no one but the USSR and Mongolia, annexed directly into the Soviet Union in 1944.</span>
+      </a>
+      <a class="country-card" href="newfoundland-flags.html">
+        <span class="swatch-strip" style="background:#d52b1e"></span>
+        <span class="era">flag timeline &rarr;</span>
+        <b>Dominion of Newfoundland</b>
+        <span>A fully separate British Dominion from 1907, its own self-government surrendered in 1934, and joined to Canada as its 10th province by referendum in 1949.</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="about">
+    <h2>About this hub</h2>
+    <p>Each of the five states above has its own full flag-by-flag timeline page, built to the same depth as any country elsewhere in this atlas &mdash; these aren't placeholders. What unites them isn't geography (they span the Pacific, East Asia, the Himalayas, Siberia, and the North Atlantic) but a shared shape of history: real, internationally documented sovereignty or near-sovereignty, followed by complete absorption into a larger state, with nothing left standing under the original name.</p>
+    <p>That absorption looked different in every case &mdash; a coup engineered by foreign business interests in Hawaii, a slow diplomatic squeeze in Sikkim, outright military annexation in the Ryukyus and Tuva, and a voluntary referendum vote in Newfoundland. Deciding how to characterize any one of these events is sometimes genuinely contested (Sikkim's 1975 vote especially); this hub and its linked pages try to lay out the documented sequence of events plainly, rather than pushing a single verdict on each.</p>
+
+    <h3>More vanished states, in brief</h3>
+    <p>Five full pages can't cover every state history has erased. A few more genuinely vanished states, without surviving successors, are worth a mention here even without a dedicated page of their own:</p>
+    <ul>
+      <li><b>Republic of Texas</b> (1836&ndash;1845) &mdash; won independence from Mexico at the Battle of San Jacinto, existed as its own recognized republic with its own currency and diplomats for nine years, then voted for annexation and joined the United States as its 28th state in 1845.</li>
+      <li><b>Free City of Danzig</b> (1920&ndash;1939) &mdash; a semi-autonomous city-state under League of Nations protection, created by the Treaty of Versailles out of a mostly German-speaking Baltic port; occupied by Nazi Germany in 1939, and absorbed into Poland as the city of Gda&#324;sk after the Second World War.</li>
+      <li><b>Republic of Formosa</b> (1895) &mdash; declared on Taiwan by local officials resisting Japan's newly acquired control of the island under the Treaty of Shimonoseki; collapsed within months under Japanese military occupation, one of the shortest-lived republics in modern history.</li>
+    </ul>
+    <p>None of these are built out as full pages here &mdash; this section is meant as further reading context, not an exhaustive catalog. The five entities above remain the hub's real focus.</p>
+  </div>
+
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This hub is one part of a larger set. See the other phases here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="microstates-hub.html"><b>Microstates hub</b><span>Tiny states that are still independent today</span></a>
+      <a class="link-card" href="north-america-hub.html"><b>North America hub</b><span>The country Newfoundland ultimately joined</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica.
+  </footer>
+
+</div>
+
+</body></html>

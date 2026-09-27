@@ -35,6 +35,13 @@ const nav = [
     ["/jurisdictions/", "Whose archive"],
     ["/coverage/", "What's missing"],
   ]],
+  /* FLAGS IS A DIRECT LINK, NOT A DROPDOWN, and the shape of this array had to
+     grow one case to allow it. Every other entry here is [label, [links]] and
+     renders as a disclosure; a disclosure holding a single item is a click in
+     front of a click. The 245 flag pages have one front door — their own
+     landing page, kept exactly as it was — so the menu item IS the door.
+     A string second element means a direct link. */
+  ["Flags", "/flags/"],
   ["About", [
     ["/start/", "Start here"],
     ["/about/", "About the atlas"],
@@ -241,21 +248,25 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
     </button>
     <nav class="topnav" aria-label="Main">
       {nav.map(([label, links]) => (
-        <details class="menu">
-          <summary>{label}</summary>
-          <div class="panel">
-            {links.map(([h, l]) => <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}
-          </div>
-        </details>
+        typeof links === "string"
+          ? <a class:list={["menulink", here === u(links) ? "on" : ""]} href={u(links)}>{label}</a>
+          : <details class="menu">
+              <summary>{label}</summary>
+              <div class="panel">
+                {links.map(([h, l]) => <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}
+              </div>
+            </details>
       ))}
       <a class="findbtn" href={u("/add/")}>Add a source</a>
     </nav>
   </div>
   <div class="drawer" id="drawer" hidden>
     <div class="wrap">{nav.map(([label, links]) => (
-      <div class="dgrp"><span class="gl">{label}</span>
-        {links.map(([h, l]) => <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}
-      </div>
+      typeof links === "string"
+        ? <div class="dgrp"><a href={u(links)} class={here === u(links) ? "on" : ""}>{label}</a></div>
+        : <div class="dgrp"><span class="gl">{label}</span>
+            {links.map(([h, l]) => <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}
+          </div>
     ))}
       <div class="dgrp"><span class="gl">Contribute</span>
         <a href={u("/add/")} class={here === u("/add/") ? "on" : ""}>Add a source</a>

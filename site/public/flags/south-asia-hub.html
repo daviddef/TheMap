@@ -1,0 +1,558 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Flags of South Asia</title>
+<meta name="description" content="A hub for the family flag atlas: eight South Asian countries, from the Maurya Empire through the British Raj, Partition, and independence, with a real interactive map.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12; --paper: #ede2c8; --card: #f8f1de; --card-border: #d9c9a0;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --adriatic: #204b5c; --adriatic-2: #163846;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #204b5c;
+    --tile: #ddd0aa; --tile-line: #b7a679; --tile-text: #7a6a45; --tile-sea: #b9d3da;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+      --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --adriatic: #6fa3b8; --adriatic-2: #8fbccf;
+    --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #17303a;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.2rem, 5.5vw, 3.4rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.1rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .countries { margin-top: 44px; }
+  .countries h2 { font-size: 1.15rem; font-weight: 600; margin: 0 0 16px; }
+  .country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .country-card {
+    display: block; padding: 20px; border: 1px solid var(--card-border); background: var(--card);
+    border-radius: 4px; text-decoration: none; color: var(--ink); position: relative; overflow: hidden;
+  }
+  .country-card .swatch-strip { position: absolute; top: 0; left: 0; right: 0; height: 5px; }
+  .country-card .era { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--brass); margin-bottom: 6px; }
+  .country-card b { display: block; font-family: "Fraunces", serif; font-size: 1.2rem; font-weight: 600; margin-bottom: 6px; }
+  .country-card span { color: var(--muted); font-size: .88rem; line-height: 1.5; }
+
+  .map-section { margin-top: 56px; padding-top: 36px; border-top: 1px solid var(--hair); }
+  .map-section h2 { font-size: 1.5rem; margin: 0 0 8px; }
+  .map-section .map-sub { font-size: .94rem; color: var(--muted); max-width: 64ch; margin: 0 0 22px; }
+  .map-section .rule-box { margin-bottom: 22px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .92rem; }
+  .map-section .rule-box b { color: var(--brick); }
+
+  .viz-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 22px; }
+
+  .controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .play-btn {
+    flex: none; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .play-btn:hover { border-color: var(--brick); }
+  input[type="range"] {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px;
+    background: var(--hair); outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper);
+    box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  .era-tag { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 68px; }
+
+  .era-head { text-align: center; margin-bottom: 16px; }
+  .era-name-inline { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.35rem; transition: opacity .35s ease; }
+  .era-owners { font-size: .86rem; color: var(--muted); max-width: 62ch; margin: 6px auto 0; transition: opacity .35s ease; }
+  .era-owners b { color: var(--ink); }
+  .era-story {
+    margin: 0 auto 22px; font-size: .98rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .35s ease; padding: 14px 18px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  .era-story b { color: var(--brick); }
+
+  .flags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin: 4px auto 18px; max-width: 680px; }
+  .flag-chip { text-align: center; width: 88px; }
+  .flag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-chip .fc-label { font-family: "IBM Plex Mono", monospace; font-size: 8.6px; color: var(--muted); margin-top: 5px; line-height: 1.3; }
+
+  #map-svg { display: block; margin: 0 auto; width: 100%; max-width: 480px; height: auto; }
+  .region-fill { transition: fill 0.7s ease; }
+  .border-line { transition: stroke-opacity 0.7s ease, stroke-width 0.7s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .group-label { font-family: "Fraunces", serif; font-weight: 600; transition: opacity .5s ease, font-size .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2.5px; }
+  .sub-label { font-family: "IBM Plex Mono", monospace; font-weight: 700; transition: opacity .5s ease, fill .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9px; font-weight: 700; fill: var(--tile-text); text-anchor: middle; opacity: .8; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+  .inset-frame { fill: var(--paper); stroke: var(--tile-line); stroke-width: 1; stroke-dasharray: 3 2; }
+  .inset-label { font-family: "IBM Plex Mono", monospace; font-size: 8px; font-weight: 700; fill: var(--tile-text); text-anchor: middle; }
+
+  .map-key { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: .8rem; color: var(--muted); justify-content: center; }
+  .map-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .map-key .sw { width: 11px; height: 11px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+  .map-notes { margin-top: 20px; font-size: .85rem; color: var(--muted); }
+  .map-notes b { color: var(--ink); }
+
+  .about { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .about h2 { font-size: 1.3rem; margin: 0 0 12px; }
+  .about p { max-width: none; opacity: .88; margin: 0 0 12px; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a></p>
+  <p class="kicker">Family research &middot; Hub &middot; Phase 16 of the world atlas</p>
+  <h1>Flags of South Asia</h1>
+  <p class="lede">Eight countries across a subcontinent that holds some of the world's oldest continuous civilizations. The Indus Valley Civilization arose here around 3300 BCE, one of the earliest urban cultures anywhere, and over the millennia that followed the region produced major, well-documented empires: the Maurya Empire, which under Ashoka in the third century BCE controlled most of the subcontinent before he embraced Buddhism and non-violence; the classical Gupta Empire; the Delhi Sultanate; and the Mughal Empire, whose emperors built the Taj Mahal and ruled from the 1500s into the 1800s.</p>
+  <p class="lede">The British East India Company gradually displaced Mughal authority from the mid-1700s, and after the 1857 rebellion the British Crown took direct control, formalizing the British Raj in 1858 over most of the subcontinent. Nepal and Bhutan, the Himalayan kingdoms, were never fully colonized and remained independent through this period. Sri Lanka (as Ceylon) and the Maldives followed separate British colonial tracks. Afghanistan, further west, spent the nineteenth century repelling British invasions during the "Great Game" rivalry with Russia and retained its independence.</p>
+  <p class="lede">In August 1947, British India was partitioned into two independent states, India and Pakistan, divided largely along religious lines. Partition triggered one of the largest mass migrations in human history, as some fourteen million people crossed the new borders, and it was accompanied by widespread communal violence with an estimated death toll ranging from several hundred thousand to over a million. Pakistan itself was founded as two wings separated by a thousand miles of Indian territory; in 1971, after a brutal crackdown and a nine-month war, East Pakistan won its independence as Bangladesh. Below, a real traced map shows who actually governed each of these eight countries at eight points across more than two thousand years.</p>
+
+  <div class="countries">
+    <h2>The 8 countries</h2>
+    <div class="country-grid">
+      <a class="country-card" href="india-flags.html">
+        <span class="swatch-strip" style="background:#FF9933"></span>
+        <span class="era">c. 3300 BCE &ndash; present</span>
+        <b>India</b>
+        <span>The Maurya and Gupta empires, Mughal rule, the British Raj from 1858, and independence in August 1947 alongside Partition.</span>
+      </a>
+      <a class="country-card" href="pakistan-flags.html">
+        <span class="swatch-strip" style="background:#01411C"></span>
+        <span class="era">c. 3300 BCE &ndash; present</span>
+        <b>Pakistan</b>
+        <span>Founded in 1947 as a Muslim-majority state carved from British India in two wings, with Muhammad Ali Jinnah as its first governor-general.</span>
+      </a>
+      <a class="country-card" href="bangladesh-flags.html">
+        <span class="swatch-strip" style="background:#006a4e"></span>
+        <span class="era">c. 3rd c. BCE &ndash; present</span>
+        <b>Bangladesh</b>
+        <span>Formerly East Pakistan, won independence in 1971 after a nine-month war, becoming South Asia's youngest sovereign state.</span>
+      </a>
+      <a class="country-card" href="sri-lanka-flags.html">
+        <span class="swatch-strip" style="background:#FFB700"></span>
+        <span class="era">c. 377 BCE &ndash; present</span>
+        <b>Sri Lanka</b>
+        <span>Home to the ancient Sinhalese kingdoms of Anuradhapura and Polonnaruwa, British Ceylon, and independence in 1948.</span>
+      </a>
+      <a class="country-card" href="nepal-flags.html">
+        <span class="swatch-strip" style="background:#DC143C"></span>
+        <span class="era">c. 1200 &ndash; present</span>
+        <b>Nepal</b>
+        <span>Unified in 1768 by Prithvi Narayan Shah, a Himalayan kingdom never colonized, and a federal republic since the monarchy's abolition in 2008.</span>
+      </a>
+      <a class="country-card" href="bhutan-flags.html">
+        <span class="swatch-strip" style="background:#FFDE00"></span>
+        <span class="era">c. 900 &ndash; present</span>
+        <b>Bhutan</b>
+        <span>Unified in the 1600s by the Tibetan lama Ngawang Namgyal, the "Land of the Thunder Dragon," and never colonized.</span>
+      </a>
+      <a class="country-card" href="maldives-flags.html">
+        <span class="swatch-strip" style="background:#D21034"></span>
+        <span class="era">c. 3rd c. BCE &ndash; present</span>
+        <b>Maldives</b>
+        <span>A chain of coral atolls with an Islamic sultanate dating to 1153, a British protectorate from 1887, and independence in 1965.</span>
+      </a>
+      <a class="country-card" href="afghanistan-flags.html">
+        <span class="swatch-strip" style="background:#000000"></span>
+        <span class="era">c. 550 BCE &ndash; present</span>
+        <b>Afghanistan</b>
+        <span>The Durrani Empire's eighteenth-century founding, repelled British invasions during the nineteenth-century "Great Game," and a turbulent modern history.</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="map-section">
+    <h2>Eight eras, one map</h2>
+    <p class="map-sub">A real, traced map &mdash; actual coastlines and borders, not schematic shapes, built from the same public boundary data used across the atlas. China, Myanmar, Central Asia, and Iran are shown faint for orientation only; the Maldives, a chain of coral atolls far to the southwest, is shown as an inset, not to scale. Drag the slider or press play; each snapshot simplifies a messier reality into the dominant power of the moment.</p>
+    <div class="rule-box">
+      <b>Borders here are data, not decoration.</b> A line between two regions only draws solid when they were actually governed separately. When they weren't &mdash; Pakistan and India both under the Mughals, say &mdash; the line dissolves and their names merge into whoever actually ruled them both. Sri Lanka and the Maldives never share a border line with anyone on this map: both were islands administered on their own track throughout, including through the colonial period, when Ceylon was a separate Crown Colony rather than part of British India.</div>
+    <div class="rule-box">
+      <b>A note on Kashmir.</b> The 1947 Partition left the princely state of Jammu and Kashmir's accession disputed between India and Pakistan; a 1947&ndash;48 war ended in a ceasefire line that still divides the region today. This map traces the current de facto line of control for the "Partition," "1971," and "Present" snapshots only, as background geography &mdash; it is not a statement about who the territory should belong to, and the dispute itself is described here only as a well-documented, still-unresolved fact.
+    </div>
+
+    <div class="viz-frame">
+      <div class="controls">
+        <button class="play-btn" id="playBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="era-tag" id="yearTag">250 BCE</span>
+        <input type="range" id="slider" min="0" max="7" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="map-svg" viewBox="0 0 658 616" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="0" width="658" height="616" fill="var(--tile-sea)"/>
+
+        <path fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" d="M785.4,319 L764.7,311 L763,302.1 L766.6,297.4 L751.8,294.9 L742.9,287.7 L733.6,296.6 L725.1,297 L721.9,301.4 L712.2,297.5 L706.8,303 L698.7,297.8 L693.3,304.1 L687.2,302.2 L683.8,306.3 L688.2,324 L679.5,324.2 L677.7,318 L676.8,314.7 L669.3,319.6 L662.1,319.4 L658.5,310.1 L647.1,308.5 L652.1,294.3 L641.9,290.3 L639,278.2 L641.5,274.5 L621.4,278.1 L623.7,272.7 L621.8,263.4 L625.5,255.3 L638.7,244.9 L640,229.2 L638.6,215.9 L633,216.3 L629.3,205.4 L622,199.8 L617.6,204.9 L601.3,201.6 L606,195.6 L603.7,190.7 L599,192.9 L602.5,187.4 L597.4,184 L587.2,191 L575.1,186.3 L561.6,196.2 L553.6,197.9 L542.5,210.7 L528.1,212.7 L528.2,209.9 L522.4,207.3 L507.9,207.2 L507.8,204.5 L502.1,203.3 L494.2,207.6 L484.9,220.2 L483.5,208.5 L480,207 L472.6,210.8 L457.3,211.3 L449.1,206.8 L445.8,209.8 L441.5,206.6 L439.3,210.1 L434.3,203.9 L425.5,203.2 L426.2,198.5 L420.4,199.1 L411.5,193.1 L409.5,187.9 L401.3,188.5 L377.1,169 L367.2,168.9 L363.4,173.9 L360.8,171.8 L347.9,164.9 L347.3,161.2 L336.9,157.7 L330.8,150.7 L325.1,152.1 L325,141.3 L319.5,131.8 L324.5,130.4 L327.9,134.5 L332.6,132.1 L331.3,120.7 L326.1,115.1 L324.9,106.4 L328.7,101.5 L318.6,96.3 L314.1,81.5 L310.2,81.2 L294,78.4 L280.5,71.8 L281.5,66.1 L278.3,60.8 L258.9,55.2 L400,-40 L1000,-100 L1000,320 Z"/>
+        <path fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" d="M661.7,339.2 L651.3,338.4 L651.7,342 L645.2,342.9 L642.8,348.4 L628.6,348.9 L625.5,353.8 L624.3,368.6 L618.5,369.8 L622.5,373.7 L623.7,382.1 L635.2,396 L638.7,407 L642.3,406.6 L637.7,411.8 L637.1,423.3 L631.4,426.1 L631.5,430 L646.2,451.4 L646,463.1 L653.8,484.3 L640.3,503.4 L639.4,511.4 L637.2,514 L635.7,503.1 L642.1,485.4 L638.3,485.1 L637.4,460.9 L631.5,446.9 L630.1,451.5 L628.6,435.5 L625.4,432 L621.8,412.3 L624,402.9 L618.5,403.7 L615.7,394 L610.2,388.8 L608.9,400.5 L603.6,404 L599.8,399.5 L601.9,405.1 L593.1,409.7 L587.2,417.3 L586.5,411 L583.9,415.6 L580.2,415.7 L579.4,409.5 L575.8,414.2 L576.4,403.9 L568.9,412.3 L574.6,385.9 L566.1,356.7 L564.2,363.3 L557.4,355.3 L562.6,357.5 L565.3,354.1 L559.2,348.4 L560.7,346.1 L553.5,343.4 L551.7,347 L550.6,338.2 L546.9,341.6 L545.4,335 L545.3,339.6 L539,331.2 L536.7,322.6 L539.1,320.1 L543.8,322.4 L542.9,311 L544.7,308.4 L549.1,310.5 L552,306.7 L550.8,298.4 L556,284.6 L554.7,275.5 L567.4,278.7 L576.5,258.8 L574.4,254.2 L583.2,241.9 L583.1,232.4 L599.8,221.2 L608.3,220 L614.2,223.6 L610.6,215.6 L617.9,209.7 L617.6,204.9 L622,199.8 L629.3,205.4 L633,216.3 L638.6,215.9 L640,229.2 L638.7,244.9 L625.5,255.3 L621.8,263.4 L623.7,272.7 L621.4,278.1 L641.5,274.5 L639,278.2 L641.9,290.3 L652.1,294.3 L647.1,308.5 L658.5,310.1 L662.1,319.4 L669.3,319.6 L676.8,314.7 L677.7,318 L670.9,323.3 L669.6,330 L663.7,332.2 L661.7,339.2 Z"/>
+        <path fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.5" d="M-65.8,49.8 L-53.4,47.6 L-42.7,37.7 L-14.2,34.9 L-11.7,39 L2.6,44.3 L19,46.9 L35.4,61.8 L47.6,61.7 L49.9,79.1 L47,92 L41.5,97.8 L44,101.2 L37.7,105 L38,112.7 L44.5,115 L38.8,122.6 L43,136.4 L42.9,149.2 L56.1,151.1 L58.5,159.1 L43.3,177 L59.8,199.3 L73.4,204.5 L73.5,221.3 L82,223 L79.7,231.5 L68.4,233.1 L59,238.8 L55,256.2 L52.2,257.9 L38,252.2 L36.3,254.3 L15,252.5 L-11.9,246.2 L-17.5,227.2 L-27.4,222.2 L-52.5,234 L-69.1,230.3 L-88.5,215.1 L-102.4,210.9 L-107.3,206.4 L-113.6,190.5 L-126.3,171.2 L-134.4,174.1 L-143.2,168.2 L-150,120 L-100,0 L-65.8,49.8 Z"/>
+        <path fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.5" d="M-33.3,-17.9 L-16.9,-16.9 L-17.8,-27 L-12.7,-31.5 L-4.4,-32.6 L-1.1,-37.7 L6,-34.5 L0.9,-40.1 L7.8,-42.6 L19.9,-34.9 L29.8,-33 L29.1,-29 L33.2,-26.1 L31.4,-19.2 L60,-14 L69.1,5 L89.2,18.9 L118.4,34.6 L133.5,38.4 L132.7,49.7 L120.8,45.9 L117.5,51.3 L105.8,53.4 L101,66.8 L93.1,72.4 L79.3,75.2 L78.1,82 L72.3,85.3 L66.3,86.7 L61.2,82.1 L49.9,79.1 L47.6,61.7 L35.4,61.8 L19,46.9 L2.6,44.3 L-11.7,39 L-14.2,34.9 L-42.7,37.7 L-53.4,47.6 L-65.8,49.8 L-100,0 L-80,-80 L60,-90 L-33.3,-17.9 Z"/>
+        <path fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" d="M202.4,-33.6 L206.8,-32.2 L190.2,-21.6 L209.4,-14.5 L213.7,-21.6 L221.9,-12.8 L236.8,-9.2 L214.1,2 L202.5,0.5 L193.3,-1.9 L199.3,-7.7 L193.8,-13 L182.9,-6.6 L177.3,-8.4 L174.9,-5 L176,1.2 L165.9,1.8 L171.3,3.1 L163.3,12.5 L151.5,11 L146.9,13.7 L145.9,17.9 L158,22.8 L157.3,30.5 L161.5,35 L152.2,52.7 L132.7,49.7 L133.5,38.4 L118.4,34.6 L89.2,18.9 L69.1,5 L60,-14 L31.4,-19.2 L33.2,-26.1 L29.1,-29 L29.8,-33 L19.9,-34.9 L7.8,-42.6 L0.9,-40.1 L6,-34.5 L-1.1,-37.7 L-4.4,-32.6 L-12.7,-31.5 L-17.8,-27 L-16.9,-16.9 L-33.3,-17.9 L60,-90 L280,-140 L202.4,-33.6 Z"/>
+        <path fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" d="M202.5,0.5 L214.1,2 L236.8,-9.2 L221.9,-12.8 L213.7,-21.6 L209.4,-14.5 L190.2,-21.6 L206.8,-32.2 L202.4,-33.6 L280,-140 L360,-100 L348.3,-30 L320.4,-19.5 L315.3,-13.7 L296.2,-12.8 L286.9,-1.4 L276.9,-0.6 L274.4,-6.1 L263.6,-3.6 L263.5,-1 L250.3,3.9 L249,11.8 L244.7,14 L222.6,18.1 L215.5,16.9 L210.6,11.3 L200.1,14.9 L195.3,11.6 L176.4,12.7 L176.1,6 L180,2.9 L187,1.1 L195.6,5.5 L202.5,0.5 Z"/>
+        <g class="context-label">
+          <text x="360" y="30">CHINA</text>
+          <text x="618" y="345">MYANMAR</text>
+          <text x="30" y="150">IRAN</text>
+          <text x="150" y="15">CENTRAL ASIA</text>
+        </g>
+
+        <path id="f-af" class="region-fill" d="M132.7,49.7 L137.5,49.3 L141.3,49.9 L143.3,51.6 L145.2,52 L148.4,51.1 L151.2,51.7 L152.2,52.7 L155.3,56.1 L157,56.5 L160.1,55.4 L160.7,54.1 L162.1,53.3 L166.5,51.2 L168.9,51 L170.3,49.9 L175.9,53.8 L176.5,53.6 L178.2,52.1 L178,48.8 L178.3,47.3 L179.5,46.2 L184.6,45.2 L188.1,46.3 L190.4,45.7 L191.4,44.3 L190.8,39.9 L194,37.3 L197.2,32.9 L199,31.4 L201.3,30.8 L204,31.5 L207.3,33.4 L208.4,35.7 L207.6,40 L212.4,40.1 L210,53.4 L211.6,58.2 L212.6,60.1 L213.7,60.8 L215.8,60.8 L224.6,55.9 L229.3,55.1 L230.9,52.7 L233,51.1 L240.7,47.7 L246,48.5 L246,50 L244.5,51.1 L245,51.5 L253.1,50 L254.5,48.5 L255.9,48.5 L260.8,48.9 L264.4,51.7 L262.5,51.4 L261.9,50.7 L256.3,52.9 L258.9,55.2 L251.1,58.6 L246.8,57.5 L236.6,57.8 L228.7,58.5 L222.9,60.1 L215.4,65.2 L213,65.2 L206.9,70.5 L206.1,71.9 L209.5,74.6 L212.2,80.3 L212.6,82.7 L211.8,84.7 L213,86.5 L210.4,90.2 L207.8,91.8 L202.7,97.6 L204.7,100.3 L204.6,104.6 L204,105.8 L197.7,107.4 L192.6,107.3 L187.4,105.7 L185.7,106.5 L185.4,108.3 L189.6,113.1 L191.9,117.3 L191.5,118.7 L186.2,121.7 L180.7,122.5 L179.6,123.3 L178.1,127.6 L178.1,129 L175.5,133.2 L176.1,141.7 L173,145 L169.7,146.8 L168.3,146.6 L165.4,144 L162.9,144.8 L158.5,144 L156.2,146.1 L149.3,149 L151.8,151.7 L147.3,153.6 L144.7,153.9 L139,152.4 L137.5,153.1 L133.8,157.3 L130.7,159.1 L129.9,161 L129,164.3 L129.3,169.1 L128.2,172.7 L129.4,175.1 L127.3,177.4 L110.2,182.1 L99.2,182.4 L95.7,183.8 L94.6,185 L86.2,183.1 L69,184.7 L43.3,177 L58.1,160.5 L58.5,159.1 L58.6,156.4 L57.7,152.8 L56.1,151.1 L42.9,149.2 L42.4,140.8 L43,136.4 L38.8,122.6 L38.8,121.3 L44.5,115 L44.3,114.4 L40.3,114.1 L38,112.7 L37.7,111.5 L38.3,109.3 L37.7,105 L40.1,101.4 L44,101.2 L41.5,97.8 L45,95.5 L47,92 L46.8,90.9 L48.1,88 L47.3,85 L48.7,84.3 L50.1,80.9 L49.9,79.1 L51.2,78.9 L55.5,82.2 L61.2,82.1 L64.9,84.7 L66.3,86.7 L68.8,85.3 L72.3,85.3 L78.1,82 L79.1,78.8 L79.9,78.1 L78.9,75.7 L79.3,75.2 L82,75 L90.8,72.4 L93.1,72.4 L94.4,70.7 L98.6,68.8 L101,66.8 L105.8,53.4 L110.2,51.6 L117.5,51.3 L118.8,47.7 L120.8,45.9 L126.2,48.5 L132.7,49.7 Z"/>
+        <path id="f-pk" class="region-fill" d="M294,78.4 L298.5,87.7 L297.7,89.7 L294.3,91.3 L292.9,93.2 L291.3,94.1 L289.1,93.8 L284.6,95.3 L282.6,95.2 L277.4,98 L273.3,97.5 L269.1,95.7 L265.4,95.6 L255.1,93.6 L249.8,95.5 L247.2,100.2 L247.4,101.1 L250,102.6 L248.9,105.3 L249.7,106.3 L253.7,106.5 L254.4,107.5 L253.8,108.5 L250.4,110.2 L250,111.3 L250.5,112.9 L252.8,115 L252.3,117.1 L250.3,119.5 L250.5,120.4 L252.4,122.3 L255.2,123.7 L255.7,126 L255.3,126.8 L256,127.5 L260.9,127.7 L260.6,130.3 L261.2,132.2 L262.9,132.8 L266,132.7 L269.9,134.3 L271.4,135.8 L271.3,136.9 L270.2,138.2 L262.1,141.5 L259.2,143.7 L258.5,145.5 L259.8,149.7 L258.6,154.4 L258.9,155.3 L260,155.7 L260.4,157 L255.8,159.4 L248.9,167.2 L248.6,168.6 L249.4,170.8 L247.4,173 L240.7,175.7 L238.3,182.2 L233.9,190.1 L233.2,191.1 L224.3,195.8 L221,202.7 L218.1,205.6 L216.9,209.2 L211.7,210.8 L206.1,211.5 L200,213.5 L198.4,212.5 L197.3,209.7 L195.1,208.2 L193.8,208.2 L189.7,211.2 L185.8,217.6 L180.2,223.5 L179.1,228.9 L179.7,230 L183.3,231.9 L188.4,232.8 L189.8,234 L189.6,239 L188.7,241.4 L189.1,244.1 L191.6,247.6 L196.4,247.6 L197.7,248.3 L197.7,252.4 L201.3,258.5 L204,264.9 L202.7,266.9 L202.8,268.3 L203.9,269.8 L198.7,272.5 L196.6,271.9 L196.1,269.5 L195.2,269.6 L189,271.7 L187.8,273.3 L184.4,273.8 L183,273.7 L180.5,272 L170.1,271.6 L169,272.1 L168.3,271.3 L167.4,272.1 L167.3,277.2 L162,277.4 L158.6,279 L157.8,280.8 L156.5,279.2 L155.2,279.5 L153.7,278.3 L153.1,279.5 L150.7,279.8 L150.4,278 L149.1,278.6 L145.1,273.6 L144.8,270.4 L142.9,263.7 L135.5,262 L135.5,255.7 L133.4,253.2 L132.9,251.4 L131.2,249.8 L129.6,249.4 L127.9,249.6 L126.5,251.2 L130.1,251 L131.9,252 L128.2,251.7 L119.4,253.6 L115.1,253.2 L109.7,254.3 L105.2,254.4 L103.3,256.5 L95.4,253.9 L93.9,252.7 L92,253.8 L88.6,253 L86,253.6 L85,254.5 L85,256 L71.9,255.1 L66.4,257.3 L64.6,255.8 L62.9,257 L60,257.4 L57.4,257.3 L54.7,256.4 L55,256.2 L56.2,246.8 L57.6,245.3 L59,238.8 L62.9,237.2 L63.5,236.3 L65.3,236.5 L66.4,234.3 L68.4,233.1 L73.3,231.7 L79.7,231.5 L80.2,228.4 L81.2,227.7 L81.1,224.3 L82,223 L79.9,221.3 L75.9,221.9 L73.5,221.3 L74.3,217.1 L73.1,208.6 L73.4,204.5 L70.4,204.6 L67.1,201.5 L59.8,199.3 L55.6,195.1 L51.1,187.1 L50.7,185.3 L43.3,177 L69,184.7 L86.2,183.1 L94.6,185 L95.7,183.8 L99.2,182.4 L110.2,182.1 L127.3,177.4 L129.4,175.1 L128.2,172.7 L129.3,169.1 L129,164.3 L129.9,161 L130.7,159.1 L133.8,157.3 L137.5,153.1 L139,152.4 L144.7,153.9 L147.3,153.6 L151.8,151.7 L149.3,149 L156.2,146.1 L158.5,144 L162.9,144.8 L165.4,144 L168.3,146.6 L169.7,146.8 L173,145 L176.1,141.7 L175.5,133.2 L178.1,129 L178.1,127.6 L179.6,123.3 L180.7,122.5 L186.2,121.7 L191.5,118.7 L191.9,117.3 L189.6,113.1 L185.4,108.3 L185.7,106.5 L187.4,105.7 L192.6,107.3 L197.7,107.4 L204,105.8 L204.6,104.6 L204.7,100.3 L202.7,97.6 L207.8,91.8 L210.4,90.2 L213,86.5 L211.8,84.7 L212.6,82.7 L212.2,80.3 L209.5,74.6 L206.1,71.9 L206.9,70.5 L213,65.2 L215.4,65.2 L222.9,60.1 L228.7,58.5 L236.6,57.8 L246.8,57.5 L251.1,58.6 L258.9,55.2 L261.3,55 L264.4,56.4 L268.5,56 L271.6,57.1 L272.8,60.1 L275.2,59.7 L278.3,60.8 L280.1,62.4 L281.5,66.1 L281.5,69.7 L280.5,71.8 L283,72.9 L284.7,75.8 L290.6,74.5 L290.8,76.5 L294,78.4 Z"/>
+        <path id="f-in" class="region-fill" d="M158.6,279 L162,277.4 L167.3,277.2 L167.4,272.1 L168.3,271.3 L169,272.1 L170.1,271.6 L180.5,272 L183,273.7 L184.4,273.8 L187.8,273.3 L189,271.7 L195.2,269.6 L196.1,269.5 L196.6,271.9 L198.7,272.5 L203.9,269.8 L202.8,268.3 L202.7,266.9 L204,264.9 L201.3,258.5 L197.7,252.4 L197.7,248.3 L196.4,247.6 L191.6,247.6 L189.1,244.1 L188.7,241.4 L189.6,239 L189.8,234 L188.4,232.8 L183.3,231.9 L179.7,230 L179.1,228.9 L180.2,223.5 L185.8,217.6 L189.7,211.2 L193.8,208.2 L195.1,208.2 L197.3,209.7 L198.4,212.5 L200,213.5 L206.1,211.5 L211.7,210.8 L216.9,209.2 L218.1,205.6 L221,202.7 L224.3,195.8 L233.2,191.1 L233.9,190.1 L238.3,182.2 L240.7,175.7 L247.4,173 L249.4,170.8 L248.6,168.6 L248.9,167.2 L255.8,159.4 L260.4,157 L260,155.7 L258.9,155.3 L258.6,154.4 L259.8,149.7 L258.5,145.5 L259.2,143.7 L262.1,141.5 L270.2,138.2 L271.3,136.9 L271.4,135.8 L269.9,134.3 L266,132.7 L262.9,132.8 L261.2,132.2 L260.6,130.3 L260.9,127.7 L256,127.5 L255.3,126.8 L255.7,126 L255.2,123.7 L252.4,122.3 L250.5,120.4 L250.3,119.5 L252.3,117.1 L252.8,115 L250.5,112.9 L250,111.3 L250.4,110.2 L253.8,108.5 L254.4,107.5 L253.7,106.5 L249.7,106.3 L248.9,105.3 L250,102.6 L247.4,101.1 L247.2,100.2 L249.8,95.5 L255.1,93.6 L265.4,95.6 L269.1,95.7 L273.3,97.5 L277.4,98 L282.6,95.2 L284.6,95.3 L289.1,93.8 L291.3,94.1 L292.9,93.2 L294.3,91.3 L297.7,89.7 L298.5,87.7 L310.2,81.2 L311.8,82 L314.1,81.5 L313.6,85.3 L318.6,96.3 L324,97.8 L328.7,101.5 L328.7,102.7 L325.3,105.1 L324.9,106.4 L325.8,109.8 L326.1,115.1 L331.3,120.7 L330.8,122.7 L332.4,124.5 L332.6,132.1 L331.2,132.5 L330.2,134 L327.9,134.5 L325.6,132.7 L324.5,130.4 L319.9,131.1 L319.5,131.8 L321.2,136.9 L325,141.3 L324.4,145 L326.1,147.1 L324.9,149.6 L325.4,150.2 L325.1,152.1 L326.7,152.5 L328.7,152 L329.3,150.6 L330.8,150.7 L334.5,155.8 L336.9,157.7 L338.1,158.5 L341.6,158.2 L346.2,161.3 L347.3,161.2 L347.9,161.7 L347.9,164.9 L355.6,167.5 L360.4,170.6 L360.8,171.8 L358.3,172.2 L353.6,176.3 L351.2,179.2 L348.9,184.4 L348.6,188.3 L347,189.9 L346.2,191.7 L346,194.5 L351.5,198.2 L352.5,198.3 L353,197.3 L354.2,197.6 L363.3,202.9 L365.6,205.6 L374.1,210.9 L376.2,210.1 L383.5,214.2 L387.1,214.1 L388,216.8 L396.7,219.3 L399.2,217.7 L405.2,219.2 L406.3,218.2 L409.3,217.2 L417.5,220.5 L418.7,224.9 L425.6,227.9 L427.4,229.8 L432.6,228.3 L433.8,228.5 L434.7,229.3 L435.2,231.7 L436.1,232.3 L439.5,231.5 L445.2,232.8 L450.4,235.2 L455.4,233.1 L456.5,235.2 L459.7,236.5 L461.6,235.4 L465.1,235.8 L468.5,235.2 L470.8,236.1 L471.7,235.3 L473.4,230.3 L472.6,226.8 L470.6,223.3 L471.2,218.7 L473.2,212.9 L473.2,211.3 L472.6,210.8 L473.1,209.5 L477.6,208.4 L480,207 L483.5,208.5 L484.2,210.8 L482.7,216.7 L482.9,218.3 L484.9,220.2 L482.5,222.6 L484,224.5 L484.4,226.3 L489,228.7 L491.9,228.2 L495.2,229.1 L496.2,229.6 L496.2,230.4 L498.7,230.7 L504.3,229.8 L505.6,228.2 L507.8,227.5 L511.2,229.1 L514,229.5 L522.6,229.2 L524.9,227.9 L526.3,228.9 L528.7,229 L534.7,227.7 L534.9,226 L533.8,223.9 L535.2,220.7 L533.7,217.9 L529.8,218.1 L527.5,216.1 L528.1,212.7 L533.5,213.2 L535.5,211.9 L540.4,211.6 L542.5,210.7 L544.7,208.8 L544,207.6 L544.9,206.1 L551.5,201.8 L553.6,197.9 L561.6,196.2 L564.9,194 L565.6,192.3 L567.1,192 L570,189.1 L575.1,186.3 L576.9,187.3 L577.5,188.6 L581.1,189.1 L587.2,191 L589.2,189 L589.2,188.1 L597.4,184 L600.5,187.4 L602.5,187.4 L598.8,190.2 L599,192.9 L603.7,190.7 L606,195.6 L603.1,198.3 L601.3,201.6 L603,202.3 L606.3,200.8 L609,202.4 L612.3,202.9 L613.8,202.3 L617.6,204.9 L617.9,209.7 L612,213.7 L610.6,215.6 L611,218.1 L614.2,222.8 L614.2,223.6 L611.9,223.3 L608.3,220 L599.8,221.2 L597.8,221.9 L595.4,224.8 L588.4,229.7 L583.1,232.4 L582,234.5 L581.9,236.7 L583.2,241.9 L581.3,244.1 L580.2,247.7 L577.7,250.8 L575.9,251.8 L574.4,254.2 L574.1,255.9 L576,257.3 L576.5,258.8 L574.6,263.6 L570,271.1 L567.4,278.7 L560.3,276.5 L557.4,277.1 L554.7,275.5 L554.4,276.2 L556.1,282 L556,284.6 L555.1,292.2 L553.6,293.3 L552.2,293.1 L552.2,295.2 L550.8,298.4 L552.2,304.5 L552,306.7 L550.3,307.5 L549.1,310.5 L547.3,310.4 L546,308.8 L544.7,308.4 L543.8,310.4 L542.9,311 L541.6,299 L539.5,294.8 L539.1,288.1 L537.7,282 L536.8,282.1 L536.2,281.3 L534.5,282.1 L532.7,281.9 L532.9,285 L530,288.7 L530,292.7 L527.9,293.9 L526.2,293 L525,290.2 L523.9,290.2 L523.9,292.3 L523.1,291.8 L520.7,282.4 L521.7,277.9 L523.9,275 L526.4,275.1 L529.6,273.1 L531.9,273.3 L533.1,270.5 L535.5,269.6 L537.4,263.5 L537.4,261.6 L540.8,262.2 L541.5,261.2 L541.2,260.6 L534.7,256.7 L509.3,256.9 L499.7,254.6 L499.2,253.2 L499.6,243.6 L497.2,239 L495.8,239.4 L495.9,241.4 L495.3,242.5 L492.4,242.5 L489.5,240.8 L488.3,239.2 L487.7,236.2 L486.9,235.6 L485.4,236.2 L486.1,238.3 L483.9,238.3 L481.6,237.6 L480.6,235.3 L477.5,232.9 L476.7,233 L476.4,234.4 L477.7,235.2 L477.8,236.3 L473.3,241.1 L472.2,244.5 L473.2,245.8 L474.9,246.2 L476.6,247.7 L478.8,250.5 L483,251.3 L483.8,253.4 L485.9,255.2 L483.8,256.6 L478,256.4 L475.8,261.6 L473.2,261.1 L471.2,265.9 L473.2,268.4 L475.4,268.4 L477.1,270 L482.3,271.9 L481.9,276.6 L479.8,282.1 L482.5,286.2 L482.3,289.3 L485.5,290.4 L484.3,292.9 L485.3,299.9 L487.4,305.9 L487.4,309 L487,311.7 L485.8,311.6 L486.9,313.4 L487.4,316.5 L485.2,316.5 L484.4,315 L484,316.4 L482.6,317.7 L481.8,315.1 L482.5,310.5 L481,308.5 L479.8,313.4 L480.1,316.4 L477.9,317.2 L475.4,314.7 L474.9,317 L472.8,316.8 L471.7,315.8 L473.9,308.2 L470.8,306.1 L469.9,304.2 L470.3,306.3 L473.4,308.5 L470,313.6 L465.8,316.5 L456.7,319.1 L452.9,323.6 L452.6,325.8 L454.7,332.7 L451.4,337.5 L451.2,339.3 L447.3,341.7 L445.3,344.5 L443.2,343.7 L444.3,344.8 L443.8,346 L442.8,346.4 L432.7,349.8 L431.4,349.7 L432.5,348.8 L432.4,346.9 L431.5,346.5 L430.9,346.4 L427.5,348.7 L426.2,351 L426.5,351.5 L429.5,350.1 L430.6,351 L427.2,353 L420,359.5 L418.7,362.2 L409.6,373.6 L402.5,377.4 L395.3,385.2 L385.7,390.9 L382.1,394 L380.8,396.7 L382.1,399.3 L380.5,403.1 L372.7,407 L367,406.4 L365.2,406.9 L362.7,413.3 L361.1,414.6 L360.3,416.7 L357.9,416.6 L357.2,414.8 L355.1,414.4 L350.9,416.1 L349.5,417.5 L346.5,424.1 L345.7,428.3 L347.7,438.5 L346.7,443 L349.8,455.3 L347.4,451.5 L345.9,453.3 L350.3,457.5 L348.5,468.9 L347.1,472.9 L344.6,476.6 L342.7,480.8 L341,487.8 L341.6,490 L340.1,492.3 L341.8,491.8 L342.3,493 L342.4,509.1 L339.7,509.5 L337.5,509 L334.1,510.2 L333.1,511.6 L333.2,514 L328.2,522 L327.9,523.9 L329.5,525.9 L333.5,526.8 L335.6,528.3 L332.5,527.3 L328.8,527 L320.1,529.8 L316.4,533.5 L315.4,539.9 L314.4,542.1 L309.8,545.4 L305.8,547.3 L302.4,546.1 L298.7,543.2 L290.6,533.3 L287.1,523.9 L285.8,515.8 L287.3,517.5 L287.9,522.4 L289.2,522.5 L287.4,515.9 L285.4,514.2 L285.1,511.2 L280.7,501.3 L277.6,491.5 L274.4,485.6 L269.3,479.6 L265.3,471 L262.6,462.3 L261,452.2 L258.3,445.8 L256.5,438.2 L249.7,428.3 L248.6,424.4 L247.3,422.8 L249.4,422.8 L246.8,419.9 L247.8,418.4 L246.2,418.4 L245.4,417.5 L242.2,411.7 L240,404.8 L237.1,385 L234.6,376.9 L233.4,368.8 L232.7,367.7 L234.8,361.3 L234.2,359 L233.1,361.3 L232.1,362 L231.6,360.3 L231.7,356.5 L234.5,356.9 L231.3,355.4 L230.8,353.9 L231.5,352.8 L230.4,351.8 L229.5,347.5 L230.1,343.3 L233,333.2 L231.7,325.6 L229.9,324.6 L228.8,321.3 L230.5,319.6 L228.6,319.8 L231.7,317.1 L236.4,314.8 L232.2,315.9 L227.5,315.7 L228.3,312.7 L230,311.1 L227.1,311 L227.7,307.9 L231.7,306.6 L228.2,305.9 L226.1,306.4 L221.8,306 L223.7,307.4 L223.3,309.1 L219.6,313.6 L222.3,315.2 L223,316.4 L223,318.6 L219.2,325 L203.6,332 L201.3,332.5 L198.8,332 L195.1,330.3 L188,324.6 L183.5,319 L174.7,310.7 L171.8,307.2 L171.3,305.7 L171.4,304.1 L172.5,303.2 L173.8,303.5 L176.1,305.7 L180.4,303.6 L182,303.7 L183.2,302.7 L184.6,302.9 L187.5,301.3 L190.2,300.9 L194.4,294.1 L195.5,293.6 L195.2,292.1 L194.3,292.3 L192.8,294.6 L191.4,294.1 L189.3,294.5 L182.2,297.7 L175.5,296.2 L168.8,292.7 L166,290.4 L162.5,283.9 L168.2,279.1 L163.8,280.9 L161.4,283.1 L159.6,283.5 L158.6,279 Z"/>
+        <path id="f-bd" class="region-fill" d="M487.4,309 L487.4,305.9 L485.3,299.9 L484.3,292.9 L485.5,290.4 L482.3,289.3 L482.5,286.2 L479.8,282.1 L481.9,276.6 L482.3,271.9 L477.1,270 L475.4,268.4 L473.2,268.4 L471.2,265.9 L473.2,261.1 L475.8,261.6 L478,256.4 L483.8,256.6 L485.9,255.2 L483.8,253.4 L483,251.3 L478.8,250.5 L476.6,247.7 L474.9,246.2 L473.2,245.8 L472.2,244.5 L473.3,241.1 L477.8,236.3 L477.7,235.2 L476.4,234.4 L476.7,233 L477.5,232.9 L480.6,235.3 L481.6,237.6 L483.9,238.3 L486.1,238.3 L485.4,236.2 L486.9,235.6 L487.7,236.2 L488.3,239.2 L489.5,240.8 L492.4,242.5 L495.3,242.5 L495.9,241.4 L495.8,239.4 L497.2,239 L499.6,243.6 L499.2,253.2 L499.7,254.6 L509.3,256.9 L534.7,256.7 L541.2,260.6 L541.5,261.2 L540.8,262.2 L537.4,261.6 L537.4,263.5 L535.5,269.6 L533.1,270.5 L531.9,273.3 L529.6,273.1 L526.4,275.1 L523.9,275 L521.7,277.9 L520.7,282.4 L523.1,291.8 L523.9,292.3 L523.9,290.2 L525,290.2 L526.2,293 L527.9,293.9 L530,292.7 L530,288.7 L532.9,285 L532.7,281.9 L534.5,282.1 L536.2,281.3 L536.8,282.1 L537.7,282 L539.1,288.1 L539.5,294.8 L541.6,299 L542.9,311 L543.8,322.4 L542.8,323.1 L542.4,322.2 L539.1,320.1 L538.2,320.3 L536.7,322.6 L539,331.2 L534.7,324.6 L534,316 L532.5,312.6 L531.1,306.7 L531.7,304.7 L530.6,305.5 L529,302 L526.4,298.6 L525.6,295.6 L521.5,299.7 L517.3,300.5 L515.4,298.3 L512.3,292 L512.7,289 L511.9,283.5 L511.2,284.5 L511.1,286.4 L506.6,285.9 L508.5,287.4 L510.6,287.7 L511.6,289.1 L511.8,291.3 L509.7,292.7 L511.1,295.2 L509.6,295.6 L509.2,297.8 L512,304.4 L511.6,306.2 L508,309.8 L506,313.5 L504.8,313.7 L503.5,312.5 L503.8,310.3 L505.6,307.9 L501.7,310.2 L501,308.6 L500.7,305.4 L502.1,302.7 L500.5,304 L499.4,310.9 L495.5,314.6 L494.2,305.9 L494.5,312.1 L492.2,315.3 L490.3,315.3 L489.3,314.3 L488.1,312.8 L487.4,309 Z"/>
+        <path id="f-np" class="region-fill" d="M472.6,210.8 L473.2,211.3 L473.2,212.9 L471.2,218.7 L470.6,223.3 L472.6,226.8 L473.4,230.3 L471.7,235.3 L470.8,236.1 L468.5,235.2 L465.1,235.8 L461.6,235.4 L459.7,236.5 L456.5,235.2 L455.4,233.1 L450.4,235.2 L445.2,232.8 L439.5,231.5 L436.1,232.3 L435.2,231.7 L434.7,229.3 L433.8,228.5 L432.6,228.3 L427.4,229.8 L425.6,227.9 L418.7,224.9 L417.5,220.5 L409.3,217.2 L406.3,218.2 L405.2,219.2 L399.2,217.7 L396.7,219.3 L388,216.8 L387.1,214.1 L383.5,214.2 L376.2,210.1 L374.1,210.9 L365.6,205.6 L363.3,202.9 L354.2,197.6 L353,197.3 L352.5,198.3 L351.5,198.2 L346,194.5 L346.2,191.7 L347,189.9 L348.6,188.3 L348.9,184.4 L351.2,179.2 L353.6,176.3 L358.3,172.2 L360.8,171.8 L362.4,174 L363.4,173.9 L364.7,173 L367.2,168.9 L370.8,168 L377.1,169 L379.9,173.5 L384,175.6 L389.8,180 L392.4,181.1 L394.6,181.2 L401.3,188.5 L406.9,186.8 L409.5,187.9 L411.5,193.1 L420.4,199.1 L424.7,198.2 L426.2,198.5 L425,202.3 L425.5,203.2 L434.3,203.9 L436.9,206.3 L438.6,209.8 L439.3,210.1 L440.4,209.7 L440.6,207.2 L441.5,206.6 L442.8,208.2 L445.8,209.8 L447.5,209.2 L448.1,207.1 L449.1,206.8 L455.5,209.8 L457.3,211.3 L464.9,211.7 L468.7,210.5 L472.6,210.8 Z"/>
+        <path id="f-bt" class="region-fill" d="M528.1,212.7 L527.5,216.1 L529.8,218.1 L533.7,217.9 L535.2,220.7 L533.8,223.9 L534.9,226 L534.7,227.7 L528.7,229 L526.3,228.9 L524.9,227.9 L522.6,229.2 L514,229.5 L511.2,229.1 L507.8,227.5 L505.6,228.2 L504.3,229.8 L498.7,230.7 L496.2,230.4 L496.2,229.6 L495.2,229.1 L491.9,228.2 L489,228.7 L484.4,226.3 L484,224.5 L482.5,222.6 L484.9,220.2 L485.8,217.7 L488.2,215.5 L489.1,213.5 L494.2,207.6 L502.1,203.3 L507.8,204.5 L507.9,207.2 L513.6,207.4 L518.4,209.1 L522.4,207.3 L528.2,209.9 L528.1,212.7 Z"/>
+        <path id="f-lk" class="region-fill" d="M344.7,517.8 L348.9,518.1 L350.8,520.7 L356.1,525.4 L359.6,532.1 L360.9,532.7 L363.8,537.4 L364.2,540 L366.5,541.3 L367.5,546.6 L371.1,552.3 L374.4,560.7 L374.2,567.3 L372.8,572.1 L370.7,575.4 L365.5,579.1 L356.3,582.9 L352.7,583.5 L349.1,582.4 L346.4,580 L342.7,568.5 L340.4,545.5 L341,543.6 L341,547.8 L341.5,548.3 L344,536.9 L343.8,533.3 L346,530 L346.5,528 L346.2,521.8 L349.9,523.7 L351.6,523.4 L351,522.3 L349,521.2 L345.6,520.6 L344.2,519 L344.7,517.8 Z"/>
+
+        <g id="borders" stroke-width="1">
+          <path class="border-line" id="b-af-pk" d="M43.3,177 L69,184.7 L86.2,183.1 L94.6,185 L95.7,183.8 L99.2,182.4 L110.2,182.1 L127.3,177.4 L129.4,175.1 L128.2,172.7 L129.3,169.1 L129,164.3 L129.9,161 L130.7,159.1 L133.8,157.3 L137.5,153.1 L139,152.4 L144.7,153.9 L147.3,153.6 L151.8,151.7 L149.3,149 L156.2,146.1 L158.5,144 L162.9,144.8 L165.4,144 L168.3,146.6 L169.7,146.8 L173,145 L176.1,141.7 L175.5,133.2 L178.1,129 L178.1,127.6 L179.6,123.3 L180.7,122.5 L186.2,121.7 L191.5,118.7 L191.9,117.3 L189.6,113.1 L185.4,108.3 L185.7,106.5 L187.4,105.7 L192.6,107.3 L197.7,107.4 L204,105.8 L204.6,104.6 L204.7,100.3 L202.7,97.6 L207.8,91.8 L210.4,90.2 L213,86.5 L211.8,84.7 L212.6,82.7 L212.2,80.3 L209.5,74.6 L206.1,71.9 L206.9,70.5 L213,65.2 L215.4,65.2 L222.9,60.1 L228.7,58.5 L236.6,57.8 L246.8,57.5 L251.1,58.6 L258.9,55.2"/>
+          <path class="border-line" id="b-pk-in" d="M298.5,87.7 L297.7,89.7 L294.3,91.3 L292.9,93.2 L291.3,94.1 L289.1,93.8 L284.6,95.3 L282.6,95.2 L277.4,98 L273.3,97.5 L269.1,95.7 L265.4,95.6 L255.1,93.6 L249.8,95.5 L247.2,100.2 L247.4,101.1 L250,102.6 L248.9,105.3 L249.7,106.3 L253.7,106.5 L254.4,107.5 L253.8,108.5 L250.4,110.2 L250,111.3 L250.5,112.9 L252.8,115 L252.3,117.1 L250.3,119.5 L250.5,120.4 L252.4,122.3 L255.2,123.7 L255.7,126 L255.3,126.8 L256,127.5 L260.9,127.7 L260.6,130.3 L261.2,132.2 L262.9,132.8 L266,132.7 L269.9,134.3 L271.4,135.8 L271.3,136.9 L270.2,138.2 L262.1,141.5 L259.2,143.7 L258.5,145.5 L259.8,149.7 L258.6,154.4 L258.9,155.3 L260,155.7 L260.4,157 L255.8,159.4 L248.9,167.2 L248.6,168.6 L249.4,170.8 L247.4,173 L240.7,175.7 L238.3,182.2 L233.9,190.1 L233.2,191.1 L224.3,195.8 L221,202.7 L218.1,205.6 L216.9,209.2 L211.7,210.8 L206.1,211.5 L200,213.5 L198.4,212.5 L197.3,209.7 L195.1,208.2 L193.8,208.2 L189.7,211.2 L185.8,217.6 L180.2,223.5 L179.1,228.9 L179.7,230 L183.3,231.9 L188.4,232.8 L189.8,234 L189.6,239 L188.7,241.4 L189.1,244.1 L191.6,247.6 L196.4,247.6 L197.7,248.3 L197.7,252.4 L201.3,258.5 L204,264.9 L202.7,266.9 L202.8,268.3 L203.9,269.8 L198.7,272.5 L196.6,271.9 L196.1,269.5 L195.2,269.6 L189,271.7 L187.8,273.3 L184.4,273.8 L183,273.7 L180.5,272 L170.1,271.6 L169,272.1 L168.3,271.3 L167.4,272.1 L167.3,277.2 L162,277.4 L158.6,279"/>
+          <path class="border-line" id="b-in-bd" d="M542.9,311 L541.6,299 L539.5,294.8 L539.1,288.1 L537.7,282 L536.8,282.1 L536.2,281.3 L534.5,282.1 L532.7,281.9 L532.9,285 L530,288.7 L530,292.7 L527.9,293.9 L526.2,293 L525,290.2 L523.9,290.2 L523.9,292.3 L523.1,291.8 L520.7,282.4 L521.7,277.9 L523.9,275 L526.4,275.1 L529.6,273.1 L531.9,273.3 L533.1,270.5 L535.5,269.6 L537.4,263.5 L537.4,261.6 L540.8,262.2 L541.5,261.2 L541.2,260.6 L534.7,256.7 L509.3,256.9 L499.7,254.6 L499.2,253.2 L499.6,243.6 L497.2,239 L495.8,239.4 L495.9,241.4 L495.3,242.5 L492.4,242.5 L489.5,240.8 L488.3,239.2 L487.7,236.2 L486.9,235.6 L485.4,236.2 L486.1,238.3 L483.9,238.3 L481.6,237.6 L480.6,235.3 L477.5,232.9 L476.7,233 L476.4,234.4 L477.7,235.2 L477.8,236.3 L473.3,241.1 L472.2,244.5 L473.2,245.8 L474.9,246.2 L476.6,247.7 L478.8,250.5 L483,251.3 L483.8,253.4 L485.9,255.2 L483.8,256.6 L478,256.4 L475.8,261.6 L473.2,261.1 L471.2,265.9 L473.2,268.4 L475.4,268.4 L477.1,270 L482.3,271.9 L481.9,276.6 L479.8,282.1 L482.5,286.2 L482.3,289.3 L485.5,290.4 L484.3,292.9 L485.3,299.9 L487.4,305.9 L487.4,309"/>
+          <path class="border-line" id="b-in-np" d="M472.6,210.8 L473.2,211.3 L473.2,212.9 L471.2,218.7 L470.6,223.3 L472.6,226.8 L473.4,230.3 L471.7,235.3 L470.8,236.1 L468.5,235.2 L465.1,235.8 L461.6,235.4 L459.7,236.5 L456.5,235.2 L455.4,233.1 L450.4,235.2 L445.2,232.8 L439.5,231.5 L436.1,232.3 L435.2,231.7 L434.7,229.3 L433.8,228.5 L432.6,228.3 L427.4,229.8 L425.6,227.9 L418.7,224.9 L417.5,220.5 L409.3,217.2 L406.3,218.2 L405.2,219.2 L399.2,217.7 L396.7,219.3 L388,216.8 L387.1,214.1 L383.5,214.2 L376.2,210.1 L374.1,210.9 L365.6,205.6 L363.3,202.9 L354.2,197.6 L353,197.3 L352.5,198.3 L351.5,198.2 L346,194.5 L346.2,191.7 L347,189.9 L348.6,188.3 L348.9,184.4 L351.2,179.2 L353.6,176.3 L358.3,172.2 L360.8,171.8"/>
+          <path class="border-line" id="b-in-bt" d="M484.9,220.2 L482.5,222.6 L484,224.5 L484.4,226.3 L489,228.7 L491.9,228.2 L495.2,229.1 L496.2,229.6 L496.2,230.4 L498.7,230.7 L504.3,229.8 L505.6,228.2 L507.8,227.5 L511.2,229.1 L514,229.5 L522.6,229.2 L524.9,227.9 L526.3,228.9 L528.7,229 L534.7,227.7 L534.9,226 L533.8,223.9 L535.2,220.7 L533.7,217.9 L529.8,218.1 L527.5,216.1 L528.1,212.7"/>
+        </g>
+
+        <g id="labels"></g>
+
+        <g id="maldives-inset">
+          <rect class="inset-frame" x="18" y="470" width="112" height="98" rx="4"/>
+          <text class="inset-label" x="74" y="483">MALDIVES</text>
+          <text class="inset-label" x="74" y="493" style="font-weight:400;opacity:.75">(inset, not to scale)</text>
+          <g id="mv-dots"></g>
+        </g>
+      </svg>
+
+      <div class="era-head">
+        <div class="era-name-inline" id="eraName">The Maurya Empire</div>
+        <div class="era-owners" id="eraOwners"></div>
+      </div>
+      <div class="flags-row" id="flagsRow"></div>
+      <p class="era-story" id="eraStory"></p>
+
+      <p class="map-note">Real traced coastlines and borders (simplified from public boundary data). Early-era "flags" before any state used a standardized banner are labeled as symbolic reconstructions, not historical specifications.</p>
+      <div class="map-key" id="legend"></div>
+      <div class="map-notes">
+        <b>Try:</b> drag slowly from 250 BCE through the Mughal era and watch Afghanistan, Pakistan, India, and Bangladesh's borders keep dissolving into one color under each successive subcontinental empire, while Nepal, Bhutan, Sri Lanka, and the Maldives stay their own separate colors the entire time &mdash; none of them was ever absorbed. Then jump to "Partition": Pakistan and India split for the first time on this map, and Bangladesh (then East Pakistan) shares Pakistan's color despite not touching it &mdash; the two wings were never contiguous. By "Present," all eight countries hold eight different colors, with no shared borders left on the map at all.
+      </div>
+    </div>
+  </div>
+
+  <div class="about">
+    <h2>About this hub</h2>
+    <p>The map above traces eight snapshots across roughly 2,250 years using real, publicly sourced coastline and border data, simplified for legibility. China, Myanmar, Central Asia (Tajikistan, Turkmenistan, Uzbekistan, Kyrgyzstan), and Iran are shown only as faint outlines for geographic orientation &mdash; they aren't tracked as regions in their own right here. The Maldives, a chain of low coral atolls roughly 700 km southwest of Sri Lanka, is shown as a small inset rather than at its true, far-off position, since the map's frame is built around the mainland subcontinent.</p>
+    <p>Kashmir, the Himalayan region at the northern edge of the former British Raj, remains a territorial dispute between India and Pakistan, administered in parts by each since a 1947&ndash;48 war shortly after independence; it is unresolved to this day. The map traces the current de facto line for orientation only, as described in the note above the map, and does not take a position on the dispute's resolution.</p>
+    <p>Colors on the country cards above are drawn from each country's current national flag, not a historical palette, since no per-country flag lineage exists yet on this site. Once a country's own page publishes, its card here will link out to a full flag timeline, matching the depth of the map above.</p>
+  </div>
+
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This hub is one region in a larger set. See the other phases here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="arabian-peninsula-hub.html"><b>Arabian Peninsula hub</b><span>Seven countries, tribal to modern states</span></a>
+      <a class="link-card" href="west-africa-hub.html"><b>West Africa hub</b><span>Sixteen countries, empires to independence</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Map boundary data adapted from Natural Earth (public domain), simplified for this atlas; not surveyed.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var C = {
+    maurya:"#8a5a2e", anuradhapura:"#2f8f5b", np_early:"#5c8f3f", unrecorded:"#9c9078",
+    gupta:"#c9a13c", af_local1:"#7a4fb5", lichhavi:"#4a9d6f",
+    delhi:"#9c3b28", af_local2:"#4a3a6b", malla:"#3f7a5c", lk_kingdoms:"#1f8a8a", mv_sultanate:"#c9603c",
+    mughal:"#2f6b3f", np_preunif:"#6faa4f", bt_theocracy:"#6a3f8f", lk_kandy_dutch:"#1f6b8a",
+    raj:"#7c2e1f", af_emirate:"#3a3a3a", np_kingdom:"#c9922c", bt_protectorate:"#a9762f", ceylon:"#204b5c", mv_protectorate:"#2a7a94",
+    india_dominion:"#d4a017", pakistan_dominion:"#268a55", af_kingdom:"#33302a", bt_kingdom:"#7a4a9c",
+    india_republic:"#e0930f", pakistan_republic:"#1f7a3f", bangladesh_indep:"#006a4e", lk_independent:"#2a5a70", mv_independent:"#1a5f7a",
+    in_modern:"#FF9933", pk_modern:"#01411C", bd_modern:"#006a4e", af_modern:"#e7e2d3",
+    np_modern:"#DC143C", bt_modern:"#FFDE00", lk_modern:"#8D153A", mv_modern:"#D21034"
+  };
+  var NAMES = {
+    maurya:"Maurya Empire", anuradhapura:"Anuradhapura Kingdom", np_early:"Local Himalayan polities", unrecorded:"No organized state recorded",
+    gupta:"Gupta Empire", af_local1:"Local / Kushano-Sasanian rule", lichhavi:"Licchavi Kingdom",
+    delhi:"Delhi Sultanate", af_local2:"Local Turko-Mongol rule", malla:"Malla-era kingdoms", lk_kingdoms:"Jaffna / Gampola kingdoms", mv_sultanate:"Maldive Sultanate",
+    mughal:"Mughal Empire", np_preunif:"Pre-unification principalities", bt_theocracy:"Bhutan (Zhabdrung's dual system)", lk_kandy_dutch:"Kingdom of Kandy / Dutch Ceylon",
+    raj:"British India (the Raj)", af_emirate:"Emirate of Afghanistan", np_kingdom:"Kingdom of Nepal", bt_protectorate:"Bhutan (British protectorate)", ceylon:"Ceylon (Crown Colony)", mv_protectorate:"Maldives (British protectorate)",
+    india_dominion:"Dominion of India", pakistan_dominion:"Dominion of Pakistan", af_kingdom:"Kingdom of Afghanistan", bt_kingdom:"Kingdom of Bhutan",
+    india_republic:"Republic of India", pakistan_republic:"Islamic Republic of Pakistan", bangladesh_indep:"Bangladesh", lk_independent:"Ceylon / Sri Lanka", mv_independent:"Maldives",
+    in_modern:"India", pk_modern:"Pakistan", bd_modern:"Bangladesh", af_modern:"Afghanistan (Islamic Emirate)",
+    np_modern:"Nepal", bt_modern:"Bhutan", lk_modern:"Sri Lanka", mv_modern:"Maldives"
+  };
+  var legendEl = document.getElementById("legend");
+  legendEl.innerHTML = Object.keys(C).map(function (k) {
+    return '<span><span class="sw" style="background:' + C[k] + '"></span>' + NAMES[k] + "</span>";
+  }).join("");
+
+  // ---- Flag graphics: one per distinct historical power, not per map color ----
+  var FLAGS = {
+    maurya_banner: '<rect width="300" height="200" fill="#c9803c"/><circle cx="150" cy="100" r="46" fill="none" stroke="#241f14" stroke-width="4"/><circle cx="150" cy="100" r="6" fill="#241f14"/><g stroke="#241f14" stroke-width="3">' + [0,45,90,135,180,225,270,315].map(function(a){var r1=8,r2=44,x1=150+r1*Math.cos(a*Math.PI/180),y1=100+r1*Math.sin(a*Math.PI/180),x2=150+r2*Math.cos(a*Math.PI/180),y2=100+r2*Math.sin(a*Math.PI/180);return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'"/>';}).join('') + '</g>',
+    garuda: '<rect width="300" height="200" fill="#c9a13c"/><path d="M150,60 L120,90 L70,95 L110,105 L60,125 L115,118 L90,150 L130,120 L150,150 L170,120 L210,150 L185,118 L240,125 L190,105 L230,95 L180,90 Z" fill="#241f14"/>',
+    anuradhapura_flag: '<rect width="300" height="200" fill="#7c2e1f"/><path d="M150,60 q40,10 40,55 q0,40 -40,55 q-40,-15 -40,-55 q0,-45 40,-55 Z" fill="#c9a13c"/><circle cx="150" cy="45" r="8" fill="#c9a13c"/>',
+    np_early_flag: '<rect width="300" height="200" fill="#3f7a5c"/><circle cx="150" cy="100" r="30" fill="none" stroke="#f4efe1" stroke-width="5"/><g stroke="#f4efe1" stroke-width="4">' + [0,60,120,180,240,300].map(function(a){var r1=32,r2=48,x1=150+r1*Math.cos(a*Math.PI/180),y1=100+r1*Math.sin(a*Math.PI/180),x2=150+r2*Math.cos(a*Math.PI/180),y2=100+r2*Math.sin(a*Math.PI/180);return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'"/>';}).join('') + '</g>',
+    unrecorded_swatch: '<rect width="300" height="200" fill="#e7e0cc"/><rect x="4" y="4" width="292" height="192" fill="none" stroke="#9c9078" stroke-width="3" stroke-dasharray="8 6"/><text x="150" y="110" font-size="46" text-anchor="middle" fill="#9c9078" font-family="serif">?</text>',
+    af_local1_flag: '<rect width="300" height="200" fill="#7a4fb5"/><circle cx="150" cy="100" r="34" fill="none" stroke="#f4efe1" stroke-width="5"/><circle cx="150" cy="100" r="14" fill="#f4efe1"/>',
+    lichhavi_flag: '<rect width="300" height="200" fill="#4a9d6f"/><path d="M150,55 L162,90 L198,90 L168,112 L180,148 L150,126 L120,148 L132,112 L102,90 L138,90 Z" fill="#f4efe1"/>',
+    delhi_sultanate_flag: '<rect width="300" height="200" fill="#9c3b28"/><path d="M120,70 A38,38 0 1 0 172,102 A28,28 0 1 1 120,70 Z" fill="#f4efe1"/><path d="M200,84 l5,15 16,0 -13,10 5,15 -13,-9 -13,9 5,-15 -13,-10 16,0 Z" fill="#f4efe1"/>',
+    af_local2_flag: '<rect width="300" height="200" fill="#4a3a6b"/><path d="M110,70 A38,38 0 1 0 162,102 A28,28 0 1 1 110,70 Z" fill="#d1a154"/>',
+    malla_flag: '<rect width="300" height="200" fill="#3f7a5c"/><rect x="115" y="65" width="70" height="70" fill="#f4efe1" stroke="#241f14" stroke-width="3"/><path d="M115,65 L150,40 L185,65 Z" fill="#c9a13c" stroke="#241f14" stroke-width="2"/>',
+    lk_kingdoms_flag: '<rect width="300" height="200" fill="#1f8a8a"/><path d="M150,60 q45,15 45,55 q0,42 -45,55 q-45,-13 -45,-55 q0,-40 45,-55 Z" fill="#c9a13c"/>',
+    mv_sultanate_flag: '<rect width="300" height="200" fill="#9c3b28"/>',
+    mughal_flag: '<rect width="300" height="200" fill="#2f6b3f"/><circle cx="150" cy="100" r="34" fill="#d1a154"/><g stroke="#d1a154" stroke-width="3">' + [0,30,60,90,120,150,180,210,240,270,300,330].map(function(a){var r1=36,r2=48,x1=150+r1*Math.cos(a*Math.PI/180),y1=100+r1*Math.sin(a*Math.PI/180),x2=150+r2*Math.cos(a*Math.PI/180),y2=100+r2*Math.sin(a*Math.PI/180);return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'"/>';}).join('') + '</g>',
+    np_preunif_flag: '<rect width="300" height="200" fill="#6faa4f"/><path d="M150,55 L190,145 L110,145 Z" fill="#f4efe1" stroke="#241f14" stroke-width="2"/>',
+    bt_theocracy_flag: '<rect width="300" height="100" fill="#d1a154"/><rect y="100" width="300" height="100" fill="#a9762f"/>',
+    lk_kandy_dutch_flag: '<g><rect width="300" height="200" fill="#a4302a"/><rect width="140" height="200" fill="#c9a13c"/><rect x="120" width="20" height="200" fill="#f4efe1"/><path d="M50,60 q35,12 35,40 q0,32 -35,40 q-35,-8 -35,-40 q0,-28 35,-40 Z" fill="#7c2e1f"/></g>',
+    raj_star_flag: '<rect width="300" height="200" fill="#1e2f6b"/><rect width="130" height="90" fill="#1e2f6b"/><path d="M0,0 L130,90 M130,0 L0,90" stroke="#f4efe1" stroke-width="10"/><path d="M0,38 L130,38 M0,52 L130,52" stroke="#a4302a" stroke-width="10"/><path d="M56,0 L56,90 M74,0 L74,90" stroke="#a4302a" stroke-width="10"/><g transform="translate(210,100)"><circle r="26" fill="none" stroke="#f4efe1" stroke-width="3"/><path d="M0,-22 l6,17 18,0 -14.5,10.5 5.5,17 -15,-10.5 -15,10.5 5.5,-17 -14.5,-10.5 18,0 Z" fill="#f4efe1"/></g>',
+    af_kingdom_tricolor: '<rect width="100" height="200" fill="#000000"/><rect x="100" width="100" height="200" fill="#a4302a"/><rect x="200" width="100" height="200" fill="#007a3d"/><circle cx="150" cy="100" r="18" fill="#d1a154" opacity="0.9"/>',
+    np_pennant_flag: '<path d="M20,20 L150,55 L20,90 Z" fill="#c8102e" stroke="#1e2f6b" stroke-width="6" stroke-linejoin="round"/><path d="M20,90 L150,120 L20,155 Z" fill="#c8102e" stroke="#1e2f6b" stroke-width="6" stroke-linejoin="round"/><circle cx="55" cy="48" r="10" fill="#f4efe1"/><path d="M45,112 a11,11 0 1 0 20,-4 a8,8 0 1 1 -20,4 Z" fill="#f4efe1"/>',
+    bt_protectorate_flag: '<rect width="300" height="200" fill="#a9762f"/><rect x="4" y="4" width="292" height="192" fill="none" stroke="#f4efe1" stroke-width="2"/>',
+    ceylon_ensign_flag: '<rect width="300" height="200" fill="#1e2f6b"/><rect width="130" height="90" fill="#1e2f6b"/><path d="M0,0 L130,90 M130,0 L0,90" stroke="#f4efe1" stroke-width="9"/><path d="M0,38 L130,38 M0,52 L130,52" stroke="#a4302a" stroke-width="9"/><path d="M56,0 L56,90 M74,0 L74,90" stroke="#a4302a" stroke-width="9"/><ellipse cx="215" cy="110" rx="34" ry="26" fill="#c9a13c"/><path d="M215,90 q14,10 14,26 q0,16 -14,26" stroke="#7c2e1f" stroke-width="4" fill="none"/>',
+    mv_protectorate_flag: '<rect width="300" height="200" fill="#9c3b28"/><path d="M235,80 a26,26 0 1 0 0,40 a20,20 0 1 1 0,-40 Z" fill="#f4efe1"/>',
+    india_tricolor: '<rect width="300" height="66.7" fill="#FF9933"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#138808"/><circle cx="150" cy="100" r="18" fill="none" stroke="#000080" stroke-width="2.5"/><g stroke="#000080" stroke-width="1.4">' + Array.from({length:24}).map(function(_,i){var a=i*15,r1=18,r2=24,x1=150+r1*Math.cos(a*Math.PI/180),y1=100+r1*Math.sin(a*Math.PI/180),x2=150+r2*Math.cos(a*Math.PI/180),y2=100+r2*Math.sin(a*Math.PI/180);return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'"/>';}).join('') + '</g>',
+    pakistan_flag: '<rect width="300" height="200" fill="#01411C"/><rect width="75" height="200" fill="#f4efe1"/><path d="M215,60 a40,40 0 1 0 0,80 a30,30 0 1 1 0,-80 Z" fill="#f4efe1"/><path d="M245,75 l5,14 15,0.5 -12,9.5 4.5,14.5 -12.5,-8.5 -12.5,8.5 4.5,-14.5 -12,-9.5 15,-0.5 Z" fill="#f4efe1"/>',
+    bangladesh_flag: '<rect width="300" height="200" fill="#006a4e"/><circle cx="130" cy="100" r="50" fill="#f42a41"/>',
+    bt_druk_flag: '<rect width="300" height="200" fill="#ffde00"/><path d="M0,0 L300,200 L0,200 Z" fill="#ff4e12"/><path d="M150,55 q20,10 25,35 q-15,-5 -25,5 q10,-25 -20,-30 q15,-15 20,-10 Z" fill="#f4efe1" stroke="#241f14" stroke-width="1.5"/>',
+    lk_lion_flag: '<rect width="300" height="200" fill="#8D153A"/><rect width="40" height="200" fill="#00534E"/><rect x="40" width="40" height="200" fill="#FF7300"/><rect x="88" y="14" width="198" height="172" fill="#8D153A" stroke="#FFB700" stroke-width="7"/><g fill="#FFB700"><rect x="100" y="95" width="16" height="16"/><rect x="255" y="95" width="16" height="16"/><rect x="130" y="30" width="10" height="10"/><rect x="230" y="30" width="10" height="10"/><rect x="130" y="150" width="10" height="10"/><rect x="230" y="150" width="10" height="10"/></g><path d="M175,60 q30,5 32,45 q-2,35 -32,45 q4,-8 4,-45 q0,-37 -4,-45 Z" fill="#FFB700"/>',
+    maldives_flag: '<rect width="300" height="200" fill="#D21034"/><rect x="70" y="30" width="160" height="140" fill="#00843D"/><path d="M155,60 a40,40 0 1 0 0,80 a30,30 0 1 1 0,-80 Z" fill="#f4efe1"/>',
+    afghan_emirate_flag: '<rect width="300" height="200" fill="#f4efe1"/><rect y="86" width="300" height="28" fill="#000000"/><text x="150" y="105" font-size="12" text-anchor="middle" fill="#f4efe1" font-family="serif">shahada (script simplified)</text>'
+  };
+  function flagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (FLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+
+  var SNAP = [
+    { year:"250 BCE", name:"The Maurya Empire", t:{ af:C.maurya, pk:C.maurya, in:C.maurya, bd:C.maurya, np:C.np_early, bt:C.unrecorded, lk:C.anuradhapura, mv:C.unrecorded },
+      story: "Chandragupta Maurya founded the Maurya Empire around 321 BCE, and by the reign of his grandson Ashoka (r. c. 268&ndash;232 BCE) it was the largest, most centralized state the subcontinent had yet seen, reaching into the Hindu Kush and covering nearly all of modern Afghanistan's east, Pakistan, and India, plus Bengal. Ashoka's own rock and pillar edicts, inscribed in Prakrit and Greek near Kandahar, are among the earliest surviving primary sources for the empire's actual reach. After the bloody conquest of Kalinga around 261 BCE, Ashoka adopted Buddhism and renounced further conquest, ruling instead through edicts promoting non-violence and tolerance carved into stone across his territory. Beyond the Maurya frontier, the Himalayan foothills that are now Nepal were home to local polities, including the Kirata kingdoms remembered in later chronicles, never brought under direct Maurya rule. Bhutan and the Maldives have left no surviving record of an organized state from this period. In the far south, the island's Anuradhapura Kingdom was consolidating around this same time &mdash; tradition holds that Buddhism reached the island under King Devanampiya Tissa, a contemporary of Ashoka, even though Anuradhapura was never part of the Maurya state." },
+    { year:"400 CE", name:"The Gupta Empire", t:{ af:C.af_local1, pk:C.gupta, in:C.gupta, bd:C.gupta, np:C.lichhavi, bt:C.unrecorded, lk:C.anuradhapura, mv:C.unrecorded },
+      story: "The Gupta Empire, founded by Sri Gupta and expanded rapidly under Chandragupta I, Samudragupta, and Chandragupta II (r. c. 375&ndash;415 CE), presided over what later historians called a golden age of Indian literature, mathematics, and astronomy, producing figures like the mathematician and astronomer Aryabhata. At its height under Chandragupta II, Gupta authority ran across the Gangetic plain and Bengal and extended into the Indus region, though its grip loosened toward the northwest. Afghanistan lay outside Gupta control in this period, contested between waning Kushan successor states and the Hunnic Kidarite and, later, Hephthalite groups pressing in from Central Asia. In the Kathmandu Valley, the Licchavi dynasty ruled a kingdom that maintained its own coinage, inscriptions, and diplomatic contacts &mdash; including with the Guptas &mdash; without ever being absorbed into the empire. Sri Lanka's Anuradhapura Kingdom continued as an independent, literate Buddhist state with its own line of kings. Bhutan and the Maldives again have no surviving record of centralized rule in this era." },
+    { year:"c. 1330", name:"The Delhi Sultanate", t:{ af:C.af_local2, pk:C.delhi, in:C.delhi, bd:C.delhi, np:C.malla, bt:C.unrecorded, lk:C.lk_kingdoms, mv:C.mv_sultanate },
+      story: "The Delhi Sultanate, established in 1206 after Muhammad of Ghor's general Qutb al-Din Aibak seized power in northern India, reached its greatest territorial extent under the Tughluq dynasty in the 1320s&ndash;30s, when Muhammad bin Tughluq's armies pushed Sultanate authority deep into the Deccan and, for a time, into Bengal &mdash; though Bengal's governors repeatedly asserted their own independence, and Delhi's hold there was never as stable as in the north. To the northwest, Afghanistan in this period was fragmented among local and Turko-Mongol rulers in the wake of the Mongol invasions, outside Sultanate control. The Kathmandu Valley was under the Malla dynasty, an independent Hindu-Buddhist kingdom with its own rich architectural and literary tradition. Sri Lanka's political center had shifted away from Anuradhapura to a series of successor kingdoms &mdash; Jaffna in the north, Gampola further south &mdash; none of them under Delhi's authority. The Maldives had its own independent Sultanate, established in 1153 when the ruling dynasty converted to Islam, predating the Delhi Sultanate itself by half a century. Bhutan remained a patchwork of local valleys without a unifying state." },
+    { year:"c. 1700", name:"The Mughal Empire", t:{ af:C.mughal, pk:C.mughal, in:C.mughal, bd:C.mughal, np:C.np_preunif, bt:C.bt_theocracy, lk:C.lk_kandy_dutch, mv:C.mv_sultanate },
+      story: "The Mughal Empire, founded by Babur in 1526, reached its greatest territorial extent under Aurangzeb (r. 1658&ndash;1707), whose relentless Deccan campaigns pushed Mughal authority further south than any prior northern power, even as the strain of constant war began eroding the empire's finances and cohesion. By 1700 Mughal writ ran across almost the whole of modern India, Pakistan, and Bangladesh, and Kabul remained a Mughal provincial capital, even as Kandahar further south had already changed hands repeatedly with Safavid Persia. To the east, the Himalayan kingdoms stayed outside Mughal control entirely: the Kathmandu Valley was still divided among competing principalities in the decades before Prithvi Narayan Shah's 1768 unification, and Bhutan had been forged into a unified, independent state in 1616 by the Tibetan lama Ngawang Namgyal (the Zhabdrung Rinpoche), who established the dual system of religious and civil authority that still shapes Bhutanese governance. In Sri Lanka, the interior Kingdom of Kandy held out as the island's last independent Sinhalese kingdom while the coasts had passed from Portuguese to Dutch colonial control by 1700 &mdash; neither power was Mughal, and Kandy itself never submitted to Delhi. The Maldives continued as its own independent Sultanate throughout." },
+    { year:"c. 1900", name:"The British Raj", t:{ af:C.af_emirate, pk:C.raj, in:C.raj, bd:C.raj, np:C.np_kingdom, bt:C.bt_protectorate, lk:C.ceylon, mv:C.mv_protectorate },
+      story: "British control expanded from the East India Company's trading footholds into outright political dominance over the eighteenth and nineteenth centuries, accelerating after the Company's 1757 victory at Plassey. The 1857 rebellion ended Company rule outright: the British Crown assumed direct control in 1858, and Queen Victoria was proclaimed Empress of India in 1877. By 1900 the British Raj administered most of present-day India, Pakistan, and Bangladesh directly or through subordinate princely states. Nepal and Afghanistan were never annexed: Nepal's kingdom preserved its sovereignty through the 1816 Sugauli Treaty and later agreements, while Afghanistan, after three Anglo-Afghan wars fought largely as a buffer-state contest with Russia during the so-called Great Game, retained the Emirate's independence, formally confirmed by the 1919 Treaty of Rawalpindi. Bhutan's status was distinct from both: the 1865 Treaty of Sinchula made Britain responsible for Bhutan's foreign relations while leaving its internal governance untouched &mdash; a protectorate relationship, not annexation. Ceylon (Sri Lanka) is a separate case again: it was administered the entire time as its own Crown Colony, never part of British India at all, with its own governor answering directly to London. The Maldives similarly became a British protectorate in 1887, with the Sultan retaining internal self-government." },
+    { year:"1947", name:"Partition", t:{ af:C.af_kingdom, pk:C.pakistan_dominion, in:C.india_dominion, bd:C.pakistan_dominion, np:C.np_kingdom, bt:C.bt_kingdom, lk:C.ceylon, mv:C.mv_protectorate },
+      story: "World War II left Britain unable to sustain the Raj, and independence arrived on 14&ndash;15 August 1947 in the form of Partition: British India split into two new dominions, India and Pakistan, dividing along lines drawn largely, though not only, on religious majorities. Pakistan itself was created as two wings a thousand miles apart &mdash; West Pakistan (shown here) and East Pakistan, formerly eastern Bengal, now Bangladesh's territory, which is why it shares Pakistan's color here despite not touching it on the map. The migration that followed Partition is estimated at some fourteen to twenty million people crossing the new borders, accompanied by widespread and severe communal violence; death-toll estimates vary widely across sources, from the low hundreds of thousands into the millions. One boundary drawn at Partition remains unresolved: the princely state of Jammu and Kashmir's accession was disputed by both new dominions, and a 1947&ndash;48 war left the region divided by a ceasefire line, administered in parts by India and by Pakistan ever since &mdash; a dispute that continues today (see the note above the map). Elsewhere, Afghanistan continued as an independent kingdom under Zahir Shah, Nepal as an independent kingdom, and Bhutan as an independent kingdom that would sign its own treaty of friendship with India in 1949. Ceylon remained a British colony for a few months more, gaining its own independence in February 1948; the Maldives remained a British protectorate until 1965." },
+    { year:"1971", name:"Bangladesh Liberation War", t:{ af:C.af_kingdom, pk:C.pakistan_republic, in:C.india_republic, bd:C.bangladesh_indep, np:C.np_kingdom, bt:C.bt_kingdom, lk:C.lk_independent, mv:C.mv_independent },
+      story: "Pakistan's two wings, separated by more than a thousand miles of Indian territory and increasingly divided by language, culture, and a growing sense of political and economic marginalization in the east, came to a head after the Pakistani military launched a crackdown in East Pakistan in March 1971 following a disputed election outcome. The result was a nine-month war and a mass displacement of refugees into India; India intervened militarily in December 1971, and East Pakistan emerged as the independent state of Bangladesh on 16 December 1971. India, a republic since 1950, and Pakistan, an Islamic Republic since 1956, both continued as separate, already-independent states through this crisis. Elsewhere on the subcontinent, Afghanistan remained a kingdom until Zahir Shah was deposed in a 1973 coup (just after this snapshot), Nepal continued under its own monarchy, and Bhutan continued as an independent kingdom, its Druk flag formalized in 1949. Ceylon, independent since 1948, would rename itself Sri Lanka and become a republic the following year, in 1972. The Maldives, independent since 1965, had itself just become a republic in 1968, ending centuries of sultanate rule." },
+    { year:"Present", name:"Eight independent states", t:{ af:C.af_modern, pk:C.pk_modern, in:C.in_modern, bd:C.bd_modern, np:C.np_modern, bt:C.bt_modern, lk:C.lk_modern, mv:C.mv_modern },
+      story: "Each of the eight states shown here is fully independent and UN-recognized today, though several have changed their form of government since 1971. Nepal's monarchy, weakened by a decade-long insurgency and the 2001 royal massacre, was formally abolished in 2008, and Nepal is now a federal democratic republic. Bhutan carried out its own gradual, monarch-led transition to constitutional democracy, adopting a written constitution in 2008 while keeping the Wangchuck dynasty as head of state. Bangladesh, India, Pakistan, Sri Lanka, and the Maldives are all republics. Afghanistan's most recent transition came in August 2021, when the Taliban's Islamic Emirate took control of Kabul as the internationally backed republic collapsed; it is the country's de facto government today, though the extent of formal international recognition remains limited. The India&ndash;Pakistan line through Jammu and Kashmir remains unresolved, administered in parts by each country, essentially unchanged in its broad outline since the 1947&ndash;48 war shown two eras back." }
+  ];
+
+  var FLAG_SETS = {
+    "250 BCE": [["maurya_banner","Maurya Empire (Ashoka)"],["anuradhapura_flag","Anuradhapura Kingdom"],["np_early_flag","Local Himalayan polities"],["unrecorded_swatch","No organized state (Bhutan, Maldives)"]],
+    "400 CE": [["garuda","Gupta Empire"],["af_local1_flag","Local / Kushano-Sasanian rule"],["lichhavi_flag","Licchavi Kingdom (Nepal)"],["anuradhapura_flag","Anuradhapura Kingdom (continues)"]],
+    "c. 1330": [["delhi_sultanate_flag","Delhi Sultanate"],["af_local2_flag","Local Turko-Mongol rule"],["malla_flag","Malla-era kingdoms (Nepal)"],["lk_kingdoms_flag","Jaffna / Gampola kingdoms"],["mv_sultanate_flag","Maldive Sultanate"]],
+    "c. 1700": [["mughal_flag","Mughal Empire"],["np_preunif_flag","Pre-unification principalities"],["bt_theocracy_flag","Bhutan (Zhabdrung's system)"],["lk_kandy_dutch_flag","Kandy / Dutch Ceylon"],["mv_sultanate_flag","Maldive Sultanate (continues)"]],
+    "c. 1900": [["raj_star_flag","British India (the Raj)"],["af_kingdom_tricolor","Emirate of Afghanistan"],["np_pennant_flag","Kingdom of Nepal"],["bt_protectorate_flag","Bhutan (protectorate)"],["ceylon_ensign_flag","Ceylon (Crown Colony)"],["mv_protectorate_flag","Maldives (protectorate)"]],
+    "1947": [["india_tricolor","Dominion of India"],["pakistan_flag","Dominion of Pakistan (incl. East Pakistan)"],["af_kingdom_tricolor","Kingdom of Afghanistan"],["np_pennant_flag","Kingdom of Nepal"],["bt_theocracy_flag","Kingdom of Bhutan"],["ceylon_ensign_flag","Ceylon (colony, indep. Feb 1948)"],["mv_protectorate_flag","Maldives (protectorate)"]],
+    "1971": [["india_tricolor","Republic of India"],["pakistan_flag","Islamic Republic of Pakistan"],["bangladesh_flag","Bangladesh (independence, Dec 1971)"],["af_kingdom_tricolor","Kingdom of Afghanistan"],["np_pennant_flag","Kingdom of Nepal"],["bt_druk_flag","Kingdom of Bhutan"],["lk_lion_flag","Ceylon / Sri Lanka"],["maldives_flag","Maldives (republic, 1968)"]],
+    "Present": [["india_tricolor","India"],["pakistan_flag","Pakistan"],["bangladesh_flag","Bangladesh"],["afghan_emirate_flag","Afghanistan (Islamic Emirate)"],["np_pennant_flag","Nepal"],["bt_druk_flag","Bhutan"],["lk_lion_flag","Sri Lanka"],["maldives_flag","Maldives"]]
+  };
+
+  var REGIONS = ["af","pk","in","bd","np","bt","lk","mv"];
+  var REGION_NAMES = { af:"Afghanistan", pk:"Pakistan", in:"India", bd:"Bangladesh", np:"Nepal", bt:"Bhutan", lk:"Sri Lanka", mv:"Maldives" };
+  var REGION_ABBR = { af:"AFG", pk:"PAK", in:"IND", bd:"BAN", np:"NEP", bt:"BHU", lk:"SRI", mv:"MDV" };
+  var REGION_POS = { af:[124,109], pk:[177,176], in:[358,300], bd:[509,282], np:[407,204], bt:[513,219], lk:[355,553], mv:[74,519] };
+  var ADJ = [["af","pk"],["pk","in"],["in","bd"],["in","np"],["in","bt"]];
+
+  function textColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+  function ownerName(hex) {
+    for (var k in C) { if (C[k] === hex) return NAMES[k]; }
+    return hex;
+  }
+
+  function groupsFor(t) {
+    var parent = {};
+    REGIONS.forEach(function (r) { parent[r] = r; });
+    function find(x) { return parent[x] === x ? x : (parent[x] = find(parent[x])); }
+    function union(a, b) { var ra = find(a), rb = find(b); if (ra !== rb) parent[ra] = rb; }
+    ADJ.forEach(function (pair) {
+      if (t[pair[0]] === t[pair[1]]) union(pair[0], pair[1]);
+    });
+    var groups = {};
+    REGIONS.forEach(function (r) {
+      var root = find(r);
+      if (!groups[root]) groups[root] = [];
+      groups[root].push(r);
+    });
+    return Object.keys(groups).map(function (k) { return groups[k]; });
+  }
+
+  var svgNS = "http://www.w3.org/2000/svg";
+  var labelsEl = document.getElementById("labels");
+  var yearTag = document.getElementById("yearTag");
+  var eraName = document.getElementById("eraName");
+  var eraOwners = document.getElementById("eraOwners");
+  var eraStory = document.getElementById("eraStory");
+  var flagsRow = document.getElementById("flagsRow");
+  var sliderEl = document.getElementById("slider");
+  var mvDotsEl = document.getElementById("mv-dots");
+
+  function render(i) {
+    var era = SNAP[i];
+    yearTag.textContent = era.year;
+    eraName.textContent = era.name;
+    eraStory.innerHTML = era.story || "";
+    flagsRow.innerHTML = (FLAG_SETS[era.year] || []).map(function (f) {
+      return '<div class="flag-chip">' + flagSvg(f[0]) + '<div class="fc-label">' + f[1] + '</div></div>';
+    }).join("");
+
+    REGIONS.forEach(function (id) {
+      if (id === "mv") return;
+      var el = document.getElementById("f-" + id);
+      el.setAttribute("fill", era.t[id]);
+    });
+
+    // Maldives inset: draw a small atoll-dot cluster in the era's color
+    var mvColor = era.t.mv;
+    mvDotsEl.innerHTML = [[46,520,7],[62,530,5],[40,540,4],[90,515,6],[100,528,5],[80,545,4]].map(function(d){
+      return '<circle cx="'+d[0]+'" cy="'+d[1]+'" r="'+d[2]+'" fill="'+mvColor+'" stroke="#241f14" stroke-width="0.6"/>';
+    }).join("");
+
+    ADJ.forEach(function (pair) {
+      var same = era.t[pair[0]] === era.t[pair[1]];
+      var line = document.getElementById("b-" + pair[0] + "-" + pair[1]);
+      line.setAttribute("stroke-opacity", same ? "0.06" : "0.85");
+      line.setAttribute("stroke-width", same ? "1" : "2.6");
+    });
+
+    var groups = groupsFor(era.t);
+    var seenOwners = {};
+    var ownerParts = [];
+    groups.forEach(function (g) {
+      var label = ownerName(era.t[g[0]]);
+      if (!seenOwners[label]) { seenOwners[label] = []; ownerParts.push(label); }
+      g.forEach(function (id) { seenOwners[label].push(REGION_NAMES[id]); });
+    });
+    eraOwners.innerHTML = ownerParts.map(function (label) {
+      return "<b>" + label + "</b>: " + seenOwners[label].join(", ");
+    }).join(" &middot; ");
+
+    labelsEl.innerHTML = "";
+    function haloFor(txtColor) { return txtColor === "#201a12" ? "#f7f1e3" : "#201a12"; }
+    groups.forEach(function (g) {
+      var visible = g.filter(function(id){ return id !== "mv"; });
+      if (!visible.length) return;
+      var cx = visible.reduce(function (s, id) { return s + REGION_POS[id][0]; }, 0) / visible.length;
+      var cy = visible.reduce(function (s, id) { return s + REGION_POS[id][1]; }, 0) / visible.length;
+      var fillHex = era.t[g[0]];
+      var txtColor = textColorFor(fillHex);
+      var halo = haloFor(txtColor);
+
+      if (visible.length > 1) {
+        var groupText = ownerName(fillHex).toUpperCase();
+        var gl = document.createElementNS(svgNS, "text");
+        gl.setAttribute("x", cx);
+        gl.setAttribute("y", cy);
+        gl.setAttribute("class", "group-label");
+        gl.setAttribute("font-size", groupText.length > 18 ? "10.5" : "13");
+        gl.setAttribute("fill", txtColor);
+        gl.setAttribute("stroke", halo);
+        gl.textContent = groupText;
+        labelsEl.appendChild(gl);
+        visible.forEach(function (id) {
+          var pos = REGION_POS[id];
+          var sl = document.createElementNS(svgNS, "text");
+          sl.setAttribute("x", pos[0]);
+          sl.setAttribute("y", pos[1] + 14);
+          sl.setAttribute("class", "sub-label");
+          sl.setAttribute("font-size", "9.5");
+          sl.setAttribute("fill", txtColor);
+          sl.setAttribute("stroke", halo);
+          sl.setAttribute("opacity", "0.85");
+          sl.textContent = REGION_ABBR[id];
+          labelsEl.appendChild(sl);
+        });
+      } else {
+        var id = visible[0];
+        var pos = REGION_POS[id];
+        var soloText = REGION_NAMES[id].toUpperCase();
+        var sl2 = document.createElementNS(svgNS, "text");
+        sl2.setAttribute("x", pos[0]);
+        sl2.setAttribute("y", pos[1]);
+        sl2.setAttribute("class", "group-label");
+        sl2.setAttribute("font-size", soloText.length > 10 ? "10.5" : "13");
+        sl2.setAttribute("fill", txtColor);
+        sl2.setAttribute("stroke", halo);
+        sl2.textContent = soloText;
+        labelsEl.appendChild(sl2);
+      }
+    });
+
+    // Maldives label (always solo, drawn from the inset group)
+    var mvTxt = textColorFor(mvColor);
+    var mvHalo = haloFor(mvTxt);
+    var mvLbl = document.createElementNS(svgNS, "text");
+    mvLbl.setAttribute("x", 74);
+    mvLbl.setAttribute("y", 560);
+    mvLbl.setAttribute("class", "sub-label");
+    mvLbl.setAttribute("font-size", "9");
+    mvLbl.setAttribute("fill", mvTxt);
+    mvLbl.setAttribute("stroke", mvHalo);
+    mvLbl.textContent = ownerName(mvColor).toUpperCase();
+    labelsEl.appendChild(mvLbl);
+  }
+
+  sliderEl.addEventListener("input", function () { render(parseInt(sliderEl.value, 10)); });
+  render(0);
+
+  var playing = false, playTimer = null;
+  var playBtn = document.getElementById("playBtn");
+  function stepPlay() {
+    var next = parseInt(sliderEl.value, 10) + 1;
+    if (next > SNAP.length - 1) { stopPlay(); return; }
+    sliderEl.value = next;
+    render(next);
+  }
+  function startPlay() {
+    playing = true;
+    playBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(sliderEl.value, 10) >= SNAP.length - 1) { sliderEl.value = 0; render(0); }
+    playTimer = setInterval(stepPlay, 2000);
+  }
+  function stopPlay() {
+    playing = false;
+    playBtn.innerHTML = "&#9654;";
+    clearInterval(playTimer);
+  }
+  playBtn.addEventListener("click", function () { playing ? stopPlay() : startPlay(); });
+})();
+</script>
+
+</body></html>

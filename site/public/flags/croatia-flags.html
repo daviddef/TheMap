@@ -1,0 +1,1632 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+</style></head><body>
+<title>Flags of the Adriatic</title>
+<meta name="description" content="A painter's atlas of the flags that flew over Croatia and Yugoslavia, from the medieval kingdom to the present republic.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #201a12;
+    --paper: #ede2c8;
+    --card: #f8f1de;
+    --card-border: #d9c9a0;
+    --brick: #9c3b28;
+    --brick-2: #7c2e1f;
+    --brass: #a9762f;
+    --adriatic: #204b5c;
+    --adriatic-2: #163846;
+    --muted: #6e6047;
+    --hair: #cbb98d;
+    --focus: #204b5c;
+    --tile-sea: #b9d3da;
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4;
+      --paper: #14171b;
+      --card: #1c2027;
+      --card-border: #33393f;
+      --brick: #d3644a;
+      --brick-2: #e07a5f;
+      --brass: #d1a154;
+      --adriatic: #6fa3b8;
+      --adriatic-2: #8fbccf;
+      --muted: #9a9280;
+      --hair: #33393f;
+      --tile-sea: #17303a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4;
+    --paper: #14171b;
+    --card: #1c2027;
+    --card-border: #33393f;
+    --brick: #d3644a;
+    --brick-2: #e07a5f;
+    --brass: #d1a154;
+    --adriatic: #6fa3b8;
+    --adriatic-2: #8fbccf;
+    --muted: #9a9280;
+    --tile-sea: #17303a;
+    --hair: #33393f;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Source Sans 3", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    padding-inline: 20px;
+    padding-block: 48px 80px;
+  }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+
+  .wrap { max-width: 880px; margin: 0 auto; }
+
+  /* ---------- Hero ---------- */
+  .kicker {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--brass);
+    margin: 0 0 14px;
+  }
+  h1 {
+    font-size: clamp(2.1rem, 5vw, 3.1rem);
+    font-weight: 600;
+    line-height: 1.05;
+    margin: 0 0 18px;
+    text-wrap: balance;
+    color: var(--ink);
+  }
+  .lede {
+    font-size: 1.08rem;
+    max-width: none;
+    color: var(--ink);
+    opacity: .88;
+    margin: 0 0 10px;
+  }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note {
+    margin-top: 28px;
+    padding: 16px 18px;
+    border: 1px solid var(--card-border);
+    background: var(--card);
+    border-radius: 3px;
+    font-size: .94rem;
+    color: var(--muted);
+  }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- Legend ---------- */
+  .legend {
+    margin-top: 44px;
+    padding-top: 28px;
+    border-top: 1px solid var(--hair);
+  }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 10px 20px;
+  }
+  .legend-item {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    font-size: .88rem;
+    color: var(--muted);
+  }
+  .legend-dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    flex: none;
+    transform: translateY(-1px);
+  }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- Timeline spine ---------- */
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 15px;
+    top: 6px;
+    bottom: 6px;
+    width: 1px;
+    background: var(--hair);
+  }
+  @media (max-width: 560px) {
+    .timeline::before { left: 9px; }
+  }
+
+  .entry {
+    position: relative;
+    padding-left: 46px;
+    margin-bottom: 46px;
+  }
+  @media (max-width: 560px) {
+    .entry { padding-left: 30px; }
+  }
+  .entry::before {
+    content: "";
+    position: absolute;
+    left: 10px;
+    top: 8px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    border: 2px solid var(--paper);
+    outline: 1px solid var(--hair);
+  }
+  @media (max-width: 560px) {
+    .entry::before { left: 4px; }
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .card-head {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    align-items: flex-start;
+  }
+  @media (max-width: 620px) {
+    .card-head { flex-direction: column; }
+  }
+
+  .flag-box {
+    flex: none;
+    width: 168px;
+  }
+  .flag-box svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    border: 1px solid var(--card-border);
+    box-shadow: 0 1px 0 rgba(0,0,0,.04);
+  }
+  .flag-caption {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+    margin-top: 6px;
+    letter-spacing: .01em;
+  }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px;
+    color: var(--brass);
+    letter-spacing: .03em;
+    margin-bottom: 6px;
+  }
+  .card-title {
+    font-size: 1.32rem;
+    font-weight: 600;
+    line-height: 1.18;
+    margin: 0 0 10px;
+    text-wrap: balance;
+  }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+    border: 1px solid var(--card-border);
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    position: relative;
+    cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+
+
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint {
+    border-top: 1px solid var(--hair);
+  }
+  details.paint > summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--adriatic);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before {
+    content: "+";
+    font-family: "Fraunces", serif;
+    font-size: 15px;
+    width: 14px;
+  }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row {
+    display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px;
+  }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch {
+    display: flex; align-items: center; gap: 8px;
+    border: 1px solid var(--card-border);
+    border-radius: 2px;
+    padding: 5px 9px 5px 5px;
+    background: var(--paper);
+  }
+  .swatch .chip {
+    width: 20px; height: 20px; border-radius: 2px; flex: none;
+    border: 1px solid rgba(0,0,0,.15);
+  }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  /* ---------- Roadmap ---------- */
+  .breadcrumb {
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 18px;
+  }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-bottom: 32px; }
+  .link-card {
+    display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card);
+    border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem;
+  }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+  .roadmap {
+    margin-top: 60px;
+    padding-top: 32px;
+    border-top: 1px solid var(--hair);
+  }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; color: var(--ink); opacity: .88; margin: 0 0 20px; }
+  .phase-list { display: grid; gap: 10px; }
+  .phase {
+    display: flex; gap: 14px; padding: 12px 16px;
+    border: 1px solid var(--card-border);
+    background: var(--card);
+    border-radius: 3px;
+    align-items: baseline;
+  }
+  .phase .num {
+    font-family: "IBM Plex Mono", monospace;
+    color: var(--brass);
+    font-size: .85rem;
+    flex: none;
+    width: 20px;
+  }
+  .phase .txt { font-size: .93rem; }
+  .phase .txt b { color: var(--ink); }
+  .phase .txt span { color: var(--muted); }
+
+  footer {
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 1px solid var(--hair);
+    font-size: .82rem;
+    color: var(--muted);
+  }
+  footer a { color: var(--adriatic); }
+
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: none; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 88px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 340px; height: auto; }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .iborder-line { transition: stroke-opacity 0.6s ease, stroke-width 0.6s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .ireg-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 700; text-anchor: middle; transition: fill .4s ease, stroke .4s ease; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; pointer-events: none; }
+  .context-border { pointer-events: none; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="yugoslavia-hub.html">&larr; Former Yugoslavia hub</a></p>
+  <p class="kicker">Family research &middot; Phase 1 of a world atlas</p>
+  <h1>Flags of the Adriatic</h1>
+  <p class="lede">Every flag that has flown over the land your family comes from &mdash; going back past Ragusa, Venetian Dalmatia, and the Habsburg kingdom to Illyrian tribes resisting Rome and the Slavic Croat duchies that came before the medieval kingdom, through two Yugoslavias to the modern republic &mdash; laid out in order, with the colors and proportions needed to paint each one accurately.</p>
+  <p class="lede">Borders in this corner of the Adriatic rarely moved because a nation voted for it. A republic was dissolved by Napoleon in an afternoon; a checkerboard shield was granted by a Habsburg chancery; a red star was sewn onto a partisan banner in the mountains before it ever flew over a capital. The flag usually tells you who held the pen.</p>
+
+  <div class="scope-note">
+    <b>Scope of this first pass:</b> the lands of present-day Croatia, under whichever crown, republic, or federation governed them, c. 400 BCE&ndash;present. Eighteen political entities, newest first &mdash; working backward from today's republic to the Illyrian tribes and Roman Dalmatia that preceded the medieval kingdom. This is the pilot for a much larger project &mdash; see the roadmap at the bottom for where to point it next (the rest of former Yugoslavia, then outward).
+  </div>
+
+  <div class="imap-section">
+    <h2>Four regions, one country &mdash; eventually</h2>
+    <p class="imap-sub">The same real coastline as the regional hub, zoomed in on Croatia alone and split into the four pieces that were, for significant stretches of history, governed separately: continental Croatia-Slavonia, the Dalmatian coast, the Istrian peninsula, and &mdash; for 328 years &mdash; the militarized Croatian Military Frontier, carved out of continental Croatia's own southern and eastern borderlands (including Lika-Senj) and answering directly to Vienna's War Council rather than the Ban in Zagreb. Press play, or drag the slider.</p>
+    <div class="rule-box">
+      <b>Croatia wasn't governed as one place until surprisingly recently.</b> Continental Croatia answered to Budapest or Vienna; Dalmatia answered to Venice, then Vienna directly; Istria was ceded to Italy twice in the 20th century alone; and from 1553 to 1881 the Military Frontier was carved out of continental Croatia itself, a standing army district answering to Vienna's War Council rather than Zagreb's own civil government. The border lines below only solidify where two pieces were actually ruled apart &mdash; they dissolve the moment a single government held them together.
+    </div>
+    <div class="imap-frame">
+      <div class="imap-controls">
+        <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="imap-year" id="iYearTag">1420</span>
+        <input type="range" id="iSlider" min="0" max="8" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="imap-svg" viewBox="0 0 260 280" xmlns="http://www.w3.org/2000/svg">
+        <path fill="var(--tile-sea)" d="M0,60 L20.9,91.9 L20.0,110.2 L31.3,127.8 L43.0,105.1 L67.7,113.4 L68.4,131.1 L85.9,153.3 L78.1,157.2 L110.3,195.9 L145.4,211.5 L167.6,230.4 L203.6,249.9 L207.8,241.0 L220,260 L200,280 L0,280 Z" transform="translate(-2,-10)"/>
+        <g class="context-border">
+          <path fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" d="M26.2,38.2 L57.8,42.3 L77.2,30.4 L110.7,29.1 L118,20.2 L124.5,20.8 L131.8,38.5 L101.2,52.4 L97.4,73.6 L84.1,79 L84.1,93.6 L69.1,92.6 L56.2,84 L49.1,92.9 L22.4,91.1 L31,86.3 L21.9,64 L26.2,38.2 Z" transform="translate(-2,-10)"/>
+          <path fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" d="M118,20.2 L130.9,-13.5 L123.6,-24.9 L145.1,-25 L148.1,-46.4 L167.5,-33 L181.6,-27.2 L213.8,-33.7 L216.9,-44.2 L232.1,-45.7 L250.8,-53.9 L254.9,-50.5 L272.9,-57.1 L282,-69.4 L294.6,-72.6 L335.5,-56.6 L343.7,-62 L364.8,-47.7 L367.4,-33.7 L344,-22.7 L325.7,12.8 L302.3,48.4 L271.6,58.2 L247.7,55.9 L204,77.5 L172.4,67.4 L143.9,45 L131.8,38.5 L124.5,20.8 L118,20.2 Z" transform="translate(-2,-10)"/>
+          <path fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" d="M296.4,95.5 L319.7,107.8 L322.6,129.5 L344.8,144.7 L356.9,132.9 L366.3,139.5 L357.4,148.3 L364.3,157.4 L354.8,169.3 L358.2,188.5 L376.6,211.1 L362,227.5 L355.4,244.2 L359.5,250.4 L353.2,257.8 L335.5,258.7 L322.4,261.7 L321.2,257.8 L325.8,251.5 L330.1,238.8 L324.7,239.1 L317.3,229.4 L311,226.9 L306.1,218.6 L298.9,215.3 L293.5,207.9 L286.7,210.8 L281.3,228.2 L272.1,232 L275.3,227.5 L260.7,216.6 L248.2,210.9 L232.5,194.7 L241.5,192.4 L247.3,167.7 L228.9,147.6 L238.6,124.5 L224.7,124.6 L239.6,104.9 L227.5,90 L218.3,69.7 L247.7,55.9 L271.6,58.2 L292.2,78.8 L296.4,95.5 Z" transform="translate(-2,-10)"/>
+          <path fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" d="M224.7,124.6 L238.6,124.5 L228.9,147.6 L247.3,167.7 L241.5,192.4 L232.5,194.7 L225.3,199.5 L212.8,211.6 L207.1,240.5 L173.3,220.6 L159,198.7 L144.4,187.1 L126.9,167.6 L118.7,151.3 L100.1,126.8 L108.3,105.1 L121.9,117.1 L130.3,106.2 L148.2,105.1 L181,113.8 L207.5,113 L224.7,124.6 Z" transform="translate(-2,-10)"/>
+          <path fill="none" stroke="var(--hair)" stroke-width="1" opacity="0.55" d="M254.5,248.3 L252.2,238.5 L235.4,264.3 L237.9,281 L229.9,276.9 L219.3,259.8 L202.8,249.4 L207.1,240.5 L212.8,211.6 L232.5,194.7 L248.2,210.9 L260.7,216.6 L275.3,227.5 L264.9,243.7 L254.5,248.3 Z" transform="translate(-2,-10)"/>
+        </g>
+        <g class="context-label">
+          <text x="53" y="30">SLOVENIA</text>
+          <text x="193" y="16">HUNGARY</text>
+          <text x="230" y="133">SERBIA</text>
+          <text x="213" y="153">BOSNIA &amp; HERZ.</text>
+          <text x="236" y="233">MONTENEGRO</text>
+        </g>
+        <path id="ireg-ist" class="ireg-fill" d="M97.2,73.5 L83.9,78.9 L84.0,93.6 L69.0,92.6 L55.9,84.0 L48.9,92.9 L22.2,91.1 L20.9,91.9 L20.0,110.2 L31.3,127.8 L43.0,105.1 L67.7,113.4 L68.4,131.1 L90,110 L97.2,73.5 Z" transform="translate(-2,-10)"/>
+        <path id="ireg-dal" class="ireg-fill" d="M68.4,131.1 L85.9,153.3 L78.1,157.2 L110.3,195.9 L145.4,211.5 L167.6,230.4 L203.6,249.9 L207.8,241.0 L173.9,221.0 L159.4,199.1 L144.8,187.4 L127.2,167.8 L118.9,151.5 L100.2,126.9 L90,120 L68.4,131.1 Z" transform="translate(-2,-10)"/>
+        <path id="ireg-con" class="ireg-fill" d="M97.2,73.5 L100.9,52.3 L131.4,38.3 L143.5,44.8 L172.2,67.4 L203.8,77.5 L218.1,69.6 L227.4,90.0 L97.2,73.5 Z" transform="translate(-2,-10)"/>
+        <path id="ireg-mf" class="ireg-fill" d="M97.2,73.5 L227.4,90.0 L239.6,105.0 L224.9,124.7 L207.5,113.1 L181.1,113.8 L148.1,105.1 L130.2,106.3 L121.9,117.2 L108.2,105.1 L100.2,126.9 L90,120 L68.4,131.1 L90,110 L97.2,73.5 Z" transform="translate(-2,-10)"/>
+        <path class="iborder-line" id="ib-ist-mf" d="M97.2,73.5 L90,110 L68.4,131.1" transform="translate(-2,-10)"/>
+        <path class="iborder-line" id="ib-dal-mf" d="M100.2,126.9 L90,120 L68.4,131.1" transform="translate(-2,-10)"/>
+        <path class="iborder-line" id="ib-con-mf" d="M97.2,73.5 L227.4,90.0" transform="translate(-2,-10)"/>
+        <g font-family="IBM Plex Mono, monospace">
+          <text class="ireg-label" id="ilbl-ist" x="48" y="90">ISTRIA</text>
+          <text class="ireg-label" id="ilbl-dal" x="128" y="180">DALMATIA</text>
+          <text class="ireg-label" id="ilbl-con" x="160" y="57">CONTINENTAL</text>
+          <text class="ireg-label" id="ilbl-con2" x="160" y="68">CROATIA &amp; SLAVONIA</text>
+          <text class="ireg-label" id="ilbl-mf" x="165" y="103">MILITARY</text>
+          <text class="ireg-label" id="ilbl-mf2" x="165" y="114">FRONTIER</text>
+        </g>
+      </svg>
+      <div class="imap-head">
+        <div class="imap-name" id="iEraName">Venice takes Dalmatia</div>
+        <div class="imap-owners" id="iEraOwners"></div>
+      </div>
+      <div class="iflags-row" id="iFlagsRow"></div>
+      <p class="imap-story" id="iEraStory"></p>
+
+      <p class="map-note">Schematic internal partition on a real traced coastline &mdash; the Istria/Dalmatia/continental/Military Frontier dividing lines are approximate, not surveyed county or generalate borders.</p>
+      <div class="imap-key" id="iLegend"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <!-- 1 -->
+    <div class="entry" id="era-1990">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#a4302a"/>
+              <rect y="66.7" width="300" height="66.6" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#1e2f96"/>
+              <g transform="translate(150,100) scale(0.6)">
+                <rect x="-45" y="-45" width="90" height="90" fill="#f4efe1" stroke="#5c4a1a" stroke-width="2"/>
+                <g fill="#a4302a">
+                  <rect x="-45" y="-45" width="18" height="18"/><rect x="-9" y="-45" width="18" height="18"/><rect x="27" y="-45" width="18" height="18"/>
+                  <rect x="-27" y="-27" width="18" height="18"/><rect x="9" y="-27" width="18" height="18"/>
+                  <rect x="-45" y="-9" width="18" height="18"/><rect x="-9" y="-9" width="18" height="18"/><rect x="27" y="-9" width="18" height="18"/>
+                  <rect x="-27" y="9" width="18" height="18"/><rect x="9" y="9" width="18" height="18"/>
+                  <rect x="-45" y="27" width="18" height="18"/><rect x="-9" y="27" width="18" height="18"/><rect x="27" y="27" width="18" height="18"/>
+                </g>
+                <g transform="translate(-55,-85) scale(0.42)"><rect width="34" height="34" fill="#1e2f96" stroke="#c9a13c" stroke-width="2"/></g>
+                <g transform="translate(-18,-92) scale(0.42)"><rect width="34" height="34" fill="#a4302a" stroke="#c9a13c" stroke-width="2"/></g>
+                <g transform="translate(18,-92) scale(0.42)"><rect width="34" height="34" fill="#1e2f96" stroke="#c9a13c" stroke-width="2"/></g>
+                <g transform="translate(-55,-50) scale(0.42) translate(0,-72)"><rect width="34" height="34" fill="#a4302a" stroke="#c9a13c" stroke-width="2"/></g>
+                <g transform="translate(-18,-50) scale(0.42) translate(0,-64)"><rect width="34" height="34" fill="#1e2f96" stroke="#c9a13c" stroke-width="2"/></g>
+              </g>
+            </svg>
+            <div class="flag-caption">the full arms: the &scaron;ahovnica crowned by five historic shields</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1990 &ndash; present</div>
+            <h3 class="card-title">Republic of Croatia</h3>
+            <div class="tag-row">
+              <span class="tag"><span class="dot" style="background:#2f6b4a"></span>Sovereign state</span>
+              <span class="tag" tabindex="0" data-tip="Historian and politician who led the Croatian Democratic Union to victory in 1990, became the republic&#x27;s first president, and led it through the declaration of independence and the war that followed."><span class="dot" style="background:#4a3b78"></span>Franjo Tuđman</span>
+              <span class="tag" tabindex="0" data-tip="Croatia&#x27;s post-1990 constitution establishes no official religion; the state is formally secular even though a large majority of citizens identify as Roman Catholic."><span class="dot" style="background:#8e3b62"></span>Secular (no state religion)</span>
+            </div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Tens of thousands of ethnic Croats and other non-Serbs flee Serb-held parts of Croatia and Bosnia-Herzegovina for government-controlled Croatian territory during the 1991&ndash;95 Croatian War of Independence and the wider Bosnian war."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#fff"/><path d="M0,0 L7,0 L0,14 Z" fill="#002664"/><g fill="#ffd700"><path d="M2,2 l0.6,1.2 -0.6,1.2 -0.6,-1.2z"/><path d="M2.8,4.8 l0.6,1.2 -0.6,1.2 -0.6,-1.2z"/><path d="M3.6,7.6 l0.6,1.2 -0.6,1.2 -0.6,-1.2z"/></g></svg>Immigration: Croat &amp; Bosnian war refugees (1991&ndash;95)</span><span class="tag" tabindex="0" data-tip="Since Croatia joined the European Union in 2013, several hundred thousand Croatians, disproportionately young and skilled, have emigrated for work to Germany, Ireland, and Austria, contributing to one of the EU's steepest population declines."><span class="dot" style="background:#a3672f"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#000"/><rect y="4.67" width="20" height="4.67" fill="#dd0000"/><rect y="9.33" width="20" height="4.67" fill="#ffce00"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="6.67" height="14" fill="#169b62"/><rect x="6.67" width="6.67" height="14" fill="#fff"/><rect x="13.33" width="6.67" height="14" fill="#ff883e"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#ed2939"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#ed2939"/></svg></span>Emigration: EU-era labor emigration (2013&ndash;)</span></div>
+            <p><span class="label">Who &amp; why:</span> as communist rule crumbled across Eastern Europe, Croatia held its first multi-party elections in 1990, adopted a new constitution, and declared independence from Yugoslavia on 25 June 1991 &mdash; triggering the Croatian War of Independence (1991&ndash;95) against the Yugoslav army and Krajina Serb forces before its borders were secured.</p>
+            <p><span class="label">What it represents:</span> the flag and coat of arms were fixed by law on 21 December 1990, months before the formal declaration. The star of the socialist era is gone; in its place, the historic five-shield crown &mdash; the oldest Croatian arms, Dubrovnik, Dalmatia, Istria, Slavonia &mdash; over the &scaron;ahovnica, asserting a continuous Croatian identity reaching back past Yugoslavia to the medieval kingdom this atlas opened with.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, three equal horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red-white-blue; the 5&times;5 &scaron;ahovnica centered, topped by a stylized crown of five small shields (left to right: oldest Croatia, Dubrovnik, Dalmatia, Istria, Slavonia).</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#1e2f96"></span><span class="meta"><span class="name">Blue</span><span class="hex">#1E2F96</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#c9a13c"></span><span class="meta"><span class="name">Crown detail, gold</span><span class="hex">#C9A13C</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="entry" id="era-1991">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#a4302a"/>
+              <rect y="66.7" width="300" height="66.6" fill="#1e2f96"/>
+              <rect y="133.3" width="300" height="66.7" fill="#f4efe1"/>
+            </svg>
+            <div class="flag-caption">red&ndash;blue&ndash;white, the Serbian ordering, on Croatian soil</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1991 &ndash; 1995</div>
+            <h3 class="card-title">Republic of Serbian Krajina</h3>
+            <div class="tag-row">
+              <span class="tag"><span class="dot" style="background:#6e6047"></span>Breakaway state</span>
+              <span class="tag" tabindex="0" data-tip="Serb Democratic Party politician who became the breakaway republic&#x27;s first president in 1991, leading its declaration of independence from a non-Yugoslav Croatia."><span class="dot" style="background:#4a3b78"></span>Milan Babić</span>
+              <span class="tag" tabindex="0" data-tip="Serbian Orthodox Christianity was the dominant identity marker of the Krajina&#x27;s Serb population, though the breakaway republic did not formally establish it as a state church."><span class="dot" style="background:#8e3b62"></span>Serbian Orthodox (identity marker, not formally established)</span>
+            </div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Tens of thousands of ethnic Croats and other non-Serbs are expelled or flee Serb-held Krajina territory as the breakaway republic is established in 1991."><span class="dot" style="background:#a3672f"></span>Emigration: Croats expelled from Krajina (1991)</span><span class="tag" tabindex="0" data-tip="An estimated 150,000 to 200,000 Krajina Serbs flee ahead of the Croatian army's August 1995 Operation Storm, one of the largest single population displacements of the Yugoslav wars."><span class="dot" style="background:#a3672f"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#0c4076"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#d52b1e"/></svg>Emigration: Serb exodus after Operation Storm (1995)</span></div>
+            <p><span class="label">Who &amp; why:</span> as Croatia moved toward independence in 1990&ndash;91, ethnic Serb-majority areas of the Croatian interior declared their own state, backed by the Yugoslav army, rather than remain in a non-Yugoslav Croatia. Its constitution was adopted 19 December 1991. Croatian forces retook most of its territory in the 1995 Operation Storm; the last sliver, Eastern Slavonia, was peacefully reintegrated under UN administration by 1998.</p>
+            <p><span class="label">What it represents:</span> visually almost identical to Serbia's own flag, red-blue-white rather than Croatia's red-white-blue, asserting Serb rather than Croatian national identity on contested ground &mdash; a small ordering difference carrying the entire claim.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, three equal horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red top, blue middle, white bottom &mdash; note the reversed order from the Croatian tricolor.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#1e2f96"></span><span class="meta"><span class="name">Blue</span><span class="hex">#1E2F96</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="entry" id="era-1947">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#a4302a"/>
+              <rect y="66.7" width="300" height="66.6" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#1e2f96"/>
+              <g transform="translate(150,100) scale(0.6)">
+                <rect x="-45" y="-45" width="90" height="90" fill="#f4efe1" stroke="#5c4a1a" stroke-width="2"/>
+                <g fill="#a4302a">
+                  <rect x="-45" y="-45" width="18" height="18"/><rect x="-9" y="-45" width="18" height="18"/><rect x="27" y="-45" width="18" height="18"/>
+                  <rect x="-27" y="-27" width="18" height="18"/><rect x="9" y="-27" width="18" height="18"/>
+                  <rect x="-45" y="-9" width="18" height="18"/><rect x="-9" y="-9" width="18" height="18"/><rect x="27" y="-9" width="18" height="18"/>
+                  <rect x="-27" y="9" width="18" height="18"/><rect x="9" y="9" width="18" height="18"/>
+                  <rect x="-45" y="27" width="18" height="18"/><rect x="-9" y="27" width="18" height="18"/><rect x="27" y="27" width="18" height="18"/>
+                </g>
+                <path d="M0,-90 l6.5,20 21,0 -17,12.3 6.5,20 -17,-12.3 -17,12.3 6.5,-20 -17,-12.3 21,0 Z" fill="#a4302a" stroke="#c9a13c" stroke-width="2.5"/>
+              </g>
+            </svg>
+            <div class="flag-caption">the &scaron;ahovnica, with a red star in place of the old crown</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1947 &ndash; 1990</div>
+            <h3 class="card-title">Socialist Republic of Croatia</h3>
+            <div class="tag-row">
+              <span class="tag"><span class="dot" style="background:#8c2f2f"></span>Socialist republic</span>
+              <span class="tag" tabindex="0" data-tip="Yugoslav Communist leader and head of state whose personal authority, alongside the federal party, overshadowed the constituent republics&#x27; own nominal governments, including Croatia&#x27;s."><span class="dot" style="background:#4a3b78"></span>Josip Broz Tito</span>
+              <span class="tag" tabindex="0" data-tip="The Communist government promoted state atheism and discouraged organized religion, in line with Marxist-Leninist doctrine applied across socialist Yugoslavia's constituent republics."><span class="dot" style="background:#8e3b62"></span>State atheism</span>
+            </div>
+            <p><span class="label">Who &amp; why:</span> one of the six constituent republics of SFR Yugoslavia, with its own capital (Zagreb), constitution, and Communist Party branch, though real power stayed centralized under the federal party and Tito personally.</p>
+            <p><span class="label">What it represents:</span> the Croatian tricolor and checkerboard shield returned to official use, but topped with a red star where a crown had once sat &mdash; the old national symbol permitted again, but only under the new regime's mark. That gold-bordered star was the first thing removed when Croatia adopted its post-independence flag in 1990.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, three equal horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red-white-blue with the plain checkerboard shield centered, a red five-pointed star with gold border above it.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#1e2f96"></span><span class="meta"><span class="name">Blue</span><span class="hex">#1E2F96</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#c9a13c"></span><span class="meta"><span class="name">Star border, gold</span><span class="hex">#C9A13C</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="entry" id="era-1946">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#1e2f96"/>
+              <rect y="66.7" width="300" height="66.6" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#a4302a"/>
+              <path d="M150,76 l10.8,33.2 34.9,0 -28.2,20.5 10.8,33.2 -28.3,-20.5 -28.3,20.5 10.8,-33.2 -28.2,-20.5 34.9,0 Z" fill="#a4302a" stroke="#c9a13c" stroke-width="4"/>
+            </svg>
+            <div class="flag-caption">the red star, enlarged and outlined in gold</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1946 &ndash; 1992</div>
+            <h3 class="card-title">Socialist Federal Republic of Yugoslavia</h3>
+            <div class="tag-row">
+              <span class="tag"><span class="dot" style="background:#8c2f2f"></span>Socialist republic</span>
+              <span class="tag" tabindex="0" data-tip="Communist Partisan leader who formalized the federal constitution in 1946 and led Yugoslavia as president and head of the ruling party for the rest of this era."><span class="dot" style="background:#4a3b78"></span>Josip Broz Tito</span>
+              <span class="tag" tabindex="0" data-tip="The federal Communist government promoted state atheism as official doctrine, though it tolerated religious practice more loosely than some other Eastern Bloc states after the 1948 split with Stalin."><span class="dot" style="background:#8e3b62"></span>State atheism</span>
+            </div>
+            <p><span class="label">Who &amp; why:</span> Tito formalized six constituent republics &mdash; Croatia, Serbia, Slovenia, Bosnia-Herzegovina, Macedonia, Montenegro &mdash; under a one-party federal constitution adopted 31 January 1946. Yugoslavia broke with Stalin in 1948 and charted its own non-aligned path through the Cold War, holding together a genuinely diverse federation for over four decades.</p>
+            <p><span class="label">What it represents:</span> the finalized state flag, designed by painter Đorđe Andrejević-Kun, enlarged the star and outlined it in gold. It flew over Croatia, alongside a Croatian republic-level variant, until the federation broke apart in the wars of 1991&ndash;92.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, three equal horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Blue-white-red; larger five-pointed red star, centered across all three bands, with a thin gold border.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#1e2f96"></span><span class="meta"><span class="name">Blue</span><span class="hex">#1E2F96</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#c9a13c"></span><span class="meta"><span class="name">Star border, gold</span><span class="hex">#C9A13C</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="entry" id="era-1943">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#1e2f96"/>
+              <rect y="66.7" width="300" height="66.6" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#a4302a"/>
+              <path d="M150,80 l9.7,29.8 31.3,0 -25.4,18.4 9.7,29.8 -25.3,-18.4 -25.3,18.4 9.7,-29.8 -25.4,-18.4 31.3,0 Z" fill="#a4302a"/>
+            </svg>
+            <div class="flag-caption">the partisan tricolor, a plain red star sewn onto the old flag</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1943 &ndash; 1946</div>
+            <h3 class="card-title">Democratic Federal Yugoslavia (Partisan flag)</h3>
+            <div class="tag-row">
+              <span class="tag"><span class="dot" style="background:#8c2f2f"></span>Socialist republic</span>
+              <span class="tag" tabindex="0" data-tip="Communist-led Partisan commander who built the only wartime resistance movement the Allies fully backed and headed the new federal government AVNOJ proclaimed before the war's end."><span class="dot" style="background:#4a3b78"></span>Josip Broz Tito</span>
+              <span class="tag" tabindex="0" data-tip="The Communist-led Partisan movement promoted atheist ideology, though wartime necessity meant no formal religious establishment was addressed while fighting continued."><span class="dot" style="background:#8e3b62"></span>State atheism (Communist-led movement)</span>
+            </div>
+            <p><span class="label">Who &amp; why:</span> Josip Broz Tito's communist-led Partisans fought both the Axis occupiers and rival royalist Chetniks through the war, building the only resistance movement the Allies came to fully back &mdash; formal recognition came at the November 1943 Tehran Conference. Their Anti-Fascist Council (AVNOJ) proclaimed a new federal Yugoslavia even before the war ended.</p>
+            <p><span class="label">What it represents:</span> the same blue-white-red tricolor, now carrying a plain red star in the center &mdash; communism laid directly over the old kingdom's flag, signaling continuity of the state but a total change of who ruled it.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, three equal horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Blue-white-red with a plain, unbordered five-pointed red star centered on the white band.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#1e2f96"></span><span class="meta"><span class="name">Blue</span><span class="hex">#1E2F96</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="entry" id="era-1941">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="80" fill="#a4302a"/>
+              <rect y="80" width="300" height="60" fill="#f4efe1"/>
+              <rect y="140" width="300" height="60" fill="#1e2f96"/>
+              <g transform="translate(150,110) scale(0.6)">
+                <rect x="-45" y="-45" width="90" height="90" fill="#f4efe1" stroke="#241f14" stroke-width="2"/>
+                <g fill="#a4302a">
+                  <rect x="-45" y="-45" width="18" height="18"/><rect x="-9" y="-45" width="18" height="18"/><rect x="27" y="-45" width="18" height="18"/>
+                  <rect x="-27" y="-27" width="18" height="18"/><rect x="9" y="-27" width="18" height="18"/>
+                  <rect x="-45" y="-9" width="18" height="18"/><rect x="-9" y="-9" width="18" height="18"/><rect x="27" y="-9" width="18" height="18"/>
+                  <rect x="-27" y="9" width="18" height="18"/><rect x="9" y="9" width="18" height="18"/>
+                  <rect x="-45" y="27" width="18" height="18"/><rect x="-9" y="27" width="18" height="18"/><rect x="27" y="27" width="18" height="18"/>
+                </g>
+              </g>
+              <g transform="translate(38,24) scale(0.5)">
+                <circle r="22" fill="none"/>
+                <text x="0" y="9" text-anchor="middle" font-family="Georgia, serif" font-size="34" fill="#241f14">U</text>
+              </g>
+            </svg>
+            <div class="flag-caption">checkerboard begins white, not red &mdash; a deliberate break from tradition</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1941 &ndash; 1945</div>
+            <h3 class="card-title">Independent State of Croatia (NDH)</h3>
+            <div class="tag-row">
+              <span class="tag"><span class="dot" style="background:#3f3f3f"></span>Occupation / puppet state</span>
+              <span class="tag" tabindex="0" data-tip="Founder and leader of the fascist Usta&scaron;e movement, installed by Nazi Germany and Fascist Italy as head of the puppet state after the April 1941 invasion of Yugoslavia."><span class="dot" style="background:#4a3b78"></span>Ante Pavelić</span>
+              <span class="tag" tabindex="0" data-tip="The Usta&scaron;e regime made no formal religious establishment, but closely identified the state with Roman Catholicism, the traditional majority faith of the Croatian population it claimed to represent."><span class="dot" style="background:#8e3b62"></span>Roman Catholic (traditionally favored, not formally established)</span>
+            </div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Nazi Germany and Fascist Italy invade and partition Yugoslavia in April 1941, installing the Ustaše regime as a client state and directly annexing or occupying large stretches of Croatian territory themselves, including Italy's annexation of most of the Dalmatian coast."><span class="dot" style="background:#6b2c2c"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#000"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#dd0000"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="6.67" height="14" fill="#009246"/><rect x="6.67" width="6.67" height="14" fill="#fff"/><rect x="13.33" width="6.67" height="14" fill="#ce2b37"/></svg></span>Conquered by: Nazi Germany &amp; Fascist Italy</span><span class="tag" tabindex="0" data-tip="The Ustaše regime murders and deports hundreds of thousands of Serbs, Jews, and Roma, above all through the Jasenovac camp system, while forcing tens of thousands more Serbs and Jews to flee the puppet state entirely."><span class="dot" style="background:#a3672f"></span>Emigration: Serbs, Jews &amp; Roma fleeing Ustaše genocide</span></div>
+            <p><span class="label">Who &amp; why:</span> after the Axis invasion of Yugoslavia on 6 April 1941, Nazi Germany and Fascist Italy installed the Ustaše, a Croatian fascist movement led by Ante Pavelić, as rulers of a nominally independent state covering Croatia and Bosnia-Herzegovina. It was a client regime, ceding the Adriatic coast to Italy and enforcing genocidal policies against Serbs, Jews, and Roma. It collapsed with the Axis defeat on 8 May 1945.</p>
+            <p><span class="label">What it represents:</span> the flag &mdash; decreed 28 April 1941 &mdash; looks like a Croatian tricolor at a glance, but the checkerboard's first square was set white instead of the traditional red, and the state flag added the Ustaše "U" monogram in the canton. A separate civil flag omitted both.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3 (state flag) or 2:5 (some variants).</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red-white-blue, checkerboard centered with first square <em>white</em>, Ustaše &ldquo;U&rdquo; emblem in upper hoist corner on the state flag; civil flag was the plain tricolor.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#1e2f96"></span><span class="meta"><span class="name">Blue</span><span class="hex">#1E2F96</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 7 -->
+    <div class="entry" id="era-1939">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#a4302a"/>
+              <rect y="66.7" width="300" height="66.6" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#1e2f96"/>
+              <g transform="translate(150,100) scale(0.62)">
+                <rect x="-45" y="-45" width="90" height="90" fill="#f4efe1" stroke="#5c4a1a" stroke-width="2"/>
+                <g fill="#a4302a">
+                  <rect x="-45" y="-45" width="18" height="18"/><rect x="-9" y="-45" width="18" height="18"/><rect x="27" y="-45" width="18" height="18"/>
+                  <rect x="-27" y="-27" width="18" height="18"/><rect x="9" y="-27" width="18" height="18"/>
+                  <rect x="-45" y="-9" width="18" height="18"/><rect x="-9" y="-9" width="18" height="18"/><rect x="27" y="-9" width="18" height="18"/>
+                  <rect x="-27" y="9" width="18" height="18"/><rect x="9" y="9" width="18" height="18"/>
+                  <rect x="-45" y="27" width="18" height="18"/><rect x="-9" y="27" width="18" height="18"/><rect x="27" y="27" width="18" height="18"/>
+                </g>
+              </g>
+            </svg>
+            <div class="flag-caption">Croatian tricolor with plain checkerboard shield, no crown</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1939 &ndash; 1941</div>
+            <h3 class="card-title">Banovina of Croatia</h3>
+            <div class="tag-row">
+              <span class="tag"><span class="dot" style="background:#5b7a8c"></span>Autonomous province</span>
+              <span class="tag" tabindex="0" data-tip="Croatian Peasant Party leader who negotiated the 1939 Sporazum with Belgrade and headed the new self-governing banovina as its Ban."><span class="dot" style="background:#4a3b78"></span>Vladko Maček</span>
+              <span class="tag" tabindex="0" data-tip="Roman Catholicism remained the majority faith of the Croatian banovina&#x27;s population, without a separate religious establishment distinct from the wider Kingdom of Yugoslavia."><span class="dot" style="background:#8e3b62"></span>Roman Catholic (majority faith, not separately established)</span>
+            </div>
+            <p><span class="label">Who &amp; why:</span> facing mounting unrest and the threat of European war, the Yugoslav government and Croatian Peasant Party leader Vladko Maček signed the Sporazum (Agreement) on 26 August 1939, merging the Sava and Littoral banovinas (plus slices of others) into a single self-governing Croatian banovina &mdash; Belgrade kept only defense and foreign affairs.</p>
+            <p><span class="label">What it represents:</span> the Croatian tricolor with the plain &scaron;ahovnica shield, used "by custom" rather than formal decree. It was the closest thing to Croatian self-rule in the interwar period &mdash; and it lasted barely eighteen months before the German-Italian invasion of April 1941 erased it.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, three equal horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red-white-blue with the plain 5&times;5 checkerboard shield centered, no crown.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#1e2f96"></span><span class="meta"><span class="name">Blue</span><span class="hex">#1E2F96</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 8 -->
+    <div class="entry" id="era-1929">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#1e2f96"/>
+              <rect y="66.7" width="300" height="66.6" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#a4302a"/>
+            </svg>
+            <div class="flag-caption">unchanged tricolor, renamed state</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1929 &ndash; 1941</div>
+            <h3 class="card-title">Kingdom of Yugoslavia</h3>
+            <div class="tag-row">
+              <span class="tag"><span class="dot" style="background:#a9762f"></span>Kingdom</span>
+              <span class="tag" tabindex="0" data-tip="King who suspended the constitution in January 1929, renamed the state Yugoslavia, and redrew its internal borders before his 1934 assassination in Marseille."><span class="dot" style="background:#4a3b78"></span>Alexander I</span>
+              <span class="tag" tabindex="0" data-tip="No single faith was formally established for the whole kingdom; the Serbian Orthodox Church held privileged status tied to the ruling dynasty, alongside substantial Catholic and Muslim populations."><span class="dot" style="background:#8e3b62"></span>No single state religion (Serbian Orthodox privileged)</span>
+            </div>
+            <p><span class="label">Who &amp; why:</span> in 1929, King Alexander I suspended the constitution and parliament, renamed the country Yugoslavia ("land of the South Slavs"), and redrew internal borders into nine banovinas that deliberately ignored historic Croatian, Serbian and Slovenian lines &mdash; an attempt to dissolve ethnic identity into a single Yugoslav one. Alexander was assassinated in Marseille in 1934.</p>
+            <p><span class="label">What it represents:</span> the flag itself didn't change from the 1918 tricolor; what changed was the claim behind it &mdash; a single Yugoslav nation rather than three united peoples &mdash; which Croatian and other regional politicians increasingly resisted through the 1930s.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, three equal horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Identical to 1918 flag: blue, white, red.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#1e2f96"></span><span class="meta"><span class="name">Blue</span><span class="hex">#1E2F96</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 9 -->
+    <div class="entry" id="era-1918">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#1e2f96"/>
+              <rect y="66.7" width="300" height="66.6" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#a4302a"/>
+            </svg>
+            <div class="flag-caption">blue&ndash;white&ndash;red, the new state's ordering</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1918 &ndash; 1929</div>
+            <h3 class="card-title">Kingdom of Serbs, Croats and Slovenes</h3>
+            <div class="tag-row">
+              <span class="tag"><span class="dot" style="background:#a9762f"></span>Kingdom</span>
+              <span class="tag" tabindex="0" data-tip="King of Serbia whose Karađorđević dynasty headed the new union of South Slavs proclaimed on 1 December 1918, reigning until his death in 1921."><span class="dot" style="background:#4a3b78"></span>Peter I of Serbia</span>
+              <span class="tag" tabindex="0" data-tip="No single faith was formally established for the new kingdom as a whole; the Serbian Orthodox Church enjoyed privileged status under the ruling dynasty, alongside sizeable Catholic and Muslim populations."><span class="dot" style="background:#8e3b62"></span>No single state religion (Serbian Orthodox privileged)</span>
+            </div>
+            <p><span class="label">Who &amp; why:</span> as Austria-Hungary collapsed at the end of World War I, the short-lived State of Slovenes, Croats and Serbs merged with the Kingdom of Serbia and Kingdom of Montenegro on 1 December 1918, uniting the South Slavs under the Serbian Karađorđević dynasty. The new government fixed the state tricolor on 9/22 December 1918, confirmed by the 1921 St Vitus Day Constitution.</p>
+            <p><span class="label">What it represents:</span> the same pan-Slavic colors, reordered blue-white-red &mdash; Serbia's ordering &mdash; over Croatia's or Slovenia's, an early sign of where power actually sat in the new kingdom. Croatian, Serbian and Slovenian "tribal" flags kept their own orderings for regional use.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, three equal horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Blue top, white middle, red bottom.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#1e2f96"></span><span class="meta"><span class="name">Blue</span><span class="hex">#1E2F96</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 10 -->
+    <div class="entry" id="era-1868">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#a4302a"/>
+              <rect y="66.7" width="300" height="66.6" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#1e2f96"/>
+              <g transform="translate(150,100) scale(0.62)">
+                <rect x="-45" y="-45" width="90" height="90" fill="#f4efe1" stroke="#5c4a1a" stroke-width="2"/>
+                <g fill="#a4302a">
+                  <rect x="-45" y="-45" width="18" height="18"/><rect x="-9" y="-45" width="18" height="18"/><rect x="27" y="-45" width="18" height="18"/>
+                  <rect x="-27" y="-27" width="18" height="18"/><rect x="9" y="-27" width="18" height="18"/>
+                  <rect x="-45" y="-9" width="18" height="18"/><rect x="-9" y="-9" width="18" height="18"/><rect x="27" y="-9" width="18" height="18"/>
+                  <rect x="-27" y="9" width="18" height="18"/><rect x="9" y="9" width="18" height="18"/>
+                  <rect x="-45" y="27" width="18" height="18"/><rect x="-9" y="27" width="18" height="18"/><rect x="27" y="27" width="18" height="18"/>
+                </g>
+                <path d="M-70,-45 q0,-30 34,-34 q-6,10 6,14 q0,-14 20,-14 q0,10 -6,14 q16,0 20,10 q-8,4 -6,10 l0,10 l-68,0 Z" fill="#c9a13c" stroke="#8a6a1f" stroke-width="1.5" transform="translate(0,-56) scale(0.55)"/>
+              </g>
+            </svg>
+            <div class="flag-caption">tricolor with the shield of Croatia-Slavonia-Dalmatia, crowned</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1868 &ndash; 1918</div>
+            <h3 class="card-title">Kingdom of Croatia-Slavonia-Dalmatia</h3>
+            <div class="tag-row">
+              <span class="tag"><span class="dot" style="background:#a9762f"></span>Kingdom (in union)</span>
+              <span class="tag" tabindex="0" data-tip="Habsburg emperor of Austria and, since the 1867 Compromise, King of Hungary as well, the shared monarch under whom the 1868 Nagodba granted Croatia-Slavonia its internal autonomy."><span class="dot" style="background:#4a3b78"></span>Franz Joseph I</span>
+              <span class="tag" tabindex="0" data-tip="Catholicism remained the traditionally favored faith of the Hungarian crown and Habsburg dynasty this kingdom answered to, though the empire's constitutional order granted legal toleration to other recognized denominations."><span class="dot" style="background:#8e3b62"></span>Roman Catholic (traditional)</span>
+            </div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Economic hardship, a phylloxera blight that devastated Dalmatian vineyards, and lack of land send several hundred thousand Croats, especially from Dalmatia and the Croatian Littoral, emigrating overseas to the United States, Argentina, and Chile between the 1880s and 1914."><span class="dot" style="background:#a3672f"></span><span class="migro-flags"><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#b22234"/><g fill="#fff"><rect y="1.6" width="20" height="1.6"/><rect y="4.8" width="20" height="1.6"/><rect y="8" width="20" height="1.6"/><rect y="11.2" width="20" height="1.6"/></g><rect width="8" height="7.5" fill="#3c3b6e"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="4.67" fill="#74acdf"/><rect y="4.67" width="20" height="4.67" fill="#fff"/><rect y="9.33" width="20" height="4.67" fill="#74acdf"/></svg><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="7" fill="#fff"/><rect y="7" width="20" height="7" fill="#d52b1e"/><rect width="7" height="7" fill="#0039a6"/><path d="M3.5,2.3 l0.8,1.6-0.8,1.6-0.8,-1.6z" fill="#fff"/></svg></span>Emigration: to the Americas (1880s&ndash;1914)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Kings of Croatia in personal union from the 1527 election of Ferdinand I, ruling from Vienna through the Kingdom of Croatia-Slavonia until 1918. Arms: gules, a fess argent (the &quot;Bindenschild&quot;)."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><rect x="4" y="46" width="92" height="24" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Habsburg</span></div>
+            <p><span class="label">Who &amp; why:</span> the 1868 Croatian-Hungarian Settlement (Nagodba) gave Croatia-Slavonia internal autonomy within the Hungarian half of Austria-Hungary &mdash; its own Sabor, Ban, and official language &mdash; while foreign policy, defense, and finance stayed with Budapest and Vienna. Dalmatia, still separately administered from the Austrian side, was claimed on paper but not actually governed together with it.</p>
+            <p><span class="label">What it represents:</span> the civil tricolor is the 1848 Croatian flag continued; the state version adds the combined arms of Croatia, Slavonia and Dalmatia beneath the Crown of St. Stephen, asserting a unity the empire never actually granted on the ground.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, three equal horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red-white-blue as in 1848; state flag adds the small crowned tri-shield at center.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#1e2f96"></span><span class="meta"><span class="name">Blue</span><span class="hex">#1E2F96</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#c9a13c"></span><span class="meta"><span class="name">Crown, gold</span><span class="hex">#C9A13C</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 11 -->
+    <div class="entry" id="era-1848">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="66.7" fill="#a4302a"/>
+              <rect y="66.7" width="300" height="66.6" fill="#f4efe1"/>
+              <rect y="133.3" width="300" height="66.7" fill="#1e2f96"/>
+            </svg>
+            <div class="flag-caption">red&ndash;white&ndash;blue, the Croatian ordering of the pan-Slavic colors</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1848</div>
+            <h3 class="card-title">The Illyrian &amp; National Revival Flag</h3>
+            <div class="tag-row">
+              <span class="tag"><span class="dot" style="background:#a9762f"></span>Kingdom (civic use)</span>
+              <span class="tag" tabindex="0" data-tip="Ban (viceroy) of Croatia who adopted the Croatian tricolor in 1848 and led the push for autonomy from Hungarian control within the Habsburg monarchy."><span class="dot" style="background:#4a3b78"></span>Josip Jelačić</span>
+              <span class="tag" tabindex="0" data-tip="Roman Catholicism remained the traditional, dominant faith of Croatian lands under Habsburg rule, as it had been since the Counter-Reformation, without change during this brief revival era."><span class="dot" style="background:#8e3b62"></span>Roman Catholic (traditional)</span>
+            </div>
+            <p><span class="label">Who &amp; why:</span> in the 1830s, writer Ljudevit Gaj's Illyrian Movement pushed a shared South Slavic language and identity against Hungarian pressure inside the Habsburg lands. When revolution swept Europe in 1848, the Croatian Sabor (parliament) and Ban Josip Jelačić adopted a Croatian tricolor and pressed for autonomy from Budapest.</p>
+            <p><span class="label">What it represents:</span> red, white and blue &mdash; the "pan-Slavic colors" formally adopted that same year at the Prague Slavic Congress, echoing Russia's flag as a sign of Slavic solidarity. Croatia stacked them red-white-blue; Serbia used red-blue-white; Slovenia white-blue-red &mdash; the same three colors, reordered by each nation, a pattern that recurs through every flag below.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">1:2, three equal horizontal bands.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Red top, white middle, blue bottom; the &scaron;ahovnica shield was added at center on formal/state versions.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#1e2f96"></span><span class="meta"><span class="name">Blue</span><span class="hex">#1E2F96</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 12 -->
+    <div class="entry" id="era-1809">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="100" height="200" fill="#1e2f96"/>
+              <rect x="100" width="100" height="200" fill="#f4efe1"/>
+              <rect x="200" width="100" height="200" fill="#a4302a"/>
+            </svg>
+            <div class="flag-caption">the French tricolor, flown over a new administrative union</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1809 &ndash; 1813</div>
+            <h3 class="card-title">Illyrian Provinces (Napoleonic France)</h3>
+            <div class="tag-row">
+              <span class="tag"><span class="dot" style="background:#204b5c"></span>Colonial rule</span>
+              <span class="tag" tabindex="0" data-tip="Emperor of the French under whom this province was carved out of defeated Austria and administered as part of the French imperial system."><span class="dot" style="background:#4a3b78"></span>Napoleon Bonaparte</span>
+              <span class="tag" tabindex="0" data-tip="Roman Catholicism remained the majority faith practiced locally, recognized as the religion of most French citizens under Napoleon's 1801 Concordat, though not an exclusive state establishment."><span class="dot" style="background:#8e3b62"></span>Roman Catholic (majority faith, not exclusively established)</span>
+            </div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Napoleon's armies defeat Austria and annex Croatian lands south of the Sava, along with Dalmatia and the recently absorbed Republic of Ragusa, into the French Empire's Illyrian Provinces."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="6.67" height="14" fill="#0055a4"/><rect x="6.67" width="6.67" height="14" fill="#fff"/><rect x="13.33" width="6.67" height="14" fill="#ef4135"/></svg>Conquered by: Napoleonic France</span></div>
+            <p><span class="label">Who &amp; why:</span> after defeating Austria, Napoleon carved Carniola, western Carinthia, Istria, Croatia south of the Sava, Dalmatia, and the just-annexed Ragusa into a single province of the French Empire, cutting Austria off from the Adriatic and securing his own supply routes.</p>
+            <p><span class="label">What it represents:</span> no distinct local flag &mdash; the province flew the French tricolor and was administered in French, with Napoleonic law and Illyrian-language schooling introduced. Short-lived (Austria took it back by 1813, formalized at the 1815 Congress of Vienna), but the name "Illyria" it popularized would be picked up a generation later by Croatian nationalists.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">2:3, standard French tricolor.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Three equal vertical bands, blue at the hoist.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#1e2f96"></span><span class="meta"><span class="name">Blue</span><span class="hex">#1E2F96</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red</span><span class="hex">#A4302A</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 13 -->
+    <div class="entry" id="era-1527">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#a4302a"/>
+              <g transform="translate(105,55)">
+                <rect x="0" y="0" width="90" height="90" fill="#f4efe1" stroke="#5c4a1a" stroke-width="1.5"/>
+                <g fill="#a4302a">
+                  <rect x="0" y="0" width="18" height="18"/>
+                  <rect x="36" y="0" width="18" height="18"/>
+                  <rect x="72" y="0" width="18" height="18"/>
+                  <rect x="18" y="18" width="18" height="18"/>
+                  <rect x="54" y="18" width="18" height="18"/>
+                  <rect x="0" y="36" width="18" height="18"/>
+                  <rect x="36" y="36" width="18" height="18"/>
+                  <rect x="72" y="36" width="18" height="18"/>
+                  <rect x="18" y="54" width="18" height="18"/>
+                  <rect x="54" y="54" width="18" height="18"/>
+                  <rect x="0" y="72" width="18" height="18"/>
+                  <rect x="36" y="72" width="18" height="18"/>
+                  <rect x="72" y="72" width="18" height="18"/>
+                </g>
+              </g>
+            </svg>
+            <div class="flag-caption">the &scaron;ahovnica: 13 red, 12 white, first square red</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1527 &ndash; 1868</div>
+            <h3 class="card-title">Kingdom of Croatia under the Habsburgs</h3>
+            <div class="tag-row">
+              <span class="tag"><span class="dot" style="background:#a9762f"></span>Kingdom</span>
+              <span class="tag" tabindex="0" data-tip="Habsburg archduke elected king by the Croatian nobility at the 1527 Cetin assembly in exchange for military protection against the advancing Ottomans, opening nearly four centuries of Habsburg rule."><span class="dot" style="background:#4a3b78"></span>Ferdinand I of Habsburg</span>
+              <span class="tag" tabindex="0" data-tip="The Habsburg monarchs were committed Counter-Reformation Catholics who promoted Roman Catholicism as the kingdom&#x27;s dominant faith throughout this long era."><span class="dot" style="background:#8e3b62"></span>Roman Catholic (Habsburg)</span>
+            </div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="From the 16th through 18th centuries, the Habsburgs resettle large numbers of Orthodox Serb refugees fleeing Ottoman-held territory onto the Croatian Military Frontier (Vojna Granica) as border-guard colonists, founding the Serb minority communities of the Croatian borderlands today."><span class="dot" style="background:#2f7a6b"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#e30a17"/><circle cx="8" cy="7" r="3.4" fill="#fff"/><circle cx="9" cy="7" r="2.7" fill="#e30a17"/><path d="M12.5,7 l3.5,1.1 -2.2,-1.9 2.2,-1.9z" fill="#fff"/></svg>Immigration: Serb refugee-soldiers on the Military Frontier (16th&ndash;18th c.)</span><span class="tag" tabindex="0" data-tip="The Ottoman Empire conquers and holds Slavonia and other stretches of eastern Croatian territory from the 16th century until the Habsburgs retake them under the 1699 Treaty of Karlowitz."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#e30a17"/><circle cx="8" cy="7" r="3.4" fill="#fff"/><circle cx="9" cy="7" r="2.7" fill="#e30a17"/><path d="M12.5,7 l3.5,1.1 -2.2,-1.9 2.2,-1.9z" fill="#fff"/></svg>Conquered by: Ottoman Empire (parts of Slavonia, 16th c.&ndash;1699)</span></div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Kings of Croatia in personal union from the 1527 election of Ferdinand I. Arms: gules, a fess argent (the &quot;Bindenschild&quot;)."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#a4302a"/><rect x="4" y="46" width="92" height="24" fill="#f4efe1"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Habsburg</span><span class="tag" tabindex="0" data-tip="Counts of Krk, later Princes of the March, one of medieval Croatia's two great magnate houses, c.1225&ndash;1671, holding lands until the last count was executed. Arms: azure, a six-pointed star above a crescent or."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1e2f7a"/><path d="M50,26 L62,46 L38,46 Z" fill="#c9a13c"/><path d="M50,66 L62,46 L38,46 Z" fill="#c9a13c"/><path d="M44,78 a13,13 0 1 0 0,26 a9,9 0 1 1 0,-26 Z" fill="#c9a13c"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Frankopan</span></div>
+            <p><span class="label">Who &amp; why:</span> facing Ottoman advance, the Croatian nobility elected the Habsburg Ferdinand I as king at the 1527 Cetin assembly in exchange for military protection &mdash; the start of nearly four centuries under Vienna. Much of the kingdom's territory became the Habsburg Military Frontier, a defensive buffer zone garrisoned against the Ottomans.</p>
+            <p><span class="label">What it represents:</span> the red-and-white checkerboard, <em>&scaron;ahovnica</em>, is first attested as Croatia's arms around this period and becomes fixed after 1527, quite possibly shaped by Habsburg heraldic fashion rather than surviving from antiquity as later nationalist accounts liked to claim. It is the single symbol every later Croatian flag on this page still carries.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">Shield only, no state flag yet &mdash; a 5&times;5 grid, 25 squares.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Alternating squares; the upper-left square is always red. This rule holds in every later Croatian flag that carries the &scaron;ahovnica.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Red squares</span><span class="hex">#A4302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White/silver squares</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 14 -->
+    <div class="entry" id="era-1102">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder &mdash; no single fixed flag survives for the union period</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1102 &ndash; 1527</div>
+            <h3 class="card-title">Kingdom of Croatia (in union with Hungary)</h3>
+            <div class="tag-row">
+              <span class="tag"><span class="dot" style="background:#a9762f"></span>Kingdom</span>
+              <span class="tag" tabindex="0" data-tip="King of Hungary with whom Croatian nobles reached the 1102 Pacta Conventa, opening this centuries-long personal union under the Hungarian crown."><span class="dot" style="background:#4a3b78"></span>Coloman of Hungary</span>
+              <span class="tag" tabindex="0" data-tip="Roman Catholicism remained the established faith of the kingdom throughout this union, consistent with both Croatian and Hungarian royal tradition."><span class="dot" style="background:#8e3b62"></span>Roman Catholic</span>
+            </div>
+            <div class="noble-row"><span class="noble-tag-label">Ruling house:</span><span class="tag" tabindex="0" data-tip="Kings of Hungary and Croatia after the native &Aacute;rp&aacute;d line died out, most notably Charles I and Louis I &quot;the Great,&quot; 1301&ndash;1386. Arms: dimidiated, the barry gules-and-argent of Hungary beside azure sem&eacute; of fleurs-de-lis or, for Anjou-Naples."><svg class="noble-mini" viewBox="0 0 100 120"><defs><clipPath id="coaClipHR1"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z"/></clipPath></defs><g clip-path="url(#coaClipHR1)"><rect x="0" y="0" width="50" height="120" fill="#a4302a"/><g fill="#f4efe1"><rect x="0" y="4" width="50" height="13"/><rect x="0" y="30" width="50" height="13"/><rect x="0" y="56" width="50" height="13"/><rect x="0" y="82" width="50" height="13"/><rect x="0" y="108" width="50" height="12"/></g><rect x="50" y="0" width="50" height="120" fill="#1e2f7a"/><g fill="#c9a13c"><g transform="translate(75,26)"><circle cx="0" cy="-3" r="2.6"/><circle cx="-3.4" cy="0" r="2.1"/><circle cx="3.4" cy="0" r="2.1"/><rect x="-1" y="0" width="2" height="5"/></g><g transform="translate(75,58)"><circle cx="0" cy="-3" r="2.6"/><circle cx="-3.4" cy="0" r="2.1"/><circle cx="3.4" cy="0" r="2.1"/><rect x="-1" y="0" width="2" height="5"/></g><g transform="translate(75,90)"><circle cx="0" cy="-3" r="2.6"/><circle cx="-3.4" cy="0" r="2.1"/><circle cx="3.4" cy="0" r="2.1"/><rect x="-1" y="0" width="2" height="5"/></g></g></g><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Anjou (Angevin)</span><span class="tag" tabindex="0" data-tip="Counts of Krk, later Princes of the March, one of medieval Croatia's two great magnate houses, c.1225&ndash;1671. Arms: azure, a six-pointed star above a crescent or."><svg class="noble-mini" viewBox="0 0 100 120"><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="#1e2f7a"/><path d="M50,26 L62,46 L38,46 Z" fill="#c9a13c"/><path d="M50,66 L62,46 L38,46 Z" fill="#c9a13c"/><path d="M44,78 a13,13 0 1 0 0,26 a9,9 0 1 1 0,-26 Z" fill="#c9a13c"/><path d="M4,4 H96 V64 Q96,100 50,116 Q4,100 4,64 Z" fill="none" stroke="#8a7a5c" stroke-width="3"/></svg>House of Frankopan</span></div>
+            <p><span class="label">Who &amp; why:</span> after the death of the last native Trpimirović king, Croatian nobles reached the 1102 <em>Pacta Conventa</em> with King Coloman of Hungary &mdash; traditionally recorded as an agreement, though no surviving contemporary document proves the exact terms. Croatia entered a personal union under the Hungarian crown rather than outright annexation: it kept its own nobility, its ban (viceroy) governing in the king's name, and its Sabor (assembly), while the same monarch wore both crowns. That union outlasted the Árpád dynasty and continued under the Angevin and Jagiellonian kings of Hungary for four centuries, ending only when Louis II died at Mohács in 1526 and Croatian nobles, meeting separately at Cetin in 1527, elected Ferdinand of Habsburg as their own king.</p>
+            <p><span class="label">What it represents:</span> no single fixed flag or coat of arms is reliably documented for Croatia across this whole 425-year span &mdash; the kingdom used royal Hungarian banners and, locally, the ban's and various noble houses' own heraldry rather than one settled national device. The checkerboard <em>&scaron;ahovnica</em> that later became fixed to Croatia is first clearly attested only around 1527, at the close of this period, not before it &mdash; shown here honestly blank rather than invented.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested single flag for the period.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 15 -->
+    <div class="entry" id="era-1420">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#a4302a"/>
+              <g transform="translate(150,100)">
+                <ellipse cx="0" cy="8" rx="70" ry="30" fill="#d9ac3c" stroke="#8a6a1f" stroke-width="2"/>
+                <path d="M-70,8 q-14,-40 20,-46 q-10,10 4,18 q16,-14 30,-2 q18,-12 32,4 q22,-4 14,26 q10,20 -10,26 q-30,22 -90,-2 Z" fill="#d9ac3c" stroke="#8a6a1f" stroke-width="2"/>
+                <circle cx="34" cy="-6" r="3.4" fill="#241f14"/>
+                <rect x="-24" y="-2" width="36" height="26" rx="2" fill="#f4efe1" stroke="#8a6a1f" stroke-width="1.5"/>
+              </g>
+            </svg>
+            <div class="flag-caption">the winged Lion of St. Mark, book open in peacetime</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1420 &ndash; 1797</div>
+            <h3 class="card-title">Venetian Dalmatia</h3>
+            <div class="tag-row">
+              <span class="tag"><span class="dot" style="background:#204b5c"></span>Colonial rule</span>
+              <span class="tag" tabindex="0" data-tip="Doge of Venice during the years the Republic secured its definitive hold on Zadar and the Dalmatian coastal cities that opened this near four-century maritime colonial period."><span class="dot" style="background:#4a3b78"></span>Doge Tommaso Mocenigo</span>
+              <span class="tag" tabindex="0" data-tip="Venice was a Roman Catholic state, and Catholicism was the religion enforced across its maritime empire, including the Dalmatian cities it governed."><span class="dot" style="background:#8e3b62"></span>Roman Catholic (Venetian)</span>
+            </div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="The Republic of Venice militarily conquers the Dalmatian coastal cities of Zadar, Split, Šibenik, and the offshore islands to secure its Adriatic trade routes, ruling them as its Stato da Màr for nearly four centuries."><span class="dot" style="background:#6b2c2c"></span><svg class="migro-flag" viewBox="0 0 20 14"><rect width="20" height="14" fill="#b22222"/><rect x="7.5" y="4.5" width="5" height="5" fill="#ffd700"/></svg>Conquered by: Republic of Venice</span></div>
+            <p><span class="label">Who &amp; why:</span> the Republic of Venice conquered the Dalmatian coastal cities (Zadar, Split, Šibenik, and the islands, though never Ragusa) to secure its Adriatic trade routes and naval supply lines. Venice ran Dalmatia as a maritime colony, the Stato da M&agrave;r, for nearly four centuries.</p>
+            <p><span class="label">What it represents:</span> the winged lion of the evangelist Mark, patron of Venice, holding an open book &mdash; peacetime rule &mdash; or a closed book and drawn sword in wartime. It was carved into fortress walls up and down the coast and remains visible on Dalmatian towers today.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">Historically 2:3, often square for a gonfalon.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Solid red field; gold winged lion, front paw resting on an open book, filling most of the field.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#a4302a"></span><span class="meta"><span class="name">Field, Venetian red</span><span class="hex">#A4302A</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#d9ac3c"></span><span class="meta"><span class="name">Lion, gold</span><span class="hex">#D9AC3C</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">Book, cream</span><span class="hex">#F4EFE1</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 16 -->
+    <div class="entry" id="era-1358">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#f4efe1"/>
+              <path d="M104,40 h92 v88 a46,46 0 0 1 -92,0 Z" fill="#f4efe1" stroke="#241f14" stroke-width="4"/>
+              <text x="150" y="86" text-anchor="middle" font-family="Georgia, serif" font-size="19" letter-spacing="2" fill="#241f14">LIBERT</text>
+              <text x="150" y="108" text-anchor="middle" font-family="Georgia, serif" font-size="19" letter-spacing="2" fill="#241f14">AS</text>
+            </svg>
+            <div class="flag-caption">the &ldquo;Libertas&rdquo; flag &middot; official St. Blaise banner was more elaborate</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1358 &ndash; 1808</div>
+            <h3 class="card-title">Republic of Ragusa (Dubrovnik)</h3>
+            <div class="tag-row">
+              <span class="tag"><span class="dot" style="background:#7c2e1f"></span>City-republic</span>
+              <span class="tag" tabindex="0" data-tip="No single ruler documented &#x2014; Ragusa was governed by an aristocratic Senate and a Rector who served a one-month rotating term, deliberately preventing any one figure from accumulating personal power."><span class="dot" style="background:#4a3b78"></span>No single ruler documented (rotating Rector)</span>
+              <span class="tag" tabindex="0" data-tip="Roman Catholicism was the republic&#x27;s official religion, embodied in its patron Saint Blaise, whose flag the city named alongside its LIBERTAS motto banner."><span class="dot" style="background:#8e3b62"></span>Roman Catholic (state religion, patron St. Blaise)</span>
+            </div>
+            <p><span class="label">Who &amp; why:</span> a Dalmatian merchant city that bought its way out of Venetian and then Hungarian overlordship, governing itself under an aristocratic Senate. It survived for 450 years on diplomacy and trade between the Ottoman and Christian worlds.</p>
+            <p><span class="label">What it represents:</span> its 1272 statute-book named the "VIXILLUM S. BLASIJ," the flag of Saint Blaise, the city's patron. A second flag simply read <em>LIBERTAS</em> &mdash; liberty &mdash; the Republic's own motto and, alongside Venice, one of the earliest civic mottoes flown as a flag anywhere in Europe. Napoleon dissolved the Republic in 1808.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio recorded; period banners were typically square or near-square.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Off-white/parchment field; centered rounded escutcheon outlined in black; "LIBERTAS" lettered across the shield in black, often on three lines.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">Field, parchment white</span><span class="hex">#F4EFE1</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#241f14"></span><span class="meta"><span class="name">Outline &amp; lettering, black</span><span class="hex">#241F14</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 17 -->
+    <div class="entry" id="era-925">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#1f4f63"/>
+              <g transform="translate(150,95)">
+                <path d="M0,-34 L9,-11 L34,-11 L14,4 L21,29 L0,14 L-21,29 L-14,4 L-34,-11 L-9,-11 Z" fill="#c9a13c" stroke="#8a6a1f" stroke-width="1.5"/>
+                <path d="M-46,40 A34,34 0 1 0 10,10 A26,26 0 1 1 -46,40 Z" fill="#e8e1cc" stroke="#8a6a1f" stroke-width="1.5"/>
+              </g>
+            </svg>
+            <div class="flag-caption">reconstructed device &middot; no single fixed national flag survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 925 &ndash; 1102</div>
+            <h3 class="card-title">Medieval Kingdom of Croatia &amp; Dalmatia</h3>
+            <div class="tag-row">
+              <span class="tag"><span class="dot" style="background:#a9762f"></span>Kingdom</span>
+              <span class="tag" tabindex="0" data-tip="First king of Croatia, crowned around 925, who united the Pannonian and Dalmatian Croat duchies under a single crown recognized by Rome."><span class="dot" style="background:#4a3b78"></span>Tomislav</span>
+              <span class="tag" tabindex="0" data-tip="Tomislav&#x27;s coronation was recognized by the Papacy, establishing Roman Catholic Christianity as the kingdom&#x27;s faith from this era's start."><span class="dot" style="background:#8e3b62"></span>Roman Catholic</span>
+            </div>
+            <p><span class="label">Who &amp; why:</span> Tomislav was crowned the first king around 925, uniting Pannonian and Dalmatian Croat duchies under one crown recognized by Rome. There was no "national flag" in the modern sense &mdash; rulers fought under dynastic and religious banners, often bearing a cross or the ruler's own device.</p>
+            <p><span class="label">What survives:</span> the star-over-crescent device shown here is the arms later remembered as "the oldest shield of Croatia" &mdash; it still sits at the top of the modern coat of arms' crown of five shields. It was retroactively fixed in heraldry centuries after the fact, not flown as a battle standard at the time.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">No fixed ratio &mdash; shown here as a field with a small central device, the format later heraldic tradition assumes.</span></div>
+            <div class="spec-row"><span class="k">Layout</span><span class="v">Solid field; centered gold six-pointed star above a silver/white crescent, thin dark-gold outline on both.</span></div>
+            <div class="swatches">
+              <div class="swatch"><span class="chip" style="background:#1f4f63"></span><span class="meta"><span class="name">Field (conventional)</span><span class="hex">#1F4F63</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#c9a13c"></span><span class="meta"><span class="name">Star, gold</span><span class="hex">#C9A13C</span></span></div>
+              <div class="swatch"><span class="chip" style="background:#e8e1cc"></span><span class="meta"><span class="name">Crescent, silver</span><span class="hex">#E8E1CC</span></span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 18 -->
+    <div class="entry" id="era-400bce">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/>
+              <rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/>
+              <text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text>
+              <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder &mdash; Illyrian, Roman, and early Croat era, no flag survives</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 400 BCE &ndash; 925 CE</div>
+            <h3 class="card-title">Illyrian Tribes, Roman Dalmatia &amp; the Early Croat Duchies</h3>
+            <div class="tag-row">
+              <span class="tag"><span class="dot" style="background:#a9762f"></span>Fragmented / successive polities</span>
+              <span class="tag" tabindex="0" data-tip="Illyrian queen of the Ardiaei who, after her husband King Agron's death, led resistance to Roman expansion in the Adriatic, provoking the Second Illyrian War (219 BCE) that ended in her defeat."><span class="dot" style="background:#4a3b78"></span>Queen Teuta (Illyrian Wars)</span>
+              <span class="tag" tabindex="0" data-tip="Illyrian and later Slavic paganism give way to Christianity: Roman Dalmatia was Christianized by late antiquity, and the Croat dukes converted from the 9th century, with Duke Branimir winning papal recognition from Pope John VIII in 879."><span class="dot" style="background:#8e3b62"></span>Illyrian/Slavic paganism, then Christianity (from 9th c.)</span>
+            </div>
+            <div class="migro-row"><span class="migro-label">Migration &amp; conquest:</span><span class="tag" tabindex="0" data-tip="Rome fights three Illyrian Wars (229, 219, 168 BCE) against the Ardiaei kingdom of Queen Teuta and King Genthius, annexing the Adriatic coast and eventually organizing it as the province of Illyricum, later split into Dalmatia and Pannonia."><span class="dot" style="background:#6b2c2c"></span>Conquest by: Rome (Illyrian Wars, 229&ndash;168 BCE)</span><span class="tag" tabindex="0" data-tip="Slavic peoples, including the Croats, migrate into the former Roman provinces of Dalmatia and Pannonia from the early 7th century as Avar and Byzantine authority weakens, forming the direct ancestors of the medieval Croat duchies."><span class="dot" style="background:#2f7a6b"></span>Settlement: Slavic &amp; Croat migration (from c. 7th c. CE)</span>
+            </div>
+            <p><span class="label">Who &amp; why:</span> Illyrian tribes &mdash; the Delmatae (who give Dalmatia its name), the Liburni, and others &mdash; hold the eastern Adriatic coast when Rome, provoked by piracy and the resistance of Queen Teuta and later King Genthius, annexes the region through three Illyrian Wars between 229 and 168 BCE. Roman Dalmatia becomes thoroughly Romanized; the emperor Diocletian, born near Salona (modern Split), retires there in 305 CE to the fortified palace whose walls still form the core of Split's old town, a genuine surviving Roman monument rather than an invented one. Slavic peoples, including the Croats, migrate into the weakening Byzantine and former Roman provinces from around the early 7th century, and by the 9th century Frankish-recognized Croat dukes &mdash; Borna, Mislav, Trpimir, and Branimir, who wins Pope John VIII's explicit recognition in 879 &mdash; rule separate Pannonian and Dalmatian duchies. Duke Tomislav unites these duchies and is crowned king around 925, exactly where the neighboring entry on this page begins.</p>
+            <p><span class="label">What it represents:</span> no securely documented flag survives from any part of this thirteen-century span &mdash; centuries before heraldry develops anywhere in Europe. Illyrian tribes and the early Croat dukes used their own devices and seals rather than fixed territorial flags. Shown here honestly blank rather than invented.</p>
+            <p><span class="label">World context:</span> the Illyrian Wars run alongside Rome's own Punic Wars against Carthage; Diocletian's Split palace is built while the Roman Empire is still constructing monuments across the Mediterranean; and the Croat duchies' Christianization and Frankish overlordship in the 9th century are contemporary with Charlemagne's Carolingian Empire and the Byzantine mission of Cyril and Methodius to neighboring Great Moravia in 863.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; no attested flag for this era.</span></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#7c2e1f"></span><b>City-republic</b> &mdash; self-governing maritime city-state</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#204b5c"></span><b>Colonial rule</b> &mdash; governed from a foreign capital</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a9762f"></span><b>Kingdom</b> &mdash; crowned realm, own or in union</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#5b7a8c"></span><b>Autonomous province</b> &mdash; self-rule inside a larger state</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#3f3f3f"></span><b>Occupation / puppet state</b> &mdash; installed by an outside power</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8c2f2f"></span><b>Socialist republic</b> &mdash; constituent or federal, one-party state</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#6e6047"></span><b>Breakaway state</b> &mdash; unrecognized or partially recognized</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#2f6b4a"></span><b>Sovereign state</b> &mdash; internationally recognized nation</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the named ruler most associated with the era's start</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official/established faith, not the population's</div>
+    </div>
+  </div>
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for Croatia lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/hr/">Search Record Atlas for Croatia &rarr;</a>
+    <p style="margin-top:14px;">Records here are filed by historical jurisdiction, not modern borders &mdash; check the region that covers your ancestral town:</p>
+    <div class="record-region-grid">
+      <a href="https://daviddef.github.io/TheMap/region/carniola/">Carniola and the Slovene lands</a>
+      <a href="https://daviddef.github.io/TheMap/region/istria-central/">Central Istria</a>
+      <a href="https://daviddef.github.io/TheMap/region/dalmatia/">Dalmatia</a>
+      <a href="https://daviddef.github.io/TheMap/region/istria-south/">Southern Istria</a>
+      <a href="https://daviddef.github.io/TheMap/region/imotski/">The Imotski frontier</a>
+      <a href="https://daviddef.github.io/TheMap/region/kvarner/">The Kvarner — Senj, Vinodol, Rijeka</a>
+      <a href="https://daviddef.github.io/TheMap/region/vojna-krajina/">The Military Frontier — Vojna krajina</a>
+    </div>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>Phase 2 is published: the rest of former Yugoslavia, each with its own flag lineage and era map, plus a hub with an interactive map of the whole region across nine centuries.</p>
+    <div class="link-grid">
+      <a class="link-card" href="yugoslavia-hub.html"><b>Hub &amp; time-slider map</b><span>Nine centuries, one map</span></a>
+      <a class="link-card" href="slovenia-flags.html"><b>Slovenia</b><span>Carantania to today</span></a>
+      <a class="link-card" href="serbia-flags.html"><b>Serbia</b><span>Nemanjić empire to today</span></a>
+      <a class="link-card" href="bosnia-flags.html"><b>Bosnia &amp; Herzegovina</b><span>Kotromanić lilies to Dayton</span></a>
+      <a class="link-card" href="montenegro-flags.html"><b>Montenegro</b><span>Zeta's eagle to today</span></a>
+      <a class="link-card" href="macedonia-flags.html"><b>North Macedonia</b><span>Dušan's capital to the sun flag</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Encyclopaedia Britannica. Colors are close historical approximations for painting reference, not official Pantone specifications except where a modern state (e.g. the Republic of Croatia) has one on record &mdash; treat pre-19th-century swatches as informed reconstructions.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var IC = {
+    ven:"#1f8a8a", hcrown:"#c9a13c", austria:"#7a5a9a", krajina:"#5c6b3f", yugo:"#1e2f96", italy:"#0b7a3d", ndh:"#a4302a", croatia:"#c9603c"
+  };
+  var INAMES = {
+    ven:"Republic of Venice", hcrown:"Hungarian / Habsburg crown", austria:"Austrian Empire (direct rule)",
+    krajina:"Croatian Military Frontier (Vojna krajina, Vienna War Council)",
+    yugo:"Kingdom of SHS / Yugoslavia", italy:"Kingdom of Italy", ndh:"NDH (Croatian puppet state)", croatia:"Republic of Croatia"
+  };
+  var IFLAGS = {
+    ven: '<rect width="300" height="200" fill="#a4302a"/><ellipse cx="150" cy="105" rx="60" ry="35" fill="#c9a13c"/><rect x="120" y="95" width="40" height="26" rx="2" fill="#f4efe1" stroke="#8a6a1f" stroke-width="1.5"/>',
+    arpad: '<rect width="300" height="200" fill="#f4efe1"/><g fill="#a4302a"><rect y="0" width="300" height="25"/><rect y="50" width="300" height="25"/><rect y="100" width="300" height="25"/><rect y="150" width="300" height="25"/></g>',
+    checkerboard: '<rect width="300" height="200" fill="#f4efe1"/><g transform="translate(150,100) scale(0.9)"><rect x="-45" y="-45" width="90" height="90" fill="#f4efe1" stroke="#241f14" stroke-width="3"/><g fill="#a4302a"><rect x="-45" y="-45" width="18" height="18"/><rect x="-9" y="-45" width="18" height="18"/><rect x="27" y="-45" width="18" height="18"/><rect x="-27" y="-27" width="18" height="18"/><rect x="9" y="-27" width="18" height="18"/><rect x="-45" y="-9" width="18" height="18"/><rect x="-9" y="-9" width="18" height="18"/><rect x="27" y="-9" width="18" height="18"/><rect x="-27" y="9" width="18" height="18"/><rect x="9" y="9" width="18" height="18"/><rect x="-45" y="27" width="18" height="18"/><rect x="-9" y="27" width="18" height="18"/><rect x="27" y="27" width="18" height="18"/></g></g>',
+    austria_eagle: '<rect width="300" height="200" fill="#c9a13c"/><ellipse cx="150" cy="100" rx="55" ry="45" fill="#241f14"/><text x="150" y="112" font-size="34" text-anchor="middle" fill="#c9a13c" font-family="serif">⚜</text>',
+    krajina: '<rect width="300" height="66.7" fill="#241f14"/><rect y="66.7" width="300" height="66.6" fill="#c9a13c"/><rect y="133.3" width="300" height="66.7" fill="#241f14"/><text x="150" y="112" font-size="26" text-anchor="middle" fill="#241f14" font-family="serif">⚔</text>',
+    croatia_slavonia: '<rect width="300" height="66.7" fill="#a4302a"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#1e2f96"/><g transform="translate(150,100) scale(0.5)"><rect x="-45" y="-45" width="90" height="90" fill="#f4efe1" stroke="#5c4a1a" stroke-width="2"/><g fill="#a4302a"><rect x="-45" y="-45" width="18" height="18"/><rect x="-9" y="-45" width="18" height="18"/><rect x="27" y="-45" width="18" height="18"/><rect x="-27" y="-27" width="18" height="18"/><rect x="9" y="-27" width="18" height="18"/><rect x="-45" y="-9" width="18" height="18"/><rect x="-9" y="-9" width="18" height="18"/><rect x="27" y="-9" width="18" height="18"/><rect x="-27" y="9" width="18" height="18"/><rect x="9" y="9" width="18" height="18"/><rect x="-45" y="27" width="18" height="18"/><rect x="-9" y="27" width="18" height="18"/><rect x="27" y="27" width="18" height="18"/></g></g>',
+    yugoslav_kingdom: '<rect width="300" height="66.7" fill="#1e2f96"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#a4302a"/>',
+    italy_kingdom: '<rect width="100" height="200" fill="#0b7a3d"/><rect x="100" width="100" height="200" fill="#f4efe1"/><rect x="200" width="100" height="200" fill="#a4302a"/>',
+    ndh: '<rect width="300" height="66.7" fill="#a4302a"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#1e2f96"/><g transform="translate(150,100) scale(0.5)"><rect x="-45" y="-45" width="90" height="90" fill="#f4efe1" stroke="#241f14" stroke-width="2"/><g fill="#a4302a"><rect x="-45" y="-45" width="18" height="18"/><rect x="-9" y="-45" width="18" height="18"/><rect x="27" y="-45" width="18" height="18"/><rect x="-27" y="-27" width="18" height="18"/><rect x="9" y="-27" width="18" height="18"/><rect x="-45" y="-9" width="18" height="18"/><rect x="-9" y="-9" width="18" height="18"/><rect x="27" y="-9" width="18" height="18"/><rect x="-27" y="9" width="18" height="18"/><rect x="9" y="9" width="18" height="18"/><rect x="-45" y="27" width="18" height="18"/><rect x="-9" y="27" width="18" height="18"/><rect x="27" y="27" width="18" height="18"/></g></g><text x="70" y="55" font-size="26" text-anchor="middle" fill="#241f14" font-family="serif">U</text>',
+    croatia_modern: '<rect width="300" height="66.7" fill="#a4302a"/><rect y="66.7" width="300" height="66.6" fill="#f4efe1"/><rect y="133.3" width="300" height="66.7" fill="#1e2f96"/><g transform="translate(150,100) scale(0.5)"><rect x="-45" y="-45" width="90" height="90" fill="#f4efe1" stroke="#5c4a1a" stroke-width="2"/><g fill="#a4302a"><rect x="-45" y="-45" width="18" height="18"/><rect x="-9" y="-45" width="18" height="18"/><rect x="27" y="-45" width="18" height="18"/><rect x="-27" y="-27" width="18" height="18"/><rect x="9" y="-27" width="18" height="18"/><rect x="-45" y="-9" width="18" height="18"/><rect x="-9" y="-9" width="18" height="18"/><rect x="27" y="-9" width="18" height="18"/><rect x="-27" y="9" width="18" height="18"/><rect x="9" y="9" width="18" height="18"/><rect x="-45" y="27" width="18" height="18"/><rect x="-9" y="27" width="18" height="18"/><rect x="27" y="27" width="18" height="18"/></g></g>'
+  };
+  function iFlagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (IFLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+  var iLegendEl = document.getElementById("iLegend");
+  iLegendEl.innerHTML = Object.keys(IC).map(function (k) {
+    return '<span><span class="sw" style="background:' + IC[k] + '"></span>' + INAMES[k] + "</span>";
+  }).join("");
+
+  var ISNAP = [
+    { year:"1420", name:"Venice takes Dalmatia", t:{ ist:IC.ven, dal:IC.ven, con:IC.hcrown, mf:IC.hcrown }, flagKeys:{ ist:"ven", dal:"ven", con:"arpad", mf:"arpad" },
+      story:"Venice, expanding its Adriatic trading empire, completes its conquest of the Dalmatian coast in 1420 &mdash; Zadar, Split, Šibenik, the islands &mdash; while inland Croatia and Slavonia remain bound to the Hungarian crown by the 1102 union, governed from Zagreb by a royally appointed Ban. Ragusa (Dubrovnik) alone stays outside both spheres, preserving its own independence by paying tribute first to Venice and later the Ottoman Sultan. There is no separate military frontier yet &mdash; that is still over a century away. For the next four centuries, \"Croatia\" will mean two entirely differently governed halves of the same coastline." },
+    { year:"1527", name:"Habsburg era begins", t:{ ist:IC.ven, dal:IC.ven, con:IC.hcrown, mf:IC.hcrown }, flagKeys:{ ist:"ven", dal:"ven", con:"checkerboard", mf:"checkerboard" },
+      story:"Facing the Ottoman advance after the catastrophic 1526 Battle of Mohács, the Croatian nobility elects Ferdinand I of Habsburg as king at Cetin in 1527, binding continental Croatia-Slavonia to Vienna rather than Budapest for the next four centuries &mdash; and fixing the &scaron;ahovnica checkerboard as its arms around this same period. Venetian Dalmatia is untouched by any of this: it answers to the Doge, not the new Habsburg king, and won't rejoin continental Croatia's political orbit for another 270 years. The first frontier captaincies against the Ottomans are only just being organized; a fully separate military administration is still decades off." },
+    { year:"1553", name:"Military Frontier established", t:{ ist:IC.ven, dal:IC.ven, con:IC.hcrown, mf:IC.krajina }, flagKeys:{ ist:"ven", dal:"ven", con:"checkerboard", mf:"krajina" },
+      story:"Ferdinand I's 1553 reorganization carves a standing military province, the Vojna krajina, out of continental Croatia's own southern and eastern borderlands &mdash; the future Lika-Senj, Banovina, and Slavonian frontier districts &mdash; and places it directly under the Habsburg War Council in Graz, not the Croatian Ban in Zagreb. Serb and Vlach refugees fleeing Ottoman territory are settled here as soldier-farmers, exempt from Croatian feudal law in exchange for permanent border service. For the next 328 years, continental Croatia is itself internally split between civil Zagreb rule and direct Habsburg military administration." },
+    { year:"1797", name:"Venice falls, Austria takes the coast", t:{ ist:IC.austria, dal:IC.austria, con:IC.hcrown, mf:IC.krajina }, flagKeys:{ ist:"austria_eagle", dal:"austria_eagle", con:"checkerboard", mf:"krajina" },
+      story:"Napoleon's conquest of northern Italy forces Venice itself to surrender without a fight in May 1797, ending the Republic after eleven centuries. The Treaty of Campo Formio hands Venetian Dalmatia and Istria to Austria directly &mdash; but not to the Hungarian-linked government in Zagreb that rules continental Croatia-Slavonia, and not to the Military Frontier, which keeps answering to Vienna's War Council regardless of who governs the civil lands around it. All three now share an emperor, Francis II, but answer to three different administrations within his empire, a split that survives Napoleon's brief 1809&ndash;13 Illyrian interlude and only hardens after 1815." },
+    { year:"1868", name:"Nagodba settlement", t:{ ist:IC.austria, dal:IC.austria, con:IC.hcrown, mf:IC.krajina }, flagKeys:{ ist:"austria_eagle", dal:"austria_eagle", con:"croatia_slavonia", mf:"krajina" },
+      story:"The 1867 Austro-Hungarian Compromise splits the empire into two halves, and the 1868 Nagodba settlement gives continental Croatia-Slavonia real autonomy &mdash; but only within the Hungarian half, and only for the civil territory the Ban actually governs. Dalmatia and Istria, governed directly from Vienna as part of Austrian Cisleithania, are left out entirely, and the Military Frontier stays a third, separate case &mdash; still a standing army district answering to the War Ministry, not the new autonomous Croatian-Slavonian government next door. Croatian politicians spend the next fifty years campaigning, unsuccessfully, for the coast's actual reunification with Zagreb." },
+    { year:"1881", name:"Frontier reincorporated", t:{ ist:IC.austria, dal:IC.austria, con:IC.hcrown, mf:IC.hcrown }, flagKeys:{ ist:"austria_eagle", dal:"austria_eagle", con:"croatia_slavonia", mf:"croatia_slavonia" },
+      story:"A gradual demilitarization through the 1870s ends in 1881 with the Military Frontier's formal dissolution and reincorporation into civil Croatia-Slavonia &mdash; roughly doubling the Ban's own territory and population at a stroke, and ending 328 years of direct rule from Vienna's War Council over Lika, Banovina, and the Slavonian border districts. Dalmatia and Istria remain outside Zagreb's government regardless; the frontier's return only reunites part of the puzzle." },
+    { year:"1920", name:"Treaty of Rapallo", t:{ ist:IC.italy, dal:IC.yugo, con:IC.yugo, mf:IC.yugo }, flagKeys:{ ist:"italy_kingdom", dal:"yugoslav_kingdom", con:"yugoslav_kingdom", mf:"yugoslav_kingdom" },
+      story:"Austria-Hungary's collapse in 1918 lets continental Croatia and Dalmatia unite for the first time in seven centuries, inside the new Kingdom of Serbs, Croats and Slovenes &mdash; the former Military Frontier, already reincorporated since 1881, comes along as an ordinary part of continental Croatia. Istria pays the price instead: the secret 1915 Treaty of London had promised it to Italy for joining the Allies, and the 1920 Treaty of Rapallo makes good on that promise, ceding the whole peninsula &mdash; including a large Croatian-speaking population &mdash; to the Kingdom of Italy. For the first time, Istria is cut off from the rest of Croatia rather than the coast further south." },
+    { year:"1941", name:"NDH & Italian annexation", t:{ ist:IC.italy, dal:IC.italy, con:IC.ndh, mf:IC.ndh }, flagKeys:{ ist:"italy_kingdom", dal:"italy_kingdom", con:"ndh", mf:"ndh" },
+      story:"The April 1941 Axis invasion hands continental Croatia and Slavonia &mdash; including the former frontier districts, by now just ordinary Croatian territory &mdash; to Ante Pavelić's fascist NDH &mdash; but Mussolini demands, and gets, a price for his help: the May 1941 Treaty of Rome cedes a wide strip of the Dalmatian coast and most of its islands to Italy outright, on top of the Istria it already holds. For over two years, most of the Adriatic coast Croatians actually live on flies a foreign flag, while the puppet state claiming to represent them controls only the inland provinces." },
+    { year:"1947–present", name:"Reunification", t:{ ist:IC.croatia, dal:IC.croatia, con:IC.croatia, mf:IC.croatia }, flagKeys:{ ist:"croatia_modern", dal:"croatia_modern", con:"croatia_modern", mf:"croatia_modern" },
+      story:"Italy's 1943 surrender and the Allied victory finally reverse the losses: the 1947 Paris Peace Treaty returns almost all of Istria and the Dalmatian coast to Yugoslavia, with a residual dispute over Trieste and its surrounding \"Zone B\" not fully resolved until 1975. Since 1991, continental Croatia, Slavonia, Istria, Dalmatia, and the long-since-reincorporated Military Frontier have been governed as one country for the first time in their combined history &mdash; the checkerboard flag now flying, without interruption or foreign exception, from the Slovenian border to Dubrovnik." }
+  ];
+
+  var IREGIONS = ["ist","dal","con","mf"];
+  var IREGION_NAMES = { ist:"Istria", dal:"Dalmatia", con:"Continental Croatia & Slavonia (civil)", mf:"Croatian Military Frontier" };
+  var IADJ = [["ist","mf"],["dal","mf"],["con","mf"]];
+
+  function iTextColorFor(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+    return lum > 0.5 ? "#201a12" : "#f7f1e3";
+  }
+
+  function iGroupsFor(t) {
+    var parent = {};
+    IREGIONS.forEach(function (r) { parent[r] = r; });
+    function find(x) { return parent[x] === x ? x : (parent[x] = find(parent[x])); }
+    function union(a, b) { var ra = find(a), rb = find(b); if (ra !== rb) parent[ra] = rb; }
+    IADJ.forEach(function (pair) { if (t[pair[0]] === t[pair[1]]) union(pair[0], pair[1]); });
+    var groups = {};
+    IREGIONS.forEach(function (r) { var root = find(r); if (!groups[root]) groups[root] = []; groups[root].push(r); });
+    return Object.keys(groups).map(function (k) { return groups[k]; });
+  }
+
+  var iYearTag = document.getElementById("iYearTag");
+  var iEraName = document.getElementById("iEraName");
+  var iEraOwners = document.getElementById("iEraOwners");
+  var iEraStory = document.getElementById("iEraStory");
+  var iFlagsRow = document.getElementById("iFlagsRow");
+  var iSlider = document.getElementById("iSlider");
+
+  function iRender(idx) {
+    var era = ISNAP[idx];
+    iYearTag.textContent = era.year;
+    iEraName.textContent = era.name;
+    iEraStory.innerHTML = era.story;
+
+    IREGIONS.forEach(function (id) {
+      document.getElementById("ireg-" + id).setAttribute("fill", era.t[id]);
+      var lbl = document.getElementById(id === "con" ? "ilbl-con" : "ilbl-" + id);
+      if (lbl) {
+        var lblColor = iTextColorFor(era.t[id]);
+        lbl.setAttribute("fill", lblColor);
+        lbl.setAttribute("stroke", lblColor === "#201a12" ? "#f7f1e3" : "#201a12");
+      }
+      var lbl2 = document.getElementById("ilbl-con2");
+      if (id === "con" && lbl2) {
+        var lbl2Color = iTextColorFor(era.t[id]);
+        lbl2.setAttribute("fill", lbl2Color);
+        lbl2.setAttribute("stroke", lbl2Color === "#201a12" ? "#f7f1e3" : "#201a12");
+      }
+    });
+
+    IADJ.forEach(function (pair) {
+      var same = era.t[pair[0]] === era.t[pair[1]];
+      var line = document.getElementById("ib-" + pair[0] + "-" + pair[1]);
+      line.setAttribute("stroke-opacity", same ? "0.06" : "0.85");
+      line.setAttribute("stroke-width", same ? "1" : "2.4");
+    });
+
+    var groups = iGroupsFor(era.t);
+    var seen = {}; var parts = [];
+    groups.forEach(function (g) {
+      var label = INAMES[Object.keys(IC).filter(function (k) { return IC[k] === era.t[g[0]]; })[0]] || era.t[g[0]];
+      if (!seen[label]) { seen[label] = []; parts.push(label); }
+      g.forEach(function (id) { seen[label].push(IREGION_NAMES[id]); });
+    });
+    iEraOwners.innerHTML = parts.map(function (label) { return "<b>" + label + "</b>: " + seen[label].join(", "); }).join(" &middot; ");
+
+    iFlagsRow.innerHTML = IREGIONS.map(function (id) {
+      return '<div class="iflag-chip">' + iFlagSvg(era.flagKeys[id]) + '<div class="ic-label">' + IREGION_NAMES[id] + '</div></div>';
+    }).join("");
+  }
+
+  iSlider.addEventListener("input", function () { iRender(parseInt(iSlider.value, 10)); });
+  iRender(0);
+
+  var iPlaying = false, iPlayTimer = null;
+  var iPlayBtn = document.getElementById("iPlayBtn");
+  function iStepPlay() {
+    var next = parseInt(iSlider.value, 10) + 1;
+    if (next > ISNAP.length - 1) { iStopPlay(); return; }
+    iSlider.value = next;
+    iRender(next);
+  }
+  function iStartPlay() {
+    iPlaying = true;
+    iPlayBtn.innerHTML = "&#10074;&#10074;";
+    if (parseInt(iSlider.value, 10) >= ISNAP.length - 1) { iSlider.value = 0; iRender(0); }
+    iPlayTimer = setInterval(iStepPlay, 1700);
+  }
+  function iStopPlay() {
+    iPlaying = false;
+    iPlayBtn.innerHTML = "&#9654;";
+    clearInterval(iPlayTimer);
+  }
+  iPlayBtn.addEventListener("click", function () { iPlaying ? iStopPlay() : iStartPlay(); });
+})();
+  document.querySelectorAll(".tag[data-tip]").forEach(function (tag) {
+    tag.addEventListener("click", function (e) {
+      var wasOpen = tag.classList.contains("tip-open");
+      document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+      if (!wasOpen) tag.classList.add("tip-open");
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".tag.tip-open").forEach(function (t) { t.classList.remove("tip-open"); });
+  });
+</script>
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var html = '<h4>Genealogical records for this ground</h4>';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>
+
+</body></html>

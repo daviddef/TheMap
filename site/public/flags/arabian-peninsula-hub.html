@@ -1,0 +1,515 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#f2e8d5;color:#241a12}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Flags of the Arabian Peninsula</title>
+<meta name="description" content="A hub for the family flag atlas: seven countries, and an interactive map showing who ruled the peninsula at nine points across thirteen centuries.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #241a12; --paper: #f2e8d5; --card: #faf3e3; --card-border: #dcc99a;
+    --brick: #9c3b28; --brick-2: #7c2e1f; --brass: #a9762f; --sea: #1f6b6b; --sea-2: #164f4f;
+    --muted: #6e6047; --hair: #cbb98d; --focus: #1f6b6b;
+    --tile: #e6d7ab; --tile-line: #c2ad7a; --tile-text: #7a6a45; --tile-sea: #a9cdd1;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+      --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --sea: #4fa3a3; --sea-2: #6fbcbc;
+      --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #15343c;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
+    --brick: #d3644a; --brick-2: #e07a5f; --brass: #d1a154; --sea: #4fa3a3; --sea-2: #6fbcbc;
+    --muted: #9a9280; --hair: #33393f; --tile: #262b31; --tile-line: #3a4147; --tile-text: #8a8f94; --tile-sea: #15343c;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--sea); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.2rem, 5.5vw, 3.4rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.1rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .countries { margin-top: 44px; }
+  .countries h2 { font-size: 1.15rem; font-weight: 600; margin: 0 0 16px; }
+  .country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .country-card {
+    display: block; padding: 20px; border: 1px solid var(--card-border); background: var(--card);
+    border-radius: 4px; text-decoration: none; color: var(--ink); position: relative; overflow: hidden;
+  }
+  .country-card .swatch-strip { position: absolute; top: 0; left: 0; right: 0; height: 5px; }
+  .country-card .era { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--brass); margin-bottom: 6px; }
+  .country-card b { display: block; font-family: "Fraunces", serif; font-size: 1.2rem; font-weight: 600; margin-bottom: 6px; }
+  .country-card span.desc { color: var(--muted); font-size: .88rem; line-height: 1.5; }
+  .country-card.soon { opacity: .72; }
+  .country-card .soon-tag { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border: 1px dashed var(--card-border); border-radius: 3px; padding: 2px 6px; display: inline-block; margin-top: 8px; }
+
+  .map-section { margin-top: 56px; padding-top: 36px; border-top: 1px solid var(--hair); }
+  .map-section h2 { font-size: 1.5rem; margin: 0 0 8px; }
+  .map-section .map-sub { font-size: .94rem; color: var(--muted); max-width: 64ch; margin: 0 0 22px; }
+  .map-section .rule-box { margin-bottom: 22px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .92rem; }
+  .map-section .rule-box b { color: var(--brick); }
+
+  .viz-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 22px; }
+
+  .controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .play-btn {
+    flex: none; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .play-btn:hover { border-color: var(--brick); }
+  input[type="range"] {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px;
+    background: var(--hair); outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper);
+    box-shadow: 0 0 0 1px var(--brick); cursor: pointer;
+  }
+  .era-tag { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+
+  .era-head { text-align: center; margin-bottom: 16px; }
+  .era-name-inline { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.35rem; transition: opacity .35s ease; }
+  .era-owners { font-size: .86rem; color: var(--muted); max-width: 62ch; margin: 6px auto 0; transition: opacity .35s ease; }
+  .era-owners b { color: var(--ink); }
+  .era-story {
+    margin: 0 auto 22px; font-size: .98rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .35s ease; padding: 14px 18px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  .era-story b { color: var(--brick); }
+
+  .flags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin: 4px auto 18px; max-width: 700px; }
+  .flag-chip { text-align: center; width: 92px; }
+  .flag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-chip .fc-label { font-family: "IBM Plex Mono", monospace; font-size: 9px; color: var(--muted); margin-top: 5px; line-height: 1.3; }
+
+  #map-svg { display: block; margin: 0 auto; width: 100%; max-width: 460px; height: auto; }
+  .region-fill { transition: fill 0.7s ease; }
+  .neighbor-fill { fill: var(--tile); stroke: var(--tile-line); stroke-width: 1; opacity: 0.55; }
+  .border-line { transition: stroke-opacity 0.7s ease, stroke-width 0.7s ease; fill: none; stroke: #241f14; stroke-linecap: round; }
+  .group-label { font-family: "Fraunces", serif; font-weight: 600; transition: opacity .5s ease, font-size .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2.5px; }
+  .sub-label { font-family: "IBM Plex Mono", monospace; font-weight: 700; transition: opacity .5s ease, fill .5s ease; text-anchor: middle; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .neighbor-label { font-family: "IBM Plex Mono", monospace; font-weight: 600; text-anchor: middle; fill: var(--tile-text); }
+
+  .map-key { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: .8rem; color: var(--muted); justify-content: center; }
+  .map-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .map-key .sw { width: 11px; height: 11px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .map-notes { margin-top: 20px; font-size: .85rem; color: var(--muted); }
+  .map-notes b { color: var(--ink); }
+  .map-note { font-size: .82rem; color: var(--muted); margin: 14px 0 0; }
+
+  .subview { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .subview h3 { font-size: 1.2rem; font-weight: 600; margin: 0 0 8px; }
+  .subview .sub-desc { font-size: .9rem; color: var(--muted); max-width: 64ch; margin: 0 0 18px; }
+
+  .gantt-row { display: flex; align-items: center; margin-bottom: 3px; }
+  .gantt-label { width: 76px; flex: none; font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--ink); text-align: right; padding-right: 10px; }
+  .gantt-track { flex: 1; height: 24px; position: relative; background: var(--paper); border-radius: 2px; overflow: hidden; }
+  .gantt-seg { position: absolute; top: 0; bottom: 0; }
+  .gantt-axis { display: flex; margin-left: 76px; padding-top: 4px; font-family: "IBM Plex Mono", monospace; font-size: 9.5px; color: var(--muted); position: relative; height: 14px; }
+  .gantt-axis span { position: absolute; transform: translateX(-50%); }
+
+  .grid-3x3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .grid-cell { text-align: center; }
+  .grid-cell svg { width: 100%; height: auto; display: block; background: var(--tile-sea); }
+  .grid-cell .cap { font-family: "IBM Plex Mono", monospace; font-size: 10px; color: var(--brass); margin-top: 6px; }
+  .grid-cell .cap b { display: block; font-family: "Fraunces", serif; font-size: .95rem; font-weight: 600; color: var(--ink); margin-top: 1px; }
+  .grid-cell .cap .diff { display: block; font-family: "Source Sans 3", sans-serif; font-size: .74rem; color: var(--brick); margin-top: 3px; font-weight: 600; }
+
+  .about { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .about h2 { font-size: 1.3rem; margin: 0 0 12px; }
+  .about p { max-width: none; opacity: .88; margin: 0 0 12px; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--sea); }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a></p>
+  <p class="kicker">Family research &middot; Hub &middot; Phase 7 of the world atlas</p>
+  <h1>Flags of the Arabian Peninsula</h1>
+  <p class="lede">Seven countries &mdash; Saudi Arabia, Yemen, Oman, the United Arab Emirates, Qatar, Bahrain, Kuwait &mdash; each with its own flag lineage, and below, one map showing who actually ruled this coastline-heavy peninsula across thirteen centuries, one slider-turn at a time.</p>
+  <p class="lede">Each country's own deep-dive page is still being painted; the cards below are placeholders until they're ready. Drag the map's slider first if you want the whole region's story at a glance &mdash; watch for how often it stays honestly fragmented rather than uniting.</p>
+
+  <div class="countries">
+    <h2>The seven lineages</h2>
+    <div class="country-grid">
+      <a class="country-card" href="saudi-arabia-flags.html">
+        <span class="swatch-strip" style="background:#0f5c33"></span>
+        <span class="era">c. 630&ndash;present</span>
+        <b>Saudi Arabia</b>
+        <span class="desc">The Hejaz's caliphal centuries, Najd's long fragmentation, three Saudi states, the kingdom of 1932.</span>
+      </a>
+      <a class="country-card" href="yemen-flags.html">
+        <span class="swatch-strip" style="background:#a4302a"></span>
+        <span class="era">c. 1200 BCE&ndash;present</span>
+        <b>Yemen</b>
+        <span class="desc">The Sabaean and Himyarite kingdoms, the Zaidi Imamate, a 72-year north/south split, reunification in 1990.</span>
+      </a>
+      <a class="country-card" href="oman-flags.html">
+        <span class="swatch-strip" style="background:#8a2f1f"></span>
+        <span class="era">c. 700&ndash;present</span>
+        <b>Oman</b>
+        <span class="desc">The Ibadi Imamate, Portuguese-held ports, a maritime empire reaching Zanzibar, the sultanate today.</span>
+      </a>
+      <a class="country-card" href="united-arab-emirates-flags.html">
+        <span class="swatch-strip" style="background:#1f6b52"></span>
+        <span class="era">c. 700&ndash;present</span>
+        <b>United Arab Emirates</b>
+        <span class="desc">The Qawasim confederation, the Trucial States system, a 1971 federation of seven emirates.</span>
+      </a>
+      <a class="country-card" href="qatar-flags.html">
+        <span class="swatch-strip" style="background:#5c1f2e"></span>
+        <span class="era">c. 700&ndash;present</span>
+        <b>Qatar</b>
+        <span class="desc">Long inside Bahrain's orbit, an 1868 separation, the Al Thani emirate, independence in 1971.</span>
+      </a>
+      <a class="country-card" href="bahrain-flags.html">
+        <span class="swatch-strip" style="background:#d1453a"></span>
+        <span class="era">c. 700&ndash;present</span>
+        <b>Bahrain</b>
+        <span class="desc">A medieval Arab emirate, an island seized by Portugal, the Al Khalifa dynasty since 1783.</span>
+      </a>
+      <a class="country-card" href="kuwait-flags.html">
+        <span class="swatch-strip" style="background:#2f7a3a"></span>
+        <span class="era">c. 700&ndash;present</span>
+        <b>Kuwait</b>
+        <span class="desc">The Al Sabah dynasty since 1752, an 1899 British treaty, the Gulf's first 1961 independence.</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="map-section">
+    <h2>Thirteen centuries, one map</h2>
+    <p class="map-sub">A real, traced map &mdash; actual coastlines along the Red Sea, the Arabian Sea, and the Gulf, not schematic shapes. Drag the slider or press play; each snapshot simplifies a messier reality into the dominant power of the moment, and Bahrain's tiny island footprint is drawn at an exaggerated scale (as this atlas does elsewhere for very small countries) so it stays visible.</p>
+    <div class="rule-box">
+      <b>Borders here are data, not decoration.</b> A line between two regions only draws solid when they were actually governed separately. When they weren't &mdash; the whole peninsula under one Caliphate in 700, say, or North and South Yemen reunited in 1990 &mdash; the line dissolves and the names merge into whoever actually ruled them both. Where no one ruled at all &mdash; much of the interior for most of this map's history &mdash; the color reads plainly as "no single ruler," not a false unity.
+    </div>
+
+    <div class="viz-frame">
+      <div class="controls">
+        <button class="play-btn" id="playBtn" type="button" aria-label="Play">&#9654;</button>
+        <span class="era-tag" id="yearTag">700</span>
+        <input type="range" id="slider" min="0" max="8" step="1" value="0" aria-label="Select era">
+      </div>
+      <svg id="map-svg" viewBox="0 0 610 640" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="0" width="610" height="640" fill="var(--tile-sea)"/>
+        <path class="neighbor-fill" d="M39.1,115.7 L43.1,107.9 L68.4,117.7 L113.0,91.4 L122.2,121.4 L117.9,125.1 L72.3,137.5 L95.0,162.1 L87.4,166.3 L83.7,174.6 L66.3,178.0 L60.9,186.8 L51.0,194.4 L25.7,190.5 L24.9,186.9 L36.3,147.6 L35.7,138.0 L39.1,130.8 L39.1,115.7 Z"/>
+<path class="neighbor-fill" d="M264.0,27.4 L278.9,34.8 L280.7,49.2 L269.2,57.7 L263.9,76.9 L279.7,100.3 L307.6,113.8 L319.3,132.6 L315.6,150.4 L322.9,150.4 L323.1,163.5 L335.7,176.5 L306.9,173.2 L290.2,196.8 L247.8,194.9 L183.6,145.3 L149.7,128.1 L122.2,121.4 L113.0,91.4 L163.5,65.8 L172.1,36.0 L169.9,18.0 L182.4,12.0 L194.1,-3.4 L203.9,-7.2 L230.3,-4.1 L238.3,2.2 L249.3,-1.9 L264.0,27.4 Z"/>
+<path class="neighbor-fill" d="M457.6,-2.7 L477.6,-7.4 L493.8,-21.5 L509.1,-20.8 L519.1,-25.4 L535.3,-23.1 L560.5,-10.6 L578.6,-7.9 L604.7,13.9 L621.7,14.8 L623.6,35.5 L608.1,84.1 L618.0,87.7 L608.3,101.2 L615.7,120.9 L617.5,136.5 L634.8,140.7 L636.6,156.5 L616.0,178.9 L627.3,191.8 L636.4,206.7 L658.2,217.5 L658.8,239.2 L669.7,243.2 L671.6,254.5 L638.8,267.3 L630.2,295.9 L587.3,288.4 L562.5,282.8 L536.8,279.6 L527.1,249.4 L516.2,245.0 L498.7,249.4 L475.7,261.3 L447.9,253.2 L424.9,234.2 L402.9,227.2 L387.7,203.9 L370.9,171.0 L358.7,175.0 L344.2,166.8 L335.7,176.5 L323.1,163.5 L322.9,150.4 L315.6,150.4 L319.3,132.6 L307.6,113.8 L279.7,100.3 L263.9,76.9 L269.2,57.7 L280.7,49.2 L278.9,34.8 L264.0,27.4 L249.3,-1.9 L236.8,-21.7 L241.3,-29.3 L234.1,-57.6 L249.7,-64.6 L253.4,-55.3 L264.9,-43.9 L280.5,-40.6 L288.7,-41.4 L315.6,-59.5 L324.1,-61.4 L330.9,-54.1 L323.0,-41.9 L337.2,-29.0 L342.9,-30.3 L350.1,-12.1 L371.7,-7.0 L387.5,5.4 L419.9,9.6 L455.4,3.1 L457.6,-2.7 Z"/>
+        <path id="f-sa" class="region-fill" d="M203.9,510.9 L200.9,500.4 L194.0,493.0 L192.3,483.2 L180.5,474.3 L168.4,453.7 L161.9,433.6 L146.2,416.7 L136.0,412.6 L121.0,389.1 L118.3,372.0 L119.3,357.4 L106.2,330.1 L95.5,320.5 L83.2,315.4 L75.8,301.3 L77.0,295.7 L70.7,283.0 L64.0,277.5 L55.1,259.1 L29.6,222.4 L18.3,222.5 L25.7,190.5 L51.0,194.4 L60.9,186.8 L66.3,178.0 L83.7,174.6 L87.4,166.3 L95.0,162.1 L72.3,137.5 L117.9,125.1 L122.2,121.4 L149.7,128.1 L183.6,145.3 L247.8,194.9 L290.2,196.8 L310.5,199.2 L316.1,211.0 L332.2,210.3 L341.2,231.6 L352.4,237.2 L356.3,245.8 L371.8,256.2 L373.2,266.4 L370.9,274.6 L373.8,282.8 L380.3,289.7 L386.8,303.8 L393.6,308.7 L400.0,307.0 L404.3,316.4 L405.2,322.1 L413.9,347.0 L482.3,359.5 L486.9,354.3 L497.4,371.7 L482.2,421.0 L413.9,445.6 L348.2,455.0 L326.9,466.1 L310.6,492.0 L300.0,496.1 L294.3,487.9 L285.6,489.1 L263.5,486.6 L259.4,484.2 L233.1,484.7 L226.9,487.0 L217.6,480.6 L211.5,492.7 L213.9,503.1 L203.9,510.9 Z"/>
+<path id="f-ye_n" class="region-fill" d="M214.6,574.5 L210.9,567.2 L206.4,549.0 L199.9,538.9 L204.4,537.7 L202.1,526.4 L204.9,521.7 L203.9,510.9 L213.9,503.1 L211.5,492.7 L217.6,480.6 L226.9,487.0 L233.1,484.7 L259.4,484.2 L263.5,486.6 L285.6,489.1 L294.3,487.9 L300.0,496.1 L310.6,492.0 L326.9,466.1 L348.2,455.0 L405.5,446.8 L356.9,480.1 L327.3,510.9 L262.4,555.2 L239.6,572.4 L221.4,584.7 L214.0,587.0 L214.6,574.5 Z"/>
+<path id="f-ye_s" class="region-fill" d="M422.6,510.1 L418.2,521.0 L417.7,529.4 L395.0,539.8 L358.6,551.3 L338.2,568.7 L328.2,570.0 L321.4,568.6 L308.1,578.8 L293.5,583.5 L274.4,584.8 L268.7,586.2 L263.7,592.7 L257.7,594.5 L254.2,600.8 L242.9,600.2 L235.6,603.6 L219.9,602.3 L214.0,587.0 L221.4,584.7 L239.6,572.4 L262.4,555.2 L327.3,510.9 L356.9,480.1 L405.5,446.8 L413.9,445.6 L439.1,503.4 L422.6,510.1 Z"/>
+<path id="f-om" class="region-fill" d="M570.1,393.5 L561.6,410.4 L551.3,409.1 L546.6,415.0 L542.9,427.5 L545.7,443.9 L543.6,447.0 L533.1,446.9 L518.9,456.1 L516.6,468.1 L511.4,473.3 L497.3,473.1 L488.3,479.3 L488.5,489.2 L477.4,496.1 L464.9,493.7 L449.6,502.0 L439.1,503.4 L413.9,445.6 L482.2,421.0 L497.4,371.7 L486.9,354.3 L487.5,344.3 L494.2,334.1 L494.2,324.1 L504.5,319.2 L500.5,315.8 L502.4,299.8 L514.0,299.7 L524.2,316.5 L536.9,325.4 L553.6,328.6 L567.1,333.1 L583.5,355.4 L591.7,358.6 L591.7,364.1 L579.7,385.6 L570.1,393.5 Z M513.9,275.7 L510.9,280.2 L506.6,271.8 L513.2,263.4 L516.0,265.6 L513.9,275.7 Z"/>
+<path id="f-ae" class="region-fill" d="M404.3,316.4 L408.3,315.2 L409.2,322.0 L427.0,318.1 L459.6,319.4 L506.6,271.8 L510.9,280.2 L514.0,299.7 L502.4,299.8 L500.5,315.8 L504.5,319.2 L494.2,324.1 L494.2,334.1 L487.5,344.3 L486.9,354.3 L482.3,359.5 L413.9,347.0 L405.2,322.1 L404.3,316.4 Z"/>
+<path id="f-qa" class="region-fill" d="M386.8,303.8 L385.3,285.9 L391.4,273.0 L397.6,270.4 L404.5,278.1 L404.9,292.5 L400.0,307.0 L393.6,308.7 L386.8,303.8 Z"/>
+<path id="f-kw" class="region-fill" d="M322.2,175.3 L326.9,186.1 L324.9,191.7 L332.2,210.3 L316.1,211.0 L310.5,199.2 L290.2,196.8 L306.9,173.2 L322.2,175.3 Z"/>
+<path id="f-bh" class="region-fill" d="M375.6,253.5 L378.7,256.2 L379.4,255.1 L380.5,254.2 L381.5,257.3 L382.4,257.3 L381.7,258.2 L381.6,259.7 L380.2,260.1 L380.6,264.7 L380.4,271.6 L379.3,280.3 L378.7,282.0 L376.5,285.4 L375.2,280.4 L374.1,277.9 L372.6,275.7 L369.4,272.2 L368.9,270.0 L370.3,267.3 L371.1,265.0 L370.7,262.1 L369.6,259.2 L368.4,257.0 L368.1,256.1 L368.1,254.8 L369.0,251.1 L369.5,250.2 L370.4,249.7 L373.0,249.9 L375.1,250.9 L378.1,249.7 L378.6,250.0 L378.9,251.0 L379.7,252.4 L379.3,253.2 L378.6,253.4 L376.6,253.1 L375.6,253.5 Z M391.8,290.8 L392.4,290.9 L393.7,290.0 L393.5,291.2 L392.4,292.7 L393.4,293.7 L393.1,294.1 L392.2,293.9 L390.9,295.0 L391.9,297.3 L391.4,297.5 L391.1,298.0 L391.0,298.6 L391.8,299.4 L390.5,301.2 L390.7,301.7 L390.5,301.9 L389.7,301.5 L389.1,300.7 L389.9,298.7 L389.9,296.8 L389.2,296.2 L389.4,294.5 L389.7,293.5 L391.8,290.8 Z M379.2,246.8 L381.5,246.2 L383.1,247.0 L383.2,249.4 L384.3,250.9 L385.2,251.3 L384.8,252.4 L384.4,252.9 L383.3,252.2 L382.6,250.0 L380.6,249.6 L380.0,249.8 L379.0,248.1 L379.2,246.8 Z"/>
+        <g id="borders" stroke-width="1">
+          <path class="border-line" id="b-sa-ye_n" d="M413.9,445.6 L348.2,455.0 L326.9,466.1 L310.6,492.0 L300.0,496.1 L294.3,487.9 L285.6,489.1 L263.5,486.6 L259.4,484.2 L233.1,484.7 L226.9,487.0 L217.6,480.6 L211.5,492.7 L213.9,503.1 L203.9,510.9"/>
+<path class="border-line" id="b-sa-om" d="M486.9,354.3 L497.4,371.7 L482.2,421.0 L413.9,445.6"/>
+<path class="border-line" id="b-sa-ae" d="M404.3,316.4 L405.2,322.1 L413.9,347.0 L482.3,359.5 L486.9,354.3"/>
+<path class="border-line" id="b-sa-qa" d="M386.8,303.8 L393.6,308.7 L400.0,307.0"/>
+<path class="border-line" id="b-sa-kw" d="M290.2,196.8 L310.5,199.2 L316.1,211.0 L332.2,210.3"/>
+<path class="border-line" id="b-ae-om" d="M514.0,299.7 L502.4,299.8 L500.5,315.8 L504.5,319.2 L494.2,324.1 L494.2,334.1 L487.5,344.3 L486.9,354.3 M506.6,271.8 L510.9,280.2"/>
+<path class="border-line" id="b-ye_n-ye_s" d="M405.5,446.8 L356.9,480.1 L327.3,510.9 L262.4,555.2 L239.6,572.4 L221.4,584.7 L214.0,587.0"/>
+<path class="border-line" id="b-om-ye_s" d="M439.1,503.4 L431.7,486.2 L413.9,445.6"/>
+        </g>
+        <g id="labels"></g>
+      </svg>
+
+      <div class="era-head">
+        <div class="era-name-inline" id="eraName">Islamic Arabia</div>
+        <div class="era-owners" id="eraOwners"></div>
+      </div>
+      <div class="flags-row" id="flagsRow"></div>
+      <p class="era-story" id="eraStory"></p>
+
+      <p class="map-note">Real traced coastlines (simplified). Jordan, Iraq, and Iran are shown faintly for context &mdash; the Peninsula's major non-Peninsula neighbors &mdash; but are never colored or merged; they are not part of this atlas's tracked regions.</p>
+      <div class="map-key" id="legend"></div>
+      <div class="map-notes">
+        <b>Try:</b> start at 700 and watch every border across all seven countries dissolve at once &mdash; one Caliphate, one color, the peninsula's first real unification. Then jump to 1200 and watch Najd, the future UAE, Qatar, and Kuwait all merge into a single dusty "no single ruler" block, while Yemen and Oman and Bahrain each hold their own separate color &mdash; a real fragmented interior, not a forced one. Finally watch 1971: six separate colors resolve into the UAE's single new color while Kuwait, Qatar, and Bahrain each stay their own; then at 1990, watch North and South Yemen's internal line dissolve one last time as they reunite.
+      </div>
+    </div>
+
+    <div class="subview">
+      <h3>The same story, as a timeline</h3>
+      <p class="sub-desc">Maps are bad at showing <em>when</em>; timelines are bad at showing <em>where</em>. This bar chart uses the same real turning-point years as the map above, stretched out so you can compare how long each region actually spent under each power &mdash; watch how much of Najd's and the Gulf's timeline reads "no single ruler" compared to Yemen's or Oman's more continuous local dynasties.</p>
+      <div class="viz-frame">
+        <div id="gantt"></div>
+        <div class="gantt-axis" id="gantt-axis"></div>
+      </div>
+    </div>
+
+    <div class="subview">
+      <h3>The same story, nine frames &mdash; only the change lights up</h3>
+      <p class="sub-desc">Every region keeps its true color, but anything unchanged from the previous frame fades to low opacity; only the region(s) that actually changed hands stay bold with a solid outline. A caption under each frame spells out exactly what flipped. No slider to operate &mdash; scan left to right, top to bottom, and watch the map redraw itself like a flipbook.</p>
+      <div class="viz-frame">
+        <div class="grid-3x3" id="grid9"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="about">
+    <h2>About this atlas</h2>
+    <p>This started as a family history project: tracing the flags that flew over the lands our ancestors came from, close enough to paint accurately &mdash; correct colors, correct proportions, correct dates. The Arabian Peninsula is Phase 7, moving the project into the Middle East for the first time.</p>
+    <p>Every country page (once painted) will carry its own timeline of flags with paint-ready color specs and a per-era location map. Colors here are close historical approximations; pre-modern swatches especially are informed reconstructions, not official specifications, and are labeled as such throughout. The regional map above simplifies thirteen centuries of messy, overlapping, and often genuinely unruled territory into nine snapshots &mdash; useful for orientation, not a substitute for the detail each country's own page will eventually carry.</p>
+  </div>
+
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This hub is one region in a larger set. See the other phases here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="yugoslavia-hub.html"><b>Former Yugoslavia hub</b><span>Six countries, nine centuries</span></a>
+      <a class="link-card" href="habsburg-hub.html"><b>Habsburg Lands hub</b><span>Seven countries, four centuries</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Compiled from Wikipedia, Flags of the World (fotw.info / crwflags.com), and Britannica. Map is schematic and not surveyed; Bahrain's scale is deliberately exaggerated for visibility.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var SNAP = [{"year": "700", "name": "Islamic Arabia", "t": {"sa": "caliphate", "ye_n": "caliphate", "ye_s": "caliphate", "om": "caliphate", "ae": "caliphate", "qa": "caliphate", "kw": "caliphate", "bh": "caliphate"}, "story": "The Arabian Peninsula is the birthplace of Islam: Muhammad received the first revelations at Mecca around 610, and the faith's twin holy cities, Mecca and Medina, anchor the Hejaz on the peninsula's western edge. By 700, the Umayyad Caliphate, ruling from distant Damascus, claims the whole peninsula as its ancestral heartland. That claim is real in the Hejaz and stronger coastal towns, where caliphal governors sit — but honesty matters here: across most of the desert interior, authority is closer to religious and tribal allegiance than day-to-day administration. Bedouin confederations continue to run their own affairs much as they did before Islam, simply now under its banner."}, {"year": "1200", "name": "No single power", "t": {"sa": "frag_interior", "ye_n": "ayyubid_yemen", "ye_s": "ayyubid_yemen", "om": "nabhani_oman", "ae": "frag_interior", "qa": "frag_interior", "kw": "frag_interior", "bh": "uyunid_bahrain"}, "story": "Five centuries on, the peninsula has fractured into genuinely separate stories, and this map is honest about it: most of what is now Saudi Arabia and the Trucial/Gulf coast — Najd's interior, and the future UAE, Qatar, and Kuwait — answers to no single ruler at all. Local shaykhs and tribal confederations hold their own ground; even the Hejaz's loose overlordship by distant powers is nominal at best. Two real, datable states stand out from that pattern: in the south, the Ayyubid dynasty (Saladin's family) conquered Yemen outright in 1174, ruling from Zabid and Ta'izz. In Oman, the Nabhani dynasty has built a lasting local Imamate around Bahla and the interior. On the eastern coast, the Uyunid dynasty rules Bahrain and the adjacent Gulf shore as its own emirate — a real, if lesser-known, medieval Arab state."}, {"year": "1517", "name": "Ottoman claim, Portuguese Gulf", "t": {"sa": "ottoman_hejaz", "ye_n": "tahirid_yemen", "ye_s": "tahirid_yemen", "om": "portuguese_gulf", "ae": "jabrid_arabia", "qa": "jabrid_arabia", "kw": "jabrid_arabia", "bh": "jabrid_arabia"}, "story": "1517 is a hinge year on two fronts at once. In Cairo, the Ottomans crush the Mamluk Sultanate, and the Sharif of Mecca sends the keys of the holy cities to Sultan Selim I — the start of four centuries of Ottoman religious sovereignty over the Hejaz, though real administrative reach into Najd's interior stays thin. The same year, Yemen's Tahirid Sultanate, which had ruled the highlands and coast since 1454, is extinguished. Meanwhile the Gulf faces an entirely different intrusion: Portuguese fleets seized Muscat in 1507 and are fortifying Hormuz and Oman's coast to command the spice route — real occupation of the ports, while Oman's interior stays under its own Imams. Along the eastern coast, the Jabrid dynasty (descended from the earlier Bedouin lords of Al-Hasa) holds Bahrain, Qatif, and the future Trucial coast as one real, unified Arabian emirate — not yet fragmented into today's separate sheikhdoms."}, {"year": "1806", "name": "The First Saudi State", "t": {"sa": "first_saudi", "ye_n": "zaidi_imamate", "ye_s": "zaidi_imamate", "om": "al_said_oman", "ae": "qawasim_trucial", "qa": "frag_interior", "kw": "al_sabah_kuwait", "bh": "al_khalifa_bahrain"}, "story": "In 1744, the Najdi ruler Muhammad ibn Saud allies with the religious reformer Muhammad ibn Abd al-Wahhab at Diriyah — the founding pact behind every Saudi state since. Their Emirate expands for six decades, and by 1806 it controls the Hejaz outright, having taken Mecca (1803) and Medina (1805) from Ottoman control: the peninsula's biggest unification since early Islam. To its south, Yemen has thrown off Ottoman rule entirely (they withdrew in 1636) and stands as its own independent Zaidi Imamate under the Qasimid line. Oman, meanwhile, has become a real maritime empire: the Al Said dynasty (from 1749) is building trade power that will soon reach across the sea to Zanzibar. Along the Gulf, the old Jabrid unity is long gone — the Qawasim run a maritime confederation from Ras al-Khaimah, the Al Sabah family has ruled an independent Kuwait since 1752, and the Al Khalifa took Bahrain in 1783 and rule it still. Qatar, caught between these neighbors, has no strong ruler of its own yet."}, {"year": "1830", "name": "Second Saudi State, first British treaties", "t": {"sa": "second_saudi", "ye_n": "zaidi_imamate", "ye_s": "zaidi_imamate", "om": "al_said_oman", "ae": "qawasim_trucial", "qa": "al_khalifa_qatar", "kw": "al_sabah_kuwait", "bh": "al_khalifa_bahrain"}, "story": "The First Saudi State's run ends violently in 1818, when an Egyptian expeditionary force under Ibrahim Pasha, acting for the Ottoman Sultan, razes Diriyah to punish the Wahhabi movement. Within six years the House of Saud is back: Turki bin Abdullah founds the Second Saudi State from Riyadh in 1824, though it never quite recovers the first state's reach into the Hejaz. In the Gulf, a new outside power arrives formally: Britain's 1820 General Treaty of Peace, signed after a naval campaign against Gulf shipping, brings the Qawasim confederation and Bahrain's Al Khalifa into treaty relationships — the start of what becomes the “Trucial” system, though each sheikhdom still rules its own affairs day to day. Qatar, without its own dynasty yet, sits loosely within Bahrain's orbit. Oman's Said bin Sultan is at the height of his power, moving his capital to Zanzibar in 1832 to run a trading empire spanning the western Indian Ocean."}, {"year": "1892", "name": "Rashidi Najd, the formal Trucial system", "t": {"sa": "rashidi_emirate", "ye_n": "ottoman_yemen", "ye_s": "ottoman_yemen", "om": "busaidi_oman", "ae": "qawasim_trucial", "qa": "al_thani_qatar", "kw": "al_sabah_kuwait", "bh": "al_khalifa_bahrain"}, "story": "The Second Saudi State collapses for good in 1891, defeated by Muhammad ibn Rashid of Ha'il — the House of Saud goes into exile in Kuwait, and the Rashidi Emirate of Jabal Shammar rules Najd in their place, a real and often overlooked chapter between the two Saudi kingdoms. To the south, the Ottomans have reoccupied Yemen's highlands (retaking Sana'a in 1872) to keep a Red Sea foothold, though Zaidi Imams keep real religious authority and will revolt repeatedly. Oman's maritime empire has faded since Said bin Sultan's death split it between Muscat and Zanzibar in 1856; the Busaidi dynasty rules on, but weaker. In the Gulf, the British treaty system is now formal: the 1892 Exclusive Agreements bind the Trucial sheikhdoms, Bahrain, and soon Kuwait to let Britain handle their foreign affairs — real protection, not annexation, and Qatar's Al Thani family, recognized separately from Bahrain since an 1868 British-brokered settlement, rules its own emirate for the first time."}, {"year": "1932", "name": "The Kingdom of Saudi Arabia", "t": {"sa": "saudi_kingdom", "ye_n": "mutawakkilite_yemen", "ye_s": "aden_protectorate", "om": "busaidi_oman", "ae": "trucial_states", "qa": "al_thani_qatar", "kw": "al_sabah_kuwait", "bh": "al_khalifa_bahrain"}, "story": "Abdulaziz ibn Saud recaptures Riyadh from the Rashidis in 1902 and spends three decades reuniting Najd, Al-Hasa, and finally the Hejaz (1925), proclaiming the Kingdom of Saudi Arabia in 1932 — the peninsula's largest and most lasting unification, still standing today. Yemen's story is already splitting in two, and stays split for the rest of this century: in the north, the Ottomans withdrew in 1918 and the Zaidi Imam Yahya founded the independent Mutawakkilite Kingdom; in the south, Aden — seized by Britain back in 1839 as a coaling station — has grown into a full Crown Colony and Protectorate over the Hadhramaut and Mahra hinterland. Around the Gulf, Britain's client sheikhdoms are now collectively known as the Trucial States; Kuwait (protected since 1899) and Bahrain and Qatar (each under their own agreements) remain separately ruled, oil not yet transforming any of them."}, {"year": "1971", "name": "Independence, in stages", "t": {"sa": "saudi_kingdom", "ye_n": "yar", "ye_s": "pdry", "om": "oman_sultanate", "ae": "uae_federation", "qa": "qatar_independent", "kw": "kuwait_independent", "bh": "bahrain_independent"}, "story": "The British era ends in a rapid sequence of real, separate events. Kuwait is first, independent in 1961. A 1962 revolution in Sana'a overthrows the Mutawakkilite Kingdom and proclaims the Yemen Arab Republic (YAR) — a bitter civil war follows, with Egyptian and Saudi forces backing opposite sides. Aden's British-ruled south wins independence in 1967 after an armed insurgency, becoming the People's Republic of South Yemen, then the explicitly Marxist People's Democratic Republic of Yemen (PDRY) from 1970: the Arab world's only Communist state. Oman, never colonized but long isolated, modernizes fast after Sultan Qaboos deposes his father in 1970. And in 1971, as Britain withdraws from the Gulf altogether, Bahrain and Qatar each choose full separate independence rather than join a wider union, while six of the smaller Trucial sheikhdoms federate on 2 December 1971 into the United Arab Emirates — Ras al-Khaimah joins in early 1972, completing it. Seven states now stand where one map once showed a single Trucial system."}, {"year": "1990", "name": "Yemen reunited, seven states today", "t": {"sa": "saudi_kingdom", "ye_n": "yemen_republic", "ye_s": "yemen_republic", "om": "oman_sultanate", "ae": "uae_federation", "qa": "qatar_independent", "kw": "kuwait_independent", "bh": "bahrain_independent"}, "story": "On 22 May 1990, the Yemen Arab Republic and the People's Democratic Republic of Yemen merge into the Republic of Yemen — the peninsula's other great unification, ending a 72-year split that ran from the Ottomans' 1918 withdrawal through two separate post-colonial states. It does not resolve every tension between the old north and south, as the brief 1994 civil war and later conflict would show, but the map itself has been one country since. Elsewhere the seven-state picture set in 1971 has held for over three decades: Saudi Arabia the peninsula's dominant kingdom; Oman an absolute sultanate reshaped by fifty years of Qaboos-era modernization; the UAE a federation of monarchies; Qatar, Kuwait, and Bahrain each their own emirate or kingdom, Kuwait alone with a real elected parliament. Borders that took thirteen centuries of caliphates, sultanates, empires, and treaties to settle now sit still — seven flags, one peninsula."}];
+  var COLORS = {"caliphate": "#3d7a4a", "frag_interior": "#8a7a5c", "ayyubid_yemen": "#b5651d", "nabhani_oman": "#6a4fb5", "uyunid_bahrain": "#1f8a8a", "ottoman_hejaz": "#a4302a", "tahirid_yemen": "#c98a3c", "portuguese_gulf": "#5c3a5c", "jabrid_arabia": "#5c8f3f", "first_saudi": "#0b6e3d", "zaidi_imamate": "#7a1f1f", "al_said_oman": "#c9a13c", "qawasim_trucial": "#204b5c", "al_sabah_kuwait": "#7a4fb5", "al_khalifa_bahrain": "#d1453a", "second_saudi": "#0b7a3d", "al_khalifa_qatar": "#b5652a", "rashidi_emirate": "#8a5a2e", "ottoman_yemen": "#a4302a", "busaidi_oman": "#9c3b28", "al_thani_qatar": "#8a2f3a", "saudi_kingdom": "#0f5c33", "mutawakkilite_yemen": "#7a1f1f", "aden_protectorate": "#3a5c8a", "trucial_states": "#204b5c", "yar": "#c0392b", "pdry": "#6b2545", "oman_sultanate": "#8a2f1f", "uae_federation": "#1f6b52", "qatar_independent": "#5c1f2e", "kuwait_independent": "#2f7a3a", "bahrain_independent": "#d1453a", "yemen_republic": "#a4302a"};
+  var NAMES = {"caliphate": "Umayyad Caliphate", "frag_interior": "No single ruler (tribal/local)", "ayyubid_yemen": "Ayyubid Yemen", "nabhani_oman": "Nabhani Imamate of Oman", "uyunid_bahrain": "Uyunid emirate of Bahrain", "ottoman_hejaz": "Ottoman claim (Hejaz)", "tahirid_yemen": "Tahirid Sultanate of Yemen", "portuguese_gulf": "Portuguese Gulf (coastal forts)", "jabrid_arabia": "Jabrid emirate (E. Arabia)", "first_saudi": "First Saudi State (Emirate of Diriyah)", "zaidi_imamate": "Zaidi Imamate of Yemen", "al_said_oman": "Omani Empire (Al Said)", "qawasim_trucial": "Qawasim confederation", "al_sabah_kuwait": "Kuwait (Al Sabah)", "al_khalifa_bahrain": "Bahrain (Al Khalifa)", "second_saudi": "Second Saudi State", "al_khalifa_qatar": "Qatar (Bahraini sphere)", "rashidi_emirate": "Rashidi Emirate (Jabal Shammar)", "ottoman_yemen": "Ottoman Yemen", "busaidi_oman": "Muscat & Oman (Busaidi, declined)", "al_thani_qatar": "Qatar (Al Thani)", "saudi_kingdom": "Kingdom of Saudi Arabia", "mutawakkilite_yemen": "Mutawakkilite Kingdom of Yemen (north)", "aden_protectorate": "Aden Colony & Protectorate (south, Britain)", "trucial_states": "Trucial States (British-protected)", "yar": "Yemen Arab Republic (north)", "pdry": "People's Democratic Republic of Yemen (south)", "oman_sultanate": "Sultanate of Oman", "uae_federation": "United Arab Emirates", "qatar_independent": "State of Qatar", "kuwait_independent": "State of Kuwait", "bahrain_independent": "Kingdom of Bahrain", "yemen_republic": "Republic of Yemen (reunified)"};
+  var FLAGS = {"caliphate": "<rect width=\"300\" height=\"200\" fill=\"#f4efe1\"/><rect width=\"300\" height=\"200\" fill=\"none\" stroke=\"#8a7a54\" stroke-width=\"3\"/>", "frag_interior": "<rect width=\"300\" height=\"200\" fill=\"#ddd0aa\"/><g fill=\"#8a7a5c\" opacity=\"0.55\"><path d=\"M40,150 L60,110 L80,150 Z\"/><path d=\"M100,160 L120,115 L140,160 Z\"/><path d=\"M160,150 L180,105 L200,150 Z\"/><path d=\"M220,160 L240,120 L260,160 Z\"/></g><text x=\"150\" y=\"40\" font-size=\"13\" text-anchor=\"middle\" fill=\"#6e6047\" font-family=\"serif\">no single flag</text>", "ayyubid_yemen": "<rect width=\"300\" height=\"200\" fill=\"#f2c14e\"/><path d=\"M150,60 q-40,10 -45,55 q30,-15 45,-10 q15,-5 45,10 q-5,-45 -45,-55 Z\" fill=\"#241f14\"/><path d=\"M150,110 l-8,40 h16 Z\" fill=\"#241f14\"/>", "nabhani_oman": "<rect width=\"300\" height=\"200\" fill=\"#9c1f1f\"/>", "uyunid_bahrain": "<rect width=\"300\" height=\"200\" fill=\"#1a1a1a\"/><rect width=\"300\" height=\"200\" fill=\"none\" stroke=\"#c9a13c\" stroke-width=\"4\"/>", "ottoman_hejaz": "<rect width=\"300\" height=\"200\" fill=\"#a4302a\"/><path d=\"M120,70 A38,38 0 1 0 172,102 A28,28 0 1 1 120,70 Z\" fill=\"#f4efe1\"/><path d=\"M200,84 l5,15 16,0 -13,10 5,15 -13,-9 -13,9 5,-15 -13,-10 16,0 Z\" fill=\"#f4efe1\"/>", "tahirid_yemen": "<rect width=\"300\" height=\"200\" fill=\"#e8dcb8\"/><path d=\"M110,60 A40,40 0 1 0 190,100\" fill=\"none\" stroke=\"#a4302a\" stroke-width=\"10\"/><circle cx=\"150\" cy=\"60\" r=\"8\" fill=\"#a4302a\"/>", "portuguese_gulf": "<rect width=\"300\" height=\"200\" fill=\"#f4efe1\"/><circle cx=\"150\" cy=\"100\" r=\"42\" fill=\"none\" stroke=\"#1e3f7a\" stroke-width=\"4\"/><circle cx=\"150\" cy=\"100\" r=\"26\" fill=\"none\" stroke=\"#1e3f7a\" stroke-width=\"3\"/><path d=\"M150,58 L150,142 M108,100 L192,100\" stroke=\"#1e3f7a\" stroke-width=\"3\"/>", "jabrid_arabia": "<rect width=\"300\" height=\"200\" fill=\"#8a1f1f\"/>", "first_saudi": "<rect width=\"300\" height=\"200\" fill=\"#0b6e3d\"/><rect x=\"70\" y=\"88\" width=\"160\" height=\"8\" fill=\"#f4efe1\"/><path d=\"M78,120 h150 l-14,-10 z\" fill=\"#f4efe1\"/>", "zaidi_imamate": "<rect width=\"300\" height=\"200\" fill=\"#7a1f1f\"/><path d=\"M110,110 q40,-40 90,-10 l-8,10 8,10 q-50,30 -90,-10Z\" fill=\"#f4efe1\"/>", "al_said_oman": "<rect width=\"300\" height=\"200\" fill=\"#8a1f1f\"/><rect x=\"0\" y=\"0\" width=\"90\" height=\"200\" fill=\"#f4efe1\"/><rect x=\"0\" y=\"0\" width=\"90\" height=\"200\" fill=\"none\" stroke=\"#8a1f1f\" stroke-width=\"4\"/>", "qawasim_trucial": "<rect width=\"300\" height=\"200\" fill=\"#a4302a\"/><rect x=\"0\" y=\"0\" width=\"26\" height=\"200\" fill=\"#f4efe1\"/>", "al_sabah_kuwait": "<rect width=\"300\" height=\"200\" fill=\"#a4302a\"/>", "al_khalifa_bahrain": "<rect width=\"300\" height=\"200\" fill=\"#f4efe1\"/><path d=\"M118,0 L300,0 L300,200 L118,200 L146,180 L118,165 L146,150 L118,135 L146,115 L118,100 L146,85 L118,65 L146,50 L118,35 L146,15 Z\" fill=\"#a4302a\"/>", "second_saudi": "<rect width=\"300\" height=\"200\" fill=\"#0b7a3d\"/><rect x=\"70\" y=\"92\" width=\"160\" height=\"7\" fill=\"#f4efe1\"/><path d=\"M78,118 h150 l-14,-9 z\" fill=\"#f4efe1\"/>", "al_khalifa_qatar": "<rect width=\"300\" height=\"200\" fill=\"#7a2333\"/><rect x=\"0\" y=\"0\" width=\"60\" height=\"200\" fill=\"#f4efe1\"/>", "rashidi_emirate": "<rect width=\"300\" height=\"200\" fill=\"#f4efe1\"/><text x=\"150\" y=\"115\" font-size=\"34\" text-anchor=\"middle\" fill=\"#241f14\" font-family=\"serif\">ر</text><rect width=\"300\" height=\"200\" fill=\"none\" stroke=\"#8a5a2e\" stroke-width=\"5\"/>", "ottoman_yemen": "<rect width=\"300\" height=\"200\" fill=\"#a4302a\"/><path d=\"M120,70 A38,38 0 1 0 172,102 A28,28 0 1 1 120,70 Z\" fill=\"#f4efe1\"/><path d=\"M200,84 l5,15 16,0 -13,10 5,15 -13,-9 -13,9 5,-15 -13,-10 16,0 Z\" fill=\"#f4efe1\"/>", "busaidi_oman": "<rect width=\"300\" height=\"200\" fill=\"#8a1f1f\"/>", "al_thani_qatar": "<rect width=\"300\" height=\"200\" fill=\"#5c1f2e\"/>", "saudi_kingdom": "<rect width=\"300\" height=\"200\" fill=\"#0f5c33\"/><rect x=\"55\" y=\"82\" width=\"190\" height=\"9\" fill=\"#f4efe1\"/><path d=\"M62,118 h175 l-16,-11 z\" fill=\"#f4efe1\"/>", "mutawakkilite_yemen": "<rect width=\"300\" height=\"200\" fill=\"#7a1f1f\"/><g fill=\"#f4efe1\"><circle cx=\"110\" cy=\"60\" r=\"5\"/><circle cx=\"150\" cy=\"50\" r=\"5\"/><circle cx=\"190\" cy=\"60\" r=\"5\"/><circle cx=\"130\" cy=\"45\" r=\"5\"/><circle cx=\"170\" cy=\"45\" r=\"5\"/></g><path d=\"M110,120 q40,-35 90,-8 l-8,9 8,9 q-50,27 -90,-10Z\" fill=\"#f4efe1\"/>", "aden_protectorate": "<rect width=\"300\" height=\"200\" fill=\"#1e3f7a\"/><rect width=\"120\" height=\"100\" fill=\"#1e3f7a\"/><path d=\"M0,0 L120,100 M120,0 L0,100\" stroke=\"#f4efe1\" stroke-width=\"14\"/><path d=\"M0,0 L120,100 M120,0 L0,100\" stroke=\"#a4302a\" stroke-width=\"6\"/><path d=\"M60,0 V100 M0,50 H120\" stroke=\"#f4efe1\" stroke-width=\"18\"/><path d=\"M60,0 V100 M0,50 H120\" stroke=\"#a4302a\" stroke-width=\"8\"/><circle cx=\"200\" cy=\"100\" r=\"30\" fill=\"#f4efe1\" stroke=\"#8a5a2e\" stroke-width=\"2\"/>", "trucial_states": "<rect width=\"300\" height=\"200\" fill=\"#a4302a\"/><rect x=\"0\" y=\"0\" width=\"80\" height=\"60\" fill=\"#1e3f7a\"/><path d=\"M0,0 L80,60 M80,0 L0,60\" stroke=\"#f4efe1\" stroke-width=\"8\"/><path d=\"M40,0 V60 M0,30 H80\" stroke=\"#f4efe1\" stroke-width=\"10\"/>", "yar": "<rect width=\"300\" height=\"66.7\" fill=\"#a4302a\"/><rect y=\"66.7\" width=\"300\" height=\"66.6\" fill=\"#f4efe1\"/><rect y=\"133.3\" width=\"300\" height=\"66.7\" fill=\"#241f14\"/><path d=\"M150,80 l7,21 22,0 -18,13 7,21 -18,-13 -18,13 7,-21 -18,-13 22,0 Z\" fill=\"#0b7a3d\"/>", "pdry": "<rect width=\"300\" height=\"66.7\" fill=\"#a4302a\"/><rect y=\"66.7\" width=\"300\" height=\"66.6\" fill=\"#f4efe1\"/><rect y=\"133.3\" width=\"300\" height=\"66.7\" fill=\"#241f14\"/><path d=\"M0,0 L110,100 L0,200 Z\" fill=\"#1e5fa0\"/><path d=\"M55,80 l7,21 22,0 -18,13 7,21 -18,-13 -18,13 7,-21 -18,-13 22,0 Z\" fill=\"#a4302a\"/>", "oman_sultanate": "<rect width=\"300\" height=\"200\" fill=\"#f4efe1\"/><rect y=\"0\" width=\"300\" height=\"60\" fill=\"#f4efe1\"/><rect y=\"60\" width=\"300\" height=\"80\" fill=\"#a4302a\"/><rect y=\"140\" width=\"300\" height=\"60\" fill=\"#0b6e3d\"/><rect x=\"0\" y=\"0\" width=\"95\" height=\"200\" fill=\"#a4302a\"/><path d=\"M40,90 q10,-14 22,0 q-11,20 -22,0 Z\" fill=\"#f4efe1\"/>", "uae_federation": "<rect width=\"300\" height=\"66.7\" fill=\"#0b6e3d\"/><rect y=\"66.7\" width=\"300\" height=\"66.6\" fill=\"#f4efe1\"/><rect y=\"133.3\" width=\"300\" height=\"66.7\" fill=\"#241f14\"/><rect x=\"0\" y=\"0\" width=\"70\" height=\"200\" fill=\"#a4302a\"/>", "qatar_independent": "<rect width=\"300\" height=\"200\" fill=\"#f4efe1\"/><path d=\"M0,0 H150 L120,14 L150,28 L120,42 L150,56 L120,70 L150,84 L120,98 L150,112 L120,126 L150,140 L120,154 L150,168 L120,182 L150,196 L0,200 Z\" fill=\"#5c1f2e\"/>", "kuwait_independent": "<rect width=\"300\" height=\"66.7\" fill=\"#0b6e3d\"/><rect y=\"66.7\" width=\"300\" height=\"66.6\" fill=\"#f4efe1\"/><rect y=\"133.3\" width=\"300\" height=\"66.7\" fill=\"#a4302a\"/><path d=\"M0,0 L70,0 L0,66.7 Z\" fill=\"#241f14\"/><path d=\"M0,66.7 L70,0 L70,133.3 L0,200 Z\" fill=\"#241f14\"/><path d=\"M0,133.3 L70,200 L0,200Z\" fill=\"#241f14\"/>", "bahrain_independent": "<rect width=\"300\" height=\"200\" fill=\"#f4efe1\"/><path d=\"M0,0 H180 L150,14 L180,28 L150,42 L180,56 L150,70 L180,84 L150,98 L180,112 L150,126 L180,140 L150,154 L180,168 L150,182 L180,196 L0,200 Z\" fill=\"#a4302a\"/>", "yemen_republic": "<rect width=\"300\" height=\"66.7\" fill=\"#a4302a\"/><rect y=\"66.7\" width=\"300\" height=\"66.6\" fill=\"#f4efe1\"/><rect y=\"133.3\" width=\"300\" height=\"66.7\" fill=\"#241f14\"/>"};
+  var REGION_LABEL = {"sa": "SAUDI", "ye_n": "YEMEN–N", "ye_s": "YEMEN–S", "om": "OMAN", "ae": "UAE", "qa": "QATAR", "kw": "KUWAIT", "bh": "BAHRAIN"};
+  var CENTROIDS = {"sa": [224.8, 325.7], "ye_n": [254.5, 515.3], "ye_s": [318.6, 552.9], "om": [519.9, 400.7], "ae": [465.0, 317.6], "qa": [394.5, 291.5], "kw": [316.9, 191.0], "bh": [375.4, 260.1]};
+  var REGIONS = ["sa", "ye_n", "ye_s", "om", "ae", "qa", "kw", "bh"];
+  var BORDER_PAIRS = [["sa", "ye_n", "SAU_YEM"], ["sa", "om", "SAU_OMN"], ["sa", "ae", "SAU_ARE"], ["sa", "qa", "SAU_QAT"], ["sa", "kw", "SAU_KWT"], ["ae", "om", "ARE_OMN"], ["ye_n", "ye_s", "YEM_N_YEM_S"], ["om", "ye_s", "OMN_YEM_S"]];
+  var USED_OWNERS = ["caliphate", "frag_interior", "ayyubid_yemen", "nabhani_oman", "uyunid_bahrain", "ottoman_hejaz", "tahirid_yemen", "portuguese_gulf", "jabrid_arabia", "first_saudi", "zaidi_imamate", "al_said_oman", "qawasim_trucial", "al_sabah_kuwait", "al_khalifa_bahrain", "second_saudi", "al_khalifa_qatar", "rashidi_emirate", "ottoman_yemen", "busaidi_oman", "al_thani_qatar", "saudi_kingdom", "mutawakkilite_yemen", "aden_protectorate", "trucial_states", "yar", "pdry", "oman_sultanate", "uae_federation", "qatar_independent", "kuwait_independent", "bahrain_independent", "yemen_republic"];
+  var NEIGHBOR_LABEL = {"jo": "Jordan", "iq": "Iraq", "ir": "Iran"};
+
+  function flagSvg(key) {
+    return '<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">' + (FLAGS[key] || '<rect width="300" height="200" fill="#ccc"/>') + '</svg>';
+  }
+
+  // ---- legend ----
+  var legendEl = document.getElementById('legend');
+  legendEl.innerHTML = USED_OWNERS.map(function (k) {
+    return '<span><span class="sw" style="background:' + COLORS[k] + '"></span>' + NAMES[k] + '</span>';
+  }).join('');
+
+  // ---- union-find helpers ----
+  function find(parent, x) { while (parent[x] !== x) { parent[x] = parent[parent[x]]; x = parent[x]; } return x; }
+  function union(parent, a, b) { a = find(parent, a); b = find(parent, b); if (a !== b) parent[a] = b; }
+
+  function computeGroups(t) {
+    var parent = {};
+    REGIONS.forEach(function (r) { parent[r] = r; });
+    BORDER_PAIRS.forEach(function (p) {
+      var a = p[0], b = p[1];
+      if (t[a] === t[b]) union(parent, a, b);
+    });
+    var groups = {};
+    REGIONS.forEach(function (r) {
+      var root = find(parent, r);
+      if (!groups[root]) groups[root] = [];
+      groups[root].push(r);
+    });
+    return groups;
+  }
+
+  var svgNS = 'http://www.w3.org/2000/svg';
+  var labelsG = document.getElementById('labels');
+
+  function renderEra(idx) {
+    var snap = SNAP[idx];
+    var t = snap.t;
+
+    // region fills
+    REGIONS.forEach(function (r) {
+      var el = document.getElementById('f-' + r);
+      if (el) el.setAttribute('fill', COLORS[t[r]] || '#ccc');
+    });
+
+    // borders: dissolve when same owner, solid otherwise
+    BORDER_PAIRS.forEach(function (p) {
+      var a = p[0], b = p[1];
+      var el = document.getElementById('b-' + a + '-' + b);
+      if (!el) return;
+      if (t[a] === t[b]) {
+        el.style.strokeOpacity = 0;
+        el.style.strokeWidth = '0px';
+      } else {
+        el.style.strokeOpacity = 0.85;
+        el.style.strokeWidth = '1.4px';
+      }
+    });
+
+    // labels: clear and rebuild
+    while (labelsG.firstChild) labelsG.removeChild(labelsG.firstChild);
+    var groups = computeGroups(t);
+    Object.keys(groups).forEach(function (root) {
+      var members = groups[root];
+      if (members.length < 2) return; // singleton regions rely on their small sub-label instead
+      var cx = 0, cy = 0;
+      members.forEach(function (r) { cx += CENTROIDS[r][0]; cy += CENTROIDS[r][1]; });
+      cx /= members.length; cy /= members.length;
+      var owner = t[members[0]];
+      var fontSize = members.length >= 3 ? 13 : (members.length === 2 ? 11.5 : 10);
+      var txt = document.createElementNS(svgNS, 'text');
+      txt.setAttribute('x', cx.toFixed(1));
+      txt.setAttribute('y', (cy - (members.length > 1 ? 4 : 0)).toFixed(1));
+      txt.setAttribute('class', 'group-label');
+      txt.setAttribute('font-size', fontSize);
+      txt.setAttribute('fill', '#2a2117');
+      txt.setAttribute('stroke', 'var(--paper)');
+      txt.textContent = NAMES[owner];
+      labelsG.appendChild(txt);
+    });
+    // sub-labels: always, small, at each region's own centroid
+    REGIONS.forEach(function (r) {
+      var c = CENTROIDS[r];
+      var txt = document.createElementNS(svgNS, 'text');
+      txt.setAttribute('x', c[0].toFixed(1));
+      txt.setAttribute('y', (c[1] + 12).toFixed(1));
+      txt.setAttribute('class', 'sub-label');
+      txt.setAttribute('font-size', 7.5);
+      txt.setAttribute('fill', '#f4efe1');
+      txt.setAttribute('stroke', '#241f14');
+      txt.textContent = REGION_LABEL[r];
+      labelsG.appendChild(txt);
+    });
+    // neighbor labels (context only, fixed each time)
+    var NEIGHBOR_POS = { jo: [46, 140], iq: [230, 55], ir: [520, 40] };
+    Object.keys(NEIGHBOR_POS).forEach(function (n) {
+      var p = NEIGHBOR_POS[n];
+      var txt = document.createElementNS(svgNS, 'text');
+      txt.setAttribute('x', p[0]); txt.setAttribute('y', p[1]);
+      txt.setAttribute('class', 'neighbor-label');
+      txt.setAttribute('font-size', 9.5);
+      txt.textContent = NEIGHBOR_LABEL[n];
+      labelsG.appendChild(txt);
+    });
+
+    // era head
+    document.getElementById('yearTag').textContent = snap.year;
+    document.getElementById('eraName').textContent = snap.name;
+    var ownerLine = Object.keys(groups).map(function (root) {
+      var members = groups[root];
+      var labels = members.map(function (r) { return REGION_LABEL[r]; }).join('/');
+      return '<b>' + labels + '</b>: ' + NAMES[t[members[0]]];
+    }).join(' &middot; ');
+    document.getElementById('eraOwners').innerHTML = ownerLine;
+    document.getElementById('eraStory').innerHTML = snap.story;
+
+    // flags row: one per distinct owner this era, in region order
+    var seen = {};
+    var flagsHtml = '';
+    REGIONS.forEach(function (r) {
+      var o = t[r];
+      if (seen[o]) return;
+      seen[o] = true;
+      flagsHtml += '<div class="flag-chip">' + flagSvg(o) + '<div class="fc-label">' + NAMES[o] + '</div></div>';
+    });
+    document.getElementById('flagsRow').innerHTML = flagsHtml;
+
+    document.getElementById('slider').value = idx;
+  }
+
+  var idx = 0;
+  renderEra(0);
+
+  var slider = document.getElementById('slider');
+  slider.addEventListener('input', function () { renderEra(+slider.value); });
+
+  var playing = false, timer = null;
+  var playBtn = document.getElementById('playBtn');
+  playBtn.addEventListener('click', function () {
+    playing = !playing;
+    playBtn.innerHTML = playing ? '&#10074;&#10074;' : '&#9654;';
+    if (playing) {
+      timer = setInterval(function () {
+        var next = (+slider.value + 1) % SNAP.length;
+        slider.value = next;
+        renderEra(next);
+        if (next === SNAP.length - 1) { clearInterval(timer); playing = false; playBtn.innerHTML = '&#9654;'; }
+      }, 1900);
+    } else {
+      clearInterval(timer);
+    }
+  });
+
+  // ---- Gantt: real transition years, era-boundary based ----
+  var YEAR_MIN = 700, YEAR_MAX = 2026;
+  var years = SNAP.map(function (s) { return parseInt(s.year, 10); });
+  var ganttEl = document.getElementById('gantt');
+  var rows = REGIONS.map(function (r) {
+    var segs = [];
+    for (var i = 0; i < SNAP.length; i++) {
+      var startY = years[i];
+      var endY = (i + 1 < SNAP.length) ? years[i + 1] : YEAR_MAX;
+      var owner = SNAP[i].t[r];
+      segs.push({ start: startY, end: endY, owner: owner });
+    }
+    return { r: r, segs: segs };
+  });
+  function pct(y) { return ((y - YEAR_MIN) / (YEAR_MAX - YEAR_MIN)) * 100; }
+  ganttEl.innerHTML = rows.map(function (row) {
+    var segHtml = row.segs.map(function (seg) {
+      var left = pct(seg.start), width = pct(seg.end) - pct(seg.start);
+      return '<div class="gantt-seg" style="left:' + left.toFixed(2) + '%;width:' + width.toFixed(2) + '%;background:' + COLORS[seg.owner] + '" title="' + NAMES[seg.owner] + ' (' + seg.start + '–' + seg.end + ')"></div>';
+    }).join('');
+    return '<div class="gantt-row"><div class="gantt-label">' + REGION_LABEL[row.r] + '</div><div class="gantt-track">' + segHtml + '</div></div>';
+  }).join('');
+  var axisEl = document.getElementById('gantt-axis');
+  var axisYears = [700, 1000, 1300, 1517, 1806, 1971, 2026];
+  axisEl.innerHTML = axisYears.map(function (y) {
+    return '<span style="left:' + pct(y).toFixed(2) + '%">' + y + '</span>';
+  }).join('');
+
+  // ---- 9-frame small multiples: only what changed lights up ----
+  var gridEl = document.getElementById('grid9');
+  var gridHtml = '';
+  for (var gi = 0; gi < SNAP.length; gi++) {
+    var snap = SNAP[gi];
+    var prev = gi > 0 ? SNAP[gi - 1].t : null;
+    var changed = {};
+    REGIONS.forEach(function (r) { changed[r] = !prev || prev[r] !== snap.t[r]; });
+    var paths = REGIONS.map(function (r) {
+      var op = changed[r] ? 1 : 0.28;
+      var strokeW = changed[r] ? 1.4 : 0.5;
+      return '<path d="' + document.getElementById('f-' + r).getAttribute('d') + '" fill="' + COLORS[snap.t[r]] + '" fill-opacity="' + op + '" stroke="#241f14" stroke-width="' + strokeW + '"/>';
+    }).join('');
+    var neighborPaths = Array.prototype.map.call(document.querySelectorAll('.neighbor-fill'), function (el) {
+      return '<path d="' + el.getAttribute('d') + '" fill="#8a8a8a" fill-opacity="0.18" stroke="none"/>';
+    }).join('');
+    var changedList = REGIONS.filter(function (r) { return changed[r]; }).map(function (r) { return REGION_LABEL[r]; });
+    var caption = gi === 0 ? 'Starting point: the whole peninsula nominally Islamic.' : (changedList.length ? changedList.join(', ') + ' change hands.' : 'No change from the previous frame.');
+    gridHtml += '<div class="grid-cell"><svg viewBox="0 0 610 640"><rect width="610" height="640" fill="var(--tile-sea)"/>' + neighborPaths + paths + '</svg><div class="cap">' + snap.year + '<b>' + snap.name + '</b><span class="diff">' + caption + '</span></div></div>';
+  }
+  gridEl.innerHTML = gridHtml;
+})();
+
+</script>
+</body></html>

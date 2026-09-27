@@ -251,6 +251,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -274,7 +302,7 @@
     <div class="imap-frame">
       <div class="imap-controls">
         <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
-        <span class="imap-year" id="iYearTag">c. 400 BCE &ndash; 1349</span>
+        <span class="imap-year" id="iYearTag">c. 400 BCE – 1349</span>
         <input type="range" id="iSlider" min="0" max="6" step="1" value="0" aria-label="Select era">
       </div>
       <svg id="imap-svg" viewBox="0 0 420 270" xmlns="http://www.w3.org/2000/svg">
@@ -816,7 +844,7 @@
   }).join("");
 
   var ISNAP = [
-    { year:"c. 400 BCE &ndash; 1349", name:"Celtic, Germanic &amp; early Slavic era (pre-unification)", t:{ bohemia:IC.ancient, moravia:IC.ancient, sudetenland:IC.ancient }, flagKeys:{ bohemia:"ancient", moravia:"ancient", sudetenland:"ancient" },
+    { year:"c. 400 BCE – 1349", name:"Celtic, Germanic & early Slavic era (pre-unification)", t:{ bohemia:IC.ancient, moravia:IC.ancient, sudetenland:IC.ancient }, flagKeys:{ bohemia:"ancient", moravia:"ancient", sudetenland:"ancient" },
       story:"No single state, and no Bohemia/Moravia administrative distinction, exists across this thirteen-century span: the Celtic Boii settle Bohemia by the 4th century BCE (giving it its name), Germanic Marcomanni displace them under King Maroboduus around 9 BCE, and Slavic tribes settle both lands from the 6th century CE, forming Samo's Empire and then Great Moravia, which receives Byzantine missionaries Cyril and Methodius in 863. Great Moravia's collapse around 895&ndash;907 leads into the Přemyslid Duchy of Bohemia, which governs both Bohemia and Moravia as one territory until John of Luxembourg carves off a separate margraviate in 1349. No securely documented flag survives from any part of this era; shown honestly blank." },
     { year:"1349", name:"Moravia gets its own margrave", t:{ bohemia:IC.bohemia, moravia:IC.moravia, sudetenland:IC.bohemia }, flagKeys:{ bohemia:"bohemia", moravia:"moravia", sudetenland:"bohemia" },
       story:"John of Luxembourg, King of Bohemia, installs his younger son Jan Jindřich (John Henry) as a separate Margrave of Moravia in 1349 &mdash; Moravia keeps its own margravial title, court, and administration from then on, distinct from his elder brother Charles's kingdom next door, even though both remain part of the same Bohemian Crown lands. The German-speaking border country later called the Sudetenland is not yet distinguished from the rest of Bohemia in any way; that separation is still nearly six centuries off." },
@@ -826,9 +854,9 @@
       story:"Ferdinand of Habsburg is elected King of Bohemia (and separately holds the title Margrave of Moravia) after Louis Jagiellon's death at Mohács. One dynasty, one Vienna-based administration, holds both titles continuously from here through the end of Austria-Hungary in 1918." },
     { year:"1928", name:"Land Moravia-Silesia is formed", t:{ bohemia:IC.bohemia, moravia:IC.moravia, sudetenland:IC.bohemia }, flagKeys:{ bohemia:"bohemia", moravia:"moravia", sudetenland:"bohemia" },
       story:"Interwar Czechoslovakia's 1927 Land reform, effective 1928, revives the old distinction: \"Land Bohemia\" and \"Land Moravia-Silesia\" each get their own governor and provincial assembly, alongside Slovakia and Ruthenia &mdash; a deliberate echo of thousand-year-old borders inside a brand-new republic. The Sudeten borderlands remain ordinary parts of Land Bohemia and Land Moravia-Silesia, governed exactly like the rest &mdash; that changes within a decade." },
-    { year:"1938–1945", name:"Munich Agreement &amp; the Protectorate", t:{ bohemia:IC.protectorate, moravia:IC.protectorate, sudetenland:IC.nazi }, flagKeys:{ bohemia:"protectorate", moravia:"protectorate", sudetenland:"nazi" },
+    { year:"1938–1945", name:"Munich Agreement & the Protectorate", t:{ bohemia:IC.protectorate, moravia:IC.protectorate, sudetenland:IC.nazi }, flagKeys:{ bohemia:"protectorate", moravia:"protectorate", sudetenland:"nazi" },
       story:"The 30 September 1938 Munich Agreement, signed by Britain, France, Germany, and Italy without a Czechoslovak representative present, forces the cession of the German-majority Sudetenland &mdash; the ring of Bohemia's own western, northern, and southern borderlands &mdash; directly into the Reich. Within six months the rest collapses too: German troops occupy the Czech rump state on 15&ndash;16 March 1939, and Hitler proclaims the Protectorate of Bohemia and Moravia the next day, nominally autonomous under Czech administration but with a German Reich Protector holding the real power. For the only span in this map's history, Bohemia and Moravia's own home-grown distinction vanishes into a single occupied unit, while the annexed Sudetenland ring answers directly to Berlin, not Prague." },
-    { year:"1945–present", name:"Liberation &amp; the Lands abolished", t:{ bohemia:IC.bohemia, moravia:IC.bohemia, sudetenland:IC.bohemia }, flagKeys:{ bohemia:"bohemia", moravia:"bohemia", sudetenland:"bohemia" },
+    { year:"1945–present", name:"Liberation & the Lands abolished", t:{ bohemia:IC.bohemia, moravia:IC.bohemia, sudetenland:IC.bohemia }, flagKeys:{ bohemia:"bohemia", moravia:"bohemia", sudetenland:"bohemia" },
       story:"The Prague Uprising and Soviet liberation in early May 1945 end Nazi occupation, and the annexed Sudetenland returns to Czechoslovak administration for the first time since 1938 &mdash; followed almost immediately by the Beneš decrees, under which roughly three million ethnic Germans are stripped of citizenship and property and expelled from the region in 1945&ndash;46. Communist Czechoslovakia's 1949 administrative reform then scraps the historic Bohemia/Moravia Lands distinction entirely too, replacing it with centrally drawn kraje (regions) that ignore the old line. Modern Czechia's regional map still doesn't restore either distinction &mdash; not Bohemia from Moravia, and not the one-time Sudetenland from either." }
   ];
 

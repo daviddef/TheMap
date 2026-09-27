@@ -250,6 +250,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -288,7 +316,7 @@
         </g>
       </svg>
       <div class="imap-head">
-        <div class="imap-name" id="iEraName">Valdivia &amp; the Formative-Period Coastal Cultures</div>
+        <div class="imap-name" id="iEraName">Valdivia & the Formative-Period Coastal Cultures</div>
         <div class="imap-owners" id="iEraOwners"></div>
       </div>
       <div class="iflags-row" id="iFlagsRow"></div>
@@ -573,9 +601,9 @@
   }).join("");
 
   var ISNAP = [
-    { year:"c. 3500 BCE", name:"Valdivia &amp; the Formative-Period Coastal Cultures", t:{ ec:IC.formative }, flagKeys:{ ec:"noflag" },
+    { year:"c. 3500 BCE", name:"Valdivia & the Formative-Period Coastal Cultures", t:{ ec:IC.formative }, flagKeys:{ ec:"noflag" },
       story:"Long before the Cara and Quitu kingdoms or any Inca presence, Ecuador's coast is home to some of the earliest known farming and pottery-making societies in South America. The Valdivia culture (c. 3500&ndash;1800 BCE) produces ceramics among the oldest documented in the Americas; successor Machalilla and Chorrera traditions (through roughly 500 CE) spread related techniques and iconography across the coast and into the Andean highlands. No unified polity governs the region &mdash; only village-level societies known through archaeology &mdash; and no flag or comparable emblem survives from any of them." },
-    { year:"to 1563", name:"Indigenous highland kingdoms &amp; Inca conquest", t:{ ec:IC.precolonial }, flagKeys:{ ec:"noflag" },
+    { year:"to 1563", name:"Indigenous highland kingdoms & Inca conquest", t:{ ec:IC.precolonial }, flagKeys:{ ec:"noflag" },
       story:"Before the late 1400s the northern highlands are home to the Quitu, Cara, and other indigenous kingdoms, with no single ruling authority. The Inca Empire conquers this region only late, under Huayna Capac, shortly before Spanish arrival. No securely documented flag survives." },
     { year:"1563", name:"Real Audiencia de Quito (Spanish colonial)", t:{ ec:IC.colonial }, flagKeys:{ ec:"colonial" },
       story:"Spain establishes the Real Audiencia of Quito in 1563 as a judicial and administrative district, governing the highland and coastal territory that becomes modern Ecuador for two and a half centuries under Spain's general colonial banners." },

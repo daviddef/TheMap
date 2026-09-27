@@ -250,6 +250,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -460,11 +488,11 @@
   }).join("");
 
   var ISNAP = [
-    { year:"before 1896", name:"Afar sultanates &amp; Issa Somali clans", t:{ dj:IC.precolonial }, flagKeys:{ dj:"precolonial" },
+    { year:"before 1896", name:"Afar sultanates & Issa Somali clans", t:{ dj:IC.precolonial }, flagKeys:{ dj:"precolonial" },
       story:"Before French colonization, this stretch of Red Sea coast is home to Afar sultanates &mdash; including the Sultanate of Tadjoura, a real small local polity trading across the strait with Arabia &mdash; and Issa Somali clans further south and inland, neither organized into a single larger state before European interest arrives in the 1860s. No securely documented unified flag survives; shown honestly blank." },
-    { year:"1896 &ndash; 1977", name:"French Somaliland / French Territory of the Afars and the Issas", t:{ dj:IC.colonial }, flagKeys:{ dj:"colonial" },
+    { year:"1896 – 1977", name:"French Somaliland / French Territory of the Afars and the Issas", t:{ dj:IC.colonial }, flagKeys:{ dj:"colonial" },
       story:"France secures the port of Obock from local Afar rulers from the 1860s&ndash;80s, founds Djibouti city in 1888, and formalizes colonial control as French Somaliland from 1896. Renamed the French Territory of the Afars and the Issas in 1967, amid contested independence referenda &mdash; the 1967 vote controversially favors staying French. A second referendum in 1977 finally delivers independence. The French tricolor flies throughout; no distinct territorial flag existed before independence." },
-    { year:"1977 &ndash; present", name:"Republic of Djibouti", t:{ dj:IC.republic }, flagKeys:{ dj:"republic" },
+    { year:"1977 – present", name:"Republic of Djibouti", t:{ dj:IC.republic }, flagKeys:{ dj:"republic" },
       story:"A second referendum finally delivers independence, and the Republic of Djibouti is proclaimed on 27 June 1977 under President Hassan Gouled Aptidon &mdash; the last French territory on mainland Africa to decolonize. Djibouti's small size and strategic position at the Bab-el-Mandeb strait has made it host to multiple foreign military bases since. The flag's light blue and light green represent the Issa Somali and Afar populations, with a red star for their unity." }
   ];
 

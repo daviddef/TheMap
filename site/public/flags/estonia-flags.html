@@ -248,6 +248,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -282,7 +310,7 @@
         </g>
       </svg>
       <div class="imap-head">
-        <div class="imap-name" id="iEraName">The Aestii, Amber Trade &amp; Iron Age Estonia</div>
+        <div class="imap-name" id="iEraName">The Aestii, Amber Trade & Iron Age Estonia</div>
         <div class="imap-owners" id="iEraOwners"></div>
       </div>
       <div class="iflags-row" id="iFlagsRow"></div>
@@ -654,7 +682,7 @@
   }).join("");
 
   var ISNAP = [
-    { year:"c. 100", name:"The Aestii, Amber Trade &amp; Iron Age Estonia", color:IC.aestii, flagKey:"aestii",
+    { year:"c. 100", name:"The Aestii, Amber Trade & Iron Age Estonia", color:IC.aestii, flagKey:"aestii",
       story:"The Roman historian Tacitus, writing around 98 CE, is the first to put this coast on the written record, naming its amber-gathering inhabitants the Aestii &mdash; centuries before any Estonian polity is named in its own right. Archaeology fills in the rest: Iron Age hill forts, farming settlements, and the Salme ship burials on Saaremaa (c. 750 CE), a mass grave of warriors killed in a Baltic Sea battle. No flag or comparable banner survives from this era; scattered farming and trading communities gradually consolidate into the named parishes and counties of the following era." },
     { year:"c. 1000", name:"Estonian tribal confederations", color:IC.pagan, flagKey:"pagan",
       story:"No central government exists yet &mdash; parishes and counties (Saaremaa, Harju, Sakala, and others) govern themselves, loosely allied at most. Estonia is one of the last pagan corners of Europe, having already turned back repeated Danish, Swedish, and Russian raids for generations." },

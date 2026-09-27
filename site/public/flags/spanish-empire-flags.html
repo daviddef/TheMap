@@ -232,6 +232,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -277,7 +305,7 @@
         </g>
       </svg>
       <div class="imap-head">
-        <div class="imap-name" id="iEraName">1492 &mdash; unification and first voyage</div>
+        <div class="imap-name" id="iEraName">1492 — unification and first voyage</div>
         <div class="imap-owners" id="iEraOwners"></div>
       </div>
       <div class="iflags-row" id="iFlagsRow"></div>
@@ -553,17 +581,17 @@
   var RNAMES = { iberia:"Spain (Iberia)", newspain:"New Spain (Mexico &amp; Central America)", caribbean:"Caribbean (Cuba &amp; Puerto Rico)", southamerica:"Spanish South America", philippines:"Philippines" };
 
   var ISNAP = [
-    { year:"1492", name:"1492 &mdash; unification and first voyage", t:{ iberia:IC.held, newspain:IC.none, caribbean:IC.none, southamerica:IC.none, philippines:IC.none }, flagKey:"y1492",
+    { year:"1492", name:"1492 — unification and first voyage", t:{ iberia:IC.held, newspain:IC.none, caribbean:IC.none, southamerica:IC.none, philippines:IC.none }, flagKey:"y1492",
       story:"The fall of Granada completes Spain's own unification under Isabella and Ferdinand, and Columbus's Crown-sponsored voyage that same year opens the Atlantic &mdash; the empire's very first territory is, for now, just Iberia itself." },
-    { year:"1519&ndash;1533", name:"Conquest of the Aztec and Inca empires", t:{ iberia:IC.held, newspain:IC.held, caribbean:IC.held, southamerica:IC.held, philippines:IC.none }, flagKey:"conquest",
+    { year:"1519–1533", name:"Conquest of the Aztec and Inca empires", t:{ iberia:IC.held, newspain:IC.held, caribbean:IC.held, southamerica:IC.held, philippines:IC.none }, flagKey:"conquest",
       story:"Hern\u00e1n Cort\u00e9s topples the Aztec Empire by 1521; Francisco Pizarro topples the Inca Empire by 1533. Two of the Americas' greatest civilizations fall within fourteen years to small, disease-aided Spanish expeditions, and the Caribbean islands already serve as staging ground for both campaigns." },
-    { year:"1535/1542&ndash;1580s", name:"The viceroyalties (New Spain and Peru)", t:{ iberia:IC.held, newspain:IC.held, caribbean:IC.held, southamerica:IC.held, philippines:IC.held }, flagKey:"viceroy",
+    { year:"1535/1542–1580s", name:"The viceroyalties (New Spain and Peru)", t:{ iberia:IC.held, newspain:IC.held, caribbean:IC.held, southamerica:IC.held, philippines:IC.held }, flagKey:"viceroy",
       story:"The Viceroyalty of New Spain (1535) and the Viceroyalty of Peru (1542) formalize Spanish administration over the conquered Americas; Miguel L\u00f3pez de Legazpi's 1565&ndash;71 expedition adds the Philippines, reached across the Pacific from Mexico rather than around Africa." },
-    { year:"1580s&ndash;1808", name:"Imperial peak and Bourbon reforms", t:{ iberia:IC.held, newspain:IC.held, caribbean:IC.held, southamerica:IC.held, philippines:IC.held }, flagKey:"peak",
+    { year:"1580s–1808", name:"Imperial peak and Bourbon reforms", t:{ iberia:IC.held, newspain:IC.held, caribbean:IC.held, southamerica:IC.held, philippines:IC.held }, flagKey:"peak",
       story:"Silver from Potos\u00ed and Mexican mines sustains Spain's ambitions across two centuries; the empire on which \"the sun never sets\" spans every piece shown here at once, even as 18th-century Bourbon reforms try to tighten royal control over an increasingly restive colonial administration." },
-    { year:"1808&ndash;1830s", name:"Latin American wars of independence", t:{ iberia:IC.held, newspain:IC.lost, caribbean:IC.held, southamerica:IC.lost, philippines:IC.held }, flagKey:"independence",
+    { year:"1808–1830s", name:"Latin American wars of independence", t:{ iberia:IC.held, newspain:IC.lost, caribbean:IC.held, southamerica:IC.lost, philippines:IC.held }, flagKey:"independence",
       story:"Napoleon's 1808 invasion of Spain and the forced abdication of Ferdinand VII trigger juntas and independence movements across the Americas; by the 1820s, Mexico, Peru, and nearly every mainland colony has broken away, leaving Spain only Cuba, Puerto Rico, and the Philippines of its once-vast American and Pacific holdings." },
-    { year:"1898", name:"Spanish-American War &mdash; loss of the residual empire", t:{ iberia:IC.held, newspain:IC.lost, caribbean:IC.lost, southamerica:IC.lost, philippines:IC.lost }, flagKey:"residual",
+    { year:"1898", name:"Spanish-American War — loss of the residual empire", t:{ iberia:IC.held, newspain:IC.lost, caribbean:IC.lost, southamerica:IC.lost, philippines:IC.lost }, flagKey:"residual",
       story:"Defeat in the brief 1898 Spanish-American War strips Spain of Cuba, Puerto Rico, Guam, and the Philippines in a matter of months &mdash; the empire's last overseas possessions, ending four centuries of global reach and leaving only Iberia itself." }
   ];
 

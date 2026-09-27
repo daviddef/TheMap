@@ -249,6 +249,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -272,7 +300,7 @@
     <div class="imap-frame">
       <div class="imap-controls">
         <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
-        <span class="imap-year" id="iYearTag">c. 1070 BC&ndash;1504 AD</span>
+        <span class="imap-year" id="iYearTag">c. 1070 BC–1504 AD</span>
         <input type="range" id="iSlider" min="0" max="6" step="1" value="0" aria-label="Select era">
       </div>
       <svg id="imap-svg" viewBox="0 0 380 300" xmlns="http://www.w3.org/2000/svg">
@@ -288,7 +316,7 @@
         </g>
       </svg>
       <div class="imap-head">
-        <div class="imap-name" id="iEraName">Kingdom of Kush &amp; Christian Nubian kingdoms</div>
+        <div class="imap-name" id="iEraName">Kingdom of Kush & Christian Nubian kingdoms</div>
         <div class="imap-owners" id="iEraOwners"></div>
       </div>
       <div class="iflags-row" id="iFlagsRow"></div>
@@ -626,19 +654,19 @@
   iLegendEl.innerHTML = '<span><span class="sw" style="background:' + IC.fragmented + '"></span>Successive kingdoms</span><span><span class="sw" style="background:' + IC.ottoman + '"></span>Ottoman-Egyptian rule</span><span><span class="sw" style="background:' + IC.condominium + '"></span>Condominium</span><span><span class="sw" style="background:' + IC.sovereign + '"></span>Sultanate / Republic, independent</span>';
 
   var ISNAP = [
-    { year:"c. 1070 BC&ndash;1504 AD", name:"Kingdom of Kush &amp; Christian Nubian kingdoms", fill:IC.fragmented, flagKey:"kush",
+    { year:"c. 1070 BC–1504 AD", name:"Kingdom of Kush & Christian Nubian kingdoms", fill:IC.fragmented, flagKey:"kush",
       story:"Kush, Christian Nubia's kingdoms (Nobatia, Makuria, Alodia), and their successors govern the middle Nile for over two and a half thousand years, through pharaonic, Meroitic, and Christian eras &mdash; no single flag survives from any of them." },
-    { year:"1504&ndash;1821", name:"Funj Sultanate (Sennar)", fill:IC.fragmented, flagKey:"funj",
+    { year:"1504–1821", name:"Funj Sultanate (Sennar)", fill:IC.fragmented, flagKey:"funj",
       story:"The Funj Sultanate, centered on Sennar, unites much of what's now northern Sudan as an Islamic state from 1504, ruling for over three centuries before Ottoman-Egyptian conquest ends it." },
-    { year:"1821&ndash;1885", name:"Turco-Egyptian Sudan", fill:IC.ottoman, flagKey:"turcoegypt",
+    { year:"1821–1885", name:"Turco-Egyptian Sudan", fill:IC.ottoman, flagKey:"turcoegypt",
       story:"Muhammad Ali's Egypt, nominally under Ottoman suzerainty, conquers and administers Sudan from 1821, extracting slaves and taxes under a red Ottoman-style banner with crescent and star." },
-    { year:"1885&ndash;1898", name:"Mahdist State", fill:IC.fragmented, flagKey:"mahdist",
+    { year:"1885–1898", name:"Mahdist State", fill:IC.fragmented, flagKey:"mahdist",
       story:"Muhammad Ahmad, proclaiming himself the Mahdi, leads a religious uprising that overruns Khartoum in 1885 and rules an independent Islamic state for thirteen years before Anglo-Egyptian reconquest." },
-    { year:"1899&ndash;1956", name:"Anglo-Egyptian Sudan", fill:IC.condominium, flagKey:"angloegypt",
+    { year:"1899–1956", name:"Anglo-Egyptian Sudan", fill:IC.condominium, flagKey:"angloegypt",
       story:"Britain and Egypt jointly govern Sudan as a condominium from 1899 following the reconquest, administering north and south under different policies until independence in 1956." },
-    { year:"1956&ndash;1970", name:"Republic of the Sudan (independence flag)", fill:IC.sovereign, flagKey:"indep",
+    { year:"1956–1970", name:"Republic of the Sudan (independence flag)", fill:IC.sovereign, flagKey:"indep",
       story:"Sudan becomes independent on 1 January 1956 under a blue-white-green tricolor, immediately inheriting the north-south tensions that will erupt into the First Sudanese Civil War the same year." },
-    { year:"1970&ndash;present", name:"Republic of the Sudan (modern flag)", fill:IC.sovereign, flagKey:"modern",
+    { year:"1970–present", name:"Republic of the Sudan (modern flag)", fill:IC.sovereign, flagKey:"modern",
       story:"The current red-white-black pan-Arab tricolor with a green hoist triangle is adopted in 1970 under Gaafar Nimeiry, and remains Sudan's flag through the 2011 secession of South Sudan and beyond." }
   ];
 

@@ -250,6 +250,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -292,7 +320,7 @@
         </g>
       </svg>
       <div class="imap-head">
-        <div class="imap-name" id="iEraName">Charr&uacute;a and other indigenous peoples</div>
+        <div class="imap-name" id="iEraName">Charrúa and other indigenous peoples</div>
         <div class="imap-owners" id="iEraOwners"></div>
       </div>
       <div class="iflags-row" id="iFlagsRow"></div>
@@ -562,9 +590,9 @@
   var ISNAP = [
     { year:"to 1680s", name:"Charrúa and other indigenous peoples", t:{ uy:IC.precontact, col:IC.precontact }, flagKeys:{ uy:"precontact", col:"precontact" },
       story:"The Charrúa and other indigenous peoples inhabit the territory in small, mobile communities before European contact, with no single ruling authority over the region. No flag or fixed territorial banner is documented." },
-    { year:"1680", name:"Colônia do Sacramento founded &mdash; Portugal splits the coast", t:{ uy:IC.colonial, col:IC.colonia_pt }, flagKeys:{ uy:"colonial", col:"colonia_pt" },
+    { year:"1680", name:"Colônia do Sacramento founded — Portugal splits the coast", t:{ uy:IC.colonial, col:IC.colonia_pt }, flagKeys:{ uy:"colonial", col:"colonia_pt" },
       story:"Portugal opens the contest by founding Colônia do Sacramento in 1680, directly across the river from Buenos Aires &mdash; a small Portuguese trading outpost dug into an otherwise Spanish-claimed coast. Spain answers by founding Montevideo in 1724&ndash;30 to secure the rest of the eastern bank against further Portuguese encroachment, and the Cross of Burgundy flies over that surrounding Banda Oriental while the House of Braganza's banner flies over the enclave itself, changing hands repeatedly in the fighting between the two crowns." },
-    { year:"1777", name:"Treaty of San Ildefonso &mdash; Colônia ceded to Spain", t:{ uy:IC.colonial, col:IC.colonial }, flagKeys:{ uy:"colonial", col:"colonial" },
+    { year:"1777", name:"Treaty of San Ildefonso — Colônia ceded to Spain", t:{ uy:IC.colonial, col:IC.colonial }, flagKeys:{ uy:"colonial", col:"colonial" },
       story:"The 1777 Treaty of San Ildefonso finally settles Colônia do Sacramento's fate, ceding the long-contested enclave to Spain outright and folding it back into the same Banda Oriental administration as the rest of the coast. The wider frontier dispute between Spain and Portugal over the territory doesn't end here, though &mdash; it remains a flashpoint until Portuguese/Brazilian forces seize the whole Banda Oriental by force in 1816." },
     { year:"1816", name:"Cisplatina (Portuguese/Brazilian rule)", t:{ uy:IC.cisplatina, col:IC.cisplatina }, flagKeys:{ uy:"cisplatina", col:"cisplatina" },
       story:"Portuguese-Brazilian forces complete the annexation by 1817, renaming it the Cisplatine Province. After Brazil's own 1822 break from Portugal, the province passes intact into the newly independent Empire of Brazil &mdash; a direct trigger for the 1825 uprising that follows." },

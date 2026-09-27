@@ -250,6 +250,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -289,7 +317,7 @@
         </g>
       </svg>
       <div class="imap-head">
-        <div class="imap-name" id="iEraName">Kingdom of Aksum &amp; the Port of Adulis</div>
+        <div class="imap-name" id="iEraName">Kingdom of Aksum & the Port of Adulis</div>
         <div class="imap-owners" id="iEraOwners"></div>
       </div>
       <div class="iflags-row" id="iFlagsRow"></div>
@@ -581,9 +609,9 @@
   }).join("");
 
   var ISNAP = [
-    { year:"c. 3rd c. BCE", name:"Kingdom of Aksum &amp; the Port of Adulis", t:{ er:IC.aksum }, flagKeys:{ er:"noflag" },
+    { year:"c. 3rd c. BCE", name:"Kingdom of Aksum & the Port of Adulis", t:{ er:IC.aksum }, flagKeys:{ er:"noflag" },
       story:"Centuries before any Ottoman, Egyptian, or Italian presence on the coast, the port of Adulis anchors the Kingdom of Aksum's trade with Rome, Egypt, Arabia, and India, making Aksum one of the major powers of late antiquity &mdash; a 3rd-century Persian text ranks it alongside Rome, Persia, and China. King Ezana's 4th-century conversion to Christianity and Aksumite coinage are both securely attested, but no state flag survives; Aksum's decline from the 7th&ndash;8th centuries leaves the fragmented, multi-power era that follows." },
-    { year:"before 1890", name:"Red Sea coastal sultanates &amp; highland peoples", t:{ er:IC.fragmented }, flagKeys:{ er:"noflag" },
+    { year:"before 1890", name:"Red Sea coastal sultanates & highland peoples", t:{ er:IC.fragmented }, flagKeys:{ er:"noflag" },
       story:"The coast passes through Ottoman and later Egyptian nominal control at ports like Massawa, while the highlands remain tied to the Ethiopian state and lowland peoples live under local sultanates. No unified Eritrean polity exists before the Italian boundary is drawn." },
     { year:"1890", name:"Italian Eritrea", t:{ er:IC.colonial }, flagKeys:{ er:"italy" },
       story:"Italy formally proclaims the colony of Eritrea in January 1890, its first colony anywhere in Africa, administered from Asmara. Eritrea later stages Italy's 1935–36 invasion of Ethiopia before British forces end Italian rule in 1941." },

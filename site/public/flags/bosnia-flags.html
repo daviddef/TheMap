@@ -227,6 +227,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -272,7 +300,7 @@
         </g>
       </svg>
       <div class="imap-head">
-        <div class="imap-name" id="iEraName">Illyrian Dalmatia &amp; early Slavic Bosona</div>
+        <div class="imap-name" id="iEraName">Illyrian Dalmatia & early Slavic Bosona</div>
         <div class="imap-owners" id="iEraOwners"></div>
       </div>
       <div class="iflags-row" id="iFlagsRow"></div>
@@ -757,7 +785,7 @@
   }).join("");
 
   var ISNAP = [
-    { year:"c. 9 CE–1154", name:"Illyrian Dalmatia &amp; early Slavic Bosona", t:{ bos:IC.ancient, herz:IC.ancient }, flagKeys:{ bos:"ancient", herz:"ancient" },
+    { year:"c. 9 CE–1154", name:"Illyrian Dalmatia & early Slavic Bosona", t:{ bos:IC.ancient, herz:IC.ancient }, flagKeys:{ bos:"ancient", herz:"ancient" },
       story:"Rome subdues the Illyrian tribes of the western Balkans by 9 CE, folding this land into the province of Dalmatia. South Slavic peoples migrate in from the 6th&ndash;7th centuries, gradually absorbing the Romanized Illyrian population; the name \"Bosona\" first survives in writing only around 950 CE, in Byzantine emperor Constantine VII's De Administrando Imperio. For two more centuries it remains a contested borderland among Byzantium, Hungary, Croatia, and Serbia's regional lords, with no independently named ruler and no distinct Bosnian or Herzegovinian territory yet &mdash; and no flag documented for either." },
     { year:"1448", name:"Kosača's Duchy", t:{ bos:IC.kingdom, herz:IC.herzdukedom }, flagKeys:{ bos:"kotromanic", herz:"herzeg" },
       story:"Herzegovina takes its name and its first separate ruler in 1448, when the Bosnian nobleman Stjepan Vukčić styles himself “Herceg (Duke) of Saint Sava” and rules the south from Blagaj, semi-independent of the Bosnian crown at Jajce. Bosnia proper stays under King Stephen Tomašević, the Kotromanić dynasty's last ruler, its lily arms already three generations old." },

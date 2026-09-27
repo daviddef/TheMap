@@ -250,6 +250,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -496,9 +524,9 @@
   }).join("");
 
   var ISNAP = [
-    { year:"before 1471", name:"Bubi &amp; Fang precolonial societies", t:{ gq:IC.fragmented }, flagKeys:{ gq:"noflag" },
+    { year:"before 1471", name:"Bubi & Fang precolonial societies", t:{ gq:IC.fragmented }, flagKeys:{ gq:"noflag" },
       story:"Before European contact, Bioko is home to the Bubi people in independent clan chiefdoms, while the Rio Muni mainland is home to Fang and other Bantu-speaking peoples in decentralized lineage-based societies. No unified flag existed." },
-    { year:"1471", name:"Portuguese claim (Bioko &amp; Annobón)", t:{ gq:IC.colonial }, flagKeys:{ gq:"portugal" },
+    { year:"1471", name:"Portuguese claim (Bioko & Annobón)", t:{ gq:IC.colonial }, flagKeys:{ gq:"portugal" },
       story:"Portuguese navigators reach Bioko around 1471 and Annobón slightly later, claiming both under the Treaty of Tordesillas; effective Portuguese governance of the interior remains minimal, and the Rio Muni mainland goes unclaimed by either Iberian crown." },
     { year:"1778", name:"Spanish Guinea", t:{ gq:IC.colonial }, flagKeys:{ gq:"spain" },
       story:"The 1778 Treaty of El Pardo transfers the territory to Spain, though effective control isn't established for over a century. Spain formally organizes Spanish Guinea in the early 20th century, run as a cocoa and timber economy under forced labor." },

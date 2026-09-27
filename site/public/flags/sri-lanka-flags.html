@@ -249,6 +249,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -272,7 +300,7 @@
     <div class="imap-frame">
       <div class="imap-controls">
         <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
-        <span class="imap-year" id="iYearTag">2009&ndash;present</span>
+        <span class="imap-year" id="iYearTag">2009–present</span>
         <input type="range" id="iSlider" min="0" max="11" step="1" value="0" aria-label="Select era">
       </div>
       <svg id="imap-svg" viewBox="0 0 380 300" xmlns="http://www.w3.org/2000/svg">
@@ -813,29 +841,29 @@
   iLegendEl.innerHTML = '<span><span class="sw" style="background:' + IC.kingdom + '"></span>Kingdom, independent</span><span><span class="sw" style="background:' + IC.foreign + '"></span>Foreign conquest</span><span><span class="sw" style="background:' + IC.colony + '"></span>Colony</span><span><span class="sw" style="background:' + IC.dominion + '"></span>Dominion</span><span><span class="sw" style="background:' + IC.republic + '"></span>Republic</span><span><span class="sw" style="background:' + IC.ltte + '"></span>LTTE (Tamil Eelam, de facto)</span>';
 
   var ISNAP = [
-    { year:"c. 377 BCE&ndash;993 CE", name:"Kingdom of Anuradhapura", t:{ coast:IC.kingdom, kandy:IC.kingdom, north:IC.kingdom }, flagKeys:{ coast:"anuradhapura", kandy:"anuradhapura", north:"anuradhapura" },
+    { year:"c. 377 BCE–993 CE", name:"Kingdom of Anuradhapura", t:{ coast:IC.kingdom, kandy:IC.kingdom, north:IC.kingdom }, flagKeys:{ coast:"anuradhapura", kandy:"anuradhapura", north:"anuradhapura" },
       story:"The Anuradhapura kingdom unites the island under one Sinhalese crown for over thirteen centuries, flying the legendary golden lion banner &mdash; an informed reconstruction, since no surviving artifact from this era exists." },
-    { year:"993&ndash;1070", name:"Chola conquest", t:{ coast:IC.foreign, kandy:IC.foreign, north:IC.foreign }, flagKeys:{ coast:"chola", kandy:"chola", north:"chola" },
+    { year:"993–1070", name:"Chola conquest", t:{ coast:IC.foreign, kandy:IC.foreign, north:IC.foreign }, flagKeys:{ coast:"chola", kandy:"chola", north:"chola" },
       story:"The South Indian Chola dynasty conquers Anuradhapura in 993, ruling the island under its own tiger emblem for over seventy years before Sinhalese resistance restores native rule." },
-    { year:"1070&ndash;1236", name:"Kingdom of Polonnaruwa", t:{ coast:IC.kingdom, kandy:IC.kingdom, north:IC.kingdom }, flagKeys:{ coast:"polonnaruwa", kandy:"polonnaruwa", north:"polonnaruwa" },
+    { year:"1070–1236", name:"Kingdom of Polonnaruwa", t:{ coast:IC.kingdom, kandy:IC.kingdom, north:IC.kingdom }, flagKeys:{ coast:"polonnaruwa", kandy:"polonnaruwa", north:"polonnaruwa" },
       story:"Vijayabahu I expels the Cholas in 1070 and restores Sinhalese rule from a new capital at Polonnaruwa, again flying the reconstructed gold-lion banner over the whole island." },
-    { year:"1236&ndash;1592", name:"Later Sinhalese kingdoms (Dambadeniya, Gampola, Kotte)", t:{ coast:IC.kingdom, kandy:IC.kingdom, north:IC.kingdom }, flagKeys:{ coast:"latersinhalese", kandy:"latersinhalese", north:"latersinhalese" },
+    { year:"1236–1592", name:"Later Sinhalese kingdoms (Dambadeniya, Gampola, Kotte)", t:{ coast:IC.kingdom, kandy:IC.kingdom, north:IC.kingdom }, flagKeys:{ coast:"latersinhalese", kandy:"latersinhalese", north:"latersinhalese" },
       story:"The capital shifts repeatedly &mdash; Dambadeniya, Gampola, then Kotte &mdash; as Sinhalese kingdoms hold the whole island through the medieval period, still under the same lion device." },
-    { year:"1505&ndash;1658", name:"Portuguese Ceylon", t:{ coast:IC.foreign, kandy:IC.kingdom, north:IC.foreign }, flagKeys:{ coast:"portuguese", kandy:"kandy", north:"portuguese" },
+    { year:"1505–1658", name:"Portuguese Ceylon", t:{ coast:IC.foreign, kandy:IC.kingdom, north:IC.foreign }, flagKeys:{ coast:"portuguese", kandy:"kandy", north:"portuguese" },
       story:"Portuguese traders arrive in 1505 and gradually seize the coastal lowlands, flying the Order of Christ's red cross over their forts &mdash; but never reach the interior, where the independent Kingdom of Kandy is founded in 1592 and holds out completely." },
-    { year:"1658&ndash;1796", name:"Dutch Ceylon", t:{ coast:IC.colony, kandy:IC.kingdom, north:IC.colony }, flagKeys:{ coast:"dutch", kandy:"kandy", north:"dutch" },
+    { year:"1658–1796", name:"Dutch Ceylon", t:{ coast:IC.colony, kandy:IC.kingdom, north:IC.colony }, flagKeys:{ coast:"dutch", kandy:"kandy", north:"dutch" },
       story:"The Dutch East India Company expels the Portuguese from the coast by 1658, ruling the lowlands under the VOC monogram for over a century &mdash; while Kandy, in the central highlands, remains just as independent as before, never conquered by either European power." },
-    { year:"1796&ndash;1815", name:"British Ceylon (coast) &amp; independent Kandy", t:{ coast:IC.colony, kandy:IC.kingdom, north:IC.colony }, flagKeys:{ coast:"british", kandy:"kandy", north:"british" },
+    { year:"1796–1815", name:"British Ceylon (coast) & independent Kandy", t:{ coast:IC.colony, kandy:IC.kingdom, north:IC.colony }, flagKeys:{ coast:"british", kandy:"kandy", north:"british" },
       story:"Britain takes the coast from the Dutch in 1796, but Kandy still holds out &mdash; the last independent Sinhalese kingdom on the island, finally conquered only in 1815 after a series of Kandyan Wars." },
-    { year:"1815&ndash;1948", name:"British Ceylon (whole island)", t:{ coast:IC.colony, kandy:IC.colony, north:IC.colony }, flagKeys:{ coast:"british", kandy:"british", north:"british" },
+    { year:"1815–1948", name:"British Ceylon (whole island)", t:{ coast:IC.colony, kandy:IC.colony, north:IC.colony }, flagKeys:{ coast:"british", kandy:"british", north:"british" },
       story:"The 1815 Kandyan Convention formally cedes the kingdom to Britain &mdash; the first time in recorded history that one power governs the entire island as a single unit, ending centuries of a genuinely divided Sri Lanka." },
-    { year:"1948&ndash;1972", name:"Dominion of Ceylon", t:{ coast:IC.dominion, kandy:IC.dominion, north:IC.dominion }, flagKeys:{ coast:"dominion", kandy:"dominion", north:"dominion" },
+    { year:"1948–1972", name:"Dominion of Ceylon", t:{ coast:IC.dominion, kandy:IC.dominion, north:IC.dominion }, flagKeys:{ coast:"dominion", kandy:"dominion", north:"dominion" },
       story:"Ceylon gains independence as a self-governing Dominion within the Commonwealth on 4 February 1948, adopting the lion flag with green and orange hoist stripes representing the island's minority communities." },
-    { year:"1972&ndash;1983", name:"Republic of Sri Lanka (pre-war)", t:{ coast:IC.republic, kandy:IC.republic, north:IC.republic }, flagKeys:{ coast:"modern", kandy:"modern", north:"modern" },
+    { year:"1972–1983", name:"Republic of Sri Lanka (pre-war)", t:{ coast:IC.republic, kandy:IC.republic, north:IC.republic }, flagKeys:{ coast:"modern", kandy:"modern", north:"modern" },
       story:"A new constitution in 1972 makes the country a republic and renames it Sri Lanka; four bo leaves are added to the flag's corners, completing the design flown today. For its first decade the republic governs the whole island, including the Tamil-majority north and east, as one administration &mdash; a status that ends in 1983." },
-    { year:"1983&ndash;2009", name:"Civil war: LTTE de facto state in the north &amp; east", t:{ coast:IC.republic, kandy:IC.republic, north:IC.ltte }, flagKeys:{ coast:"modern", kandy:"modern", north:"ltte" },
+    { year:"1983–2009", name:"Civil war: LTTE de facto state in the north & east", t:{ coast:IC.republic, kandy:IC.republic, north:IC.ltte }, flagKeys:{ coast:"modern", kandy:"modern", north:"ltte" },
       story:"The 1983&ndash;2009 civil war pits the government against the Liberation Tigers of Tamil Eelam (LTTE), who fight for an independent Tamil state in the north and east. Beyond fighting for that goal, the LTTE spends much of this period actually administering the Jaffna peninsula and large stretches of the Vanni and the eastern coast as a de facto separate territory &mdash; running its own courts, police force, and taxation, and governing from a de facto capital at Kilinochchi &mdash; while the government's flag and administration continue over the rest of the island. Control of the north and east fluctuates over the war's course rather than staying fixed; the LTTE's grip is at its height through the 1990s and early 2000s before the government's final offensive." },
-    { year:"2009&ndash;present", name:"Republic of Sri Lanka (reunified)", t:{ coast:IC.republic, kandy:IC.republic, north:IC.republic }, flagKeys:{ coast:"modern", kandy:"modern", north:"modern" },
+    { year:"2009–present", name:"Republic of Sri Lanka (reunified)", t:{ coast:IC.republic, kandy:IC.republic, north:IC.republic }, flagKeys:{ coast:"modern", kandy:"modern", north:"modern" },
       story:"The war ends with the LTTE's military defeat in May 2009, and the north and east return to ordinary central-government administration for the first time since the mid-1980s. The flag itself is untouched by any of this &mdash; unchanged since 1978, when a second constitution renamed the country the Democratic Socialist Republic of Sri Lanka without altering the banner." }
   ];
 

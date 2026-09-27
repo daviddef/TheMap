@@ -249,6 +249,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -272,7 +300,7 @@
     <div class="imap-frame">
       <div class="imap-controls">
         <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
-        <span class="imap-year" id="iYearTag">c. 98&ndash;900 CE</span>
+        <span class="imap-year" id="iYearTag">c. 98–900 CE</span>
         <input type="range" id="iSlider" min="0" max="6" step="1" value="0" aria-label="Select era">
       </div>
       <svg id="imap-svg" viewBox="0 0 380 300" xmlns="http://www.w3.org/2000/svg">
@@ -287,7 +315,7 @@
         </g>
       </svg>
       <div class="imap-head">
-        <div class="imap-name" id="iEraName">Suiones &amp; the Vendel-era chieftaincies</div>
+        <div class="imap-name" id="iEraName">Suiones & the Vendel-era chieftaincies</div>
         <div class="imap-owners" id="iEraOwners"></div>
       </div>
       <div class="iflags-row" id="iFlagsRow"></div>
@@ -608,19 +636,19 @@
   iLegendEl.innerHTML = '<span><span class="sw" style="background:' + IC.fragmented + '"></span>Fragmented chieftaincies</span><span><span class="sw" style="background:' + IC.kingdom + '"></span>Kingdom, independent</span><span><span class="sw" style="background:' + IC.union + '"></span>Union</span>';
 
   var ISNAP = [
-    { year:"c. 98&ndash;900 CE", name:"Suiones &amp; the Vendel-era chieftaincies", fill:IC.fragmented, flagKey:"frag",
+    { year:"c. 98–900 CE", name:"Suiones & the Vendel-era chieftaincies", fill:IC.fragmented, flagKey:"frag",
       story:"Tacitus's Germania (98 CE) names the Suiones as a powerful, seafaring people east of the Baltic — the earliest surviving written reference to a people ancestral to the Svear and the Swedes. The Vendel period (c. 550–790) leaves elite boat-grave cemeteries near Old Uppsala furnished with Roman-influenced helmets and weapons, evidence of a wealthy, stratified chieftaincy, though no securely documented king's name survives independently of much later, partly legendary sagas. No flag survives or is plausibly attested from this era in any modern sense." },
-    { year:"c. 900&ndash;995", name:"Fragmented Svear and G&ouml;tar chieftaincies", fill:IC.fragmented, flagKey:"frag",
+    { year:"c. 900–995", name:"Fragmented Svear and Götar chieftaincies", fill:IC.fragmented, flagKey:"frag",
       story:"Svear (around Lake Mälaren) and Götar (further south) exist as separate Norse chieftaincies with no unified crown and no documented flag of any kind." },
-    { year:"995&ndash;1397", name:"Kingdom of Sweden (medieval, pre-Kalmar)", fill:IC.kingdom, flagKey:"premed",
+    { year:"995–1397", name:"Kingdom of Sweden (medieval, pre-Kalmar)", fill:IC.kingdom, flagKey:"premed",
       story:"Olof Skötkonung, traditionally credited as Sweden's first Christian king, unites Svealand and Götaland under one crown around 995, founding the medieval kingdom that precedes the Kalmar Union." },
-    { year:"1397&ndash;1523", name:"Kalmar Union", fill:IC.union, flagKey:"kalmar",
+    { year:"1397–1523", name:"Kalmar Union", fill:IC.union, flagKey:"kalmar",
       story:"The 1397 Kalmar Union joins Sweden, Denmark, and Norway under a single monarch to counter the rising power of the Hanseatic League &mdash; a union Sweden repeatedly resists and finally breaks under Gustav Vasa." },
-    { year:"1523&ndash;1814", name:"Kingdom of Sweden (independent, post-Kalmar)", fill:IC.kingdom, flagKey:"postkalmar",
+    { year:"1523–1814", name:"Kingdom of Sweden (independent, post-Kalmar)", fill:IC.kingdom, flagKey:"postkalmar",
       story:"Gustav Vasa leads a successful rebellion and is elected king in 1523, ending the Kalmar Union for Sweden and founding the Vasa dynasty; Sweden rises to become a major European power over the following two centuries." },
-    { year:"1814&ndash;1905", name:"Sweden&ndash;Norway (personal union)", fill:IC.union, flagKey:"norwayunion",
+    { year:"1814–1905", name:"Sweden–Norway (personal union)", fill:IC.union, flagKey:"norwayunion",
       story:"Following the Napoleonic Wars, Sweden forces Norway into a personal union in 1814 under the Swedish crown &mdash; two separate kingdoms sharing one monarch, marked on Sweden's own flag by a small union canton." },
-    { year:"1905&ndash;present", name:"Kingdom of Sweden (independent, modern)", fill:IC.kingdom, flagKey:"modern",
+    { year:"1905–present", name:"Kingdom of Sweden (independent, modern)", fill:IC.kingdom, flagKey:"modern",
       story:"Norway peacefully dissolves the union in 1905 after a referendum; Sweden drops the union mark from its flag and continues as a fully independent constitutional monarchy to this day." }
   ];
 

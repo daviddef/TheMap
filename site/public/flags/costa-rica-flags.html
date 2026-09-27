@@ -250,6 +250,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -274,7 +302,7 @@
     <div class="imap-frame">
       <div class="imap-controls">
         <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
-        <span class="imap-year" id="iYearTag">c. 1000 BCE &amp;ndash; 1200 CE</span>
+        <span class="imap-year" id="iYearTag">c. 1000 BCE – 1200 CE</span>
         <input type="range" id="iSlider" min="0" max="6" step="1" value="0" aria-label="Select era">
       </div>
       <svg id="imap-svg" viewBox="0 0 290.0 259.2" xmlns="http://www.w3.org/2000/svg">
@@ -610,19 +638,19 @@
   }).join("");
 
   var ISNAP = [
-    { year:"c. 1000 BCE &ndash; 1200 CE", name:"Early Costa Rica: Guayabo &amp; the Diqu&iacute;s culture", t:{ cr:IC.guayabo }, flagKeys:{ cr:"guayabo" },
+    { year:"c. 1000 BCE – 1200 CE", name:"Early Costa Rica: Guayabo & the Diquís culture", t:{ cr:IC.guayabo }, flagKeys:{ cr:"guayabo" },
       story:"Settled village life and farming appear in this territory by roughly 1000 BCE, and by the early centuries CE its people are raising the earthen mounds, paved causeways, aqueducts, and tombs of Guayabo, the largest known pre-Columbian settlement in Costa Rica, occupied into the 1400s. Farther south, the Diqu&iacute;s culture of the Palmar Sur region carves and moves the famous granite stone spheres (some over 15 tons) between roughly 600 and 1000 CE. No single state ever unifies the territory in this period; it remains organized into separate chiefdoms, and no securely documented flag or banner survives from this era, many centuries before the small-chiefdoms era with which this map's earlier version began." },
-    { year:"c. 1200 &ndash; 1564", name:"Indigenous chiefdoms and early resistance", t:{ cr:IC.indigenous }, flagKeys:{ cr:"indigenous" },
+    { year:"c. 1200 – 1564", name:"Indigenous chiefdoms and early resistance", t:{ cr:IC.indigenous }, flagKeys:{ cr:"indigenous" },
       story:"Small, scattered indigenous chiefdoms &mdash; Hu&eacute;tares, Bor&uacute;cas, and Chorotega groups &mdash; occupy the territory with no single unifying polity when Columbus first sights the coast in 1502. Spanish conquest attempts repeatedly fail through the early 16th century against disease, terrain, and sustained resistance; durable control waits until Cartago&rsquo;s 1564 founding, the last-pacified territory in the region. No flag survives; shown honestly blank." },
-    { year:"1564 &ndash; 1821", name:"Spanish colonial rule (Captaincy General of Guatemala)", t:{ cr:IC.colonial }, flagKeys:{ cr:"colonial" },
+    { year:"1564 – 1821", name:"Spanish colonial rule (Captaincy General of Guatemala)", t:{ cr:IC.colonial }, flagKeys:{ cr:"colonial" },
       story:"Juan V&aacute;squez de Coronado founds Cartago in 1564, establishing the first durable Spanish settlement after decades of failed attempts and hard indigenous resistance into the 1560s. As a province of the Captaincy General of Guatemala, Costa Rica remains the poorest and most peripheral corner of the whole colony, surviving mostly through small-scale subsistence farming. The Cross of Burgundy, the standard Spanish colonial ensign, flies throughout." },
-    { year:"1821 &ndash; 1823", name:"Annexation to the First Mexican Empire", t:{ cr:IC.mexico }, flagKeys:{ cr:"mexico" },
+    { year:"1821 – 1823", name:"Annexation to the First Mexican Empire", t:{ cr:IC.mexico }, flagKeys:{ cr:"mexico" },
       story:"The Captaincy General of Guatemala, including Costa Rica, declares independence from Spain jointly with its neighbors on 15 September 1821; news reaches isolated Costa Rica weeks late. The territory is nominally absorbed into Agust&iacute;n de Iturbide&rsquo;s Mexican Empire, a distant and loosely governed arrangement ending with the empire&rsquo;s 1823 collapse. The green-white-red Mexican tricolor flies nominally over a remote, barely governed province." },
-    { year:"1823 &ndash; 1838", name:"Federal Republic of Central America (member state)", t:{ cr:IC.federation }, flagKeys:{ cr:"federation" },
+    { year:"1823 – 1838", name:"Federal Republic of Central America (member state)", t:{ cr:IC.federation }, flagKeys:{ cr:"federation" },
       story:"After breaking from the Mexican Empire, the five former Guatemalan provinces &mdash; including Costa Rica, the poorest and most sparsely populated &mdash; form the United Provinces of Central America on 1 July 1823, reorganized as the Federal Republic in 1824. Costa Rica&rsquo;s remoteness keeps it a minor, disengaged partner as the union splinters through the 1830s; it declares itself sovereign on 15 November 1838. The blue-white-blue triband carries a central coat of arms of five volcanoes for the five member states." },
-    { year:"1838 &ndash; 1848", name:"Sovereign state, transitional (pre-redesign)", t:{ cr:IC.transitional }, flagKeys:{ cr:"transitional" },
+    { year:"1838 – 1848", name:"Sovereign state, transitional (pre-redesign)", t:{ cr:IC.transitional }, flagKeys:{ cr:"transitional" },
       story:"Costa Rica declares itself fully sovereign on 15 November 1838 as the Federal Republic disintegrates, but keeps flying the federation&rsquo;s own blue-white-blue banner for another decade while institutions stabilize under the Jefe de Estado system, until the 1848 declaration of a republic prompts a new flag. A direct, unmodified continuation of the federation&rsquo;s tricolor &mdash; the last moment Costa Rica&rsquo;s flag matches its neighbors&rsquo;." },
-    { year:"1848 &ndash; present", name:"Republic of Costa Rica", t:{ cr:IC.republic }, flagKeys:{ cr:"republic" },
+    { year:"1848 – present", name:"Republic of Costa Rica", t:{ cr:IC.republic }, flagKeys:{ cr:"republic" },
       story:"President Jos&eacute; Mar&iacute;a Castro Madriz proclaims a republic on 31 August 1848, and a month later adopts a new flag &mdash; credited to First Lady Pacif&iacute;ca Fern&aacute;ndez Oreamuno &mdash; keeping the outer blue and white of the federation banner but inserting a broad central red stripe, consciously echoing the French tricolor. Costa Rica abolishes its standing army in 1948 after a brief civil war and has remained one of the region&rsquo;s most stable democracies since." }
   ];
 

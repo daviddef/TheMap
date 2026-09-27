@@ -247,6 +247,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -270,7 +298,7 @@
     <div class="imap-frame">
       <div class="imap-controls">
         <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
-        <span class="imap-year" id="iYearTag">c. 3100 BCE &ndash; c. 1493 CE</span>
+        <span class="imap-year" id="iYearTag">c. 3100 BCE – c. 1493 CE</span>
         <input type="range" id="iSlider" min="0" max="4" step="1" value="0" aria-label="Select era">
       </div>
       <svg id="imap-svg" viewBox="0 0 300 340" xmlns="http://www.w3.org/2000/svg">
@@ -556,7 +584,7 @@
   }).join("");
 
   var ISNAP = [
-    { year:"c. 3100 BCE &ndash; c. 1493 CE", name:"Pre-Kalinago Dominica: Ortoiroid &amp; Arawak (Igneri) settlement", t:{ dm:IC.prekalinago }, flagKeys:{ dm:"prekalinago" },
+    { year:"c. 3100 BCE – c. 1493 CE", name:"Pre-Kalinago Dominica: Ortoiroid & Arawak (Igneri) settlement", t:{ dm:IC.prekalinago }, flagKeys:{ dm:"prekalinago" },
       story:"Dominica's documented human history stretches back roughly forty-six centuries before Columbus. Archaic, pre-ceramic Ortoiroid peoples reach the Lesser Antilles from the South American mainland by canoe by around 3100 BCE. Arawakan-speaking Saladoid and then Igneri communities follow from around 400 CE, bringing pottery, agriculture, and permanent villages. Kalinago (Island Carib) peoples migrate up the island chain in turn, arriving in Dominica by roughly the 1400s and displacing or absorbing the resident Igneri population &mdash; the same Kalinago society already in firm control of the island when Columbus sights it in 1493. No securely documented flag or banner survives from any part of this span; shown honestly blank." },
     { year:"c. 1493", name:"Kalinago Dominica (“neutral island”)", t:{ dm:IC.kalinago }, flagKeys:{ dm:"kalinago" },
       story:"Columbus sights Dominica in 1493, but the island's rugged terrain and sustained Kalinago resistance keep both France and Britain from a lasting foothold for nearly two and a half centuries. From 1660 both powers formally recognize it as neutral Kalinago territory. No securely documented flag survives &mdash; shown honestly blank." },

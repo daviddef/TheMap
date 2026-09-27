@@ -249,6 +249,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -496,7 +524,7 @@
   var ISNAP = [
     { year:"c. 700–1492", name:"Lucayan Taíno settlement, pre-contact", t:{ bs:IC.precontact }, flagKeys:{ bs:"precontact" },
       story:"Taíno-related peoples paddle north from Hispaniola and Cuba in dugout canoes and settle the Bahamian archipelago in scattered island chiefdoms, roughly the 7th to 10th centuries CE, with no unified authority across the islands at any point. Lucayan society, fishing, farming cassava, and trading across the archipelago, develops independently for the better part of eight centuries until Columbus's 1492 landfall opens the contact era. No securely documented flag or banner survives &mdash; shown here honestly blank." },
-    { year:"c. 1490s–1718", name:"Lucayan Taíno Bahamas &amp; depopulation", t:{ bs:IC.e0 }, flagKeys:{ bs:"e0" },
+    { year:"c. 1490s–1718", name:"Lucayan Taíno Bahamas & depopulation", t:{ bs:IC.e0 }, flagKeys:{ bs:"e0" },
       story:"San Salvador is traditionally identified as Columbus's first landfall in the Americas, 12 October 1492. Spain never settled the Bahamas, but its slave raiders did: within a few decades the Lucayan population was almost entirely wiped out, forced to Hispaniola and Cuba's gold mines and pearl fisheries. The islands sat nearly depopulated for over a century. No flag survives from Lucayan society or the loosely governed pirate period that briefly followed English settlement &mdash; shown honestly blank." },
     { year:"1718–1973", name:"British Bahamas (Crown Colony)", t:{ bs:IC.e1 }, flagKeys:{ bs:"e1" },
       story:"English settlement resumes with the Eleutheran Adventurers in 1648, but a governance vacuum turns Nassau into the “Republic of Pirates” by the early 1700s. The Crown answers by sending Woodes Rogers as first royal governor in 1718 &mdash; “Expulsis Piratis, Restituta Commercia” &mdash; and the Bahamas remain a British Crown Colony, unbroken, for two and a half centuries. The Blue Ensign flies with a badge of a sailing ship approaching an island under a rising sun." },

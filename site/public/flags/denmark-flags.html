@@ -252,6 +252,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -275,7 +303,7 @@
     <div class="imap-frame">
       <div class="imap-controls">
         <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
-        <span class="imap-year" id="iYearTag">c. 1 &ndash; 936 CE</span>
+        <span class="imap-year" id="iYearTag">c. 1 – 936 CE</span>
         <input type="range" id="iSlider" min="0" max="6" step="1" value="0" aria-label="Select era">
       </div>
       <svg id="imap-svg" viewBox="0 0 260 320" xmlns="http://www.w3.org/2000/svg">
@@ -578,7 +606,7 @@
     '<span><span class="sw" style="background:' + DK_MODERN + '"></span>Kingdom of Denmark (modern)</span>';
 
   var ISNAP = [
-    { year:"c. 1 &ndash; 936 CE", name:"Iron Age Denmark &amp; the Early Danes", fill: DK_ANCIENT, flagKey:"undocumented", owner:"No single Danish kingdom (fragmented petty kingships)",
+    { year:"c. 1 – 936 CE", name:"Iron Age Denmark & the Early Danes", fill: DK_ANCIENT, flagKey:"undocumented", owner:"No single Danish kingdom (fragmented petty kingships)",
       story:"Roman-era trade goods excavated across Jutland and the Danish isles document extensive contact between Iron Age Denmark and the Roman world, without Rome ever conquering the region. Sixth-century writers Jordanes and Procopius are the first to name the “Dani” as a people, and Gregory of Tours records a Danish king, Chlochilaicus (identified with the Hygelac of Beowulf), leading a real, dated sea raid on Frankish Gaul around 515 CE that ended in his death — more than four centuries before Gorm the Old, credited as the first king of a unified Denmark. No securely documented flag survives from this era, many centuries before heraldic flags develop anywhere in Europe." },
     { year:"c. 965", name:"Harald Bluetooth's Denmark", fill: DK_PRE, flagKey:"undocumented", owner:"Kingdom of Denmark",
       story:"Gorm the Old is the first historically attested king of a unified Denmark; his son Harald Bluetooth raises the larger Jelling stone around 965, proclaiming he “won for himself all of Denmark and Norway, and made the Danes Christian.” No flag survives from this era &mdash; heraldry itself is still generations away." },

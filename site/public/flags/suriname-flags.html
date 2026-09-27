@@ -249,6 +249,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -272,7 +300,7 @@
     <div class="imap-frame">
       <div class="imap-controls">
         <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
-        <span class="imap-year" id="iYearTag">c. 1500s&ndash;1667</span>
+        <span class="imap-year" id="iYearTag">c. 1500s–1667</span>
         <input type="range" id="iSlider" min="0" max="3" step="1" value="0" aria-label="Select era">
       </div>
       <svg id="imap-svg" viewBox="0 0 380 300" xmlns="http://www.w3.org/2000/svg">
@@ -495,13 +523,13 @@
   iLegendEl.innerHTML = '<span><span class="sw" style="background:' + IC.none + '"></span>No unified polity</span><span><span class="sw" style="background:' + IC.colony + '"></span>Colony</span><span><span class="sw" style="background:' + IC.autonomous + '"></span>Autonomous territory</span><span><span class="sw" style="background:' + IC.republic + '"></span>Republic</span>';
 
   var ISNAP = [
-    { year:"c. 1500s&ndash;1667", name:"Indigenous peoples and earlier settlement attempts", fill:IC.none, flagKey:"indigenous",
+    { year:"c. 1500s–1667", name:"Indigenous peoples and earlier settlement attempts", fill:IC.none, flagKey:"indigenous",
       story:"Kalina, Arawak, and other Indigenous peoples inhabit the coast and interior; early Spanish, English, and French attempts at settlement fail to take permanent root before the Dutch arrive." },
-    { year:"1667&ndash;1954", name:"Dutch Guiana (Netherlands colony)", fill:IC.colony, flagKey:"dutchguiana",
+    { year:"1667–1954", name:"Dutch Guiana (Netherlands colony)", fill:IC.colony, flagKey:"dutchguiana",
       story:"The Dutch formally take control in 1667 (confirmed by the Treaty of Breda, traded for New Amsterdam/New York), building a plantation colony on enslaved and later indentured labor for nearly three centuries under the Netherlands tricolor." },
-    { year:"1954&ndash;1975", name:"Suriname, autonomous country within the Kingdom of the Netherlands", fill:IC.autonomous, flagKey:"autonomous",
+    { year:"1954–1975", name:"Suriname, autonomous country within the Kingdom of the Netherlands", fill:IC.autonomous, flagKey:"autonomous",
       story:"The 1954 Charter for the Kingdom of the Netherlands grants Suriname full internal self-government while the Dutch crown retains defense and foreign affairs; a distinct flag with five stars representing the colony's major ethnic groups is adopted in 1959." },
-    { year:"1975&ndash;present", name:"Republic of Suriname (independent, modern)", fill:IC.republic, flagKey:"modern",
+    { year:"1975–present", name:"Republic of Suriname (independent, modern)", fill:IC.republic, flagKey:"modern",
       story:"Suriname becomes fully independent on 25 November 1975 under Prime Minister Henck Arron, adopting a green-white-red flag with a central yellow star symbolizing unity and a golden future." }
   ];
 

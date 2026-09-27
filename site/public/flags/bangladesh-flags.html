@@ -250,6 +250,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -668,7 +696,7 @@
   }).join("");
 
   var ISNAP = [
-    { year:"c. 3rd c. BCE–1204 CE", name:"Historic Bengal (ancient &amp; medieval)", t:{ bd:IC.e0 }, flagKeys:{ bd:"e0" },
+    { year:"c. 3rd c. BCE–1204 CE", name:"Historic Bengal (ancient & medieval)", t:{ bd:IC.e0 }, flagKeys:{ bd:"e0" },
       story:"The Bengal delta passes through the Maurya and Gupta empires, Shashanka's 7th-century kingdom, the Buddhist Pala Empire from the 8th century, and the Hindu Sena dynasty from the 12th, until the 1204 conquest opens Bengal's Islamic era. No securely documented flag survives &mdash; shown honestly blank." },
     { year:"1204–1576", name:"Bengal Sultanate", t:{ bd:IC.e1 }, flagKeys:{ bd:"e1" },
       story:"Muhammad bin Bakhtiyar Khalji's 1204 conquest brings Bengal under Delhi Sultanate governors; it breaks away as its own independent Bengal Sultanate in 1352, enduring as a major regional Islamic power &mdash; trade, textiles, architecture &mdash; until Mughal conquest in 1576. No specific flag survives; shown as an informed reconstruction following regional sultanate conventions." },
@@ -680,7 +708,7 @@
       story:"Following the 1857 rebellion, the Crown assumes direct control under the Government of India Act 1858. Lord Curzon's controversial 1905 partition of Bengal along religious lines is reversed in 1911 after mass protest, foreshadowing 1947. The Union flag flies with the Star of India badge marking British India as a crown possession." },
     { year:"1947–1971", name:"East Bengal / East Pakistan", t:{ bd:IC.e5 }, flagKeys:{ bd:"e5" },
       story:"The August 1947 partition splits Bengal along the Radcliffe Line: East Bengal joins Pakistan as its eastern wing, geographically separated by roughly 1,600 km of Indian territory (renamed East Pakistan, 1955). The 1952 Bengali Language Movement becomes a formative grievance, feeding the nationalist movement toward the Awami League's 1970 mandate. Pakistan's green field, white hoist stripe, crescent and star fly over both wings." },
-    { year:"March–December 1971", name:"Liberation War &amp; provisional Bangladesh", t:{ bd:IC.e6 }, flagKeys:{ bd:"e6" },
+    { year:"March–December 1971", name:"Liberation War & provisional Bangladesh", t:{ bd:IC.e6 }, flagKeys:{ bd:"e6" },
       story:"After the Awami League's decisive 1970 election win is denied, Pakistan's military launches a crackdown in late March 1971; independence is declared 26 March and a provisional government organizes at Mujibnagar. A nine-month war, fought largely by the Mukti Bahini, ends with Pakistan's surrender at Dhaka, 16 December 1971. Students first raise the green field, red sun disc, and gold silhouette map on 2 March 1971." },
     { year:"1972–present", name:"People's Republic of Bangladesh", t:{ bd:IC.e7 }, flagKeys:{ bd:"e7" },
       story:"Sheikh Mujibur Rahman returns to Dhaka in January 1972 to lead the new state. That January the wartime flag is simplified: the gold silhouette map is dropped for consistent printing, and the disc's position fixed toward the hoist so it reads centered when flying. Green for fields and forests; the red disc for the rising sun and for the blood of 1971." }

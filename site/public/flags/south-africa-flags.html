@@ -249,6 +249,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -597,19 +625,19 @@
   var ISNAP = [
     { year:"pre-1652", name:"Khoikhoi and San societies", t:{ coast:IC.none, interior:IC.none }, flagKeys:{ coast:"none", interior:"none" },
       story:"Khoikhoi pastoralists and San hunter-gatherers inhabit the region for thousands of years with no centralized state and no flag of any kind &mdash; shown here as one undivided territory." },
-    { year:"1652&ndash;1806", name:"Dutch Cape Colony", t:{ coast:IC.colony, interior:IC.colony }, flagKeys:{ coast:"dutch", interior:"dutch" },
+    { year:"1652–1806", name:"Dutch Cape Colony", t:{ coast:IC.colony, interior:IC.colony }, flagKeys:{ coast:"dutch", interior:"dutch" },
       story:"The Dutch East India Company establishes a supply station at the Cape in 1652 under the Dutch Prince's Flag; the interior highveld remains outside colonial control, so the whole territory is shown as one undivided Dutch sphere." },
-    { year:"1806&ndash;1852", name:"British Cape Colony (Boer republics not yet founded)", t:{ coast:IC.colony, interior:IC.colony }, flagKeys:{ coast:"britishblue", interior:"britishblue" },
+    { year:"1806–1852", name:"British Cape Colony (Boer republics not yet founded)", t:{ coast:IC.colony, interior:IC.colony }, flagKeys:{ coast:"britishblue", interior:"britishblue" },
       story:"Britain seizes the Cape from the Dutch in 1806; Boer trekboers move inland from the 1830s in the Great Trek, but no independent Boer state yet exists, so the map still shows one undivided territory under British claim." },
-    { year:"1852&ndash;1902", name:"British Cape &amp; Natal, and the Boer Republics", t:{ coast:IC.colony, interior:IC.boer }, flagKeys:{ coast:"britishblue", interior:"vierkleur" },
+    { year:"1852–1902", name:"British Cape & Natal, and the Boer Republics", t:{ coast:IC.colony, interior:IC.boer }, flagKeys:{ coast:"britishblue", interior:"vierkleur" },
       story:"Britain recognizes Transvaal's independence in 1852 and the Orange Free State's in 1854 &mdash; for half a century, the coast (Cape Colony and Natal) and the interior highveld are genuinely separate countries, until the 1899&ndash;1902 Second Boer War ends both republics by force." },
-    { year:"1902&ndash;1910", name:"Reunified under British rule", t:{ coast:IC.colony, interior:IC.colony }, flagKeys:{ coast:"britishred", interior:"britishred" },
+    { year:"1902–1910", name:"Reunified under British rule", t:{ coast:IC.colony, interior:IC.colony }, flagKeys:{ coast:"britishred", interior:"britishred" },
       story:"Following the Boer War, Transvaal and the Orange Free State become British colonies alongside the Cape and Natal &mdash; all four territories now governed by the same colonial authority for the first time, ahead of formal union in 1910." },
-    { year:"1910&ndash;1928", name:"Union of South Africa (Dominion)", t:{ coast:IC.colony, interior:IC.colony }, flagKeys:{ coast:"britishred", interior:"britishred" },
+    { year:"1910–1928", name:"Union of South Africa (Dominion)", t:{ coast:IC.colony, interior:IC.colony }, flagKeys:{ coast:"britishred", interior:"britishred" },
       story:"The four colonies unite as the self-governing Union of South Africa within the British Empire on 31 May 1910, flying the British Red Ensign with the Union's own badge." },
-    { year:"1928&ndash;1994", name:"Union / Republic of South Africa (segregation and apartheid)", t:{ coast:IC.apartheid, interior:IC.apartheid }, flagKeys:{ coast:"apartheid", interior:"apartheid" },
+    { year:"1928–1994", name:"Union / Republic of South Africa (segregation and apartheid)", t:{ coast:IC.apartheid, interior:IC.apartheid }, flagKeys:{ coast:"apartheid", interior:"apartheid" },
       story:"A new orange-white-blue flag is adopted in 1928; the National Party's 1948 election victory formalizes apartheid, a system of racial segregation that governs the whole country shown here until 1994." },
-    { year:"1994&ndash;present", name:"Republic of South Africa (democratic)", t:{ coast:IC.republic, interior:IC.republic }, flagKeys:{ coast:"modern", interior:"modern" },
+    { year:"1994–present", name:"Republic of South Africa (democratic)", t:{ coast:IC.republic, interior:IC.republic }, flagKeys:{ coast:"modern", interior:"modern" },
       story:"South Africa's first fully democratic, universal-suffrage election in April 1994 brings Nelson Mandela to power and introduces the six-color \"rainbow nation\" flag, governing the whole reunited territory as one constitutional democracy." }
   ];
 

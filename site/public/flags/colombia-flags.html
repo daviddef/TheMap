@@ -250,6 +250,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -274,7 +302,7 @@
     <div class="imap-frame">
       <div class="imap-controls">
         <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
-        <span class="imap-year" id="iYearTag">c. 1st century BCE &amp;ndash; 8th century CE</span>
+        <span class="imap-year" id="iYearTag">c. 1st century BCE – 8th century CE</span>
         <input type="range" id="iSlider" min="0" max="5" step="1" value="0" aria-label="Select era">
       </div>
       <svg id="imap-svg" viewBox="0 0 218.2 290.0" xmlns="http://www.w3.org/2000/svg">
@@ -565,17 +593,17 @@
   }).join("");
 
   var ISNAP = [
-    { year:"c. 1st century BCE &ndash; 8th century CE", name:"San Agust&iacute;n culture (pre-Muisca)", t:{ co:IC.sanagustin }, flagKeys:{ co:"sanagustin" },
+    { year:"c. 1st century BCE – 8th century CE", name:"San Agustín culture (pre-Muisca)", t:{ co:IC.sanagustin }, flagKeys:{ co:"sanagustin" },
       story:"In the highlands of what is now Huila department, in Colombia's southern Andes, the San Agust&iacute;n culture carves hundreds of monumental stone statues &mdash; anthropomorphic and animal deities, shamanic figures, and tomb guardians &mdash; over roughly nine centuries, leaving South America's largest collection of megalithic religious sculpture. No unified state or named rulers are documented; the culture's major ceremonial centers are abandoned by around the 8th century CE, for reasons the archaeological record does not establish, centuries before Spanish contact and well before the later Muisca Confederation forms to the north. No flag or comparable banner survives; the culture expressed itself through stone carving and burial architecture instead." },
-    { year:"c. 1450 &ndash; 1550", name:"Muisca Confederation", t:{ co:IC.muisca }, flagKeys:{ co:"muisca" },
+    { year:"c. 1450 – 1550", name:"Muisca Confederation", t:{ co:IC.muisca }, flagKeys:{ co:"muisca" },
       story:"On the high plateau around modern Bogot&aacute; and Tunja, the Muisca organize into a loose confederation of chiefdoms (zipa and zaque) by the 15th century, renowned for goldwork whose ritual offerings at Lake Guatavita feed the later Spanish El Dorado legend. Spanish forces conquer the Muisca heartland in 1537&ndash;38. No flag in the European sense is documented; the gold disc shown is a symbolic stand-in for their metalwork, not an attested banner." },
-    { year:"1550 &ndash; 1819", name:"Viceroyalty of New Granada (Spanish colonial rule)", t:{ co:IC.viceroyalty }, flagKeys:{ co:"viceroyalty" },
+    { year:"1550 – 1819", name:"Viceroyalty of New Granada (Spanish colonial rule)", t:{ co:IC.viceroyalty }, flagKeys:{ co:"viceroyalty" },
       story:"Spain organizes the conquered northern Andes first under the Viceroyalty of Peru, then as its own Viceroyalty of New Granada (1717/1739), governing what is now Colombia, Venezuela, Ecuador, and Panama from Bogot&aacute;. Independence movements gather through the 1800s&ndash;10s, culminating in Sim&oacute;n Bol&iacute;var&rsquo;s 1819 victory at Boyac&aacute;. Spain flew no single fixed colonial flag; the cross of Burgundy and viceregal sun shown here are schematic, not a specific New Granada banner." },
-    { year:"1819 &ndash; 1830", name:"Gran Colombia", t:{ co:IC.grancolombia }, flagKeys:{ co:"grancolombia" },
+    { year:"1819 – 1830", name:"Gran Colombia", t:{ co:IC.grancolombia }, flagKeys:{ co:"grancolombia" },
       story:"Bol&iacute;var&rsquo;s 1819 victory at Boyac&aacute; secures independence, and the Congress of Angostura proclaims Gran Colombia, uniting New Granada, Venezuela, Ecuador, and Panama into one republic under Bol&iacute;var. Regional caudillos resist Bogot&aacute;&rsquo;s central authority, and Venezuela and Ecuador secede by 1830, the year Bol&iacute;var dies. The yellow-blue-red tricolor, devised by Francisco de Miranda, becomes the shared ancestor of Colombia&rsquo;s, Venezuela&rsquo;s, and Ecuador&rsquo;s later flags." },
-    { year:"1830 &ndash; 1861", name:"Republic of New Granada", t:{ co:IC.newgranada }, flagKeys:{ co:"newgranada" },
+    { year:"1830 – 1861", name:"Republic of New Granada", t:{ co:IC.newgranada }, flagKeys:{ co:"newgranada" },
       story:"Gran Colombia dissolves in 1830&ndash;31; the remaining core, roughly the old Viceroyalty of New Granada plus Panama, reorganizes as the Republic of New Granada under Francisco de Paula Santander. The new state cycles through unitary rule and, from 1858, the Granadine Confederation, retaining the tricolor &mdash; still in equal bands &mdash; as a shared inheritance from Bol&iacute;var&rsquo;s project." },
-    { year:"1861 &ndash; present", name:"Republic of Colombia (modern)", t:{ co:IC.modern }, flagKeys:{ co:"modern" },
+    { year:"1861 – present", name:"Republic of Colombia (modern)", t:{ co:IC.modern }, flagKeys:{ co:"modern" },
       story:"After decades of federal and unitary experiments, the country settles on &ldquo;Republic of Colombia&rdquo; and a fixed flag under President Tom&aacute;s Cipriano de Mosquera in 1861. The republic survives the Thousand Days&rsquo; War, the 1903 loss of Panama, and, in recent decades, a long internal armed conflict substantially wound down by the 2016 FARC peace accord. The tricolor is kept, its yellow band now doubled in width &mdash; a distinction unique to Colombia among the old Gran Colombian states." }
   ];
 

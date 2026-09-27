@@ -250,6 +250,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -274,7 +302,7 @@
     <div class="imap-frame">
       <div class="imap-controls">
         <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
-        <span class="imap-year" id="iYearTag">c. 1400 &amp;ndash; 1880</span>
+        <span class="imap-year" id="iYearTag">c. 1400 – 1880</span>
         <input type="range" id="iSlider" min="0" max="4" step="1" value="0" aria-label="Select era">
       </div>
       <svg id="imap-svg" viewBox="0 0 239.8 280.0" xmlns="http://www.w3.org/2000/svg">
@@ -535,15 +563,15 @@
   }).join("");
 
   var ISNAP = [
-    { year:"c. 1400 &ndash; 1880", name:"Teke Kingdom (Kingdom of Anzico) and neighboring polities", t:{ cg:IC.teke }, flagKeys:{ cg:"teke" },
+    { year:"c. 1400 – 1880", name:"Teke Kingdom (Kingdom of Anzico) and neighboring polities", t:{ cg:IC.teke }, flagKeys:{ cg:"teke" },
       story:"The Teke (Bateke) Kingdom, also recorded as Anzico, controls the plateau north of the Congo River from at least the 15th century, trading ivory and copper into networks reaching the Kingdom of Kongo to the south. The Teke ruler Makoko signs the 1880 treaty with Brazza that becomes the basis for French claims. No securely documented flag survives; shown honestly blank." },
-    { year:"1880 &ndash; 1959", name:"French Congo / French Equatorial Africa", t:{ cg:IC.french }, flagKeys:{ cg:"french" },
+    { year:"1880 – 1959", name:"French Congo / French Equatorial Africa", t:{ cg:IC.french }, flagKeys:{ cg:"french" },
       story:"Pierre Savorgnan de Brazza negotiates a treaty with Teke ruler Makoko in 1880, founding the post that becomes Brazzaville and formalized as French Congo in 1891. From 1910 the territory anchors French Equatorial Africa, a federation of four colonies governed from Brazzaville &mdash; the administrative heart of French holdings across central Africa. The French Tricolor flies throughout; no distinct territorial flag existed for Middle Congo." },
-    { year:"1959 &ndash; 1970", name:"Republic of the Congo (independence)", t:{ cg:IC.independence }, flagKeys:{ cg:"independence" },
+    { year:"1959 – 1970", name:"Republic of the Congo (independence)", t:{ cg:IC.independence }, flagKeys:{ cg:"independence" },
       story:"The territory becomes an autonomous republic within the French Community in 1958 and adopts this flag in September 1959, ahead of full independence on 15 August 1960 under Fulbert Youlou. Brazzaville, already the administrative seat of French Equatorial Africa, becomes the new republic&rsquo;s capital. The green-yellow-red diagonal tricolor uses the pan-African colors popularized by Ethiopia and Ghana." },
-    { year:"1970 &ndash; 1991", name:"People's Republic of the Congo", t:{ cg:IC.peoplesrepublic }, flagKeys:{ cg:"peoplesrepublic" },
+    { year:"1970 – 1991", name:"People's Republic of the Congo", t:{ cg:IC.peoplesrepublic }, flagKeys:{ cg:"peoplesrepublic" },
       story:"After a series of coups, Marien Ngouabi declares the People&rsquo;s Republic of the Congo in December 1969, formalized in January 1970 &mdash; sub-Saharan Africa&rsquo;s first officially Marxist-Leninist state, aligned with the Soviet bloc under the sole ruling Congolese Labour Party. The system persists through Ngouabi&rsquo;s 1977 assassination until the 1991 National Conference ends one-party rule. A red field carries gold socialist emblems, replacing the independence-era tricolor." },
-    { year:"1991 &ndash; present", name:"Republic of the Congo (multiparty republic)", t:{ cg:IC.modern }, flagKeys:{ cg:"modern" },
+    { year:"1991 – present", name:"Republic of the Congo (multiparty republic)", t:{ cg:IC.modern }, flagKeys:{ cg:"modern" },
       story:"A 1991 National Conference strips the ruling Congolese Labour Party of its constitutional monopoly and restores the pre-1970 flag alongside multiparty elections. The transition is not smooth &mdash; a 1997 civil war returns Denis Sassou Nguesso to power by force, and he has governed continuously (aside from a 1992&ndash;97 interlude) ever since &mdash; but the flag itself has not changed since 1991." }
   ];
 

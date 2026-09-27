@@ -250,6 +250,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -270,7 +298,7 @@
     <div class="imap-frame">
       <div class="imap-controls">
         <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
-        <span class="imap-year" id="iYearTag">c. 4000 BCE &amp;ndash; 1492 CE</span>
+        <span class="imap-year" id="iYearTag">c. 4000 BCE – 1492 CE</span>
         <input type="range" id="iSlider" min="0" max="5" step="1" value="0" aria-label="Select era">
       </div>
       <svg id="imap-svg" viewBox="0 0 310.0 116.4" xmlns="http://www.w3.org/2000/svg">
@@ -578,17 +606,17 @@
   }).join("");
 
   var ISNAP = [
-    { year:"c. 4000 BCE &ndash; 1492 CE", name:"Pre-Columbian Cuba: Earliest Settlement to the Ta&iacute;no", t:{ cu:IC.precolumbian }, flagKeys:{ cu:"precolumbian" },
+    { year:"c. 4000 BCE – 1492 CE", name:"Pre-Columbian Cuba: Earliest Settlement to the Taíno", t:{ cu:IC.precolumbian }, flagKeys:{ cu:"precolumbian" },
       story:"Cuba's human history begins many centuries before Columbus. Archaic, pre-ceramic peoples &mdash; recorded by later Spanish chroniclers under the name Guanahatabey, concentrated in western Cuba &mdash; arrive by canoe from other Caribbean islands as early as 4000 BCE, subsisting on fishing, shellfish gathering, and foraging. Ciboney communities follow, and finally Arawakan-speaking Ta&iacute;no peoples migrate up the island chain from South America, arriving in Cuba by around 800&ndash;1000 CE and establishing the cacicazgos (chiefdoms) that Spanish accounts describe on contact in 1492. No securely documented flag or banner survives from any part of this six-thousand-year span; shown honestly blank." },
-    { year:"1492 &ndash; 1515", name:"Ta&iacute;no and Ciboney Cuba / early Spanish contact", t:{ cu:IC.indigenous }, flagKeys:{ cu:"indigenous" },
+    { year:"1492 – 1515", name:"Taíno and Ciboney Cuba / early Spanish contact", t:{ cu:IC.indigenous }, flagKeys:{ cu:"indigenous" },
       story:"Columbus sights Cuba in October 1492, encountering an island organized into Ta&iacute;no cacicazgos (chiefdoms) in the more populous east and center, with Ciboney communities in the west. Spanish conquest is gradual, only completed when Diego Vel&aacute;zquez brings the island fully under control by 1515. No securely documented flag survives from Cuba&rsquo;s indigenous societies; shown honestly blank." },
-    { year:"1515 &ndash; 1868", name:"Spanish colonial Cuba", t:{ cu:IC.colonial }, flagKeys:{ cu:"colonial" },
+    { year:"1515 – 1868", name:"Spanish colonial Cuba", t:{ cu:IC.colonial }, flagKeys:{ cu:"colonial" },
       story:"Diego Vel&aacute;zquez de Cu&eacute;llar conquers and settles the island between 1511 and 1515, founding Havana and six other original villas; Havana grows into Spain&rsquo;s key Caribbean naval and treasure-fleet hub. Across nearly all of this span, the Cross of Burgundy &mdash; a red saltire on white &mdash; is the standard reference symbol for Spanish territories including Cuba, a military and naval banner rather than a single national flag." },
-    { year:"1868 &ndash; 1898", name:"Flag of Cuban independence (Lone Star)", t:{ cu:IC.insurgency }, flagKeys:{ cu:"insurgency" },
+    { year:"1868 – 1898", name:"Flag of Cuban independence (Lone Star)", t:{ cu:IC.insurgency }, flagKeys:{ cu:"insurgency" },
       story:"Drawn up in 1849 by exiled revolutionary Narciso L&oacute;pez and poet Miguel Teurbe Tol&oacute;n in New York, first raised on Cuban soil at C&aacute;rdenas in 1850. It became the banner of Carlos Manuel de C&eacute;spedes&rsquo;s Ten Years&rsquo; War (1868&ndash;78) and, a generation later, of Jos&eacute; Mart&iacute;, M&aacute;ximo G&oacute;mez, and Antonio Maceo&rsquo;s War of Independence (1895&ndash;98) &mdash; carried by rebels for three decades before any Cuban government existed to fly it officially." },
-    { year:"1898 &ndash; 1902", name:"US military occupation of Cuba", t:{ cu:IC.occupation }, flagKeys:{ cu:"occupation" },
+    { year:"1898 – 1902", name:"US military occupation of Cuba", t:{ cu:IC.occupation }, flagKeys:{ cu:"occupation" },
       story:"Spain cedes control after its defeat in the 1898 Spanish&ndash;American War, and the United States administers Cuba as a military government under generals John R. Brooke and then Leonard Wood. Cubans fly their own Lone Star flag symbolically throughout, though it holds no official legal status until independence is proclaimed on 20 May 1902. The flag shown is the flag of record for the administering power, not a Cuban national flag." },
-    { year:"1902 &ndash; present", name:"Republic of Cuba", t:{ cu:IC.republic }, flagKeys:{ cu:"republic" },
+    { year:"1902 – present", name:"Republic of Cuba", t:{ cu:IC.republic }, flagKeys:{ cu:"republic" },
       story:"The Republic of Cuba is formally inaugurated on 20 May 1902, and the rebel Lone Star flag of the independence wars is adopted as the official national flag. The 1959 revolution led by Fidel Castro overturns that republic's government entirely, installing a one-party socialist state that endures today &mdash; a sweeping change of government and ideology, but not, at any point, of flag." }
   ];
 

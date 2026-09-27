@@ -249,6 +249,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -502,7 +530,7 @@
   var ISNAP = [
     { year:"c. 350–1200s", name:"Saladoid and early Arawakan settlement", t:{ bb:IC.saladoid }, flagKeys:{ bb:"saladoid" },
       story:"Saladoid horticulturalists from South America's Orinoco basin, part of the same broad Arawakan-speaking migration that settled much of the Lesser Antilles, establish the earliest known settlements on Barbados by around the 4th century CE. Successive Arawakan communities occupy the island for roughly eight centuries, developing pottery traditions and small farming settlements, before continuous occupation ends by around the 1200s. No securely documented flag survives from this era &mdash; shown here honestly blank." },
-    { year:"c. 1200s–1627", name:"Pre-colonial &amp; uninhabited-at-contact Barbados", t:{ bb:IC.e0 }, flagKeys:{ bb:"e0" },
+    { year:"c. 1200s–1627", name:"Pre-colonial & uninhabited-at-contact Barbados", t:{ bb:IC.e0 }, flagKeys:{ bb:"e0" },
       story:"Barbados was inhabited by Kalinago and other Arawakan-speaking peoples at various points, but for reasons still debated &mdash; possibly Spanish slave raiding, possibly voluntary withdrawal, possibly disease &mdash; the island appears to have been largely uninhabited by the time English settlers arrived in the 1620s. No securely documented flag survives; shown honestly blank." },
     { year:"1627–1966", name:"British Barbados (continuous, unbroken)", t:{ bb:IC.e1 }, flagKeys:{ bb:"e1" },
       story:"English settlers claim Barbados in 1625, with the first permanent settlement at Holetown in 1627. Remarkably, Barbados never changes hands between colonial powers even once, staying English then British for well over three centuries. It becomes one of the wealthiest sugar-plantation slave societies in the Caribbean; the 1661 Slave Code was later copied elsewhere. The Blue Ensign carries a colonial badge whose trident/shield imagery directly foreshadows the 1966 flag's trident." },

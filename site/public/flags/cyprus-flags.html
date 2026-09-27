@@ -250,6 +250,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -274,7 +302,7 @@
     <div class="imap-frame">
       <div class="imap-controls">
         <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
-        <span class="imap-year" id="iYearTag">c. 1200 BCE &ndash; 330 CE</span>
+        <span class="imap-year" id="iYearTag">c. 1200 BCE – 330 CE</span>
         <input type="range" id="iSlider" min="0" max="8" step="1" value="0" aria-label="Select era">
       </div>
       <svg id="imap-svg" viewBox="0 0 410.0 214.0" xmlns="http://www.w3.org/2000/svg">
@@ -673,23 +701,23 @@
   }).join("");
 
   var ISNAP = [
-    { year:"c. 1200 BCE &ndash; 330 CE", name:"Mycenaean Settlement &amp; the Kingdom of Cyprus (City-Kingdoms)", t:{ south:IC.citykingdoms, north:IC.citykingdoms }, flagKeys:{ south:"citykingdoms", north:"citykingdoms" },
+    { year:"c. 1200 BCE – 330 CE", name:"Mycenaean Settlement & the Kingdom of Cyprus (City-Kingdoms)", t:{ south:IC.citykingdoms, north:IC.citykingdoms }, flagKeys:{ south:"citykingdoms", north:"citykingdoms" },
       story:"Mycenaean Greek settlers arrive in Cyprus around the time of the Bronze Age collapse and the Trojan War tradition, founding city-kingdoms &mdash; Salamis, Kition, Paphos, Kourion, Marion, Soloi, Idalion, and others &mdash; that endure for roughly a millennium under changing outside overlordship (Assyria, Egypt, then Persia) while keeping their own local kings; an Assyrian inscription names ten Cypriot kings paying tribute in 673 BCE. Alexander the Great's 333 BCE conquest ends Persian rule, Ptolemy I annexes the island outright in 294 BCE ending the city-kingdoms' self-government, and Rome in turn annexes it from the Ptolemies in 58 BCE, ruling it as an ordinary province until Constantine's 330 refounding of Constantinople. No securely documented flag can be attributed to any city-kingdom or to the island as a whole; shown honestly blank." },
-    { year:"c. 330 &ndash; 1191", name:"Byzantine Cyprus", t:{ south:IC.byzantine, north:IC.byzantine }, flagKeys:{ south:"byzantine", north:"byzantine" },
+    { year:"c. 330 – 1191", name:"Byzantine Cyprus", t:{ south:IC.byzantine, north:IC.byzantine }, flagKeys:{ south:"byzantine", north:"byzantine" },
       story:"Following Constantine's 330 refounding of Constantinople, Cyprus remains a single Byzantine province, administered whole from the imperial capital, until Richard the Lionheart's 1191 conquest ends Byzantine rule for good. No securely documented flag survives; shown honestly blank." },
-    { year:"1192 &ndash; 1489", name:"Kingdom of Cyprus (Lusignan)", t:{ south:IC.lusignan, north:IC.lusignan }, flagKeys:{ south:"lusignan", north:"lusignan" },
+    { year:"1192 – 1489", name:"Kingdom of Cyprus (Lusignan)", t:{ south:IC.lusignan, north:IC.lusignan }, flagKeys:{ south:"lusignan", north:"lusignan" },
       story:"Richard the Lionheart sells the island to Guy of Lusignan, the deposed King of Jerusalem, in 1192, founding a French-descended crusader dynasty that rules the whole island as one independent kingdom for nearly three centuries from its royal court at Nicosia." },
-    { year:"1489 &ndash; 1571", name:"Venetian Cyprus", t:{ south:IC.venetian, north:IC.venetian }, flagKeys:{ south:"venetian", north:"venetian" },
+    { year:"1489 – 1571", name:"Venetian Cyprus", t:{ south:IC.venetian, north:IC.venetian }, flagKeys:{ south:"venetian", north:"venetian" },
       story:"Catherine Cornaro, the Venetian-born widow of the last Lusignan king, is pressured by Venice into ceding the kingdom in 1489, bringing the whole island under direct Venetian rule as a maritime colonial possession, fortified heavily at Famagusta and Nicosia against Ottoman expansion." },
-    { year:"1571 &ndash; 1878", name:"Ottoman Cyprus", t:{ south:IC.ottoman, north:IC.ottoman }, flagKeys:{ south:"ottoman", north:"ottoman" },
+    { year:"1571 – 1878", name:"Ottoman Cyprus", t:{ south:IC.ottoman, north:IC.ottoman }, flagKeys:{ south:"ottoman", north:"ottoman" },
       story:"The Ottoman Empire conquers the whole island from Venice in 1570&ndash;71, taking Nicosia and, after a prolonged siege, Famagusta. Ottoman rule brings substantial Turkish settlement to the island &mdash; the origin of its modern Turkish Cypriot community &mdash; governing the island as one ordinary province for three centuries." },
-    { year:"1878 &ndash; 1925", name:"British administration and annexation", t:{ south:IC.britishadmin, north:IC.britishadmin }, flagKeys:{ south:"britishadmin", north:"britishadmin" },
+    { year:"1878 – 1925", name:"British administration and annexation", t:{ south:IC.britishadmin, north:IC.britishadmin }, flagKeys:{ south:"britishadmin", north:"britishadmin" },
       story:"Under the 1878 Cyprus Convention, the Ottoman Empire leases administration of the whole island to Britain while nominal Ottoman sovereignty continues; Britain formally annexes the island outright once the Ottomans enter World War I in late 1914, still governing it as one territory." },
-    { year:"1925 &ndash; 1960", name:"Crown Colony of Cyprus", t:{ south:IC.crowncolony, north:IC.crowncolony }, flagKeys:{ south:"crowncolony", north:"crowncolony" },
+    { year:"1925 – 1960", name:"Crown Colony of Cyprus", t:{ south:IC.crowncolony, north:IC.crowncolony }, flagKeys:{ south:"crowncolony", north:"crowncolony" },
       story:"Britain formalizes the whole island's status as a single Crown Colony in 1925. Greek Cypriot demands for enosis (union with Greece) grow through the 1930s and intensify into the armed EOKA insurgency from 1955, pushing Britain toward negotiating independence for the island as one piece." },
-    { year:"1960 &ndash; 1974", name:"Republic of Cyprus (united)", t:{ south:IC.republic, north:IC.republic }, flagKeys:{ south:"republic", north:"republic" },
+    { year:"1960 – 1974", name:"Republic of Cyprus (united)", t:{ south:IC.republic, north:IC.republic }, flagKeys:{ south:"republic", north:"republic" },
       story:"Cyprus becomes independent on 16 August 1960 under the Zurich and London Agreements, with a constitution designed to balance its Greek Cypriot majority and Turkish Cypriot minority in shared government over the whole island. That power-sharing arrangement breaks down over the following years." },
-    { year:"1974 &ndash; present", name:"De facto division", t:{ south:IC.republic, north:IC.trnc }, flagKeys:{ south:"republic", north:"trnc" },
+    { year:"1974 – present", name:"De facto division", t:{ south:IC.republic, north:IC.trnc }, flagKeys:{ south:"republic", north:"trnc" },
       story:"In July 1974 a Greek-backed coup aiming at union with Greece is followed within days by a Turkish military intervention. The island has remained de facto divided since: the Republic of Cyprus, internationally recognized and an EU member since 2004, administers the south, while a Turkish Cypriot administration controls the north and declared itself the Turkish Republic of Northern Cyprus in 1983, recognized only by Turkey. The Republic of Cyprus flag, deliberately neutral by design, has not changed through any of this; the map states the division as a documented fact without taking a position on its resolution." }
   ];
 

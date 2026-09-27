@@ -249,6 +249,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -563,9 +591,9 @@
   var ISNAP = [
     { year:"c. 650–c. 900", name:"Monyul and the arrival of Buddhism", t:{ bt:IC.e0 }, flagKeys:{ bt:"e0" },
       story:"Before any unified valley lordship, Bhutan's earliest attested episode is Tibetan-Buddhist tradition's account of Songtsen Gampo's temple-building mission &mdash; Kyichu Lhakhang in the Paro valley and Jambay Lhakhang in Bumthang, both traditionally dated to around 659 CE. The region, then known as Monyul, was a borderland of scattered valley communities practicing indigenous Bon shamanism, with no unified government and no flag or comparable symbol surviving from the era." },
-    { year:"c. 900–1616", name:"Fragmented valley lords &amp; monastic principalities", t:{ bt:IC.e0 }, flagKeys:{ bt:"e0" },
+    { year:"c. 900–1616", name:"Fragmented valley lords & monastic principalities", t:{ bt:IC.e0 }, flagKeys:{ bt:"e0" },
       story:"Before unification, Bhutan's valleys are held by local lords and clan chiefs, with Buddhist monastic schools arriving in waves from Tibet from roughly the 8th century, intensifying with Drukpa Kagyu presence from the 12th–13th. No single ruler unites the region until Ngawang Namgyal's 1616 arrival. No securely documented flag survives &mdash; shown honestly blank." },
-    { year:"1616–1907", name:"Unified Bhutan &mdash; the Druk Desi theocracy", t:{ bt:IC.e1 }, flagKeys:{ bt:"e1" },
+    { year:"1616–1907", name:"Unified Bhutan — the Druk Desi theocracy", t:{ bt:IC.e1 }, flagKeys:{ bt:"e1" },
       story:"Ngawang Namgyal, a Tibetan lama who fled succession disputes, arrives in 1616 and unifies Bhutan's fractious valleys, formalizing a dual system: a spiritual Je Khenpo and a temporal Druk Desi ruling in tandem. The system holds for close to three centuries, even as 19th-century regional penlops contest power, until Ugyen Wangchuck's decisive 1885 victory. The Druk, the Thunder Dragon, is this era's defining symbol, giving the country its own name, Druk Yul." },
     { year:"1907–1949", name:"Kingdom of Bhutan (early hereditary monarchy)", t:{ bt:IC.e2 }, flagKeys:{ bt:"e2" },
       story:"On 17 December 1907 an assembly elects Ugyen Wangchuck, the penlop of Trongsa, as Bhutan's first hereditary Druk Gyalpo, ending the dual Druk Desi system. The 1910 Treaty of Punakha formalizes British-guided, never colonial, management of foreign relations. No single fixed national flag is confidently documented yet for this transitional period." },

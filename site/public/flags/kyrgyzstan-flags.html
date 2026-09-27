@@ -250,6 +250,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -291,7 +319,7 @@
         </g>
       </svg>
       <div class="imap-head">
-        <div class="imap-name" id="iEraName">Saka (Scythian) &amp; Wusun nomads of the Tian Shan</div>
+        <div class="imap-name" id="iEraName">Saka (Scythian) & Wusun nomads of the Tian Shan</div>
         <div class="imap-owners" id="iEraOwners"></div>
       </div>
       <div class="iflags-row" id="iFlagsRow"></div>
@@ -574,13 +602,13 @@
   }).join("");
 
   var ISNAP = [
-    { year:"c. 800 BCE", name:"Saka (Scythian) &amp; Wusun nomads of the Tian Shan", t:{ kg:IC.saka }, flagKeys:{ kg:"saka" },
+    { year:"c. 800 BCE", name:"Saka (Scythian) & Wusun nomads of the Tian Shan", t:{ kg:IC.saka }, flagKeys:{ kg:"saka" },
       story:"Long before the Yenisei Kyrgyz or the Kyrgyz ethnonym existed, the Tian Shan and Issyk-Kul basin were home to the Saka, Iranian-speaking horse-nomads known for elaborate gold-adorned kurgan burials from around the 8th century BCE. From the 2nd century BCE the Wusun, a nomadic confederation pushed west by the Xiongnu and the Yuezhi migration, settled the same territory, maintaining a documented alliance with Han-dynasty China until fading from the record by the 5th century CE. Neither confederation was a settled state, and no flag or banner survives for either." },
     { year:"antiquity", name:"Ancient Yenisei-region antecedents", t:{ kg:IC.ancient }, flagKeys:{ kg:"ancient" },
       story:"The deeper origins of the Kyrgyz people trace to Turkic-speaking populations of the Yenisei River basin in southern Siberia, gradually consolidating into the Kyrgyz Khaganate that emerges into the historical record by the 9th century. Documentary evidence for this earlier span is sparse and largely archaeological; no flag survives." },
     { year:"c. 9th c.", name:"From the Yenisei Kyrgyz to Tian Shan tribal confederations", t:{ kg:IC.tribal }, flagKeys:{ kg:"tribal" },
       story:"The early medieval Kyrgyz Khaganate, centered on the Yenisei, was a recognized regional power around the 9th century. Kyrgyz peoples gradually migrated southwest into the Tian Shan mountains over the following centuries, living as nomadic tribal confederations under shifting Mongol, Timurid, Dzungar, and eventually Kokand overlordship." },
-    { year:"1876", name:"Russian Turkestan &amp; the Turkestan ASSR transition", t:{ kg:IC.russian }, flagKeys:{ kg:"russian" },
+    { year:"1876", name:"Russian Turkestan & the Turkestan ASSR transition", t:{ kg:IC.russian }, flagKeys:{ kg:"russian" },
       story:"Russian conquest of the Khanate of Kokand, which had held suzerainty over Kyrgyz tribal territory, was completed in 1876; the khanate was abolished and absorbed into Russian Turkestan. After the 1917 Revolution the region became part of the Turkestan ASSR, a Soviet transitional administration, before the 1924 national delimitation." },
     { year:"1924", name:"Kara-Kirghiz AO / Kirghiz ASSR / Kirghiz SSR", t:{ kg:IC.soviet }, flagKeys:{ kg:"soviet" },
       story:"The Kara-Kirghiz Autonomous Oblast was formed in 1924 as part of the Soviet \"national delimitation\"; it was renamed the Kirghiz ASSR in 1926, and elevated to a full Union Republic in 1936. Its flag was the standard Soviet red with a gold hammer-and-sickle canton, later distinguished by a light-blue stripe near the base." },

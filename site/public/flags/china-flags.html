@@ -250,6 +250,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -274,7 +302,7 @@
     <div class="imap-frame">
       <div class="imap-controls">
         <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
-        <span class="imap-year" id="iYearTag">c. 2070 &amp;ndash; 221 BCE</span>
+        <span class="imap-year" id="iYearTag">c. 2070 – 221 BCE</span>
         <input type="range" id="iSlider" min="0" max="10" step="1" value="0" aria-label="Select era">
       </div>
       <svg id="imap-svg" viewBox="0 0 290.0 170.6" xmlns="http://www.w3.org/2000/svg">
@@ -779,27 +807,27 @@
   }).join("");
 
   var ISNAP = [
-    { year:"c. 2070 &ndash; 221 BCE", name:"Xia, Shang, and Zhou dynasties (pre-imperial)", t:{ cn:IC.ancient }, flagKeys:{ cn:"ancient" },
+    { year:"c. 2070 – 221 BCE", name:"Xia, Shang, and Zhou dynasties (pre-imperial)", t:{ cn:IC.ancient }, flagKeys:{ cn:"ancient" },
       story:"Chinese tradition places Yu the Great&rsquo;s founding of the Xia dynasty around 2070 BCE, though whether it was an actual centralized state or a later legendary construction remains genuinely debated; the Bronze Age Erlitou culture is the most-cited possible match, unconfirmed. The Shang dynasty from roughly 1600 BCE is the first period directly confirmed by contemporary writing, via oracle bone divination records. King Wu of Zhou topples the Shang in 1046 BCE and founds the Zhou, which rules in name for centuries before fragmenting into rival states during the Spring and Autumn and Warring States periods; that fragmentation ends only when Qin conquers the last rival state in 221 BCE. No flag or comparable banner survives from any of these three dynasties &mdash; vexillology as a concept doesn&rsquo;t yet exist &mdash; so this whole 1,800-year span is shown honestly blank rather than invented." },
-    { year:"221 &ndash; 206 BCE", name:"Qin Dynasty", t:{ cn:IC.qin }, flagKeys:{ cn:"qin" },
+    { year:"221 – 206 BCE", name:"Qin Dynasty", t:{ cn:IC.qin }, flagKeys:{ cn:"qin" },
       story:"King Zheng of Qin conquers the last Warring States and proclaims himself Qin Shi Huang, the &ldquo;First Emperor,&rdquo; in 221 BCE &mdash; China&rsquo;s first unified imperial state. No flag exists in this era; Qin ideology favored black, the water element&rsquo;s color, shown here as a reference only." },
-    { year:"206 BCE &ndash; 220 CE", name:"Han Dynasty", t:{ cn:IC.han }, flagKeys:{ cn:"han" },
+    { year:"206 BCE – 220 CE", name:"Han Dynasty", t:{ cn:IC.han }, flagKeys:{ cn:"han" },
       story:"Liu Bang founds the Han after Qin&rsquo;s collapse, ruling roughly four centuries &mdash; long enough that China&rsquo;s majority ethnic group still calls itself Han today. The Silk Road opens under Emperor Wu; regional warlordism ends the dynasty in 220 CE. No flag survives; red, the fire element&rsquo;s color, is an informed reference only." },
-    { year:"618 &ndash; 907", name:"Tang Dynasty", t:{ cn:IC.tang }, flagKeys:{ cn:"tang" },
+    { year:"618 – 907", name:"Tang Dynasty", t:{ cn:IC.tang }, flagKeys:{ cn:"tang" },
       story:"The Li family founds the Tang in 618, presiding over a high point of premodern Chinese civilization &mdash; cosmopolitan Chang&rsquo;an, Tang poetry, and Silk Road trade at its peak. The An Lushan Rebellion weakens it fatally; it collapses in 907. No flag survives from this period; the gold shown is a court-palette reference only." },
-    { year:"960 &ndash; 1279", name:"Song Dynasty", t:{ cn:IC.song }, flagKeys:{ cn:"song" },
+    { year:"960 – 1279", name:"Song Dynasty", t:{ cn:IC.song }, flagKeys:{ cn:"song" },
       story:"Zhao Kuangyin reunifies most of China after the Five Dynasties chaos, founding the Song in 960 &mdash; a commercial and technological golden age of movable type, gunpowder, and paper money. The dynasty never fully controls the north, losing it to the Jurchen Jin in 1127, before Kublai Khan&rsquo;s Mongols conquer the remaining Southern Song in 1279. No state flag exists yet; red is a ceremonial-color reference only." },
-    { year:"1271 &ndash; 1368", name:"Yuan Dynasty (Mongol rule)", t:{ cn:IC.yuan }, flagKeys:{ cn:"yuan" },
+    { year:"1271 – 1368", name:"Yuan Dynasty (Mongol rule)", t:{ cn:IC.yuan }, flagKeys:{ cn:"yuan" },
       story:"Kublai Khan, grandson of Genghis Khan, completes the conquest of Song China and proclaims the Yuan in 1271, ruling China as part of the wider, fractured Mongol Empire. Ming rebellion drives the Mongol court back to the steppe in 1368. Kept brief here on purpose &mdash; the Mongol Empire&rsquo;s own banners are covered on this atlas&rsquo;s dedicated Mongol Empire page." },
-    { year:"1368 &ndash; 1644", name:"Ming Dynasty", t:{ cn:IC.ming }, flagKeys:{ cn:"ming" },
+    { year:"1368 – 1644", name:"Ming Dynasty", t:{ cn:IC.ming }, flagKeys:{ cn:"ming" },
       story:"Zhu Yuanzhang, a former peasant and monk, drives out the Mongol Yuan and founds the Ming in 1368, restoring native Han rule. The Ming build the Forbidden City and send Zheng He&rsquo;s treasure fleets across the Indian Ocean, before falling to peasant rebellion and the invading Manchu in 1644. No flag exists yet; red-and-gold is the dynasty&rsquo;s own palette, shown as reference only." },
-    { year:"1644 &ndash; 1912", name:"Qing Dynasty", t:{ cn:IC.qing }, flagKeys:{ cn:"qing" },
+    { year:"1644 – 1912", name:"Qing Dynasty", t:{ cn:IC.qing }, flagKeys:{ cn:"qing" },
       story:"The Manchu-led Qing conquer Beijing in 1644 and rule for nearly 270 years, China&rsquo;s last imperial dynasty. Facing Western and Japanese naval powers that all flew national flags, the court adopts the Yellow Dragon banner for its navy in the 1860s&ndash;70s, formalized as the empire&rsquo;s first official national flag in 1889. The dynasty falls with the 1911 Xinhai Revolution and Puyi&rsquo;s 1912 abdication." },
-    { year:"1912 &ndash; 1928", name:"Republic of China (Beiyang government)", t:{ cn:IC.beiyang }, flagKeys:{ cn:"beiyang" },
+    { year:"1912 – 1928", name:"Republic of China (Beiyang government)", t:{ cn:IC.beiyang }, flagKeys:{ cn:"beiyang" },
       story:"The Xinhai Revolution topples the last Qing emperor, six-year-old Puyi, who abdicates in February 1912, ending over two thousand years of imperial rule. The nominally unified republic runs in practice through competing Beiyang warlord factions until the Kuomintang&rsquo;s Northern Expedition in 1928. Five stripes stand for the &ldquo;five races&rdquo; the republic claimed to unite: Han, Manchu, Mongol, Hui, and Tibetan." },
-    { year:"1928 &ndash; 1949", name:"Republic of China (Nationalist government, mainland)", t:{ cn:IC.nationalist }, flagKeys:{ cn:"nationalist" },
+    { year:"1928 – 1949", name:"Republic of China (Nationalist government, mainland)", t:{ cn:IC.nationalist }, flagKeys:{ cn:"nationalist" },
       story:"Chiang Kai-shek&rsquo;s Nationalist Kuomintang completes the Northern Expedition in 1928 and adopts its own party banner &mdash; Blue Sky, White Sun, and a Wholly Red Earth &mdash; as the national flag. A brutal civil war against the Communist Party runs almost continuously from 1927, interrupted by Japan&rsquo;s full invasion of 1937&ndash;45, before the Nationalists lose the mainland in 1949 and relocate to Taiwan, where this same flag continues today." },
-    { year:"1949 &ndash; present", name:"People's Republic of China", t:{ cn:IC.prc }, flagKeys:{ cn:"prc" },
+    { year:"1949 – present", name:"People's Republic of China", t:{ cn:IC.prc }, flagKeys:{ cn:"prc" },
       story:"The Chinese Communist Party, led by Mao Zedong, wins the civil war and proclaims the People&rsquo;s Republic in Beijing on 1 October 1949, while the defeated Nationalists relocate to Taiwan. The PRC claims Taiwan as its own territory, a claim Taiwan&rsquo;s government disputes &mdash; an unresolved, live political question, covered from Taiwan&rsquo;s side on its own page. The five-star flag: one large star for Communist Party leadership, four smaller stars for the social classes the party claimed to unite." }
   ];
 

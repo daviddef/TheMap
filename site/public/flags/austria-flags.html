@@ -251,6 +251,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -303,7 +331,7 @@
         </g>
       </svg>
       <div class="imap-head">
-        <div class="imap-name" id="iEraName">Roman Noricum &amp; the Carolingian Ostmark</div>
+        <div class="imap-name" id="iEraName">Roman Noricum & the Carolingian Ostmark</div>
         <div class="imap-owners" id="iEraOwners"></div>
       </div>
       <div class="iflags-row" id="iFlagsRow"></div>
@@ -842,7 +870,7 @@
   }).join("");
 
   var ISNAP = [
-    { year:"c. 15 BCE", name:"Roman Noricum &amp; the Carolingian Ostmark", t:{ proper:IC.ancient, burgenland:IC.ancient }, flagKeys:{ proper:"ancient", burgenland:"ancient" },
+    { year:"c. 15 BCE", name:"Roman Noricum & the Carolingian Ostmark", t:{ proper:IC.ancient, burgenland:IC.ancient }, flagKeys:{ proper:"ancient", burgenland:"ancient" },
       story:"Rome peacefully annexes the Celtic Kingdom of Noricum around 15 BCE as a Danube frontier province; after Rome's western collapse, Bavarian and Frankish rule follows, and Charlemagne organizes the reconquered Avar frontier into an eastern march, the Ostmark, by the 790s. Magyar raiders destroy that march in 907, and it is not securely reestablished until Otto II re-grants it to Leopold I of Babenberg in 976. No internal line exists yet between what will become Burgenland and the rest of Austria &mdash; both are simply part of the same unsettled Danube frontier, and no flag survives from either Roman or Carolingian rule." },
     { year:"1867", name:"Cisleithania, without the east", t:{ proper:IC.austria_lands, burgenland:IC.hungary }, flagKeys:{ proper:"austria_lands", burgenland:"hungary" },
       story:"The 1867 Ausgleich splits Austria-Hungary into two halves under one emperor. The historic Austrian lands &mdash; Vienna, Lower and Upper Austria, Styria, Tyrol, the Alpine and Bohemian crownlands &mdash; form Cisleithania, governed from Vienna. The strip of territory that will become Burgenland is part of Transleithania, the Hungarian half, governed from Budapest &mdash; the same government as the rest of Hungary, an entirely different administration from Vienna's own." },

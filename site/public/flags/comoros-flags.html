@@ -250,6 +250,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -274,7 +302,7 @@
     <div class="imap-frame">
       <div class="imap-controls">
         <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
-        <span class="imap-year" id="iYearTag">c. 6th &amp;ndash; 10th century CE</span>
+        <span class="imap-year" id="iYearTag">c. 6th – 10th century CE</span>
         <input type="range" id="iSlider" min="0" max="4" step="1" value="0" aria-label="Select era">
       </div>
       <svg id="imap-svg" viewBox="0 0 250.0 199.2" xmlns="http://www.w3.org/2000/svg">
@@ -546,15 +574,15 @@
   }).join("");
 
   var ISNAP = [
-    { year:"c. 6th &ndash; 10th century CE", name:"Earliest settlement (pre-Islamic)", t:{ km:IC.settlement }, flagKeys:{ km:"settlement" },
+    { year:"c. 6th – 10th century CE", name:"Earliest settlement (pre-Islamic)", t:{ km:IC.settlement }, flagKeys:{ km:"settlement" },
       story:"Centuries before any sultanate, the islands' earliest known inhabitants are documented only through archaeology. Excavations at Dembeni on Mayotte &mdash; the type-site for this earliest identified settlement phase &mdash; show small farming and fishing communities, plausibly linked to Bantu-speaking migration from the nearby East African coast, established by roughly the 6th to 8th century CE and importing pottery that attests to early Indian Ocean trade contact. The widespread Arab, Swahili, and Shirazi Persian migration and Islamization that define the later sultanate era arrive only from around the 9th&ndash;10th century onward. No flag or comparable symbol survives; shown honestly blank." },
     { year:"before 1841", name:"Island sultanates", t:{ km:IC.sultanates }, flagKeys:{ km:"sultanates" },
       story:"For centuries before French rule, Bantu African, Arab, Swahili, and Shirazi Persian migration and trade shape a distinctively Islamic, Swahili-inflected culture. Each main island typically hosts its own sultanate or rival sultanates &mdash; Ngazidja alone was often divided among several competing sultans &mdash; with no single ruler ever unifying the archipelago before colonization. No flag is securely reconstructable; shown honestly blank." },
-    { year:"1841 &ndash; 1975", name:"French colonial rule", t:{ km:IC.french }, flagKeys:{ km:"french" },
+    { year:"1841 – 1975", name:"French colonial rule", t:{ km:IC.french }, flagKeys:{ km:"french" },
       story:"France annexes Mayotte in 1841 at a local sultan&rsquo;s invitation, then extends control over the rest of the archipelago through the 1880s&ndash;90s, administering the islands jointly with Madagascar from 1912 and as a separate overseas territory from 1946. A gradual postwar push for self-government culminates in the 1975 declaration of independence. The plain French Tricolor flies; no distinct territorial flag existed." },
-    { year:"1975 &ndash; 2001", name:"Independence, Federal Islamic Republic, and repeated coups", t:{ km:IC.independence }, flagKeys:{ km:"independence" },
+    { year:"1975 – 2001", name:"Independence, Federal Islamic Republic, and repeated coups", t:{ km:IC.independence }, flagKeys:{ km:"independence" },
       story:"Comoros unilaterally declares independence on 6 July 1975; Mayotte alone votes to remain French, splitting the archipelago. President Ahmed Abdallah is quickly overthrown, then restored in 1978 by mercenaries under Bob Denard, proclaiming the Federal Islamic Republic. What follows is an extraordinary run of instability &mdash; more than twenty coups or attempted coups by some counts, including Abdallah&rsquo;s own 1989 assassination and a 1997 secessionist revolt on Nzwani and Mwali. The green flag with white crescent and stars stays broadly consistent throughout, only the star count shifting." },
-    { year:"2001 &ndash; present", name:"Union of the Comoros", t:{ km:IC.union }, flagKeys:{ km:"union" },
+    { year:"2001 – present", name:"Union of the Comoros", t:{ km:IC.union }, flagKeys:{ km:"union" },
       story:"After a 1997 secessionist crisis nearly broke the state apart, a new 2001 constitution restructures the country as the Union of the Comoros, granting each island significant autonomy under a rotating union presidency. The new flag follows in 2001&ndash;02: four stripes for Ngazidja, Mwali, Nzwani, and Mayotte (still claimed despite its 1974 vote), a green hoist triangle for Islam, and a crescent with four stars. Azali Assoumani, first taking power in a 1999 coup, dominates union politics for most of the period since." }
   ];
 

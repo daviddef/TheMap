@@ -247,6 +247,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -611,11 +639,11 @@
   }).join("");
 
   var ISNAP = [
-    { year:"c. 3000 BCE–700 CE", name:"Dilmun, Tylos &amp; Sassanid Mishmahig", t:{ bh:IC.ancient }, flagKeys:{ bh:"ancient" },
+    { year:"c. 3000 BCE–700 CE", name:"Dilmun, Tylos & Sassanid Mishmahig", t:{ bh:IC.ancient }, flagKeys:{ bh:"ancient" },
       story:"Bahrain's known history opens with Dilmun, a major Bronze Age trading civilization first attested in Sumerian cuneiform tablets by the late 3rd millennium BCE, linking Mesopotamia to the Indus Valley through Gulf maritime trade. Achaemenid Persian control from the 6th century BCE draws the island &mdash; known to Greek geographers as Tylos &mdash; into successive Achaemenid, Seleucid, and Parthian orbits, and Sassanid Persia renames and garrisons it as Mishmahig by the 3rd century CE. No flag in the modern territorial sense survives from this nearly four-thousand-year span; shown here honestly blank." },
     { year:"c. 700–899", name:"Early Islamic Bahrain", t:{ bh:IC.e0 }, flagKeys:{ bh:"e0" },
       story:"Bahrain converts to Islam during Muhammad's own lifetime, one of the faith's earliest conversions outside the Hejaz, and comes under successive caliphal authority, sitting atop the ancient Dilmun civilization's roughly four-thousand-year trading legacy. No flag in the modern territorial sense survives; caliphal and provincial insignia stood in its place." },
-    { year:"899–1521", name:"Medieval Arab emirate (Qarmatian &amp; successors)", t:{ bh:IC.e1 }, flagKeys:{ bh:"e1" },
+    { year:"899–1521", name:"Medieval Arab emirate (Qarmatian & successors)", t:{ bh:IC.e1 }, flagKeys:{ bh:"e1" },
       story:"The Qarmatians, a radical Ismaili sect, seize the wider Bahrain region in 899, ruled in turn by the Uyunid, Usfurid, and Jarwanid dynasties over the following six centuries &mdash; real, datable Arab dynasties, but no single flag can be attributed with confidence across four ruling houses, so this stands as one honest bridging entry." },
     { year:"1521–1602", name:"Portuguese occupation", t:{ bh:IC.e2 }, flagKeys:{ bh:"e2" },
       story:"Portuguese forces seize Bahrain in 1521 to control Gulf and Indian Ocean trade routes, building Bahrain Fort on the site of the ancient Dilmun capital. Portugal flew its own maritime ensigns over the fort; no local flag is attested for this occupation." },

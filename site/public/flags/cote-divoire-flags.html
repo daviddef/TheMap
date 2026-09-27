@@ -250,6 +250,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -504,11 +532,11 @@
   var ISNAP = [
     { year:"pre-1893", name:"Pre-colonial Akan and Mande polities", t:{ ci:IC.precolonial }, flagKeys:{ ci:"precolonial" },
       story:"Before French rule, the territory holds no single unifying kingdom: Akan groups including the Baoul&eacute; migrate into the central forest in the 18th century, Agni kingdoms sit in the southeast, and Mande-speaking states including the Kong Empire hold sway in the north. Portuguese and later French traders make coastal contact from the 15th&ndash;17th centuries, but no single power controls the whole territory before colonization. No flag unifies this era; shown honestly blank." },
-    { year:"1893 &ndash; 1958", name:"French Ivory Coast (colony)", t:{ ci:IC.colony }, flagKeys:{ ci:"colony" },
+    { year:"1893 – 1958", name:"French Ivory Coast (colony)", t:{ ci:IC.colony }, flagKeys:{ ci:"colony" },
       story:"France formally declares the colony of Ivory Coast in 1893 after decades of coastal trading-post presence, then folds it into French West Africa (AOF) in 1904. Colonial rule brings forced labor and export-crop agriculture built largely on local and migrant labor; F&eacute;lix Houphou&euml;t-Boigny rises to prominence in this period as a planter and labor-rights advocate before entering French politics. The French Tricolore flies; no distinct territorial flag existed." },
-    { year:"1958 &ndash; 1960", name:"Autonomous Republic within the French Community", t:{ ci:IC.autonomous }, flagKeys:{ ci:"autonomous" },
+    { year:"1958 – 1960", name:"Autonomous Republic within the French Community", t:{ ci:IC.autonomous }, flagKeys:{ ci:"autonomous" },
       story:"Unlike neighboring Guinea, C&ocirc;te d&rsquo;Ivoire votes &ldquo;yes&rdquo; in the September 1958 referendum on de Gaulle&rsquo;s French Community, becoming a self-governing republic within it rather than breaking immediately. Houphou&euml;t-Boigny, already a senior figure in French politics, leads the territory toward independence two years later. The orange-white-green tricolor is adopted 3 December 1959, ahead of full independence." },
-    { year:"1960 &ndash; present", name:"Republic of C&ocirc;te d'Ivoire (independent)", t:{ ci:IC.independent }, flagKeys:{ ci:"independent" },
+    { year:"1960 – present", name:"Republic of Côte d'Ivoire (independent)", t:{ ci:IC.independent }, flagKeys:{ ci:"independent" },
       story:"Independence comes on 7 August 1960 under Houphou&euml;t-Boigny, who governs until his death in 1993, a period often called the &ldquo;Ivorian miracle.&rdquo; Real strain follows: a civil war splits the country north-south from 2002 to 2007, and a disputed 2010 election triggers a second, sharper crisis in 2010&ndash;11 before a single government is restored. The orange-white-green tricolor &mdash; orange for the northern savanna, green for the southern forest, white for the peace between them &mdash; never changes through any of it." }
   ];
 

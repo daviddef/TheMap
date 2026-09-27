@@ -250,6 +250,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -273,7 +301,7 @@
     <div class="imap-frame">
       <div class="imap-controls">
         <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
-        <span class="imap-year" id="iYearTag">c. 2300&ndash;1700 BCE</span>
+        <span class="imap-year" id="iYearTag">c. 2300–1700 BCE</span>
         <input type="range" id="iSlider" min="0" max="9" step="1" value="0" aria-label="Select era">
       </div>
       <svg id="imap-svg" viewBox="0 0 340 260" xmlns="http://www.w3.org/2000/svg">
@@ -294,7 +322,7 @@
         </g>
       </svg>
       <div class="imap-head">
-        <div class="imap-name" id="iEraName">Bronze Age Oxus Civilization (Bactria&ndash;Margiana)</div>
+        <div class="imap-name" id="iEraName">Bronze Age Oxus Civilization (Bactria–Margiana)</div>
         <div class="imap-owners" id="iEraOwners"></div>
       </div>
       <div class="iflags-row" id="iFlagsRow"></div>
@@ -725,7 +753,7 @@
   }).join("");
 
   var ISNAP = [
-    { year:"c. 2300–1700 BCE", name:"Bronze Age Oxus Civilization (Bactria&ndash;Margiana)", t:{ tj:IC.bmac }, flagKeys:{ tj:"bmac" },
+    { year:"c. 2300–1700 BCE", name:"Bronze Age Oxus Civilization (Bactria–Margiana)", t:{ tj:IC.bmac }, flagKeys:{ tj:"bmac" },
       story:"More than a thousand years before the Achaemenid Persian rule that opens the next era, the Oxus (Amu Darya) river basin supported the Bronze Age Bactria&ndash;Margiana Archaeological Complex, often called the Oxus civilization: walled towns with monumental mudbrick architecture, most famously excavated at Gonur Tepe, flourished roughly 2300&ndash;1700 BCE and traded tin, lapis lazuli, and other goods along routes reaching Mesopotamia and the Indus Valley. No king list or named ruler survives, and no flag or comparable territorial symbol is documented, or plausible, from this pre-literate Bronze Age culture." },
     { year:"antiquity", name:"Ancient Sogdiana and Bactria", t:{ tj:IC.antiquity }, flagKeys:{ tj:"antiquity" },
       story:"Tajikistan's Persian and Iranian language and culture trace to this ancient span: Achaemenid Persian rule, Alexander the Great's conquest and the Greco-Bactrian successor states, the Kushan Empire, and Sasanian-era Persian influence, all across the Sogdian and Bactrian lands before the early Islamic conquest. No securely documented flag survives from this span &mdash; shown honestly blank rather than invented." },

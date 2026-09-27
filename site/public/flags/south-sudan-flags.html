@@ -249,6 +249,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -536,13 +564,13 @@
   var ISNAP = [
     { year:"before c. 1821", name:"Stateless Nilotic peoples of the upper Nile", fill:IC.fragmented, flagKey:"stateless",
       story:"Dinka, Nuer, Shilluk, and other Nilotic peoples govern themselves through kinship and cattle-based clan structures across the upper Nile, with no overarching state and no flag of any kind." },
-    { year:"c. 1821&ndash;1899", name:"Ottoman-Egyptian expansion &amp; the Mahdist State", fill:IC.fragmented, flagKey:"mahdist",
+    { year:"c. 1821–1899", name:"Ottoman-Egyptian expansion & the Mahdist State", fill:IC.fragmented, flagKey:"mahdist",
       story:"Ottoman-Egyptian forces push slaving and administrative expeditions south from 1821 onward, followed from 1885 by the Mahdist State's own claim over the wider Sudan &mdash; neither power ever fully pacifies this southern territory." },
-    { year:"1899&ndash;1956", name:"Anglo-Egyptian Sudan", fill:IC.colonial, flagKey:"angloegypt",
+    { year:"1899–1956", name:"Anglo-Egyptian Sudan", fill:IC.colonial, flagKey:"angloegypt",
       story:"Britain and Egypt jointly govern Sudan as a condominium from 1899, but administer the south separately under \"Southern Policy,\" discouraging Arabic and Islam and orienting the region toward British East Africa &mdash; a divergence that outlives colonial rule itself." },
-    { year:"1956&ndash;2011", name:"South within independent Sudan (two civil wars)", fill:IC.civilwar, flagKey:"civilwar",
+    { year:"1956–2011", name:"South within independent Sudan (two civil wars)", fill:IC.civilwar, flagKey:"civilwar",
       story:"Independence in 1956 hands power in Khartoum to the north with little southern representation; the First (1955&ndash;72) and Second (1983&ndash;2005) Sudanese Civil Wars follow, ending in the 2005 Comprehensive Peace Agreement's promise of a southern independence referendum." },
-    { year:"9 July 2011&ndash;present", name:"Republic of South Sudan", fill:IC.sovereign, flagKey:"republic",
+    { year:"9 July 2011–present", name:"Republic of South Sudan", fill:IC.sovereign, flagKey:"republic",
       story:"98.83% of southern voters back independence in the January 2011 referendum; South Sudan becomes the world's newest sovereign state on 9 July 2011, this territory governed as its own republic for the first time." }
   ];
 

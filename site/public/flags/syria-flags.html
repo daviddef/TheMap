@@ -249,6 +249,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -272,7 +300,7 @@
     <div class="imap-frame">
       <div class="imap-controls">
         <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
-        <span class="imap-year" id="iYearTag">antiquity&ndash;636</span>
+        <span class="imap-year" id="iYearTag">antiquity–636</span>
         <input type="range" id="iSlider" min="0" max="12" step="1" value="0" aria-label="Select era">
       </div>
       <svg id="imap-svg" viewBox="0 0 380 300" xmlns="http://www.w3.org/2000/svg">
@@ -295,7 +323,7 @@
         </g>
       </svg>
       <div class="imap-head">
-        <div class="imap-name" id="iEraName">Ancient &amp; Byzantine Syria</div>
+        <div class="imap-name" id="iEraName">Ancient & Byzantine Syria</div>
         <div class="imap-owners" id="iEraOwners"></div>
       </div>
       <div class="iflags-row" id="iFlagsRow"></div>
@@ -810,35 +838,35 @@
   }
 
   var ISNAP = [
-    Object.assign({ year:"antiquity&ndash;636", name:"Ancient &amp; Byzantine Syria",
+    Object.assign({ year:"antiquity–636", name:"Ancient & Byzantine Syria",
       story:"Damascus and Aleppo pass through Aramean, Assyrian, Persian, Seleucid, Roman, and Byzantine hands over millennia &mdash; no single flag survives from any pre-Islamic era on this territory." }, iUniform(IC.none, "ancient")),
-    Object.assign({ year:"636&ndash;750", name:"Umayyad Caliphate (Damascus as imperial capital)",
+    Object.assign({ year:"636–750", name:"Umayyad Caliphate (Damascus as imperial capital)",
       story:"Muslim armies take Damascus in 634&ndash;36; the Umayyad dynasty makes it the capital of an empire stretching from Iberia to Central Asia, flying a plain white banner as its dynastic color." }, iUniform(IC.caliphate, "umayyad")),
-    Object.assign({ year:"750&ndash;1174", name:"Abbasid suzerainty and local dynasties",
+    Object.assign({ year:"750–1174", name:"Abbasid suzerainty and local dynasties",
       story:"The Abbasid revolution moves the caliphate's capital to Baghdad in 750; Syria becomes a contested province under shifting local dynasties, nominally loyal to a black-bannered Abbasid caliph." }, iUniform(IC.caliphate, "abbasid")),
-    Object.assign({ year:"1174&ndash;1260", name:"Zengid &amp; Ayyubid Damascus",
+    Object.assign({ year:"1174–1260", name:"Zengid & Ayyubid Damascus",
       story:"Saladin unites Damascus under Ayyubid rule in 1174, launching the campaigns that retake Jerusalem from the Crusaders in 1187; the dynasty rules Syria and Egypt together until the Mongol invasion and Mamluk takeover." }, iUniform(IC.sultanate1, "zengidayyubid")),
-    Object.assign({ year:"1260&ndash;1517", name:"Mamluk Sultanate",
+    Object.assign({ year:"1260–1517", name:"Mamluk Sultanate",
       story:"Mamluk sultans ruling from Cairo halt the Mongol advance at Ain Jalut in 1260 and govern Syria as a frontier province for over two and a half centuries, until Ottoman conquest." }, iUniform(IC.sultanate2, "mamluk")),
-    Object.assign({ year:"1517&ndash;1918", name:"Ottoman Empire (Damascus and Aleppo eyalets)",
+    Object.assign({ year:"1517–1918", name:"Ottoman Empire (Damascus and Aleppo eyalets)",
       story:"Sultan Selim I conquers Syria in 1516&ndash;17; the region is governed as Ottoman provinces for exactly four centuries, under the standard red Ottoman banner with crescent and star, until the empire's WWI collapse." }, iUniform(IC.ottoman, "ottoman")),
-    { year:"1920&ndash;1930", name:"French Mandate &mdash; fragmented into separate states",
+    { year:"1920–1930", name:"French Mandate — fragmented into separate states",
       t:{ coast:IC.alawite, druze:IC.jaldruze, interior:IC.mandate },
       flagKeys:{ coast:"ancient", druze:"ancient", interior:"frenchmandate" },
       names:{ coast:"Alawite State (Mandate substate)", druze:"Jabal Druze State (Mandate substate)", interior:"French Mandate (Damascus &amp; Aleppo)" },
       story:"The League of Nations grants France a Mandate over Syria in 1920. True to this map's own rule box, France genuinely fragments the territory for part of this period: Damascus and Aleppo run together as the interior administration, while the Alawite coast around Latakia and Jabal Druze around As-Suwayda are governed as their own separate French-administered statelets &mdash; a real internal split, now traced rather than only narrated in prose. No specific substate flag is documented on this page, so both are shown honestly blank rather than invented." },
-    { year:"1930&ndash;1946", name:"French Mandate &mdash; recentralized",
+    { year:"1930–1946", name:"French Mandate — recentralized",
       t:{ coast:IC.mandate, druze:IC.mandate, interior:IC.mandate }, flagKeys:{ coast:"frenchmandate", druze:"frenchmandate", interior:"frenchmandate" },
       story:"The Mandate's institutions recentralize by 1930, folding the Alawite and Jabal Druze statelets and the Damascus/Aleppo interior back into one unified administration &mdash; the same institutions that become the fully sovereign Syrian Republic once French troops complete their withdrawal in 1946." },
-    Object.assign({ year:"1946&ndash;1958", name:"Syrian Republic (independence)",
+    Object.assign({ year:"1946–1958", name:"Syrian Republic (independence)",
       story:"French troops withdraw in April 1946, completing full independence; the new republic adopts a green-white-black tricolor with three red stars, tracing its lineage to the wider Arab Revolt flag." }, iUniform(IC.republic, "indep")),
-    Object.assign({ year:"1958&ndash;1961", name:"United Arab Republic (union with Egypt)",
+    Object.assign({ year:"1958–1961", name:"United Arab Republic (union with Egypt)",
       story:"Syria and Egypt merge into the United Arab Republic in 1958 under Gamal Abdel Nasser, adopting a shared red-white-black flag with two green stars; the union collapses in 1961 amid Syrian dissatisfaction with Egyptian dominance." }, iUniform(IC.union, "uar")),
-    Object.assign({ year:"1961&ndash;1980", name:"Syrian Arab Republic (post-union)",
+    Object.assign({ year:"1961–1980", name:"Syrian Arab Republic (post-union)",
       story:"Syria restores independent statehood in 1961 and readopts the pre-union green-white-black flag with three red stars, a design that alternates with the UAR-era flag depending on the government of the day through the 1960s and 70s." }, iUniform(IC.republic, "postunion")),
-    Object.assign({ year:"1980&ndash;2024", name:"Ba&#x27;athist Syrian Arab Republic",
+    Object.assign({ year:"1980–2024", name:"Ba&#x27;athist Syrian Arab Republic",
       story:"Hafez al-Assad's government readopts the red-white-black, two-green-star flag in 1980, a design his son Bashar al-Assad's government keeps until the regime's fall in December 2024, ending over four decades of Assad-family rule." }, iUniform(IC.baathist, "baathist")),
-    Object.assign({ year:"2024&ndash;present", name:"Transitional government",
+    Object.assign({ year:"2024–present", name:"Transitional government",
       story:"Rebel forces topple the Assad government in December 2024; the transitional administration restores the green-white-black, three-red-star independence-era flag as the country's new/old national symbol." }, iUniform(IC.transitional, "transitional"))
   ];
 

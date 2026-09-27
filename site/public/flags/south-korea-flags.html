@@ -249,6 +249,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -272,7 +300,7 @@
     <div class="imap-frame">
       <div class="imap-controls">
         <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
-        <span class="imap-year" id="iYearTag">c. 7th c. BCE&ndash;108 BCE</span>
+        <span class="imap-year" id="iYearTag">c. 7th c. BCE–108 BCE</span>
         <input type="range" id="iSlider" min="0" max="9" step="1" value="0" aria-label="Select era">
       </div>
       <svg id="imap-svg" viewBox="0 0 380 300" xmlns="http://www.w3.org/2000/svg">
@@ -680,25 +708,25 @@
   iLegendEl.innerHTML = '<span><span class="sw" style="background:' + IC.fragmented + '"></span>Fragmented / colonial / occupied</span><span><span class="sw" style="background:' + IC.kingdom + '"></span>Kingdom / empire</span><span><span class="sw" style="background:' + IC.sovereign + '"></span>Sovereign republic</span>';
 
   var ISNAP = [
-    { year:"trad. 2nd mill. BCE; hist. c. 7th c. BCE&ndash;108 BCE", name:"Gojoseon (\"Old Joseon\")", fill:IC.kingdom, flagKey:"gojoseon",
+    { year:"trad. 2nd mill. BCE; hist. c. 7th c. BCE–108 BCE", name:"Gojoseon (\"Old Joseon\")", fill:IC.kingdom, flagKey:"gojoseon",
       story:"Gojoseon is the earliest state Korean tradition and Chinese written sources agree existed on the peninsula and in southern Manchuria, though its exact founding date, extent, and institutions before its final centuries remain genuinely uncertain. Han China conquers its final, best-documented phase (Wiman Joseon) in 108 BCE; the power vacuum and Chinese commanderies that follow set the stage for the Three Kingdoms era. No flag survives or is plausibly attested for Gojoseon in any modern sense." },
-    { year:"c. 57 BCE&ndash;668 CE", name:"Three Kingdoms of Korea", fill:IC.fragmented, flagKey:"threekingdoms",
+    { year:"c. 57 BCE–668 CE", name:"Three Kingdoms of Korea", fill:IC.fragmented, flagKey:"threekingdoms",
       story:"Goguryeo, Baekje, and Silla compete for the peninsula for over six centuries &mdash; no single Korean government exists yet, so this map shows the whole later-unified extent as contested rather than held by one crown." },
-    { year:"676&ndash;935", name:"Unified Silla", fill:IC.kingdom, flagKey:"silla",
+    { year:"676–935", name:"Unified Silla", fill:IC.kingdom, flagKey:"silla",
       story:"Silla, allied with Tang China, defeats Baekje and Goguryeo and unifies most of the peninsula by 676 &mdash; the first time one Korean kingdom holds this much of the territory shown here." },
-    { year:"918&ndash;1392", name:"Goryeo Dynasty", fill:IC.kingdom, flagKey:"goryeo",
+    { year:"918–1392", name:"Goryeo Dynasty", fill:IC.kingdom, flagKey:"goryeo",
       story:"Wang Geon founds Goryeo in 918, the dynasty that gives Korea its Western name, ruling as a Buddhist kingdom that survives Khitan and Mongol invasions before falling to internal coup in 1392." },
-    { year:"1392&ndash;1883", name:"Joseon Dynasty (pre-flag era)", fill:IC.kingdom, flagKey:"joseon_pre",
+    { year:"1392–1883", name:"Joseon Dynasty (pre-flag era)", fill:IC.kingdom, flagKey:"joseon_pre",
       story:"General Yi Seong-gye founds the Joseon dynasty in 1392, adopting Confucianism as state orthodoxy; the dynasty rules for exactly five centuries before any national flag is formally adopted." },
-    { year:"1883&ndash;1897", name:"Joseon Dynasty (Taegukgi adopted)", fill:IC.kingdom, flagKey:"joseon_flag",
+    { year:"1883–1897", name:"Joseon Dynasty (Taegukgi adopted)", fill:IC.kingdom, flagKey:"joseon_flag",
       story:"The Taegukgi &mdash; the yin-yang taeguk over a white field &mdash; is formally adopted in 1883 as Joseon opens to foreign trade under mounting pressure from Japan, China, and Western powers." },
-    { year:"1897&ndash;1910", name:"Korean Empire", fill:IC.kingdom, flagKey:"empire",
+    { year:"1897–1910", name:"Korean Empire", fill:IC.kingdom, flagKey:"empire",
       story:"King Gojong proclaims the Korean Empire in 1897, asserting full sovereignty and equal imperial status with China and Japan &mdash; a proud but short-lived declaration, undone within thirteen years." },
-    { year:"1910&ndash;1945", name:"Japanese colonial rule", fill:IC.fragmented, flagKey:"japan",
+    { year:"1910–1945", name:"Japanese colonial rule", fill:IC.fragmented, flagKey:"japan",
       story:"Japan formally annexes Korea in 1910; the Taegukgi is banned and the Hinomaru flies instead for thirty-five years of colonial administration, forced labor, and cultural suppression." },
-    { year:"1945&ndash;1948", name:"US Army Military Government", fill:IC.fragmented, flagKey:"usamgik",
+    { year:"1945–1948", name:"US Army Military Government", fill:IC.fragmented, flagKey:"usamgik",
       story:"Japan's surrender in August 1945 splits the peninsula at the 38th parallel; the US Army administers the south while the Soviets occupy the north, each preparing separate governments." },
-    { year:"1948&ndash;present", name:"Republic of Korea", fill:IC.sovereign, flagKey:"rok",
+    { year:"1948–present", name:"Republic of Korea", fill:IC.sovereign, flagKey:"rok",
       story:"The Republic of Korea is proclaimed on 15 August 1948, adopting the restored Taegukgi with all four trigrams. The 1950&ndash;53 Korean War fails to reunify the peninsula; South Korea governs this territory, at this extent, ever since." }
   ];
 

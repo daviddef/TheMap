@@ -250,6 +250,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -273,7 +301,7 @@
     <div class="imap-frame">
       <div class="imap-controls">
         <button class="imap-play" id="iPlayBtn" type="button" aria-label="Play">&#9654;</button>
-        <span class="imap-year" id="iYearTag">c. 3300&ndash;1300 BCE</span>
+        <span class="imap-year" id="iYearTag">c. 3300–1300 BCE</span>
         <input type="range" id="iSlider" min="0" max="15" step="1" value="0" aria-label="Select era">
       </div>
       <svg id="imap-svg" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
@@ -1009,7 +1037,7 @@
   var ISNAP = [
     { year:"c. 3300–1300 BCE", name:"Indus Valley Civilization", t:{ in:IC.indus, ps:IC.indus }, flagKeys:{ in:"indus", ps:"indus" },
       story:"No flag, banner, or comparable state symbol is documented or can be attributed to the Indus Valley Civilization with any confidence; its undeciphered script and the absence of monumental royal imagery leave no basis for a reconstruction, so this era is shown honestly blank." },
-    { year:"c. 1300–322 BCE", name:"Vedic Period &amp; Mahajanapadas", t:{ in:IC.vedic, ps:IC.vedic }, flagKeys:{ in:"vedic", ps:"vedic" },
+    { year:"c. 1300–322 BCE", name:"Vedic Period & Mahajanapadas", t:{ in:IC.vedic, ps:IC.vedic }, flagKeys:{ in:"vedic", ps:"vedic" },
       story:"This long bridging span covers the transition from the late Indus Valley Civilization through the Vedic period into the sixteen Mahajanapadas, the regional kingdoms and oligarchic republics recorded by the 6th century BCE. No flag, royal or otherwise, is documented from this span &mdash; shown here honestly blank rather than inventing a symbol." },
     { year:"c. 322–185 BCE", name:"Maurya Empire", t:{ in:IC.maurya, ps:IC.maurya }, flagKeys:{ in:"maurya", ps:"maurya" },
       story:"Chandragupta Maurya unifies most of the subcontinent into a single empire beginning around 322 BCE; his grandson Ashoka's pillars, most famously the Lion Capital at Sarnath, carry a 24-spoke dharma wheel that the modern Indian flag's own chakra descends from. No cloth flag survives from this period &mdash; the emblem shown here reconstructs the pillar carving, not a documented banner." },
@@ -1023,7 +1051,7 @@
       story:"Qutb-ud-din Aibak establishes an independent sultanate at Delhi in 1206; five successive dynasties rule from Delhi over the next three centuries. No single sultanate flag survives with confidence across five different ruling dynasties &mdash; the crescent-and-banner motif shown here is an informed reconstruction, not a documented state flag." },
     { year:"1526–1707", name:"Mughal Empire (founding to peak)", t:{ in:IC.mughalpeak, ps:IC.mughalpeak }, flagKeys:{ in:"mughalpeak", ps:"mughalpeak" },
       story:"Babur founds the Mughal Empire with his 1526 victory at Panipat; his descendants expand it into one of the wealthiest and most powerful states in the early modern world. A green field with a gold sun or star-burst emblem is used across the dynasty's peak reigns as the closest thing to a consistent imperial banner in a period without one fixed national flag." },
-    { year:"1707–1857", name:"Mughal Decline &amp; British Ascendancy", t:{ in:IC.mughaldecline, ps:IC.mughaldecline }, flagKeys:{ in:"mughaldecline", ps:"mughaldecline" },
+    { year:"1707–1857", name:"Mughal Decline & British Ascendancy", t:{ in:IC.mughaldecline, ps:IC.mughaldecline }, flagKeys:{ in:"mughaldecline", ps:"mughaldecline" },
       story:"After Aurangzeb's death in 1707, the empire fragments under weak successors and regional revolts while the East India Company steadily converts commercial privilege into territorial control. The Mughal emperor remains the nominal sovereign for decades even as actual power drains away &mdash; shown here as the same green-and-gold imperial banner, faded, to signal a sovereign in name only." },
     { year:"1757–1858", name:"British East India Company Rule", t:{ in:IC.eic, ps:IC.eic }, flagKeys:{ in:"eic", ps:"eic" },
       story:"Robert Clive's victory at the Battle of Plassey in June 1757 gives the East India Company effective control of Bengal, and the Company steadily expands its administrative and military reach across the subcontinent over the following century, alongside &mdash; not instead of &mdash; the many princely rulers it left in place as tributaries. Its own ensign &mdash; alternating red and white stripes with the Union Jack in the canton &mdash; is flown on Company ships and forts until the 1857 rebellion ends Company rule entirely." },
@@ -1037,7 +1065,7 @@
       story:"In 1921, Pingali Venkayya presents Gandhi with a red-and-green flag representing India's two largest religious communities; Gandhi adds a white band for other communities and suggests the charkha at center as a unifying, secular emblem. The Congress does not yet adopt it officially, but it circulates widely as the movement's own banner through the 1920s, while the princely states continue under their own rulers regardless." },
     { year:"1931–1947", name:"Indian National Congress Tricolor", t:{ in:IC.inc, ps:IC.princely }, flagKeys:{ in:"inc", ps:"princely" },
       story:"At its August 1931 Karachi session, the Indian National Congress formally adopts a refined version of the 1921 flag: saffron replaces the earlier red, and the charkha is fixed in navy blue on the white band. This becomes the de facto flag of the independence movement for its final sixteen years, flown through the 1942 Quit India campaign &mdash; still alongside, not over, the princely states' own separate rule." },
-    { year:"1947–present", name:"Union &amp; Republic of India", t:{ in:IC.republic, ps:IC.republic }, flagKeys:{ in:"republic", ps:"republic" },
+    { year:"1947–present", name:"Union & Republic of India", t:{ in:IC.republic, ps:IC.republic }, flagKeys:{ in:"republic", ps:"republic" },
       story:"The Constituent Assembly adopts this tricolor on 22 July 1947, days before British India is partitioned into the independent dominions of India and Pakistan on 15 August 1947. Between 1947 and 1949 the princely states accede to the new Union one by one &mdash; Mewar's Sisodia rulers among them, per this page's own ruling-house tag &mdash; ending the 1858&ndash;1947 dual structure shown on this map and merging both patches into one country under the 24-spoke Ashoka Chakra tricolor, whose design has not changed since." }
   ];
 

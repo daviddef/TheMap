@@ -249,6 +249,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -629,7 +657,7 @@
       story:"Margaret I unites Denmark, Norway, and Sweden under one crown at Kalmar in June 1397. Iceland, already a Norwegian dependency since 1262, is carried into the union as part of Norway's own share &mdash; it never joins as a separate party, and everyday governance through a royal governor barely registers the change locally." },
     { year:"1523/1537", name:"Denmark–Norway, after Sweden's exit", t:{ is:IC.denmark_norway }, flagKeys:{ is:"dannebrog" },
       story:"Sweden breaks from the Kalmar Union in 1523; Denmark and Norway stay bound together in a narrower union, now led firmly from Copenhagen. Iceland simply continues under the same crown as before, only more centralized &mdash; the Reformation is imposed by 1550 and a harsh royal trade monopoly follows in 1602. The Dannebrog, already centuries old, is the only flag Iceland knows for the next three hundred years." },
-    { year:"1814", name:"Treaty of Kiel &mdash; Iceland stays Danish", t:{ is:IC.denmark }, flagKeys:{ is:"dannebrog" },
+    { year:"1814", name:"Treaty of Kiel — Iceland stays Danish", t:{ is:IC.denmark }, flagKeys:{ is:"dannebrog" },
       story:"Denmark, on the losing side of the Napoleonic Wars, is forced to cede Norway to Sweden &mdash; but negotiates hard to keep Iceland, the Faroe Islands, and Greenland explicitly carved out of the transfer. Iceland's centuries-old tie, which had technically run through the Norwegian crown, becomes a direct Danish possession. Icelandic nationalism, led by J&oacute;n Sigurðsson, grows through the century; home rule follows in 1904, and Iceland gets its own domestic flag &mdash; blue, white, and red &mdash; in 1915." },
     { year:"1918", name:"Kingdom of Iceland, personal union", t:{ is:IC.kingdom_union }, flagKeys:{ is:"iceland_modern" },
       story:"The Act of Union of 1 December 1918 recognizes Iceland as a fully sovereign state sharing only its monarch, King Christian X, with Denmark &mdash; modeled on the earlier Sweden-Norway union. The 1915 domestic flag becomes Iceland's full state and merchant flag for the first time, flown internationally at sea. The union carries a 25-year review clause, which Iceland exercises at the first opportunity." },

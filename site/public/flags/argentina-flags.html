@@ -249,6 +249,34 @@
    Scoped to tags that actually have a tip. */
 .tag:not([data-tip])::after,.tag:not([data-tip])::before,
 .tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
 </style>
 
 <div class="wrap">
@@ -612,11 +640,11 @@
   var ISNAP = [
     { year:"c. 1516", name:"Spanish colonial rule from Lima / earlier settlement", t:{ interior:IC.spanish, bsas:IC.spanish }, flagKeys:{ interior:"spanish", bsas:"spanish" },
       story:"Spanish colonization begins with Buenos Aires's first, short-lived 1536 founding and Asunci&oacute;n's lasting one in 1537; for over two centuries the territory is governed remotely from the Viceroyalty of Peru in distant Lima, a genuinely marginal corner of the Spanish American empire." },
-    { year:"1776", name:"Viceroyalty of the R&iacute;o de la Plata (Spanish colonial)", t:{ interior:IC.viceroyalty, bsas:IC.viceroyalty }, flagKeys:{ interior:"viceroyalty", bsas:"viceroyalty" },
+    { year:"1776", name:"Viceroyalty of the Río de la Plata (Spanish colonial)", t:{ interior:IC.viceroyalty, bsas:IC.viceroyalty }, flagKeys:{ interior:"viceroyalty", bsas:"viceroyalty" },
       story:"Madrid creates the new Viceroyalty of the R&iacute;o de la Plata in 1776, finally giving Buenos Aires its own vice-regal government &mdash; recognition of the port city's growing trade importance, and the administrative unit whose borders roughly define modern Argentina, Uruguay, Paraguay, and Bolivia together." },
     { year:"1810", name:"War of independence / United Provinces (revolutionary period)", t:{ interior:IC.revolution, bsas:IC.revolution }, flagKeys:{ interior:"revolution", bsas:"revolution" },
       story:"The 25 May 1810 Revoluci&oacute;n de Mayo replaces the Spanish viceroy with a locally elected junta; formal independence is declared on 9 July 1816 at the Congress of Tucum&aacute;n, though the wars against remaining Spanish royalist forces continue for years after." },
-    { year:"1816", name:"United Provinces of the R&iacute;o de la Plata (independence declared)", t:{ interior:IC.provinces, bsas:IC.provinces }, flagKeys:{ interior:"provinces", bsas:"provinces" },
+    { year:"1816", name:"United Provinces of the Río de la Plata (independence declared)", t:{ interior:IC.provinces, bsas:IC.provinces }, flagKeys:{ interior:"provinces", bsas:"provinces" },
       story:"The United Provinces spend over a decade without a permanent national government, riven by conflict between Unitarians (favoring a strong central state) and Federalists (favoring provincial autonomy) &mdash; a fight only nominally resolved, never fully, in this period." },
     { year:"1820s", name:"Civil war era / Argentine Confederation", t:{ interior:IC.confederation, bsas:IC.confederation }, flagKeys:{ interior:"confederation", bsas:"confederation" },
       story:"After 1820 the fragile national government collapses and the country splinters into loosely confederated provinces racked by recurring war between centralizing Unitarians and autonomy-minded Federalists. Juan Manuel de Rosas, governor of Buenos Aires province, dominates the era's federalist coalition from 1829 to 1852, controlling the confederation's foreign affairs without ever fully unifying it under a written constitution." },

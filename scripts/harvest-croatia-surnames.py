@@ -103,6 +103,26 @@ def opener():
     return op
 
 
+def decode_strict(blob):
+    """Decode the DZS response, failing loudly rather than replacing.
+
+    Nothing decoded here currently reaches a stored value — the surname
+    written to cache[] is always the query the atlas already attested, never
+    an echo parsed out of this HTML — so errors="replace" could not corrupt
+    hr.json the way it corrupted be.json. It is still the same smell
+    (RESEARCH-REPORT.md), and a decode failure should be visible rather than
+    silently smoothed over one byte at a time.
+    """
+    for enc in ("utf-8", "cp1252"):
+        try:
+            return blob.decode(enc)
+        except UnicodeDecodeError:
+            continue
+    raise SystemExit(
+        "DZS answered in an encoding that is neither UTF-8 nor CP1252 — "
+        "stopping rather than guessing at it")
+
+
 def hidden(body):
     return {k: html.unescape(v) for k, v in re.findall(
         r'<input type="hidden" name="(__[A-Z]+)" id="\1" value="([^"]*)"', body)}
@@ -124,7 +144,7 @@ def main():
 
     op = opener()
     try:
-        state = hidden(op.open(URL, timeout=30).read().decode("utf-8", "replace"))
+        state = hidden(decode_strict(op.open(URL, timeout=30).read()))
     except urllib.error.URLError as e:
         sys.exit(f"DZS did not answer at all: {e}")
 
@@ -135,7 +155,7 @@ def main():
             r = op.open(urllib.request.Request(
                 URL, urllib.parse.urlencode(form).encode(),
                 {"Content-Type": "application/x-www-form-urlencoded"}), timeout=30)
-            body = r.read().decode("utf-8", "replace")
+            body = decode_strict(r.read())
         except (urllib.error.URLError, OSError) as e:
             # One failure is not a verdict. Leave it out of the cache so the
             # next run asks again, rather than recording an absence the

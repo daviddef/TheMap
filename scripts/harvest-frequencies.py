@@ -215,6 +215,27 @@ SOURCES = {
 }
 
 
+def decode_strict(blob):
+    """Decode fetched bytes, failing loudly rather than replacing.
+
+    errors="replace" here would repeat the exact bug that put 4,836 U+FFFD
+    into data/frequencies/be.json and damaged 4,066 surnames in
+    data/surnames.json (see RESEARCH-REPORT.md) — this file's own Polish
+    register is at the same risk, since ą ć ę ł ń ó ś ź ż appear constantly
+    in Polish surnames. utf-8-sig is tried first because dane.gov.pl's CSVs
+    are documented as UTF-8; cp1252 is the fallback. If neither decodes
+    cleanly, stop rather than guess at the encoding.
+    """
+    for enc in ("utf-8-sig", "cp1252"):
+        try:
+            return blob.decode(enc)
+        except UnicodeDecodeError:
+            continue
+    raise SystemExit(
+        "this file decodes as neither UTF-8 nor CP1252 — "
+        "stopping rather than guessing at its encoding")
+
+
 def fetch(url, name):
     os.makedirs(CACHE, exist_ok=True)
     p = os.path.join(CACHE, name)
@@ -222,7 +243,7 @@ def fetch(url, name):
         return open(p, encoding="utf-8-sig").read()
     req = urllib.request.Request(url, headers={"User-Agent": UA})
     with urllib.request.urlopen(req, timeout=180) as r:
-        body = r.read().decode("utf-8-sig", "replace")
+        body = decode_strict(r.read())
     open(p, "w", encoding="utf-8").write(body)
     time.sleep(1)
     return body

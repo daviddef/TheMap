@@ -85,21 +85,27 @@ near a text read. Findings, worst first:
 
 | File | Line | What it decodes | Risk |
 |---|---|---|---|
-| `harvest-frequencies.py` | 225 | Poland's `dane.gov.pl` surname CSVs (`utf-8-sig`, `"replace"`) | **Real.** Polish surnames carry `ą ć ę ł ń ó ś ź ż` constantly; a wrong encoding here would silently mangle names the same way Belgium's did, and this file feeds directly into `data/frequencies/pl.json`. |
-| `harvest-croatia-surnames.py` | 127, 138 | The DZS "Names and surnames" ASP.NET form's HTML response (`utf-8`, `"replace"`) | **Real, smaller blast radius.** Croatian diacritics (`č ć dž đ š ž`) are exactly the kind of character U+FFFD would eat, but this harvester only asks about the ~466 surnames the atlas already attests, one at a time, so a bad decode would show up as a damaged *query* rather than a damaged *corpus* — still worth a strict/fallback decode. |
+| `harvest-frequencies.py` | 225 | Poland's `dane.gov.pl` surname CSVs (`utf-8-sig`, `"replace"`) | **Real, now fixed.** Polish surnames carry `ą ć ę ł ń ó ś ź ż` constantly; a wrong encoding here would have silently mangled names the same way Belgium's did. `pl.json` currently has zero U+FFFD, so this was a live risk, not live damage — the fetch now tries `utf-8-sig` then `cp1252` and raises rather than replacing. |
+| `harvest-croatia-surnames.py` | 127, 138 | The DZS "Names and surnames" ASP.NET form's HTML response (`utf-8`, `"replace"`) | **Fixed, smaller blast radius.** Croatian diacritics (`č ć dž đ š ž`) are exactly what U+FFFD would eat, but the surname written to `hr.json` is always the query the atlas already attested, never an echo parsed out of this HTML — a bad decode could only break the found/absent regex match, not corrupt a stored name. Same `utf-8`/`cp1252` fallback applied anyway, for consistency. |
 | `harvest-ireland-surnames.py` | 44 | CSO's VSA110 CSV (`utf-8-sig`, `"replace"`) | Low. Irish CSO surname data is effectively ASCII/Latin script with few diacritics, but the pattern is the same and costs nothing to fix. |
 | `sweep-surname-portals.py` | 65 | CKAN/Socrata catalogue JSON, used only to find dataset *titles* to investigate | Low — a discovery tool, not a final data writer; a mis-decoded title would at worst hide a lead, never corrupt a shipped surname. |
 | `survey-providers.py` | 153, 180 | `robots.txt` bodies and provider HTML pages, for the source survey | Low — same reasoning; this drives which sources get investigated, not what gets written to `data/`. |
 | `harvest-italy-surnames.py` | 166–174 | Municipal CSVs of unknown dialect | **Already correct** — this is the pattern the others should copy: tries `utf-8-sig`, `utf-8`, `cp1252`, `latin-1` in order, keeps the first clean decode, returns nothing rather than guessing if all four fail. It was the model for the Belgium fix above. |
 | `check-data.py`, `extract-flag-eras.py`, `extract-flag-index.py`, `audit-site.py` | various | Local, already-UTF-8 build output (rendered `.astro`/HTML) | Cosmetic. These read files this repository itself wrote as UTF-8; `errors="replace"` here can't corrupt sourced data, only mask a self-inflicted encoding bug in the site build. Not touched. |
 
-Per your instruction this was an audit, not a fix pass — I did not change
-`harvest-frequencies.py` or `harvest-croatia-surnames.py`. Poland is the one
-I'd fix first in a follow-up: same shape of bug as Belgium, same
-consequence, and it is currently unverified whether `pl.json` already has
-U+FFFD in it (I did not check contents, since fixing without a way to
-re-verify against the source seemed like the wrong use of the time you'd
-already scoped to code-only).
+**Update:** checked every file in `data/frequencies/` for existing U+FFFD
+damage — Belgium is the only one hit (4,836); Poland, Croatia, and the rest
+are clean (0 each). So the audit found no second live corruption, only a
+second *risk*. Since the fix itself needs no network — it's the same
+`decode_strict`-shaped code change as Belgium's, applied without touching
+any data file — I made it for both: `harvest-frequencies.py`'s Poland fetch
+now tries `utf-8-sig` then `cp1252` before raising, and
+`harvest-croatia-surnames.py`'s two response decodes do the same (lower
+stakes there — the surname written to `hr.json` is always the query the
+atlas already attested, never an echo parsed out of the DZS HTML, so a bad
+decode there was already unable to corrupt a stored name, only to make the
+found/absent regex match fail loudly). Neither has been re-run against its
+source, for the same reason as Belgium.
 
 ## Everything else in the brief (Parts 1–3)
 
@@ -140,29 +146,31 @@ fact. That's the failure mode the brief is written to prevent.
   contain) — this is documented as a *guess*, not a confirmed fact, in both
   the script's docstring and this report, because it can't be checked
   against the real file from here.
-- Left `data/frequencies/pl.json` and `harvest-frequencies.py` /
-  `harvest-croatia-surnames.py` unchanged, since you scoped this session to
-  the Belgium fix plus an audit, and I'd rather flag Poland precisely than
-  fix it speculatively without a way to verify.
+- Initially left `harvest-frequencies.py` (Poland) and
+  `harvest-croatia-surnames.py` unchanged, on the reasoning that fixing them
+  without a way to verify against the source was the wrong use of code-only
+  time. Revisited once it was clear the fix needs no network at all and
+  Poland's live data had no existing damage to weigh against: applied the
+  same `decode_strict` fallback to both.
 
 ## What I'd do next with another day (and working egress)
 
-1. Widen this environment's allowlist to the hosts above, or run the
+1. Widen this environment's allowlist to the hosts named above, or run the
    equivalent from a session that already has them.
 2. Re-run `harvest-belgium-surnames.py`, confirm zero U+FFFD in both
    `be.json` and the rebuilt `surnames.json`, and note whether the CP1252
    fallback actually fired (if UTF-8 decoded cleanly, the whole guess about
    CP1252 was moot and can be removed from the docstring's uncertainty).
-2. Apply the same `decode_strict`-style fallback chain to
-   `harvest-frequencies.py`'s Poland fetch and `harvest-croatia-surnames.py`,
-   and check `pl.json` for existing U+FFFD damage.
-3. Start Part 1 with the London/Edinburgh/Belfast Gazette API (it has the
+3. Re-run the Poland and Croatia harvesters once egress allows it, as a
+   sanity check that the new strict decode doesn't reject data that was
+   fine all along.
+4. Start Part 1 with the London/Edinburgh/Belfast Gazette API (it has the
    deepest open history, 1665 on) and Trove's gazette holdings (the API key
    is already in the repo).
-4. Start Part 2 with Portugal and Germany — both publish open surname
+5. Start Part 2 with Portugal and Germany — both publish open surname
    registers and neither is in `_refused.json` yet, so there's no prior
    attempt to reconcile.
-5. Start Part 3 by pulling Wikidata family-name items (`Q101352`) for the
+6. Start Part 3 by pulling Wikidata family-name items (`Q101352`) for the
    surnames already in `data/surnames.json` with the highest
    `withRegisterCount`, since that's the intersection the brief explicitly
    prioritises.

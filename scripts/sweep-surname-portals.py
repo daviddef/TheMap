@@ -20,6 +20,7 @@ claim than «this country does not publish surnames», and the output says
 so in those words.
 """
 import json, sys, time, urllib.parse, urllib.request
+import textsource            # strict decoding; see scripts/textsource.py
 
 UA = ("RecordAtlas/1.0 (+https://daviddef.github.io/TheMap; "
       "a map of genealogical sources)")
@@ -62,7 +63,7 @@ def get(url, timeout=45):
     req = urllib.request.Request(url, headers={"User-Agent": UA,
                                                "Accept": "application/json"})
     with urllib.request.urlopen(req, timeout=timeout) as r:
-        return json.loads(r.read().decode("utf-8", "replace"))
+        return json.loads(textsource.decode(r.read(), what="the portal API")[0])
 
 
 def titles(payload):

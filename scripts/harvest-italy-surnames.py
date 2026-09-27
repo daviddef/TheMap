@@ -32,6 +32,7 @@ is the part with something to say.
 """
 import collections, csv, io, json, os, re, sys, time
 import urllib.parse, urllib.request, urllib.error
+import textsource            # strict decoding; see scripts/textsource.py
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
@@ -164,14 +165,22 @@ def catalogue():
 
 
 def read_csv(blob):
-    """(surname, count) pairs from a municipal CSV of unknown dialect."""
-    for enc in ("utf-8-sig", "utf-8", "cp1252", "latin-1"):
-        try:
-            text = blob.decode(enc)
-            break
-        except UnicodeDecodeError:
-            continue
-    else:
+    """(surname, count) pairs from a municipal CSV of unknown dialect.
+
+    This used to end its encoding list on latin-1, which cannot fail: it maps
+    all 256 bytes to something, so it was guaranteed to «succeed» on anything
+    the first three refused, and a comune whose file was in neither UTF-8 nor
+    CP1252 would quietly yield mojibake surnames instead of an error. Dropping
+    it costs almost nothing — CP1252 is a superset of latin-1 across the
+    printable range — and turns that silent success into a skipped file, which
+    is what the caller already handles.
+    """
+    try:
+        text, _ = textsource.decode(blob, ("utf-8-sig", "utf-8", "cp1252"),
+                                    what="a comune CSV")
+    except ValueError:
+        # Unreadable, or already damaged upstream. The caller drops the comune
+        # rather than shipping guessed characters into it.json.
         return [], None
     sample = text[:4000]
     try:

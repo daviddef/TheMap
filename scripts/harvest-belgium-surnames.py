@@ -30,8 +30,9 @@ grain, for the map to use when there is somewhere to put it.
 
 Statbel's open data are CC BY 4.0.
 """
-import collections, io, json, os, re, time, urllib.parse
+import collections, json, os, re, time, urllib.parse
 import urllib.request, zipfile
+import textsource            # strict decoding; see scripts/textsource.py
 
 ZIP = ("https://statbel.fgov.be/sites/default/files/files/opendata/"
        "Familienamen/TA_POP_LST_2026.zip")
@@ -101,37 +102,58 @@ def fetch():
     return CACHE
 
 
+def decode_member(z, member):
+    """Statbel ship this file as CP1252. It is not UTF-8 and never was.
+
+    It used to be read as UTF-8 with errors="replace", which does not fail on
+    the wrong encoding — it quietly substitutes U+FFFD and carries on. One
+    decoding fault therefore became 4,836 replacement characters in be.json
+    and 4,066 surnames whose OWN NAME was damaged on the live site:
+    «Abandonn?» for Abandonné, «Aba?ch» for Abaïch, «Abel?» for Abelé.
+    Belgium has a large Moroccan-descended population and those are exactly
+    the names carrying the accents that broke.
+
+    Verified against the real file: UTF-8 fails strictly at byte 5115 on an
+    invalid continuation byte; CP1252 decodes all 18.9MB with zero U+FFFD.
+
+    The reasoning, and the reason latin-1 is not in the list, live in
+    scripts/textsource.py — every harvester that reads an outside publisher
+    goes through it now.
+    """
+    return textsource.decode(z.open(member).read(), what=member)
+
+
 def main():
     z = zipfile.ZipFile(fetch())
     member = z.namelist()[0]
+    text, used = decode_member(z, member)
+    print("  %s decoded as %s" % (member, used))
 
     national = collections.Counter()
     by_muni = collections.defaultdict(list)
     names = {}
     rows = skipped = 0
 
-    with z.open(member) as f:
-        for i, raw in enumerate(io.TextIOWrapper(f, encoding="utf-8",
-                                                 errors="replace")):
-            if i == 0:
-                continue                      # CD_REFNIS|nl|fr|name|freq
-            p = raw.rstrip("\n").split("|")
-            if len(p) < 5:
-                skipped += 1
-                continue
-            nis, nl, fr, name, freq = p[0], p[1], p[2], p[3].strip(), p[4]
-            try:
-                c = int(freq)
-            except ValueError:
-                skipped += 1
-                continue
-            if not name:
-                skipped += 1
-                continue
-            rows += 1
-            national[name] += c
-            names[nis] = {"nl": nl, "fr": fr}
-            by_muni[nis].append([name, c])
+    for i, raw in enumerate(text.split("\n")):
+        if i == 0:
+            continue                      # CD_REFNIS|nl|fr|name|freq
+        p = raw.rstrip("\n").split("|")
+        if len(p) < 5:
+            skipped += 1
+            continue
+        nis, nl, fr, name, freq = p[0], p[1], p[2], p[3].strip(), p[4]
+        try:
+            c = int(freq)
+        except ValueError:
+            skipped += 1
+            continue
+        if not name:
+            skipped += 1
+            continue
+        rows += 1
+        national[name] += c
+        names[nis] = {"nl": nl, "fr": fr}
+        by_muni[nis].append([name, c])
 
     if not rows:
         raise SystemExit(f"{member} parsed to nothing — the layout has changed")

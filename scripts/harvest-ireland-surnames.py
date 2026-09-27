@@ -28,6 +28,7 @@ died out in Ireland in 1900 is not in here, and its absence means
 nothing at all.
 """
 import csv, io, json, os, time, urllib.request
+import textsource            # strict decoding; see scripts/textsource.py
 
 URL = ("https://ws.cso.ie/public/api.restful/PxStat.Data.Cube_API."
        "ReadDataset/VSA110/CSV/1.0/en")
@@ -41,7 +42,8 @@ COUNT_STAT = "VSA110C02"          # C01 is the rank, C02 the number
 def main():
     req = urllib.request.Request(URL, headers={"User-Agent": UA})
     with urllib.request.urlopen(req, timeout=180) as r:
-        raw = r.read().decode("utf-8-sig", "replace")
+        raw = textsource.decode(r.read(), ("utf-8-sig", "cp1252"),
+                                what="the CSO table")[0]
 
     rows = list(csv.DictReader(io.StringIO(raw)))
     if not rows or "Surnames" not in rows[0]:

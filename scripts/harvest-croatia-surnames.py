@@ -36,6 +36,7 @@ the exodus written into a census.
 """
 import html, http.cookiejar, json, os, re, sys, time
 import urllib.error, urllib.parse, urllib.request
+import textsource            # strict decoding; see scripts/textsource.py
 
 URL = "https://web.dzs.hr/app/imena/default_en.aspx"
 UA = ("RecordAtlas/1.0 (+https://daviddef.github.io/TheMap; "
@@ -124,7 +125,8 @@ def main():
 
     op = opener()
     try:
-        state = hidden(op.open(URL, timeout=30).read().decode("utf-8", "replace"))
+        state = hidden(textsource.decode(op.open(URL, timeout=30).read(),
+                                         what="the DZS form")[0])
     except urllib.error.URLError as e:
         sys.exit(f"DZS did not answer at all: {e}")
 
@@ -135,7 +137,7 @@ def main():
             r = op.open(urllib.request.Request(
                 URL, urllib.parse.urlencode(form).encode(),
                 {"Content-Type": "application/x-www-form-urlencoded"}), timeout=30)
-            body = r.read().decode("utf-8", "replace")
+            body = textsource.decode(r.read(), what="the DZS response")[0]
         except (urllib.error.URLError, OSError) as e:
             # One failure is not a verdict. Leave it out of the cache so the
             # next run asks again, rather than recording an absence the

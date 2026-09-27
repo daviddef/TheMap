@@ -25,6 +25,7 @@ surname under Polish grammar. That last is a variant link nobody has to curate.
     python3 scripts/harvest-frequencies.py --country pl
 """
 import argparse, csv, io, json, os, re, sys, time, urllib.parse, urllib.request
+import textsource            # strict decoding; see scripts/textsource.py
 
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(_ROOT)
@@ -222,7 +223,8 @@ def fetch(url, name):
         return open(p, encoding="utf-8-sig").read()
     req = urllib.request.Request(url, headers={"User-Agent": UA})
     with urllib.request.urlopen(req, timeout=180) as r:
-        body = r.read().decode("utf-8-sig", "replace")
+        body = textsource.decode(r.read(), ("utf-8-sig", "cp1252"),
+                                 what=url)[0]
     open(p, "w", encoding="utf-8").write(body)
     time.sleep(1)
     return body

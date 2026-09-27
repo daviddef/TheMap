@@ -1,0 +1,132 @@
+---
+/* THE PAGE THE FRONT PAGE KEPT FOLDING AWAY.
+ *
+ * Two panels of prose — why the atlas is a map, and what it does not know —
+ * sat under the map behind a <details>. Folding them was the right call for
+ * the front page and the wrong home for the text: a reader who has already
+ * got the point scrolled past it every visit, and a reader who arrived with a
+ * surname met an essay before they met an answer.
+ *
+ * So the text lives here, on a page somebody reaches by asking for help, and
+ * it is allowed to be longer than a fold. The front page keeps the map.
+ *
+ * WHILE MOVING IT, TWO THINGS WERE WRONG AND ARE FIXED:
+ *   · «Online is four different things» — it is eight, and the eighth is
+ *     «nobody has looked», which is nine dots in ten.
+ *   · The counts printed as 21473 and 2547650, unseparated, because the front
+ *     page interpolated them raw.
+ * Every number here is counted at build time.
+ */
+import Base from "../layouts/Base.astro";
+import { u } from "../lib/url.js";
+import { atlas as idx } from "../lib/atlas.js";
+import regions from "../../public/regions.json";
+import provs from "../../public/providers.json";
+
+const places = idx.places.length;
+const volumes = idx.places.reduce((a, p) => a + (p.v || 0), 0);
+const archives = provs.providers.filter((p) => p.at);
+const archiveCountries = new Set(archives.map((p) => p.at.place.split(", ").pop())).size;
+
+const RANK = idx.rank || [];
+const SURVEYED = new Set(["free", "account", "index", "mixed", "paid", "catalogue", "onsite"]);
+const accessOf = (p) => (typeof p.a === "number" && RANK[p.a]) || "unsurveyed";
+const surveyed = idx.places.filter((p) => SURVEYED.has(accessOf(p))).length;
+const unsurveyedPct = Math.round((1 - surveyed / places) * 1000) / 10;
+
+/* The access vocabulary, read from the index rather than restated, so this
+   page cannot drift from the colours the map actually draws. */
+const access = idx.access || {};
+---
+<Base
+  title="Help"
+  eyebrow="How to search it · what the colours mean · what to do when it finds nothing"
+  dek="Most of what a reader needs is one of three things: how to find a place whose name has changed, what the colour of a dot is telling them, and what to do when the answer is nothing.">
+
+  <div class="prose" style="max-width:74ch">
+    <h3>Three ways to search</h3>
+    <p><b>A surname.</b> Type it and the map lights the countries a register or
+    an archive attests it in. It will not tell you your family lived there — it
+    tells you the name is recorded there, which is where to start.</p>
+    <p><b>A village, by any name it has ever had.</b> This is the one most
+    people need and do not know to ask for. Type <em>Gallignana</em> and the map
+    goes to Gračišće; <em>Breslau</em> answers Wrocław, <em>Czernowitz</em>
+    answers Chernivtsi, <em>Memel</em> answers Klaipėda. It works worldwide, not
+    only where this atlas is deep.</p>
+    <p><b>A name and a place together.</b> <em>Blazevic Gracisce</em> narrows to
+    that name on that ground.</p>
+    <p><b>Or just click a country.</b> Every country on earth answers with
+    something — whose national archive, what research guide exists — even where
+    this atlas holds nothing below the country itself.</p>
+
+    <h3>Why a map, and not another list</h3>
+    <p><b>Three things stand between a researcher and a record, and all three
+    are geographic.</b></p>
+    <p><b>The name changed.</b> You cannot search for a place whose name you do
+    not know. That is why the find box matches every name a place has ever had
+    rather than the one it happens to carry today.</p>
+    <p><b>The jurisdiction changed.</b> An 1863 baptism from a Croatian village
+    sits in a Croatian archive. A 1930 one, from the same village, is filed
+    under <em>Italy</em> — because between the wars that village was Italian.
+    Searching the Croatian collection alone finds nothing, and <b>nothing is not
+    the same as not existing</b>. Set the year on the map and it tells you which
+    it is; <a href={u("/jurisdictions/")}>the table behind that</a> is the part
+    of this atlas nobody else publishes.</p>
+    <p><b>"Online" is eight different things</b>, not one, and the difference is
+    the whole cost of an evening. Here it is the colour of the dot:</p>
+    <ul class="akey">
+      {Object.entries(access).map(([k, v]) => (
+        <li><b>{k}</b> — {v}</li>
+      ))}
+    </ul>
+    <p>The last of those is the commonest colour on this map, and the next
+    section is about that.</p>
+
+    <h3>When it finds nothing</h3>
+    <p><b>A grey dot means nobody has surveyed it. It does not mean nothing is
+    there.</b> That distinction is the difference between a map and a claim, and
+    keeping it is worth more than coverage — a map that quietly implies
+    completeness sends people home when they should keep looking.</p>
+    <p>So if a place is grey, the useful next steps are, in order: set the year
+    and see <b>whose archive held that ground</b>, because the records may be
+    filed under a country you were not searching; open <a href={u("/providers/")}>the
+    source directory</a> for that country and write to the archive named there;
+    and check whether the ground was covered by a newspaper rather than a
+    register — for some countries, Australia above all, the newspaper <em>is</em>
+    the record.</p>
+    <p>If you find the answer, <a href={u("/add/")}>send it back</a>. A grey dot
+    you have personally turned into an answer is the single most valuable thing
+    a stranger can give this map.</p>
+
+    <h3>What this map does not know yet</h3>
+    <p>It is honest about being early, and the layers are at different stages.
+    <b>{unsurveyedPct}% of the ground here has never been surveyed</b> — that is
+    the number every other one refines.</p>
+    <p><b>The archives layer is worldwide</b> — {archives.length} institutions
+    across {archiveCountries} countries, each saying what it holds and what it
+    costs to look. <b>The shelf is deep in one corner</b>: {places.toLocaleString()}
+    places and {volumes.toLocaleString()} volumes, with Croatia, Istria and
+    Carnia far ahead of everywhere else. <b>The jurisdiction layer covers
+    {regions.regions.length} pieces of ground</b>, not the planet —
+    {" "}{regions.regions.slice(0, 8).map((r) => r.label.split(" — ")[0]).join(", ")}
+    {regions.regions.length > 8 ? ` and ${regions.regions.length - 8} more` : ""}.
+    A place outside them says so in its own panel rather than guessing, because
+    a confident wrong answer about which archive to write to costs somebody a
+    month.</p>
+
+    <h3>Still stuck?</h3>
+    <p><a href={u("/start/")}>Start here</a> walks the first search end to end.
+    <a href={u("/about/")}>About</a> says what this atlas is and where it came
+    from, and <a href={u("/coverage/")}>what's missing</a> measures the gaps
+    country by country rather than asserting coverage.</p>
+  </div>
+</Base>
+
+<style>
+  .akey { list-style: none; padding: 0; margin: 10px 0 16px; display: grid;
+          gap: 4px; }
+  .akey li { font-family: var(--sans); font-size: 13px; color: var(--ink-2);
+             line-height: 1.55; }
+  .akey b { font-family: var(--mono); font-size: 11.5px; color: var(--ink);
+            text-transform: uppercase; letter-spacing: .04em; }
+</style>

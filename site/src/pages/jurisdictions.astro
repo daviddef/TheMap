@@ -8,6 +8,27 @@ const PROV = Object.fromEntries(provs.providers.map(p => [p.id, p]));
 const eras = regions.regions.reduce((a, r) => a + r.eras.length, 0);
 /* A region's own centre, so a map link lands on the ground being described
    rather than wherever the reader happened to leave the map. */
+/* WHOSE FLAG, BESIDE WHOSE ARCHIVE. The 245 flag pages merged in today answer
+   the other half of this table's question: this page says which archive a
+   regime's paper went to, those pages say what that regime looked like and
+   when it changed. They are keyed on the modern country, which is a coarser
+   grain than a record region — Istria is not Croatia for most of this table —
+   so the link is offered as context rather than as an equivalence, and only
+   where a page for that country exists. */
+const FLAG_SLUG = {
+  AR: "argentina", AT: "austria", AU: "australia", BA: "bosnia-and-herzegovina",
+  BE: "belgium", BY: "belarus", CA: "canada", CZ: "czechia", DE: "germany",
+  DK: "denmark", EE: "estonia", FI: "finland", FR: "france",
+  GB: "united-kingdom", HR: "croatia", HU: "hungary", IE: "ireland",
+  IT: "italy", LT: "lithuania", LV: "latvia", NL: "netherlands", NO: "norway",
+  PL: "poland", PT: "portugal", RO: "romania", RS: "serbia", RU: "russia",
+  SE: "sweden", SI: "slovenia", SK: "slovakia", UA: "ukraine",
+  US: "united-states", ZA: "south-africa",
+};
+const flagsFor = (r) => (r.countries || [])
+  .filter((cc) => FLAG_SLUG[cc])
+  .map((cc) => ({ cc, href: `/flags/${FLAG_SLUG[cc]}-flags.html` }));
+
 const mid = (r) => [
   (Math.min(...r.ring.map(p => p[0])) + Math.max(...r.ring.map(p => p[0]))) / 2,
   (Math.min(...r.ring.map(p => p[1])) + Math.max(...r.ring.map(p => p[1]))) / 2,
@@ -28,6 +49,12 @@ const mid = (r) => [
       does not exist.</p>
       <p>That is the column this table adds. <a href={u("/")}>Set a year on the map</a> and it
       appears in every panel.</p>
+      <p><b>And now the other half of the same question.</b> This table knows whose archive;
+      <a href={u("/flags/")}>the flag pages</a>, merged into this atlas today, know who was
+      governing and what they flew, for 210 countries. Each region below links to the flag
+      history of the countries it covers. Treat that link as context rather than as an
+      equivalence: a flag page is keyed on a modern country, and a record region usually is
+      not one — Istria has been under seven regimes and is not the same shape as Croatia.</p>
     </div>
   </div>
 
@@ -36,6 +63,13 @@ const mid = (r) => [
   {regions.regions.map(r => (
     <section style="margin-top:38px">
       <h2><a href={u(`/region/${r.id}/`)}>{r.label}</a></h2>
+      {flagsFor(r).length > 0 && (
+        <p class="cap" style="margin:2px 0 8px">Flags flown over this ground:
+          {flagsFor(r).map((f, i) => (
+            <>{i > 0 && " · "} <a href={u(f.href)}>{f.cc}</a></>
+          ))}
+        </p>
+      )}
       <p class="cap" style="margin-top:2px">{r.sub}</p>
       <table style="margin-top:12px">
         <thead><tr>

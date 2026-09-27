@@ -1378,6 +1378,23 @@ def main():
         abytes += len(blob.encode())
         open(os.path.join(ad, k + ".json"), "w").write(blob)
 
+    # ---- the flag timelines, published so the map can search them ---------
+    # data/flag-eras.json is the source of truth, extracted once from the 245
+    # pages in site/public/flags/ and committed. It is COPIED here rather than
+    # regenerated, because regenerating on every build would put a parser for
+    # hand-written prose on the critical path of a forty-minute deploy — and
+    # because check-data.py already fails when the pages and the data disagree,
+    # which is the guarantee that matters.
+    try:
+        _fe = json.load(open("data/flag-eras.json"))
+        json.dump(_fe, open(os.path.join(OUT, "flag-eras.json"), "w"),
+                  ensure_ascii=False, separators=(",", ":"))
+        print(f"flag-eras         {_fe['counts']['eras']:,} eras over "
+              f"{_fe['counts']['pages']} pages, "
+              f"{_fe['counts']['withYears']:,} with a usable year")
+    except FileNotFoundError:
+        pass
+
     # ---- surnames, sharded like the gazetteer -----------------------------
     # Same trick and the same reason: a search corpus is fetched three letters
     # at a time and never rides in the index that draws the map.

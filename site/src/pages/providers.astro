@@ -13,11 +13,32 @@ const KIND = {
   "diocesan": "Church and diocesan archives",
   "volunteer": "Volunteer transcriptions and indexes",
   "library": "Libraries, newspapers and full-text",
+  "national-library": "National libraries",
+  "index": "Name indexes",
+  "catalogue": "Catalogues",
+  "statistics": "Statistical offices",
   "commercial": "Commercial subscriptions",
 };
 const order = ["aggregator", "national-archive", "regional-archive", "diocesan",
-               "volunteer", "library", "commercial"];
+               "volunteer", "library", "national-library", "index", "catalogue",
+               "statistics", "commercial"];
+
+/* A KIND THIS PAGE HAS NO HEADING FOR MUST NOT VANISH, and eight of them did.
+   `order` was a hand-written list and the render was `order.filter(...)`, so a
+   provider whose kind was missing from it — index, statistics, national-library,
+   catalogue — was silently dropped. Eight sources sat in the directory, counted
+   in its own total, and appeared nowhere on the page that exists to list them.
+   A directory that quietly omits its own entries is the exact failure this
+   project keeps finding elsewhere, so the fallback below is the fix that
+   matters more than the four labels added above: anything not in `order` is
+   rendered under its own raw kind rather than discarded. */
+const shown = new Set(order);
+const leftover = [...new Set(P.map((p) => p.kind).filter((k) => !shown.has(k)))].sort();
+const sections = [...order.filter((k) => byKind[k]), ...leftover];
+
 const free = P.filter(p => p.access === "free").length;
+const unsurveyed = P.filter(p => p.access === "unsurveyed").length;
+const triaged = P.filter(p => p.triage).length;
 ---
 <Base
   title="The sources"
@@ -33,9 +54,28 @@ const free = P.filter(p => p.access === "free").length;
     </ul>
   </div>
 
-  {order.filter(k => byKind[k]).map(k => (
+  {/* WHAT THE DIRECTORY IS, HONESTLY, before the tables imply otherwise.
+      A reader seeing 519 rows reasonably assumes 519 assessed sources. */}
+  <p class="cap" style="max-width:76ch;margin-top:18px">
+    <b>{unsurveyed} of these {P.length} have never been opened.</b> They are here because a
+    national register, an open dataset or a state's own list named them — which is worth
+    knowing, and is not the same as somebody having looked. {triaged} have now at least had
+    their door rattled: alive or dead, a page or a JavaScript application, open or refusing
+    robots. That turns a list of URLs into a queue somebody can work; it does not make any of
+    them a surveyed source, and the access class still reads <b>unsurveyed</b> until a person
+    has read the site and written down the sentence that settles it.
+  </p>
+  <p class="cap" style="max-width:76ch">
+    <b>Declining after looking is a result; declining without looking is a gap.</b> Sources
+    that refuse automated access are recorded as declined, with what was found, rather than
+    worked around — this project does not defeat a bot gate or send a user-agent it is not.
+    An archive that turns a robot away is stating its terms, and an atlas that asks archives
+    to trust it cannot be the thing that ignores them.
+  </p>
+
+  {sections.map(k => (
     <section style="margin-top:34px">
-      <h2>{KIND[k]}</h2>
+      <h2>{KIND[k] || k}</h2>
       <table>
         <thead><tr>
           <th>Provider</th><th>What it is</th><th class="m">Access</th><th class="m">Where</th><th class="m">Checked</th>

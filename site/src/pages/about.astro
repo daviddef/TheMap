@@ -1,4 +1,5 @@
 ---
+import fs from "node:fs";
 import Base from "../layouts/Base.astro";
 import { u } from "../lib/url.js";
 import { atlas as idx } from "../lib/atlas.js";
@@ -18,6 +19,31 @@ const walkedCC = new Set(full.places.filter((p) => p.via !== "geonames-admin"
                                       && (p.collections || []).length)
                                     .map((p) => p.country)).size;
 const regionList = regions.regions.map((r) => r.label).join(", ");
+
+/* The chapters this page had not caught up with, all counted the same way.
+   A story about an atlas is a claim about its contents, so the claims are
+   read out of the contents. */
+const eras = regions.regions.reduce((a, r) => a + r.eras.length, 0);
+
+/* THE DENOMINATOR, WHICH IS THE WHOLE POINT OF THE «what it does not know»
+   SECTION. `a` is an index into idx.rank; anything that is not one of the
+   seven surveyed classes is ground nobody has walked. */
+const RANK = idx.rank || [];
+const surveyedClasses = new Set(["free", "account", "index", "mixed", "paid",
+                                 "catalogue", "onsite"]);
+const accessOf = (p) => (typeof p.a === "number" && RANK[p.a]) || "unsurveyed";
+const surveyed = idx.places.filter((p) => surveyedClasses.has(accessOf(p))).length;
+const unsurveyedPct = Math.round((1 - surveyed / dots) * 1000) / 10;
+
+let trove = { counts: { titles: 0 } };
+try { trove = JSON.parse(fs.readFileSync("../data/trove-newspapers.json", "utf8")); }
+catch { /* the newspapers are optional; the sentence about them is not printed
+           when they are absent rather than printed as a zero. */ }
+const troveTitles = trove.counts?.titles || 0;
+
+let flagPages = 0;
+try { flagPages = fs.readdirSync("public/flags").filter((f) => f.endsWith(".html")).length; }
+catch { flagPages = 0; }
 ---
 <Base
   title="About Record Atlas"
@@ -47,16 +73,43 @@ const regionList = regions.regions.map((r) => r.label).join(", ");
     was Italian. This is not a curiosity — it is the single commonest reason a record that
     exists cannot be found, and <a href={u("/jurisdictions/")}>this map has a table for it</a>.</p>
 
-    <p><b>"Online" is four different things.</b> Free images; images behind a free login;
-    an index with no images at all; and a catalogue card for paper nobody has photographed.
-    Most directories flatten all four into a link. Here they are the colour of the dot.</p>
+    <p><b>"Online" is eight different things.</b> Free images; images behind a free login;
+    an index with no images at all; part free and part paid; images behind a paywall; a
+    catalogue card for paper nobody has photographed; paper you can only read in the building;
+    and — for nine places in ten — <b>nobody has looked yet</b>. Most directories flatten all
+    of that into a link. Here it is the colour of the dot, and the eighth colour is the
+    commonest one on the map.</p>
+
+    <p><b>And a fourth thing, which took this atlas a while to admit: the record is not always
+    a register.</b> Australia has no parish-register series. Civil registration there is
+    state by state and closed for a lifetime. What exists instead is {troveTitles.toLocaleString()}
+    digitised newspapers, free and full-text, in which births, marriages, deaths and obituaries
+    were printed in volume — so for most Australian ancestors before 1950 the newspaper
+    <em>is</em> the record. A map that only counted registers would have called that country
+    empty and been wrong about it.</p>
+
+    <h3>Whose flag flew over it</h3>
+    <p>The jurisdiction problem has a companion, and as of today it lives here rather than
+    beside here. <a href={u("/flags/")}>{flagPages} pages of flag history</a> — who governed
+    which ground, when, and the banner they flew — were built as a separate project and have
+    been merged in whole. They are unchanged: this was a move, not a redesign.</p>
+    <p>The two halves answer the same question from opposite ends. This atlas knows, for
+    {eras} researched eras across {regions.regions.length} regions, <em>which archive a regime's
+    paper actually went to</em> — the part nobody else publishes. The flag pages know who was
+    flying what, for 210 countries rather than {regions.regions.length} regions. Each era on a
+    flag page now shows what this atlas holds for that ground in those years, fetched live from
+    a file this site publishes for anyone to use.</p>
+    <p><b>They are side by side, not yet one thing.</b> The flag timelines are written into
+    their pages as markup, so a search here cannot see them. Freeing that data is the next
+    piece of work, and until it is done this page will not pretend otherwise.</p>
 
     <h3>Where it came from</h3>
     <p>Out of a one-family archive. <a href="https://daviddef.github.io/TheDefranceski/map/">The
     Defranceschi Archive's map</a> answers three questions about one family's ground: where the
     record books are, where a named person can be put, and where the family is buried. Two of
     those are family facts and cannot generalise. The first one can, and this is it, taken out
-    and pointed at the world.</p>
+    and pointed at the world. There are <a href={u("/my-work/")}>nine such archives</a>, and
+    what they have in common is the reason this atlas exists.</p>
     <p>The Croatian depth here — {places} places and {volumes.toLocaleString()} volumes, of
     {dots.toLocaleString()} dots in all — is that archive's work,
     imported once as a snapshot. Everything family-specific was dropped on the way in, including
@@ -65,9 +118,10 @@ const regionList = regions.regions.map((r) => r.label).join(", ");
     a stranger's question instead.</p>
 
     <h3>What it does not know</h3>
-    <p>It is early and it says so. There are {dots.toLocaleString()} dots on this map standing
-    in {countries} countries, and only {walked.toLocaleString()} of them, across {walkedCC}
-    countries, are places somebody has actually walked volume by volume. The rest are
+    <p>It is early and it says so, and here is the number that says it: <b>{unsurveyedPct}% of
+    the ground on this map has never been surveyed.</b> There are {dots.toLocaleString()} dots
+    standing in {countries} countries, and only {walked.toLocaleString()} of them, across
+    {walkedCC} countries, are places somebody has actually walked volume by volume. The rest are
     administrative districts — the units records are filed in, correctly placed and completely
     unread — and they are drawn hollow so that the difference cannot be mistaken. A place
     outside a mapped region <b>says so in its own panel</b> rather than guessing.</p>
@@ -78,6 +132,17 @@ const regionList = regions.regions.map((r) => r.label).join(", ");
     <p><b>A grey dot means nobody has surveyed it. It does not mean nothing is there.</b> Keeping
     those two apart is worth more than coverage, because a map that quietly implies completeness
     sends people home when they should keep looking.</p>
+    <p>The same honesty applies to the institutions. Of the sources in the directory, a little
+    over three hundred are listed because a national register or an open dataset named them and
+    <b>nobody has opened them since</b>. Two hundred of those have now at least had their door
+    rattled — alive or dead, a page or an application, open or refusing robots — which turns a
+    list of URLs into a queue somebody can work. It does not turn any of them into a surveyed
+    source, and the directory does not say it does.</p>
+    <p><b>Declining after looking is a result; declining without looking is a gap.</b> Fifteen
+    sources have been assessed and turned down with the reason written out, and this project
+    does not defeat a bot gate or send a user-agent it is not, however easy that would be. An
+    archive that refuses a robot is stating terms, and an atlas that asks archives to trust it
+    cannot be the thing that ignores them.</p>
 
     <h3>How it is built</h3>
     <p>A static site — no server, no database, no account. The data is plain JSON

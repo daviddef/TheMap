@@ -509,10 +509,90 @@ window.addEventListener("load", async function () {
     return h + "</span>";
   }
 
+  /* ---- THE FLAG TIMELINES, FETCHED WHEN A PLACE IS OPENED ----------------
+     Phase 2. The 1,471 era cards used to exist only as markup on 245 pages,
+     so this panel could answer «who held this ground» for the 33 countries
+     our own region research covers and for nowhere else. flag-eras.json is
+     the same research as data, so the answer now reaches 210 countries.
+
+     FETCHED, NOT BUNDLED, and deliberately late. It is 916 KB — larger than
+     index.json, which is the file the first paint waits on. Loading it up
+     front to answer a question nobody has asked yet would slow the map for
+     every visitor to help the few who open a place outside a record region.
+     So it arrives on the first panel that needs it and is kept thereafter.
+
+     OUR REGIONS STILL WIN WHERE WE HAVE THEM. A record region knows
+     `filedUnder` — which archive the regime's paper actually went to — and
+     that is the thing nobody else publishes. The flag data knows who was
+     governing. Where both cover the ground, the archive answer is the more
+     useful one and goes first; the flags fill in the rest of the world. */
+  var flagEras = null, flagErasWanted = false;
+  function loadFlagEras(then) {
+    if (flagEras) { then(); return; }
+    if (flagErasWanted) return;
+    flagErasWanted = true;
+    fetch(BASE + "flag-eras.json")
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        flagEras = {};
+        (d.eras || []).forEach(function (e) {
+          (flagEras[e.slug] = flagEras[e.slug] || []).push(e);
+        });
+        then();
+      })
+      .catch(function () { flagEras = {}; /* the panel is fine without them */ });
+  }
+
+  function flagErasFor(cc) {
+    var slug = FLAG_SLUG[String(cc || "").toUpperCase()];
+    if (!slug || !flagEras) return null;
+    return flagEras[slug + "-flags"] || null;
+  }
+
+  /* THE 204 COUNTRIES WITH NO RECORD REGION, which is most of the world.
+     Before this they got nothing at all from this panel — the honest answer
+     was silence, and silence reads as «this ground has no history» rather
+     than «this atlas has not researched its filing yet». The flag timelines
+     do not know which archive holds the paper, and this says so rather than
+     letting a reader assume the stronger claim. */
+  function flagsOnly(d) {
+    var rows = flagErasFor(d.country);
+    if (!rows) {
+      if (d.country && FLAG_SLUG[String(d.country).toUpperCase()]) {
+        loadFlagEras(function () {
+          var box = document.getElementById("ra-flagera");
+          if (box) box.innerHTML = flagsOnly(d);
+        });
+        return '<div id="ra-flagera"></div>';
+      }
+      return "";
+    }
+    var withYear = rows.filter(function (e) { return e.from != null; })
+                       .sort(function (a, b) { return b.from - a.from; });
+    if (!withYear.length) return '<div id="ra-flagera"></div>';
+    var h = ['<div id="ra-flagera">'];
+    h.push('<p class="at-lab">' + esc(T("Who governed this ground")) + "</p>");
+    h.push('<p class="at-hint" style="margin:0 0 6px">' +
+           esc(T("No record region covers this place yet, so this says who was " +
+                 "governing — not which archive holds the paper.")) + "</p>");
+    h.push('<ul class="ra-eras">');
+    withYear.slice(0, 14).forEach(function (e) {
+      h.push('<li><span class="ra-era-y">' + e.from +
+             (e.to != null ? "\u2013" + e.to : "\u2013") + "</span>" +
+             '<span class="ra-era-p">' + esc(e.polity) + "</span></li>");
+    });
+    h.push("</ul>");
+    var slug = FLAG_SLUG[String(d.country).toUpperCase()];
+    h.push('<p class="at-hint"><a href="' + BASE + "flags/" + slug +
+           '-flags.html">' + esc(T("The flags these regimes flew")) +
+           " \u2192</a></p>");
+    return h.join("") + "</div>";
+  }
+
   function heldBy(d) {
     if (d.lat == null || d.lon == null) return "";
     var regs = regionsAt(d.lat, d.lon);
-    if (!regs.length) return "";
+    if (!regs.length) return flagsOnly(d);
     var h = [];
     regs.forEach(function (reg) {
       h.push('<p class="at-lab">' + esc(T("Who held this ground")) + " · " +

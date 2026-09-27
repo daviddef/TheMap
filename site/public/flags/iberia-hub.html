@@ -145,6 +145,18 @@
   .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
   .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
   .link-card span { color: var(--muted); font-size: .82rem; }
+
+/* A TAG WITH NOTHING TO SAY MUST NOT SAY IT. `.tag::after` sets
+   `content: attr(data-tip)`, and the hover rule sets opacity:1 on EVERY tag —
+   so the 700 tags that carry no data-tip (the government-type chips: KINGDOM,
+   CITY-REPUBLIC, FRAGMENTED / SUCCESSIVE POLITIES) opened an empty bubble and
+   its arrow on hover. Two symptoms, one cause: hovering them showed nothing,
+   and the empty bubble rendered ABOVE the tag — which is exactly where the
+   card title sits, so it appeared as a small blank box over the first letters
+   of «Medieval Kingdom of Croatia» and «Republic of Ragusa».
+   Scoped to tags that actually have a tip. */
+.tag:not([data-tip])::after,.tag:not([data-tip])::before,
+.tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
 </style>
 
 <div class="wrap">

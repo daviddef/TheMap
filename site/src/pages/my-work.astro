@@ -1,0 +1,146 @@
+---
+/* THE PAGE THE FRONT PAGE COULD NOT BE.
+ *
+ * This material used to sit under the map as eight cards, each with a
+ * paragraph and a list of spellings. It was cut to a single strip because
+ * below a map it read as documentation of somebody else's research — half a
+ * screen about families the reader has no connection to, in the place where
+ * they were trying to find their own.
+ *
+ * The fault was the position, not the writing. A reader who has clicked
+ * «My Work» is asking exactly the question the long version answers. So the
+ * long version lives here, and the front page keeps the map.
+ *
+ * EVERY EXAMPLE ON THIS PAGE IS A REAL ARCHIVE, read from the same file the
+ * strip used. Nothing here is illustrative.
+ */
+import Base from "../layouts/Base.astro";
+import { u } from "../lib/url.js";
+import showcase from "../data/archives-showcase.json";
+import regions from "../../public/regions.json";
+
+const kids = {
+  id: "our-family",
+  name: "Our Family",
+  url: "https://daviddef.github.io/Our-Family/",
+  accent: "var(--accent)",
+  where: "written for children",
+  what: "The landing site the eight archives meet in, written so that a "
+      + "six-year-old can follow their own family back — which is the thing "
+      + "people actually want, and the thing a list of parish registers does "
+      + "not convey.",
+};
+const all = [kids, ...showcase.archives];
+const names = [...new Set(showcase.archives.flatMap((a) => a.names || []))];
+const eras = regions.regions.reduce((a, r) => a + r.eras.length, 0);
+---
+<Base
+  title="My Work"
+  eyebrow={`${all.length} family archives · ${names.length} surnames followed`}
+  dek="Interactive family histories — the records found and cited, the claims tested, and the whole thing published as something a family can explore rather than a folder nobody opens.">
+
+  <div class="prose" style="max-width:74ch">
+    <h3>What I actually build</h3>
+    <p>Not a tree. A tree is a shape, and a shape is the last thing you produce,
+    not the thing you produce. What I build is an <b>archive</b>: every claim
+    about a person carries the record it rests on and how sure that record makes
+    it, and the whole thing is published as a site a family can walk through.</p>
+
+    <p>The difference shows up the first time somebody disagrees with you. A tree
+    says <em>Giovanni was born in 1861</em>. An archive says <em>Giovanni was born
+    in 1861 — parish register of Arienzo, book 4, folio 22, which names his
+    father and mother and is in his own parish's hand</em>. The first is a
+    position. The second is an argument, and an argument can be checked, inherited
+    and corrected by somebody who comes after you.</p>
+
+    <h3>How it is done</h3>
+    <p><b>Start from the ground, not the name.</b> Surnames move, mutate and
+    repeat; ground does not. Every one of the archives below is anchored on a
+    place first — Arienzo, Senj, Piedimonte Etneo, Schubin — and the people are
+    hung off it. That is also why the tool on this site is a map rather than a
+    search box.</p>
+
+    <p><b>Find out whose archive it is before looking for the record.</b> This is
+    the step almost everybody skips and it is the commonest reason a record that
+    exists cannot be found. A 1930 baptism from a Croatian village is filed under
+    <em>Italy</em>, because between the wars the village was Italian. This atlas
+    carries {eras} researched eras across {regions.regions.length} regions for
+    precisely that reason — <a href={u("/jurisdictions/")}>whose archive held this
+    ground, and when</a>.</p>
+
+    <p><b>Test the family stories rather than repeating them.</b> Every family has
+    four or five. Some are true, some are half true, and the half-true ones are
+    the most useful because the half that is wrong usually tells you where the
+    record actually is. The Lerena archive exists largely to do this: four
+    traditions, tested against the record one at a time.</p>
+
+    <p><b>Write down what you did not find.</b> A search that returned nothing is
+    a result, and it is the result most often thrown away — so the next person
+    repeats it. Every archive here records the negative searches alongside the
+    positive ones. It is the least glamorous discipline in the work and the one
+    that compounds.</p>
+
+    <p><b>Grade the claims.</b> Nothing is stated flat. A thing is proven,
+    probable, a candidate, or a family story — and it says which. A candidate
+    promoted quietly to a fact is how a wrong ancestor gets inherited by
+    everybody who copies your tree.</p>
+
+    <h3>Nine archives, and what each one had to solve</h3>
+    <p>These follow different families on four continents, and each ran into a
+    different wall. That is why there are nine of them rather than one: the
+    method was worked out against problems that did not resemble each other.</p>
+  </div>
+
+  <ul class="works">
+    {all.map((a) => (
+      <li style={`--edge:${a.accent}`}>
+        <a href={a.url} class="wn">{a.name}</a>
+        <span class="ww">{a.where}</span>
+        <p class="wt">{a.what}</p>
+        {a.names && a.names.length > 1 && (
+          <p class="ws">{a.names.join(" · ")}</p>
+        )}
+      </li>
+    ))}
+  </ul>
+
+  <div class="prose" style="max-width:74ch">
+    <h3>Why this atlas exists at all</h3>
+    <p>Eight of those archives kept hitting the same three walls, and all three
+    were geographic: the place had changed its name, the border had moved so the
+    records were in another country's archive, and "online" turned out to mean
+    four or five quite different things. Solving that eight times over for eight
+    families is how <a href={u("/")}>Record Atlas</a> came to exist — it is the
+    part of this work that generalises, taken out and pointed at the world.</p>
+    <p>The family facts stayed in the archives, where they belong. What came out
+    was the geography.</p>
+
+    <h3>If you want this done for your family</h3>
+    <p>The nine sites above are what finished work looks like. <a href={u("/add/")}>
+    Add a source</a> if you know a record set this map is missing — that is the
+    most useful thing a stranger can do for it, and it costs nothing.</p>
+  </div>
+</Base>
+
+<style>
+  /* The archives carry their own colour, as they do everywhere else on this
+     site. A left edge rather than a top border, because these are read as a
+     list of paragraphs rather than scanned as a grid of cards. */
+  .works { list-style: none; padding: 0; margin: 26px 0 30px;
+           display: grid; gap: 14px; }
+  .works li { border-left: 3px solid var(--edge, var(--rule-strong));
+              background: var(--panel); border-radius: 0 6px 6px 0;
+              padding: 13px 16px 14px; }
+  .wn { font-family: var(--serif); font-size: 17.5px; color: var(--edge);
+        text-decoration: none; }
+  .wn:hover { text-decoration: underline; }
+  .ww { font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em;
+        text-transform: uppercase; color: var(--ink-3); margin-left: 10px; }
+  .wt { font-family: var(--sans); font-size: 13.5px; line-height: 1.6;
+        color: var(--ink-2); margin: 7px 0 0; max-width: 78ch; }
+  .ws { font-family: var(--mono); font-size: 11px; color: var(--ink-3);
+        margin: 6px 0 0; }
+  @media (max-width: 640px) {
+    .ww { display: block; margin: 3px 0 0; }
+  }
+</style>

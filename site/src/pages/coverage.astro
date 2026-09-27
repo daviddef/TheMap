@@ -1,6 +1,7 @@
 ---
 /* How complete this map is, measured rather than asserted.
    Every other page says what is here. This one says what is not. */
+import fs from "node:fs";
 import Base from "../layouts/Base.astro";
 import { u } from "../lib/url.js";
 import full from "../data/places-full.json";
@@ -17,6 +18,28 @@ import setts from "../../../data/region-settlements.json";
 import irl from "../../../data/ireland-osm.json";
 
 const CN = idx.countries || {};
+
+/* THE SHARPEST NUMBER ON THE SITE, and this page had not been carrying it.
+   Counted from the shipped index rather than asserted, like everything else
+   here. `a` indexes idx.rank; anything outside the seven surveyed classes is
+   ground nobody has walked. */
+const RANK = idx.rank || [];
+const SURVEYED = new Set(["free", "account", "index", "mixed", "paid", "catalogue", "onsite"]);
+const accessOf = (p) => (typeof p.a === "number" && RANK[p.a]) || "unsurveyed";
+const nSurveyed = idx.places.filter((p) => SURVEYED.has(accessOf(p))).length;
+const nDots = idx.places.length;
+const unsurveyedPct = Math.round((1 - nSurveyed / nDots) * 1000) / 10;
+
+const nProv = provs.providers.length;
+const provUnsurveyed = provs.providers.filter((p) => p.access === "unsurveyed").length;
+const provTriaged = provs.providers.filter((p) => p.triage).length;
+
+let troveTitles = 0;
+try { troveTitles = JSON.parse(fs.readFileSync("../data/trove-newspapers.json", "utf8")).counts.titles; }
+catch { troveTitles = 0; }
+let flagPages = 0;
+try { flagPages = fs.readdirSync("public/flags").filter((f) => f.endsWith(".html")).length; }
+catch { flagPages = 0; }
 const LOCAL = new Set(["CITY","TOWN","COMMUNE","HAMLET","VILLAGE","PARISH","MUNICIPALITY",
                        "BOROUGH","SUBURB","CIVIL_PARISH","TOWNSHIP","COUNTY","BR_COUNTY",
                        "PROVINCE","DEPARTMENT","DISTRICT","SHIRE","CANTON"]);
@@ -87,8 +110,18 @@ const mapped = list.filter((r) => r.regions > 0).length;
   dek="Every other page here says what is present. This one measures what is missing, country by country, because a map that only advertises its coverage is quietly claiming the rest.">
 
   <div class="one" style="border-left-color:#C0392B">
-    <div class="lab">The three honest numbers</div>
+    {/* It said «three» over five items, on the one page whose whole argument is
+        that a number must be the number. Counted, like the rest. */}
+    <div class="lab">The honest numbers</div>
     <ul class="big">
+      <li><b>{unsurveyedPct}% of the ground on this map has never been surveyed.</b>
+        {" "}{nSurveyed.toLocaleString()} of {nDots.toLocaleString()} dots carry an access
+        class somebody established; the rest are correctly placed and unread. Every other
+        figure on this page is a refinement of that one.</li>
+      <li><b>{provUnsurveyed}</b> of {nProv} sources in the directory have never been opened —
+        they are listed because a register or an open dataset named them. {provTriaged} have
+        been triaged since: alive or dead, a page or an application, open or refusing robots.
+        A queue somebody can work is not the same as a source somebody has read.</li>
       <li><b>{walked}</b> of {list.length} countries have a single place walked — that is,
         somebody went through a catalogue and wrote down what stands there. {drawn} have a
         dot of some kind; the difference, {drawn - walked} countries, is ground that is
@@ -109,6 +142,17 @@ const mapped = list.filter((r) => r.regions > 0).length;
         {Math.round(100*mapped/list.length)}% of the countries it names.</li>
       <li><b>{Math.round(100*T.local/T.cols)}%</b> of collections reach a named place. The
         rest are country-level: real, searchable, and no substitute for knowing the parish.</li>
+      <li><b>{troveTitles.toLocaleString()}</b> Australian newspapers are now catalogued, and
+        they matter here because Australia has no parish-register series at all: civil
+        registration is state by state and closed for a lifetime, so the newspaper is the
+        record. Counting only registers would have called that continent empty. 558 of those
+        titles name a town this atlas does not hold — Katoomba, Kalgoorlie, Coolgardie — and
+        they are counted here rather than placed on a guess.</li>
+      <li><b>{flagPages}</b> pages of flag history now sit inside this atlas, covering 210
+        countries against the {regions.regions.length} record regions above. They say who
+        governed; the regions say whose archive that means. The two are side by side and not
+        yet one thing: the timelines are written into their pages as markup, so a search here
+        cannot read them.</li>
     </ul>
   </div>
 

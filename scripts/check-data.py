@@ -117,7 +117,47 @@ def licence_gate():
                     f"none of the condition.")
 
 
+# ---------------------------------------------------------------------------
+# THE FLAG DATA AND THE FLAG PAGES MUST NOT DRIFT APART.
+#
+# data/flag-eras.json is extracted from site/public/flags/*.html by
+# scripts/extract-flag-eras.py. Two copies of one truth is the shape of bug
+# this project has paid for repeatedly — the archive list that shipped twice,
+# the surname-page rule in three languages, the count that disagreed with the
+# file it counted. Keeping them in step by intention does not work; a gate
+# does.
+#
+# It compares the number of era cards in the pages against the number of rows
+# in the data. A page edited without re-running the extractor fails the build
+# rather than quietly serving a search that has never heard of the change.
+def flag_era_drift():
+    import glob as _glob
+    data_p = "data/flag-eras.json"
+    if not os.path.exists(data_p):
+        return                      # the extraction is optional until it exists
+    try:
+        data = json.load(open(data_p, encoding="utf-8"))
+    except Exception as e:
+        err(f"data/flag-eras.json will not parse: {e}")
+        return
+    in_pages = 0
+    for f in _glob.glob("site/public/flags/*.html"):
+        if os.path.basename(f) == "index.html":
+            continue
+        h = open(f, encoding="utf-8", errors="replace").read()
+        in_pages += h.count('<div class="entry"')
+    in_data = len(data.get("eras") or [])
+    if in_pages != in_data:
+        err(f"the flag pages hold {in_pages:,} era cards and data/flag-eras.json "
+            f"holds {in_data:,}. A page was edited without re-running "
+            f"scripts/extract-flag-eras.py --write, so the map's search and the "
+            f"pages now disagree about history.")
+    else:
+        print(f"flag eras: {in_data:,} in the pages and in the data, agreed")
+
+
 def main():
+    flag_era_drift()
     places = json.load(open("data/places.json"))["places"]
     regions = json.load(open("data/regions.json"))
     provs = json.load(open("data/providers.json"))

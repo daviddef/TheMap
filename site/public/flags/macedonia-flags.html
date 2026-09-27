@@ -217,6 +217,18 @@
   .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
   .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
   .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+
+/* A TAG WITH NOTHING TO SAY MUST NOT SAY IT. `.tag::after` sets
+   `content: attr(data-tip)`, and the hover rule sets opacity:1 on EVERY tag —
+   so the 700 tags that carry no data-tip (the government-type chips: KINGDOM,
+   CITY-REPUBLIC, FRAGMENTED / SUCCESSIVE POLITIES) opened an empty bubble and
+   its arrow on hover. Two symptoms, one cause: hovering them showed nothing,
+   and the empty bubble rendered ABOVE the tag — which is exactly where the
+   card title sits, so it appeared as a small blank box over the first letters
+   of «Medieval Kingdom of Croatia» and «Republic of Ragusa».
+   Scoped to tags that actually have a tip. */
+.tag:not([data-tip])::after,.tag:not([data-tip])::before,
+.tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
 </style>
 
 <div class="wrap">

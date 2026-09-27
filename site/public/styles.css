@@ -11,6 +11,31 @@
      lightened for looks, run the audit again first. */
   --ink:#16222A; --ink-2:#4C5D66; --ink-3:#5C6A71;
   --rule:#D3D0C7; --rule-strong:#B6B2A6;
+  /* ---- THE UNION PALETTE, PHASE 3 STEP ONE ----------------------------
+     The Flags Atlas and this atlas were built separately and turned out to
+     be the same design language with different saturation. Measured:
+
+         paper   #ede2c8  there   #EDEBE5  here
+         teal    #204b5c  there   #1F5C6B  here     <- four hex digits apart
+         ground  #14171b  there   #101820  here     (dark)
+
+     What the flags have that this did not is a SECOND and THIRD accent —
+     a brick red and a brass — and they are most of why that site reads as
+     warmer. They are added here rather than invented, so the two sides stop
+     drifting while the rest of the union is done.
+
+     THEY MUST NOT COLLIDE WITH THE ACCESS CLASSES, and that is the whole
+     constraint on colour in this project. free/account/index/mixed/paid/
+     catalogue/onsite/unsurveyed colour every dot on the map and a reader
+     learns them; they are vocabulary, not decoration. Brick and brass are
+     for CHROME — eyebrows, rules, emphasis — and never for a dot. */
+  /* #8D6227, not the Flags Atlas's own #A9762F. That value measures 3.31:1
+     on this paper — below the 4.5 AA floor — and I wrote «4.52, over the
+     floor» into this file from memory before measuring it. The same mistake
+     this project shipped 59 unreadable elements with. Darkened until it
+     clears: 4.51 on --ground, 4.97 on --panel. The dark-mode value needed no
+     change at 7.62. */
+  --brass:#8D6227; --brick:#9C3B28;
   --accent:#1F5C6B; --accent-2:#2E7C8C; --accent-wash:#DDE7E9;
   --ochre:#9A6B18; --terra:#A8442B;
   --r-feudal:#7C8A91; --r-venice:#B08322; --r-habsburg:#3E5A66; --r-napo:#9184A8;
@@ -36,6 +61,9 @@
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --ground:#101820; --panel:#17212A; --panel-2:#1E2A34;
   --ink:#E8E6DF; --ink-2:#A6B4BC; --ink-3:#7C8D97;
+  /* The flag atlas's own dark values for the same two accents, so a reader
+     moving between the flag pages and the rest sees one palette. */
+  --brass:#D1A154; --brick:#D3644A;
   --rule:#2A3841; --rule-strong:#3F515C;
   --accent:#6FB6C6; --accent-2:#8FCEDC; --accent-wash:#1B2E36;
   --ochre:#D2A24A; --terra:#D97A5F;
@@ -58,6 +86,9 @@
 :root[data-theme="dark"]{
   --ground:#101820; --panel:#17212A; --panel-2:#1E2A34;
   --ink:#E8E6DF; --ink-2:#A6B4BC; --ink-3:#7C8D97;
+  /* The flag atlas's own dark values for the same two accents, so a reader
+     moving between the flag pages and the rest sees one palette. */
+  --brass:#D1A154; --brick:#D3644A;
   --rule:#2A3841; --rule-strong:#3F515C;
   --accent:#6FB6C6; --accent-2:#8FCEDC; --accent-wash:#1B2E36;
   --ochre:#D2A24A; --terra:#D97A5F;
@@ -88,8 +119,20 @@ a{color:var(--accent);text-underline-offset:3px;text-decoration-thickness:.06em}
 a:focus-visible,button:focus-visible{outline:2px solid var(--accent-2);outline-offset:3px;border-radius:2px}
 img{max-width:100%}
 .wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px}
+/* THE EYEBROW IN BRASS. This is the smallest change that carries most of what
+   David was reacting to in the Flags Atlas — «FAMILY RESEARCH · WORLD FLAGS
+   ATLAS» in gold above a serif title is the first thing a reader sees there,
+   and here the same line sat in --ink-3, the same muted grey as a caption.
+   An eyebrow is a signpost, not a footnote.
+
+   CONTRAST MEASURED, AND THE FIRST ATTEMPT FAILED IT. I wrote the Flags
+   Atlas's own #A9762F in here with a comment claiming 4.52:1, from memory,
+   without running the numbers. It is 3.31:1 on this paper — below the AA
+   floor — which is precisely the fault that put 59 unreadable elements on
+   every page of this site earlier today, committed by the same hand that had
+   just fixed them. --brass is #8D6227 now: 4.51 light, 7.62 dark. */
 .lab{font-family:var(--sans);font-size:10.5px;font-weight:600;letter-spacing:.14em;
-  text-transform:uppercase;color:var(--ink-3)}
+  text-transform:uppercase;color:var(--brass)}
 .mono{font-family:var(--mono);font-size:12.5px;font-variant-numeric:tabular-nums}
 .dek{font-family:var(--sans);font-size:15px;line-height:1.62;color:var(--ink-2);max-width:76ch}
 .cap{font-family:var(--sans);font-size:12.5px;line-height:1.55;color:var(--ink-3);margin-top:12px;max-width:92ch}

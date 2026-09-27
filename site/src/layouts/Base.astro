@@ -44,10 +44,25 @@ const nav = [
   ["Flags", "/flags/"],
   ["About", [
     ["/start/", "Start here"],
+    /* The two prose panels that used to sit folded under the map. Folding
+       them was right for the front page and wrong as a home: a reader who
+       wants them is asking for help, and a reader who does not should never
+       meet them. */
+    ["/help/", "Help"],
     ["/about/", "About the atlas"],
+    /* The nine family archives used to sit under the map on the front page.
+       Below a map they read as documentation of somebody else's research, in
+       the place a reader was trying to find their own — so the strip was cut
+       to one line and the long version had nowhere to live. It lives here. */
+    ["/my-work/", "My work"],
     /* The files this map draws from are public URLs and nothing said so.
        A licence nobody can find is a licence nobody can act on. */
     ["/data/", "Use the data"],
+    /* Both were footer-only links. The footer had grown to five stacked
+       blocks and half of it duplicated this menu — About, Use the data and
+       Add a source all appear above. These two did not, so they move up
+       rather than disappear. */
+    ["/privacy/", "Privacy"],
     ["/changelog/", "What changed"],
     ["/worklist/", "What is being done"],
   ]],
@@ -136,6 +151,25 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
   .foot-note { font-family: var(--sans); font-size: 12.5px; line-height: 1.6;
                color: var(--ink-3); max-width: 80ch; margin: 0 0 8px; }
   .foot-thin { font-size: 11.5px; }
+
+  /* ---- THE FOOTER, HALVED ---------------------------------------------
+     It was five stacked blocks and half of them repeated the About menu —
+     About, Use the data and Add a source all sit in the navigation above.
+     Those rows are gone, Privacy moved up into that menu, and Feed rides the
+     language line.
+
+     THE ATTRIBUTION BLOCK COULD NOT MOVE, and the reason is worth keeping.
+     GeoNames, Statbel, Istat, the National Records of Scotland,
+     OpenStreetMap, Townlands.ie and Trove are CC BY or equivalent:
+     attribution is a CONDITION of the licence, owed on the pages that use the
+     data, not a courtesy that can be filed away on /data/. check-built.py
+     fails the build if any of those names leaves the home or place pages —
+     so moving it would not have tidied the footer, it would have broken the
+     licence and then the build. The only saving available on it was
+     horizontal: it drops the 80ch reading measure and spans the wrap, which
+     takes it from five lines to two on a wide screen. */
+  .foot-cred { max-width: none; font-size: 11.5px; line-height: 1.7; }
+  .foot-sep { margin: 0 4px 0 10px; color: var(--ink-3); }
     /* NOT A FLEX CONTAINER. It was, and the ins element inside it is a
      block-level flex child with no intrinsic width, so it measured zero and
      AdSense rejected the slot outright: "No slot size for availableWidth=0".
@@ -378,13 +412,12 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
         <a href={`?lang=${code}`} data-lang={code} hreflang={code}>{label}</a>
       ))}
       <span class="foot-when" data-lang-note></span>
+      {/* Feed rides the language line rather than owning a row of its own.
+          It was one of five stacked blocks; it is one link. */}
+      <span class="foot-sep">·</span>
+      <a href={u("/feed.xml")}>Feed</a>
     </p>
-    <p class="foot-note foot-thin">
-      <a href={u("/about/")}>About</a> · <a href={u("/add/")}>Add or correct a source</a> ·
-      <a href={u("/data/")}>Use the data</a> ·
-      <a href={u("/feed.xml")}>Feed</a> ·
-      <a href={u("/privacy/")}>Privacy</a>
-    </p>
+
     {/* ATTRIBUTION IS A LICENCE CONDITION, NOT A COURTESY, and four of these
         were missing. This credited OpenStreetMap, Natural Earth and Wikidata
         and said nothing about GeoNames — which is the gazetteer, and
@@ -393,7 +426,7 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
         those four are CC BY, where attribution is the whole of what is
         asked in return. Found while documenting /data/, which had made the
         same omission one layer up. */}
-    <p class="foot-note foot-thin">
+    <p class="foot-note foot-thin foot-cred">
       Maps and {osm.archives.length} archives &copy; OpenStreetMap contributors,
       <a href="https://opendatacommons.org/licenses/odbl/">ODbL</a>, as are the Irish
       townlands via Townlands.ie ·

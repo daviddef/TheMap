@@ -307,11 +307,43 @@ def main():
             # intervening markup as if it were JavaScript and reported a
             # syntax error in a script that was perfectly fine. A gate that
             # cries wolf gets switched off, so it has to be right.
-            for _i, _m in enumerate(re.finditer(
-                    r"<script[^>]*\bis:inline\b[^>]*[^/]>(.*?)</script>", _src, re.S)):
+            # AND `[^>]*` IS NOT HOW YOU FIND THE END OF A TAG EITHER.
+            # An Astro attribute can hold an expression, and an expression can
+            # hold an arrow function: `define:vars={{ x: a.map((c) => c.n) }}`
+            # contains a «>» that is not the end of the tag. This pattern
+            # stopped there and handed node the tail of an attribute, which
+            # reports a syntax error in a script that parses perfectly — the
+            # same class of false alarm as the self-closing bug above, from
+            # the same character class, caught the same way: by a script that
+            # was fine being called broken.
+            #
+            # So the tag end is found by scanning, tracking brace depth, and a
+            # «>» inside {...} does not count.
+            def _inline_scripts(src):
+                out = []
+                for _s in re.finditer(r"<script\b", src):
+                    j, depth = _s.end(), 0
+                    while j < len(src):
+                        ch = src[j]
+                        if ch == "{":
+                            depth += 1
+                        elif ch == "}":
+                            depth -= 1
+                        elif ch == ">" and depth == 0:
+                            break
+                        j += 1
+                    tag = src[_s.start():j]
+                    if "is:inline" not in tag or tag.rstrip().endswith("/"):
+                        continue
+                    end = src.find("</script>", j)
+                    if end > 0:
+                        out.append(src[j + 1:end])
+                return out
+
+            for _i, _body in enumerate(_inline_scripts(_src)):
                 with _tf.NamedTemporaryFile("w", suffix=".js", delete=False,
                                             encoding="utf-8") as _fh:
-                    _fh.write(_m.group(1))
+                    _fh.write(_body)
                     _tmp = _fh.name
                 _r = _sp.run(["node", "--check", _tmp], capture_output=True, text=True)
                 os.unlink(_tmp)

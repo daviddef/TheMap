@@ -1,0 +1,161 @@
+---
+/* PHASE 4B — the survey queue, opened to anybody.
+ *
+ * 316 of 519 sources in this directory have never been opened. They are here
+ * because a national register or an open dataset named them, which is worth
+ * knowing and is not the same as somebody having looked. 199 have been
+ * triaged — alive or dead, a page or a JavaScript application, open or
+ * refusing robots — which turns a list of URLs into a queue.
+ *
+ * A QUEUE ONE PERSON WORKS IS A BOTTLENECK, and it is the clearest structural
+ * risk this atlas has: the gap grows faster than one researcher can close it.
+ * Surveying a source is ten minutes of work — open it, find whether the images
+ * are free, and write down the sentence that proves it. That is something a
+ * stranger with an evening can do, and there was no way for them to do it.
+ *
+ * WHAT THIS PAGE IS NOT. It is not a form that writes to the atlas. This is a
+ * static site with no server and no account, and inventing one to accept
+ * unverified edits would put the directory's one asset — that a row can be
+ * trusted — in the hands of anybody with a browser. So it hands somebody a
+ * specific source, tells them exactly what to look for, and gives them a
+ * prepared message to send back. A person still reads it before it lands.
+ *
+ * The queue is ordered by what makes a survey cheap: a source whose homepage
+ * we have already read, in a country where somebody is likely to read the
+ * language, with the phrases we found already printed so the reader knows
+ * what they are walking into.
+ */
+import Base from "../layouts/Base.astro";
+import { u } from "../lib/url.js";
+import provs from "../../public/providers.json";
+import { atlas as idx } from "../lib/atlas.js";
+
+const CN = idx.countries || {};
+const P = provs.providers;
+const unsurveyed = P.filter((p) => p.access === "unsurveyed" && p.url);
+
+/* READ FIRST, because those are the ones somebody can settle in ten minutes.
+   `needs-browser` and the dead ones are real work or no work at all. */
+const RANK = { read: 0, "needs-browser": 1, http: 2, unreachable: 3, declined: 4 };
+const queue = unsurveyed.slice().sort((a, b) =>
+  (RANK[a.triage] ?? 9) - (RANK[b.triage] ?? 9) ||
+  String(a.name).localeCompare(String(b.name)));
+
+const byCountry = {};
+for (const p of unsurveyed) {
+  for (const c of (p.countries || [])) (byCountry[c] = byCountry[c] || []).push(p);
+}
+const countries = Object.entries(byCountry)
+  .map(([cc, list]) => ({ cc, n: list.length, name: CN[cc] || cc }))
+  .sort((a, b) => b.n - a.n);
+
+const readable = queue.filter((p) => p.triage === "read").length;
+const surveyed = P.filter((p) => p.access && p.access !== "unsurveyed").length;
+---
+<Base
+  title="Survey a source"
+  eyebrow={`${unsurveyed.length} sources nobody has opened · ${surveyed} somebody has`}
+  dek="Ten minutes each. Open one, find out what it actually costs to look, and send back the sentence that proves it. This is the work that turns a grey dot into an answer.">
+
+  <div class="prose" style="max-width:74ch">
+    <h3>Why this is the most useful thing you can do here</h3>
+    <p>Nine places in ten on this map have never been surveyed. Not because the
+    records are missing — because <b>nobody has opened the archive's website and
+    written down what is behind it</b>. The atlas knows those sources exist; it
+    does not know whether their images are free, behind a login, or not
+    photographed at all.</p>
+    <p>That single fact is the difference between a researcher spending an
+    evening well and spending it on a catalogue card. And establishing it takes
+    about ten minutes per source.</p>
+
+    <h3>What "surveying" actually means</h3>
+    <ol class="sv-steps">
+      <li><b>Open the site.</b> One of the {readable} below whose homepage we have
+        already read is the easiest start.</li>
+      <li><b>Find the records, not the homepage.</b> Look for the register
+        viewer — in French it is usually <em>archives en ligne</em> or
+        <em>état civil</em>; in Italian <em>registri</em>; in German
+        <em>Kirchenbücher</em>.</li>
+      <li><b>Answer one question: what does it cost to look?</b>
+        <ul>
+          <li><b>free</b> — images, no account</li>
+          <li><b>account</b> — images, but you must register first</li>
+          <li><b>index</b> — names transcribed, no images</li>
+          <li><b>catalogue</b> — a card saying the paper exists, unphotographed</li>
+          <li><b>onsite</b> — readable only in the building</li>
+          <li><b>paid</b> or <b>mixed</b> — a charge, or a charge for part</li>
+        </ul>
+      </li>
+      <li><b>Copy the sentence that proves it</b> and the page it is on. Not a
+        summary — the site's own words. That quotation is what lets the next
+        person check you instead of trusting you.</li>
+      <li><b>Send it.</b> <a href={u("/add/")}>Through this form</a>, with the
+        source's name, the class, the quotation and the URL.</li>
+    </ol>
+
+    <h3>Two rules, and they matter more than the speed</h3>
+    <p><b>If a site refuses robots or asks you not to, stop.</b> Record that it
+    declined and why. This project does not defeat bot gates or pretend to be a
+    browser it is not — an atlas that asks archives to trust it cannot be the
+    thing that ignores them.</p>
+    <p><b>If you cannot tell, say you cannot tell.</b> An honest
+    <em>unsurveyed</em> is worth more than a confident guess. A place wrongly
+    marked <em>free</em> costs somebody an evening and costs this directory the
+    only thing it sells.</p>
+  </div>
+
+  <h2 style="margin-top:34px">Pick a country</h2>
+  <p class="cap">Language is the real barrier, so start where you can read.</p>
+  <ul class="sv-cc">
+    {countries.map((c) => (
+      <li><a href={`#cc-${c.cc}`}>{c.name}</a><span class="y">{c.n}</span></li>
+    ))}
+  </ul>
+
+  <h2 style="margin-top:30px">The queue</h2>
+  <p class="cap">Ordered by how cheap each one is to settle. A source whose
+  homepage we have already read is a ten-minute job; one that needs a browser
+  to render is longer; one that did not answer may simply be gone.</p>
+
+  <table class="sv-q">
+    <thead><tr>
+      <th>Source</th><th>Where</th><th class="m">What we know</th>
+    </tr></thead>
+    <tbody>
+      {queue.slice(0, 220).map((p) => (
+        <tr id={`cc-${(p.countries || [])[0] || "zz"}`}>
+          <td><a href={p.url} target="_blank" rel="noopener">{p.name}</a></td>
+          <td class="m">{(p.countries || []).map((c) => CN[c] || c).join(", ")}</td>
+          <td class="sv-note">{p.triageNote || "not yet opened by anybody"}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  {queue.length > 220 && (
+    <p class="cap">and {queue.length - 220} more — the whole list is in
+    {" "}<a href={u("/providers.json")}>providers.json</a>, where
+    <code>access: "unsurveyed"</code> is the queue.</p>
+  )}
+</Base>
+
+<style>
+  .sv-steps { margin: 10px 0 18px; padding-left: 20px; }
+  .sv-steps li { font-family: var(--sans); font-size: 13.5px; line-height: 1.65;
+                 color: var(--ink-2); margin-bottom: 7px; }
+  .sv-steps ul { margin: 6px 0 0; padding-left: 18px; }
+  .sv-steps ul li { margin-bottom: 2px; font-size: 13px; }
+  .sv-cc { list-style: none; padding: 0; margin: 8px 0 0;
+           display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+           gap: 1px 18px; }
+  .sv-cc li { font-family: var(--sans); font-size: 13px; line-height: 1.8; }
+  .sv-q { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  .sv-q th { text-align: left; font-family: var(--mono); font-size: 10.5px;
+             text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3);
+             border-bottom: 1px solid var(--rule-strong); padding: 0 14px 6px 0; }
+  .sv-q td { padding: 7px 14px 7px 0; border-bottom: 1px solid var(--rule);
+             vertical-align: top; font-family: var(--sans); font-size: 13px;
+             color: var(--ink-2); }
+  .sv-q .m { font-family: var(--mono); font-size: 11.5px; white-space: nowrap; }
+  .sv-note { font-family: var(--mono) !important; font-size: 11px !important;
+             color: var(--ink-3); }
+</style>

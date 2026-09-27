@@ -1,7 +1,9 @@
 ---
 import Base from "../layouts/Base.astro";
 import { u } from "../lib/url.js";
+import fs from "node:fs";
 import regions from "../../public/regions.json";
+import { atlas as idx } from "../lib/atlas.js";
 import provs from "../../public/providers.json";
 
 const PROV = Object.fromEntries(provs.providers.map(p => [p.id, p]));
@@ -28,6 +30,51 @@ const FLAG_SLUG = {
 const flagsFor = (r) => (r.countries || [])
   .filter((cc) => FLAG_SLUG[cc])
   .map((cc) => ({ cc, href: `/flags/${FLAG_SLUG[cc]}-flags.html` }));
+
+/* ---- PHASE 4C: WHERE THIS LAYER IS MISSING, RANKED --------------------
+   41 regions cover 33 of the 237 countries this atlas names. Extending that
+   is the most distinctive work left — `filedUnder` is the thing nobody else
+   publishes — and it is also the slowest, because it is archival research
+   rather than data processing.
+
+   WHAT CAN BE AUTOMATED IS THE QUEUE, NOT THE ANSWER. The flag timelines now
+   give the sovereignty half for 210 countries: Spain has fourteen eras,
+   Mexico eight. What they cannot give is which archive a regime's paper went
+   to — that is read out of finding aids and correspondence, one country at a
+   time. So this ranks where the work would pay most and shows what is already
+   in hand to start from, and it does NOT invent regions.
+
+   Auto-generating two hundred regions from the flag data would also destroy
+   the property that makes these 41 worth having: each was written because
+   somebody was stuck on that ground and needed to know whose archive to
+   write to. A region nobody needed is a row that has never been tested. */
+const covered = new Set(regions.regions.flatMap((r) => r.countries || []));
+const CN = idx.countries || {};
+const placesByCC = {};
+for (const p of (idx.places || [])) {
+  if (p.cc) placesByCC[p.cc] = (placesByCC[p.cc] || 0) + 1;
+}
+let flagEraCount = {};
+try {
+  const fi = JSON.parse(fs.readFileSync("../data/flag-index.json", "utf8"));
+  const fe = JSON.parse(fs.readFileSync("../data/flag-eras.json", "utf8"));
+  const slugToName = {};
+  for (const c of fi.countries) {
+    slugToName[c.url.split("/").pop().replace(".html", "")] = c.name;
+  }
+  const nameToCC = Object.fromEntries(Object.entries(CN).map(([k, v]) => [v, k]));
+  for (const e of fe.eras) {
+    const nm = slugToName[e.slug];
+    const cc = nm && nameToCC[nm];
+    if (cc) flagEraCount[cc] = (flagEraCount[cc] || 0) + 1;
+  }
+} catch { flagEraCount = {}; }
+
+const gaps = Object.entries(placesByCC)
+  .filter(([cc]) => !covered.has(cc))
+  .map(([cc, n]) => ({ cc, n, name: CN[cc] || cc, eras: flagEraCount[cc] || 0 }))
+  .sort((a, b) => b.n - a.n)
+  .slice(0, 16);
 
 const mid = (r) => [
   (Math.min(...r.ring.map(p => p[0])) + Math.max(...r.ring.map(p => p[0]))) / 2,
@@ -114,6 +161,42 @@ const mid = (r) => [
       you could contribute →</a></p>
     </div>
   </div>
+
+  <section style="margin-top:44px">
+    <h2>Where this layer is missing</h2>
+    <p class="cap" style="max-width:76ch">These {regions.regions.length} regions cover
+    {covered.size} of the {Object.keys(CN).length} countries this atlas names. Below are the
+    countries where the atlas already holds the most ground and has no jurisdiction research
+    at all — which is where the next region would do the most good.</p>
+    <p class="cap" style="max-width:76ch"><b>The sovereignty half is already in hand.</b>
+    The <a href={u("/flags/")}>flag timelines</a> merged in today give who governed and when
+    for 210 countries. What they cannot give is <em>whose archive that means</em> — that is
+    read out of finding aids one country at a time, and it is the column this table exists
+    for. The count below is the head start, not the answer.</p>
+    <table>
+      <thead><tr>
+        <th>Country</th><th class="m">Places held</th><th class="m">Eras already known</th>
+        <th>Starting point</th>
+      </tr></thead>
+      <tbody>
+        {gaps.map((g) => (
+          <tr>
+            <td><a href={u(`/country/${g.cc.toLowerCase()}/`)}>{g.name}</a></td>
+            <td class="m">{g.n.toLocaleString()}</td>
+            <td class="m">{g.eras || "\u2014"}</td>
+            <td>{g.eras
+              ? <a href={u("/flags/")}>its flag timeline</a>
+              : <span class="cap">no timeline either \u2014 both halves open</span>}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <p class="cap" style="margin-top:12px">A region is written when somebody is stuck on that
+    ground and needs to know whose archive to write to. That is why there are
+    {regions.regions.length} rather than two hundred, and why this table is a queue rather
+    than a plan.</p>
+  </section>
+
 </Base>
 
 <style>

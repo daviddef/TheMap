@@ -19,6 +19,7 @@ import regions from "../../../public/regions.json";
 import provs from "../../../public/providers.json";
 import { sourcesFor, sourcesNear, access as ACCESS } from "../../lib/sources-by-country.js";
 import { atlas as idx } from "../../lib/atlas.js";
+import WhereToBegin from "../../components/WhereToBegin.astro";
 
 export async function getStaticPaths() {
   const full = (await import("../../data/places-full.json")).default;
@@ -197,6 +198,20 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
     marker sits at its centre, not at a building. Records filed at this level are usually held
     for the whole {place.level}.</p>
   )}
+
+  {/* FIRST, BEFORE THE DATA. Everything below this is what the atlas holds;
+      this is the order to open it in. A beginner handed eight headed sections
+      does not know which to click, and the honest order — free before a
+      login, a login before an index, an index before a letter — was nowhere
+      stated on a page that had all the parts. */}
+  <WhereToBegin
+    place={place}
+    region={region}
+    eras={region ? region.eras : []}
+    names={place.names || []}
+    parishes={place.parishes || []}
+    countryName={countryName}
+    u={u} />
 
   {older.length > 0 && (
     <div class="one" style="border-left-color:var(--accent)">

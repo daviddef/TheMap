@@ -1,0 +1,369 @@
+---
+/* WHERE TO BEGIN — the order of work, not another table of data.
+ *
+ * David: «someone searches a name or a place. They don't really know where to
+ * start other than my family comes from here. I want us to give them a start
+ * point… almost dummying the whole process.»
+ *
+ * The place page already held every piece of this. What it did not hold was an
+ * ORDER. A beginner given eight headed sections of collections, parishes,
+ * burials and unverified national sources does not know which to open first,
+ * and the honest answer — free images before a login, a login before an index,
+ * an index before a letter — is nowhere stated. This states it.
+ *
+ * THE ORDER IS BY WHAT IT COSTS YOU, NOT BY WHAT WE HOLD MOST OF.
+ *   1. the names, because you cannot search a name you do not know
+ *   2. the years and whose archive they fall in — the border question
+ *   3. free images
+ *   4. images behind a free account
+ *   5. an index, which proves a record exists and does not show it to you
+ *   6. a catalogue card, which means writing a letter
+ *   7. the parish itself, which is where the book physically was
+ *
+ * AND IT SAYS WHAT NOBODY HAS DONE. A step that reads «nobody has surveyed
+ * this» is more useful than a step omitted, because the reader then knows the
+ * silence is ours rather than the record's.
+ */
+const { place: d, region, eras, names, sources, volumes, parishes, countryName, u } =
+  Astro.props;
+
+const ACC_ORDER = ["free", "account", "index", "mixed", "paid", "catalogue", "onsite"];
+const ACC_SAY = {
+  free: "Images you can read now, free, no account",
+  account: "Images, free, but you must make an account first",
+  index: "An index — it proves the record exists and will not show it to you",
+  mixed: "Partly free, partly paid",
+  paid: "Images behind a paywall",
+  catalogue: "A catalogue card. The paper is not photographed — this is a letter, not a click",
+  onsite: "On paper, in the building. Somebody has to go, or ask somebody who can",
+};
+
+/* Collections grouped by what they cost, in the order a researcher should
+   actually open them. */
+const byCost = {};
+for (const c of (d.collections || [])) {
+  const a = c.access || "unsurveyed";
+  (byCost[a] = byCost[a] || []).push(c);
+}
+const costSteps = ACC_ORDER.filter((k) => byCost[k]?.length);
+
+/* The eras, oldest first, because a researcher walks backwards in time but
+   plans forwards from the earliest thing they can reach. */
+const timeline = (eras || []).slice().sort((a, b) => (a.from || 0) - (b.from || 0));
+
+/* The era notes are where this atlas's actual research lives — «THE TRAP.
+   Records of these years are filed under Italy» — so the ones carrying a note
+   are surfaced rather than left for somebody to scroll to. */
+/* A NOTE ON EVERY ERA IS NOT A TRAP ON EVERY ERA. Filtering on «has a note»
+   flagged all eight of Gračišće's periods as things that catch people out,
+   and if everything is a warning then nothing is. The ones worth lifting are
+   those that say the paper went somewhere a reader would not look — another
+   country, another archive, or nowhere at all. The rest are context and stay
+   in the table above, where they are still read. */
+const TRAP_WORDS = /filed under|trap|another|not (in|the)|elsewhere|nothing |no (parish |civil )?regist|destroyed|lost|never |instead of|rather than/i;
+const traps = timeline.filter((e) => e.note && e.note.length > 40
+                                  && TRAP_WORDS.test(e.note));
+
+const otherNames = (names || []).map((n) => n.n).filter(Boolean);
+const archives = [...new Set(timeline.flatMap((e) => e.filedUnder || []))];
+
+/* Shaped here rather than inside define:vars. An arrow function in that
+   attribute contains a «>», and every tool that finds the end of a tag with
+   [^>]* — including this project's own inline-script gate — stops there and
+   hands the parser half an attribute. Frontmatter is also simply where this
+   belongs. */
+const volRows = (d.collections || []).map((c) => ({
+  t: c.title, f: c.from, to: c.to, a: c.access, h: c.held,
+  k: c.kinds || [], u: c.url || null,
+}));
+const eraRows = (eras || []).map((e) => ({
+  f: e.from, to: e.to, p: e.polity, u: e.filedUnder || [], n: e.note || null,
+}));
+---
+<section class="wtb">
+  <h2 id="where-to-begin">Where to begin</h2>
+  <p class="wtb-lead">You know your family came from {d.name}. Here is the order
+  I would work in, cheapest and easiest first — and what to do when that runs
+  out.</p>
+
+  {/* PHASE 4D — THE QUESTION PEOPLE ACTUALLY ARRIVE WITH.
+      Nobody thinks «show me the holdings of Gračišće». They think «my
+      great-grandfather was born here about 1861». Every volume on this page
+      carries a year span, an access class and the archive that holds it, so
+      that question is answerable exactly — and until now the reader had to
+      answer it themselves by reading thirty-two rows and doing the arithmetic.
+      A year turns the whole plan from a list into an answer. */}
+  <div class="wtb-year">
+    <label for="wtb-y">Know roughly when? Put the year in and this plan narrows to it.</label>
+    <div class="wtb-yrow">
+      <input id="wtb-y" type="number" inputmode="numeric" placeholder="e.g. 1861"
+             min="1400" max="2026" autocomplete="off" />
+      <button type="button" id="wtb-yclear">Clear</button>
+    </div>
+    <div id="wtb-yout" class="wtb-yout" role="status" aria-live="polite"></div>
+  </div>
+
+  <ol class="wtb-steps">
+
+    {otherNames.length > 0 && (
+      <li>
+        <h3>Search both names, not one</h3>
+        {/* A map, not a join with tags in the separator: JSX escapes a string,
+            so «</b>, <b>» would have rendered as visible text rather than
+            markup — the reader would see the tags. */}
+        <p>This place has been written down as
+        {[d.name, ...otherNames].map((n, i) => (
+          <>{i > 0 && ", "}<b>{n}</b></>
+        ))}. A catalogue
+        indexed under the old name will not answer to the new one, and most
+        people never find out they were searching the wrong word.</p>
+        <p class="wtb-do">Do this: search each name separately on every site
+        below. Write the list down; you will need it every time.</p>
+      </li>
+    )}
+
+    {timeline.length > 0 && (
+      <li>
+        <h3>Work out which country your year belongs to</h3>
+        <p>This is the step almost everybody skips, and it is the commonest
+        reason a record that exists cannot be found. The ground did not move;
+        the border did. A baptism here in one decade may sit in a different
+        country's archive from one twenty years later.</p>
+        <table class="wtb-era">
+          <thead><tr><th>Years</th><th>Who governed</th><th>Whose archive</th></tr></thead>
+          <tbody>
+            {timeline.map((e) => (
+              <tr>
+                <td class="m">{e.from}–{e.to}</td>
+                <td>{e.polity}</td>
+                <td class="m">{(e.filedUnder || []).length
+                  ? e.filedUnder.join(" · ")
+                  : <span class="wtb-none">no archive holds this yet</span>}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p class="wtb-do">Do this: take the year you are looking for, find its
+        row, and note the archive. That is the one to search — not the one the
+        village is in today.</p>
+      </li>
+    )}
+
+    {traps.length > 0 && (
+      <li>
+        <h3>The things that catch people out here</h3>
+        {traps.map((e) => (
+          <p class="wtb-trap"><b>{e.from}–{e.to}, {e.polity}.</b> {e.note}</p>
+        ))}
+      </li>
+    )}
+
+    {costSteps.length > 0 && !["free", "account"].includes(costSteps[0]) && (
+      <li>
+        <h3>Nothing here is a click away — and that is the honest answer</h3>
+        <p>Every catalogued volume for {d.name} needs a letter, a login or a
+        visit. That is not a failure of your searching; it is what the record
+        looks like here. The steps below are still in order of what they cost
+        you, but the cheapest one is not free.</p>
+      </li>
+    )}
+
+    {costSteps.map((k, i) => (
+      <li>
+        {/* «Start here» only where starting there is actually possible. It was
+            printed on the first AVAILABLE step, which for a place whose
+            registers are all onsite read «Start here — On paper, in the
+            building»: the hardest option dressed as the easy first move. */}
+        <h3>{i === 0 && ["free", "account"].includes(k) ? "Start here — " : ""}{ACC_SAY[k]}</h3>
+        <ul class="wtb-cols">
+          {byCost[k].slice(0, 12).map((c) => (
+            <li>
+              {c.url ? <a href={c.url} target="_blank" rel="noopener">{c.title}</a> : c.title}
+              {c.from && <span class="m"> {c.from}{c.to && c.to !== c.from ? `–${c.to}` : ""}</span>}
+            </li>
+          ))}
+          {byCost[k].length > 12 && <li class="wtb-none">and {byCost[k].length - 12} more below</li>}
+        </ul>
+        {k === "index" && (
+          <p class="wtb-do">An index entry is a finding, not an answer. Note the
+          reference it gives you — that reference is what you quote when you
+          write for the actual page.</p>
+        )}
+        {(k === "catalogue" || k === "onsite") && (
+          <p class="wtb-do">Write to the archive. Give the place, the years, the
+          record type, and the reference if you have one. Archives answer
+          specific questions far more often than open ones.</p>
+        )}
+      </li>
+    ))}
+
+    {(parishes || []).length > 0 && (
+      <li>
+        <h3>Find the parish, because that is where the book was</h3>
+        <p>Before civil registration, the parish priest kept the register.
+        The nearest here {(parishes || []).length === 1 ? "is" : "are"}
+        {" "}{(parishes || []).slice(0, 4).map((p) => p.n || p.name).join(", ")}.
+        A village without its own church was written into a neighbour's book.</p>
+      </li>
+    )}
+
+    <li>
+      <h3>When you run out — and you will</h3>
+      <p>Everything above is what this atlas knows. It is not everything there
+      is. <b>Nine places in ten on this map have never been surveyed by
+      anybody</b>, so a gap here is usually our silence rather than the
+      record's absence.</p>
+      <p class="wtb-do">Do this: write to the archive named in the era table for
+      your year, even if we hold nothing for it. Then
+      {" "}<a href={u("/add/")}>tell us what you found</a> — a gap somebody has
+      personally closed is the most useful thing a stranger can give this map.</p>
+    </li>
+  </ol>
+
+  {archives.length > 0 && (
+    <p class="wtb-foot">The archives named above: {archives.join(" · ")}.
+    {" "}<a href={u("/jurisdictions/")}>What each one holds and why</a>.</p>
+  )}
+</section>
+
+<script is:inline define:vars={{ WTB_VOLS: volRows, WTB_ERAS: eraRows, WTB_NAME: d.name }}>
+  (function () {
+    var box = document.getElementById("wtb-y");
+    var out = document.getElementById("wtb-yout");
+    var clear = document.getElementById("wtb-yclear");
+    if (!box || !out) return;
+
+    function esc(s) {
+      return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; });
+    }
+    /* Order by what it costs, exactly as the steps above do. A year that
+       returns a free register and a catalogue card should show the free one
+       first or the ordering advice on this page contradicts itself. */
+    var COST = ["free", "account", "index", "mixed", "paid", "catalogue", "onsite"];
+
+    function run() {
+      var y = parseInt(box.value, 10);
+      if (!y || y < 1000 || y > 2100) { out.innerHTML = ""; return; }
+
+      var era = WTB_ERAS.filter(function (e) {
+        return e.f != null && y >= e.f && (e.to == null || y <= e.to); })[0];
+
+      /* A REGISTER COVERING THE YEAR, NOT STARTING IN IT. A book running
+         1667–1745 is exactly what somebody searching 1700 wants, and the
+         commonest beginner mistake is looking for a volume labelled with
+         their year. */
+      var hit = WTB_VOLS.filter(function (v) {
+        return v.f != null && y >= v.f && y <= (v.to == null ? v.f : v.to); });
+      hit.sort(function (a, b) {
+        return (COST.indexOf(a.a) < 0 ? 9 : COST.indexOf(a.a)) -
+               (COST.indexOf(b.a) < 0 ? 9 : COST.indexOf(b.a)); });
+
+      var h = [];
+      if (era) {
+        h.push('<p class="wtb-yera"><b>' + y + " \u2014 " + esc(era.p) + ".</b> " +
+          (era.u.length
+            ? "Search " + era.u.map(esc).join(" and ") + " for this year, not the " +
+              "country " + esc(WTB_NAME) + " is in today."
+            : "No archive here is recorded as holding this period yet.") + "</p>");
+        if (era.n) h.push('<p class="wtb-ynote">' + esc(era.n) + "</p>");
+      } else {
+        h.push('<p class="wtb-yera"><b>' + y + ".</b> No researched era covers " +
+          "this year here, so this map cannot tell you whose archive it was. " +
+          "That is a gap in the research, not a statement about the record.</p>");
+      }
+
+      if (hit.length) {
+        h.push('<p class="wtb-ycount"><b>' + hit.length + "</b> volume" +
+          (hit.length === 1 ? "" : "s") + " here cover" + (hit.length === 1 ? "s" : "") +
+          " " + y + ", cheapest first:</p><ul class=\"wtb-yhits\">");
+        hit.slice(0, 10).forEach(function (v) {
+          h.push("<li>" + (v.u
+            ? '<a href="' + esc(v.u) + '" target="_blank" rel="noopener">' + esc(v.t) + "</a>"
+            : esc(v.t)) +
+            ' <span class="m">' + v.f + (v.to && v.to !== v.f ? "\u2013" + v.to : "") +
+            "</span>" + (v.a ? ' <span class="wtb-ya">' + esc(v.a) + "</span>" : "") +
+            (v.h ? ' <span class="m">at ' + esc(v.h) + "</span>" : "") + "</li>");
+        });
+        h.push("</ul>");
+      } else {
+        h.push('<p class="wtb-ycount">No volume catalogued here covers ' + y +
+          ". Write to the archive named above anyway \u2014 nine places in ten on " +
+          "this map have never been surveyed, so this is usually our silence.</p>");
+      }
+      out.innerHTML = h.join("");
+    }
+
+    box.addEventListener("input", function () {
+      clearTimeout(box._t); box._t = setTimeout(run, 200); });
+    clear.addEventListener("click", function () { box.value = ""; out.innerHTML = ""; });
+  })();
+</script>
+
+<style>
+  .wtb-year { margin: 14px 0 4px; padding: 12px 14px; border-radius: 6px;
+              background: var(--panel-2); }
+  .wtb-year label { display: block; font-family: var(--sans); font-size: 13px;
+                    color: var(--ink-2); margin-bottom: 7px; }
+  .wtb-yrow { display: flex; gap: 8px; }
+  .wtb-year input { font-family: var(--mono); font-size: 15px; padding: 8px 10px;
+    width: 9em; border: 1px solid var(--rule-strong); border-radius: 5px;
+    background: var(--panel); color: var(--ink); }
+  .wtb-year input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .wtb-year button { font-family: var(--sans); font-size: 12.5px; padding: 0 12px;
+    border: 1px solid var(--rule); border-radius: 5px; background: var(--panel);
+    color: var(--ink-2); cursor: pointer; }
+  .wtb-yout:not(:empty) { margin-top: 11px; }
+  :global(.wtb-yera) { font-family: var(--sans); font-size: 13.5px; line-height: 1.6;
+    color: var(--ink) !important; margin: 0 0 6px; }
+  :global(.wtb-ynote) { font-family: var(--sans); font-size: 12.5px; line-height: 1.55;
+    color: var(--ink-2); border-left: 2px solid var(--brick); padding-left: 10px;
+    margin: 0 0 8px; }
+  :global(.wtb-ycount) { font-family: var(--sans); font-size: 13px; margin: 8px 0 4px; }
+  :global(.wtb-yhits) { margin: 0; padding-left: 18px; }
+  :global(.wtb-yhits li) { font-family: var(--sans); font-size: 13px; line-height: 1.75; }
+  :global(.wtb-yhits .m) { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+  :global(.wtb-ya) { font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+    letter-spacing: .04em; border: 1px solid var(--rule); border-radius: 999px;
+    padding: 1px 6px; color: var(--ink-2); }
+
+  .wtb { margin: 8px 0 34px; padding: 22px 24px 8px;
+         border: 1px solid var(--rule); border-left: 3px solid var(--brass);
+         border-radius: 0 6px 6px 0; background: var(--panel); }
+  .wtb h2 { font-family: var(--serif); font-size: 26px; margin: 0 0 6px; }
+  .wtb-lead { font-family: var(--sans); font-size: 14.5px; line-height: 1.62;
+              color: var(--ink-2); max-width: 72ch; margin: 0 0 6px; }
+  .wtb-steps { counter-reset: s; list-style: none; padding: 0; margin: 18px 0 0; }
+  .wtb-steps > li { counter-increment: s; position: relative;
+                    padding: 0 0 20px 44px; }
+  .wtb-steps > li::before { content: counter(s); position: absolute; left: 0; top: 1px;
+    width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+    font-family: var(--mono); font-size: 13px; color: var(--brass);
+    border: 1px solid var(--brass); }
+  .wtb-steps h3 { font-family: var(--serif); font-size: 18px; margin: 2px 0 6px; }
+  .wtb-steps p { font-family: var(--sans); font-size: 13.5px; line-height: 1.6;
+                 color: var(--ink-2); margin: 0 0 7px; max-width: 74ch; }
+  /* «Do this» is the sentence a beginner is actually here for, so it does not
+     read like the paragraph above it. */
+  .wtb-do { border-left: 2px solid var(--rule-strong); padding-left: 11px;
+            color: var(--ink) !important; }
+  .wtb-trap { border-left: 2px solid var(--brick); padding-left: 11px; }
+  .wtb-era { width: 100%; border-collapse: collapse; margin: 8px 0 9px; font-size: 13px; }
+  .wtb-era th { text-align: left; font-family: var(--mono); font-size: 10.5px;
+                text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3);
+                border-bottom: 1px solid var(--rule-strong); padding: 0 12px 5px 0; }
+  .wtb-era td { padding: 5px 12px 5px 0; border-bottom: 1px solid var(--rule);
+                vertical-align: top; color: var(--ink-2); }
+  .wtb-era .m { font-family: var(--mono); font-size: 11.5px; white-space: nowrap; }
+  .wtb-cols { margin: 4px 0 7px; padding-left: 18px; }
+  .wtb-cols li { font-family: var(--sans); font-size: 13px; line-height: 1.7;
+                 color: var(--ink-2); }
+  .wtb-cols .m { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+  .wtb-none { color: var(--ink-3); font-style: italic; }
+  .wtb-foot { font-family: var(--sans); font-size: 12.5px; color: var(--ink-3);
+              margin: 2px 0 14px; }
+  @media (max-width: 640px) {
+    .wtb { padding: 16px 15px 4px; }
+    .wtb-steps > li { padding-left: 36px; }
+  }
+</style>

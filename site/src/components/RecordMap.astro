@@ -253,6 +253,30 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
   </aside>
 </div>
 
+{/* ---- THE FLAGS, UNDER THE MAP AND ON THE SAME SEARCH --------------------
+    David asked for the Flags Atlas's own countries-and-hubs cards to sit
+    below the map and filter as you type, the way its index page does. So one
+    search box now answers two questions at once: where the records are, and
+    who governed the ground.
+
+    IT SHARES THE MAP'S BOX RATHER THAN ADDING ONE. Two search fields on one
+    page is two places to look and two states to reconcile; the reader types
+    once. The section is hidden until the data arrives and hidden again when
+    nothing matches, so a fruitless search does not leave a wall of 210 cards
+    contradicting an empty map.
+
+    FETCHED, NOT BUNDLED. 164 KB of cards and hand-drawn flags is not worth
+    delaying the first paint for, so it arrives after the map is up. */}
+<section class="ra-flagres" id="ra-flagres" hidden aria-live="polite">
+  <div class="ra-flagres-head">
+    <h2 id="ra-flagres-h">Whose flag flew there</h2>
+    <p class="cap" id="ra-flagres-sub"></p>
+  </div>
+  <div class="ra-fgrid" id="ra-fcountries"></div>
+  <h3 class="ra-fsub" id="ra-fhubs-h" hidden>The hubs</h3>
+  <div class="ra-fgrid ra-fgrid-hub" id="ra-fhubs"></div>
+</section>
+
 
 
 {/* The map cannot draw without these three, and the browser cannot know
@@ -620,6 +644,125 @@ window.addEventListener("load", async function () {
                " \u2197</a> " + esc(T("on Flag History, a sister project.")) + "</p>");
     });
     return h.join("");
+  }
+
+  /* ---- the flag cards under the map -------------------------------------
+     One search box, two answers. The map filters places; this filters the 210
+     countries and 34 hubs on the same keystroke, matching the name, the
+     region, the hub and every crown that ruled there — so «habsburg» returns
+     the ten countries it held, which is a question the map alone cannot
+     answer and a reader of this atlas very often has. */
+  var FLAGIDX = null, flagIdxWanted = false;
+  var fSec = document.getElementById("ra-flagres");
+  var fCountries = document.getElementById("ra-fcountries");
+  var fHubs = document.getElementById("ra-fhubs");
+  var fHubsH = document.getElementById("ra-fhubs-h");
+  var fSub = document.getElementById("ra-flagres-sub");
+
+  function loadFlagIndex() {
+    if (FLAGIDX || flagIdxWanted) return;
+    flagIdxWanted = true;
+    fetch(BASE + "flag-index.json")
+      .then(function (r) { return r.json(); })
+      .then(function (d) { FLAGIDX = d; drawFlagRes(qbox ? qbox.value : ""); })
+      .catch(function () { FLAGIDX = { countries: [], hubs: [] }; });
+  }
+
+  function flagHay(c) {
+    /* Built once per card and cached on it. Matching the crowns is the point:
+       a reader who types «ottoman» is asking which ground it held. */
+    if (!c._hay) {
+      c._hay = fold([c.name, c.region, c.hub].concat(c.crowns || [])
+                    .filter(Boolean).join(" "));
+    }
+    return c._hay;
+  }
+
+  function drawFlagRes(q) {
+    if (!FLAGIDX || !fSec) return;
+    var k = fold((q || "").trim());
+    /* A TWO-PART QUERY STILL HAS TO ANSWER. «Blazevic Gracisce» is a surname
+       and a village; neither is a country, so matching the whole string would
+       hide this section for every combined search.
+       splitQuery() looked like the tool for it and is not: it returns nothing
+       and instead sets qPlace/qName on the module, so calling it from here
+       would have reached into the map's own state to read a value that was
+       never returned. Any word of three characters or more is asked
+       separately instead — same effect, no side effect. */
+    var words = k ? k.split(/\s+/).filter(function (w) { return w.length >= 3; }) : [];
+    var hit = function (hay) {
+      if (!k) return true;
+      if (hay.indexOf(k) !== -1) return true;
+      for (var i = 0; i < words.length; i++) {
+        if (hay.indexOf(words[i]) !== -1) return true;
+      }
+      return false;
+    };
+    var cs = FLAGIDX.countries || [], hs = FLAGIDX.hubs || [];
+    var mc = cs.filter(function (c) { return hit(flagHay(c)); });
+    var mh = hs.filter(function (h) {
+      return hit(fold(h.name + " " + (h.what || "") + " " + (h.meta || "")));
+    });
+
+    if (k && !mc.length && !mh.length) { fSec.hidden = true; return; }
+    fSec.hidden = false;
+    fSub.textContent = k
+      ? mc.length + " of " + cs.length + " countries, " + mh.length + " of " +
+        hs.length + " hubs"
+      : cs.length + " countries and " + hs.length + " hubs — type to filter";
+
+    /* Capped at 60. Painting 210 cards with inline SVG on every keystroke is
+       work nobody asked for; an unfiltered reader is browsing, not looking. */
+    fCountries.innerHTML = mc.slice(0, 60).map(function (c) {
+      return '<a class="ra-fcard" href="' + BASE + esc(c.url) + '" style="--edge:' +
+        esc(c.color || "var(--rule-strong)") + '">' +
+        '<span class="ra-fflag">' + (c.flag
+          ? '<svg viewBox="0 0 300 200" aria-hidden="true">' + c.flag + "</svg>" : "") +
+        "</span>" +
+        '<span class="ra-fname">' + esc(c.name) + "</span>" +
+        (c.region ? '<span class="ra-freg">' + esc(c.region) + "</span>" : "") +
+        '<span class="ra-fcrowns">' + (c.crowns || []).slice(0, 8).map(function (x) {
+          return '<span class="ra-fcrown">' + esc(x) + "</span>"; }).join("") +
+        "</span></a>";
+    }).join("");
+
+    fHubsH.hidden = !mh.length;
+    /* A HUB IS THE UNIT A RESEARCHER ACTUALLY HAS. Somebody chasing a Habsburg
+       ancestor does not know whether the parish ended up in Austria, Hungary,
+       Croatia or Romania — the hub spans exactly that uncertainty, which is
+       why David asked for the records to hang off it. So each hub says what
+       this atlas holds across its member countries and offers a way in.
+
+       THE DENOMINATOR TRAVELS WITH IT, as everywhere else: «9 countries ·
+       1,588 places · 6,844 volumes» is a claim about coverage and a hub with
+       nothing says so rather than showing a bare zero. */
+    fHubs.innerHTML = mh.slice(0, 12).map(function (h) {
+      var held = h.holds, stat = "", ways = "";
+      if (held) {
+        stat = held.countries + " countr" + (held.countries === 1 ? "y" : "ies") +
+          (held.places
+            ? " · " + held.places.toLocaleString() + " place" +
+              (held.places === 1 ? "" : "s") +
+              (held.volumes ? " · " + held.volumes.toLocaleString() + " volume" +
+                (held.volumes === 1 ? "" : "s") : "")
+            : " · nothing walked here yet");
+        /* Straight into the map with those countries lit, which is the thing
+           a reader wants next and had no way to ask for. */
+        if (held.ccs && held.ccs.length) {
+          ways = '<span class="ra-fways">' +
+            '<a href="' + BASE + "?hub=" + encodeURIComponent(h.name) +
+            '" data-hub="' + esc(h.name) + '">' + esc(T("Show these on the map")) +
+            "</a></span>";
+        }
+      }
+      return '<a class="ra-fcard ra-fhub" href="' + BASE + esc(h.url) + '" style="--edge:' +
+        esc(h.color || "var(--rule-strong)") + '">' +
+        (h.meta ? '<span class="ra-fmeta">' + esc(h.meta) + "</span>" : "") +
+        '<span class="ra-fname">' + esc(h.name) + "</span>" +
+        (stat ? '<span class="ra-fholds">' + esc(stat) + "</span>" : "") +
+        (h.what ? '<span class="ra-fwhat">' + esc(h.what) + "</span>" : "") +
+        ways + "</a>";
+    }).join("");
   }
 
   var REGION = {}; regions.regions.forEach(function (r) { REGION[r.id] = r; });
@@ -3307,6 +3450,10 @@ window.addEventListener("load", async function () {
     recentSync();
     clearTimeout(qbox._t);
     qbox._t = setTimeout(apply, 140);
+    /* The flag cards ride the same keystroke. Debounced together so the two
+       halves of the answer change at the same moment rather than staggering. */
+    clearTimeout(qbox._tf);
+    qbox._tf = setTimeout(function () { drawFlagRes(qbox.value); }, 160);
     /* REMEMBERED ONLY WHEN IT WORKED, AND ONLY WHEN THE TYPING STOPPED.
        apply() runs on a 140ms debounce, so recording there would keep «B»,
        «Bl» and «Bla» as well as «Blažević». A second and a half of quiet,
@@ -3635,6 +3782,44 @@ window.addEventListener("load", async function () {
      so they obey the year and the kind boxes the visitor has already set;
      and a ?at= link that pointed at one, which found nothing a moment ago
      and can now be honoured. */
+  /* After the map is drawable, not before: 164 KB of cards must not stand in
+     front of the file the first paint waits on. */
+  loadFlagIndex();
+
+  /* ?hub=Former+Yugoslavia — the hub cards offer it, so the map has to honour
+     it. A link that lands on an unchanged map is the fault this project
+     caught in its own Flag History deep links this morning: an address the
+     browser accepts and silently does nothing with looks exactly like one
+     that worked. */
+  (function () {
+    var wantHub = Q.get("hub");
+    if (!wantHub) return;
+    var tries = 0;
+    (function waitForIndex() {
+      if (!FLAGIDX) {
+        if (tries++ > 60) return;      // the file never came; leave the map alone
+        setTimeout(waitForIndex, 250);
+        return;
+      }
+      var hub = (FLAGIDX.hubs || []).filter(function (h) {
+        return h.name === wantHub; })[0];
+      if (!hub || !hub.holds || !hub.holds.ccs || !hub.holds.ccs.length) return;
+      var want = {};
+      hub.holds.ccs.forEach(function (c) { want[c] = 1; });
+      var pts = [];
+      markers.forEach(function (m) {
+        if (m._p && want[m._p.cc]) pts.push([m._p.y, m._p.x]);
+      });
+      if (pts.length) map.fitBounds(pts, { padding: [30, 30], maxZoom: 6 });
+      var box = document.getElementById("ra-flagres-sub");
+      if (box) {
+        box.textContent = hub.name + " — " + hub.holds.places.toLocaleString() +
+          " places across " + hub.holds.countries + " countries";
+      }
+      if (fSec) fSec.hidden = false;
+    })();
+  })();
+
   if (idx.quiet && idx.quiet.file) {
     fetch(INDEX.replace(/[^/]*$/, idx.quiet.file))
       .then(function (r) { return r.json(); })
@@ -4051,6 +4236,54 @@ window.addEventListener("load", async function () {
   :global(.ra-recent-x) { font: 400 10.5px/1 var(--sans); color: var(--ink-3);
     background: none; border: 0; cursor: pointer; text-decoration: underline;
     padding: 5px 2px; }
+  /* ---- the flag cards under the map --------------------------------------
+     THE FLAGS ATLAS'S OWN DEVICE, brought across rather than reinvented: a
+     card with a coloured top edge keyed to the country, its flag, and the
+     crowns as chips. It is the thing David pointed at when he said that site
+     feels warmer, and it works here for the same reason it works there —
+     colour carrying identity on a card, where it cannot be confused with the
+     access classes that colour the dots on the map. Those stay the map's
+     vocabulary and are not touched. */
+  .ra-flagres { margin: 30px 0 8px; }
+  .ra-flagres[hidden] { display: none; }
+  .ra-flagres-head h2 { font-family: var(--serif); font-size: 22px; margin: 0; }
+  .ra-flagres-head .cap { font-family: var(--mono); font-size: 11.5px;
+    color: var(--ink-3); margin: 4px 0 14px; }
+  .ra-fsub { font-family: var(--serif); font-size: 17px; margin: 22px 0 10px; }
+  .ra-fgrid { display: grid; gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  .ra-fgrid-hub { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+
+  :global(.ra-fcard) { display: block; text-decoration: none;
+    background: var(--panel); border: 1px solid var(--rule);
+    border-top: 3px solid var(--edge, var(--rule-strong));
+    border-radius: 0 0 6px 6px; padding: 11px 13px 12px; }
+  :global(.ra-fcard:hover) { border-color: var(--rule-strong);
+    border-top-color: var(--edge, var(--accent)); }
+  :global(.ra-fcard:focus-visible) { outline: 2px solid var(--accent);
+    outline-offset: 2px; }
+  :global(.ra-fflag) { display: inline-block; vertical-align: middle;
+    width: 30px; margin-right: 9px; }
+  :global(.ra-fflag svg) { display: block; width: 100%; height: auto;
+    border: 1px solid var(--rule); border-radius: 2px; }
+  :global(.ra-fname) { font-family: var(--serif); font-size: 16.5px;
+    color: var(--ink); vertical-align: middle; }
+  :global(.ra-freg) { display: block; font-family: var(--sans); font-size: 12px;
+    color: var(--ink-3); margin: 5px 0 0; }
+  :global(.ra-fcrowns) { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+  :global(.ra-fcrown) { font-family: var(--mono); font-size: 10px;
+    letter-spacing: .03em; color: var(--ink-2); border: 1px solid var(--rule);
+    border-radius: 999px; padding: 2px 7px; }
+  :global(.ra-fmeta) { display: block; font-family: var(--mono); font-size: 10px;
+    letter-spacing: .05em; text-transform: uppercase; color: var(--brass);
+    margin-bottom: 5px; }
+  :global(.ra-fwhat) { display: block; font-family: var(--sans); font-size: 12.5px;
+    line-height: 1.55; color: var(--ink-2); margin-top: 6px; }
+  :global(.ra-fholds) { display: block; font-family: var(--mono); font-size: 11px;
+    color: var(--ink); margin-top: 5px; }
+  :global(.ra-fways) { display: block; font-family: var(--sans); font-size: 12px;
+    margin-top: 8px; color: var(--accent); }
+
   /* ---- who held this ground -------------------------------------------- */
   .ra-eras { list-style: none; margin: 4px 0 10px; padding: 0; }
   :global(.ra-eras li) { display: grid; gap: 1px 10px; padding: 6px 0;

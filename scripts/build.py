@@ -1395,6 +1395,111 @@ def main():
     except FileNotFoundError:
         pass
 
+    # The cards under the map — 210 countries, 34 hubs and their flags.
+    #
+    # AND WHAT THIS ATLAS HOLDS FOR EACH HUB, computed here rather than
+    # extracted, because it is a fact about the records and it changes with
+    # every harvest. David: «a user is typically going to want to find records
+    # from hubs and it's well structured to do this» — which is right, and the
+    # hub is a better unit than a country for the question a researcher
+    # actually has. Somebody chasing a Habsburg ancestor does not know whether
+    # the parish ended up in Austria, Hungary, Croatia or Romania; the hub
+    # spans exactly that uncertainty.
+    #
+    # MATCHED ON THE COUNTRY NAME, WHICH IS NOT FREE. The flags data names
+    # countries in its own words and this atlas names them in the ISO table's.
+    # Where they disagree the country contributes nothing to its hub's total —
+    # silently — so the aliases below exist and the count of what still fails
+    # is printed rather than swallowed.
+    try:
+        _fi = json.load(open("data/flag-index.json"))
+        # HAND-WRITTEN, AND IT HAS TO BE. This atlas names countries the way
+        # Natural Earth does — «Bosnia and Herz.», «Dominican Rep.», «St. Vin.
+        # and Gren.» — and the flags data names them in full. A fuzzy matcher
+        # over the gap proposed Scotland→Poland, Wales→Maldives, Roman
+        # Empire→Romania and Northern Ireland→North Korea, which is the same
+        # answer this project already refused when matching polities to
+        # Wikidata. Every line below was read off both lists.
+        _ALIAS = {
+            "Antigua and Barbuda": "Antigua and Barb.",
+            "Bosnia & Herzegovina": "Bosnia and Herz.",
+            "Cape Verde": "Cabo Verde",
+            "Central African Republic": "Central African Rep.",
+            "Democratic Republic of the Congo": "Dem. Rep. Congo",
+            "Republic of the Congo": "Congo",
+            "Dominican Republic": "Dominican Rep.",
+            "Equatorial Guinea": "Eq. Guinea",
+            "Eswatini": "eSwatini",
+            "Marshall Islands": "Marshall Is.",
+            "Saint Kitts and Nevis": "St. Kitts and Nevis",
+            "Saint Vincent and the Grenadines": "St. Vin. and Gren.",
+            "Solomon Islands": "Solomon Is.",
+            "South Sudan": "S. Sudan",
+            "São Tomé & Príncipe": "São Tomé and Principe",
+            "The Gambia": "Gambia",
+            "United States": "United States of America",
+            "Vatican City": "Vatican",
+            # The home nations have records and no ISO2 of their own here, so
+            # they resolve to GB and the hub dedupes rather than counting
+            # Britain three times.
+            "Scotland": "United Kingdom",
+            "Wales": "United Kingdom",
+            "Northern Ireland": "United Kingdom",
+            "England": "United Kingdom",
+        }
+        # Polities with no modern country at all. Not a mismatch to be fixed —
+        # there is no ISO2 for the Ottoman Empire — so they are named here and
+        # excluded from the count of failures, which would otherwise read as
+        # thirty-one broken aliases forever.
+        _HISTORICAL = {
+            "Ancient Egypt", "British Empire", "Dominion of Newfoundland",
+            "Kingdom of Hawaii", "Kingdom of Sikkim", "Mongol Empire",
+            "Mughal Empire", "Ottoman Empire", "Persian Empire",
+            "Roman Empire", "Ryukyu Kingdom", "Spanish Empire", "Tannu Tuva",
+        }
+        _n2cc = {v: k for k, v in (idx.get("countries") or {}).items()}
+        _bycc = {}
+        for _p in index:
+            if _p.get("cc"):
+                _bycc.setdefault(_p["cc"], []).append(_p)
+        _hubagg, _unmatched = {}, []
+        for _c in _fi["countries"]:
+            _h = _c.get("hub")
+            if not _h:
+                continue
+            _nm = _ALIAS.get(_c["name"], _c["name"])
+            _cc = _n2cc.get(_nm)
+            _a = _hubagg.setdefault(_h, {"countries": 0, "places": 0,
+                                         "volumes": 0, "ccs": []})
+            _a["countries"] += 1
+            if not _cc:
+                if _c["name"] not in _HISTORICAL:
+                    _unmatched.append(_c["name"])
+                continue
+            if _cc not in _a["ccs"]:
+                _a["ccs"].append(_cc)
+            else:
+                continue          # already counted for this hub, e.g. the home nations
+            _rows = _bycc.get(_cc, [])
+            _a["places"] += len(_rows)
+            _a["volumes"] += sum((_r.get("v") or 0) for _r in _rows)
+        for _h in _fi["hubs"]:
+            _a = _hubagg.get(_h["name"])
+            if _a:
+                _h["holds"] = {"countries": _a["countries"], "places": _a["places"],
+                               "volumes": _a["volumes"], "ccs": sorted(_a["ccs"])}
+        _withheld = sum(1 for _h in _fi["hubs"] if _h.get("holds"))
+        print(f"flag-hubs         {_withheld} of {len(_fi['hubs'])} hubs carry record "
+              f"counts; {len(set(_unmatched))} country names did not match the ISO "
+              f"table" + (f" ({', '.join(sorted(set(_unmatched))[:4])}…)" if _unmatched else ""))
+        json.dump(_fi, open(os.path.join(OUT, "flag-index.json"), "w"),
+                  ensure_ascii=False, separators=(",", ":"))
+        print(f"flag-index        {_fi['counts']['countries']} countries, "
+              f"{_fi['counts']['hubs']} hubs, "
+              f"{_fi['counts'].get('withFlag', 0)} drawn flags")
+    except FileNotFoundError:
+        pass
+
     # ---- surnames, sharded like the gazetteer -----------------------------
     # Same trick and the same reason: a search corpus is fetched three letters
     # at a time and never rides in the index that draws the map.

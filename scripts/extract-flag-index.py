@@ -79,22 +79,52 @@ def main():
         hubs.append({"name": text(name), "url": "flags/" + href,
                      "meta": text(meta), "what": blurb, "color": colour})
 
+    # THE FLAGS THEMSELVES, 60 KB for all 210. They are inline SVG bodies in a
+    # FLAGS registry — hand-drawn line art this project owns, not files
+    # fetched from anywhere, so there is no licence question and no request
+    # per card. Small enough to ship whole and the reason the cards read as
+    # something rather than a list of names.
+    flags = {}
+    fm = re.search(r"(?:var|const|let)\s+FLAGS\s*=\s*\{", src)
+    if fm:
+        i = fm.end() - 1
+        depth, j = 0, i
+        while j < len(src):
+            if src[j] == "{":
+                depth += 1
+            elif src[j] == "}":
+                depth -= 1
+                if depth == 0:
+                    break
+            j += 1
+        for k, v in re.findall(r"([A-Za-z0-9_\-]+)\s*:\s*'((?:[^'\\]|\\.)*)'",
+                               src[i:j + 1]):
+            flags[k] = v.replace("\\'", "'")
+
+    # ENTITIES, AGAIN, AND THIS IS THE THIRD TIME TODAY. The COUNTRIES array is
+    # written into HTML, so its strings carry HTML escapes: «C&ocirc;te
+    # d'Ivoire», «Bosnia &amp; Herzegovina». Left raw they do not match the
+    # atlas's own country names, so those countries silently contributed
+    # nothing to their hub's totals — the same failure as the French survey
+    # that read a page of «&eacute;tat civil» as saying nothing.
     rows = []
     for c in countries:
         rows.append({
-            "name": c.get("name"),
+            "name": html.unescape(c.get("name") or ""),
             "url": "flags/" + c.get("url", ""),
-            "region": c.get("region"),
-            "hub": c.get("hub"),
+            "region": html.unescape(c.get("region") or "") or None,
+            "hub": html.unescape(c.get("hub") or "") or None,
             "color": c.get("color"),
-            "crowns": c.get("crowns") or [],
+            "crowns": [html.unescape(x) for x in (c.get("crowns") or [])],
             "ownPage": bool(c.get("ownPage")),
+            "flag": flags.get(c.get("flag") or ""),
         })
 
     print(f"{len(rows)} countries, {len(hubs)} hubs")
     print(f"  with a page of their own : {sum(1 for r in rows if r['ownPage'])}")
     print(f"  distinct regions         : {len({r['region'] for r in rows if r['region']})}")
     print(f"  crowns named in total    : {sum(len(r['crowns']) for r in rows):,}")
+    print(f"  with a drawn flag        : {sum(1 for r in rows if r.get('flag'))}")
 
     if not a.write:
         print("  (dry run — pass --write)")
@@ -108,7 +138,8 @@ def main():
         "source": "site/public/flags/index.html — this project's own page",
         "licence": "This atlas's own compilation",
         "generatedBy": "scripts/extract-flag-index.py",
-        "counts": {"countries": len(rows), "hubs": len(hubs)},
+        "counts": {"countries": len(rows), "hubs": len(hubs),
+                   "withFlag": sum(1 for r in rows if r.get("flag"))},
         "countries": rows,
         "hubs": hubs,
     }, open(OUT, "w"), ensure_ascii=False, indent=1)

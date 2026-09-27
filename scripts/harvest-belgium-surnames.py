@@ -29,8 +29,25 @@ build-surnames.py reads. data/belgium-by-municipality.json keeps the
 grain, for the map to use when there is somewhere to put it.
 
 Statbel's open data are CC BY 4.0.
+
+A FIFTH MISTAKE, FOUND LATER, IN THIS SAME FILE. Line 114 read the zip
+member through io.TextIOWrapper(..., errors="replace"), which does not
+fail — it substitutes U+FFFD for every byte Python cannot decode as
+UTF-8 and keeps going. Statbel has never documented this export's
+encoding, and it is not UTF-8: the substitution landed 4,836 replacement
+characters in be.json, which propagated into 4,066 damaged surnames in
+data/surnames.json (Abandonné as "Abandonn<?>", Abou Yaïla as
+"Abou Ya<?>la", Abaïch as "Aba<?>ch" — live, broken page titles). That is
+the same failure as the other four: a loud problem quietly absorbed
+instead of raised. decode_strict() below replaces it — UTF-8 first, then
+CP1252, and SystemExit if the file matches neither — so a future encoding
+mismatch stops the run instead of mangling names. It has not been run
+against Statbel since, because this environment has no route to
+statbel.fgov.be; see RESEARCH-REPORT.md for what that means for
+data/frequencies/be.json and data/surnames.json, which still carry the
+4,066 damaged names this fix would have prevented.
 """
-import collections, io, json, os, re, time, urllib.parse
+import collections, json, os, re, time, urllib.parse
 import urllib.request, zipfile
 
 ZIP = ("https://statbel.fgov.be/sites/default/files/files/opendata/"
@@ -101,6 +118,29 @@ def fetch():
     return CACHE
 
 
+def decode_strict(blob):
+    """Decode the member's bytes, failing loudly rather than replacing.
+
+    Statbel has never documented this file's encoding, and errors="replace"
+    once turned that uncertainty into 4,066 silently wrong surnames (see
+    data/frequencies/_refused.json / RESEARCH-REPORT.md). UTF-8 is tried
+    first because it is what Statbel's other open-data exports use; CP1252
+    is the fallback because it is the encoding legacy Windows tooling in
+    Belgian public administration defaults to, and it is a superset of
+    Latin-1 for the accented characters this file actually contains. If
+    neither decodes cleanly, that is a real problem with the file and must
+    stop the run rather than quietly mangle names.
+    """
+    for enc in ("utf-8", "cp1252"):
+        try:
+            return blob.decode(enc), enc
+        except UnicodeDecodeError:
+            continue
+    raise SystemExit(
+        "the family-names file decodes as neither UTF-8 nor CP1252 — "
+        "stopping rather than guessing at its encoding")
+
+
 def main():
     z = zipfile.ZipFile(fetch())
     member = z.namelist()[0]
@@ -111,27 +151,30 @@ def main():
     rows = skipped = 0
 
     with z.open(member) as f:
-        for i, raw in enumerate(io.TextIOWrapper(f, encoding="utf-8",
-                                                 errors="replace")):
-            if i == 0:
-                continue                      # CD_REFNIS|nl|fr|name|freq
-            p = raw.rstrip("\n").split("|")
-            if len(p) < 5:
-                skipped += 1
-                continue
-            nis, nl, fr, name, freq = p[0], p[1], p[2], p[3].strip(), p[4]
-            try:
-                c = int(freq)
-            except ValueError:
-                skipped += 1
-                continue
-            if not name:
-                skipped += 1
-                continue
-            rows += 1
-            national[name] += c
-            names[nis] = {"nl": nl, "fr": fr}
-            by_muni[nis].append([name, c])
+        blob = f.read()
+    text, enc = decode_strict(blob)
+    print(f"  decoded {member} as {enc}")
+
+    for i, raw in enumerate(text.splitlines()):
+        if i == 0:
+            continue                          # CD_REFNIS|nl|fr|name|freq
+        p = raw.split("|")
+        if len(p) < 5:
+            skipped += 1
+            continue
+        nis, nl, fr, name, freq = p[0], p[1], p[2], p[3].strip(), p[4]
+        try:
+            c = int(freq)
+        except ValueError:
+            skipped += 1
+            continue
+        if not name:
+            skipped += 1
+            continue
+        rows += 1
+        national[name] += c
+        names[nis] = {"nl": nl, "fr": fr}
+        by_muni[nis].append([name, c])
 
     if not rows:
         raise SystemExit(f"{member} parsed to nothing — the layout has changed")

@@ -70,9 +70,9 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
     <button class="ra-ico" id="ra-copy" type="button" title="Copy a link to this exact view">&#128279;</button>
     <button class="ra-ico" id="ra-full" type="button"
             title="Full screen — the map and its panel fill the window">&#9974;</button>
-    <button class="ra-ico ra-ico-wide" id="ra-reset" type="button"
+    <button class="ra-ico" id="ra-reset" type="button"
             aria-label="Start again — clear the search, the year, the filters and the layers, and go back to the whole world"
-            title="Start again — clear the search, the year, the filters and the layers, and go back to the whole world"><span aria-hidden="true">&#8634;</span> Reset</button>
+            title="Start again — clear the search, the year, the filters and the layers, and go back to the whole world"><span aria-hidden="true">&#8634;</span></button>
     <span class="ra-copied" id="ra-copied" hidden>copied</span>
   </div>
   <div class="ra-bar-row ra-bar-filters">
@@ -87,29 +87,36 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
         meant full screen hid them exactly as it hid the search box — the same
         bug, two controls further along, and it would have been found the same
         way eventually. */}
-    <details class="ra-cats-wrap ra-drop" id="ra-layersw">
-      <summary id="ra-laysum" title="Which layers the map draws">Layers</summary>
+    {/* AND NOW ONE CONTROL, NOT THREE. David: «can we consolidate the filter
+        fills into a single filter icon that shows them all under one?» Three
+        disclosures side by side spent the width of the bar saying «Layers 2
+        · Costs All · Kind All», which is three states a reader has to read
+        and reconcile before touching anything — and on a phone they wrapped
+        onto their own line and pushed the map further down.
+
+        One «Filters» disclosure holds all three panels and its summary says
+        the combined state, so a closed control still answers «what is on the
+        map». The three inner groups keep their own headings, because they
+        filter different things and merging their vocabularies would be the
+        real mess. */}
+    <details class="ra-cats-wrap ra-drop ra-filters-one" id="ra-layersw">
+      <summary id="ra-laysum" title="Layers, cost and record kind">Filters</summary>
       <div class="ra-drop-in">
+        <p class="ra-fgroup-h">Layers</p>
         <p class="ra-key-lead">What the map draws. The shelf is the places and
           their volumes; the rest are context, and the unchecked ones cost
           nothing until you ask for them.</p>
         <div class="ra-layers" id="ra-layers"></div>
-      </div>
-    </details>
-    <details class="ra-cats-wrap ra-drop" id="ra-catsw">
-      <summary id="ra-catsum" title="Filter by what it costs to look">What it costs to look</summary>
-      <div class="ra-drop-in">
+
+        <p class="ra-fgroup-h" id="ra-catsum">What it costs to look</p>
         <p class="ra-key-lead">Ordered from what you can open tonight down to what
           needs a letter. <b>A place takes the colour of the most open thing it
           has</b> — so red means red is the best on offer there, and green says
           nothing about what else is underneath it. The panel lists the rest.
           Click a colour to take it off the map.</p>
         <div class="atlas-key" id="ra-cats"></div>
-      </div>
-    </details>
-    <details class="ra-cats-wrap ra-drop" id="ra-kindw">
-      <summary id="ra-kindsum" title="Filter by what kind of record">What kind of record</summary>
-      <div class="ra-drop-in">
+
+        <p class="ra-fgroup-h" id="ra-kindsum">What kind of record</p>
         <div class="atlas-key" id="ra-kinds"></div>
       </div>
     </details>
@@ -668,6 +675,19 @@ window.addEventListener("load", async function () {
       .catch(function () { FLAGIDX = { countries: [], hubs: [] }; });
   }
 
+  function flagCardHTML(c) {
+    return '<a class="ra-fcard" href="' + BASE + esc(c.url) + '" style="--edge:' +
+      esc(c.color || "var(--rule-strong)") + '">' +
+      '<span class="ra-fflag">' + (c.flag
+        ? '<svg viewBox="0 0 300 200" aria-hidden="true">' + c.flag + "</svg>" : "") +
+      "</span>" +
+      '<span class="ra-fname">' + esc(c.name) + "</span>" +
+      (c.region ? '<span class="ra-freg">' + esc(c.region) + "</span>" : "") +
+      '<span class="ra-fcrowns">' + (c.crowns || []).slice(0, 8).map(function (x) {
+        return '<span class="ra-fcrown">' + esc(x) + "</span>"; }).join("") +
+      "</span></a>";
+  }
+
   function flagHay(c) {
     /* Built once per card and cached on it. Matching the crowns is the point:
        a reader who types «ottoman» is asking which ground it held. */
@@ -676,6 +696,53 @@ window.addEventListener("load", async function () {
                     .filter(Boolean).join(" "));
     }
     return c._hay;
+  }
+
+  /* Country codes straight to cards, bypassing the text filter. The atlas
+     names countries in the ISO table's words and the flags data in its own,
+     so the two are joined through flag-index's country names — the same
+     aliasing build.py does for the hub totals, kept in one direction here. */
+  /* The same twenty-two aliases build.py uses for the hub totals. Kept in
+     both places deliberately: build.py needs them server-side to aggregate,
+     this needs them in the browser, and shipping a second copy of a
+     twenty-line table is cheaper than another fetch. If one changes, so must
+     the other — which is why both say so. */
+  var FLAG_ALIAS = {
+    "Antigua and Barbuda": "Antigua and Barb.", "Bosnia & Herzegovina": "Bosnia and Herz.",
+    "Cape Verde": "Cabo Verde", "Central African Republic": "Central African Rep.",
+    "Democratic Republic of the Congo": "Dem. Rep. Congo",
+    "Republic of the Congo": "Congo", "Dominican Republic": "Dominican Rep.",
+    "Equatorial Guinea": "Eq. Guinea", "Eswatini": "eSwatini",
+    "Marshall Islands": "Marshall Is.", "Saint Kitts and Nevis": "St. Kitts and Nevis",
+    "Saint Vincent and the Grenadines": "St. Vin. and Gren.",
+    "Solomon Islands": "Solomon Is.", "South Sudan": "S. Sudan",
+    "S\u00e3o Tom\u00e9 & Pr\u00edncipe": "S\u00e3o Tom\u00e9 and Principe",
+    "The Gambia": "Gambia", "United States": "United States of America",
+    "Vatican City": "Vatican", "Scotland": "United Kingdom",
+    "Wales": "United Kingdom", "Northern Ireland": "United Kingdom",
+    "England": "United Kingdom"
+  };
+  var CC2FLAG = null;
+  function drawFlagResForCountries(ccs) {
+    if (!FLAGIDX || !fSec) { return; }
+    if (!ccs || !ccs.length) return;
+    if (!CC2FLAG) {
+      CC2FLAG = {};
+      var n2 = {};
+      Object.keys(CNAME).forEach(function (cc) {
+        n2[fold(CNAME[cc])] = cc; });
+      (FLAGIDX.countries || []).forEach(function (c) {
+        var cc = n2[fold(c.name)] || n2[fold((FLAG_ALIAS[c.name] || ""))];
+        if (cc) CC2FLAG[cc] = c;
+      });
+    }
+    var cards = ccs.map(function (cc) { return CC2FLAG[cc]; }).filter(Boolean);
+    if (!cards.length) { fSec.hidden = true; return; }
+    fSec.hidden = false;
+    fSub.textContent = cards.length + " of the countries this name is attested in";
+    fCountries.innerHTML = cards.map(flagCardHTML).join("");
+    fHubsH.hidden = true;
+    fHubs.innerHTML = "";
   }
 
   function drawFlagRes(q) {
@@ -713,18 +780,7 @@ window.addEventListener("load", async function () {
 
     /* Capped at 60. Painting 210 cards with inline SVG on every keystroke is
        work nobody asked for; an unfiltered reader is browsing, not looking. */
-    fCountries.innerHTML = mc.slice(0, 60).map(function (c) {
-      return '<a class="ra-fcard" href="' + BASE + esc(c.url) + '" style="--edge:' +
-        esc(c.color || "var(--rule-strong)") + '">' +
-        '<span class="ra-fflag">' + (c.flag
-          ? '<svg viewBox="0 0 300 200" aria-hidden="true">' + c.flag + "</svg>" : "") +
-        "</span>" +
-        '<span class="ra-fname">' + esc(c.name) + "</span>" +
-        (c.region ? '<span class="ra-freg">' + esc(c.region) + "</span>" : "") +
-        '<span class="ra-fcrowns">' + (c.crowns || []).slice(0, 8).map(function (x) {
-          return '<span class="ra-fcrown">' + esc(x) + "</span>"; }).join("") +
-        "</span></a>";
-    }).join("");
+    fCountries.innerHTML = mc.slice(0, 60).map(flagCardHTML).join("");
 
     fHubsH.hidden = !mh.length;
     /* A HUB IS THE UNIT A RESEARCHER ACTUALLY HAS. Somebody chasing a Habsburg
@@ -1534,6 +1590,11 @@ window.addEventListener("load", async function () {
   }
   function laySummary() {
     var n = LAYERS.filter(function (l) { return on[l[0]]; }).length;
+    /* ONE SUMMARY FOR THREE STATES. The bar used to print «Layers 2 · Costs
+       All · Kind All» across three controls; it now prints the same three
+       facts in one, because a closed filter still has to answer «what is on
+       the map» and hiding that behind a click would trade tidiness for the
+       thing the control is for. */
     setSummary("ra-laysum", "Layers", n === LAYERS.length ? "All" : String(n),
       n === LAYERS.length ? "Layers — all " + LAYERS.length + " on"
                           : "Layers — " + n + " of " + LAYERS.length + " on");
@@ -1661,6 +1722,21 @@ window.addEventListener("load", async function () {
         if (r.right > window.innerWidth - pad) shift = (window.innerWidth - pad) - r.right;
         if (r.left + shift < pad) shift = pad - r.left;
         if (shift) box.style.left = Math.round(shift) + "px";
+        /* AND THE SAME FOR THE BOTTOM EDGE, FOR THE SAME REASON. Merging
+           the three filters into one control made this popover 1136px tall
+           in a 900px viewport: the last third hung below the fold with no
+           way to reach it, and the only test that caught it was the one
+           that asks what is actually painted at a point. Measured, not
+           guessed at with a breakpoint, because where the popover starts
+           depends on whether the bar has wrapped. */
+        box.style.maxHeight = "";
+        box.style.overflowY = "";
+        var room = window.innerHeight - box.getBoundingClientRect().top - pad;
+        if (box.scrollHeight > room) {
+          box.style.maxHeight = Math.max(160, Math.round(room)) + "px";
+          box.style.overflowY = "auto";
+          box.style.overscrollBehavior = "contain";
+        }
       }
       /* The bar is fixed in full screen and its height is measured; a
          popover does not change that height, but the summary text does when
@@ -1754,7 +1830,12 @@ window.addEventListener("load", async function () {
                   n.map(function (k) { return KLAB[k] || k; }).join(", "));
   }
   kindSummary();
-  if (Object.keys(kindOn).length) document.getElementById("ra-kindw").open = true;
+  /* The kind group no longer has a disclosure of its own — it is a heading
+     inside the one Filters panel — so a preset kind opens THAT instead. */
+  if (Object.keys(kindOn).length) {
+    var _lw = document.getElementById("ra-layersw");
+    if (_lw) _lw.open = true;
+  }
   kbox.addEventListener("change", function (ev) {
     var b = ev.target.closest(".ra-opt[data-kind]"); if (!b) return;
     var k = b.getAttribute("data-kind");
@@ -2781,6 +2862,15 @@ window.addEventListener("load", async function () {
   async function showCountries(list, stale) {
     if (list && list.length) { searchHit = true; noteSearch(); }
     litFor = fold(qbox.value.trim());
+    /* THE FLAG CARDS FOLLOW THE SURNAME, NOT THE TEXT. David: «when I search
+       Defranceski I don't see flags below, even though we know which countries
+       a name is found in and we show it on the map.» Quite right — the cards
+       were filtering on the typed string against country names, regions, hubs
+       and crowns, and a surname is none of those, so a name search emptied a
+       section the map had just answered. The countries lit here ARE the
+       answer; the cards now take them directly. */
+    drawFlagResForCountries((list || []).map(function (x) {
+      return String(x.cc || x).toUpperCase(); }));
     /* Clears its own outlines and NOT the commune dots. It used to clear
        both, which was invisible until the dots started being drawn first
        — showCommunes ran, drew 60 towns, and this wiped them a
@@ -3621,7 +3711,28 @@ window.addEventListener("load", async function () {
     if (!wrap.classList.contains("ra-fs")) return;
     wrap.style.paddingTop = (fsBar.offsetHeight + 12) + "px";
   }
+  /* THE TOOLS LIVE IN THE HEADER — EXCEPT IN FULL SCREEN, WHERE THE HEADER IS
+     UNDER THE OVERLAY. Full screen fixes .at-wrap to the viewport and covers
+     everything behind it, which is the exact bug the «full screen keeps the
+     controls» spec exists for: last time it swallowed the search box. Moving
+     these to the header would have swallowed them too, one control further
+     along. So they go home to the bar while full screen is on and back to the
+     header when it ends — the same elements throughout, so their handlers and
+     their state come with them. */
+  var toolSlot = document.getElementById("ra-tools");
+  var toolHome = document.getElementById("ra-copy") &&
+                 document.getElementById("ra-copy").parentNode;
+  function toolsTo(where) {
+    if (!where) return;
+    ["ra-copy", "ra-full", "ra-reset"].forEach(function (id) {
+      var b = document.getElementById(id);
+      if (b && b.parentNode !== where) where.appendChild(b);
+    });
+  }
+  if (toolSlot) toolsTo(toolSlot);
+
   function setFull(on2) {
+    toolsTo(on2 ? toolHome : toolSlot);
     var wrap = document.querySelector(".at-wrap");
     wrap.classList.toggle("ra-fs", on2);
     fsBar.classList.toggle("ra-fs-bar", on2);
@@ -3680,8 +3791,10 @@ window.addEventListener("load", async function () {
     });
     kindSummary();
     catSummary();
-    document.getElementById("ra-catsw").open = false;
-    document.getElementById("ra-kindw").open = false;
+    /* Was two separate disclosures; one now. Guarded because this runs on
+       reset and a missing element used to throw here silently. */
+    var _one = document.getElementById("ra-layersw");
+    if (_one) _one.open = false;
     if (gmark) { map.removeLayer(gmark); gmark = null; }
     ctryLayer.clearLayers();
     communeLayer.clearLayers();
@@ -4307,7 +4420,14 @@ window.addEventListener("load", async function () {
 
   @media (max-width: 900px) {
     .at-wrap { grid-template-columns: 1fr; }
-    .at-map { height: 420px; } .at-panel { height: auto; max-height: 480px; }
+    /* THE PANEL WAS EATING THE PHONE. 480px of answer under 420px of map is
+       nine hundred pixels before a reader reaches anything else — and there is
+       now something else: the flag cards. A viewport-relative cap keeps the
+       proportion right on a small phone and a large one, and the panel scrolls
+       inside it rather than pushing the page down. */
+    .at-map { height: 420px; }
+    .at-panel { height: auto; max-height: 56vh; overflow-y: auto;
+                -webkit-overflow-scrolling: touch; }
   }
 
   /* ---- the scrubber along the foot of the map ---------------------------- */

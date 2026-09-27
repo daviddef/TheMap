@@ -33,9 +33,14 @@ const archiveCountries = new Set(archives.map(p => p.at.place.split(", ").pop())
     <div class="lab">{places.toLocaleString()} places · {volumes.toLocaleString()} record volumes · {archives.length} archives in {archiveCountries} countries · {regions.regions.length} record regions</div>
     <h1>Where the records are</h1>
     <p class="dek">
-      Click the place your people came from: every collection that covers it,
-      coloured by <em>what it actually costs to look</em>. Set a year and it also names
-      whose empire held that ground — and therefore whose archive to write to.
+      {/* THREE LINES OF EXPLANATION ABOVE THE THING BEING EXPLAINED. On a phone
+          that pushed the search box most of a screen down, so the first thing a
+          reader met was a paragraph about the map rather than the map itself.
+          The long version now lives on the Help page, which is where somebody
+          goes when they want it. (No tag syntax in this comment: Astro opens a
+          real element for it and swallows the file. That is written in capitals
+          in Base.astro and it caught me again anyway.) */}
+      Click the place your people came from. <a href={u("/help/")}>How this works &rarr;</a>
     </p>
   </div>
 

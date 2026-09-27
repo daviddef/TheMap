@@ -281,6 +281,15 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
 <header class="site">
   <div class="wrap sitein">
     <a class="brand" href={u("/")}>Record <em>Atlas</em></a>
+    {/* WHERE THE MAP'S OWN TOOLS GO. The link, full-screen and reset buttons
+        sat in the map's control bar, below the search box, where on a phone
+        they took a whole row of their own and pushed the map further down.
+        David asked for them up here beside the burger.
+
+        Empty in the markup and filled by the map on mount: only the map page
+        has those buttons, and Base is shared by 46,000 pages. A container
+        with nothing in it collapses to nothing. */}
+    <span class="site-tools" id="ra-tools"></span>
     <button class="burger" type="button" aria-expanded="false" aria-controls="drawer">
       <span class="bars" aria-hidden="true"></span>Menu
     </button>

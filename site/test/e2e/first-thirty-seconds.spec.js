@@ -162,10 +162,16 @@ test("the three filters are one control, and none of them shoves the map", async
   await page.waitForTimeout(300);
   /* A popover, not a fold-out: opening a filter must not move the map. */
   expect(await mapTop()).toBe(settled);
-  /* One at a time. */
-  await page.locator("#ra-catsw summary").click();
-  await page.waitForTimeout(300);
-  await expect(page.locator("#ra-layersw[open]")).toHaveCount(0);
+  /* «One at a time» used to mean one of three controls. There is one now,
+     so the rule it leaves behind is about this one: it has to FIT on the
+     screen it opens on. Merging the three made it 1136px tall in a 900px
+     viewport — the bottom third hung below the fold with no way to reach
+     it, and nothing structural noticed, because the popover was positioned,
+     sized and on screen in every sense except the one that matters. */
+  const vh = page.viewportSize().height;
+  const fit = await page.locator("#ra-layersw .ra-drop-in").boundingBox();
+  expect(fit.y + fit.height, "the filter popover runs below the fold")
+    .toBeLessThanOrEqual(vh + 1);
   /* And a click anywhere else closes it. */
   await page.locator("#ra-map").click({ position: { x: 5, y: 5 } });
   await page.waitForTimeout(300);
@@ -204,13 +210,19 @@ test("a dropdown stays on screen at every width the bar wraps at", async ({ page
   for (const width of [1100, 820, 640, 480, 380]) {
     await page.setViewportSize({ width, height: 800 });
     await page.waitForTimeout(250);
-    for (const id of ["ra-layersw", "ra-catsw", "ra-kindw"]) {
+    /* Layers, cost and record kind are one control now, so there is one
+       dropdown to keep on screen — but it has to stay on screen in BOTH
+       directions, and the tall merged popover is the one that fails the
+       vertical half. */
+    for (const id of ["ra-layersw"]) {
       await page.locator(`#${id} summary`).click();
       await page.waitForTimeout(220);
       const b = await page.locator(`#${id} .ra-drop-in`).boundingBox();
       expect(b.x, `${id} at ${width}px runs off the left`).toBeGreaterThanOrEqual(-1);
       expect(b.x + b.width, `${id} at ${width}px runs off the right`)
         .toBeLessThanOrEqual(width + 1);
+      expect(b.y + b.height, `${id} at ${width}px runs off the bottom`)
+        .toBeLessThanOrEqual(800 + 1);
       await page.locator(`#${id} summary`).click();
       await page.waitForTimeout(120);
     }

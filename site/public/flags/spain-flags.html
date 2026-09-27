@@ -16,6 +16,23 @@
   .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
   .record-panel a { color: var(--adriatic); }
   .record-panel a:hover { color: var(--brick); }
+  /* The fold. The summary carries the same heading it always did, plus the
+     count, so a shut panel still answers «is there anything here for me». */
+  .record-fold > summary { list-style: none; cursor: pointer; display: flex;
+    align-items: baseline; gap: 8px; }
+  .record-fold > summary::-webkit-details-marker { display: none; }
+  .record-fold > summary h4 { margin: 0; }
+  .record-fold > summary::after { content: "\203A"; margin-left: auto;
+    font-size: 1.1rem; line-height: 1; color: var(--muted);
+    transform: rotate(90deg); transition: transform .15s ease; }
+  .record-fold[open] > summary::after { transform: rotate(-90deg); }
+  .record-fold > summary:hover h4, .record-fold > summary:hover .rr-count,
+  .record-fold > summary:focus-visible h4 { color: var(--brick); }
+  .record-fold > summary:focus-visible { outline: 2px solid var(--focus);
+    outline-offset: 3px; border-radius: 2px; }
+  .record-fold .rr-count { font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; color: var(--muted); letter-spacing: .04em; }
+  .record-fold-in { margin-top: 10px; }
 </style></head><body>
 <title>Flags of Spain</title>
 <meta name="description" content="A chronological, paint-ready atlas of every flag that flew over Spain, from the pre-heraldic Kingdom of Asturias to the constitutional monarchy of today — with a map of the Reconquista's last frontier.">
@@ -1132,7 +1149,17 @@
         if (!cardBody) return;
         any = true;
 
-        var html = '<h4>Genealogical records for this ground</h4>';
+        var n = matches[idxStr].length;
+        /* FOLDED, BECAUSE IT IS REFERENCE AND NOT THE POINT OF THE PAGE.
+           This block can run to five or six regions on a card, which pushed
+           the era's own story off the screen on a phone. Shut, it still says
+           what it holds — the ground and how many regions answered — so a
+           reader can tell whether it is worth opening. */
+        var html = '<details class="record-fold"><summary>' +
+                   '<h4>Genealogical records for this ground</h4>' +
+                   '<span class="rr-count">' + n + ' region' +
+                   (n === 1 ? '' : 's') + '</span></summary>' +
+                   '<div class="record-fold-in">';
         matches[idxStr].forEach(function (row) {
           html += '<div class="record-region">';
           html += '<div class="rr-name">' + row.regionLabel + '</div>';
@@ -1146,6 +1173,7 @@
           html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
           html += '</div>';
         });
+        html += '</div></details>';
 
         var panel = document.createElement("div");
         panel.className = "record-panel";

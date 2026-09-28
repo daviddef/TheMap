@@ -42,7 +42,14 @@ os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 geo = SourceFileLoader("_geo", "scripts/geo.py").load_module()
 
 OUT = "site/public/eras.json"
-BASE = "https://daviddef.github.io/TheMap"
+# THE ORIGIN IS NOT OURS TO HARD-CODE, AND THIS FEED IS READ FROM ONE PLACE.
+# eras.json used to carry 1,644 absolute URLs naming daviddef.github.io. Its
+# only consumer is the 197 flag pages, every one of which lives at
+# <site>/flags/<country>-flags.html — so «..» is the site root for all of
+# them, on the old origin, on recordatlas.org when the cutover lands, and in
+# a local preview on any port. (The Astro pages read flag-eras.json, a
+# different file, and build their own URLs with u().)
+BASE = ".."
 FLAGS = "https://daviddef.github.io/Flag-History"
 
 # Their pages are <slug>-flags.html, lowercase and hyphenated. We hold ISO2, so

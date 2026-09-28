@@ -685,6 +685,13 @@ window.addEventListener("load", async function () {
     return h.join("");
   }
 
+  /* The surname page's address, from the name. It was written inline where
+     the card links to the page; the heading row needs the same one, and two
+     copies of a URL rule is how the two stop agreeing. */
+  function nameSlug(n) {
+    return fold(n).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  }
+
   function goIcons(pageHref, pageLabel, cc, name) {
     var h = '<span class="at-ico">';
     h += '<a href="' + pageHref + '" title="' + esc(pageLabel) +
@@ -2327,6 +2334,19 @@ window.addEventListener("load", async function () {
 
   /* Picking one from the list is the same as clicking its dot. */
   document.addEventListener("click", function (ev) {
+    /* The panel's door into the right pane. It opens it rather than toggling:
+       somebody who just clicked «Where to read» wants it open, and a toggle
+       would shut it for the reader who already had it open. */
+    var oc = ev.target.closest && ev.target.closest(".ra-open-check");
+    if (oc) {
+      var ck = document.getElementById("ra-check");
+      if (ck && !ck.classList.contains("on")) {
+        var tb = document.getElementById("ra-check-t");
+        if (tb) tb.click();
+      }
+      if (ck) ck.scrollIntoView({ block: "nearest" });
+      return;
+    }
     var sb = ev.target.closest && ev.target.closest(".ra-sn");
     if (sb) { elsewhere(sb.dataset.name, true); return; }
     var b = ev.target.closest && ev.target.closest(".ra-mk");
@@ -2467,6 +2487,81 @@ window.addEventListener("load", async function () {
     (document.querySelector(".ra-check-w") || {}).textContent = T("Visiting");
     pane.hidden = false;
     drawCheckPins();
+  }
+
+  /* ---- THE SAME PANE, FOR A NAME -----------------------------------------
+     David, with Senj and Lerena open side by side: «search by place vs name,
+     completely different look and feel. can we align names to places please?
+     the timelines the maps, the volumes, the right pane».
+
+     Senj gets a framed map with numbered pins, a right pane reading «WHERE
+     THE PAPER IS · Državni arhiv u Rijeci 51.9 km», parishes, burial grounds
+     and villages. Lerena got a world map with grey dots and no pane at all —
+     and the archives it DOES have were printed as a flat list at the bottom
+     of the panel, below the fold, unnumbered and unpinned.
+
+     A name is not a place and the pane cannot be identical: there is no
+     «within 14 km» because there is no centre, and no parish for a surname.
+     But the two questions rhyme — «where do I go and read» — and the answer
+     should be built out of the same parts. So: the same pane, the same
+     running number, the same pin on the same map, grouped by country in the
+     order the timeline above uses.
+
+     WHAT MAKES THE NUMBER WORTH HAVING IS THAT IT IS ON BOTH. The list is
+     ordered by the name's own evidence, not by distance, so a reader working
+     down it is walking their family's countries in the order the name
+     appears in them. */
+  function buildNameCheck(term, byCC, order, rank) {
+    var pane = document.getElementById("ra-check");
+    var body = document.getElementById("ra-check-b");
+    if (!pane || !body) return;
+    clearCheckPins();
+    if (!order.length) { pane.hidden = true; return; }
+    var h = ['<p class="ra-hood ra-hood-n">' +
+             '<span class="ra-hood-k ra-hood-k-n"></span><span>' +
+             esc(T("Where to read for") + " " + term) + " \u2014 " +
+             esc(order.length + " " +
+                 T(order.length === 1 ? "country" : "countries") + ", " +
+                 T("in the order the name appears in them")) + ".</span></p>"];
+    var count = 0;
+    h.push("<h4>" + esc(T("Where the paper is")) + "</h4><ul>");
+    order.forEach(function (cc) {
+      var ps = byCC[cc];
+      h.push('<li class="ra-ck-cc">' +
+             (cc ? '<a href="' + BASE + "country/" + cc.toLowerCase() + '/">' +
+                   esc(CNAME[cc] || cc) + "</a>" : esc(T("Matched by name"))) +
+             ' <span class="ra-ck-km">' + ps.length + "</span></li>");
+      ps.slice(0, 3).forEach(function (pv) {
+        count++;
+        /* The access colour is the same vocabulary the place pane uses and a
+           reader has already learnt — free, account, index, paid. */
+        h.push(checkRow(pv.url, pv.name, null,
+                        (ACC[pv.access] || [0, pv.access])[1],
+                        ACCESS_DOT(pv.access), count,
+                        pv.at ? pv.at.lat : null, pv.at ? pv.at.lon : null));
+      });
+      if (ps.length > 3)
+        h.push('<li class="ra-ck-more">' + esc(T("and") + " " +
+               (ps.length - 3) + " " + T("more in") + " " +
+               (CNAME[cc] || cc)) + "</li>");
+    });
+    h.push("</ul>");
+    if (!count) { pane.hidden = true; return; }
+    body.innerHTML = h.join("");
+    document.getElementById("ra-check-n").textContent = count;
+    (document.querySelector(".ra-check-w") || {}).textContent = T("Where to read");
+    pane.hidden = false;
+    drawCheckPins();
+    /* AND FRAME THE MAP ON THEM, which is the other half of what makes Senj
+       look answered and Lerena look ignored. A world view with a dozen grey
+       dots on it is the view you get before you have searched; once there is
+       an answer the map should be looking at it. Padded, and never tighter
+       than a continent — a name with one archive should not slam to street
+       level on a building nobody asked about. */
+    if (checkPins.length) {
+      var b = L.latLngBounds(checkPins.map(function (pp) { return [pp.y, pp.x]; }));
+      map.fitBounds(b.pad(0.25), { maxZoom: 6, animate: false });
+    }
   }
 
   /* Shut by default, and it stays as the reader left it while they move from
@@ -3731,6 +3826,57 @@ window.addEventListener("load", async function () {
         h.push(oh.join(""));
       }
 
+      /* AND WHAT WIKTIONARY SAYS, WHICH IS WIDER AND SHARE-ALIKE.
+         Wikidata's structured fields reach a tenth of the corpus and that is
+         its ceiling; the standard printed authority is not openly licensed.
+         Wiktionary is CC BY-SA 4.0 and covers far more.
+
+         THE SAME RULE AS ABOVE, AND FOR THE SAME REASON. Only what a named
+         source says, never in this map's voice, with the citation attached —
+         here the page and the revision it was read at, because Wiktionary
+         changes under you in a way a Wikidata id does not. Nothing is taken
+         from the Etymology or Statistics sections: those are prose, and the
+         `from=` of the surname template is a field.
+
+         AND UNDER THE LANGUAGE THAT SAID IT. Taylor is «from occupations» in
+         its English section and «from English» in its French one. Printed as
+         one list those two true statements read as a name from occupations
+         AND from English, which is a third thing neither of them says. */
+      if (r.wk) {
+        var w = r.wk, wh = ['<div class="ra-orig ra-orig-wk">'];
+        (w.etymon || []).forEach(function (e) {
+          wh.push('<p class="ra-orig-l"><b>' +
+                  esc(T("From") + " " + e.lang + " " + e.word) + "</b>" +
+                  (e.gloss ? ' <i>&#8220;' + esc(e.gloss) + "&#8221;</i>" : "") +
+                  (e.in ? ' <span class="ra-who">' +
+                          esc(T("in the") + " " + e.in + " " + T("entry")) +
+                          "</span>" : "") + "</p>");
+        });
+        Object.keys(w.from || {}).forEach(function (lg) {
+          wh.push('<p class="ra-orig-l"><b>' + esc(w.from[lg].join(" \u00b7 ")) +
+                  "</b> <span class=\"ra-who\">" +
+                  esc(T("what the") + " " + lg + " " + T("entry says it is from")) +
+                  "</span></p>");
+        });
+        if (w.langs && w.langs.length)
+          wh.push('<p class="ra-orig-l"><b>' + esc(w.langs.join(" \u00b7 ")) +
+                  "</b> <span class=\"ra-who\">" +
+                  esc(T("recorded as a surname in these languages")) +
+                  "</span></p>");
+        /* The caveat is the same one the Wikidata block carries and is worth
+           repeating here rather than assumed read: a name's language is not
+           a family's country. */
+        wh.push('<p class="cap ra-orig-c">' + esc(T("A language here is the " +
+                "language of the NAME, not a country a family came from.")) +
+                "</p>");
+        wh.push('<p class="ra-orig-s">' + esc(T("said by")) +
+                ' <a href="' + esc(w.cite) + '" target="_blank" rel="noopener">' +
+                esc(T("Wiktionary")) + " \u2197</a> \u00b7 " +
+                esc(T("CC BY-SA 4.0")) + "</p>");
+        wh.push("</div>");
+        h.push(wh.join(""));
+      }
+
       /* WHERE THE NAME WAS, AND WHEN. David: «finding a name almost does
          nothing — i thought we had dates the name was at a certain place… we
          could draw that on a timeline, and start to align our place search
@@ -3755,8 +3901,30 @@ window.addEventListener("load", async function () {
           return { cc: cc, ds: r.tl[cc], first: r.tl[cc][0] };
         }).sort(function (a, b) { return a.first - b.first; });
 
+        /* THE SAME BAND THE GROUND GETS, AND FOR THE SAME REASON.
+           David, with a place answer and a name answer side by side: «search
+           by place vs name, completely different look and feel. can we align
+           names to places please? the timelines the maps, the volumes, the
+           right pane».
+
+           He is looking at «Who held this ground» — proportional blocks in
+           each regime's own colour, the years written inside them, an axis
+           underneath — against a name timeline that was a 7px beige rule with
+           tick marks on it. Same question, «when was this here», answered in
+           two visual languages.
+
+           So this is the band's markup, not a cousin of it: .ra-tl-band of
+           .ra-tl-seg, flex-grow by duration, --seg for the colour, the years
+           inside the segment, .ra-tl-axis at the foot. One row per country
+           instead of one row for the ground, and a RUN is a segment while a
+           GAP is a bare spacer — so a name absent from a country for a
+           century reads as absence and not as a thinner line.
+
+           THE COLOUR IS THE COUNTRY'S OWN, the way the band's is the regime's.
+           flag-index.json has carried a colour for all 210 countries from the
+           start; this is the second thing to use it. */
         var wh = ['<div class="ra-tw"><p class="at-lab">' +
-                  esc(T("Where the name was, and when")) + "</p><ul>"];
+                  esc(T("Where the name was, and when")) + "</p>"];
         rows.slice(0, 10).forEach(function (row) {
           /* group decades into runs, breaking on a gap of more than 50 years */
           var runs = [], cur = [row.ds[0]];
@@ -3765,23 +3933,50 @@ window.addEventListener("load", async function () {
             cur.push(row.ds[i]);
           }
           runs.push(cur);
-          var label = runs.map(function (g) {
-            return g.length === 1 ? g[0] + "s" : g[0] + "s\u2013" + g[g.length - 1] + "s";
-          }).join(" \u00b7 ");
           var f = CC2FLAG && CC2FLAG[row.cc];
-          wh.push('<li><span class="ra-tw-f">' +
+          var tint = (f && f.color) || "var(--accent)";
+          wh.push('<div class="ra-tw-r">' +
+                  '<span class="ra-tw-f">' +
                   (f && f.flag ? '<svg viewBox="0 0 300 200" aria-hidden="true">' +
                                  f.flag + "</svg>" : "") + "</span>" +
                   '<a class="ra-tw-c" href="' + BASE + "country/" +
                   row.cc.toLowerCase() + '/">' + esc(CNAME[row.cc] || row.cc) +
                   "</a>" +
-                  '<span class="ra-tw-b">' + row.ds.map(function (d) {
-                    return '<i style="left:' +
-                           Math.round(((d - lo) / span) * 100) + '%"></i>';
-                  }).join("") + "</span>" +
-                  '<span class="ra-tw-y">' + esc(label) + "</span></li>");
+                  '<span class="ra-tw-band">');
+          /* PLACED ON THE SCALE, NOT GROWN INTO IT. The first version used
+             flex-grow, the way the ground band does, and it broke in a way
+             worth recording: flex-grow only shares out FREE space, and once
+             six rows of labels have taken their natural widths there is none
+             left. Latvia's single 1920s decade rendered as nothing at all,
+             Croatia's was pushed off the right edge, and the proportions —
+             the entire content of the drawing — quietly stopped being true.
+
+             The ground band gets away with it because it is ONE row of
+             consecutive eras with no gaps. These are several rows that have
+             to line up with each other: the same decade must sit at the same
+             x on Germany's row and on Latvia's, or reading down the stack
+             says nothing. So each run is positioned on the shared 1880s–1990s
+             scale by percentage. A gap is then simply the space nobody
+             occupies, which is also what it means. */
+          runs.forEach(function (g) {
+            var a = g[0], b = g[g.length - 1];
+            var L = ((a - lo) / span) * 100;
+            var W = ((b - a) / span) * 100;
+            var label = a === b ? a + "s" : a + "s\u2013" + b + "s";
+            wh.push('<span class="ra-tl-seg ra-tw-seg" style="--seg:' + tint +
+                    /* The LAST decade sits at 100%, where a 52px minimum
+                       hangs entirely past the clip — Blažević's Lithuanian
+                       2000s rendered at x=1157 in a 1157px band, which is to
+                       say nowhere. min() holds any segment back far enough to
+                       show itself without moving the ones that fit. */
+                    ";left:min(" + Math.max(0, Math.min(100, L)).toFixed(2) +
+                    "%, 100% - 52px);width:" + Math.max(W, 0).toFixed(2) +
+                    '%" title="' +
+                    esc(label + " \u2014 " + (CNAME[row.cc] || row.cc)) + '">' +
+                    '<span class="ra-tl-y">' + esc(label) + "</span></span>");
+          });
+          wh.push("</span></div>");
         });
-        wh.push("</ul>");
         if (rows.length > 10)
           wh.push('<p class="cap">' + esc(T("and") + " " + (rows.length - 10) + " " +
                   T("more countries")) + "</p>");
@@ -3796,9 +3991,15 @@ window.addEventListener("load", async function () {
         h.push(wh.join(""));
       }
 
+      /* `same` SUPPRESSES THE LINK, NOT THE BRANCH. Written as
+         `if (r.pg && !same)`, a name that HAS a page and is the exact thing
+         searched fell through to the else — which is the message for the
+         thirty-nine names in forty that have none. Lerena has a page and was
+         being told it did not. The condition on the branch is whether a page
+         exists; whether to print a second link to it is a separate question,
+         and it is no because the heading row above already carries it. */
       if (r.pg) {
-        var slug = fold(r.n).replace(/[^a-z0-9]+/g, "-")
-                            .replace(/^-|-$/g, "");
+        var slug = same ? "" : nameSlug(r.n);
         if (slug)
           h.push('<p class="ra-go"><a href="' + BASE + "surname/" + slug +
                  '/">Everything about ' + esc(r.n) + " &#8594;</a></p>");
@@ -3819,7 +4020,13 @@ window.addEventListener("load", async function () {
                  between two names that are both independently attested. */
       var cur = r.variants.filter(function (v) { return v.how !== "sounds"; });
       var snd = r.variants.filter(function (v) { return v.how === "sounds"; });
-      if (cur.length)
+      /* NOT TWICE. The heading row now carries the attested spellings the way
+         a place's does — «de Franceschi · 17 countries · also written De
+         Franceski» — so printing them again four lines down is the «arent we
+         showing the same thing 2 different ways» this panel has been told off
+         for before. The by-sound row below stays: it is a different claim,
+         labelled as a guess, and the heading deliberately never carries it. */
+      if (cur.length && !same)
         h.push('<p class="ra-vars"><span class="ra-tag">also written</span> ' +
                cur.map(function (v) { return "<em>" + esc(v.n) + "</em>"; }).join(" · ") + "</p>");
       if (snd.length)
@@ -4428,7 +4635,47 @@ window.addEventListener("load", async function () {
        duplicate. */
     var canon = null;
     if (names.length && fold(names[0].n) === fold(term)) canon = names[0].n;
-    var h = ['<div class="at-h"><h3>' + esc(canon || term) + "</h3></div>"];
+    /* THE SAME HEADING ROW A PLACE GETS. Senj's reads «Senj (Senj) · 10
+       volumes · also written Segna · Segno · Senia · Zengg · Read more about
+       Senj → · [page] [flag]». A name's read «de Franceschi» and nothing else,
+       and then repeated the spellings and the page link further down the card
+       as two more labelled rows. Same furniture, same line, same order —
+       a count, the other spellings, the page, the icons. */
+    var nrow = names.length ? names[0] : null;
+    var h = ['<div class="at-h"><h3>' + esc(canon || term) + "</h3>"];
+    if (nrow) {
+      var nccs = (nrow.countries || []).length;
+      if (nccs)
+        h.push('<span class="at-n">' + nccs + " " +
+               esc(T(nccs === 1 ? "country" : "countries")) + "</span>");
+      /* Only the attested spellings, never the by-sound guesses: the place
+         header lists names a record actually uses, and the phonetic
+         neighbours stay where they are labelled as guesses. */
+      var nalso = (nrow.variants || []).filter(function (v) {
+        return v && fold(v.n || v) !== fold(nrow.n);
+      }).map(function (v) { return v.n || v; }).slice(0, 6);
+      if (nalso.length)
+        h.push('<span class="at-also">' + esc(T("also written")) + " " +
+               nalso.map(function (x) { return "<em>" + esc(x) + "</em>"; })
+                    .join(" \u00b7 ") + "</span>");
+      if (nrow.pg) {
+        h.push('<a class="at-go" href="' + BASE + "surname/" +
+               nameSlug(nrow.n) + '/">' + esc(T("Read more about") + " " + nrow.n) +
+               " &rarr;</a>");
+        /* The flag icon takes the country the band opens on — the earliest
+           attestation — because that is the ground this name is first on. */
+        var nflagcc = null;
+        if (nrow.tl) {
+          var tks = Object.keys(nrow.tl);
+          tks.sort(function (a, b) { return nrow.tl[a][0] - nrow.tl[b][0]; });
+          nflagcc = tks[0];
+        }
+        h.push(goIcons(BASE + "surname/" + nameSlug(nrow.n) + "/",
+                       T("Everything about") + " " + nrow.n + " \u2014 its own page",
+                       nflagcc, nrow.n));
+      }
+    }
+    h.push("</div>");
     if (names.length) {
       h.push(renderSurnames(names, term));
       /* The strongest evidence for a country wins its outline. A name in both
@@ -4781,59 +5028,54 @@ window.addEventListener("load", async function () {
         order.sort(function (a, b) {
           return (a === "" ? 9999 : rank[a]) - (b === "" ? 9999 : rank[b]);
         });
-        h.push('<div class="at-sec at-sec-wide"><div class="lab">Where to look for ' +
-               esc(canon || term) + '</div><ul class="at-films">');
-        /* AND A CEILING ON THE COUNTRIES, NOT ONLY ON EACH. Taylor is attested
-           in thirty-six countries that have an archive here; three apiece is a
-           hundred rows, which is a wall, not an answer. The band above stops
-           at ten countries for the same reason. Twelve, then a count. */
-        var rest = 0, moreCC = 0, moreInCC = 0;
+        /* A CEILING ON THE COUNTRIES, NOT ONLY ON EACH. Taylor is attested
+           in thirty-six countries that have an archive here; three apiece is
+           a hundred rows, which is a wall, not an answer. The band above
+           stops at ten countries for the same reason. Twelve, then a count.
+           Applied before the pane is built so the two agree on what is in
+           the list and what is behind the country links. */
+        var moreCC = 0, moreInCC = 0, shown = 0;
         if (order.length > 12) {
           order.slice(12).forEach(function (cc) { moreCC++; moreInCC += byCC[cc].length; });
           order = order.slice(0, 12);
         }
         order.forEach(function (cc) {
-          var ps = byCC[cc].slice().sort(function (a, b) {
-            /* A COUNTRY'S OWN ARCHIVE BEFORE A CROSS-BORDER ONE. Alphabetical
-               alone opened Italy on ANNO — the Austrian newspaper archive,
-               which carries IT because it covers the Austrian Littoral, and
-               which is not what somebody looking for an Italian register
-               should be handed first. Antenati is. Fewest countries wins. */
+          /* A COUNTRY'S OWN ARCHIVE BEFORE A CROSS-BORDER ONE. Alphabetical
+             alone opened Italy on ANNO — the Austrian newspaper archive,
+             which carries IT because it covers the Austrian Littoral, and
+             which is not what somebody looking for an Italian register should
+             be handed first. Antenati is. Fewest countries wins. */
+          byCC[cc] = byCC[cc].slice().sort(function (a, b) {
             var d = (a.countries || []).length - (b.countries || []).length;
             return d || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
           });
-          /* A provider can also be here because its own name or seat matched
-             what was typed rather than any country the name is attested in.
-             It gets its own rule rather than being filed silently under the
-             country above it, which would be a claim the data does not make. */
-          var head = cc ? (CNAME[cc] || cc) : T("Matched by name");
-          h.push('<li class="at-films-cc">' +
-                 (cc ? '<a href="' + BASE + "country/" + cc.toLowerCase() + '/">' +
-                       esc(head) + "</a>" : esc(head)) +
-                 ' <span class="ra-who">' + ps.length + "</span></li>");
-          ps.slice(0, 3).forEach(function (p) {
-            h.push('<li><a href="' + esc(p.url) + '" target="_blank" rel="noopener">' +
-                   esc(p.name) + " &#8599;</a> <span class=\"ra-who\">" +
-                   esc((ACC[p.access] || [0, p.access])[1]) + "</span>" +
-                   (p.at ? ' <span class="ra-who">' + esc(p.at.place) + "</span>" : "") + "</li>");
-          });
-          rest += Math.max(0, ps.length - 3);
+          shown += Math.min(3, byCC[cc].length);
         });
-        h.push("</ul>");
-        if (rest || moreCC) {
-          var bits = [];
-          if (rest) bits.push(rest.toLocaleString() + " more in these countries");
-          if (moreCC) bits.push(moreInCC.toLocaleString() + " in " + moreCC +
-                                " further " + (moreCC === 1 ? "country" : "countries") +
-                                " the name is attested in");
-          h.push('<p class="at-sub">' + bits.join(", and ") + ".</p>");
-        }
-        /* Said plainly, because the difference matters and is easy to miss:
-           these reach the COUNTRIES the name is attested in. None of them is
-           an archive of a place called by this name. */
-        h.push('<p class="at-sub">The archives of the countries ' + esc(canon || term) +
-               " is attested in — not of a place of that name.</p>");
-        h.push("</div>");
+        /* AND THE LIST ITSELF MOVES TO THE RIGHT PANE, which is the other
+           half of what David asked for. Senj's archives are in the pane,
+           numbered, with those numbers on the map; Lerena's were a flat list
+           at the foot of the panel, unnumbered and unpinned, below the fold.
+           Same question, same answer, so: same place.
+
+           The panel keeps what is about the NAME — what it is, where it was,
+           whose flag flew there — and the pane keeps where to go and read.
+           This line is the door between them, because the pane is shut by
+           default and a reader should be told what is behind it rather than
+           left to find the handle. */
+        var totalCC = order.length + moreCC;
+        h.push('<p class="at-sub at-sub-wide">' +
+               '<b>' + (shown + moreInCC).toLocaleString() + " " +
+               esc(T("archives reach the countries") + " " + (canon || term) + " " +
+                   T("is attested in")) + "</b> \u2014 " +
+               esc(T("listed in") + " ") +
+               '<button type="button" class="ra-open-check">' +
+               esc(T("Where to read")) + "</button>" +
+               esc(", " + T("numbered, and numbered on the map") + ". " +
+                   T("Grouped by country in the order the band above uses") +
+                   (moreCC ? ", " + T("the first") + " 12 " + T("of") + " " + totalCC : "") +
+                   ". " + T("These are the archives of those COUNTRIES, not of a " +
+                            "place of that name.")) + "</p>");
+        buildNameCheck(canon || term, byCC, order, rank);
       } else {
         h.push('<p class="at-sub at-sub-wide">Nothing in this map reaches the countries ' +
                "this name is attested in yet — which is exactly the kind of gap worth " +
@@ -6240,29 +6482,55 @@ window.addEventListener("load", async function () {
   /* Where the name was, and when — the surname panel's answer to the place
     panel's era band, and deliberately the same furniture. */
  :global(.ra-tw) { margin: 10px 0 0; }
- :global(.ra-tw ul) { list-style: none; margin: 6px 0 0; padding: 0; }
- :global(.ra-tw li) { display: flex; align-items: center; gap: 8px;
-    margin: 0 0 5px; font-size: 12.5px; }
- :global(.ra-tw-f) { flex: none; width: 21px; height: 14px; display: block;
-    border: 1px solid var(--rule); background: var(--ground); }
- :global(.ra-tw-f svg) { width: 100%; height: 100%; display: block; }
- :global(.ra-tw-c) { flex: none; min-width: 9em; }
- :global(.ra-tw-b) { position: relative; flex: 1 1 90px; height: 7px;
-    border-radius: 4px; background: var(--rule); min-width: 60px; }
- :global(.ra-tw-b i) { position: absolute; top: -2px; width: 3px; height: 11px;
-    margin-left: -1.5px; border-radius: 2px; background: #1B2A5B; }
- :global(.ra-tw-y) { flex: none; font-family: var(--mono); font-size: 10.5px;
-    color: var(--ink-3); white-space: nowrap; }
- :global(.ra-tw-axis) { display: flex; justify-content: space-between;
-    margin: 2px 0 0; font-family: var(--mono); font-size: 10px;
+  /* ONE ROW PER COUNTRY, BUILT FROM THE GROUND BAND'S PARTS. The flag and the
+     country name hold a fixed column so the bands line up under each other and
+     can be read down as well as across; the band itself takes the rest, so the
+     same decade sits at the same x on every row. */
+  :global(.ra-tw-r) { display: flex; align-items: center; gap: 8px;
+    margin: 0 0 3px; }
+  :global(.ra-tw-f) { flex: none; width: 21px; height: 14px; display: block;
+    border: 1px solid var(--rule); border-radius: 1px; overflow: hidden; }
+  :global(.ra-tw-f svg) { width: 100%; height: 100%; display: block; }
+  :global(.ra-tw-c) { flex: none; width: 11em; font-size: 12.5px; }
+  /* THE BAND'S OWN LOOK, NOT THE BAND'S CLASS. Wearing .ra-tl-band too meant
+     inheriting `display: flex` from a rule declared later in this sheet at
+     equal specificity — which silently won, and undid the absolute
+     positioning below. The frame is three declarations; copying them is
+     cheaper than a specificity fight nobody will remember losing. */
+  :global(.ra-tw-band) { flex: 1 1 auto; min-width: 0; display: block;
+    position: relative; height: 21px; overflow: hidden;
+    border: 1px solid var(--rule); border-radius: 3px;
+    background: var(--ground); }
+  /* Shorter than the ground band: that one carries a polity name under the
+     year and this carries only the years, so the extra height would be air. */
+  /* min-width keeps a single decade legible; because the segment is
+     positioned rather than laid out, growing it past its share pushes
+     nothing off the row — it just overlaps the empty ground beside it. */
+  :global(.ra-tw-band .ra-tw-seg) { position: absolute; top: 0; bottom: 0;
+    min-width: 52px; padding: 2px 5px; border-top-width: 3px; cursor: default;
+    display: flex; align-items: center; }
+  :global(.ra-tw-band .ra-tl-y) { font-size: 10.5px; white-space: nowrap; }
+  /* A GAP IS THE POINT, SO IT IS DRAWN AS ONE — and now it needs no element
+     of its own. De Franceschi is in Italy in the 1550s and then not again
+     until the 1840s; with the runs placed on the scale, the silence is the
+     band's own ground showing through between them, which is what it is. */
+  :global(.ra-tw-axis) { display: flex; justify-content: space-between;
+    margin: 4px 0 0; font-family: var(--mono); font-size: 10.5px;
     color: var(--ink-3); }
- :global(.ra-tw-c2) { margin: 6px 0 0; }
+  :global(.ra-tw-c2) { margin: 6px 0 0; }
  :global(.ra-orig) { margin: 8px 0 0; padding: 9px 11px;
     background: var(--ground); border-left: 3px solid var(--brass);
     border-radius: 0 3px 3px 0; }
  :global(.ra-orig-l) { margin: 0 0 3px; font-size: 13px; }
  :global(.ra-orig-c) { margin: 4px 0 0; }
  :global(.ra-orig-s) { margin: 6px 0 0; font-size: 11.5px; color: var(--ink-3); }
+  /* TWO SOURCES HAVE TO LOOK LIKE TWO SOURCES. Wikidata and Wiktionary can
+     and do disagree about a name, and stacking two identical brass-edged
+     blocks would read as one authority saying two things. The edge is the
+     only difference that is needed — the label under each already names who
+     said it, and the point of this whole pair of blocks is that the reader
+     can see which claim came from where. */
+  :global(.ra-orig-wk) { border-left-color: var(--brick); }
  :global(.ra-sug-h) { margin: 6px 0 3px; padding: 0 8px; font-family: var(--mono);
     font-size: 9.5px; letter-spacing: .07em; text-transform: uppercase;
     color: var(--brass); }
@@ -6378,6 +6646,29 @@ window.addEventListener("load", async function () {
     color: var(--ink-3); margin-left: 5px; white-space: nowrap; }
   :global(.ra-ck-n) { display: block; font-size: 11px; color: var(--ink-3); }
   :global(.ra-ck-more) { font-size: 11px; color: var(--ink-3); font-style: italic; }
+  /* A run of archives belongs to a country, and the pane says which — the
+     place pane groups by KIND (archives, parishes, graves) because everything
+     in it is near one point. Nothing in a name's list is near anything, so
+     the country is the only grouping that means something. */
+  :global(.ra-ck-cc) { display: flex; justify-content: space-between;
+    align-items: baseline; margin: 12px 0 4px; padding-bottom: 3px;
+    border-bottom: 1px solid var(--rule); font-family: var(--mono);
+    font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink-3); }
+  :global(.ra-ck-cc:first-child) { margin-top: 0; }
+  /* A link, not a button, to look at — it sits mid-sentence and a grey box
+     there would read as a form control in a paragraph. */
+  :global(.ra-open-check) { padding: 0; border: 0; background: none;
+    font: inherit; color: var(--accent); cursor: pointer;
+    text-decoration: underline; text-underline-offset: 2px; }
+  :global(.ra-open-check:hover) { color: var(--ink); }
+  :global(.ra-ck-cc a) { color: var(--ink-2); text-decoration: none; }
+  :global(.ra-ck-cc a:hover) { color: var(--accent); }
+  /* The place pane's key is the navy dotted ring, because that is what is
+     drawn on the map. A name has no ring — the pins are the whole of it — so
+     the key is a pin. */
+  :global(.ra-hood-k-n) { width: 15px; height: 15px; border-radius: 50%;
+    border-style: solid; background: #1B2A5B; }
   :global(.ra-check-b .ra-dot) { margin-right: 5px; }
   @media (max-width: 900px) {
     /* ONE COLUMN, AND THE CHECKLIST BECOMES A ROW. This rule was written once

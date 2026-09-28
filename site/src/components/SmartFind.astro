@@ -1,0 +1,245 @@
+---
+/* ONE SEARCH BOX, RANKED, WITH THE KIND ON EVERY ROW.
+
+   David: «shouldnt these searches be a smart search rather than another list?
+   where each type is shown be it a country, or a city, etc in the search
+   results dropdown?» — and, separately, «shouldnt we be sorting based on best
+   fit %age?»
+
+   Typing «south» returned sixty links in four columns with the country code
+   run onto the name — «South AfricaZA1524» — in no order worth the name:
+   South Africa, South Carolina, South Dakota, South Holland, South Bend. A
+   country, four American states and a Dutch province, all looking identical,
+   and the one exact-ish match for what a reader means by «south africa»
+   buried among them.
+
+   The MAP already solved this and the index pages had not. Same furniture
+   here: a dropdown, grouped by kind, each row saying what it is.
+
+   RANKED IN TIERS, NOT BY A SCORE OUT OF A HUNDRED. «Best fit percentage»
+   sounds like one number and behaves badly as one — a 90%-similar string is
+   not 90% as useful as an exact hit, it is not useful at all. What a reader
+   means by best fit is an ORDER, and the order is: the name exactly, then
+   names that begin with it, then names with a WORD beginning with it, then
+   names merely containing it. Within a tier the shorter name wins, because
+   the query covers more of it — which is the part of «percentage» that is
+   real, used as a tie-break where it belongs.
+*/
+const { placesIndex, quietIndex, base } = Astro.props;
+---
+
+<form class="sfind" role="search" autocomplete="off" onsubmit="return false">
+  <label class="vh" for="sfq">Find a country or a place</label>
+  <input id="sfq" type="search" autocomplete="off" spellcheck="false"
+         role="combobox" aria-expanded="false" aria-controls="sfdrop"
+         placeholder="Find a country or a place — Gallignana finds Gračišće" />
+  <div class="sfdrop" id="sfdrop" role="listbox" hidden></div>
+  <p class="sfhint" id="sfhint" role="status" aria-live="polite"></p>
+</form>
+
+<script is:inline define:vars={{ IDX: placesIndex, QUIET: quietIndex, BASE: base }}>
+  (function () {
+    var box = document.getElementById("sfq");
+    var drop = document.getElementById("sfdrop");
+    var hint = document.getElementById("sfhint");
+    if (!box) return;
+    var rows = null, loading = false, pending = "", cur = -1, items = [];
+
+    function fold(s) {
+      return (s || "").toString().toLowerCase()
+        .normalize("NFD").replace(/[̀-ͯ]/g, "");
+    }
+    function esc(s) {
+      return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+    /* The four tiers. Lower is better; 99 is no match at all. */
+    function tier(name, k) {
+      var f = fold(name);
+      if (f === k) return 0;
+      if (f.indexOf(k) === 0) return 1;
+      if ((" " + f).indexOf(" " + k) > -1) return 2;
+      return f.indexOf(k) > -1 ? 3 : 99;
+    }
+    function cmp(a, b) {
+      if (a.t !== b.t) return a.t - b.t;
+      /* The real part of «percentage»: how much of the name the query covers.
+         «Senj» against «senj» is all of it; «Senjska Draga» is a third. */
+      if (a.n.length !== b.n.length) return a.n.length - b.n.length;
+      return a.n.localeCompare(b.n);
+    }
+
+    function load() {
+      if (rows || loading) return;
+      loading = true;
+      hint.textContent = "Loading the place index…";
+      fetch(IDX).then(function (r) { return r.json(); }).then(function (d) {
+        rows = d.places.slice();
+        hint.textContent = "";
+        return fetch(QUIET).then(function (r) { return r.json(); })
+          .then(function (q) { rows = rows.concat(q.places || []); })
+          .catch(function () {});
+      }).catch(function () {
+        hint.textContent = "The place index did not load. Countries below still work.";
+      }).then(function () {
+        loading = false;
+        if (pending) run(pending);
+      });
+    }
+
+    /* Countries come from the cards already in the page — no fetch, and they
+       answer while the 1.7 MB place index is still arriving. */
+    function countries(k) {
+      var out = [];
+      [].slice.call(document.querySelectorAll("#ccgrid .cccard")).forEach(function (c) {
+        var n = c.getAttribute("data-name") || "";
+        var t = tier(n, k);
+        if (t === 99) return;
+        var a = c.querySelector(".ccname");
+        out.push({ t: t, n: n, kind: "country", href: a ? a.getAttribute("href") : "#",
+                   meta: (+c.getAttribute("data-places") || 0) + " places",
+                   card: c });
+      });
+      return out.sort(cmp);
+    }
+
+    function places(k) {
+      var out = [];
+      for (var i = 0; rows && i < rows.length; i++) {
+        var p = rows[i];
+        /* `q` is the fold of every name the place has ever had, which is why
+           Gallignana finds Gračišće — so a match may be on a name that is not
+           the one shown. Tier on the DISPLAY name where it hits, and fall to
+           the alias blob otherwise. */
+        var t = tier(p.n, k);
+        if (t === 99 && (p.q || "").indexOf(k) > -1) t = 4;
+        if (t === 99) continue;
+        out.push({ t: t, n: p.n, kind: "place",
+                   href: BASE + "place/" + p.i + "/",
+                   meta: (p.cc || "") + (p.v ? " · " + p.v + " volumes" : "") });
+        if (out.length > 400) break;
+      }
+      return out.sort(cmp).slice(0, 8);
+    }
+
+    function render(cc, pl) {
+      /* Built in one pass, groups in order, `items` filled as the rows are
+         made — the first version tracked an index into an array of HTML and
+         patched a placeholder, which is the kind of cleverness that is wrong
+         the first time somebody adds a third group. */
+      items = [];
+      var h = [];
+      function group(label, list, cap) {
+        var take = list.slice(0, cap);
+        if (!take.length) return;
+        h.push('<p class="sfh">' + label + "</p>");
+        take.forEach(function (r) { h.push(row(r, items.length)); items.push(r); });
+      }
+      group("Countries", cc, 5);
+      group("Places", pl, 8);
+      drop.innerHTML = h.join("");
+      drop.hidden = !items.length;
+      box.setAttribute("aria-expanded", items.length ? "true" : "false");
+      cur = -1;
+    }
+    function row(r, i) {
+      return '<a class="sfr" role="option" aria-selected="false" data-i="' + i +
+             '" href="' + esc(r.href) + '">' +
+             '<span class="sfn">' + esc(r.n) + "</span>" +
+             '<span class="sfk sfk-' + r.kind + '">' + r.kind + "</span>" +
+             '<span class="sfm">' + esc(r.meta) + "</span></a>";
+    }
+
+    function run(t) {
+      var k = fold(t).trim();
+      if (k.length < 2) {
+        drop.hidden = true; drop.innerHTML = ""; hint.textContent = "";
+        box.setAttribute("aria-expanded", "false");
+        if (window.raCountryFilter) window.raCountryFilter("");
+        return;
+      }
+      if (!rows) { pending = t; load(); } else { pending = ""; }
+      var cc = countries(k), pl = places(k);
+      /* The directory below filters to match, so the cards ARE the country
+         answer; the dropdown is how you get there in one keystroke. */
+      if (window.raCountryFilter) window.raCountryFilter(t);
+      render(cc, pl);
+      var bits = [];
+      if (cc.length) bits.push(cc.length + " countr" + (cc.length === 1 ? "y" : "ies"));
+      if (pl.length) bits.push(pl.length + " place" + (pl.length === 1 ? "" : "s"));
+      hint.textContent = bits.length ? bits.join(" · ")
+        : "Nothing answers to “" + t.trim() + "”. The map searches the gazetteer too.";
+    }
+
+    function mark() {
+      drop.querySelectorAll(".sfr").forEach(function (a, i) {
+        a.setAttribute("aria-selected", i === cur ? "true" : "false");
+        a.classList.toggle("on", i === cur);
+      });
+    }
+    box.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") { box.value = ""; run(""); return; }
+      if (drop.hidden) return;
+      if (e.key === "ArrowDown") { e.preventDefault(); cur = Math.min(cur + 1, items.length - 1); mark(); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); cur = Math.max(cur - 1, -1); mark(); }
+      else if (e.key === "Enter" && cur >= 0) {
+        e.preventDefault();
+        var a = drop.querySelectorAll(".sfr")[cur];
+        if (a) window.location = a.getAttribute("href");
+      }
+    });
+    var timer = null;
+    box.addEventListener("input", function () {
+      clearTimeout(timer);
+      var v = box.value;
+      timer = setTimeout(function () { run(v); }, 100);
+    });
+    box.addEventListener("focus", load, { once: true });
+    /* Clicking away shuts it; clicking a row is a link and navigates. */
+    document.addEventListener("click", function (e) {
+      if (!e.target.closest || !e.target.closest(".sfind")) drop.hidden = true;
+    });
+  })();
+</script>
+
+<style>
+  .sfind { position: relative; margin: 14px 0 0; }
+  .sfind input { width: 100%; box-sizing: border-box; font-family: var(--sans);
+    font-size: 16px; padding: 13px 15px; border: 1px solid var(--rule);
+    border-radius: 4px; background: var(--panel); color: var(--ink); }
+  .sfind input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  /* ABOVE EVERYTHING ON THE PAGE, which the map's own popover had to learn
+     twice — see the z-index note in RecordMap.astro. */
+  .sfdrop { position: absolute; top: calc(100% + 5px); left: 0; right: 0;
+    z-index: 1400; max-height: 58vh; overflow-y: auto; padding: 6px;
+    background: var(--panel); border: 1px solid var(--rule-strong);
+    border-radius: 5px; box-shadow: 0 10px 30px rgba(0,0,0,.28); }
+  .sfdrop[hidden] { display: none; }
+  /* :global() ON EVERYTHING THE SCRIPT WRITES. Astro scopes a component's
+     styles by stamping an attribute on the markup IT renders; these rows are
+     built by innerHTML and carry no such attribute, so a scoped `.sfr` simply
+     never matches and the flex layout never lands — which is why the first
+     run printed «South Koreacountry17 placesSouth Africa…» as one line of
+     inline text. RecordMap.astro has a note about paying for this once
+     already, twenty-six rule heads at a time. */
+  :global(.sfh) { margin: 6px 0 3px; padding: 0 8px; font-family: var(--mono);
+    font-size: 9.5px; letter-spacing: .07em; text-transform: uppercase;
+    color: var(--brass); }
+  :global(.sfr) { display: flex; align-items: baseline; gap: 9px; padding: 7px 9px;
+    border-radius: 4px; text-decoration: none; color: var(--ink);
+    font-family: var(--sans); font-size: 14px; }
+  :global(.sfr.on), :global(.sfr:hover) { background: var(--accent-wash); }
+  :global(.sfn) { font-weight: 500; }
+  /* THE KIND, SAID ON EVERY ROW. «South Africa» and «South Carolina» look
+     identical in a list and are a country and a state; the label is the
+     whole difference. */
+  :global(.sfk) { flex: none; font-family: var(--mono); font-size: 9.5px;
+    letter-spacing: .06em; text-transform: uppercase; padding: 1px 5px;
+    border-radius: 2px; border: 1px solid var(--rule); color: var(--ink-3); }
+  :global(.sfk-country) { color: var(--accent); border-color: var(--accent); }
+  :global(.sfm) { margin-left: auto; font-family: var(--mono); font-size: 10.5px;
+    color: var(--ink-3); }
+  .sfhint { margin: 6px 0 0; font-family: var(--mono); font-size: 11px;
+    color: var(--ink-3); min-height: 1em; }
+</style>

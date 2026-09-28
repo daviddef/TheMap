@@ -1,0 +1,185 @@
+---
+/* WHAT YOU HAVE ALREADY SEARCHED, KEPT PAGE BY PAGE.
+
+   David: «i want to be able to store the page im up to, or pages ive done,
+   not just a yes/no/partial» — and, on what this atlas is for: «this was
+   always a geneology tool, now it just isnt a info tool it actually give
+   something».
+
+   RANGES, BECAUSE THAT IS HOW THE WORK IS ACTUALLY DONE. Nobody searches a
+   register and comes away with a boolean. They come away with «I did images
+   1 to 47, then the light went». So the unit stored is a set of ranges, the
+   input accepts what a person would write — «1-47, 60-72» — and the thing
+   the page shows back is where to start again.
+
+   NO INVENTED DENOMINATOR. This atlas does NOT know how long a volume is: a
+   volume row carries a waypoint, a title and years, and the only image counts
+   in the data are collection-level aggregates like 283,815,879 for Find a
+   Grave. So there is no progress bar until the reader types the total they
+   can see on the film themselves, and when they do it is labelled as theirs.
+   A percentage this map made up would be the one thing it exists not to do.
+
+   LOCALSTORAGE, AND THIS TIME THAT IS NOT ENOUGH ON ITS OWN. Elsewhere in
+   this project localStorage is used for conveniences, with the note that it
+   «is a convenience and not a record». Page ranges ARE a record — somebody
+   may spend months building them — and site data gets cleared, private
+   windows forget, browsers evict under pressure, laptops get replaced. So
+   export is a first-class verb here rather than a footnote, and the pages
+   that show progress say plainly where it lives.
+
+   THE ROW SHAPE BORROWS FROM THE ARCHIVE KIT, which already had to answer
+   «what is being done» for eight family archives: `covers` is a list of
+   stable ids, `since` is when it was raised. Keeping the same two words means
+   a reader's own progress can be exported into an archive's worklist.json
+   instead of being a second, incompatible record of the same work. `owner`
+   and `state` are dropped: there is one owner here, and a range says more
+   than a state does.
+*/
+---
+<script is:inline>
+  (function () {
+    var KEY = "ra-progress-v1";
+    var mem = null;
+
+    function load() {
+      if (mem) return mem;
+      mem = { v: 1, marks: {} };
+      try {
+        var raw = localStorage.getItem(KEY);
+        if (raw) {
+          var d = JSON.parse(raw);
+          if (d && d.marks) mem = d;
+        }
+      } catch (e) { /* private window, blocked storage — carry on empty */ }
+      return mem;
+    }
+    function save() {
+      try { localStorage.setItem(KEY, JSON.stringify(mem)); }
+      catch (e) { /* quota or blocked; the page must not break over it */ }
+    }
+    function today() { return new Date().toISOString().slice(0, 10); }
+
+    /* «1-47, 60-72» · «1–47» · «5» · «12 to 30» — whatever a person writes.
+       Returns merged, sorted, non-overlapping ranges, or null if nothing in
+       the string was a number. Silence beats a wrong guess: a string this
+       cannot read leaves the stored ranges alone. */
+    function parseRanges(text) {
+      var s = String(text == null ? "" : text);
+      var out = [], any = false;
+      s.split(/[,;]+/).forEach(function (part) {
+        var m = part.match(/(\d+)\s*(?:[-–—]|to)\s*(\d+)/);
+        if (m) { any = true; out.push([+m[1], +m[2]]); return; }
+        var one = part.match(/(\d+)/);
+        if (one) { any = true; out.push([+one[1], +one[1]]); }
+      });
+      if (!any) return null;
+      return merge(out);
+    }
+    function merge(list) {
+      var r = list.map(function (p) {
+        return p[0] <= p[1] ? [p[0], p[1]] : [p[1], p[0]];
+      }).filter(function (p) { return p[0] >= 0; })
+        .sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; });
+      var out = [];
+      r.forEach(function (p) {
+        var last = out[out.length - 1];
+        /* Adjacent ranges join: 1-47 and 48-60 is 1-60, because a reader who
+           typed them separately did not mean to leave a gap of nothing. */
+        if (last && p[0] <= last[1] + 1) last[1] = Math.max(last[1], p[1]);
+        else out.push([p[0], p[1]]);
+      });
+      return out;
+    }
+    function fmt(ranges) {
+      return (ranges || []).map(function (p) {
+        return p[0] === p[1] ? String(p[0]) : p[0] + "–" + p[1];
+      }).join(", ");
+    }
+    /* WHERE TO START AGAIN IS THE FIRST GAP, NOT THE HIGHEST PAGE. After
+       1-47 and 60-72 the answer is 48: the reader skipped 48-59 and will
+       want to know it. Reporting 73 would quietly bless the hole. */
+    function resume(ranges) {
+      if (!ranges || !ranges.length) return 1;
+      if (ranges[0][0] > 1) return 1;
+      return ranges[0][1] + 1;
+    }
+    function covered(ranges) {
+      return (ranges || []).reduce(function (a, p) { return a + (p[1] - p[0] + 1); }, 0);
+    }
+
+    window.raProgress = {
+      get: function (id) { return load().marks[id] || null; },
+      /* Every setter stamps `since`, because a volume last touched five weeks
+         ago is a different thing from one touched this morning, and that is
+         the difference between a checklist and a research log. */
+      setRanges: function (id, text) {
+        var r = parseRanges(text);
+        var m = load().marks;
+        if (r === null) {
+          /* An empty box means «forget this», which is a real thing to want
+             and must be possible without clearing the whole record. */
+          if (String(text || "").trim() === "") delete m[id];
+        } else {
+          m[id] = m[id] || {};
+          m[id].done = r;
+          m[id].since = today();
+        }
+        save();
+        return m[id] || null;
+      },
+      setTotal: function (id, n) {
+        var m = load().marks;
+        n = parseInt(n, 10);
+        m[id] = m[id] || {};
+        if (n > 0) m[id].total = n; else delete m[id].total;
+        m[id].since = today();
+        save();
+        return m[id];
+      },
+      setNote: function (id, s) {
+        var m = load().marks;
+        m[id] = m[id] || {};
+        if (String(s || "").trim()) m[id].note = String(s).trim();
+        else delete m[id].note;
+        m[id].since = today();
+        save();
+        return m[id];
+      },
+      clear: function (id) { delete load().marks[id]; save(); },
+      all: function () { return load().marks; },
+      count: function () { return Object.keys(load().marks).length; },
+      /* The export IS the record. Named with the date so successive exports
+         do not overwrite each other in a downloads folder. */
+      toJSON: function () {
+        var d = load();
+        return JSON.stringify({ v: 1, exported: today(), marks: d.marks }, null, 1);
+      },
+      fromJSON: function (text, mode) {
+        var d = JSON.parse(text);
+        if (!d || !d.marks) throw new Error("not a Record Atlas progress file");
+        var m = load().marks;
+        Object.keys(d.marks).forEach(function (k) {
+          var incoming = d.marks[k];
+          if (mode === "replace" || !m[k]) { m[k] = incoming; return; }
+          /* MERGING TWO MACHINES MUST NOT LOSE A PAGE. Ranges from both sides
+             are unioned rather than overwritten, because the alternative is
+             that importing last week's file on the laptop silently deletes
+             what was done on the phone since. */
+          m[k].done = merge((m[k].done || []).concat(incoming.done || []));
+          if (incoming.total && !m[k].total) m[k].total = incoming.total;
+          if (incoming.note && incoming.note !== m[k].note) {
+            m[k].note = m[k].note ? m[k].note + " · " + incoming.note : incoming.note;
+          }
+          if (incoming.since && (!m[k].since || incoming.since > m[k].since))
+            m[k].since = incoming.since;
+        });
+        save();
+        return Object.keys(d.marks).length;
+      },
+      parseRanges: parseRanges,
+      fmt: fmt,
+      resume: resume,
+      covered: covered
+    };
+  })();
+</script>

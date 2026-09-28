@@ -3,38 +3,20 @@
    ninety-three of them. The crawl path for the country pages, and the honest
    overview of how uneven this map is. */
 import Base from "../layouts/Base.astro";
-import { u } from "../lib/url.js";
 import cols from "../data/collections-full.json";
-import full from "../data/places-full.json";
-import provs from "../../public/providers.json";
-import { atlas as idx } from "../lib/atlas.js";
-import { flagFor } from "../lib/flags.js";
+import CountryCards from "../components/CountryCards.astro";
+import { countryMetrics, countryTotals } from "../lib/country-metrics.js";
 
-const CN = idx.countries || {};
-const rows = {};
-const bump = (cc, k) => { (rows[cc] = rows[cc] || { cc, cols: 0, places: 0, arch: 0 })[k]++; };
-for (const c of cols.collections) for (const k of c.countries) bump(k, "cols");
-for (const p of full.places) if (p.country) bump(p.country, "places");
-for (const p of provs.providers) for (const k of p.countries) if (k !== "*") bump(k, "arch");
-const list = Object.values(rows)
-  .map((r) => ({ ...r, name: CN[r.cc] || r.cc }))
-  /* ALPHABETICAL, BECAUSE THAT IS WHAT A LIST OF COUNTRIES IS FOR. It was
-     ordered by collection count, which answers «where is this map thickest» —
-     a question nobody arrives with. Somebody looking for Uruguay wants to run
-     their eye down a column, and could not. The counts are still sortable, by
-     clicking the heading, for when that IS the question. */
-  /* THE FLAG IT FLIES, WHICH THIS ATLAS HAS DRAWN AND NEVER SHOWN HERE.
-     210 of them sit in flag-index.json, already published and already fetched
-     by the map, and this table — the one page on the site most obviously about
-     countries — printed none of them. The flag carries a link into the flags
-     atlas too, which is the other half of the same omission: there were no
-     cross-links between these four indexes at all. */
-  .map((r) => ({ ...r, flag: flagFor(r.cc) }))
-  .sort((a, b) => a.name.localeCompare(b.name));
-const withFlag = list.filter((r) => r.flag).length;
+/* THE ARITHMETIC MOVED TO lib/country-metrics.js, because /places/ and
+   /surnames/ were each doing their own and one of the three was going to
+   drift. This page keeps only what is its own: the record total. */
+const list = countryMetrics();
+const T = countryTotals();
+const withFlag = T.withFlag;
+
 const totalCols = cols.collections.length;
 const records = cols.collections.reduce((a, c) => a + (c.records || 0), 0);
-const walked = list.filter((r) => r.places > 0).length;
+const walked = T.walked;
 ---
 <Base
   title="Every country"
@@ -51,143 +33,5 @@ const walked = list.filter((r) => r.places > 0).length;
     flag history.</p>
   </div>
 
-  {/* A LIST OF COUNTRIES AND NO WAY TO TYPE ONE. Of the four indexes on this
-      site, three had a search box and this one did not, so a reader after
-      Uruguay ran their eye down a column. It filters the rows already in the
-      page, so it costs nothing when the script never runs. */}
-  <div class="cfind">
-    <input id="cq" type="search" autocomplete="off" spellcheck="false"
-           aria-label="Find a country"
-           placeholder="Find a country — Uruguay · Eswatini · Cabo Verde" />
-    <span class="cfind-n" id="cq-n" aria-live="polite"></span>
-  </div>
-
-  <table style="margin-top:14px" data-sortable>
-    <thead><tr>
-      <th><button class="sortby" data-col="0" data-kind="text" aria-label="Sort by country">Country</button></th>
-      <th class="m"><button class="sortby" data-col="1" data-kind="num">Collections</button></th>
-      <th class="m"><button class="sortby" data-col="2" data-kind="num">Archives</button></th>
-      <th class="m"><button class="sortby" data-col="3" data-kind="num">Places</button></th>
-    </tr></thead>
-    <tbody>
-      {list.map((r) => (
-        <tr>
-          <td data-name={r.name}>
-            {r.flag && (
-              <svg class="cflag" viewBox="0 0 300 200" role="img"
-                   aria-label={`Flag of ${r.name}`} set:html={r.flag.flag} />
-            )}
-            <a href={u(`/country/${r.cc.toLowerCase()}/`)}>{r.name}</a>
-            {r.flag && (
-              <a class="cflag-l" href={u("/" + r.flag.url)}
-                 title={`${r.name} in the flags atlas — who held this ground, and when`}
-              >flags &rarr;</a>
-            )}
-          </td>
-          <td class="m">{r.cols || ""}</td>
-          <td class="m">{r.arch || ""}</td>
-          <td class={"m" + (r.places ? "" : " none")}>{r.places || "—"}</td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
+  <CountryCards list={list} totals={T} />
 </Base>
-
-<script is:inline>
-  /* Click a heading to reorder. Plain DOM, no dependency, and the rows are
-     already in the page — so it works on the markup the server sent and costs
-     nothing if the script never runs. */
-  (function () {
-    var t = document.querySelector("table[data-sortable]");
-    if (!t) return;
-    var body = t.tBodies[0];
-    t.querySelectorAll("button.sortby").forEach(function (b) {
-      b.addEventListener("click", function () {
-        var col = +b.dataset.col, num = b.dataset.kind === "num";
-        /* A second click on the same heading reverses it. Numbers start
-           biggest-first because «most collections» is the useful end; names
-           start A–Z because the other end of an alphabet is not useful. */
-        var desc = b.getAttribute("aria-sort") === (num ? "descending" : "ascending")
-          ? !num : num;
-        t.querySelectorAll("button.sortby").forEach(function (o) {
-          o.removeAttribute("aria-sort"); o.classList.remove("on");
-        });
-        b.setAttribute("aria-sort", desc ? "descending" : "ascending");
-        b.classList.add("on");
-        var cell = function (tr) { return tr.children[col].textContent.trim(); };
-        var rows = [].slice.call(body.rows).sort(function (x, y) {
-          if (num) {
-            /* "—" and "" both mean none, and must not sort as text. */
-            var a = parseFloat(cell(x).replace(/[^0-9.]/g, "")) || 0;
-            var c = parseFloat(cell(y).replace(/[^0-9.]/g, "")) || 0;
-            return desc ? c - a : a - c;
-          }
-          return desc ? cell(y).localeCompare(cell(x)) : cell(x).localeCompare(cell(y));
-        });
-        rows.forEach(function (r) { body.appendChild(r); });
-      });
-    });
-  })();
-
-  /* THE SEARCH THIS PAGE NEVER HAD.
-     Folded, so «Cote» finds «Côte d'Ivoire» and «Hrvatska» does not have to
-     be spelt with the right accents to be typed. It matches the country's own
-     name only — not the counts — because a reader typing here is naming a
-     place, and matching «12» against a column of numbers would be noise. */
-  (function () {
-    var q = document.getElementById("cq");
-    var out = document.getElementById("cq-n");
-    var t = document.querySelector("table[data-sortable]");
-    if (!q || !t) return;
-    var body = t.tBodies[0];
-    var fold = function (v) {
-      return (v || "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-    };
-    var rows = [].slice.call(body.rows).map(function (r) {
-      return { el: r, hay: fold(r.cells[0].getAttribute("data-name") || r.cells[0].textContent) };
-    });
-    var run = function () {
-      var v = fold(q.value.trim());
-      var n = 0;
-      rows.forEach(function (r) {
-        var hit = !v || r.hay.indexOf(v) >= 0;
-        r.el.hidden = !hit;
-        if (hit) n++;
-      });
-      out.textContent = v ? n + " of " + rows.length : "";
-    };
-    q.addEventListener("input", run);
-    /* Escape clears it, the same as the map's own search box. */
-    q.addEventListener("keydown", function (e) {
-      if (e.key === "Escape" && q.value) { q.value = ""; run(); }
-    });
-  })();
-</script>
-
-<style>
-  /* The flag reads as a small object beside the name, not as an illustration:
-     28px wide, a hairline border so a white flag still has edges, and the
-     baseline aligned with the country it belongs to. */
-  .cflag { width: 28px; height: auto; vertical-align: -3px; margin-right: 8px;
-    border: 1px solid var(--rule); border-radius: 1px; }
-  .cflag-l { margin-left: 8px; font-size: .78em; white-space: nowrap;
-    color: var(--ink-3); text-decoration: none; }
-  .cflag-l:hover { color: var(--accent); text-decoration: underline; }
-  tr:hover .cflag-l { color: var(--accent); }
-  .cfind { margin-top: 20px; display: flex; align-items: center; gap: 10px; }
-  .cfind input { flex: 1; min-width: 0; font: inherit; padding: 8px 11px;
-    border: 1px solid var(--rule); border-radius: 4px; background: var(--panel);
-    color: var(--ink); }
-  .cfind input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-  .cfind-n { font-family: var(--mono); font-size: 11px; color: var(--ink-3);
-    white-space: nowrap; }
-  td.none { color: var(--ink-3); }
-  td { vertical-align: top; }
-  button.sortby { background: none; border: 0; padding: 0; cursor: pointer;
-    font: inherit; color: inherit; letter-spacing: inherit; text-transform: inherit; }
-  button.sortby:hover { color: var(--accent); }
-  button.sortby::after { content: " \2195"; opacity: .35; font-size: .9em; }
-  button.sortby.on { color: var(--accent); }
-  button.sortby[aria-sort="ascending"]::after { content: " \25B4"; opacity: 1; }
-  button.sortby[aria-sort="descending"]::after { content: " \25BE"; opacity: 1; }
-</style>

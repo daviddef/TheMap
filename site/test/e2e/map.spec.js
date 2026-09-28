@@ -70,7 +70,13 @@ test("a surname search lights only the countries it is attested in", async ({ pa
 test("a surname with a page is linked, and the link is not a 404", async ({ page }) => {
   await mapReady(page);
   await page.fill("#ra-q", "Peeters");
-  const link = page.locator(".at-panel .ra-go a").first();
+  /* THE LINK MOVED AND THE ASSERTION SHOULD NOT CARE WHERE IT SITS. It used
+     to be «.ra-go» inside the name card; the heading row now carries it the
+     way a place's does — «Peeters · 13 countries · also written … · Read more
+     about Peeters →» — and the card drops its duplicate. What this test is
+     for is that a name with a page is REACHABLE and the href is not a 404, so
+     it asks for that and not for one class name. */
+  const link = page.locator(".at-panel .ra-go a, .at-panel .at-h .at-go").first();
   await expect(link).toBeVisible({ timeout: 30000 });
   const href = await link.getAttribute("href");
   const res = await page.request.get(href);

@@ -36,6 +36,9 @@
  * path and because search that needs JavaScript must not be the only way in.
  */
 import Base from "../../layouts/Base.astro";
+import CountryCards from "../../components/CountryCards.astro";
+import SmartFind from "../../components/SmartFind.astro";
+import { countryMetrics, countryTotals } from "../../lib/country-metrics.js";
 import { u } from "../../lib/url.js";
 import full from "../../data/places-full.json";
 import { atlas as idx } from "../../lib/atlas.js";
@@ -93,6 +96,8 @@ const countryList = Object.entries(counts)
   .map(([cc, n]) => ({ cc, n, name: CN[cc] || cc, flag: flagFor(cc) }))
   .sort((a, b) => a.name.localeCompare(b.name));
 const countries = countryList.length;
+const ccList = countryMetrics();
+const ccTotals = countryTotals();
 
 /* Print a country heading only where the country changes. */
 let last = null;
@@ -111,35 +116,33 @@ const rows = page.data.map((p) => {
       actually asked. It is hidden until the script runs: a search box that
       does nothing is worse than no search box, and a reader without
       JavaScript still has the country directory and the list below. */}
-  <form class="psearch" id="psearch" hidden autocomplete="off"
-        onsubmit="return false">
-    <label class="vh" for="pq">Find a place by any name it has ever had</label>
-    <input id="pq" type="search" placeholder="Find a place — Gallignana finds Gračišće" />
-    <p class="phint" id="phint" role="status" aria-live="polite"></p>
-    <ul class="phits" id="phits"></ul>
-  </form>
+  {/* THE FLAT LIST BECAME A RANKED DROPDOWN. It answered «south» with sixty
+      links in four columns, the country code run onto the name, a country and
+      four American states looking identical. See SmartFind.astro. */}
+  <SmartFind placesIndex={u("/index.json")} quietIndex={u("/index-quiet.json")}
+             base={u("/")} />
 
+  {/* THE SAME CARDS /countries/ USES, NOT A SECOND DESCRIPTION OF THE SAME
+      COUNTRIES. David: «every country can just move to "places"? surely and
+      summarise the same numbers there?» and «i think places should be country
+      mini cards rather than just text, showing the metrics?»
+
+      This was a text grid of flag + name + place count, and /countries/ was a
+      sortable table of flag + name + three counts, and they were the same
+      hundred and fifty rows counted twice in two files. One component, one
+      set of numbers, from lib/country-metrics.js. */}
   <details class="cdir" id="cdir" open={page.currentPage === 1}>
-    <summary><b>Jump to a country</b> — {countries} of them</summary>
+    <summary><b>Jump to a country</b> — {ccTotals.countries} of them</summary>
+    {/* TWO TRUE COUNTS, AND THE DIFFERENCE IS THE POINT. The line above this
+        page says 101 countries, because that is how many have a place somebody
+        has walked. The directory holds 152, because that is how many this
+        atlas knows anything at all about. Printed together rather than left
+        to look like one of them is wrong. */}
     <p class="cap">Almost nobody wants every place at once. Each country page lists
-    its own places and what covers them.</p>
-    <ul class="cgrid">
-      {countryList.map((c) => (
-        <li>
-          {c.flag && (
-            <svg class="cdirflag" viewBox="0 0 300 200" role="img"
-                 aria-label={`Flag of ${c.name}`} set:html={c.flag.flag} />
-          )}
-          <a href={u(`/country/${c.cc.toLowerCase()}/`)}>{c.name}</a>
-          {c.flag && (
-            <a class="cdirflag-l" href={u("/" + c.flag.url)}
-               title={`${c.name} in the flags atlas — who held this ground, and when`}
-            >&#8599;</a>
-          )}
-          <span class="y">{c.n.toLocaleString()}</span>
-        </li>
-      ))}
-    </ul>
+    its own places and what covers them. <b>{countries} of these {ccTotals.countries}
+    have a place walked volume by volume</b>; the rest are known by their
+    collections or their archives alone.</p>
+    <CountryCards list={ccList} totals={ccTotals} showFind={false} />
   </details>
 
   <p class="cap">This index exists so that no place page is an orphan — everything here
@@ -186,95 +189,7 @@ const rows = page.data.map((p) => {
     )}
   </nav>
 
-  <script is:inline define:vars={{ BASE: u("/"), IDX: u("/index.json"), QUIET: u("/index-quiet.json") }}>
-    /* SEARCH ACROSS ALL OF IT, not across the six hundred on this page.
-       index.json is what the map fetches, so a reader arriving from the map
-       has it cached already; the quiet half follows so that ground nobody has
-       walked is findable too — those are exactly the places a reader is most
-       likely to be the first to ask about. */
-    (function () {
-      var form = document.getElementById("psearch");
-      var box = document.getElementById("pq");
-      var hits = document.getElementById("phits");
-      var hint = document.getElementById("phint");
-      var rows = null, loading = false, pending = "";
 
-      form.hidden = false;
-
-      function fold(s) {
-        return (s || "").toString().toLowerCase()
-          .normalize("NFD").replace(/[̀-ͯ]/g, "");
-      }
-      function esc(s) {
-        return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
-          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
-        });
-      }
-
-      function load() {
-        if (rows || loading) return Promise.resolve();
-        loading = true;
-        hint.textContent = "Loading the index…";
-        return fetch(IDX).then(function (r) { return r.json(); }).then(function (d) {
-          rows = d.places.slice();
-          hint.textContent = "";
-          /* The quiet half arrives second and is merged in place, so a search
-             typed in the first second still works and simply gets better. */
-          return fetch(QUIET).then(function (r) { return r.json(); })
-            .then(function (q) { rows = rows.concat(q.places || []); })
-            .catch(function () {});
-        }).catch(function () {
-          hint.textContent = "The index did not load. The list below still works, " +
-                             "and so does the map.";
-        }).then(function () {
-          loading = false;
-          if (pending) run(pending);
-        });
-      }
-
-      function run(t) {
-        var k = fold(t).trim();
-        if (k.length < 2) { hits.innerHTML = ""; hint.textContent = ""; return; }
-        if (!rows) { pending = t; load(); return; }
-        pending = "";
-        var out = [], starts = [];
-        for (var i = 0; i < rows.length && out.length < 400; i++) {
-          var p = rows[i];
-          /* `q` is the fold of every name the place has ever had, which is why
-             Gallignana finds Gračišće. Fall back to the display name for rows
-             that carry no blob. */
-          var hay = p.q || fold(p.n);
-          if (hay.indexOf(k) === -1) continue;
-          (fold(p.n).indexOf(k) === 0 ? starts : out).push(p);
-        }
-        /* A name that STARTS with what was typed is what the reader meant;
-           one that merely contains it is a maybe. Sorting that way means
-           «pazin» does not answer with Kaliningrad-Pazin-something first. */
-        var all = starts.concat(out).slice(0, 60);
-        if (!all.length) {
-          hits.innerHTML = "";
-          hint.textContent = "Nothing here answers to “" + t.trim() +
-            "”. The map searches the gazetteer as well, which is larger.";
-          return;
-        }
-        hint.textContent = all.length + (all.length === 60 ? "+ " : " ") +
-          "place" + (all.length === 1 ? "" : "s");
-        hits.innerHTML = all.map(function (p) {
-          return '<li><a href="' + BASE + "place/" + esc(p.i) + '/">' + esc(p.n) +
-                 "</a>" + (p.cc ? '<span class="cc">' + esc(p.cc) + "</span>" : "") +
-                 (p.v ? '<span class="y">' + p.v + "</span>" : "") + "</li>";
-        }).join("");
-      }
-
-      var t = null;
-      box.addEventListener("input", function () {
-        clearTimeout(t);
-        var v = box.value;
-        t = setTimeout(function () { run(v); }, 110);
-      });
-      box.addEventListener("focus", load, { once: true });
-    })();
-  </script>
 </Base>
 
 <style>

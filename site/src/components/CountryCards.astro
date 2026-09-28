@@ -1,0 +1,225 @@
+---
+/* THE COUNTRY DIRECTORY, ONCE, AS CARDS.
+
+   David: «i think places should be country mini cards rather than just text,
+   showing the metrics? same as in surname» — and «keep sorting controls».
+
+   The same countries were being described three ways: a sortable table on
+   /countries/, a text grid on /places/, and nothing at all on /surnames/. This
+   is the one of them, used by all three, so the numbers cannot disagree.
+
+   SORTING SURVIVED THE MOVE TO CARDS, which was the condition. A table sorts
+   by reordering rows; this reorders the cards themselves, which is the same
+   operation on a different box. It is kept because the page's whole argument
+   is about UNEVENNESS — «where this map reaches, and how unevenly» — and you
+   cannot see unevenness in an alphabetical list. Sorting by places answers
+   «where is this thickest»; sorting by names answers «whose register have we
+   never touched», which is the question David asked for.
+*/
+import { u } from "../lib/url.js";
+/* `showFind` false where the PAGE already has a search box. /places/ had two —
+   «Find a place» at the top and «Find a country» inside the directory — which
+   is one box too many on one page, and the reason a country typed into the
+   first one came back as a stray line of text instead of filtering the cards
+   it was standing above. That page drives this grid through window.raCountryFilter
+   instead. */
+const { list, totals, showFind = true } = Astro.props;
+---
+
+{showFind && (
+  <form class="ccfind" role="search" onsubmit="return false">
+    <label class="vh" for="ccq">Find a country</label>
+    <input id="ccq" type="search" autocomplete="off"
+           placeholder="Find a country — Uruguay · Eswatini · Cabo Verde" />
+    <span class="ccn" id="ccq-n" role="status" aria-live="polite"></span>
+  </form>
+)}
+
+<div class="ccsort">
+  <span class="cclab">Sort</span>
+  <button type="button" class="sortby on" data-k="name" data-kind="text"
+          aria-sort="ascending">Country</button>
+  <button type="button" class="sortby" data-k="places">Places</button>
+  <button type="button" class="sortby" data-k="arch">Archives</button>
+  <button type="button" class="sortby" data-k="cols">Collections</button>
+  <button type="button" class="sortby" data-k="reg">Names in a register</button>
+</div>
+
+<ul class="ccgrid" id="ccgrid">
+  {list.map((c) => (
+    <li class="cccard" data-name={c.name} data-places={c.places}
+        data-arch={c.arch} data-cols={c.cols} data-reg={c.reg}
+        data-state={c.names}>
+      <div class="cchead">
+        {c.flag && (
+          <svg class="ccflag" viewBox="0 0 300 200" role="img"
+               aria-label={`Flag of ${c.name}`} set:html={c.flag.flag} />
+        )}
+        <a class="ccname" href={u(`/country/${c.cc.toLowerCase()}/`)}>{c.name}</a>
+        {c.flag && (
+          <a class="ccflags-l" href={u("/" + c.flag.url)}
+             title={`${c.name} in the flags atlas — who held this ground, and when`}
+          >flags &rarr;</a>
+        )}
+      </div>
+      <dl class="ccm">
+        <div><dt>Places</dt><dd>{c.places ? c.places.toLocaleString() : "0"}</dd></div>
+        <div><dt>Archives</dt><dd>{c.arch ? c.arch.toLocaleString() : "0"}</dd></div>
+        <div><dt>Collections</dt><dd>{c.cols ? c.cols.toLocaleString() : "0"}</dd></div>
+      </dl>
+      {/* THE NAMES LINE SAYS WHICH OF THE THREE STATES THIS IS, because the
+          number alone would be read as a fact about the country. Croatia's
+          141 against Denmark's 290,156 is a fact about our harvest. */}
+      {c.names === "register" && (
+        <p class="ccnames"><b>{c.reg.toLocaleString()}</b>
+        {" "}{c.reg === 1 ? "name" : "names"} in its national register</p>
+      )}
+      {c.names === "archive" && (
+        <p class="ccnames ccnames-thin">no register harvested — {c.arc.toLocaleString()}
+        {" "}{c.arc === 1 ? "name" : "names"} known only from a family archive</p>
+      )}
+      {c.names === "none" && (
+        <p class="ccnames ccnames-none"><b>0</b> names — no register harvested, and no archive names one</p>
+      )}
+    </li>
+  ))}
+</ul>
+
+<p class="cap ccfoot">{totals.withRegister} countries have a national register
+  harvested, {totals.archiveOnly} are named only by a family archive, and
+  <b>{totals.noNames} have no names at all</b> — which is a gap in this map,
+  not a gap in the record. Sorting by <b>Names in a register</b> puts them
+  together.</p>
+
+<script is:inline>
+  /* Sort and filter the cards in place. No fetch: everything is already in
+     the DOM as data- attributes, and 152 nodes reorder faster than a frame. */
+  (function () {
+    var grid = document.getElementById("ccgrid");
+    if (!grid) return;
+    var cards = [].slice.call(grid.children);
+    var q = document.getElementById("ccq");
+    var out = document.getElementById("ccq-n");
+    function filterBoxValue() { return q ? q.value : ""; }
+
+    function fold(v) {
+      return (v || "").normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase();
+    }
+    var hay = cards.map(function (c) { return fold(c.getAttribute("data-name")); });
+
+    function filter() {
+      var v = fold((filterBoxValue() || "").trim());
+      var n = 0;
+      cards.forEach(function (c, i) {
+        var hit = !v || hay[i].indexOf(v) >= 0;
+        c.hidden = !hit;
+        if (hit) n++;
+      });
+      out.textContent = v ? n + " of " + cards.length : "";
+    }
+    if (q) {
+      q.addEventListener("input", filter);
+      /* Escape clears it, the same as every other search box on this site. */
+      q.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") { q.value = ""; filter(); }
+      });
+    }
+    /* THE PAGE'S OWN BOX CAN DRIVE THIS GRID. Returns how many cards are
+       showing, so the caller can say «1 country» without counting twice. */
+    window.raCountryFilter = function (text) {
+      var v = fold((text || "").trim());
+      var n = 0;
+      cards.forEach(function (c, i) {
+        var hit = !v || hay[i].indexOf(v) >= 0;
+        c.hidden = !hit;
+        if (hit) n++;
+      });
+      if (out) out.textContent = v ? n + " of " + cards.length : "";
+      /* A filtered directory inside a shut <details> is a filter nobody can
+         see working. */
+      if (v && n) {
+        var d = grid.closest && grid.closest("details");
+        if (d) d.open = true;
+      }
+      return n;
+    };
+
+    grid.parentNode.querySelectorAll("button.sortby").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var k = b.getAttribute("data-k");
+        var text = b.getAttribute("data-kind") === "text";
+        /* A NUMBER SORTS BIGGEST FIRST AND A NAME SORTS A TO Z, because that
+           is what each is for: nobody wants the country with the fewest
+           archives at the top, and nobody wants Zimbabwe. */
+        var was = b.getAttribute("aria-sort");
+        var desc = text ? was === "ascending" : was !== "descending";
+        grid.parentNode.querySelectorAll("button.sortby").forEach(function (o) {
+          o.removeAttribute("aria-sort"); o.classList.remove("on");
+        });
+        b.setAttribute("aria-sort", desc ? "descending" : "ascending");
+        b.classList.add("on");
+        var sorted = cards.slice().sort(function (x, y) {
+          if (text) {
+            var a = x.getAttribute("data-name"), c = y.getAttribute("data-name");
+            return desc ? c.localeCompare(a) : a.localeCompare(c);
+          }
+          var n1 = +x.getAttribute("data-" + k) || 0;
+          var n2 = +y.getAttribute("data-" + k) || 0;
+          /* Ties keep alphabetical order rather than whatever the sort
+             happened to do — 116 countries tie at zero, and a list that
+             reshuffles them on every click reads as broken. */
+          if (n1 === n2)
+            return x.getAttribute("data-name").localeCompare(y.getAttribute("data-name"));
+          return desc ? n2 - n1 : n1 - n2;
+        });
+        var frag = document.createDocumentFragment();
+        sorted.forEach(function (c) { frag.appendChild(c); });
+        grid.appendChild(frag);
+      });
+    });
+  })();
+</script>
+
+<style>
+  .ccfind { margin: 14px 0 0; display: flex; align-items: baseline; gap: 10px; }
+  .ccfind input { flex: 1 1 auto; font-family: var(--sans); font-size: 15px;
+    padding: 11px 13px; border: 1px solid var(--rule); border-radius: 4px;
+    background: var(--panel); color: var(--ink); }
+  .ccn { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+  .ccsort { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px;
+    margin: 12px 0 0; }
+  .cclab { font-family: var(--mono); font-size: 10px; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--ink-3); }
+  button.sortby { background: none; border: 0; padding: 2px 0; cursor: pointer;
+    font-family: var(--sans); font-size: 12.5px; color: var(--ink-2); }
+  button.sortby::after { content: " \2195"; opacity: .35; }
+  button.sortby:hover { color: var(--accent); }
+  button.sortby.on { color: var(--accent); font-weight: 600; }
+
+  .ccgrid { list-style: none; padding: 0; margin: 14px 0 0; display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(255px, 1fr)); gap: 12px; }
+  .ccgrid [hidden] { display: none; }
+  .cccard { border: 1px solid var(--rule); border-radius: 5px;
+    padding: 11px 13px 12px; background: var(--panel); }
+  /* A country with nothing is the point of the page, so it is marked rather
+     than merely empty — see the note in country-metrics.js. */
+  .cccard[data-state="none"] { border-left: 3px solid var(--brick); }
+  .cccard[data-state="register"] { border-left: 3px solid var(--accent); }
+  .cccard[data-state="archive"] { border-left: 3px solid var(--brass); }
+  .cchead { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .ccflag { flex: none; width: 26px; height: 17px; border: 1px solid var(--rule);
+    border-radius: 1px; display: block; }
+  .ccname { font-family: var(--serif); font-size: 17px; font-weight: 600; }
+  .ccflags-l { font-family: var(--mono); font-size: 10px; color: var(--ink-3);
+    text-decoration: none; }
+  .ccflags-l:hover { color: var(--accent); }
+  .ccm { display: flex; gap: 16px; margin: 9px 0 0; }
+  .ccm div { display: flex; flex-direction: column; }
+  .ccm dt { font-family: var(--mono); font-size: 9.5px; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--ink-3); }
+  .ccm dd { margin: 0; font-family: var(--sans); font-size: 15px; }
+  .ccnames { margin: 9px 0 0; font-family: var(--sans); font-size: 12px;
+    line-height: 1.45; color: var(--ink-2); }
+  .ccnames-thin, .ccnames-none { color: var(--ink-3); }
+  .ccfoot { margin: 14px 0 0; }
+</style>

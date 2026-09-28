@@ -65,6 +65,11 @@ ATTRIBUTION_ON = {
     # to it. An unmet condition on a licence is not a missing footnote, so it
     # is gated like the CC BY ones rather than trusted to survive edits.
     "Trove": ["home", "place"],
+    # CC BY-SA, and share-alike makes the credit a condition rather than a
+    # courtesy. It is read on the surname page and in the map panel, so it is
+    # owed on both: home carries the footer every page carries, surname is
+    # where the origin block is actually printed.
+    "Wiktionary": ["home", "surname"],
 }
 # Which declared licence strings mean which holder.
 LICENCE_HOLDER = {
@@ -74,6 +79,7 @@ LICENCE_HOLDER = {
     "national records of scotland": "the National Records of Scotland",
     "openstreetmap": "OpenStreetMap",
     "townlands.ie": "Townlands.ie",
+    "wiktionary": "Wiktionary",
 }
 
 

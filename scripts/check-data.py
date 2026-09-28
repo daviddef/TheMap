@@ -64,6 +64,10 @@ ATTRIBUTION_NAMES = {
     "national records of scotland": "the National Records of Scotland",
     "openstreetmap": "OpenStreetMap",
     "townlands.ie": "Townlands.ie",
+    # CC BY-SA is the first share-alike licence on a surname file. Named here
+    # so the footer credit is enforced rather than remembered: the obligation
+    # is the same whether the data is a map layer or a line in a panel.
+    "wiktionary": "Wiktionary",
 }
 # Ours by construction: research and derivations this project made itself.
 OUR_OWN = {"regions.json", "providers.json", "collections.json", "directory.json",

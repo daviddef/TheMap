@@ -1666,6 +1666,16 @@ def main():
         SCTX = json.load(open("data/surname-context.json"))["surnames"]
     except (FileNotFoundError, KeyError):
         SCTX = {}
+    # ---- AND WHAT WIKTIONARY SAYS, WHICH IS WIDER -------------------------
+    # Wikidata's structured fields reach 10.5% of the corpus and that is its
+    # ceiling. Wiktionary is CC BY-SA and covers far more, so the panel gets
+    # both: `ctx` for Wikidata, `wk` for Wiktionary, each labelled with who
+    # said it. Two sources that disagree are shown disagreeing rather than
+    # merged into one confident sentence with nobody's name on it.
+    try:
+        SWK = json.load(open("data/surname-wiktionary.json"))["surnames"]
+    except (FileNotFoundError, KeyError):
+        SWK = {}
 
     # ---- AND WHEN THE NAME WAS WHERE ------------------------------------
     # David: «i thought we had dates the name was at a certain place… we could
@@ -1785,6 +1795,25 @@ def main():
                          if _c.get(k2)}
                 if _keep:
                     rec["ctx"] = _keep
+            # Same folded key as SCTX above, and the same reason it rides in
+            # the shard rather than being fetched: the file is large and the
+            # panel is client-side. Trimmed hard, because this is a search
+            # corpus — the language sections, up to three `from=` values per
+            # section, and at most two etymons. The surname PAGE reads the
+            # whole file and can afford to print all of it.
+            _w = SWK.get(r.get("q") or "")
+            if _w:
+                _wk = {}
+                if _w.get("langs"):
+                    _wk["langs"] = _w["langs"][:6]
+                if _w.get("from"):
+                    _wk["from"] = {k2: v2[:3] for k2, v2 in
+                                   list(_w["from"].items())[:4]}
+                if _w.get("etymon"):
+                    _wk["etymon"] = _w["etymon"][:2]
+                if _wk:
+                    _wk["cite"] = _w["cite"]
+                    rec["wk"] = _wk
             # Keyed by the DISPLAY name, not the folded one: the timeline is
             # harvested from Wikidata's own spelling, which is why the surname
             # brief warned that a direct lookup on the folded key silently

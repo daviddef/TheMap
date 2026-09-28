@@ -4712,6 +4712,16 @@ window.addEventListener("load", async function () {
        the word "Slovakia" at any point. */
     names.forEach(function (r) {
       r.countries.forEach(function (c) { if (iso.indexOf(c.cc) < 0) iso.push(c.cc); });
+      /* AND THE COUNTRIES THE TIMELINE NAMES. These are not always the same
+         set: Taylor's band runs «United Kingdom 1570s–2000s» and the UK is not
+         in its register-evidence list, so «Where to look» offered Ireland,
+         America, Poland and Belgium and not one British archive — under a
+         timeline that had just said the name was in Britain for four hundred
+         years. If the panel is willing to draw a country on the band it has to
+         be willing to say where to read there. */
+      Object.keys(r.tl || {}).forEach(function (cc) {
+        if (iso.indexOf(cc) < 0) iso.push(cc);
+      });
     });
     if (hits.length || names.length) {
       hits.slice(0, 3).forEach(function (r) { if (iso.indexOf(r[3]) < 0) iso.push(r[3]); });
@@ -4720,6 +4730,117 @@ window.addEventListener("load", async function () {
         if (p.at && fold(p.at.place).indexOf(f) > -1) return true;
         return fold(p.name).indexOf(f) > -1;
       });
+    }
+    /* A NAME ANSWER DOES NOT OWE A PLACE APOLOGY. David, looking at a surname
+       card folded into one 327px column beside two columns of place regret:
+       «isnt this about the name, not places, so i wouldnt have places here?»
+       The paragraph below is the right thing to say to somebody who typed a
+       PLACE this map holds but has never walked volume by volume. Said to
+       somebody who typed a NAME it answers a question they did not ask, and
+       takes two thirds of the panel to do it. The card above has already said
+       where the name was and when; the only thing still worth adding is where
+       to go and read — so say that, name it for the name, and stop. */
+    if (names.length) {
+      if (cover.length) {
+        /* ORDERED, AND ORDERED BY SOMETHING A READER CAN SEE. Unsorted, this
+           list opened on «Archives communales de Nice» for a name attested
+           first in Italy — providers.json order, which is the order rows were
+           added and means nothing to anybody reading it. Group by country in
+           the order the name's own evidence ranks them, so the list runs
+           Italy, Croatia, France, top to bottom, exactly as the timeline
+           directly above it does; within a country, by name. */
+        var rank = {}, ord = 0;
+        /* First the countries the TIMELINE names, in the timeline's own order
+           — earliest attestation first — so this opens on Italy for a name
+           first seen in Italy in the 1550s, exactly as the band above it does.
+           Then everything else the name is attested in, BY COUNTRY NAME. `iso`
+           is in ISO-code order, which put Austria above Australia and
+           Switzerland above Cuba, and reads — correctly — as not sorted. */
+        var tl0 = (names[0] || {}).tl || {};
+        Object.keys(tl0).sort(function (a, b) { return tl0[a][0] - tl0[b][0]; })
+          .forEach(function (k) { if (rank[k] === undefined) rank[k] = ord++; });
+        iso.slice().sort(function (a, b) {
+          var A = CNAME[a] || a, B = CNAME[b] || b;
+          return A < B ? -1 : A > B ? 1 : 0;
+        }).forEach(function (k) { if (rank[k] === undefined) rank[k] = ord++; });
+        /* THREE FROM EACH, NOT FOURTEEN FROM THE FIRST. Sorted and capped at
+           fourteen rows, this listed fourteen Italian state archives beginning
+           with A — Agrigento, Alessandria, Ancona, Arezzo — then "and 351
+           more", and never reached Croatia or France at all. A name attested
+           in seventeen countries wants a door into each of them, not the
+           first page of one country's alphabet. So: three per country, the
+           country's own full count on the rule above them, and that rule is
+           the link that opens the rest. */
+        var byCC = {}, order = [];
+        cover.forEach(function (p) {
+          var cc = (p.countries || []).filter(function (k) { return rank[k] !== undefined; })
+                   .sort(function (a, b) { return rank[a] - rank[b]; })[0] || "";
+          if (!byCC[cc]) { byCC[cc] = []; order.push(cc); }
+          byCC[cc].push(p);
+        });
+        order.sort(function (a, b) {
+          return (a === "" ? 9999 : rank[a]) - (b === "" ? 9999 : rank[b]);
+        });
+        h.push('<div class="at-sec at-sec-wide"><div class="lab">Where to look for ' +
+               esc(canon || term) + '</div><ul class="at-films">');
+        /* AND A CEILING ON THE COUNTRIES, NOT ONLY ON EACH. Taylor is attested
+           in thirty-six countries that have an archive here; three apiece is a
+           hundred rows, which is a wall, not an answer. The band above stops
+           at ten countries for the same reason. Twelve, then a count. */
+        var rest = 0, moreCC = 0, moreInCC = 0;
+        if (order.length > 12) {
+          order.slice(12).forEach(function (cc) { moreCC++; moreInCC += byCC[cc].length; });
+          order = order.slice(0, 12);
+        }
+        order.forEach(function (cc) {
+          var ps = byCC[cc].slice().sort(function (a, b) {
+            /* A COUNTRY'S OWN ARCHIVE BEFORE A CROSS-BORDER ONE. Alphabetical
+               alone opened Italy on ANNO — the Austrian newspaper archive,
+               which carries IT because it covers the Austrian Littoral, and
+               which is not what somebody looking for an Italian register
+               should be handed first. Antenati is. Fewest countries wins. */
+            var d = (a.countries || []).length - (b.countries || []).length;
+            return d || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
+          });
+          /* A provider can also be here because its own name or seat matched
+             what was typed rather than any country the name is attested in.
+             It gets its own rule rather than being filed silently under the
+             country above it, which would be a claim the data does not make. */
+          var head = cc ? (CNAME[cc] || cc) : T("Matched by name");
+          h.push('<li class="at-films-cc">' +
+                 (cc ? '<a href="' + BASE + "country/" + cc.toLowerCase() + '/">' +
+                       esc(head) + "</a>" : esc(head)) +
+                 ' <span class="ra-who">' + ps.length + "</span></li>");
+          ps.slice(0, 3).forEach(function (p) {
+            h.push('<li><a href="' + esc(p.url) + '" target="_blank" rel="noopener">' +
+                   esc(p.name) + " &#8599;</a> <span class=\"ra-who\">" +
+                   esc((ACC[p.access] || [0, p.access])[1]) + "</span>" +
+                   (p.at ? ' <span class="ra-who">' + esc(p.at.place) + "</span>" : "") + "</li>");
+          });
+          rest += Math.max(0, ps.length - 3);
+        });
+        h.push("</ul>");
+        if (rest || moreCC) {
+          var bits = [];
+          if (rest) bits.push(rest.toLocaleString() + " more in these countries");
+          if (moreCC) bits.push(moreInCC.toLocaleString() + " in " + moreCC +
+                                " further " + (moreCC === 1 ? "country" : "countries") +
+                                " the name is attested in");
+          h.push('<p class="at-sub">' + bits.join(", and ") + ".</p>");
+        }
+        /* Said plainly, because the difference matters and is easy to miss:
+           these reach the COUNTRIES the name is attested in. None of them is
+           an archive of a place called by this name. */
+        h.push('<p class="at-sub">The archives of the countries ' + esc(canon || term) +
+               " is attested in — not of a place of that name.</p>");
+        h.push("</div>");
+      } else {
+        h.push('<p class="at-sub at-sub-wide">Nothing in this map reaches the countries ' +
+               "this name is attested in yet — which is exactly the kind of gap worth " +
+               "telling us about.</p>");
+      }
+      panel.innerHTML = h.join("");
+      return;
     }
     h.push('<p class="at-what"><b>No places of that name here yet.</b> The shelf stands in ' +
            "95 countries, but only 46 of them have a place somebody has actually walked " +
@@ -5826,6 +5947,18 @@ window.addEventListener("load", async function () {
      with its segments overflowing, instead of spanning the panel. */
   .at-body > :global(.at-h), .at-body > :global(.at-also),
   .at-body > :global(.ra-juris), .at-body > :global(#ra-flagera),
+  /* A NAME IS NOT A PLACE, AND SHOULD NOT SIT IN A PLACE'S COLUMN. David:
+     «why are we so crammed? isnt this about the name, not places… shouldnt the
+     name go the whole way across?» — quite right. .at-body is a grid of ~300px
+     cards because a PLACE answers with several sources side by side. A surname
+     answers with one card that holds a timeline, an origin and a list of
+     countries, and it was being folded into a third of the width while «No
+     places of that name here yet» took the other two thirds. */
+  .at-body > :global(.ra-surn), .at-body > :global(.ra-dead),
+  /* .ra-note also lands here on its own — Taylor's Belgian commune count is a
+     paragraph, not a card, and a paragraph in a 327px column beside a
+     1361px one is the same crammed reading all over again. */
+  .at-body > :global(.ra-note),
   .at-body > :global(.ra-era-lead), .at-body > :global(.ra-tl),
   .at-body > :global(.ra-tl-group),
   .at-body > :global(.at-lab),
@@ -5844,7 +5977,7 @@ window.addEventListener("load", async function () {
      not a card. A list of volumes is not a card either: it wants the full
      width and its own columns, because a long list of short lines is the one
      thing that genuinely benefits from being set in columns. */
-  .at-body > :global(.at-go),
+  .at-body > :global(.at-go), .at-body > :global(.at-sub-wide),
   .at-body > :global(.at-sec-wide) { grid-column: 1 / -1; }
   /* Sized in em so the columns track the text, not the window: at 22em a
      volume title and its years sit on one line, which is the whole point.
@@ -5857,6 +5990,20 @@ window.addEventListener("load", async function () {
   :global(.at-sec-wide .at-films) { display: block; columns: 22em;
     column-gap: 30px; }
   :global(.at-sec-wide .at-films li) { break-inside: avoid; margin-bottom: 5px; }
+  /* The country a run of archives belongs to, set as a rule over them. In a
+     multi-column list a heading that lands at the foot of a column labels
+     nothing, so it is glued to the row beneath it. */
+  :global(.at-films-cc) { font-family: var(--sans); font-size: 10.5px;
+    letter-spacing: .09em; text-transform: uppercase; color: var(--ink-3);
+    margin: 12px 0 4px; padding-bottom: 3px; border-bottom: 1px solid var(--rule);
+    break-after: avoid; break-inside: avoid; list-style: none; }
+  :global(.at-films-cc:first-child) { margin-top: 0; }
+  :global(.at-films-cc a) { color: var(--ink-2); text-decoration: none;
+    border-bottom: 1px solid transparent; }
+  :global(.at-films-cc a:hover) { color: var(--ink); border-bottom-color: var(--rule-strong); }
+  /* The country's own count, set apart from its name so the rule reads
+     «Italy  126» and not «Italy 126» as one word. */
+  :global(.at-films-cc .ra-who) { float: right; letter-spacing: 0; }
 
   /* The vertical era rail's styles lived here. The rail is gone — one
      timeline, under the map — so they went with it. loadEraArt() and the
@@ -5919,7 +6066,17 @@ window.addEventListener("load", async function () {
   :global(.at-what) { font-size: 13.5px; line-height: 1.65; margin: 12px 0 0; }
   :global(.ra-surn) { margin-top: 14px; padding: 12px 14px; border-radius: 3px;
                       background: var(--accent-wash); border-left: 2px solid #7A5CA8; }
+  /* FULL WIDTH IS FOR THE TIMELINE, NOT FOR THE PROSE. Spanning the card to
+     1361px — which is what «shouldnt the name go the whole way across?» asked
+     for, and right for the era band and the country rows — set every sentence
+     in it as a single 200-character line. The card stays wide; the reading
+     stays at a measure a person can follow back to the left margin. */
   :global(.ra-surn p) { font-size: 13px; line-height: 1.6; margin: 6px 0 0; }
+  /* The card holds two kinds of paragraph and they want opposite widths.
+     .ra-note is PROSE and gets a measure; .ra-vars and .ra-filed are LISTS of
+     spellings and countries separated by middots, and a list of short items
+     reads better on one long line than wrapped into a narrow column. */
+  :global(.ra-note) { max-width: 76ch; }
   :global(.ra-surn b) { font-family: var(--serif); font-size: 18px; }
   :global(.ra-vars) { font-size: 12.5px !important; }
   :global(.ra-vars.ra-weak) { color: var(--ink-3); }

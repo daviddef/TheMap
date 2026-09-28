@@ -18,19 +18,24 @@
  * a place page for one of its towns would show, never an overcount, and
  * that direction of error is the safe one for a claim this page makes.
  *
- * WHY A SEGMENT TREE. A country's volumes have to be queried by the surname's
- * OWN attested decades in that country, which differ on every page, so this
- * cannot be precomputed per country in advance. Italy alone holds 1,340,764
- * volumes; a linear scan of that per surname page, times however many of the
- * ~19,779 pages attest a name in Italy, is exactly the mistake this project's
- * own briefs keep finding (a regex inside near(), a find() over fr.surnames,
- * a provider filter per page — see surname-timeline.js). A merge-sort tree
- * built once per country answers "how many volumes have from<=hi and to>=lo"
- * in O(log^2 n), and — because each tree node keeps the ORIGINAL volume's
- * index alongside its sort key, not just the key — the same query also
- * yields the exact matching volumes when there are few enough to list,
- * with no separate code path for "count" versus "list".
- */
+ * A SECOND VERSION, AFTER THE FIRST ONE DOUBLED THE BUILD. That version
+ * indexed each country in a merge-sort tree so a query never had to scan a
+ * whole country — sound in complexity, wrong in practice. A tree over
+ * 2,890,777 leaves holds O(n log n) elements, and every one of those was a
+ * plain JS array boxed onto the heap: roughly 60 million small objects
+ * alive for the whole build. `npm run build` went from 2,209s to 4,947s —
+ * every OTHER page paid rent on a heap this module inflated, not just the
+ * surname pages that queried it. Measure the whole build, not just the
+ * function.
+ *
+ * WHAT REPLACED IT is the same shape build.py's own coverage-by-country.json
+ * already computes: a flat array of volume refs per (country, decade),
+ * built by counting sizes first and filling typed arrays second — no
+ * per-node duplication, no tree. A query for a handful of decades collects
+ * refs from just those buckets into a Set (exact, because a volume
+ * touching two queried decades must count once) — proportional to how much
+ * of a country the surname's OWN decades actually touch, not to the
+ * country's total. */
 import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import { resolve } from "node:path";
@@ -77,76 +82,12 @@ function fsImageUrl(col, wp) {
     col + "/waypoints/" + wp;
 }
 
+const THIS_YEAR = new Date().getFullYear();
+
 /* ---- load, once for the whole build ------------------------------------ */
 
-let BY_CC = null;         // cc -> { total, fromArr, toArr, refArr, meta[] }
+let BY_CC = null;   // cc -> { total, buckets: Map<decade, Int32Array of refs>, meta[] }
 let TOTAL_LOADED = 0;
-
-function buildTree(sortedRefs) {
-  /* A bottom-up merge-sort tree over `to`, sorted-by-`from` order preserved
-     as the leaf order. Node i (1-indexed, array-backed) covers a range of
-     the from-sorted array; leaves hold one element. Internal nodes hold
-     their range's elements sorted by `to`, built by merging children —
-     O(n log n) time and space, once, per country. */
-  const n = sortedRefs.length;
-  if (n === 0) return null;
-  const leafToVal = new Float64Array(n);
-  const leafRef = new Int32Array(n);
-  for (let i = 0; i < n; i++) {
-    leafToVal[i] = sortedRefs[i].to;
-    leafRef[i] = sortedRefs[i].ref;
-  }
-  const size = 1 << Math.ceil(Math.log2(Math.max(n, 1)));
-  const nodeTo = new Array(2 * size).fill(null);
-  const nodeRef = new Array(2 * size).fill(null);
-  for (let i = 0; i < n; i++) { nodeTo[size + i] = [leafToVal[i]]; nodeRef[size + i] = [leafRef[i]]; }
-  for (let i = n; i < size; i++) { nodeTo[size + i] = []; nodeRef[size + i] = []; }
-  for (let i = size - 1; i >= 1; i--) {
-    const l = 2 * i, r = 2 * i + 1;
-    const lt = nodeTo[l], rt = nodeTo[r], lr = nodeRef[l], rr = nodeRef[r];
-    const mTo = new Array(lt.length + rt.length);
-    const mRef = new Array(lr.length + rr.length);
-    let a = 0, b = 0, k = 0;
-    while (a < lt.length && b < rt.length) {
-      if (lt[a] <= rt[b]) { mTo[k] = lt[a]; mRef[k] = lr[a]; a++; }
-      else { mTo[k] = rt[b]; mRef[k] = rr[b]; b++; }
-      k++;
-    }
-    while (a < lt.length) { mTo[k] = lt[a]; mRef[k] = lr[a]; a++; k++; }
-    while (b < rt.length) { mTo[k] = rt[b]; mRef[k] = rr[b]; b++; k++; }
-    nodeTo[i] = mTo; nodeRef[i] = mRef;
-    /* Children are NOT freed here. The iterative range query below picks
-       its canonical nodes from every level of the tree, not only the
-       root, so every node has to stay populated for a query to find it. */
-  }
-  return { size, nodeTo, nodeRef };
-}
-
-function lowerBoundGE(arr, lo) {
-  /* First index in `arr` (sorted ascending) with value >= lo. */
-  let a = 0, b = arr.length;
-  while (a < b) { const m = (a + b) >> 1; if (arr[m] < lo) a = m + 1; else b = m; }
-  return a;
-}
-
-/* Collect the refs of every leaf-range node fully inside [ql, qr) whose
-   sorted `to` values are >= lo, walking the segment tree iteratively. */
-function queryRefs(tree, ql, qr, lo, out) {
-  if (!tree || ql >= qr) return;
-  let l = ql + tree.size, r = qr + tree.size;
-  while (l < r) {
-    if (l & 1) { collectNode(tree, l, lo, out); l++; }
-    if (r & 1) { r--; collectNode(tree, r, lo, out); }
-    l >>= 1; r >>= 1;
-  }
-}
-function collectNode(tree, node, lo, out) {
-  const toArr = tree.nodeTo[node];
-  if (!toArr || !toArr.length) return;
-  const pos = lowerBoundGE(toArr, lo);
-  const refArr = tree.nodeRef[node];
-  for (let i = pos; i < refArr.length; i++) out.push(refArr[i]);
-}
 
 function tryRead(candidates) {
   let lastErr = null;
@@ -177,42 +118,75 @@ function load() {
   const placeCc = {};
   for (const p of idx.places || []) if (p.cc) placeCc[p.i] = p.cc;
 
-  /* One growing array of volume metadata per country, plus a parallel
-     collector of {from,to,ref} used only while building the tree. */
-  const metaByCc = {};
-  const rowsByCc = {};
-  let placed = 0, unplaced = 0;
+  const metaByCc = {};        // cc -> [{t,from,to,url,rk}, ...]
+  const sizeByCcDecade = {};  // cc -> Map<decade, count>  (pass 1)
+  let placed = 0, unplaced = 0, malformed = 0;
 
+  /* PASS 1: read every volume once, keep its metadata, and count how many
+     land in each (country, decade) bucket without allocating them yet. */
   for (const [pid, rows] of Object.entries(world.byPlace || {})) {
     const cc = placeCc[pid];
     if (!cc) { unplaced += rows.length; continue; }
-    placed += rows.length;
     const meta = (metaByCc[cc] ||= []);
-    const list = (rowsByCc[cc] ||= []);
+    const sizes = (sizeByCcDecade[cc] ||= new Map());
     for (const r of rows) {
-      const from = r.from, to = r.to ?? r.from;
+      let from = r.from, to = r.to ?? r.from;
       if (from == null) continue;
+      from = Number(from); to = Number(to);
+      /* Mirrors build.py's own coverage sanity filter exactly, so a volume
+         this atlas would not count as dated coverage there is not counted
+         as overlapping anything here either. */
+      if (!Number.isFinite(from) || !Number.isFinite(to) || to < from ||
+          from < 1200 || from > THIS_YEAR) { malformed++; continue; }
+      to = Math.min(to, THIS_YEAR);
+      placed++;
       const ref = meta.length;
-      meta.push({
-        t: r.t,
-        from, to,
-        url: r.url || fsImageUrl(r.col, r.wp),
-        rk: kindsOf(r.t, colTitles[r.col]),
-      });
-      list.push({ from, to, ref });
+      meta.push({ t: r.t, from, to, url: r.url || fsImageUrl(r.col, r.wp),
+                  rk: kindsOf(r.t, colTitles[r.col]) });
+      for (let d = Math.floor(from / 10) * 10; d <= Math.floor(to / 10) * 10; d += 10) {
+        sizes.set(d, (sizes.get(d) || 0) + 1);
+      }
     }
   }
   TOTAL_LOADED = placed;
 
-  for (const [cc, list] of Object.entries(rowsByCc)) {
-    list.sort((a, b) => a.from - b.from);
-    const fromArr = new Float64Array(list.length);
-    for (let i = 0; i < list.length; i++) fromArr[i] = list[i].from;
-    BY_CC[cc] = { total: list.length, fromArr, tree: buildTree(list), meta: metaByCc[cc] };
+  /* PASS 2: allocate exactly-sized Int32Arrays and refill — no push, no
+     resizing, no per-node duplication. A volume spanning k decades appears
+     in k buckets; total storage is the sum of those, not n log n of it. */
+  for (const cc of Object.keys(metaByCc)) {
+    const sizes = sizeByCcDecade[cc];
+    const buckets = new Map();
+    for (const [d, n] of sizes) buckets.set(d, { arr: new Int32Array(n), pos: 0 });
+    BY_CC[cc] = { total: metaByCc[cc].length, buckets, meta: metaByCc[cc] };
   }
+  /* PASS 3: refill the buckets. `ref` has to land on the same volume as
+     pass 1 gave it, so this re-derives it by walking byPlace in the same
+     order and re-applying the identical filter — a second pass over the
+     source, not a second copy of it. */
+  const cursor = {};
+  for (const [pid, rows] of Object.entries(world.byPlace || {})) {
+    const cc = placeCc[pid];
+    if (!cc) continue;
+    const entry = BY_CC[cc];
+    for (const r of rows) {
+      let from = r.from, to = r.to ?? r.from;
+      if (from == null) continue;
+      from = Number(from); to = Number(to);
+      if (!Number.isFinite(from) || !Number.isFinite(to) || to < from ||
+          from < 1200 || from > THIS_YEAR) continue;
+      to = Math.min(to, THIS_YEAR);
+      const ref = (cursor[cc] = (cursor[cc] || 0));
+      cursor[cc]++;
+      for (let d = Math.floor(from / 10) * 10; d <= Math.floor(to / 10) * 10; d += 10) {
+        const b = entry.buckets.get(d);
+        b.arr[b.pos++] = ref;
+      }
+    }
+  }
+
   console.log(`surname-volumes: ${placed.toLocaleString()} volumes indexed across ` +
     `${Object.keys(BY_CC).length} countries (${unplaced.toLocaleString()} on places ` +
-    "outside the current atlas, skipped)");
+    `outside the current atlas, ${malformed.toLocaleString()} with no usable date, skipped)`);
 }
 
 /** Total volumes this atlas holds for a country (all years), or 0. */
@@ -222,19 +196,6 @@ export function totalVolumes(cc) {
 }
 
 const SHORTLIST_CAP = 40;
-
-/** Merge a set of decade numbers (e.g. [1900,1910,1930]) into maximal
-    contiguous runs, each covering [decade, decade+9] for its span. */
-function decadeRuns(decades) {
-  const sorted = [...new Set(decades)].sort((a, b) => a - b);
-  const runs = [];
-  for (const d of sorted) {
-    const last = runs[runs.length - 1];
-    if (last && d <= last.hi + 10) last.hi = d + 9;
-    else runs.push({ lo: d, hi: d + 9 });
-  }
-  return runs;
-}
 
 /** The volumes worth opening for `cc`, given the decades this name is
  *  attested there. Returns one of three shapes:
@@ -247,21 +208,21 @@ export function volumesFor(cc, decades) {
   load();
   const c = BY_CC[cc];
   if (!c || !c.total || !decades || !decades.length) return null;
-  const runs = decadeRuns(decades.map(Number));
-  const refs = [];
-  for (const { lo, hi } of runs) {
-    const qr = lowerBoundGE(c.fromArr, hi + 1);   // exclusive upper bound: from <= hi
-    queryRefs(c.tree, 0, qr, lo, refs);
+  const seen = new Set();
+  for (const dRaw of decades) {
+    const d = Number(dRaw);
+    const b = c.buckets.get(d);
+    if (!b) continue;
+    for (let i = 0; i < b.arr.length; i++) seen.add(b.arr[i]);
   }
-  const uniq = [...new Set(refs)];
-  const overlap = uniq.length;
+  const overlap = seen.size;
   if (overlap === 0) return { total: c.total, state: "warning" };
   if (overlap <= SHORTLIST_CAP) {
-    const list = uniq.map((r) => c.meta[r]).sort((a, b) => a.from - b.from);
+    const list = [...seen].map((r) => c.meta[r]).sort((a, b) => a.from - b.from);
     return { total: c.total, state: "shortlist", overlap, list };
   }
   const kindCount = {};
-  for (const r of uniq) for (const k of c.meta[r].rk) kindCount[k] = (kindCount[k] || 0) + 1;
+  for (const r of seen) for (const k of c.meta[r].rk) kindCount[k] = (kindCount[k] || 0) + 1;
   const kinds = Object.entries(kindCount).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([k]) => k);
   return { total: c.total, state: "filter", overlap, kinds };
 }

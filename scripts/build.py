@@ -1420,6 +1420,25 @@ def main():
         # Empire→Romania and Northern Ireland→North Korea, which is the same
         # answer this project already refused when matching polities to
         # Wikidata. Every line below was read off both lists.
+        # AND THE HUBS DISAGREE WITH THEMSELVES ABOUT THEIR OWN NAMES.
+        # A hub card is headed «Baltic States» while the countries beneath it are
+        # filed under «Baltics»; «Pacific & Oceania» against «Pacific»; «Central
+        # Africa & the Indian Ocean» against the same without the «the». Three
+        # words of drift, and 24 countries — three Baltic, fourteen Pacific, seven
+        # Central African — contributed nothing to their own hub, so those cards
+        # carried no record counts at all and no archives. It looked like missing
+        # data and was a missing «the».
+        #
+        # European Union, the Schengen Area and the European Economic Area are NOT
+        # here and are not a bug: `hub` is one field per country and those are
+        # membership groupings that overlap the geographic hubs. A card with no
+        # counts is the honest answer until they are modelled as memberships.
+        _HUB_ALIAS = {
+            "Baltics": "Baltic States",
+            "Pacific": "Pacific & Oceania",
+            "Central Africa & Indian Ocean": "Central Africa & the Indian Ocean",
+        }
+
         _ALIAS = {
             "Antigua and Barbuda": "Antigua and Barb.",
             "Bosnia & Herzegovina": "Bosnia and Herz.",
@@ -1467,6 +1486,7 @@ def main():
             _h = _c.get("hub")
             if not _h:
                 continue
+            _h = _HUB_ALIAS.get(_h, _h)
             _nm = _ALIAS.get(_c["name"], _c["name"])
             _cc = _n2cc.get(_nm)
             _a = _hubagg.setdefault(_h, {"countries": 0, "places": 0,
@@ -1483,11 +1503,55 @@ def main():
             _rows = _bycc.get(_cc, [])
             _a["places"] += len(_rows)
             _a["volumes"] += sum((_r.get("v") or 0) for _r in _rows)
+        # AND THE ARCHIVES THAT ACTUALLY HOLD THE PAPER FOR THAT HUB.
+        # David, twice: «for the hubs can we also include the volume/sources
+        # etc links and references. A user is typically going to want to find
+        # records from hubs and it's well structured to do this.» Until now a
+        # hub card carried three numbers and nowhere to go — which is the
+        # question it raises and does not answer.
+        #
+        # Ordered by what a researcher should try first: a national archive
+        # before a regional one before anything else, and within a rank the
+        # ones somebody has actually surveyed, because an unsurveyed row
+        # cannot say what it costs to look. Named, not counted: «Arhiv
+        # Jugoslavije» is a lead and «14 archives» is not.
+        _RANKS = ["national-archive", "regional-archive", "state-archive",
+                  "church-archive", "library", "university"]
+        def _srcrank(_p):
+            _k = _p.get("kind") or ""
+            return (_RANKS.index(_k) if _k in _RANKS else len(_RANKS),
+                    0 if (_p.get("access") or "unsurveyed") != "unsurveyed" else 1,
+                    (_p.get("name") or "").lower())
+        _bycc_prov = {}
+        for _p in providers["providers"]:
+            for _pc in (_p.get("countries") or []):
+                _bycc_prov.setdefault(_pc, []).append(_p)
+
         for _h in _fi["hubs"]:
             _a = _hubagg.get(_h["name"])
             if _a:
                 _h["holds"] = {"countries": _a["countries"], "places": _a["places"],
                                "volumes": _a["volumes"], "ccs": sorted(_a["ccs"])}
+                _seen, _srcs = set(), []
+                for _pc in sorted(_a["ccs"]):
+                    for _p in sorted(_bycc_prov.get(_pc, []), key=_srcrank):
+                        if _p["id"] in _seen:
+                            continue
+                        _seen.add(_p["id"])
+                        _srcs.append({"id": _p["id"], "name": _p["name"],
+                                      "cc": _pc, "kind": _p.get("kind") or "",
+                                      "access": _p.get("access") or "unsurveyed"})
+                        if len([x for x in _srcs if x["cc"] == _pc]) >= 2:
+                            break          # two per country, so no one country floods a hub
+                # How many there are in total, so the card can say «showing 8
+                # of 41» rather than implying eight is all of them.
+                _all = set()
+                for _pc in _a["ccs"]:
+                    for _p in _bycc_prov.get(_pc, []):
+                        _all.add(_p["id"])
+                if _srcs:
+                    _h["holds"]["sources"] = _srcs[:14]
+                    _h["holds"]["sourceCount"] = len(_all)
         _withheld = sum(1 for _h in _fi["hubs"] if _h.get("holds"))
         print(f"flag-hubs         {_withheld} of {len(_fi['hubs'])} hubs carry record "
               f"counts; {len(set(_unmatched))} country names did not match the ISO "

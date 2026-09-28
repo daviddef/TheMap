@@ -1686,6 +1686,34 @@ def main():
     except (FileNotFoundError, KeyError, OSError):
         STL = {}
 
+    # ---- AND WHEN THE ARCHIVES SAY IT WAS THERE --------------------------
+    # The band above is Wikidata's notable people and opens, for Blažević in
+    # Croatia, at 1910. The family archives hold Croatian Blaževićs from the
+    # 1790s. David: «do 4 - with dates from my archives».
+    #
+    # KEPT AS A SEPARATE SERIES, NOT POURED INTO THE FIRST. They answer the
+    # same question from different evidence and with opposite biases —
+    # Wikidata is famous people everywhere, an archive is ordinary people in
+    # one family's ground — and a reader can only weigh them if the panel says
+    # which is which. Merged, the band would claim a coverage neither source
+    # has.
+    #
+    # Folded on the key, because the corpus canonicalises spellings the
+    # archives do not: Žubrinić and Zubrinic are one row here and two there.
+    STLA = {}
+    try:
+        _ad = json.load(open("data/archive-dates.json"))["when"]
+        for _n, _ccs in _ad.items():
+            _row = {cc: sorted(int(d) for d in decs) for cc, decs in _ccs.items()}
+            if not _row:
+                continue
+            _k = fold(_n)
+            _into = STLA.setdefault(_k, {})
+            for cc, decs in _row.items():
+                _into[cc] = sorted(set(_into.get(cc, [])) | set(decs))
+    except (FileNotFoundError, KeyError):
+        STLA = {}
+
     sn = os.path.join(OUT, "s")
     shutil.rmtree(sn, ignore_errors=True)
     os.makedirs(sn)
@@ -1798,6 +1826,9 @@ def main():
             _t = STL.get((r.get("n") or "").lower())
             if _t:
                 rec["tl"] = _t
+            _ta = STLA.get(r.get("q") or "")
+            if _ta:
+                rec["tla"] = _ta
             uniq.append(rec)
         blob = json.dumps(uniq, ensure_ascii=False, separators=(",", ":"))
         sbytes += len(blob.encode())

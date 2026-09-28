@@ -54,17 +54,39 @@ def latin(s):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--src", required=True, help="GeoNames cities5000.txt")
+    ap.add_argument("--src", required=True, nargs="+",
+                    help="GeoNames dump files — cities5000.txt, or per-country "
+                         "files like HR.txt (several may be given)")
     ap.add_argument("--out", default="data/gazetteer.json")
     a = ap.parse_args()
 
-    rows, kept_alts = [], 0
-    for line in open(a.src, encoding="utf-8"):
+    rows, kept_alts, skipped_class = [], 0, 0
+    seen_ids = set()
+    lines = []
+    for src in a.src:
+        with open(src, encoding="utf-8") as fh:
+            lines += fh.readlines()
+    for line in lines:
         f = line.rstrip("\n").split("\t")
         if len(f) < 15:
             continue
         gid, name, ascii_name, alts = f[0], f[1], f[2], f[3]
-        lat, lon, cc, pop = f[4], f[5], f[8], f[14]
+        lat, lon, fclass, cc, pop = f[4], f[5], f[6], f[8], f[14]
+
+        # POPULATED PLACES ONLY, which cities5000 guaranteed and a country file
+        # does not. HR.txt holds 26,632 rows and only 11,631 of them are places
+        # anybody lived in; the rest are mountains, streams, forests, chapels
+        # and stretches of road. A gazetteer that answers «Velebit» with a
+        # mountain range when somebody typed it looking for a village is worse
+        # than one that says nothing.
+        if fclass != "P":
+            skipped_class += 1
+            continue
+        # The same place can appear in two source files when a country file is
+        # given alongside cities5000. First wins; they are the same row.
+        if gid in seen_ids:
+            continue
+        seen_ids.add(gid)
 
         base = {fold(name), fold(ascii_name)}
         fname = fold(name)
@@ -121,8 +143,22 @@ def main():
         reps = [c[0] for c in clusters]
         reps.sort(key=lambda alt: difflib.SequenceMatcher(None, fname, fold(alt)).ratio())
         out = reps[:12]
-        if not out:
-            continue                               # nothing this file can add
+        # A PLACE WITH NO OTHER NAME IS STILL A PLACE. This used to drop every
+        # row that carried no alternate, which was right while the source was
+        # cities5000 and the question was «the name changed»: Pressburg is
+        # Bratislava, and a town nobody ever wrote differently added nothing.
+        #
+        # It is wrong now the source is the per-country files. David searched
+        # for Lovinac and found nothing; the gazetteer held 73 Croatian places
+        # against the country file's 11,631. Krivi Put has 39 people and no
+        # German name, so it has no alternates and was discarded — and it is
+        # precisely the village a reader working the Blažević registers needs
+        # to type. The second question a gazetteer answers is not «what was
+        # this called» but «does this place exist, and where», and a row with
+        # no exonym answers that one perfectly well.
+        #
+        # It costs little: a row without alternates is a name, a point and a
+        # country, and the alternate blob was always the bulk of the bytes.
         kept_alts += len(out)
         rows.append({"n": name, "y": round(float(lat), 4), "x": round(float(lon), 4),
                      "k": cc, "p": int(pop or 0), "a": out,

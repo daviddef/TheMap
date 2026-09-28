@@ -14,6 +14,9 @@ const surn = corpus();
 import { atlas as idx } from "../lib/atlas.js";
 import refused from "../../../data/frequencies/_refused.json";
 import { flagFor } from "../lib/flags.js";
+import SmartFind from "../components/SmartFind.astro";
+import CountryCards from "../components/CountryCards.astro";
+import { countryMetrics, countryTotals } from "../lib/country-metrics.js";
 /* COUNTED, NOT TYPED — like the heading below, which was fixed for exactly this
    after saying «Four» above a list of eight. The typed «Five» under it happened
    to be right, and that is the whole problem with a typed number: it is right
@@ -37,6 +40,8 @@ const absent = (refused.refused || []).filter((r) => !partial.includes(r));
    page that is attested in the most countries, so the picture has
    something in it. Hard-coding «Blažević» would have been a caption that
    quietly rots the first time the corpus changes. */
+const ccList = countryMetrics();
+const ccT = countryTotals();
 const demo = (() => {
   /* PICKED ON PEOPLE COUNTED, NOT ON COUNTRIES TOUCHED. The first rule
      took the name attested in the most countries, which is «de
@@ -90,9 +95,34 @@ function dlSize(name) {
       { "@type": "DataDownload", encodingFormat: "application/json", contentUrl: u("/surnames.json.gz") },
     ],
   }}
-  title="Surnames"
+  title="Look up a surname"
   eyebrow={`${c.surnames} surnames · ${c.curatedLinks} curated variant links · ${c.withCountries} with a country`}
   dek="Every spelling a surname takes, and the countries it is attested in. Built to answer the other way in: not «where is this place» but «I have a name and nothing else».">
+
+  {/* A PAGE CALLED «LOOK UP A SURNAME» THAT COULD NOT LOOK ONE UP. David: «i
+      feel the surname page has nothing to do with Looking up a surname? you
+      cant look them up at all, it just a download spot», and then: «i want the
+      surname finder to look like the place finder! the country list should
+      also be counting the surnames... summarise by country first and then by
+      last names below, with a working search box. everything else below that.»
+
+      So: the place finder's own furniture, in that order. The box searches
+      NAMES and countries and places together, because somebody holding only a
+      name does not always know which of the three they are holding. */}
+  <SmartFind base={u("/")}
+             placesIndex={u("/index.json")} quietIndex={u("/index-quiet.json")}
+             surnameShards={u("/s/")}
+             hint="A surname, a country or a place — Blažević · Peeters · Croatia" />
+
+  <details class="cdir" open>
+    <summary><b>By country</b> — where the names come from</summary>
+    <p class="cap">A count here is how many surnames that country's <b>national
+    register</b> names. It measures which registers have been harvested, not
+    where a name is borne: {ccT.withRegister} countries have one,
+    {ccT.archiveOnly} are named only by a family archive, and <b>{ccT.noNames}
+    have nothing at all</b> — which is the list worth shortening.</p>
+    <CountryCards list={ccList} totals={ccT} showFind={false} />
+  </details>
 
   <div class="one" style="border-left-color:#7A5CA8">
     <div class="lab">Three kinds of fact, never mixed</div>
@@ -147,18 +177,15 @@ function dlSize(name) {
       the countries lit by evidence, and for Belgian names the actual
       towns. A plain GET form, so it works before any script does. */}
   <section style="margin-top:30px">
-    <h2>Look one up</h2>
-    <form class="snfind" method="get" action={u("/")}>
-      <label class="vh" for="snq">Surname</label>
-      <input id="snq" name="q" type="search" autocomplete="off"
-             placeholder="A surname — Peeters · Blažević · Murphy · Kosina" />
-      <button type="submit">Find it on the map</button>
-    </form>
-    <p class="cap">Takes you to the map with the name searched: the
-    countries where a register or an archive attests it, and — for
-    Belgian names, the only country that counts below itself — the
-    communes, sized by how many people the state counted there.
-    {demo && <> Or read a made page: <a href={u(`/surname/${demo.slug}/`)}>{demo.r.n}</a>.</>}</p>
+    {/* THE BOX MOVED TO THE TOP OF THE PAGE, where a finder's box belongs;
+        what was here was a form that bounced to the map rather than answering
+        anything. What is left is the pointer to where a name IS answered. */}
+    <h2>The map answers in full</h2>
+    <p class="cap">The box at the top of this page finds a name. The map's own
+    panel is where one is <em>answered</em> — the countries a register or an
+    archive attests it in, when it was there, whose archives to write to, and
+    how much paper stands in each.
+    {demo && <> A made page reads like this: <a href={u(`/surname/${demo.slug}/`)}>{demo.r.n}</a>.</>}</p>
   </section>
 
   {demo && demo.map && (

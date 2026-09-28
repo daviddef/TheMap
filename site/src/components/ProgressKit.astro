@@ -145,6 +145,31 @@
         save();
         return m[id];
       },
+      /* The label the reader will recognise this row by, copied in at save
+         time — nothing later can look a waypoint up. */
+      setWhat: function (id, what) {
+        var m = load().marks;
+        m[id] = m[id] || {};
+        if (what && what.t) m[id].t = what.t;
+        if (what && what.where) m[id].where = what.where;
+        if (what && what.href) m[id].href = what.href;
+        save();
+        return m[id];
+      },
+      /* An archive or a town takes a STATE — written, searched, blocked —
+         because it has no pages to count. Clearing the state forgets the row
+         unless a note or a range is holding it up. */
+      setState: function (id, v) {
+        var m = load().marks;
+        m[id] = m[id] || {};
+        if (v) { m[id].state = v; m[id].since = today(); }
+        else {
+          delete m[id].state;
+          if (!m[id].done && !m[id].note) delete m[id];
+        }
+        save();
+        return m[id] || null;
+      },
       clear: function (id) { delete load().marks[id]; save(); },
       all: function () { return load().marks; },
       count: function () { return Object.keys(load().marks).length; },

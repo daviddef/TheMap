@@ -1,0 +1,250 @@
+---
+/* THE CONTROL ON A VOLUME ROW: what you have searched, and where to start again.
+
+   Draws itself into every `<li data-vol="...">` that has a `.volmark` slot,
+   so a page only has to say WHICH rows are volumes and this decides what the
+   control looks like. Requires ProgressKit.astro on the page.
+
+   SHUT UNTIL IT HAS SOMETHING TO SAY. An unmarked volume shows one quiet
+   link — «mark pages» — because a list of forty registers with forty open
+   forms in it is unreadable, and most rows on most visits are not the one
+   being worked on. A marked volume shows its ranges and its resume point
+   without being asked, because that is the thing the reader came back for.
+*/
+---
+<script is:inline>
+  (function () {
+    if (!window.raProgress) return;
+    var P = window.raProgress;
+
+    function esc(s) {
+      return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    function summary(id) {
+      var m = P.get(id);
+      if (!m || !m.done || !m.done.length) {
+        return '<button type="button" class="vm-open">mark pages</button>';
+      }
+      var done = P.covered(m.done);
+      var bits = ['<b>' + esc(P.fmt(m.done)) + "</b>"];
+      /* THE TOTAL IS THE READER'S, so the share is only shown once they have
+         given one — see the note in ProgressKit.astro about denominators this
+         atlas does not have. */
+      if (m.total) {
+        bits.push('<span class="vm-bar" aria-hidden="true"><i style="width:' +
+                  Math.min(100, Math.round((done / m.total) * 100)) + '%"></i></span>');
+        bits.push('<span class="vm-n">' + done + " of " + m.total +
+                  " · your count</span>");
+      } else {
+        bits.push('<span class="vm-n">' + done + " page" + (done === 1 ? "" : "s") + "</span>");
+      }
+      bits.push('<span class="vm-res">start again at ' + P.resume(m.done) + "</span>");
+      if (m.note) bits.push('<span class="vm-note">' + esc(m.note) + "</span>");
+      if (m.since) bits.push('<span class="vm-since">' + esc(m.since) + "</span>");
+      bits.push('<button type="button" class="vm-open">edit</button>');
+      return bits.join(" ");
+    }
+
+    function editor(id) {
+      var m = P.get(id) || {};
+      return '<span class="vm-edit">' +
+        '<label>pages done <input class="vm-r" type="text" inputmode="numeric" ' +
+        'placeholder="1-47, 60-72" value="' + esc(P.fmt(m.done)) + '"></label>' +
+        '<label>of <input class="vm-t" type="text" inputmode="numeric" size="5" ' +
+        'placeholder="total" value="' + esc(m.total || "") + '"></label>' +
+        '<label class="vm-notel">note <input class="vm-no" type="text" ' +
+        'placeholder="found something?" value="' + esc(m.note || "") + '"></label>' +
+        '<button type="button" class="vm-save">save</button>' +
+        '<button type="button" class="vm-cancel">cancel</button>' +
+        (m.done ? '<button type="button" class="vm-clear">forget</button>' : "") +
+        "</span>";
+    }
+
+    function paint(li) {
+      var slot = li.querySelector(".volmark");
+      if (!slot) return;
+      slot.innerHTML = summary(li.getAttribute("data-vol"));
+      li.classList.toggle("vm-has", !!(P.get(li.getAttribute("data-vol")) || {}).done);
+    }
+
+    function all() {
+      return [].slice.call(document.querySelectorAll("li[data-vol]"));
+    }
+    all().forEach(paint);
+
+    document.addEventListener("click", function (e) {
+      var li = e.target.closest && e.target.closest("li[data-vol]");
+      if (!li) return;
+      var id = li.getAttribute("data-vol");
+      var slot = li.querySelector(".volmark");
+
+      if (e.target.closest(".vm-open")) {
+        slot.innerHTML = editor(id);
+        var f = slot.querySelector(".vm-r");
+        if (f) { f.focus(); f.select(); }
+        return;
+      }
+      if (e.target.closest(".vm-cancel")) { paint(li); return; }
+      if (e.target.closest(".vm-clear")) { P.clear(id); paint(li); bump(); return; }
+      if (e.target.closest(".vm-save")) {
+        /* WHAT THE ROW IS, SAVED WITH IT. The id is a FamilySearch waypoint —
+           «3JXZ-K68:172062901,172062902,172062903» — which is stable, which is
+           why it is the key, and which tells a reader nothing. My research
+           listed those raw and was a column of barcodes. The title, the place
+           and the way back are copied in at save time because the page that
+           lists them later has no way to look any of it up. */
+        P.setWhat(id, {
+          t: li.getAttribute("data-vol-t"),
+          where: li.getAttribute("data-vol-where"),
+          href: li.getAttribute("data-vol-href")
+        });
+        P.setRanges(id, slot.querySelector(".vm-r").value);
+        P.setTotal(id, slot.querySelector(".vm-t").value);
+        P.setNote(id, slot.querySelector(".vm-no").value);
+        paint(li);
+        bump();
+        return;
+      }
+    });
+    /* Enter saves, Escape abandons — a form that can only be left with the
+       mouse is a form people stop using. */
+    document.addEventListener("keydown", function (e) {
+      var li = e.target.closest && e.target.closest("li[data-vol]");
+      if (!li || !e.target.matches("input")) return;
+      if (e.key === "Enter") { e.preventDefault();
+        var b = li.querySelector(".vm-save"); if (b) b.click(); }
+      if (e.key === "Escape") { e.preventDefault(); paint(li); }
+    });
+
+    /* ---- A SOURCE AND A PLACE TAKE A STATE, NOT A RANGE -----------------
+       David's list was «i have finished searching this volume, or i have
+       already scanned this location, etc». A volume has pages; an archive and
+       a town do not. What you record about an archive is that you wrote to it
+       and they have not answered, or you went and it was shut, or you read
+       everything they hold. Forcing those through a page-range box would be
+       the tool telling the work what shape to be.
+
+       The states are the ones a genealogist actually reaches for, and
+       «written, no reply» is there because it is the commonest and the one
+       most worth a date against it. */
+    var STATES = [
+      ["", "not started"],
+      ["planned", "planning to"],
+      ["written", "written, no reply"],
+      ["searched", "searched, nothing found"],
+      ["found", "found something"],
+      ["exhausted", "read everything here"],
+      ["blocked", "cannot get access"]
+    ];
+    function label(v) {
+      for (var i = 0; i < STATES.length; i++) if (STATES[i][0] === v) return STATES[i][1];
+      return v;
+    }
+    function srcPaint(el) {
+      var slot = el.querySelector(".srcmark");
+      if (!slot) return;
+      var id = el.getAttribute("data-src");
+      var m = P.get(id) || {};
+      var opts = STATES.map(function (o) {
+        return '<option value="' + o[0] + '"' +
+               (o[0] === (m.state || "") ? " selected" : "") + ">" + o[1] + "</option>";
+      }).join("");
+      slot.innerHTML =
+        '<select class="src-s" aria-label="What you have done here">' + opts + "</select>" +
+        (m.state ? '<input class="src-no" type="text" placeholder="note" value="' +
+                   esc(m.note || "") + '">' : "") +
+        (m.since ? '<span class="vm-since">' + esc(m.since) + "</span>" : "");
+      el.classList.toggle("src-has", !!m.state);
+    }
+    function srcAll() {
+      return [].slice.call(document.querySelectorAll("[data-src]"));
+    }
+    srcAll().forEach(srcPaint);
+    document.addEventListener("change", function (e) {
+      var el = e.target.closest && e.target.closest("[data-src]");
+      if (!el || !e.target.classList.contains("src-s")) return;
+      var id = el.getAttribute("data-src");
+      P.setWhat(id, { t: el.getAttribute("data-src-t"),
+                      where: el.getAttribute("data-src-where"),
+                      href: el.getAttribute("data-src-href") });
+      P.setState(id, e.target.value);
+      srcPaint(el);
+      bump();
+    });
+    document.addEventListener("input", function (e) {
+      var el = e.target.closest && e.target.closest("[data-src]");
+      if (!el || !e.target.classList.contains("src-no")) return;
+      P.setNote(el.getAttribute("data-src"), e.target.value);
+      bump();
+    });
+
+    /* A COUNT THE READER CAN SEE, because progress kept somewhere invisible
+       is progress nobody trusts. Links to the page that can export it. */
+    function bump() {
+      var n = P.count();
+      var el = document.getElementById("ra-mywork");
+      if (!el) return;
+      el.hidden = !n;
+      el.innerHTML = n
+        ? '<b>' + n + "</b> volume" + (n === 1 ? "" : "s") +
+          " marked in this browser · " +
+          '<a href="' + (el.getAttribute("data-href") || "#") + '">see and export them</a>'
+        : "";
+    }
+    bump();
+  })();
+</script>
+
+<style is:global>
+  li[data-vol] .volmark { display: inline-flex; flex-wrap: wrap; gap: 6px;
+    align-items: baseline; margin-left: 8px; font-family: var(--sans);
+    font-size: 11.5px; color: var(--ink-3); }
+  /* QUIET BY COLOUR, NOT BY OPACITY. The first version dimmed this link with
+     `opacity: .55` so forty unmarked rows would not shout, and put 25
+     colour-contrast violations on every place page: opacity multiplies against
+     the background and takes the ratio down with it, which axe measures and a
+     reader with low vision feels. --ink-3 is pinned in this project's own
+     stylesheet «by contrast, not by taste» and is the right tool — it is quiet
+     AND it passes. The accent comes back on hover and on a marked row, where
+     the link is the thing being looked for. */
+  li[data-vol] .vm-open { background: none; border: 0; padding: 0; cursor: pointer;
+    font: inherit; color: var(--ink-3); text-decoration: underline;
+    text-underline-offset: 2px; }
+  li[data-vol]:hover .vm-open, li[data-vol].vm-has .vm-open { color: var(--accent); }
+  li[data-vol].vm-has { border-left: 2px solid var(--accent); padding-left: 8px; }
+  li[data-vol] .volmark b { font-family: var(--mono); color: var(--ink-2); }
+  .vm-bar { display: inline-block; width: 64px; height: 6px; border-radius: 3px;
+    background: var(--rule); overflow: hidden; vertical-align: middle; }
+  .vm-bar i { display: block; height: 100%; background: var(--accent); }
+  .vm-res { font-family: var(--mono); color: var(--brick); }
+  .vm-note { font-style: italic; color: var(--ink-2); }
+  .vm-since { font-family: var(--mono); font-size: 10px; color: var(--ink-3); }
+  .vm-edit { display: inline-flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
+  .vm-edit label { display: inline-flex; gap: 4px; align-items: baseline;
+    font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+    letter-spacing: .05em; }
+  .vm-edit input { font-family: var(--sans); font-size: 12.5px; padding: 3px 6px;
+    border: 1px solid var(--rule); border-radius: 3px; background: var(--panel);
+    color: var(--ink); width: 11em; }
+  .vm-edit .vm-t { width: 4em; }
+  .vm-edit button { font-family: var(--sans); font-size: 12px; padding: 3px 9px;
+    border: 1px solid var(--rule); border-radius: 3px; background: var(--panel);
+    color: var(--ink); cursor: pointer; }
+  .vm-edit .vm-save { border-color: var(--accent); color: var(--accent); }
+  .vm-edit .vm-clear { color: var(--brick); border-color: var(--brick); }
+  .srcmark { display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: baseline;
+    margin-left: 8px; }
+  .srcmark select, .srcmark input { font-family: var(--sans); font-size: 11.5px;
+    padding: 2px 5px; border: 1px solid var(--rule); border-radius: 3px;
+    background: var(--panel); color: var(--ink-3); }
+  [data-src].src-has .srcmark select { color: var(--accent);
+    border-color: var(--accent); }
+  .placemark { margin: 16px 0 0; }
+  #ra-mywork { margin: 10px 0 0; font-family: var(--sans); font-size: 12.5px;
+    padding: 8px 11px; border-left: 3px solid var(--accent);
+    background: var(--ground); border-radius: 0 3px 3px 0; }
+  #ra-mywork[hidden] { display: none; }
+</style>

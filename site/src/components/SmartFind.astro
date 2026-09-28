@@ -25,19 +25,20 @@
    the query covers more of it — which is the part of «percentage» that is
    real, used as a tie-break where it belongs.
 */
-const { placesIndex, quietIndex, base } = Astro.props;
+const { placesIndex, quietIndex, base, surnameShards = null,
+        hint: hintText = "Find a country or a place — Gallignana finds Gračišće" } = Astro.props;
 ---
 
 <form class="sfind" role="search" autocomplete="off" onsubmit="return false">
   <label class="vh" for="sfq">Find a country or a place</label>
   <input id="sfq" type="search" autocomplete="off" spellcheck="false"
          role="combobox" aria-expanded="false" aria-controls="sfdrop"
-         placeholder="Find a country or a place — Gallignana finds Gračišće" />
+         placeholder={hintText} />
   <div class="sfdrop" id="sfdrop" role="listbox" hidden></div>
   <p class="sfhint" id="sfhint" role="status" aria-live="polite"></p>
 </form>
 
-<script is:inline define:vars={{ IDX: placesIndex, QUIET: quietIndex, BASE: base }}>
+<script is:inline define:vars={{ IDX: placesIndex, QUIET: quietIndex, BASE: base, SURN: surnameShards }}>
   (function () {
     var box = document.getElementById("sfq");
     var drop = document.getElementById("sfdrop");
@@ -123,7 +124,41 @@ const { placesIndex, quietIndex, base } = Astro.props;
       return out.sort(cmp).slice(0, 8);
     }
 
-    function render(cc, pl) {
+    /* SURNAMES COME FROM THE SHARDS THE MAP ALREADY FETCHES — three folded
+       characters per file, which is why this needs three before it can ask.
+       Nothing new is built or downloaded whole: 943,956 names would be a
+       hundred megabytes, and the reason they were sharded in the first place
+       is so that nobody ever loads more than the letters they typed. */
+    var scache = {};
+    function surnames(k, done) {
+      if (!SURN || k.length < 3) { done([]); return; }
+      var key = "";
+      for (var i = 0; i < k.length && key.length < 3; i++)
+        if (/[a-z0-9]/.test(k[i])) key += k[i];
+      if (key.length < 3) { done([]); return; }
+      function use(list) {
+        var out = [];
+        (list || []).forEach(function (r) {
+          var t = tier(r.n, k);
+          if (t === 99) return;
+          var ccs = (r.countries || []).length;
+          out.push({ t: t, n: r.n, kind: "surname",
+                     href: BASE + "surname/" + (r.pg ? slugOf(r.n) : "") + "/",
+                     nopage: !r.pg,
+                     meta: ccs ? ccs + (ccs === 1 ? " country" : " countries") : "" });
+        });
+        done(out.sort(cmp).slice(0, 8));
+      }
+      if (scache[key]) { use(scache[key]); return; }
+      fetch(SURN + key + ".json").then(function (r) { return r.json(); })
+        .then(function (d) { scache[key] = d; use(d); })
+        .catch(function () { scache[key] = []; done([]); });
+    }
+    function slugOf(n) {
+      return fold(n).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    }
+
+    function render(cc, pl, sn) {
       /* Built in one pass, groups in order, `items` filled as the rows are
          made — the first version tracked an index into an array of HTML and
          patched a placeholder, which is the kind of cleverness that is wrong
@@ -137,6 +172,7 @@ const { placesIndex, quietIndex, base } = Astro.props;
         take.forEach(function (r) { h.push(row(r, items.length)); items.push(r); });
       }
       group("Countries", cc, 5);
+      group("Names", sn || [], 8);
       group("Places", pl, 8);
       drop.innerHTML = h.join("");
       drop.hidden = !items.length;
@@ -144,8 +180,12 @@ const { placesIndex, quietIndex, base } = Astro.props;
       cur = -1;
     }
     function row(r, i) {
+      /* THIRTY-NINE NAMES IN FORTY HAVE NO PAGE, and sending those to a 404
+         would be worse than not listing them. They go to the map with the
+         name searched, which is where the panel answers in full anyway. */
+      var href = r.nopage ? BASE + "?q=" + encodeURIComponent(r.n) : r.href;
       return '<a class="sfr" role="option" aria-selected="false" data-i="' + i +
-             '" href="' + esc(r.href) + '">' +
+             '" href="' + esc(href) + '">' +
              '<span class="sfn">' + esc(r.n) + "</span>" +
              '<span class="sfk sfk-' + r.kind + '">' + r.kind + "</span>" +
              '<span class="sfm">' + esc(r.meta) + "</span></a>";
@@ -164,12 +204,31 @@ const { placesIndex, quietIndex, base } = Astro.props;
       /* The directory below filters to match, so the cards ARE the country
          answer; the dropdown is how you get there in one keystroke. */
       if (window.raCountryFilter) window.raCountryFilter(t);
-      render(cc, pl);
+      /* PAINT FIRST, THEN LET THE NAMES LAND — and the order matters because
+         surnames() calls back SOMETIMES SYNCHRONOUSLY. The first search for a
+         shard fetches, so the callback arrived late and everything worked.
+         Every search after that hits the cache, so the callback fired
+         immediately — rendering the names, and then falling back into this
+         function which rendered the empty placeholder over the top of them.
+         A search for «blazevic» found five names, drew them, and erased them
+         within the same tick.
+         Placeholder first, names second, whichever way round the callback
+         chooses to arrive. */
+      render(cc, pl, []);
+      tell(cc, pl, []);
+      surnames(k, function (sn) {
+        if (!sn.length) return;
+        render(cc, pl, sn);
+        tell(cc, pl, sn);
+      });
+    }
+    function tell(cc, pl, sn) {
       var bits = [];
       if (cc.length) bits.push(cc.length + " countr" + (cc.length === 1 ? "y" : "ies"));
+      if (sn && sn.length) bits.push(sn.length + " name" + (sn.length === 1 ? "" : "s"));
       if (pl.length) bits.push(pl.length + " place" + (pl.length === 1 ? "" : "s"));
       hint.textContent = bits.length ? bits.join(" · ")
-        : "Nothing answers to “" + t.trim() + "”. The map searches the gazetteer too.";
+        : "Nothing answers to that yet. The map searches the gazetteer too.";
     }
 
     function mark() {
@@ -238,6 +297,7 @@ const { placesIndex, quietIndex, base } = Astro.props;
     letter-spacing: .06em; text-transform: uppercase; padding: 1px 5px;
     border-radius: 2px; border: 1px solid var(--rule); color: var(--ink-3); }
   :global(.sfk-country) { color: var(--accent); border-color: var(--accent); }
+  :global(.sfk-surname) { color: var(--brick); border-color: var(--brick); }
   :global(.sfm) { margin-left: auto; font-family: var(--mono); font-size: 10.5px;
     color: var(--ink-3); }
   .sfhint { margin: 6px 0 0; font-family: var(--mono); font-size: 11px;

@@ -1,37 +1,33 @@
 ---
-/* Every country the catalogue reaches, which since the harvest widened is
-   ninety-three of them. The crawl path for the country pages, and the honest
-   overview of how uneven this map is. */
-import Base from "../layouts/Base.astro";
-import cols from "../data/collections-full.json";
-import CountryCards from "../components/CountryCards.astro";
-import { countryMetrics, countryTotals } from "../lib/country-metrics.js";
+/* EVERY COUNTRY MOVED INTO EVERY PLACE. David: «every country can just move
+   to "places"? surely and summarise the same numbers there?» and then
+   «collapse it».
 
-/* THE ARITHMETIC MOVED TO lib/country-metrics.js, because /places/ and
-   /surnames/ were each doing their own and one of the three was going to
-   drift. This page keeps only what is its own: the record total. */
-const list = countryMetrics();
-const T = countryTotals();
-const withFlag = T.withFlag;
+   It had already become the same thing: once CountryCards.astro was shared,
+   this page and the country directory on /places/ were one component reading
+   one set of numbers, printed twice under two names. Two pages that cannot
+   disagree are still two pages a reader has to choose between.
 
-const totalCols = cols.collections.length;
-const records = cols.collections.reduce((a, c) => a + (c.records || 0), 0);
-const walked = T.walked;
+   NOT DELETED, REDIRECTED. This URL is in the site's own navigation history,
+   in its sitemap, and — for all anyone here knows — in somebody's bookmarks
+   and in a search index. Deleting it turns those into 404s to save one file.
+   A static host has no 301 to offer, so the redirect is the two things a
+   static page CAN do: a canonical link, which is what a search engine reads,
+   and a meta refresh, which is what a person gets. */
+import { u } from "../lib/url.js";
+const to = u("/places/");
 ---
-<Base
-  title="Every country"
-  eyebrow={`${list.length} countries · ${totalCols} FamilySearch collections · ${records.toLocaleString()} records`}
-  dek="Where this map reaches, and how unevenly. A country with collections but no places is one where the sources are known and nobody has walked the shelf — which is a gap in this map rather than a gap in the record.">
-
-  <div class="one" style="border-left-color:var(--rule-strong)">
-    <div class="lab">How to read this</div>
-    <p class="cap"><b>Collections</b> are FamilySearch's, reaching that country.
-    <b>Archives</b> are institutions this map names for it. <b>Places</b> are towns whose
-    volumes have actually been walked — and {walked} countries of {list.length} have any at
-    all. The other {list.length - walked} are honest blanks. {withFlag} of them
-    fly a flag this atlas has drawn; the arrow beside it opens that country's own
-    flag history.</p>
-  </div>
-
-  <CountryCards list={list} totals={T} />
-</Base>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Every country — moved to Every place</title>
+    <link rel="canonical" href={to} />
+    <meta name="robots" content="noindex, follow" />
+    <meta http-equiv="refresh" content={`0; url=${to}`} />
+  </head>
+  <body>
+    <p>Every country is now part of <a href={to}>Every place</a> — the same
+    countries, the same numbers, and the places underneath them.</p>
+  </body>
+</html>

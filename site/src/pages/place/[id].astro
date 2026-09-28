@@ -14,6 +14,8 @@ import { readFileSync } from "node:fs";
    surviving volume with what it costs to open it. */
 import Base from "../../layouts/Base.astro";
 import { flagFor } from "../../lib/flags.js";
+import ProgressKit from "../../components/ProgressKit.astro";
+import VolumeMarks from "../../components/VolumeMarks.astro";
 import { u } from "../../lib/url.js";
 import full from "../../data/places-full.json";
 import regions from "../../../public/regions.json";
@@ -330,7 +332,7 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
   )}
 
   {volumes.length > 0 && (
-    <section style="margin-top:38px">
+    <section style="margin-top:38px" id="ra-vols">
       <h2>{volumesTotal.toLocaleString()} volumes catalogued here</h2>
       {volumesTotal > volumes.length && (
         <p class="cap">The oldest {volumes.length} are listed. A researcher is
@@ -339,19 +341,42 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
       )}
       <p class="cap">The level below «a collection covers this place»: which book, for which
       years, and the link that opens its images. From FamilySearch's own catalogue.
-      <b>Nobody here has opened any of them.</b></p>
+      <b>Nobody here has opened any of them.</b> You can, though — mark the pages
+      you have searched on any row below and this browser will remember where
+      you stopped.</p>
+      <p id="ra-mywork" data-href={u("/my-research/")} hidden></p>
       {VOLKINDS.map((k) => {
         const rows = volumes.filter((v) => (v.kinds && v.kinds.length ? v.kinds : ["Other"]).includes(k));
         return rows.length > 0 && (
           <div style="margin-top:16px">
             <div class="lab">{k} — {rows.length}</div>
             <ul class="vols">
+              {/* THE ID IS THE WAYPOINT, which 99% of volumes carry; the rest
+                  fall back to their url. Both are stable across rebuilds,
+                  which is the whole requirement — a reader's page ranges must
+                  still point at the same book next month.
+
+                  The comment sits HERE and not inside the map, for two
+                  reasons learnt one after the other. An arrow function that
+                  returns a comment AND an element is returning two sibling
+                  nodes with no wrapper, which is a syntax error — and the
+                  message it produces, «Expected ")" but found "$$render"»,
+                  names the generated code rather than the line at fault.
+                  Then the rewritten comment quoted the closing delimiter of a
+                  JSX comment inside a JSX comment, which ends it early and
+                  leaves the remaining prose to be parsed as markup:
+                  «Unterminated regular expression». Two compiler errors, both
+                  pointing anywhere but here. */}
               {rows.map((v) => (
-                <li>
+                <li data-vol={"volume:" + (v.waypoint || v.url || v.t)}
+                    data-vol-t={v.t}
+                    data-vol-where={place.name + ", " + countryName}
+                    data-vol-href={u(`/place/${place.id}/`)}>
                   {v.url ? <a href={v.url} target="_blank" rel="noopener">{v.t} ↗</a> : <b>{v.t}</b>}
                   {v.from && <span class="y">{v.from}–{v.to}</span>}
                   {v.conf && <span class="who">{v.conf}</span>}
                   {v.film && <span class="who">film {v.film}</span>}
+                  <span class="volmark"></span>
                 </li>
               ))}
             </ul>
@@ -397,10 +422,12 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
       and are on the <a href={u(`/country/${place.country.toLowerCase()}/`)}>country page</a>.</>}</p>
       <ul class="vols" style="margin-top:12px">
         {national.map((p) => (
-          <li>
+          <li data-src={"source:" + p.id} data-src-t={p.name}
+              data-src-where={countryName} data-src-href={u(`/archive/${p.id}/`)}>
             <a href={u(`/archive/${p.id}/`)}>{p.name}</a>
             <span class="who">{ACCESS[p.access] || p.access}</span>
             {p.at && <span class="who">{p.at.place}{p.km != null && ` — ${p.km.toLocaleString()} km`}</span>}
+            <span class="srcmark"></span>
             {p.what && <><br /><span class="who">{p.what}</span></>}
           </li>
         ))}
@@ -448,10 +475,21 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
       {region.eras[region.eras.length - 1].to}.</span></p>
   )}
 
+  {/* THE PLACE ITSELF, because David's list of what a reader wants to mark
+      began «i have finished searching this volume, or i have already scanned
+      this location». A location is not a volume: there are no pages to it,
+      so it takes a state and a date rather than ranges. */}
+  <p class="placemark" data-src={"place:" + place.id} data-src-t={place.name}
+     data-src-where={countryName} data-src-href={u(`/place/${place.id}/`)}>
+    <span class="srcmark"></span>
+  </p>
+
   <p style="margin-top:22px"><a class="bigl" href={mapLink}>See {place.name} on the map →</a></p>
   <p class="cap"><a href={u(`/country/${(place.country||"").toLowerCase()}/`)}>Everything in {where}</a> ·
     <a href={u("/places/")}>All {full.places.length} places</a> ·
     <a href={u("/add/")}>Correct something on this page</a></p>
+  <ProgressKit />
+  <VolumeMarks />
 </Base>
 
 <style>

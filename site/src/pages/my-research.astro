@@ -1,0 +1,190 @@
+---
+/* WHAT YOU HAVE SEARCHED, AND THE FILE THAT MAKES IT YOURS.
+
+   Everything on this page is read out of this browser at load. Nothing here
+   is built, nothing here is sent anywhere, and the server has never seen any
+   of it — which is the honest position for a static site with no accounts,
+   and also the reason EXPORT is the loudest thing on the page rather than a
+   link at the bottom.
+
+   Elsewhere this project treats localStorage as «a convenience and not a
+   record». Page ranges are a record: somebody may build them over months.
+   localStorage can still vanish — cleared site data, a private window, a
+   browser evicting under pressure, a new laptop — so the page says so in
+   words rather than assuming a reader knows, and hands them a file.
+*/
+import Base from "../layouts/Base.astro";
+import { u } from "../lib/url.js";
+import ProgressKit from "../components/ProgressKit.astro";
+---
+<Base
+  title="My research"
+  eyebrow="Kept in this browser · never sent anywhere"
+  dek="The volumes you have marked, the pages you did, and where to start again. This lives in this browser only — export it to keep it.">
+
+  <ProgressKit />
+
+  <div class="one" style="border-left-color:var(--brick)">
+    <div class="lab">Where this lives</div>
+    <p class="cap"><b>In this browser, and nowhere else.</b> It is not an
+    account, it has never been sent to us, and we could not read it if we
+    wanted to. That also means clearing your site data, using a private
+    window, or picking up a different machine will not find it.
+    <b>Export it and you own it</b> — the file imports on any machine, and
+    importing merges rather than replaces, so a laptop and a phone can both
+    be right.</p>
+  </div>
+
+  <p class="mrbtns">
+    <button type="button" id="mr-export">Export my research</button>
+    <button type="button" id="mr-import">Import a file</button>
+    <input type="file" id="mr-file" accept="application/json,.json" hidden />
+    <span id="mr-said" role="status" aria-live="polite"></span>
+  </p>
+
+  <div id="mr-body"></div>
+
+  <script is:inline define:vars={{ BASE: u("/") }}>
+    (function () {
+      var P = window.raProgress;
+      var body = document.getElementById("mr-body");
+      var said = document.getElementById("mr-said");
+      if (!P || !body) return;
+
+      function esc(s) {
+        return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+        });
+      }
+      function draw() {
+        var marks = P.all();
+        var ids = Object.keys(marks);
+        if (!ids.length) {
+          body.innerHTML = '<p class="cap" style="margin-top:22px">Nothing marked yet. ' +
+            'Open a place, find its volumes, and say which pages you have ' +
+            'searched — this page is where they all come back together.</p>';
+          return;
+        }
+        /* NEWEST WORK FIRST. Somebody opening this page has just been
+           working, or is trying to remember where they were; either way the
+           thing they touched last is the thing they want. */
+        ids.sort(function (a, b) {
+          return String(marks[b].since || "").localeCompare(String(marks[a].since || ""));
+        });
+        var pages = 0, vols = 0, others = 0;
+        ids.forEach(function (id) {
+          if (marks[id].done) { vols++; pages += P.covered(marks[id].done); }
+          else { others++; }
+        });
+        var sum = [];
+        if (vols) sum.push("<b>" + vols + "</b> volume" + (vols === 1 ? "" : "s") +
+                           " \u00b7 <b>" + pages.toLocaleString() + "</b> page" +
+                           (pages === 1 ? "" : "s"));
+        if (others) sum.push("<b>" + others + "</b> archive" +
+                             (others === 1 ? "" : "s") + " or place" +
+                             (others === 1 ? "" : "s"));
+        var h = ['<p class="mrsum">' + sum.join(" \u00b7 ") + " recorded</p>",
+                 '<ul class="mrlist">'];
+        ids.forEach(function (id) {
+          var m = marks[id];
+          /* THE TITLE AND THE PLACE, NOT THE WAYPOINT. The key is a
+             FamilySearch waypoint because it is stable; printed raw it reads
+             «3JXZ-K68:172062901,172062902,172062903», and the first cut of
+             this page was a column of exactly those. What a reader needs is
+             «Bautismos 1894-1926 — La Huerta, Mexico», which is why the title
+             and the place are copied into the mark as it is saved. A row
+             marked before that change has no label and falls back to the id
+             rather than showing nothing. */
+          var raw = id.replace(/^volume:/, "");
+          h.push("<li>" +
+            (m.href ? '<a class="mrt" href="' + esc(m.href) + '">' + esc(m.t || raw) + "</a>"
+                    : '<span class="mrt">' + esc(m.t || raw) + "</span>") +
+            (m.where ? '<span class="mrwhere">' + esc(m.where) + "</span>" : "") +
+            /* A VOLUME AND AN ARCHIVE READ DIFFERENTLY BECAUSE THEY ARE
+               DIFFERENT WORK. A volume carries ranges and somewhere to start
+               again; an archive or a town carries a state — «written, no
+               reply» — and no pages at all. Printing «0 pages · start again at
+               1» against an archive would be the page inventing work nobody
+               did. */
+            (m.done
+              ? '<span class="mrdone">' + esc(P.fmt(m.done)) + "</span>" +
+                (m.total ? '<span class="mrn">' + P.covered(m.done) + " of " + m.total + "</span>"
+                         : '<span class="mrn">' + P.covered(m.done) + " pages</span>") +
+                '<span class="mrres">start again at ' + P.resume(m.done) + "</span>"
+              : "") +
+            (m.state ? '<span class="mrstate">' + esc(m.state) + "</span>" : "") +
+            (m.note ? '<span class="mrnote">' + esc(m.note) + "</span>" : "") +
+            (m.since ? '<span class="mrsince">' + esc(m.since) + "</span>" : "") +
+            '<button type="button" class="mrdel" data-id="' + esc(id) + '">forget</button>' +
+            "</li>");
+        });
+        h.push("</ul>");
+        body.innerHTML = h.join("");
+      }
+      draw();
+
+      document.getElementById("mr-export").addEventListener("click", function () {
+        var blob = new Blob([P.toJSON()], { type: "application/json" });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        /* Dated, so successive exports pile up in a downloads folder instead
+           of overwriting the one good copy. */
+        a.download = "record-atlas-research-" +
+          new Date().toISOString().slice(0, 10) + ".json";
+        a.click();
+        URL.revokeObjectURL(a.href);
+        said.textContent = "Exported " + P.count() + " volumes.";
+      });
+      var file = document.getElementById("mr-file");
+      document.getElementById("mr-import").addEventListener("click", function () { file.click(); });
+      file.addEventListener("change", function () {
+        var f = file.files && file.files[0];
+        if (!f) return;
+        var r = new FileReader();
+        r.onload = function () {
+          try {
+            var n = P.fromJSON(String(r.result), "merge");
+            said.textContent = "Merged " + n + " volumes from that file.";
+            draw();
+          } catch (e) {
+            said.textContent = "That file is not a Record Atlas research export.";
+          }
+        };
+        r.readAsText(f);
+      });
+      body.addEventListener("click", function (e) {
+        var b = e.target.closest && e.target.closest(".mrdel");
+        if (!b) return;
+        P.clear(b.getAttribute("data-id"));
+        draw();
+      });
+    })();
+  </script>
+</Base>
+
+<style>
+  .mrbtns { display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline;
+    margin: 18px 0 0; }
+  .mrbtns button { font-family: var(--sans); font-size: 14px; padding: 9px 14px;
+    border: 1px solid var(--rule-strong); border-radius: 4px;
+    background: var(--panel); color: var(--ink); cursor: pointer; }
+  #mr-export { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+  #mr-said { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); }
+  :global(.mrsum) { margin: 20px 0 0; font-family: var(--sans); font-size: 15px; }
+  :global(.mrlist) { list-style: none; padding: 0; margin: 10px 0 0; }
+  :global(.mrlist li) { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline;
+    padding: 9px 0; border-bottom: 1px solid var(--rule);
+    font-family: var(--sans); font-size: 13px; }
+  :global(.mrt) { font-weight: 600; }
+  :global(.mrwhere) { color: var(--ink-3); }
+  :global(.mrdone) { font-family: var(--mono); color: var(--ink); }
+  :global(.mrn) { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+  :global(.mrstate) { font-family: var(--mono); font-size: 11px; color: var(--accent); }
+  :global(.mrres) { font-family: var(--mono); font-size: 11px; color: var(--brick); }
+  :global(.mrnote) { font-style: italic; color: var(--ink-2); }
+  :global(.mrsince) { font-family: var(--mono); font-size: 10px; color: var(--ink-3); }
+  :global(.mrdel) { margin-left: auto; background: none; border: 0; padding: 0;
+    cursor: pointer; font: inherit; font-size: 11.5px; color: var(--ink-3);
+    text-decoration: underline; text-underline-offset: 2px; }
+  :global(.mrdel:hover) { color: var(--brick); }
+</style>

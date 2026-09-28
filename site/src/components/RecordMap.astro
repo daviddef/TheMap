@@ -3926,10 +3926,16 @@ window.addEventListener("load", async function () {
          and none is implied — the strip is the same hatching the ground band
          uses for an era no archive holds, which a reader of this map has
          already met meaning exactly «this is known to be empty, not missing». */
-      var tlHas = r.tl || {};
+      /* TWO SERIES, NOT ONE MERGED CLAIM. `tl` is Wikidata's notable people;
+         `tla` is a count of ordinary people from the eight family archives,
+         which is where the earlier dates live — Blažević in Croatia opens at
+         1910 in the first and at the 1790s in the second. They have opposite
+         biases and the reader can only weigh them if the band says which row
+         came from where, so each country can carry a row of each. */
+      var tlHas = r.tl || {}, tlaHas = r.tla || {};
       var undated = (r.countries || []).filter(function (c) {
         return ["register", "archive", "curated"].indexOf(c.how) > -1 &&
-               !tlHas[c.cc];
+               !tlHas[c.cc] && !tlaHas[c.cc];
       }).map(function (c) { return c.cc; });
       undated = undated.filter(function (cc, i) { return undated.indexOf(cc) === i; })
                        .sort(function (a, b) {
@@ -3940,16 +3946,28 @@ window.addEventListener("load", async function () {
                          var A = CNAME[a] || a, B = CNAME[b] || b;
                          return A < B ? -1 : A > B ? 1 : 0;
                        });
-      if (r.tl || undated.length) {
+      if (r.tl || r.tla || undated.length) {
         var cc0 = Object.keys(r.tl || {});
         var lo = 9999, hi = 0;
-        cc0.forEach(function (cc) {
-          r.tl[cc].forEach(function (d) { if (d < lo) lo = d; if (d > hi) hi = d; });
-        });
+        /* THE SCALE SPANS BOTH SERIES. Sized on Wikidata alone, an archive row
+           starting in the 1790s against a band that opens at 1880 computes a
+           negative left and is clamped to zero — every early decade, which is
+           the entire reason the archives were opened, piled against the edge
+           saying nothing. */
+        function stretch(src) {
+          Object.keys(src || {}).forEach(function (cc) {
+            src[cc].forEach(function (d) { if (d < lo) lo = d; if (d > hi) hi = d; });
+          });
+        }
+        stretch(r.tl); stretch(r.tla);
         var span = Math.max(1, hi - lo);
         var rows = cc0.map(function (cc) {
-          return { cc: cc, ds: r.tl[cc], first: r.tl[cc][0] };
-        }).sort(function (a, b) { return a.first - b.first; });
+          return { cc: cc, ds: r.tl[cc], first: r.tl[cc][0], src: "wd" };
+        });
+        Object.keys(r.tla || {}).forEach(function (cc) {
+          rows.push({ cc: cc, ds: r.tla[cc], first: r.tla[cc][0], src: "ar" });
+        });
+        rows.sort(function (a, b) { return a.first - b.first; });
         /* Dated rows first, in the order the evidence puts them; the undated
            ones after, because they cannot be placed on the scale and sorting
            them into it would put them somewhere they do not belong. */
@@ -4012,6 +4030,7 @@ window.addEventListener("load", async function () {
           runs.push(cur);
           var f = CC2FLAG && CC2FLAG[row.cc];
           var tint = (f && f.color) || "var(--accent)";
+          var isAr = row.src === "ar";
           wh.push('<div class="ra-tw-r">' +
                   '<span class="ra-tw-f">' +
                   (f && f.flag ? '<svg viewBox="0 0 300 200" aria-hidden="true">' +
@@ -4019,6 +4038,11 @@ window.addEventListener("load", async function () {
                   '<a class="ra-tw-c" href="' + BASE + "country/" +
                   row.cc.toLowerCase() + '/">' + esc(CNAME[row.cc] || row.cc) +
                   "</a>" +
+                  '<span class="ra-tw-src' + (isAr ? " ra-tw-src-ar" : "") +
+                  '" title="' + esc(isAr
+                     ? T("Counted in a family archive held here")
+                     : T("People notable enough for an encyclopaedia")) + '">' +
+                  (isAr ? esc(T("archive")) : esc(T("notable"))) + "</span>" +
                   '<span class="ra-tw-band">');
           /* PLACED ON THE SCALE, NOT GROWN INTO IT. The first version used
              flex-grow, the way the ground band does, and it broke in a way
@@ -4040,7 +4064,8 @@ window.addEventListener("load", async function () {
             var L = ((a - lo) / span) * 100;
             var W = ((b - a) / span) * 100;
             var label = a === b ? a + "s" : a + "s\u2013" + b + "s";
-            wh.push('<span class="ra-tl-seg ra-tw-seg" style="--seg:' + tint +
+            wh.push('<span class="ra-tl-seg ra-tw-seg' +
+                    (isAr ? " ra-tw-seg-ar" : "") + '" style="--seg:' + tint +
                     /* The LAST decade sits at 100%, where a 52px minimum
                        hangs entirely past the clip — Blažević's Lithuanian
                        2000s rendered at x=1157 in a 1157px band, which is to
@@ -4062,9 +4087,18 @@ window.addEventListener("load", async function () {
                   "s</span></p>");
         /* The file's own warning, in its own words, because a row of ticks
            looks like a census and is nothing of the kind. */
-        wh.push('<p class="cap ra-tw-c2">' + esc(T("People notable enough for an " +
-                "encyclopaedia, not a census — evidence that the name was borne " +
-                "in a place at a time, never how common it was.")) + "</p>");
+        /* THE CAPTION NAMED ONE SOURCE AND THERE ARE NOW TWO, with different
+           biases, and saying so is the whole reason they are drawn apart. */
+        wh.push('<p class="cap ra-tw-c2">' + esc(T("Rows marked ") ) +
+                '<b>' + esc(T("notable")) + "</b>" +
+                esc(T(" are people notable enough for an encyclopaedia — not a " +
+                      "census, and thin before 1900. Rows marked ")) +
+                '<b>' + esc(T("archive")) + "</b>" +
+                esc(T(" are counts of ordinary people from this project's own " +
+                      "family archives, which reach further back and only where " +
+                      "a family has been researched. Both are evidence that the " +
+                      "name was borne in a place at a time; neither is how common " +
+                      "it was.")) + "</p>");
         wh.push("</div>");
         h.push(wh.join(""));
       }
@@ -6699,7 +6733,16 @@ window.addEventListener("load", async function () {
     gap: 6px; }
   :global(.ra-vol .ra-tw-f) { align-self: center; }
   :global(.ra-vol .ra-ck-n) { flex: 1 0 100%; margin: 0 0 0 29px; }
-  :global(.ra-tw-axis) { display: flex; justify-content: space-between;
+  /* The source, said on the row rather than in a key nobody reads. */
+  :global(.ra-tw-src) { flex: none; font-family: var(--mono); font-size: 9px;
+    letter-spacing: .05em; text-transform: uppercase; padding: 1px 4px;
+    border-radius: 2px; border: 1px solid var(--rule); color: var(--ink-3);
+    cursor: help; }
+  :global(.ra-tw-src-ar) { color: var(--brick); border-color: var(--brick); }
+  /* An archive row is drawn from counted people rather than from a handful of
+     notable ones, so it reads as the more solid of the two. */
+  :global(.ra-tw-seg-ar) { border-top-style: double; border-top-width: 5px; }
+    :global(.ra-tw-axis) { display: flex; justify-content: space-between;
     margin: 4px 0 0; font-family: var(--mono); font-size: 10.5px;
     color: var(--ink-3); }
   :global(.ra-tw-c2) { margin: 6px 0 0; }

@@ -1,119 +1,116 @@
-# Cloud brief: one name, many spellings — and 355,315 attestations nobody sees
+# Cloud brief: the variant graph has no notion of identity
 
-You are working in **Record Atlas** (`github.com/daviddef/TheMap`), which maps
-where genealogical records are held: 943,938 surnames, 2,890,777 volumes, 519
-archives.
+You are working in **Record Atlas** (`github.com/daviddef/TheMap`): 943,938
+surnames, 2,890,777 volumes, 519 archives, mapping where records are held.
 
-**This task needs no network at all.** Every input is committed; the one file
-that is gitignored is the output you will regenerate. A previous cloud session
-was given a brief that was 95% fetching and could do almost none of it, because
-this environment's egress is limited to GitHub/npm/PyPI. Nothing here fetches.
+**No network needed.** Every input is committed; the only gitignored file is
+the output you regenerate. This is computation and judgement, nothing else.
 
-## The finding
+## The problem, measured across every name
 
-A surname page shows the countries that surname is attested in. It does not
-pool the attestation of its own variant spellings, even when it names them on
-the same page.
+A surname page lists the countries that surname is attested in. It does not
+pool the attestation of its variant spellings — not even the ones it prints on
+the same page under "The same name, spelt two ways".
 
-**Defranceski** is the case that found it. The page says, under "The same name,
-spelt two ways": *Defranceschi*. It then lists **10 countries**. Defranceschi's
-own record carries countries Defranceski's does not. Pool the two — one link,
-already displayed — and it is **19 countries**: Austria, Switzerland, Czechia,
-Spain, France, Hong Kong, Poland, Puerto Rico and Russia all appear.
+    943,938  surnames
+    378,669  have at least one variant link
 
-Measured across the whole dataset, joining ONLY evidence-grade links:
+    countries hidden at hop 1:  571,699   affecting 217,505 names
+                       hop 2:   331,019             140,166
+                       hop 3:   183,046             101,503
+                       hop 4:   107,009              70,856
+                       hop 5:    70,370              51,691
 
-    names in the graph                      940,738
-    clusters                                757,508
-    names in a cluster larger than one      304,942
-    largest cluster                             946 names
+    total attestations sitting beyond hop 0: 1,263,143
 
-    surnames that would gain countries      148,825   (15.8% of all names)
-    country-attestations not currently shown 355,315
+**It never converges, and that is the finding.** Every extra hop keeps
+yielding countries. That does not mean walking further is valuable — it means
+the graph has no natural boundary. Of roughly 1,020,300 links, **622,625 are
+`sounds`**: an algorithmic phonetic match. Phonetic skeletons chain freely;
+the dataset itself contains `Bär → Br → Ber → Bir → Bor → Bur`. Follow far
+enough and every name is a variant of every other.
 
-Some pages show **zero** countries while their cluster has nine — `Abbel`,
-`Albercht`. A page saying "attested nowhere" is one hop from real attestation.
+So the question is NOT "how many hops". It is that **the graph has no notion
+of identity**, and 1,263,143 attestations are stranded behind that absence.
 
-## The rule that governs everything here
+## Two ways to get this wrong — both already made, on this data
 
-`data/surnames.json` gives every variant a `how`:
+Writing this brief, two rules were proposed and both were wrong:
 
-    sounds     622,625    an algorithm's guess
-    spelling   243,910    one systematic substitution, both spellings attested
-    grammar    145,517    an inflected form of the same name
-    curated      8,248    a human decided, from documents
+1. **"Follow the graph transitively."** Produced a confident 24-country figure
+   for one name by chaining seven `sounds` guesses end to end. Each link was
+   plausible; the seventh was nonsense.
+2. **"One hop only; hop 2 adds nothing."** True for the name it was checked
+   against, false for the dataset: across 20,000 sampled names hop 2 yields
+   **59%** as much as hop 1.
 
-The dataset's own words for `sounds` are: *"An algorithm's guess. Useful for
-casting a net, and not evidence."*
-
-**Never follow a `sounds` link, and never chain one.** Doing so is how this
-brief's first draft claimed 24 countries for Defranceski: seven guesses
-chained end to end, presented as evidence. The honest figure from evidence
-links is 19. If you find yourself merging on `sounds`, stop.
+Both came from reasoning about one family instead of sampling the corpus. Do
+not repeat that. Every rule you propose gets measured across the whole set.
 
 ## The job
 
-### 1. Build the clusters
-Union-find over `spelling`, `grammar` and `curated` links only. Links in the
-file are one-way; walk both directions. Write
-`data/surname-clusters.json`: cluster id -> member names, plus for each the
-pooled country set with the evidence kind that justifies each country.
+### 1. Characterise the graph
+Build it from `data/surnames.json`, links both directions, keeping each link's
+`how` (`sounds` 622,625 · `spelling` 243,910 · `grammar` 145,517 · `curated`
+8,248). Report: degree distribution, connected-component sizes under each
+combination of link kinds, and how component size explodes as `sounds` is
+admitted. Where is the knee?
 
-### 2. Judge where a cluster stops being one name — THIS IS THE REAL WORK
-The largest cluster is **946 names**. That is almost certainly not one family
-of spellings; it is a chain of individually-defensible pairs, each a small step,
-adding up to a merge nobody would defend end to end. `grammar` links are the
-likeliest culprit (Slavic declensions: *Kowalski / Kowalska / Kowalskiego*
-are one name; follow far enough and you may arrive somewhere else).
+### 2. Find a real identity signal — this is the actual work
+Hops are a proxy for identity and a bad one. The corpus carries signals that
+might be better, and `data/surname-context.json` holds 99,560 Wikidata-linked
+surnames with `lang` (64,684), `kind` (13,013) and `after` — "named after" —
+on only 2,329. Candidates to test, none to assume:
 
-Sample clusters at each size — 2, 3, 5, 10, 25, 100, 946 — and read them.
-Decide, with reasons, where a cluster stops being one name. Candidate rules to
-test and report on, not to assume:
+- **language agreement** — two spellings sharing an attested language
+- **shared root** — both derived from the same base name, where `after` says so
+- **bounded edit distance** as well as phonetic equality, so `Bär`/`Bur` fails
+  where `Defranceschi`/`De Franceschi` passes
+- **co-attestation** — variants appearing in the same countries corroborate
+  each other; variants sharing no country at all are weaker
+- **link kind composition** — a path of one `spelling` plus one `sounds` may be
+  sound where two `sounds` are not
 
-- a hop limit from the seed name;
-- `grammar` only within one language, `spelling` across languages;
-- a cluster diameter cap (longest path), which catches chains that a size cap
-  misses;
-- no rule at all, if the data turns out to be cleaner than it looks.
+For each rule report: components affected, how the 1,263,143 figure moves, and
+**the three worst merges it still permits**, named.
 
-For each rule report: clusters affected, how the 148,825 and 355,315 figures
-move, and the three worst merges it still permits.
-
-### 3. Show your working
-`docs/variant-clusters.md`: the size distribution, the samples you read, the
-rule you chose, why, and the merges you are least comfortable with.
+### 3. Judge it
+Sample components at every size and read them. A human has to be able to look
+at a merged set and agree it is one name. Say where you stopped and why.
 
 ## What must not happen
 
 **A wrong merge tells somebody their family is attested in a country it never
-was.** That is worse than showing too little, because a reader cannot tell a
-pooled claim from a direct one unless the page says which is which. So:
+was.** A reader cannot tell a pooled claim from a direct one unless the data
+carries the difference. So:
 
 1. **Every pooled country keeps its provenance** — which member name carries
-   it, by what evidence. The page has to be able to say "attested in Poland as
-   *Defranceschi*" rather than implying the register held *Defranceski*.
-2. **Fewer, defensible merges beat more.** Where a cluster is doubtful, split
-   it and say so in the report.
-3. **No `sounds`. Not once, not transitively, not "just to cast a net".**
-4. Do not edit the surname page rendering. This task produces the data and the
-   judgement; wiring it into the page comes after the rule is agreed.
+   it, under which link kind, at what distance. The page must be able to say
+   "attested in Poland as *Defranceschi*", never imply the register held the
+   name the reader typed.
+2. **Fewer, defensible merges beat more.** "The data supports pooling only
+   where language agrees" is a good outcome. A large number nobody can defend
+   is not.
+3. **`sounds` is not worthless and is not evidence.** It is a lead. It may
+   qualify a merge in company with another signal; it must not carry one alone,
+   and it must never chain.
 
 ## Practical notes
 
 - `python3 scripts/build-surnames.py` from `site/` regenerates
-  `data/surnames.json` (156MB, gitignored) from committed inputs:
+  `data/surnames.json` (156 MB, gitignored) from committed inputs:
   `archive-surnames.json`, `gazetteer.json`, `italy-comuni.json`,
-  `wikidata-variants.json`, and `data/frequencies/*.json`.
-- Run `python3 ../scripts/check-data.py` from `site/` before pushing. In a
-  fresh worktree it reports pre-existing errors about generated artefacts that
-  are not in the repository; diff the failure list before and after your change
-  and confirm it is unchanged, rather than assuming.
-- Work on a branch off `main`, push it, do not merge. Commit
+  `wikidata-variants.json` and all thirteen `data/frequencies/*.json`.
+- `python3 ../scripts/check-data.py` from `site/` before pushing. A fresh
+  worktree reports pre-existing errors about generated artefacts that are not
+  in the repository — diff the failure list before and after your change and
+  confirm it is unchanged, rather than assuming.
+- Do not edit the surname page. This produces the data and the rule; wiring it
+  in comes after the rule is agreed.
+- Branch off `main`, push, do not merge. Commit
   `data/surname-clusters.json` and `docs/variant-clusters.md` only.
 
 ## What to hand back
 
-The branch, and a report that leads with the rule you chose and the number it
-produces. If the honest answer is "the data will not support pooling beyond
-two-name clusters", that is a perfectly good result and worth more than a large
-number nobody can defend.
+The rule, the number it produces, and the worst thing it still lets through.
+Lead with whichever of those is most likely to change the decision.

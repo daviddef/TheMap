@@ -51,16 +51,23 @@ One is in now, verified by hand:
 - `gazettes-africa` — Gazettes.Africa, free, full text, **24 African countries**
   (the list was read off the portal's own country menu, not inferred from the
   name).
-**And one that could not go in.** *Portal starije hrvatske periodike*
-(`dnc.nsk.hr`), the National and University Library in Zagreb's run of older
-Croatian periodicals — the Croatian-language press, where ANNO gives only the
-German. It is real, free, and **http only**: `https://dnc.nsk.hr` times out.
-`scripts/check-data.py` requires every provider URL to be https and stops the
-build, so the row was removed rather than the check weakened. That is a
-decision for David, not for a brief: either the atlas admits http sources with
-a visible warning on the link, or it loses a national library's newspaper
-archive. Expect to meet this again — state libraries in several countries are
-still http-only.
+**And one that took a second look.** *Portal starije hrvatske periodike*
+(`dnc.nsk.hr`) — the Croatian-language press, where ANNO gives only the German
+— is real and free and **http only**, and `check-data.py` requires https on
+every provider URL. The first move was to drop it and put the question to
+David: admit http sources, or lose a national library's newspaper archive.
+
+That was a false choice, and worth remembering. The same library publishes
+`https://digitalna.nsk.hr`, which browses the same newspapers and periodicals,
+is the institution's own entry point, and links out to the older run on the
+http host. So the row records the https portal, and its `what` says plainly
+where the oldest material actually sits.
+
+**The lesson for this brief: when a source is http-only, look for the
+institution's current portal before either dropping it or arguing for an
+exception.** Digitised collections are often reachable by two routes of
+different ages, and the newer one is usually https. Only if there is genuinely
+no https route does the question become a real one.
 
 They are the shape to copy, not the extent of the job.
 

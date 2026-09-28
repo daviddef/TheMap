@@ -438,6 +438,23 @@ window.addEventListener("load", async function () {
      whole session — 40 KB that turns «no sources here» into a list in 164
      countries. */
   var warch = {};
+  /* HOW MUCH PAPER EACH COUNTRY HAS, AND FOR WHICH DECADES. David: «why no
+     volume data for the name work? we show it really well in the location
+     work?» — Senj prints «7 books catalogued for this place» and then the
+     books. A surname has no books of its own, because a volume belongs to a
+     PLACE; what it has is countries, and this atlas knows how much paper
+     stands in each and which decades that paper covers.
+
+     coverage-by-country.json is 31 KB, has been built all along, and nothing
+     client-side had ever opened it. Fetched here rather than merged into the
+     shards because it is per COUNTRY, not per name — 200-odd rows against
+     943,956, so a shard merge would copy the same numbers a thousand times
+     over. */
+  var COVER = null;
+  var coverReady = fetch(BASE + "coverage-by-country.json")
+    .then(function (r) { return r.json(); })
+    .then(function (d) { COVER = d.countries || {}; })
+    .catch(function () { COVER = {}; });
   var warchReady = fetch(WARCH).then(function (r) { return r.json(); })
               .then(function (d) { warch = d.byCountry || {}; return warch; })
               .catch(function () { return {}; });
@@ -4617,6 +4634,11 @@ window.addEventListener("load", async function () {
     var hitCC = null;
     var list = await cptsReady;
     await warchReady;
+    /* Awaited, not hoped for. 31 KB alongside the shards; without this the
+       FIRST search after a cold load finds COVER still null and prints no
+       volumes at all, while every search after it works — the kind of bug
+       that never reproduces for the person who wrote it. */
+    await coverReady;
     if (mine !== searchTok) return;
     for (var ci = 0; ci < list.length; ci++) {
       var cp = list[ci];
@@ -5137,6 +5159,79 @@ window.addEventListener("load", async function () {
                    ". " + T("These are the archives of those COUNTRIES, not of a " +
                             "place of that name.")) + "</p>");
         buildNameCheck(canon || term, byCC, order, rank);
+        /* THE VOLUMES, WHICH A NAME CAN HAVE AFTER ALL. David: «why no volume
+           data for the name work? we show it really well in the location
+           work?» Senj prints «7 books catalogued for this place» and then the
+           books themselves. A surname cannot have that list, because a volume
+           belongs to a PLACE and no volume in this atlas is indexed by who is
+           written inside it — the surname file says so in its own words: «a
+           surname in a register's title is a book's subject, not a person».
+           Printing a book list under a name would be the map claiming to know
+           something it has never opened.
+
+           What it CAN say is how much paper stands in each country the name
+           is attested in, and — the part worth having — how much of that
+           paper covers the decades the band above just drew. «Italy holds
+           1.06M volumes, 41,000 of them in the 1840s–1970s» is a real answer
+           to «where do I start», and every number in it is counted rather
+           than inferred.
+
+           A country with dated evidence gets the narrowed figure; one with
+           none gets the total and is told plainly that it could not be
+           narrowed, which is the same admission the band makes one section
+           above rather than a different one. */
+        if (COVER && names.length) {
+          var vrows = [], vAny = false;
+          order.forEach(function (cc) {
+            if (!cc) return;
+            var cv = COVER[cc];
+            if (!cv || !cv.volumes) return;
+            vAny = true;
+            var decs = (names[0].tl || {})[cc] || null;
+            var inDec = null;
+            if (decs && cv.decades) {
+              inDec = 0;
+              decs.forEach(function (d) { inDec += (cv.decades[d] || 0); });
+            }
+            vrows.push({ cc: cc, v: cv.volumes, from: cv.from, to: cv.to,
+                         places: cv.places, inDec: inDec, decs: decs });
+          });
+          if (vAny) {
+            h.push('<div class="at-sec at-sec-wide"><div class="lab">' +
+                   esc(T("The volumes that could hold") + " " + (canon || term)) +
+                   "</div>");
+            h.push('<p class="at-sub">' + esc(T("No volume in this atlas is " +
+                   "indexed by who is written inside it, so this is what " +
+                   "stands in each country the name is attested in — not a " +
+                   "claim that the name is in any of it.")) + "</p>");
+            h.push('<ul class="at-films ra-vol">');
+            vrows.slice(0, 12).forEach(function (v) {
+              var f = CC2FLAG && CC2FLAG[v.cc];
+              h.push('<li><span class="ra-tw-f">' +
+                     (f && f.flag ? '<svg viewBox="0 0 300 200" aria-hidden="true">' +
+                                    f.flag + "</svg>" : "") + "</span>" +
+                     '<a href="' + BASE + "country/" + v.cc.toLowerCase() + '/">' +
+                     esc(CNAME[v.cc] || v.cc) + "</a> " +
+                     '<b>' + v.v.toLocaleString() + "</b> " +
+                     esc(T(v.v === 1 ? "volume" : "volumes")) +
+                     ' <span class="ra-who">' + v.from + "\u2013" + v.to +
+                     " \u00b7 " + v.places.toLocaleString() + " " +
+                     esc(T(v.places === 1 ? "place" : "places")) + "</span>" +
+                     (v.inDec !== null
+                       ? '<span class="ra-ck-n">' +
+                         esc(v.inDec.toLocaleString() + " " +
+                             T("in the decades the band shows")) + "</span>"
+                       : '<span class="ra-ck-n">' +
+                         esc(T("no dates for the name here, so this cannot be narrowed")) +
+                         "</span>") + "</li>");
+            });
+            h.push("</ul>");
+            if (vrows.length > 12)
+              h.push('<p class="at-sub">' + esc(T("and") + " " +
+                     (vrows.length - 12) + " " + T("more countries")) + "</p>");
+            h.push("</div>");
+          }
+        }
         /* AND THE FULL PER-COUNTRY BLOCKS A PLACE GETS. David: «surely we can
            do the same as we did with places and show sources and links FOR
            ALL COUNTRIES??» — yes, and countrySources() is the same function
@@ -6599,6 +6694,11 @@ window.addEventListener("load", async function () {
     border-top-style: solid; }
   :global(.ra-tw-none .ra-tl-y) { font-size: 10px; color: var(--ink-3);
     font-family: var(--sans); letter-spacing: .02em; }
+  /* One country per line, flag first, the way the band above reads. */
+  :global(.ra-vol li) { display: flex; flex-wrap: wrap; align-items: baseline;
+    gap: 6px; }
+  :global(.ra-vol .ra-tw-f) { align-self: center; }
+  :global(.ra-vol .ra-ck-n) { flex: 1 0 100%; margin: 0 0 0 29px; }
   :global(.ra-tw-axis) { display: flex; justify-content: space-between;
     margin: 4px 0 0; font-family: var(--mono); font-size: 10.5px;
     color: var(--ink-3); }

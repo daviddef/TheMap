@@ -29,9 +29,16 @@ const archiveCountries = new Set(archives.map(p => p.at.place.split(", ").pop())
       third of a wide screen blank. .ra-lede takes the air back and lets the
       line run the full width. The wording is two sentences now; the old five
       spent three of them clearing their throat before the point. */}
+  {/* THREE STACKED BLOCKS BECAME ONE LINE. A 44px headline, a stats line and
+      a standfirst came to about 150 pixels above the search box — on a laptop
+      that is a fifth of the window spent saying the name of a page the reader
+      is already looking at, and the same complaint David made about the panel
+      below: «there isnt much point wasting real estate». The h1 stays, because
+      a page needs one and a screen reader announces it; it is just no longer
+      the size of a poster. Stats and the help link ride on the same baseline. */}
   <div class="pagehead ra-lede">
-    <div class="lab">{places.toLocaleString()} places · {volumes.toLocaleString()} record volumes · {archives.length} archives in {archiveCountries} countries · {regions.regions.length} record regions</div>
     <h1>Where the records are</h1>
+    <div class="lab">{places.toLocaleString()} places · {volumes.toLocaleString()} record volumes · {archives.length} archives in {archiveCountries} countries · {regions.regions.length} record regions</div>
     <p class="dek">
       {/* THREE LINES OF EXPLANATION ABOVE THE THING BEING EXPLAINED. On a phone
           that pushed the search box most of a screen down, so the first thing a

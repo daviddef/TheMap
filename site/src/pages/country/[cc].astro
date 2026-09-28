@@ -8,6 +8,7 @@
    collections, the institutions, the record regions and the places — which is
    more than any single layer of the map can show at once. */
 import Base from "../../layouts/Base.astro";
+import { flagFor } from "../../lib/flags.js";
 import { u } from "../../lib/url.js";
 import full from "../../data/places-full.json";
 import cols from "../../data/collections-full.json";
@@ -145,6 +146,7 @@ const nf = (n) => n.toLocaleString();
 ---
 <Base
   title={NAME}
+  flag={flagFor(cc)}
   eyebrow={[`${mine.length} FamilySearch collection${mine.length === 1 ? "" : "s"}`,
             who.length ? `${who.length} archive${who.length === 1 ? "" : "s"}` : null,
             hereAll.length ? `${hereAll.length.toLocaleString()} place${hereAll.length === 1 ? "" : "s"}` : null,

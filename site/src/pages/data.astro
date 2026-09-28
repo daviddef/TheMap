@@ -95,9 +95,24 @@ const FILES = [
   { path: "/c/<cc>.json", size: `${countIn("c")} files`,
     what: "One file per country: its bounding box, its archives, and what this atlas holds there. Keyed by ISO 3166-1 alpha-2, lowercased.",
     shape: `{ cc, name, box: [minLat, minLon, maxLat, maxLon], archives[], … }` },
+  /* THE ONE MIXED FILE IN THE WHOLE SET, AND THE ROW HAS TO SAY SO.
+     These shards began as a cut of data/surnames.json, which is CC0, and
+     that is what this row used to describe. They are no longer only that:
+     build.py merges the Wikidata context and birth timeline (CC0) and the
+     WIKTIONARY reading of a name, which is CC BY-SA 4.0 and share-alike.
+     The licence list further down this page names CC BY-SA because
+     check-data.py insists on it — but the gate reads data/, and the file a
+     reuser actually downloads is this one. A page that names a licence
+     somewhere and not against the file carrying it has met the checker and
+     not the obligation. Stated per field, because only one field is
+     affected and a blanket claim either overstates or understates. */
   { path: "/s/<3-char>.json", size: `${countIn("s").toLocaleString()} files`,
-    what: "The surname register, sharded on the first three folded characters of a name. Which countries attest a name, how many people each counted, and which spellings are linked to which.",
-    shape: `{ "<name>": { countries: [{ cc, n, how }], variants: [{ n, how }] } }` },
+    lic: "CC0-1.0 — EXCEPT the `wk` field, which is CC BY-SA 4.0",
+    src: "data/surnames.json and surname-context.json (Wikidata, CC0); the `wk` field from the English Wiktionary (CC BY-SA 4.0, share-alike)",
+    what: "The surname register, sharded on the first three folded characters of a name. Which countries attest a name, how many people each counted, and which spellings are linked to which — plus, where they exist, what Wikidata and Wiktionary say the name IS and the decades it was being born in. Drop `wk` and the rest is CC0.",
+    shape: `{ n, variants: [{ n, how }], countries: [{ cc, n, how }],` +
+           ` tl?: { cc: [decade] }, ctx?: { lang, kind, after, wiki, q },` +
+           ` wk?: { langs, from, etymon, cite }, places?, pg? }` },
   { path: "/world-archives.json", size: sizeOf("world-archives.json"), ...licOf("world-archives.json"),
     what: "The archives layer — institutions at their street address, with what it takes to get an answer out of them.",
     shape: `{ archives: [{ name, lat, lon, cc, url, kind }] }` },

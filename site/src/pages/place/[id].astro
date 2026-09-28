@@ -13,6 +13,7 @@ import { readFileSync } from "node:fs";
    which empire held it in which years, WHICH ARCHIVE that means, and every
    surviving volume with what it costs to open it. */
 import Base from "../../layouts/Base.astro";
+import { flagFor } from "../../lib/flags.js";
 import { u } from "../../lib/url.js";
 import full from "../../data/places-full.json";
 import regions from "../../../public/regions.json";
@@ -144,6 +145,7 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
     description: dek,
   }}
   title={place.name}
+  flag={flagFor(place.country)}
   eyebrow={[adm.adm2, adm.adm1, where,
             `${cs.length} volume${cs.length === 1 ? "" : "s"}`,
             span ? `${span[0]}–${span[1]}` : null].filter(Boolean).join(" · ")}

@@ -100,7 +100,16 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
         filter different things and merging their vocabularies would be the
         real mess. */}
     <details class="ra-cats-wrap ra-drop ra-filters-one" id="ra-layersw">
-      <summary id="ra-laysum" title="Layers, cost and record kind">Filters</summary>
+      {/* AN ICON, NOT A WORD. David: «can filters just be a filter icon, no
+          text». The word cost a third of the bar on a phone to say what a
+          funnel says. The state is kept, but only when there IS a state: a
+          count appears beside the funnel when something is actually filtered
+          and nothing appears when everything is on, so the control is quiet
+          by default and speaks when it has something to say. The full
+          sentence is still in the title and the aria-label, which is where a
+          reader who needs it goes and where a screen reader looks. */}
+      <summary id="ra-laysum" aria-label="Filters — layers, cost and record kind"
+               title="Filters — layers, cost and record kind"></summary>
       <div class="ra-drop-in">
         <p class="ra-fgroup-h">Layers</p>
         <p class="ra-key-lead">What the map draws. The shelf is the places and
@@ -793,7 +802,7 @@ window.addEventListener("load", async function () {
        1,588 places · 6,844 volumes» is a claim about coverage and a hub with
        nothing says so rather than showing a bare zero. */
     fHubs.innerHTML = mh.slice(0, 12).map(function (h) {
-      var held = h.holds, stat = "", ways = "";
+      var held = h.holds, stat = "", ways = "", srcs = "";
       if (held) {
         stat = held.countries + " countr" + (held.countries === 1 ? "y" : "ies") +
           (held.places
@@ -816,6 +825,28 @@ window.addEventListener("load", async function () {
             encodeURIComponent(h.name) + '" data-hub="' + esc(h.name) + '">' +
             esc(T("Show these on the map")) + " \u2192</a>";
         }
+        /* WHO ACTUALLY HOLDS THE PAPER FOR THIS HUB.
+           The card used to carry three numbers and nowhere to go, which is
+           the question it raises rather than the answer. These are the
+           archives across the hub's countries, national ones first, and each
+           is a link to what this atlas knows about it. Folded, because a
+           reader scanning twelve hubs wants the names of the hubs, not
+           fourteen archives under each. */
+        if (held.sources && held.sources.length) {
+          srcs = '<details class="ra-fsrc"><summary>' +
+            esc(T("Where the records are held")) + ' <b>' +
+            (held.sourceCount > held.sources.length
+              ? held.sources.length + " of " + held.sourceCount
+              : String(held.sourceCount || held.sources.length)) +
+            "</b></summary><ul>" +
+            held.sources.map(function (sc) {
+              return '<li><a href="' + BASE + "archive/" + esc(sc.id) + '/">' +
+                esc(sc.name) + "</a>" +
+                (sc.access && sc.access !== "unsurveyed"
+                  ? ' <span class="ra-fsrc-a">' + esc(sc.access) + "</span>"
+                  : "") + "</li>";
+            }).join("") + "</ul></details>";
+        }
       }
       return '<div class="ra-fhubwrap" style="--edge:' +
         esc(h.color || "var(--rule-strong)") + '">' +
@@ -824,7 +855,7 @@ window.addEventListener("load", async function () {
         '<span class="ra-fname">' + esc(h.name) + "</span>" +
         (stat ? '<span class="ra-fholds">' + esc(stat) + "</span>" : "") +
         (h.what ? '<span class="ra-fwhat">' + esc(h.what) + "</span>" : "") +
-        "</a>" + ways + "</div>";
+        "</a>" + ways + srcs + "</div>";
     }).join("");
   }
 
@@ -1606,11 +1637,24 @@ window.addEventListener("load", async function () {
   var sumFull = { layers: "", costs: "", kinds: "" };
 
   function oneSummary() {
-    var badge = [sumBits.layers, sumBits.costs, sumBits.kinds]
-      .filter(Boolean).join(" \u00b7 ");
+    var el = document.getElementById("ra-laysum");
+    if (!el) return;
     var full = [sumFull.layers, sumFull.costs, sumFull.kinds]
       .filter(Boolean).join(". ");
-    setSummary("ra-laysum", "Filters", badge, full);
+    /* «All» three times is the default and says nothing worth the width. Any
+       other combination is a state the reader chose and has to be able to see
+       without opening the panel. */
+    var narrowed = [sumBits.layers, sumBits.costs, sumBits.kinds]
+      .filter(function (b) { return b && b !== "All"; });
+    el.innerHTML =
+      '<svg class="ra-funnel" viewBox="0 0 16 16" aria-hidden="true" focusable="false">' +
+      '<path d="M1.5 2.5h13l-5 6v5l-3 1.5v-6.5z" fill="none" ' +
+      'stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>' +
+      (narrowed.length
+        ? '<b class="ra-badge">' + esc(narrowed.join(" \u00b7 ")) + "</b>"
+        : "");
+    el.setAttribute("title", full);
+    el.setAttribute("aria-label", full);
   }
 
   function laySummary() {
@@ -3756,11 +3800,14 @@ window.addEventListener("load", async function () {
      header when it ends — the same elements throughout, so their handlers and
      their state come with them. */
   var toolSlot = document.getElementById("ra-tools");
-  var toolHome = document.getElementById("ra-copy") &&
-                 document.getElementById("ra-copy").parentNode;
+  var toolHome = document.getElementById("ra-info") &&
+                 document.getElementById("ra-info").parentNode;
   function toolsTo(where) {
     if (!where) return;
-    ["ra-copy", "ra-full", "ra-reset"].forEach(function (id) {
+    /* ra-info joins them: David asked for it up in the header with the rest
+       of the icons, and it is the same kind of thing — a control about the
+       map rather than a part of it. */
+    ["ra-info", "ra-copy", "ra-full", "ra-reset"].forEach(function (id) {
       var b = document.getElementById(id);
       if (b && b.parentNode !== where) where.appendChild(b);
     });
@@ -4183,10 +4230,22 @@ window.addEventListener("load", async function () {
   :global(.ra-drop .ra-key-lead) { display: block; margin: 0 0 10px;
     font: 400 11.5px/1.6 var(--sans); color: var(--ink-2); max-width: 54ch; }
   :global(.ra-drop .ra-layers) { gap: 6px; }
-  .ra-cats-wrap summary { font: 400 12px/1.6 var(--sans); color: var(--ink-3);
-    cursor: pointer; padding: 5px 9px; border: 1px solid var(--rule);
-    border-radius: 999px; background: var(--panel); display: inline-block;
-    list-style: none; }
+  /* THE FILTER CONTROL IS AN ICON THAT CAN GROW A BADGE.
+     It was a text pill reading «Filters 2 · All · All». As a funnel it sits
+     the same size and shape as the link, full-screen and reset buttons it now
+     stands beside, so the row reads as one set of tools rather than a pill
+     and some icons. It widens only when something is actually narrowed. */
+  .ra-cats-wrap summary { font: 400 12px/1.6 var(--sans); color: var(--ink-2);
+    cursor: pointer; border: 1px solid var(--rule); border-radius: 3px;
+    background: var(--panel); list-style: none;
+    box-sizing: border-box; height: var(--ra-ctl, 38px);
+    min-width: var(--ra-ctl, 38px); padding: 0 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 6px; flex: 0 0 auto; }
+  .ra-cats-wrap summary:hover { border-color: var(--accent); color: var(--accent); }
+  .ra-cats-wrap summary:focus-visible { outline: 2px solid var(--accent);
+    outline-offset: 2px; }
+  :global(.ra-funnel) { width: 15px; height: 15px; display: block; flex: none; }
   .ra-cats-wrap summary::-webkit-details-marker { display: none; }
   :global(.ra-cats-wrap summary .ra-badge) {
     display: inline-block; margin-left: 5px; padding: 0 5px;
@@ -4464,6 +4523,22 @@ window.addEventListener("load", async function () {
   :global(.ra-fways) { display: block; font-family: var(--sans); font-size: 12px;
     margin-top: 6px; padding: 0 2px; color: var(--accent); text-decoration: none; }
   :global(.ra-fways:hover) { text-decoration: underline; }
+  :global(.ra-fsrc) { margin-top: 4px; font-family: var(--sans); font-size: 12px; }
+  :global(.ra-fsrc > summary) { cursor: pointer; color: var(--ink-3);
+    list-style: none; padding: 2px; }
+  :global(.ra-fsrc > summary::-webkit-details-marker) { display: none; }
+  :global(.ra-fsrc > summary::before) { content: "\203A"; display: inline-block;
+    margin-right: 6px; transition: transform .15s ease; }
+  :global(.ra-fsrc[open] > summary::before) { transform: rotate(90deg); }
+  :global(.ra-fsrc > summary:hover) { color: var(--brick); }
+  :global(.ra-fsrc > summary b) { font-family: var(--mono); font-size: 10.5px;
+    font-weight: 500; color: var(--accent); }
+  :global(.ra-fsrc ul) { list-style: none; margin: 4px 0 0; padding: 0 0 0 16px; }
+  :global(.ra-fsrc li) { margin: 2px 0; line-height: 1.4; }
+  :global(.ra-fsrc a) { color: var(--accent); text-decoration: none; }
+  :global(.ra-fsrc a:hover) { text-decoration: underline; }
+  :global(.ra-fsrc-a) { font-family: var(--mono); font-size: 10px;
+    color: var(--ink-3); }
   :global(.ra-hubclear) { font: inherit; color: var(--accent); background: none;
     border: 0; padding: 0; cursor: pointer; text-decoration: underline; }
   :global(.ra-hubclear:hover) { color: var(--brick); }

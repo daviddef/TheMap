@@ -39,6 +39,7 @@ import Base from "../../layouts/Base.astro";
 import { u } from "../../lib/url.js";
 import full from "../../data/places-full.json";
 import { atlas as idx } from "../../lib/atlas.js";
+import { flagFor } from "../../lib/flags.js";
 
 export function getStaticPaths({ paginate }) {
   /* DECLARED IN HERE, NOT OUTSIDE. Astro hoists getStaticPaths out of the
@@ -85,7 +86,11 @@ for (const p of full.places) {
   counts[cc] = (counts[cc] || 0) + 1;
 }
 const countryList = Object.entries(counts)
-  .map(([cc, n]) => ({ cc, n, name: CN[cc] || cc }))
+  /* AND THE FLAG, which this atlas draws for 194 of these and had never shown
+     outside the flags pages. A country directory is exactly where a flag earns
+     its place: it is the fastest way to recognise a country in a list of a
+     hundred and thirty. */
+  .map(([cc, n]) => ({ cc, n, name: CN[cc] || cc, flag: flagFor(cc) }))
   .sort((a, b) => a.name.localeCompare(b.name));
 const countries = countryList.length;
 
@@ -120,7 +125,19 @@ const rows = page.data.map((p) => {
     its own places and what covers them.</p>
     <ul class="cgrid">
       {countryList.map((c) => (
-        <li><a href={u(`/country/${c.cc.toLowerCase()}/`)}>{c.name}</a><span class="y">{c.n.toLocaleString()}</span></li>
+        <li>
+          {c.flag && (
+            <svg class="cdirflag" viewBox="0 0 300 200" role="img"
+                 aria-label={`Flag of ${c.name}`} set:html={c.flag.flag} />
+          )}
+          <a href={u(`/country/${c.cc.toLowerCase()}/`)}>{c.name}</a>
+          {c.flag && (
+            <a class="cdirflag-l" href={u("/" + c.flag.url)}
+               title={`${c.name} in the flags atlas — who held this ground, and when`}
+            >&#8599;</a>
+          )}
+          <span class="y">{c.n.toLocaleString()}</span>
+        </li>
       ))}
     </ul>
   </details>
@@ -308,4 +325,11 @@ const rows = page.data.map((p) => {
            font-family: var(--mono); font-size: 13px; }
   .pager a { text-decoration: none; border-bottom: 1px solid var(--rule-strong); }
   .pager span { color: var(--ink-3); }
+  /* The flag reads as a small object beside the name, not an illustration. */
+  .cdirflag { width: 22px; height: auto; vertical-align: -2px; margin-right: 6px;
+    border: 1px solid var(--rule); border-radius: 1px; flex: none; }
+  .cdirflag-l { margin-left: 5px; color: var(--ink-3); text-decoration: none;
+    font-size: .9em; }
+  .cdirflag-l:hover { color: var(--accent); }
+  .cgrid li:hover .cdirflag-l { color: var(--accent); }
 </style>

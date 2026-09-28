@@ -13,6 +13,7 @@ import { earnsPage, slugForSurname } from "../lib/surname-pages.js";
 const surn = corpus();
 import { atlas as idx } from "../lib/atlas.js";
 import refused from "../../../data/frequencies/_refused.json";
+import { flagFor } from "../lib/flags.js";
 /* COUNTED, NOT TYPED — like the heading below, which was fixed for exactly this
    after saying «Four» above a list of eight. The typed «Five» under it happened
    to be right, and that is the whole problem with a typed number: it is right
@@ -199,9 +200,29 @@ function dlSize(name) {
   <section style="margin-top:30px">
     <h2>Where the names are attested</h2>
     <ul class="ccs">
-      {top.map(([cc, n]) => (
-        <li><a href={u(`/country/${cc.toLowerCase()}/`)}>{CN[cc] || cc}</a> <span class="y">{n}</span></li>
-      ))}
+      {/* THE FLAG OF EVERY COUNTRY A NAME IS ATTESTED IN. This list names
+          countries and this atlas has drawn 194 of their flags, and the two
+          had never met. The arrow opens that country's flag history, which is
+          the same question a surname raises — whose ground was this when the
+          register was written, and therefore whose archive holds it. */}
+      {top.map(([cc, n]) => {
+        const f = flagFor(cc);
+        return (
+          <li>
+            {f && (
+              <svg class="ccflag" viewBox="0 0 300 200" role="img"
+                   aria-label={`Flag of ${CN[cc] || cc}`} set:html={f.flag} />
+            )}
+            <a href={u(`/country/${cc.toLowerCase()}/`)}>{CN[cc] || cc}</a>
+            {f && (
+              <a class="ccflag-l" href={u("/" + f.url)}
+                 title={`${CN[cc] || cc} in the flags atlas — who held this ground, and when`}
+              >&#8599;</a>
+            )}
+            <span class="y">{n}</span>
+          </li>
+        );
+      })}
     </ul>
   </section>
 
@@ -333,4 +354,10 @@ function dlSize(name) {
   .ccs li { font-family: var(--sans); font-size: 13px; }
   .y { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
   td { vertical-align: top; }
+  .ccflag { width: 20px; height: auto; vertical-align: -2px; margin-right: 6px;
+    border: 1px solid var(--rule); border-radius: 1px; }
+  .ccflag-l { margin-left: 4px; color: var(--ink-3); text-decoration: none;
+    font-size: .9em; }
+  .ccflag-l:hover { color: var(--accent); }
+  .ccs li:hover .ccflag-l { color: var(--accent); }
 </style>

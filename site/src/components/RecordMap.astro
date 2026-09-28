@@ -2328,7 +2328,7 @@ window.addEventListener("load", async function () {
   /* Picking one from the list is the same as clicking its dot. */
   document.addEventListener("click", function (ev) {
     var sb = ev.target.closest && ev.target.closest(".ra-sn");
-    if (sb) { elsewhere(sb.dataset.name); return; }
+    if (sb) { elsewhere(sb.dataset.name, true); return; }
     var b = ev.target.closest && ev.target.closest(".ra-mk");
     if (!b) return;
     var p = matchCache[b.dataset.place];
@@ -3690,6 +3690,112 @@ window.addEventListener("load", async function () {
          without the flag this would 404 for thirty-nine names in forty,
          because most surnames in a 946,575-name corpus have nothing to
          put on a page. */
+      /* WHAT WIKIDATA SAYS THE NAME IS. David: «why would we not be showing
+         the proper origin of the surname?» — and we were, on the surname page
+         and nowhere else, because the file is 13 MB and this panel is client
+         side. It rides in the shard now (see build.py).
+
+         NEVER IN THIS MAP'S VOICE. The label says who said it and the id is
+         shown, because the whole reason origin was kept out is that everywhere
+         else serves etymology with no source behind it. «Named after tailor —
+         Wikidata Q15080511» is a citation; «Taylor means a cutter of cloth» is
+         a claim this atlas has no standing to make.
+
+         And the caveat travels with the language, in the page's own words: a
+         name's language is not where a family is from. */
+      if (r.ctx) {
+        var c = r.ctx, oh = ['<div class="ra-orig">'];
+        if (c.after && c.after.length)
+          oh.push('<p class="ra-orig-l"><b>' + esc(T("Named after") + " " +
+                  c.after.join(" · ")) + "</b> <span class=\"ra-who\">" +
+                  esc(T("what the name is from")) + "</span></p>");
+        if (c.kind && c.kind.length)
+          oh.push('<p class="ra-orig-l"><b>' + esc(c.kind.join(" · ")) +
+                  "</b> <span class=\"ra-who\">" + esc(T("kind of surname")) +
+                  "</span></p>");
+        if (c.lang && c.lang.length)
+          oh.push('<p class="ra-orig-l"><b>' + esc(c.lang.join(" · ")) +
+                  "</b> <span class=\"ra-who\">" +
+                  esc(T("the language of the name")) + "</span></p>" +
+                  '<p class="cap ra-orig-c">' + esc(T("Which is not where a " +
+                  "family is from. A Polish surname can be borne by people " +
+                  "whose forebears never saw Poland, and often is.")) + "</p>");
+        oh.push('<p class="ra-orig-s">' +
+                (c.wiki ? '<a href="' + esc(c.wiki) + '" target="_blank" ' +
+                          'rel="noopener">' + esc(T("Read about it on Wikipedia")) +
+                          " \u2197</a> \u00b7 " : "") +
+                esc(T("said by")) + ' <a href="https://www.wikidata.org/wiki/' +
+                esc(c.q) + '" target="_blank" rel="noopener">Wikidata ' +
+                esc(c.q) + "</a></p>");
+        oh.push("</div>");
+        h.push(oh.join(""));
+      }
+
+      /* WHERE THE NAME WAS, AND WHEN. David: «finding a name almost does
+         nothing — i thought we had dates the name was at a certain place… we
+         could draw that on a timeline, and start to align our place search
+         with the location search». The decades ride in the shard now; this is
+         the drawing, and it borrows the place panel's furniture on purpose —
+         a flag per country, a band per row, the same navy the visit ring uses.
+
+         RUNS, NOT A SINGLE SPAN. De Franceschi in Italy is 1550 and then
+         1840–1970: printed as «1550s–1970s» that invents four centuries of
+         continuous presence out of two data points. Decades more than fifty
+         years apart start a new run, so the gap is visible as a gap.
+
+         The counts are not here and not in the shard — see build.py. */
+      if (r.tl) {
+        var cc0 = Object.keys(r.tl);
+        var lo = 9999, hi = 0;
+        cc0.forEach(function (cc) {
+          r.tl[cc].forEach(function (d) { if (d < lo) lo = d; if (d > hi) hi = d; });
+        });
+        var span = Math.max(1, hi - lo);
+        var rows = cc0.map(function (cc) {
+          return { cc: cc, ds: r.tl[cc], first: r.tl[cc][0] };
+        }).sort(function (a, b) { return a.first - b.first; });
+
+        var wh = ['<div class="ra-tw"><p class="at-lab">' +
+                  esc(T("Where the name was, and when")) + "</p><ul>"];
+        rows.slice(0, 10).forEach(function (row) {
+          /* group decades into runs, breaking on a gap of more than 50 years */
+          var runs = [], cur = [row.ds[0]];
+          for (var i = 1; i < row.ds.length; i++) {
+            if (row.ds[i] - row.ds[i - 1] > 50) { runs.push(cur); cur = []; }
+            cur.push(row.ds[i]);
+          }
+          runs.push(cur);
+          var label = runs.map(function (g) {
+            return g.length === 1 ? g[0] + "s" : g[0] + "s\u2013" + g[g.length - 1] + "s";
+          }).join(" \u00b7 ");
+          var f = CC2FLAG && CC2FLAG[row.cc];
+          wh.push('<li><span class="ra-tw-f">' +
+                  (f && f.flag ? '<svg viewBox="0 0 300 200" aria-hidden="true">' +
+                                 f.flag + "</svg>" : "") + "</span>" +
+                  '<a class="ra-tw-c" href="' + BASE + "country/" +
+                  row.cc.toLowerCase() + '/">' + esc(CNAME[row.cc] || row.cc) +
+                  "</a>" +
+                  '<span class="ra-tw-b">' + row.ds.map(function (d) {
+                    return '<i style="left:' +
+                           Math.round(((d - lo) / span) * 100) + '%"></i>';
+                  }).join("") + "</span>" +
+                  '<span class="ra-tw-y">' + esc(label) + "</span></li>");
+        });
+        wh.push("</ul>");
+        if (rows.length > 10)
+          wh.push('<p class="cap">' + esc(T("and") + " " + (rows.length - 10) + " " +
+                  T("more countries")) + "</p>");
+        wh.push('<p class="ra-tw-axis"><span>' + lo + "s</span><span>" + hi +
+                "s</span></p>");
+        /* The file's own warning, in its own words, because a row of ticks
+           looks like a census and is nothing of the kind. */
+        wh.push('<p class="cap ra-tw-c2">' + esc(T("People notable enough for an " +
+                "encyclopaedia, not a census — evidence that the name was borne " +
+                "in a place at a time, never how common it was.")) + "</p>");
+        wh.push("</div>");
+        h.push(wh.join(""));
+      }
+
       if (r.pg) {
         var slug = fold(r.n).replace(/[^a-z0-9]+/g, "-")
                             .replace(/^-|-$/g, "");
@@ -4219,7 +4325,9 @@ window.addEventListener("load", async function () {
     return false;
   }
 
-  async function elsewhere(term) {
+  /* `exact` — the reader CHOSE this name from the dropdown, so answer with it
+     and not with everything that resembles it. */
+  async function elsewhere(term, exact) {
     var mine = ++searchTok;
     /* THE THIRD TIME THIS EXACT BUG. David searched «blazevic», the panel
        said «No places of that name here yet» — correctly — and the right-hand
@@ -4280,6 +4388,20 @@ window.addEventListener("load", async function () {
     });
     var hits = await gazetteer(term);
     var names = await surnames(term);
+    /* PICKING «Lerena» SHOULD NOT ANSWER WITH LERENARD. David, on the new
+       dropdown: «why if i now have "smart" search and i select the exact named
+       record do you then still show me all the variation in names?» — because
+       selecting ran the same fuzzy search that typing does, and that search
+       exists precisely to cast wide when the reader does not yet know which
+       spelling they want. Once they have said which, the casting is over: four
+       cards for one choice is the search second-guessing the answer it was
+       just given. Typing the name and pressing Enter still gets the wide
+       list, which is the right behaviour for somebody who has not chosen. */
+    if (exact) {
+      var fe = fold(term);
+      var only = names.filter(function (r) { return fold(r.n) === fe; });
+      if (only.length) names = only;
+    }
     /* Fetched here with the rest, because the panel is written once
        and a promise landing after it has nowhere to put its line. */
     var beRec = names.length ? await communes(names[0].n) : null;
@@ -4683,7 +4805,14 @@ window.addEventListener("load", async function () {
         h.push('<button type="button" role="option" aria-selected="false" ' +
                'class="ra-sug-r" data-i="' + i + '">' +
                '<span class="ra-sug-n">' + esc(r.n) + "</span>" +
-               '<span class="ra-sug-m">' + esc(T("surname")) + "</span>" +
+               /* «occupational surname · English» beats «surname» when the
+                  atlas knows it — it is the difference between four spellings
+                  that look alike and one you can recognise. */
+               '<span class="ra-sug-m">' + esc(
+                  (r.ctx && r.ctx.kind && r.ctx.kind.length ? r.ctx.kind[0]
+                                                            : T("surname")) +
+                  (r.ctx && r.ctx.lang && r.ctx.lang.length
+                     ? " \u00b7 " + r.ctx.lang[0] : "")) + "</span>" +
                '<span class="ra-sug-c">' + (r.countries || []).length + " " +
                esc(T((r.countries || []).length === 1 ? "country" : "countries")) +
                "</span></button>");
@@ -4727,7 +4856,7 @@ window.addEventListener("load", async function () {
       map.setView([p.y, p.x], Math.max(map.getZoom(), 11));
     } else {
       qbox.value = row.r.n;
-      elsewhere(row.r.n);
+      elsewhere(row.r.n, true);
     }
   }
 
@@ -5951,7 +6080,33 @@ window.addEventListener("load", async function () {
             background: var(--panel); border: 1px solid var(--rule-strong);
             border-radius: 6px; box-shadow: 0 10px 28px rgba(10, 20, 26, .22); }
   .ra-sug[hidden] { display: none; }
-  :global(.ra-sug-h) { margin: 6px 0 3px; padding: 0 8px; font-family: var(--mono);
+  /* Where the name was, and when — the surname panel's answer to the place
+    panel's era band, and deliberately the same furniture. */
+ :global(.ra-tw) { margin: 10px 0 0; }
+ :global(.ra-tw ul) { list-style: none; margin: 6px 0 0; padding: 0; }
+ :global(.ra-tw li) { display: flex; align-items: center; gap: 8px;
+    margin: 0 0 5px; font-size: 12.5px; }
+ :global(.ra-tw-f) { flex: none; width: 21px; height: 14px; display: block;
+    border: 1px solid var(--rule); background: var(--ground); }
+ :global(.ra-tw-f svg) { width: 100%; height: 100%; display: block; }
+ :global(.ra-tw-c) { flex: none; min-width: 9em; }
+ :global(.ra-tw-b) { position: relative; flex: 1 1 90px; height: 7px;
+    border-radius: 4px; background: var(--rule); min-width: 60px; }
+ :global(.ra-tw-b i) { position: absolute; top: -2px; width: 3px; height: 11px;
+    margin-left: -1.5px; border-radius: 2px; background: #1B2A5B; }
+ :global(.ra-tw-y) { flex: none; font-family: var(--mono); font-size: 10.5px;
+    color: var(--ink-3); white-space: nowrap; }
+ :global(.ra-tw-axis) { display: flex; justify-content: space-between;
+    margin: 2px 0 0; font-family: var(--mono); font-size: 10px;
+    color: var(--ink-3); }
+ :global(.ra-tw-c2) { margin: 6px 0 0; }
+ :global(.ra-orig) { margin: 8px 0 0; padding: 9px 11px;
+    background: var(--ground); border-left: 3px solid var(--brass);
+    border-radius: 0 3px 3px 0; }
+ :global(.ra-orig-l) { margin: 0 0 3px; font-size: 13px; }
+ :global(.ra-orig-c) { margin: 4px 0 0; }
+ :global(.ra-orig-s) { margin: 6px 0 0; font-size: 11.5px; color: var(--ink-3); }
+ :global(.ra-sug-h) { margin: 6px 0 3px; padding: 0 8px; font-family: var(--mono);
     font-size: 9.5px; letter-spacing: .07em; text-transform: uppercase;
     color: var(--brass); }
   :global(.ra-sug-r) { display: flex; align-items: baseline; gap: 9px;

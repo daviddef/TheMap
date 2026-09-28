@@ -1660,6 +1660,45 @@ def main():
     # ---- surnames, sharded like the gazetteer -----------------------------
     # Same trick and the same reason: a search corpus is fetched three letters
     # at a time and never rides in the index that draws the map.
+    # Read once for the shard merge below. Same file the surname page reads,
+    # so the two cannot drift: one source, two consumers.
+    try:
+        SCTX = json.load(open("data/surname-context.json"))["surnames"]
+    except (FileNotFoundError, KeyError):
+        SCTX = {}
+
+    # ---- AND WHEN THE NAME WAS WHERE ------------------------------------
+    # David: «i thought we had dates the name was at a certain place… we could
+    # draw that on a timeline». We do: data/surname-timeline.json.gz, 363,574
+    # names, Wikidata humans with a birth date and a birth place resolved to a
+    # country. The surname page uses it; the panel could not, for the same
+    # reason as the context — it is a 4.3 MB gzip and the panel is client side.
+    #
+    # THE COUNTS ARE DROPPED ON PURPOSE. The file's own note says to read it
+    # as evidence that a name was BORNE in a place at a time and never as how
+    # common it was — it over-counts men, the recent, and Europe. A count
+    # invites exactly the reading it warns against, so the shard carries the
+    # DECADES and nothing else: «Italy, 1550s and 1840s–1970s» is the honest
+    # shape of what this data can say.
+    try:
+        import gzip as _gz
+        _tl = json.load(_gz.open("data/surname-timeline.json.gz"))["when"]
+        # KEYED LOWER-CASE, AND THIS IS THE TRAP THE SURNAME BRIEF NAMED.
+        # Wikidata spells it «De Franceschi»; this atlas's corpus also holds
+        # «de Franceschi», and a direct lookup on the display name silently
+        # returns nothing for one of them — the panel then shows no timeline
+        # for a name that has one, which looks like missing data rather than a
+        # missed join. Lower-case only: «Defranceschi» is a DIFFERENT spelling
+        # and must not collide with «De Franceschi», which folding away the
+        # space would have done.
+        STL = {}
+        for _n, _ccs in _tl.items():
+            _row = {cc: sorted(int(d) for d in decs) for cc, decs in _ccs.items()}
+            if _row:
+                STL[_n.lower()] = _row
+    except (FileNotFoundError, KeyError, OSError):
+        STL = {}
+
     sn = os.path.join(OUT, "s")
     shutil.rmtree(sn, ignore_errors=True)
     os.makedirs(sn)
@@ -1724,6 +1763,35 @@ def main():
             rec = {kk: vv for kk, vv in r.items() if kk not in ("skel", "q")}
             if earns_page(r):
                 rec["pg"] = 1        # the map may link to /surname/<slug>/
+            # ---- WHAT WIKIDATA SAYS THE NAME IS -------------------------
+            # David: «why would we not be showing the proper origin of the
+            # surname?» We were — on the surname PAGE, which reads
+            # data/surname-context.json at build time. The map panel could
+            # not: that file is 13 MB and the panel is client-side, so the
+            # one place most readers meet a name was the one place that
+            # looked like it refused to answer.
+            #
+            # It rides in the shard the panel already fetches. Only the
+            # fields that say something, and only for the 99,560 names that
+            # have any — about a tenth of the corpus, so the shards grow by
+            # a little and nobody fetches a file they did not want.
+            #
+            # `q` HERE IS THE WIKIDATA ID, not the folded search key the row
+            # was keyed by. Two different `q`s a line apart, which is the
+            # kind of thing that reads fine and breaks quietly.
+            _c = SCTX.get(r.get("q") or "")
+            if _c:
+                _keep = {k2: _c[k2] for k2 in ("lang", "kind", "after", "wiki", "q")
+                         if _c.get(k2)}
+                if _keep:
+                    rec["ctx"] = _keep
+            # Keyed by the DISPLAY name, not the folded one: the timeline is
+            # harvested from Wikidata's own spelling, which is why the surname
+            # brief warned that a direct lookup on the folded key silently
+            # returns nothing.
+            _t = STL.get((r.get("n") or "").lower())
+            if _t:
+                rec["tl"] = _t
             uniq.append(rec)
         blob = json.dumps(uniq, ensure_ascii=False, separators=(",", ":"))
         sbytes += len(blob.encode())

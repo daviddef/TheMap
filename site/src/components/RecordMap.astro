@@ -27,6 +27,11 @@
    — is the family Atlas's and is kept deliberately, because a reader who knows
    one of these maps should know all of them. */
 const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, belgiumBase, wikidataUrl, osmUrl, featureBase, settlementBase, districtBase, countryBase, townlandBase, comuneBase, estoniaBase, scotlandBase, worldArchivesUrl, countryPointsUrl, base } = Astro.props;
+
+/* The long explanation the idle panel used to carry in full now lives at
+   /help/, and the panel links to it. Derived from `base` so it survives the
+   /TheMap/ prefix on GitHub Pages, which a hard-coded "/help/" would not. */
+const HELP = base.replace(/\/$/, "") + "/help/";
 ---
 
 {/* ONE BAR, NOT THREE PANELS. The search box, seven layer switches, the year
@@ -56,6 +61,8 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
     <div class="ra-find">
       <input id="ra-q" type="search" autocomplete="off"
              aria-label="Find a place or a surname, by any name it has ever had"
+             role="combobox" aria-expanded="false" aria-controls="ra-sug"
+             aria-autocomplete="list"
              aria-describedby="ra-recent"
              placeholder="Find a place or a surname — Gallignana · Žubrinić · Lerena" />
       {/* role="group", because a div has no role and aria-label is prohibited
@@ -64,18 +71,26 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
           the one thing it did not say. */}
       <div class="ra-recent" id="ra-recent" hidden role="group"
            aria-label="Searches you made before"></div>
+      {/* ---- THE SUGGESTIONS, UNDER THE BOX ---------------------------------
+          David: «cant we "smart search" this search field, so the choice
+          happens in the search box dropdown smartly rather than this clunky
+          window?» — so the choosing happens here, where the typing is, and
+          the strip that used to sit above the map is gone.
+
+          It answers with BOTH kinds at once, which is the thing the map could
+          never do: «taylor» is four American villages and a surname borne in
+          eleven countries, and until now a search could only be told one of
+          those. Places first because this is a map, the name after them under
+          its own heading, and an exact match outranks everything. */}
+      <div class="ra-sug" id="ra-sug" hidden role="listbox"
+           aria-label="Matching places and names"></div>
     </div>
-    <button class="ra-ico" id="ra-info" type="button" aria-expanded="false"
-            title="What these controls mean">&#9432;</button>
-    <button class="ra-ico" id="ra-copy" type="button" title="Copy a link to this exact view">&#128279;</button>
-    <button class="ra-ico" id="ra-full" type="button"
-            title="Full screen — the map and its panel fill the window">&#9974;</button>
-    <button class="ra-ico" id="ra-reset" type="button"
-            aria-label="Start again — clear the search, the year, the filters and the layers, and go back to the whole world"
-            title="Start again — clear the search, the year, the filters and the layers, and go back to the whole world"><span aria-hidden="true">&#8634;</span></button>
-    <span class="ra-copied" id="ra-copied" hidden>copied</span>
-  </div>
-  <div class="ra-bar-row ra-bar-filters">
+    {/* THE FILTER SITS WITH THE SEARCH, NOT UNDER IT. David: «filter icon
+        should be on right of search box, not taking 2 lines.» It was its own
+        .ra-bar-row, so the bar was a search line and a filter line — two rows
+        of chrome above a map, for one button. It is one control now and it
+        belongs beside the box it filters. */}
+    <div class="ra-bar-filters">
     {/* THREE FILTERS, THREE DIFFERENT SHAPES. The layers were eight loose
         pills in a row while «what it costs» and «what kind» were tidy
         disclosures that said how many were on — so the one control a reader
@@ -157,7 +172,22 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
         answer for and it becomes a sentence explaining why the map is empty,
         with a way out. That message is better placed here than below a map
         the reader has already decided is broken. */}
+  </div>
+    <button class="ra-ico" id="ra-info" type="button" aria-expanded="false"
+            title="What these controls mean">&#9432;</button>
+    <button class="ra-ico" id="ra-copy" type="button" title="Copy a link to this exact view">&#128279;</button>
+    <button class="ra-ico" id="ra-full" type="button"
+            title="Full screen — the map and its panel fill the window">&#9974;</button>
+    {/* IT CAME ALONG WITH THE FILTER AND SHOULD NOT HAVE. «1 of 21,754 places
+        shown» was the last child of the filters block, so when that block
+        moved up beside the search box the count moved with it and ended up
+        wedged under the funnel. It belongs at the end of the row, where it
+        can take a line of its own when the message grows into a sentence. */}
+    <button class="ra-ico" id="ra-reset" type="button"
+            aria-label="Start again — clear the search, the year, the filters and the layers, and go back to the whole world"
+            title="Start again — clear the search, the year, the filters and the layers, and go back to the whole world"><span aria-hidden="true">&#8634;</span></button>
     <span class="cap" id="ra-count" role="status" aria-live="polite"></span>
+    <span class="ra-copied" id="ra-copied" hidden>copied</span>
   </div>
 </div>
 <div class="ra-help" id="ra-help" hidden></div>
@@ -198,7 +228,7 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
   <button class="ra-ico" id="ra-play" type="button" aria-pressed="false"
             title="Play the years — watch the jurisdictions change and the records follow">&#9654;</button>
     <label class="ra-ylab" id="ra-ylab"
-           title="Keep only the places that can answer for any year in this range — and every panel will say whose archive those years belonged to.">
+           title="Set a year and the map keeps only the places that can answer for it, the volume lists narrow to it, and every panel says whose archive those years belonged to.">
       <input type="checkbox" id="ra-yon"
              aria-label="Filter by year"
              title="Turn the year filter on or off" />
@@ -227,6 +257,50 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
       right for a result that follows a search the reader just typed.
       The count below is its own region for the same reason: «0 of 21302
       places shown» is the answer to a filter, and it was silent. */}
+  {/* THE RAIL THAT USED TO BE HERE IS GONE, AND THE MAP HAS ITS WIDTH BACK.
+      David: «arent we showing the same thing 2 different ways?» We were, and
+      worse than that: they were two DIFFERENT sequences under one caption.
+      The rail showed Croatia's national flag eras — seventeen of them, 925
+      onwards. The band below the map showed Central Istria's record-region
+      eras — eight, from 1200, each with the archive that holds its paper.
+      Both said «who held it», and for Istria they disagree, because Istria
+      was Venetian while Croatia proper was Habsburg.
+
+      So there is one timeline now, and which one depends on what is known:
+        · ground covered by a record region -> the band, coloured by regime,
+          because that is the answer that also names an archive;
+        · ground with no region yet -> the country's flag eras, as a band with
+          the drawn flags on it, which is the best that can honestly be said.
+      Never both. The «see the flags these regimes flew» link is still at the
+      foot of the band for the ground that has a region. */}
+
+  {/* ---- THE VISITOR'S CHECKLIST ------------------------------------------
+      David, on the ring's caption: «this list? its meaningless if i cant know
+      what they are. should we add a collapsed right pane … as a "visitors
+      checklist" to include the list of things in the best order we can to go
+      and research in the vicinity?»
+
+      Quite right — «14 places · 3 parishes · 3 burial grounds» is a count you
+      cannot act on, and every one of those things is already named in the
+      data with a distance against it. The order is the order of a research
+      day, not alphabetical: the archive that holds the paper first, because
+      that is the appointment you have to make; then the parishes whose
+      priests wrote the registers; then the burial grounds, which are open
+      whenever you are; then the villages inside the ring, whose own registers
+      may name the same family.
+
+      Collapsed by default. It is the answer to a question the reader has not
+      asked yet, and an open pane would take a third of the map to say so. */}
+  <aside class="ra-check" id="ra-check" hidden>
+    <button class="ra-check-t" id="ra-check-t" type="button"
+            aria-expanded="false" aria-controls="ra-check-b">
+      <span class="ra-check-i" aria-hidden="true">&#9776;</span>
+      <span class="ra-check-w" data-i18n>Visiting</span>
+      <span class="ra-check-n" id="ra-check-n"></span>
+    </button>
+    <div class="ra-check-b" id="ra-check-b" hidden></div>
+  </aside>
+
   <aside class="at-panel" role="region" aria-live="polite"
          aria-label="What the map found">
     {/* «PICK A PLACE» ASKED THE READER TO ALREADY KNOW THE ANSWER.
@@ -248,21 +322,38 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
     <button class="ra-sheet-x" id="ra-sheet-x" type="button"
             title="Close this result and go back to the map">
       &#9662;&nbsp;<span data-i18n>Back to the map</span></button>
+    {/* SIX HUNDRED PIXELS EXPLAINING A SEARCH BOX. David, on the old version
+        of this block: «there isnt much point wasting real estate on describing
+        what you can search for, its a terrible real estate waste.» He was
+        right, and it got worse when the panel moved under the map: as a 360px
+        column the three-item list and two paragraphs were a sidebar, at full
+        width they were a wall between the map and the flags.
+
+        What survives is the part a reader can ACT on — four example searches
+        that run on click, because «a village by any name it ever had» is an
+        abstraction until Breslau finds Wrocław. The rest is a link. The
+        sentence about what a dot's colour means was the best paragraph on the
+        page and it is still a paragraph nobody asked for; it lives on /help/
+        and in the ⓘ, which is where somebody goes when they want it. */}
     <div class="at-empty" id="ra-empty">
-      <div class="lab">Start with what you have</div>
-      <ul class="at-start">
-        <li><b>A surname.</b> Type it above — <a href="#" class="ra-try" data-q="Peeters" title="Run this search: Peeters — a Belgian name">Peeters</a>,
-          <a href="#" class="ra-try" data-q="Blažević" title="Run this search: Blažević — a Croatian name">Blažević</a> — and the map lights the
-          countries a register or an archive attests it in.</li>
-        <li><b>A village, by any name it ever had.</b>
-          <a href="#" class="ra-try" data-q="Gallignana" title="Run this search: Gallignana — the Italian name of Gračišće">Gallignana</a> finds Gračišće;
-          <a href="#" class="ra-try" data-q="Breslau" title="Run this search: Breslau — the German name of Wrocław">Breslau</a> finds Wrocław.</li>
-        <li><b>Only a country.</b> Click anywhere on it — every country on earth answers with
-          something, even where this atlas has nothing yet.</li>
-      </ul>
-      <p><b>The colour of a dot is what it costs to look</b> — free images, behind a login,
-      an index with no images, a catalogue card for paper nobody has photographed. That is
-      the thing most directories flatten into a link.</p>
+      <p class="at-start">
+        <b data-i18n>Start with what you have.</b>
+        A surname &mdash;
+        <a href="#" class="ra-try" data-q="Peeters"
+           title="Run this search: Peeters &mdash; a Belgian name">Peeters</a>,
+        <a href="#" class="ra-try" data-q="Blažević"
+           title="Run this search: Blažević &mdash; a Croatian name">Blažević</a>
+        &mdash; a village by any name it ever had &mdash;
+        <a href="#" class="ra-try" data-q="Gallignana"
+           title="Run this search: Gallignana &mdash; the Italian name of Gračišće">Gallignana</a>
+        finds Gračišće,
+        <a href="#" class="ra-try" data-q="Breslau"
+           title="Run this search: Breslau &mdash; the German name of Wrocław">Breslau</a>
+        finds Wrocław &mdash; or click any country on the map.
+      </p>
+      <p class="at-start-more">
+        <a href="{HELP}"><span data-i18n>The colour of a dot is what it costs to look</span> &rarr;</a>
+      </p>
       <p class="at-hint" id="ra-hint"></p>
     </div>
     <div class="at-body" id="ra-body" hidden></div>
@@ -536,13 +627,72 @@ window.addEventListener("load", async function () {
      The flag icon is only drawn where Flag History actually has that country.
      A greyed-out icon that does nothing is worse than no icon, and a link to a
      page that 404s is worse than both. */
+  /* THE SOURCES FOR ONE COUNTRY, AS A CARD. Lifted out of render() so an era
+     can ask for a country other than the one the place is in today — which is
+     the whole point of knowing that Istria was Italian between 1918 and 1943.
+     Same ordering as before: national archives first, then diocesan, regional,
+     libraries, and within a kind the cheapest to look at first. */
+  /* Rough great-circle km. Good enough to put Trieste above Agrigento, which
+     is the entire job. */
+  function provKm(p, lat, lon) {
+    if (lat == null || !p.at || p.at.lat == null) return null;
+    var toR = Math.PI / 180, dLat = (p.at.lat - lat) * toR,
+        dLon = (p.at.lon - lon) * toR, a = lat * toR, b = p.at.lat * toR;
+    var x = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(a) * Math.cos(b) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return 6371 * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+  }
+
+  function countrySources(cc, hint, heading, lat, lon, id) {
+    if (!cc) return "";
+    var nat = provs.providers.filter(function (p) {
+      return (p.countries || []).indexOf(cc) > -1;
+    }).sort(function (a, b) {
+      var K = ["national-archive", "diocesan", "regional-archive", "library",
+               "volunteer", "aggregator", "commercial"];
+      var ka = K.indexOf(a.kind), kb = K.indexOf(b.kind);
+      if (ka !== kb) return (ka < 0 ? 99 : ka) - (kb < 0 ? 99 : kb);
+      /* THEN BY HOW FAR AWAY IT IS. Italy's list opened with the state
+         archives of Agrigento and Alessandria — Sicily and Piedmont — for a
+         village in Istria, because within a kind it was alphabetical. 125 of
+         Italy's 126 providers carry coordinates, so the ones that actually
+         held this ground's paper can come first: Trieste and Gorizia rather
+         than the far end of the country. Only when the place is known;
+         otherwise the old order stands. */
+      var da = provKm(a, lat, lon), db = provKm(b, lat, lon);
+      if (da != null && db != null && Math.round(da) !== Math.round(db))
+        return da - db;
+      return RANK.indexOf(a.access) - RANK.indexOf(b.access);
+    });
+    if (!nat.length) return "";
+    var h = ['<div class="at-sec"' + (id ? ' id="' + id + '"' : "") +
+             '><div class="lab">' +
+             esc(heading || ("The sources for " + (CNAME[cc] || cc))) + "</div>"];
+    if (hint) h.push('<p class="at-sub">' + esc(hint) + "</p>");
+    h.push('<ul class="at-films">');
+    nat.slice(0, 10).forEach(function (p) {
+      h.push('<li><a href="' + esc(p.url) + '" target="_blank" rel="noopener">' +
+             esc(p.name) + " &#8599;</a> " +
+             '<span class="ra-who"><i class="at-dot" style="background:' +
+             (ACC[p.access] || ["#7C8A91"])[0] + '"></i>' +
+             esc((ACC[p.access] || [0, p.access])[1]) + "</span></li>");
+    });
+    if (nat.length > 10)
+      h.push('<li class="ra-who">…and ' + (nat.length - 10) + " more on the " +
+             '<a href="' + BASE + "country/" + cc.toLowerCase() + '/">' +
+             esc(CNAME[cc] || cc) + " page</a>.</li>");
+    h.push("</ul></div>");
+    return h.join("");
+  }
+
   function goIcons(pageHref, pageLabel, cc, name) {
     var h = '<span class="at-ico">';
     h += '<a href="' + pageHref + '" title="' + esc(pageLabel) +
          '" aria-label="' + esc(pageLabel) + '">&#128196;</a>';
     if (cc && FLAG_SLUG[String(cc).toUpperCase()]) {
       var lab = T("Which flags flew over") + " " + name + " \u2014 Flag History";
-      h += '<a href="' + FLAG_BASE + FLAG_SLUG[String(cc).toUpperCase()] +
+      h += '<a class="at-ico-flag" data-cc="' + esc(String(cc).toUpperCase()) +
+           '" href="' + FLAG_BASE + FLAG_SLUG[String(cc).toUpperCase()] +
            '-flags.html" target="_blank" rel="noopener" title="' + esc(lab) +
            '" aria-label="' + esc(lab) + '">&#9873;</a>';
     }
@@ -589,75 +739,575 @@ window.addEventListener("load", async function () {
     return flagEras[slug + "-flags"] || null;
   }
 
+  /* ---- THE ERA RAIL, RIGHT OF THE MAP -------------------------------------
+     flag-eras.json has every era's dates and polity and no picture; the
+     artwork was inline SVG inside the 210 flag pages, reachable by a reader
+     who opened one and by nothing else. era-flags.json is that artwork,
+     1,454 flags, lifted out by scripts/extract-era-flags.py.
+
+     TWO FETCHES, BOTH LAZY, AND THE RAIL DRAWS TWICE. Years alone are worth
+     showing the moment the eras arrive, so the rail paints as soon as
+     flag-eras.json lands and repaints when the artwork does — rather than
+     holding 544 KB in front of a reader who only wanted the dates. */
+  var eraArt = null, eraArtWanted = false;
+  function loadEraArt(then) {
+    if (eraArt) { then(); return; }
+    if (eraArtWanted) return;
+    eraArtWanted = true;
+    fetch(BASE + "era-flags.json")
+      .then(function (r) { return r.json(); })
+      .then(function (d) { eraArt = d.art || {}; then(); })
+      /* The rail is honest without the pictures: years and polity names in
+         title text still say who held the ground. */
+      .catch(function () { eraArt = {}; });
+  }
+
+  /* railFor()/hideRail() lived here and drew the vertical rail. Both are
+     gone with it; loadEraArt() above stays, because the country band uses the
+     same artwork. */
+
   /* THE 204 COUNTRIES WITH NO RECORD REGION, which is most of the world.
      Before this they got nothing at all from this panel — the honest answer
      was silence, and silence reads as «this ground has no history» rather
      than «this atlas has not researched its filing yet». The flag timelines
      do not know which archive holds the paper, and this says so rather than
      letting a reader assume the stronger claim. */
-  function flagsOnly(d) {
+  /* TWO MODES, AND THEY ANSWER DIFFERENT QUESTIONS.
+     `alone` — no record region covers this place, so the country's flag eras
+     are the best that can be said about who governed it.
+     `supplement` — a region band is already above this one. David: «could we
+     show the flag timeline where the current "see the flags these regimes
+     flew"? ie a horizontal timeline of flags?» The link took a line to point
+     at the thing; the thing itself fits in the same space.
+
+     They are not the duplicate pair the vertical rail was. That rail and the
+     region band both claimed to say who held THIS GROUND and disagreed. This
+     is explicitly the COUNTRY's flag history, labelled as such and sitting
+     under the ground's own timeline, which is the relationship between them. */
+  function flagsOnly(d, supplement) {
     var rows = flagErasFor(d.country);
     if (!rows) {
       if (d.country && FLAG_SLUG[String(d.country).toUpperCase()]) {
         loadFlagEras(function () {
           var box = document.getElementById("ra-flagera");
-          if (box) box.innerHTML = flagsOnly(d);
+          if (box) { box.innerHTML = flagsOnly(d, supplement); bandsInit(box); }
         });
         return '<div id="ra-flagera"></div>';
       }
       return "";
     }
-    var withYear = rows.filter(function (e) { return e.from != null; })
-                       .sort(function (a, b) { return b.from - a.from; });
-    if (!withYear.length) return '<div id="ra-flagera"></div>';
-    var h = ['<div id="ra-flagera">'];
-    h.push('<p class="at-lab">' + esc(T("Who governed this ground")) + "</p>");
-    h.push('<p class="at-hint" style="margin:0 0 6px">' +
-           esc(T("No record region covers this place yet, so this says who was " +
-                 "governing — not which archive holds the paper.")) + "</p>");
-    h.push('<ul class="ra-eras">');
-    withYear.slice(0, 14).forEach(function (e) {
-      h.push('<li><span class="ra-era-y">' + e.from +
-             (e.to != null ? "\u2013" + e.to : "\u2013") + "</span>" +
-             '<span class="ra-era-p">' + esc(e.polity) + "</span></li>");
-    });
-    h.push("</ul>");
+    /* A BAND HERE TOO, AND THIS IS WHERE THE DRAWN FLAGS BELONG. These eras
+       are the COUNTRY's — the same sequence the flags atlas publishes — so a
+       flag on each segment is the thing itself, not a guess about which flag
+       flew over one valley. (The band below the map, for ground that has a
+       record region, gets regime colours instead and no flags, because a
+       national flag over a regional era would be exactly that guess: Istria
+       was Venetian while Croatia proper was Habsburg.)
+
+       This runs only where no record region covers the place, so the two can
+       never appear at once. */
+    var NOW = new Date().getFullYear();
+    var asc = rows.filter(function (e) { return +e.from; })
+                  .sort(function (a, b) { return (+a.from) - (+b.from); });
+    if (!asc.length) return '<div id="ra-flagera"></div>';
+
     var slug = FLAG_SLUG[String(d.country).toUpperCase()];
-    h.push('<p class="at-hint"><a href="' + BASE + "flags/" + slug +
-           '-flags.html">' + esc(T("The flags these regimes flew")) +
-           " \u2192</a></p>");
+    var art = eraArt && eraArt[slug + "-flags"];
+    if (!art) loadEraArt(function () {
+      var box = document.getElementById("ra-flagera");
+      if (box) { box.innerHTML = flagsOnly(d, supplement); bandsInit(box); }
+    });
+
+    /* An era's end is its own `to`, or the next one's start, or today. Without
+       this the last segment has no width and the band stops early. */
+    var spans = asc.map(function (e, i) {
+      var to = +e.to || (asc[i + 1] ? +asc[i + 1].from : NOW);
+      return { e: e, from: +e.from, to: Math.max(to, +e.from + 1) };
+    });
+    var uid = "ra-tl-" + (++bandN);
+    var h = ['<div id="ra-flagera"><div class="ra-tl ra-tl-flags" id="' + uid + '">'];
+    if (supplement) {
+      h.push('<p class="at-lab">' + esc(T("The flags")) + " " +
+             esc(CNAME[String(d.country).toUpperCase()] || d.country) + " " +
+             esc(T("has flown")) + "</p>");
+    } else {
+      h.push('<p class="at-lab">' + esc(T("Who governed this ground")) + "</p>");
+      h.push('<p class="at-hint" style="margin:0 0 6px">' +
+             esc(T("No record region covers this place yet, so this says who was " +
+                   "governing — not which archive holds the paper.")) + "</p>");
+    }
+    h.push('<div class="ra-tl-band" role="tablist" aria-label="' +
+           esc(T("Flags over time")) + '">');
+    /* WHICH ONE OPENS SELECTED, AND WHY NOT SIMPLY THE LAST. Sorted by start
+       year, Croatia's last era is the Republic of Serbian Krajina — a
+       secessionist state over part of the country between 1991 and 1995 —
+       so the band opened claiming that was what governs there now, above the
+       Republic of Croatia which began in 1990 and has not ended. The era
+       still running is the one to open on; `present` is the string "True" in
+       this data, not a boolean. */
+    var running = spans.filter(function (sp) {
+      return String(sp.e.present) === "True" || sp.e.to == null; });
+    var cur = running.length ? spans.indexOf(running[running.length - 1])
+                             : spans.length - 1;
+
+    spans.forEach(function (sp, i) {
+      var svg = art && art[sp.e.id];
+      var last = i === cur;
+      h.push('<button type="button" role="tab" class="ra-tl-seg"' +
+             ' id="' + uid + "-t" + i + '" aria-controls="' + uid + '-p"' +
+             ' aria-selected="' + (last ? "true" : "false") + '"' +
+             ' tabindex="' + (last ? "0" : "-1") + '"' +
+             ' data-i="' + i + '" style="flex-grow:' + (sp.to - sp.from) + '"' +
+             ' title="' + esc((sp.e.dates || sp.from) + " \u2014 " + sp.e.polity) + '">' +
+             /* NO NAME IN THE SEGMENT. David: «the flags croatia has flown
+                seems really squashed. could we just show the icon and a hover
+                over or click describes it in more detail». Seventeen polities
+                across one row gave «Kingdor of Serbs, Croats and Slovene» and
+                «Democ Federal Yugosla (Partisa flag)» — text so clipped it
+                was noise, in a band whose whole content is a picture. The
+                year and the flag are the segment; the name is on the title
+                for a hover and in the panel below on a click, both of which
+                already existed and were being talked over. */
+             '<span class="ra-tl-y">' + sp.from + "</span>" +
+             '<span class="ra-tl-flag' + (svg ? "" : " ra-tl-flag-none") + '">' +
+               (svg || "") + "</span>" +
+             "</button>");
+    });
+    h.push("</div>");
+    h.push('<p class="ra-tl-axis"><span>' + spans[0].from + "</span><span>" +
+           spans[spans.length - 1].to + "</span></p>");
+    if (!supplement)
+      h.push('<div class="ra-tl-detail" id="' + uid + '-p" role="tabpanel"' +
+             ' aria-live="polite"></div>');
+    h.push("</div>");
+
+    BANDS[uid] = spans.map(function (sp) {
+      return '<p class="ra-tl-d-h"><span class="ra-era-y">' +
+             esc(sp.e.dates || (sp.from + "\u2013" + sp.to)) +
+             '</span> <span class="ra-era-p">' + esc(sp.e.polity) + "</span></p>" +
+             '<p class="at-hint" style="margin:0"><a href="' + BASE +
+             esc(sp.e.page || ("flags/" + slug + "-flags.html")) + "#" +
+             esc(sp.e.id) + '">' + esc(T("This flag on Flag History")) +
+             " \u2192</a></p>";
+    });
+
+    /* In supplement mode the flag beside the place's name already links to
+       the same page, so a second link would be the third thing on screen
+       pointing at Flag History. */
+    if (!supplement)
+      h.push('<p class="at-hint"><a href="' + BASE + "flags/" + slug +
+             '-flags.html">' + esc(T("The flags these regimes flew")) +
+             " \u2192</a></p>");
     return h.join("") + "</div>";
   }
 
+  /* ---- WHO HELD THIS GROUND, AS A BAND -----------------------------------
+     David, looking at the stacked version: «do you think this could show as a
+     horizontal timeline?» It should, and the list was not merely longer — it
+     was misleading. Central Istria's Habsburg era ran 1374–1805, four hundred
+     and thirty-one years, and the Adriatisches Küstenland lasted two; stacked,
+     they were the same size, and the one thing a reader most needs to know
+     about a period — how long it lasted, and therefore how much paper it is
+     likely to have left — was the one thing the shape did not say.
+
+     Width is duration. Colour is whether anything holds the records: an era
+     with an archive is solid, an era with none is hatched, because «no archive
+     holds this yet» is a real state and not an empty cell.
+
+     The notes stay below rather than inside. «THE TRAP. Records of these years
+     are filed under ITALY, not Croatia» is the most valuable sentence on the
+     page and it does not fit in a segment two years wide, so the band selects
+     and the panel beneath it reads.
+
+     A LIST IS STILL THE FALLBACK. One era is not a timeline, and a band of one
+     segment is a rectangle pretending to be information. */
+  /* Which countries' archives an era sends you to, other than the one the
+     place is in today. regions.json now gives every regime an `archives`
+     list — see regimeArchivesNote there for what it does and does not
+     claim. */
+  function abroadFor(e, home) {
+    var rg = (regions.regimes || {})[e.regime] || {};
+    return (rg.archives || []).filter(function (cc) { return cc !== home; });
+  }
+
+  var bandN = 0;
+  /* `grouped` — this band shares one info block with the band above it, so
+     it emits no detail panel of its own. See heldBy(). */
+  function eraBand(reg, home, grouped) {
+    var eras = (reg.eras || []).filter(function (e) {
+      return +e.from && +e.to;
+    }).sort(function (a, b) { return (+a.from) - (+b.from); });
+    if (eras.length < 2) return eraList(reg);
+
+    var uid = "ra-tl-" + (++bandN);
+    var first = +eras[0].from, last = +eras[eras.length - 1].to;
+    var h = ['<div class="ra-tl" id="' + uid + '">'];
+
+    h.push('<div class="ra-tl-band" role="tablist" aria-label="' +
+           esc(T("Who held this ground")) + '">');
+    eras.forEach(function (e, i) {
+      var yrs = (+e.to) - (+e.from);
+      var held = (e.filedUnder || []).length;
+      /* Grow by years so the band is to scale, but never below 38px: a
+         two-year era inside a nine-century span computes to less than one
+         pixel, and an invisible segment cannot be clicked or tabbed to. */
+      /* THE COLOUR IS THE REGIME'S OWN. regions.json files every era under
+         one of 43 regimes — venice, habsburg, ottoman, yugo — and each of
+         those already has a colour in the stylesheet: Venice gold, Habsburg
+         slate, Yugoslavia red. Nothing had ever drawn them. This is the
+         «bold, colourful, distinct» the flags atlas gets from its cards, and
+         it is not decoration: two segments of the same colour are the same
+         power holding the ground twice, which is exactly the shape of
+         Istria's 1374 and 1815. */
+      var tint = e.regime ? "var(--r-" + String(e.regime).replace(/[^a-z0-9-]/gi, "") + ")" : "";
+      h.push('<button type="button" role="tab" class="ra-tl-seg' +
+             (held ? "" : " ra-tl-seg-bare") + '"' +
+             (tint ? ' style="--seg:' + tint + ';flex-grow:' + Math.max(yrs, 1) + '"' : "") +
+             ' id="' + uid + '-t' + i + '"' +
+             ' aria-controls="' + uid + '-p" aria-selected="' +
+             (i === eras.length - 1 ? "true" : "false") + '"' +
+             ' tabindex="' + (i === eras.length - 1 ? "0" : "-1") + '"' +
+             ' data-i="' + i + '"' +
+             (tint ? "" : ' style="flex-grow:' + Math.max(yrs, 1) + '"') +
+             ' title="' + esc(e.from + "\u2013" + e.to + " \u2014 " + e.polity) + '">' +
+             '<span class="ra-tl-y">' + e.from + "</span>" +
+             '<span class="ra-tl-p">' + esc(e.polity) + "</span>" +
+             "</button>");
+    });
+    h.push("</div>");
+    h.push('<p class="ra-tl-axis"><span>' + first + "</span><span>" +
+           last + "</span></p>");
+    if (!grouped)
+      h.push('<div class="ra-tl-detail" id="' + uid + '-p" role="tabpanel"' +
+             ' aria-live="polite"></div>');
+
+    /* THE STANDING «ALSO GOVERNED FROM» ROW WAS HERE, AND IT WENT.
+       I added it on the theory that a reader who never clicks a segment still
+       needs to know the paper may sit in other countries' archives. What it
+       actually produced was every country and every year range crushed onto
+       one line under the band — David: «im literally trying to read the
+       writing». And it was saying, in half the type size, precisely what the
+       detail says when you click the era: «Governed from Austria · Hungary —
+       try those archives for these years too». One statement, at the era it
+       belongs to, is the whole point of having a band you can click. */
+    h.push("</div>");
+
+    /* The detail for each era, handed to the script as data rather than
+       re-rendered from the region — the region object is not in scope by the
+       time somebody clicks. */
+    /* uid -> per-era [countries], read when a segment is chosen. */
+    BAND_ABROAD[uid] = eras.map(function (e) {
+      var rg = (regions.regimes || {})[e.regime] || {};
+      return { ccs: abroadFor(e, home), home: home, from: e.from, to: e.to,
+               /* EVERY country that governed, including the modern one — the
+                  foreign list above is filtered for the sources block and is
+                  empty for an era like 1991 Croatia, which still flew flags. */
+               gov: (rg.archives || []).slice(),
+               lat: bandLat, lon: bandLon };
+    });
+    BANDS[uid] = eras.map(function (e) {
+      var filed = (e.filedUnder || []).length
+        ? (e.filedUnder || []).map(esc).join(" \u00b7 ")
+        /* An era with no archive is not a gap in the research — for Istria
+           before 1374 no parish registers exist anywhere, because Trent only
+           required them from 1563. Saying so beats an empty cell. */
+        : '<span class="ra-era-none">' + esc(T("no archive holds this yet")) + "</span>";
+      /* NOT THE ERA'S NAME AGAIN. David: «can you also explain why you showing
+         e.g. another row for 1991-2026 with the same istria county?» Because
+         the detail led with «1991–2026 Croatia — Istria County» while the
+         segment above it, highlighted, already said exactly that — so the box
+         read as a duplicate row rather than as the selected era's detail.
+         What is genuinely new here is the END of the range, who holds the
+         paper, and the note; the polity is named by the segment, and by the
+         tab-panel's aria-labelledby for anybody who cannot see which one is
+         lit. */
+      /* THE SENTENCE THE PAGE COULD NOT SAY. David, on Gračišće's 1918–1943
+         era: «if its under italian filling, then why arent you showing the
+         italian sources? you just tell me its probably under italy but then
+         keep showing the croatian.» Exactly right, and it was not a display
+         bug — nothing in the data connected «regime: italy» to Italy, so the
+         panel keyed its sources off the place's modern country and could only
+         ever answer «Croatia».
+
+         Worded as what the region data supports: this ground was governed
+         from there over those years, so those archives are worth trying. Not
+         «the records are in Italy», which is a claim about every volume and
+         one the atlas cannot make. */
+      var away = abroadFor(e, home);
+      var alsoTry = away.length
+        ? '<p class="ra-tl-d-away">' + esc(T("Governed from")) + " " +
+          away.map(function (cc) {
+            return '<a href="' + BASE + "country/" + cc.toLowerCase() + '/">' +
+                   esc(CNAME[cc] || cc) + "</a>"; }).join(" \u00b7 ") +
+          " \u2014 " + esc(T("try those archives for these years too")) + "</p>"
+        : "";
+      return '<p class="ra-tl-d-y"><span class="ra-era-y">' + e.from +
+             "\u2013" + e.to + "</span> \u00b7 " + filed + "</p>" +
+             (e.note ? '<p class="ra-era-n">' + esc(e.note) + "</p>"
+                     : '<p class="ra-era-n ra-era-quiet">' +
+                       esc(T("No note recorded for this era.")) + "</p>") +
+             alsoTry;
+    });
+    return h.join("");
+  }
+
+  /* The old stacked list, kept for a region with a single era. */
+  function eraList(reg) {
+    var h = ['<ul class="ra-eras">'];
+    (reg.eras || []).forEach(function (e) {
+      var filed = (e.filedUnder || []).length
+        ? (e.filedUnder || []).map(esc).join(" \u00b7 ")
+        : '<span class="ra-era-none">' + esc(T("no archive holds this yet")) + "</span>";
+      h.push('<li><span class="ra-era-y">' + e.from + "\u2013" + e.to + "</span>" +
+             '<span class="ra-era-p">' + esc(e.polity) + "</span>" +
+             '<span class="ra-era-f">' + filed + "</span>" +
+             (e.note ? '<span class="ra-era-n">' + esc(e.note) + "</span>" : "") +
+             "</li>");
+    });
+    h.push("</ul>");
+    return h.join("");
+  }
+
+  /* uid -> [detail html per era]. Filled as bands are built, read on click. */
+  var BANDS = {}, BAND_ABROAD = {}, groupN = 0;
+
+  /* THE SOURCES FOLLOW THE ERA. David: «cant we show e.g. the italian sources
+     when i click on 1918? instead of just telling me to try those archives.»
+     Right — a sentence telling somebody to go and look is a worse version of
+     the list itself, and the list was already being built for the place's own
+     country three lines further down.
+
+     WHAT THIS DOES NOT CLAIM. These are Italy's archives, shown because this
+     ground was governed from Italy over those years. It is not a statement
+     that any particular volume from Gračišće is in any particular one of
+     them. FamilySearch's own collections are not repeated here: the map does
+     not load the collection corpus, and the country page does, so the last
+     row links there rather than guessing. */
+  function paintEraSources(entry) {
+    var box = document.getElementById("ra-era-src");
+    var home = document.getElementById("ra-home-src");
+    if (!box) return;
+    /* An era with nothing abroad puts the standing card back and clears this. */
+    if (!entry || !entry.ccs || !entry.ccs.length) {
+      box.innerHTML = "";
+      if (home) home.hidden = false;
+      return;
+    }
+    /* BOTH COUNTRIES, NOT THE FOREIGN ONE ON ITS OWN. David: «if i select
+       italy why are you ONLY showing italy? and not showing both italy and
+       croatia? … it should be "you should look in Croatia and italian
+       sources" not "heres italy"».
+
+       He is right, and the first version was worse than incomplete: it added
+       an Italy card while the standing «The sources for Croatia» card sat
+       further down the page unchanged, so the two halves of one answer were
+       in different places and neither said the other existed. The era now
+       owns the whole question — the country that holds this ground TODAY
+       first, because that is where the paper usually is, then whoever
+       governed it then — and the standing card steps aside while it does. */
+    if (home) home.hidden = true;
+    var years = entry.from + "\u2013" + entry.to;
+    var all = (entry.home ? [entry.home] : []).concat(entry.ccs);
+    var names = all.map(function (cc) { return CNAME[cc] || cc; });
+    var lead = names.length > 1
+      ? names.slice(0, -1).join(", ") + " and " + names[names.length - 1]
+      : names[0];
+
+    var h = ['<p class="ra-era-lead"><span class="ra-era-lead-l">' +
+             esc(T("Where to look for")) + " " + years + "</span> " +
+             esc(T("Try")) + " <b>" + esc(lead) + "</b>. " +
+             esc(entry.home
+                 ? (CNAME[entry.home] || entry.home) + " holds this ground today; " +
+                   "it was governed from " + names.slice(1).join(" and ") +
+                   " over these years, so those archives may hold the paper too."
+                 : "") + "</p>"];
+    all.forEach(function (cc, i) {
+      h.push(countrySources(cc,
+        i === 0 && entry.home
+          ? "Where this ground's records are kept now."
+          : "This ground was governed from " + (CNAME[cc] || cc) + " over " +
+            years + ", so its archives are worth trying for those years.",
+        (CNAME[cc] || cc) + " \u00b7 " + years,
+        entry.lat, entry.lon));
+    });
+    box.innerHTML = h.join("");
+  }
+
+  /* THE FLAGS BELONG TO THE ERA, NOT TO THE PAGE. David: «lose the flag
+     timeline, and instead show the flags in the info area pertaining to the
+     period we selected … so if i select the 1918 Italy provincia del istria i
+     see the flags and descriptions of those flags from 1918 until 1939».
+
+     And it has to be the GOVERNING power's flags, which is why the standing
+     band had to go rather than move. That band was Croatia's flag history; for
+     1918–1943 it would have shown the Kingdom of Serbs, Croats and Slovenes
+     and the Kingdom of Yugoslavia — flags that never flew over Istria, because
+     Italy held it those years. The era knows who governed it, so the flags
+     come from there: Italy's for 1918–1943, Austria's and Hungary's for the
+     Habsburg centuries, none at all for an era whose regime resolves to no
+     modern archive.
+
+     Overlap, not containment: a flag adopted in 1861 and struck in 1946 covers
+     1918–1943 completely and would be missed by any rule that asked for flags
+     BEGINNING inside the era. */
+  function eraFlagsHtml(entry) {
+    if (!entry || !entry.gov || !entry.gov.length || !flagEras) return "";
+    var from = +entry.from, to = +entry.to, NOW = new Date().getFullYear();
+    var out = [];
+    entry.gov.forEach(function (cc) {
+      var slug = FLAG_SLUG[String(cc).toUpperCase()];
+      var rows = slug && flagEras[slug + "-flags"];
+      if (!rows) return;
+      var art = eraArt && eraArt[slug + "-flags"];
+      rows.filter(function (e) {
+        var f = +e.from, t = +e.to || (String(e.present) === "True" ? NOW : +e.from);
+        return f && f <= to && t >= from;
+      }).sort(function (a, b) { return (+a.from) - (+b.from); })
+        .slice(0, 8).forEach(function (e) {
+          var svg = art && art[e.id];
+          out.push('<li><span class="ra-ef-f' + (svg ? "" : " ra-ef-none") + '">' +
+                   (svg || "") + "</span>" +
+                   '<span class="ra-ef-t"><b>' + esc(e.polity) + "</b>" +
+                   '<span class="ra-ef-d">' + esc(e.dates || e.from) + " \u00b7 " +
+                   esc(CNAME[cc] || cc) + "</span></span>" +
+                   '<a class="ra-ef-l" href="' + BASE +
+                   esc(e.page || ("flags/" + slug + "-flags.html")) + "#" +
+                   esc(e.id) + '">\u2192</a></li>');
+        });
+    });
+    if (!out.length) return "";
+    return '<div class="ra-ef"><p class="ra-ef-h">' +
+           esc(T("Flags over this ground")) + ", " + entry.from + "\u2013" +
+           entry.to + "</p><ul>" + out.join("") + "</ul></div>";
+  }
+
+  function bandShow(tl, i) {
+    var rows = BANDS[tl.id];
+    if (!rows || !rows[i]) return;
+    /* The group's shared block when there is one, otherwise the band's own. */
+    var grp = tl.closest && tl.closest(".ra-tl-group");
+    var det = (grp && grp.querySelector(":scope > .ra-tl-detail")) ||
+              tl.querySelector(".ra-tl-detail");
+    if (!det) return;
+    det.innerHTML = rows[i];
+    [].forEach.call(tl.querySelectorAll(".ra-tl-seg"), function (b, j) {
+      b.setAttribute("aria-selected", j === i ? "true" : "false");
+      b.tabIndex = j === i ? 0 : -1;
+      /* The panel no longer prints the era's name, so it has to borrow it
+         from the tab — otherwise a screen reader hears «1374–1805 · dapa»
+         with nothing saying whose years those were. */
+      if (j === i && b.id) det.setAttribute("aria-labelledby", b.id);
+    });
+    /* The other band in the group is no longer what the block describes, so
+       it stops looking selected. One segment keeps tabindex 0 so that band is
+       still reachable by keyboard. */
+    if (grp) {
+      [].forEach.call(grp.querySelectorAll(".ra-tl"), function (other) {
+        if (other === tl) return;
+        [].forEach.call(other.querySelectorAll(".ra-tl-seg"), function (b, j) {
+          b.setAttribute("aria-selected", "false");
+          b.tabIndex = j === 0 ? 0 : -1;
+        });
+      });
+    }
+    /* Only the ground's own band moves the sources and the flags. */
+    var entry = BAND_ABROAD[tl.id] && BAND_ABROAD[tl.id][i];
+    if (entry) {
+      paintEraSources(entry);
+      /* Both files are fetched late; ask for them and redraw when they land,
+         rather than holding the panel back for a picture. */
+      if (!flagEras) loadFlagEras(function () { bandShow(tl, i); });
+      else if (!eraArt) loadEraArt(function () { bandShow(tl, i); });
+      det.insertAdjacentHTML("beforeend", eraFlagsHtml(entry));
+    }
+  }
+
+  /* Delegated, because bands are written into the panel long after this runs
+     and every one of them would otherwise need wiring at render time. */
+  document.addEventListener("click", function (ev) {
+    var seg = ev.target.closest && ev.target.closest(".ra-tl-seg");
+    if (!seg) return;
+    var tl = seg.closest(".ra-tl");
+    if (tl) bandShow(tl, +seg.dataset.i);
+  });
+
+  /* A tablist that cannot be walked with the arrow keys is a row of buttons
+     wearing the role. Home and End because nine centuries is a long way to
+     arrow through to reach either end. */
+  document.addEventListener("keydown", function (ev) {
+    var seg = ev.target.closest && ev.target.closest(".ra-tl-seg");
+    if (!seg) return;
+    var tl = seg.closest(".ra-tl");
+    if (!tl) return;
+    var segs = [].slice.call(tl.querySelectorAll(".ra-tl-seg"));
+    var i = segs.indexOf(seg), to = null;
+    if (ev.key === "ArrowRight" || ev.key === "ArrowDown") to = i + 1;
+    else if (ev.key === "ArrowLeft" || ev.key === "ArrowUp") to = i - 1;
+    else if (ev.key === "Home") to = 0;
+    else if (ev.key === "End") to = segs.length - 1;
+    if (to == null) return;
+    to = Math.max(0, Math.min(segs.length - 1, to));
+    ev.preventDefault();
+    bandShow(tl, to);
+    segs[to].focus();
+  });
+
+  /* Bands arrive with an empty detail panel; this fills whichever is newest
+     as soon as one is written into the page. */
+  function bandsInit(root) {
+    [].forEach.call((root || document).querySelectorAll(".ra-tl"), function (tl) {
+      if (tl.dataset.on) return;
+      tl.dataset.on = "1";
+      var rows = BANDS[tl.id] || [];
+      /* Open on whichever segment the markup marked selected, not blindly on
+         the last — the flag band picks the era that is still running, which
+         is not always the one with the latest start year. */
+      var sel = tl.querySelector('.ra-tl-seg[aria-selected="true"]');
+      /* In a group both bands would fill the shared block in turn and the
+         last to run would win. The ground's band is the answer, so it opens
+         the block; the flag band is wired below without writing anything. */
+      if (tl.closest && tl.closest(".ra-tl-group") && !BAND_ABROAD[tl.id]) return;
+      bandShow(tl, sel ? +sel.dataset.i : rows.length - 1);
+    });
+    [].forEach.call((root || document).querySelectorAll(".ra-tl-group .ra-tl"),
+      function (tl) {
+        if (BAND_ABROAD[tl.id]) return;
+        [].forEach.call(tl.querySelectorAll(".ra-tl-seg"), function (b, j) {
+          b.setAttribute("aria-selected", "false");
+          b.tabIndex = j === 0 ? 0 : -1;
+        });
+      });
+  }
+
+  /* The position of the place whose panel is open, so an era's source cards
+     can be ordered by distance from it. */
+  var bandLat = null, bandLon = null;
   function heldBy(d) {
     if (d.lat == null || d.lon == null) return "";
+    bandLat = d.lat; bandLon = d.lon;
     var regs = regionsAt(d.lat, d.lon);
     if (!regs.length) return flagsOnly(d);
     var h = [];
     regs.forEach(function (reg) {
+      /* ONE INFO BLOCK FOR BOTH BANDS. David: «can we unify these 2 sections?
+         … so i can tap a flag and tap a who held the ground and they show
+         united text descriptions in one info block, instead of 2?»
+
+         Two panels meant two places to read an answer and, worse, two answers
+         on screen at once describing different centuries — the flag band
+         sitting on 1990 while the ground band sat on 1918. One block, written
+         by whichever segment was last tapped, and the other band's selection
+         clears, so nothing on screen claims to be current that is not.
+
+         Flags first, directly under the map, as asked; the ground's own band
+         below it and nearer the block, because that is the answer and the
+         country's flags are the context around it. */
       h.push('<p class="at-lab">' + esc(T("Who held this ground")) + " · " +
              esc(reg.label) + "</p>");
-      h.push('<ul class="ra-eras">');
-      reg.eras.forEach(function (e) {
-        var filed = (e.filedUnder || []).length
-          ? (e.filedUnder || []).map(esc).join(" · ")
-          /* An era with no archive is not a gap in the research — for Istria
-             before 1374 no parish registers exist anywhere, because Trent only
-             required them from 1563. Saying so beats an empty cell. */
-          : '<span class="ra-era-none">' + esc(T("no archive holds this yet")) + "</span>";
-        h.push('<li><span class="ra-era-y">' + e.from + "\u2013" + e.to + "</span>" +
-               '<span class="ra-era-p">' + esc(e.polity) + "</span>" +
-               '<span class="ra-era-f">' + filed + "</span>" +
-               (e.note ? '<span class="ra-era-n">' + esc(e.note) + "</span>" : "") +
-               "</li>");
-      });
-      h.push("</ul>");
-      var cc = (reg.countries || [])[0];
-      if (cc && FLAG_SLUG[cc])
-        h.push('<p class="at-hint"><a href="' + FLAG_BASE + FLAG_SLUG[cc] +
-               '-flags.html" rel="noopener">' +
-               esc(T("See the flags these regimes flew")) +
-               " \u2197</a> " + esc(T("on Flag History, a sister project.")) + "</p>");
+      h.push(eraBand(reg, d.country));
+      /* The country's own flag timeline, in the space the link to it used
+         to occupy. Below the ground's band, because the ground is the
+         question and the country is the context. */
     });
     return h.join("");
   }
@@ -680,7 +1330,10 @@ window.addEventListener("load", async function () {
     flagIdxWanted = true;
     fetch(BASE + "flag-index.json")
       .then(function (r) { return r.json(); })
-      .then(function (d) { FLAGIDX = d; drawFlagRes(qbox ? qbox.value : ""); })
+      .then(function (d) { FLAGIDX = d; drawFlagRes(qbox ? qbox.value : "");
+                           /* A panel may already be open and showing the
+                              fallback glyph; upgrade it in place. */
+                           paintIcoFlags(document); })
       .catch(function () { FLAGIDX = { countries: [], hubs: [] }; });
   }
 
@@ -732,19 +1385,47 @@ window.addEventListener("load", async function () {
     "England": "United Kingdom"
   };
   var CC2FLAG = null;
+  /* Lifted out of drawFlagResForCountries so the icon row can use it too.
+     Names, not codes: the flags atlas files by its own spelling and this is
+     the one place that reconciles the two. */
+  function buildCC2FLAG() {
+    if (CC2FLAG || !FLAGIDX) return;
+    CC2FLAG = {};
+    var n2 = {};
+    Object.keys(CNAME).forEach(function (cc) { n2[fold(CNAME[cc])] = cc; });
+    (FLAGIDX.countries || []).forEach(function (c) {
+      var cc = n2[fold(c.name)] || n2[fold((FLAG_ALIAS[c.name] || ""))];
+      if (cc) CC2FLAG[cc] = c;
+    });
+  }
+
+  /* THE ICON BECOMES THE FLAG. David: «instead of "see the flags these
+     regimes flew", can you just add the countrys flag to the right of the
+     name? we already have an icon that does this but replace it with the
+     flag and just add the hover text rather than waste real estate».
+
+     So the ⚑ glyph in the icon row is replaced by the country's own drawn
+     flag, and the sentence under the band goes. The glyph stays in the
+     markup as the fallback: flag-index.json is fetched late and on purpose,
+     so the row has to render before the artwork can possibly be there, and
+     it must still be a working link if the fetch never finishes. */
+  function paintIcoFlags(root) {
+    buildCC2FLAG();
+    if (!CC2FLAG) return;
+    [].forEach.call((root || document).querySelectorAll(".at-ico-flag[data-cc]"),
+      function (a) {
+        if (a.dataset.on) return;
+        var f = CC2FLAG[a.dataset.cc];
+        if (!f || !f.flag) return;
+        a.dataset.on = "1";
+        a.innerHTML = '<svg viewBox="0 0 300 200" aria-hidden="true">' +
+                      f.flag + "</svg>";
+      });
+  }
   function drawFlagResForCountries(ccs) {
     if (!FLAGIDX || !fSec) { return; }
     if (!ccs || !ccs.length) return;
-    if (!CC2FLAG) {
-      CC2FLAG = {};
-      var n2 = {};
-      Object.keys(CNAME).forEach(function (cc) {
-        n2[fold(CNAME[cc])] = cc; });
-      (FLAGIDX.countries || []).forEach(function (c) {
-        var cc = n2[fold(c.name)] || n2[fold((FLAG_ALIAS[c.name] || ""))];
-        if (cc) CC2FLAG[cc] = c;
-      });
-    }
+    buildCC2FLAG();
     var cards = ccs.map(function (cc) { return CC2FLAG[cc]; }).filter(Boolean);
     if (!cards.length) { fSec.hidden = true; return; }
     fSec.hidden = false;
@@ -911,15 +1592,25 @@ window.addEventListener("load", async function () {
        what they actually mean is «nothing has reached here YET» — while 32
        African countries have a named national archive sitting in the panel.
        The marker could not say that and now does. */
+    /* GREEN ON GREEN. David: «green markers on the map are almost impossible
+       to see» — and the free-access colour is #1E8449 sitting on OpenStreetMap's
+       wooded green, held apart by a white stroke eight tenths of a pixel wide.
+       Every access colour has some basemap it disappears into: the greens in
+       forest, the greys in urban fill, the amber in farmland.
+
+       So the ring does the separating, not the fill: 1.8px of solid white on
+       the dots that carry volumes, and the unwalked dots keep a neutral edge
+       rather than a faint tint of their own colour, which was the worst of
+       both — too pale to read as a dot, too coloured to read as absent. */
     var m = L.circleMarker([p.y, p.x], !n ? {
       radius: Math.min(3.5 + Math.sqrt(p.b || 1) * 0.5, 8),
-      color: p.w && !p.b ? "#7C8A91" : col, weight: 1.4, opacity: .85,
+      color: p.w && !p.b ? "#6B7780" : "#8A8E86", weight: 1.5, opacity: .95,
       dashArray: p.w && !p.b ? "2 2" : null,
-      fillColor: col, fillOpacity: .12
+      fillColor: col, fillOpacity: .22
     } : {
       radius: Math.min(3 + Math.sqrt(n) * 0.9, 13),
-      color: "#fff", weight: 0.8, opacity: .9,
-      fillColor: col, fillOpacity: .85
+      color: "#fff", weight: 1.8, opacity: 1,
+      fillColor: col, fillOpacity: .95
     });
     m._p = p;
     m.bindTooltip(p.n, { sticky: true });
@@ -1137,7 +1828,7 @@ window.addEventListener("load", async function () {
            esc((ACC[p.access] || [0, p.access])[1]) + "</p>");
     var cite = citedBy(p.id);
     if (cite.length) {
-      h.push('<div class="at-sec"><div class="lab">Holds the records of</div><ul class="at-films">');
+      h.push('<div class="at-sec at-sec-wide"><div class="lab">Holds the records of</div><ul class="at-films">');
       cite.forEach(function (c) {
         h.push("<li>" + esc(c.label) + ' <span class="at-y">' + c.n +
                " era" + (c.n === 1 ? "" : "s") + "</span></li>");
@@ -1165,23 +1856,38 @@ window.addEventListener("load", async function () {
     }
     setQ("at", p.i);
     panel.innerHTML = render(d);
+    bandsInit(panel);
+    paintIcoFlags(panel);
+    buildCheck(d, drawHood(d));
   }
 
   function render(d) {
     var h = [];
+    /* ONE LINE, NOT FOUR. David: «"everything about gracisce" does it really
+       need that much real estate. cant it just be written on the same line as
+       the gracisce header». It was a heading, then a line of older spellings,
+       then a lone link on a row of its own — three stacked blocks and most of
+       two hundred pixels before the first source. The heading already lays
+       out as a wrapping flex row, so both join it. */
     h.push('<div class="at-h"><h3>' + esc(d.name) + "</h3>");
     if (d.collections.length)
       h.push('<span class="at-n">' + d.collections.length + " volume" +
              (d.collections.length === 1 ? "" : "s") + "</span>");
+    var alsoNames = (d.names || []).map(function (n) { return n.n; });
+    if (alsoNames.length)
+      h.push('<span class="at-also">also written ' +
+             alsoNames.map(function (x) { return "<em>" + esc(x) + "</em>"; })
+                      .join(" · ") + "</span>");
+    /* The page behind the panel. A marker is a view; a page is a thing you
+       can send somebody, bookmark, or find from a search engine. */
+    h.push('<a class="at-go" href="' + BASE + "place/" + esc(d.id) + '/">' +
+           "Read more about " + esc(d.name) + " &rarr;</a>");
     h.push(goIcons(BASE + "place/" + esc(d.id) + "/",
                    T("Everything about") + " " + d.name + " \u2014 its own page",
                    d.country, d.name));
     h.push("</div>");
 
-    var alsoNames = (d.names || []).map(function (n) { return n.n; });
-    if (alsoNames.length)
-      h.push('<p class="at-also">also written ' + alsoNames.map(function (x) {
-        return "<em>" + esc(x) + "</em>"; }).join(" · ") + "</p>");
+    /* The older spellings ride on the heading line now, built above. */
 
     if (d.filedUnder) {
       h.push('<div class="ra-juris" style="border-left-color:#C0392B">' +
@@ -1196,6 +1902,20 @@ window.addEventListener("load", async function () {
              "centre, not at a building.</p>");
     }
     if (d.note) h.push('<p class="at-sub">' + esc(d.note) + "</p>");
+
+    /* FIRST, NOT LAST. It used to sit at the foot of the panel on the grounds
+       that «the volumes are what a reader came for and the jurisdiction is
+       what they need next». That was true while the panel was a narrow column
+       you scrolled; under the map at full width it meant the timeline sat
+       below the sources and the volume lists, a screen and a half down, and
+       David — having asked for it under the map — could not see that it was.
+       It is also the thing that tells you WHICH archive to believe, so it
+       belongs above the list of them. */
+    h.push(heldBy(d));
+    /* Filled when an era is selected. display:contents so its cards become
+       grid items of the panel proper, and sit beside «The sources for
+       Croatia» rather than in a box of their own. */
+    h.push('<div class="at-era-src" id="ra-era-src"></div>');
 
     /* THE LINE THIS SITE EXISTS FOR. */
     var reg = d.region && REGION[d.region];
@@ -1230,9 +1950,16 @@ window.addEventListener("load", async function () {
           h.push("</div>");
         }
       } else {
-        h.push('<div class="ra-juris"><div class="lab">Whose ground this was</div>' +
-               "<p>" + esc(reg.label) + " — <a href=\"#\" class=\"ra-setyear\">set a year</a> " +
-               "to see which empire held it, and whose archive that means.</p></div>");
+        /* NOTHING HERE, AND THAT IS THE POINT.
+           «Whose ground this was» stood here restating, as a sentence, what
+           the band above answers era by era with the archives attached —
+           David: «why do we talk about "who held this ground" in 2 separate
+           places?» I replaced it with the one thing it uniquely offered, a
+           «set a year» link, and that was still a whole line spent on a
+           control the reader can already see: the year scrubber sits along
+           the foot of the map, a few pixels away, with its own label and its
+           own hover text. So the line goes too, and the scrubber's tooltip
+           carries the explanation instead. */
       }
     } else {
       h.push('<div class="ra-juris ra-unmapped"><div class="lab">Whose ground this was</div>' +
@@ -1243,11 +1970,8 @@ window.addEventListener("load", async function () {
              "rather than a gap in the record.</p></div>");
     }
 
-    /* The page behind the panel. A marker is a view; a page is a thing you
-       can send somebody, bookmark, or find from a search engine — and until
-       these existed, 1,239 places had no address of their own. */
-    h.push('<p class="at-go"><a href="' + BASE + "place/" + esc(d.id) + '/">' +
-           "Everything about " + esc(d.name) + " &rarr;</a></p>");
+    /* The link to this place's own page moved up onto the heading line.
+       Until these pages existed, 1,239 places had no address of their own. */
 
     /* THE BOOKS THEMSELVES. «Croatia, Church Books, 1516–1994 covers this
        place» is true and one step short of what a researcher needs: which
@@ -1279,7 +2003,7 @@ window.addEventListener("load", async function () {
         if (ib < 0) ib = b === "Other" ? 999 : 500;
         return ia - ib || a.localeCompare(b);
       });
-      h.push('<div class="at-sec"><div class="lab">The volumes themselves</div>');
+      h.push('<div class="at-sec at-sec-wide"><div class="lab">The volumes themselves</div>');
       h.push('<p class="at-sub">' +
              (d.volumesTotal
                 ? esc(d.volumesTotal.toLocaleString()) + " books catalogued for " +
@@ -1293,8 +2017,14 @@ window.addEventListener("load", async function () {
         if (!byKind[k]) return;
         h.push('<div class="lab" style="margin-top:10px">' + esc(k) + "</div>");
         h.push('<ul class="at-films">');
-        byKind[k].slice(0, 25).forEach(function (v) {
-          h.push("<li>" + (v.url
+        /* EVERY VOLUME IS WRITTEN, AND THE TAIL IS FOLDED. David: «i see a
+           "…and 34 more" but i cant click on it to get the more? surely it
+           should expand the full list?» — it was a caption describing a
+           truncation, which is the least useful sentence a list can end on.
+           The rows past the first 25 are in the page now and hidden, so the
+           button reveals what is already there rather than fetching again. */
+        byKind[k].forEach(function (v, vi) {
+          h.push("<li" + (vi >= 25 ? ' class="ra-vx"' : "") + ">" + (v.url
               ? '<a href="' + esc(v.url) + '" target="_blank" rel="noopener">' +
                 esc(v.t) + " &#8599;</a>"
               : "<b>" + esc(v.t) + "</b>") +
@@ -1309,7 +2039,9 @@ window.addEventListener("load", async function () {
             "</li>");
         });
         if (byKind[k].length > 25)
-          h.push('<li class="ra-who">…and ' + (byKind[k].length - 25) + " more</li>");
+          h.push('<li class="ra-vmore"><button type="button" class="ra-vmore-b">' +
+                 esc(T("Show all") + " " + byKind[k].length.toLocaleString() + " " +
+                     T("volumes")) + " \u25be</button></li>");
         h.push("</ul>");
       });
       h.push("</div>");
@@ -1356,36 +2088,9 @@ window.addEventListener("load", async function () {
       h.push("</ul></div>");
     }
 
-    if (d.country) {
-      var nat = provs.providers.filter(function (p) {
-        return (p.countries || []).indexOf(d.country) > -1;
-      }).sort(function (a, b) {
-        var K = ["national-archive", "diocesan", "regional-archive", "library",
-                 "volunteer", "aggregator", "commercial"];
-        var ka = K.indexOf(a.kind), kb = K.indexOf(b.kind);
-        if (ka !== kb) return (ka < 0 ? 99 : ka) - (kb < 0 ? 99 : kb);
-        return RANK.indexOf(a.access) - RANK.indexOf(b.access);
-      });
-      if (nat.length) {
-        h.push('<div class="at-sec"><div class="lab">The sources for ' +
-               esc(CNAME[d.country] || d.country) + "</div>");
-        h.push('<p class="at-sub">National and regional, and they cover this ground ' +
-               "whether or not anybody has walked it here.</p>");
-        h.push('<ul class="at-films">');
-        nat.slice(0, 10).forEach(function (p) {
-          h.push('<li><a href="' + esc(p.url) + '" target="_blank" rel="noopener">' +
-                 esc(p.name) + " &#8599;</a> " +
-                 '<span class="ra-who"><i class="at-dot" style="background:' +
-                 (ACC[p.access] || ["#7C8A91"])[0] + '"></i>' +
-                 esc((ACC[p.access] || [0, p.access])[1]) + "</span></li>");
-        });
-        if (nat.length > 10)
-          h.push('<li class="ra-who">…and ' + (nat.length - 10) + " more on the " +
-                 '<a href="' + BASE + "country/" + d.country.toLowerCase() +
-                 '/">' + esc(CNAME[d.country] || d.country) + " page</a>.</li>");
-        h.push("</ul></div>");
-      }
-    }
+    if (d.country) h.push(countrySources(d.country,
+      "National and regional, and they cover this ground whether or not " +
+      "anybody has walked it here.", null, d.lat, d.lon, "ra-home-src"));
 
     /* The collections that reach this ground. The panel shows the nearest few
        and the page shows them all — a marker is a glance, not a catalogue. */
@@ -1440,7 +2145,7 @@ window.addEventListener("load", async function () {
     cs.forEach(function (c) { (by[c.access] = by[c.access] || []).push(c); });
     RANK.forEach(function (a) {
       if (!by[a]) return;
-      h.push('<div class="at-sec"><div class="lab"><i class="ra-dot" style="background:' +
+      h.push('<div class="at-sec at-sec-wide"><div class="lab"><i class="ra-dot" style="background:' +
              ACC[a][0] + '"></i>' + esc(ACC[a][1]) + "</div>");
       h.push('<ul class="at-films">');
       by[a].forEach(function (c) {
@@ -1455,10 +2160,6 @@ window.addEventListener("load", async function () {
       });
       h.push("</ul></div>");
     });
-    /* Last, because it is context rather than an answer: the volumes above are
-       what a reader came for, and whose archive held the ground is what they
-       need next when the volumes run out. */
-    h.push(heldBy(d));
     return h.join("");
   }
 
@@ -1495,6 +2196,295 @@ window.addEventListener("load", async function () {
      looking at Gračišće. */
   var litFor = null;
   var hitLayer = L.layerGroup(), lastHitFor = null;
+
+  /* ---- THE GROUND YOU WOULD ACTUALLY WALK -------------------------------
+     David: «if i really was doing research i would "walk the region" around
+     gracisce — parishes, cemeteries, etc within a reasonable neighbours
+     realm. could you draw a boundary around that neighbourhood?»
+
+     THE RADIUS IS NOT A NUMBER I PICKED. A fixed 10 km would be a guess
+     dressed as a fact, and wrong in both directions — too wide on the Istrian
+     plateau, far too narrow on the Canadian prairie. The atlas already knows
+     what is near a place, because the place record carries its parishes and
+     its cemeteries with the distance to each, researched rather than
+     computed. So the circle is drawn to hold them: the furthest of that
+     place's own parishes and burial grounds, and far enough to reach a
+     handful of neighbouring settlements, whichever is greater.
+
+     Gračišće comes out at about 12 km, which holds its three parishes (8.0,
+     8.7, 9.2), its three cemeteries (6.9, 7.9, 11.5) and fourteen villages
+     including Pazin — which is exactly the day a researcher would plan.
+
+     Clamped at both ends. Under 4 km the ring is smaller than the village and
+     says nothing; over 25 it stops being a neighbourhood and becomes a
+     county, and the reader should be looking at the region band by then. */
+  var hoodLayer = L.layerGroup();
+  var HOOD_MIN = 4, HOOD_MAX = 25, HOOD_NEIGHBOURS = 8;
+
+  function hoodKm(d) {
+    var far = 0;
+    (d.parishes || []).forEach(function (p) { if (+p.km > far) far = +p.km; });
+    (d.graves || []).forEach(function (g) { if (+g.km > far) far = +g.km; });
+    /* Far enough to reach the nearest few villages, so a place with no parish
+       or cemetery of its own still gets a sensible ring. */
+    var ds = [];
+    idx.places.forEach(function (p) {
+      if (p.y == null || p.i === d.id) return;
+      ds.push(haversine(d.lat, d.lon, p.y, p.x));
+    });
+    ds.sort(function (a, b) { return a - b; });
+    var nth = ds[Math.min(HOOD_NEIGHBOURS, ds.length) - 1];
+    if (nth != null && nth > far) far = nth;
+    return Math.min(HOOD_MAX, Math.max(HOOD_MIN, Math.ceil(far)));
+  }
+
+  function haversine(a, b, c, e) {
+    var p = Math.PI / 180;
+    var x = Math.sin((c - a) * p / 2) * Math.sin((c - a) * p / 2) +
+            Math.cos(a * p) * Math.cos(c * p) *
+            Math.sin((e - b) * p / 2) * Math.sin((e - b) * p / 2);
+    return 2 * 6371 * Math.asin(Math.sqrt(x));
+  }
+
+  /* A ring with no caption is decoration. This says what it holds, in the
+     panel, using the counts the place record already carries. */
+  /* HEADS THE CHECKLIST INSTEAD OF SITTING UNDER THE MAP. David: «can this
+     just move to the top of our maps right hand pane?» — it describes the
+     ring AND the list the pane holds, so having it in the panel below meant
+     the caption and the things it counts were in different places. It is
+     returned as a string rather than written into a slot, because the
+     checklist rebuilds its own body and would wipe anything written there
+     first. */
+  function hoodNoteHtml(d, r) {
+    if (!r) return "";
+    var places = 0;
+    idx.places.forEach(function (p) {
+      if (p.y == null || p.i === d.id) return;
+      if (haversine(d.lat, d.lon, p.y, p.x) <= r) places++;
+    });
+    var bits = [];
+    if (places) bits.push(places + " " + T(places === 1 ? "place" : "places"));
+    if ((d.parishes || []).length)
+      bits.push(d.parishes.length + " " +
+                T(d.parishes.length === 1 ? "parish" : "parishes"));
+    if ((d.graves || []).length)
+      bits.push(d.graves.length + " " +
+                T(d.graves.length === 1 ? "burial ground" : "burial grounds"));
+    if (!bits.length) return "";
+    return '<p class="ra-hood"><span class="ra-hood-k"></span><span>' +
+      esc(T("Within") + " " + r + " km") + " \u2014 " + esc(bits.join(" \u00b7 ")) +
+      ". " + esc(T("The ring on the map is the ground worth walking in a day.")) +
+      "</span></p>";
+  }
+
+  function drawHood(d) {
+    hoodLayer.clearLayers();
+    if (d.lat == null || d.lon == null) return null;
+    var r = hoodKm(d);
+    /* Deep navy, dotted, and almost no fill — a boundary to read the map
+       through, not a shape laid over it. Round caps make the dashes read as
+       dots rather than ticks.
+
+       DRAWN TWICE. A single navy ring at 1.6px disappeared into Istria's
+       greens and the pink of the roads; it was on the map and could not be
+       found. A soft white ring underneath gives every dot something to sit
+       on, so the boundary holds over forest, sea and relief alike without
+       making the navy heavier than a hairline. */
+    L.circle([d.lat, d.lon], {
+      radius: r * 1000, interactive: false,
+      color: "#FFFFFF", weight: 5, opacity: .55,
+      dashArray: "2 6", lineCap: "round", fill: false
+    }).addTo(hoodLayer);
+    L.circle([d.lat, d.lon], {
+      radius: r * 1000, interactive: false,
+      color: "#1B2A5B", weight: 2.2, opacity: 1,
+      dashArray: "2 6", lineCap: "round",
+      fillColor: "#1B2A5B", fillOpacity: .05
+    }).addTo(hoodLayer);
+    if (!map.hasLayer(hoodLayer)) hoodLayer.addTo(map);
+    return r;
+  }
+
+  function clearHood() { hoodLayer.clearLayers(); }
+
+  /* A NEW SEARCH RETIRES THE LAST PLACE'S FURNITURE. David searched «senj»,
+     got five matching places on the map, and the right-hand pane still listed
+     Gračišće's archive, Gračišće's parishes and Gračišće's villages with
+     twenty-two numbered pins to match — stale, and looking authoritative.
+
+     CALLED FROM THE BRANCHES THAT ANSWER WITH SOMETHING OTHER THAN A PLACE,
+     not from apply(). My first attempt cleared on any change of search term,
+     which also fired on first load — after the ?at= place had already built
+     its checklist — so arriving at a link to Gračišće showed no checklist at
+     all. The panel's own «the panel must not still be answering the last
+     question» note a few hundred lines down is the same bug, found twice. */
+  function retireVisit() {
+    clearHood(); clearCheckPins();
+    var ck = document.getElementById("ra-check");
+    if (ck) ck.hidden = true;
+  }
+
+
+  /* Picking one from the list is the same as clicking its dot. */
+  document.addEventListener("click", function (ev) {
+    var sb = ev.target.closest && ev.target.closest(".ra-sn");
+    if (sb) { elsewhere(sb.dataset.name); return; }
+    var b = ev.target.closest && ev.target.closest(".ra-mk");
+    if (!b) return;
+    var p = matchCache[b.dataset.place];
+    if (!p) return;
+    markHit(p, fold(qbox.value.trim()));
+    open(p);
+    map.setView([p.y, p.x], Math.max(map.getZoom(), 11));
+  });
+
+  /* ---- the checklist's contents ------------------------------------------
+     Everything here is already in the data with a distance against it; none
+     of it is computed about the world, only measured from the place. */
+  var ACCESS_DOT = function (a) { return (ACC[a] || ["#7C8A91"])[0]; };
+
+  /* NUMBERED, AND THE SAME NUMBER ON THE MAP. David: «could we show all
+     those items numbered, and numbered on the map? so a person planning their
+     trip can see them in relation to each other?» — which is the difference
+     between a list of distances and a route. One running number down the
+     whole checklist, archives first, so 1 is the appointment and the rest
+     fall around it.
+
+     An item without coordinates still gets its number and simply has no pin;
+     nothing in the list is silently dropped for want of a position. */
+  var checkPins = [];
+  function checkRow(href, name, km, note, dot, num, y, x) {
+    if (num != null && y != null && x != null)
+      checkPins.push({ n: num, y: y, x: x, name: name });
+    return '<li>' +
+           (num != null ? '<span class="ra-ck-i">' + num + "</span>" : "") +
+           (dot ? '<i class="ra-dot" style="background:' + dot + '"></i>' : "") +
+           (href ? '<a href="' + esc(href) + '" target="_blank" rel="noopener">' +
+                   esc(name) + "</a>" : esc(name)) +
+           (km != null ? ' <span class="ra-ck-km">' + (Math.round(km * 10) / 10) +
+                         " km</span>" : "") +
+           (note ? '<span class="ra-ck-n">' + esc(note) + "</span>" : "") + "</li>";
+  }
+
+  var checkLayer = L.layerGroup();
+  function drawCheckPins() {
+    checkLayer.clearLayers();
+    checkPins.forEach(function (p) {
+      L.marker([p.y, p.x], {
+        interactive: false, keyboard: false,
+        icon: L.divIcon({ className: "ra-pin", iconSize: [19, 19],
+                          iconAnchor: [9.5, 9.5], html: String(p.n) })
+      }).addTo(checkLayer);
+    });
+    if (checkPins.length && !map.hasLayer(checkLayer)) checkLayer.addTo(map);
+  }
+  function clearCheckPins() { checkPins = []; checkLayer.clearLayers(); }
+
+  function buildCheck(d, r) {
+    var pane = document.getElementById("ra-check");
+    var body = document.getElementById("ra-check-b");
+    if (!pane || !body) return;
+    if (d.lat == null || !r) { pane.hidden = true; clearCheckPins(); return; }
+    clearCheckPins();
+    var h = [hoodNoteHtml(d, r)], count = 0;
+
+    /* 1. The archive. The appointment you have to make, and often the only
+          one with an opening time. */
+    var arch = provs.providers.filter(function (p) {
+      return p.at && p.at.lat != null &&
+             (p.countries || []).indexOf(d.country) > -1;
+    }).map(function (p) {
+      return { p: p, km: haversine(d.lat, d.lon, p.at.lat, p.at.lon) };
+    /* Within a drive, not merely nearest. Gračišće's third-closest Croatian
+       archive is Zadar at 160 km, which is a different holiday; the list said
+       so with a straight face because it only asked for the nearest three. */
+    }).filter(function (x) { return x.km <= 120; })
+      .sort(function (a, b) { return a.km - b.km; }).slice(0, 4);
+    if (arch.length) {
+      h.push('<h4>' + esc(T("Where the paper is")) + "</h4><ul>");
+      arch.forEach(function (x) {
+        count++;
+        h.push(checkRow(x.p.url, x.p.name, x.km,
+                        (ACC[x.p.access] || [0, x.p.access])[1],
+                        ACCESS_DOT(x.p.access), count, x.p.at.lat, x.p.at.lon));
+      });
+      h.push("</ul>");
+    }
+
+    /* 2. The parishes. Where the registers were written. */
+    if ((d.parishes || []).length) {
+      h.push('<h4>' + esc(T("Parishes")) + "</h4><ul>");
+      d.parishes.forEach(function (p) {
+        count++;
+        h.push(checkRow(p.q ? "https://www.wikidata.org/wiki/" + p.q : null,
+                        p.n, p.km, null, null, count, p.y, p.x));
+      });
+      h.push("</ul>");
+    }
+
+    /* 3. The burial grounds. Open whenever you are. */
+    if ((d.graves || []).length) {
+      h.push('<h4>' + esc(T("Burial grounds")) + "</h4><ul>");
+      d.graves.forEach(function (g) {
+        count++;
+        var href = g.src === "wikidata"
+          ? "https://www.wikidata.org/wiki/" + g.id
+          : g.id ? "https://www.openstreetmap.org/" +
+                   ({ w: "way", n: "node", r: "relation" }[g.id[0]] || "way") +
+                   "/" + g.id.slice(1)
+                 : null;
+        h.push(checkRow(href, g.n, g.km, null, null, count, g.y, g.x));
+      });
+      h.push("</ul>");
+    }
+
+    /* 4. The villages inside the ring, nearest first — their own registers
+          may name the same family, and they are a walk apart. */
+    var vs = [];
+    idx.places.forEach(function (p) {
+      if (p.y == null || p.i === d.id) return;
+      var km = haversine(d.lat, d.lon, p.y, p.x);
+      if (km <= r) vs.push({ p: p, km: km });
+    });
+    vs.sort(function (a, b) { return a.km - b.km; });
+    if (vs.length) {
+      h.push('<h4>' + esc(T("Villages within") + " " + r + " km") + "</h4><ul>");
+      vs.slice(0, 20).forEach(function (x) {
+        count++;
+        h.push(checkRow(BASE + "place/" + x.p.i + "/", x.p.n, x.km,
+                        x.p.c ? x.p.c + " " + T(x.p.c === 1 ? "volume" : "volumes")
+                              : null, null, count, x.p.y, x.p.x));
+      });
+      if (vs.length > 20)
+        h.push('<li class="ra-ck-more">' + esc(T("and") + " " +
+               (vs.length - 20) + " " + T("more")) + "</li>");
+      h.push("</ul>");
+    }
+
+    if (!count) { pane.hidden = true; return; }
+    body.innerHTML = h.join("");
+    document.getElementById("ra-check-n").textContent = count;
+    (document.querySelector(".ra-check-w") || {}).textContent = T("Visiting");
+    pane.hidden = false;
+    drawCheckPins();
+  }
+
+  /* Shut by default, and it stays as the reader left it while they move from
+     place to place — somebody planning a trip opens it once. */
+  (function () {
+    var t = document.getElementById("ra-check-t");
+    if (!t) return;
+    t.addEventListener("click", function () {
+      var open = document.getElementById("ra-check").classList.toggle("on");
+      t.setAttribute("aria-expanded", open ? "true" : "false");
+      document.getElementById("ra-check-b").hidden = !open;
+      try { localStorage.setItem("ra-check", open ? "1" : "0"); } catch (e) {}
+      map.invalidateSize();
+    });
+    var was = null;
+    try { was = localStorage.getItem("ra-check"); } catch (e) {}
+    if (was === "1") t.click();
+  })();
   function clearLit() {
     litCC = null; litFor = null;
     ctryLayer.clearLayers();
@@ -1964,13 +2954,27 @@ window.addEventListener("load", async function () {
     document.getElementById("ra-ylab").title = year
       ? "Showing only what can answer for " + (year === year2 ? year : year + "–" + year2) +
         ". Every panel now says whose archive those years belonged to."
-      : "Turn this on and the map keeps only the places that can answer for a range of years — and every panel says whose archive those years belonged to.";
+      /* THIS IS THE STRING THAT WINS. There is a title on the label in the
+         markup too, and yearUI() overwrites it on first run — so editing the
+         static one changes nothing a reader will ever see. Both now say the
+         same thing, and this is the one to change. */
+      : "Turn this on and the map keeps only the places that can answer for a range of years, the volume lists narrow to it, and every panel says whose archive those years belonged to.";
     setQ("years", year ? year + "," + year2 : "");
     setQ("year", "");
     paintRegions();
     apply();
     var at = Q.get("at");
-    if (at && cache[at]) { panel.innerHTML = render(cache[at]); }
+    if (at && cache[at]) {
+      /* RE-RENDERED AND LEFT DEAD. Moving the year rebuilds the panel's
+         innerHTML, which throws away the era band's wiring, the flag icon,
+         the checklist and the ring — everything open() does after render().
+         The panel looked right and nothing in it worked until the reader
+         picked the place again. */
+      panel.innerHTML = render(cache[at]);
+      bandsInit(panel);
+      paintIcoFlags(panel);
+      buildCheck(cache[at], drawHood(cache[at]));
+    }
   }
   yon.addEventListener("change", function () {
     readRange();
@@ -2317,7 +3321,14 @@ window.addEventListener("load", async function () {
     searchHit = false;
     /* The lighting belongs to the query that produced it, and nothing else. */
     if (litFor !== null && litFor !== t) { clearLit(); syncCountryDots(); }
-    if (t !== lastHitFor) { hitLayer.clearLayers(); lastHitFor = null; }
+    /* THE STRIP BELONGS TO THE SEARCH THAT BUILT IT. Typing runs a search per
+       keystroke: at «de» 1,640 places matched and filled the strip, and by
+       «defranceski» NO place matched — so the branch that would have rebuilt
+       it never ran, and the strip sat there offering Aberdeen and Adelaide
+       under a heading that said «1,640 places match "de"» while the box read
+       defranceski. Cleared at the top of every search, and rebuilt below only
+       if this search has matches of its own. */
+    if (t !== lastHitFor) { hitLayer.clearLayers(); lastHitFor = null; clearHood(); }
     splitQuery(t);
     if (qPlace) t = qPlace;
     syncCountryDots();
@@ -2381,6 +3392,14 @@ window.addEventListener("load", async function () {
       /* Both halves were asked, so both get answered, in one panel. */
       if (qName) { both(vis, qName, qbox.value.trim()); return; }
       if (vis.length === 1) { markHit(vis[0]._p, t); open(vis[0]._p); return; }
+      /* EVERY MATCH GETS THE RING, NOT JUST A LONE ONE. David: «why if i
+         search senj am i not getting the pulsing red markers?» Because
+         markHit() was only reached when exactly one place matched — so the
+         clearer the search, the better it was marked, and five Senjs spread
+         across two counties got nothing at all. That is backwards: a handful
+         of matches is exactly when the reader needs to be shown where they
+         are. Capped, because ringing forty dots marks nothing. */
+      if (vis.length > 1 && vis.length <= 12) markHits(vis, t);
       /* SEVERAL PLACES MATCHED, SO THE MAP IS THE ANSWER — BUT THE PANEL
          MUST NOT STILL BE ANSWERING THE LAST QUESTION. This branch framed
          the matches and fell through without touching the panel, so the
@@ -2391,7 +3410,7 @@ window.addEventListener("load", async function () {
          the map were answering different questions.
          One line saying what was framed, and which places they are. */
       if (vis.length > 1) {
-        empty.hidden = true; panel.hidden = false;
+        empty.hidden = true; panel.hidden = false; retireVisit();
         var some = vis.slice(0, 12);
         var hh = ['<div class="at-h"><h3>' + esc(qbox.value.trim()) + "</h3>" +
                   '<span class="at-n">' + vis.length.toLocaleString() +
@@ -2563,14 +3582,35 @@ window.addEventListener("load", async function () {
      A search framed the map on Gračišće and then drew it as one more small
      grey dot among grey dots — «i cant differentiate the country icons from
      the one i searched». Every other colour on this map means «what it
-     costs to look», so the answer cannot be another of those: this is amber,
-     which the access scale does not use, and it pulses, which nothing else
-     does. A ring around the dot rather than a replacement for it, so the
-     dot's own colour — the thing the legend is about — is still readable
-     underneath.
+     costs to look», so the answer cannot be another of those.
+
+     IT WAS AMBER, AND AMBER WAS NOT FREE. This comment used to say «amber,
+     which the access scale does not use»; the scale's `mixed` is #E8792B and
+     the ring was #E8912B, so it collided with an access state and with the
+     amber archive triangles around it. Magenta is the colour the scale has
+     never used — see the note on .ra-hit in the stylesheet below. It pulses,
+     which nothing else does.
+
+     A ring around the dot rather than a replacement for it, so the dot's own
+     colour — the thing the legend is about — is still readable underneath.
 
      A DOM marker rather than a canvas one, because the canvas renderer
      cannot animate and the whole point is that it moves. */
+  function markHits(list, term) {
+    hitLayer.clearLayers();
+    lastHitFor = term;
+    list.forEach(function (m) {
+      var p = m._p || m;
+      if (p.y == null) return;
+      L.marker([p.y, p.x], {
+        interactive: false, keyboard: false,
+        icon: L.divIcon({ className: "ra-hit", iconSize: [34, 34],
+                          iconAnchor: [17, 17], html: "<i></i><b></b>" })
+      }).addTo(hitLayer);
+    });
+    if (!map.hasLayer(hitLayer)) hitLayer.addTo(map);
+  }
+
   function markHit(p, term) {
     hitLayer.clearLayers();
     lastHitFor = term;
@@ -2685,14 +3725,50 @@ window.addEventListener("load", async function () {
          once and therefore none of them clearly: where a name is BORNE today,
          where a record NAMES it, and where it CAME FROM. They take different
          evidence and deserve different sentences. */
+      /* THE SPELLINGS' COUNTRIES BELONG HERE TOO, AND WERE MISSING.
+         David, on Defranceski: «poland is in reality the real name origin» —
+         and the panel did not list Poland, while the flag cards did. Neither
+         was lying. Poland is attested for DEFRANCESCHI, which is a `spelling`
+         variant of Defranceski: the same name, one clerk's letter apart. The
+         map has lit countries that way for a while (see VARIANT_OK below);
+         this list was still reading the one record and so answered «where is
+         this exact spelling attested» to a reader asking «where is my name».
+
+         Sounds-alike variants stay out, here as everywhere. They are an
+         algorithm's guess, and folding them in is how «attested» quietly
+         becomes «rhymes with». Every country that arrives by a spelling is
+         labelled with the spelling that brought it, so the claim on screen is
+         the claim the data supports. */
+      var VOK = { curated: 1, grammar: 1, spelling: 1 };
+      var seenCC = {}, merged = [];
+      r.countries.forEach(function (c) { seenCC[c.cc] = 1; merged.push(c); });
+      (r.variants || []).forEach(function (v) {
+        if (!VOK[v.how]) return;
+        var fv = fold(v.n), rec = null;
+        Object.keys(scache).forEach(function (k) {
+          (scache[k] || []).forEach(function (x) {
+            if (!rec && fold(x.n) === fv) rec = x; });
+        });
+        if (!rec) return;
+        (rec.countries || []).forEach(function (c) {
+          if (seenCC[c.cc]) return;
+          seenCC[c.cc] = 1;
+          merged.push({ cc: c.cc, how: c.how, by: c.by, n: c.n, via: v.n });
+        });
+      });
+
       var byHow = {};
-      r.countries.forEach(function (c) { (byHow[c.how] = byHow[c.how] || []).push(c); });
+      merged.forEach(function (c) { (byHow[c.how] = byHow[c.how] || []).push(c); });
       var linkCC = function (list, withN) {
         return list.map(function (c) {
           return '<a href="' + BASE + "country/" + c.cc.toLowerCase() + '/">' +
                  esc(CNAME[c.cc] || c.cc) + "</a>" +
                  (withN && c.n ? ' <span class="ra-who">' + c.n.toLocaleString() +
-                                 "</span>" : "");
+                                 "</span>" : "") +
+                 /* «as Defranceschi» — without it the reader cannot tell which
+                    spelling the country actually came from, and the list would
+                    be making a slightly bigger claim than the data does. */
+                 (c.via ? ' <span class="ra-who">as ' + esc(c.via) + "</span>" : "");
         }).join(" · ");
       };
 
@@ -2940,7 +4016,7 @@ window.addEventListener("load", async function () {
   };
 
   async function showCountries(list, stale) {
-    if (list && list.length) { searchHit = true; noteSearch(); }
+    if (list && list.length) { searchHit = true; noteSearch(); retireVisit(); }
     litFor = fold(qbox.value.trim());
     /* THE FLAG CARDS FOLLOW THE SURNAME, NOT THE TEXT. David: «when I search
        Defranceski I don't see flags below, even though we know which countries
@@ -2958,7 +4034,13 @@ window.addEventListener("load", async function () {
        by the search that starts a new question. */
     ctryLayer.clearLayers();
     if (!list.length) return;
-    var got = await Promise.all(list.slice(0, 10).map(function (x) {
+    /* TEN WAS AN ARBITRARY NUMBER AND IT CONTRADICTED THE CARDS. The flag
+       cards below take this same list whole, so a name attested in sixteen
+       countries got sixteen cards and ten outlines, and the six that lost the
+       coin toss — Poland among them for Defranceski — looked like countries
+       the atlas had never heard of. Whatever the evidence supports gets drawn;
+       the cap that remains is there because each outline is a fetch. */
+    var got = await Promise.all(list.slice(0, 40).map(function (x) {
       return outline(x.cc || x);
     }));
     if (stale && stale()) return;
@@ -3139,6 +4221,15 @@ window.addEventListener("load", async function () {
 
   async function elsewhere(term) {
     var mine = ++searchTok;
+    /* THE THIRD TIME THIS EXACT BUG. David searched «blazevic», the panel
+       said «No places of that name here yet» — correctly — and the right-hand
+       pane went on offering a fifteen-item visit to St Blazey in Cornwall,
+       parishes, cemeteries, numbered pins and all, left over from an earlier
+       pick. retireVisit() was wired into the branches that answer with several
+       places and with a country, and not into this one, which is the branch
+       that answers when there is no place at all. Every path that stops
+       describing a chosen place has to say so. */
+    retireVisit();
     /* TYPING A COUNTRY'S NAME SHOULD OPEN THE COUNTRY. David typed «libya» and
        got «Qaṣr Lībiyā», a village whose name happens to contain it, and
        nothing at all about the country — while the country panel, with its
@@ -3513,7 +4604,7 @@ window.addEventListener("load", async function () {
            "volume by volume — the rest are districts, correctly placed and unread. " +
            "<b>That is a gap in this map, not a gap in the record.</b></p>");
     if (cover.length) {
-      h.push('<div class="at-sec"><div class="lab">But these reach it</div><ul class="at-films">');
+      h.push('<div class="at-sec at-sec-wide"><div class="lab">But these reach it</div><ul class="at-films">');
       cover.slice(0, 14).forEach(function (p) {
         h.push('<li><a href="' + esc(p.url) + '" target="_blank" rel="noopener">' +
                esc(p.name) + " &#8599;</a> <span class=\"ra-who\">" +
@@ -3538,6 +4629,173 @@ window.addEventListener("load", async function () {
      windows and blocked site data throw on access rather than returning
      empty, and a map that will not draw because it could not remember a
      search would be a poor trade. */
+  /* ---- SMART SEARCH -------------------------------------------------------
+     Places and surnames in one list, ranked, keyboard-driven.
+
+     RANKED IN TIERS, NOT BY SCORE. An exact name wins outright — «Senj» is
+     Senj, not one of five things containing those letters, which is what the
+     old list offered. Then names that START with what was typed, then the
+     alias index (so «Gallignana» finds Gračišće and «Breslau» finds Wrocław,
+     which is the whole point of this atlas's place index), then anything
+     containing it. Within a tier, the place with more volumes first — that is
+     the one most likely to be meant, and it is the only signal here that is
+     not about spelling. */
+  var SUG_PLACES = 7, SUG_NAMES = 3;
+  var sugBox, sugRows = [], sugIdx = -1, sugTerm = "";
+
+  function sugPlaces(f) {
+    var out = [];
+    for (var i = 0; i < idx.places.length; i++) {
+      var p = idx.places[i], n = fold(p.n), tier = null;
+      if (n === f) tier = 0;
+      else if (n.indexOf(f) === 0) tier = 1;
+      else if (p.q) {
+        var qi = p.q.indexOf(f);
+        if (qi === 0 || (qi > 0 && /[\s,]/.test(p.q[qi - 1]))) tier = 2;
+        else if (qi > -1) tier = 3;
+      }
+      if (tier !== null) out.push([tier, -(p.c || 0), p]);
+    }
+    out.sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; });
+    return out.slice(0, SUG_PLACES).map(function (x) { return x[2]; });
+  }
+
+  function sugRender(places, names) {
+    sugRows = [];
+    var h = [];
+    if (places.length) {
+      h.push('<p class="ra-sug-h">' + esc(T("Places")) + "</p>");
+      places.forEach(function (p) {
+        var i = sugRows.length; sugRows.push({ kind: "place", p: p });
+        h.push('<button type="button" role="option" aria-selected="false" ' +
+               'class="ra-sug-r" data-i="' + i + '">' +
+               '<span class="ra-sug-n">' + esc(p.n) + "</span>" +
+               (p.cc ? '<span class="ra-sug-m">' + esc(CNAME[p.cc] || p.cc) + "</span>" : "") +
+               (p.c ? '<span class="ra-sug-c">' + p.c + " " +
+                      esc(T(p.c === 1 ? "volume" : "volumes")) + "</span>" : "") +
+               "</button>");
+      });
+    }
+    if (names && names.length) {
+      h.push('<p class="ra-sug-h">' + esc(T("Names")) + "</p>");
+      names.forEach(function (r) {
+        var i = sugRows.length; sugRows.push({ kind: "name", r: r });
+        h.push('<button type="button" role="option" aria-selected="false" ' +
+               'class="ra-sug-r" data-i="' + i + '">' +
+               '<span class="ra-sug-n">' + esc(r.n) + "</span>" +
+               '<span class="ra-sug-m">' + esc(T("surname")) + "</span>" +
+               '<span class="ra-sug-c">' + (r.countries || []).length + " " +
+               esc(T((r.countries || []).length === 1 ? "country" : "countries")) +
+               "</span></button>");
+      });
+    }
+    if (!sugRows.length) { sugHide(); return; }
+    sugBox.innerHTML = h.join("");
+    sugBox.hidden = false;
+    qbox.setAttribute("aria-expanded", "true");
+    sugIdx = -1;
+  }
+
+  function sugHide() {
+    if (!sugBox) return;
+    sugBox.hidden = true; sugBox.innerHTML = "";
+    sugRows = []; sugIdx = -1;
+    qbox.setAttribute("aria-expanded", "false");
+  }
+
+  function sugMark(i) {
+    var bs = sugBox.querySelectorAll(".ra-sug-r");
+    [].forEach.call(bs, function (b, j) {
+      b.classList.toggle("on", j === i);
+      b.setAttribute("aria-selected", j === i ? "true" : "false");
+      if (j === i) b.scrollIntoView({ block: "nearest" });
+    });
+    sugIdx = i;
+  }
+
+  function sugPick(i) {
+    var row = sugRows[i];
+    if (!row) return;
+    sugHide();
+    if (row.kind === "place") {
+      var p = row.p;
+      /* The box keeps the name that was chosen, not the fragment typed — but
+         without re-running the search, which would answer the question twice. */
+      qbox.value = p.n;
+      markHit(p, fold(p.n));
+      open(p);
+      map.setView([p.y, p.x], Math.max(map.getZoom(), 11));
+    } else {
+      qbox.value = row.r.n;
+      elsewhere(row.r.n);
+    }
+  }
+
+  function sugFor(raw) {
+    var term = (raw || "").trim();
+    var f = fold(term);
+    sugTerm = term;
+    if (f.length < 2 || !idx.places) { sugHide(); return; }
+    var places = sugPlaces(f);
+    sugRender(places, null);
+    /* The surname shard is a fetch, so the list appears on places first and
+       grows a «Names» section when it lands — rather than the whole dropdown
+       waiting on a file for a name the reader may not have meant. */
+    surnames(term).then(function (ns) {
+      /* ONLY «ARE THEY STILL TYPING THIS». The guard also carried
+         `|| sugBox.hidden && !places.length`, which is exactly the case that
+         matters most: a pure surname like «blazevic» matches no place, so the
+         box was hidden, so the names were thrown away and the dropdown stayed
+         empty for the one query it should answer best. */
+      if (sugTerm !== term) return;
+      var keep = (ns || []).filter(function (r) {
+        var n = fold(r.n);
+        return n === f || n.indexOf(f) === 0;
+      }).slice(0, SUG_NAMES);
+      if (keep.length) sugRender(places, keep);
+    }).catch(function () {});
+  }
+
+  sugBox = document.getElementById("ra-sug");
+
+  /* Typing rebuilds the list; the search itself still runs on its own debounce
+     further down, so the dropdown is a shortcut past it rather than a
+     replacement for it. */
+  qbox.addEventListener("input", function () { sugFor(qbox.value); });
+  qbox.addEventListener("focus", function () {
+    if (qbox.value.trim().length >= 2) sugFor(qbox.value);
+  });
+  /* A click inside the list must land before the blur closes it. */
+  qbox.addEventListener("blur", function () { setTimeout(sugHide, 160); });
+
+  qbox.addEventListener("keydown", function (ev) {
+    if (sugBox.hidden || !sugRows.length) return;
+    if (ev.key === "ArrowDown") {
+      ev.preventDefault(); sugMark((sugIdx + 1) % sugRows.length);
+    } else if (ev.key === "ArrowUp") {
+      ev.preventDefault();
+      sugMark((sugIdx <= 0 ? sugRows.length : sugIdx) - 1);
+    } else if (ev.key === "Enter") {
+      /* Enter with nothing highlighted runs the ordinary search, which is what
+         somebody who typed a whole name and never looked down expects. */
+      if (sugIdx > -1) { ev.preventDefault(); sugPick(sugIdx); }
+      else sugHide();
+    } else if (ev.key === "Escape") {
+      sugHide();
+    }
+  });
+
+  sugBox.addEventListener("mousedown", function (ev) {
+    var b = ev.target.closest && ev.target.closest(".ra-sug-r");
+    if (!b) return;
+    ev.preventDefault();                 // keep focus, beat the blur
+    sugPick(+b.dataset.i);
+  });
+  sugBox.addEventListener("mousemove", function (ev) {
+    var b = ev.target.closest && ev.target.closest(".ra-sug-r");
+    if (b) sugMark(+b.dataset.i);
+  });
+
   var RECENT_KEY = "ra-recent", RECENT_MAX = 8;
   function recentGet() {
     try {
@@ -3885,7 +5143,9 @@ window.addEventListener("load", async function () {
     hitLayer.clearLayers(); lastHitFor = null;
     helpBox.hidden = true;
     document.getElementById("ra-info").setAttribute("aria-expanded", "false");
-    panel.hidden = true; empty.hidden = false;
+    panel.hidden = true; empty.hidden = false; clearHood();
+    var ck = document.getElementById("ra-check"); if (ck) ck.hidden = true;
+    clearCheckPins();
     ["q", "year", "years", "off", "kind", "layers", "at", "view"].forEach(function (k) {
       setQ(k, "");
     });
@@ -3895,7 +5155,7 @@ window.addEventListener("load", async function () {
     map.fitBounds(L.latLngBounds(HOME), { padding: [24, 24] });
   });
 
-  function closeSheet() { panel.hidden = true; empty.hidden = false; }
+  function closeSheet() { panel.hidden = true; empty.hidden = false; clearHood(); }
   document.getElementById("ra-sheet-x").addEventListener("click", closeSheet);
 
   /* ---- A HANDLE ON THE MAP, ON PURPOSE -----------------------------------
@@ -4089,18 +5349,51 @@ window.addEventListener("load", async function () {
      top of the screen instead of below the fold. */
   /* A COLUMN OF ROWS, not one long wrapping line. Where a control landed
      used to depend on the width of everything before it. */
+  /* AND THE BAR HAS TO SIT ABOVE THE MAP. With the wrapper positioned, the
+     dropdown landed in the right place and was then painted over by Leaflet —
+     only its «PLACES» heading showed above the map's top edge. Leaflet stacks
+     its own panes from 200 to 700 inside the map container, so the bar needs
+     a stacking context of its own above that. 800 was not enough: Leaflet's
+     CONTROLS — the zoom buttons and the basemap switcher — sit at 1000, and
+     they went on punching through the list. Above them, and still below the
+     full-screen exit pill at 950... which is itself below this, so the pill
+     is raised with it where full screen applies. */
   .ra-bar { display: flex; flex-direction: column; align-items: stretch;
-            gap: 8px; margin: 14px 0 10px; }
+            gap: 8px; margin: 14px 0 10px; position: relative; z-index: 1100; }
   .ra-bar-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  /* The filter rides with the search box; the icon buttons still go to the
+     far end of the row. */
+  .ra-bar-filters { flex: 0 0 auto; }
+  /* The box takes the room the row has. Without this it sat at its intrinsic
+     width with the filter jammed against it. */
+  /* THE THING BOTH DROPDOWNS HANG FROM. .ra-sug and .ra-recent are both
+     `position: absolute; top: calc(100% + 6px); left: 0; right: 0` — which
+     only means «under the search box» if the search box's wrapper is a
+     positioned ancestor. It was static, so they resolved against the page and
+     rendered 1,462 pixels down it, full width, below the fold. The dropdown
+     was in the DOM, not hidden, display:block, with seven rows in it — and
+     invisible. My own checks asked `hidden`, `innerHTML.length` and `display`
+     and never asked WHERE it was, so they all passed while nothing was on
+     screen. One line, and it fixes the remembered-searches list too, which
+     has been landing in the same wrong place. */
+  .ra-bar-find .ra-find { flex: 1 1 320px; min-width: 200px; position: relative; }
+  /* Its own line when the row is full, which is most of the time now that the
+     filter shares it — and always, when the message becomes a sentence. */
+  .ra-bar-find #ra-count { flex: 1 1 100%; margin: 0; }
   /* The search takes the row and the buttons are pushed to the far end. */
   .ra-bar-find #ra-q { font-size: 14px; padding: 9px 12px; }
   .ra-bar-find #ra-info { margin-left: auto; }
   .ra-bar #ra-q { font-size: 14px; padding: 9px 12px; }
   /* The opening panel's three ways in. Compact, because it is scaffolding
      the reader should stop needing after their first search. */
-  .at-start { margin: 8px 0 12px; padding-left: 1.1em; }
-  .at-start li { margin: 0 0 7px; line-height: 1.5; }
+  /* ONE PARAGRAPH, NOT A LIST OF THREE. See the note on the markup. Held to
+     a readable measure because the panel it sits in is now the full width of
+     the page, and a single line of 150 characters is its own kind of waste. */
+  .at-start { margin: 0; font-size: 13.5px; line-height: 1.65;
+              color: var(--ink-2); max-width: 88ch; }
+  .at-start b { color: var(--ink); }
   .at-start a { border-bottom: 1px solid var(--rule-strong); }
+  .at-start-more { margin: 6px 0 0; font-size: 12.5px; }
   #ra-play[aria-pressed="true"] { background: var(--accent); color: var(--band-label, #fff);
                                   border-color: var(--accent); }
   /* THE SAME HEIGHT AS THE SEARCH BOX. They were 32px against its 38 and sat
@@ -4175,7 +5468,15 @@ window.addEventListener("load", async function () {
      inside a box with empty screen beneath it. Both sides are grid items in a
      container that is already the height of the window; auto lets the row
      stretch them equally. */
-  :global(.at-wrap.ra-fs .at-panel) { height: auto; }
+  /* THE PANEL IS A ROW NOW. When it was the right-hand column, `height:auto`
+     let it stretch to the window beside the map. As the bottom row of the
+     areas grid, `auto` means «as tall as your content» — so a place with
+     forty volumes would push the map off the screen in the mode whose whole
+     point is to give the map the screen. The rows split it instead. */
+  :global(.at-wrap.ra-fs) { grid-template-rows: 1fr minmax(0, 38vh); }
+  :global(.at-wrap.ra-fs .at-panel) { height: auto; min-height: 0;
+    overflow-y: auto; }
+  :global(.at-wrap.ra-fs .ra-rail) { height: auto; min-height: 0; }
   /* FULL SCREEN ON A PHONE GAVE THE MAP A SLIVER.
      The two rules above say `height: auto` so that, in the two-COLUMN
      desktop layout, both sides stretch to the height of the window. Below
@@ -4188,7 +5489,10 @@ window.addEventListener("load", async function () {
      its own content. min-height:0 is what lets a grid item shrink below its
      content and scroll instead of pushing the row open. */
   @media (max-width: 900px) {
-    :global(.at-wrap.ra-fs) { grid-template-rows: 3fr 2fr; padding: 8px; gap: 8px; }
+    /* One column, so the rail becomes a horizontal strip and there are three
+       rows to share rather than two. */
+    :global(.at-wrap.ra-fs) { grid-template-rows: 3fr auto 2fr;
+      padding: 8px; gap: 8px; }
     :global(.at-wrap.ra-fs .at-map) { height: 100%; min-height: 0; }
     :global(.at-wrap.ra-fs .at-panel) { height: 100%; min-height: 0;
       max-height: none; overflow-y: auto; }
@@ -4327,13 +5631,41 @@ window.addEventListener("load", async function () {
   /* See index.astro: the shared .pagehead is sized for reading, not for a
      tool. Here the title sits closer to the top and the standfirst runs the
      full column instead of stopping at 76ch. */
-  :global(.pagehead.ra-lede) { padding: 26px 0 18px; margin-bottom: 18px; }
-  :global(.pagehead.ra-lede h1) { font-size: clamp(30px, 3.6vw, 44px); margin-top: 8px; }
-  :global(.pagehead.ra-lede .dek) { max-width: none; }
+  /* ONE BASELINE ROW: heading, then the scale, then the way out to /help/.
+     See the note on the markup in index.astro. The row wraps rather than
+     shrinking the type, so a narrow window gets two short lines instead of
+     an unreadable one. */
+  :global(.pagehead.ra-lede) { padding: 16px 0 10px; margin-bottom: 10px;
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; }
+  :global(.pagehead.ra-lede h1) { font-size: clamp(21px, 2vw, 27px);
+    margin: 0; letter-spacing: -.01em; }
+  :global(.pagehead.ra-lede .lab) { margin: 0; }
+  :global(.pagehead.ra-lede .dek) { max-width: none; margin: 0;
+    font-size: 13px; }
+  /* The stats line is the first thing to go when there is no room for it:
+     it is evidence of scale, not an instruction, and the reader can find the
+     same numbers on /help/ and on the data index. */
   @media (max-width: 760px) {
-    :global(.pagehead.ra-lede) { padding: 18px 0 14px; margin-bottom: 12px; }
+    :global(.pagehead.ra-lede) { padding: 12px 0 8px; margin-bottom: 8px; }
+    :global(.pagehead.ra-lede .lab) { flex-basis: 100%; }
   }
-  .at-wrap { display: grid; grid-template-columns: 1fr 360px; gap: 18px; margin-top: 12px; }
+  /* TWO COLUMNS BECAME AN L. The answer — name, volumes, archives — used to
+     be a 360px column on the right, which is a narrow measure for a list of
+     volume titles and left the map three quarters of the width. It now runs
+     full width UNDER the map, and the right of the map is a 112px rail of
+     era flags, which is the one thing that suits a tall thin box.
+     Areas rather than DOM order, because full screen fixes this same element
+     to the viewport with the panel inside it — moving the panel out of the
+     wrap in markup would have emptied full screen of everything but the map. */
+  /* The column is as wide as the checklist wants to be: a 44px rail when it
+     is shut, a readable list when it is open. The map takes the rest either
+     way, which is why this is `auto` and not a number. */
+  .at-wrap { display: grid; gap: 18px; margin-top: 12px;
+             grid-template-columns: 1fr auto;
+             grid-template-areas: "map check" "panel panel"; }
+  .at-map { grid-area: map; }
+  .ra-check { grid-area: check; }
+  .at-panel { grid-area: panel; }
   /* A MAP THAT DOES NOT FIT THE WINDOW IS A MAP YOU SCROLL TO USE.
      600px was fine while every control lived in the bar above it. It stopped
      being fine the moment the year scrubber moved to the FOOT of the map:
@@ -4345,11 +5677,70 @@ window.addEventListener("load", async function () {
      capped so it does not sprawl on a tall monitor. */
   .at-map { height: clamp(380px, calc(100vh - var(--ra-above, 340px)), 620px);
             border: 1px solid var(--rule); border-radius: 3px; }
-  .at-panel { height: clamp(380px, calc(100vh - var(--ra-above, 340px)), 620px);
-              overflow-y: auto; border: 1px solid var(--rule);
-              border-radius: 3px; background: var(--panel); padding: 18px 18px 24px; }
+  /* NO LONGER A 620px SCROLLER. Beside the map it had to match the map's
+     height and scroll inside itself; under the map it can be as tall as its
+     content and the page scrolls, which is one scrollbar instead of two. */
+  .at-panel { height: auto; border: 1px solid var(--rule);
+              border-radius: 3px; background: var(--panel); padding: 16px 18px 20px; }
+  /* AND FULL WIDTH IS NOT A REASON FOR 160-CHARACTER LINES. The body was a
+     vertical list built for a narrow column; across the full width its
+     volume lists would run the width of a monitor. A card grid keeps the
+     measure readable and puts the sources side by side, which is how the
+     mockup read. The heading and the two notes that qualify the whole place
+     span every column — they are about the place, not about one source. */
+  .at-body { display: grid; gap: 14px 18px; align-items: start;
+             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+  /* The BODY is rendered by Astro and carries the scope class; everything
+     inside it is written by script and does not, so the child half of each
+     of these has to be global or the rule never lands. This is the whole
+     reason the band appeared inside one 362px column of a four-column grid
+     with its segments overflowing, instead of spanning the panel. */
+  .at-body > :global(.at-h), .at-body > :global(.at-also),
+  .at-body > :global(.ra-juris), .at-body > :global(#ra-flagera),
+  .at-body > :global(.ra-era-lead), .at-body > :global(.ra-tl),
+  .at-body > :global(.ra-tl-group),
+  .at-body > :global(.at-lab),
+  .at-body > :global(.at-hint) { grid-column: 1 / -1; }
+
+  /* NOT EVERY CHILD IS A CARD, AND THE FIRST VERSION TREATED THEM ALL AS ONE.
+     David: «why is everything so wonky? a whole column dedicated to
+     "everything about Gračišće"». He was looking at a 21-pixel link holding a
+     362-pixel column open, and — worse — at the 32 volumes for Gračišće
+     squeezed into another 362-pixel column, 870 pixels tall, with three
+     quarters of the page blank beside it, while «Marriages 1671–1835 … ŽU
+     Gračišće» wrapped onto two lines for want of room it could see.
+
+     Three kinds of child, three behaviours. The source blocks ARE cards and
+     read well side by side, which is what the grid is for. A single link is
+     not a card. A list of volumes is not a card either: it wants the full
+     width and its own columns, because a long list of short lines is the one
+     thing that genuinely benefits from being set in columns. */
+  .at-body > :global(.at-go),
+  .at-body > :global(.at-sec-wide) { grid-column: 1 / -1; }
+  /* Sized in em so the columns track the text, not the window: at 22em a
+     volume title and its years sit on one line, which is the whole point.
+
+     display:block IS LOAD-BEARING. .at-films is `display: grid` further down
+     for its 5px row gap, and a grid container ignores `columns` outright —
+     the property computed to a 418px column width and the list went on
+     rendering as one 755px column of 32 items, which looked exactly like the
+     bug I had just fixed. The row gap comes back as a margin. */
+  :global(.at-sec-wide .at-films) { display: block; columns: 22em;
+    column-gap: 30px; }
+  :global(.at-sec-wide .at-films li) { break-inside: avoid; margin-bottom: 5px; }
+
+  /* The vertical era rail's styles lived here. The rail is gone — one
+     timeline, under the map — so they went with it. loadEraArt() and the
+     .ra-tl-flag rules remain: the country band still draws the flags.
+
+     RESTORED BELOW, AND THE REASON THIS NOTE IS LONG. Removing the rail's
+     rules, I cut from the rail's own comment to the next section marker and
+     assumed the two were adjacent. They were two hundred and thirty lines
+     apart, so the cut took .at-h, .at-sec, .at-films, .ra-fcard, .ra-eras and
+     ninety-odd other rules with it — most of the panel and every flag card.
+     Twenty-three kilobytes for a block that should have been two. The rules
+     below are those, put back. */
   .at-empty p { font-size: 13px; line-height: 1.6; color: var(--ink-2); margin: 8px 0 0; }
-  .at-hint { color: var(--ink-3) !important; font-size: 12px !important; }
   :global(.at-dot) { display: inline-block; width: 7px; height: 7px;
     border-radius: 50%; margin-right: 5px; vertical-align: baseline; }
   /* Matches the hollow marker: rim only, middle empty. */
@@ -4357,8 +5748,6 @@ window.addEventListener("load", async function () {
   :global(.at-hollow-key i) { background: transparent !important;
     border: 1.5px solid var(--ink-3); }
   :global(.at-natl-key i) { border-style: dotted !important; }
-
-  :global(.at-h) { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
   /* The two ways out of the panel, beside the heading rather than under the
      fold. Sized and bordered like the bar's own icon buttons so they read as
      controls rather than as decoration next to a title. `align-self: center`
@@ -4366,7 +5755,12 @@ window.addEventListener("load", async function () {
      22px serif heading sits visibly low. */
   :global(.at-ico) { display: inline-flex; gap: 4px; margin-left: auto;
     align-items: center; align-self: center; flex: 0 0 auto; }
-  :global(.at-ico a) { display: inline-flex; align-items: center;
+  /* The flag slot. Sized to the icon buttons either side of it so the row
+    still reads as a row of controls rather than a picture wedged into one. */
+ :global(.at-ico a.at-ico-flag) { padding: 0; overflow: hidden; }
+ :global(.at-ico a.at-ico-flag svg) { width: 22px; height: 15px; display: block;
+    border: 1px solid var(--rule); }
+ :global(.at-ico a) { display: inline-flex; align-items: center;
     justify-content: center; width: 26px; height: 26px; border-radius: 5px;
     border: 1px solid var(--rule); background: var(--panel);
     font-size: 13px; line-height: 1; text-decoration: none; color: var(--ink-2); }
@@ -4375,7 +5769,6 @@ window.addEventListener("load", async function () {
     outline-offset: 2px; }
   :global(.at-h h3) { font-family: var(--serif); font-size: 22px; margin: 0; line-height: 1.25; }
   :global(.at-n) { font: 400 11px/1 var(--mono); color: var(--accent); white-space: nowrap; }
-  :global(.at-also) { font: 400 11.5px/1.5 var(--mono); color: var(--ink-3); margin: 8px 0 0; }
   :global(.at-sub) { font: 400 11.5px/1.5 var(--mono); color: var(--ink-3); margin: 6px 0 8px; }
   :global(.at-sec) { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--rule); }
   :global(.at-films) { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 5px; }
@@ -4384,8 +5777,6 @@ window.addEventListener("load", async function () {
   :global(.ra-who) { font: 400 10.5px/1 var(--sans); color: var(--ink-3); }
   :global(.ra-dot) { width: 9px; height: 9px; border-radius: 50%; display: inline-block;
                      margin-right: 7px; vertical-align: baseline; }
-  :global(.ra-juris) { margin-top: 16px; padding: 12px 14px; border-radius: 3px;
-                       background: var(--accent-wash); border-left: 2px solid var(--accent); }
   :global(.ra-juris p) { font-size: 13px; line-height: 1.6; margin: 6px 0 0; }
   :global(.ra-juris.ra-unmapped) { background: transparent; border-left-color: var(--rule-strong); }
   :global(.ra-filed) { font-size: 12.5px !important; }
@@ -4397,7 +5788,6 @@ window.addEventListener("load", async function () {
   :global(.ra-acc) { font-family: var(--sans); font-size: 12px; color: var(--ink-2);
                      margin: 12px 0 0; }
   :global(.at-what) { font-size: 13.5px; line-height: 1.65; margin: 12px 0 0; }
-  :global(.at-go) { margin: 14px 0 0; font-size: 13px; }
   :global(.ra-surn) { margin-top: 14px; padding: 12px 14px; border-radius: 3px;
                       background: var(--accent-wash); border-left: 2px solid #7A5CA8; }
   :global(.ra-surn p) { font-size: 13px; line-height: 1.6; margin: 6px 0 0; }
@@ -4407,20 +5797,14 @@ window.addEventListener("load", async function () {
   :global(.ra-tag) { font-family: var(--sans); font-size: 10px; text-transform: uppercase;
                      letter-spacing: .08em; color: var(--ink-3); margin-right: 6px; }
   :global(.ra-dead) { padding: 24px; font-family: var(--sans); font-size: 13px; color: var(--ink-3); }
-
   .at-tools { display: flex; flex-wrap: wrap; gap: 16px 26px; align-items: flex-end; margin-top: 16px; }
   .at-find { flex: 1 1 280px; }
-  #ra-q { width: 100%; box-sizing: border-box; margin-top: 6px; padding: 9px 12px;
-          font: 400 15px/1.3 var(--serif); color: var(--ink);
-          background: var(--panel); border: 1px solid var(--rule); border-radius: 3px; }
   #ra-q:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
-  .atlas-key { display: flex; flex-wrap: wrap; gap: 7px; }
   :global(.at-cat) { font: 400 12px/1 var(--sans); color: var(--ink-3); cursor: pointer;
             background: none; border: 1px solid var(--rule); border-radius: 999px;
             padding: 6px 11px; display: inline-flex; align-items: center; gap: 6px; opacity: .45; }
   :global(.at-cat.on) { opacity: 1; color: var(--ink-2); border-color: var(--ink-3); }
   :global(.at-cat i) { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
-
   /* ONE OPTION, ONE SHAPE, IN ALL THREE MENUS. */
   :global(.ra-opt) { display: inline-flex; align-items: center; gap: 7px;
     padding: 6px 11px; border: 1px solid var(--rule); border-radius: 999px;
@@ -4437,17 +5821,10 @@ window.addEventListener("load", async function () {
      remove nothing, or empty the map, should not look like a live choice. */
   :global(.ra-opt.dead) { opacity: .4; cursor: default; border-style: dashed; }
   :global(.ra-opt.dead .ra-n) { color: var(--ink-3); }
-
   .ra-copy { font: 400 12px/1 var(--sans); color: var(--accent); cursor: pointer;
              background: none; border: 1px solid var(--rule); border-radius: 3px; padding: 6px 10px; }
   :global(.ra-ico-wide) { width: auto !important; padding: 0 11px;
     gap: 5px; font: 400 12px/1 var(--sans); }
-  /* The wrapper has to be the control's height too, or it is the odd one out
-     on the row: it measured 44 against the buttons' 38 and pushed the input
-     three pixels low. Everything on this row is one variable now. */
-  .ra-find { position: relative; flex: 1 1 260px; min-width: 200px;
-             display: flex; align-items: center;
-             height: var(--ra-ctl, 38px); box-sizing: border-box; }
   .ra-find #ra-q { width: 100%; }
   /* [hidden] is a UA rule, and `display: flex` below is an author rule, so
      the author rule wins: the closed dropdown stayed laid out — a 1074x22
@@ -4457,11 +5834,6 @@ window.addEventListener("load", async function () {
      this box. All three filters were unclickable on the live site. Nothing
      looked wrong, which is why it took a browser asking for the click. */
   .ra-recent[hidden] { display: none; }
-  .ra-recent { position: absolute; top: calc(100% + 6px); left: 0; right: 0;
-               z-index: 40; display: flex; align-items: center; gap: 6px;
-               flex-wrap: wrap; padding: 10px 12px;
-               background: var(--panel); border: 1px solid var(--rule-strong);
-               border-radius: 6px; box-shadow: 0 10px 28px rgba(10, 20, 26, .22); }
   .ra-recent-l { font: 400 11px/1 var(--sans); color: var(--ink-3); }
   :global(.ra-recent-p) { font: 400 11.5px/1 var(--sans); color: var(--ink-2);
     background: var(--panel); border: 1px solid var(--rule); border-radius: 999px;
@@ -4487,7 +5859,6 @@ window.addEventListener("load", async function () {
   .ra-fgrid { display: grid; gap: 12px;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
   .ra-fgrid-hub { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
-
   :global(.ra-fcard) { display: block; text-decoration: none;
     background: var(--panel); border: 1px solid var(--rule);
     border-top: 3px solid var(--edge, var(--rule-strong));
@@ -4542,7 +5913,6 @@ window.addEventListener("load", async function () {
   :global(.ra-hubclear) { font: inherit; color: var(--accent); background: none;
     border: 0; padding: 0; cursor: pointer; text-decoration: underline; }
   :global(.ra-hubclear:hover) { color: var(--brick); }
-
   /* ---- who held this ground -------------------------------------------- */
   .ra-eras { list-style: none; margin: 4px 0 10px; padding: 0; }
   :global(.ra-eras li) { display: grid; gap: 1px 10px; padding: 6px 0;
@@ -4564,16 +5934,268 @@ window.addEventListener("load", async function () {
                         text-transform: capitalize; }
   :global(.ra-base a.on) { background: var(--accent-wash); color: var(--accent); font-weight: 600; }
 
+  .at-hint { color: var(--ink-3) !important; font-size: 12px !important; }
+  :global(.at-h) { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  :global(.at-also) { font: 400 11.5px/1.5 var(--mono); color: var(--ink-3); margin: 8px 0 0; }
+  :global(.ra-juris) { margin-top: 16px; padding: 12px 14px; border-radius: 3px;
+                       background: var(--accent-wash); border-left: 2px solid var(--accent); }
+  :global(.at-go) { margin: 14px 0 0; font-size: 13px; }
+  #ra-q { width: 100%; box-sizing: border-box; margin-top: 6px; padding: 9px 12px;
+          font: 400 15px/1.3 var(--serif); color: var(--ink);
+          background: var(--panel); border: 1px solid var(--rule); border-radius: 3px; }
+  .atlas-key { display: flex; flex-wrap: wrap; gap: 7px; }
+  /* The suggestions sit where the remembered searches sit, and never both:
+     the list replaces them the moment there is something to suggest. */
+  .ra-sug { position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+            z-index: 45; max-height: 52vh; overflow-y: auto; padding: 6px;
+            background: var(--panel); border: 1px solid var(--rule-strong);
+            border-radius: 6px; box-shadow: 0 10px 28px rgba(10, 20, 26, .22); }
+  .ra-sug[hidden] { display: none; }
+  :global(.ra-sug-h) { margin: 6px 0 3px; padding: 0 8px; font-family: var(--mono);
+    font-size: 9.5px; letter-spacing: .07em; text-transform: uppercase;
+    color: var(--brass); }
+  :global(.ra-sug-r) { display: flex; align-items: baseline; gap: 9px;
+    width: 100%; padding: 6px 8px; background: none; border: 0; cursor: pointer;
+    border-radius: 4px; text-align: left; font-family: var(--sans);
+    font-size: 13.5px; color: var(--ink); }
+  :global(.ra-sug-r.on), :global(.ra-sug-r:hover) { background: var(--accent-wash); }
+  :global(.ra-sug-n) { font-weight: 500; }
+  :global(.ra-sug-m) { font-size: 11.5px; color: var(--ink-3); }
+  :global(.ra-sug-c) { margin-left: auto; font-family: var(--mono);
+    font-size: 10.5px; color: var(--ink-3); white-space: nowrap; }
+
+  .ra-recent { position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+               z-index: 40; display: flex; align-items: center; gap: 6px;
+               flex-wrap: wrap; padding: 10px 12px;
+               background: var(--panel); border: 1px solid var(--rule-strong);
+               border-radius: 6px; box-shadow: 0 10px 28px rgba(10, 20, 26, .22); }
+
+  /* MY OWN EDITS TO THESE, RE-APPLIED. .at-also and the page link ride on the
+     heading row now rather than sitting under it — see the note in render(). */
+  :global(.at-also) { font: 400 11.5px/1.5 var(--mono); color: var(--ink-3);
+    margin: 0; }
+  :global(.at-h .at-go) { margin: 0 0 0 auto; font-size: 12.5px;
+    white-space: nowrap; }
+
+  /* ---- who held this ground, as a band -----------------------------------
+     Width is duration, colour is the regime's own, hatching is «no archive
+     holds this yet». The reasoning is on eraBand().
+
+     ALL OF THESE ARE :global(). The band is written into the panel by script,
+     so its elements never carry Astro's scope class and a plain selector
+     never reaches them — the same trap that made the first version of this
+     band render as unstyled buttons. */
+  :global(.at-era-src) { display: contents; }
+ /* The neighbourhood caption. The swatch is the ring on the map, so the two
+    are recognisably the same thing without a legend. */
+ /* ---- the visitor's checklist -------------------------------------------
+     TIED TO THE MAP'S HEIGHT, NOT ITS OWN. David: «why is the list extending
+     past the map, it should be scrollable?» — it was running to its content,
+     which for a place with twenty villages in the ring is far taller than the
+     map beside it, so the column dragged the whole row down. Same clamp the
+     map uses, and it scrolls inside that.
+
+     AND A RAIL WHEN SHUT. 44px with the word on its side, rather than a
+     full-width button sitting in an empty column. */
+  .ra-check { align-self: start; background: var(--panel);
+    border: 1px solid var(--rule); border-top: 3px solid var(--accent);
+    border-radius: 0 0 3px 3px; width: 44px; overflow: hidden;
+    height: clamp(380px, calc(100vh - var(--ra-above, 340px)), 620px);
+    display: flex; flex-direction: column; }
+  .ra-check.on { width: min(320px, 34vw); }
+  .ra-check-t { flex: none; display: flex; align-items: center; gap: 8px;
+    width: 100%; padding: 10px 11px; cursor: pointer; background: none;
+    border: 0; border-bottom: 1px solid var(--rule); font-family: var(--sans);
+    font-size: 12px; color: var(--ink-2); text-align: left; }
+  .ra-check-t:hover { color: var(--accent); }
+  .ra-check-i { flex: none; font-size: 14px; line-height: 1; }
+  .ra-check:not(.on) .ra-check-w { writing-mode: vertical-rl; margin-top: 6px;
+    letter-spacing: .04em; }
+  .ra-check:not(.on) .ra-check-t { flex-direction: column; padding: 10px 4px;
+    border-bottom: 0; }
+  .ra-check-n { font-family: var(--mono); font-size: 10.5px; color: var(--brass); }
+  /* The scroller is the body, so the toggle stays put while the list moves. */
+  .ra-check-b { flex: 1 1 auto; min-height: 0; overflow-y: auto;
+    -webkit-overflow-scrolling: touch; padding: 4px 13px 14px; }
+  :global(.ra-check-b h4) { font-family: var(--mono); font-size: 9.5px;
+    letter-spacing: .07em; text-transform: uppercase; color: var(--brass);
+    margin: 14px 0 5px; font-weight: 400; }
+  :global(.ra-check-b ul) { list-style: none; margin: 0; padding: 0; }
+  :global(.ra-check-b li) { font-size: 12.5px; line-height: 1.45; margin: 0 0 6px; }
+  /* «7.7 kmOn paper, in the building» — the distance and the note ran into
+     each other. The note takes its own line, which is where it reads best in
+     a column this narrow anyway. */
+  /* The number, in the list and on the map, the same on both. */
+ /* `hidden` LOSES TO A DISPLAY RULE, EVERY TIME. Setting el.hidden = true
+    only works while nothing else sets `display`; .ra-check is display:flex and
+    .at-body is display:grid, so both went on rendering after being hidden —
+    the checklist sat there as an empty «Visiting» column taking a third of the
+    map, and the panel below kept its layout. The attribute is the state; these
+    two lines are what make the state mean anything. */
+ .ra-check[hidden] { display: none; }
+ :global(.at-body[hidden]) { display: none; }
+
+ :global(.at-films .ra-vx) { display: none; }
+ :global(.at-films.ra-vopen .ra-vx) { display: list-item; }
+ :global(.ra-vmore-b) { margin-top: 4px; padding: 3px 9px; cursor: pointer;
+    font-family: var(--sans); font-size: 11.5px; color: var(--accent);
+    background: none; border: 1px solid var(--rule-strong); border-radius: 999px; }
+ :global(.ra-vmore-b:hover) { border-color: var(--accent); }
+ :global(.ra-sn) { padding: 0; background: none; border: 0; cursor: pointer;
+    font-family: var(--sans); font-size: 13px; color: var(--accent);
+    text-decoration: underline; text-decoration-color: var(--rule-strong); }
+ :global(.ra-sn:hover) { color: var(--brick); }
+ /* A match is a button because it selects rather than navigates. */
+ :global(.ra-mk) { display: flex; align-items: baseline; gap: 0; width: 100%;
+    padding: 3px 4px; margin: 0 0 1px -4px; background: none; border: 0;
+    border-radius: 3px; cursor: pointer; text-align: left;
+    font-family: var(--sans); font-size: 12.5px; color: var(--ink); }
+ :global(.ra-mk:hover) { background: var(--accent-wash); }
+ :global(.ra-mk-n) { text-decoration: underline;
+    text-decoration-color: var(--rule-strong); }
+ :global(.ra-mk .ra-ck-n) { margin-left: auto; padding-left: 8px; }
+ :global(.ra-ck-i) { display: inline-flex; align-items: center;
+    justify-content: center; width: 17px; height: 17px; flex: none;
+    margin-right: 6px; border-radius: 50%; background: #1B2A5B; color: #fff;
+    font-family: var(--mono); font-size: 9.5px; line-height: 1; }
+ :global(.ra-pin) { display: flex !important; align-items: center;
+    justify-content: center; border-radius: 50%; background: #1B2A5B;
+    color: #fff; font-family: var(--mono); font-size: 10px; font-weight: 500;
+    border: 1.5px solid #fff; box-shadow: 0 1px 4px rgba(10, 20, 26, .45); }
+ :global(.ra-ck-km) { font-family: var(--mono); font-size: 10.5px;
+    color: var(--ink-3); margin-left: 5px; white-space: nowrap; }
+  :global(.ra-ck-n) { display: block; font-size: 11px; color: var(--ink-3); }
+  :global(.ra-ck-more) { font-size: 11px; color: var(--ink-3); font-style: italic; }
+  :global(.ra-check-b .ra-dot) { margin-right: 5px; }
   @media (max-width: 900px) {
-    .at-wrap { grid-template-columns: 1fr; }
-    /* THE PANEL WAS EATING THE PHONE. 480px of answer under 420px of map is
-       nine hundred pixels before a reader reaches anything else — and there is
-       now something else: the flag cards. A viewport-relative cap keeps the
-       proportion right on a small phone and a large one, and the panel scrolls
-       inside it rather than pushing the page down. */
-    .at-map { height: 420px; }
-    .at-panel { height: auto; max-height: 56vh; overflow-y: auto;
-                -webkit-overflow-scrolling: touch; }
+    /* ONE COLUMN, AND THE CHECKLIST BECOMES A ROW. This rule was written once
+       and lost — a patch of mine reported it applied and had not — so the
+       phone kept the desktop's `1fr auto` with the checklist beside the map.
+       At 375px that leaves the map a sliver, and in full screen, where the
+       rows are 3fr/auto/2fr against a two-row area template, it collapsed to
+       two pixels: the e2e test asks for more than 300 and got 2.015. */
+    .at-wrap { grid-template-columns: 1fr;
+               grid-template-areas: "map" "check" "panel"; }
+    /* Stacked under the map it is a block, not a rail, and takes its content. */
+    .ra-check, .ra-check.on { width: auto; height: auto; max-height: 60vh; }
+    .ra-check:not(.on) .ra-check-w { writing-mode: horizontal-tb; margin: 0; }
+    .ra-check:not(.on) .ra-check-t { flex-direction: row; padding: 10px 11px; }
+  }
+
+ :global(.ra-hood) { margin: 8px 0 2px; font-size: 11.5px; line-height: 1.45;
+    color: var(--ink-2); display: flex; align-items: flex-start; gap: 8px;
+    padding-bottom: 10px; border-bottom: 1px solid var(--rule); }
+ :global(.ra-hood .ra-hood-k) { margin-top: 3px; }
+ :global(.ra-hood:empty) { display: none; }
+ :global(.ra-hood-k) { flex: none; width: 22px; height: 12px; border-radius: 7px;
+    border: 1.6px dotted #1B2A5B; background: rgba(27, 42, 91, .05); }
+ @media (prefers-color-scheme: dark) {
+   :root:not([data-theme="light"]) :global(.ra-hood-k) { border-color: #93A7D6; }
+ }
+ :global(.ra-era-lead) { margin: 2px 0 0; font-size: 13.5px; line-height: 1.6;
+    color: var(--ink-2); }
+ :global(.ra-era-lead b) { color: var(--ink); }
+ :global(.ra-era-lead-l) { font-family: var(--mono); font-size: 10px;
+    letter-spacing: .06em; text-transform: uppercase; color: var(--brass);
+    margin-right: 8px; }
+ /* The two bands and the one block they share. */
+ :global(.ra-tl-group) { margin: 6px 0 12px; }
+ :global(.ra-tl-group .ra-tl) { margin: 0 0 10px; }
+ :global(.ra-tl-group > .ra-tl-detail) { margin-top: 0; }
+ :global(.ra-tl-group > .at-lab) { margin: 0 0 4px; }
+ :global(.ra-tl) { margin: 6px 0 12px; }
+  :global(.ra-tl-band) { display: flex; align-items: stretch; gap: 2px;
+    border: 1px solid var(--rule); border-radius: 3px;
+    background: var(--ground); padding: 2px; overflow: hidden; }
+  :global(.ra-tl-seg) { --seg: var(--accent);
+    flex: 1 1 38px; min-width: 38px; position: relative;
+    display: flex; flex-direction: column; justify-content: flex-start;
+    gap: 2px; padding: 7px 7px 8px; overflow: hidden; cursor: pointer;
+    text-align: left; font-family: var(--sans); border: 0; border-radius: 2px;
+    /* colour-mix keeps the wash readable whatever the regime's colour is,
+       rather than trusting 43 hand-picked tints to land at the right
+       lightness against a bone ground. */
+    /* 13% WAS BEIGE WITH A HINT. David: «can we make these colours more
+       fun? totally boring!» — right: at thirteen per cent every regime from
+       Venetian gold to Yugoslav red came out the same bone, and the only
+       thing carrying the colour was a hairline nobody reads. 30% is as far as
+       this goes while dark ink on top stays clear of 4.5:1 for all 43,
+       darkest (Prussia #2F3E46) to lightest (Bosnia's gold #C9A13C). */
+    background: color-mix(in srgb, var(--seg) 30%, var(--panel));
+    color: var(--ink); /* Full strength along the TOP, which is how the flags atlas gets its
+       cards to read as coloured rather than tinted. */
+    border-top: 5px solid var(--seg); }
+  /* AN ERA WITH NO ARCHIVE IS NOT AN EMPTY SEGMENT. Hatching says «nothing
+     holds this» in the same glance that the width says how long it lasted —
+     for Istria that is 1200–1374, and it is true rather than missing: no
+     parish registers exist anywhere for those years. */
+  :global(.ra-tl-seg-bare) { border-top-color: var(--rule-strong);
+    color: var(--ink-2);
+    background: repeating-linear-gradient(135deg, transparent 0 5px,
+      var(--rule) 5px 6px); }
+  :global(.ra-tl-seg:hover) { outline: 1px solid var(--accent);
+    outline-offset: -1px; }
+  :global(.ra-tl-seg[aria-selected="true"]) {
+    background: color-mix(in srgb, var(--seg) 52%, var(--panel));
+    box-shadow: inset 0 0 0 2px var(--seg); }
+  /* THE YEAR IS THE LABEL, so it is read at arm's length. 10.5px of muted
+    mono was the smallest thing in the band and the first thing anybody
+    looks for. */
+ :global(.ra-tl-y) { font-family: var(--mono); font-size: 13px;
+    font-weight: 500; color: var(--ink); line-height: 1.1; }
+  :global(.ra-tl-seg[aria-selected="true"] .ra-tl-y) { color: var(--ink);
+    font-weight: 700; }
+  /* The polity name may sit in a 38px segment, so it is allowed to clip: the
+     full «1374–1805 — Habsburg» is on the title, in the detail below, and
+     read out by the tab. */
+  :global(.ra-tl-p) { font-size: 11.5px; line-height: 1.25; overflow: hidden; }
+  /* The drawn flag, on the COUNTRY band only — never on the regime band,
+     where a national flag over a regional era would be a guess. */
+  :global(.ra-tl-flag) { display: block; width: 33px; height: 22px;
+    margin: 3px 0; border: 1px solid var(--rule); background: var(--ground); }
+  :global(.ra-tl-flag svg) { width: 100%; height: 100%; display: block; }
+  :global(.ra-tl-flag-none) { border-style: dashed; }
+  /* Narrower now that a segment is a year and a flag: 44px holds both with
+    room, and the band keeps its proportional widths so duration still reads. */
+ :global(.ra-tl-flags .ra-tl-seg) { flex-basis: 44px; min-width: 44px;
+    align-items: center; padding: 6px 4px 7px; }
+ :global(.ra-tl-flags .ra-tl-flag) { margin: 4px 0 0; }
+  :global(.ra-tl-axis) { display: flex; justify-content: space-between;
+    margin: 3px 0 0; font-family: var(--mono); font-size: 10px;
+    color: var(--ink-3); }
+  :global(.ra-tl-detail) { margin-top: 8px; padding: 10px 12px;
+    background: var(--panel); border: 1px solid var(--rule);
+    border-left: 3px solid var(--accent); border-radius: 0 3px 3px 0; }
+  /* A caption, not a heading: the heading is the lit segment above it. */
+  :global(.ra-tl-d-y) { margin: 0 0 5px; font-family: var(--mono);
+    font-size: 11px; color: var(--ink-3); }
+  :global(.ra-era-quiet) { font-style: italic; color: var(--ink-3); }
+  :global(.ra-tl-d-away) { margin: 6px 0 0; font-size: 12.5px; }
+ /* The flags that flew over this ground while the selected era ran. */
+ :global(.ra-ef) { margin: 10px 0 0; padding-top: 9px;
+    border-top: 1px solid var(--rule); }
+ :global(.ra-ef-h) { margin: 0 0 7px; font-family: var(--mono); font-size: 10px;
+    letter-spacing: .06em; text-transform: uppercase; color: var(--brass); }
+ :global(.ra-ef ul) { list-style: none; margin: 0; padding: 0; display: grid;
+    gap: 7px 18px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+ :global(.ra-ef li) { display: flex; align-items: center; gap: 9px; }
+ :global(.ra-ef-f) { flex: none; width: 34px; height: 23px;
+    border: 1px solid var(--rule); background: var(--ground); display: block; }
+ :global(.ra-ef-f svg) { width: 100%; height: 100%; display: block; }
+ :global(.ra-ef-none) { border-style: dashed; }
+ :global(.ra-ef-t) { min-width: 0; font-size: 12.5px; line-height: 1.3; }
+ :global(.ra-ef-t b) { display: block; font-weight: 600; }
+ :global(.ra-ef-d) { display: block; font-family: var(--mono); font-size: 10px;
+    color: var(--ink-3); }
+ :global(.ra-ef-l) { margin-left: auto; flex: none; text-decoration: none; }
+  /* ON A PHONE THE BAND SCROLLS RATHER THAN CRUSHES. Nine segments at 38px is
+     342px, which a 375px phone just fits and a 320px one does not; scrolling
+     sideways keeps every era reachable instead of squeezing the long ones
+     into the same sliver as the short ones and losing the one thing the band
+     exists to show. */
+  @media (max-width: 560px) {
+    :global(.ra-tl-band) { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    :global(.ra-tl-seg) { flex: 0 0 auto; min-width: 74px; }
   }
 
   /* ---- the scrubber along the foot of the map ---------------------------- */
@@ -4602,19 +6224,42 @@ window.addEventListener("load", async function () {
       padding: 6px 9px; }
   }
 
-  /* The searched place. Amber because the access scale never uses it, and
-     a ring rather than a fill so the dot's own colour still reads. */
+  /* THE SEARCHED PLACE, AND THE COLOUR THAT WAS NOT AS FREE AS I CLAIMED.
+     The note under markHit() said amber «because the access scale does not
+     use it». The access scale has `mixed: #E8792B`, which is the same hue as
+     the #E8912B ring to within a few degrees — so the marker meaning «this is
+     the one you searched for» looked like the marker meaning «partly free,
+     partly paid», and on a green basemap dotted with amber archive triangles
+     it did not separate from them at all. David: «could the pulsing marker
+     background be red or another vibrant colour? its grey really isnt good».
+
+     Red is taken too — `paid` is #C0392B. So is green (free, account),
+     yellow (index), purple (catalogue) and grey (onsite, unsurveyed). What
+     the scale has never used is magenta, which is also the most vibrant thing
+     available against OpenStreetMap's greens and greys.
+
+     THE GREY UNDERNEATH IS REAL AND STAYS. The dot keeps its own access
+     colour — grey there means «nobody has walked this one yet», which is
+     information, not a rendering fault. What changes is that the ring and its
+     wash are now emphatic enough that the marker reads as «found» before the
+     eye gets to the dot's own colour. */
   :global(.ra-hit) { pointer-events: none; }
   :global(.ra-hit i), :global(.ra-hit b) {
     position: absolute; inset: 0; border-radius: 50%;
-    border: 2px solid #E8912B; display: block; }
+    border: 2.5px solid #E5006D; display: block; }
+  /* A hairline of white outside the ring, so it holds its edge over dark
+     forest green and over pale relief alike without a second animation. */
+  :global(.ra-hit b) { box-shadow: 0 0 0 1.5px rgba(255,255,255,.75); }
   :global(.ra-hit b) { animation: ra-ping 1.8s ease-out infinite; }
   @keyframes ra-ping {
     0%   { transform: scale(.42); opacity: .95; }
     70%  { transform: scale(1);   opacity: 0; }
     100% { transform: scale(1);   opacity: 0; }
   }
-  :global(.ra-hit i) { transform: scale(.42); background: rgba(232,145,43,.16); }
+  /* The still ring, and the wash that stops the grey dot reading as the
+     whole marker. .16 was almost nothing; at .28 the magenta carries. */
+  :global(.ra-hit i) { transform: scale(.42); background: rgba(229,0,109,.28);
+    box-shadow: 0 0 0 1.5px rgba(255,255,255,.6); }
   @media (prefers-reduced-motion: reduce) {
     :global(.ra-hit b) { animation: none; transform: scale(.72); opacity: .55; }
   }

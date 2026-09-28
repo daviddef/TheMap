@@ -249,7 +249,16 @@ def main():
                 continue                      # cheap box before the real sum
             d = km(place["lat"], place["lon"], c["y"], c["x"])
             if d <= within:
-                near.append({"n": c["n"], "q": c["q"], "km": round(d, 1)})
+                # y/x TRAVEL WITH THEM NOW. The distance alone lets the panel
+                # say «8 km» and nothing else; the map cannot draw a parish it
+                # has no position for, and David asked for these numbered on
+                # the map so a trip can be planned against them. The
+                # coordinates are already in hand here — they are what the
+                # distance was computed from — and the alternative was making
+                # the browser fetch a ten-megabyte church file to rediscover
+                # six points it had already been told about.
+                near.append({"n": c["n"], "q": c["q"], "km": round(d, 1),
+                             "y": round(c["y"], 5), "x": round(c["x"], 5)})
         near.sort(key=lambda z: z["km"])
         return near[:most]
 
@@ -289,7 +298,8 @@ def main():
             d = km(place["lat"], place["lon"], c["y"], c["x"])
             if d <= within:
                 near.append({"n": c["n"], "km": round(d, 1), "src": c["src"],
-                             "id": c.get("q") or c.get("id")})
+                             "id": c.get("q") or c.get("id"),
+                             "y": round(c["y"], 5), "x": round(c["x"], 5)})
         near.sort(key=lambda z: z["km"])
         out = []
         for c in near:
@@ -1462,6 +1472,19 @@ def main():
         print(f"flag-eras         {_fe['counts']['eras']:,} eras over "
               f"{_fe['counts']['pages']} pages, "
               f"{_fe['counts']['withYears']:,} with a usable year")
+    except FileNotFoundError:
+        pass
+
+    # ---- and the artwork those eras fly ------------------------------------
+    # Same arrangement, same reason: data/era-flags.json is extracted once by
+    # scripts/extract-era-flags.py and committed, and copied here so the map
+    # can fetch it. 1,454 flags lifted out of the same 210 pages.
+    try:
+        _ef = json.load(open("data/era-flags.json"))
+        json.dump(_ef, open(os.path.join(OUT, "era-flags.json"), "w"),
+                  ensure_ascii=False, separators=(",", ":"))
+        print(f"era-flags         {_ef['counts']['eras']:,} drawn flags over "
+              f"{_ef['counts']['countries']} countries")
     except FileNotFoundError:
         pass
 

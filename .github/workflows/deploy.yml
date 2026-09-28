@@ -3,6 +3,31 @@ name: Build and deploy Record Atlas
 on:
   push:
     branches: [main]
+    # A DEPLOY THAT CANNOT CHANGE THE SITE STILL COSTS FORTY MINUTES OF QUEUE.
+    #
+    # A build here renders 46,152 pages and takes about twenty-four minutes;
+    # deploys are serialised on the `pages` concurrency group, and GitHub keeps
+    # only one run pending, so a push that changes nothing visible does not
+    # merely waste a slot — it pushes a real change further back and can
+    # displace a pending one.
+    #
+    # On 28 September, of seven pushes to main, two could not have altered a
+    # single byte of the built site: one changed .gitignore, one added a file
+    # under docs/. Between them they held the queue for over an hour while the
+    # live map sat hours behind main, which is what prompted this.
+    #
+    # Kept deliberately short and obviously-safe. scripts/ is NOT here, because
+    # build.py and its siblings ARE the build. data/ is NOT here, because it is
+    # the build's input. Only files that nothing in site/ reads and no script
+    # consumes: prose, editor scaffolding, and git's own housekeeping.
+    paths-ignore:
+      - 'docs/**'
+      - '.claude/**'
+      - '.gitignore'
+      - '.gitattributes'
+      - 'README.md'
+      - 'LICENSE'
+      - '*.md'
   workflow_dispatch:
 
 permissions:

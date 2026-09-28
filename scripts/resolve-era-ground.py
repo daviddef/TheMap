@@ -62,15 +62,58 @@ def isnap(h):
     return None
 
 
+# «6th c.», «15th century», «1st cent.» — that ordinal is a century, not a year.
+# Two traps here. «c.» means CIRCA far more often than it means century, so a
+# bare one never counts — only one directly behind an ordinal. And a span like
+# «c. 6th - 10th century CE» carries its century marker at the END, after the
+# ordinal the era actually starts at, so the marker is detected separately from
+# the number and the FIRST ordinal is the one taken.
+CENTMARK = re.compile(r'\b(?:century|centuries|cent\.)\b'
+                      r'|\d\s*(?:st|nd|rd|th)\s*c\.', re.I)
+ORDINAL = re.compile(r'(\d{1,2})\s*(?:st|nd|rd|th)\b', re.I)
+# «17 July 1973», «26 Apr 1964», «1 July 1962 - 1966» — the LEADING number is a
+# day. Anchored at the start so it cannot swallow a year from mid-label.
+FULLDATE = re.compile(r'^\s*(?:c\.\s*)?\d{1,2}\s+[A-Za-z]{3,9}\.?\s+(\d{3,4})')
+
+
 def era_year(label):
-    """The year an era's map should be drawn at. A label like «c. 1800 – 1895»
-    is answered at its START, because that is the moment the map is claiming."""
-    t = label.replace('–', '-').replace('—', '-')
-    bce = 'BCE' in t or 'BC' in t
-    m = re.search(r'(-?\d{1,4})', t)
-    if not m: return None
+    """The year an era's map should be drawn at.
+
+    An era is answered at its START: «c. 1800 - 1895» is 1800, because that is
+    the moment the map is claiming.
+
+    This used to be one regex for the first number in the label, which is
+    wrong twice over, and it was caught by surveying the OUTPUT rather than by
+    reading the code. «17 July 1973» became the year 17. «1 July 1962 - 1966»
+    became 1. «c. 6th c.» became 6, and «15th century - 1888» became 15 — out
+    by fifteen centuries. Each of those eras was then looked up against
+    polygons from antiquity, correctly found nothing, and the failure arrived
+    disguised as a coverage gap in somebody else's data.
+
+    Order matters: century before full-date before bare number, because
+    «15th century» holds a number that is not a year at all and «17 July 1973»
+    holds one that is not the year wanted.
+    """
+    t = label.replace('\u2013', '-').replace('\u2014', '-')
+    bce = bool(re.search(r'\bBCE?\b', t))
+
+    if CENTMARK.search(t):
+        m = ORDINAL.search(t)
+        if m:
+            # The 6th century begins in 500; the 6th century BCE in -600.
+            start = (int(m.group(1)) - 1) * 100
+            return -(start + 100) if bce else start
+
+    m = FULLDATE.match(t)
+    if m:
+        y = int(m.group(1))
+        return -y if bce else y
+
+    m = re.search(r'(\d{1,4})', t)
+    if not m:
+        return None
     y = int(m.group(1))
-    return -abs(y) if bce else y
+    return -y if bce else y
 
 
 def main():
@@ -130,6 +173,52 @@ def main():
             eras.append(dict(label=label, name=name, year=y, held=held))
             stats['era covered' if held else 'era UNCOVERED'] += 1
         out[page] = dict(cc=cp.get('cc'), lat=cp['y'], lon=cp['x'], eras=eras)
+
+    # ---- split the uncovered eras into the two different problems ---------
+    # An uncovered era is not one kind of thing. Some are real states whose
+    # ground nobody has mapped openly — New France, the Spanish Philippines,
+    # Old Kingdom Egypt — and those are worth hunting a source for. Others are
+    # pre-state peoples, and drawing a frontier round them is not an
+    # approximation of anything; it invents a KIND of thing that did not
+    # exist. Those stay blank and let the prose carry them, as several pages
+    # already do with «no flag documented».
+    #
+    # The first pass of this list mis-sorted nineteen of them, which a survey
+    # of the output caught: Aboriginal Australia, the Māori tribal era, Taíno
+    # and Kalinago society, Iron Age Denmark, Tiwanaku. The words below were
+    # widened from those misses rather than guessed at up front.
+    PRESTATE = re.compile(
+        r"hunter|gatherer|pastoral|nomad|neolithic|bronze age|iron age|stone age|"
+        r"palaeo|paleo|prehistor|indigenous|aborigin|first nations|first peoples|"
+        r"pre-?colum|pre-?contact|pre-?conquest|pre-?islamic|pre-?dynastic|"
+        r"pre-?unification|pre-?settlement|settlement|peoples|cultures?\b|tribes|"
+        r"tribal|chiefdom|clans|earliest|first inhabitants|before\s|"
+        # «Taíno» carries its accent on the I, not the O, so tain[oó] missed
+        # Haiti and Jamaica while catching Cuba and the Bahamas.
+        r"ta[ií]no|cacicazgo|kalinago|arawak|lucayan|m[aā]ori|tiwanaku|valdivia|"
+        r"ortoiroid|swahili coast|bantu", re.I)
+
+    findable, prestate = [], []
+    for page, v in out.items():
+        for e in v['eras']:
+            if e['year'] is None or e['held']:
+                continue
+            row = {'page': page, 'year': e['year'], 'name': e['name'],
+                   'label': e['label']}
+            # Pre-state by its own words, or simply older than any state here.
+            (prestate if (e['year'] < -1000 or PRESTATE.search(e['name']))
+             else findable).append(row)
+
+    json.dump({'note': ("Uncovered eras, split by what kind of gap they are. "
+                        "«findable» are real states whose ground OHM does not "
+                        "map, and are worth hunting an openly-licensed source "
+                        "for. «prestate» have no borders to draw at all and "
+                        "stay blank; inventing one would be a category error, "
+                        "not an approximation."),
+               'findable': findable, 'prestate': prestate},
+              open(os.path.join(ROOT, 'data', 'ohm', 'era-gaps.json'), 'w'),
+              indent=1)
+    print('gaps split  : %d findable, %d pre-state' % (len(findable), len(prestate)))
 
     json.dump({'note': ('Which OpenHistoricalMap polity held each country point in each '
                         'era year. An empty «held» means no polygon covers that ground '

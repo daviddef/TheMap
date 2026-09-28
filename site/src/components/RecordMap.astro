@@ -3890,8 +3890,41 @@ window.addEventListener("load", async function () {
          years apart start a new run, so the gap is visible as a gap.
 
          The counts are not here and not in the shard — see build.py. */
-      if (r.tl) {
-        var cc0 = Object.keys(r.tl);
+      /* AND THE COUNTRIES WITH RECORDS BUT NO DATES SAY SO, RATHER THAN
+         BEING LEFT OFF. David, on Blazevic opening in Croatia at 1910 when
+         the family research goes far earlier: «No dates record should say
+         that».
+
+         The band has exactly one source — Wikidata people notable enough for
+         an encyclopaedia — and counted across the corpus that is not one
+         name's problem. Of the 205,400 names carrying both a band and record
+         evidence, 140,578 have evidence in a country the band DOES NOT DRAW,
+         and 79,469 open at 1900 or later in a country they are attested in.
+         A band that silently omits Croatia does not read as «no dates here»;
+         it reads as «not here», which is a claim this atlas does not hold and
+         would not make in words.
+
+         So the country gets its row, and the row says what is true: the
+         records name it, and nobody has put a date on it. No date is invented
+         and none is implied — the strip is the same hatching the ground band
+         uses for an era no archive holds, which a reader of this map has
+         already met meaning exactly «this is known to be empty, not missing». */
+      var tlHas = r.tl || {};
+      var undated = (r.countries || []).filter(function (c) {
+        return ["register", "archive", "curated"].indexOf(c.how) > -1 &&
+               !tlHas[c.cc];
+      }).map(function (c) { return c.cc; });
+      undated = undated.filter(function (cc, i) { return undated.indexOf(cc) === i; })
+                       .sort(function (a, b) {
+                         /* By country NAME. Ordering an undated list by how
+                            many rows produced it would rank countries by how
+                            much of this atlas has been built, which is a fact
+                            about us and not about the name. */
+                         var A = CNAME[a] || a, B = CNAME[b] || b;
+                         return A < B ? -1 : A > B ? 1 : 0;
+                       });
+      if (r.tl || undated.length) {
+        var cc0 = Object.keys(r.tl || {});
         var lo = 9999, hi = 0;
         cc0.forEach(function (cc) {
           r.tl[cc].forEach(function (d) { if (d < lo) lo = d; if (d > hi) hi = d; });
@@ -3900,6 +3933,12 @@ window.addEventListener("load", async function () {
         var rows = cc0.map(function (cc) {
           return { cc: cc, ds: r.tl[cc], first: r.tl[cc][0] };
         }).sort(function (a, b) { return a.first - b.first; });
+        /* Dated rows first, in the order the evidence puts them; the undated
+           ones after, because they cannot be placed on the scale and sorting
+           them into it would put them somewhere they do not belong. */
+        rows = rows.concat(undated.map(function (cc) {
+          return { cc: cc, ds: null };
+        }));
 
         /* THE SAME BAND THE GROUND GETS, AND FOR THE SAME REASON.
            David, with a place answer and a name answer side by side: «search
@@ -3925,7 +3964,28 @@ window.addEventListener("load", async function () {
            start; this is the second thing to use it. */
         var wh = ['<div class="ra-tw"><p class="at-lab">' +
                   esc(T("Where the name was, and when")) + "</p>"];
-        rows.slice(0, 10).forEach(function (row) {
+        rows.slice(0, 14).forEach(function (row) {
+          var f0 = CC2FLAG && CC2FLAG[row.cc];
+          /* NO DATES IS A FINDING, AND IT IS WRITTEN OUT. The row exists
+             because a register or an archive names this surname in this
+             country; what nothing here knows is WHEN. Hatched across the
+             whole width — the ground band's own mark for «known to be empty,
+             not missing» — with the sentence beside it, so the strip cannot
+             be mistaken for a span. */
+          if (!row.ds) {
+            wh.push('<div class="ra-tw-r">' +
+                    '<span class="ra-tw-f">' +
+                    (f0 && f0.flag ? '<svg viewBox="0 0 300 200" aria-hidden="true">' +
+                                     f0.flag + "</svg>" : "") + "</span>" +
+                    '<a class="ra-tw-c" href="' + BASE + "country/" +
+                    row.cc.toLowerCase() + '/">' + esc(CNAME[row.cc] || row.cc) +
+                    "</a>" +
+                    '<span class="ra-tw-band"><span class="ra-tl-seg-bare ' +
+                    'ra-tw-none"><span class="ra-tl-y">' +
+                    esc(T("in the records, no dates recorded")) +
+                    "</span></span></span></div>");
+            return;
+          }
           /* group decades into runs, breaking on a gap of more than 50 years */
           var runs = [], cur = [row.ds[0]];
           for (var i = 1; i < row.ds.length; i++) {
@@ -3977,11 +4037,12 @@ window.addEventListener("load", async function () {
           });
           wh.push("</span></div>");
         });
-        if (rows.length > 10)
-          wh.push('<p class="cap">' + esc(T("and") + " " + (rows.length - 10) + " " +
+        if (rows.length > 14)
+          wh.push('<p class="cap">' + esc(T("and") + " " + (rows.length - 14) + " " +
                   T("more countries")) + "</p>");
-        wh.push('<p class="ra-tw-axis"><span>' + lo + "s</span><span>" + hi +
-                "s</span></p>");
+        if (cc0.length)
+          wh.push('<p class="ra-tw-axis"><span>' + lo + "s</span><span>" + hi +
+                  "s</span></p>");
         /* The file's own warning, in its own words, because a row of ticks
            looks like a census and is nothing of the kind. */
         wh.push('<p class="cap ra-tw-c2">' + esc(T("People notable enough for an " +
@@ -5076,6 +5137,24 @@ window.addEventListener("load", async function () {
                    ". " + T("These are the archives of those COUNTRIES, not of a " +
                             "place of that name.")) + "</p>");
         buildNameCheck(canon || term, byCC, order, rank);
+        /* AND THE FULL PER-COUNTRY BLOCKS A PLACE GETS. David: «surely we can
+           do the same as we did with places and show sources and links FOR
+           ALL COUNTRIES??» — yes, and countrySources() is the same function
+           Senj's «THE SOURCES FOR CROATIA» block is built from, ranked
+           national archive first, then diocesan, regional, library, and
+           coloured by what it costs to see an image.
+
+           A place calls it ONCE, for the ground it stands on. A name is
+           attested in many countries and each of them is a real place to
+           write to, so it is called for each, in the band's order — the
+           country the name is oldest in first. The grid sets them side by
+           side, which is what .at-body is for and what the place answer
+           already does with its three source columns. */
+        order.forEach(function (cc) {
+          if (!cc) return;
+          h.push(countrySources(cc, null,
+                                T("The sources for") + " " + (CNAME[cc] || cc)));
+        });
       } else {
         h.push('<p class="at-sub at-sub-wide">Nothing in this map reaches the countries ' +
                "this name is attested in yet — which is exactly the kind of gap worth " +
@@ -6514,6 +6593,12 @@ window.addEventListener("load", async function () {
      of its own. De Franceschi is in Italy in the 1550s and then not again
      until the 1840s; with the runs placed on the scale, the silence is the
      band's own ground showing through between them, which is what it is. */
+  /* Full width, because it is not a span and must not read as one. */
+  :global(.ra-tw-none) { position: absolute; inset: 0; display: flex;
+    align-items: center; padding: 2px 7px; border-top-width: 3px;
+    border-top-style: solid; }
+  :global(.ra-tw-none .ra-tl-y) { font-size: 10px; color: var(--ink-3);
+    font-family: var(--sans); letter-spacing: .02em; }
   :global(.ra-tw-axis) { display: flex; justify-content: space-between;
     margin: 4px 0 0; font-family: var(--mono); font-size: 10.5px;
     color: var(--ink-3); }

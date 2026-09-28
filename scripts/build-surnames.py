@@ -115,6 +115,41 @@ def skeleton(name):
     return _skel(s)
 
 
+def translit_key(name):
+    """Collapse the ways a Latin alphabet without diacritics writes č, ć, š, ž
+    — AND NOTHING ELSE.
+
+    David: «Zubrinich last name not in croatia? odd». It was: the Blažević
+    archive attests Žubrinić in Croatia and Zubrinich in Australia, Canada,
+    Britain, Hong Kong and the United States, and the only thing joining them
+    was the phonetic tier — an algorithmic guess the panel rightly refuses to
+    pool as evidence. So one family, researched in one archive, read as two
+    names, and the Croatian half of it invisible from the spelling the
+    Australian branch actually uses.
+
+    A clerk at a border writes ć as «ch», or «cz», or «ics». That is not a
+    guess about how a name sounds; it is a documented substitution, and it is
+    the single commonest thing that happens to a Slavic surname on emigration.
+
+    WHY NOT THE PHONETIC SKELETON, WHICH ALREADY EXISTS. Because it was tried
+    and counted first: skeleton() drops vowels, and «same archive + same
+    skeleton» asserted 685 pairs including MARY/MURRAY, STONE/Sutton,
+    LAW/Love, Katz/Kotze, DATO/DEATH, Mazza/Muzzi and Trjan/Turina. That is
+    the confident wrong answer the three tiers exist to prevent. This rule
+    touches consonant renderings only and leaves every vowel alone, which is
+    what keeps Tadić and Todić — one letter apart, and plausibly two families
+    — correctly separate. It asserts 22 pairs across all eight archives, and
+    all 22 were read by hand before this shipped.
+    """
+    s = fold(name).replace("'", "").replace("\u2019", "").replace(".", "")
+    s = s.replace(" ", "")
+    s = re.sub(r"(?:itch|ics|ich|icz)$", "ic", s)
+    s = re.sub(r"c[hz]", "c", s)
+    s = re.sub(r"s[hz]", "s", s)
+    s = re.sub(r"zh", "z", s)
+    return s
+
+
 # ---- what a surname is allowed to look like -----------------------------
 # Registers publish artefacts as well as names. The Polish, Spanish and
 # American files between them carry «[BRIGIDO?]», «[S», «A/GADIR» and a
@@ -135,6 +170,12 @@ JUNK = re.compile(r"[\[\]?*/\\|<>{}()\d]|^.$|^\W")
 PARTICLE = {"de", "del", "della", "dei", "di", "da", "das", "dos", "du", "des",
             "van", "von", "der", "den", "ter", "te", "op", "af", "al", "el",
             "la", "le", "lo", "y", "e", "i", "zu", "bin", "ibn", "abu"}
+
+
+def _marks(s):
+    """How many combining marks a spelling still carries. See touch()."""
+    return sum(1 for c in unicodedata.normalize("NFKD", s or "")
+               if unicodedata.combining(c))
 
 
 def display(name):
@@ -176,6 +217,17 @@ def main():
             r = rec[k] = {"n": display(name), "variants": [], "countries": []}
         elif r["n"].isupper() and not display(name).isupper():
             # A later, better-cased sighting of a name first seen shouting.
+            r["n"] = display(name)
+        elif _marks(name) > _marks(r["n"]):
+            # THE ACCENTED FORM CARRIES MORE, AND IS USUALLY THE RIGHT ONE.
+            # «first spelling seen wins» is a fine tie-break between two
+            # equally informative forms, and the wrong rule when one of them
+            # has had its diacritics knocked off. Žubrinić and Zubrinic fold
+            # to one row; 238 people stand in the Croatian register under the
+            # first, and the row began printing itself as the second purely
+            # because the transliteration pass upstream touched it first.
+            # Restoring a caron is not a guess — it is the same string with
+            # information still attached.
             r["n"] = display(name)
         elif len(name) > len(r["n"]) and name[:1].isupper():
             pass      # keep the first spelling seen as canonical
@@ -250,6 +302,26 @@ def main():
         # written once, and every one of them IS that archive's research. A
         # long tail of single mentions in a large archive is not.
         deliberate = len(names) < 150
+        # ---- THE SAME NAME THROUGH A BORDER CLERK ---------------------------
+        # Within ONE archive, forms that differ only by how a diacritic was
+        # rendered are that archive's own family spelt two ways. Scoped to a
+        # single archive on purpose: it is what makes the claim attributable
+        # — «the Blažević archive researches both» — and it keeps a Croatian
+        # orthographic rule from being applied to 943,938 names worldwide.
+        tl = collections.defaultdict(list)
+        for n in names:
+            if "/" in n or "?" in n:
+                continue          # the slash branch below owns these
+            tl[translit_key(n)].append(n)
+        for forms in tl.values():
+            seen_f, distinct = set(), []
+            for f in forms:
+                if fold(f) not in seen_f:
+                    seen_f.add(fold(f))
+                    distinct.append(f)
+            for i in range(len(distinct)):
+                for j in range(i + 1, len(distinct)):
+                    link(distinct[i], distinct[j], "curated")
         for n in names:
             # A SLASH IS A PROMISE, A BRACKET IS A GUESS.
             #

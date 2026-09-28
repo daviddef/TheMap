@@ -157,7 +157,17 @@ function load() {
     const sizes = sizeByCcDecade[cc];
     const buckets = new Map();
     for (const [d, n] of sizes) buckets.set(d, { arr: new Int32Array(n), pos: 0 });
-    BY_CC[cc] = { total: metaByCc[cc].length, buckets, meta: metaByCc[cc] };
+    /* DEDUP BY STAMP, NOT BY SET. The first cut here used a JS Set to dedupe
+       a volume that touches more than one queried decade, and it was the
+       second thing (after the tree) to double the build: Italy alone can
+       union half a million refs for a single page, and hashing every one of
+       them into a Set costs far more than writing to a plain index. A
+       Uint32Array the size of the country, each slot holding the query
+       "stamp" that last touched it, turns membership into one array read —
+       no hashing, no resizing, no per-query allocation beyond the output
+       itself. */
+    BY_CC[cc] = { total: metaByCc[cc].length, buckets, meta: metaByCc[cc],
+                  stampArr: new Uint32Array(metaByCc[cc].length), stamp: 0 };
   }
   /* PASS 3: refill the buckets. `ref` has to land on the same volume as
      pass 1 gave it, so this re-derives it by walking byPlace in the same
@@ -204,25 +214,48 @@ const SHORTLIST_CAP = 40;
  *    { total, state: "filter", overlap, kinds }           — too many to list
  *  `total` is every dated volume this atlas holds for the country, whether
  *  or not it overlaps; `overlap` is the exact count that does. */
+/* Only the ranking of the four commonest kinds is ever shown for a
+   "filter" result, never a count — so once there are more matches than
+   this, tallying kinds from a bounded sample instead of every match gives
+   the same answer for a fraction of the cost. Italy-scale countries can
+   overlap 500,000+ volumes on a single page; scanning `.rk` on all of them
+   just to rank four labels was most of this function's remaining cost. */
+const KIND_SAMPLE_CAP = 20000;
+
 export function volumesFor(cc, decades) {
   load();
   const c = BY_CC[cc];
   if (!c || !c.total || !decades || !decades.length) return null;
-  const seen = new Set();
+  const stamp = ++c.stamp;
+  const stampArr = c.stampArr;
+  // Upper bound on the union size, known without touching a bucket:
+  // preallocating one typed array up front avoids a plain array's repeated
+  // grow-and-copy as `refs` fills, which dominated the cost at Italy's scale.
+  let cap = 0;
+  const chosen = [];
   for (const dRaw of decades) {
-    const d = Number(dRaw);
-    const b = c.buckets.get(d);
-    if (!b) continue;
-    for (let i = 0; i < b.arr.length; i++) seen.add(b.arr[i]);
+    const b = c.buckets.get(Number(dRaw));
+    if (b) { chosen.push(b); cap += b.arr.length; }
   }
-  const overlap = seen.size;
+  const refs = new Int32Array(cap);
+  let n = 0;
+  for (const b of chosen) {
+    const arr = b.arr;
+    for (let i = 0; i < arr.length; i++) {
+      const r = arr[i];
+      if (stampArr[r] !== stamp) { stampArr[r] = stamp; refs[n++] = r; }
+    }
+  }
+  const overlap = n;
   if (overlap === 0) return { total: c.total, state: "warning" };
   if (overlap <= SHORTLIST_CAP) {
-    const list = [...seen].map((r) => c.meta[r]).sort((a, b) => a.from - b.from);
+    const list = Array.from(refs.subarray(0, n), (r) => c.meta[r])
+      .sort((a, b) => a.from - b.from);
     return { total: c.total, state: "shortlist", overlap, list };
   }
   const kindCount = {};
-  for (const r of seen) for (const k of c.meta[r].rk) kindCount[k] = (kindCount[k] || 0) + 1;
+  const step = overlap > KIND_SAMPLE_CAP ? Math.ceil(overlap / KIND_SAMPLE_CAP) : 1;
+  for (let i = 0; i < n; i += step) for (const k of c.meta[refs[i]].rk) kindCount[k] = (kindCount[k] || 0) + 1;
   const kinds = Object.entries(kindCount).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([k]) => k);
   return { total: c.total, state: "filter", overlap, kinds };
 }

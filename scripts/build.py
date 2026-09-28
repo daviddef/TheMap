@@ -21,6 +21,8 @@ _ROOT = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
 sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
 _os.chdir(_ROOT)
 from geo import in_ring_latlon
+import time
+THIS_YEAR = time.gmtime().tm_year   # a volume cannot end after today
 
 TODAY = datetime.date.today().isoformat()
 
@@ -606,6 +608,74 @@ def main():
                 _added += 1
         print(f"volumes         {_added} from the waypoint API, "
               f"on top of {sum(len(v) for v in (fsv or {}).get('byPlace', {}).values())} walked in Croatia")
+
+    # WHAT YEARS THE PAPER ACTUALLY COVERS, PER COUNTRY.
+    #
+    # A surname page can say a name is attested in ten countries and cannot
+    # say when. The three dated sources it has are all the wrong shape: the
+    # Wikidata birth series is people notable enough for an encyclopaedia (22
+    # of them for Defranceski), the national registers are undated snapshots,
+    # and the archive attestation covers eight archives. So the page tells a
+    # reader WHERE and never WHEN, and the movement of a family across a
+    # century is exactly the thing it cannot show.
+    #
+    # This is the honest answer to that, and it is a different question:
+    # not «when was your family there», which nothing here can know, but
+    # «where could you look, and for which years». Every one of the 2.9
+    # million volumes carries a from and a to and sits on a place with a
+    # country, so the span is a fact about the holdings rather than an
+    # inference about people.
+    #
+    # Kept coarse on purpose. A decade is the grain the volume dates support —
+    # many are «1660-1900» for a whole parish run — and a finer bucket would
+    # imply a precision the source does not have.
+    _cov = {}
+    for _pl in places:
+        _pcc = _pl.get("country")
+        if not _pcc:
+            continue
+        for _v in vol_by_place.get(_pl["id"], []):
+            _f, _t = _v.get("from"), _v.get("to")
+            if not _f:
+                continue
+            try:
+                _f = int(_f); _t = int(_t) if _t else _f
+            except (TypeError, ValueError):
+                continue
+            if _t < _f or _f < 1200 or _f > THIS_YEAR:
+                continue
+            _e = _cov.setdefault(_pcc, {"from": _f, "to": _t, "volumes": 0,
+                                        "places": set(), "decades": {},
+                                        "kinds": {}})
+            _e["from"] = min(_e["from"], _f)
+            _e["to"] = max(_e["to"], _t)
+            _e["volumes"] += 1
+            _e["places"].add(_pl["id"])
+            # A run spanning 1660-1900 is evidence for every decade it covers,
+            # not only the one it starts in.
+            for _d in range((_f // 10) * 10, (min(_t, THIS_YEAR) // 10) * 10 + 10, 10):
+                _e["decades"][_d] = _e["decades"].get(_d, 0) + 1
+            for _k in (_v.get("rk") or []):
+                _e["kinds"][_k] = _e["kinds"].get(_k, 0) + 1
+    _coverage = {}
+    for _pcc, _e in _cov.items():
+        _coverage[_pcc] = {
+            "from": _e["from"], "to": _e["to"], "volumes": _e["volumes"],
+            "places": len(_e["places"]),
+            "decades": {str(k): v for k, v in sorted(_e["decades"].items())},
+            "kinds": [k for k, _ in sorted(_e["kinds"].items(),
+                                           key=lambda x: -x[1])[:6]],
+        }
+    json.dump({"note": ("What years the holdings actually cover, per country. "
+                        "NOT when a family was there \u2014 nothing in this atlas "
+                        "knows that. This is where you could look and for which "
+                        "years, taken from the from/to on every volume."),
+               "grain": "decade; a volume spanning several counts in each",
+               "countries": _coverage},
+              open(os.path.join(OUT, "coverage-by-country.json"), "w"),
+              ensure_ascii=False, separators=(",", ":"))
+    print(f"coverage          {len(_coverage)} countries with dated holdings, "
+          f"earliest {min((v['from'] for v in _coverage.values()), default=0)}")
 
     wa_by_cc = {}
     try:

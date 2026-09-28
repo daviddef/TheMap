@@ -804,20 +804,27 @@ window.addEventListener("load", async function () {
             : " · nothing walked here yet");
         /* Straight into the map with those countries lit, which is the thing
            a reader wants next and had no way to ask for. */
+        /* A LINK INSIDE A LINK IS NOT A LINK. This «Show these on the map»
+           anchor used to sit INSIDE the card's own anchor, which is invalid
+           HTML, and every browser repairs it the same way: it closes the
+           outer <a> early and hoists the inner one out as a sibling. The
+           grid then laid that orphan out as a cell of its own, so the links
+           marched down the page beside the cards they belonged to, one row
+           out of step. It looked like a CSS problem and was a markup one. */
         if (held.ccs && held.ccs.length) {
-          ways = '<span class="ra-fways">' +
-            '<a href="' + BASE + "?hub=" + encodeURIComponent(h.name) +
-            '" data-hub="' + esc(h.name) + '">' + esc(T("Show these on the map")) +
-            "</a></span>";
+          ways = '<a class="ra-fways" href="' + BASE + "?hub=" +
+            encodeURIComponent(h.name) + '" data-hub="' + esc(h.name) + '">' +
+            esc(T("Show these on the map")) + " \u2192</a>";
         }
       }
-      return '<a class="ra-fcard ra-fhub" href="' + BASE + esc(h.url) + '" style="--edge:' +
+      return '<div class="ra-fhubwrap" style="--edge:' +
         esc(h.color || "var(--rule-strong)") + '">' +
+        '<a class="ra-fcard ra-fhub" href="' + BASE + esc(h.url) + '">' +
         (h.meta ? '<span class="ra-fmeta">' + esc(h.meta) + "</span>" : "") +
         '<span class="ra-fname">' + esc(h.name) + "</span>" +
         (stat ? '<span class="ra-fholds">' + esc(stat) + "</span>" : "") +
         (h.what ? '<span class="ra-fwhat">' + esc(h.what) + "</span>" : "") +
-        ways + "</a>";
+        "</a>" + ways + "</div>";
     }).join("");
   }
 
@@ -1588,16 +1595,31 @@ window.addEventListener("load", async function () {
     el.setAttribute("title", full);
     el.setAttribute("aria-label", full);
   }
+  /* ONE SUMMARY FOR THREE STATES, and this time actually three.
+     Merging the three controls into one «Filters» disclosure left the closed
+     label still saying «Layers 2» — the name and the number of only the first
+     of the three things now inside it. A reader narrowing by cost or by record
+     kind then shut the panel and saw no sign they had done anything. The
+     closed control has to answer «what is on the map», so it carries all
+     three: «Filters  2 · All · All». */
+  var sumBits = { layers: "", costs: "", kinds: "" };
+  var sumFull = { layers: "", costs: "", kinds: "" };
+
+  function oneSummary() {
+    var badge = [sumBits.layers, sumBits.costs, sumBits.kinds]
+      .filter(Boolean).join(" \u00b7 ");
+    var full = [sumFull.layers, sumFull.costs, sumFull.kinds]
+      .filter(Boolean).join(". ");
+    setSummary("ra-laysum", "Filters", badge, full);
+  }
+
   function laySummary() {
     var n = LAYERS.filter(function (l) { return on[l[0]]; }).length;
-    /* ONE SUMMARY FOR THREE STATES. The bar used to print «Layers 2 · Costs
-       All · Kind All» across three controls; it now prints the same three
-       facts in one, because a closed filter still has to answer «what is on
-       the map» and hiding that behind a click would trade tidiness for the
-       thing the control is for. */
-    setSummary("ra-laysum", "Layers", n === LAYERS.length ? "All" : String(n),
-      n === LAYERS.length ? "Layers — all " + LAYERS.length + " on"
-                          : "Layers — " + n + " of " + LAYERS.length + " on");
+    sumBits.layers = n === LAYERS.length ? "All" : String(n);
+    sumFull.layers = n === LAYERS.length
+      ? "Layers — all " + LAYERS.length + " on"
+      : "Layers — " + n + " of " + LAYERS.length + " on";
+    oneSummary();
   }
   /* HOW MANY PLACES ARE ACTUALLY BEHIND EACH OPTION.
      David: «i dont even see much for eg. costs, almost nothing for most
@@ -1770,9 +1792,13 @@ window.addEventListener("load", async function () {
   drawCats();
   function catSummary() {
     var n = RANK.filter(function (a) { return !off[a]; }).length;
-    setSummary("ra-catsum", "Costs", n === RANK.length ? "All" : String(n),
-      n === RANK.length ? "What it costs to look — all " + RANK.length + " shown"
-                        : "What it costs to look — " + n + " of " + RANK.length + " shown");
+    var catFull = n === RANK.length
+      ? "What it costs to look — all " + RANK.length + " shown"
+      : "What it costs to look — " + n + " of " + RANK.length + " shown";
+    setSummary("ra-catsum", "Costs", n === RANK.length ? "All" : String(n), catFull);
+    sumBits.costs = n === RANK.length ? "All" : String(n);
+    sumFull.costs = catFull;
+    oneSummary();
   }
   catSummary();
   /* `change`, not `click`: these are checkboxes now, so the keyboard works
@@ -1824,10 +1850,13 @@ window.addEventListener("load", async function () {
   drawKinds();
   function kindSummary() {
     var n = KORDER.filter(function (k) { return kindOn[k]; });
-    setSummary("ra-kindsum", "Kind", !n.length ? "All" : String(n.length),
-      !n.length ? "What kind of record — every kind"
-                : "What kind of record — " +
-                  n.map(function (k) { return KLAB[k] || k; }).join(", "));
+    var kindFull = !n.length ? "What kind of record — every kind"
+      : "What kind of record — " +
+        n.map(function (k) { return KLAB[k] || k; }).join(", ");
+    setSummary("ra-kindsum", "Kind", !n.length ? "All" : String(n.length), kindFull);
+    sumBits.kinds = !n.length ? "All" : String(n.length);
+    sumFull.kinds = kindFull;
+    oneSummary();
   }
   kindSummary();
   /* The kind group no longer has a disclosure of its own — it is a heading
@@ -2130,7 +2159,14 @@ window.addEventListener("load", async function () {
     }
   }
 
+  /* Set by ?hub=, and the reason «Show these on the map» now shows THESE.
+     It used to fitBounds to the hub's countries and change nothing else, so
+     the map flew to the Balkans with every other place on earth still drawn
+     on it — an answer that looks like an answer and is not one. */
+  var hubCCs = null;
+
   function keep(p) {
+    if (hubCCs && !hubCCs[p.cc]) return false;
     if (off[RANK[p.a]]) return false;
     var t = qPlace || fold(qbox.value.trim());
     /* `q` now holds only the forms that are NOT the place's own name, so the
@@ -3919,6 +3955,11 @@ window.addEventListener("load", async function () {
       if (!hub || !hub.holds || !hub.holds.ccs || !hub.holds.ccs.length) return;
       var want = {};
       hub.holds.ccs.forEach(function (c) { want[c] = 1; });
+      /* Actually narrow the map to the hub, rather than merely flying to it.
+         keep() reads hubCCs, so one apply() hides everything outside it and
+         every other filter goes on working inside it. */
+      hubCCs = want;
+      apply();
       var pts = [];
       markers.forEach(function (m) {
         if (m._p && want[m._p.cc]) pts.push([m._p.y, m._p.x]);
@@ -3926,8 +3967,29 @@ window.addEventListener("load", async function () {
       if (pts.length) map.fitBounds(pts, { padding: [30, 30], maxZoom: 6 });
       var box = document.getElementById("ra-flagres-sub");
       if (box) {
-        box.textContent = hub.name + " — " + hub.holds.places.toLocaleString() +
-          " places across " + hub.holds.countries + " countries";
+        /* A FILTER THE READER CANNOT SEE IS A BUG THEY CANNOT REPORT. The map
+           is now showing a fraction of itself, so it has to say so, and to
+           offer the way out in the same breath. */
+        box.innerHTML = "";
+        box.appendChild(document.createTextNode(
+          "Showing only " + hub.name + " \u2014 " +
+          hub.holds.places.toLocaleString() + " places across " +
+          hub.holds.countries + " countries. "));
+        var clear = document.createElement("button");
+        clear.type = "button";
+        clear.className = "ra-hubclear";
+        clear.textContent = "Show the whole map";
+        clear.addEventListener("click", function () {
+          hubCCs = null;
+          apply();
+          box.textContent = "";
+          try {
+            var u = new URL(location.href);
+            u.searchParams.delete("hub");
+            history.replaceState(null, "", u);
+          } catch (e) {}
+        });
+        box.appendChild(clear);
       }
       if (fSec) fSec.hidden = false;
     })();
@@ -4394,8 +4456,17 @@ window.addEventListener("load", async function () {
     line-height: 1.55; color: var(--ink-2); margin-top: 6px; }
   :global(.ra-fholds) { display: block; font-family: var(--mono); font-size: 11px;
     color: var(--ink); margin-top: 5px; }
+  /* The wrapper is the grid cell now; card and link stack inside it, and the
+     card grows so every «Show these on the map» sits on the same baseline
+     however long the hub's description runs. */
+  :global(.ra-fhubwrap) { display: flex; flex-direction: column; }
+  :global(.ra-fhubwrap > .ra-fcard) { flex: 1; }
   :global(.ra-fways) { display: block; font-family: var(--sans); font-size: 12px;
-    margin-top: 8px; color: var(--accent); }
+    margin-top: 6px; padding: 0 2px; color: var(--accent); text-decoration: none; }
+  :global(.ra-fways:hover) { text-decoration: underline; }
+  :global(.ra-hubclear) { font: inherit; color: var(--accent); background: none;
+    border: 0; padding: 0; cursor: pointer; text-decoration: underline; }
+  :global(.ra-hubclear:hover) { color: var(--brick); }
 
   /* ---- who held this ground -------------------------------------------- */
   .ra-eras { list-style: none; margin: 4px 0 10px; padding: 0; }

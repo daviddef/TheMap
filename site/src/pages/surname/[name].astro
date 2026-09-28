@@ -22,6 +22,7 @@ import { belgiumFor } from "../../lib/belgium-surnames.js";
 import { contextFor } from "../../lib/surname-context.js";
 import { flagFor } from "../../lib/flags.js";
 import { totalVolumes, volumesFor, KIND_LABEL } from "../../lib/surname-volumes.js";
+import { wiktionaryFor } from "../../lib/surname-wiktionary.js";
 import regions from "../../../public/regions.json";
 
 export async function getStaticPaths() {
@@ -92,6 +93,7 @@ const smap = surnameMap(ccs);
    the page has to say so rather than let a reader read a blank France as
    a fact about the name. */
 const wd = contextFor(r.n);
+const wk = wiktionaryFor(r.n);
 
 /* JOBS 1-3: one block per attested country, replacing three sections that
    used to say «where it is borne», «when it was being born» and «whose
@@ -280,6 +282,61 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
       <p class="cap" style="margin-top:10px">
         <a href={wd.cite} target="_blank" rel="noopener">{wd.q} on Wikidata ↗</a>
         {" "}— the item every line above came from.
+      </p>
+    </section>
+  )}
+
+  {wk && (wk.langs || wk.from || wk.etymon) && (
+    <section style="margin-top:30px">
+      <h2>What Wiktionary says this name is</h2>
+      {/* A SECOND SOURCE, SHOWN SEPARATELY ON PURPOSE.
+          Wikidata's structured fields reach about a tenth of the names
+          here and that is its ceiling; the Oxford Dictionary of Family
+          Names is the standard authority and is not openly licensed.
+          Wiktionary is, and is far wider — so it is added as its OWN
+          section rather than merged into the one above. The two disagree
+          about names, and a reader who can see which claim came from
+          where can weigh them; a merged paragraph with nobody's name on
+          it is exactly the genre this atlas exists not to join.
+
+          NO PROSE IS TAKEN. The Etymology and Statistics sections are
+          somebody's writing. What is read here is the `from=` parameter
+          of Wiktionary's own surname template — a controlled value typed
+          into a field, which is what drives its category tree. */}
+      <p class="cap">Copied from the surname template on Wiktionary, not
+      worked out here, and not from its etymology prose. Anyone may edit
+      it; the page and the revision it was read at are linked below.</p>
+      <ul class="vols" style="margin-top:12px">
+        {(wk.etymon || []).map((e) => (
+          <li>
+            <b>From {e.lang} {e.word}</b>
+            {e.gloss && <i>{" "}&#8220;{e.gloss}&#8221;</i>}
+            <span class="who">{e.in ? `in the ${e.in} entry` : "the word it is from"}</span>
+          </li>
+        ))}
+        {Object.entries(wk.from || {}).map(([lg, vals]) => (
+          <li>
+            <b>{vals.join(" · ")}</b>
+            <span class="who">what the {lg} entry says it is from</span>
+          </li>
+        ))}
+        {wk.langs && wk.langs.length > 0 && (
+          <li>
+            <b>{wk.langs.join(" · ")}</b>
+            <span class="who">recorded as a surname in these languages</span>
+            <p class="cap" style="margin:4px 0 0">A language here is the
+            language of the NAME, not a country a family came from — the
+            same caveat the Wikidata section carries, and worth repeating
+            rather than assumed read.</p>
+          </li>
+        )}
+      </ul>
+      <p class="cap" style="margin-top:10px">
+        <a href={wk.cite} target="_blank" rel="noopener">{r.n} on Wiktionary ↗</a>
+        {wk.rev ? ` — read at revision ${wk.rev}. ` : " — "}
+        Text from Wiktionary, by its contributors, under{" "}
+        <a href="https://creativecommons.org/licenses/by-sa/4.0/"
+           target="_blank" rel="noopener">CC BY-SA 4.0</a>.
       </p>
     </section>
   )}

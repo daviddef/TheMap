@@ -78,7 +78,11 @@ def main() -> int:
                  "scripts/extract-era-flags.py. Keyed slug -> era id -> inline "
                  "SVG. Dates and polity names are NOT here: they live in "
                  "flag-eras.json, and duplicating them is how two files drift."),
-        "licence": "Hand-drawn for this project, CC0.",
+        # The wording matters: check-data.py requires every licence string in
+# data/ to be named on /data/, so a reuser is told what they are taking.
+# This is the same declaration data/flag-eras.json carries, because it is
+# the same provenance — both come out of the project's own flag pages.
+        "licence": "This atlas's own compilation",
         "counts": {"countries": len(out), "eras": art, "erasWithoutArt": bare},
         "art": out,
     }

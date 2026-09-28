@@ -149,6 +149,19 @@ def bare(s):
 
 # Church-dedication prefixes that are never the place. "Sv. Stošija" is a
 # patron saint, not a settlement.
+US_STATE_NAMES = {
+    "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
+    "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
+    "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine",
+    "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi",
+    "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey",
+    "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio",
+    "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina",
+    "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia",
+    "Washington", "West Virginia", "Wisconsin", "Wyoming",
+    "District of Columbia", "Puerto Rico",
+}
+
 ABBREV = {"sv", "st", "ss", "sta", "sto", "san", "sankt", "hl"}
 
 
@@ -1007,10 +1020,46 @@ def main():
     reyeared = [0]
     col_titles = {}
     by_place = collections.defaultdict(list)
+    # THIRD CHANCE: THE PLACEMENTS A HUMAN OR A RESEARCH PASS DECIDED.
+    #
+    # The gazetteer below resolves a name it already holds. It cannot resolve
+    # «Kings County» to Brooklyn, «Forsyth County» to Winston-Salem, or any of
+    # the other names that are administrative areas rather than settlements —
+    # data/gazetteer.json is GeoNames cities5000 and holds no US counties at
+    # all. Those names have been sitting in fs-volumes-unplaced.json, 45,668
+    # of them holding 1,181,581 volumes, described in that file's own note as
+    # «the map's next places» and actioned by nobody.
+    #
+    # data/unplaced-placed*.json are the decisions: name -> a real point, each
+    # with the collection title that corroborates it and a `why` saying how it
+    # was decided. They are read here rather than in build.py because this is
+    # where a name becomes a place id; wiring them in later would mean
+    # inventing a place the matcher never matched.
+    #
+    # A placement never outranks the shelf or the gazetteer. It is the last
+    # thing tried, on names nothing else could answer.
+    placements = {}
+    for _pf in ("data/unplaced-placed.json", "data/unplaced-placed-2.json"):
+        if not os.path.exists(_pf):
+            continue
+        _d = json.load(open(_pf, encoding="utf-8"))
+        _rows = _d.get("placed") if isinstance(_d, dict) else _d
+        if not isinstance(_rows, list):
+            _rows = next((v for v in _d.values() if isinstance(v, list)), [])
+        for _r in _rows:
+            _n, _cc = _r.get("n"), (_r.get("cc") or "").upper()
+            if not _n or _r.get("lat") is None or _r.get("lon") is None:
+                continue
+            placements.setdefault((_cc, fold(_n)), _r)
+    if placements:
+        print(f"placements      {len(placements)} names with a decided point")
+
     promote = {}
     crossed = collections.Counter()
+    placed_by_decision = 0
     unplaced = collections.Counter()
     unplaced_cc = {}
+    unplaced_ccw = {}      # name -> Counter of country -> volumes
     # NOT EVERY NAME WE FAIL TO PLACE IS A GAP IN THE MAP. «不明» is
     # Japanese for unknown and «Propiedades y Testamentos» is a bundle of
     # wills: readings() refuses both, correctly, and yet they were being
@@ -1026,6 +1075,20 @@ def main():
 
     for cid, col in (wp.get("byCollection") or {}).items():
         ccs = [x for x in (live_cc.get(cid) or col.get("cc") or []) if x != "*"]
+        # A US STATE IS NOT THE COUNTRY OF THE SAME NAME.
+        # 36 collections titled «Georgia, Probate Records», «Georgia, Death
+        # Index» and their like are filed under BOTH GE and US, and ccs[0]
+        # took GE — so every unplaced name out of them was reported as
+        # Georgian: «Greene GE» with 2,180 volumes, «Wayne GE» with 1,910,
+        # both of them counties in Alabama. The books were never Georgian and
+        # the collection's own title says so in its first word.
+        # The title is the corroboration, which is the rule everywhere else
+        # in this project: where it names a US state and the collection also
+        # claims the US, the US comes first.
+        if len(ccs) > 1 and "US" in ccs:
+            _t0 = (col.get("title") or col.get("name") or "").split(",")[0].strip()
+            if _t0 in US_STATE_NAMES:
+                ccs = ["US"] + [x for x in ccs if x != "US"]
         for v in col.get("volumes", []):
             raw = v.get("path") or []
             labels = v.get("labels") or []
@@ -1090,6 +1153,30 @@ def main():
                     if hit:
                         break
             if not hit:
+                # The decided placements, keyed on the same «deepest» name
+                # that would otherwise be reported as unplaced.
+                _deep = (path[0][0] if path else (areas[0][0] if areas else ""))
+                for _cc in list(ccs):
+                    _pl = placements.get((_cc, fold(_deep))) if _deep else None
+                    if not _pl:
+                        continue
+                    _drawn = already_drawn(_pl.get("gazetteer") or _deep, _cc,
+                                           _pl["lat"], _pl["lon"])
+                    if _drawn:
+                        hit = {"id": _drawn}
+                    else:
+                        _pid = "p-" + re.sub(r"[^a-z0-9]+", "-",
+                                             fold(_pl.get("gazetteer") or _deep)
+                                             ).strip("-")[:48] + "-" + _cc.lower()
+                        hit = {"id": _pid}
+                        promote.setdefault(_pid, {
+                            "id": _pid, "name": _pl.get("gazetteer") or _deep,
+                            "country": _cc, "lat": _pl["lat"], "lon": _pl["lon"],
+                            "from": "placement", "why": _pl.get("why", "")})
+                    placed_by_decision += 1
+                    break
+
+            if not hit:
                 miss += 1
                 # REPORT THE TOWN, NOT THE CHURCH. Counting the deepest
                 # level put Inmaculada Concepción at the head of "the map's
@@ -1105,7 +1192,16 @@ def main():
                     unplaceable[deepest] += 1
                 else:
                     unplaced[deepest] += 1
-                    unplaced_cc.setdefault(deepest, ccs[0] if ccs else "")
+                    # WHERE THE BOOKS ARE, NOT WHERE THE NAME FIRST MATCHED.
+                    # This was setdefault(ccs[0]), so a name kept whichever
+                    # country happened to be processed first and never
+                    # reconsidered. «Bibb», «Baldwin» and «Blount» are
+                    # counties in Alabama and were reported as Australian;
+                    # «Essex» and «Warren» as Canadian. Counting instead, and
+                    # taking the country holding the most volumes for that
+                    # name, answers the question the field is actually for.
+                    if ccs:
+                        unplaced_ccw.setdefault(deepest, collections.Counter())[ccs[0]] += 1
                 continue
             # A SHELF MARK IS NOT A YEAR, and the harvester's fix only helps
             # collections walked after it. These rows are already on disk:
@@ -1221,7 +1317,10 @@ def main():
         # off this list, so a name missing from it can never be looked up: the
         # 27,530 names below the cut were carrying 200,641 books that nothing
         # was even trying to place. The file is a work list; it can be long.
-        "names": [{"n": n, "cc": unplaced_cc.get(n, ""), "volumes": c}
+        "names": [{"n": n,
+                   "cc": (unplaced_ccw[n].most_common(1)[0][0]
+                          if unplaced_ccw.get(n) else unplaced_cc.get(n, "")),
+                   "volumes": c}
                   for n, c in unplaced.most_common()],
         "unplaceableNote": ("Values this matcher refuses on sight — «unknown» in "
                             "several languages, and record types like a binding or "
@@ -1258,6 +1357,9 @@ def main():
     print(f"  {noname:,} had nothing usable in their path at all")
     print(f"\n{sum(len(v) for v in by_place.values()):,} distinct books on "
           f"{len(by_place):,} places -> {OUT}")
+    if placed_by_decision:
+        print(f"{placed_by_decision:,} volumes placed from the decided "
+              f"placements that no gazetteer could answer")
     print(f"{len(unplaced):,} unknown place names -> {GAPS}")
     print(f"{len(promote):,} promoted places -> {PROMOTE}")
     if crossed:

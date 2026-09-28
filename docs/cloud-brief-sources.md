@@ -64,6 +64,36 @@ still http-only.
 
 They are the shape to copy, not the extent of the job.
 
+## FIRST: can this environment reach the open web?
+
+Run one check before anything else:
+
+    curl -sS -o /dev/null -w '%{http_code}\n' --max-time 15 https://gazettes.africa
+
+**If that fails, do not attempt the verification work in this brief.** A
+sandboxed session usually reaches GitHub and npm and nothing else, and this
+brief's central requirement — open the page, see what it holds — cannot be met
+there. `scripts/recheck-providers.py` and `scripts/check-links.py` need the
+network too and will fail for the same reason.
+
+That is a flaw in how this brief was handed over, not in the session running
+it. It was written for an environment with egress and given to one without.
+
+**Without network, do this instead and nothing else:**
+
+1. **Audit the 520 rows already there.** Duplicates, ids that disagree with
+   names, rows missing `at` (they sink to the bottom of every list because the
+   panel orders by distance), `access: unsurveyed` rows that have sat unopened,
+   `countries` lists that look copied rather than read, http URLs that
+   `check-data.py` would reject.
+2. **Write the per-country research plan** for the ten starved giants — RU, MX,
+   BY, AR, PT, MD, CO, GT, BE, ES — naming candidate sources by URL and what
+   each is believed to hold, **every one marked unverified**, so the session
+   that does have egress can work down a list instead of starting cold.
+3. **Add no rows to `data/providers.json`.** A row means somebody opened it.
+
+Hand back the audit and the plan. The verification is done elsewhere.
+
 ## The job
 
 Raise the source layer for the countries the atlas actually covers, in this

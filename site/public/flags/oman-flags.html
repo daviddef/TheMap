@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#f2e8d5;color:#241a12}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+<!doctype html><html><head><link rel="stylesheet" href="../atlas-tokens.css"><!-- THE PALETTE LIVES IN ONE FILE NOW. These three :root blocks used to be inline on all 210 flag pages; see site/public/atlas-tokens.css for why, and for the one colour that changed. --><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#f2e8d5;color:#241a12}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
   .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
   .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
   .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
@@ -34,7 +34,17 @@
     font-size: 10.5px; color: var(--muted); letter-spacing: .04em; }
   .record-fold-in { margin-top: 10px; }
   .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
-</style></head><body>
+</style><!-- THE ORIGIN IS NOT OURS TO HARD-CODE.
+     Every link and fetch on this page used to name
+     https://daviddef.github.io/TheMap explicitly — 1,271 of them across 197
+     flag pages. recordatlas.org is bought and its cutover is scripted, and on
+     the day it lands every one of those would have gone on pointing at the old
+     origin: not broken, which would at least be visible, but quietly serving
+     the old site from the new one.
+     A flag page always lives at <base>/flags/<country>-flags.html, so «../» is
+     the site root wherever the site is — old origin, new domain, a local
+     preview on any port, or a project page under any path. -->
+</head><body>
 <title>Flags of Oman</title>
 <meta name="description" content="A chronological, paint-ready atlas of every flag that flew over Oman, from the 8th-century Ibadi Imamate through the maritime empire that once controlled Zanzibar, to the Al Said dynasty's modern sultanate.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -42,26 +52,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
-  :root {
-    --ink: #241a12; --paper: #f2e8d5; --card: #faf3e3; --card-border: #dcc99a;
-    --brick: #8a2f1f; --brick-2: #6b2317; --brass: #a9762f; --sea: #1f6b6b; --sea-2: #164f4f;
-    --muted: #6e6047; --hair: #cbb98d; --focus: #8a2f1f;
-    color-scheme: light;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
-      --brick: #e0785f; --brick-2: #ec9276; --brass: #d1a154; --sea: #4fa3a3; --sea-2: #6fbcbc;
-      --muted: #9a9280; --hair: #33393f;
-      color-scheme: dark;
-    }
-  }
-  :root[data-theme="dark"] {
-    --ink: #ece1c4; --paper: #14171b; --card: #1c2027; --card-border: #33393f;
-    --brick: #e0785f; --brick-2: #ec9276; --brass: #d1a154; --sea: #4fa3a3; --sea-2: #6fbcbc;
-    --muted: #9a9280; --hair: #33393f;
-    color-scheme: dark;
-  }
+  
+  
+  
   * { box-sizing: border-box; }
   body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
   h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
@@ -593,8 +586,8 @@
 
   <div class="record-links">
     <h2>Find the records</h2>
-    <p>Family history research for Oman lives in a different project, <a href="https://daviddef.github.io/TheMap/">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
-    <a class="record-cta" href="https://daviddef.github.io/TheMap/country/om/">Search Record Atlas for Oman &rarr;</a>
+    <p>Family history research for Oman lives in a different project, <a href="../">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="../country/om/">Search Record Atlas for Oman &rarr;</a>
   </div>
   <div class="roadmap">
     <h2>More of the atlas</h2>
@@ -770,7 +763,7 @@
   var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
   var ISO2 = iso2Match ? iso2Match[1] : null;
 
-  fetch("https://daviddef.github.io/TheMap/eras.json").then(function (r) {
+  fetch("../eras.json").then(function (r) {
     return r.ok ? r.json() : null;
   }).then(function (data) {
     if (!data) return;
@@ -822,7 +815,7 @@
           html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
           if (row.filedUnder && row.filedUnder.length) {
             html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
-              return '<a href="https://daviddef.github.io/TheMap/archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+              return '<a href="../archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
             }).join(', ') + '</div>';
           }
           if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
@@ -844,7 +837,7 @@
         line.style.marginTop = "10px";
         line.style.fontSize = ".82rem";
         line.style.color = "var(--muted)";
-        line.innerHTML = 'Per-era record counts above via <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        line.innerHTML = 'Per-era record counts above via <a href="../" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
         box.appendChild(line);
       }
     } else if (ISO2 && data.countries && box) {
@@ -856,7 +849,7 @@
         line2.style.marginTop = "10px";
         line2.style.fontSize = ".82rem";
         line2.style.color = "var(--muted)";
-        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="https://daviddef.github.io/TheMap/" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="../" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
         box.appendChild(line2);
       }
     }

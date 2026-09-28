@@ -1,0 +1,79 @@
+/* The atlas palette, in one place.
+ *
+ * It lived in 210 copies: every flag page carried these three blocks inline,
+ * so changing a colour meant changing it 210 times and hoping none drifted.
+ * They had not drifted — all 210 were byte-identical — but that was luck
+ * maintained by hand, and the site's own stylesheet had meanwhile grown a
+ * second opinion: 66 custom properties of which exactly three shared a name
+ * with these, and two of those three disagreed on the value.
+ *
+ * ONE DISAGREEMENT MATTERED. --brass was #a9762f here and #8D6227 in
+ * styles.css, because #a9762f had been measured at 3.31:1 against the site's
+ * background and replaced. Measured again against these backgrounds:
+ *
+ *     #a9762f on --card  #f8f1de   3.50:1   fails AA
+ *     #8D6227 on --card  #f8f1de   4.77:1   passes
+ *     #a9762f on --paper #ede2c8   3.07:1   fails
+ *     #8D6227 on --paper #ede2c8   4.17:1   still fails
+ *
+ * So the accessible value is adopted here. It is a visible change — the
+ * brass reads a shade deeper — and it is the only one in this file.
+ * .card-dates and .noble-dates sit on --card and now pass. .kicker and
+ * .phase .num sit on --paper and still do not; brass on paper needs either a
+ * darker brass or a lighter paper, and that is a design decision rather than
+ * a refactor, so it is left visible rather than quietly fudged.
+ *
+ * Three blocks, deliberately: the system default, the OS dark preference
+ * scoped so an explicit light choice still wins, and the explicit dark
+ * choice. Removing any one of them breaks a way of asking for dark. */
+
+:root {
+  --ink: #201a12;
+  --paper: #ede2c8;
+  --card: #f8f1de;
+  --card-border: #d9c9a0;
+  --brick: #9c3b28;
+  --brick-2: #7c2e1f;
+  --brass: #8D6227;          /* was #a9762f; see the note above */
+  --adriatic: #204b5c;
+  --adriatic-2: #163846;
+  --muted: #6e6047;
+  --hair: #cbb98d;
+  --focus: #204b5c;
+  --tile-sea: #b9d3da;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink: #ece1c4;
+    --paper: #14171b;
+    --card: #1c2027;
+    --card-border: #33393f;
+    --brick: #d3644a;
+    --brick-2: #e07a5f;
+    --brass: #d1a154;
+    --adriatic: #6fa3b8;
+    --adriatic-2: #8fbccf;
+    --muted: #9a9280;
+    --hair: #33393f;
+    --tile-sea: #17303a;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --ink: #ece1c4;
+  --paper: #14171b;
+  --card: #1c2027;
+  --card-border: #33393f;
+  --brick: #d3644a;
+  --brick-2: #e07a5f;
+  --brass: #d1a154;
+  --adriatic: #6fa3b8;
+  --adriatic-2: #8fbccf;
+  --muted: #9a9280;
+  --hair: #33393f;
+  --tile-sea: #17303a;
+  color-scheme: dark;
+}

@@ -732,19 +732,42 @@ window.addEventListener("load", async function () {
     "England": "United Kingdom"
   };
   var CC2FLAG = null;
+  /* Shared by the country-card path and the hub-card flags below — built
+     once, the first time either needs it. */
+  function ensureCC2Flag() {
+    if (CC2FLAG) return CC2FLAG;
+    CC2FLAG = {};
+    var n2 = {};
+    Object.keys(CNAME).forEach(function (cc) {
+      n2[fold(CNAME[cc])] = cc; });
+    (FLAGIDX.countries || []).forEach(function (c) {
+      var cc = n2[fold(c.name)] || n2[fold((FLAG_ALIAS[c.name] || ""))];
+      if (cc) CC2FLAG[cc] = c;
+    });
+    return CC2FLAG;
+  }
+  /* SMALL, IN A ROW, NO TEXT. A hub's own «9 countries · 1,588 places ·
+     6,844 volumes» line already says how many and how much; this says
+     which, at a glance, the way a shelf of flags does. Capped at ten so a
+     hub spanning an empire's worth of successor states does not turn one
+     card into a strip. Decorative: the count is read from `held.countries`
+     already on the card, so the row is hidden from assistive tech rather
+     than repeating it flag by flag. */
+  function hubFlagsHTML(ccs) {
+    if (!ccs || !ccs.length) return "";
+    var flags = ccs.map(function (cc) { return ensureCC2Flag()[cc]; }).filter(Boolean);
+    if (!flags.length) return "";
+    var shown = flags.slice(0, 10), extra = flags.length - shown.length;
+    return '<span class="ra-fhub-flags" aria-hidden="true">' +
+      shown.map(function (f) {
+        return '<svg viewBox="0 0 300 200">' + f.flag + "</svg>"; }).join("") +
+      (extra > 0 ? '<span class="ra-fhub-more">+' + extra + "</span>" : "") +
+      "</span>";
+  }
   function drawFlagResForCountries(ccs) {
     if (!FLAGIDX || !fSec) { return; }
     if (!ccs || !ccs.length) return;
-    if (!CC2FLAG) {
-      CC2FLAG = {};
-      var n2 = {};
-      Object.keys(CNAME).forEach(function (cc) {
-        n2[fold(CNAME[cc])] = cc; });
-      (FLAGIDX.countries || []).forEach(function (c) {
-        var cc = n2[fold(c.name)] || n2[fold((FLAG_ALIAS[c.name] || ""))];
-        if (cc) CC2FLAG[cc] = c;
-      });
-    }
+    ensureCC2Flag();
     var cards = ccs.map(function (cc) { return CC2FLAG[cc]; }).filter(Boolean);
     if (!cards.length) { fSec.hidden = true; return; }
     fSec.hidden = false;
@@ -853,6 +876,7 @@ window.addEventListener("load", async function () {
         '<a class="ra-fcard ra-fhub" href="' + BASE + esc(h.url) + '">' +
         (h.meta ? '<span class="ra-fmeta">' + esc(h.meta) + "</span>" : "") +
         '<span class="ra-fname">' + esc(h.name) + "</span>" +
+        (held && held.ccs ? hubFlagsHTML(held.ccs) : "") +
         (stat ? '<span class="ra-fholds">' + esc(stat) + "</span>" : "") +
         (h.what ? '<span class="ra-fwhat">' + esc(h.what) + "</span>" : "") +
         "</a>" + ways + srcs + "</div>";
@@ -4515,6 +4539,13 @@ window.addEventListener("load", async function () {
     line-height: 1.55; color: var(--ink-2); margin-top: 6px; }
   :global(.ra-fholds) { display: block; font-family: var(--mono); font-size: 11px;
     color: var(--ink); margin-top: 5px; }
+  /* The hub's member countries, small and in a row — see hubFlagsHTML()
+     above. Decorative, so it carries no text of its own. */
+  :global(.ra-fhub-flags) { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 6px; }
+  :global(.ra-fhub-flags svg) { display: block; width: 16px; height: auto;
+    border: 1px solid var(--rule); border-radius: 1px; }
+  :global(.ra-fhub-more) { font-family: var(--mono); font-size: 10px;
+    color: var(--ink-3); align-self: center; margin-left: 2px; }
   /* The wrapper is the grid cell now; card and link stack inside it, and the
      card grows so every «Show these on the map» sits on the same baseline
      however long the hub's description runs. */

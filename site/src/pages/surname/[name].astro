@@ -1,6 +1,5 @@
 ---
 import { timelineFor } from "../../lib/surname-timeline.js";
-import { hasCountryPage } from "../../lib/country-pages.js";
 import { surnamePageRows } from "../../lib/surname-pages.js";
 /* One page per surname that has something real to say.
 
@@ -21,6 +20,8 @@ import { corpus } from "../../lib/surname-corpus.js";
 import { surnameMap, placesMap } from "../../lib/surname-map.js";
 import { belgiumFor } from "../../lib/belgium-surnames.js";
 import { contextFor } from "../../lib/surname-context.js";
+import { flagFor } from "../../lib/flags.js";
+import { totalVolumes, volumesFor, KIND_LABEL } from "../../lib/surname-volumes.js";
 import regions from "../../../public/regions.json";
 
 export async function getStaticPaths() {
@@ -91,6 +92,49 @@ const smap = surnameMap(ccs);
    the page has to say so rather than let a reader read a blank France as
    a fact about the name. */
 const wd = contextFor(r.n);
+
+/* JOBS 1-3: one block per attested country, replacing three sections that
+   used to say «where it is borne», «when it was being born» and «whose
+   archive to write to» without ever meeting. Every piece of evidence about
+   one country now sits under that country's own name and flag.
+
+   SCOPED TO `ccs` — the register/archive-attested countries — not to every
+   country the Wikidata birth timeline happens to mention. Blažević has
+   Wikidata-notable births in Lithuania and Belarus that this atlas does not
+   otherwise attest at all; the old «when and where it was being born»
+   section showed those as a fourth, unlabelled kind of country next to the
+   attested ones. Keeping the spine to what this atlas actually attests, and
+   using the timeline only to date the countries already on the page, is a
+   real narrowing of what this page shows — stated here rather than left for
+   a reader to notice by counting rows. */
+const tlByCc = {};
+if (tl) for (const row of tl.rows) tlByCc[row.cc] = row;
+
+function decadeList(decades) {
+  const s = decades.map((d) => `${d}s`);
+  if (s.length === 1) return s[0];
+  return `${s.slice(0, -1).join(", ")} and ${s[s.length - 1]}`;
+}
+
+const countryBlocks = ccs.map((c) => {
+  const flag = flagFor(c.cc);
+  const src = sourcesFor(c.cc).slice(0, 6);
+  const row = tlByCc[c.cc];
+  const decades = row ? Object.keys(row.d).map(Number).sort((a, b) => a - b) : null;
+  const vTotal = totalVolumes(c.cc);
+  /* THREE STATES FROM JOB 3, plus a fourth this atlas has to admit to: no
+     dated evidence at all for this name in this country, so the volumes
+     here cannot be narrowed by date and the page must not pretend they
+     have been. */
+  const vol = vTotal === 0 ? null
+    : !decades || !decades.length ? { state: "nodates", total: vTotal }
+    : volumesFor(c.cc, decades);
+  const enumerableSrc = [...new Set((c.by || [])
+    .filter((b) => attestedBy[b]?.enumerable === false)
+    .map((b) => attestedBy[b].name))];
+  return { c, flag, src, decades, vol, enumerableSrc };
+});
+
 /* PLACES THIS NAME IS ALSO THE NAME OF, drawn rather than only listed.
    The gazetteer match has always been here; its coordinates were sitting
    unused in the same file the match came from, so «Llerena is a town in
@@ -328,80 +372,120 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
         <Fragment set:html={bemap.svg} />
       </figure>
     )}
-
-    <p class="cap">Two different claims, and they used to be one word. A <b>register</b> is a
-    head-count — a state counted these people. A <b>record</b> is one document naming the
-    surname on that ground, which is narrower evidence and often very much older. Neither ever
-    means the name exists in that country and nowhere else.</p>
-      <thead><tr><th>Country</th><th class="m">People</th><th>Kind of claim</th>
-        <th>How we know</th></tr></thead>
-      <tbody>
-        {ccs.map((c) => (
-          <tr>
-            <td><a href={u(`/country/${c.cc.toLowerCase()}/`)}>{CN[c.cc] || c.cc}</a></td>
-            <td class="m">{c.n ? c.n.toLocaleString() : "—"}</td>
-            <td>{KIND_OF[c.how] || c.how}</td>
-            <td>{(c.by || []).map((b) => attestedBy[b]?.name || b).join("; ") || c.how}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-    {/* WHEN A SOURCE CANNOT BE ENUMERATED, ITS SILENCE IS NOT EVIDENCE.
-        Every other register in this table was downloaded whole, so a name
-        missing from it is a name the state did not count. Croatia's cannot
-        be downloaded at all: DZS answers one surname at a time and will not
-        say which surnames exist, so this atlas asked only about names it
-        already attests on Croatian ground. A reader who took a blank row
-        for «not in Croatia» would be reading our question list, not the
-        census. */}
-    {ccs.some((c) => (c.by || []).some((b) => attestedBy[b]?.enumerable === false)) && (
-      <p class="cap" style="margin-top:10px">
-        One of these sources answers questions rather than publishing a list:
-        {" "}{[...new Set(ccs.flatMap((c) => (c.by || [])
-              .filter((b) => attestedBy[b]?.enumerable === false)
-              .map((b) => attestedBy[b].name)))].join("; ")}.
-        {" "}It was asked about this name because the atlas already holds it.
-        A surname absent from that country's row may simply never have been
-        asked about.
-      </p>
-    )}
   </section>
 
-  {tl && (
-    <section style="margin-top:34px">
-      <h2>When and where it was being born</h2>
-      <p class="cap">{tl.total.toLocaleString()} people with this name, or one of its
-      variants, whose birth year and birth country are both recorded — from the
-      {" "}{tl.decades[0]}s to the {tl.decades[tl.decades.length - 1]}s.
-      {tl.names.length > 1 && <> Counted across {tl.names.join(", ")}, because they
-      are the same name.</>}</p>
-      <div class="one" style="border-left-color:var(--rule-strong)">
-        <div class="lab">Read this as evidence, not as a count</div>
-        <p class="cap">These are people notable enough for an encyclopaedia, which is
-        not a census. It over-counts men, the recent, Europe and North America, and
-        misses almost everybody. It is good evidence that the name <b>was borne</b> in
-        a place at a time. It says nothing about how common it was.</p>
+  {/* ONE BLOCK PER COUNTRY, replacing three sections that used to say «where
+      it is borne», «when it was being born» and «whose archive to write to»
+      — each correct, none of them meeting, none of them showing a flag
+      although this atlas draws 194 of them. A reader who has just learnt a
+      name is attested in Croatia wants to know it in one place: how the
+      atlas knows, who holds the paper, and which of that paper is worth a
+      Saturday. */}
+  <section style="margin-top:34px">
+    <h2>Country by country</h2>
+    <p class="cap">Each country below can carry up to three different kinds of evidence, and
+    none of them is the same claim. A <b>register</b> is a head-count — a state counted these
+    people. A <b>record</b> is one document naming the surname on that ground, narrower
+    evidence and often much older. And a <b>volume overlapping these dates</b> is a document
+    from the right place and years — never a document known to name this surname. None of the
+    three ever means the name exists in that country and nowhere else, or that it exists
+    nowhere but here.</p>
+
+    {countryBlocks.map(({ c, flag, src, decades, vol, enumerableSrc }) => (
+      <div class="cblock">
+        <h3>
+          {flag && (
+            <a class="cflag-l" href={u("/" + flag.url)}
+               title={`${CN[c.cc] || c.cc} in the flags atlas — who held this ground, and when`}>
+              <svg class="ccflag" viewBox="0 0 300 200" role="img"
+                   aria-label={`Flag of ${CN[c.cc] || c.cc}`} set:html={flag.flag} />
+            </a>
+          )}
+          <a href={u(`/country/${c.cc.toLowerCase()}/`)}>{CN[c.cc] || c.cc}</a>
+        </h3>
+        <p class="cap ctop">
+          {c.n ? <><b>{c.n.toLocaleString()}</b>{" "}</> : ""}
+          {KIND_OF[c.how] || c.how} — {(c.by || []).map((b) => attestedBy[b]?.name || b).join("; ") || c.how}.
+        </p>
+        {/* WHEN A SOURCE CANNOT BE ENUMERATED, ITS SILENCE IS NOT EVIDENCE.
+            DZS answers one surname at a time and will not say which surnames
+            exist, so this atlas asked only about names it already attests on
+            Croatian ground. A reader who took a blank row for «not in
+            Croatia» would be reading our question list, not the census. */}
+        {enumerableSrc.length > 0 && (
+          <p class="cap">{enumerableSrc.join("; ")} answers questions rather than publishing
+          a list. This name was asked about because the atlas already holds it elsewhere — a
+          name absent here may simply never have been asked about, not absent
+          from {CN[c.cc] || c.cc}.</p>
+        )}
+
+        {src.length > 0 && (
+          <>
+            <div class="lab" style="margin-top:12px">Whose archive to write to</div>
+            <ul class="vols">
+              {src.map((p) => (
+                <li>
+                  <a href={u(`/archive/${p.id}/`)}>{p.name}</a>
+                  <span class="who">{PACCESS[p.access] || p.access}</span>
+                  {p.at && <span class="who">{p.at.place}</span>}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+
+        {/* JOB 3: which volumes are worth opening. The atlas knows a country
+            and nothing finer; it separately knows when a name was borne
+            (Wikidata's notable births) and when a volume's own pages run.
+            Intersecting the two is a real filter, and its strength depends
+            entirely on the name — so all four honest outcomes are rendered,
+            never just the flattering one. */}
+        {vol && vol.state === "nodates" && (
+          <p class="cap" style="margin-top:12px">This atlas has no birth-year evidence
+          for {r.n} in {CN[c.cc] || c.cc}, so it cannot narrow {CN[c.cc] || c.cc}'s{" "}
+          {vol.total.toLocaleString()} volume{vol.total === 1 ? "" : "s"} by date — see{" "}
+          <a href={u(`/country/${c.cc.toLowerCase()}/`)}>{CN[c.cc] || c.cc}'s own page</a>{" "}
+          for all of it.</p>
+        )}
+        {vol && vol.state === "warning" && (
+          <div class="one" style="margin-top:12px">
+            <div class="lab">Attested here, and nothing that survives covers those years</div>
+            <p class="cap">{r.n} is attested in {CN[c.cc] || c.cc} in
+            the {decadeList(decades)}. Not one of the {vol.total.toLocaleString()} volumes
+            this atlas holds for {CN[c.cc] || c.cc} covers those years — worth knowing before
+            an afternoon is spent on {CN[c.cc] || c.cc}'s shelf rather than after.</p>
+          </div>
+        )}
+        {vol && vol.state === "shortlist" && (
+          <>
+            <p class="cap" style="margin-top:12px"><b>{vol.overlap} of{" "}
+            {vol.total.toLocaleString()}</b> volumes held for {CN[c.cc] || c.cc} overlap
+            the {decadeList(decades)} — the decades {r.n} is attested here. None is known to
+            name {r.n}: a volume overlapping these years is a document from the right place
+            and time, not a confirmed match. Worth an afternoon.</p>
+            <ul class="vols">
+              {vol.list.map((v) => (
+                <li>
+                  <a href={v.url} target="_blank" rel="noopener">{v.t}</a>
+                  <span class="who">{v.from === v.to ? v.from : `${v.from}–${v.to}`}</span>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+        {vol && vol.state === "filter" && (
+          <p class="cap" style="margin-top:12px"><b>{vol.overlap.toLocaleString()} of{" "}
+          {vol.total.toLocaleString()}</b> volumes held for {CN[c.cc] || c.cc} overlap
+          the {decadeList(decades)} — the decades {r.n} is attested here. Too many to list,
+          and this atlas does not know whether any one of them names {r.n}.
+          {vol.kinds.length > 0 && <> The commonest
+          kinds: {vol.kinds.map((k) => KIND_LABEL[k] || k).join(", ")}.</>}
+          {" "}<a href={u(`/country/${c.cc.toLowerCase()}/`)}>See everything this atlas
+          holds for {CN[c.cc] || c.cc} →</a></p>
+        )}
       </div>
-      <table style="margin-top:16px">
-        <thead><tr><th>Country</th><th class="m">People</th><th>Decades of birth</th></tr></thead>
-        <tbody>
-          {tl.rows.map((r) => (
-            <tr>
-              {/* Only a link where there is a page. Wikidata knows people
-                  born in East Germany and Taiwan; this atlas holds nothing
-                  for either, and a link to a 404 is worse than plain text. */}
-              <td>{hasCountryPage(r.cc)
-                ? <a href={u(`/country/${r.cc.toLowerCase()}/`)}>{CN[r.cc] || r.cc}</a>
-                : <span>{CN[r.cc] || r.cc}</span>}</td>
-              <td class="m">{r.tot}</td>
-              <td class="cap">{Object.keys(r.d).map(Number).sort((a, b) => a - b)
-                .map((dd) => `${dd}s`).join(" · ")}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </section>
-  )}
+    ))}
+  </section>
 
   {frCurve && (
     <section style="margin-top:34px">
@@ -425,30 +509,6 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
       </ul>
     </section>
   )}
-
-  <section style="margin-top:34px">
-    <h2>Whose archive to write to</h2>
-    <p class="cap">The national and regional sources covering the countries this name is
-    attested in. This is the point of knowing where a name is: <b>a country is not an
-    answer, an archive is.</b></p>
-    {ccs.map((c) => {
-      const src = sourcesFor(c.cc);
-      return src.length > 0 && (
-        <div style="margin-top:16px">
-          <div class="lab"><a href={u(`/country/${c.cc.toLowerCase()}/`)}>{CN[c.cc] || c.cc}</a></div>
-          <ul class="vols">
-            {src.slice(0, 6).map((p) => (
-              <li>
-                <a href={u(`/archive/${p.id}/`)}>{p.name}</a>
-                <span class="who">{PACCESS[p.access] || p.access}</span>
-                {p.at && <span class="who">{p.at.place}</span>}
-              </li>
-            ))}
-          </ul>
-        </div>
-      );
-    })}
-  </section>
 
   {jurShown.length > 0 && (
     <section style="margin-top:34px">
@@ -553,4 +613,17 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
   .curve .bar { height: 11px; background: var(--accent); opacity: .72; min-width: 1px;
                 border-radius: 1px; }
   .curve .n { text-align: right; color: var(--ink-2); }
+  /* One block per attested country — same flag treatment as surnames.astro's
+     own country list, so a flag beside a name means the same thing on both
+     pages. */
+  .cblock { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--rule); }
+  .cblock:first-of-type { margin-top: 18px; padding-top: 0; border-top: 0; }
+  .cblock h3 { font-family: var(--serif); font-size: 21px; font-weight: 500;
+               margin: 0 0 6px; }
+  .cblock h3 a { text-decoration: none; }
+  .cblock h3 a:hover { text-decoration: underline; }
+  .ctop { margin-top: 0; }
+  .ccflag { width: 22px; height: auto; vertical-align: -4px; margin-right: 8px;
+    border: 1px solid var(--rule); border-radius: 1px; }
+  .cflag-l:hover .ccflag { border-color: var(--accent); }
 </style>

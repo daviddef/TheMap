@@ -9,7 +9,7 @@ import site from "../data/site.json";
    attribution — the one kind of number that must not quietly go stale. */
 import osm from "../../public/archives-osm.json";
 
-const { title, dek, eyebrow, bare, jsonld, og = "default", wide, flag } = Astro.props;
+const { title, dek, eyebrow, bare, jsonld, og = "default", wide } = Astro.props;
 /* GROUPED, BECAUSE THE STYLESHEET ONLY EVER STYLED GROUPS. styles.css came
    across whole from the family archive and it carries a complete navigation
    design: dropdown groups, a menu button, a drawer. This file rendered eleven
@@ -324,52 +324,10 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
 
 <main id="main" tabindex="-1">
   <div class="wrap">
-    {/* THE FLAG ATLAS DOES NOT LOOK LIGHTER BECAUSE OF ITS PALETTE.
-        David kept asking why the rest of the site would not read like the
-        flags atlas, and I kept answering with colour — warmer ground, a
-        softer rule, Fraunces over the old face. Then I counted the hex
-        values in the flags atlas's own stylesheet: TWO. It runs on exactly
-        the tokens everything else runs on. What makes it feel lighter is
-        that every card on it carries a hand-drawn flag, and the rest of this
-        site carried none: flagFor was imported by three index pages and the
-        map, and by none of the 21,754 place pages or 139 country pages —
-        the pages a reader actually lands on.
-
-        So the flag belongs in the page header, once, where every template
-        gets it. Optional, because a page about a surname spans countries and
-        a page about the project has no country at all.
-
-        AND THE COMMENT LIVES OUT HERE, not inside the parentheses below.
-        `{!bare && ( … )}` has to hold ONE expression: a braced JSX comment
-        in there is a second one with no operator, and a plain block comment
-        confuses the parser just as badly. Both spellings fail with a line
-        number in the GENERATED file that points nowhere near this one. */}
     {!bare && (
-      <div class={"pagehead" + (flag ? " pagehead-flagged" : "")}
-           style={flag && flag.color ? `--edge:${flag.color}` : undefined}>
+      <div class="pagehead">
         {eyebrow && <div class="lab">{eyebrow}</div>}
-        <div class="pagehead-title">
-          {/* LABELLED WITH THE COUNTRY, NOT THE PAGE. The first version used
-              the page title, which on a country page is right by accident and
-              on a place page is a lie: Gračišće's header carries the flag of
-              CROATIA, and a screen reader was about to announce «Flag of
-              Gračišće» on 21,754 pages. flag.name is the country as the flags
-              atlas spells it.
-
-              AND THIS COMMENT SITS OUTSIDE THE PARENTHESES, for the second
-              time in ten minutes: I wrote the note explaining that a braced
-              comment cannot be the first child of `{x && ( … )}`, and then
-              immediately put one inside `{flag && ( … )}`. Same error, same
-              unhelpful message about a generated line number. */}
-          {flag && (
-            <a class="pagehead-flag" href={u("/" + flag.url)}
-               title={`${flag.name} in the flags atlas — who held this ground, and when`}>
-              <svg viewBox="0 0 300 200" role="img"
-                   aria-label={`Flag of ${flag.name}`} set:html={flag.flag} />
-            </a>
-          )}
-          <h1>{title}</h1>
-        </div>
+        <h1>{title}</h1>
         {dek && <p class="dek">{dek}</p>}
       </div>
     )}

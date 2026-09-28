@@ -9,7 +9,24 @@ Lemberg is Lviv. A researcher holding a document that says Pressburg can be
 told what to type next, in any country on earth, whether or not this map has
 walked a single register there.
 
-SOURCE. GeoNames `cities5000`, CC BY 4.0 — 69,722 populated places, 59,159 of
+SOURCE. GeoNames cities5000 as a worldwide floor, PLUS per-country dumps for
+the ground this atlas actually works — CC BY 4.0.
+
+BOTH, BECAUSE EITHER ALONE IS WRONG. The country files answer «Lovinac», which
+cities5000 cannot: it starts at five thousand people and Lovinac has 290, Krivi
+Put 39, Mrzli Dol 23. But nineteen country files cover nineteen countries, and
+swapping one for the other would have taken the gazetteer away from the eighty
+other countries that have a walked place in this atlas — trading a hole in
+Croatia for eighty holes elsewhere. Layered, and deduplicated on the GeoNames
+id, every country keeps what it had and nineteen of them gain their villages.
+
+WAS. GeoNames per-country dumps, CC BY 4.0 — HR.txt, IT.txt and the rest,
+which is what «Lovinac» needed: cities5000 starts at five thousand people and
+Lovinac has 290, Krivi Put 39, Mrzli Dol 23. The country files carry every
+populated place, so the gazetteer answers the villages a parish register
+actually names. Written gzipped — see scripts/gazetteer.py for why.
+
+WAS. GeoNames `cities5000`, CC BY 4.0 — 69,722 populated places, 59,159 of
 them carrying alternate names. Downloaded, not scraped: the providers this
 project would otherwise have ingested (Matricula, Antenati, the Polish state
 archives) all refuse robots, and the honest answer to that is to use the data
@@ -28,6 +45,8 @@ somebody types something the shelf cannot answer.
     python3 scripts/build-gazetteer.py --src cities5000.txt
 """
 import argparse, difflib, json, os, sys, unicodedata
+import time as _time
+import gazetteer as _gazetteer
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -57,7 +76,7 @@ def main():
     ap.add_argument("--src", required=True, nargs="+",
                     help="GeoNames dump files — cities5000.txt, or per-country "
                          "files like HR.txt (several may be given)")
-    ap.add_argument("--out", default="data/gazetteer.json")
+    ap.add_argument("--out", default="data/gazetteer.json.gz")
     a = ap.parse_args()
 
     rows, kept_alts, skipped_class = [], 0, 0
@@ -165,14 +184,43 @@ def main():
                      "q": " ".join(sorted(base))})
 
     rows.sort(key=lambda r: -r["p"])
-    out = {"note": "Worldwide place-name gazetteer. n=name y=lat x=lon k=country "
-                   "p=population a=other names it has been written under q=every form "
-                   "folded for search. Built by scripts/build-gazetteer.py.",
-           "source": "GeoNames cities5000, CC BY 4.0 — https://www.geonames.org/",
+    # SAID, NOT ASSUMED. The first cut of this change left «Worldwide» and
+    # «cities5000» in place while the data underneath had become 19 country
+    # files — a gazetteer misdescribing its own coverage, which is the one
+    # thing this atlas is built not to do. The countries and the date are
+    # counted from what was actually read.
+    # BIGGEST FIRST, GUARANTEED RATHER THAN INHERITED. RecordMap.astro sorts
+    # its gazetteer hits by match quality alone and notes that «the shard is
+    # already in population order, which is the right tie-break: somebody
+    # typing Czernowitz means Chernivtsi, not a suburb of Brno». That was true
+    # only because cities5000.txt happens to be sorted by population and
+    # happened to be listed first; build.py drops the population field when it
+    # shards, so nothing downstream can recover the order if it is lost.
+    #
+    # It matters far more now. Croatia alone has 55 places whose name starts
+    # «Rij» and 30 called Rijeka — full country coverage means common village
+    # names repeat — so a reader typing «Rijeka» gets the city or gets a
+    # hamlet depending on an argument order nobody would think to preserve.
+    rows.sort(key=lambda r: -int(r.get("p") or 0))
+    ccs_in = sorted({r["k"] for r in rows})
+    out = {"note": "Place-name gazetteer: every populated place GeoNames holds "
+                   "for the countries listed in `countries`, NOT worldwide. "
+                   "n=name y=lat x=lon k=country p=population a=other names it "
+                   "has been written under q=every form folded for search. "
+                   "A row with no `a` is a place nobody wrote differently — "
+                   "usually a village — and is here so that it can be found at "
+                   "all. Built by scripts/build-gazetteer.py.",
+           "source": "GeoNames per-country dumps, CC BY 4.0 — https://www.geonames.org/",
            "licence": "CC BY 4.0 (GeoNames)",
-           "built": "2026-09-16",
+           "countries": ccs_in,
+           "built": _time.strftime("%Y-%m-%d"),
            "places": rows}
-    json.dump(out, open(a.out, "w"), ensure_ascii=False, separators=(",", ":"))
+    # WRITTEN THROUGH THE SHARED HELPER, which decides gzip by the extension.
+    # Renaming the default to .gz without changing this line produced a 56 MB
+    # file of plain JSON wearing a .gz suffix — every reader then failed
+    # trying to gunzip it, and the size that justified the whole change never
+    # materialised.
+    _gazetteer.dump(out, a.out)
     print(f"{len(rows)} places carrying {kept_alts} other names -> {a.out}")
     print(f"{os.path.getsize(a.out)/1024/1024:.1f} MB")
     print("countries:", len({r['k'] for r in rows}))

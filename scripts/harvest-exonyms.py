@@ -24,6 +24,7 @@ actually failed on.
 """
 import collections, json, math, os, re, sys, time, unicodedata
 import urllib.parse, urllib.request
+import gazetteer as _gazetteer
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
@@ -128,7 +129,7 @@ def km(a_lat, a_lon, b_lat, b_lon):
 def country_boxes():
     """Rough extent per country, from the places this atlas already trusts."""
     try:
-        g = json.load(open("data/gazetteer.json", encoding="utf-8"))
+        g = _gazetteer.load()
     except Exception:
         return {}
     G = g if isinstance(g, list) else g.get("places", list(g.values()))

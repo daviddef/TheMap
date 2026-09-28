@@ -22,6 +22,7 @@ sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
 _os.chdir(_ROOT)
 from geo import in_ring_latlon
 import time
+import gazetteer as _gazetteer
 THIS_YEAR = time.gmtime().tm_year   # a volume cannot end after today
 
 TODAY = datetime.date.today().isoformat()
@@ -1070,7 +1071,7 @@ def main():
     shutil.rmtree(gz, ignore_errors=True)
     os.makedirs(gz)
     try:
-        gaz = json.load(open("data/gazetteer.json"))["places"]
+        gaz = _gazetteer.places()
     except FileNotFoundError:
         gaz = []
     shards = {}

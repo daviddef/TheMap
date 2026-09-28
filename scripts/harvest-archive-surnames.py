@@ -42,6 +42,7 @@ are, and the family layers are the one thing that cannot generalise.
     python3 scripts/harvest-archive-surnames.py
 """
 import json, glob, os, re, sys, time, collections, unicodedata
+import gazetteer as _gazetteer
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -130,7 +131,7 @@ class Ground:
     def __init__(self):
         self.by_name, self.cc_names = {}, {}
         try:
-            for g in json.load(open("data/gazetteer.json"))["places"]:
+            for g in _gazetteer.places():
                 k = _fold(g["n"])
                 if k not in self.by_name or (g.get("p") or 0) > self.by_name[k][1]:
                     self.by_name[k] = (g["k"], g.get("p") or 0)

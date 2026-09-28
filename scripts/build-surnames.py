@@ -28,6 +28,7 @@ of this file deliberately, so that attribution does not have to travel with it.
     python3 scripts/build-surnames.py
 """
 import json, os, re, sys, time, unicodedata, collections
+import gazetteer as _gazetteer
 
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(_ROOT)
@@ -681,7 +682,7 @@ def main():
     # is just the evidence tiering this file already does everywhere else.
     gaz = collections.defaultdict(list)
     try:
-        for g in json.load(open("data/gazetteer.json"))["places"]:
+        for g in _gazetteer.places():
             gaz[fold(g["n"])].append((g["n"], g.get("k"), g.get("p") or 0,
                                       "gazetteer", g.get("y"), g.get("x")))
     except OSError:

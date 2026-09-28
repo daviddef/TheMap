@@ -42,6 +42,7 @@ PROJ = "/Users/daviddefranceski/Claude/Projects"
 # and the deployed dataset silently lost every archive attestation. If this
 # ever needs to run at build time, snapshot it first.
 import sys as _sys, os as _os2
+import gazetteer as _gazetteer
 if not _os2.path.exists(PROJ):
     _sys.exit("PROJ is not here: " + PROJ + "\n"
               "This is a hand-run snapshot importer. It cannot run without the "
@@ -97,7 +98,7 @@ def load_gaz():
 
     # Our own gazetteer last, under every name each place answers to.
     try:
-        own = json.load(open("data/gazetteer.json"))["places"]
+        own = _gazetteer.places()
     except FileNotFoundError:
         own = []
     # WHOLE NAMES, not the tokens `q` splits into. "New York" folded and split

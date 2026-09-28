@@ -11,6 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from geo import country_of, km_to
 
 import os as _os
+import gazetteer as _gazetteer
 _ROOT = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
 _os.chdir(_ROOT)
 
@@ -478,7 +479,7 @@ def main():
         count("registers", len(_enum))
         if len(_fq) > len(_enum):
             count("lookups", len(_fq) - len(_enum))
-        count("gazetteer", len(json.load(open("data/gazetteer.json"))["places"]))
+        count("gazetteer", len(_gazetteer.places()))
         try:
             ie = json.load(open("data/ireland-osm.json"))
             count("irishCivilParishes", len(ie["civilParishes"]))

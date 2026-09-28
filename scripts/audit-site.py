@@ -13,6 +13,7 @@ switched off.
     python3 scripts/audit-site.py
 """
 import ast, collections, glob, gzip, json, math, os, re, sys, unicodedata, urllib.parse
+import gazetteer as _gazetteer
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
@@ -270,12 +271,12 @@ def provider_places():
     the parent city, because that is where it genuinely is.
     """
     import re
-    pf, gf = "data/providers.json", "data/gazetteer.json"
-    if not (os.path.exists(pf) and os.path.exists(gf)):
+    pf = "data/providers.json"
+    if not (os.path.exists(pf) and _gazetteer.exists()):
         note("providers", "providers or gazetteer missing")
         return
     P = json.load(open(pf, encoding="utf-8"))["providers"]
-    g = json.load(open(gf, encoding="utf-8"))
+    g = _gazetteer.load()
     G = g if isinstance(g, list) else g.get("places", list(g.values()))
 
     def fold(x):
@@ -504,10 +505,10 @@ def promoted_countries():
     trusts in that country, with two degrees of slack, because the
     gazetteer is a sample and coastlines are ragged.
     """
-    pf, gf = "data/fs-volumes-promote.json", "data/gazetteer.json"
-    if not (os.path.exists(pf) and os.path.exists(gf)):
+    pf = "data/fs-volumes-promote.json"
+    if not (os.path.exists(pf) and _gazetteer.exists()):
         return
-    g = json.load(open(gf, encoding="utf-8"))
+    g = _gazetteer.load()
     G = g if isinstance(g, list) else g.get("places", list(g.values()))
     box = {}
     for r in G:

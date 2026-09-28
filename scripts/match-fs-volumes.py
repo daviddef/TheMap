@@ -21,6 +21,7 @@ descending order of how many books are waiting on them.
     python3 scripts/match-fs-volumes.py
 """
 import math, collections, gzip, json, os, re, sys, time, unicodedata
+import gazetteer as _gazetteer
 
 THIS_YEAR = time.gmtime().tm_year
 
@@ -435,7 +436,7 @@ def main():
 
     gaz_idx = collections.defaultdict(list)
     try:
-        gaz = json.load(open("data/gazetteer.json"))["places"]
+        gaz = _gazetteer.places()
     except FileNotFoundError:
         gaz = []
     for g in gaz:

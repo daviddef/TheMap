@@ -30,6 +30,7 @@ exactly as correct.
     python3 scripts/place-unplaced.py --write    # data/fs-volumes-promote.json
 """
 import argparse, collections, json, os, re, sys, unicodedata
+import gazetteer as _gazetteer
 
 os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
@@ -62,7 +63,7 @@ def main():
     ap.add_argument("--min-volumes", type=int, default=0)
     a = ap.parse_args()
 
-    gz = json.load(open("data/gazetteer.json"))
+    gz = _gazetteer.load()
     grows = gz.get("places") or gz
     # (folded name, cc) -> every candidate, by display name AND by every other
     # name it has answered to. The aliases are the point: Kings County is not a

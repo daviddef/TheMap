@@ -66,8 +66,12 @@ ATTRIBUTION_NAMES = {
     "townlands.ie": "Townlands.ie",
 }
 # Ours by construction: research and derivations this project made itself.
+# era-flags.json is scripts/extract-era-flags.py's output — hand-drawn art
+# for this project, not yet read by any page or published under public/, so
+# there is no /data/ row for it to be named on.
 OUR_OWN = {"regions.json", "providers.json", "collections.json", "directory.json",
-           "countries.json", "country-overrides.json", "worklist.json"}
+           "countries.json", "country-overrides.json", "worklist.json",
+           "era-flags.json"}
 
 
 def licence_gate():

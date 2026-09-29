@@ -195,6 +195,17 @@ write it. To get work onto the map, produce an import file and open
 ```
 
 - Mark ids: `volume:<waypoint>`, `source:<providerId>`, `collection:<url>`.
+- **SAY WHICH FAMILY THE ROW IS FOR, in `tags`.** This is the one thing the
+  skill used to leave unsaid, and it mattered: your archive folder is not a
+  family. The Blažević archive holds 22 rows of Kosina research and 14 of
+  Žubrinić, and with nothing to go on the importer filed all of them under
+  Blažević — the exact conflation lines exist to prevent. Put the surname in
+  the row's `tags` (`"tags": ["kosina", "senj", "familysearch"]`) and the work
+  lands in that family's line. A tag counts as a family only when your own
+  archive's person records already name it, so place and method tags are safe
+  to keep alongside. With no family tag the row falls back to the archive's
+  own family, which is a guess and is usually right for a single-family
+  archive and wrong for yours the moment you follow a second line.
 - **A line is a family.** Blažević in Senj and Kosina in Senj are different
   progress on the same shelf. Put scanning under `by[line]`; put a register you
   read entry by entry in `walked`, where every line inherits it.

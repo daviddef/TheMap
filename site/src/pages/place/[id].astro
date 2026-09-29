@@ -24,6 +24,7 @@ import provs from "../../../public/providers.json";
 import { sourcesFor, sourcesNear, access as ACCESS } from "../../lib/sources-by-country.js";
 import { atlas as idx } from "../../lib/atlas.js";
 import WhereToBegin from "../../components/WhereToBegin.astro";
+import Neighbourhood from "../../components/Neighbourhood.astro";
 
 export async function getStaticPaths() {
   const full = (await import("../../data/places-full.json")).default;
@@ -305,6 +306,14 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
   ) : (
     <p class="cap" style="margin-top:30px">No volumes recorded here yet.</p>
   )}
+
+  {/* THE NEIGHBOURS, BEFORE THE PLACE'S OWN DETAIL. A register belongs to a
+      parish rather than to a village, so the settlement up the road may be
+      holding this family's entries under its own name — which makes the
+      neighbourhood part of the plan, not an appendix to it. The map panel has
+      drawn this ring for a while; the page that actually gets printed and
+      carried into a reading room did not. */}
+  <Neighbourhood place={place} />
 
   {(place.parishes || []).length > 0 && (
     <section style="margin-top:34px">

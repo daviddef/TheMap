@@ -1,0 +1,137 @@
+---
+/* THE GROUND WORTH WALKING, ON THE PAGE AS WELL AS ON THE MAP.
+ *
+ * David: «for my research, a place/town is useful, but only if we consider its
+ * neighbours. How do we ensure we have a view on a place, and its neighbours,
+ * that paints the FULL PICTURE of the research for that town… our map already
+ * does that to an extent in its checklist, but I think the place pages should
+ * as well?»
+ *
+ * He is right, and the asymmetry was real: the map panel drew a ring, counted
+ * what fell inside it and listed the villages by distance, and the place page
+ * — the thing that gets printed, linked and read on a phone in a reading room
+ * — knew its own parishes and its own burial grounds and nothing at all about
+ * the settlement four kilometres up the road that shares its parish priest.
+ *
+ * WHY NEIGHBOURS ARE NOT A NICETY. A register belongs to a PARISH, not to a
+ * village. A hamlet with no church of its own was written into the book of the
+ * church it walked to, and that book is catalogued under the OTHER place's
+ * name. Somebody searching only «Senj» never opens Senjska Draga's two volumes,
+ * and nothing on the page told them to.
+ *
+ * THE RADIUS IS THE MAP'S OWN RULE, NOT A SECOND ONE. Ported from hoodKm() in
+ * RecordMap: the furthest of this place's researched parishes and burial
+ * grounds, or far enough to reach the nearest eight settlements, whichever is
+ * greater, clamped to 4–25 km. Two different numbers for the same idea on two
+ * surfaces would be worse than none — a reader comparing them would be right
+ * to trust neither. If that rule changes, it must change in both.
+ */
+import { u } from "../lib/url.js";
+import { atlas as idx } from "../lib/atlas.js";
+
+const { place: d } = Astro.props;
+
+const HOOD_MIN = 4, HOOD_MAX = 25, HOOD_NEIGHBOURS = 8;
+
+function km(a, b, c, e) {
+  const p = Math.PI / 180;
+  const x = Math.sin(((c - a) * p) / 2) ** 2 +
+            Math.cos(a * p) * Math.cos(c * p) * Math.sin(((e - b) * p) / 2) ** 2;
+  return 2 * 6371 * Math.asin(Math.sqrt(x));
+}
+
+let ring = 0, near = [];
+if (d.lat != null && d.lon != null) {
+  let far = 0;
+  for (const p of d.parishes || []) if (+p.km > far) far = +p.km;
+  for (const g of d.graves || []) if (+g.km > far) far = +g.km;
+
+  const all = [];
+  for (const p of idx.places) {
+    if (p.y == null || p.i === d.id) continue;
+    all.push({ p, km: km(d.lat, d.lon, p.y, p.x) });
+  }
+  all.sort((a, b) => a.km - b.km);
+  const nth = all[Math.min(HOOD_NEIGHBOURS, all.length) - 1];
+  if (nth && nth.km > far) far = nth.km;
+  ring = Math.min(HOOD_MAX, Math.max(HOOD_MIN, Math.ceil(far)));
+  near = all.filter((x) => x.km <= ring);
+}
+
+/* WHAT A READER IS ACTUALLY DECIDING is «which of these is worth an hour», so
+   the ones holding volumes come first — not because they matter more, but
+   because they are the only ones that can be opened today. The rest are named
+   anyway: a neighbour with nothing catalogued is where a gap in this atlas
+   looks exactly like a gap in the record, and saying so is the point. */
+const withVols = near.filter((x) => (x.p.v || 0) > 0).sort((a, b) => a.km - b.km);
+const without = near.filter((x) => !(x.p.v || 0)).sort((a, b) => a.km - b.km);
+const volsNear = withVols.reduce((a, x) => a + (x.p.v || 0), 0);
+
+const bits = [];
+if (near.length) bits.push(`${near.length} ${near.length === 1 ? "place" : "places"}`);
+if ((d.parishes || []).length)
+  bits.push(`${d.parishes.length} ${d.parishes.length === 1 ? "parish" : "parishes"}`);
+if ((d.graves || []).length)
+  bits.push(`${d.graves.length} burial ${d.graves.length === 1 ? "ground" : "grounds"}`);
+---
+{near.length > 0 && (
+  <section class="nbh">
+    <h2>The ground worth walking</h2>
+    <p class="nbh-sum"><b>Within {ring} km — {bits.join(" · ")}.</b>
+    {volsNear > 0 && <> These neighbours hold <b>{volsNear.toLocaleString()}</b> catalogued
+    {" "}volume{volsNear === 1 ? "" : "s"} between them.</>}</p>
+
+    <p class="cap">A register belongs to a <b>parish</b>, not to a village. A
+    hamlet with no church of its own was written into the book of the church it
+    walked to — and that book is catalogued under the <i>other</i> place's name.
+    This is the ground to search before concluding a record does not exist.</p>
+
+    {withVols.length > 0 && (
+      <>
+        <div class="lab">Neighbours with volumes catalogued</div>
+        <ul class="nbh-list">
+          {withVols.slice(0, 24).map((x) => (
+            <li>
+              <a href={u(`/place/${x.p.i}/`)}>{x.p.n}</a>
+              <span class="nbh-km">{x.km.toFixed(1)} km</span>
+              <span class="nbh-v">{x.p.v} volume{x.p.v === 1 ? "" : "s"}</span>
+              {x.p.s && <span class="nbh-y">{x.p.s[0]}–{x.p.s[1]}</span>}
+            </li>
+          ))}
+        </ul>
+      </>
+    )}
+
+    {without.length > 0 && (
+      <>
+        <div class="lab">Also within {ring} km, nothing catalogued</div>
+        <p class="nbh-bare">
+          {without.slice(0, 40).map((x, i) => (
+            <>{i > 0 && " · "}<a href={u(`/place/${x.p.i}/`)}>{x.p.n}</a></>
+          ))}
+          {without.length > 40 && <> · and {without.length - 40} more</>}
+        </p>
+        <p class="cap">Correctly placed and unread. A gap here is this atlas's
+        silence, not the record's — the registers may well exist and nobody has
+        walked them.</p>
+      </>
+    )}
+  </section>
+)}
+
+<style>
+  .nbh { margin: 26px 0 0; }
+  .nbh-sum { font-family: var(--sans); font-size: 15px; margin: 0 0 8px; }
+  .nbh .lab { margin-top: 16px; }
+  .nbh-list { list-style: none; padding: 0; margin: 8px 0 0; }
+  .nbh-list li { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline;
+    padding: 7px 0; border-bottom: 1px solid var(--rule);
+    font-family: var(--sans); font-size: 14px; }
+  .nbh-list a { font-weight: 600; }
+  .nbh-km { font-family: var(--mono); font-size: 11.5px; color: var(--ink-2); }
+  .nbh-v { font-family: var(--mono); font-size: 11.5px; color: var(--accent); }
+  .nbh-y { font-family: var(--mono); font-size: 11px; color: var(--ink-3);
+    margin-left: auto; }
+  .nbh-bare { font-family: var(--sans); font-size: 13.5px; line-height: 1.7;
+    margin: 8px 0 6px; }
+</style>

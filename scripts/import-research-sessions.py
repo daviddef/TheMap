@@ -86,6 +86,26 @@ WHEN_KEYS = ("when",)
 # site/src/components/ProgressKit.astro — if these two ever disagree the
 # import lands in a tally nothing else reads, which is the exact failure that
 # function was written to stop.
+# A DGS FILM IS A THING YOU CAN MARK. David: «we can't mark DGS film numbers
+# as well?» — and the answer was no only because I had been trying to RESOLVE a
+# film to a waypoint so the mark would attach to an atlas volume and colour a
+# ring on the map. That is a nice-to-have. The record of work is the point, and
+# a mark id is only a string: `film:005497886` keys a tally exactly as well as
+# `volume:9RK1-T3F` does, and it is the reader's own research either way.
+# 84 rows cite a film this way and every one of them was being discarded.
+#
+# AND THE URL CARRIES THE IMAGE NUMBER. «/search/film/005481649?i=363» says
+# film 005481649, image 363 — 48 of those rows have one, and film 005497894
+# alone names 31 separate images. Those become the mark's page ranges, which is
+# real page-level progress that was going in the bin.
+#
+# THE RANGES UNDERSTATE, DELIBERATELY. A cited image is one the researcher
+# demonstrably opened; images they read and did not cite leave no trace. So the
+# set is what is KNOWN to have been seen, never a claim about what was not —
+# and «start again at» pointing into a gap is the safe direction to be wrong in.
+FILM = re.compile(r"/search/film/(\d+)")
+IMG = re.compile(r"[?&]i=(\d+)")
+
 WC = re.compile(r"[?&]o?wc=([^&]+)")
 ARK = re.compile(r"/ark:/61903/3:1:([0-9A-Z-]+)", re.I)
 
@@ -130,6 +150,51 @@ RANGE_PATS = [
     re.compile(r"\b(\d{1,4})\s+(?:images|pages)\b", re.I),
 ]
 WALKED = re.compile(r"\bwalk(?:ed)?\b|\bpage by page\b|\bswept\b|\bin full\b|\bcover to cover\b", re.I)
+
+# FOR A FILM, ONLY AN EXPLICIT IMAGE RANGE COUNTS, and this is not fussiness.
+# Using the general reader on a film row produced [[1, 698], [702, 720]] for
+# DGS 005497940 — a claim that the whole film had been read — out of prose that
+# says «Seventeen openings read» and happens to mention images 698, 715 and
+# 716. The whole-book inference is right for a volume row whose sentence says
+# the register was walked; on a film row it turns any large number in an
+# analytical paragraph into 700 images of false progress, and false progress is
+# the one thing this record must never contain: it tells the next person a book
+# is finished.
+# So: the word «image» must be there, and both ends must look like image
+# numbers rather than years. The archives' prose is thick with «1880–1886» and
+# «Rođeni 1846-1858», and a year range is not a page range.
+IMG_RANGE = re.compile(r"\bimages?\.?\s*(\d{1,4})\s*(?:[-\u2013\u2014]|to)\s*(\d{1,4})\b", re.I)
+IMG_ONE = re.compile(r"\bimages?\.?\s*(\d{1,4})\b", re.I)
+YEARISH = range(1500, 2101)
+
+
+def image_ranges(text):
+    """Nothing. Kept as a function so the reasoning stays next to the decision.
+
+    PROSE CANNOT BE MINED FOR THIS AND THE ATTEMPT WAS ACTIVELY WRONG.
+    Two narrowing passes were not enough. The row for DGS 005497940 contains,
+    in one paragraph and in identical grammar:
+
+        "That is images 1–698 of this film and was not opened"
+        "Images 699, 700 and 701 were read"
+        "Images 702–720 — June to December 1891 — are ..."
+
+    The first is a statement that a range was NOT searched, and the parser
+    recorded all 698 as done — the exact inverse of what the researcher wrote,
+    and the worst error this file can make, because a mark saying a book is
+    finished stops anybody opening it again. Restricting to the word "image"
+    did not help: every one of those says "image".
+
+    A sentence naming an image range can mean I read it, I did not read it, it
+    does not exist, or it is where the answer would be. Distinguishing those is
+    reading comprehension, not parsing, and a wrong guess here is unrecoverable
+    because nothing downstream questions a range.
+
+    So the only page evidence taken from a film row is the image number in its
+    URL, which is unambiguous: the reader opened that image. The prose goes
+    into the note, intact, for a person to read.
+    """
+    return []
 
 
 def ranges_from(text):
@@ -265,6 +330,7 @@ def when_of(row):
 # (flat `done`/`state`) while the store and the skill had moved to v2, so an
 # import was being quarantined into a single «Imported <date>» line and every
 # archive's work was attributed to the same fictional family.
+# The archive's OWN family, used when a row does not say which one it is for.
 LINE_NAME = {
     "Blazevic Family": "Blažević",
     "Booyzen Family": "Booyzen",
@@ -275,6 +341,35 @@ LINE_NAME = {
     "Luwinski Family": "Luwinski",
     "Mazza Family": "Mazza",
 }
+
+
+def build_family_index():
+    """Which tag words genuinely name a family, per archive.
+
+    AN ARCHIVE IS NOT A FAMILY, AND I HAD BEEN TREATING IT AS ONE. Every row in
+    the Blažević archive was landing in a «Blažević» line — including the 22
+    tagged `kosina` and the 14 tagged `zubrinic`, which are different families
+    researched from the same folder. That is exactly the conflation lines were
+    added to prevent, reintroduced one level up. David asked the question that
+    found it: «what family is each session sending to in the skill?»
+
+    A tag counts as a family only when the ARCHIVE'S OWN SURNAME LIST says so —
+    data/archive-surnames.json is harvested from the archives' person records,
+    so «kosina» being in the Blažević set is that archive stating it holds
+    Kosina people. Tags that are places this atlas knows, or provider ids, are
+    excluded: the tag vocabulary is a mix of families, parishes, methods and
+    sources, and «Senj» or «Antenati» matching some surname somewhere would
+    file a family's work under a town.
+    """
+    try:
+        doc = json.load(io.open("data/archive-surnames.json", encoding="utf-8"))
+    except Exception:
+        return {}
+    out = {}
+    for arch, v in (doc.get("archives") or {}).items():
+        names = v.get("surnames") or [] if isinstance(v, dict) else (v or [])
+        out[squash(arch)] = {squash(n): n.title() for n in names if n}
+    return out
 
 
 def slug_of(fam):
@@ -385,6 +480,20 @@ def named_provider(text, idx):
     return idx.get(squash(m.group(1))) if m else None
 
 
+def idx_places_names():
+    """Folded names of every place the atlas holds, so a parish tag is not
+    mistaken for a surname."""
+    out = set()
+    for f in ("site/public/index.json", "site/public/index-quiet.json"):
+        try:
+            for p in json.load(io.open(f, encoding="utf-8")).get("places", []):
+                if p.get("n"):
+                    out.add(squash(p["n"]))
+        except Exception:
+            pass
+    return out
+
+
 def build_collection_index():
     """url -> title, for the few rows that cite a collection outright."""
     doc = json.load(io.open("data/collections.json", encoding="utf-8"))
@@ -419,20 +528,47 @@ def main():
     provs = build_provider_index()
     names = build_name_index()
     cols = build_collection_index()
+    fam_names = build_family_index()
+    # Words that are not families even when they collide with a surname.
+    not_family = set()
+    for p in (json.load(io.open("data/providers.json", encoding="utf-8"))
+              ["providers"]):
+        not_family.add(squash(p["id"]))
+        not_family.add(squash(p["name"]))
+    for p in idx_places_names():
+        not_family.add(p)
     print(f"{len(vols):,} atlas volumes indexed by waypoint, "
           f"{len(provs):,} provider hosts")
 
     marks, rejects, lines = {}, [], {}
-    seen = matched = ranged = srcmarked = 0
+    seen = matched = ranged = srcmarked = filmed = 0
     per = {}
 
     for fam in ARCHIVES:
         path = os.path.join(PROJ, fam, "site/src/data/searched.json")
         rows = rows_of(path)
-        line = slug_of(fam)
+        home = slug_of(fam)
+        archive_names = fam_names.get(squash(LINE_NAME.get(fam, fam)), {})
         if rows:
-            lines[line] = {"name": LINE_NAME.get(fam, fam), "where": "",
+            lines[home] = {"name": LINE_NAME.get(fam, fam), "where": "",
                            "made": time.strftime("%Y-%m-%d")}
+
+        def line_for(row):
+            """The family this ROW is about, falling back to the archive."""
+            for t in (row.get("tags") or []):
+                k = squash(t)
+                if not k or k in not_family:
+                    continue
+                proper = archive_names.get(k)
+                if not proper:
+                    continue
+                sl = slug_of(proper)
+                if sl not in lines:
+                    lines[sl] = {"name": proper, "where": "",
+                                 "made": time.strftime("%Y-%m-%d")}
+                return sl
+            return home
+
         hit = 0
         # COUNTED PER ARCHIVE BECAUSE THE TOTAL-ONLY LINE MISLED TWO SESSIONS.
         # This summary used to report volume matches alone, so an archive whose
@@ -449,6 +585,7 @@ def main():
             blob = " ".join(filter(None, [src, first(r, WHAT_KEYS), first(r, GOT_KEYS)]))
             when = when_of(r)
             st = state_of(r)
+            line = line_for(r)
             wps = [w for w in waypoints_in(url) if w in vols]
 
             # THE SOURCE MARK FIRST, BECAUSE IT IS THE ONE MOST ROWS SUPPORT.
@@ -496,6 +633,37 @@ def main():
                     b["since"] = max(b.get("since", ""), when)
                 if src and not b.get("note"):
                     b["note"] = src[:150]
+
+            # THE FILM MARK, which needs no waypoint and no resolution.
+            fm = FILM.search(url or "")
+            if fm:
+                fid = "film:" + fm.group(1)
+                m = marks.setdefault(fid, {"by": {}})
+                m["t"] = m.get("t") or ("FamilySearch film " + fm.group(1))
+                m["href"] = m.get("href") or (
+                    "https://www.familysearch.org/search/film/" + fm.group(1))
+                b = m["by"].setdefault(line, {})
+                if when:
+                    b["since"] = max(b.get("since", ""), when)
+                if st and not b.get("state"):
+                    b["state"] = st
+                if src and not b.get("note"):
+                    b["note"] = src[:150]
+                # THE URL AND THE PROSE EACH KNOW HALF OF IT. The link for
+                # this row carries «?i=172» and the sentence beside it says
+                # «DGS 005497894, images 172–174» — the URL names where the
+                # reader happened to be standing, the prose names what they
+                # read. Taking only the first understates by two images every
+                # time somebody wrote the range down properly.
+                got = []
+                im = IMG.search(url or "")
+                if im:
+                    n = int(im.group(1))
+                    got.append([n, n])
+                got += image_ranges(blob)
+                if got:
+                    b["done"] = (b.get("done") or []) + got
+                filmed += 1
 
             if not wps:
                 rejects.append({"archive": fam, "src": src[:140], "url": url,
@@ -572,6 +740,8 @@ def main():
     print(f"    tied to an atlas volume    {matched:,}")
     print(f"    distinct volumes marked    {len(marks):,}")
     print(f"    carrying a page range      {sum(1 for m in marks.values() if m.get('done')):,}")
+    nfilm = sum(1 for k in marks if k.startswith("film:"))
+    print(f"    film marks                {nfilm:,}  (from {filmed:,} rows)")
     ncol = sum(1 for k in marks if k.startswith("collection:"))
     print(f"    research lines            {len(lines):,}")
     print(f"    collection marks          {ncol:,}")

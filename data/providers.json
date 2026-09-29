@@ -4641,9 +4641,9 @@
    "countries": [
     "HR"
    ],
-   "what": "The Croatian State Archives, and through it the national register of archival fonds — which archive holds which fonds; the paper itself is almost all unphotographed. THE OLD LINK HERE WAS DEAD. This row pointed at arhinet.arhiv.hr, which no longer resolves at all — NXDOMAIN on Google's and Cloudflare's resolvers both, not a timeout or a redirect, so every Croatian researcher who clicked ARHiNET on this map got nothing. The successor is HAIS at hais.arhiv.hr, which resolves to 161.53.80.20 and did not answer this project's requests at all; unable to tell a service that is down from one that does not answer us, this points at the archive's own site, which does answer, rather than shipping a second link nobody can open.",
+   "what": "The Croatian State Archives, and through it the national register of archival fonds — which archive holds which fonds; the paper itself is almost all unphotographed. THE OLD LINK HERE WAS DEAD. This row pointed at arhinet.arhiv.hr, which no longer resolves at all — NXDOMAIN on Google's and Cloudflare's resolvers both, not a timeout or a redirect, so every Croatian researcher who clicked ARHiNET on this map got nothing. The successor is HAIS at hais.arhiv.hr, which resolves to 161.53.80.20 and did not answer this project's requests at all; unable to tell a service that is down from one that does not answer us, this points at the archive's own site, which does answer, rather than shipping a second link nobody can open. NOTE: the same site DOES carry a working register search — see provider hda-mk-search — which indexes the microfilmed register collection HR-HDA-1448 and answers whether a given parish was filmed. That is a separate tool from the fonds register described above, and it is the one to reach for first when the question is about matične knjige.",
    "deepLink": null,
-   "checked": "2026-09-22",
+   "checked": "2026-09-29",
    "at": {
     "lat": 45.81,
     "lon": 15.97,
@@ -10758,6 +10758,28 @@
    "wikidata": null,
    "triage": "unverified",
    "triageNote": "Recorded ONLY on the state archive's own referral, not from the diocese. Its holdings, access and whether it replies are all unsurveyed. Wikidata id not looked up."
+  },
+  {
+   "id": "hda-mk-search",
+   "name": "HDA — Pretraga matičnih knjiga (HR-HDA-1448)",
+   "url": "https://www.arhiv.hr/Pretraga-mati%C4%8Dnih-knjiga",
+   "kind": "index",
+   "access": "index",
+   "countries": [
+    "HR",
+    "BA"
+   ],
+   "what": "The Croatian State Archives' own searchable index of HR-HDA-1448, «Zbirka dopunskih mikrofilmova matičnih knjiga i popisa obitelji» — registers of ALL confessions across Croatia, plus Bosnian Catholics, from the mid-16th to the first half of the 20th century, microfilmed from originals held in state archives, church archives, parish offices, registry offices and monasteries. This answers «is this parish filmed at all» in one query, which arhinet's own row cannot: three drop-downs (parish/regiment, confession, type), then Pretraži. A row gives the period, PRIJEPIS when it is a transcript rather than the original, the holding institution, the signatura svitka (e.g. ZM-34C/681), the topografska oznaka (e.g. M-1278) and Digitalni oblik Da/Ne. Types: R births, V marriages, U deaths, S status animarum, Z confirmations, O anniversarii, I index. To order: info@arhiv.hr with place, type, period, signatura and topografska oznaka; consulted in the HDA reading room in Zagreb, max ten units a day. TWO TRAPS. First, the place box is a Telerik combo on an ASP.NET page: setting it FROM SCRIPT changes only what it displays and never commits to the server, so the search runs on an empty place and returns «Nema zapisa za pregled» — identical to a real nil. On 2026-09-29 that manufactured nine false negatives in one sitting, caught only by re-running a known-positive place as a control and watching it come back empty too. Always run that control. Second, the site itself warns that one settlement may be listed under several name forms — CRIKVENICA has four — so check every variant before calling a place absent.",
+   "deepLink": null,
+   "checked": "2026-09-29",
+   "at": {
+    "lat": 45.81,
+    "lon": 15.97,
+    "place": "Zagreb, Croatia"
+   },
+   "wikidata": null,
+   "triage": "seen-in-use",
+   "triageNote": "Added from a family archive after using it to settle whether one Lika parish was filmed. Free and needs no login; access class 'index' because it indexes holdings rather than serving images — nothing in HR-HDA-1448 was found digitised for the parish tested."
   }
  ]
 }

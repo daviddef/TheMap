@@ -293,8 +293,17 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
         has those buttons, and Base is shared by 46,000 pages. A container
         with nothing in it collapses to nothing. */}
     <span class="site-tools" id="ra-tools"></span>
-    <button class="burger" type="button" aria-expanded="false" aria-controls="drawer">
-      <span class="bars" aria-hidden="true"></span>Menu
+    {/* THE WORD «MENU» WENT, THE NAME DID NOT. David: «can we have menu as
+        just the burgers and no word "menu"? and then that will give space for
+        the icons?» — the four map tools were wrapping to a 2×2 block on a
+        phone because this button was eating the row.
+        aria-label carries what the text used to carry, so a screen reader
+        still hears «Menu, button» and the accessibility test still passes; a
+        bare icon with no accessible name would read as «button» and nothing
+        else, which is the trade this is deliberately not making. */}
+    <button class="burger" type="button" aria-expanded="false"
+            aria-controls="drawer" aria-label="Menu">
+      <span class="bars" aria-hidden="true"></span>
     </button>
     <nav class="topnav" aria-label="Main">
       {nav.map(([label, links]) => (

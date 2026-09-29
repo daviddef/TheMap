@@ -5207,14 +5207,37 @@ window.addEventListener("load", async function () {
       if (!names.length || fold(top[0]) === f)
         map.setView([top[1], top[2]], Math.max(map.getZoom(), 8));
       h.push('<div class="ra-juris"><div class="lab">That name is a place</div>');
+      /* TWO PLACES CAN SHARE A NAME AND OFTEN DO. Croatia has two Lovinacs,
+         forty kilometres apart, and the panel printed them as two identical
+         lines — «Lovinac — Croatia» twice, with nothing to say which was
+         which. For somebody deciding which archive to write to that is worse
+         than one row, because it looks like a bug and hides a real fork in
+         the research. Only the ones that actually collide are marked. */
+      var dupe = {};
+      hits.slice(0, 5).forEach(function (r) {
+        var k = fold(r[0]) + "|" + r[3];
+        dupe[k] = (dupe[k] || 0) + 1;
+      });
       hits.slice(0, 5).forEach(function (r) {
         var older = r[4].filter(function (a) { return fold(a) !== fold(r[0]); });
         /* If what they typed is a form the curated list left out, put it back
-           at the front — it is the one word on this panel they already trust. */
-        if (!older.some(function (a) { return fold(a).indexOf(f) > -1; }))
+           at the front — it is the one word on this panel they already trust.
+           UNLESS IT IS THE PLACE'S OWN NAME. Typing «Lovinac» and being told
+           «Lovinac — Croatia, also written Lovinac» is the panel repeating
+           the word back as though it were a discovery. The test used to be
+           «is the typed form somewhere in the alias list», which is false for
+           an empty list and false for «Lovinjac», so the name was pushed in
+           front of itself both times. */
+        if (fold(term) !== fold(r[0]) &&
+            !older.some(function (a) { return fold(a).indexOf(f) > -1; }))
           older.unshift(term);
         older = older.slice(0, 5);
-        h.push("<p><b>" + esc(r[0]) + "</b> — " + esc(CNAME[r[3]] || r[3]) +
+        var where = dupe[fold(r[0]) + "|" + r[3]] > 1
+          ? ' <span class="ra-who">' +
+            esc(r[1].toFixed(2) + "\u00b0N " + r[2].toFixed(2) + "\u00b0E") +
+            "</span>"
+          : "";
+        h.push("<p><b>" + esc(r[0]) + "</b> — " + esc(CNAME[r[3]] || r[3]) + where +
                (older.length ? '<br><span class="ra-who">also written ' +
                  older.map(esc).join(" · ") + "</span>" : "") + "</p>");
       });
@@ -5447,10 +5470,21 @@ window.addEventListener("load", async function () {
       panel.innerHTML = h.join("");
       return;
     }
-    h.push('<p class="at-what"><b>No places of that name here yet.</b> The shelf stands in ' +
-           "95 countries, but only 46 of them have a place somebody has actually walked " +
-           "volume by volume — the rest are districts, correctly placed and unread. " +
-           "<b>That is a gap in this map, not a gap in the record.</b></p>");
+    /* IT IS A DIFFERENT SENTENCE WHEN THE PLACE WAS FOUND. «No places of that
+       name here yet» sat directly under a box headed «That name is a place»
+       listing two of them, which reads as the page contradicting itself. The
+       shelf and the gazetteer answer different questions — does this map hold
+       volumes here, and does this place exist — and only the first is «no». */
+    h.push(hits.length
+      ? '<p class="at-what"><b>The place is here. The volumes are not.</b> ' +
+        "This map knows where it is and has nothing anybody has walked for it " +
+        "— the shelf stands in 95 countries and only 46 of them have a place " +
+        "somebody has read volume by volume. <b>That is a gap in this map, " +
+        "not a gap in the record.</b></p>"
+      : '<p class="at-what"><b>No places of that name here yet.</b> The shelf stands in ' +
+        "95 countries, but only 46 of them have a place somebody has actually walked " +
+        "volume by volume — the rest are districts, correctly placed and unread. " +
+        "<b>That is a gap in this map, not a gap in the record.</b></p>");
     if (cover.length) {
       h.push('<div class="at-sec at-sec-wide"><div class="lab">But these reach it</div><ul class="at-films">');
       cover.slice(0, 14).forEach(function (p) {
@@ -6056,6 +6090,22 @@ window.addEventListener("load", async function () {
       t.hidden = false; setTimeout(function () { t.hidden = true; }, 1600);
     });
   });
+
+  /* HOW MUCH ROOM IS LEFT UNDER THE SEARCH BAR, for the mobile sheet.
+     Recomputed on resize and on rotate because the bar wraps differently at
+     every width, and the sheet is anchored to the bottom so its top edge is
+     whatever is left over. Written as a pixel value on the root so the rule
+     can take the smaller of this and its own 70vh. */
+  function sheetRoom() {
+    var bar = document.querySelector(".ra-bar");
+    if (!bar) return;
+    var room = window.innerHeight - bar.getBoundingClientRect().bottom - 8;
+    document.documentElement.style.setProperty(
+      "--ra-sheet-max", Math.max(220, Math.round(room)) + "px");
+  }
+  sheetRoom();
+  window.addEventListener("resize", sheetRoom);
+  window.addEventListener("orientationchange", sheetRoom);
 
   syncLayers();
   paintRegions();
@@ -7261,7 +7311,19 @@ window.addEventListener("load", async function () {
   @media (max-width: 700px) {
     .at-panel:has(.at-body:not([hidden])) {
       position: fixed; left: 0; right: 0; bottom: 0; z-index: 1200;
-      height: auto; max-height: 70vh; overflow-y: auto;
+      height: auto; overflow-y: auto;
+      /* THE SHEET MUST NOT CLIMB OVER THE SEARCH BAR. At 70vh on a 812px
+         phone it stands 568px tall, so its top edge lands at 244 — ten pixels
+         above the bottom of the search input, cutting the box in half and
+         hiding the count line under it completely. David: «mobile the pane is
+         overlapping and covers the map?» — and worse than the map, it covered
+         the one control you need to ask a different question.
+         --ra-sheet-max is the room below the bar, measured in script because
+         the bar wraps to one, two or three rows depending on the width and
+         CSS cannot know which. The 70vh stays as the smaller of the two, so
+         the sheet never grows past its designed height either; the fallback
+         keeps the old behaviour if the script has not run yet. */
+      max-height: min(70vh, var(--ra-sheet-max, 70vh));
       border: 1px solid var(--rule); border-bottom: 0;
       border-radius: 14px 14px 0 0;
       box-shadow: 0 -10px 30px rgba(0, 0, 0, .24);

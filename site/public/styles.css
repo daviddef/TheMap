@@ -887,8 +887,22 @@ header.site nav.topnav{display:flex;align-items:center;gap:1px;flex-wrap:nowrap}
   text-decoration:none;margin-left:10px;color:#fff!important;background:var(--accent);
   padding:8px 15px;border-radius:999px;white-space:nowrap}
 .findbtn:hover{background:var(--accent-2)}
-.burger{display:none!important;align-items:center;gap:9px;font-family:var(--sans);font-size:13px;
-  background:none;border:1px solid var(--rule-strong);border-radius:999px;padding:7px 14px;
+/* THE MAP'S FOUR TOOLS, IN A ROW. This span had no rule of its own at all, so
+   the buttons the map moves into it were inline-blocks taking whatever width
+   was left and wrapping into a 2x2 block on a phone — which is what David
+   photographed. A flex row that does not wrap keeps them one control, and
+   `flex:0 0 auto` stops the header squeezing them instead of wrapping itself. */
+.site-tools{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;
+  flex-wrap:nowrap}
+.site-tools:empty{display:none}
+
+/* Square now that it carries no word, so the row has room for the map's four
+   tool buttons instead of wrapping them into a 2x2 block. 38px matches
+   --ra-ctl, which is what those buttons measure. */
+.burger{display:none!important;align-items:center;justify-content:center;
+  font-family:var(--sans);font-size:13px;
+  background:none;border:1px solid var(--rule-strong);border-radius:999px;
+  width:38px;height:38px;padding:0;flex:0 0 auto;
   color:var(--ink);cursor:pointer}
 .drawer{border-top:1px solid var(--rule);background:var(--panel);padding:16px 0 22px;max-height:70vh;overflow:auto}
 .drawer .dgrp{padding:10px 0;border-bottom:1px solid var(--rule)}

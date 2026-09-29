@@ -33,6 +33,45 @@ link — the browse path carries `owc=`. If you genuinely cannot find one,
 write the film number into a `film` field and say so. Do **not** invent a
 waypoint, and do not guess one from a similar volume.
 
+#### A FILM PAGE'S WAYPOINT CAN BE THE WRONG BOOK — CHECK THE YEARS
+
+One DGS film often bundles several older films, and the film page's `wc=`
+describes only its **first segment**. Take it at face value and you get a
+waypoint that is well formed, confident and wrong — the worst kind of error,
+because nothing downstream will question it.
+
+This happened. A session captured `9R28-RMN` off the page for DGS `005497886`
+and wrote it into six rows. Checked against the atlas's own data:
+
+    9R28-RMN  =  Marriages 1581-1589, 1622-1623
+    the frames actually read  =  1777-1784
+
+Wrong book by two centuries. The session backed the waypoint out, kept the
+film number, and recorded that the waypoint is not established — and it
+explicitly did NOT write `9R28-YWT` (Marriages 1762-1858), which does cover
+those years, because picking the volume whose range happens to fit is the
+guess-from-a-similar-volume this page forbids. That was the right call.
+
+**So before you write a waypoint, check that its year range contains your
+frames.** You can check without leaving the machine:
+
+```bash
+cd "~/Projects/Family Projects/Record Atlas" && python3 -c "
+import json,sys
+wp=sys.argv[1]
+for f in ('data/fs-volumes.json','data/fs-volumes-world.json'):
+    for place,vols in (json.load(open(f)).get('byPlace') or {}).items():
+        for v in vols:
+            if (v.get('waypoint') or v.get('wp') or '').split(':')[0]==wp:
+                print(place, v.get('from'),'-',v.get('to'),'|',v.get('t'))
+" 9R28-RMN
+```
+
+If the years do not contain your frames, the waypoint is a different segment
+of the same film. Write the film number, say the waypoint is not established,
+and stop there. An unresolved row is a small gap; a confidently wrong waypoint
+attributes your work to a book you never opened.
+
 ## What to write, and where
 
 ### 1. Work you did in a volume
@@ -54,6 +93,21 @@ Append to your archive's `site/src/data/searched.json`. Include, at minimum:
 
 - `waypoint` — add it as its own field even though it is in the URL. It is
   what the atlas keys on.
+- **A waypoint scraped from a FILM-NUMBER page names only that page's default
+  segment, not the frames you actually read.** A DGS film number can bundle
+  several old films end to end, and the `wc=` the page defaults to describes
+  only the first of them. Before writing a waypoint down, check it against
+  `data/fs-volumes.json`'s `byPlace` entry for your place: if your frames fall
+  outside that entry's `from`–`to` range, the waypoint is wrong, and the fix
+  is never to guess the neighbouring volume that looks closer — that is the
+  same "resemblance, not a match" error the atlas already refuses on its own
+  side. Write the film number and say plainly that no waypoint was
+  established. (Verified case: DGS 005497886's film page defaults to
+  9R28-RMN, "Marriages 1581–1623" — frames 1777–1784 fall outside it, ruling
+  it out cleanly. The neighbour 9R28-YWT, "Marriages 1762–1895", DOES contain
+  1777–1784, which is exactly what makes it dangerous: a date range that fits
+  is not a confirmed match, only a plausible one, and writing it down anyway
+  is the same guess the atlas already refuses on its own side.)
 - `pages` — the images you actually read, as a range: `"1-47, 60-72"`. Omit it
   rather than guessing. A page count with no range is the size of the book,
   not the part you read.
@@ -64,6 +118,7 @@ Append to your archive's `site/src/data/searched.json`. Include, at minimum:
 - `outcome` — one of `yield`/`hit`/`found`, `nothing`/`nil`/`empty`,
   `blocked`, `pending`, `planned`.
 - `when` — a real date. Not `"not yet"`, not `"—"`.
+  The importer accepts `9 Sept 2026` too, but ISO is what it stores.
 
 ### 2. A source the atlas does not list
 
@@ -95,6 +150,23 @@ If nothing comes back, add a row to `data/providers.json`:
   and telephone for archives you have to write to.
 
 Then run `python3 scripts/check-data.py`. It must say **"data is sound"**.
+
+### Non-FamilySearch work is not wasted, even with no waypoint
+
+The waypoint rule above is about the ATLAS'S VOLUME-LEVEL DATA and it does not
+apply here. A row whose `url` points at a REGISTERED PROVIDER — its host
+matching the `url` field of a row in `data/providers.json` — becomes a
+`source:<providerId>` mark automatically, with no waypoint needed. Two archive
+sessions have independently read the importer's per-archive summary line
+("N rows, M matched to an atlas volume") and concluded their non-FamilySearch
+work produced nothing, because that line reports ONLY volume matches. It does
+not report source marks, which are counted once in total ("source marks: N,
+from M rows") and not broken out per archive. A Polish state archive, a
+newspaper portal, Findmypast, Trove — none of these carry a waypoint, and all
+of them mark correctly when the provider is registered and the row's `url`
+matches its host. If the provider is not yet in `data/providers.json`, add it
+first (§2 above); that is the actual and only reason a source mark will not
+appear.
 
 ### 3. A place under a name the atlas does not know
 
@@ -162,6 +234,15 @@ So:
 - If `data/providers.json` has changes that are not yours, add your row, commit
   **only** that file, and note in your message that the file also carried
   another session's edits — better an honest line than a silent merge.
+
+**Push when your commit is green.** On 2026-09-29 several sessions committed
+correctly and nobody pushed — HEAD sat five commits ahead of `origin/main`
+for long enough that David judged the live site, reported a shipped fix as
+"still not showing, we've really regressed", and the deployed `regions.json`
+really did carry none of what the fix wrote, because the commit had never
+left this machine. The collision rule above protects the commit. It does not
+push it. Once `check-data.py` says sound, `git push` — don't leave a green
+commit for the next session to find.
 
 ## Before you finish
 

@@ -25,7 +25,7 @@
    the query covers more of it — which is the part of «percentage» that is
    real, used as a tie-break where it belongs.
 */
-const { placesIndex, quietIndex, base, surnameShards = null,
+const { placesIndex, quietIndex, base, surnameShards = null, gazShards = null,
         hint: hintText = "Find a country or a place — Gallignana finds Gračišće" } = Astro.props;
 ---
 
@@ -38,7 +38,7 @@ const { placesIndex, quietIndex, base, surnameShards = null,
   <p class="sfhint" id="sfhint" role="status" aria-live="polite"></p>
 </form>
 
-<script is:inline define:vars={{ IDX: placesIndex, QUIET: quietIndex, BASE: base, SURN: surnameShards }}>
+<script is:inline define:vars={{ IDX: placesIndex, QUIET: quietIndex, BASE: base, SURN: surnameShards, GAZ: gazShards }}>
   (function () {
     var box = document.getElementById("sfq");
     var drop = document.getElementById("sfdrop");
@@ -129,6 +129,50 @@ const { placesIndex, quietIndex, base, surnameShards = null,
        Nothing new is built or downloaded whole: 943,956 names would be a
        hundred megabytes, and the reason they were sharded in the first place
        is so that nobody ever loads more than the letters they typed. */
+    /* THE GAZETTEER, WHICH THIS BOX CLAIMED TO SEARCH AND DID NOT.
+       The empty state read «Nothing answers to that yet. The map searches the
+       gazetteer too» — which was true of the map and false of this box, so
+       typing «Lovin» offered three surnames and no village, for a place the
+       atlas holds and can put a marker on. David found it by looking for
+       Lovinac, a village of 290 people, and finding nothing.
+       Same shards the map fetches, three folded characters at a time, so
+       nothing new is built or downloaded whole. A gazetteer place has no page
+       of its own — it is ground the atlas can place and has no volumes for —
+       so it links to the map carrying the query, which is what opens the
+       marker and the panel that explains the difference. */
+    var gcache = {};
+    function gazetteer(k, done) {
+      if (!GAZ || k.length < 3) { done([]); return; }
+      var key = "";
+      for (var i = 0; i < k.length && key.length < 3; i++)
+        if (/[a-z0-9]/.test(k[i])) key += k[i];
+      if (key.length < 3) { done([]); return; }
+      function use(list) {
+        var out = [], seen = {};
+        (list || []).forEach(function (r) {
+          var t = tier(r[0], k);
+          /* r[5] is every form the place has ever been written under, folded
+             and space-joined — the reason Gallignana finds Gračišće. */
+          if (t === 99 && (r[5] || "").indexOf(k) > -1) t = 4;
+          if (t === 99) return;
+          /* The atlas's own places answer better than the gazetteer's copy of
+             them — they have a page, volumes and a count — so a name already
+             offered above is not offered twice. */
+          var id = fold(r[0]) + "|" + r[3];
+          if (seen[id]) return;
+          seen[id] = 1;
+          out.push({ t: t, n: r[0], kind: "place on the map",
+                     href: BASE + "?q=" + encodeURIComponent(r[0]),
+                     meta: (r[3] || "") + " · no volumes here yet" });
+        });
+        done(out.sort(cmp).slice(0, 6));
+      }
+      if (gcache[key]) { use(gcache[key]); return; }
+      fetch(GAZ + key + ".json").then(function (r) { return r.json(); })
+        .then(function (d) { gcache[key] = d; use(d); })
+        .catch(function () { gcache[key] = []; done([]); });
+    }
+
     var scache = {};
     function surnames(k, done) {
       if (!SURN || k.length < 3) { done([]); return; }
@@ -214,12 +258,28 @@ const { placesIndex, quietIndex, base, surnameShards = null,
          within the same tick.
          Placeholder first, names second, whichever way round the callback
          chooses to arrive. */
-      render(cc, pl, []);
-      tell(cc, pl, []);
+      /* Both late answers write into the same two slots, so each keeps the
+         other's result rather than painting over it — the surname callback
+         fires synchronously off a warm cache, and the gazetteer one does not. */
+      var lateSn = [], lateGz = [];
+      function paint() {
+        render(cc, pl.concat(lateGz), lateSn);
+        tell(cc, pl.concat(lateGz), lateSn);
+      }
+      paint();
       surnames(k, function (sn) {
         if (!sn.length) return;
-        render(cc, pl, sn);
-        tell(cc, pl, sn);
+        lateSn = sn;
+        paint();
+      });
+      gazetteer(k, function (gz) {
+        if (!gz.length) return;
+        /* A place the shelf already answers for is not repeated from the
+           gazetteer's copy of it. */
+        var have = {};
+        pl.forEach(function (p) { have[fold(p.n)] = 1; });
+        lateGz = gz.filter(function (g) { return !have[fold(g.n)]; });
+        if (lateGz.length) paint();
       });
     }
     function tell(cc, pl, sn) {
@@ -228,7 +288,8 @@ const { placesIndex, quietIndex, base, surnameShards = null,
       if (sn && sn.length) bits.push(sn.length + " name" + (sn.length === 1 ? "" : "s"));
       if (pl.length) bits.push(pl.length + " place" + (pl.length === 1 ? "" : "s"));
       hint.textContent = bits.length ? bits.join(" · ")
-        : "Nothing answers to that yet. The map searches the gazetteer too.";
+        : "Nothing answers to that yet \u2014 not on the shelf, and not in "
+          + "the gazetteer either.";
     }
 
     function mark() {

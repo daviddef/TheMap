@@ -65,6 +65,7 @@ import os
 import re
 import sys
 import time
+import unicodedata
 
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(_ROOT)
@@ -174,10 +175,116 @@ def rows_of(path):
 # Only something with a year in it is taken.
 YEAR = re.compile(r"\b(19|20)\d{2}\b")
 
+# AND IT IS NORMALISED, BECAUSE max() ON TWO DATE STRINGS IS NOT A DATE
+# COMPARISON. The archives write both «9 Sept 2026» and «2026-09-28», and in
+# ASCII every human-format date beginning 3-9 sorts above every ISO date
+# forever — so `max(a, b)` picked «9 Sept 2026» over «2026-09-28» and a mark
+# touched three weeks later kept the older date. source:findmypast shipped
+# saying it was last touched on 9 September when Luwinski had worked it on the
+# 27th and 28th.
+# It is structural rather than a collision: across the archives 1,072 rows are
+# human-format and 156 are ISO, and the ISO ones are the two most recently
+# onboarded archives — the newer the archive, the more reliably it loses.
+# Everything is parsed to ISO here, once, so every later comparison is between
+# two dates of the same shape. A string that will not parse yields "" and
+# never wins, rather than winning by accident.
+MONTHS = {}
+for _i, _m in enumerate(["jan", "feb", "mar", "apr", "may", "jun",
+                         "jul", "aug", "sep", "oct", "nov", "dec"], 1):
+    MONTHS[_m] = _i
+MONTHS["sept"] = 9
+DMY = re.compile(r"\b(\d{1,2})\s+([A-Za-z]{3,9})\.?\s+((?:19|20)\d{2})\b")
+MY = re.compile(r"\b([A-Za-z]{3,9})\.?\s+((?:19|20)\d{2})\b")
+ISO = re.compile(r"\b((?:19|20)\d{2})-(\d{2})-(\d{2})\b")
+
+
+def to_iso(v):
+    """«9 Sept 2026» and «2026-09-28» both become «2026-09-28»-shaped, or ""."""
+    v = (v or "").strip()
+    m = ISO.search(v)
+    if m:
+        return f"{m.group(1)}-{m.group(2)}-{m.group(3)}"
+    m = DMY.search(v)
+    if m:
+        mo = MONTHS.get(m.group(2)[:4].lower()) or MONTHS.get(m.group(2)[:3].lower())
+        if mo:
+            return f"{m.group(3)}-{mo:02d}-{int(m.group(1)):02d}"
+    m = MY.search(v)
+    if m:
+        mo = MONTHS.get(m.group(1)[:4].lower()) or MONTHS.get(m.group(1)[:3].lower())
+        if mo:
+            # A month with no day sorts at its first, which is the earliest it
+            # could have been — an unstated day is not licence to claim the
+            # 31st and outrank a dated row.
+            return f"{m.group(2)}-{mo:02d}-01"
+    m = YEAR.search(v)
+    return f"{m.group(0)}-01-01" if m else ""
+
+
+# AND `when` DOES NOT MEAN THE SAME THING IN EVERY ARCHIVE. Falco writes the
+# RECORD's year there — «1846» against the Arienzo birth register — not the
+# date the search happened. Taken at face value that produced marks claiming
+# they were last touched in 1913 and 1924, which is not a stale date, it is a
+# nonsense one: `since` exists to say how long ago somebody looked.
+# A research date in this project is 2024 or later, and a bare year earlier
+# than that is the record talking rather than the researcher. Those are
+# dropped rather than guessed at — a mark with no date reads as «no date»,
+# which is true, where 1913 reads as a fact and is not.
+WORK_FLOOR = "2024-01-01"
+
 
 def when_of(row):
-    v = first(row, WHEN_KEYS)
-    return v if YEAR.search(v) else ""
+    """A date somebody actually wrote, or nothing.
+
+    A BARE YEAR IS NOT A WORK DATE. Nobody records an afternoon's searching as
+    «2026»; they write «15 Sep 2026» or «2026-09-28». to_iso() falls back to
+    the 1st of January so that a year is at least orderable, and for `since`
+    that fallback invents a date — «2026-01-01» against a row worked in
+    September is the same defect as the 1913 pair, just inside the floor and
+    therefore harder to see. Seven rows carry one. They lose their date rather
+    than gaining a wrong one.
+    """
+    raw = first(row, WHEN_KEYS)
+    iso = to_iso(raw)
+    if not iso or iso < WORK_FLOOR:
+        return ""
+    # A month has to be named or numbered somewhere in the original.
+    if not (re.search(r"\d{4}-\d{2}", raw) or
+            re.search(r"[A-Za-z]{3}", raw)):
+        return ""
+    return iso
+
+
+# ONE LINE PER ARCHIVE, BECAUSE THAT IS WHAT AN ARCHIVE IS.
+# Progress is now kept per family line — searching Senj for Blažević is not
+# progress on Kosina — and the eight archives are already exactly that split.
+# So the Blažević archive's work lands in a «Blažević» line rather than being
+# merged into one undifferentiated pile, which would reintroduce the
+# over-claim the lines were added to remove.
+# This also fixes a straight mismatch: the exporter wrote v1-shaped marks
+# (flat `done`/`state`) while the store and the skill had moved to v2, so an
+# import was being quarantined into a single «Imported <date>» line and every
+# archive's work was attributed to the same fictional family.
+LINE_NAME = {
+    "Blazevic Family": "Blažević",
+    "Booyzen Family": "Booyzen",
+    "D'arcy Family": "D'Arcy",
+    "Defranceski Family": "Defranceschi",
+    "Falco Family": "Falco",
+    "Lerena Family": "Lerena",
+    "Luwinski Family": "Luwinski",
+    "Mazza Family": "Mazza",
+}
+
+
+def slug_of(fam):
+    name = LINE_NAME.get(fam, fam)
+    out = []
+    for ch in unicodedata.normalize("NFKD", name.lower()):
+        if unicodedata.combining(ch):
+            continue
+        out.append(ch if ch.isalnum() else "-")
+    return re.sub(r"-+", "-", "".join(out)).strip("-") or "line"
 
 
 def first(row, keys):
@@ -232,6 +339,52 @@ def build_provider_index():
     return idx
 
 
+def squash(s):
+    s = unicodedata.normalize("NFKD", (s or "").lower())
+    return re.sub(r"[^a-z0-9]", "",
+                  "".join(c for c in s if not unicodedata.combining(c)))
+
+
+def build_name_index():
+    """A provider by the name an archive writes in prose, EXACTLY.
+
+    TWO ARCHIVES CARRY NO SOURCE URL AT ALL and were producing nothing.
+    D'Arcy's `href` is a link into its own site — «/sneyds», «/chatham» — not
+    to the record, and Mazza has no link field whatsoever. Both name the
+    source in prose instead, in the same shape: «FindMyPast — National Burial
+    Index», «Antenati — Scilla, Matrimoni 1899». 906 rows across the archives
+    have a named source and no URL.
+
+    So the text before the first dash or comma is matched against provider
+    names, and the match must be EXACT once punctuation and accents are
+    stripped — never a substring, never a prefix. «Antenati» resolves;
+    «Antenati name index» does not, and «Arienzo BIRTH register» names a book
+    rather than a provider and resolves to nothing, which is correct. A fuzzy
+    rule here would attach one archive's work to whichever provider happened
+    to share a word with it, and a wrong attribution is worse than a gap
+    because nobody goes looking for it.
+    """
+    doc = json.load(io.open("data/providers.json", encoding="utf-8"))
+    provs = doc["providers"] if isinstance(doc, dict) else doc
+    idx = {}
+    for p in provs:
+        for k in (p["name"], p["id"],
+                  re.split(r"\s+[\u2014\u2013-]\s+", p["name"])[0]):
+            key = squash(k)
+            if key:
+                idx.setdefault(key, p)
+    return idx
+
+
+SRC_HEAD = re.compile(r"^(.*?)(?:\s+[\u2014\u2013]\s+|\s+-\s+|,|$)")
+
+
+def named_provider(text, idx):
+    """The provider an archive named in prose, or None."""
+    m = SRC_HEAD.match((text or "").strip())
+    return idx.get(squash(m.group(1))) if m else None
+
+
 def build_collection_index():
     """url -> title, for the few rows that cite a collection outright."""
     doc = json.load(io.open("data/collections.json", encoding="utf-8"))
@@ -264,18 +417,31 @@ def main():
 
     vols = build_volume_index()
     provs = build_provider_index()
+    names = build_name_index()
     cols = build_collection_index()
     print(f"{len(vols):,} atlas volumes indexed by waypoint, "
           f"{len(provs):,} provider hosts")
 
-    marks, rejects = {}, []
+    marks, rejects, lines = {}, [], {}
     seen = matched = ranged = srcmarked = 0
     per = {}
 
     for fam in ARCHIVES:
         path = os.path.join(PROJ, fam, "site/src/data/searched.json")
         rows = rows_of(path)
+        line = slug_of(fam)
+        if rows:
+            lines[line] = {"name": LINE_NAME.get(fam, fam), "where": "",
+                           "made": time.strftime("%Y-%m-%d")}
         hit = 0
+        # COUNTED PER ARCHIVE BECAUSE THE TOTAL-ONLY LINE MISLED TWO SESSIONS.
+        # This summary used to report volume matches alone, so an archive whose
+        # work is all Antenati, Findmypast or a state archive read «0 matched
+        # to an atlas volume» and concluded it had produced nothing — while its
+        # source marks were sitting in the output, correctly attributed. A
+        # number that is true and reads as the opposite of the truth is worse
+        # than no number.
+        src_hit = 0
         for r in rows:
             seen += 1
             src = first(r, SRC_KEYS)
@@ -288,18 +454,30 @@ def main():
             # THE SOURCE MARK FIRST, BECAUSE IT IS THE ONE MOST ROWS SUPPORT.
             # A row naming a source this atlas knows is a true statement that
             # the source was worked, whether or not the volume can be pinned.
+            # The URL is the stronger claim, so it is tried first; the
+            # prose name only answers for a row that has no usable link.
             p = provs.get(host_of(url))
+            # A RELATIVE HREF IS NOT A SOURCE URL. D'Arcy's 422 rows carry an
+            # href like «/sneyds» — a link into its own site, not to the
+            # record — so testing «has no url» left every one of them out of
+            # the prose fallback and the archive produced nothing at all. What
+            # matters is whether there is a HOST to match, not whether the
+            # field is filled.
+            if not p and not host_of(url):
+                p = named_provider(src, names)
             if p and st:
                 sid = "source:" + p["id"]
-                m = marks.setdefault(sid, {})
+                m = marks.setdefault(sid, {"by": {}})
                 m["t"] = m.get("t") or p.get("name") or p["id"]
-                m["state"] = m.get("state") or st
                 m["href"] = m.get("href") or p.get("url")
+                b = m["by"].setdefault(line, {})
+                b["state"] = b.get("state") or st
                 if when:
-                    m["since"] = max(m.get("since", ""), when)
-                if src and not m.get("note"):
-                    m["note"] = f"{fam}: {src[:150]}"
+                    b["since"] = max(b.get("since", ""), when)
+                if src and not b.get("note"):
+                    b["note"] = src[:150]
                 srcmarked += 1
+                src_hit += 1
 
             # A ROW THAT NAMES A WHOLE COLLECTION NAMES A REAL THING. Five
             # of 406 research URLs are a FamilySearch collection page rather
@@ -308,15 +486,16 @@ def main():
             cu = (url or "").rstrip("/")
             if cu in cols:
                 cid = "collection:" + cu
-                m = marks.setdefault(cid, {})
+                m = marks.setdefault(cid, {"by": {}})
                 m["t"] = m.get("t") or cols[cu]
                 m["href"] = m.get("href") or cu
-                if st and not m.get("state"):
-                    m["state"] = st
+                b = m["by"].setdefault(line, {})
+                if st and not b.get("state"):
+                    b["state"] = st
                 if when:
-                    m["since"] = max(m.get("since", ""), when)
-                if src and not m.get("note"):
-                    m["note"] = f"{fam}: {src[:150]}"
+                    b["since"] = max(b.get("since", ""), when)
+                if src and not b.get("note"):
+                    b["note"] = src[:150]
 
             if not wps:
                 rejects.append({"archive": fam, "src": src[:140], "url": url,
@@ -328,48 +507,63 @@ def main():
             wp = wps[0]
             mid = canonical("volume:" + wp)
             rng, whole = ranges_from(blob)
-            m = marks.setdefault(mid, {})
+            m = marks.setdefault(mid, {"by": {}})
             m["t"] = m.get("t") or vols[wp]["t"] or src[:90]
             m["where"] = m.get("where") or vols[wp]["place"]
             m["href"] = m.get("href") or ("/TheMap/place/" + vols[wp]["place"] + "/")
-            m["since"] = max(m.get("since", ""), when) if when else m.get("since", "")
-            if st and not m.get("state"):
-                m["state"] = st
+            b = m["by"].setdefault(line, {})
+            if when:
+                b["since"] = max(b.get("since", ""), when)
+            if st and not b.get("state"):
+                b["state"] = st
             # THE NOTE IS THE ARCHIVE'S OWN SENTENCE, not a summary of it. A
             # reader opening this mark in six months needs to know which of
             # their own sessions produced it.
-            note = f"{fam}: {src[:150]}" if src else fam
-            m["note"] = note if not m.get("note") else m["note"]
+            if src and not b.get("note"):
+                b["note"] = src[:150]
             if rng:
-                prev = m.get("done") or []
-                m["done"] = sorted(prev + rng)
-                if whole and not m.get("total"):
-                    m["total"] = rng[0][1]
+                if whole:
+                    # READ ENTRY BY ENTRY, so it belongs to every family and
+                    # sits above the lines. This is the one place the importer
+                    # widens a claim past the archive that made it, and
+                    # ranges_from() returns `whole` only when the row itself
+                    # says the register was walked.
+                    m["walked"] = sorted((m.get("walked") or []) + rng)
+                    if not m.get("total"):
+                        m["total"] = rng[0][1]
+                else:
+                    b["done"] = sorted((b.get("done") or []) + rng)
                 ranged += 1
             matched += 1
             hit += 1
-        per[fam] = (len(rows), hit)
-        print(f"  {fam:<20} {len(rows):>4} rows, {hit:>4} matched to an atlas volume")
+        per[fam] = (len(rows), hit, src_hit)
+        print(f"  {fam:<20} {len(rows):>4} rows \u2192 "
+              f"{hit:>4} volume, {src_hit:>4} source")
 
     # Merge overlapping ranges the way ProgressKit does, so an import is not
     # the one place a reader's ranges come back unmerged.
-    for m in marks.values():
-        if not m.get("done"):
-            m.pop("done", None)
-            continue
+    def merged(rs):
         out = []
-        for a, b in sorted(m["done"]):
+        for a, b in sorted(rs or []):
             if out and a <= out[-1][1] + 1:
                 out[-1][1] = max(out[-1][1], b)
             else:
                 out.append([a, b])
-        m["done"] = out
-        m["since"] = m.get("since") or time.strftime("%Y-%m-%d")
+        return out
 
+    today = time.strftime("%Y-%m-%d")
     for m in marks.values():
-        m["since"] = m.get("since") or time.strftime("%Y-%m-%d")
+        if m.get("walked"):
+            m["walked"] = merged(m["walked"])
+        for b in m.get("by", {}).values():
+            if b.get("done"):
+                b["done"] = merged(b["done"])
+            else:
+                b.pop("done", None)
+            b["since"] = b.get("since") or today
 
-    doc = {"v": 1, "exported": time.strftime("%Y-%m-%d"), "marks": marks}
+    doc = {"v": 2, "exported": today, "lines": lines,
+           "active": (sorted(lines)[0] if lines else None), "marks": marks}
     json.dump(doc, io.open(args.out, "w", encoding="utf-8"),
               ensure_ascii=False, indent=1)
 
@@ -379,6 +573,7 @@ def main():
     print(f"    distinct volumes marked    {len(marks):,}")
     print(f"    carrying a page range      {sum(1 for m in marks.values() if m.get('done')):,}")
     ncol = sum(1 for k in marks if k.startswith("collection:"))
+    print(f"    research lines            {len(lines):,}")
     print(f"    collection marks          {ncol:,}")
     nvol = sum(1 for k in marks if k.startswith("volume:"))
     nsrc = sum(1 for k in marks if k.startswith("source:"))

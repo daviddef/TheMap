@@ -68,6 +68,65 @@ RX = [(k, label, re.compile(p, re.I)) for k, label, p in KINDS]
 LABEL = {k: label for k, label, _ in KINDS}
 ORDER = [k for k, _, _ in KINDS]
 
+# A CONFESSION IS NOT A HINT, IT IS THE ANSWER. The classifier reads titles,
+# and a FamilySearch parish register is titled «Births (Rođeni) 1734-1756» —
+# three generic vital words and nothing a church pattern can see. So Senj's
+# ten Roman Catholic parish books were filed as CIVIL REGISTRATION, its `k`
+# bitmask came out 64, and ticking «Church and parish registers» hid the town
+# whose entire holding is parish registers. David found it from the other end:
+# «0 of 21,754 places shown… something more central is wrong here».
+#
+# The row already carried the answer in a field nobody passed in. `denom` is
+# the confession the register was kept by, and a register kept by a confession
+# IS a church register — that is not an inference from a title, it is what the
+# word means. Sampled across 1,308 collections: every one had no kind, and 859
+# carried a denomination.
+#
+# «civil» and «mil» are here so they are not silently treated as churches:
+# they map to the kinds they actually are.
+DENOM = {
+    "rc": "Roman Catholic church parish",
+    "orth": "Orthodox church parish",
+    "gc": "Greek Catholic church parish",
+    "ref": "Reformed church parish",
+    "ev": "Evangelical Lutheran church parish",
+    "jew": "Jewish synagogue congregation",
+    "civil": "civil registration",
+    "mil": "military",
+}
+
+
+# The confessions that make a register a CHURCH register. «civil» and «mil»
+# are deliberately not here: they are confessions in the same field and they
+# say the opposite.
+CHURCH_DENOM = {"rc", "orth", "gc", "ref", "ev", "jew"}
+
+
+def denom_text(code):
+    """The words a confession code stands for, or '' — never a guess."""
+    return DENOM.get((code or "").strip().lower(), "")
+
+
+def kinds_for(title, denom=None):
+    """A collection's kinds, with its confession taken into account.
+
+    AND «CIVIL» IS DROPPED WHEN A CONFESSION CLAIMS IT. «Births (Rođeni)» is
+    read as a vital record by the generic pattern, which is how it ended up as
+    civil registration in the first place; adding the confession makes it
+    church AND civil, and a Roman Catholic parish register is not civil
+    registration. Left in, Senj would answer a filter for records it does not
+    hold — the same fault as before, pointing the other way.
+    A title that names both — «Church and civil registers» — keeps both,
+    because there the second kind is in the title rather than inferred from
+    the first one's words.
+    """
+    got = kinds_of(title, denom_text(denom))
+    if (denom or "").strip().lower() in CHURCH_DENOM and "church" in got:
+        if not re.search(r"\bcivil\b|\bstato civile\b|\bstandesamt\b", title or "", re.I):
+            got = [k for k in got if k != "civil"]
+    return got
+
+
 def kinds_of(*texts):
     """Every kind a title plausibly is, most specific first. May be empty."""
     hay = " ".join(t for t in texts if t)

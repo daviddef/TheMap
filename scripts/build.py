@@ -778,7 +778,11 @@ def main():
         # the mistake the shard keys made.
         kb = 0
         for _c in cs:
-            for _k in (_c.get("rkinds") or record_kinds.kinds_of(_c.get("title", ""))):
+            # The confession goes in beside the title: see DENOM in
+            # record_kinds. Without it a parish register whose title is three
+            # vital words reads as civil registration.
+            for _k in (_c.get("rkinds") or record_kinds.kinds_for(
+                    _c.get("title", ""), _c.get("denom"))):
                 kb |= KIND_BIT[_k]
         if kb:
             row["k"] = kb

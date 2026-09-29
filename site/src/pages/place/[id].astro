@@ -80,6 +80,10 @@ try {
     .slice(0, 6);
 } catch (e) { worldNat = []; }
 const countryName = (idx.countries || {})[place.country] || place.country;
+/* What a mark made on this page says it belongs to, and the way back to it.
+   Same two values every markable row on the page needs, computed once. */
+const placeLabel = place.name + (countryName ? ", " + countryName : "");
+const selfHref = u(`/place/${place.id}/`);
 const region = regions.regions.find((r) => r.id === place.region);
 const ACC = {
   free: "Images, free, no account",
@@ -323,11 +327,20 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
       the distance is the useful part. <b>Wikidata's coverage is very uneven</b>: 34,612
       churches in England against 105 in central Istria, so a short list here means thin
       data and not an empty landscape. Unchecked, and only inside a mapped record region.</p>
+      {/* A PARISH IS THE ONE THING IN THIS WHOLE ATLAS YOU COULD NOT MARK,
+          which is close to absurd: the register belongs to the parish, and
+          «write to the parish» or «visit the church» is the commonest next
+          step there is. David: «i want to go to the senj archive or volume or
+          look at a parish… how can i add something to the dossier? i just
+          dont see anything». Volumes and archives had controls and parishes
+          had none, so the answer to the most obvious question was no. */}
       <ul class="vols">
         {place.parishes.map((c) => (
-          <li>
+          <li data-src={"source:parish-" + (c.q || c.n)}
+              data-src-t={c.n} data-src-where={placeLabel} data-src-href={selfHref}>
             <a href={`https://www.wikidata.org/wiki/${c.q}`} target="_blank" rel="noopener">{c.n} ↗</a>
             <span class="y">{c.km} km</span>
+            <span class="srcmark"></span>
           </li>
         ))}
       </ul>
@@ -346,13 +359,15 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
       Only inside a mapped record region.</p>
       <ul class="vols">
         {place.graves.map((c) => (
-          <li>
+          <li data-src={"source:grave-" + c.id}
+              data-src-t={c.n} data-src-where={placeLabel} data-src-href={selfHref}>
             <a href={c.src === "wikidata"
                        ? `https://www.wikidata.org/wiki/${c.id}`
                        : `https://www.openstreetmap.org/${c.id.startsWith("w") ? "way" : "node"}/${c.id.slice(1)}`}
                target="_blank" rel="noopener">{c.n} ↗</a>
             <span class="y">{c.km} km</span>
             <span class="who">{c.src === "wikidata" ? "Wikidata" : "OpenStreetMap"}</span>
+            <span class="srcmark"></span>
           </li>
         ))}
       </ul>

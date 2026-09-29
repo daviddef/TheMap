@@ -124,12 +124,40 @@ import LineSwitcher from "../components/LineSwitcher.astro";
 
         if (!mine.length) {
           var others = P.lines().filter(function (l) { return !l.active && l.marks; });
-          body.innerHTML = '<p class="cap" style="margin-top:22px">Nothing recorded yet' +
-            (me ? " for <b>" + esc(me.name) + "</b>" : "") + ". " +
-            "Open a place, find its volumes, and say which pages you have searched." +
+          /* AN EMPTY PAGE THAT DOES NOT SAY HOW TO FILL IT IS A DEAD END.
+             David: «how do i add things to the dossier? eg i want to go to
+             the senj archive or volume or look at a parish… i just dont see
+             anything». Everything IS markable — volumes, archives, parishes,
+             burial grounds, whole collections — and every control lives on a
+             PLACE page, which this page knew and never said. It told a reader
+             to «open a place and find its volumes» and stopped there, which
+             names one of the five things and none of the buttons. */
+          body.innerHTML =
+            '<p class="cap" style="margin-top:22px">Nothing recorded yet' +
+            (me ? " for <b>" + esc(me.name) + "</b>" : "") + "." +
             (others.length ? " You do have work under " +
               others.map(function (l) { return "<b>" + esc(l.name) + "</b>"; }).join(", ") +
-              " — switch above to see it." : "") + "</p>";
+              " — switch above to see it." : "") + "</p>" +
+            '<div class="one mrhow"><div class="lab">How this page fills up</div>' +
+            "<p>Everything here is recorded on a <b>place page</b>, and it all " +
+            "lands under whichever family is chosen above. Open the place you " +
+            "are working \u2014 " +
+            '<a href="' + BASE + 'place/senj/">Senj</a>, say \u2014 and you can mark:</p>' +
+            '<ul class="mrhowl">' +
+            "<li><b>A volume</b> \u2014 «mark pages» beside any book, then type " +
+            "the images you did: <code>1-47, 60-72</code>. It remembers where " +
+            "to start again.</li>" +
+            "<li><b>An archive</b> \u2014 the dropdown beside it: planning to, " +
+            "written no reply, searched nothing found, found something, read " +
+            "everything, cannot get access. A letter shows up here with the " +
+            "address and how long it has been.</li>" +
+            "<li><b>A parish</b> or <b>a burial ground</b> \u2014 same dropdown, " +
+            "beside each one in its list.</li>" +
+            "<li><b>A whole collection</b> \u2014 same again, where the page " +
+            "lists them.</li></ul>" +
+            "<p class=\"cap\">If you already have work recorded elsewhere, " +
+            "<b>Import a file</b> above merges it in rather than replacing " +
+            "what is here.</p></div>";
           return;
         }
 
@@ -384,6 +412,11 @@ import LineSwitcher from "../components/LineSwitcher.astro";
   /* The dossier's own furniture. Scoped styles never reach markup written by
      script, so every one of these is :global — the third time this project has
      been caught by that, and the build gate checks it. */
+  :global(.mrhow) { margin-top: 18px; border-left-color: var(--accent); }
+  :global(.mrhowl) { margin: 8px 0 10px; padding-left: 20px;
+    font-family: var(--sans); font-size: 13.5px; line-height: 1.65; }
+  :global(.mrhowl code) { font-family: var(--mono); font-size: 11.5px;
+    background: var(--ground); padding: 1px 5px; border-radius: 3px; }
   :global(.mrh) { margin: 22px 0 2px; }
   :global(.mrwhere2) { font-family: var(--sans); font-size: 15px;
     font-weight: 400; color: var(--ink-3); }

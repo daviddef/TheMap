@@ -3842,7 +3842,8 @@ window.addEventListener("load", async function () {
              " more on the map.</p>");
     if (r) h.push(renderSurnames([r], r.n));
     panel.innerHTML = h.join("");
-    if (r) showCountries(r.countries, function () { return mine !== searchTok; });
+    if (r) showCountries(r.countries, function () { return mine !== searchTok; },
+                         firstAttested(r));
   }
 
   /* THE PLACE YOU ASKED FOR, IN A COLOUR NOTHING ELSE USES.
@@ -4014,6 +4015,22 @@ window.addEventListener("load", async function () {
          its English section and «from English» in its French one. Printed as
          one list those two true statements read as a name from occupations
          AND from English, which is a third thing neither of them says. */
+      /* AN ABSENT ENTRY IS AN ANSWER AND WAS BEING RENDERED AS SILENCE.
+         David, more than once: «i still dont see anything about the origin of
+         the name?» — because Wiktionary has no page for Defrančeski, so the
+         whole block was omitted and the panel simply skipped from the
+         timeline to the spelling list. A reader cannot tell that apart from
+         the atlas not looking. It holds 78,628 surnames, 25,987 of them with
+         an etymology; saying which of those a name missed out on is a fact
+         about the source, and it stops somebody asking a fourth time. */
+      if (!r.wk) {
+        h.push('<div class="ra-orig ra-orig-none"><p class="ra-orig-l">' +
+               esc(T("Wiktionary has no entry for this name.")) +
+               ' <span class="ra-who">' + esc(T("It holds 78,628 surnames and "
+               + "25,987 of those say what the name is from. This one is not "
+               + "among them \u2014 which is the dictionary's gap, not a "
+               + "judgement about the name.")) + "</span></p></div>");
+      }
       if (r.wk) {
         var w = r.wk, wh = ['<div class="ra-orig ra-orig-wk">'];
         (w.etymon || []).forEach(function (e) {
@@ -4595,7 +4612,37 @@ window.addEventListener("load", async function () {
     sounds:   { color: "#7C8A91", dash: "1 5", say: "a phonetic neighbour" }
   };
 
-  async function showCountries(list, stale) {
+  /* WHERE THE NAME IS FIRST ATTESTED, WHICH IS NOT THE SAME AS WHERE IT CAME
+     FROM, and the difference matters enough to name. David: «i want the map
+     to start by zooming into the country of origin». Fitting to every
+     attested country is what the map did, and for a name in ten of them it
+     framed Argentina to Australia and dropped the reader in the Atlantic —
+     the same failure the comment at fitBounds already describes for Peeters.
+
+     THE ARCHIVE TIMELINE WINS OVER THE NOTABLE ONE. `tla` is this project's
+     own family archives — ordinary people in parish registers — and `tl` is
+     Wikidata's notable births, which are thin before 1900 and biased towards
+     whichever country writes encyclopaedias. Defrančeski has only tla,
+     {HR: [1920]}, and Croatia is the right answer. Falco has only tl and its
+     earliest is DE 1590 for a name that is plainly Italian, which is exactly
+     why this is labelled «first attested» everywhere it is shown and never
+     «origin»: the atlas knows when a name turns up in a record it holds, and
+     that is a different and smaller fact. */
+  function firstAttested(r) {
+    var best = null;
+    ["tla", "tl"].forEach(function (k) {
+      if (best || !r || !r[k]) return;
+      Object.keys(r[k]).forEach(function (cc) {
+        var ds = (r[k][cc] || []).filter(function (d) { return +d; });
+        if (!ds.length) return;
+        var lo = Math.min.apply(null, ds);
+        if (!best || lo < best.year) best = { cc: cc, year: lo, src: k };
+      });
+    });
+    return best;
+  }
+
+  async function showCountries(list, stale, origin) {
     if (list && list.length) { searchHit = true; noteSearch(); retireVisit(); }
     litFor = fold(qbox.value.trim());
     /* THE FLAG CARDS FOLLOW THE SURNAME, NOT THE TEXT. David: «when I search
@@ -4624,7 +4671,7 @@ window.addEventListener("load", async function () {
       return outline(x.cc || x);
     }));
     if (stale && stale()) return;
-    var box = null;
+    var box = null, originBox = null;
     got.forEach(function (c, i) {
       if (!c) return;
       var e = EVID[(list[i] || {}).how] || EVID.register;
@@ -4636,6 +4683,7 @@ window.addEventListener("load", async function () {
         .addTo(ctryLayer);
       var b = L.latLngBounds([c.box[0], c.box[1]], [c.box[2], c.box[3]]);
       box = box ? box.extend(b) : b;
+      if (origin && (list[i] || {}).cc === origin.cc) originBox = b;
     });
     if (!map.hasLayer(ctryLayer)) ctryLayer.addTo(map);
     if (!map.hasLayer(communeLayer)) communeLayer.addTo(map);
@@ -4646,7 +4694,13 @@ window.addEventListener("load", async function () {
        answer on the map, sat unframed off the edge. Country outlines are
        context; towns a state counted people in are the answer, so when
        there are towns they decide the view. */
+    /* The earliest-attested country frames the map when there is one, because
+       that is the ground a reader is actually asking about; the rest stay
+       drawn and lit, so nothing is hidden, they are simply not what the view
+       is centred on. Register towns still win over both — a town a state
+       counted people in is a sharper answer than a whole country. */
     if (communeBox) map.fitBounds(communeBox, { padding: [40, 40], maxZoom: 9 });
+    else if (origin && originBox) map.fitBounds(originBox, { padding: [30, 30], maxZoom: 6 });
     else if (box) map.fitBounds(box, { padding: [30, 30], maxZoom: 7 });
   }
 
@@ -6718,11 +6772,23 @@ window.addEventListener("load", async function () {
      in it as a single 200-character line. The card stays wide; the reading
      stays at a measure a person can follow back to the left margin. */
   :global(.ra-surn p) { font-size: 13px; line-height: 1.6; margin: 6px 0 0; }
-  /* The card holds two kinds of paragraph and they want opposite widths.
-     .ra-note is PROSE and gets a measure; .ra-vars and .ra-filed are LISTS of
-     spellings and countries separated by middots, and a list of short items
-     reads better on one long line than wrapped into a narrow column. */
-  :global(.ra-note) { max-width: 76ch; }
+  /* THE MEASURE BECAME THE RAGGED EDGE. A 76ch cap is textbook-correct — the
+     readable range is about 66 to 90 characters — and in a card 1,900px wide
+     it stops the prose at roughly a third, directly under bands that run the
+     whole way. David, looking at it: «can all the text go the full width
+     across, looks odd cutting off short». He is describing the page, not the
+     rule, and he is right: a paragraph ending at 35% under a timeline ending
+     at 100% reads as a layout fault rather than a considered line length.
+     THE CAP IS GONE, WHICH IS WHAT WAS ASKED FOR TWICE. Columns were tried
+     first and are worse: a three-line paragraph split into two columns of a
+     line and a half is a different kind of broken. The real cost of removing
+     it is long lines on a wide monitor — the thing the cap existed to stop —
+     and that is a trade the owner of the page is entitled to make, having now
+     looked at both. The panel is not the full window: it is the right-hand
+     pane, and the surrounding structure already breaks the prose up with
+     labelled rows, so the lines are nothing like the 230 characters a bare
+     measurement of the viewport would suggest. */
+  :global(.ra-note) { max-width: none; }
   :global(.ra-surn b) { font-family: var(--serif); font-size: 18px; }
   :global(.ra-vars) { font-size: 12.5px !important; }
   :global(.ra-vars.ra-weak) { color: var(--ink-3); }

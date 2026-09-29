@@ -8243,9 +8243,9 @@
    "countries": [
     "PL"
    ],
-   "what": "A Polish state-archives portal of scanned metrical books — civil registration from the Prussian partition (1874 on), duplicates of Roman Catholic parish registers from before that, and population and registration books from 1837. Separate from Szukaj w Archiwach and run by its own archives. Secondary sources say the scans are free and need no account; NOBODY HERE HAS CONFIRMED THAT, because the site is a Vaadin application that renders nothing without JavaScript, so it is marked unsurveyed rather than taking a blog's word for what it costs.",
+   "what": "A Polish state-archives portal of scanned metrical books — civil registration from the Prussian partition (1874 on), duplicates of Roman Catholic parish registers from before that, and population and registration books from 1837. Separate from Szukaj w Archiwach and run by its own archives. Secondary sources say the scans are free and need no account; NOBODY HERE HAS CONFIRMED THAT, because the site is a Vaadin application that renders nothing without JavaScript, so it is marked unsurveyed rather than taking a blog's word for what it costs. SCANS ARE SERVED BY A LORIS IIIF IMAGE SERVER and can be read in place without downloading: /loris/<id>/<x,y,w,h>/<width>,/0/default.jpg returns an arbitrary region at up to TWICE native resolution, which is enough to settle a difficult hand. info.json returns 403 while image requests succeed, and anything above 2x returns a bare 404. The viewer's own canvas is tainted, so the tile server is the route and screenshots are not. THE PORTAL WILL NOT OPEN A UNIT BY ITS SIGNATURE: a scan's modal id resolves only inside the current search result set, so a neighbouring scan cannot be reached by guessing an id. The route that works is to open any scan's modal, click 'View the document' to expose the unit's own scan list, click Show on the scan wanted, and take the new Loris id from the network log.",
    "deepLink": null,
-   "checked": "2026-09-22",
+   "checked": "2026-09-29",
    "at": {
     "lat": 52.4064,
     "lon": 16.9252,
@@ -9934,9 +9934,9 @@
    "countries": [
     "ZA"
    ],
-   "what": "The South African archives index — estate files above all, which are the backbone of South African genealogy. An index; the file is ordered from the depot.",
+   "what": "The South African archives index — estate files above all, which are the backbone of South African genealogy. An index; the file is ordered from the depot. TWO DATABASES SINCE THE 2026 MIGRATION AND ONLY ONE IS COMPLETE: NARSSA's own 'Using the Search Function' page states it is migrating more than 8.3 million entries from the old NAAIRS database to the new one, that the new 'fulltext search' WILL NOT DISPLAY ALL THE RECORDS IN THE SYSTEM, and that 'Search Old NAAIRS database' will provide a more complete search. Both are offered to the public side by side. A NIL FROM THE NEW DATABASE IS THEREFORE NOT A NIL, and any recorded NAAIRS negative should say which database answered and at what address.",
    "deepLink": null,
-   "checked": "2026-09-22",
+   "checked": "2026-09-29",
    "at": {
     "lat": -25.7479,
     "lon": 28.2293,
@@ -10453,9 +10453,9 @@
    "countries": [
     "AU"
    ],
-   "what": "The National Library of Australia's newspaper archive. Free, full-text, and the single best source for Australian family detail before 1955.",
+   "what": "The National Library of Australia's newspaper and gazette archive. Free and full-text. Most titles stop at 1954 for copyright, which is the usual rule of thumb — BUT TWO EXCEPTIONS REACH MUCH LATER AND ARE EASY TO MISS: THE CANBERRA TIMES IS DIGITISED 1926-1995, and the COMMONWEALTH OF AUSTRALIA GAZETTE 1901-1973, whose naturalisation and citizenship lists carry name, street address and date. Those two make Trove usable for post-war arrivals that the 1954 rule would rule out. NOTE THAT THE SEARCH NORMALISES SPELLING — two different spellings of one surname can return an identical result set — SO TROVE CANNOT BE USED AS A SPELLING TEST. The v3 API needs an X-API-KEY header and does not serve article text at ordinary key level; the public article page carries the OCR.",
    "deepLink": "https://trove.nla.gov.au/search/newspapers?keyword={q}",
-   "checked": "2026-09-22",
+   "checked": "2026-09-29",
    "at": {
     "lat": -35.2966,
     "lon": 149.1296,
@@ -10510,6 +10510,44 @@
     "lon": 35.175,
     "place": "Jerusalem, Israel"
    }
+  },
+  {
+   "id": "archiwum-panstwowe-bydgoszcz",
+   "name": "Archiwum Państwowe w Bydgoszczy",
+   "url": "https://www.bydgoszcz.ap.gov.pl/",
+   "kind": "regional-archive",
+   "access": "unsurveyed",
+   "countries": [
+    "PL"
+   ],
+   "what": "The Polish state archive for the Kuyavian-Pomeranian voivodeship, holding the civil registers of the former Prussian registry offices of the region, Szubin among them. IT ANSWERS LETTERS AND WILL SHARE SCANS: three e-mails in September 2026 were each answered within about eight days, in Polish, over the Director's signature with a named case officer. It points first at genealogiawarchiwach.pl for what is already digitised, and then supplied a 103-scan volume that is NOT on that portal, shared from its own OneDrive. TWO HOLDINGS FACTS IT STATED BY LETTER THAT NO ONLINE CATALOGUE SHOWS: the metrical books of the Jewish religious community of Szubin survive ONLY for 1820-1847; and the alphabetical death indexes (skorowidze zgonów) of USC Szubin Miasto survive ONLY for 1874-1878 and 1894-1924, with nothing between. An archivist there will also read a difficult line from a register on request and say plainly where the reading is uncertain.",
+   "deepLink": null,
+   "checked": "2026-09-29",
+   "at": null,
+   "wikidata": "Q18423215",
+   "triage": "seen-in-use",
+   "triageNote": "Added from the Luwinski Family archive after three letters were answered in September 2026. Access class still needs a person: nothing was paid, no fee schedule was seen, and the reading room was not visited."
+  },
+  {
+   "id": "brisbane-catholic-cemeteries",
+   "name": "Catholic Metropolitan Cemeteries Trust — Brisbane (cemsearch)",
+   "url": "https://search.cemsearch.com.au/mapguide/BrisbaneRCA/",
+   "kind": "index",
+   "access": "unsurveyed",
+   "countries": [
+    "AU"
+   ],
+   "what": "The burial register search for the Roman Catholic cemeteries of the Archdiocese of Brisbane, Nudgee among them — NINE cemeteries. Returns register number, cemetery, name, birth, death, interment date and PLOT NUMBER. It is NOT in the Brisbane City Council grave search, because these are not council cemeteries: a family buried here is invisible to the council portal and to the aggregators that copy it. Queried by POST to `query.php?type=Deceased` with `CemeteryCode=%` and `SectionCode=%` — passing «All» returns nothing. Used from the Falco family archive, where it produced five burials that corrected two death dates carried from a family tree.",
+   "deepLink": null,
+   "checked": "2026-09-29",
+   "at": {
+    "lat": -27.4,
+    "lon": 153.07,
+    "place": "Brisbane, Australia"
+   },
+   "wikidata": null,
+   "triage": "seen-in-use",
+   "triageNote": "Added from the Falco family archive, which has used it repeatedly. Access class still needs a person: it answers without a login, but nobody has surveyed what an ordinary visitor is charged for a full register entry, so it stays unsurveyed. No Wikidata id established for the operating trust and none was guessed."
   }
  ]
 }

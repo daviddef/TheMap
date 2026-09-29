@@ -16,6 +16,7 @@
 import Base from "../layouts/Base.astro";
 import { u } from "../lib/url.js";
 import ProgressKit from "../components/ProgressKit.astro";
+import LineSwitcher from "../components/LineSwitcher.astro";
 ---
 <Base
   title="My research"
@@ -23,6 +24,7 @@ import ProgressKit from "../components/ProgressKit.astro";
   dek="The volumes you have marked, the pages you did, and where to start again. This lives in this browser only — export it to keep it.">
 
   <ProgressKit />
+  <LineSwitcher />
 
   <div class="one" style="border-left-color:var(--brick)">
     <div class="lab">Where this lives</div>
@@ -58,23 +60,48 @@ import ProgressKit from "../components/ProgressKit.astro";
       }
       function draw() {
         var marks = P.all();
-        var ids = Object.keys(marks);
+        var slug = P.active();
+        /* THIS PAGE SHOWS ONE LINE AT A TIME, and says which. A single list
+           of every family's work reads as one researcher's progress and is
+           the thing the lines were added to stop — «12 volumes done» meaning
+           four families' worth of scanning is a number that misleads whoever
+           reads it, including the person who wrote it. */
+        var ids = Object.keys(marks).filter(function (id) {
+          var m = marks[id];
+          var b = (m.by && m.by[slug]) || {};
+          return (b.done && b.done.length) || b.state || b.note ||
+                 (m.walked && m.walked.length);
+        });
         if (!ids.length) {
-          body.innerHTML = '<p class="cap" style="margin-top:22px">Nothing marked yet. ' +
+          var me = P.lines().filter(function (l) { return l.active; })[0];
+          var other = P.lines().filter(function (l) { return !l.active && l.marks; });
+          body.innerHTML = '<p class="cap" style="margin-top:22px">Nothing marked yet' +
+            (me ? " for <b>" + esc(me.name) + "</b>" : "") + ". " +
             'Open a place, find its volumes, and say which pages you have ' +
-            'searched — this page is where they all come back together.</p>';
+            'searched — this page is where they all come back together.' +
+            (other.length
+              ? " You do have work recorded under " +
+                other.map(function (l) { return "<b>" + esc(l.name) + "</b>"; }).join(", ") +
+                " — switch above to see it."
+              : "") + "</p>";
           return;
         }
         /* NEWEST WORK FIRST. Somebody opening this page has just been
            working, or is trying to remember where they were; either way the
            thing they touched last is the thing they want. */
-        ids.sort(function (a, b) {
-          return String(marks[b].since || "").localeCompare(String(marks[a].since || ""));
-        });
-        var pages = 0, vols = 0, others = 0;
+        function since(id) {
+          var b = (marks[id].by && marks[id].by[slug]) || {};
+          return String(b.since || "");
+        }
+        ids.sort(function (a, b) { return since(b).localeCompare(since(a)); });
+        var pages = 0, vols = 0, others = 0, shared = 0;
         ids.forEach(function (id) {
-          if (marks[id].done) { vols++; pages += P.covered(marks[id].done); }
-          else { others++; }
+          var cov = P.coverage(id, slug);
+          if (cov.length) {
+            vols++;
+            pages += P.covered(cov);
+            if ((marks[id].walked || []).length) shared++;
+          } else { others++; }
         });
         var sum = [];
         if (vols) sum.push("<b>" + vols + "</b> volume" + (vols === 1 ? "" : "s") +
@@ -83,10 +110,22 @@ import ProgressKit from "../components/ProgressKit.astro";
         if (others) sum.push("<b>" + others + "</b> archive" +
                              (others === 1 ? "" : "s") + " or place" +
                              (others === 1 ? "" : "s"));
+        if (shared) sum.push("<b>" + shared + "</b> read in full \u2014 " +
+                             "counting for every family");
         var h = ['<p class="mrsum">' + sum.join(" \u00b7 ") + " recorded</p>",
                  '<ul class="mrlist">'];
         ids.forEach(function (id) {
-          var m = marks[id];
+          var m = P.get(id) || {};
+          var raw = marks[id];
+          /* Where a volume has been worked for more than one family, the
+             others are named. A reader who sees «also: Kosina» knows the book
+             is not fresh ground even for a line they have not opened yet,
+             which is the cross-family question the old flat list could not
+             answer at all. */
+          var also = Object.keys(raw.by || {}).filter(function (sl) {
+            var b = raw.by[sl];
+            return sl !== slug && ((b.done && b.done.length) || b.state);
+          });
           /* THE TITLE AND THE PLACE, NOT THE WAYPOINT. The key is a
              FamilySearch waypoint because it is stable; printed raw it reads
              «3JXZ-K68:172062901,172062902,172062903», and the first cut of
@@ -114,6 +153,13 @@ import ProgressKit from "../components/ProgressKit.astro";
               : "") +
             (m.state ? '<span class="mrstate">' + esc(m.state) + "</span>" : "") +
             (m.note ? '<span class="mrnote">' + esc(m.note) + "</span>" : "") +
+            (also.length ? '<span class="mralso">also worked for ' +
+              esc(also.map(function (sl) {
+                var L = P.lines().filter(function (x) { return x.slug === sl; })[0];
+                return L ? L.name : sl;
+              }).join(", ")) + "</span>" : "") +
+            ((raw.walked || []).length
+              ? '<span class="mrwalk">read in full</span>' : "") +
             (m.since ? '<span class="mrsince">' + esc(m.since) + "</span>" : "") +
             '<button type="button" class="mrdel" data-id="' + esc(id) + '">forget</button>' +
             "</li>");
@@ -122,6 +168,7 @@ import ProgressKit from "../components/ProgressKit.astro";
         body.innerHTML = h.join("");
       }
       draw();
+      document.addEventListener("ra-progress-changed", draw);
 
       document.getElementById("mr-export").addEventListener("click", function () {
         var blob = new Blob([P.toJSON()], { type: "application/json" });
@@ -182,6 +229,8 @@ import ProgressKit from "../components/ProgressKit.astro";
   :global(.mrstate) { font-family: var(--mono); font-size: 11px; color: var(--accent); }
   :global(.mrres) { font-family: var(--mono); font-size: 11px; color: var(--brick); }
   :global(.mrnote) { font-style: italic; color: var(--ink-2); }
+  :global(.mralso) { font-family: var(--mono); font-size: 10.5px; color: var(--brick); }
+  :global(.mrwalk) { font-family: var(--mono); font-size: 10.5px; color: var(--accent); }
   :global(.mrsince) { font-family: var(--mono); font-size: 10px; color: var(--ink-3); }
   :global(.mrdel) { margin-left: auto; background: none; border: 0; padding: 0;
     cursor: pointer; font: inherit; font-size: 11.5px; color: var(--ink-3);

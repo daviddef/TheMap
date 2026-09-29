@@ -24,8 +24,44 @@
  * this» is more useful than a step omitted, because the reader then knows the
  * silence is ours rather than the record's.
  */
+import allProviders from "../../public/providers.json";
+import providerContacts from "../../../data/provider-contacts.json";
+
 const { place: d, region, eras, names, sources, volumes, parishes, countryName, u } =
   Astro.props;
+
+/* WHERE TO WRITE, ON THE TWO STEPS THAT MEAN WRITING.
+   David: «when you talk about a "its a letter" is there any way we could add
+   the "known email / form / address" or institute to contact?» — because
+   «Write to the archive» followed by a homepage link is an instruction with
+   the operative detail missing.
+   Contacts are keyed by Wikidata id in data/provider-contacts.json; see the
+   harvest script for what is and is not claimed. A provider with no id, or an
+   id whose item holds no address, appears with its name and nothing else —
+   there is no fallback to a parent body, because writing to the wrong
+   institution costs a month. */
+const PROV_BY_ID = Object.fromEntries(
+  (allProviders.providers || allProviders).map((p) => [p.id, p]));
+
+function contactsFor(cols) {
+  const seen = new Map();
+  for (const c of cols) {
+    const p = PROV_BY_ID[c.provider];
+    if (!p || seen.has(p.id)) continue;
+    const k = providerContacts.contacts[p.wikidata] || {};
+    seen.set(p.id, { name: p.name, url: p.url, post: k.post || null,
+                     email: k.email || null, tel: k.tel || null });
+  }
+  /* Only the ones that add something. A row repeating the provider name a
+     reader just clicked is noise dressed as help. */
+  return [...seen.values()].filter((x) => x.post || x.email || x.tel);
+}
+
+/* Where a marked row says it belongs, and the way back to it. Computed once
+   rather than inline, because the same two values are wanted by every list on
+   this component. */
+const whereLabel = d.name + (countryName ? ", " + countryName : "");
+const placeHref = u(`/place/${d.id}/`);
 
 const ACC_ORDER = ["free", "account", "index", "mixed", "paid", "catalogue", "onsite"];
 const ACC_SAY = {
@@ -176,10 +212,22 @@ const eraRows = (eras || []).map((e) => ({
             building»: the hardest option dressed as the easy first move. */}
         <h3>{i === 0 && ["free", "account"].includes(k) ? "Start here — " : ""}{ACC_SAY[k]}</h3>
         <ul class="wtb-cols">
+          {/* THE SAME VOLUME, THE SAME ID, WHEREVER IT IS PRINTED. David,
+              looking at this block: «even on the place pages, how do i then
+              mark my progress on a volume for example?» — because the marks
+              were on the other volume list further down the page and not on
+              this one, which is the one headed «Start here» and therefore
+              the one a reader actually starts from.
+              Keyed on the waypoint like every other surface, so a volume
+              marked here is marked in the panel, on the map and in My
+              research, rather than three tallies of the same book. */}
           {byCost[k].slice(0, 12).map((c) => (
-            <li>
+            <li data-vol={"volume:" + (c.waypoint || c.url || c.title)}
+                data-vol-t={c.title} data-vol-where={whereLabel}
+                data-vol-href={placeHref}>
               {c.url ? <a href={c.url} target="_blank" rel="noopener">{c.title}</a> : c.title}
               {c.from && <span class="m"> {c.from}{c.to && c.to !== c.from ? `–${c.to}` : ""}</span>}
+              <span class="volmark"></span>
             </li>
           ))}
           {byCost[k].length > 12 && <li class="wtb-none">and {byCost[k].length - 12} more below</li>}
@@ -193,6 +241,18 @@ const eraRows = (eras || []).map((e) => ({
           <p class="wtb-do">Write to the archive. Give the place, the years, the
           record type, and the reference if you have one. Archives answer
           specific questions far more often than open ones.</p>
+        )}
+        {(k === "catalogue" || k === "onsite") && contactsFor(byCost[k]).length > 0 && (
+          <ul class="wtb-contact">
+            {contactsFor(byCost[k]).map((x) => (
+              <li>
+                <span class="wtb-cn">{x.url ? <a href={x.url} target="_blank" rel="noopener">{x.name}</a> : x.name}</span>
+                {x.email && <a class="wtb-cm" href={`mailto:${x.email}`}>{x.email}</a>}
+                {x.tel && <span class="wtb-ct">{x.tel}</span>}
+                {x.post && <span class="wtb-cp">{x.post}</span>}
+              </li>
+            ))}
+          </ul>
         )}
       </li>
     ))}
@@ -347,6 +407,19 @@ const eraRows = (eras || []).map((e) => ({
      read like the paragraph above it. */
   .wtb-do { border-left: 2px solid var(--rule-strong); padding-left: 11px;
             color: var(--ink) !important; }
+  /* The address block sits under «Write to the archive» and is indented to
+     the same rule, so it reads as the detail of that instruction rather than
+     as a second list of sources. Scoped, not :global — this is rendered by
+     Astro, not written in by script. */
+  .wtb-contact { list-style: none; margin: 7px 0 0; padding: 0 0 0 13px;
+    border-left: 2px solid var(--rule-strong); }
+  .wtb-contact li { display: flex; flex-wrap: wrap; gap: 4px 12px;
+    align-items: baseline; padding: 6px 0; font-size: 13px; }
+  .wtb-contact li + li { border-top: 1px solid var(--rule); }
+  .wtb-cn { font-weight: 600; }
+  .wtb-cm { font-family: var(--mono); font-size: 11.5px; }
+  .wtb-ct { font-family: var(--mono); font-size: 11.5px; color: var(--ink-2); }
+  .wtb-cp { flex-basis: 100%; font-size: 12px; color: var(--ink-2); }
   .wtb-trap { border-left: 2px solid var(--brick); padding-left: 11px; }
   .wtb-era { width: 100%; border-collapse: collapse; margin: 8px 0 9px; font-size: 13px; }
   .wtb-era th { text-align: left; font-family: var(--mono); font-size: 10.5px;

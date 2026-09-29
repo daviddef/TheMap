@@ -1,6 +1,9 @@
 ---
 import Base from "../layouts/Base.astro";
 import RecordMap from "../components/RecordMap.astro";
+import ProgressKit from "../components/ProgressKit.astro";
+import LineSwitcher from "../components/LineSwitcher.astro";
+import VolumeMarks from "../components/VolumeMarks.astro";
 import { u } from "../lib/url.js";
 import { atlas as idx } from "../lib/atlas.js";
 import regions from "../../public/regions.json";
@@ -80,6 +83,13 @@ const archiveCountries = new Set(archives.map(p => p.at.place.split(", ").pop())
       will go looking for it. A reader who arrived with a surname should meet
       the map and nothing else. */}
 
+  <p id="ra-mywork" data-href={u("/my-research/")} hidden></p>
+  <ProgressKit />
+  {/* Quiet here: the map is the whole of this page for somebody who arrived
+      with a surname, so the family selector stays out of the way until a
+      second family exists and there is genuinely something to pick. */}
+  <LineSwitcher quiet={true} />
+  <VolumeMarks />
 </Base>
 
 <style>

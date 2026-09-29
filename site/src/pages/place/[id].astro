@@ -15,6 +15,7 @@ import { readFileSync } from "node:fs";
 import Base from "../../layouts/Base.astro";
 import { flagFor } from "../../lib/flags.js";
 import ProgressKit from "../../components/ProgressKit.astro";
+import LineSwitcher from "../../components/LineSwitcher.astro";
 import VolumeMarks from "../../components/VolumeMarks.astro";
 import { u } from "../../lib/url.js";
 import full from "../../data/places-full.json";
@@ -203,6 +204,21 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
     for the whole {place.level}.</p>
   )}
 
+  {/* WHICH FAMILY THIS PAGE'S MARKS BELONG TO, above everything that marks.
+      A reader with two lines open will otherwise record an afternoon of one
+      family's scanning against the other and have no way of noticing; the
+      cost of that is a month of repeated work, and the cost of saying so
+      here is one line of type. Hidden until the script runs, because lines
+      live in this browser and a server-rendered guess would flash the wrong
+      family's name on every load. */}
+  {/* THE STORE BEFORE ANYTHING THAT READS IT. ProgressKit is an inline
+      script that defines window.raProgress, and every other marking script
+      on this page gives up quietly if it is not there yet — so it sits above
+      the first of them rather than at the foot of the page where it used to
+      be. It renders nothing. */}
+  <ProgressKit />
+  <LineSwitcher />
+
   {/* FIRST, BEFORE THE DATA. Everything below this is what the atlas holds;
       this is the order to open it in. A beginner handed eight headed sections
       does not know which to click, and the honest order — free before a
@@ -270,7 +286,10 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
           <div class="lab"><i class={"dot d-" + a}></i>{ACC[a]} — {list.length}</div>
           <ul class="vols">
             {list.map((c) => (
-              <li>
+              <li data-vol={"volume:" + (c.waypoint || c.url || c.title)}
+                  data-vol-t={c.title || "Untitled volume"}
+                  data-vol-where={place.name + ", " + countryName}
+                  data-vol-href={u(`/place/${place.id}/`)}>
                 {c.url
                   ? <a href={c.url} target="_blank" rel="noopener">{c.title || "Untitled volume"} ↗</a>
                   : <span>{c.title || "Untitled volume"}</span>}
@@ -397,7 +416,8 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
       therefore say nothing about anywhere.</p>
       <ul class="vols" style="margin-top:12px">
         {worldNat.map((r) => (
-          <li>
+          <li data-src={"source:wd-" + (r.id || r.name)} data-src-t={r.name}
+              data-src-where={countryName} data-src-href={r.url}>
             <a href={r.url} target="_blank" rel="noopener">{r.name} ↗</a>
             <span class="who">{r.kind === "national-archive" ? "national archive" : "national library"}</span>
             {r.status !== "ok" && <span class="who">{
@@ -449,7 +469,8 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
             <p class="cap" style="margin-top:2px">{sub}</p>
             <ul class="vols">
               {rows.slice(0, 25).map((c) => (
-                <li>
+                <li data-src={"collection:" + (c.url || c.t)} data-src-t={c.t}
+                    data-src-where={countryName} data-src-href={c.url}>
                   <a href={c.url} target="_blank" rel="noopener">{c.t} ↗</a>
                   {c.from && <span class="y">{c.from}–{c.to}</span>}
                   <span class="who">{c.n.toLocaleString()} records</span>
@@ -475,20 +496,20 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
       {region.eras[region.eras.length - 1].to}.</span></p>
   )}
 
-  {/* THE PLACE ITSELF, because David's list of what a reader wants to mark
-      began «i have finished searching this volume, or i have already scanned
-      this location». A location is not a volume: there are no pages to it,
-      so it takes a state and a date rather than ranges. */}
-  <p class="placemark" data-src={"place:" + place.id} data-src-t={place.name}
-     data-src-where={countryName} data-src-href={u(`/place/${place.id}/`)}>
-    <span class="srcmark"></span>
-  </p>
+  {/* A TOWN IS NOT A THING YOU MARK, IT IS WHAT ITS VOLUMES ADD UP TO.
+      This carried a state dropdown of its own — searched, written, blocked —
+      and David: «youre marking a whole town, i want to mark specifc volumes
+      that roll up into that town». Quite right: a state on the town is a
+      second, competing record of the same work, and the two would disagree
+      the moment a volume was marked and the town was not. The heading now
+      shows what the volumes below it come to, and nothing sets it directly. */}
+
+  <p class="ra-rollup-page" hidden></p>
 
   <p style="margin-top:22px"><a class="bigl" href={mapLink}>See {place.name} on the map →</a></p>
   <p class="cap"><a href={u(`/country/${(place.country||"").toLowerCase()}/`)}>Everything in {where}</a> ·
     <a href={u("/places/")}>All {full.places.length} places</a> ·
     <a href={u("/add/")}>Correct something on this page</a></p>
-  <ProgressKit />
   <VolumeMarks />
 </Base>
 

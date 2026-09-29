@@ -24,7 +24,7 @@ const MAP = "/TheMap/";
 /* The atlas is ready when it has told the reader how much of it there is. */
 async function ready(page) {
   await page.goto(MAP);
-  await expect(page.locator("#ra-count")).not.toBeEmpty({ timeout: 45000 });
+  await expect(page.locator("#ra-count[data-ready]")).toHaveCount(1, { timeout: 45000 });
 }
 const state = (page) => page.evaluate(() => window.recordAtlas.state());
 
@@ -255,7 +255,11 @@ test("full screen keeps the controls, which is the point of controls", async ({ 
      it used to live under the map, so the one line saying whether a filter
      did anything was missing in the mode where the map is biggest. */
   await expect(page.locator(".ra-bar #ra-count")).toHaveCount(1);
+  /* It reports when there is something to report. Unfiltered it says nothing
+     — the total is already in the dek — so this asks it a question first. */
+  await page.locator("#ra-q").fill("Gračišće");
   await expect(page.locator("#ra-count")).toContainText(/places shown/);
+  await page.locator("#ra-q").fill("");
   await page.keyboard.press("Escape");
   await expect(page.locator(".at-wrap.ra-fs")).toHaveCount(0);
 });

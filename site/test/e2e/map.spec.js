@@ -18,7 +18,11 @@ async function mapReady(page) {
   await page.goto(MAP);
   await expect(page.locator("#ra-map")).toBeVisible();
   /* The count only fills once the index has arrived and apply() has run. */
-  await expect(page.locator("#ra-count")).not.toBeEmpty({ timeout: 45000 });
+  /* READY IS AN ATTRIBUTE, NOT TEXT. The count line is deliberately silent
+     when nothing is filtered — it used to repeat the total already in the
+     dek above it — so "has text" stopped meaning "apply() has run". The
+     element sets data-ready once it has, which is what this actually wanted. */
+  await expect(page.locator("#ra-count[data-ready]")).toHaveCount(1, { timeout: 45000 });
 }
 
 test("the index is requested before the page has finished loading", async ({ page }) => {
@@ -49,10 +53,10 @@ test("the quiet half arrives and every place is on the map", async ({ page }) =>
   await mapReady(page);
   await quiet;
   await expect.poll(async () => {
-    const text = await page.locator("#ra-count").innerText();
-    const m = text.match(/([\d,]+) of ([\d,]+)/);
-    if (!m) return null;
-    const [shown, total] = m.slice(1).map((n) => Number(n.replace(/,/g, "")));
+    const el = page.locator("#ra-count");
+    const shown = Number(await el.getAttribute("data-shown"));
+    const total = Number(await el.getAttribute("data-total"));
+    if (!shown || !total) return null;
     return shown === total ? total : null;
   }, { timeout: 20000 }).toBeGreaterThan(20000);
 });

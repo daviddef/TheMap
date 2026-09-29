@@ -34,12 +34,60 @@
    instead of being a second, incompatible record of the same work. `owner`
    and `state` are dropped: there is one owner here, and a range says more
    than a state does.
+
+   ONE VOLUME, SEVERAL FAMILIES, DIFFERENT WORK.
+
+   David: «if I'm researching multiple families… searching for Blažević in
+   Senj may be different progress than if I am doing Kosina in Senj.»
+
+   He is right, and his own archives prove it: inside the Blažević archive,
+   Kranj–Šmartin marriages 1780–1815 was worked for KOSINAR and 1816–1855 for
+   KOSINA. Same parish, same shelf, different line. Across all 1,349 rows in
+   the eight archives, 519 describe hunting a named family and 72 describe
+   walking a book with no name in sight.
+
+   BECAUSE THOSE ARE TWO DIFFERENT KINDS OF WORK, AND ONLY ONE OF THEM
+   GENERALISES.
+     · WALKING a register — reading every entry — is true for every family
+       ever after. Pages 1–174 walked are walked.
+     · SCANNING for a name is true for that name and nothing else. «1–47
+       scanned for Blažević» says nothing whatever about Kosina.
+   Version 1 stored one `done` per volume and quietly treated the second as
+   the first, which overstates the work on every line but the one it was
+   done for — and the entire value of this record is knowing what is still
+   left to do.
+
+   So a mark now carries `walked`, shared by everyone, and `by[line]`, which
+   is not. What a reader sees for a line is the union of the two.
+
+   MIGRATION CLAIMS NOTHING. Marks made under v1 have no line and were mostly
+   made while hunting one family, so promoting them to `walked` would assert
+   coverage for families that were never looked for. They go into a single
+   line instead, named «My research so far», which is renameable — David
+   chose this over the promotion when asked. Nothing is lost and nothing is
+   claimed.
 */
 ---
 <script is:inline>
   (function () {
+    /* THE KEY DID NOT CHANGE. A reader's v1 record is read, migrated in
+       place and written back under the same key — a new key would have left
+       months of work sitting in storage that nothing reads any more, which
+       is the loss this whole file exists to prevent. */
     var KEY = "ra-progress-v1";
     var mem = null;
+
+    /* The line every pre-line mark lands in. Renameable, and named as a
+       statement of fact rather than as a family, because it is not one. */
+    var FIRST_LINE = "my-research-so-far";
+
+    function slugify(s) {
+      return String(s || "").toLowerCase()
+        .normalize ? String(s || "").toLowerCase().normalize("NFKD")
+          .replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "").slice(0, 48)
+        : String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    }
 
     function load() {
       if (mem) return mem;
@@ -51,13 +99,170 @@
           if (d && d.marks) mem = d;
         }
       } catch (e) { /* private window, blocked storage — carry on empty */ }
+      /* MARKS MADE BEFORE THE KEYS AGREED ARE MOVED, NOT DROPPED. The place
+         page shipped keying volumes by their image URL; the map panel keys
+         them by waypoint. Anyone who marked a volume in that window has it
+         under the old key, and canonical() would simply stop finding it —
+         which is exactly the silent loss of somebody's work this whole file
+         is written to avoid. Migrated once, on read, and the result is saved
+         so it happens once rather than every load. */
+      var moved = 0;
+      Object.keys(mem.marks).forEach(function (k) {
+        var c = canonical(k);
+        if (c === k) return;
+        var from = mem.marks[k];
+        var into = mem.marks[c];
+        if (!into) { mem.marks[c] = from; }
+        else {
+          /* Both keys used: union the ranges rather than pick a winner. */
+          into.done = merge((into.done || []).concat(from.done || []));
+          if (from.total && !into.total) into.total = from.total;
+          if (from.note && from.note !== into.note) {
+            into.note = into.note ? into.note + " \u00b7 " + from.note : from.note;
+          }
+          if (from.t && !into.t) into.t = from.t;
+          if (from.where && !into.where) into.where = from.where;
+          if (from.href && !into.href) into.href = from.href;
+        }
+        delete mem.marks[k];
+        moved++;
+      });
+      if (moved) { try { localStorage.setItem(KEY, JSON.stringify(mem)); } catch (e) {} }
+      if (toLines()) { try { localStorage.setItem(KEY, JSON.stringify(mem)); } catch (e) {} }
       return mem;
+    }
+
+    /* v1 -> v2, ONCE, ON READ. A v1 mark carried `done`, `state`, `note` and
+       `since` at its top level and no idea which family they were for. They
+       move wholesale into one line rather than into `walked`: see the header.
+       Idempotent, because a record that has already been through this has a
+       `lines` map and is left alone. */
+    function toLines() {
+      if (mem.lines && mem.v >= 2) return false;
+      mem.lines = mem.lines || {};
+      mem.v = 2;
+      var any = false;
+      Object.keys(mem.marks).forEach(function (k) {
+        var m = mem.marks[k];
+        if (m.by) return;
+        var mine = {};
+        ["done", "state", "note", "since"].forEach(function (f) {
+          if (m[f] !== undefined) { mine[f] = m[f]; delete m[f]; }
+        });
+        m.by = {};
+        if (Object.keys(mine).length) { m.by[FIRST_LINE] = mine; any = true; }
+      });
+      if (any && !mem.lines[FIRST_LINE]) {
+        mem.lines[FIRST_LINE] = { name: "My research so far", where: "",
+                                  made: today() };
+      }
+      if (!Object.keys(mem.lines).length) {
+        mem.lines[FIRST_LINE] = { name: "My research so far", where: "",
+                                  made: today() };
+      }
+      if (!mem.active || !mem.lines[mem.active]) {
+        mem.active = Object.keys(mem.lines)[0];
+      }
+      return true;
+    }
+
+    function activeSlug() {
+      var d = load();
+      if (!d.active || !d.lines[d.active]) d.active = Object.keys(d.lines)[0];
+      return d.active;
+    }
+
+    /* WHAT A LINE CAN SEE: everything walked, plus what was scanned for it.
+       Walked pages are shared because reading every entry on a page is a
+       fact about the page, not about who was being looked for. */
+    function coverage(m, slug) {
+      if (!m) return [];
+      var mine = (m.by && m.by[slug] && m.by[slug].done) || [];
+      return merge((m.walked || []).concat(mine));
+    }
+
+    /* The shape every existing caller already expects — `done`, `state`,
+       `note`, `since` at the top — assembled for one line. Keeping this the
+       return type of get() is why the map panel, the place pages and the
+       rings did not each need teaching about lines. */
+    function view(m, slug) {
+      if (!m) return null;
+      var mine = (m.by && m.by[slug]) || {};
+      var cov = coverage(m, slug);
+      var out = { t: m.t, where: m.where, href: m.href, total: m.total,
+                  walked: m.walked || null,
+                  state: mine.state, note: mine.note, since: mine.since };
+      if (cov.length) out.done = cov;
+      return out;
+    }
+
+    function markFor(id) {
+      var m = load().marks;
+      m[id] = m[id] || {};
+      m[id].by = m[id].by || {};
+      return m[id];
+    }
+    function mineFor(id, slug) {
+      var m = markFor(id);
+      m.by[slug] = m.by[slug] || {};
+      return m.by[slug];
+    }
+    /* A mark nothing holds up any more is removed rather than left as an
+       empty husk that still counts in «12 volumes marked». */
+    function tidy(id) {
+      var m = load().marks[id];
+      if (!m) return;
+      var lines = Object.keys(m.by || {});
+      lines.forEach(function (s) {
+        var b = m.by[s];
+        if (!(b.done && b.done.length) && !b.state && !b.note) delete m.by[s];
+      });
+      if (!Object.keys(m.by || {}).length && !(m.walked || []).length) {
+        delete load().marks[id];
+      }
     }
     function save() {
       try { localStorage.setItem(KEY, JSON.stringify(mem)); }
       catch (e) { /* quota or blocked; the page must not break over it */ }
     }
     function today() { return new Date().toISOString().slice(0, 10); }
+
+    /* ONE BOOK, ONE KEY, WHEREVER IT IS PRINTED.
+       The same register is listed on three surfaces and each had a different
+       idea of its id: the map panel had a FamilySearch waypoint («9RK1-T3F»),
+       the place page had none and fell back to the whole image URL, and the
+       «Start here» list fell back to the title. Marking Births 1734-1756 on
+       the map and opening the place page showed it unmarked — I had claimed
+       these were the same id and the overlap was literally zero.
+       The URL carries the waypoint inside it as `wc=`, so every form can be
+       reduced to the same thing. Taken before the first colon because the
+       source data disagrees with itself even there: some rows carry
+       «9RK1-T3F» and others «3JXZ-K68:172062901,172062902», and the leading
+       code is what they share.
+       Normalised HERE rather than in the markup, so a list added later cannot
+       start a fourth tally by guessing differently. */
+    function canonical(id) {
+      var raw = String(id || "");
+      var kind = raw.indexOf(":") > -1 ? raw.slice(0, raw.indexOf(":")) : "";
+      var rest = kind ? raw.slice(kind.length + 1) : raw;
+      if (kind !== "volume") return raw;
+      var wp = null;
+      /* `owc=` AS WELL AS `wc=`. FamilySearch writes the waypoint as `wc=`
+         on an ark URL and as `owc=` on a search/image one, and
+         data/fs-volumes-world.json — 1,576 places — is entirely the second
+         form. Matching only `wc=` meant every one of those volumes fell
+         through to «a title, nothing better» and kept its own tally, which
+         is the same silent split this function was written to close. */
+      var m = rest.match(/[?&]o?wc=([^&]+)/);
+      if (m) {
+        try { wp = decodeURIComponent(m[1]); } catch (e) { wp = m[1]; }
+      } else if (!/^https?:/.test(rest)) {
+        wp = rest;
+      }
+      if (!wp) return raw;                       // a title, nothing better
+      wp = wp.split(":")[0].trim();
+      return wp ? "volume:" + wp : raw;
+    }
 
     /* «1-47, 60-72» · «1–47» · «5» · «12 to 30» — whatever a person writes.
        Returns merged, sorted, non-overlapping ranges, or null if nothing in
@@ -108,99 +313,229 @@
     }
 
     window.raProgress = {
-      get: function (id) { return load().marks[id] || null; },
-      /* Every setter stamps `since`, because a volume last touched five weeks
-         ago is a different thing from one touched this morning, and that is
-         the difference between a checklist and a research log. */
-      setRanges: function (id, text) {
+      get: function (id) { return view(load().marks[canonical(id)], activeSlug()); },
+      /* The whole mark, every line, for the pages that show the breakdown. */
+      raw: function (id) { return load().marks[canonical(id)] || null; },
+
+      /* ---- LINES ------------------------------------------------------ */
+      lines: function () {
+        var d = load();
+        return Object.keys(d.lines).map(function (slug) {
+          var n = 0;
+          Object.keys(d.marks).forEach(function (k) {
+            var b = d.marks[k].by && d.marks[k].by[slug];
+            if (b && ((b.done && b.done.length) || b.state || b.note)) n++;
+          });
+          return { slug: slug, name: d.lines[slug].name,
+                   where: d.lines[slug].where || "", marks: n,
+                   active: slug === d.active };
+        }).sort(function (a, b) { return a.name.localeCompare(b.name); });
+      },
+      active: activeSlug,
+      setActive: function (slug) {
+        var d = load();
+        if (d.lines[slug]) { d.active = slug; save(); }
+        return d.active;
+      },
+      addLine: function (name, where) {
+        var d = load();
+        var base = slugify(name + (where ? "-" + where : "")) || "line";
+        var slug = base, n = 2;
+        while (d.lines[slug]) { slug = base + "-" + (n++); }
+        d.lines[slug] = { name: String(name || "Untitled").trim(),
+                          where: String(where || "").trim(), made: today() };
+        d.active = slug;
+        save();
+        return slug;
+      },
+      renameLine: function (slug, name, where) {
+        var d = load();
+        if (!d.lines[slug]) return null;
+        if (name !== undefined) d.lines[slug].name = String(name).trim() || d.lines[slug].name;
+        if (where !== undefined) d.lines[slug].where = String(where).trim();
+        save();
+        return d.lines[slug];
+      },
+      /* REMOVING A LINE REMOVES ITS WORK, and nothing else's. Pages walked
+         stay, because they were never this line's to begin with. The caller
+         is expected to have asked first — this does not ask. */
+      removeLine: function (slug) {
+        var d = load();
+        if (!d.lines[slug] || Object.keys(d.lines).length < 2) return false;
+        delete d.lines[slug];
+        Object.keys(d.marks).forEach(function (k) {
+          if (d.marks[k].by) delete d.marks[k].by[slug];
+          tidy(k);
+        });
+        if (d.active === slug) d.active = Object.keys(d.lines)[0];
+        save();
+        return true;
+      },
+
+      /* ---- MARKS ------------------------------------------------------ */
+      /* `walked` is the one flag that changes whose work this is: pages read
+         entry by entry belong to every line, so they are stored once at the
+         top of the mark instead of under the line that happened to be open. */
+      setRanges: function (id, text, opts) {
+        id = canonical(id);
         var r = parseRanges(text);
-        var m = load().marks;
+        var walked = !!(opts && opts.walked);
+        var slug = activeSlug();
+        var d = load();
         if (r === null) {
-          /* An empty box means «forget this», which is a real thing to want
-             and must be possible without clearing the whole record. */
-          if (String(text || "").trim() === "") delete m[id];
+          if (String(text || "").trim() === "") {
+            if (walked) { if (d.marks[id]) delete d.marks[id].walked; }
+            else if (d.marks[id] && d.marks[id].by) delete d.marks[id].by[slug];
+            tidy(id);
+          }
+        } else if (walked) {
+          var m = markFor(id);
+          m.walked = r;
+          /* Pages now known to have been read in full are no longer this
+             line's private business; leaving a duplicate copy under the line
+             would double-count in any per-line total. */
+          if (m.by[slug] && m.by[slug].done) {
+            m.by[slug].done = m.by[slug].done.filter(function (p) {
+              return !r.some(function (w) { return p[0] >= w[0] && p[1] <= w[1]; });
+            });
+            if (!m.by[slug].done.length) delete m.by[slug].done;
+          }
+          m.by[slug] = m.by[slug] || {};
+          m.by[slug].since = today();
         } else {
-          m[id] = m[id] || {};
-          m[id].done = r;
-          m[id].since = today();
+          var b = mineFor(id, slug);
+          b.done = r;
+          b.since = today();
         }
         save();
-        return m[id] || null;
+        return view(d.marks[id], slug);
       },
       setTotal: function (id, n) {
-        var m = load().marks;
+        id = canonical(id);
+        var m = markFor(id);
         n = parseInt(n, 10);
-        m[id] = m[id] || {};
-        if (n > 0) m[id].total = n; else delete m[id].total;
-        m[id].since = today();
+        if (n > 0) m.total = n; else delete m.total;
+        mineFor(id, activeSlug()).since = today();
         save();
-        return m[id];
+        return view(m, activeSlug());
       },
       setNote: function (id, s) {
-        var m = load().marks;
-        m[id] = m[id] || {};
-        if (String(s || "").trim()) m[id].note = String(s).trim();
-        else delete m[id].note;
-        m[id].since = today();
+        id = canonical(id);
+        var b = mineFor(canonical(id), activeSlug());
+        if (String(s || "").trim()) b.note = String(s).trim();
+        else delete b.note;
+        b.since = today();
+        tidy(id);
         save();
-        return m[id];
+        return view(load().marks[id], activeSlug());
       },
-      /* The label the reader will recognise this row by, copied in at save
-         time — nothing later can look a waypoint up. */
+      /* The label is the BOOK's, not the line's, so it stays at the top of
+         the mark where every line reads the same one. */
       setWhat: function (id, what) {
-        var m = load().marks;
-        m[id] = m[id] || {};
-        if (what && what.t) m[id].t = what.t;
-        if (what && what.where) m[id].where = what.where;
-        if (what && what.href) m[id].href = what.href;
+        id = canonical(id);
+        var m = markFor(id);
+        if (what && what.t) m.t = what.t;
+        if (what && what.where) m.where = what.where;
+        if (what && what.href) m.href = what.href;
         save();
-        return m[id];
+        return view(m, activeSlug());
       },
-      /* An archive or a town takes a STATE — written, searched, blocked —
-         because it has no pages to count. Clearing the state forgets the row
-         unless a note or a range is holding it up. */
       setState: function (id, v) {
-        var m = load().marks;
-        m[id] = m[id] || {};
-        if (v) { m[id].state = v; m[id].since = today(); }
-        else {
-          delete m[id].state;
-          if (!m[id].done && !m[id].note) delete m[id];
-        }
+        id = canonical(id);
+        var slug = activeSlug();
+        var b = mineFor(id, slug);
+        if (v) { b.state = v; b.since = today(); }
+        else { delete b.state; }
+        tidy(id);
         save();
-        return m[id] || null;
+        return view(load().marks[id], slug);
       },
-      clear: function (id) { delete load().marks[id]; save(); },
+      /* Clearing clears THIS LINE. A shared walk survives it, because one
+         family's researcher deciding they are done is not a statement that
+         the pages were never read. */
+      clear: function (id) {
+        id = canonical(id);
+        var d = load();
+        if (d.marks[id] && d.marks[id].by) delete d.marks[id].by[activeSlug()];
+        tidy(id);
+        save();
+      },
       all: function () { return load().marks; },
-      count: function () { return Object.keys(load().marks).length; },
-      /* The export IS the record. Named with the date so successive exports
-         do not overwrite each other in a downloads folder. */
+      count: function () {
+        var d = load(), slug = activeSlug(), n = 0;
+        Object.keys(d.marks).forEach(function (k) {
+          var b = d.marks[k].by && d.marks[k].by[slug];
+          if ((b && ((b.done && b.done.length) || b.state || b.note)) ||
+              (d.marks[k].walked || []).length) n++;
+        });
+        return n;
+      },
       toJSON: function () {
         var d = load();
-        return JSON.stringify({ v: 1, exported: today(), marks: d.marks }, null, 1);
+        return JSON.stringify({ v: 2, exported: today(), lines: d.lines,
+                                active: d.active, marks: d.marks }, null, 1);
       },
       fromJSON: function (text, mode) {
-        var d = JSON.parse(text);
-        if (!d || !d.marks) throw new Error("not a Record Atlas progress file");
-        var m = load().marks;
-        Object.keys(d.marks).forEach(function (k) {
-          var incoming = d.marks[k];
-          if (mode === "replace" || !m[k]) { m[k] = incoming; return; }
-          /* MERGING TWO MACHINES MUST NOT LOSE A PAGE. Ranges from both sides
-             are unioned rather than overwritten, because the alternative is
-             that importing last week's file on the laptop silently deletes
-             what was done on the phone since. */
-          m[k].done = merge((m[k].done || []).concat(incoming.done || []));
-          if (incoming.total && !m[k].total) m[k].total = incoming.total;
-          if (incoming.note && incoming.note !== m[k].note) {
-            m[k].note = m[k].note ? m[k].note + " · " + incoming.note : incoming.note;
+        var inc = JSON.parse(text);
+        if (!inc || !inc.marks) throw new Error("not a Record Atlas progress file");
+        var d = load();
+        /* A v1 FILE STILL IMPORTS. It has no lines, so its marks land in one
+           named after the file's own date — not merged into whatever line
+           happens to be open, which would attribute somebody else's work to
+           this family. */
+        if (!inc.lines) {
+          var slug = "imported-" + (inc.exported || today());
+          if (!d.lines[slug]) {
+            d.lines[slug] = { name: "Imported " + (inc.exported || today()),
+                              where: "", made: today() };
           }
-          if (incoming.since && (!m[k].since || incoming.since > m[k].since))
-            m[k].since = incoming.since;
+          var lifted = {};
+          Object.keys(inc.marks).forEach(function (k) {
+            var m = inc.marks[k], mine = {};
+            ["done", "state", "note", "since"].forEach(function (f) {
+              if (m[f] !== undefined) { mine[f] = m[f]; delete m[f]; }
+            });
+            m.by = {}; m.by[slug] = mine;
+            lifted[k] = m;
+          });
+          inc.marks = lifted;
+        } else {
+          Object.keys(inc.lines).forEach(function (sl) {
+            if (!d.lines[sl]) d.lines[sl] = inc.lines[sl];
+          });
+        }
+        Object.keys(inc.marks).forEach(function (k) {
+          var incoming = inc.marks[k];
+          if (mode === "replace" || !d.marks[k]) { d.marks[k] = incoming; return; }
+          var mine = d.marks[k];
+          mine.t = mine.t || incoming.t;
+          mine.where = mine.where || incoming.where;
+          mine.href = mine.href || incoming.href;
+          if (incoming.total && !mine.total) mine.total = incoming.total;
+          if (incoming.walked) mine.walked = merge((mine.walked || []).concat(incoming.walked));
+          mine.by = mine.by || {};
+          Object.keys(incoming.by || {}).forEach(function (sl) {
+            var a = mine.by[sl], b = incoming.by[sl];
+            if (!a) { mine.by[sl] = b; return; }
+            /* MERGING TWO MACHINES MUST NOT LOSE A PAGE — per line, now,
+               because a union across lines would hand one family credit for
+               another's reading. */
+            a.done = merge((a.done || []).concat(b.done || []));
+            if (!a.done.length) delete a.done;
+            if (b.state && !a.state) a.state = b.state;
+            if (b.note && b.note !== a.note) {
+              a.note = a.note ? a.note + " \u00b7 " + b.note : b.note;
+            }
+            if (b.since && (!a.since || b.since > a.since)) a.since = b.since;
+          });
         });
         save();
-        return Object.keys(d.marks).length;
+        return Object.keys(inc.marks).length;
       },
+      coverage: function (id, slug) {
+        return coverage(load().marks[canonical(id)], slug || activeSlug());
+      },
+      canonical: canonical,
       parseRanges: parseRanges,
       fmt: fmt,
       resume: resume,

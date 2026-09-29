@@ -1,0 +1,110 @@
+---
+/* WHO YOU ARE LOOKING FOR, WHICH IS NOT THE SAME QUESTION AS WHERE.
+ *
+ * David: «if I'm researching multiple families… searching for Blažević in
+ * Senj may be different progress than if I am doing Kosina in Senj. How could
+ * we allow research for different families in our tracking?»
+ *
+ * This is the switch. Everything that marks, counts or colours progress reads
+ * the active line through ProgressKit, so this one control changes the map
+ * rings, the volume marks, the rollups and My research together.
+ *
+ * IT IS A BAR AND NOT A SETTING BURIED IN A MENU, because a reader who forgets
+ * which line is open will record an afternoon of Kosina work against Blažević
+ * and have no way of knowing. The cost of that mistake is a month; the cost of
+ * a line of type at the top of the page is a line of type.
+ *
+ * `quiet` — SHOW ONLY ONCE THERE IS SOMETHING TO CHOOSE. The home page is
+ * deliberately «the map and nothing else» for a reader arriving with a
+ * surname, and a family selector offering one family is furniture. With
+ * `quiet` the bar stays hidden until a second line exists, which is exactly
+ * the moment it starts mattering. Place pages and My research pass nothing
+ * and always show it, because that is where marks are actually made.
+ *
+ * IT RENDERS NOTHING UNTIL THE SCRIPT RUNS. Lines live in localStorage, which
+ * the server has never seen and must never be guessed at — a server-rendered
+ * default would flash the wrong family's name at a reader on every page load.
+ */
+const { quiet = false } = Astro.props;
+---
+<div class="ra-lines" id="ra-lines" data-quiet={quiet ? "1" : null} hidden>
+  <label class="ra-lines-l" for="ra-line-sel">Researching</label>
+  <select id="ra-line-sel" aria-label="Which family this progress belongs to"></select>
+  <button type="button" id="ra-line-new">+ another family</button>
+  <button type="button" id="ra-line-ren">rename</button>
+  <span class="ra-lines-n" id="ra-line-n" role="status" aria-live="polite"></span>
+</div>
+
+<script is:inline>
+  (function () {
+    var P = window.raProgress;
+    var bar = document.getElementById("ra-lines");
+    if (!P || !bar) return;
+    var sel = document.getElementById("ra-line-sel");
+    var say = document.getElementById("ra-line-n");
+
+    function draw() {
+      var lines = P.lines();
+      sel.innerHTML = lines.map(function (l) {
+        var label = l.name + (l.where ? " of " + l.where : "");
+        return '<option value="' + l.slug + '"' +
+               (l.active ? " selected" : "") + ">" +
+               label.replace(/[&<>]/g, "") + "</option>";
+      }).join("");
+      var me = lines.filter(function (l) { return l.active; })[0];
+      say.textContent = me
+        ? me.marks + (me.marks === 1 ? " mark" : " marks")
+        : "";
+      bar.hidden = bar.getAttribute("data-quiet") === "1" && lines.length < 2;
+    }
+
+    sel.addEventListener("change", function () {
+      P.setActive(sel.value);
+      draw();
+      /* EVERYTHING ON THE PAGE IS NOW ABOUT A DIFFERENT FAMILY. Rather than
+         each surface subscribing to a store it does not own, the one event
+         it already listens for is fired — the same one a mark fires. */
+      document.dispatchEvent(new CustomEvent("ra-progress-changed"));
+    });
+
+    document.getElementById("ra-line-new").addEventListener("click", function () {
+      var name = window.prompt("Which family? (a surname)");
+      if (!name || !name.trim()) return;
+      var where = window.prompt("Where, if it helps tell them apart? (optional)") || "";
+      P.addLine(name, where);
+      draw();
+      document.dispatchEvent(new CustomEvent("ra-progress-changed"));
+    });
+
+    document.getElementById("ra-line-ren").addEventListener("click", function () {
+      var cur = P.lines().filter(function (l) { return l.active; })[0];
+      if (!cur) return;
+      var name = window.prompt("Name for this line", cur.name);
+      if (name === null) return;
+      var where = window.prompt("Where (optional)", cur.where);
+      P.renameLine(cur.slug, name, where === null ? cur.where : where);
+      draw();
+    });
+
+    document.addEventListener("ra-progress-changed", draw);
+    draw();
+  })();
+</script>
+
+<style>
+  .ra-lines { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline;
+    margin: 0 0 14px; padding: 8px 11px; border: 1px solid var(--rule);
+    border-left: 3px solid var(--accent); border-radius: 3px;
+    background: var(--panel); font-family: var(--sans); font-size: 13px; }
+  .ra-lines-l { font-family: var(--mono); font-size: 10.5px;
+    text-transform: uppercase; letter-spacing: .07em; color: var(--ink-3); }
+  .ra-lines select { font: inherit; font-weight: 600; padding: 3px 6px;
+    border: 1px solid var(--rule-strong); border-radius: 3px;
+    background: var(--bg); color: var(--ink); max-width: 20rem; }
+  .ra-lines button { background: none; border: 0; padding: 0; cursor: pointer;
+    font: inherit; font-size: 11.5px; color: var(--ink-3);
+    text-decoration: underline; text-underline-offset: 2px; }
+  .ra-lines button:hover { color: var(--accent); }
+  .ra-lines-n { margin-left: auto; font-family: var(--mono); font-size: 10.5px;
+    color: var(--ink-3); }
+</style>

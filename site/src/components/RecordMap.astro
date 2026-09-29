@@ -354,7 +354,15 @@ const HELP = base.replace(/\/$/, "") + "/help/";
       <p class="at-start-more">
         <a href="{HELP}"><span data-i18n>The colour of a dot is what it costs to look</span> &rarr;</a>
       </p>
-      <p class="at-hint" id="ra-hint"></p>
+      {/* THE THIRD COUNTS LINE IS GONE. David, counting them: «in this one
+          area i see 3 different places you talk about volumes» — the masthead
+          dek, the filter counter under the search box, and this. And it said
+          «Search by any name a place has ever had — Gallignana finds
+          Gračišće» directly beneath a paragraph that already says «a village
+          by any name it ever had — Gallignana finds Gračišće», with the same
+          example. Two sentences, four claims, nothing new in any of them.
+          The dek states the size of the atlas, the counter answers a filter;
+          this had no question of its own to answer. */}
     </div>
     <div class="at-body" id="ra-body" hidden></div>
   </aside>
@@ -603,11 +611,21 @@ window.addEventListener("load", async function () {
      page has eighteen anchors and era-1374 is not one of them, so a precise
      link would land silently at the top of the page and look like it worked.
      Their page can find the year; we do not invent an address for it. */
+  /* THESE ARE PAGE NAMES IN THE FLAG ATLAS, NOT GUESSES AT ONE. Three of
+     them were guesses and all three missed: BA read "bosnia-and-herzegovina"
+     where the page is "bosnia", GB read "united-kingdom" where it is "uk",
+     and ES was not here at all — so Britain's seventeen eras and Spain's two
+     drew nothing while looking, from the code, as though they were covered.
+     Checked against the 210 slugs in flag-eras.json.
+     FR IS DELIBERATELY LEFT POINTING AT A PAGE THAT DOES NOT EXIST. The flag
+     atlas has no France, so the Napoleonic eras draw no flags; the guard
+     below turns that into silence rather than an error, and the mapping is
+     kept so it starts working the day that page is written. */
   var FLAG_SLUG = {
-    AR: "argentina", AT: "austria", AU: "australia", BA: "bosnia-and-herzegovina",
+    AR: "argentina", AT: "austria", AU: "australia", BA: "bosnia",
     BE: "belgium", BY: "belarus", CA: "canada", CZ: "czechia", DE: "germany",
-    DK: "denmark", EE: "estonia", FI: "finland", FR: "france",
-    GB: "united-kingdom", HR: "croatia", HU: "hungary", IE: "ireland",
+    DK: "denmark", EE: "estonia", ES: "spain", FI: "finland", FR: "france",
+    GB: "uk", HR: "croatia", HU: "hungary", IE: "ireland",
     IT: "italy", LT: "lithuania", LV: "latvia", NL: "netherlands",
     NO: "norway", PL: "poland", PT: "portugal", RO: "romania", RS: "serbia",
     RU: "russia", SE: "sweden", SI: "slovenia", SK: "slovakia", UA: "ukraine",
@@ -740,9 +758,19 @@ window.addEventListener("load", async function () {
      that is the thing nobody else publishes. The flag data knows who was
      governing. Where both cover the ground, the archive answer is the more
      useful one and goes first; the flags fill in the rest of the world. */
-  var flagEras = null, flagErasWanted = false;
+  function drain(list) {
+    var waiting = list.splice(0, list.length);
+    waiting.forEach(function (fn) { try { fn(); } catch (e) {} });
+  }
+  var flagEras = null, flagErasWanted = false, flagErasWaiting = [];
   function loadFlagEras(then) {
     if (flagEras) { then(); return; }
+    /* IN FLIGHT IS NOT THE SAME AS DONE. This used to return here, which
+       threw the second caller's callback away: the country band asks for
+       this on render and the era panel asks on the first click, usually
+       while that first fetch is still open, and the panel's redraw never
+       happened. Both are answered now, in the order they asked. */
+    flagErasWaiting.push(then);
     if (flagErasWanted) return;
     flagErasWanted = true;
     fetch(BASE + "flag-eras.json")
@@ -752,9 +780,14 @@ window.addEventListener("load", async function () {
         (d.eras || []).forEach(function (e) {
           (flagEras[e.slug] = flagEras[e.slug] || []).push(e);
         });
-        then();
+        drain(flagErasWaiting);
       })
-      .catch(function () { flagEras = {}; /* the panel is fine without them */ });
+      .catch(function () {
+        /* The panel is fine without them, but everyone waiting still has to
+           be released or the era detail sits half-drawn forever. */
+        flagEras = {};
+        drain(flagErasWaiting);
+      });
   }
 
   function flagErasFor(cc) {
@@ -773,17 +806,18 @@ window.addEventListener("load", async function () {
      showing the moment the eras arrive, so the rail paints as soon as
      flag-eras.json lands and repaints when the artwork does — rather than
      holding 544 KB in front of a reader who only wanted the dates. */
-  var eraArt = null, eraArtWanted = false;
+  var eraArt = null, eraArtWanted = false, eraArtWaiting = [];
   function loadEraArt(then) {
     if (eraArt) { then(); return; }
+    eraArtWaiting.push(then);        /* see loadFlagEras: in flight ≠ done */
     if (eraArtWanted) return;
     eraArtWanted = true;
     fetch(BASE + "era-flags.json")
       .then(function (r) { return r.json(); })
-      .then(function (d) { eraArt = d.art || {}; then(); })
-      /* The rail is honest without the pictures: years and polity names in
-         title text still say who held the ground. */
-      .catch(function () { eraArt = {}; });
+      .then(function (d) { eraArt = d.art || {}; drain(eraArtWaiting); })
+      /* Honest without the pictures: years and polity names still say who
+         held the ground, so a failed fetch redraws rather than blocking. */
+      .catch(function () { eraArt = {}; drain(eraArtWaiting); });
   }
 
   /* railFor()/hideRail() lived here and drew the vertical rail. Both are
@@ -1177,14 +1211,23 @@ window.addEventListener("load", async function () {
   function eraFlagsHtml(entry) {
     if (!entry || !entry.gov || !entry.gov.length || !flagEras) return "";
     var from = +entry.from, to = +entry.to, NOW = new Date().getFullYear();
-    var out = [];
+    var out = [], flew = [];
     entry.gov.forEach(function (cc) {
       var slug = FLAG_SLUG[String(cc).toUpperCase()];
       var rows = slug && flagEras[slug + "-flags"];
       if (!rows) return;
+      flew.push(CNAME[cc] || cc);
       var art = eraArt && eraArt[slug + "-flags"];
       rows.filter(function (e) {
-        var f = +e.from, t = +e.to || (String(e.present) === "True" ? NOW : +e.from);
+        /* `present` is a JSON boolean. It was read as String(e.present) ===
+           "True", which is Python's spelling and never matches JavaScript's
+           "true" — so every flag still flying, Croatia's among them, tested as
+           having ended in the year it was adopted and fell out of its own
+           era. */
+        var f = +e.from;
+        var t = +e.to || (e.present === true ||
+                          String(e.present).toLowerCase() === "true"
+                            ? NOW : +e.from);
         return f && f <= to && t >= from;
       }).sort(function (a, b) { return (+a.from) - (+b.from); })
         .slice(0, 8).forEach(function (e) {
@@ -1200,9 +1243,20 @@ window.addEventListener("load", async function () {
         });
     });
     if (!out.length) return "";
+    /* NAME THE STATES, DO NOT CLAIM THE GROUND. The header said «Flags over
+       this ground» and that is more than this can know: what is listed is the
+       flag history of the states that governed here, taken whole across the
+       era, and a state's own history includes flags that never reached this
+       parish. Senj under Austria and Hungary, 1469–1809, picks up Ottoman
+       Hungary's Budin Eyalet — true of the Kingdom of Hungary, never true of
+       Senj. So the header names whose flag history this is, and the line
+       under it says plainly that not every one flew here. */
     return '<div class="ra-ef"><p class="ra-ef-h">' +
-           esc(T("Flags over this ground")) + ", " + entry.from + "\u2013" +
-           entry.to + "</p><ul>" + out.join("") + "</ul></div>";
+           esc(T("The flags of") + " " + flew.join(" \u00b7 ")) + ", " +
+           entry.from + "\u2013" + entry.to + "</p>" +
+           '<p class="ra-ef-c">' + esc(T("Their whole flag history across " +
+           "these years — not every one flew over this parish.")) + "</p>" +
+           "<ul>" + out.join("") + "</ul></div>";
   }
 
   function bandShow(tl, i) {
@@ -1643,6 +1697,68 @@ window.addEventListener("load", async function () {
   }
   var markers = idx.places.map(makeMarker);
 
+  /* ---- WHERE YOU HAVE ALREADY BEEN ---------------------------------------
+     David: «when we are done researching with a location can it be shown on
+     the map differently to those locations that we are part way through vs
+     those not started?»
+
+     Three states, and they are READ FROM THE VOLUME MARKS rather than set:
+     a town is finished when every volume this atlas holds for it has been
+     marked, under way when some have, and untouched otherwise. Nothing new
+     is stored — the same objection as the rollup, that a second record of the
+     same work is a record that can disagree with the first.
+
+     DRAWN AS A RING, NOT A FILL. The fill is already the access colour and a
+     reader has learnt it: free is green, paid is amber, on paper is grey.
+     Overwriting that to say «done» would trade one vocabulary for another and
+     lose the first. A ring outside the dot says something about the READER's
+     progress; the dot goes on saying what it always said about the record. */
+  var PROG_RING = { done: "#1E8449", part: "#C77C2E" };
+  function progressOf(placeId) {
+    if (!window.raProgress) return null;
+    var marks = window.raProgress.all();
+    var pre = "volume:", n = 0;
+    /* A mark knows which place it belongs to because the row that made it
+       said so — see setWhat in ProgressKit. Counting by href keeps this from
+       needing a second index of volumes by place. */
+    var href = BASE + "place/" + placeId + "/";
+    /* PER LINE, because the rings answer «how far am I with THIS family».
+       A volume walked in full counts for everybody; one scanned for another
+       surname does not, and colouring Senj green because somebody once
+       searched it for a different family is the over-claim the line model
+       was added to stop. */
+    var slug = window.raProgress.active();
+    for (var k in marks) {
+      if (k.indexOf(pre) !== 0) continue;
+      if (marks[k].href !== href) continue;
+      if (window.raProgress.coverage(k, slug).length) n++;
+    }
+    return n;
+  }
+  function paintProgressRings() {
+    if (!window.raProgress) return { done: 0, part: 0 };
+    var tally = { done: 0, part: 0 };
+    markers.forEach(function (m) {
+      var p = m._p;
+      if (!p || !p.i) return;
+      var done = progressOf(p.i);
+      var total = p.v || 0;
+      var state = !done ? null : (total && done >= total ? "done" : "part");
+      if (m._prog === state) return;
+      m._prog = state;
+      if (!state) { m.setStyle({ color: m.options.color, weight: m.options.weight }); return; }
+      m.setStyle({ color: PROG_RING[state], weight: 3.5, opacity: 1 });
+    });
+    /* Counted again from scratch rather than incremented, because `_prog`
+       short-circuits the loop for markers that have not changed. */
+    markers.forEach(function (m) { if (m._prog) tally[m._prog]++; });
+    return tally;
+  }
+  /* Repainted whenever a mark changes — VolumeMarks calls this after every
+     save, so the map reflects the work without a reload. */
+  window.raPaintProgress = paintProgressRings;
+  setTimeout(paintProgressRings, 0);
+
   /* ---- the archives -------------------------------------------------------
      Where the paper physically is. Drawn as a hollow square rather than a
      filled dot because an institution is not a place on the shelf: one archive
@@ -1909,6 +2025,12 @@ window.addEventListener("load", async function () {
     h.push(goIcons(BASE + "place/" + esc(d.id) + "/",
                    T("Everything about") + " " + d.name + " \u2014 its own page",
                    d.country, d.name));
+    /* WHAT THE VOLUMES BELOW COME TO — derived, never set. David: «youre
+       marking a whole town, i want to mark specifc volumes that roll up into
+       that town». A town with a state of its own would be a second tally of
+       the same work, disagreeing with the volumes the moment either moved.
+       VolumeMarks fills this from the rows it can see. */
+    h.push('<span class="ra-rollup" hidden></span>');
     h.push("</div>");
 
     /* The older spellings ride on the heading line now, built above. */
@@ -2048,7 +2170,20 @@ window.addEventListener("load", async function () {
            The rows past the first 25 are in the page now and hidden, so the
            button reveals what is already there rather than fetching again. */
         byKind[k].forEach(function (v, vi) {
-          h.push("<li" + (vi >= 25 ? ' class="ra-vx"' : "") + ">" + (v.url
+          /* THE MARK BELONGS WHERE THE WORK HAPPENS. It was built on the
+             standalone place page and not here, which is backwards: the map
+             IS the product, and a reader who has just found Senj's registers
+             is looking at this list, not at /place/g-senj-hr/. David: «not
+             following how the checklist/research works here. on a page like
+             the attached? if ive done those volumes? how can i see it?»
+             The id is the same waypoint the place page uses, so a volume
+             marked on either surface is the same volume. */
+          h.push("<li" + (vi >= 25 ? ' class="ra-vx"' : "") +
+            ' data-vol="' + esc("volume:" + (v.waypoint || v.url || v.t)) + '"' +
+            ' data-vol-t="' + esc(v.t) + '"' +
+            ' data-vol-where="' + esc(d.name + (d.country ? ", " +
+                 (CNAME[d.country] || d.country) : "")) + '"' +
+            ' data-vol-href="' + esc(BASE + "place/" + d.id + "/") + '">' + (v.url
               ? '<a href="' + esc(v.url) + '" target="_blank" rel="noopener">' +
                 esc(v.t) + " &#8599;</a>"
               : "<b>" + esc(v.t) + "</b>") +
@@ -2060,6 +2195,7 @@ window.addEventListener("load", async function () {
                from a wrong one, and these are matched by name. */
             (v["in"] ? ' <span class="ra-who" title="Where this book sits in ' +
                        'FamilySearch\u2019s own tree">' + esc(v["in"]) + "</span>" : "") +
+            '<span class="volmark"></span>' +
             "</li>");
         });
         if (byKind[k].length > 25)
@@ -3471,8 +3607,27 @@ window.addEventListener("load", async function () {
        it states that the atlas holds 15,780 places when it holds 21,473. That
        is the precise mistake the comment at TOTAL_PLACES was written to stop,
        made in the one line a reader actually reads. */
-    count.innerHTML = esc(shown.toLocaleString() + " of " +
-                          TOTAL_PLACES.toLocaleString() + " places shown") +
+    /* SILENT WHEN NOTHING IS FILTERED. «21,754 of 21,754 places shown» under
+       an unfiltered map answers a question nobody asked and repeats the count
+       already in the dek above it — the third of the three David counted. The
+       moment a filter, a year or the archive layer narrows anything it speaks
+       again, which is the whole reason it exists: «0 of 21,302 places shown»
+       is the answer to a filter and must never be silent. */
+    var narrowed = shown !== TOTAL_PLACES || year || on.archives;
+    /* THE ELEMENT KEEPS REPORTING EVEN WHEN IT STOPS SPEAKING. Two tests read
+       this line: one waits for it to fill as the signal that the map is up,
+       and one parses «X of Y» to prove the quiet half landed before the total
+       was stated — that second one guards a real past bug where the
+       denominator was the loud half and the line misstated the size of the
+       atlas. Going silent at rest would have deleted both guards along with
+       the duplicate sentence, so the numbers move to attributes: machine
+       readable, announced to nobody, and true the moment apply() has run. */
+    count.setAttribute("data-shown", shown);
+    count.setAttribute("data-total", TOTAL_PLACES);
+    count.setAttribute("data-ready", "1");
+    count.innerHTML = !narrowed ? "" :
+      esc(shown.toLocaleString() + " of " +
+          TOTAL_PLACES.toLocaleString() + " places shown") +
       (year ? esc(", able to answer for " + year) : "") +
       (on.archives ? esc(", and " + aShown.toLocaleString() + " of " +
                           archives.length.toLocaleString() + " archives") : "");
@@ -5902,15 +6057,6 @@ window.addEventListener("load", async function () {
     });
   });
 
-  /* VOLUMES ARE `v`; `c` IS COLLECTIONS. This line summed the collection
-     count and called the total "record volumes", so it told every visitor
-     "26,699 places, 8,557 record volumes" while the atlas held 2,016,426 —
-     wrong by a factor of 236, on the first line under the map. */
-  document.getElementById("ra-hint").textContent =
-    TOTAL_PLACES.toLocaleString() + " places, " +
-    idx.places.reduce(function (a, p) { return a + (p.v || 0); }, 0).toLocaleString() +
-    " record volumes. Search by any name a place has ever had — Gallignana finds Gračišće.";
-
   syncLayers();
   paintRegions();
   yearUI();
@@ -7005,6 +7151,8 @@ window.addEventListener("load", async function () {
  /* The flags that flew over this ground while the selected era ran. */
  :global(.ra-ef) { margin: 10px 0 0; padding-top: 9px;
     border-top: 1px solid var(--rule); }
+ :global(.ra-ef-c) { margin: -4px 0 8px; font-family: var(--sans);
+    font-size: 11px; line-height: 1.4; color: var(--ink-3); }
  :global(.ra-ef-h) { margin: 0 0 7px; font-family: var(--mono); font-size: 10px;
     letter-spacing: .06em; text-transform: uppercase; color: var(--brass); }
  :global(.ra-ef ul) { list-style: none; margin: 0; padding: 0; display: grid;

@@ -3843,7 +3843,7 @@ window.addEventListener("load", async function () {
     if (r) h.push(renderSurnames([r], r.n));
     panel.innerHTML = h.join("");
     if (r) showCountries(r.countries, function () { return mine !== searchTok; },
-                         firstAttested(r));
+                         originCC(r));
   }
 
   /* THE PLACE YOU ASKED FOR, IN A COLOUR NOTHING ELSE USES.
@@ -4042,7 +4042,9 @@ window.addEventListener("load", async function () {
                           "</span>" : "") + "</p>");
         });
         Object.keys(w.from || {}).forEach(function (lg) {
-          wh.push('<p class="ra-orig-l"><b>' + esc(w.from[lg].join(" \u00b7 ")) +
+          wh.push('<p class="ra-orig-l"><span class="ra-tag">' +
+                  esc(T("origin")) + "</span> <b>" +
+                  esc(w.from[lg].join(" \u00b7 ")) +
                   "</b> <span class=\"ra-who\">" +
                   esc(T("what the") + " " + lg + " " + T("entry says it is from")) +
                   "</span></p>");
@@ -4171,6 +4173,74 @@ window.addEventListener("load", async function () {
            start; this is the second thing to use it. */
         var wh = ['<div class="ra-tw"><p class="at-lab">' +
                   esc(T("Where the name was, and when")) + "</p>"];
+        /* FIRST ATTESTED, ON THE PAGE AND NOT ONLY IN THE MAP'S HEAD.
+           David: «first attested and origin should both show». They are two
+           different claims from two different sources and the panel was
+           making one of them silently — the earliest dated country decided
+           where the map flew and was never written down, so a reader saw the
+           map move and could not say why.
+           ORIGIN is what Wiktionary's entry says the name is FROM, printed
+           below with the language that said it. FIRST ATTESTED is the
+           earliest year this atlas holds a record of the name anywhere, and
+           they can disagree: Falco is Italian by etymology and first attested
+           in Germany in 1590, because Wikidata's notables are thin before
+           1900 and biased to whoever writes encyclopaedias. Both are true and
+           neither is the other, so both are labelled for what they are. */
+        /* ORIGIN FIRST, because it is the answer to the question a reader
+           asked; first-attested follows as the record behind part of it.
+           Both are shown because they disagree often enough to matter —
+           Falco is Italian and first attested in Germany. */
+        var og = r.or;
+        if (og) {
+          var CONF = { 3: T("strong"), 2: T("fair"), 1: T("a lead") };
+          var why = [];
+          if (og.s != null && og.t)
+            why.push(Math.round(og.s * 100) + "% " +
+                     T("of the") + " " + og.t[1].toLocaleString() + " " +
+                     T("a state counted, across") + " " + og.t[2] + " " +
+                     T("national registers this atlas holds"));
+          if (og.f)
+            why.push(T("earliest record held") + ": " +
+                     (CNAME[og.f[0]] || og.f[0]) + " " + og.f[1] + "s" +
+                     (og.f[2] === "a" ? " (" + T("our own archives") + ")" : ""));
+          if (og.p) why.push(T("a place of the name is there too"));
+          /* THE TWO THIN KINDS HAVE TO SAY WHICH THIN KIND THEY ARE. Without
+             these a lever-1 row prints «origin Denmark — a lead» and nothing
+             else: a bare country with a confidence badge and no working,
+             which is exactly what every other row here refuses to be.
+             `r` — a national register NAMES the name and gives no number, so
+             the country is evidenced and the strength is not.
+             `v` — borrowed from a spelling variant that has one. Only
+             spelling variants are ever inherited, never phonetic ones, and
+             the row names the variant so a reader can go and disagree. */
+          if (og.r)
+            why.push(T("the national register of") + " " +
+                     (CNAME[og.cc] || og.cc) + " " +
+                     T("names it, without saying how many"));
+          if (og.v)
+            why.push(T("taken from") + " " + og.v + ", " +
+                     T("a spelling of the same name"));
+          wh.push('<p class="ra-first"><span class="ra-tag">' +
+            esc(T("origin")) + "</span> <b>" + esc(CNAME[og.cc] || og.cc) +
+            '</b> <span class="ra-conf ra-conf-' + og.c + '">' +
+            esc(CONF[og.c]) + "</span>" +
+            (why.length ? '<br><span class="ra-who">' + esc(why.join(" \u00b7 ")) +
+              " \u2014 " + esc(T("worked out from this atlas's own data, not "
+              + "looked up")) + "</span>" : "") + "</p>");
+        }
+        var fa = firstAttested(r);
+        if (fa && !(og && og.f && og.f[0] === fa.cc && og.f[1] === fa.year)) {
+          wh.push('<p class="ra-first"><span class="ra-tag">' +
+            esc(T("first attested")) + "</span> <b>" +
+            esc(CNAME[fa.cc] || fa.cc) + "</b> " + esc(fa.year + "s") +
+            ' <span class="ra-who">' +
+            esc(fa.src === "tla"
+                  ? T("the earliest year a record in this project's own family "
+                      + "archives carries the name")
+                  : T("the earliest birth year Wikidata gives for somebody "
+                      + "notable of the name \u2014 thin before 1900")) +
+            "</span></p>");
+        }
         rows.slice(0, 14).forEach(function (row) {
           var f0 = CC2FLAG && CC2FLAG[row.cc];
           /* NO DATES IS A FINDING, AND IT IS WRITTEN OUT. The row exists
@@ -4628,6 +4698,19 @@ window.addEventListener("load", async function () {
      why this is labelled «first attested» everywhere it is shown and never
      «origin»: the atlas knows when a name turns up in a record it holds, and
      that is a different and smaller fact. */
+  /* THE MAP OPENS ON THE ORIGIN. David: «I want you to default the map
+     country to the origin country when we select a surname». The derived
+     origin weighs the register share, the earliest record, the language the
+     name is in and the spelling together — where first-attested was one of
+     those on its own and put Falco in Germany on the strength of a single
+     1590 birth. Falls back to first-attested for the 20% with no derived
+     origin, and to the old fit-everything for the rest. */
+  function originCC(r) {
+    if (r && r.or && r.or.cc) return { cc: r.or.cc, from: "origin" };
+    var fa = firstAttested(r);
+    return fa ? { cc: fa.cc, from: "first" } : null;
+  }
+
   function firstAttested(r) {
     var best = null;
     ["tla", "tl"].forEach(function (k) {
@@ -6789,6 +6872,18 @@ window.addEventListener("load", async function () {
      labelled rows, so the lines are nothing like the 230 characters a bare
      measurement of the viewport would suggest. */
   :global(.ra-note) { max-width: none; }
+  /* First attested sits at the head of the timeline it summarises, so the
+     reader meets the claim before the rows it was read from. */
+  :global(.ra-first) { margin: 2px 0 8px !important; font-size: 13px; }
+  /* Confidence is a word, not a colour alone — a reader who cannot tell the
+     greens apart still reads «a lead». The colour follows it. */
+  :global(.ra-conf) { font-family: var(--mono); font-size: 10px;
+    text-transform: uppercase; letter-spacing: .07em; padding: 1px 6px;
+    border-radius: 999px; border: 1px solid currentColor; }
+  :global(.ra-conf-3) { color: var(--accent); }
+  :global(.ra-conf-2) { color: var(--ink-2); }
+  :global(.ra-conf-1) { color: var(--brick); }
+  :global(.ra-first b) { font-family: var(--serif); font-size: 15px; }
   :global(.ra-surn b) { font-family: var(--serif); font-size: 18px; }
   :global(.ra-vars) { font-size: 12.5px !important; }
   :global(.ra-vars.ra-weak) { color: var(--ink-3); }

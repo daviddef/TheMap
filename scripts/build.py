@@ -1733,6 +1733,26 @@ def main():
     except (FileNotFoundError, KeyError):
         STLA = {}
 
+    # ---- AND WHERE THE NAME IS FROM, AS FAR AS WE CAN WORK IT OUT --------
+    # Wiktionary answered 2.8% of the corpus and was the only origin this map
+    # had. scripts/derive-surname-origins.py works one out from what the atlas
+    # already holds — the register share, the earliest record, the language
+    # Wikidata calls the name, the spelling itself — and reaches 79.7%.
+    # Structured, never prose: the panel composes the sentence so the wording
+    # can change without rebuilding 940,562 rows.
+    # `import gzip as _gzip` happens 200 lines below this, where surnames.json.gz
+    # is written — using it here was a NameError that the except clause did not
+    # catch, so the build died and the shards kept whatever the previous run
+    # had left. Imported where it is used.
+    import gzip as _gz_or
+    try:
+        with _gz_or.open("data/surname-origins.json.gz", "rt", encoding="utf-8") as _fh:
+            SORIG = json.load(_fh)["origins"]
+        print(f"surname origins  {len(SORIG):,} names")
+    except (FileNotFoundError, KeyError, OSError, ValueError):
+        SORIG = {}
+        print("surname origins  none — /surname/ panels will show no origin")
+
     sn = os.path.join(OUT, "s")
     shutil.rmtree(sn, ignore_errors=True)
     os.makedirs(sn)
@@ -1797,6 +1817,9 @@ def main():
             rec = {kk: vv for kk, vv in r.items() if kk not in ("skel", "q")}
             if earns_page(r):
                 rec["pg"] = 1        # the map may link to /surname/<slug>/
+            _or = SORIG.get(r["n"])
+            if _or:
+                rec["or"] = _or
             # ---- WHAT WIKIDATA SAYS THE NAME IS -------------------------
             # David: «why would we not be showing the proper origin of the
             # surname?» We were — on the surname PAGE, which reads

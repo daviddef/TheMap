@@ -103,6 +103,33 @@ WHEN_KEYS = ("when",)
 # demonstrably opened; images they read and did not cite leave no trace. So the
 # set is what is KNOWN to have been seen, never a claim about what was not —
 # and «start again at» pointing into a gap is the safe direction to be wrong in.
+# WHICH VOLUME EACH DGS FILM OPENS AT, read off FamilySearch's own film pages
+# on 2026-09-29 in David's signed-in browser, one page at a time. The film
+# page's title carries the viewer URL and its `wc=` is the waypoint; nothing
+# here is derived, guessed, or pattern-matched from a similar film.
+#
+# READ THE SECOND COLUMN CAREFULLY: this is the volume the film OPENS AT, not
+# the whole of what the film holds. DGS 005497886 is 639 images across three
+# image groups and its waypoint names only the first — Marriages 1581-1623 —
+# while the frames actually read on it were 1777-1784, two centuries later in
+# a later segment. That is why a resolved film does NOT become a volume mark:
+# it becomes a film mark that KNOWS WHERE IT IS, which is a smaller and true
+# claim. Turning it into a volume mark would attribute a reader's pages to a
+# book they may never have opened, and nothing downstream would question it.
+#
+# Four films have no waypoint at all — they sit outside a browsable collection
+# — and three resolve to collections this atlas does not hold at volume level
+# (Argentine parish books, Illinois naturalisations, US passport applications).
+FILM_WAYPOINT = {
+    "004571398": "MDBL-JNL", "004640985": "M6TM-QWR", "005481649": "9RK1-HZK",
+    "005482657": "9RK1-Y4C", "005494111": "9R2W-PTY", "005494174": "9R24-PYZ",
+    "005494763": "9R2Z-FMX", "005497870": "9R2X-HZ8", "005497871": "9R2X-VZ9",
+    "005497884": "9R28-2N1", "005497885": "9R2H-RM8", "005497886": "9R28-RMN",
+    "005497893": "9R28-3YH", "005497894": "9R2D-927", "005497925": "9R2X-ZNT",
+    "005497940": "9R2F-DP6", "005497948": "9R2D-JW1", "005498269": "9R2D-16X",
+    "007572652": "3XZQ-RM9",
+}
+
 FILM = re.compile(r"/search/film/(\d+)")
 IMG = re.compile(r"[?&]i=(\d+)")
 
@@ -655,6 +682,20 @@ def main():
                 m["t"] = m.get("t") or ("FamilySearch film " + fm.group(1))
                 m["href"] = m.get("href") or (
                     "https://www.familysearch.org/search/film/" + fm.group(1))
+                # A RESOLVED FILM KNOWS ITS GROUND. The waypoint gives the
+                # volume the film opens at, and through it the place — so the
+                # mark can sit under that place on /my-research/ and link to
+                # its page, instead of floating in «films not yet tied to a
+                # place». The volume it names is recorded as the film's FIRST
+                # segment, never as what the reader necessarily read.
+                wpf = FILM_WAYPOINT.get(fm.group(1))
+                if wpf and wpf in vols:
+                    m["waypoint"] = wpf
+                    m["where"] = m.get("where") or vols[wpf].get("label") or vols[wpf]["place"]
+                    m["place"] = vols[wpf]["place"]
+                    m["opensAt"] = vols[wpf].get("t") or ""
+                elif wpf:
+                    m["waypoint"] = wpf
                 b = m["by"].setdefault(line, {})
                 if when:
                     b["since"] = max(b.get("since", ""), when)
@@ -742,6 +783,22 @@ def main():
             else:
                 b.pop("done", None)
             b["since"] = b.get("since") or today
+
+    # A LINE WITH NOTHING UNDER IT IS NOISE IN A DROPDOWN. Tag matching finds
+    # families the archives genuinely name — Gerkacs, Pekass, Defrančeski —
+    # whose rows carried no state this could map, so the line was created and
+    # left empty. Exporting it puts a family in the switcher that answers
+    # nothing when chosen, and «Defrančeski, 0 marks» sitting next to
+    # «Defranceschi, 47» reads as a duplicate rather than as an absence. A
+    # family with no recorded work has nothing to import.
+    used = set()
+    for m in marks.values():
+        used.update(m.get("by", {}).keys())
+    dropped = [k for k in lines if k not in used]
+    for k in dropped:
+        del lines[k]
+    if dropped:
+        print(f"    empty lines dropped       {len(dropped):,}  ({', '.join(sorted(dropped))})")
 
     doc = {"v": 2, "exported": today, "lines": lines,
            "active": (sorted(lines)[0] if lines else None), "marks": marks}

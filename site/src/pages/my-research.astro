@@ -43,6 +43,16 @@ import LineSwitcher from "../components/LineSwitcher.astro";
     <input type="file" id="mr-file" accept="application/json,.json" hidden />
     <span id="mr-said" role="status" aria-live="polite"></span>
   </p>
+  {/* WHERE THE FILE ACTUALLY GOES. «Exported 12 volumes» told a reader the
+      export had happened and not one thing about where to find it, so the
+      next step — attaching it, copying it to another machine, importing it
+      here — began with hunting. A page cannot read your download folder and
+      must not pretend to: what it CAN say for certain is the file's name,
+      which it chooses, and that the browser puts it wherever downloads go. */}
+  <p class="mrwhere3">The file is named <code id="mr-fname">record-atlas-research-…json</code>
+  and lands wherever this browser saves downloads — usually <b>Downloads</b>.
+  A page is not allowed to know the folder, so that last part is the browser's
+  business, not ours.</p>
 
   <div id="mr-body"></div>
 
@@ -58,117 +68,253 @@ import LineSwitcher from "../components/LineSwitcher.astro";
           return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
         });
       }
+      /* ---- THE DOSSIER ---------------------------------------------------
+         David: «could the my research page be a full guided checklist /
+         progress showing everything we're looking at for a family, everything
+         we should be looking at, neighbours, parishes… similar to a place page
+         but focused on a specific family, and everything around it — places,
+         status, inputs, letters we've written?»
+
+         So this stopped being a list of marks and became the page for ONE
+         FAMILY LINE: where that family has been worked, what is left at those
+         places, and what is out in the post. The line switcher above chooses
+         whose page it is.
+
+         EVERYTHING IS DERIVED, NOTHING IS ASKED FOR. The marks already know
+         which place they belong to, because the row that made one said so; the
+         atlas already knows how many volumes a place holds. «2 of 7» is those
+         two facts put next to each other, and it is the number a researcher
+         actually wants.
+
+         AND THE NEIGHBOURS ARE LINKED, NOT RECOMPUTED. The place page works
+         out the ring and lists what falls inside it. Doing that a second time
+         here would be a second answer to one question, which is the mistake
+         this project has already made once with the era radius. */
+      var ATLAS = null, PLACEC = {}, PROVS = null, CONTACTS = null;
+
+      function fetchOnce(url, into, key) {
+        return fetch(url).then(function (r) { return r.json(); })
+          .then(function (d) { return d; })
+          .catch(function () { return null; });
+      }
+
+      function placeIdOf(m) {
+        var h = m.href || "";
+        var x = h.match(/\/place\/([^/]+)\/?/);
+        return x ? x[1] : null;
+      }
+
+      function daysSince(iso) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(iso || "")) return null;
+        var d = Math.round((Date.now() - Date.parse(iso)) / 86400000);
+        return d >= 0 ? d : null;
+      }
+
+      function line() {
+        return P.lines().filter(function (l) { return l.active; })[0] || null;
+      }
+
       function draw() {
-        var marks = P.all();
-        var slug = P.active();
-        /* THIS PAGE SHOWS ONE LINE AT A TIME, and says which. A single list
-           of every family's work reads as one researcher's progress and is
-           the thing the lines were added to stop — «12 volumes done» meaning
-           four families' worth of scanning is a number that misleads whoever
-           reads it, including the person who wrote it. */
-        var ids = Object.keys(marks).filter(function (id) {
-          var m = marks[id];
-          var b = (m.by && m.by[slug]) || {};
+        var marks = P.all(), slug = P.active(), me = line();
+        var mine = Object.keys(marks).filter(function (id) {
+          var b = (marks[id].by && marks[id].by[slug]) || {};
           return (b.done && b.done.length) || b.state || b.note ||
-                 (m.walked && m.walked.length);
+                 (marks[id].walked && marks[id].walked.length);
         });
-        if (!ids.length) {
-          var me = P.lines().filter(function (l) { return l.active; })[0];
-          var other = P.lines().filter(function (l) { return !l.active && l.marks; });
-          body.innerHTML = '<p class="cap" style="margin-top:22px">Nothing marked yet' +
+
+        if (!mine.length) {
+          var others = P.lines().filter(function (l) { return !l.active && l.marks; });
+          body.innerHTML = '<p class="cap" style="margin-top:22px">Nothing recorded yet' +
             (me ? " for <b>" + esc(me.name) + "</b>" : "") + ". " +
-            'Open a place, find its volumes, and say which pages you have ' +
-            'searched — this page is where they all come back together.' +
-            (other.length
-              ? " You do have work recorded under " +
-                other.map(function (l) { return "<b>" + esc(l.name) + "</b>"; }).join(", ") +
-                " — switch above to see it."
-              : "") + "</p>";
+            "Open a place, find its volumes, and say which pages you have searched." +
+            (others.length ? " You do have work under " +
+              others.map(function (l) { return "<b>" + esc(l.name) + "</b>"; }).join(", ") +
+              " — switch above to see it." : "") + "</p>";
           return;
         }
-        /* NEWEST WORK FIRST. Somebody opening this page has just been
-           working, or is trying to remember where they were; either way the
-           thing they touched last is the thing they want. */
-        function since(id) {
-          var b = (marks[id].by && marks[id].by[slug]) || {};
-          return String(b.since || "");
-        }
-        ids.sort(function (a, b) { return since(b).localeCompare(since(a)); });
-        var pages = 0, vols = 0, others = 0, shared = 0;
-        ids.forEach(function (id) {
+
+        /* ---- sort the marks into the three questions the page answers ---- */
+        var byPlace = {}, films = [], letters = [], blocked = [], loose = [];
+        var pages = 0, vols = 0;
+        mine.forEach(function (id) {
+          var m = marks[id], b = (m.by && m.by[slug]) || {};
           var cov = P.coverage(id, slug);
-          if (cov.length) {
-            vols++;
-            pages += P.covered(cov);
-            if ((marks[id].walked || []).length) shared++;
-          } else { others++; }
+          var row = { id: id, m: m, b: b, cov: cov };
+          if (cov.length) { vols++; pages += P.covered(cov); }
+          if (b.state === "blocked") { blocked.push(row); return; }
+          if (id.indexOf("film:") === 0) { films.push(row); return; }
+          if (id.indexOf("volume:") === 0) {
+            var pid = placeIdOf(m);
+            if (pid) { (byPlace[pid] = byPlace[pid] || []).push(row); return; }
+            loose.push(row); return;
+          }
+          if (b.state === "written") { letters.push(row); return; }
+          loose.push(row);
         });
+
+        var h = [];
+
+        /* ---- the line, and what it amounts to --------------------------- */
+        h.push('<h2 class="mrh">' + esc(me ? me.name : "My research") +
+               (me && me.where ? ' <span class="mrwhere2">of ' + esc(me.where) + "</span>" : "") +
+               "</h2>");
         var sum = [];
-        if (vols) sum.push("<b>" + vols + "</b> volume" + (vols === 1 ? "" : "s") +
-                           " \u00b7 <b>" + pages.toLocaleString() + "</b> page" +
-                           (pages === 1 ? "" : "s"));
-        if (others) sum.push("<b>" + others + "</b> archive" +
-                             (others === 1 ? "" : "s") + " or place" +
-                             (others === 1 ? "" : "s"));
-        if (shared) sum.push("<b>" + shared + "</b> read in full \u2014 " +
-                             "counting for every family");
-        var h = ['<p class="mrsum">' + sum.join(" \u00b7 ") + " recorded</p>",
-                 '<ul class="mrlist">'];
-        ids.forEach(function (id) {
-          var m = P.get(id) || {};
-          var raw = marks[id];
-          /* Where a volume has been worked for more than one family, the
-             others are named. A reader who sees «also: Kosina» knows the book
-             is not fresh ground even for a line they have not opened yet,
-             which is the cross-family question the old flat list could not
-             answer at all. */
-          var also = Object.keys(raw.by || {}).filter(function (sl) {
-            var b = raw.by[sl];
-            return sl !== slug && ((b.done && b.done.length) || b.state);
+        if (Object.keys(byPlace).length)
+          sum.push("<b>" + Object.keys(byPlace).length + "</b> place" +
+                   (Object.keys(byPlace).length === 1 ? "" : "s"));
+        if (vols) sum.push("<b>" + vols + "</b> book" + (vols === 1 ? "" : "s") +
+                           " with pages recorded");
+        if (pages) sum.push("<b>" + pages.toLocaleString() + "</b> page" +
+                            (pages === 1 ? "" : "s"));
+        if (films.length) sum.push("<b>" + films.length + "</b> film" +
+                                   (films.length === 1 ? "" : "s"));
+        if (letters.length) sum.push("<b>" + letters.length + "</b> letter" +
+                                     (letters.length === 1 ? "" : "s") + " out");
+        h.push('<p class="mrsum">' + (sum.join(" \u00b7 ") || "Nothing counted yet") + "</p>");
+
+        /* ---- 1. where this family has been ------------------------------ */
+        var pids = Object.keys(byPlace).sort();
+        if (pids.length) {
+          h.push('<div class="lab">Where this family has been worked</div>');
+          pids.forEach(function (pid) {
+            var rows = byPlace[pid];
+            var label = rows[0].m.where || pid;
+            var held = PLACEC[pid] ? (PLACEC[pid].volumes || []).length : null;
+            h.push('<section class="mrp" data-place="' + esc(pid) + '">' +
+              '<h3><a href="' + BASE + "place/" + esc(pid) + '/">' + esc(label) + "</a>" +
+              '<span class="mrcount">' + rows.length +
+              (held != null ? " of " + held : "") + " book" +
+              ((held != null ? held : rows.length) === 1 ? "" : "s") + " marked</span></h3>");
+            h.push('<ul class="mrlist">');
+            rows.forEach(function (r) { h.push(rowHtml(r)); });
+            h.push("</ul>");
+            if (held != null && held > rows.length) {
+              h.push('<p class="mrnext">' + (held - rows.length) +
+                " book" + (held - rows.length === 1 ? "" : "s") +
+                ' here you have not opened. <a href="' + BASE + "place/" + esc(pid) +
+                '/">Open the place</a> to mark them \u2014 and to see the ' +
+                "villages within a day's walk, whose registers may hold this " +
+                "family under their own name.</p>");
+            } else {
+              h.push('<p class="mrnext"><a href="' + BASE + "place/" + esc(pid) +
+                '/">The neighbours of ' + esc(label) + "</a> \u2014 a register " +
+                "belongs to a parish, not a village.</p>");
+            }
+            h.push("</section>");
           });
-          /* THE TITLE AND THE PLACE, NOT THE WAYPOINT. The key is a
-             FamilySearch waypoint because it is stable; printed raw it reads
-             «3JXZ-K68:172062901,172062902,172062903», and the first cut of
-             this page was a column of exactly those. What a reader needs is
-             «Bautismos 1894-1926 — La Huerta, Mexico», which is why the title
-             and the place are copied into the mark as it is saved. A row
-             marked before that change has no label and falls back to the id
-             rather than showing nothing. */
-          var raw = id.replace(/^volume:/, "");
-          h.push("<li>" +
-            (m.href ? '<a class="mrt" href="' + esc(m.href) + '">' + esc(m.t || raw) + "</a>"
-                    : '<span class="mrt">' + esc(m.t || raw) + "</span>") +
-            (m.where ? '<span class="mrwhere">' + esc(m.where) + "</span>" : "") +
-            /* A VOLUME AND AN ARCHIVE READ DIFFERENTLY BECAUSE THEY ARE
-               DIFFERENT WORK. A volume carries ranges and somewhere to start
-               again; an archive or a town carries a state — «written, no
-               reply» — and no pages at all. Printing «0 pages · start again at
-               1» against an archive would be the page inventing work nobody
-               did. */
-            (m.done
-              ? '<span class="mrdone">' + esc(P.fmt(m.done)) + "</span>" +
-                (m.total ? '<span class="mrn">' + P.covered(m.done) + " of " + m.total + "</span>"
-                         : '<span class="mrn">' + P.covered(m.done) + " pages</span>") +
-                '<span class="mrres">start again at ' + P.resume(m.done) + "</span>"
-              : "") +
-            (m.state ? '<span class="mrstate">' + esc(m.state) + "</span>" : "") +
-            (m.note ? '<span class="mrnote">' + esc(m.note) + "</span>" : "") +
-            (also.length ? '<span class="mralso">also worked for ' +
-              esc(also.map(function (sl) {
-                var L = P.lines().filter(function (x) { return x.slug === sl; })[0];
-                return L ? L.name : sl;
-              }).join(", ")) + "</span>" : "") +
-            ((raw.walked || []).length
-              ? '<span class="mrwalk">read in full</span>' : "") +
-            (m.since ? '<span class="mrsince">' + esc(m.since) + "</span>" : "") +
-            '<button type="button" class="mrdel" data-id="' + esc(id) + '">forget</button>' +
-            "</li>");
-        });
-        h.push("</ul>");
+        }
+
+        /* ---- 2. films, which have no place of their own ------------------ */
+        if (films.length) {
+          h.push('<div class="lab">Films worked, not yet tied to a place</div>');
+          h.push('<p class="cap">A DGS film number is not a waypoint, so the ' +
+                 "atlas cannot say which of its catalogued books this is. The " +
+                 "work is recorded all the same.</p>");
+          h.push('<ul class="mrlist">');
+          films.forEach(function (r) { h.push(rowHtml(r)); });
+          h.push("</ul>");
+        }
+
+        /* ---- 3. letters out ---------------------------------------------- */
+        if (letters.length) {
+          h.push('<div class="lab">Letters out, no reply yet</div>');
+          h.push('<ul class="mrlist mrletters">');
+          letters.forEach(function (r) {
+            var pid = r.id.replace(/^source:/, "");
+            var p = PROVS ? PROVS[pid] : null;
+            var c = (p && CONTACTS && CONTACTS[p.wikidata]) || null;
+            var d = daysSince(r.b.since);
+            h.push("<li>" +
+              '<span class="mrt">' + esc(r.m.t || pid) + "</span>" +
+              (d != null ? '<span class="mrago">' + d + " day" + (d === 1 ? "" : "s") +
+                           " ago</span>" : "") +
+              (r.b.note ? '<span class="mrnote">' + esc(r.b.note) + "</span>" : "") +
+              (c && c.email ? '<a class="mrcm" href="mailto:' + esc(c.email) + '">' +
+                              esc(c.email) + "</a>" : "") +
+              (c && c.tel ? '<span class="mrct">' + esc(c.tel) + "</span>" : "") +
+              (c && c.post ? '<span class="mrcp">' + esc(c.post) + "</span>" : "") +
+              (!c ? '<span class="mrcp mrnoc">No address recorded for this one ' +
+                    "\u2014 the atlas knows it only by its website.</span>" : "") +
+              "</li>");
+          });
+          h.push("</ul>");
+        }
+
+        /* ---- 4. blocked, and the rest ------------------------------------ */
+        if (blocked.length) {
+          h.push('<div class="lab">Cannot get access</div><ul class="mrlist">');
+          blocked.forEach(function (r) { h.push(rowHtml(r)); });
+          h.push("</ul>");
+        }
+        if (loose.length) {
+          h.push('<div class="lab">Sources worked</div><ul class="mrlist">');
+          loose.forEach(function (r) { h.push(rowHtml(r)); });
+          h.push("</ul>");
+        }
+
         body.innerHTML = h.join("");
+        fill();
       }
+
+      function rowHtml(r) {
+        var m = r.m, b = r.b, cov = r.cov;
+        var raw = r.id.replace(/^(volume|film|source|collection):/, "");
+        var shared = (m.walked || []).length;
+        return "<li>" +
+          (m.href ? '<a class="mrt" href="' + esc(m.href) + '">' + esc(m.t || raw) + "</a>"
+                  : '<span class="mrt">' + esc(m.t || raw) + "</span>") +
+          (cov.length
+            ? '<span class="mrdone">' + esc(P.fmt(cov)) + "</span>" +
+              (m.total ? '<span class="mrn">' + P.covered(cov) + " of " + m.total + "</span>"
+                       : '<span class="mrn">' + P.covered(cov) + " pages</span>") +
+              '<span class="mrres">start again at ' + P.resume(cov) + "</span>"
+            : "") +
+          (shared ? '<span class="mrwalk">read in full</span>' : "") +
+          (b.state ? '<span class="mrstate">' + esc(b.state) + "</span>" : "") +
+          (b.note ? '<span class="mrnote">' + esc(b.note) + "</span>" : "") +
+          (b.since ? '<span class="mrsince">' + esc(b.since) + "</span>" : "") +
+          '<button type="button" class="mrdel" data-id="' + esc(r.id) + '">forget</button>' +
+          "</li>";
+      }
+
+      /* THE COUNTS ARRIVE SECOND. «2 of 7 books» needs the place's own file,
+         and there is no reason to hold the whole page back for it — the marks
+         are already true without it. Fetched once per place, then the page is
+         drawn again with the denominators in. */
+      var filling = false;
+      function fill() {
+        if (filling) return;
+        var want = [].slice.call(document.querySelectorAll("[data-place]"))
+          .map(function (el) { return el.getAttribute("data-place"); })
+          .filter(function (p) { return !(p in PLACEC); });
+        var needProv = !PROVS, needCon = !CONTACTS;
+        if (!want.length && !needProv && !needCon) return;
+        filling = true;
+        var jobs = want.map(function (pid) {
+          return fetch(BASE + "p/" + pid + ".json").then(function (r) { return r.json(); })
+            .then(function (d) { PLACEC[pid] = d; })
+            .catch(function () { PLACEC[pid] = { volumes: [] }; });
+        });
+        if (needProv) jobs.push(
+          fetch(BASE + "providers.json").then(function (r) { return r.json(); })
+            .then(function (d) {
+              PROVS = {};
+              (d.providers || []).forEach(function (p) { PROVS[p.id] = p; });
+            }).catch(function () { PROVS = {}; }));
+        if (needCon) jobs.push(
+          fetch(BASE + "provider-contacts.json").then(function (r) { return r.json(); })
+            .then(function (d) { CONTACTS = d.contacts || {}; })
+            .catch(function () { CONTACTS = {}; }));
+        Promise.all(jobs).then(function () { filling = false; draw(); });
+      }
+
       draw();
       document.addEventListener("ra-progress-changed", draw);
+      /* The filename is date-stamped, so the page shows today's rather than an
+         ellipsis a reader has to guess at. */
+      var fn = document.getElementById("mr-fname");
+      if (fn) fn.textContent = "record-atlas-research-" +
+        new Date().toISOString().slice(0, 10) + ".json";
 
       document.getElementById("mr-export").addEventListener("click", function () {
         var blob = new Blob([P.toJSON()], { type: "application/json" });
@@ -176,11 +322,13 @@ import LineSwitcher from "../components/LineSwitcher.astro";
         a.href = URL.createObjectURL(blob);
         /* Dated, so successive exports pile up in a downloads folder instead
            of overwriting the one good copy. */
-        a.download = "record-atlas-research-" +
+        var fname = "record-atlas-research-" +
           new Date().toISOString().slice(0, 10) + ".json";
+        a.download = fname;
         a.click();
         URL.revokeObjectURL(a.href);
-        said.textContent = "Exported " + P.count() + " volumes.";
+        /* Named, not counted. The number was the less useful half. */
+        said.textContent = "Saved as " + fname;
       });
       var file = document.getElementById("mr-file");
       document.getElementById("mr-import").addEventListener("click", function () { file.click(); });
@@ -191,7 +339,7 @@ import LineSwitcher from "../components/LineSwitcher.astro";
         r.onload = function () {
           try {
             var n = P.fromJSON(String(r.result), "merge");
-            said.textContent = "Merged " + n + " volumes from that file.";
+            said.textContent = "Merged " + n + " marks from " + f.name;
             draw();
           } catch (e) {
             said.textContent = "That file is not a Record Atlas research export.";
@@ -217,6 +365,10 @@ import LineSwitcher from "../components/LineSwitcher.astro";
     background: var(--panel); color: var(--ink); cursor: pointer; }
   #mr-export { border-color: var(--accent); color: var(--accent); font-weight: 600; }
   #mr-said { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); }
+  .mrwhere3 { margin: 8px 0 0; font-family: var(--sans); font-size: 12.5px;
+    color: var(--ink-2); max-width: 46em; }
+  .mrwhere3 code { font-family: var(--mono); font-size: 11.5px;
+    background: var(--ground); padding: 1px 5px; border-radius: 3px; }
   :global(.mrsum) { margin: 20px 0 0; font-family: var(--sans); font-size: 15px; }
   :global(.mrlist) { list-style: none; padding: 0; margin: 10px 0 0; }
   :global(.mrlist li) { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline;
@@ -229,6 +381,25 @@ import LineSwitcher from "../components/LineSwitcher.astro";
   :global(.mrstate) { font-family: var(--mono); font-size: 11px; color: var(--accent); }
   :global(.mrres) { font-family: var(--mono); font-size: 11px; color: var(--brick); }
   :global(.mrnote) { font-style: italic; color: var(--ink-2); }
+  /* The dossier's own furniture. Scoped styles never reach markup written by
+     script, so every one of these is :global — the third time this project has
+     been caught by that, and the build gate checks it. */
+  :global(.mrh) { margin: 22px 0 2px; }
+  :global(.mrwhere2) { font-family: var(--sans); font-size: 15px;
+    font-weight: 400; color: var(--ink-3); }
+  :global(.mrp) { margin: 14px 0 0; padding-left: 12px;
+    border-left: 2px solid var(--rule-strong); }
+  :global(.mrp h3) { display: flex; flex-wrap: wrap; gap: 10px;
+    align-items: baseline; margin: 0 0 2px; font-size: 17px; }
+  :global(.mrcount) { font-family: var(--mono); font-size: 11px;
+    font-weight: 400; color: var(--ink-3); }
+  :global(.mrnext) { margin: 6px 0 12px; font-family: var(--sans);
+    font-size: 12.5px; color: var(--ink-2); }
+  :global(.mrletters li) { align-items: flex-start; }
+  :global(.mrago) { font-family: var(--mono); font-size: 11px; color: var(--brick); }
+  :global(.mrcm), :global(.mrct) { font-family: var(--mono); font-size: 11.5px; }
+  :global(.mrcp) { flex-basis: 100%; font-size: 12px; color: var(--ink-2); }
+  :global(.mrnoc) { font-style: italic; color: var(--ink-3); }
   :global(.mralso) { font-family: var(--mono); font-size: 10.5px; color: var(--brick); }
   :global(.mrwalk) { font-family: var(--mono); font-size: 10.5px; color: var(--accent); }
   :global(.mrsince) { font-family: var(--mono); font-size: 10px; color: var(--ink-3); }

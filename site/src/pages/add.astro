@@ -22,13 +22,110 @@ const iss = site.repo + "/issues/new";
       so. Rendered only when an address exists, because a contact link
       that goes nowhere is worse than none. */}
   {site.contact && site.contact.email && (
-    <div class="one" style="margin:22px 0 0;border-left-color:var(--accent)">
-      <div class="lab">Or just write</div>
-      <p class="cap">No account, no template. Tell us what is wrong and
-      where you saw it, and it will be checked against the source before
-      anything changes — <a href={`mailto:${site.contact.email}?subject=${
-        encodeURIComponent("Record Atlas — a correction")}`}>{site.contact.email}</a>.</p>
+    <div class="one addform" style="margin:22px 0 0;border-left-color:var(--accent)">
+      <div class="lab">No account needed</div>
+      <p class="cap">David: «so to add sources users need a git account? not
+      really feasible». Correct, and this is the way round it. Fill in what you
+      know — anything you leave blank is simply left blank — and this writes
+      the message for you. <b>Nothing is sent from this page and there is no
+      server behind it</b>: the button opens your own mail app with the text
+      already in it, or you can copy it and send it however you like.</p>
+
+      <div class="addgrid">
+        <label>What is it called
+          <input type="text" id="af-name" placeholder="Državni arhiv u Gospiću" /></label>
+        <label>Its web address
+          <input type="text" id="af-url" placeholder="https://…" /></label>
+        <label>Which country or countries
+          <input type="text" id="af-cc" placeholder="Croatia" /></label>
+        <label>What does it hold
+          <input type="text" id="af-what" placeholder="parish registers for Lika-Senj, 1780–1900" /></label>
+        <label>What does it cost to look
+          <select id="af-access">
+            <option value="">I do not know</option>
+            <option value="free">Images, free, no account</option>
+            <option value="account">Images, free, account needed</option>
+            <option value="index">An index only — no images</option>
+            <option value="mixed">Partly free, partly paid</option>
+            <option value="paid">Images, behind a paywall</option>
+            <option value="catalogue">A catalogue entry only — the paper is not photographed</option>
+            <option value="onsite">On paper, in the building</option>
+          </select></label>
+        <label class="addwide">Anything else — how you know, what is wrong, what changed
+          <textarea id="af-note" rows="3" placeholder="I am the archivist here and our registers moved to a new portal in March."></textarea></label>
+      </div>
+
+      <p class="addbtns">
+        <a id="af-send" href="#">Open this in my mail app</a>
+        <button type="button" id="af-copy">Copy the message</button>
+        <span id="af-said" role="status" aria-live="polite"></span>
+      </p>
+      <p class="cap addto">It goes to <b>{site.contact.email}</b>. It will be
+      checked against the source before anything changes — that is the whole
+      method here, and it applies to a message from a stranger exactly as it
+      applies to everything else.</p>
     </div>
+  )}
+
+  {site.contact && site.contact.email && (
+    <script is:inline define:vars={{ TO: site.contact.email }}>
+      (function () {
+        /* NO SERVER, NO THIRD PARTY, NO FORM SERVICE. This site is static and
+           stores nothing about anybody; posting a stranger's message through
+           somebody else's endpoint to avoid asking them to open a mail client
+           would trade the one property the whole project is built on for a
+           small convenience. So the form composes text, and the reader sends
+           it — or copies it, because a mail app is not a safe assumption and
+           `mailto:` quietly fails on a machine with none configured. */
+        var F = ["af-name", "af-url", "af-cc", "af-what", "af-access", "af-note"];
+        var LBL = { "af-name": "Name", "af-url": "Web address",
+                    "af-cc": "Country", "af-what": "What it holds",
+                    "af-access": "What it costs to look", "af-note": "Notes" };
+        function body() {
+          var out = [];
+          F.forEach(function (id) {
+            var el = document.getElementById(id);
+            var v = el && el.value ? el.value.trim() : "";
+            if (v) out.push(LBL[id] + ": " + v);
+          });
+          if (!out.length) return "";
+          out.push("", "Sent from the Add a source page on Record Atlas.");
+          return out.join("\n");
+        }
+        var send = document.getElementById("af-send");
+        var said = document.getElementById("af-said");
+        function refresh() {
+          var b = body();
+          var name = (document.getElementById("af-name") || {}).value || "";
+          send.href = "mailto:" + TO +
+            "?subject=" + encodeURIComponent("Record Atlas — a source" +
+              (name ? ": " + name.trim() : "")) +
+            "&body=" + encodeURIComponent(b);
+          send.setAttribute("aria-disabled", b ? "false" : "true");
+        }
+        F.forEach(function (id) {
+          var el = document.getElementById(id);
+          if (el) { el.addEventListener("input", refresh); el.addEventListener("change", refresh); }
+        });
+        refresh();
+        send.addEventListener("click", function (e) {
+          if (!body()) { e.preventDefault(); said.textContent = "Fill in at least one field first."; }
+        });
+        document.getElementById("af-copy").addEventListener("click", function () {
+          var b = body();
+          if (!b) { said.textContent = "Fill in at least one field first."; return; }
+          var text = "To: " + TO + "\n\n" + b;
+          function ok() { said.textContent = "Copied \u2014 paste it into any email."; }
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(ok, function () { said.textContent = TO; });
+          } else {
+            /* Older browsers, and any context where the clipboard API is
+               blocked: show the address rather than fail silently. */
+            said.textContent = TO;
+          }
+        });
+      })();
+    </script>
   )}
 
   <div class="ways">

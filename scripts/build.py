@@ -979,6 +979,20 @@ def main():
               ensure_ascii=False, separators=(",", ":"))
     json.dump(providers, open(os.path.join(OUT, "providers.json"), "w"),
               ensure_ascii=False, separators=(",", ":"))
+    # WHERE TO WRITE, SERVED TO THE BROWSER. /my-research/ shows the letters a
+    # reader has out — «written, no reply» against an archive — and a chase-up
+    # is useless without the address beside it. The file is keyed by Wikidata
+    # id, the same key providers.json already carries, so the two join in the
+    # page without a third index.
+    try:
+        with open("data/provider-contacts.json", encoding="utf-8") as fh:
+            json.dump(json.load(fh),
+                      open(os.path.join(OUT, "provider-contacts.json"), "w"),
+                      ensure_ascii=False, separators=(",", ":"))
+    except FileNotFoundError:
+        # Not fatal: the harvest is a separate script and the page degrades to
+        # naming the archive without its address.
+        print("provider-contacts.json missing — /my-research/ will show no addresses")
     # Wikidata's archives, served separately and drawn differently, because
     # 4,929 unchecked rows beside 178 checked ones would make the checked ones
     # mean nothing.

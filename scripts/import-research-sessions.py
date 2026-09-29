@@ -504,6 +504,18 @@ def build_collection_index():
 
 def build_volume_index():
     """waypoint -> {t, place}. Only volumes this atlas actually holds."""
+    # THE PLACE'S NAME, NOT ITS ID. The mark's `where` is printed as the
+    # heading of a place's block on /my-research/, and keyed by the byPlace
+    # slug it read «otocac» — an id is a good key and a poor label, and this
+    # one drops the diacritics that make it Otočac.
+    label = {}
+    for f in ("site/public/index.json", "site/public/index-quiet.json"):
+        try:
+            for p in json.load(io.open(f, encoding="utf-8")).get("places", []):
+                if p.get("i") and p.get("n"):
+                    label.setdefault(p["i"], p["n"])
+        except Exception:
+            pass
     idx = {}
     for f, key in (("data/fs-volumes.json", "byPlace"),
                    ("data/fs-volumes-world.json", "byPlace")):
@@ -514,7 +526,8 @@ def build_volume_index():
             for v in vols:
                 wp = (v.get("waypoint") or v.get("wp") or "").split(":")[0].strip()
                 if wp:
-                    idx.setdefault(wp, {"t": v.get("t") or "", "place": place})
+                    idx.setdefault(wp, {"t": v.get("t") or "", "place": place,
+                                        "label": label.get(place, place)})
     return idx
 
 
@@ -677,7 +690,7 @@ def main():
             rng, whole = ranges_from(blob)
             m = marks.setdefault(mid, {"by": {}})
             m["t"] = m.get("t") or vols[wp]["t"] or src[:90]
-            m["where"] = m.get("where") or vols[wp]["place"]
+            m["where"] = m.get("where") or vols[wp].get("label") or vols[wp]["place"]
             m["href"] = m.get("href") or ("/TheMap/place/" + vols[wp]["place"] + "/")
             b = m["by"].setdefault(line, {})
             if when:

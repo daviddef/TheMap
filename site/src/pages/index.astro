@@ -2,7 +2,6 @@
 import Base from "../layouts/Base.astro";
 import RecordMap from "../components/RecordMap.astro";
 import ProgressKit from "../components/ProgressKit.astro";
-import LineSwitcher from "../components/LineSwitcher.astro";
 import VolumeMarks from "../components/VolumeMarks.astro";
 import { u } from "../lib/url.js";
 import { atlas as idx } from "../lib/atlas.js";
@@ -54,6 +53,19 @@ const archiveCountries = new Set(archives.map(p => p.at.place.split(", ").pop())
     </p>
   </div>
 
+  {/* ABOVE THE MAP, BECAUSE IT DECIDES WHERE EVERY MARK GOES. David: «can we
+      move the researching dropdown thats hiding all the way at the bottom to
+      the header at the top, otherwise im marking things without selecting a
+      family?» It was below the map and below the fold, which on this page is
+      a very long way down — so the honest description of it was not «quiet»
+      but «hidden», and a reader could work a whole session into whichever
+      line happened to be active. A control that assigns ownership has to be
+      visible before the thing it assigns.
+      `quiet` stays: it holds the bar to one line until a second family
+      exists, which keeps a first-time reader's map uncluttered without
+      hiding the selector from somebody who has several. */}
+  <ProgressKit />
+
   <RecordMap
     indexUrl={u("/index.json")}
     detailBase={u("/p/")}
@@ -84,11 +96,6 @@ const archiveCountries = new Set(archives.map(p => p.at.place.split(", ").pop())
       the map and nothing else. */}
 
   <p id="ra-mywork" data-href={u("/my-research/")} hidden></p>
-  <ProgressKit />
-  {/* Quiet here: the map is the whole of this page for somebody who arrived
-      with a surname, so the family selector stays out of the way until a
-      second family exists and there is genuinely something to pick. */}
-  <LineSwitcher quiet={true} />
   <VolumeMarks />
 </Base>
 

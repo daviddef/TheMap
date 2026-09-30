@@ -77,6 +77,7 @@ const nav = [
 const here = Astro.url.pathname;
 /* Strip the query string: /?q=Breslau and / are the same page. */
 const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
+import LineSwitcher from "../components/LineSwitcher.astro";
 ---
 <html lang="en" data-base={u("")}>
 <head>
@@ -316,6 +317,16 @@ const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
               </div>
             </details>
       ))}
+      {/* WHICH FAMILY EVERY MARK BELONGS TO, IN THE NAVIGATION. It was a
+          full-width bar under the header: a second rule doing the header's
+          job, and on the map page a whole row of a screen that is meant to
+          be the map and nothing else.
+          It renders on all 46,000 pages and shows itself on the three that
+          carry ProgressKit — index, place and my-research, which is exactly
+          where marks are made. Everywhere else the store is absent, the
+          script finds nothing and the element stays hidden, collapsing to
+          nothing the way .site-tools above it already does. */}
+      <LineSwitcher compact />
       <a class="findbtn" href={u("/add/")}>Add a source</a>
     </nav>
   </div>

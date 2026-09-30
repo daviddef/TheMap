@@ -24,24 +24,42 @@
  * IT RENDERS NOTHING UNTIL THE SCRIPT RUNS. Lines live in localStorage, which
  * the server has never seen and must never be guessed at — a server-rendered
  * default would flash the wrong family's name at a reader on every page load.
+ *
+ * `compact` — IN THE HEADER, NOT UNDER IT. David: «can you rather add the
+ * researching dropdown to the header? not another rod.» He was right twice
+ * over: a full-width bar of its own was a second horizontal rule doing what
+ * the navigation already does, and it cost a row of a screen on the one page
+ * that is meant to be «the map and nothing else». Compact renders the label
+ * and the select inline in the top navigation and drops the running mark
+ * count, which is a statistic rather than a control and lives on
+ * /my-research/ where it can be read properly.
  */
-const { quiet = false } = Astro.props;
+const { quiet = false, compact = false } = Astro.props;
+const uid = compact ? "ra-lines-c" : "ra-lines";
 ---
-<div class="ra-lines" id="ra-lines" data-quiet={quiet ? "1" : null} hidden>
-  <label class="ra-lines-l" for="ra-line-sel">Researching</label>
-  <select id="ra-line-sel" aria-label="Which family this progress belongs to"></select>
-  <button type="button" id="ra-line-new">+ another family</button>
-  <button type="button" id="ra-line-ren">rename</button>
-  <span class="ra-lines-n" id="ra-line-n" role="status" aria-live="polite"></span>
+<div class:list={["ra-lines", compact && "ra-lines-c"]} id={uid}
+     data-quiet={quiet ? "1" : null} hidden>
+  <label class="ra-lines-l" for={uid + "-sel"}>Researching</label>
+  <select id={uid + "-sel"} aria-label="Which family this progress belongs to"></select>
+  <button type="button" class="ra-line-new">+ another family</button>
+  {!compact && <button type="button" class="ra-line-ren">rename</button>}
+  {!compact && <span class="ra-lines-n" role="status" aria-live="polite"></span>}
 </div>
 
-<script is:inline>
+<script is:inline define:vars={{ uid }}>
+  /* THE HEADER IS PARSED BEFORE THE STORE EXISTS. ProgressKit is an inline
+     script inside the page body; this component now also renders inside
+     Base.astro's <header>, which the browser reaches first. Reading
+     window.raProgress at parse time therefore found nothing and the control
+     gave up permanently — visible as a header switcher that never appeared.
+     So it waits for the document instead of for luck. */
   (function () {
+    function start() {
     var P = window.raProgress;
-    var bar = document.getElementById("ra-lines");
+    var bar = document.getElementById(uid);
     if (!P || !bar) return;
-    var sel = document.getElementById("ra-line-sel");
-    var say = document.getElementById("ra-line-n");
+    var sel = bar.querySelector("select");
+    var say = bar.querySelector(".ra-lines-n");
 
     function draw() {
       var lines = P.lines();
@@ -52,7 +70,7 @@ const { quiet = false } = Astro.props;
                label.replace(/[&<>]/g, "") + "</option>";
       }).join("");
       var me = lines.filter(function (l) { return l.active; })[0];
-      say.textContent = me
+      if (say) say.textContent = me
         ? me.marks + (me.marks === 1 ? " mark" : " marks")
         : "";
       bar.hidden = bar.getAttribute("data-quiet") === "1" && lines.length < 2;
@@ -67,7 +85,7 @@ const { quiet = false } = Astro.props;
       document.dispatchEvent(new CustomEvent("ra-progress-changed"));
     });
 
-    document.getElementById("ra-line-new").addEventListener("click", function () {
+    bar.querySelector(".ra-line-new").addEventListener("click", function () {
       var name = window.prompt("Which family? (a surname)");
       if (!name || !name.trim()) return;
       var where = window.prompt("Where, if it helps tell them apart? (optional)") || "";
@@ -76,7 +94,8 @@ const { quiet = false } = Astro.props;
       document.dispatchEvent(new CustomEvent("ra-progress-changed"));
     });
 
-    document.getElementById("ra-line-ren").addEventListener("click", function () {
+    var ren = bar.querySelector(".ra-line-ren");
+    if (ren) ren.addEventListener("click", function () {
       var cur = P.lines().filter(function (l) { return l.active; })[0];
       if (!cur) return;
       var name = window.prompt("Name for this line", cur.name);
@@ -88,6 +107,10 @@ const { quiet = false } = Astro.props;
 
     document.addEventListener("ra-progress-changed", draw);
     draw();
+    }
+    if (document.readyState === "loading")
+      document.addEventListener("DOMContentLoaded", start);
+    else start();
   })();
 </script>
 
@@ -107,4 +130,22 @@ const { quiet = false } = Astro.props;
   .ra-lines button:hover { color: var(--accent); }
   .ra-lines-n { margin-left: auto; font-family: var(--mono); font-size: 10.5px;
     color: var(--ink-3); }
+
+  /* ---- IN THE HEADER --------------------------------------------------
+     Sized to sit on the navigation's baseline rather than to be a panel: no
+     border, no background, no left rule, and the type scale the menu links
+     already use. It is the same control, wearing the header's clothes. */
+  .ra-lines-c { margin: 0; padding: 0; border: 0; background: none;
+    gap: 6px; align-items: center; font-size: 12.5px; }
+  .ra-lines-c .ra-lines-l { font-size: 9.5px; letter-spacing: .08em; }
+  .ra-lines-c select { font-size: 12.5px; font-weight: 600; padding: 2px 4px;
+    max-width: 11rem; }
+  .ra-lines-c .ra-line-new { font-size: 11px; }
+  /* THE NAVIGATION IS THE FIRST THING TO RUN OUT OF ROOM. Below this the
+     menu already collapses to a burger, and a family selector wedged beside
+     it would push the brand off the line. /my-research/ keeps the full bar,
+     so switching and renaming stay reachable on a phone — which is why that
+     page is the one place the wide bar was left in. */
+  @media (max-width: 860px) { .ra-lines-c { display: none; } }
+  @media (max-width: 1080px) { .ra-lines-c .ra-line-new { display: none; } }
 </style>

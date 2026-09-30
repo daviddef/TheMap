@@ -7528,10 +7528,25 @@ window.addEventListener("load", async function () {
  :global(.ra-mk-n) { text-decoration: underline;
     text-decoration-color: var(--rule-strong); }
  :global(.ra-mk .ra-ck-n) { margin-left: auto; padding-left: 8px; }
+ /* THE NUMBER AND THE MARK BUTTON ARE THE SAME SIZE. David: «can the + buttons
+    match the size of the numbered, everywhere?» They were 26px and 17px, which
+    reads as two different kinds of thing sitting in one column.
+    MET AT 24, NOT AT 17. Matching downwards would have put the button below
+    24x24, which is WCAG 2.2's minimum target size and the floor this project's
+    own accessibility gate holds — and a 17px target is genuinely hard to hit
+    on a phone, which is where he was reading. So the number comes up, the
+    button comes down a little, and they line up without making the one you
+    press worse. The number's type grows with it, which it needed: 9.5px mono
+    was small enough to be a smudge at arm's length. */
  :global(.ra-ck-i) { display: inline-flex; align-items: center;
-    justify-content: center; width: 17px; height: 17px; flex: none;
-    margin-right: 6px; border-radius: 50%; background: #1B2A5B; color: #fff;
-    font-family: var(--mono); font-size: 9.5px; line-height: 1; }
+    justify-content: center; width: 24px; height: 24px; flex: none;
+    margin-right: 10px; border-radius: 50%; background: #1B2A5B; color: #fff;
+    font-family: var(--mono); font-size: 11px; line-height: 1; }
+  /* AIR BETWEEN THEM. «and also allow an additional space between the icons» —
+    two circles 2px apart read as one control with a hole in it. */
+  :global(#ra-check-b .srcmark) { margin-left: 0; margin-right: 10px; }
+  :global(#ra-check-b li) { display: flex; align-items: center;
+    flex-wrap: wrap; gap: 2px 0; }
  :global(.ra-pin) { display: flex !important; align-items: center;
     justify-content: center; border-radius: 50%; background: #1B2A5B;
     color: #fff; font-family: var(--mono); font-size: 10px; font-weight: 500;

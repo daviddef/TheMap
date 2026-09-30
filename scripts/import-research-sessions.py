@@ -224,6 +224,44 @@ def image_ranges(text):
     return []
 
 
+def parse_ranges(text):
+    """«1-47, 60-72» -> [[1,47],[60,72]]. None when nothing usable is there.
+
+    The same grammar ProgressKit.astro's own box accepts, because this is the
+    field the skill tells a session to fill and a reader typing into the site
+    should be writing the same thing. Deliberately strict: a part that is not
+    a number or a number range is dropped rather than guessed at, and if
+    nothing survives the row gets no range at all — a mark that overstates
+    what was searched is worse than a mark with no range.
+    """
+    out = []
+    for part in re.split(r"[,;]+", text or ""):
+        part = part.strip()
+        if not part:
+            continue
+        # THE RANGE LEADS THE PART; WHAT FOLLOWS IT IS THE READER'S OWN NOTE.
+        # The first cut demanded the whole part BE a range, and the Blažević
+        # session's real entry — «1-400 (item 2, finished); 401-450 of item 3»
+        # — was thrown away entirely by it, which is 450 images of walked
+        # register discarded for carrying an annotation. The numbers are
+        # explicit either way; a range at the front of a part is not made less
+        # true by the words after it.
+        # STILL ANCHORED AT THE START, so «item 3» cannot become pages 3-3 and
+        # «DGS 005497886» cannot become a page range at all.
+        m = re.match(r"(\d{1,4})\s*[-–—]\s*(\d{1,4})\b", part)
+        if m:
+            a, b = int(m.group(1)), int(m.group(2))
+            if 0 < a <= b <= 9999:
+                out.append([a, b])
+            continue
+        m = re.match(r"(\d{1,4})\b", part)
+        if m and re.fullmatch(r"\d{1,4}", part):
+            n = int(m.group(1))
+            if 0 < n <= 9999:
+                out.append([n, n])
+    return out or None
+
+
 def ranges_from(text):
     """[[a,b], ...] or None. `whole` says the range covers the book."""
     t = text or ""
@@ -544,11 +582,32 @@ def build_volume_index():
         except Exception:
             pass
     idx = {}
+    # GZIP FIRST — THE WORLD FILE HAS BEEN COMPRESSED FOR A WHILE AND THIS
+    # NEVER NOTICED. data/fs-volumes-world.json.gz is 45 MB and the plain path
+    # named here does not exist, so os.path.exists said no, the loop skipped it
+    # in silence, and this indexed only the small local fs-volumes.json:
+    # 31,028 volumes out of 2,933,990 waypoints. Every session row citing a
+    # waypoint outside that 1% was reported as «no volume could be placed»,
+    # which reads like the session's fault and was ours. The Blažević session's
+    # 9R26-82S is in the world file and could never be tied.
+    #
+    # Same failure as the cemeteries and the gazetteer this week: the data
+    # moved to .gz and a reader kept asking for the plain name. Nothing throws
+    # when that happens, which is exactly why it lasted.
+    def _open_vols(stem):
+        if os.path.exists(stem + ".gz"):
+            import gzip as _gz
+            return _gz.open(stem + ".gz", "rt", encoding="utf-8")
+        if os.path.exists(stem):
+            return io.open(stem, encoding="utf-8")
+        return None
     for f, key in (("data/fs-volumes.json", "byPlace"),
                    ("data/fs-volumes-world.json", "byPlace")):
-        if not os.path.exists(f):
+        fh = _open_vols(f)
+        if fh is None:
             continue
-        d = json.load(io.open(f, encoding="utf-8"))
+        with fh:
+            d = json.load(fh)
         for place, vols in (d.get(key) or {}).items():
             for v in vols:
                 wp = (v.get("waypoint") or v.get("wp") or "").split(":")[0].strip()
@@ -728,7 +787,32 @@ def main():
                 continue
             wp = wps[0]
             mid = canonical("volume:" + wp)
-            rng, whole = ranges_from(blob)
+            # THE FIELD THE SKILL ASKS FOR, BEFORE THE PROSE. .claude/skills/
+            # record-atlas-feedback/SKILL.md tells every session to write
+            # `"pages": "1-47, 60-72"` and `"walked": true`, with careful rules
+            # about both — omit `pages` rather than guess it, and set `walked`
+            # only if every entry was read. Neither field was ever read here.
+            # Sessions followed the instruction and the atlas discarded it:
+            # of 75 marks in the last import, 8 carried a range and NONE was
+            # marked walked, because the only path in was a regex over the
+            # `src` sentence.
+            #
+            # The prose path stays and stays second — it is what rescued those
+            # 8 from sessions written before the skill existed. But a session
+            # that states its range in the field provided should not have to
+            # also phrase it correctly in a sentence.
+            rng = whole = None
+            if isinstance(r.get("pages"), str) and r["pages"].strip():
+                rng = parse_ranges(r["pages"])
+                if rng:
+                    whole = r.get("walked") is True
+            if not rng:
+                rng, whole = ranges_from(blob)
+                # `walked: true` alongside prose that gave a range but did not
+                # say «walked» is still the session's own claim, and it is the
+                # claim the skill is strictest about. Honour it.
+                if rng and r.get("walked") is True:
+                    whole = True
             m = marks.setdefault(mid, {"by": {}})
             m["t"] = m.get("t") or vols[wp]["t"] or src[:90]
             m["where"] = m.get("where") or vols[wp].get("label") or vols[wp]["place"]
@@ -809,7 +893,17 @@ def main():
     print(f"    rows read                  {seen:,}")
     print(f"    tied to an atlas volume    {matched:,}")
     print(f"    distinct volumes marked    {len(marks):,}")
-    print(f"    carrying a page range      {sum(1 for m in marks.values() if m.get('done')):,}")
+    # COUNTED WHERE THE RANGES ACTUALLY LIVE. This asked for `m["done"]`, which
+    # stopped existing when marks became per-family: a range is written to
+    # m["by"][line]["done"], or to m["walked"] when the register was read entry
+    # by entry. So the line reported 0 while the file plainly carried ranges —
+    # a summary that undercounts its own success, which is how a broken import
+    # goes unnoticed for weeks.
+    def _has_range(m):
+        if m.get("walked"):
+            return True
+        return any((b or {}).get("done") for b in (m.get("by") or {}).values())
+    print(f"    carrying a page range      {sum(1 for m in marks.values() if _has_range(m)):,}")
     nfilm = sum(1 for k in marks if k.startswith("film:"))
     print(f"    film marks                {nfilm:,}  (from {filmed:,} rows)")
     ncol = sum(1 for k in marks if k.startswith("collection:"))

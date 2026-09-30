@@ -72,6 +72,32 @@ of the same film. Write the film number, say the waypoint is not established,
 and stop there. An unresolved row is a small gap; a confidently wrong waypoint
 attributes your work to a book you never opened.
 
+## Your write is not the last step
+
+Writing to your archive's `searched.json` puts the work where the atlas can
+find it. It does **not** put it in front of David. Nothing watches your repo,
+and `/my-research/` reads a store that lives in his browser and that no script
+can write to.
+
+Somebody has to run, in the Record Atlas repo:
+
+```
+python3 scripts/import-research-sessions.py
+```
+
+which reads every family archive and writes `record-atlas-research-import.json`
+— and then David has to open `/my-research/` and use **Import a file**.
+Importing merges rather than replaces, so running it again is safe.
+
+**So say so when you finish.** «Recorded in the atlas» is not true yet at that
+point; «recorded in searched.json — run the importer to pull it into My
+research» is. A session that says the first sends him looking for work that is
+not there, which has happened.
+
+WHAT YOU DO NOT NEED TO DO is build an import file by hand. That has been done,
+because the importer was broken at the time, and it should not need doing
+again: the fields below are read directly now.
+
 ## What to write, and where
 
 ### 1. Work you did in a volume

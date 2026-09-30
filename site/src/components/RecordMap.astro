@@ -2661,10 +2661,31 @@ window.addEventListener("load", async function () {
      An item without coordinates still gets its number and simply has no pin;
      nothing in the list is silently dropped for want of a position. */
   var checkPins = [];
-  function checkRow(href, name, km, note, dot, num, y, x) {
+  /* EVERY ROW IN THIS PANE IS A THING YOU CAN DECIDE ABOUT. David: «how can I
+     mark the visiting pane? and even things without a name?» Until now the
+     pane was read-only — the one surface that answers «what is around this
+     place» could not record that you had been to any of it, while the lists
+     further down the panel could.
+     `mark` is {id, t}: the id is the SAME one the place page and the panel
+     already use for that thing — source:parish-…, source:grave-…, source:<
+     provider>, place:<id> — so a burial ground marked here is the same mark
+     as the one marked there, not a second one that can disagree.
+     AND THE UNNAMED ONES TOO, which is the harder half. A ground OSM has not
+     named still has a stable OSM id, so it can carry a mark; what it cannot
+     carry is a name, so the label says where it is instead — «A burial ground,
+     2 km from Senj» — which is enough for a reader to know which row of their
+     dossier is which. */
+  function checkRow(href, name, km, note, dot, num, y, x, mark) {
     if (num != null && y != null && x != null)
       checkPins.push({ n: num, y: y, x: x, name: name });
-    return '<li>' +
+    var at = "";
+    if (mark && mark.id) {
+      at = ' data-src="' + esc(mark.id) + '"' +
+           ' data-src-t="' + esc(mark.t || name) + '"' +
+           ' data-src-where="' + esc(mark.where || "") + '"' +
+           ' data-src-href="' + esc(mark.href || href || "") + '"';
+    }
+    return "<li" + at + ">" +
            (num != null ? '<span class="ra-ck-i">' + num + "</span>" : "") +
            (dot ? '<i class="ra-dot" style="background:' + dot + '"></i>' : "") +
            (href ? '<a href="' + esc(href) + '" target="_blank" rel="noopener">' +
@@ -2694,6 +2715,9 @@ window.addEventListener("load", async function () {
     if (!pane || !body) return;
     if (d.lat == null || !r) { pane.hidden = true; clearCheckPins(); return; }
     clearCheckPins();
+    /* What a mark made in this pane says it belongs to. Same string the place
+       page writes, so the dossier reads «Senj (Senj), Croatia» either way. */
+    var placeLabel = d.name + (d.country ? ", " + (CNAME[d.country] || d.country) : "");
     var h = [hoodNoteHtml(d, r)], count = 0;
 
     /* 1. The archive. The appointment you have to make, and often the only
@@ -2734,7 +2758,9 @@ window.addEventListener("load", async function () {
       d.parishes.forEach(function (p) {
         count++;
         h.push(checkRow(p.q ? "https://www.wikidata.org/wiki/" + p.q : null,
-                        p.n, p.km, null, null, count, p.y, p.x));
+                        p.n, p.km, null, null, count, p.y, p.x,
+                        { id: "source:parish-" + (p.q || p.n), t: p.n,
+                          where: placeLabel, href: BASE + "place/" + d.id + "/" }));
       });
       h.push("</ul>");
     }
@@ -2752,9 +2778,18 @@ window.addEventListener("load", async function () {
                  : null;
         /* «A burial ground» rather than a blank. The row is still worth
            walking to; what OpenStreetMap does not know is its name. */
+        /* THE UNNAMED ONES CARRY WHERE THEY ARE INSTEAD OF WHAT THEY ARE
+           CALLED, so a dossier row reads «A burial ground, 2 km from Senj»
+           rather than five identical «A burial ground» lines. */
         h.push(checkRow(href, g.n || T("A burial ground"), g.km,
                         g.n ? null : T("unnamed in OpenStreetMap"),
-                        null, count, g.y, g.x));
+                        null, count, g.y, g.x,
+                        { id: "source:grave-" + (g.id || (g.y + "," + g.x)),
+                          t: g.n || (T("A burial ground") + ", " +
+                                     (Math.round(g.km * 10) / 10) + " km from " +
+                                     d.name),
+                          where: placeLabel,
+                          href: BASE + "place/" + d.id + "/" }));
       });
       h.push("</ul>");
     }
@@ -2767,7 +2802,10 @@ window.addEventListener("load", async function () {
         count++;
         archHtml.push(checkRow(x.p.url, x.p.name, x.km,
                         (ACC[x.p.access] || [0, x.p.access])[1],
-                        ACCESS_DOT(x.p.access), count, x.p.at.lat, x.p.at.lon));
+                        ACCESS_DOT(x.p.access), count, x.p.at.lat, x.p.at.lon,
+                        { id: "source:" + x.p.id, t: x.p.name,
+                          where: CNAME[d.country] || d.country || "",
+                          href: BASE + "archive/" + x.p.id + "/" }));
       });
       archHtml.push("</ul>");
       h = h.concat(archHtml);
@@ -2788,7 +2826,10 @@ window.addEventListener("load", async function () {
         count++;
         h.push(checkRow(BASE + "place/" + x.p.i + "/", x.p.n, x.km,
                         x.p.c ? x.p.c + " " + T(x.p.c === 1 ? "volume" : "volumes")
-                              : null, null, count, x.p.y, x.p.x));
+                              : null, null, count, x.p.y, x.p.x,
+                        { id: "place:" + x.p.i, t: x.p.n,
+                          where: CNAME[x.p.cc] || x.p.cc || "",
+                          href: BASE + "place/" + x.p.i + "/" }));
       });
       if (vs.length > 20)
         h.push('<li class="ra-ck-more">' + esc(T("and") + " " +

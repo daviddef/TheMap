@@ -1025,6 +1025,31 @@ def main():
         # Not fatal: the harvest is a separate script and the page degrades to
         # naming the archive without its address.
         print("provider-contacts.json missing — /my-research/ will show no addresses")
+    # ---- THE SESSIONS' OWN RESEARCH, PUBLISHED SO THE PAGE CAN READ IT ----
+    #
+    # The eight family archives record what they searched;
+    # scripts/import-research-sessions.py gathers all of it into
+    # record-atlas-research-import.json. Until now that file sat in the repo
+    # and reached /my-research/ only if somebody knew to run the script and
+    # then import the file by hand in a browser. David: «is there any way the
+    # my research area can just include these sessions in the dropdown rather
+    # than…». There is: publish it, and let the page fetch it.
+    #
+    # IT IS NOT SECRET AND IT IS NOT PERSONAL. A row is a volume, a page range
+    # and a surname line — the same shape already on every place page — with no
+    # living person, no date of birth and no relationship in it.
+    try:
+        with open("record-atlas-research-import.json", encoding="utf-8") as fh:
+            _rs = json.load(fh)
+        json.dump(_rs, open(os.path.join(OUT, "research-sessions.json"), "w"),
+                  ensure_ascii=False, separators=(",", ":"))
+        print(f"research-sessions.json  {len(_rs.get('marks') or {}):,} marks, "
+              f"{len(_rs.get('lines') or {}):,} families, from the archives")
+    except FileNotFoundError:
+        # Not fatal: the page falls back to whatever is in the reader's browser.
+        print("record-atlas-research-import.json missing — /my-research/ will "
+              "show only what this browser holds")
+
     # ---- ERA FLAGS AS FILES, NOT AS INLINE MARKUP -----------------------
     #
     # The «who governed» table on a place page shows the flag that actually

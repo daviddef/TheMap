@@ -312,6 +312,42 @@
       return (ranges || []).reduce(function (a, p) { return a + (p[1] - p[0] + 1); }, 0);
     }
 
+    /* ---- THE FAMILY SESSIONS' OWN WORK, FOLDED IN ON LOAD ---------------
+       David: «is there any way the my research area can just include these
+       sessions in the dropdown rather, so I can add to their work and see it
+       clearer?» It can, and the only reason it did not was that the file
+       existed in the repository and not on the site. build.py publishes it now
+       and this reads it, so the Blažević, Defranceski, Falco, Lerena, Booyzen,
+       D'Arcy, Mazza and Luwinski sessions' families appear in the switcher
+       without anybody running a script or importing anything.
+
+       MERGED, NEVER IMPOSED. It goes through the same fromJSON("merge") path a
+       hand import uses, which is additive by design: it adds a family that is
+       not there, unions page ranges per line, and never overwrites a value
+       this browser already holds. Your own marks always win.
+
+       ONCE PER VERSION, NOT ONCE PER VISIT. The file's `exported` stamp is
+       remembered; while it is unchanged nothing is merged again. Without that,
+       a family deleted here would reappear on the next page load, which is the
+       kind of small betrayal that makes somebody stop trusting a tool. */
+    function foldInSessions() {
+      var base = (document.documentElement.getAttribute("data-base") || "/");
+      var url = base.replace(/\/?$/, "/") + "research-sessions.json";
+      fetch(url).then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (doc) {
+          if (!doc || !doc.marks) return;
+          var stamp = "ra-sessions-seen";
+          var seen = null;
+          try { seen = localStorage.getItem(stamp); } catch (e) { return; }
+          var v = String(doc.exported || doc.built || "");
+          if (seen === v) return;
+          window.raProgress.fromJSON(JSON.stringify(doc), "merge");
+          try { localStorage.setItem(stamp, v); } catch (e) {}
+          document.dispatchEvent(new CustomEvent("ra-progress-changed"));
+        })
+        .catch(function () {});
+    }
+
     window.raProgress = {
       get: function (id) { return view(load().marks[canonical(id)], activeSlug()); },
       /* The whole mark, every line, for the pages that show the breakdown. */
@@ -541,5 +577,6 @@
       resume: resume,
       covered: covered
     };
+      foldInSessions();
   })();
 </script>

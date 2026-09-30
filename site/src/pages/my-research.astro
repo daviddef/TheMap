@@ -28,6 +28,9 @@ const BASE_ = u("/");
   eyebrow="Kept in this browser · never sent anywhere"
   dek="The volumes you have marked, the pages you did, and where to start again. This lives in this browser only — export it to keep it.">
 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
+
   <ProgressKit />
   <LineSwitcher />
 
@@ -59,6 +62,17 @@ const BASE_ = u("/");
   A page is not allowed to know the folder, so that last part is the browser's
   business, not ours.</p>
 
+  {/* THE DOSSIER ON A MAP. David: «can the dossier include a map with a marker
+      to places?» The page lists where a family has been worked as text, which
+      answers «what have I done» and not «where has this family been» — and for
+      a family that has moved, the second question is the shape of the whole
+      problem. Same tiles, same numbering as the map's own visiting pane, so a
+      number here and a number there mean the same row.
+      DRAWN ONLY WHEN THERE IS SOMETHING TO DRAW. An empty map of the world is
+      a worse answer than no map. */}
+  <div id="mr-map" hidden></div>
+  <p class="cap" id="mr-map-cap" hidden></p>
+
   <div id="mr-body"></div>
 
   {/* RESEARCH THAT IS NOT IN THIS BROWSER. Everything above is marks kept in
@@ -73,6 +87,32 @@ const BASE_ = u("/");
       today, which is why the Banićević page is worth putting beside it. Sveti
       Rok is not a drawn place, so it is not linked rather than linked to
       nothing. */}
+  {/* WHERE THE OTHER SESSIONS' WORK IS, AND WHY IT IS NOT HERE YET. The family
+      archives record what they searched — pages, waypoints, the family each
+      row is about — into their own repositories. Nothing watches those, and no
+      script can write to this page: it reads a store in this browser. So the
+      work arrives only when somebody runs the importer and imports the file,
+      and until this said so there was no way to know that from here. */}
+  <section class="mrext" style="border-left-color:var(--brass)">
+    <div class="lab">Work done by the family-research sessions</div>
+    <p class="cap">The Blažević, Defranceski, Falco, Lerena, Booyzen, D'Arcy,
+    Mazza and Luwinski sessions record what they search — the volume, the pages,
+    and which family each row is about — into their own archives.
+    <b>Their families are already in the switcher above.</b> This page reads
+    what they have published and folds it in when you arrive, so Kalanj, Kosina,
+    Žubrinić, Pilipić and the rest are there to pick without importing
+    anything.</p>
+    <p class="cap">It is <b>merged, never imposed</b>: a family you do not have
+    is added, page ranges are unioned, and nothing you have marked yourself is
+    overwritten. Add to their work and your additions stay yours. A family you
+    delete here stays deleted — the fold happens once per published update, not
+    once per visit.</p>
+    <p class="cap">The published file is rebuilt from the archives by
+    <code>scripts/import-research-sessions.py</code>, so work a session did
+    after the last build arrives with the next one. <b>Import a file</b> above
+    still takes a hand-made file if you ever need it.</p>
+  </section>
+
   <section class="mrext">
     <div class="lab">Research you have done elsewhere</div>
     <p class="cap">Pages written as favours, on
@@ -397,7 +437,59 @@ const BASE_ = u("/");
           fetch(BASE + "provider-contacts.json").then(function (r) { return r.json(); })
             .then(function (d) { CONTACTS = d.contacts || {}; })
             .catch(function () { CONTACTS = {}; }));
-        Promise.all(jobs).then(function () { filling = false; draw(); });
+        Promise.all(jobs).then(function () { filling = false; draw(); drawMap(); });
+      }
+
+      /* ---- THE DOSSIER ON A MAP ------------------------------------------
+         One pin per place this family has been worked at, numbered in the same
+         order the sections below are written, so «3» in the list and «3» on
+         the map are the one place. Coordinates come from the place files the
+         page already fetches for its «6 books here you have not opened» counts
+         — no second request and nothing new to keep in step.
+         SHOWN ONLY WHEN IT SAYS SOMETHING. One place is not a map, it is a
+         dot; an empty world is worse than no map at all. Two or more, or
+         nothing. */
+      var mrMap = null;
+      function drawMap() {
+        var box = document.getElementById("mr-map");
+        var cap = document.getElementById("mr-map-cap");
+        if (!box || typeof L === "undefined") return;
+        var pts = [];
+        [].slice.call(document.querySelectorAll("[data-place]")).forEach(function (el) {
+          var pid = el.getAttribute("data-place");
+          var d = PLACEC[pid];
+          if (!d || d.lat == null || d.lon == null) return;
+          pts.push({ id: pid, y: d.lat, x: d.lon, n: d.name || pid });
+        });
+        if (pts.length < 2) {
+          box.hidden = true; if (cap) cap.hidden = true;
+          if (mrMap) { mrMap.remove(); mrMap = null; }
+          return;
+        }
+        box.hidden = false;
+        if (!mrMap) {
+          mrMap = L.map(box, { scrollWheelZoom: false, preferCanvas: true });
+          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: "&copy; OpenStreetMap contributors", maxZoom: 18
+          }).addTo(mrMap);
+        }
+        if (mrMap._raPins) mrMap.removeLayer(mrMap._raPins);
+        var g = L.layerGroup();
+        pts.forEach(function (p, i) {
+          L.marker([p.y, p.x], {
+            icon: L.divIcon({ className: "mr-pin", html: String(i + 1),
+                              iconSize: [22, 22] })
+          }).addTo(g).bindPopup('<a href="' + BASE + "place/" + p.id + '/">' +
+                                p.n.replace(/[<>&]/g, "") + "</a>");
+        });
+        g.addTo(mrMap); mrMap._raPins = g;
+        mrMap.fitBounds(L.latLngBounds(pts.map(function (p) { return [p.y, p.x]; }))
+                         .pad(0.2));
+        if (cap) {
+          cap.hidden = false;
+          cap.textContent = pts.length + " places this family has been worked at" +
+            ", numbered as they are listed below.";
+        }
       }
 
       draw();
@@ -460,6 +552,16 @@ const BASE_ = u("/");
   .mrextl > li { font-family: var(--sans); font-size: 14.5px; }
   .mrextl > li > a { font-weight: 600; }
   .mrextw { display: block; font-size: 12.5px; color: var(--ink-3); }
+  .mrcode { margin: 10px 0; font-family: var(--mono); font-size: 12.5px; }
+  .mrcode code { background: var(--ground); padding: 7px 10px;
+    border-radius: 3px; display: inline-block; }
+  #mr-map { height: 340px; margin: 18px 0 6px; border: 1px solid var(--rule);
+    border-radius: 4px; }
+  #mr-map[hidden] { display: none; }
+  :global(.mr-pin) { background: var(--accent); color: var(--panel);
+    border-radius: 50%; width: 22px; height: 22px; line-height: 22px;
+    text-align: center; font-family: var(--sans); font-size: 12px;
+    font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,.4); }
 
   .mrbtns { display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline;
     margin: 18px 0 0; }

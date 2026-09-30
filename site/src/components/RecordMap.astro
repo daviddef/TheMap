@@ -173,11 +173,22 @@ const HELP = base.replace(/\/$/, "") + "/help/";
         with a way out. That message is better placed here than below a map
         the reader has already decided is broken. */}
   </div>
+    {/* THE TITLE IS FOR THE POINTER; THE LABEL IS FOR EVERYBODY ELSE. All
+        five of these carried a `title`, so hovering always explained them —
+        but a button whose only content is an emoji announces itself to a
+        screen reader as its emoji's name, or as nothing. `title` is not a
+        reliable accessible name and never was; ra-reset below already had
+        both, and the other four are now brought up to it. The glyph is
+        hidden from the accessibility tree so the label is not read twice. */}
     <button class="ra-ico" id="ra-info" type="button" aria-expanded="false"
-            title="What these controls mean">&#9432;</button>
-    <button class="ra-ico" id="ra-copy" type="button" title="Copy a link to this exact view">&#128279;</button>
+            aria-label="What these controls mean"
+            title="What these controls mean"><span aria-hidden="true">&#9432;</span></button>
+    <button class="ra-ico" id="ra-copy" type="button"
+            aria-label="Copy a link to this exact view"
+            title="Copy a link to this exact view"><span aria-hidden="true">&#128279;</span></button>
     <button class="ra-ico" id="ra-full" type="button"
-            title="Full screen — the map and its panel fill the window">&#9974;</button>
+            aria-label="Full screen — the map and its panel fill the window"
+            title="Full screen — the map and its panel fill the window"><span aria-hidden="true">&#9974;</span></button>
     {/* IT CAME ALONG WITH THE FILTER AND SHOULD NOT HAVE. «1 of 21,754 places
         shown» was the last child of the filters block, so when that block
         moved up beside the search box the count moved with it and ended up
@@ -226,7 +237,8 @@ const HELP = base.replace(/\/$/, "") + "/help/";
         screen carries it without anything extra. */}
     <div class="ra-time" id="ra-time">
   <button class="ra-ico" id="ra-play" type="button" aria-pressed="false"
-            title="Play the years — watch the jurisdictions change and the records follow">&#9654;</button>
+            aria-label="Play the years — watch the jurisdictions change and the records follow"
+            title="Play the years — watch the jurisdictions change and the records follow"><span aria-hidden="true">&#9654;</span></button>
     <label class="ra-ylab" id="ra-ylab"
            title="Set a year and the map keeps only the places that can answer for it, the volume lists narrow to it, and every panel says whose archive those years belonged to.">
       <input type="checkbox" id="ra-yon"
@@ -706,7 +718,20 @@ window.addEventListener("load", async function () {
     if (hint) h.push('<p class="at-sub">' + esc(hint) + "</p>");
     h.push('<ul class="at-films">');
     nat.slice(0, 10).forEach(function (p) {
-      h.push('<li><a href="' + esc(p.url) + '" target="_blank" rel="noopener">' +
+      /* MARKABLE HERE TOO. David: «none of the "where to look" items are
+         available to mark». The place page has put `data-src` on every
+         provider row since the states were added; this list — the one the map
+         panel shows, which is where most readers meet an archive — had none,
+         so «written, no reply» could not be recorded against the very
+         institutions /my-research/ lists addresses for.
+         THE SAME ID AS THE PLACE PAGE, deliberately: `source:<provider id>`.
+         Mark ARHiNET from the map and open it later from Rovinj's own page
+         and it is one mark, not two that disagree. */
+      h.push('<li data-src="source:' + esc(p.id) + '" ' +
+             'data-src-t="' + esc(p.name) + '" ' +
+             'data-src-where="' + esc(CNAME[cc] || cc) + '" ' +
+             'data-src-href="' + BASE + "archive/" + esc(p.id) + '/">' +
+             '<a href="' + esc(p.url) + '" target="_blank" rel="noopener">' +
              esc(p.name) + " &#8599;</a> " +
              '<span class="ra-who"><i class="at-dot" style="background:' +
              (ACC[p.access] || ["#7C8A91"])[0] + '"></i>' +
@@ -728,9 +753,23 @@ window.addEventListener("load", async function () {
   }
 
   function goIcons(pageHref, pageLabel, cc, name) {
+    /* DRAWN, NOT TYPED. It was &#128196; — the page emoji — which every
+       platform renders in its own house style, at its own weight, in colours
+       nothing else here uses; on this ground it came out as a pale grey slab
+       that read as disabled. An inline SVG in currentColor sits on the same
+       line, at the same weight, as everything around it, and now that it is
+       the ONLY way to that page it has to look like a control rather than a
+       decoration somebody forgot to remove. */
     var h = '<span class="at-ico">';
     h += '<a href="' + pageHref + '" title="' + esc(pageLabel) +
-         '" aria-label="' + esc(pageLabel) + '">&#128196;</a>';
+         '" aria-label="' + esc(pageLabel) + '">' +
+         '<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" ' +
+         'fill="none" stroke="currentColor" stroke-width="1.4" ' +
+         'stroke-linecap="round" stroke-linejoin="round">' +
+         '<path d="M3.2 1.8h6l3.6 3.6v8.8H3.2z"/>' +
+         '<path d="M9.2 1.8v3.6h3.6"/>' +
+         '<path d="M5.6 8.4h4.8M5.6 11h3.2"/>' +
+         "</svg></a>";
     if (cc && FLAG_SLUG[String(cc).toUpperCase()]) {
       var lab = T("Which flags flew over") + " " + name + " \u2014 Flag History";
       h += '<a class="at-ico-flag" data-cc="' + esc(String(cc).toUpperCase()) +
@@ -2020,8 +2059,25 @@ window.addEventListener("load", async function () {
                       .join(" · ") + "</span>");
     /* The page behind the panel. A marker is a view; a page is a thing you
        can send somebody, bookmark, or find from a search engine. */
-    h.push('<a class="at-go" href="' + BASE + "place/" + esc(d.id) + '/">' +
-           "Read more about " + esc(d.name) + " &rarr;</a>");
+    /* THE ICON BESIDE IT WENT TO THE SAME PAGE. David: «there is a "read more
+       about…" and also the icon next to the flag, both take me to the same
+       place page? can we keep it to the icon and save the text real estate?»
+       Two controls, one destination, on the row that has least room for
+       either — the heading already carries the name, the volume count and
+       every former spelling. The icon stays and is drawn properly below; the
+       sentence goes. Nothing is lost for a screen reader, which was reading
+       the same href twice and now reads it once, with the same words, from
+       the icon's own label. */
+    /* THE PLACE ITSELF IS A THING YOU DECIDE ABOUT. David: «i search e.g. a
+       place and i want to add it to my to-do list / dossier?» Until now the
+       only markable things here were the books inside it, so a reader who had
+       decided to work Rovinj — and had not yet opened a single register — had
+       nowhere to put that decision, and /my-research/ could not show it.
+       «planning to» is the whole point of a to-do list. */
+    h.push('<span class="at-placemark" data-src="place:' + esc(d.id) + '" ' +
+           'data-src-t="' + esc(d.name) + '" ' +
+           'data-src-where="' + esc(CNAME[d.country] || d.country || "") + '" ' +
+           'data-src-href="' + BASE + "place/" + esc(d.id) + '/"></span>');
     h.push(goIcons(BASE + "place/" + esc(d.id) + "/",
                    T("Everything about") + " " + d.name + " \u2014 its own page",
                    d.country, d.name));
@@ -2159,9 +2215,20 @@ window.addEventListener("load", async function () {
                   (d.volumes.length === 1 ? "" : "s") + " catalogued for this place. ") +
              "<b>Nobody here has opened any of them</b> — these are the " +
              "catalogue's own titles and the links that open the images.</p>");
+      /* A COLUMN PER RECORD TYPE, NOT ONE LIST POURED THROUGH COLUMNS.
+         David: «could we rather show these as columns? eg births all together
+         in a column, then marriages, then deaths?» The list was `columns:
+         22em`, which is CSS multi-column: it takes ONE list and flows it
+         across the available width, so Births ran left-to-right into the
+         second and third columns and Marriages started wherever Births
+         happened to stop. Reading down a column got you three record types
+         and reading across got you one, which is the opposite of both.
+         A grid of three lists instead: each type is a column, each column is
+         read top to bottom, and the headings line up across the top. */
+      h.push('<div class="at-kinds">');
       order.forEach(function (k) {
         if (!byKind[k]) return;
-        h.push('<div class="lab" style="margin-top:10px">' + esc(k) + "</div>");
+        h.push('<div class="at-kind"><div class="lab">' + esc(k) + "</div>");
         h.push('<ul class="at-films">');
         /* EVERY VOLUME IS WRITTEN, AND THE TAIL IS FOLDED. David: «i see a
            "…and 34 more" but i cant click on it to get the more? surely it
@@ -2202,8 +2269,9 @@ window.addEventListener("load", async function () {
           h.push('<li class="ra-vmore"><button type="button" class="ra-vmore-b">' +
                  esc(T("Show all") + " " + byKind[k].length.toLocaleString() + " " +
                      T("volumes")) + " \u25be</button></li>");
-        h.push("</ul>");
+        h.push("</ul></div>");
       });
+      h.push("</div>");          /* .at-kinds */
       h.push("</div>");
     }
 
@@ -2234,7 +2302,17 @@ window.addEventListener("load", async function () {
              "source at all is the worse answer</b>.</p>");
       h.push('<ul class="at-films">');
       warch[d.country].slice(0, 6).forEach(function (r) {
-        h.push('<li><a href="' + esc(r.url) + '" target="_blank" rel="noopener">' +
+        /* SAME ID AS THE PLACE PAGE'S OWN WIKIDATA ROWS (`source:wd-…`), so a
+           national archive marked here and the same one marked there are one
+           record. David: «why do national sources… not have the ability to
+           +?» — because only two of the panel's six lists had ever been
+           wired, and which two was an accident of the order they were
+           written in rather than a decision about what is markable. */
+        h.push('<li data-src="source:wd-' + esc(r.id || r.name) + '" ' +
+               'data-src-t="' + esc(r.name) + '" ' +
+               'data-src-where="' + esc(CNAME[d.country] || d.country) + '" ' +
+               'data-src-href="' + esc(r.url) + '">' +
+               '<a href="' + esc(r.url) + '" target="_blank" rel="noopener">' +
                esc(r.name) + " &#8599;</a> " +
                '<span class="ra-who">' +
                (r.kind === "national-archive" ? "national archive" : "national library") +
@@ -2271,7 +2349,15 @@ window.addEventListener("load", async function () {
          this map knows.
          NOT class ra-filed: that name is already the jurisdiction section's. */
       (near.length ? near : (d.fs || [])).slice(0, 5).forEach(function (c) {
-        h.push('<li><a href="' + esc(c.url) + '" target="_blank" rel="noopener">' +
+        /* AND THE COLLECTIONS. `collection:<url or title>` is the place page's
+           id for the same rows. A collection is a thing you finish — «searched,
+           nothing found» against a whole church-book series is one of the most
+           useful things a reader can record, and there was nowhere to put it. */
+        h.push('<li data-src="collection:' + esc(c.url || c.t) + '" ' +
+               'data-src-t="' + esc(c.t) + '" ' +
+               'data-src-where="' + esc(CNAME[d.country] || d.country || "") + '" ' +
+               'data-src-href="' + esc(c.url) + '">' +
+               '<a href="' + esc(c.url) + '" target="_blank" rel="noopener">' +
                esc(c.t) + " &#8599;</a>" +
                (c.from ? ' <span class="at-y">' + c.from + "\u2013" + c.to + "</span>" : "") +
                (c.filed && c.filed.length
@@ -2313,7 +2399,21 @@ window.addEventListener("load", async function () {
           (c.to && c.to !== c.from ? c.from + "–" + c.to : c.from) + "</span>" : "";
         var who = PROV[c.provider] ? PROV[c.provider].name : c.provider;
         var t = esc(c.title || "Untitled volume");
-        h.push("<li>" + (c.url
+        /* THE SAME BOOKS AS THE LIST ABOVE, SORTED A SECOND WAY — and that is
+           the whole of David's «why do some have a + and some do not». This
+           panel shows a place's volumes twice: grouped by what the register
+           is (Births, Marriages, Deaths) and grouped by what it costs to look
+           at it. The first grouping was wired for marking and the second was
+           not, so the same book carried a + in one list and nothing in the
+           other, a few hundred pixels apart. That reads as a rule about the
+           books when it was only an accident of which loop got the attribute.
+           SAME ID, so it is one mark seen twice rather than two marks that can
+           disagree: `volume:<waypoint or url or title>`, exactly as above. */
+        h.push('<li data-vol="' + esc("volume:" + (c.waypoint || c.url || c.title)) + '"' +
+          ' data-vol-t="' + esc(c.title || "Untitled volume") + '"' +
+          ' data-vol-where="' + esc(d.name + (d.country ? ", " +
+               (CNAME[d.country] || d.country) : "")) + '"' +
+          ' data-vol-href="' + esc(BASE + "place/" + d.id + "/") + '">' + (c.url
           ? '<a href="' + esc(c.url) + '" target="_blank" rel="noopener">' + t + " &#8599;</a>"
           : t) + span + ' <span class="ra-who">' + esc(who) + "</span>" +
           (c.held ? ' <span class="ra-who">held at ' + esc(c.held) + "</span>" : "") + "</li>");
@@ -2573,16 +2673,25 @@ window.addEventListener("load", async function () {
        so with a straight face because it only asked for the nearest three. */
     }).filter(function (x) { return x.km <= 120; })
       .sort(function (a, b) { return a.km - b.km; }).slice(0, 4);
-    if (arch.length) {
-      h.push('<h4>' + esc(T("Where the paper is")) + "</h4><ul>");
-      arch.forEach(function (x) {
-        count++;
-        h.push(checkRow(x.p.url, x.p.name, x.km,
-                        (ACC[x.p.access] || [0, x.p.access])[1],
-                        ACCESS_DOT(x.p.access), count, x.p.at.lat, x.p.at.lon));
-      });
-      h.push("</ul>");
-    }
+    /* HELD BACK, NOT DROPPED — see the note above the ordering below. The
+       archives are built here because the numbering runs in display order and
+       they have to be numbered last; they are emitted after the ring. */
+    var archHtml = [];
+
+    /* WHAT IS HERE, BEFORE WHERE YOU MUST TRAVEL. David, looking at Senj:
+       «if i wanted to research senj you are sending me out of senj first and
+       forgetting everything inside it». He was reading the panel exactly as
+       written — «Where the paper is» led with Rijeka at 51.9 km, Gospić at
+       61.9, Pazin at 80.3 and Zadar at 100.3, and Senj's own Co-Cathedral at
+       0.2 km came after all four.
+       The old order had a reason and it is still in the comment above: an
+       archive is the appointment you have to make, and often the only thing
+       here with an opening time. That is true and it is outranked. A reader
+       who has just found Senj is asking what Senj holds; the drive to Zadar
+       is the answer to a later question, and putting it first buries the
+       parish that wrote the register under four places that did not.
+       So: outward from the ground. Parishes, then burial grounds, then the
+       villages in the ring, then the archives. */
 
     /* 2. The parishes. Where the registers were written. */
     if ((d.parishes || []).length) {
@@ -2606,9 +2715,27 @@ window.addEventListener("load", async function () {
                    ({ w: "way", n: "node", r: "relation" }[g.id[0]] || "way") +
                    "/" + g.id.slice(1)
                  : null;
-        h.push(checkRow(href, g.n, g.km, null, null, count, g.y, g.x));
+        /* «A burial ground» rather than a blank. The row is still worth
+           walking to; what OpenStreetMap does not know is its name. */
+        h.push(checkRow(href, g.n || T("A burial ground"), g.km,
+                        g.n ? null : T("unnamed in OpenStreetMap"),
+                        null, count, g.y, g.x));
       });
       h.push("</ul>");
+    }
+
+    /* 4a. The archives, last, because they are the furthest and the most
+           planning. Built at the top of this function, numbered here. */
+    if (arch.length) {
+      archHtml.push('<h4>' + esc(T("Where the paper is")) + "</h4><ul>");
+      arch.forEach(function (x) {
+        count++;
+        archHtml.push(checkRow(x.p.url, x.p.name, x.km,
+                        (ACC[x.p.access] || [0, x.p.access])[1],
+                        ACCESS_DOT(x.p.access), count, x.p.at.lat, x.p.at.lon));
+      });
+      archHtml.push("</ul>");
+      h = h.concat(archHtml);
     }
 
     /* 4. The villages inside the ring, nearest first — their own registers
@@ -5682,8 +5809,9 @@ window.addEventListener("load", async function () {
      containing it. Within a tier, the place with more volumes first — that is
      the one most likely to be meant, and it is the only signal here that is
      not about spelling. */
-  var SUG_PLACES = 7, SUG_NAMES = 3;
+  var SUG_PLACES = 7, SUG_NAMES = 3, SUG_GAZ = 4;
   var sugBox, sugRows = [], sugIdx = -1, sugTerm = "";
+  var sugNames = null, sugGaz = null;
 
   function sugPlaces(f) {
     var out = [];
@@ -5702,10 +5830,22 @@ window.addEventListener("load", async function () {
     return out.slice(0, SUG_PLACES).map(function (x) { return x[2]; });
   }
 
-  function sugRender(places, names) {
+  /* THE DROPDOWN READ ONLY THE PLACES THE MAP DRAWS, which is 21,754 of the
+     720,252 names this atlas can answer. David typed «Mlj» and was offered
+     one surname; he typed «Brač» and was offered Bračevci, Bracciano,
+     Bracebridge, Bracigliano, Braço do Norte, Bracadale — and «Murvica
+     (Brač)», a village ON the island, while the island itself was missing.
+     Both names work on Enter, because the gazetteer is consulted when the
+     search actually runs. Neither could be SUGGESTED, so a reader typing four
+     letters and watching the list concluded the map had never heard of them.
+     A shelf you can only reach by guessing that it is there is not reachable.
+
+     The gazetteer is a fetch, so it arrives the same way surnames already do:
+     the list paints on drawn places first and grows when the shard lands. */
+  function sugRender(places, names, gaz) {
     sugRows = [];
     var h = [];
-    if (places.length) {
+    if (places.length || (gaz && gaz.length)) {
       h.push('<p class="ra-sug-h">' + esc(T("Places")) + "</p>");
       places.forEach(function (p) {
         var i = sugRows.length; sugRows.push({ kind: "place", p: p });
@@ -5718,6 +5858,20 @@ window.addEventListener("load", async function () {
                "</button>");
       });
     }
+    /* BELOW THE DRAWN PLACES, NEVER ABOVE THEM. A row here is a name the
+       gazetteer holds and the shelf has not been walked for, so it must not
+       outrank a place that actually carries volumes — and it says so on its
+       face rather than looking like a place with a count of nothing. */
+    (gaz || []).forEach(function (g) {
+      var i = sugRows.length; sugRows.push({ kind: "gaz", g: g });
+      h.push('<button type="button" role="option" aria-selected="false" ' +
+             'class="ra-sug-r ra-sug-g" data-i="' + i + '">' +
+             '<span class="ra-sug-n">' + esc(g[0]) + "</span>" +
+             (g[3] ? '<span class="ra-sug-m">' + esc(CNAME[g[3]] || g[3]) +
+                     "</span>" : "") +
+             '<span class="ra-sug-c">' + (g[6] === "isl" ? "island · " : "") +
+             "no volumes here</span></button>");
+    });
     if (names && names.length) {
       h.push('<p class="ra-sug-h">' + esc(T("Names")) + "</p>");
       names.forEach(function (r) {
@@ -5766,6 +5920,18 @@ window.addEventListener("load", async function () {
     var row = sugRows[i];
     if (!row) return;
     sugHide();
+    if (row.kind === "gaz") {
+      /* No place page to open and no marker to light: this name is in the
+         gazetteer and not on the shelf. apply() already handles it — it draws
+         the «That name is a place» panel and flies there when the name
+         matches exactly, which it now does, because the box carries the full
+         name rather than the four letters that were typed. */
+      qbox.value = row.g[0];
+      setQ("q", row.g[0]);
+      clearTimeout(qbox._t);
+      apply();
+      return;
+    }
     if (row.kind === "place") {
       var p = row.p;
       /* The box keeps the name that was chosen, not the fragment typed — but
@@ -5785,8 +5951,25 @@ window.addEventListener("load", async function () {
     var f = fold(term);
     sugTerm = term;
     if (f.length < 2 || !idx.places) { sugHide(); return; }
+    sugNames = null; sugGaz = null;
     var places = sugPlaces(f);
-    sugRender(places, null);
+    sugRender(places, null, null);
+    /* DEDUPED AGAINST WHAT IS ALREADY ON THE LIST, by name and country. Many
+       gazetteer rows ARE drawn places; offering «Senj» twice, once with its
+       volumes and once saying it has none, would be the panel arguing with
+       itself. */
+    var gazSeen = {};
+    places.forEach(function (p) { gazSeen[fold(p.n) + "|" + (p.cc || "")] = 1; });
+    gazetteer(term).then(function (gs) {
+      if (sugTerm !== term) return;
+      var gkeep = (gs || []).filter(function (g) {
+        var k = fold(g[0]) + "|" + (g[3] || "");
+        if (gazSeen[k]) return false;
+        gazSeen[k] = 1;
+        return true;
+      }).slice(0, SUG_GAZ);
+      if (gkeep.length) { sugGaz = gkeep; sugRender(places, sugNames, gkeep); }
+    }).catch(function () {});
     /* The surname shard is a fetch, so the list appears on places first and
        grows a «Names» section when it lands — rather than the whole dropdown
        waiting on a file for a name the reader may not have meant. */
@@ -5801,7 +5984,12 @@ window.addEventListener("load", async function () {
         var n = fold(r.n);
         return n === f || n.indexOf(f) === 0;
       }).slice(0, SUG_NAMES);
-      if (keep.length) sugRender(places, keep);
+      /* BOTH LATE ARRIVALS REDRAW THE WHOLE LIST, so each has to carry the
+         other's result forward or the second one to land erases the first —
+         names wiping out the gazetteer or the other way about, depending on
+         which file was quicker. */
+      sugNames = keep;
+      if (keep.length) sugRender(places, keep, sugGaz);
     }).catch(function () {});
   }
 
@@ -6796,6 +6984,14 @@ window.addEventListener("load", async function () {
   :global(.at-sec-wide .at-films) { display: block; columns: 22em;
     column-gap: 30px; }
   :global(.at-sec-wide .at-films li) { break-inside: avoid; margin-bottom: 5px; }
+  /* BIRTHS, MARRIAGES, DEATHS SIDE BY SIDE — see the note at the loop that
+     builds these. `columns` is reset inside, because the outer rule would
+     otherwise pour each type's list through columns of its own again and put
+     the problem back one level down. */
+  :global(.at-kinds) { display: grid; gap: 4px 30px;
+    grid-template-columns: repeat(auto-fit, minmax(19em, 1fr)); }
+  :global(.at-kinds .at-films) { columns: auto; column-gap: normal; }
+  :global(.at-kinds .at-kind .lab) { margin: 10px 0 2px; }
   /* The country a run of archives belongs to, set as a rule over them. In a
      multi-column list a heading that lands at the foot of a column labels
      nothing, so it is glued to the row beneath it. */
@@ -7151,6 +7347,12 @@ window.addEventListener("load", async function () {
   :global(.ra-sug-m) { font-size: 11.5px; color: var(--ink-3); }
   :global(.ra-sug-c) { margin-left: auto; font-family: var(--mono);
     font-size: 10.5px; color: var(--ink-3); white-space: nowrap; }
+  /* A GAZETTEER ROW IS A REAL ANSWER AND A LESSER ONE. It is the name you
+     typed and a place that exists; it is not somewhere this atlas has walked
+     a register. Marked by a rule rather than by dimming — opacity would take
+     the contrast down with it, which this project has already paid for once
+     — so it reads as a second rank without becoming hard to read. */
+  :global(.ra-sug-g) { border-left: 2px solid var(--rule-strong); }
 
   .ra-recent { position: absolute; top: calc(100% + 6px); left: 0; right: 0;
                z-index: 40; display: flex; align-items: center; gap: 6px;
@@ -7162,6 +7364,14 @@ window.addEventListener("load", async function () {
      heading row now rather than sitting under it — see the note in render(). */
   :global(.at-also) { font: 400 11.5px/1.5 var(--mono); color: var(--ink-3);
     margin: 0; }
+  /* The icons take the place the sentence used to hold on the heading row.
+     Nothing else is needed: `.at-ico a` above already gives every icon in this
+     group its box, its border and its hover, so the page icon inherits the
+     same shape as the flag beside it. The first cut restated all of that on a
+     class of its own and check-built.py caught it — «selectors declared in a
+     style block never reach the built CSS» is exactly what a redundant rule
+     looks like from the outside. */
+  :global(.at-h .at-ico) { margin-left: auto; }
   :global(.at-h .at-go) { margin: 0 0 0 auto; font-size: 12.5px;
     white-space: nowrap; }
 

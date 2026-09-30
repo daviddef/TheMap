@@ -15,7 +15,6 @@ import { readFileSync } from "node:fs";
 import Base from "../../layouts/Base.astro";
 import { flagFor } from "../../lib/flags.js";
 import ProgressKit from "../../components/ProgressKit.astro";
-import LineSwitcher from "../../components/LineSwitcher.astro";
 import VolumeMarks from "../../components/VolumeMarks.astro";
 import { u } from "../../lib/url.js";
 import full from "../../data/places-full.json";
@@ -222,7 +221,14 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
       the first of them rather than at the foot of the page where it used to
       be. It renders nothing. */}
   <ProgressKit />
-  <LineSwitcher />
+
+  {/* THE PLACE ITSELF, MARKABLE — the same control and the SAME id the map
+      panel writes, so deciding to work Rovinj from the map and opening its
+      page afterwards is one decision, not two. «planning to» is how a place
+      gets onto the to-do list before a single register has been opened. */}
+  <p class="placemark" data-src={"place:" + place.id}
+     data-src-t={placeLabel} data-src-where={countryName}
+     data-src-href={selfHref}><span class="placemark-l">This place</span></p>
 
   {/* FIRST, BEFORE THE DATA. Everything below this is what the atlas holds;
       this is the order to open it in. A beginner handed eight headed sections
@@ -352,19 +358,24 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
       <h2>Where the burials are</h2>
       <p class="cap">The other end of a parish: the register records the burial and the
       ground holds it, and a family that left no other trace very often left a stone.
-      <b>These are points on a map, not record collections</b> — named cemeteries from
-      Wikidata and OpenStreetMap, nobody here has visited one, and whether the burial
-      register survives is a question for the parish or the municipality above. Unnamed
-      cemeteries are left out: a shape with no name is not a place anyone can ask about.
-      Only inside a mapped record region.</p>
+      <b>These are points on a map, not record collections</b> — from Wikidata and
+      OpenStreetMap, nobody here has visited one, and whether the burial register
+      survives is a question for the parish or the municipality above.
+      <b>Grounds OpenStreetMap has not named are here too.</b> They used to be left
+      out, on the reasoning that a shape with no name is not a place anyone can ask
+      about — which cost Senj its own graveyard, 2 km away and unnamed, while a named
+      one 7 km off was all this page would show. Being unnamed is a fact about the map
+      data, not about the ground. Only inside a mapped record region.</p>
       <ul class="vols">
         {place.graves.map((c) => (
           <li data-src={"source:grave-" + c.id}
-              data-src-t={c.n} data-src-where={placeLabel} data-src-href={selfHref}>
+              data-src-t={c.n || "A burial ground near " + placeLabel}
+              data-src-where={placeLabel} data-src-href={selfHref}>
             <a href={c.src === "wikidata"
                        ? `https://www.wikidata.org/wiki/${c.id}`
                        : `https://www.openstreetmap.org/${c.id.startsWith("w") ? "way" : "node"}/${c.id.slice(1)}`}
-               target="_blank" rel="noopener">{c.n} ↗</a>
+               target="_blank" rel="noopener">{c.n || "A burial ground"} ↗</a>
+            {!c.n && <span class="who">unnamed in OpenStreetMap</span>}
             <span class="y">{c.km} km</span>
             <span class="who">{c.src === "wikidata" ? "Wikidata" : "OpenStreetMap"}</span>
             <span class="srcmark"></span>

@@ -144,9 +144,13 @@ import LineSwitcher from "../components/LineSwitcher.astro";
             "are working \u2014 " +
             '<a href="' + BASE + 'place/senj/">Senj</a>, say \u2014 and you can mark:</p>' +
             '<ul class="mrhowl">' +
-            "<li><b>A volume</b> \u2014 «mark pages» beside any book, then type " +
-            "the images you did: <code>1-47, 60-72</code>. It remembers where " +
-            "to start again.</li>" +
+            /* NAMING THE GLYPH, because the words came off the button. An
+               instruction that still says «mark pages» sends a reader looking
+               for text that is no longer on the screen. */
+            "<li><b>A volume</b> \u2014 the green <b>+</b> beside any book, then " +
+            "type the images you did: <code>1-47, 60-72</code>. It remembers " +
+            "where to start again, and the <b>+</b> becomes a <b>\u2713</b> so " +
+            "you can see down the list what you have already done.</li>" +
             /* NAMING THE WORDS ON THE BUTTON, not a description of it. An
                instruction that says «the dropdown» when the screen says
                «mark what you did …» makes the reader check whether they are
@@ -176,6 +180,15 @@ import LineSwitcher from "../components/LineSwitcher.astro";
           if (cov.length) { vols++; pages += P.covered(cov); }
           if (b.state === "blocked") { blocked.push(row); return; }
           if (id.indexOf("film:") === 0) { films.push(row); return; }
+          /* A PLACE YOU HAVE DECIDED ABOUT BELONGS TO THAT PLACE'S SECTION,
+             which is the whole reason for marking it: «planning to» against
+             Rovinj is a to-do, and a to-do filed under «other» is lost. It
+             opens the section even when not one book inside it is marked. */
+          if (id.indexOf("place:") === 0) {
+            var ppid = placeIdOf(m) || id.slice(6);
+            (byPlace[ppid] = byPlace[ppid] || []).push(row);
+            return;
+          }
           if (id.indexOf("volume:") === 0) {
             var pid = placeIdOf(m);
             if (pid) { (byPlace[pid] = byPlace[pid] || []).push(row); return; }
@@ -213,11 +226,17 @@ import LineSwitcher from "../components/LineSwitcher.astro";
             var rows = byPlace[pid];
             var label = rows[0].m.where || pid;
             var held = PLACEC[pid] ? (PLACEC[pid].volumes || []).length : null;
+            /* «1 of 19 books marked» must count BOOKS. A place-level mark is
+               in this list too — it is what opens the section — and counting
+               it here would report a book nobody has opened. */
+            var books = rows.filter(function (r) {
+              return r.id.indexOf("volume:") === 0;
+            }).length;
             h.push('<section class="mrp" data-place="' + esc(pid) + '">' +
               '<h3><a href="' + BASE + "place/" + esc(pid) + '/">' + esc(label) + "</a>" +
-              '<span class="mrcount">' + rows.length +
+              '<span class="mrcount">' + books +
               (held != null ? " of " + held : "") + " book" +
-              ((held != null ? held : rows.length) === 1 ? "" : "s") + " marked</span></h3>");
+              ((held != null ? held : books) === 1 ? "" : "s") + " marked</span></h3>");
             h.push('<ul class="mrlist">');
             rows.forEach(function (r) { h.push(rowHtml(r)); });
             h.push("</ul>");

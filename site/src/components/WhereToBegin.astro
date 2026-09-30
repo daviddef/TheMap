@@ -27,6 +27,33 @@
 import allProviders from "../../public/providers.json";
 import providerContacts from "../../../data/provider-contacts.json";
 
+import { flagForSpan } from "../lib/flag-slug.js";
+import flagEras from "../../public/flag-eras.json";
+import regionsDoc from "../../public/regions.json";
+
+/* THE FLAG THAT FLEW, PER ROW. David: «section 1, worth showing the mini
+   flags?» — yes, and the era already knows enough to find them: each row
+   carries a `regime`, and regions.json says which countries' archives that
+   regime governs through. That country plus the row's own years is exactly
+   the question flag-eras.json answers.
+   PERIOD, NOT PRESENT. The modern Austrian flag did not fly over
+   Austria–Hungary, and this atlas keeps the two apart everywhere else; the
+   picking rule is in flag-slug.js and is the same overlap rule the map uses.
+   ONE FLAG PER ROW — several powers governed some of these spans, and a table
+   row has room for the one that covered most of it. */
+const REGIMES = regionsDoc.regimes || {};
+const flagOf = (e) => {
+  const ccs = ((REGIMES[e.regime] || {}).archives) || [];
+  let best = null, bestSpan = 0;
+  for (const cc of ccs) {
+    const f = flagForSpan(flagEras.eras, cc, +e.from, +e.to);
+    if (!f) continue;
+    const span = Math.min(+f.to || +e.to, +e.to) - Math.max(+f.from, +e.from);
+    if (span > bestSpan) { bestSpan = span; best = f; }
+  }
+  return best;
+};
+
 const { place: d, region, eras, names, sources, volumes, parishes, countryName, u } =
   Astro.props;
 
@@ -171,7 +198,11 @@ const eraRows = (eras || []).map((e) => ({
             {timeline.map((e) => (
               <tr>
                 <td class="m">{e.from}–{e.to}</td>
-                <td>{e.polity}</td>
+                <td>{(() => { const f = flagOf(e); return f ? (
+                  <img class="wtb-flag" src={u(`/fl/${f.slug}--${f.id}.svg`)}
+                       width="20" height="13" loading="lazy"
+                       alt="" title={f.polity} />
+                ) : null; })()}{e.polity}</td>
                 <td class="m">{(e.filedUnder || []).length
                   ? e.filedUnder.join(" · ")
                   : <span class="wtb-none">no archive holds this yet</span>}</td>
@@ -260,10 +291,35 @@ const eraRows = (eras || []).map((e) => ({
     {(parishes || []).length > 0 && (
       <li>
         <h3>Find the parish, because that is where the book was</h3>
+        {/* A LIST, BECAUSE THEY ARE A LIST. David: «parishes dont list like
+            the rest, they are just one big blob of text, and should surely
+            allow me to mark them?» Four church names joined with commas
+            inside a sentence — «Co-Cathedral of the Assumption of Mary, Senj,
+            crkva svete Marije od Arta, Church of St. Lucy» — cannot even be
+            read reliably, because half of them contain a comma themselves and
+            the reader cannot tell a name from a place.
+            SAME data-src AS THE PLACE PAGE'S OWN PARISH ROWS, so a parish
+            marked in this checklist and the same one marked further down the
+            page are one mark, not two. */}
         <p>Before civil registration, the parish priest kept the register.
-        The nearest here {(parishes || []).length === 1 ? "is" : "are"}
-        {" "}{(parishes || []).slice(0, 4).map((p) => p.n || p.name).join(", ")}.
         A village without its own church was written into a neighbour's book.</p>
+        {/* .wtb-cols, THE CLASS THE VOLUME LISTS IN THIS SAME COMPONENT USE.
+            David: «font style/size is not the same in section 6?» — it was
+            not, because I gave this list its own font-family and size instead
+            of the one four steps above it, and two lists on one page set from
+            two different rules will always drift. Describing the type once
+            and reusing it is the only version of this that stays true. */}
+        <ul class="wtb-cols">
+          {(parishes || []).slice(0, 4).map((p) => (
+            <li data-src={"source:parish-" + (p.q || p.n || p.name)}
+                data-src-t={p.n || p.name}
+                data-src-where={d.name}
+                data-src-href={u(`/place/${d.id}/`)}>
+              {p.n || p.name}
+              <span class="srcmark"></span>
+            </li>
+          ))}
+        </ul>
       </li>
     )}
 
@@ -361,6 +417,7 @@ const eraRows = (eras || []).map((e) => ({
 </script>
 
 <style>
+
   .wtb-year { margin: 14px 0 4px; padding: 12px 14px; border-radius: 6px;
               background: var(--panel-2); }
   .wtb-year label { display: block; font-family: var(--sans); font-size: 13px;
@@ -432,6 +489,13 @@ const eraRows = (eras || []).map((e) => ({
   .wtb-cols li { font-family: var(--sans); font-size: 13px; line-height: 1.7;
                  color: var(--ink-2); }
   .wtb-cols .m { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+  /* Sized to the type it sits beside, and given a hairline because several of
+     these flags are white at the edge and would otherwise bleed into the
+     page. `alt=""` deliberately: the polity is written immediately after it,
+     so a screen reader announcing the flag as well would say it twice. */
+  .wtb-flag { width: 20px; height: 13px; margin-right: 7px;
+    vertical-align: -2px; border: 1px solid var(--rule);
+    border-radius: 1px; object-fit: cover; }
   .wtb-none { color: var(--ink-3); font-style: italic; }
   .wtb-foot { font-family: var(--sans); font-size: 12.5px; color: var(--ink-3);
               margin: 2px 0 14px; }

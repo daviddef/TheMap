@@ -89,13 +89,24 @@ def licence_gate():
         footer = io.open("site/src/layouts/Base.astro", encoding="utf-8").read()
 
     seen = {}
-    for f in sorted(_g.glob("data/*.json")):
+    # GZIPPED DATA IS STILL DATA. cemeteries-osm.json went from 1.5 MB to 9.4 MB
+    # when the unnamed burial grounds came in, and 2.0 MB gzipped — but a
+    # `data/*.json` glob does not see a `.json.gz`, so compressing it would have
+    # quietly carried it out of this gate. That is exactly the failure this gate
+    # exists to prevent: /data/ once named three licences when there were seven.
+    # A file does not stop needing a licence because it was compressed.
+    for f in sorted(list(_g.glob("data/*.json")) + list(_g.glob("data/*.json.gz"))):
         base = os.path.basename(f)
         if base.startswith(".") or base.startswith("_") or base in OUR_OWN:
             continue
         try:
-            with io.open(f, encoding="utf-8") as fh:
-                d = json.load(fh)
+            if f.endswith(".gz"):
+                import gzip as _gz
+                with _gz.open(f, "rt", encoding="utf-8") as fh:
+                    d = json.load(fh)
+            else:
+                with io.open(f, encoding="utf-8") as fh:
+                    d = json.load(fh)
         except Exception:
             continue                      # shape is other checks' business
         if not isinstance(d, dict):

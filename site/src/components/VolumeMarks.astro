@@ -48,6 +48,27 @@
       return bits.join(" ");
     }
 
+    /* AN EDITOR THAT OPENS OFF-SCREEN READS AS A DEAD BUTTON. David, twice:
+       «what is "mark pages" supposed to do, it does nothing right now». It
+       does — measured on the live site, the click lands and the panel renders
+       709x127 — at top 1388 in a 682-pixel window. The volumes sit in a
+       multi-column list, the slot becomes a block when it fills, and the
+       editor can land a column over and a screen down from the button that
+       opened it. None of that is visible to the person clicking.
+       So the editor is brought to the reader rather than left where the
+       layout happened to put it, and the pages box takes focus so it can be
+       typed into at once. Only scrolled when it is actually out of view, so a
+       reader who can already see it is not jerked around. */
+    function reveal(li) {
+      var ed = li.querySelector(".vm-edit");
+      if (!ed) return;
+      var box = ed.getBoundingClientRect();
+      if (box.top < 8 || box.bottom > window.innerHeight - 8)
+        ed.scrollIntoView({ block: "center", behavior: "smooth" });
+      var f = ed.querySelector(".vm-r");
+      if (f) f.focus({ preventScroll: true });
+    }
+
     function editor(id) {
       var m = P.get(id) || {};
       return '<span class="vm-edit">' +
@@ -182,15 +203,19 @@
        entirely. */
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", paintAll);
-    /* SWITCHING FAMILY REPAINTS EVERYTHING. Every mark on the page belongs to
-       the line that was open when it was drawn, so a switch makes all of them
-       stale at once — including the rings on the map, which paintAll already
-       pokes. Listened for rather than called from the switcher, so a surface
-       added later gets it without the switcher having to know about it. */
-    document.addEventListener("ra-progress-changed", function () { paintAll(); });
     } else {
       setTimeout(paintAll, 0);
     }
+    /* SWITCHING FAMILY REPAINTS EVERYTHING. Every mark on the page belongs to
+       the line that was open when it was drawn, so a switch makes all of them
+       stale at once — including the rings on the map, which paintAll already
+       pokes.
+       IT WAS REGISTERED INSIDE THE readyState BRANCH ABOVE, so on any page
+       that had already finished loading when this script ran — which is most
+       of them, the script is at the foot of the body — the listener was never
+       attached and changing family repainted nothing. Outside the branch, so
+       it is attached either way. */
+    document.addEventListener("ra-progress-changed", function () { paintAll(); });
 
     document.addEventListener("click", function (e) {
       var li = e.target.closest && e.target.closest("li[data-vol]");
@@ -202,7 +227,11 @@
         _editing = id;
         slot.innerHTML = editor(id);
         var f = slot.querySelector(".vm-r");
-        if (f) { f.focus(); f.select(); }
+        if (f) f.select();
+        /* After the layout has settled, not before: the editor has only just
+           been written and its position is not final until the browser has
+           reflowed the column it landed in. */
+        requestAnimationFrame(function () { reveal(li); });
         return;
       }
       if (e.target.closest(".vm-cancel")) { _editing = null; paint(li, true); return; }
@@ -268,9 +297,22 @@
       var slot = slotFor(el, "srcmark");
       var id = el.getAttribute("data-src");
       var m = P.get(id) || {};
+      /* THE EMPTY OPTION HAS TO ASK FOR SOMETHING. David: «i cant see a way
+         to add on the home screen sources, or the places pages either». The
+         control was there on every source row — a 11.5px select reading «not
+         started», which is a STATUS. A reader scanning a place page reads a
+         status as something the atlas is telling them, not as something they
+         are being invited to change, and nothing else on the row looks
+         clickable either. The volumes list says «mark pages» and that one gets
+         found.
+         So the resting label asks, and «not started» comes back as soon as
+         there is a state to return from — because then it is a real choice the
+         reader may want again, rather than a label on an empty box. */
+      var unset = !m.state;
       var opts = STATES.map(function (o) {
+        var text = (o[0] === "" && unset) ? "mark what you did \u2026" : o[1];
         return '<option value="' + o[0] + '"' +
-               (o[0] === (m.state || "") ? " selected" : "") + ">" + o[1] + "</option>";
+               (o[0] === (m.state || "") ? " selected" : "") + ">" + text + "</option>";
       }).join("");
       slot.innerHTML =
         '<select class="src-s" aria-label="What you have done here">' + opts + "</select>" +
@@ -381,7 +423,11 @@
     margin-left: 8px; }
   .srcmark select, .srcmark input { font-family: var(--sans); font-size: 11.5px;
     padding: 2px 5px; border: 1px solid var(--rule); border-radius: 3px;
-    background: var(--panel); color: var(--ink-3); }
+    background: var(--panel); color: var(--ink-3); cursor: pointer; }
+  /* Same bargain as .vm-open above: quiet in a list of forty, and unmistakably
+     a control the moment the row is the one being looked at. */
+  [data-src]:hover .srcmark select { color: var(--accent);
+    border-color: var(--accent); }
   [data-src].src-has .srcmark select { color: var(--accent);
     border-color: var(--accent); }
   .placemark { margin: 16px 0 0; }

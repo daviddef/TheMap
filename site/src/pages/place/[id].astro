@@ -66,7 +66,7 @@ try {
 } catch (e) { volumes = []; det = {}; }
 /* Narrowed to what is near, not merely in the same country — see
    sources-by-country.js. Italy put 126 archives on every Italian page. */
-const { shown: national, hidden: nationalHidden } =
+const { shown: national, hidden: nationalHidden, worldwide } =
   sourcesNear(place.country, place.lat, place.lon, 10);
 /* Wikidata's national archive and library, where this atlas has nothing
    curated for the country. Kept apart from `national` above because those
@@ -470,8 +470,7 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
       <h2>The sources for {countryName}</h2>
       <p class="cap">National and regional sources that cover this ground <b>whether or not
       anybody has walked it here</b> — which makes them the answer, not the consolation, for
-      a place with no volumes recorded on it. The worldwide services are left out: they cover
-      everywhere, so they say nothing about here.{nationalHidden > 0 && <> A country-wide body is
+      a place with no volumes recorded on it.{nationalHidden > 0 && <> A country-wide body is
       listed whatever the distance; a provincial archive is a claim over its own province, so
       those are the <b>nearest</b> ones. <b>{nationalHidden.toLocaleString()} more</b> cover {countryName}
       and are on the <a href={u(`/country/${place.country.toLowerCase()}/`)}>country page</a>.</>}</p>
@@ -482,6 +481,34 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
             <a href={u(`/archive/${p.id}/`)}>{p.name}</a>
             <span class="who">{ACCESS[p.access] || p.access}</span>
             {p.at && <span class="who">{p.at.place}{p.km != null && ` — ${p.km.toLocaleString()} km`}</span>}
+            <span class="srcmark"></span>
+            {p.what && <><br /><span class="who">{p.what}</span></>}
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  {/* THE ONES THAT COVER EVERYWHERE, INCLUDING HERE. Kept out of the list
+      above so a global aggregator never outranks the archive that actually
+      holds the paper — but no longer kept off the page. Eleven of these twelve
+      appeared on no place page in this atlas, for any country, which meant a
+      reader working Croatia was never told Geneanet or Find a Grave exist. See
+      the note at the top of sources-by-country.js for why the old exclusion
+      did not survive being measured. */}
+  {worldwide.length > 0 && (
+    <section style="margin-top:34px">
+      <h2>Sources that cover everywhere</h2>
+      <p class="cap">Not about {countryName} in particular — these reach most of the
+      world, which includes here. They are listed after the local sources because a
+      body that holds this ground's own paper is a better first stop than one that
+      holds a little of everywhere's. Worth knowing they exist all the same.</p>
+      <ul class="vols" style="margin-top:12px">
+        {worldwide.map((p) => (
+          <li data-src={"source:" + p.id} data-src-t={p.name}
+              data-src-where="worldwide" data-src-href={u(`/archive/${p.id}/`)}>
+            <a href={u(`/archive/${p.id}/`)}>{p.name}</a>
+            <span class="who">{ACCESS[p.access] || p.access}</span>
             <span class="srcmark"></span>
             {p.what && <><br /><span class="who">{p.what}</span></>}
           </li>

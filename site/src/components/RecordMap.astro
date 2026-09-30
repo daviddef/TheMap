@@ -694,7 +694,22 @@ window.addEventListener("load", async function () {
     if (!cc) return "";
     var nat = provs.providers.filter(function (p) {
       return (p.countries || []).indexOf(cc) > -1;
-    }).sort(function (a, b) {
+    });
+    /* THE SAME FALLBACK THE PAGE MAKES, because the panel is the surface most
+       readers actually meet. 134 of the 237 countries this atlas names have no
+       provider of their own, and this list was simply empty for all of them
+       while twelve worldwide services sat in providers.json declaring
+       `countries: ["*"]`. Held back where a country has its own sources, so
+       Italy's archives are not buried under Ancestry; shown where it has none,
+       because there «nothing» was never true. */
+    /* The twelve that cover everywhere are drawn as their own group after the
+       country's own, never mixed in — see sources-by-country.js. Held to a
+       separate list here for the same reason the page holds one: they must not
+       outrank the archive that actually holds this ground's paper. */
+    var ww = provs.providers.filter(function (p) {
+      return (p.countries || []).indexOf("*") > -1;
+    });
+    nat = nat.sort(function (a, b) {
       var K = ["national-archive", "diocesan", "regional-archive", "library",
                "volunteer", "aggregator", "commercial"];
       var ka = K.indexOf(a.kind), kb = K.indexOf(b.kind);
@@ -742,6 +757,26 @@ window.addEventListener("load", async function () {
              '<a href="' + BASE + "country/" + cc.toLowerCase() + '/">' +
              esc(CNAME[cc] || cc) + " page</a>.</li>");
     h.push("</ul></div>");
+    /* AND THE WORLDWIDE GROUP, last. It is the same list on every country, so
+       it is labelled for what it is rather than dressed as a national source. */
+    if (ww.length) {
+      h.push('<div class="at-sec"><div class="lab">' +
+             esc(T("Sources that cover everywhere")) + "</div>" +
+             '<p class="at-sub">' +
+             esc("Not about " + (CNAME[cc] || cc) + " in particular — these reach " +
+                 "most of the world, which includes here.") + "</p><ul class=\"at-films\">");
+      ww.forEach(function (p) {
+        h.push('<li data-src="source:' + esc(p.id) + '" ' +
+               'data-src-t="' + esc(p.name) + '" data-src-where="worldwide" ' +
+               'data-src-href="' + BASE + "archive/" + esc(p.id) + '/">' +
+               '<a href="' + esc(p.url) + '" target="_blank" rel="noopener">' +
+               esc(p.name) + " &#8599;</a> " +
+               '<span class="ra-who"><i class="at-dot" style="background:' +
+               (ACC[p.access] || ["#7C8A91"])[0] + '"></i>' +
+               esc((ACC[p.access] || [0, p.access])[1]) + "</span></li>");
+      });
+      h.push("</ul></div>");
+    }
     return h.join("");
   }
 

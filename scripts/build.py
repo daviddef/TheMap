@@ -271,11 +271,21 @@ def main():
     # means the harvest is thin, not that nobody was buried; the page says so
     # rather than letting a blank imply it.
     CEM = []
+    # GZIP FIRST, PLAIN SECOND — the same bargain scripts/gazetteer.py makes
+    # and for the same reason: a working tree part-way through a rebuild, or an
+    # older checkout, may still hold the plain file, and reading it beats
+    # failing. When both exist the compressed one is the newer contract.
+    def _cem_open(stem):
+        import gzip as _gz
+        if os.path.exists(stem + ".gz"):
+            return _gz.open(stem + ".gz", "rt", encoding="utf-8")
+        return open(stem, encoding="utf-8")
     for _f, _src in (("data/cemeteries-wikidata.json", "wikidata"),
                      ("data/cemeteries-osm.json", "osm")):
         try:
-            for _c in json.load(open(_f))["features"]:
-                _c = dict(_c); _c["src"] = _src; CEM.append(_c)
+            with _cem_open(_f) as _fh:
+                for _c in json.load(_fh)["features"]:
+                    _c = dict(_c); _c["src"] = _src; CEM.append(_c)
         except FileNotFoundError:
             pass
     cem_by_region = {}
@@ -289,12 +299,18 @@ def main():
                 continue
             d = km(place["lat"], place["lon"], c["y"], c["x"])
             if d <= within:
-                near.append({"n": c["n"], "km": round(d, 1), "src": c["src"],
+                near.append({"n": c.get("n"), "km": round(d, 1), "src": c["src"],
                              "id": c.get("q") or c.get("id")})
         near.sort(key=lambda z: z["km"])
         out = []
         for c in near:
-            if any(o["n"] == c["n"] and abs(o["km"] - c["km"]) < 0.3 for o in out):
+            # TWO UNNAMED GROUNDS ARE NOT THE SAME GROUND. The dedupe is «same
+            # name within 300 m», which was safe while every row had a name and
+            # is not now: `None == None` is true, so two genuinely different
+            # unnamed cemeteries a couple of hundred metres apart would collapse
+            # into one. Only a real name can vouch for two rows being the same.
+            if c.get("n") and any(o["n"] == c["n"] and
+                                  abs(o["km"] - c["km"]) < 0.3 for o in out):
                 continue                      # the same ground, twice named
             out.append(c)
             if len(out) >= most:
@@ -997,6 +1013,63 @@ def main():
         # Not fatal: the harvest is a separate script and the page degrades to
         # naming the archive without its address.
         print("provider-contacts.json missing — /my-research/ will show no addresses")
+    # ---- ERA FLAGS AS FILES, NOT AS INLINE MARKUP -----------------------
+    #
+    # The «who governed» table on a place page shows the flag that actually
+    # flew over that ground in each span. The artwork is ~460 bytes of SVG per
+    # flag, which looks free until it is multiplied: eight rows on each of
+    # 21,754 place pages is about 80 MB of duplicated markup, on a project
+    # that has measured and written down what its pages weigh.
+    #
+    # So each flag is written ONCE, as its own file, and referenced. Only the
+    # flags some regime actually governs with are written — 43 regimes name a
+    # handful of countries between them — so this is tens of kilobytes shared
+    # and cached, against 500 bytes of <img> per page.
+    try:
+        with open("site/public/flag-eras.json", encoding="utf-8") as fh:
+            _fe = json.load(fh)["eras"]
+        with open("site/public/era-flags.json", encoding="utf-8") as fh:
+            _fa = json.load(fh)["art"]
+        with open("site/public/regions.json", encoding="utf-8") as fh:
+            _rg = json.load(fh).get("regimes", {})
+        # Mirrors site/src/lib/flag-slug.js. Kept in step by hand, and named
+        # here so the next person to change one knows the other exists.
+        _SLUG = {
+            "AR": "argentina", "AT": "austria", "AU": "australia",
+            "BA": "bosnia", "BE": "belgium", "BY": "belarus", "CA": "canada",
+            "CZ": "czechia", "DE": "germany", "DK": "denmark", "EE": "estonia",
+            "ES": "spain", "FI": "finland", "GB": "uk", "HR": "croatia",
+            "HU": "hungary", "IE": "ireland", "IT": "italy", "LT": "lithuania",
+            "LV": "latvia", "NL": "netherlands", "NO": "norway",
+            "PL": "poland", "PT": "portugal", "RO": "romania", "RS": "serbia",
+            "RU": "russia", "SE": "sweden", "SI": "slovenia", "SK": "slovakia",
+            "TR": "turkey", "UA": "ukraine", "US": "united-states",
+            "ZA": "south-africa",
+        }
+        _want = set()
+        for _r in _rg.values():
+            for _cc in (_r.get("archives") or []):
+                _b = _SLUG.get(str(_cc).upper())
+                if _b:
+                    _want.add(_b + "-flags")
+        _fl = os.path.join(OUT, "fl")
+        shutil.rmtree(_fl, ignore_errors=True)
+        os.makedirs(_fl)
+        _n = _bytes = 0
+        for _slug in sorted(_want):
+            for _id, _svg in (_fa.get(_slug) or {}).items():
+                _p = os.path.join(_fl, _slug + "--" + _id + ".svg")
+                with open(_p, "w", encoding="utf-8") as fh:
+                    fh.write(_svg)
+                _n += 1
+                _bytes += len(_svg.encode())
+        print(f"fl/*.svg        {_bytes/1024:8.1f} KB  {_n} era flags for "
+              f"{len(_want)} countries the regimes actually name")
+    except (FileNotFoundError, KeyError) as _e:
+        # Not fatal: the table degrades to the words it always had.
+        print(f"era flags not written ({_e}) — the «who governed» table will "
+              f"show no flags")
+
     # Wikidata's archives, served separately and drawn differently, because
     # 4,929 unchecked rows beside 178 checked ones would make the checked ones
     # mean nothing.

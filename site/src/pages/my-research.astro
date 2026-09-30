@@ -17,6 +17,11 @@ import Base from "../layouts/Base.astro";
 import { u } from "../lib/url.js";
 import ProgressKit from "../components/ProgressKit.astro";
 import LineSwitcher from "../components/LineSwitcher.astro";
+
+/* The links below are rendered by Astro rather than by the dossier's script,
+   so they need the base path at build time, not the one define:vars hands the
+   inline script further down. */
+const BASE_ = u("/");
 ---
 <Base
   title="My research"
@@ -55,6 +60,41 @@ import LineSwitcher from "../components/LineSwitcher.astro";
   business, not ours.</p>
 
   <div id="mr-body"></div>
+
+  {/* RESEARCH THAT IS NOT IN THIS BROWSER. Everything above is marks kept in
+      localStorage; these are finished pages, written for other people as
+      favours, and they are the one part of «my research» that survives a
+      cleared cache. They were nowhere on this page, so the page claimed to be
+      the whole of David's research while omitting three families of it.
+
+      EACH ONE IS ALSO GROUND THIS ATLAS HOLDS, and the link goes both ways on
+      purpose: Rovinj has 29 volumes catalogued here, and Mljet's Babino Polje
+      has 4 — Mljet being the island the gazetteer could not find at all until
+      today, which is why the Banićević page is worth putting beside it. Sveti
+      Rok is not a drawn place, so it is not linked rather than linked to
+      nothing. */}
+  <section class="mrext">
+    <div class="lab">Research you have done elsewhere</div>
+    <p class="cap">Pages written as favours, on
+    <a href="https://daviddef.github.io/External-Family-Work/" target="_blank"
+       rel="noopener">External Family Work</a>. These are finished write-ups
+    rather than marks, so they live on their own site and not in this
+    browser.</p>
+    <ul class="mrextl">
+      <li><a href="https://daviddef.github.io/External-Family-Work/vidakovic-vrban/"
+             target="_blank" rel="noopener">Vidaković &amp; Vrban</a>
+        <span class="mrextw">Sveti Rok</span></li>
+      <li><a href="https://daviddef.github.io/External-Family-Work/apollonio-champion/"
+             target="_blank" rel="noopener">Apollonio &amp; Champion</a>
+        <span class="mrextw">Rovigno, Istria —
+          <a href={BASE_ + "place/rovinj/"}>Rovinj in this atlas</a>, 29 volumes</span></li>
+      <li><a href="https://daviddef.github.io/External-Family-Work/banicevic-mljet/"
+             target="_blank" rel="noopener">Banićević &amp; Banicevich</a>
+        <span class="mrextw">Mljet —
+          <a href={BASE_ + "place/babinopolje/"}>Babino Polje</a>, the island's
+          largest village</span></li>
+    </ul>
+  </section>
 
   <script is:inline define:vars={{ BASE: u("/") }}>
     (function () {
@@ -410,6 +450,17 @@ import LineSwitcher from "../components/LineSwitcher.astro";
 </Base>
 
 <style>
+  /* Set apart from the dossier above it, because it is a different kind of
+     thing: finished pages rather than progress, and on another site. */
+  .mrext { margin: 34px 0 0; padding: 16px 18px; border: 1px solid var(--rule);
+    border-left: 3px solid var(--brass); border-radius: 3px;
+    background: var(--panel); }
+  .mrextl { list-style: none; margin: 12px 0 0; padding: 0;
+    display: flex; flex-direction: column; gap: 10px; }
+  .mrextl > li { font-family: var(--sans); font-size: 14.5px; }
+  .mrextl > li > a { font-weight: 600; }
+  .mrextw { display: block; font-size: 12.5px; color: var(--ink-3); }
+
   .mrbtns { display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline;
     margin: 18px 0 0; }
   .mrbtns button { font-family: var(--sans); font-size: 14px; padding: 9px 14px;

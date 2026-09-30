@@ -116,7 +116,25 @@ jobs:
         id: datacache
         uses: actions/cache@v4
         with:
-          path: site/public
+          # BOTH PLACES THE DATA STEP WRITES, NOT JUST THE OBVIOUS ONE. This
+          # cached site/public only, and `npm run data` also generates three
+          # gitignored files into site/src/data — places-full.json,
+          # collections-full.json and surnames.json. On a cache MISS nobody
+          # noticed, because the data step ran and made them. On the first
+          # cache HIT the step was skipped, those files were never created, and
+          # check-data.py stopped the build with 22 errors: «imports
+          # ../data/places-full.json … that file is not there».
+          #
+          # Two deploys failed that way before it was caught, and both were
+          # pushes that touched only site/src — which is precisely the case
+          # this cache was added to make fast. A cache that only works when it
+          # misses is worse than no cache: it turns a green build into a red
+          # one exactly when it is doing its job.
+          path: |
+            site/public
+            site/src/data/places-full.json
+            site/src/data/collections-full.json
+            site/src/data/surnames.json
           key: ${{ steps.datakey.outputs.k }}
 
       - name: Build the data

@@ -250,7 +250,17 @@ def main():
                 continue                      # cheap box before the real sum
             d = km(place["lat"], place["lon"], c["y"], c["x"])
             if d <= within:
-                near.append({"n": c["n"], "q": c["q"], "km": round(d, 1)})
+                # WITH COORDINATES, BECAUSE THE PANEL NUMBERS THEM AND THE MAP
+                # PINS THEM. David: «why dont i see any eg number 1 to 10 on our
+                # map?» Because a parish row carried a name, a Wikidata id and a
+                # distance and no position at all — and checkRow only pins a row
+                # when `num != null && y != null && x != null`, so every parish
+                # and every burial ground failed that test silently. The panel
+                # counted 1 to 25 and the map drew 15 to 23. A number in a list
+                # with no pin beside it is worse than no number: it tells the
+                # reader to look for something that is not there.
+                near.append({"n": c["n"], "q": c["q"], "km": round(d, 1),
+                             "y": round(c["y"], 5), "x": round(c["x"], 5)})
         near.sort(key=lambda z: z["km"])
         return near[:most]
 
@@ -299,8 +309,10 @@ def main():
                 continue
             d = km(place["lat"], place["lon"], c["y"], c["x"])
             if d <= within:
+                # Same omission as the parishes above, same consequence: no pin.
                 near.append({"n": c.get("n"), "km": round(d, 1), "src": c["src"],
-                             "id": c.get("q") or c.get("id")})
+                             "id": c.get("q") or c.get("id"),
+                             "y": round(c["y"], 5), "x": round(c["x"], 5)})
         near.sort(key=lambda z: z["km"])
         out = []
         for c in near:

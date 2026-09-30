@@ -87,8 +87,51 @@ jobs:
             https://github.com/daviddef/TheMap/releases/download/harvest-data/fs-volumes-world.json.gz
           python3 -c "import gzip,json,sys; d=json.load(gzip.open('data/fs-volumes-world.json.gz','rt',encoding='utf-8')); n=sum(len(v) for v in d['byPlace'].values()); print(f'{n:,} volumes over {len(d[\"byPlace\"]):,} places'); sys.exit(0 if n > 20000 else 'the artefact downloaded but is too small to be right')"
 
-      - name: Build
-        run: npm run build
+      # ---- THE DATA STEP IS CACHED, AND ONLY ON AN EXACT MATCH ------------
+      #
+      # `npm run build` is `npm run data && npm run check && astro build`, and
+      # the data half rebuilds index.json, 21,754 place files and every surname
+      # shard from scratch on every push — including a push that changed one
+      # .astro file and no data at all. Deploys run 1h09 to 1h36; David: «do we
+      # need to keep doing full deploys… why is only that one page not
+      # building?»
+      #
+      # WHAT site/public/ ACTUALLY DEPENDS ON is data/** and scripts/**, and
+      # nothing else: build.py, build-surnames.py and build-eras.py read from
+      # those two and write into site/public. So the key is a hash of both,
+      # computed AFTER the harvest artefact lands in data/ so a new artefact
+      # counts as a change. An exact hit means the inputs are byte-identical
+      # and the output would be byte-identical too.
+      #
+      # NO restore-keys, DELIBERATELY. A prefix match would restore a
+      # near-miss — public/ built from different data — and publish it as
+      # current. This workflow already refuses `continue-on-error` on the
+      # artefact download for the same reason: a wrong site that looks right is
+      # the one failure this project cannot afford. Either the inputs match
+      # exactly and the cache is used, or the data is rebuilt.
+      - name: Key the data cache
+        id: datakey
+        run: echo "k=data-${{ hashFiles('data/**', 'scripts/**') }}" >> "$GITHUB_OUTPUT"
+      - name: Restore built data
+        id: datacache
+        uses: actions/cache@v4
+        with:
+          path: site/public
+          key: ${{ steps.datakey.outputs.k }}
+
+      - name: Build the data
+        if: steps.datacache.outputs.cache-hit != 'true'
+        run: npm run data
+        working-directory: site
+      - name: Data unchanged
+        if: steps.datacache.outputs.cache-hit == 'true'
+        run: echo "::notice::site/public restored from cache — data/ and scripts/ are unchanged, so the data step was skipped"
+
+      # `npm run build` is data + site; CI runs the halves separately so the
+      # data half can be skipped on a cache hit. The chain itself stays in
+      # package.json so the two definitions cannot drift apart.
+      - name: Build the site
+        run: npm run build:site
         working-directory: site
       # WHAT THE SITE ACTUALLY WEIGHS, MEASURED WHERE IT IS CLEAN.
       # Every size decision on this project has been made against a local

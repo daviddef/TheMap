@@ -9,10 +9,11 @@
     "check": "python3 ../scripts/check-data.py && npm run test",
     "dev": "npm run data && astro dev --port 4330",
     "dev:fast": "NODE_OPTIONS=--max-old-space-size=10240 astro dev --port 4331",
-    "build": "npm run data && npm run check && NODE_OPTIONS=--max-old-space-size=10240 astro build && npm run check:built",
+    "build": "npm run data && npm run build:site",
     "preview": "astro preview --port 4332",
     "check:built": "python3 ../scripts/check-built.py",
-    "test:e2e": "playwright test test/e2e --config test/e2e/playwright.config.js"
+    "test:e2e": "playwright test test/e2e --config test/e2e/playwright.config.js",
+    "build:site": "npm run check && NODE_OPTIONS=--max-old-space-size=10240 astro build && npm run check:built"
   },
   "dependencies": {
     "@daviddef/archive-kit": "github:daviddef/TheArchiveKit#81746764e2f89d84bed9c44853bf7f9b2ec6a8f3",

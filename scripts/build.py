@@ -1105,6 +1105,12 @@ def main():
         # for display and catastrophic for matching, because "Breslu" is not
         # the word on anybody's certificate and "Breslau" is.
         rec = [r["n"], r["y"], r["x"], r["k"], r["a"], r["q"]]
+        # A SEVENTH SLOT, ADDED ONLY WHEN THERE IS SOMETHING TO PUT IN IT.
+        # Every reader of this array indexes it positionally, so appending is
+        # the one safe change: an older shard is six long and reads exactly as
+        # it did. `isl` says the row is an island rather than a town.
+        if r.get("f"):
+            rec.append(r["f"])
         keys = set()
         for form in r["q"].split(" "):
             key = shard_key(form)

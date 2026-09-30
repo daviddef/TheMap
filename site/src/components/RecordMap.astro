@@ -5385,7 +5385,16 @@ window.addEventListener("load", async function () {
             esc(r[1].toFixed(2) + "\u00b0N " + r[2].toFixed(2) + "\u00b0E") +
             "</span>"
           : "";
-        h.push("<p><b>" + esc(r[0]) + "</b> — " + esc(CNAME[r[3]] || r[3]) + where +
+        /* AN ISLAND SAYS SO. Without it «Mljet — Croatia» reads as a town,
+           and the reader writes to a parish that does not exist. The volumes
+           are filed under the villages on it — Babino Polje, Sobra, Goveđari,
+           Polače — which are the markers the map has just flown to, so the
+           row's job is to explain what they are looking at rather than to
+           list them. `r[6]` is only present on rows built after islands were
+           admitted; an older shard is six long and reads exactly as before. */
+        var isIsland = r[6] === "isl";
+        h.push("<p><b>" + esc(r[0]) + "</b> — " +
+               (isIsland ? "an island, " : "") + esc(CNAME[r[3]] || r[3]) + where +
                (older.length ? '<br><span class="ra-who">also written ' +
                  older.map(esc).join(" · ") + "</span>" : "") +
                (matchedOn ? '<br><span class="ra-who">contains what you typed, ' +

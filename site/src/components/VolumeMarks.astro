@@ -23,11 +23,69 @@
       });
     }
 
-    function summary(id) {
+    /* A PILL, NOT A SENTENCE. David: «instead of the words "mark pages" could
+       we just have a neat green icon/pill? or an alternate one if we already
+       marked it and want to edit or remove?» Forty rows each ending in two
+       words of instruction is a column of repeated prose, and the instruction
+       is only news the first time.
+       + to add, ✓ once there is something there — so the state of the row is
+       legible down the whole list at a glance rather than by reading it.
+
+       THE WORDS DO NOT DISAPPEAR, THEY MOVE TO WHERE A SCREEN READER FINDS
+       THEM. `aria-label` carries the full sentence including the book's own
+       title, and `title` gives a sighted reader the same on hover. This
+       project already made exactly this trade for the menu burger and wrote
+       down why: a bare glyph with no accessible name announces itself as
+       «button» and nothing else, which is not the bargain being made here. */
+    function summary(id, what) {
       var m = P.get(id);
+      var of = what ? " in " + what : "";
       if (!m || !m.done || !m.done.length) {
-        return '<button type="button" class="vm-open">mark pages</button>';
+        return '<button type="button" class="vm-open vm-pill" ' +
+               'aria-label="Mark the pages you have done' + esc(of) + '" ' +
+               'title="Mark the pages you have done">+</button>';
       }
+      var done = P.covered(m.done);
+
+      /* AMBER UNTIL IT IS FINISHED, GREEN WHEN IT IS. David: «if its not
+         complete it should probably be marked amber rather? and green is when
+         all pages done or confirmed complete?» Right, and it makes the list
+         answer a better question than «have I touched this»: it answers «what
+         is still open».
+         COMPLETE MEANS THE READER SAID SO. The only way this can know a book
+         is finished is a total to measure against, and the total is the
+         reader's — see ProgressKit's note on denominators this atlas does not
+         have. So a book with pages recorded and no total stays amber however
+         many pages are in it, and the tooltip says why rather than leaving
+         somebody wondering what is keeping it off green.
+         NOT COLOUR ALONE: + for nothing, ✓ outlined for started, ✓ filled for
+         finished. Shape and fill carry it too, so it survives a reader who
+         cannot tell the two hues apart. */
+      var whole = m.total && done >= m.total;
+      var tip = P.fmt(m.done) + " \u00b7 " + done + " page" +
+                (done === 1 ? "" : "s") +
+                (m.total ? " of " + m.total : "") +
+                " \u00b7 start again at " + P.resume(m.done) +
+                (m.total ? "" : " \u00b7 give a total to mark it finished");
+
+      /* THE SUMMARY MOVES INTO THE BUTTON. David: «can that be shown once i
+         click the button, not consume real estate on the main page?» It was a
+         second line under every marked row — ranges, a page count, a resume
+         point and a date — which on a place page with forty books is forty
+         extra lines of the thing he had already read. It is all still here:
+         on the pill as its title and its accessible name, and in full the
+         moment the editor opens. */
+      return '<button type="button" class="vm-open vm-pill ' +
+             (whole ? "vm-pill-on" : "vm-pill-part") + '" ' +
+             'aria-label="' + esc((whole ? "Finished" : "In progress") + of +
+                                  " \u2014 " + tip) + '" ' +
+             'title="' + esc(tip) + '">\u2713</button>';
+    }
+
+    /* Kept for the editor, which does want the whole sentence. */
+    function detail(id) {
+      var m = P.get(id);
+      if (!m || !m.done || !m.done.length) return "";
       var done = P.covered(m.done);
       var bits = ['<b>' + esc(P.fmt(m.done)) + "</b>"];
       /* THE TOTAL IS THE READER'S, so the share is only shown once they have
@@ -44,7 +102,6 @@
       bits.push('<span class="vm-res">start again at ' + P.resume(m.done) + "</span>");
       if (m.note) bits.push('<span class="vm-note">' + esc(m.note) + "</span>");
       if (m.since) bits.push('<span class="vm-since">' + esc(m.since) + "</span>");
-      bits.push('<button type="button" class="vm-open">edit</button>');
       return bits.join(" ");
     }
 
@@ -71,11 +128,27 @@
 
     function editor(id) {
       var m = P.get(id) || {};
+      /* THE WHOLE SENTENCE, HERE, WHERE IT WAS ASKED FOR. It came off the row
+         to stop forty books costing forty extra lines; it belongs in the panel
+         the reader deliberately opened. */
+      var d = detail(id);
+      /* ONE THING PER ROW. David: «form is a mess. can you clean it up» — and
+         it was: every field, the running summary, a checkbox and three
+         buttons were siblings in one wrapping flex line, so the layout was
+         decided by how wide the panel happened to be and the summary ended up
+         wedged between «your count» and the pages box.
+         Explicit rows instead, top to bottom in the order the reader fills
+         them: what you have already recorded, then the numbers, then the
+         note, then the one checkbox that changes who the work belongs to,
+         then the buttons. Nothing wraps into anything else. */
       return '<span class="vm-edit">' +
+        (d ? '<span class="vm-detail">' + d + "</span>" : "") +
+        '<span class="vm-row">' +
         '<label>pages done <input class="vm-r" type="text" inputmode="numeric" ' +
         'placeholder="1-47, 60-72" value="' + esc(P.fmt(m.done)) + '"></label>' +
         '<label>of <input class="vm-t" type="text" inputmode="numeric" size="5" ' +
         'placeholder="total" value="' + esc(m.total || "") + '"></label>' +
+        "</span>" +
         '<label class="vm-notel">note <input class="vm-no" type="text" ' +
         'placeholder="found something?" value="' + esc(m.note || "") + '"></label>' +
         /* THE ONE CHECKBOX THAT CHANGES WHOSE WORK THIS IS. Scanning a page
@@ -87,10 +160,11 @@
         '<label class="vm-walk"><input class="vm-w" type="checkbox"' +
         (m.walked && m.walked.length ? " checked" : "") +
         "> I read every entry (counts for every family)</label>" +
+        '<span class="vm-btns">' +
         '<button type="button" class="vm-save">save</button>' +
         '<button type="button" class="vm-cancel">cancel</button>' +
         (m.done ? '<button type="button" class="vm-clear">forget</button>' : "") +
-        "</span>";
+        "</span></span>";
     }
 
     /* THE SLOT IS MADE, NOT DEMANDED. Every list that wants marking had to
@@ -98,13 +172,26 @@
        list meant two edits and I made one of them — the sources on a place
        page declared ids and had nowhere to draw. A row that says what it is
        is enough; the control follows. */
+    /* FIRST CHILD, NOT LAST. David: «can the icon be on the left? its getting
+       ugly on right». It was: a trailing pill sat after the title, the year
+       span, the denomination and the film number, so in a three-column list
+       it wrapped to its own line and landed under the middle of the text —
+       and where it landed changed with the length of every title, so a column
+       of them was a scatter rather than a column.
+       At the head of the row it is a margin: every pill at the same x, which
+       is what makes a list of forty scannable at all. */
     function slotFor(el, cls) {
       var slot = el.querySelector("." + cls);
       if (!slot) {
         slot = document.createElement("span");
         slot.className = cls;
-        el.appendChild(slot);
       }
+      /* MOVED, NOT ONLY CREATED. Place pages ship their own
+         <span class="volmark"> at the END of the row — that is how this
+         component was originally fed — so creating it at the front fixed the
+         map panel and left every place page with the pill still trailing.
+         Whoever made the slot, it belongs at the head of the row. */
+      if (el.firstChild !== slot) el.insertBefore(slot, el.firstChild);
       return slot;
     }
 
@@ -127,7 +214,14 @@
          cannot be raced. `force` is save and cancel saying «this row was just
          edited, replace it now». */
       if (!force && _editing === li.getAttribute("data-vol")) return;
-      slot.innerHTML = summary(li.getAttribute("data-vol"));
+      /* WRITE ONLY WHAT CHANGES. Every paint replaced the slot's innerHTML
+         whether or not a single character of it differed, and each of those
+         writes is a mutation the observer below then reacts to. Comparing
+         first costs a string compare and breaks the feedback at its source:
+         a panel that is already correct produces no mutations at all. */
+      var html = summary(li.getAttribute("data-vol"),
+                         li.getAttribute("data-vol-t"));
+      if (slot.innerHTML !== html) slot.innerHTML = html;
       li.classList.toggle("vm-has", !!(P.get(li.getAttribute("data-vol")) || {}).done);
     }
 
@@ -186,11 +280,28 @@
       _painting = true;
       /* After the batch, not during it — innerHTML fires many records and
          painting inside the callback would re-enter the observer. */
-      /* Held across the paint, not released before it: paintAll writes into
-         the very subtree being observed, so clearing the flag first let each
-         pass schedule the next one — the trace showed several hundred repaints
-         of one row, five milliseconds apart, for a single click. */
-      setTimeout(function () { paintAll(); _painting = false; }, 0);
+      /* HOLDING THE FLAG ACROSS THE PAINT IS NOT ENOUGH, and believing it was
+         cost David a day. `_painting` suppresses callbacks that fire WHILE it
+         is set — but a MutationObserver delivers the records its own subject
+         produced in a LATER microtask, after this function has returned and
+         after the flag has been cleared. So paintAll's own writes were queued,
+         delivered to a callback that now saw `_painting === false`, and
+         scheduled the next paint. Measured on the live map panel: 3,906
+         mutations in three seconds with nobody touching the page, about
+         1,300 a second, for ever.
+         That is what «mark pages does nothing» actually was. The button was
+         being destroyed and rebuilt under the pointer — a real click landed on
+         a node that had already been replaced, and an editor that did open was
+         overwritten within milliseconds. It only happened on the MAP PANEL,
+         because that is the only surface this observer watches, which is why
+         the place pages tested clean and the bug survived two fixes.
+         takeRecords() empties the queue our own writes filled, so the pending
+         callback finds nothing to report and the loop has no fuel. */
+      setTimeout(function () {
+        paintAll();
+        _obs.takeRecords();
+        _painting = false;
+      }, 0);
     });
     [".at-panel", "#ra-check-b", "#ra-body"].forEach(function (sel) {
       var el = document.querySelector(sel);
@@ -293,9 +404,32 @@
       for (var i = 0; i < STATES.length; i++) if (STATES[i][0] === v) return STATES[i][1];
       return v;
     }
-    function srcPaint(el) {
+    /* WHICH SOURCE ROW IS EXPANDED. Same variable, same reason as `_editing`
+       on the volumes: inferring it from the DOM loses the race against the
+       repaint. */
+    var _srcOpen = null;
+
+    function srcExpand(id, m) {
+      var unset = !m.state;
+      var opts = STATES.map(function (o) {
+        var text = (o[0] === "" && unset) ? "mark what you did \u2026" : o[1];
+        return '<option value="' + o[0] + '"' +
+               (o[0] === (m.state || "") ? " selected" : "") + ">" + text + "</option>";
+      }).join("");
+      return '<span class="src-edit">' +
+        '<select class="src-s" aria-label="What you have done here">' + opts + "</select>" +
+        (m.state ? '<input class="src-no" type="text" placeholder="note" value="' +
+                   esc(m.note || "") + '">' : "") +
+        '<button type="button" class="src-shut" aria-label="Close">\u00d7</button>' +
+        "</span>";
+    }
+
+    function srcPaint(el, force) {
       var slot = slotFor(el, "srcmark");
       var id = el.getAttribute("data-src");
+      /* NEVER PAINT OVER AN OPEN ONE — the same rule the volume editor needed
+         and for the same reason. */
+      if (!force && _srcOpen === id) return;
       var m = P.get(id) || {};
       /* THE EMPTY OPTION HAS TO ASK FOR SOMETHING. David: «i cant see a way
          to add on the home screen sources, or the places pages either». The
@@ -314,16 +448,61 @@
         return '<option value="' + o[0] + '"' +
                (o[0] === (m.state || "") ? " selected" : "") + ">" + text + "</option>";
       }).join("");
-      slot.innerHTML =
-        '<select class="src-s" aria-label="What you have done here">' + opts + "</select>" +
-        (m.state ? '<input class="src-no" type="text" placeholder="note" value="' +
-                   esc(m.note || "") + '">' : "") +
-        (m.since ? '<span class="vm-since">' + esc(m.since) + "</span>" : "");
+      /* A PILL AT REST, THE DROPDOWN ON CLICK. David: «could we also use the
+         same icon/pill and allow this dropdown on click? its taking a lot of
+         real estate.» He is right about the cost — a 180px select on every
+         row wrapped onto a line of its own, so ten archives came to twenty
+         lines and the list read as a form rather than as sources.
+         Shut, a row is a + or a ✓ and the state in words once there is one.
+         Open, it is the select it always was. Exactly the volumes' bargain,
+         which is the point: one control to learn, not two. */
+      var what = el.getAttribute("data-src-t");
+      var of = what ? " at " + what : "";
+      var shtml = _srcOpen === id
+        ? srcExpand(id, m)
+        : (m.state
+            ? '<button type="button" class="src-open vm-pill vm-pill-on" ' +
+              'aria-label="Edit what you recorded' + esc(of) + '" ' +
+              'title="Edit or remove what you recorded">\u2713</button>' +
+              '<span class="src-state">' + esc(label(m.state)) + "</span>" +
+              (m.note ? '<span class="vm-note">' + esc(m.note) + "</span>" : "") +
+              (m.since ? '<span class="vm-since">' + esc(m.since) + "</span>" : "")
+            : '<button type="button" class="src-open vm-pill" ' +
+              'aria-label="Mark what you have done' + esc(of) + '" ' +
+              'title="Mark what you have done here">+</button>');
+      if (slot.innerHTML !== shtml) slot.innerHTML = shtml;
       el.classList.toggle("src-has", !!m.state);
     }
     function srcAll() {
       return [].slice.call(document.querySelectorAll("[data-src]"));
     }
+    /* OPEN AND SHUT. The pill expands its own row; anything else that was
+       open shuts first, so the list never carries two selects at once — which
+       would give back exactly the space this was meant to save. */
+    document.addEventListener("click", function (e) {
+      var el = e.target.closest && e.target.closest("[data-src]");
+      if (!el) return;
+      var id = el.getAttribute("data-src");
+      if (e.target.closest(".src-open")) {
+        var was = _srcOpen;
+        _srcOpen = null;
+        if (was && was !== id) {
+          var prev = document.querySelector('[data-src="' + was.replace(/"/g, '\\"') + '"]');
+          if (prev) srcPaint(prev, true);
+        }
+        _srcOpen = id;
+        srcPaint(el, true);
+        var s = el.querySelector(".src-s");
+        if (s) s.focus();
+        return;
+      }
+      if (e.target.closest(".src-shut")) {
+        _srcOpen = null;
+        srcPaint(el, true);
+        return;
+      }
+    });
+
     document.addEventListener("change", function (e) {
       var el = e.target.closest && e.target.closest("[data-src]");
       if (!el || !e.target.classList.contains("src-s")) return;
@@ -332,7 +511,13 @@
                       where: el.getAttribute("data-src-where"),
                       href: el.getAttribute("data-src-href") });
       P.setState(id, e.target.value);
-      srcPaint(el);
+      /* CHOOSING IS FINISHING, for the common case. Picking a state is the
+         whole interaction nine times in ten, so it saves and collapses back
+         to the pill rather than leaving a select open on a row that is now
+         answered. A note is the tenth time: click the ✓ again and the field
+         is there, because by then there is a state for it to belong to. */
+      _srcOpen = null;
+      srcPaint(el, true);
       bump();
     });
     document.addEventListener("input", function (e) {
@@ -374,12 +559,90 @@
      stylesheet «by contrast, not by taste» and is the right tool — it is quiet
      AND it passes. The accent comes back on hover and on a marked row, where
      the link is the thing being looked for. */
-  li[data-vol] .vm-open { background: none; border: 1px solid var(--rule);
-    border-radius: 3px; padding: 2px 7px; cursor: pointer;
-    font: inherit; color: var(--ink-3); }
-  li[data-vol]:hover .vm-open, li[data-vol].vm-has .vm-open { color: var(--accent);
-    border-color: var(--accent); }
-  li[data-vol].vm-has { border-left: 2px solid var(--accent); padding-left: 8px; }
+  /* THE GREEN IS THE ONE THE SITE ALREADY SPEAKS, AT A VALUE THAT PASSES.
+     #1E8449 is the access dot for «images, free, no account», and it is the
+     obvious colour to reach for — but measured it is 3.66:1 on the paper
+     ground and 3.46:1 on the dark card, which is large-text territory and
+     this glyph is 13px. So the dot's green stays a dot, and the pill takes
+     the nearest value that actually clears 4.5:1 on both halves of the site:
+     #176B3A on paper (5.10) and #4FB477 on the dark card (6.32).
+     Three blocks, the same three the token file uses and for the same reason
+     — the system default, the OS preference scoped so an explicit light
+     choice still wins, and the explicit dark choice. */
+  /* THREE STATES, THREE TONES. Nothing recorded is quiet — it is the resting
+     state of most rows on most visits and must not shout. Started is --brass,
+     which is this project's own amber and the one colour here that has been
+     contrast-corrected twice against this exact ground (4.84:1 on the paper,
+     5.53:1 on the panel); inventing a fourth amber would be inventing a
+     fourth thing to get wrong. Finished is the green. */
+  .vm-pill { --walked: #6E6047; }
+  .vm-pill-part { --walked: #7E5A20; }
+  .vm-pill-on { --walked: #176B3A; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .vm-pill-on { --walked: #4FB477; }
+    :root:not([data-theme="light"]) .vm-pill-part { --walked: #D9A441; }
+  }
+  :root[data-theme="dark"] .vm-pill-on { --walked: #4FB477; }
+  :root[data-theme="dark"] .vm-pill-part { --walked: #D9A441; }
+
+  /* A TARGET BEFORE IT IS A DECORATION. 26px square is the smallest thing
+     this project is willing to ask a thumb to hit, and the glyph is centred
+     rather than sitting on the text baseline it no longer shares. */
+  /* A CIRCLE, AND THE SAME CIRCLE IN EVERY STATE. David: «clear tick and
+     filled tick are not the same, why is the one oval and not round?» Because
+     the box was `min-width: 26px` plus 7px of horizontal padding, so its width
+     followed its glyph — and only the filled state had been given a smaller
+     font size, so the outlined tick was still drawing at the +'s 19px and
+     stretched its own button into an oval.
+     Fixed 26×26 with no padding: the shape is the shape whatever is inside
+     it, and the glyph size is set per state below without moving anything. */
+  .vm-pill { display: inline-flex; align-items: center;
+    justify-content: center; width: 26px; height: 26px; padding: 0;
+    flex: 0 0 26px; box-sizing: border-box;
+    border: 1px solid var(--walked); border-radius: 50%; cursor: pointer;
+    background: none; color: var(--walked); font-family: var(--sans);
+    /* THE GLYPH IS THE WHOLE CONTROL, so it gets the weight the words used to
+       have. At 14px regular the + read as a hairline crossing a circle and
+       the circle looked empty at a glance — which is the one thing this pill
+       must not do, because «is there anything here» is the question the list
+       is scanned for. 19px at 700 fills the disc without touching its edge.
+       `line-height: 1` with the flex centring above keeps it optically
+       centred: a + carries top bearing that the normal line box would push
+       down, and at this size that misalignment is visible. */
+    font-size: 19px; font-weight: 700; line-height: 1; }
+  .vm-pill:hover { background: var(--walked); color: var(--panel); }
+  /* MARKED READS AS FILLED, so a list of forty answers «which of these have I
+     done» without being read.
+     --panel, AND NOT --card. --card is the estate token file's name for this
+     colour and it is not defined on these pages: `var(--card)` was invalid at
+     computed-value time, the declaration was dropped, and the tick inherited
+     --ink-3 — muted brown on dark green, which is how it went out looking
+     like an empty green disc. Measured after the fix, --panel is also the
+     right choice rather than merely a working one: it flips with the theme
+     exactly as --walked does, so it is a light glyph on the dark green by
+     day (5.82:1) and a dark glyph on the light green at night (6.32:1). */
+  /* THE TICK IS ALREADY A HEAVY SHAPE — matching the +'s 19px would make the
+     done rows shout over the ones still to do, which is backwards. Same
+     weight, smaller body, so the two read as one family at one glance. */
+  /* BOTH TICKS AT ONE SIZE — the + is a wider, airier glyph and carries 19px
+     comfortably; a ✓ at 19px fills the disc to its edge. */
+  .vm-pill-part, .vm-pill-on { font-size: 14px; }
+  .vm-pill-on { background: var(--walked); color: var(--panel);
+    font-weight: 700; }
+  .vm-pill:focus-visible { outline: 2px solid var(--focus);
+    outline-offset: 2px; }
+  /* NO LEFT RULE ANY MORE. David: «why do we have vertical lines next to some
+     of our sources and not others?» — because a marked row used to carry one,
+     from before the pill existed and said the same thing better. Two signals
+     for one state, and the weaker of them looked like a bracket grouping the
+     rows it happened to sit beside rather than a property of one row. The
+     pill is the state. */
+  /* STARTED IS A RING, FINISHED IS A DISC — so the two are told apart by fill
+     as well as by hue, which is the part a colour-blind reader relies on. */
+  .vm-pill-part { background: none; color: #7E5A20; border-color: #7E5A20; }
+  .vm-detail { flex-basis: 100%; font-family: var(--sans); font-size: 12px;
+    color: var(--ink-2); }
+  .vm-detail b { font-family: var(--mono); }
   li[data-vol] .volmark b { font-family: var(--mono); color: var(--ink-2); }
   .vm-bar { display: inline-block; width: 64px; height: 6px; border-radius: 3px;
     background: var(--rule); overflow: hidden; vertical-align: middle; }
@@ -395,11 +658,21 @@
      working is a control that does not work.
      Below the row, boxed, with room — so the click has an obvious result and
      the fields are big enough to type a page range into on a phone. */
-  .vm-edit { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: baseline;
-    flex-basis: 100%; margin: 6px 0 4px; padding: 10px 12px;
+  /* A COLUMN, NOT A WRAPPING LINE. See the note at editor() — the old rule
+     was `flex-wrap: wrap` over every field at once, which is a layout that
+     rearranges itself depending on the width of whatever list it landed in.
+     A column of rows looks the same in a narrow panel and a wide page, which
+     is the whole requirement for a form somebody types into. */
+  .vm-edit { display: flex; flex-direction: column; align-items: flex-start;
+    gap: 10px; flex-basis: 100%; margin: 6px 0 4px; padding: 12px 14px;
     border: 1px solid var(--accent); border-left-width: 3px; border-radius: 4px;
-    background: var(--ground); }
-  .vm-edit label { display: inline-flex; gap: 5px; align-items: baseline;
+    background: var(--ground); max-width: 34rem; }
+  .vm-row { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: flex-end; }
+  .vm-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
+  /* Label above field, not beside it: «PAGES DONE» and «OF» beside their
+     boxes made two columns of different widths that never lined up. */
+  .vm-edit label { display: flex; flex-direction: column; gap: 4px;
+    align-items: flex-start;
     font-family: var(--mono); font-size: 10px; text-transform: uppercase;
     letter-spacing: .05em; color: var(--ink-3); }
   .vm-edit input { font-family: var(--sans); font-size: 14px; padding: 6px 9px;
@@ -411,8 +684,10 @@
      width of the editor and normal case rather than the uppercase mono the
      field labels wear. Without the width reset it would inherit `12em` from
      the rule above and draw a checkbox the size of a text box. */
-  .vm-edit .vm-walk { flex-basis: 100%; text-transform: none; font-size: 12px;
+  .vm-edit .vm-walk { flex-direction: row; align-items: center; gap: 7px;
+    text-transform: none; font-size: 12px;
     font-family: var(--sans); letter-spacing: 0; color: var(--ink-2); }
+  .vm-edit .vm-notel input { width: 20em; max-width: 100%; }
   .vm-edit .vm-w { width: auto; padding: 0; margin: 0; }
   .vm-edit button { font-family: var(--sans); font-size: 13px; padding: 6px 13px;
     border: 1px solid var(--rule-strong); border-radius: 3px;
@@ -423,14 +698,27 @@
     margin-left: 8px; }
   .srcmark select, .srcmark input { font-family: var(--sans); font-size: 11.5px;
     padding: 2px 5px; border: 1px solid var(--rule); border-radius: 3px;
-    background: var(--panel); color: var(--ink-3); cursor: pointer; }
-  /* Same bargain as .vm-open above: quiet in a list of forty, and unmistakably
-     a control the moment the row is the one being looked at. */
-  [data-src]:hover .srcmark select { color: var(--accent);
-    border-color: var(--accent); }
-  [data-src].src-has .srcmark select { color: var(--accent);
-    border-color: var(--accent); }
-  .placemark { margin: 16px 0 0; }
+    background: var(--panel); color: var(--ink); cursor: pointer; }
+  .src-edit { display: inline-flex; flex-wrap: wrap; gap: 5px;
+    align-items: center; }
+  .src-shut { background: none; border: 0; padding: 0 4px; cursor: pointer;
+    font-family: var(--sans); font-size: 15px; line-height: 1;
+    color: var(--ink-3); }
+  .src-shut:hover { color: var(--brick); }
+  /* THE STATE IN WORDS, once there is one. The pill says «something is
+     recorded here»; this says what, which is the thing a reader came back to
+     find out and the reason the select is not simply left on the row. */
+  .src-state { font-family: var(--sans); font-size: 11.5px;
+    color: var(--walked, var(--ink-2)); font-weight: 600; }
+  /* THE PLACE'S OWN MARK, on the place page and in the map panel. It reads as
+     a labelled row rather than a naked dropdown, because «This place» beside
+     the states is the difference between a control and a stray select. */
+  .placemark { margin: 16px 0 0; display: flex; flex-wrap: wrap; gap: 8px;
+    align-items: baseline; }
+  .placemark-l { font-family: var(--mono); font-size: 10px;
+    text-transform: uppercase; letter-spacing: .05em; color: var(--ink-3); }
+  :global(.at-placemark) { display: inline-flex; align-items: baseline; }
+  :global(.at-placemark .srcmark) { margin-left: 0; }
   .ra-rollup, .ra-rollup-page { display: inline-block; margin-left: 10px;
     padding: 2px 8px; border-radius: 3px; background: var(--accent-wash);
     color: var(--ink-2); font-family: var(--sans); font-size: 11.5px; }

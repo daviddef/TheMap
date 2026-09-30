@@ -5357,17 +5357,28 @@ window.addEventListener("load", async function () {
       });
       hits.slice(0, 5).forEach(function (r) {
         var older = r[4].filter(function (a) { return fold(a) !== fold(r[0]); });
-        /* If what they typed is a form the curated list left out, put it back
-           at the front — it is the one word on this panel they already trust.
-           UNLESS IT IS THE PLACE'S OWN NAME. Typing «Lovinac» and being told
-           «Lovinac — Croatia, also written Lovinac» is the panel repeating
-           the word back as though it were a discovery. The test used to be
-           «is the typed form somewhere in the alias list», which is false for
-           an empty list and false for «Lovinjac», so the name was pushed in
-           front of itself both times. */
-        if (fold(term) !== fold(r[0]) &&
-            !older.some(function (a) { return fold(a).indexOf(f) > -1; }))
-          older.unshift(term);
+        /* «ALSO WRITTEN» IS A CLAIM ABOUT THE PLACE, NOT ABOUT THE SEARCH.
+           David typed Mljet and the panel answered «Mljetvine — Bosnia and
+           Herz., also written Mljet». Mljetvine is a hamlet 200km inland with
+           an EMPTY alias list in the gazetteer: `a: []`, `q: "mljetvine"`.
+           Nobody has ever written it Mljet. The panel made the alias up.
+
+           This is how: the typed term used to be pushed to the front of the
+           alias list whenever it was not already in it — the stated intent was
+           «a form the curated list left out». But the only way a row can
+           surface under a term that is NOT among its names is a substring
+           match, and a substring is not a spelling. So the rule fired exactly
+           when it had no evidence, and never when it did: a term that really
+           IS an alias is already in the list, printed from the data.
+           It printed a fabricated one for every prefix match, which is the one
+           thing this atlas does not do.
+
+           The typed word is now gone from this line entirely. What the row is
+           written under comes from the gazetteer or is not said. Why the row
+           surfaced is the reader's own word back at them, and it is said as
+           that, below, where it cannot be mistaken for a finding. */
+        var matchedOn = (fold(r[0]).indexOf(f) > -1 && fold(r[0]) !== f)
+                        ? term : "";
         older = older.slice(0, 5);
         var where = dupe[fold(r[0]) + "|" + r[3]] > 1
           ? ' <span class="ra-who">' +
@@ -5376,7 +5387,10 @@ window.addEventListener("load", async function () {
           : "";
         h.push("<p><b>" + esc(r[0]) + "</b> — " + esc(CNAME[r[3]] || r[3]) + where +
                (older.length ? '<br><span class="ra-who">also written ' +
-                 older.map(esc).join(" · ") + "</span>" : "") + "</p>");
+                 older.map(esc).join(" · ") + "</span>" : "") +
+               (matchedOn ? '<br><span class="ra-who">contains what you typed, ' +
+                 "\u00ab" + esc(matchedOn) + "\u00bb \u2014 it is not another " +
+                 "name for it</span>" : "") + "</p>");
       });
       h.push("</div>");
     }

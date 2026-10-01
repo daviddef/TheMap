@@ -28,6 +28,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
+import zlib from "node:zlib";
 import Base from "../layouts/Base.astro";
 import { u } from "../lib/url.js";
 import idx from "../../public/index.json";
@@ -62,10 +63,21 @@ const licOf = (f) => {
    was CC0. */
 const DATA_ROOTS = [path.join(process.cwd(), "..", "data"),
                     path.join(process.cwd(), "data")];
+/* GZIP FIRST, PLAIN SECOND — the bargain scripts/gazetteer.py makes. The
+   gazetteer is data/gazetteer.json.gz and has been for a while; asking only
+   for gazetteer.json threw, the catch swallowed it, and this page printed
+   no licence for the one file whose licence (CC BY 4.0, attribution
+   required) most needs printing. */
+const readJson = (file) => {
+  try {
+    return JSON.parse(zlib.gunzipSync(fs.readFileSync(file + ".gz")).toString("utf8"));
+  } catch { /* no .gz, or unreadable — fall back to the plain file */ }
+  return JSON.parse(fs.readFileSync(file, "utf8"));
+};
 const srcLic = (f) => {
   for (const root of DATA_ROOTS) {
     try {
-      const j = JSON.parse(fs.readFileSync(path.join(root, f), "utf8"));
+      const j = readJson(path.join(root, f));
       return { lic: j.licence || j.license || null, src: j.source || null };
     } catch { /* try the next root */ }
   }

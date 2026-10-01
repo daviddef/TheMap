@@ -57,10 +57,13 @@ frames.** You can check without leaving the machine:
 
 ```bash
 cd "~/Projects/Family Projects/Record Atlas" && python3 -c "
-import json,sys
+import json,sys,gzip,os
 wp=sys.argv[1]
+def load(f):
+    # the world file is gzipped; asking for the plain name finds nothing
+    return json.load(gzip.open(f+'.gz','rt',encoding='utf-8') if os.path.exists(f+'.gz') else open(f))
 for f in ('data/fs-volumes.json','data/fs-volumes-world.json'):
-    for place,vols in (json.load(open(f)).get('byPlace') or {}).items():
+    for place,vols in (load(f).get('byPlace') or {}).items():
         for v in vols:
             if (v.get('waypoint') or v.get('wp') or '').split(':')[0]==wp:
                 print(place, v.get('from'),'-',v.get('to'),'|',v.get('t'))

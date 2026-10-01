@@ -135,15 +135,46 @@ jobs:
             site/src/data/places-full.json
             site/src/data/collections-full.json
             site/src/data/surnames.json
+            data/surnames.json
           key: ${{ steps.datakey.outputs.k }}
 
+      # A CACHE THAT RESTORES LESS THAN THE BUILD NEEDS MUST NOT LOOK LIKE A
+      # HIT. Enumerating the paths has now been got wrong twice: first
+      # site/src/data/*.json were missing, which stopped the build with 22
+      # «that file is not there» errors; then data/surnames.json, which the
+      # surname-page cross-check reads directly and whose absence turned into
+      # four «_floors.json has a floor for 'surnames' and nothing counts it».
+      # Both times the cache reported a hit and the build broke after it.
+      #
+      # So the hit is VERIFIED rather than trusted. If anything the build needs
+      # is missing, the data step runs anyway — slower, and correct. Adding a
+      # generated file to this list is now the only thing a future change has
+      # to remember, and forgetting costs a rebuild rather than a red deploy.
+      - name: Check the cache actually restored everything
+        id: cacheok
+        run: |
+          missing=""
+          for f in site/public/index.json \
+                   site/src/data/places-full.json \
+                   site/src/data/collections-full.json \
+                   site/src/data/surnames.json \
+                   data/surnames.json; do
+            [ -s "$f" ] || missing="$missing $f"
+          done
+          if [ -n "$missing" ]; then
+            echo "::warning::cache hit but incomplete, rebuilding the data —$missing"
+            echo "complete=no" >> "$GITHUB_OUTPUT"
+          else
+            echo "complete=yes" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build the data
-        if: steps.datacache.outputs.cache-hit != 'true'
+        if: steps.datacache.outputs.cache-hit != 'true' || steps.cacheok.outputs.complete != 'yes'
         run: npm run data
         working-directory: site
       - name: Data unchanged
-        if: steps.datacache.outputs.cache-hit == 'true'
-        run: echo "::notice::site/public restored from cache — data/ and scripts/ are unchanged, so the data step was skipped"
+        if: steps.datacache.outputs.cache-hit == 'true' && steps.cacheok.outputs.complete == 'yes'
+        run: echo "::notice::site/public restored from cache and verified complete — data/ and scripts/ are unchanged, so the data step was skipped"
 
       # `npm run build` is data + site; CI runs the halves separately so the
       # data half can be skipped on a cache hit. The chain itself stays in

@@ -75,6 +75,35 @@ const nav = [
   ]],
 ];
 const here = Astro.url.pathname;
+
+/* WHICH PAGES MAY CARRY AN AD, AND WHY MOST MAY NOT.
+ *
+ * AdSense refused recordatlas.org on 6 October for «Google-served ads on
+ * screens without publisher content» and «low-value content». Measured, the
+ * pages are not thin — a place page carries a median 14,513 characters of
+ * visible text and a surname page 10,698, and NONE is under 2,000. Adding
+ * words would have been effort spent arguing with the wrong diagnosis.
+ *
+ * The real figure is this: Senj and Rovinj, two different towns, are about
+ * 96% identical character for character. They are one template with a little
+ * data swapped, and the ad snippet lived in this layout, so all 65,177 pages
+ * carried it. Google's test is «substantial unique value», which a 96%
+ * identical long tail fails however long each page is.
+ *
+ * So the generated tail stops carrying ads and the written pages keep them.
+ * The list below is pages somebody composed — prose, decisions, explanations
+ * — rather than pages a loop produced. That is roughly a hundred pages
+ * instead of sixty-five thousand, and it is the honest answer to the policy
+ * rather than a way around it: these are the screens that actually have
+ * publisher content on them.
+ *
+ * `/` is matched exactly. Everything else matches as a prefix, so /country/
+ * covers its children while /place/ and /surname/ are simply absent.
+ */
+const AD_PAGES = ["/about/", "/help/", "/data/", "/coverage/", "/countries/",
+                  "/country/", "/changelog/", "/worklist/", "/jurisdictions/",
+                  "/add/", "/my-research/", "/flags/"];
+const adsHere = here === "/" || AD_PAGES.some((p) => here.startsWith(p));
 /* Strip the query string: /?q=Breslau and / are the same page. */
 const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
 import LineSwitcher from "../components/LineSwitcher.astro";
@@ -428,7 +457,7 @@ import LineSwitcher from "../components/LineSwitcher.astro";
         the build twice over: a comment is not a valid first child there, and
         it named the two elements in angle brackets, which is the fault the
         comment forty lines down describes in capitals. Read that one. */}
-    {site.ads.enabled && site.ads.slot && (
+    {adsHere && site.ads.enabled && site.ads.slot && (
       <aside class="adslot" aria-label="Advertisement">
         <ins class="adsbygoogle" style="display:block" data-ad-client={site.ads.client}
              data-ad-slot={site.ads.slot} data-ad-format="horizontal"

@@ -16,7 +16,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 SRC = "/Users/daviddefranceski/Downloads/Global_Genealogy_Collections_Directory.csv"
 OUT = "data/directory-linkcheck.json"
-UA = "RecordAtlas/1.0 (+https://daviddef.github.io/TheMap; link checker)"
+UA = "RecordAtlas/1.0 (+https://recordatlas.org; link checker)"
 CTX = ssl.create_default_context()
 CTX.check_hostname = False
 CTX.verify_mode = ssl.CERT_NONE   # we are asking "does this answer", not "is the cert good"

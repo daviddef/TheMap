@@ -42,7 +42,7 @@ from concurrent.futures import ThreadPoolExecutor
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
 OUT = "data/fs-waypoints.json"
-UA = "RecordAtlas/1.0 (+https://daviddef.github.io/TheMap; volume index)"
+UA = "RecordAtlas/1.0 (+https://recordatlas.org; volume index)"
 API = "https://api.familysearch.org/platform/records"
 MAX_DEPTH = 6
 # A GUARD, NOT A BUDGET. At 4,000 this silently truncated Croatia, Church

@@ -34,7 +34,7 @@ import concurrent.futures as cf
 
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(_ROOT)
-UA = ("RecordAtlas/1.0 (+https://daviddef.github.io/TheMap; "
+UA = ("RecordAtlas/1.0 (+https://recordatlas.org; "
       "a map of genealogical sources)")
 
 

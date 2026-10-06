@@ -54,7 +54,7 @@ OUT = "data/surname-timeline.json.gz"
 # still in half the documentation, so the new one is used directly and the
 # reason is written here rather than rediscovered.
 ENDPOINT = "https://qlever.dev/api/wikidata"
-UA = "RecordAtlas/1.0 (+https://daviddef.github.io/TheMap; surname timeline)"
+UA = "RecordAtlas/1.0 (+https://recordatlas.org; surname timeline)"
 PAGE = 200000
 
 Q = """

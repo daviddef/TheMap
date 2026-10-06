@@ -32,7 +32,7 @@ import io, json, os, re, time, urllib.request, zipfile
 
 ZIP = ("https://sprogtek-ressources.digst.govcloud.dk/"
        "danmarks%20statistik/navne_registreret_i_danmark_2020.zip")
-UA = ("RecordAtlas/1.0 (+https://daviddef.github.io/TheMap; "
+UA = ("RecordAtlas/1.0 (+https://recordatlas.org; "
       "a map of genealogical sources)")
 CACHE = "data/.denmark-names-2020.zip"
 OUT = "data/frequencies/dk.json"

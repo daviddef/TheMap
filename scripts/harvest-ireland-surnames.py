@@ -33,7 +33,7 @@ import textsource            # strict decoding; see scripts/textsource.py
 URL = ("https://ws.cso.ie/public/api.restful/PxStat.Data.Cube_API."
        "ReadDataset/VSA110/CSV/1.0/en")
 PAGE = "https://data.gov.ie/dataset/vsa110-surnames-of-babies-in-ireland"
-UA = ("RecordAtlas/1.0 (+https://daviddef.github.io/TheMap; "
+UA = ("RecordAtlas/1.0 (+https://recordatlas.org; "
       "a map of genealogical sources)")
 OUT = "data/frequencies/ie.json"
 COUNT_STAT = "VSA110C02"          # C01 is the rank, C02 the number

@@ -12,7 +12,7 @@ data/_floors.json now stops a shrinkage before it deploys. This asks the other
 question, the one a floor cannot: does the thing on the internet match the
 thing in this directory?
 
-    python3 scripts/check-deployed.py [--base https://daviddef.github.io/TheMap]
+    python3 scripts/check-deployed.py [--base https://recordatlas.org]
 
 It is deliberately NOT part of the build — it needs the network and it compares
 against the PREVIOUS deploy, so a legitimate change makes it disagree. It is a
@@ -76,7 +76,7 @@ def fold(s):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--base", default="https://daviddef.github.io/TheMap")
+    ap.add_argument("--base", default="https://recordatlas.org")
     a = ap.parse_args()
     base = a.base.rstrip("/")
     bad, notes = [], []

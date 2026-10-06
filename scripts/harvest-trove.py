@@ -42,7 +42,7 @@ import json, os, re, sys, time, urllib.error, urllib.request
 
 os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
-UA = ("RecordAtlas/1.0 (+https://daviddef.github.io/TheMap; "
+UA = ("RecordAtlas/1.0 (+https://recordatlas.org; "
       "a map of genealogical sources)")
 API = "https://api.trove.nla.gov.au/v3/newspaper/titles?encoding=json"
 OUT = "data/trove-newspapers.json"

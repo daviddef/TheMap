@@ -22,7 +22,7 @@ so in those words.
 import json, sys, time, urllib.parse, urllib.request
 import textsource            # strict decoding; see scripts/textsource.py
 
-UA = ("RecordAtlas/1.0 (+https://daviddef.github.io/TheMap; "
+UA = ("RecordAtlas/1.0 (+https://recordatlas.org; "
       "a map of genealogical sources)")
 
 # The word for «surname» in the language the portal is catalogued in.

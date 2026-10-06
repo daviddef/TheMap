@@ -35,7 +35,7 @@ const _pw = _req("@playwright/test");
 const chromium = _pw.chromium || (_pw.default && _pw.default.chromium);
 if (!chromium) throw new Error("playwright resolved but exposes no chromium");
 
-const UA = "RecordAtlas/1.0 (+https://daviddef.github.io/TheMap; a map of genealogical sources)";
+const UA = "RecordAtlas/1.0 (+https://recordatlas.org; a map of genealogical sources)";
 const [, , inPath, outPath] = process.argv;
 if (!inPath || !outPath) {
   console.error("usage: node scripts/render-pages.mjs <review.json> <out.json>");

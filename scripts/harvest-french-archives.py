@@ -42,7 +42,7 @@ nowhere near it.
 import io, json, math, os, sys, time, urllib.parse, urllib.request
 
 QLEVER = "https://qlever.dev/api/wikidata"
-UA = ("RecordAtlas/1.0 (+https://daviddef.github.io/TheMap; "
+UA = ("RecordAtlas/1.0 (+https://recordatlas.org; "
       "a map of genealogical sources)")
 
 # TWO CLASSES, AND THEY ARE NOT THE SAME ANSWER.

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Move Record Atlas from daviddef.github.io/TheMap to recordatlas.org.
+# Move Record Atlas from recordatlas.org to recordatlas.org.
 #
 # RUN THIS ONLY ONCE THE DNS RESOLVES. It checks first and refuses otherwise,
 # because the two halves of this change are not independently safe: a CNAME
@@ -31,8 +31,8 @@ s = s.replace("site: 'https://daviddef.github.io',", "site: 'https://recordatlas
 s = re.sub(r"\n\s*base: '/TheMap',", "", s)
 open(p, "w").write(s)
 PY
-grep -rln "daviddef.github.io/TheMap" site/src notes README.md 2>/dev/null \
-  | xargs -r sed -i '' 's#https://daviddef.github.io/TheMap#https://recordatlas.org#g'
+grep -rln "recordatlas.org" site/src notes README.md 2>/dev/null \
+  | xargs -r sed -i '' 's#https://recordatlas.org#https://recordatlas.org#g'
 
 ( cd site && npm run build )
 echo

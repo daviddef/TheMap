@@ -10,7 +10,7 @@ ready to send from his own address, or to adapt.
 
 Dear colleagues,
 
-I maintain **Record Atlas** (https://daviddef.github.io/TheMap/), a free, non-commercial,
+I maintain **Record Atlas** (https://recordatlas.org/), a free, non-commercial,
 open-source index of where genealogical records are held — which archive holds which ground,
 for which years, and what it costs to look. It carries no advertising beyond a single footer
 unit, holds no personal data, and its own datasets are published CC0.

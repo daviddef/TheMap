@@ -47,7 +47,7 @@ CACHE = "data/.italy-surnames-scan.json"
 # list for one comune is tens of kilobytes; nothing here is 20 MB.
 MAX_BYTES = 20 * 1024 * 1024
 CKAN = "https://dati.gov.it/opendata/api/3/action/package_search"
-UA = ("RecordAtlas/1.0 (+https://daviddef.github.io/TheMap; "
+UA = ("RecordAtlas/1.0 (+https://recordatlas.org; "
       "surname frequency; contact david.defranceski@gmail.com)")
 
 # Header names seen across the municipal files. Read, not assumed — and

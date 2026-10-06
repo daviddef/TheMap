@@ -6,7 +6,7 @@ A map of where genealogical records actually are — searchable by every name a 
 ever had, coloured by what it costs to look, and able to tell you *whose empire's filing
 system* a piece of ground fell under in the year you care about.
 
-→ **[daviddef.github.io/TheMap](https://daviddef.github.io/TheMap/)**
+→ **[recordatlas.org](https://recordatlas.org/)**
 
 ## Why
 

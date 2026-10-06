@@ -66,7 +66,7 @@ for key, title, sub in CARDS:
         y += 44
 
     f = ImageFont.truetype(SANS, 22)
-    d.text((80, 540), "daviddef.github.io/TheMap", font=f, fill=ACCENT)
+    d.text((80, 540), "recordatlas.org", font=f, fill=ACCENT)
     im.save(f"{OUT}/{key}.png", optimize=True)
     print(f"  og/{key}.png  {os.path.getsize(f'{OUT}/{key}.png')//1024} KB")
 print(f"{len(CARDS)} cards -> {OUT}")

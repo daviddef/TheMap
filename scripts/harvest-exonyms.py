@@ -34,7 +34,7 @@ OUT = "data/exonyms.json"
 # starting again.
 CACHE = "data/.exonym-scan.json"
 ENDPOINT = "https://qlever.dev/api/wikidata"
-UA = "RecordAtlas/1.0 (+https://daviddef.github.io/TheMap; exonyms)"
+UA = "RecordAtlas/1.0 (+https://recordatlas.org; exonyms)"
 PAGE = 150000
 
 # CITY DISTRICTS AS WELL AS SETTLEMENTS, but ranked below them.

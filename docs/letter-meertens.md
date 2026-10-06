@@ -29,7 +29,7 @@ Meertens Instituut (KNAW), Amsterdam — via the contact address on
 >
 > Dear colleagues,
 >
-> I maintain Record Atlas (recordatlas.org / daviddef.github.io/TheMap), a
+> I maintain Record Atlas (recordatlas.org), a
 > free, non-commercial, open-data map of genealogical *sources*. It answers
 > one question: for a given place, which archives and collections hold
 > records covering it, and what can a researcher actually reach today. It
@@ -77,7 +77,7 @@ Meertens Instituut (KNAW), Amsterdam — via the contact address on
 >
 > David Defranceski
 > david.defranceski@gmail.com
-> https://daviddef.github.io/TheMap/
+> https://recordatlas.org/
 
 ## When a reply comes
 

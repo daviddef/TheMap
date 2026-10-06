@@ -4,8 +4,7 @@ import { defineConfig } from 'astro/config';
    set base to '/' and site to 'https://recordatlas.org' — nothing else moves,
    because every internal link goes through lib/url.js. */
 export default defineConfig({
-  site: 'https://daviddef.github.io',
-  base: '/TheMap',
+  site: 'https://recordatlas.org',
   build: { format: 'directory' },
 
   /* SCOPE STYLES WITH A CLASS, NOT A LONG ATTRIBUTE ON EVERY ELEMENT.

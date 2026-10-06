@@ -59,7 +59,7 @@ written carefully, and carefully is not the same as natively.
 >
 > Szanowni Państwo,
 >
-> prowadzę Record Atlas (`daviddef.github.io/TheMap`) — bezpłatną,
+> prowadzę Record Atlas (`recordatlas.org`) — bezpłatną,
 > niekomercyjną mapę *źródeł* genealogicznych. Odpowiada ona na jedno
 > pytanie: dla danej miejscowości, które archiwa i które zespoły
 > przechowują dotyczące jej akta, i co badacz może dziś realnie obejrzeć.
@@ -117,7 +117,7 @@ written carefully, and carefully is not the same as natively.
 >
 > David Defranceski
 > david.defranceski@gmail.com
-> https://daviddef.github.io/TheMap/
+> https://recordatlas.org/
 
 ## The same letter, in English
 
@@ -125,7 +125,7 @@ written carefully, and carefully is not the same as natively.
 >
 > Dear colleagues,
 >
-> I maintain Record Atlas (`daviddef.github.io/TheMap`), a free,
+> I maintain Record Atlas (`recordatlas.org`), a free,
 > non-commercial map of genealogical *sources*. It answers one question:
 > for a given place, which archives and which fonds hold records covering
 > it, and what can a researcher actually reach today. It grew out of eight
@@ -176,7 +176,7 @@ written carefully, and carefully is not the same as natively.
 >
 > David Defranceski
 > david.defranceski@gmail.com
-> https://daviddef.github.io/TheMap/
+> https://recordatlas.org/
 
 ## When a reply comes
 

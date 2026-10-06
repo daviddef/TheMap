@@ -40,7 +40,7 @@ _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(_ROOT)
 
 QLEVER = "https://qlever.dev/api/wikidata"
-UA = ("RecordAtlas/1.0 (+https://daviddef.github.io/TheMap; "
+UA = ("RecordAtlas/1.0 (+https://recordatlas.org; "
       "a map of genealogical sources)")
 OUT = "data/surname-context.json"
 PAGE = 25000

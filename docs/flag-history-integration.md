@@ -146,7 +146,7 @@ One row per `(country, era)` we can speak to:
   "polity": "Habsburg — County of Pazin",
   "filedUnder": ["dapa", "familysearch"],
   "places": 34, "volumes": 1207, "collections": 3,
-  "map": "https://daviddef.github.io/TheMap/?at=gracisce&year=1374",
+  "map": "https://recordatlas.org/?at=gracisce&year=1374",
   "note": "The books stayed with the parish and were gathered to Pazin…"
 }
 ```

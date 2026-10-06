@@ -34,7 +34,7 @@ import json, os, re, sys, time, urllib.request, urllib.parse
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT  = os.path.join(HERE, '..', 'data', 'ohm')
 API  = 'https://overpass-api.openhistoricalmap.org/api/interpreter'
-UA   = ('RecordAtlas/1.0 (+https://daviddef.github.io/TheMap/; '
+UA   = ('RecordAtlas/1.0 (+https://recordatlas.org/; '
         'david.defranceski@gmail.com) historical boundary cache')
 
 # A 300x200 schematic cannot show detail finer than roughly a tenth of a

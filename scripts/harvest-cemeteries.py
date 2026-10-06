@@ -50,7 +50,7 @@ _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(_ROOT)
 
 API = "https://overpass-api.de/api/interpreter"
-UA = ("RecordAtlas/1.0 (+https://daviddef.github.io/TheMap/; "
+UA = ("RecordAtlas/1.0 (+https://recordatlas.org/; "
       "burial grounds for a genealogy atlas)")
 # GZIPPED, for the same reason the gazetteer is: 118,204 burial grounds is
 # 9.4 MB of JSON and 2.0 MB compressed, on a .git that has already paid dearly

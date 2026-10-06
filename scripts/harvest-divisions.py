@@ -27,7 +27,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
 OUT = "data/admin-divisions.json"
 ENDPOINT = "https://qlever.dev/api/wikidata"
-UA = ("RecordAtlas/1.0 (+https://daviddef.github.io/TheMap; "
+UA = ("RecordAtlas/1.0 (+https://recordatlas.org; "
       "administrative divisions)")
 POINT = re.compile(r"POINT\(([-0-9.]+) ([-0-9.]+)\)")
 

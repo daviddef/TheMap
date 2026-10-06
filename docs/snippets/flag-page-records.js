@@ -19,7 +19,7 @@
  * parish registers exist anywhere before Trent required them in 1563.
  */
 (function () {
-  var FEED = "https://daviddef.github.io/TheMap/eras.json";
+  var FEED = "https://recordatlas.org/eras.json";
   var self = document.currentScript;
   var CC = (self && self.dataset.cc) || document.documentElement.dataset.cc;
   if (!CC) return;
@@ -83,7 +83,7 @@
       box.className = "ra-records";
       box.innerHTML =
         '<h4>Records for this period</h4><ul>' + rows + "</ul>" +
-        '<p class="ra-credit">From <a href="https://daviddef.github.io/TheMap/" ' +
+        '<p class="ra-credit">From <a href="https://recordatlas.org/" ' +
         'rel="noopener">Record Atlas</a> (CC BY 4.0) — a map of genealogical ' +
         "sources. Counts are places on this ground, not records held: most of " +
         "the atlas is ground nobody has surveyed yet.</p>";

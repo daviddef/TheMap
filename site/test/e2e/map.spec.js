@@ -12,7 +12,7 @@
  */
 import { test, expect } from "@playwright/test";
 
-const MAP = "/TheMap/";
+const MAP = "/";
 
 async function mapReady(page) {
   await page.goto(MAP);
@@ -104,7 +104,7 @@ test("the surname map draws land, not a black continent", async ({ page }) => {
   /* Astro scopes styles and the SVG arrives through set:html, so the
      first render was browser defaults: a black continent, invisible
      dots, on a light background inside a dark page. */
-  await page.goto("/TheMap/surname/peeters/");
+  await page.goto("/surname/peeters/");
   const land = page.locator("svg.sm .sm-land").first();
   await expect(land).toBeVisible();
   const fill = await land.evaluate((el) => getComputedStyle(el).fill);

@@ -39,7 +39,7 @@ import urllib.error, urllib.parse, urllib.request
 import textsource            # strict decoding; see scripts/textsource.py
 
 URL = "https://web.dzs.hr/app/imena/default_en.aspx"
-UA = ("RecordAtlas/1.0 (+https://daviddef.github.io/TheMap; "
+UA = ("RecordAtlas/1.0 (+https://recordatlas.org; "
       "a map of genealogical sources; contact via the repository)")
 OUT = "data/frequencies/hr.json"
 CACHE = "data/.croatia-surnames-scan.json"

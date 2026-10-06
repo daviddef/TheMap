@@ -19,11 +19,11 @@ import { createRequire } from "node:module";
 const AXE = createRequire(import.meta.url).resolve("axe-core/axe.min.js");
 
 const PAGES = [
-  ["the map",        "/TheMap/"],
-  ["a place",        "/TheMap/place/aberdeen/"],
-  ["a surname",      "/TheMap/surname/blazevic/"],
-  ["the data index", "/TheMap/data/"],
-  ["the region index", "/TheMap/jurisdictions/"],
+  ["the map",        "/"],
+  ["a place",        "/place/aberdeen/"],
+  ["a surname",      "/surname/blazevic/"],
+  ["the data index", "/data/"],
+  ["the region index", "/jurisdictions/"],
 ];
 
 for (const [what, path] of PAGES) {

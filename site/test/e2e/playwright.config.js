@@ -15,7 +15,7 @@ export default {
   },
   webServer: process.env.RA_BASE ? undefined : {
     command: "npm run preview",
-    url: "http://localhost:4332/TheMap/",
+    url: "http://localhost:4332/",
     reuseExistingServer: true,
     timeout: 120000,
   },

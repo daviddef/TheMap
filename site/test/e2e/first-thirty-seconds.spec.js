@@ -19,7 +19,7 @@
  */
 import { test, expect } from "@playwright/test";
 
-const MAP = "/TheMap/";
+const MAP = "/";
 
 /* The atlas is ready when it has told the reader how much of it there is. */
 async function ready(page) {

@@ -38,7 +38,7 @@ ZIP = ("https://statbel.fgov.be/sites/default/files/files/opendata/"
        "Familienamen/TA_POP_LST_2026.zip")
 PAGE = ("https://statbel.fgov.be/en/themes/population/"
         "family-names-and-first-names/family-names")
-UA = ("RecordAtlas/1.0 (+https://daviddef.github.io/TheMap; "
+UA = ("RecordAtlas/1.0 (+https://recordatlas.org; "
       "a map of genealogical sources)")
 CACHE = "data/.belgium-names-2026.zip"
 OUT = "data/frequencies/be.json"

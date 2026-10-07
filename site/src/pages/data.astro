@@ -41,6 +41,12 @@ const PUB = fs.existsSync(path.join(process.cwd(), "public"))
   ? path.join(process.cwd(), "public")
   : path.join(process.cwd(), "site", "public");
 
+/* Same two-cwd problem PUB solves, one directory up: the build runs from
+   site/ and a test or a script may run from the repository root. */
+const REPO = (f) => fs.existsSync(path.join(process.cwd(), f))
+  ? path.join(process.cwd(), f)
+  : path.join(process.cwd(), "..", f);
+
 const kb = (n) => n >= 1048576 ? (n / 1048576).toFixed(1) + " MB"
                                : Math.round(n / 1024).toLocaleString() + " KB";
 const sizeOf = (f) => { try { return kb(fs.statSync(path.join(PUB, f)).size); }
@@ -95,6 +101,17 @@ const srcLic = (f) => {
 const nPlaces = whole.places.length;
 const nVolumes = whole.places.reduce((a, p) => a + (p.v || 0), 0);
 const nTailCells = Object.keys((idx.tail && idx.tail.cells) || {}).length;
+/* COUNTED FROM THE FILE, NOT WRITTEN IN THE SENTENCE. The gazetteer states
+   which countries it covers to village level in its own `full` field, and a
+   number typed into prose here would be a second claim free to drift from it
+   — which is the fault this page exists to catch everywhere else. */
+const gazFull = (() => {
+  try {
+    const g = JSON.parse(zlib.gunzipSync(
+      fs.readFileSync(REPO("data/gazetteer.json.gz"))).toString("utf8"));
+    return (g.full || []).length;
+  } catch { return 0; }
+})();
 
 /* One row per published file. `shards` means the path carries a key. */
 const FILES = [
@@ -156,7 +173,7 @@ const FILES = [
     shape: `{ cemeteries: [{ name, lat, lon, cc }] }` },
   { path: "/g/<3-char>.json", size: `${countIn("g").toLocaleString()} files`,
     ...srcLic("gazetteer.json"),
-    what: "The gazetteer: every settlement the search box can find, sharded on the first three folded characters. This is what makes «Gallignana» resolve to Gračišće. ATTRIBUTION REQUIRED — see the licence column.",
+    what: `The gazetteer: the settlements the search box can find, sharded on the first three folded characters. This is what makes «Gallignana» resolve to Gračišće. COVERAGE IS NOT UNIFORM and the file says so itself: for the ${gazFull} countries in its \`full\` field it holds every populated place GeoNames knows, down to the hamlet of thirty people; for the rest it holds only places of five thousand and up, so a village there may genuinely not be in it. Shards are keyed on ASCII, so Cyrillic names are searchable in the data but not yet from this box. ATTRIBUTION REQUIRED — see the licence column.`,
     shape: `{ "<folded name>": [{ n, y, x, cc, alt[] }] }` },
   { path: "/a/<3-char>.json", size: `${countIn("a").toLocaleString()} files`,
     ...srcLic("admin-divisions.json"),

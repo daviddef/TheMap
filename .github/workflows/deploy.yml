@@ -161,6 +161,17 @@ jobs:
                    data/surnames.json; do
             [ -s "$f" ] || missing="$missing $f"
           done
+          # AND THE VIEWPORT CELLS, COUNTED RATHER THAN SPOT-CHECKED. index.json
+          # promises one pi/<cell>.json per entry in `tail.cells`, and
+          # lib/atlas.js treats a promised cell as required — so a restore that
+          # brought index.json but not its cells would fail the build with a
+          # missing-file throw rather than quietly building a smaller atlas.
+          # That is the right failure, and this turns it into a rebuild instead.
+          want=$(jq -r '.tail.cells | length // 0' site/public/index.json 2>/dev/null || echo 0)
+          have=$(ls site/public/pi/*.json 2>/dev/null | wc -l | tr -d ' ')
+          if [ "$want" != "0" ] && [ "$want" != "$have" ]; then
+            missing="$missing site/public/pi/ ($have of $want cells)"
+          fi
           if [ -n "$missing" ]; then
             echo "::warning::cache hit but incomplete, rebuilding the data —$missing"
             echo "complete=no" >> "$GITHUB_OUTPUT"

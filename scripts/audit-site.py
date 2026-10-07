@@ -140,7 +140,35 @@ def payloads():
             if len(quiet) != idx["quiet"].get("places"):
                 bad("data", f"index.json says {idx['quiet'].get('places')} quiet "
                             f"places, index-quiet.json holds {len(quiet)}")
-    places = (idx.get("places") or []) + quiet
+    # AND THE SECOND SPLIT MUST NOT SPLIT IT EITHER. index.json now carries
+    # only the twelve biggest places in each five-degree cell; the other
+    # 40,291 ride in pi/<cell>.json, fetched for the viewport and then in the
+    # background. Every check below has to see those too — and they are where
+    # a bad row now hides, because they are the small places nobody clicks,
+    # which is the same argument the quiet half won above.
+    tail = []
+    if idx.get("tail"):
+        want = idx["tail"].get("cells") or {}
+        for key, n in sorted(want.items()):
+            f = os.path.join(DIST, "pi", key + ".json")
+            if not os.path.exists(f):
+                bad("data", f"index.json promises pi/{key}.json ({n} places) and "
+                            "it was not built — those dots can never load")
+                continue
+            rows = json.load(open(f)).get("places") or []
+            if len(rows) != n:
+                bad("data", f"index.json says pi/{key}.json holds {n} places, "
+                            f"it holds {len(rows)}")
+            tail += rows
+        stray = [os.path.basename(f) for f in glob.glob(os.path.join(DIST, "pi", "*.json"))
+                 if os.path.basename(f)[:-5] not in want]
+        if stray:
+            bad("data", f"{len(stray)} pi/ cells are served that index.json does "
+                        f"not list, so nothing will ever fetch them: {stray[:4]}")
+        if len(tail) != idx["tail"].get("places"):
+            bad("data", f"index.json declares tail.places="
+                        f"{idx['tail'].get('places')} and the cells hold {len(tail)}")
+    places = (idx.get("places") or []) + tail + quiet
     # MEASURED AS A VISITOR PAYS IT, WHICH IS GZIPPED.
     #
     # The 800 KB budget was counting bytes on disk. GitHub Pages compresses
@@ -221,7 +249,9 @@ def payloads():
         except Exception as e:
             bad("data", f"{os.path.basename(f)} is served but does not parse — {e}")
 
-    note("data", f"{len(ids):,} places, index.json {wire:.0f} KB over the wire, "
+    note("data", f"{len(ids):,} places, index.json {wire:.0f} KB over the wire "
+                 f"for the first paint, {len(tail):,} more in "
+                 f"{len(glob.glob(DIST + '/pi/*.json')):,} viewport cells, "
                  f"{len(glob.glob(DIST + '/p/*.json')):,} detail files")
 
 

@@ -1704,8 +1704,13 @@ window.addEventListener("load", async function () {
   /* THE SPLIT MUST NOT CHANGE WHAT THE MAP CLAIMS TO HOLD. index.json now
      stops at the places that have something to show, so every count taken
      from idx.places.length would have quietly shed the 4,932 quiet dots —
-     the same class of mistake as the header that said 8,557 volumes. */
-  var TOTAL_PLACES = idx.places.length + ((idx.quiet && idx.quiet.places) || 0);
+     the same class of mistake as the header that said 8,557 volumes.
+     AND THEN IT SPLIT AGAIN: index.json carries the twelve biggest places per
+     five-degree cell, so this must add the 40,291 in the viewport cells as
+     well, or «Drawing 12,673 places…» would appear on an atlas of 52,964. */
+  var TOTAL_PLACES = idx.places.length +
+                     ((idx.tail && idx.tail.places) || 0) +
+                     ((idx.quiet && idx.quiet.places) || 0);
   var loadT = document.getElementById("ra-loading-t");
   /* «Drawing 21,473 places…» has an English verb in it, so a translated
      page says the number and the noun rather than a half-translated
@@ -6622,6 +6627,148 @@ window.addEventListener("load", async function () {
     })();
   })();
 
+  /* ---- the rest of the dots, nearest the reader first --------------------
+     index.json carries the top twelve places in each five-degree cell — 2,550
+     of 42,841, 77 KB instead of 1,021 — and the other 40,291 ride in
+     pi/<lat>_<lon>.json. Three things pull them in, in this order:
+
+       1. the cells the viewport covers, the moment it covers them;
+       2. the cells next to those, because panning is the commonest gesture
+          and a dot that appears a second after you arrive is a dot you saw
+          missing;
+       3. everything else, in the background, because SEARCH AND THE FILTER
+          COUNTS MUST NOT DEPEND ON WHERE THE READER HAS PANNED. A place
+          that is findable or not according to the map's scroll history is
+          worse than a slow first paint, and it is the trap this whole
+          scheme walks past rather than into.
+
+     So this is a loading ORDER, not a budget: every place still arrives.
+     What changed is that the first paint no longer waits for all of them. */
+  var PLACE_SEEN = {};
+  idx.places.forEach(function (p) { PLACE_SEEN[p.i] = 1; });
+
+  /* ONE REDRAW FOR A BURST OF CELLS, NOT ONE PER CELL. apply() walks every
+     marker, so refreshing per arriving cell would make the background pass
+     walk the whole array 169 times for no visible gain. */
+  var absorbTimer = null;
+  function absorb(rows) {
+    var added = 0;
+    (rows || []).forEach(function (p) {
+      if (!p || PLACE_SEEN[p.i]) return;      /* a cell served twice, or a
+                                                 stale public/ with overlap */
+      PLACE_SEEN[p.i] = 1;
+      added++;
+      var k = fold(p.n);
+      if (!(k in byName)) byName[k] = p.i;
+      markers.push(makeMarker(p));
+      idx.places.push(p);
+    });
+    if (!added) return 0;
+    if (absorbTimer) clearTimeout(absorbTimer);
+    absorbTimer = setTimeout(settle, 60);
+    return added;
+  }
+
+  /* THE DECLARED TOTAL STANDS UNTIL EVERY SOURCE IS IN, which is the lesson
+     already written at TOTAL_PLACES: a count taken from what has arrived
+     states that the atlas holds less than it does, and the line «15,780 of
+     15,780 places shown» is not an undercount, it is a false claim about the
+     size of the atlas. Counting only once nothing is outstanding keeps the
+     old guarantee under a loader that now has 170 outstanding things. */
+  var quietIn = false;
+  function allIn() {
+    return quietIn && !tailPending() ;
+  }
+  function settle() {
+    absorbTimer = null;
+    if (allIn()) TOTAL_PLACES = idx.places.length;
+    COUNTS = optionCounts();
+    drawCats();
+    drawKinds();
+    catSummary();
+    kindSummary();
+    apply(true);
+    if (openAt && !opened) {
+      var late = idx.places.filter(function (p) { return p.i === openAt; })[0];
+      if (late) { open(late); opened = true; }
+    }
+  }
+
+  var TAIL = (idx.tail && idx.tail.cells) ? idx.tail : null;
+  var tailState = {};                 /* key -> 1 fetching, 2 done */
+  function tailPending() {
+    if (!TAIL) return false;
+    for (var k in TAIL.cells) if (tailState[k] !== 2) return true;
+    return false;
+  }
+  function cellKey(lat, lon) {
+    var d = TAIL.deg;
+    return (Math.floor(lat / d) * d) + "_" + (Math.floor(lon / d) * d);
+  }
+  var tailInFlight = 0;
+  function fetchCell(k) {
+    if (!TAIL || !TAIL.cells[k] || tailState[k]) return false;
+    tailState[k] = 1;
+    tailInFlight++;
+    fetch(INDEX.replace(/[^/]*$/, TAIL.dir) + k + ".json")
+      .then(function (r) { return r.json(); })
+      .then(function (d) { tailState[k] = 2; absorb(d.places); })
+      .catch(function () {
+        /* Leave it unmarked so the background pass can try again; a cell that
+           failed once must not become a permanent hole in the search. */
+        tailState[k] = 0;
+      })
+      .then(function () { tailInFlight--; drainTail(); });
+    return true;
+  }
+  /* Cells the current view covers, plus one ring around it, nearest the
+     centre first — so the dots under the cursor arrive before the margins. */
+  function cellsInView(pad) {
+    if (!TAIL) return [];
+    var b = map.getBounds(), d = TAIL.deg, out = [];
+    var p = (pad || 0) * d;
+    var y0 = Math.max(-90, b.getSouth() - p), y1 = Math.min(90, b.getNorth() + p);
+    var x0 = b.getWest() - p, x1 = b.getEast() + p;
+    var cy = (b.getSouth() + b.getNorth()) / 2, cx = (b.getWest() + b.getEast()) / 2;
+    for (var y = Math.floor(y0 / d) * d; y <= y1; y += d)
+      for (var x = Math.floor(x0 / d) * d; x <= x1; x += d) {
+        /* The world wraps; the cells do not. */
+        var xw = x;
+        while (xw < -180) xw += 360;
+        while (xw >= 180) xw -= 360;
+        var k = (y) + "_" + (Math.floor(xw / d) * d);
+        if (TAIL.cells[k] && !tailState[k])
+          out.push([k, Math.abs(y - cy) + Math.abs(xw - cx)]);
+      }
+    out.sort(function (a, b2) { return a[1] - b2[1]; });
+    return out.map(function (r) { return r[0]; });
+  }
+  /* Four at a time: enough to fill a viewport in one round trip on a normal
+     line, few enough that the background pass never competes with the tiles
+     or with p/<id>.json when somebody clicks a marker. */
+  var TAIL_PARALLEL = 4;
+  function drainTail() {
+    if (!TAIL) return;
+    var want = cellsInView(1);
+    for (var i = 0; i < want.length && tailInFlight < TAIL_PARALLEL; i++)
+      fetchCell(want[i]);
+    if (tailInFlight >= TAIL_PARALLEL || !bgTail) return;
+    /* Then the remainder, so nothing is left unfetched. */
+    for (var k in TAIL.cells) {
+      if (tailInFlight >= TAIL_PARALLEL) return;
+      fetchCell(k);
+    }
+  }
+  /* The viewport's own cells are wanted at once; the global sweep waits for
+     the map to be up and quiet, so it never stands in front of the first
+     paint or the quiet half. */
+  var bgTail = false;
+  if (TAIL) {
+    map.on("moveend zoomend", function () { drainTail(); });
+    drainTail();
+    setTimeout(function () { bgTail = true; drainTail(); }, 2500);
+  }
+
   if (idx.quiet && idx.quiet.file) {
     fetch(INDEX.replace(/[^/]*$/, idx.quiet.file))
       .then(function (r) { return r.json(); })
@@ -6631,30 +6778,26 @@ window.addEventListener("load", async function () {
           var k = fold(p.n);
           if (!(k in byName)) byName[k] = p.i;
           markers.push(makeMarker(p));
+          PLACE_SEEN[p.i] = 1;
         });
         idx.places = idx.places.concat(qp);
-        /* AND NOW THE TRUTH REPLACES THE DECLARATION. TOTAL_PLACES was
-           idx.places.length plus idx.quiet.places — a number index.json
-           STATES about a file it does not contain. If the two ever disagree
-           the count can never settle: it reads «21,479 of 21,473 places
-           shown», which is both wrong and impossible, and it stays that way.
-           A stale local public/ produced exactly that, six places apart.
-           Once the file is here, its rows are the count, so the declaration
-           is only ever used for the second before it can be checked. */
-        TOTAL_PLACES = idx.places.length;
-        /* The counts in the filters were taken from the loud half alone;
-           the quiet half is 5,693 more places and almost all of them
-           unsurveyed, so redraw or the numbers are a third of the truth. */
-        COUNTS = optionCounts();
-        drawCats();
-        drawKinds();
-        catSummary();
-        kindSummary();
-        apply(true);
-        if (openAt && !opened) {
-          var late = qp.filter(function (p) { return p.i === openAt; })[0];
-          if (late) { open(late); opened = true; }
-        }
+        quietIn = true;
+        /* AND THE TRUTH REPLACES THE DECLARATION ONLY WHEN IT IS THE WHOLE
+           TRUTH. TOTAL_PLACES was idx.places.length plus idx.quiet.places —
+           a number index.json STATES about a file it does not contain. If the
+           two ever disagree the count can never settle: it reads «21,479 of
+           21,473 places shown», which is both wrong and impossible, and it
+           stays that way. A stale local public/ produced exactly that, six
+           places apart.
+           Replacing it here used to be safe because the quiet file was the
+           last thing outstanding. It is not any more — 169 viewport cells are
+           — so settle() counts only once NOTHING is outstanding, and until
+           then the declaration stands. Counting early under this loader would
+           have been the same false claim, just with a number that moved. */
+        /* The counts in the filters were taken from the eager places alone,
+           so redraw: the quiet half is 10,123 more places and almost all of
+           them unsurveyed. */
+        settle();
       })
       .catch(function () { /* the atlas is still an atlas without them */ });
   }

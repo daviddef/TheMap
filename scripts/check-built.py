@@ -172,7 +172,37 @@ def quiet_count_gate():
         err(f"index.json declares quiet.places={declared} and index-quiet.json "
             f"holds {actual} — the place count would be wrong by "
             f"{abs(actual - declared)} for every visitor")
-    else:
+    # AND THE SAME GATE FOR THE VIEWPORT CELLS, for exactly the same reason:
+    # TOTAL_PLACES is now eager + tail.places + quiet.places, so a wrong
+    # tail.places misstates the size of the atlas on every page — and under
+    # the new loader it is worse than before, because the count is only
+    # recomputed from the rows once every cell has landed. If a declaration
+    # is wrong and a cell never lands, the wrong number is what the reader
+    # keeps.
+    tail = loud.get("tail") or {}
+    cells = tail.get("cells") or {}
+    if tail:
+        summed = sum(cells.values())
+        if tail.get("places") != summed:
+            err(f"index.json declares tail.places={tail.get('places')} and its "
+                f"own cell list sums to {summed}")
+        on_disk, short = 0, []
+        for key, n in cells.items():
+            f = os.path.join(DIST, "pi", key + ".json")
+            if not os.path.exists(f):
+                short.append(key)
+                continue
+            rows = len(json.load(open(f, encoding="utf-8")).get("places") or [])
+            on_disk += rows
+            if rows != n:
+                short.append(f"{key} ({n} declared, {rows} held)")
+        if short:
+            err(f"{len(short)} of {len(cells)} viewport cells are missing or "
+                f"miscounted, so those places never load: {short[:4]}")
+        else:
+            print(f"viewport cells: {len(cells):,} cells, {on_disk:,} places, "
+                  f"declared and counted agree")
+    if declared == actual:
         print(f"quiet half: {actual:,} places, declared and counted agree")
 
 

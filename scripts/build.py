@@ -12,7 +12,7 @@ for the world. Here the map fetches an index that carries only what a marker
 needs to be DRAWN and FOUND, and the panel fetches one small file when somebody
 actually clicks. Worldwide, the index grows linearly and the panel never does.
 """
-import collections, datetime, hashlib, json, os, re, shutil, sys, unicodedata
+import collections, datetime, hashlib, json, math, os, re, shutil, sys, unicodedata
 import record_kinds  # one classifier, shared with the other scripts
 KIND_BIT = record_kinds.BIT
 
@@ -1013,13 +1013,76 @@ def main():
                     "note": ("Places with no volume and no collection yet. "
                              "Real ground, correctly placed, nobody has "
                              "walked it. Fetched after the map draws.")}
+    # AND SPLIT AGAIN, BY WHERE THE READER IS LOOKING.
+    #
+    # The quiet split above bought the first paint 124 KB and was the right
+    # move while the loud half was 15,566 places. Placing the Cyrillic corpus
+    # and thirty countries' villages took it to 42,841, and the eager file
+    # with it: 418 KB over the wire became 1,021 KB. audit-site.py's own
+    # verdict on that number — "past 700 KB the answer is loading dots by
+    # viewport, not trimming fields" — is right, and trimming really is
+    # hopeless: the rows are 24 bytes each over the wire, because gzip has
+    # already collapsed everything repetitive in them.
+    #
+    # TOP TWELVE PER FIVE-DEGREE CELL, NOT TOP N BY VOLUME. Ranking the whole
+    # world by volume and taking the head gives a first paint that is Italy
+    # and the United States, with Scandinavia and the Balkans blank until the
+    # rest lands — a map that looks like the atlas has nothing there, which is
+    # the one impression this project works hardest not to give. Per cell, the
+    # same byte budget covers every corner of the world at once: 2,550 places,
+    # 77 KB, and no region empty.
+    #
+    # The rest ride in cells the client fetches for the viewport it is
+    # actually showing, and a background pass picks up the remainder so that
+    # SEARCH AND THE FILTER COUNTS ARE NEVER PERMANENTLY PARTIAL. That last
+    # part is not optional: the map's search box resolves against every place
+    # it holds, and a viewport scheme that left the rest unfetched would make
+    # a place findable or not depending on where the reader had panned.
+    tail_deg = 5
+    groups = {}
+    for r in loud:
+        key = "%d_%d" % (math.floor(r["y"] / tail_deg) * tail_deg,
+                         math.floor(r["x"] / tail_deg) * tail_deg)
+        groups.setdefault(key, []).append(r)
+    pi = os.path.join(OUT, "pi")
+    shutil.rmtree(pi, ignore_errors=True)
+    os.makedirs(pi)
+    eager, tail_cells, tail_bytes = [], {}, 0
+    for key, rows in groups.items():
+        # Biggest first WITHIN the cell, so the twelve that ride in the eager
+        # file are the twelve a reader zooming there would want first.
+        rows.sort(key=lambda r: -(r.get("v") or 0))
+        eager.extend(rows[:12])
+        rest = rows[12:]
+        if not rest:
+            continue
+        tail_cells[key] = len(rest)
+        blob = json.dumps({"places": rest}, ensure_ascii=False,
+                          separators=(",", ":"))
+        tail_bytes += len(blob.encode())
+        open(os.path.join(pi, key + ".json"), "w").write(blob)
+    eager.sort(key=lambda r: -(r.get("v") or 0))
+    idx["places"] = eager
+    idx["tail"] = {"dir": "pi/", "deg": tail_deg,
+                   "places": sum(tail_cells.values()),
+                   "cells": dict(sorted(tail_cells.items())),
+                   "note": ("The places this file does not carry, in cells of "
+                            f"{tail_deg} degrees. The map fetches the cells its "
+                            "viewport covers, then the rest in the background "
+                            "so that search and the filter counts end up "
+                            "complete. `cells` maps cell to how many places "
+                            "are in it; the cell key is the floor of its "
+                            "south-west corner, lat_lon.")}
     json.dump(idx, open(os.path.join(OUT, "index.json"), "w"),
               ensure_ascii=False, separators=(",", ":"))
     json.dump({"note": idx["quiet"]["note"], "places": quiet},
               open(os.path.join(OUT, "index-quiet.json"), "w"),
               ensure_ascii=False, separators=(",", ":"))
-    print(f"index split      {len(loud):,} drawn first, "
+    print(f"index split      {len(eager):,} drawn first, "
+          f"{idx['tail']['places']:,} in {len(tail_cells)} viewport cells, "
           f"{len(quiet):,} quiet dots after")
+    print(f"pi/*.json     {tail_bytes/1024:10.1f} KB  {len(tail_cells)} cells, "
+          f"biggest {max(tail_cells.values()):,} places")
     json.dump(regions, open(os.path.join(OUT, "regions.json"), "w"),
               ensure_ascii=False, separators=(",", ":"))
     json.dump(providers, open(os.path.join(OUT, "providers.json"), "w"),
@@ -2118,7 +2181,11 @@ def main():
                                 "; ".join(c.get("by", [])), r["skel"]])
 
     sz = lambda f: os.path.getsize(os.path.join(OUT, f))
-    print(f"index.json      {sz('index.json')/1024:8.1f} KB  {len(index)} places")
+    # `len(index)` is every place; the FILE now holds only the first paint, so
+    # printing the two together under one label read «286 KB, 52964 places»
+    # and invited exactly the arithmetic this split exists to avoid.
+    print(f"index.json      {sz('index.json')/1024:8.1f} KB  "
+          f"{len(idx['places'])} of {len(index)} places — the first paint")
     print(f"p/*.json        {nbytes/1024:8.1f} KB  {len(index)} files, "
           f"{nbytes/max(len(index),1):.0f} B each on average")
     print(f"regions.json    {sz('regions.json')/1024:8.1f} KB")

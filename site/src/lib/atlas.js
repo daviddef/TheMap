@@ -1,9 +1,10 @@
 /* THE WHOLE ATLAS, FOR THINGS THAT ARE NOT THE MAP.
 
-   index.json was split in two so the map can draw before the quiet dots
-   arrive: index.json carries the places that have something to show,
-   index-quiet.json the ones that are real ground nobody has walked yet.
-   That split is a loading strategy for ONE consumer — the browser.
+   index.json was split so the map can draw before the rest arrives:
+   index.json carries the twelve biggest places in each five-degree cell,
+   pi/<cell>.json the rest of them as the viewport asks for them, and
+   index-quiet.json the real ground nobody has walked yet. Those splits are
+   a loading strategy for ONE consumer — the browser.
 
    Every static page is built on a machine with the whole file already on
    disk and nothing to wait for. Left to import index.json alone they
@@ -49,7 +50,25 @@ function load() {
      says it exists it must be there — a missing half is 4,904 places
      silently gone, which is the bug this module was written for. */
   if (idx.quiet && idx.quiet.file) quiet = read(idx.quiet.file);
-  cached = { ...idx, places: idx.places.concat(quiet.places || []) };
+  /* AND THE VIEWPORT CELLS, WHICH ARE THE SAME BUG AGAIN AT FOUR TIMES THE
+     SIZE. index.json now carries only the twelve biggest places in each
+     five-degree cell and promises the other 40,291 in pi/<cell>.json — a
+     second loading strategy for the same one consumer, the browser. Without
+     this the home page read «12,673 places · 963,618 record volumes» on an
+     atlas of 52,964 and 3,051,301, every small place lost its /place/ page,
+     and the countries lists shed their villages. Exactly what the paragraph
+     above describes, which is why it is fixed in the same module rather than
+     in each page that trips over it.
+
+     Promised means required: a cell listed and not on disk is places
+     silently gone, so this throws rather than quietly building a smaller
+     atlas. */
+  let tail = [];
+  if (idx.tail && idx.tail.cells)
+    for (const key of Object.keys(idx.tail.cells))
+      tail = tail.concat(read(`${idx.tail.dir}${key}.json`).places || []);
+  cached = { ...idx,
+             places: idx.places.concat(tail, quiet.places || []) };
   return cached;
 }
 

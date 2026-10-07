@@ -32,6 +32,7 @@ import zlib from "node:zlib";
 import Base from "../layouts/Base.astro";
 import { u } from "../lib/url.js";
 import idx from "../../public/index.json";
+import { atlas as whole } from "../lib/atlas.js";
 import regions from "../../public/regions.json";
 import provs from "../../public/providers.json";
 import site from "../data/site.json";
@@ -84,16 +85,28 @@ const srcLic = (f) => {
   return { lic: null, src: null };
 };
 
-const nPlaces = idx.places.length + ((idx.quiet && idx.quiet.places) || 0);
-const nVolumes = idx.places.reduce((a, p) => a + (p.v || 0), 0);
+/* ALL THREE PARTS OF THE INDEX, BECAUSE THERE ARE NOW THREE — AND THE MODULE
+   WRITTEN FOR THAT IS lib/atlas.js, NOT A FOURTH COPY OF THE LOGIC HERE.
+   `idx` above is the raw file, which this page needs in order to describe the
+   raw file: how many rows index.json itself holds, what it promises. Every
+   COUNT of what the atlas contains comes from the whole index instead, or
+   this page — the page whose entire job is saying truthfully what is here —
+   would report 2,550 places and a fifteenth of the volumes. */
+const nPlaces = whole.places.length;
+const nVolumes = whole.places.reduce((a, p) => a + (p.v || 0), 0);
+const nTailCells = Object.keys((idx.tail && idx.tail.cells) || {}).length;
 
 /* One row per published file. `shards` means the path carries a key. */
 const FILES = [
   { path: "/index.json", size: sizeOf("index.json"), ...licOf("index.json"),
-    what: `Every place the map can draw, with only what a marker needs: id, name, latitude, longitude, folded search text, access class, collection and volume counts, and the year span its books cover. ${idx.places.length.toLocaleString()} rows.`,
-    shape: `{ countries, access, rank, kinds, kindLabels, places: [{ i, n, y, x, c, v, a, q, s: [from, to] }] }` },
+    what: `The first paint: the ${(((idx.tail && idx.tail.deg) || 5)).toString()}-degree cell grid's twelve biggest places in each cell, with only what a marker needs — id, name, latitude, longitude, folded search text, access class, collection and volume counts, and the year span its books cover. ${idx.places.length.toLocaleString()} rows, NOT every place: \`tail\` says where the other ${(((idx.tail && idx.tail.places) || 0)).toLocaleString()} live and \`quiet\` the unwalked ground. If you want them all, read this plus every pi/ cell plus index-quiet.json.`,
+    shape: `{ countries, access, rank, kinds, kindLabels, tail: { dir, deg, places, cells }, quiet: { file, places }, places: [{ i, n, y, x, c, v, a, q, s: [from, to] }] }` },
+  { path: "/pi/<lat>_<lon>.json", size: `${nTailCells.toLocaleString()} files`,
+    ...licOf("index.json"),
+    what: `The places index.json leaves out, in cells of ${(((idx.tail && idx.tail.deg) || 5)).toString()} degrees keyed on the floor of their south-west corner. The map fetches the cells its viewport covers and then the rest in the background, so searching never depends on where the reader has panned. ${(((idx.tail && idx.tail.places) || 0)).toLocaleString()} rows across ${nTailCells.toLocaleString()} cells, same shape as index.json's.`,
+    shape: `{ places: [ … as above … ] }` },
   { path: "/index-quiet.json", size: sizeOf("index-quiet.json"), ...licOf("index-quiet.json"),
-    what: `The second half of the index — places with nothing catalogued yet. Fetched after first paint so the map draws before it arrives. ${((idx.quiet && idx.quiet.places) || 0).toLocaleString()} rows, same shape.`,
+    what: `The unwalked ground — places with nothing catalogued yet. Fetched after first paint so the map draws before it arrives. ${((idx.quiet && idx.quiet.places) || 0).toLocaleString()} rows, same shape.`,
     shape: `{ places: [ … as above … ] }` },
   { path: "/p/<place-id>.json", size: `${countIn("p").toLocaleString()} files`,
     what: "Everything about one place that a marker does not need: every collection covering it, every volume with its year span and deep link, its other names, which archive holds it, the nearest parishes and the nearest cemeteries. The `i` field of an index row is the filename. NOTE: the volume TITLES here are FamilySearch's catalogue metadata, not this atlas's writing — see the licence column and the note above.",
@@ -286,8 +299,14 @@ const FILES = [
 
   <div class="one" style="margin-top:18px">
     <div class="lab">How to fetch it</div>
-    <pre class="ra-code"><code>{`# every place the map can draw
+    <pre class="ra-code"><code>{`# the first paint only — the twelve biggest places per 5-degree cell
 curl -s https://recordatlas.org/index.json | jq '.places | length'
+
+# every place: the first paint, plus every viewport cell, plus the quiet half
+curl -s https://recordatlas.org/index.json > i.json
+jq -r '.tail.cells | keys[]' i.json \
+  | xargs -I{} curl -s https://recordatlas.org/pi/{}.json \
+  | jq '.places[]' | jq -s 'length'
 
 # one place, in full
 curl -s https://recordatlas.org/p/gracisce.json
@@ -296,7 +315,8 @@ curl -s https://recordatlas.org/p/gracisce.json
 curl -s https://recordatlas.org/regions.json | jq '.regions[0]'`}</code></pre>
     <p class="cap">No key, no rate limit, no account, readable from any origin — these
     are static files on GitHub Pages, which is also why there is no query
-    endpoint. Fetch the index and filter it yourself; it is {sizeOf("index.json")}.</p>
+    endpoint. Fetch the index and filter it yourself; the first paint is {sizeOf("index.json")},
+    and every place is that plus the {nTailCells.toLocaleString()} cells under <code>/pi/</code>.</p>
   </div>
 
   <div class="one" style="margin-top:18px">

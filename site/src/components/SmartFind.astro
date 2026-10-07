@@ -78,6 +78,27 @@ const { placesIndex, quietIndex, base, surnameShards = null, gazShards = null,
       fetch(IDX).then(function (r) { return r.json(); }).then(function (d) {
         rows = d.places.slice();
         hint.textContent = "";
+        /* THE VIEWPORT SPLIT IS THE MAP'S BUSINESS, NOT THIS BOX'S. index.json
+           now carries only the top twelve places per five-degree cell, so
+           taking it as the place index would have quietly cut this search from
+           42,841 places to 2,550 — and the names it lost would be the smaller
+           places, which are exactly the ones somebody needs a search box to
+           find. A reader typing Lovinac does not care which cell it is in.
+           So: every cell, and the box says it is still loading until they are
+           all in. It is lazy — nothing here is fetched until the first
+           keystroke — so this costs the first paint nothing. */
+        var tail = d.tail;
+        if (!tail || !tail.cells) return null;
+        var keys = Object.keys(tail.cells);
+        var base = IDX.replace(/[^/]*$/, tail.dir);
+        hint.textContent = "Loading the place index\u2026";
+        return Promise.all(keys.map(function (k) {
+          return fetch(base + k + ".json")
+            .then(function (r) { return r.json(); })
+            .then(function (c) { rows = rows.concat(c.places || []); })
+            .catch(function () {});
+        })).then(function () { hint.textContent = ""; });
+      }).then(function () {
         return fetch(QUIET).then(function (r) { return r.json(); })
           .then(function (q) { rows = rows.concat(q.places || []); })
           .catch(function () {});

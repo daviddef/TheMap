@@ -19,15 +19,25 @@ test("the corpus loads from disk and is whole", () => {
   assert.ok(c.counts && typeof c.counts.surnames === "number");
 });
 
-test("the atlas is both halves of the split index", () => {
-  /* index.json carries the places with something to show and
-     index-quiet.json the rest; ten static pages import this instead of
-     index.json because importing half a file and believing it whole cost
-     4,904 places their pages. */
+test("the atlas is every part of the split index", () => {
+  /* index.json carries the twelve biggest places in each five-degree cell,
+     pi/<cell>.json the rest, and index-quiet.json the ground nobody has
+     walked; ten static pages import this instead of index.json because
+     importing part of a file and believing it whole cost 4,904 places their
+     pages — and when the viewport cells were added it cost 40,291 more,
+     which is the failure this assertion caught rather than a reader did. */
   const idx = JSON.parse(fs.readFileSync("public/index.json", "utf8"));
   const quiet = JSON.parse(fs.readFileSync("public/index-quiet.json", "utf8"));
-  assert.equal(atlas.places.length, idx.places.length + quiet.places.length);
-  assert.ok(atlas.places.length > idx.places.length, "the quiet half is not empty");
+  const cells = Object.keys((idx.tail && idx.tail.cells) || {});
+  const tail = cells.reduce((n, k) => n +
+    JSON.parse(fs.readFileSync(`public/${idx.tail.dir}${k}.json`, "utf8")).places.length, 0);
+  assert.ok(cells.length > 0, "the index is no longer split by viewport cell — if that is deliberate, this test should go, not be loosened");
+  assert.equal(tail, idx.tail.places,
+    "index.json's tail.places disagrees with the cells on disk");
+  assert.equal(atlas.places.length,
+    idx.places.length + tail + quiet.places.length);
+  assert.ok(atlas.places.length > idx.places.length + quiet.places.length,
+    "the viewport cells are not empty");
 });
 
 test("every place has somewhere to be and a name", () => {

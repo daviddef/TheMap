@@ -103,10 +103,23 @@ def shard_key(form):
     every name with a separator near the front: O'Brien, D'Angelo, Ah-Sing,
     Le Roy, de Witt. Some were rescued by a variant that happened to shard
     correctly, which is why it looked like it worked.
+
+    AND ASCII, BECAUSE THE CLIENT IS ASCII. `isalnum()` is true of Cyrillic,
+    so once the gazetteer started keeping «Тверь» alongside «Tver» this began
+    writing shards called «тве.json» — and SmartFind.astro builds its key with
+    /[a-z0-9]/, so it can never ask for one. That is thousands of files nobody
+    will ever fetch, which is the same build-disagrees-with-client fault as
+    above, only wasting bytes instead of losing names.
+
+    Cyrillic search in the box is a real thing to want and is not this: it
+    needs the client's regex widened in the same change, and it is worth
+    measuring the shard growth before paying for it. The gazetteer keeps the
+    Cyrillic either way — scripts/match-fs-volumes.py reads the whole file and
+    never touches a shard, which is where the 112,938 volumes come back.
     """
     k = ""
     for ch in form:
-        if ch.isalnum():
+        if ch.isalnum() and ch.isascii():
             k += ch
             if len(k) == 3:
                 break

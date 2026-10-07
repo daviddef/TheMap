@@ -97,6 +97,59 @@ function tryRead(candidates) {
   throw lastErr || new Error("not found: " + candidates.join(", "));
 }
 
+/* ONE PLACE AT A TIME, BECAUSE V8 WILL NOT HOLD THE WHOLE FILE.
+ *
+ * This was `JSON.parse(gunzipSync(raw).toString("utf8"))`, and it worked
+ * until the corpus outgrew a JS string. V8 caps a string at 0x1fffffe8 bytes
+ * — 512 MB — and the placed corpus reached 539 MB decompressed when the
+ * gazetteer gained the thirty per-country files it had been missing. The
+ * build died with «Cannot create a string longer than 0x1fffffe8 characters»
+ * on the first surname page, nineteen minutes in.
+ *
+ * A Buffer has no such limit, so the bytes are fine; only the string was the
+ * problem. scripts/match-fs-volumes.py now ends every `byPlace` entry with a
+ * newline — still one valid JSON document, since a newline between members is
+ * whitespace — and this walks those lines, so the largest string built is one
+ * place's books instead of all of them.
+ *
+ * Each line is `"placeid":[...]`, with a trailing comma on all but the last,
+ * which `{` + line + `}` turns into a parseable object. A raw newline cannot
+ * occur inside a title, because JSON writes those as \n.
+ *
+ * THE OLD ONE-LINE FORMAT STILL READS, for a file restored from a cache
+ * written before this change — it simply cannot be larger than 512 MB, and
+ * the throw says so plainly rather than blaming the string length. */
+function parseWorld(buf) {
+  const firstNl = buf.indexOf(10);
+  if (firstNl < 0 || firstNl > 4096) {
+    try {
+      return JSON.parse(buf.toString("utf8"));
+    } catch (e) {
+      throw new Error(
+        "fs-volumes-world.json.gz is in the old single-line format and is too " +
+        "large for one JS string (" + buf.length.toLocaleString() + " bytes " +
+        "decompressed, limit 536,870,888). Re-run scripts/match-fs-volumes.py " +
+        "to rewrite it one place per line. Original: " + e.message);
+    }
+  }
+  const out = { byPlace: {} };
+  let i = 0, inBy = false;
+  while (i < buf.length) {
+    let j = buf.indexOf(10, i);
+    if (j < 0) j = buf.length;
+    let line = buf.toString("utf8", i, j).trim();
+    i = j + 1;
+    if (!line || line === "{" || line === "}" || line === "}}") continue;
+    if (line.endsWith(",")) line = line.slice(0, -1);
+    if (line === '"byPlace":{') { inBy = true; continue; }
+    if (line.charCodeAt(0) !== 34) continue;      // not a `"key":value` line
+    const obj = JSON.parse("{" + line + "}");
+    if (inBy) Object.assign(out.byPlace, obj);
+    else Object.assign(out, obj);
+  }
+  return out;
+}
+
 function load() {
   if (BY_CC) return;
   BY_CC = {};
@@ -112,7 +165,7 @@ function load() {
       "Set RA_ALLOW_NO_WORLD=1 knowingly, or fetch the release asset.");
     return;
   }
-  const world = JSON.parse(gunzipSync(raw).toString("utf8"));
+  const world = parseWorld(gunzipSync(raw));
   const colTitles = world.colTitles || {};
 
   const placeCc = {};

@@ -193,7 +193,11 @@ jobs:
         run: |
           echo "raw dist:  $(du -sm site/dist | cut -f1) MB"
           echo "files:     $(find site/dist -type f | wc -l)"
-          echo "GitHub Pages publishes at most 1,024 MB."
+          # 1,024 MB is what GitHub DOCUMENTS as the published-site limit, and
+          # this site has been eight times it and deploying for weeks — so the
+          # line used to read like a gate it has never been. Both numbers, so
+          # whoever reads this log next knows which one actually bit.
+          echo "GitHub documents a 1,024 MB limit; measured deploys have passed at 8,060 MB."
           echo "--- the heaviest directories:"
           du -sm site/dist/* | sort -rn | head -12
           echo "--- pages by kind:"

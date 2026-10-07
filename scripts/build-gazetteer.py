@@ -71,6 +71,44 @@ def latin(s):
     return lat / len(letters) > 0.9
 
 
+# THE SCRIPT THE RECORDS ARE ACTUALLY IN, WHICH IS NOT ALWAYS LATIN.
+#
+# `latin()` above threw away every name not written in Latin letters, on the
+# reasoning that those are transliterations of the CURRENT name and what a
+# genealogist needs is the name on the document in their hand. That reasoning
+# is sound for Europe west of the Bug and wrong everywhere east of it: a
+# Russian parish register says Тверь, and FamilySearch files it under Тверь.
+#
+# MEASURED, NOT ASSUMED. 112,938 volumes sat unplaced under Cyrillic names —
+# RU 68,048, BY 39,588, MD 5,302 — against a gazetteer that held the Latin
+# «Tver» and had been made to forget the Cyrillic «Тверь» that would have
+# matched it. It also forgot «Калинин», the name the town carried from 1931 to
+# 1990, which is precisely the «what was this called» question this file
+# exists to answer. Both were in the GeoNames row all along.
+#
+# This is an EXACT match restored, not a romanisation guessed. A transliterator
+# that turned Тверь into Tver would be placing a book on resemblance; keeping
+# the name GeoNames already records for the place places it on identity.
+NATIVE = {
+    "RU": "CYRILLIC", "BY": "CYRILLIC", "UA": "CYRILLIC", "MD": "CYRILLIC",
+    "BG": "CYRILLIC", "RS": "CYRILLIC", "MK": "CYRILLIC", "ME": "CYRILLIC",
+    "KZ": "CYRILLIC", "KG": "CYRILLIC", "TJ": "CYRILLIC", "MN": "CYRILLIC",
+    "GR": "GREEK",
+}
+
+
+def native(s, cc):
+    """Is this the place's name in the script its own records are written in?"""
+    want = NATIVE.get(cc)
+    if not want:
+        return False
+    letters = [c for c in unicodedata.normalize("NFKD", s) if c.isalpha()]
+    if not letters:
+        return False
+    hit = sum(1 for c in letters if want in unicodedata.name(c, ""))
+    return hit / len(letters) > 0.9
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--src", required=True, nargs="+",
@@ -147,15 +185,28 @@ def main():
 
         base = {fold(name), fold(ascii_name)}
         fname = fold(name)
-        cand = []
+        cand, nat = [], []
         for alt in alts.split(",") if alts else []:
             alt = alt.strip()
             if len(alt) < 4:                       # airport and rail codes
                 continue
             if alt.isupper():                      # ditto, and shouting
                 continue
-            if not latin(alt):                     # a transliteration, not a former name
-                continue
+            if not latin(alt):
+                # NOT LATIN IS NOT THE SAME AS NOT USEFUL. A name in the
+                # country's own script goes to its own pool below, because the
+                # clustering the Latin names go through would destroy it:
+                # «Твер» and «Тверь» score 0.89 against each other, so they
+                # collapse to one and the rule «prefer the shortest» — right
+                # for a Latin exonym, since the short form is the historical
+                # one rather than a romance elaboration — keeps «Твер» and
+                # throws away «Тверь», the only form anybody files under.
+                if native(alt, cc):
+                    fa = fold(alt)
+                    if fa not in base:
+                        base.add(fa)
+                        nat.append(alt)
+                continue                           # a transliteration, not a former name
             # GeoNames also carries ROMANISATIONS of non-Latin scripts —
             # "bu la di si la fa" for Bratislava, "lywyw" for Lviv, "pwlh" for
             # Pula. They pass the Latin test because they are spelt in Latin
@@ -199,7 +250,7 @@ def main():
                 clusters.append([alt])
         reps = [c[0] for c in clusters]
         reps.sort(key=lambda alt: difflib.SequenceMatcher(None, fname, fold(alt)).ratio())
-        out = reps[:12]
+        out = nat[:6] + reps[:12]
         # A PLACE WITH NO OTHER NAME IS STILL A PLACE. This used to drop every
         # row that carried no alternate, which was right while the source was
         # cities5000 and the question was «the name changed»: Pressburg is
@@ -274,18 +325,51 @@ def main():
     # hamlet depending on an argument order nobody would think to preserve.
     rows.sort(key=lambda r: -int(r.get("p") or 0))
     ccs_in = sorted({r["k"] for r in rows})
-    out = {"note": "Place-name gazetteer: every populated place GeoNames holds "
-                   "for the countries listed in `countries`, NOT worldwide, "
-                   "plus every island in those countries — `f`:\"isl\" marks "
-                   "one. "
+    # AND THE NOTE WAS STILL OVERCLAIMING, IN THE OTHER DIRECTION. It read
+    # «every populated place GeoNames holds for the countries listed in
+    # `countries`, NOT worldwide», which is true of the countries a per-country
+    # file was read for and false of the two hundred reached only by the
+    # cities5000 floor. The Netherlands had 582 places in a gazetteer that
+    # described itself as holding every one of them; the real number is tens of
+    # thousands, and 43,246 Dutch volumes sat unplaced because of the gap the
+    # note denied. `full` now says which countries the strong claim covers.
+    #
+    # TAKEN FROM THE FILES THAT WERE READ, which is the only exact answer.
+    #
+    # The first cut inferred it from the rows — a populated place under five
+    # thousand people can only have come from a country file, because that is
+    # where the cities5000 floor starts — and it was wrong in both directions.
+    # cities5000 carries administrative seats whatever their population, so one
+    # such row was enough to mark a country fully covered: 151 countries
+    # claimed it and 50 had earned it. A count threshold fixed the arithmetic
+    # and left a threshold, which is a number to be wrong about later.
+    #
+    # The source list is not a guess. `HR.txt` is Croatia and `cities5000.txt`
+    # is not a country, and nothing about that can drift.
+    full = sorted({os.path.basename(src).split(".")[0].upper()
+                   for src in a.src
+                   if len(os.path.basename(src).split(".")[0]) == 2}
+                  & {r["k"] for r in rows})
+    out = {"note": "Place-name gazetteer. For the countries listed in `full`, "
+                   "every populated place GeoNames holds, down to the "
+                   "single-farm hamlet, plus every island written down twice "
+                   "— `f`:\"isl\" marks one. For every OTHER country in "
+                   "`countries` this is the cities5000 floor only: places of "
+                   "five thousand people and up, so villages are missing. "
+                   "Neither is worldwide-complete. "
                    "n=name y=lat x=lon k=country p=population a=other names it "
                    "has been written under q=every form folded for search. "
+                   "Names are kept in Latin script and, for the countries "
+                   "whose own records are not written in it, in that script "
+                   "too — Тверь as well as Tver. "
                    "A row with no `a` is a place nobody wrote differently — "
                    "usually a village — and is here so that it can be found at "
                    "all. Built by scripts/build-gazetteer.py.",
-           "source": "GeoNames per-country dumps, CC BY 4.0 — https://www.geonames.org/",
+           "source": "GeoNames cities5000 as a worldwide floor plus per-country "
+                     "dumps, CC BY 4.0 — https://www.geonames.org/",
            "licence": "CC BY 4.0 (GeoNames)",
            "countries": ccs_in,
+           "full": full,
            "built": _time.strftime("%Y-%m-%d"),
            "places": rows}
     # WRITTEN THROUGH THE SHARED HELPER, which decides gzip by the extension.

@@ -105,9 +105,25 @@ gazetteer and most still do not match. Their shapes:
 | bare admin unit (`Franklin County`) | 594 | 21,430 |
 | compound (`Ile-de-Montréal, Lapraire, Chambly…`) | 499 | 5,721 |
 
-**The non-Latin group is the tractable one.** `Тверь` is Tver; the gazetteer
-folds to Latin and holds `Tver`, so the two never meet. A transliteration pass
-over Cyrillic and Greek could be worth ~103,000 volumes.
+**The non-Latin group is the tractable one, and the ~103,000 figure that
+first stood here was wrong twice over.** It assumed a transliteration pass was
+the fix and that every Cyrillic name would then match. Measured:
+
+- A transliterator over the Cyrillic corpus, checked against the real
+  gazetteer with the country constraint applied, would have matched **170
+  names / 6,896 volumes** — not 103,000. Most of those villages were not in
+  the gazetteer under any spelling, so there was nothing to romanise *to*.
+- The actual cause was **gazetteer coverage**. The gazetteer held 6,026
+  Russian and **164** Belarusian places, because neither country was among
+  the nineteen per-country GeoNames files it was built from — against
+  Croatia's 12,007 and Italy's 63,163.
+- And the romanisation was never needed. GeoNames carries `Тверь` *and*
+  `Калинин` in the row for Tver; `build-gazetteer.py` threw both away with a
+  Latin-script filter. Keeping them is an **exact** match restored, not a
+  resemblance — which is the standard this file sets below.
+
+Fixed 7 October: per-country files for the 30 floor-only countries that carry
+unplaced volumes, and native-script names kept for the Cyrillic ones.
 
 **Do not change the matcher's standard of proof.** It is deliberately
 "deepest first, and only inside the collection's own countries", so that

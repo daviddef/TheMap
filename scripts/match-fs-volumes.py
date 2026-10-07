@@ -38,7 +38,7 @@ GAPS = "data/fs-volumes-unplaced.json"
 PROMOTE = "data/fs-volumes-promote.json"
 
 
-def dump(obj, path):
+def dump(obj, path, lines_key=None):
     """Write, then rename — never leave a half-written file in place.
 
     A build read fs-volumes-promote.json while a second matcher run was
@@ -46,11 +46,47 @@ def dump(obj, path):
     indistinguishable from a whole one until something parses it, so the
     file is written beside its destination and moved into place, which is
     atomic on one filesystem.
+
+    ONE LINE PER PLACE, BECAUSE NODE CANNOT HOLD THE WHOLE FILE AS A STRING.
+
+    This used to be a single `json.dump`, which writes the document on one
+    line. Python reads that back without caring, and six scripts here do. But
+    site/src/lib/surname-volumes.js reads it too, and V8 refuses any string
+    longer than 0x1fffffe8 bytes — 512 MB. When the gazetteer gained the
+    thirty missing per-country files the placed corpus went to 539 MB
+    decompressed, and `gunzipSync(raw).toString("utf8")` threw
+    «Cannot create a string longer than 0x1fffffe8 characters» two thirds of
+    the way through a nineteen-minute build, on the first surname page.
+
+    So `lines_key` — "byPlace" — is written with a newline after every entry.
+    This is still ONE valid JSON document, because a newline between members
+    is just whitespace: every Python reader is unaffected and none of them
+    needed changing. The JS reader splits on newlines and parses one place at
+    a time, so the largest string it ever builds is a single place's books
+    rather than the whole corpus. JSON escapes a literal newline as \n, so a
+    raw 0x0A can only ever be one this writer put there — splitting on it
+    cannot land inside a title.
     """
     tmp = path + ".partial"
     if path.endswith(".gz"):
         with gzip.open(tmp, "wt", encoding="utf-8") as f:
-            json.dump(obj, f, ensure_ascii=False)
+            big = obj.get(lines_key) if lines_key else None
+            if not isinstance(big, dict):
+                json.dump(obj, f, ensure_ascii=False)
+            else:
+                f.write("{\n")
+                for k, v in obj.items():
+                    if k == lines_key:
+                        continue
+                    f.write(json.dumps(k, ensure_ascii=False) + ":"
+                            + json.dumps(v, ensure_ascii=False) + ",\n")
+                f.write(json.dumps(lines_key, ensure_ascii=False) + ":{\n")
+                for n, (k, v) in enumerate(big.items()):
+                    if n:
+                        f.write(",\n")
+                    f.write(json.dumps(k, ensure_ascii=False) + ":"
+                            + json.dumps(v, ensure_ascii=False))
+                f.write("\n}}\n")
     else:
         with open(tmp, "w") as f:
             json.dump(obj, f, ensure_ascii=False, indent=1)
@@ -1306,7 +1342,7 @@ def main():
         # The collection titles, once each, instead of on 2.8 million rows.
         "colTitles": col_titles,
         "byPlace": {k: v for k, v in sorted(by_place.items())},
-    }, OUT)
+    }, OUT, lines_key="byPlace")
 
     dump({
         "note": ("Settlements FamilySearch has books for and this atlas has "

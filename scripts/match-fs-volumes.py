@@ -184,6 +184,34 @@ def bare(s):
     return re.sub(r"\s*\([^)]*\)\s*$", "", s or "").strip()
 
 
+# THE WORD FOR WHAT A DIVISION IS, WHICH IS NOT PART OF ITS NAME.
+#
+# Chosen from the data rather than guessed, and the guessing is the danger:
+# the commonest last words in data/admin-divisions.json include «Sul»,
+# «Norte», «Grande», «Minas» and «Piauí», which are Brazilian place names, not
+# kinds. Stripping those would turn «Rio Grande do Sul» into «Rio Grande do»
+# and «Cruzeiro do Sul» into «Cruzeiro do». Only words that name a KIND of
+# division are here. «City» is deliberately left out: 30 rows, and «Kansas
+# City» is the shape of mistake it invites.
+DIVISION_KIND = {
+    "county", "parish", "district", "province", "region", "department",
+    "municipality", "raion", "rayon", "oblast", "okrug", "kommun", "kommune",
+    "shi", "gun", "ilcesi", "i̇lçesi", "İlçesi", "barrio-pueblo", "megye",
+    "jaras", "járás", "powiat", "gmina", "voivodeship", "prefecture",
+    "borough", "shire", "township", "governorate", "krai", "ken", "fu",
+}
+
+
+def _bare_division(name):
+    """«Vas County» -> «Vas». The kind, when GeoNames wrote it into the name."""
+    parts = (name or "").strip().split()
+    if len(parts) < 2:
+        return None
+    if parts[-1].lower().strip(".") in DIVISION_KIND:
+        return " ".join(parts[:-1]).strip(" ,-")
+    return None
+
+
 # Church-dedication prefixes that are never the place. "Sv. Stošija" is a
 # patron saint, not a settlement.
 US_STATE_NAMES = {
@@ -456,7 +484,7 @@ def main():
     # DIVISIONS cannot do that — Polla is a town and is not in this file,
     # while Udine is, as adm2 at 46.06,13.19. It is the settlement gazetteer
     # that was never safe for an area name, not the idea of reading one.
-    adm_idx = {}
+    adm_idx, adm_bare = {}, {}
     try:
         _adm = json.load(open("data/admin-divisions.json"))
         _rows = _adm if isinstance(_adm, list) else _adm.get(
@@ -470,10 +498,31 @@ def main():
         for _r in _rows:
             if isinstance(_r, dict) and _r.get("name") and _r.get("lat") is not None:
                 adm_idx.setdefault((_r.get("cc"), fold(_r["name"])), []).append(_r)
+                # AND UNDER THE NAME WITHOUT ITS KIND, IN A SEPARATE INDEX.
+                #
+                # GeoNames writes the kind into the name — «Vas County»,
+                # «Hefei Shi», «Zvenihorodka Raion» — and FamilySearch does
+                # not: it files the Hungarian civil registers under path
+                # ["Vas", "Acsád"] with labels ["County", "Town or
+                # Registration District"]. The kind is in the LABEL there,
+                # which is why the two never met, and 142,713 volumes sat
+                # unplaced naming a division this file already held.
+                #
+                # A SECOND INDEX, NOT MORE KEYS IN THE FIRST, because merging
+                # them can only make matching worse: a real division named
+                # «Vas» and another named «Vas County» would collide into one
+                # ambiguous entry and division_for would start refusing a name
+                # it answers correctly today. Tried only after the exact index
+                # has nothing, so nothing that works now can break.
+                _b = _bare_division(_r["name"])
+                if _b and fold(_b) != fold(_r["name"]) and len(fold(_b)) > 2:
+                    adm_bare.setdefault((_r.get("cc"), fold(_b)), []).append(_r)
         _amb = sum(1 for v in adm_idx.values() if len(v) > 1)
         print(f"admin divisions  {len(adm_idx):,} keyed, for reading an area "
               f"when no town survives; {_amb:,} names are shared by more than "
               f"one division and need their parent to tell them apart")
+        print(f"                 {len(adm_bare):,} also keyed without their kind "
+              f"«Vas County» -> «Vas», tried only when the exact name misses")
     except Exception as _e:
         print(f"admin divisions  unavailable ({_e})")
 
@@ -659,14 +708,31 @@ def main():
         states are a thousand miles apart and the wrong one is not a near
         miss.
         """
-        got = adm_idx.get((cc, fold(cand))) or []
-        if len(got) == 1:
-            return got[0]
-        if not got:
-            return None
         parents = {fold(n) for n, _l in areas} | {fold(bare(n)) for n, _l in areas}
-        near = [g for g in got if fold(g.get("adm1") or "") in parents]
-        return near[0] if len(near) == 1 else None
+
+        def _pick(got):
+            if len(got) == 1:
+                return got[0]
+            if not got:
+                return None
+            near = [g for g in got if fold(g.get("adm1") or "") in parents]
+            return near[0] if len(near) == 1 else None
+
+        # The exact name first, always, so this answers today exactly as it
+        # did. Only when GeoNames' spelling of the name does not appear at all
+        # is the kind-stripped index consulted — «Vas» for «Vas County» — and
+        # it refuses ambiguity by the same rule rather than a looser one.
+        exact = adm_idx.get((cc, fold(cand))) or []
+        if exact:
+            # AMBIGUOUS AND UNRESOLVED STAYS REFUSED. Falling through to the
+            # kind-stripped index here would be worse than useless: an exact
+            # name matching several divisions means several of that name
+            # exist, and picking one out of a different index while ignoring
+            # that is how a Vermont register lands in Massachusetts. The
+            # second index answers a name the first has never heard of, and
+            # nothing else.
+            return _pick(exact)
+        return _pick(adm_bare.get((cc, fold(cand))) or [])
 
     def look_in(index, cand, ccs):
         for cc in ccs:
@@ -1023,6 +1089,25 @@ def main():
         for name, lab in reversed(areas):
             for cand in readings(name, lab):
                 for _cc in ccs:
+                    # A RESEARCHED COUNTY SEAT BEATS A DERIVED CENTRE.
+                    #
+                    # «A placement never outranks the shelf or the gazetteer»
+                    # is the rule, and it is right, because those are evidence
+                    # and a placement is a judgement. This branch is neither:
+                    # it is a population-weighted average of the towns in a
+                    # division, which is a fallback for when NO town in the
+                    # path survived. A decided placement is a town that
+                    # survived — somebody worked out that King County's
+                    # registers are at Seattle, Etowah's at Gadsden, Choctaw's
+                    # at Hugo — and letting an average overwrite that trades a
+                    # named real town for a point in a field.
+                    #
+                    # Measured when the kind-stripped index went in and this
+                    # guard had not: 101 of 283 decided placements were
+                    # intercepted, Seattle among them. The division answer is
+                    # still there for every name nobody has decided.
+                    if placements.get((_cc, fold(cand))):
+                        continue
                     a = division_for(cand, _cc, areas)
                     if not a:
                         continue

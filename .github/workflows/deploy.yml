@@ -80,9 +80,23 @@ jobs:
       # with 2.5 million volumes quietly missing — and a wrong site that looks right
       # is the one failure this project cannot afford. A download that breaks
       # must break the deploy.
+      #
+      # AND IT MUST SURVIVE THE RE-UPLOAD, WHICH IS NOT ATOMIC. The documented
+      # way to replace this artefact is `gh release upload … --clobber`, and
+      # clobber DELETES the asset and then uploads 54 MB in its place: for
+      # about two minutes the release has no such file and this URL is a 404.
+      # On 7 October a deploy fetched eleven seconds after one such upload
+      # finished — luck, not design, and the failure it missed would have been
+      # a red deploy with a confusing «could not download» rather than
+      # anything naming the cause.
+      #
+      # `--retry` alone does not cover it: curl treats a 404 as a final answer
+      # and retries only transient errors, so the one error this actually hits
+      # was the one it would not wait for. `--retry-all-errors` makes the 404
+      # retryable, and ten tries fifteen seconds apart outlast the window.
       - name: Fetch the harvest artefact
         run: |
-          curl -fsSL --retry 4 --retry-delay 5 \
+          curl -fsSL --retry 10 --retry-delay 15 --retry-all-errors \
             -o data/fs-volumes-world.json.gz \
             https://github.com/daviddef/TheMap/releases/download/harvest-data/fs-volumes-world.json.gz
           python3 -c "import gzip,json,sys; d=json.load(gzip.open('data/fs-volumes-world.json.gz','rt',encoding='utf-8')); n=sum(len(v) for v in d['byPlace'].values()); print(f'{n:,} volumes over {len(d[\"byPlace\"]):,} places'); sys.exit(0 if n > 20000 else 'the artefact downloaded but is too small to be right')"

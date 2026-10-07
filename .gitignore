@@ -146,8 +146,15 @@ site/public/eras.json
 # Sixteen committed versions cost 431 MB of a 686 MB .git, because gzip does not
 # delta-compress and each version paid full price.
 #   github.com/daviddef/TheMap/releases/tag/harvest-data
-# The deploy downloads it; build.py FAILS without it. Re-upload after a harvest:
+# The deploy downloads it; build.py FAILS without it. Re-upload after a harvest
+# — or after ANY local re-run of match-fs-volumes.py, because its two committed
+# siblings then describe a run this file does not:
 #   gh release upload harvest-data data/fs-volumes-world.json.gz --clobber
+# Forgetting it shipped «52,964 places · 2,780,922 record volumes» on 7 October,
+# every new place drawn and its books missing, through a green deploy. The three
+# files now carry a shared `run` stamp and check-data.py refuses the mismatch.
+# --clobber deletes before it uploads, so the asset 404s for about two minutes;
+# the deploy's fetch retries through that window rather than going red.
 data/fs-volumes-world.json.gz
 site/public/flag-eras.json
 site/public/flag-index.json

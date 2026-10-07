@@ -346,6 +346,13 @@ def readings(name, label=None):
     return out
 
 
+# The identity of one matcher run, stamped into every file it writes. Not a
+# timestamp alone: two runs a second apart over different data would collide,
+# and a rebuild over identical inputs SHOULD collide rather than force a
+# pointless re-upload. So it is the clock plus the process, written once.
+RUN_STAMP = time.strftime("%Y-%m-%dT%H:%M:%S") + "-" + str(os.getpid())
+
+
 def main():
     if not os.path.exists(SRC):
         sys.exit(f"{SRC} is not there — run harvest-fs-waypoints.py first.")
@@ -1331,6 +1338,23 @@ def main():
                  "Matched deepest-first and only within the collection's own "
                  "countries. Titles are FamilySearch's."),
         "harvested": wp.get("harvested"),
+        # ONE STAMP ACROSS ALL THREE OUTPUTS OF THIS RUN, so that a stale one
+        # can be SEEN rather than inferred from a headline looking wrong.
+        #
+        # data/fs-volumes-world.json.gz is gitignored and lives as a release
+        # asset — 740 MB of waypoints are not in a checkout, so no runner can
+        # rebuild it. Its two siblings, promote and unplaced, ARE committed.
+        # Re-running the matcher locally and pushing therefore ships new
+        # committed data against whatever artefact the release still holds,
+        # and nothing says so: the 7 October deploy was green and put
+        # «52,964 places · 2,780,922 record volumes» on the live site, every
+        # new place present and its books missing, because the artefact was
+        # nine days older than the promote file beside it. Lower than the
+        # 2,893,805 it replaced, from a build that passed every gate.
+        #
+        # check-data.py compares this against the committed promote file and
+        # stops the build, naming the one command that fixes it.
+        "run": RUN_STAMP,
         "counts": {"places": len(by_place),
                    "volumes": sum(len(v) for v in by_place.values()),
                    "matched": matched, "unmatched": miss,
@@ -1347,6 +1371,7 @@ def main():
     dump({
         "note": ("Settlements FamilySearch has books for and this atlas has "
                  "never heard of — the map's next places, commonest first."),
+        "run": RUN_STAMP,
         "counts": {"names": len(unplaced), "volumes": sum(unplaced.values()),
                    "unplaceable_names": len(unplaceable),
                    "unplaceable_volumes": sum(unplaceable.values())},
@@ -1370,6 +1395,7 @@ def main():
         "note": ("Settlements the gazetteer knows, with coordinates, that "
                  "FamilySearch has books for and this shelf had not drawn. "
                  "Promoted to places so the books have somewhere to land."),
+        "run": RUN_STAMP,
         "counts": {"places": len(promote)},
         "places": sorted(promote.values(), key=lambda x: x["id"]),
     }, PROMOTE)

@@ -176,8 +176,53 @@ def flag_era_drift():
         print(f"flag eras: {in_data:,} in the pages and in the data, agreed")
 
 
+def harvest_artefact_is_this_run():
+    """The fetched artefact and the committed data must be one matcher run.
+
+    data/fs-volumes-world.json.gz is gitignored — 740 MB of waypoints are not
+    in a checkout, so no runner can rebuild it — and the deploy downloads it
+    from the harvest-data release. Its two siblings out of the same run,
+    fs-volumes-promote.json and fs-volumes-unplaced.json, ARE committed.
+
+    So re-running the matcher locally and pushing ships new committed data
+    against whatever artefact the release still holds, and until now nothing
+    said so. On 7 October that produced a green deploy carrying
+    «52,964 places · 2,780,922 record volumes»: every newly placed village on
+    the map and none of its books, because the artefact was nine days older
+    than the promote file beside it — and LOWER than the 2,893,805 it
+    replaced. Every gate passed, because every gate checked one side.
+
+    A run stamp costs nothing and makes it visible. Files written before the
+    stamp existed carry none; that is not an error, only an older pair.
+    """
+    import gzip as _gz
+    try:
+        prom = json.load(open("data/fs-volumes-promote.json", encoding="utf-8"))
+    except Exception:
+        return
+    try:
+        with _gz.open("data/fs-volumes-world.json.gz", "rt", encoding="utf-8") as fh:
+            head = fh.read(4096)
+    except FileNotFoundError:
+        return                      # build.py reports this one properly
+    except Exception:
+        return
+    m = re.search(r'"run"\s*:\s*"([^"]+)"', head)
+    world_run, prom_run = (m.group(1) if m else None), prom.get("run")
+    if not world_run or not prom_run:
+        return                      # one of them predates the stamp
+    if world_run != prom_run:
+        err("data/fs-volumes-world.json.gz is from a different matcher run "
+            f"({world_run}) than the committed data beside it ({prom_run}). "
+            "The artefact is a release asset the deploy downloads, so a local "
+            "re-run does not reach it and the site would ship new places with "
+            "stale volumes. Fix with:\n"
+            "    gh release upload harvest-data data/fs-volumes-world.json.gz --clobber")
+
+
 def main():
     flag_era_drift()
+    harvest_artefact_is_this_run()
     places = json.load(open("data/places.json"))["places"]
     regions = json.load(open("data/regions.json"))
     provs = json.load(open("data/providers.json"))

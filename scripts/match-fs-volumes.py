@@ -716,7 +716,40 @@ def main():
             if not got:
                 return None
             near = [g for g in got if fold(g.get("adm1") or "") in parents]
-            return near[0] if len(near) == 1 else None
+            if len(near) == 1:
+                return near[0]
+            # AND THEN THE COLLECTION'S OWN TITLE, WHICH NAMES THE STATE.
+            #
+            # «Baldwin» is a county in Georgia and one in Alabama, and the
+            # path says only «Baldwin» — but the collection is titled
+            # «Georgia, County Marriages, 1785-1950», and a book in a Georgia
+            # collection filed under Baldwin is in Baldwin County, Georgia.
+            # Same for «Kings» in «Canada, Nova Scotia, Marriages» and
+            # «Queens» in «Canada, New Brunswick County Deed Registry».
+            #
+            # This is not a looser standard, it is the standard this file
+            # already sets twenty lines further down, where a collection
+            # filed under both GE and US is read as American because its
+            # title begins «Georgia»: «the title is the corroboration, which
+            # is the rule everywhere else in this project».
+            #
+            # Measured before writing it: 471 of the 472 still-unplaced names
+            # that match several divisions get exactly one parent this way.
+            # The path's own area levels are tried FIRST and win, because a
+            # parent one level up in the same book is better evidence than a
+            # word in the title of a collection holding thousands.
+            #
+            # Whole words only, and never a short one: a two-letter adm1
+            # would match inside some other word in every title it met.
+            title = cur_title[0]
+            if title:
+                named = [g for g in got
+                         if len(fold(g.get("adm1") or "")) > 3
+                         and re.search(r"\b" + re.escape(fold(g["adm1"])) + r"\b",
+                                       title)]
+                if len(named) == 1:
+                    return named[0]
+            return None
 
         # The exact name first, always, so this answers today exactly as it
         # did. Only when GeoNames' spelling of the name does not appear at all
@@ -1148,6 +1181,10 @@ def main():
     far_from_parent = [0]
     reyeared = [0]
     col_titles = {}
+    # The title of the collection being walked, folded, for division_for's
+    # last disambiguation. A holder rather than an argument because
+    # resolve_path sits between the two and has no business carrying it.
+    cur_title = [""]
     by_place = collections.defaultdict(list)
     # THIRD CHANCE: THE PLACEMENTS A HUMAN OR A RESEARCH PASS DECIDED.
     #
@@ -1218,6 +1255,7 @@ def main():
             _t0 = (col.get("title") or col.get("name") or "").split(",")[0].strip()
             if _t0 in US_STATE_NAMES:
                 ccs = ["US"] + [x for x in ccs if x != "US"]
+        cur_title[0] = fold(col.get("title") or col.get("name") or "")
         for v in col.get("volumes", []):
             raw = v.get("path") or []
             labels = v.get("labels") or []

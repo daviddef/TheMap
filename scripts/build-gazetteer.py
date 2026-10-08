@@ -97,6 +97,42 @@ NATIVE = {
 }
 
 
+# ROMANISED ONLY TO RANK, NEVER TO MATCH — and the difference is the whole
+# reason this is allowed to exist.
+#
+# A transliterator that turned «Тверь» into «Tver» and then PLACED a book on
+# the strength of it was measured and refused: it would put a book somewhere
+# on resemblance, and this atlas does not do that. Deciding which of a place's
+# OWN recorded names to keep is not that. Every candidate here is already a
+# name GeoNames holds for this exact place; the worst a bad score can do is
+# keep a true name in a worse order, and nothing is placed either way.
+#
+# It exists because `nat[:6]` took GeoNames' own order, which is arbitrary.
+# Ulyanovsk's first six native forms are «Оулиꙗновьскъ, Сембер, Синбирск,
+# Сімбір, Ульск, Ульянаўск» — Old Church Slavonic, Belarusian and three
+# historical spellings — and the one name a Russian document actually says,
+# Ульяновск, fell off the end. Two of fourteen major cities tested had lost
+# their own modern name that way.
+ROMAN = {
+    "а": "a", "б": "b", "в": "v", "г": "g", "д": "d", "е": "e", "ё": "e",
+    "ж": "zh", "з": "z", "и": "i", "й": "y", "к": "k", "л": "l", "м": "m",
+    "н": "n", "о": "o", "п": "p", "р": "r", "с": "s", "т": "t", "у": "u",
+    "ф": "f", "х": "kh", "ц": "ts", "ч": "ch", "ш": "sh", "щ": "shch",
+    "ъ": "", "ы": "y", "ь": "", "э": "e", "ю": "yu", "я": "ya",
+    "і": "i", "ї": "yi", "є": "ye", "ґ": "g", "ў": "w",          # UA, BY
+    "ђ": "dj", "ј": "j", "љ": "lj", "њ": "nj", "ћ": "c", "џ": "dz",  # RS
+    "α": "a", "β": "v", "γ": "g", "δ": "d", "ε": "e", "ζ": "z",   # GR
+    "η": "i", "θ": "th", "ι": "i", "κ": "k", "λ": "l", "μ": "m",
+    "ν": "n", "ξ": "x", "ο": "o", "π": "p", "ρ": "r", "σ": "s",
+    "ς": "s", "τ": "t", "υ": "y", "φ": "f", "χ": "ch", "ψ": "ps", "ω": "o",
+}
+
+
+def romanise(s):
+    """Rough Latin for a native-script name. For ranking only — see above."""
+    return "".join(ROMAN.get(c, c) for c in fold(s))
+
+
 def native(s, cc):
     """Is this the place's name in the script its own records are written in?"""
     want = NATIVE.get(cc)
@@ -188,7 +224,13 @@ def main():
         cand, nat = [], []
         for alt in alts.split(",") if alts else []:
             alt = alt.strip()
-            if len(alt) < 4:                       # airport and rail codes
+            # AN AIRPORT CODE IS THREE LATIN LETTERS, AND «Уфа» IS A CITY.
+            # This dropped everything shorter than four characters to clear
+            # out LHR and BRU, and then the native-script pool inherited a
+            # rule written for Latin: Уфа is three characters and vanished,
+            # along with every other short name in its script. The codes this
+            # is aimed at are Latin, so the rule stays where it belongs.
+            if len(alt) < 4 and (latin(alt) or not native(alt, cc)):
                 continue
             if alt.isupper():                      # ditto, and shouting
                 continue
@@ -250,7 +292,41 @@ def main():
                 clusters.append([alt])
         reps = [c[0] for c in clusters]
         reps.sort(key=lambda alt: difflib.SequenceMatcher(None, fname, fold(alt)).ratio())
-        out = nat[:6] + reps[:12]
+        # EVERY NATIVE NAME, UNCAPPED AND UNCLUSTERED — and it took three
+        # wrong diagnoses to get here, so they are written down.
+        #
+        # The Latin pool beside this is clustered and capped for a good
+        # reason: GeoNames lists dozens of romanisations of one name and a
+        # reader wants a curated handful. This list is not for reading. It is
+        # what a DOCUMENT might say, and every entry in it is a name GeoNames
+        # records for this exact place.
+        #
+        #   1. «nat[:6]» in GeoNames' own order lost Ульяновск and Уфа, so I
+        #      ranked by closeness to the place's ASCII name.
+        #   2. Ranking filled all six slots with Ульяновск, Ульяновськ,
+        #      Уляновск, Улјановск, Уљановск and Ульянаўск — one name in six
+        #      national spellings — so I clustered them, as the Latin pool
+        #      does.
+        #   3. Clustering lost Тверь to Твер, which romanise alike; a
+        #      length tie-break fixed that and lost Минск and Кишинёв.
+        #      Removing the cap did not bring them back, which is what showed
+        #      the cap had never been the problem: CLUSTERING was. «Минск»
+        #      and «Мінск» romanise identically and are Russian and
+        #      Belarusian, and a register may be written in either.
+        #
+        # Each heuristic won some names and lost others, and the ones it lost
+        # were different every time. There is no ordering that chooses
+        # correctly between a place's own names, because the choice itself is
+        # the mistake — the romanisation is deliberately rough and cannot tell
+        # a soft sign from nothing, a Ukrainian и from a Russian и.
+        #
+        # So: keep them all. Ordered modern-name-first for display only,
+        # because `a` is also what a panel prints.
+        _ascii = fold(ascii_name or name)
+        _sim = lambda a: difflib.SequenceMatcher(None, _ascii, romanise(a)).ratio()
+        nat.sort(key=lambda a: (-_sim(a), -len(a)))
+        nat = nat[:1] + sorted(nat[1:], key=_sim)
+        out = nat + reps[:12]
         # A PLACE WITH NO OTHER NAME IS STILL A PLACE. This used to drop every
         # row that carried no alternate, which was right while the source was
         # cities5000 and the question was «the name changed»: Pressburg is

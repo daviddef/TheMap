@@ -690,7 +690,27 @@ def main():
             return _parent_xy[key]
         xy = None
         # Shallowest first: the province or city, not the parish.
-        for name, _lab in list(areas) + list(path)[:-1]:
+        #
+        # AND NEVER THE LEVEL THAT PRODUCED THE MATCH. `path[:-1]` already
+        # drops the deepest path level for exactly that reason — a name
+        # cannot vouch for itself — but when the path is empty the match came
+        # from an AREA, and this then anchored on the very area it was
+        # checking. The result was a name vetoed against itself:
+        #
+        #   «Alabama» matched the state and anchored on Alabama, NEW YORK,
+        #   1,334 km away, and was refused. «Kent» in a British collection
+        #   anchored on Kent, ONTARIO, 5,792 km from Kent in England.
+        #   «California» anchored on California, MARYLAND. «Alaska» on
+        #   Alaska, WEST VIRGINIA.
+        #
+        # Measured over 4,000 sampled refusals: 24% were this.
+        #
+        # Dropping the deepest area when there is no path makes the two
+        # halves symmetric, and leaves every other veto exactly as it was —
+        # «Архангельское» under Казань › Чистополь still anchors on Казань,
+        # because its path is not empty and Казань is not what matched.
+        levels = list(areas) + list(path)[:-1] if path else list(areas)[:-1]
+        for name, _lab in levels:
             xy = rough_xy(name, ccs)
             if xy:
                 break

@@ -172,9 +172,9 @@ RANGE_PATS = [
     # «images 1-47», «pages 1 to 47»
     re.compile(r"\b(?:image|page|img|p)s?\.?\s*(\d{1,4})\s*(?:[-–—]|to)\s*(\d{1,4})\b", re.I),
     # «all 174», «all 110 images» — a whole volume walked
-    re.compile(r"\ball\s+(?:the\s+)?(\d{1,4})\b(?:\s*(?:images|pages))?", re.I),
+    re.compile(r"\ball\s+(?:the\s+)?(\d{1,4})\b(?!,\d)(?:\s*(?:images|pages))?", re.I),
     # «174 images», «110 images walked»
-    re.compile(r"\b(\d{1,4})\s+(?:images|pages)\b", re.I),
+    re.compile(r"(?<![\d,])\b(\d{1,4})\s+(?:images|pages)\b", re.I),
 ]
 WALKED = re.compile(r"\bwalk(?:ed)?\b|\bpage by page\b|\bswept\b|\bin full\b|\bcover to cover\b", re.I)
 
@@ -192,7 +192,36 @@ WALKED = re.compile(r"\bwalk(?:ed)?\b|\bpage by page\b|\bswept\b|\bin full\b|\bc
 # «Rođeni 1846-1858», and a year range is not a page range.
 IMG_RANGE = re.compile(r"\bimages?\.?\s*(\d{1,4})\s*(?:[-\u2013\u2014]|to)\s*(\d{1,4})\b", re.I)
 IMG_ONE = re.compile(r"\bimages?\.?\s*(\d{1,4})\b", re.I)
-YEARISH = range(1500, 2101)
+# A YEAR IS NEVER A PAGE. 1400-2100 covers every year these registers can be
+# dated to; a number inside it is refused as a page number wherever it turns up.
+# The price is a real image 1406 or 2091 in a very large collection being
+# dropped rather than kept — the safe direction, since an omitted range only
+# understates the work and a year taken for a page claims 1,000 pages read.
+YEARISH = range(1400, 2101)
+
+# PHRASES THAT MEAN «I DID NOT READ THIS», in a field whose job is to say what
+# was read. «year headers checked on 70, 76-82, 88, 94» is a researcher looking
+# at the date at the top of each page to find the right year, not reading 20
+# pages; «sampled», «glanced at» and «looked at» are the same. Any segment
+# that says so contributes no range at all — the numbers beside the phrase are
+# the pages it was done to.
+NOT_READ = re.compile(
+    r"\bheaders?\b[^;.]{0,25}\bchecked\b|\bchecked\b[^;.]{0,25}\bheaders?\b"
+    r"|\bsampl(?:e|es|ed|ing)\b|\bglanc(?:e|es|ed|ing)\b|\blooked\s+at\b"
+    r"|\bskimm(?:ed|ing)\b|\bunread\b|\b(?:not|never)\s+(?:yet\s+)?(?:read|opened)\b",
+    re.I)
+
+PAGE_LABEL = r"(?:images?|img|pages?|pp?)\.?"
+MONTH = (r"(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b")
+# «images 10-489», «pp. 1 to 174» — a range with its label
+LABELLED_RANGE = re.compile(
+    PAGE_LABEL + r"\s*(\d{1,4})\s*(?:[-\u2013\u2014]|to)\s*(\d{1,4})\b(?!\s*(?:of\s+)?" + MONTH + ")", re.I)
+# «10-194» with nothing in front of it — and not «5-6 October»
+BARE_RANGE = re.compile(
+    r"(\d{1,4})\s*[-\u2013\u2014]\s*(\d{1,4})\b(?!\s*(?:of\s+)?" + MONTH + ")", re.I)
+SINGLE_PAGE = re.compile(r"(?:" + PAGE_LABEL + r"\s*)?(\d{1,4})", re.I)
+# a year range lying around in the prose, reported when it is refused
+YEAR_RANGE = re.compile(r"\b(1[4-9]\d\d|20\d\d|2100)\s*[-\u2013\u2014]\s*(\d{2,4})\b")
 
 
 def image_ranges(text):
@@ -224,51 +253,131 @@ def image_ranges(text):
     return []
 
 
-def parse_ranges(text):
-    """«1-47, 60-72» -> [[1,47],[60,72]]. None when nothing usable is there.
+def split_top(text, seps):
+    """Split on `seps` outside brackets, and not inside «2,246».
 
-    The same grammar ProgressKit.astro's own box accepts, because this is the
-    field the skill tells a session to fill and a reader typing into the site
-    should be writing the same thing. Deliberately strict: a part that is not
-    a number or a number range is dropped rather than guessed at, and if
-    nothing survives the row gets no range at all — a mark that overstates
-    what was searched is worse than a mark with no range.
+    The first parser split blindly on commas and semicolons, so the aside in
+    «126 (both pages, 1809-1810)» became a free-standing «1809-1810)» and
+    «2,246 images» became page 246. What is in brackets belongs to the item it
+    follows, and a comma between digits with no space is a thousands mark.
     """
-    out = []
-    for part in re.split(r"[,;]+", text or ""):
-        part = part.strip()
-        if not part:
+    parts, depth, cur = [], 0, []
+    for i, ch in enumerate(text):
+        if ch in "(\u00ab[":
+            depth += 1
+        elif ch in ")\u00bb]" and depth:
+            depth -= 1
+        elif ch in seps and depth == 0:
+            thousands = (ch == "," and i and text[i - 1].isdigit()
+                         and text[i + 1:i + 4].isdigit()
+                         and not text[i + 4:i + 5].isdigit())
+            if not thousands:
+                parts.append("".join(cur))
+                cur = []
+                continue
+        cur.append(ch)
+    parts.append("".join(cur))
+    return parts
+
+
+def _yearish(*ns):
+    return any(n in YEARISH for n in ns)
+
+
+def parse_pages(text):
+    """(ranges, refused) for a `pages` field. ranges is [[a,b], ...] or None.
+
+    «1-47, 60-72» -> [[1,47],[60,72]]. The same grammar ProgressKit.astro's own
+    box accepts, because this is the field the skill tells a session to fill
+    and a reader typing into the site should be writing the same thing.
+
+    Deliberately strict, because a mark that overstates what was searched is
+    worse than a mark with no range. A range is taken only when
+      * it LEADS an item — a bare «10-194», or one with its label,
+        «images 10-489» / «pages 1 to 174» — and the words after it are the
+        reader's own note, so «1-400 (item 2, finished)» is 1-400;
+      * neither end is a year (1400-2100) and it is not a date («5-6 October»);
+      * the segment (what lies between semicolons) does not say the pages were
+        only sampled, glanced at, looked at or had their headers checked.
+    A lone page counts only as a bare number («186, 221»): «125 (left, page 12)»
+    is one half of an image and is left out rather than rounded up to all of it.
+    Numbers inside brackets are the item's description, never separate items.
+
+    `refused` lists (segment, why) for everything this declined that the old
+    parser would have taken as pages, so a person can see what was dropped.
+    """
+    out, refused = [], []
+    for seg in split_top(text or "", ";"):
+        seg = seg.strip()
+        if not seg:
             continue
-        # THE RANGE LEADS THE PART; WHAT FOLLOWS IT IS THE READER'S OWN NOTE.
-        # The first cut demanded the whole part BE a range, and the Blažević
-        # session's real entry — «1-400 (item 2, finished); 401-450 of item 3»
-        # — was thrown away entirely by it, which is 450 images of walked
-        # register discarded for carrying an annotation. The numbers are
-        # explicit either way; a range at the front of a part is not made less
-        # true by the words after it.
-        # STILL ANCHORED AT THE START, so «item 3» cannot become pages 3-3 and
-        # «DGS 005497886» cannot become a page range at all.
-        m = re.match(r"(\d{1,4})\s*[-–—]\s*(\d{1,4})\b", part)
-        if m:
-            a, b = int(m.group(1)), int(m.group(2))
-            if 0 < a <= b <= 9999:
-                out.append([a, b])
+        found, years = [], []
+        for part in split_top(seg, ","):
+            part = part.strip()
+            if not part:
+                continue
+            lead = LABELLED_RANGE.match(part) or BARE_RANGE.match(part)
+            if lead:
+                a, b = int(lead.group(1)), int(lead.group(2))
+                if _yearish(a, b):
+                    years.append(lead.group(0))
+                elif 0 < a <= b <= 9999:
+                    found.append([a, b])
+                continue
+            one = SINGLE_PAGE.fullmatch(part)
+            if one:
+                n = int(one.group(1))
+                if _yearish(n):
+                    years.append(part)
+                elif 0 < n <= 9999:
+                    found.append([n, n])
+        # A year range tucked into the prose is not taken either way; say so.
+        for ym in YEAR_RANGE.finditer(seg):
+            if ym.group(0) not in years:
+                years.append(ym.group(0))
+        said = NOT_READ.search(seg)
+        if said:
+            if found:
+                refused.append((seg[:140], "not counted as read: \u00ab%s\u00bb" % said.group(0)))
+            if years:
+                refused.append((seg[:140], "year-like, not a page: " + ", ".join(years)))
             continue
-        m = re.match(r"(\d{1,4})\b", part)
-        if m and re.fullmatch(r"\d{1,4}", part):
-            n = int(m.group(1))
-            if 0 < n <= 9999:
-                out.append([n, n])
-    return out or None
+        if years:
+            refused.append((seg[:140], "year-like, not a page: " + ", ".join(years)))
+        out += found
+    return (out or None), refused
+
+
+def parse_ranges(text):
+    """[[a,b], ...] or None. See parse_pages for the rules and the refusals."""
+    return parse_pages(text)[0]
+
+
+def _clause(t, i, j):
+    """The sentence or semicolon-clause of `t` holding t[i:j]."""
+    start, end = 0, len(t)
+    for b in re.finditer(r"[.;]\s|\n", t):
+        if b.end() <= i:
+            start = b.end()
+        elif b.start() >= j:
+            end = b.start()
+            break
+    return t[start:end]
 
 
 def ranges_from(text):
-    """[[a,b], ...] or None. `whole` says the range covers the book."""
+    """[[a,b], ...] or None. `whole` says the range covers the book.
+
+    The same refusals as parse_pages apply: a year is not a page, and a clause
+    that says the pages were sampled or glanced at is not a record of reading
+    them. Only the clause holding the match is judged, so one honest sentence
+    is not lost to a neighbour's «sampled».
+    """
     t = text or ""
-    m = RANGE_PATS[0].search(t)
-    if m:
+    for m in RANGE_PATS[0].finditer(t):
         a, b = int(m.group(1)), int(m.group(2))
-        if 0 < a <= b <= 9999:
+        if (0 < a <= b <= 9999 and not _yearish(a, b)
+                and not NOT_READ.search(_clause(t, m.start(), m.end()))):
             return [[a, b]], False
     # A COUNT IS ONLY A RANGE WHEN THE ROW ALSO SAYS IT WAS WALKED. «110
     # images» on its own is the size of the book, not the part that was read;
@@ -277,10 +386,10 @@ def ranges_from(text):
     # having read it.
     if WALKED.search(t):
         for pat in RANGE_PATS[1:]:
-            m = pat.search(t)
-            if m:
+            for m in pat.finditer(t):
                 n = int(m.group(1))
-                if 0 < n <= 9999:
+                if (0 < n <= 9999 and not _yearish(n)
+                        and not NOT_READ.search(_clause(t, m.start(), m.end()))):
                     return [[1, n]], True
     return None, False
 
@@ -640,6 +749,7 @@ def main():
           f"{len(provs):,} provider hosts")
 
     marks, rejects, lines = {}, [], {}
+    page_refusals = []
     seen = matched = ranged = srcmarked = filmed = 0
     per = {}
 
@@ -686,6 +796,17 @@ def main():
             st = state_of(r)
             line = line_for(r)
             wps = [w for w in waypoints_in(url) if w in vols]
+
+            # THE `pages` FIELD IS PARSED FOR EVERY ROW, tied to a volume or
+            # not, so the report of what was refused is complete. Only a row
+            # that reaches a volume below turns the result into a mark.
+            pg_rng, pg_refused = None, []
+            if isinstance(r.get("pages"), str) and r["pages"].strip():
+                pg_rng, pg_refused = parse_pages(r["pages"])
+                for seg, why in pg_refused:
+                    page_refusals.append({"archive": fam, "src": src[:100],
+                                          "segment": seg, "why": why,
+                                          "tiedToVolume": bool(wps)})
 
             # THE SOURCE MARK FIRST, BECAUSE IT IS THE ONE MOST ROWS SUPPORT.
             # A row naming a source this atlas knows is a true statement that
@@ -802,11 +923,16 @@ def main():
             # that states its range in the field provided should not have to
             # also phrase it correctly in a sentence.
             rng = whole = None
-            if isinstance(r.get("pages"), str) and r["pages"].strip():
-                rng = parse_ranges(r["pages"])
-                if rng:
-                    whole = r.get("walked") is True
-            if not rng:
+            if pg_rng:
+                rng = pg_rng
+                whole = r.get("walked") is True
+            # A `pages` FIELD THAT WAS REFUSED IS NOT AN INVITATION TO GUESS.
+            # The row said what it read, in the place it was told to say it;
+            # this declined some of it as years or as not-read. Falling back to
+            # a regex over the sentences then turned «found out of sequence on
+            # images 304–322» into 19 images read — the same overstatement by
+            # another road. The prose path is for rows with no `pages` at all.
+            if not rng and not pg_refused:
                 rng, whole = ranges_from(blob)
                 # `walked: true` alongside prose that gave a range but did not
                 # say «walked» is still the session's own claim, and it is the
@@ -914,9 +1040,21 @@ def main():
     print(f"    source marks              {nsrc:,}  (from {srcmarked:,} rows)")
     print(f"    volume marks              {nvol:,}")
     print(f"    no volume could be placed {len(rejects):,}")
+    # WHAT THE PAGE PARSER REFUSED, shown rather than silently dropped. A year
+    # range or a «sampled» list that used to be recorded as pages read is now
+    # left out, and the person who wrote it should be able to see that it was.
+    nrows = len({(x["archive"], x["src"], x["segment"]) for x in page_refusals})
+    print(f"    pages text refused        {nrows:,} segments  "
+          f"(year-like numbers or not counted as read)")
+    for x in page_refusals[:40]:
+        print(f"      {x['archive'].split()[0]:<10} {x['why'][:60]}\n"
+              f"        pages: {x['segment'][:110]}")
+    if len(page_refusals) > 40:
+        print(f"      ... and {len(page_refusals) - 40} more (see --rejects)")
 
     if args.rejects:
-        json.dump(rejects, io.open(args.rejects, "w", encoding="utf-8"),
+        json.dump({"noVolume": rejects, "pagesRefused": page_refusals},
+                  io.open(args.rejects, "w", encoding="utf-8"),
                   ensure_ascii=False, indent=1)
         print(f"    rejects written to         {args.rejects}")
 

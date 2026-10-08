@@ -678,6 +678,30 @@ def main():
                     xy = _place_xy.get(min(got, key=lambda r: r[0])[1].get("id"))
                     if xy:
                         return xy
+                # AND THE ADMINISTRATIVE DIVISIONS, WHICH THIS NEVER ASKED.
+                #
+                # An area level that no settlement answers to — «Forsyth
+                # County», «Chittenden County», «Massachusetts», «England» —
+                # left this returning None, so parent_anchor found nothing and
+                # the 400 km check never ran at all. Those books were not
+                # placed carefully; they were placed UNCHECKED, which reads
+                # the same in the counts and is not the same thing.
+                #
+                # 416,699 volumes across 764 area names sit in that gap, and
+                # data/admin-divisions.json has held a defensible centre for
+                # every one of them the whole time — the file is already open
+                # four lines up, for a different purpose.
+                #
+                # ONLY WHEN THE NAME MEANS ONE DIVISION. Taking the first of
+                # several is precisely the fault that made «Alabama» anchor on
+                # a village in New York, and an anchor exists to veto: a wrong
+                # one refuses a correct book. Where a name is shared, this
+                # declines, exactly as division_for does when no parent
+                # disambiguates it.
+                for _i in (adm_idx, adm_bare):
+                    _d = _i.get((cc, fc)) or []
+                    if len(_d) == 1 and _d[0].get("lat") is not None:
+                        return (_d[0]["lat"], _d[0]["lon"])
         return None
 
     # Memoised on the path, because the same tree repeats across thousands

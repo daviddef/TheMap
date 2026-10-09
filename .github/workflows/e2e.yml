@@ -59,10 +59,18 @@ jobs:
           done
           echo "::error::the site never answered 200"; exit 1
 
+      # THE DOMAIN MOVED AND THIS DID NOT FOLLOW IT. The wait step above already
+      # polls recordatlas.org; this drove daviddef.github.io, which still answers
+      # 200 at the root and 404s on every page under it. So the liveness check
+      # passed, 25 of 27 tests failed on «/place/aberdeen/ should exist», and the
+      # mail said the site was broken when what was broken was the address.
+      #
+      # A LIVENESS CHECK THAT ASKS A DIFFERENT HOST FROM THE TESTS IS NOT A
+      # LIVENESS CHECK. Both names are written once, here, for that reason.
       - name: Drive it
         id: drive
         env:
-          RA_BASE: https://daviddef.github.io
+          RA_BASE: https://recordatlas.org
         run: |
           set +e
           npx playwright test test/e2e --config test/e2e/playwright.config.js --reporter=list 2>&1 | tee e2e.txt
@@ -90,7 +98,7 @@ jobs:
               '',
               '```',
               'cd site && npx playwright install chromium',
-              'RA_BASE=https://daviddef.github.io npm run test:e2e',
+              'RA_BASE=https://recordatlas.org npm run test:e2e',
               '```',
               '',
               '```', out, '```',

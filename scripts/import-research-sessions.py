@@ -980,8 +980,19 @@ def main():
                     # ranges_from() returns `whole` only when the row itself
                     # says the register was walked.
                     m["walked"] = sorted((m.get("walked") or []) + rng)
-                    if not m.get("total"):
-                        m["total"] = rng[0][1]
+                    # AND NO `total`. The last image of a read range is the end
+                    # of what was READ, never the size of the book. On
+                    # 2026-10-09 the Falco archive walked images 802-838 of
+                    # FamilySearch waypoint MC5R-Q23 — one year's marriages out
+                    # of a volume of 3,013 images — and this line wrote
+                    # `total: 838`, so /my-research/ showed the volume as
+                    # walked end to end. A mark that overstates what was
+                    # searched is worse than no mark, because the whole point
+                    # of the record is knowing what still has to be done.
+                    # Nothing in the atlas carries a volume's image count, so
+                    # the honest value is no value: a mark with `walked` and no
+                    # `total` says which images were read and claims nothing
+                    # about the rest.
                 else:
                     b["done"] = sorted((b.get("done") or []) + rng)
                 ranged += 1

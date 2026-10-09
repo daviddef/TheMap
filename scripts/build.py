@@ -1196,12 +1196,20 @@ def main():
     # flags some regime actually governs with are written — 43 regimes name a
     # handful of countries between them — so this is tens of kilobytes shared
     # and cached, against 500 bytes of <img> per page.
+    # READ THE COMMITTED SOURCES, NOT THIS BUILD'S OWN OUTPUT. These three were
+    # read from site/public, which this same script writes — flag-eras.json a
+    # few hundred lines BELOW here. On a warm cache the files were left over
+    # from the last run and it worked; on a cold one, which is every deploy
+    # after a data change, the read failed and the build printed «era flags not
+    # written … the «who governed» table will show no flags» and carried on.
+    # A table shipping without its flags whenever the cache missed, quietly,
+    # for as long as this has existed. data/ is tracked and always there.
     try:
-        with open("site/public/flag-eras.json", encoding="utf-8") as fh:
+        with open("data/flag-eras.json", encoding="utf-8") as fh:
             _fe = json.load(fh)["eras"]
-        with open("site/public/era-flags.json", encoding="utf-8") as fh:
+        with open("data/era-flags.json", encoding="utf-8") as fh:
             _fa = json.load(fh)["art"]
-        with open("site/public/regions.json", encoding="utf-8") as fh:
+        with open("data/regions.json", encoding="utf-8") as fh:
             _rg = json.load(fh).get("regimes", {})
         # Mirrors site/src/lib/flag-slug.js. Kept in step by hand, and named
         # here so the next person to change one knows the other exists.

@@ -30,10 +30,23 @@ editorialising dressed as data — the Soviet Union is not Russia to a Latvian,
 and this atlas's whole argument is that it says what the source says. A name
 resolves when it IS a country this map draws, and otherwise it stays text.
 """
-import json, os, re, time
+import json, os as _os, re, time
+import os
 
-ERAS = "site/public/flag-eras.json"
-INDEX = "site/public/flag-index.json"
+# RUN FROM ANYWHERE, BECAUSE `npm run data` RUNS FROM site/. Every path below
+# is written from the repository root, which is true when a human runs this
+# and false when the pipeline does — the deploy failed with «No such file or
+# directory: 'site/public/flag-eras.json'» because cwd was site/ and the path
+# resolved to site/site/public/. build.py has chdir'd to the root since it was
+# written; this did not, and nothing caught it until CI.
+_os.chdir(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
+
+# THE COMMITTED SOURCE, NOT THE PUBLISHED COPY. build.py copies
+# data/flag-eras.json into site/public on every run, so reading the copy works
+# only if this runs after it — an ordering dependency with nothing enforcing
+# it. The source is tracked and always there.
+ERAS = "data/flag-eras.json"
+INDEX = "data/flag-index.json"
 COUNTRIES = "data/countries.json"
 FLAGSJS = "site/src/lib/flags.js"
 OUT = "site/public/era-moves.json"

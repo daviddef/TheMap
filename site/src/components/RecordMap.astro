@@ -5201,7 +5201,20 @@ window.addEventListener("load", async function () {
     ctryLayer.clearLayers();
     communeLayer.clearLayers();
     litCC = null;
-    var f = fold(term);
+    /* THE PLACE HALF DOES THE PLACE LOOKUPS. «Blazevic Gracisce» arrives here
+       as one string, and every shard below is keyed on the FIRST THREE LETTERS
+       of whatever it is handed — so the place was being looked for in
+       /g/bla.json, the surname's shard, and Gračišće was never going to be in
+       it. The panel then said «No places of that name here yet» about a place
+       this atlas holds and had just flown the map to; measured on a cold load,
+       three times in four. The map filter has done this right since the start
+       — `if (qPlace) t = qPlace` — and the panel had not.
+       Guarded on the split belonging to THIS term, because elsewhere() is also
+       called with a bare name chosen from the dropdown, and qPlace would then
+       still be set from the search before it. */
+    var pterm = term;
+    if (!exact && qPlace && qName && fold(term).indexOf(qPlace) > -1) pterm = qPlace;
+    var f = fold(pterm);
     var iso = Object.keys(CNAME).filter(function (k) {
       return wordHit(fold(CNAME[k]), f) || k.toLowerCase() === f;
     });
@@ -5210,7 +5223,7 @@ window.addEventListener("load", async function () {
       if (p.at && wordHit(fold(p.at.place), f)) return true;
       return wordHit(fold(p.name), f);
     });
-    var hits = await gazetteer(term);
+    var hits = await gazetteer(pterm);
     var names = await surnames(term);
     /* PICKING «Lerena» SHOULD NOT ANSWER WITH LERENARD. David, on the new
        dropdown: «why if i now have "smart" search and i select the exact named
@@ -5230,13 +5243,13 @@ window.addEventListener("load", async function () {
        and a promise landing after it has nowhere to put its line. */
     var beRec = names.length ? await communes(names[0].n) : null;
     if (stale()) return;
-    var setts = await settlements(term);
-    var dists = await districts(term);
-    var tlands = await townlands(term);
-    var com = await comuni(term);
-    var est = await estonia(term);
-    var sct = await scotland(term);
-    var regs = regionsNamed(term);
+    var setts = await settlements(pterm);
+    var dists = await districts(pterm);
+    var tlands = await townlands(pterm);
+    var com = await comuni(pterm);
+    var est = await estonia(pterm);
+    var sct = await scotland(pterm);
+    var regs = regionsNamed(pterm);
     if (stale()) return;
     /* If the typed word is an OLD name, say which one it matched and what the
        place is called now. "Pressburg → Bratislava" is the whole answer to the

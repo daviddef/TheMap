@@ -487,6 +487,14 @@ window.addEventListener("load", async function () {
   /* index.json already carries the country names the rest of the site uses,
      so a badge reads "Italy" and not "IT". */
   var ccName = function (cc) { return (idx.countries || {})[cc] || cc; };
+  /* THE FLAGS ATLAS MOVED INTO THE SITE. Its pages were hand-built files at
+     /flags/croatia-flags.html and are Astro pages at /flags/croatia-flags/
+     now. flag-eras.json still carries the old spelling, because it is
+     extracted FROM those filenames, so convert at the point of use. This is
+     the client-side twin of flagHref() in lib/flags.js; keep them in step. */
+  var flagHref = function (u) {
+    return u ? String(u).replace(/^\/+/, "").replace(/\.html$/, "/") : u;
+  };
   var esc = function (x) { return String(x == null ? "" : x)
     .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); };
 
@@ -1018,7 +1026,7 @@ window.addEventListener("load", async function () {
              esc(sp.e.dates || (sp.from + "\u2013" + sp.to)) +
              '</span> <span class="ra-era-p">' + esc(sp.e.polity) + "</span></p>" +
              '<p class="at-hint" style="margin:0"><a href="' + BASE +
-             esc(sp.e.page || ("flags/" + slug + "-flags.html")) + "#" +
+             esc(flagHref(sp.e.page) || ("flags/" + slug + "-flags/")) + "#" +
              esc(sp.e.id) + '">' + esc(T("This flag on Flag History")) +
              " \u2192</a></p>";
     });
@@ -1028,7 +1036,7 @@ window.addEventListener("load", async function () {
        pointing at Flag History. */
     if (!supplement)
       h.push('<p class="at-hint"><a href="' + BASE + "flags/" + slug +
-             '-flags.html">' + esc(T("The flags these regimes flew")) +
+             '-flags/">' + esc(T("The flags these regimes flew")) +
              " \u2192</a></p>");
     return h.join("") + "</div>";
   }
@@ -1312,7 +1320,7 @@ window.addEventListener("load", async function () {
                    '<span class="ra-ef-d">' + esc(e.dates || e.from) + " \u00b7 " +
                    esc(CNAME[cc] || cc) + "</span></span>" +
                    '<a class="ra-ef-l" href="' + BASE +
-                   esc(e.page || ("flags/" + slug + "-flags.html")) + "#" +
+                   esc(flagHref(e.page) || ("flags/" + slug + "-flags/")) + "#" +
                    esc(e.id) + '">\u2192</a></li>');
         });
     });

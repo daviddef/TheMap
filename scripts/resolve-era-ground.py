@@ -29,7 +29,7 @@ import json, os, re, sys, glob, collections
 
 HERE  = os.path.dirname(os.path.abspath(__file__))
 ROOT  = os.path.join(HERE, '..')
-FLAGS = os.path.join(ROOT, 'site', 'public', 'flags')
+FLAGS = os.path.join(ROOT, 'site', 'src', 'flags-pages')
 CACHE = os.path.join(ROOT, 'data', 'ohm', 'boundaries.json')
 OUT   = os.path.join(ROOT, 'data', 'ohm', 'era-ground.json')
 

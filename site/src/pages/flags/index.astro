@@ -1,0 +1,16 @@
+---
+/* The flags atlas index — 210 countries and 34 hubs — inside the atlas shell. */
+import Base from "../../layouts/Base.astro";
+import { page } from "../../lib/flag-pages.js";
+
+const f = page("index");
+---
+<Base title={f.title} bare wide>
+  <style is:inline set:html={f.css}></style>
+  <div class="flagpage" set:html={f.html}></div>
+</Base>
+
+<style>
+  .flagpage { max-width: 900px; margin: 0 auto; padding: 0 16px 48px; }
+  .flagpage :global(footer) { display: none; }
+</style>

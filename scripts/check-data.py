@@ -140,7 +140,7 @@ def licence_gate():
 # ---------------------------------------------------------------------------
 # THE FLAG DATA AND THE FLAG PAGES MUST NOT DRIFT APART.
 #
-# data/flag-eras.json is extracted from site/public/flags/*.html by
+# data/flag-eras.json is extracted from site/src/flags-pages/*.html by
 # scripts/extract-flag-eras.py. Two copies of one truth is the shape of bug
 # this project has paid for repeatedly — the archive list that shipped twice,
 # the surname-page rule in three languages, the count that disagreed with the
@@ -161,7 +161,7 @@ def flag_era_drift():
         err(f"data/flag-eras.json will not parse: {e}")
         return
     in_pages = 0
-    for f in _glob.glob("site/public/flags/*.html"):
+    for f in _glob.glob("site/src/flags-pages/*.html"):
         if os.path.basename(f) == "index.html":
             continue
         h = open(f, encoding="utf-8", errors="replace").read()

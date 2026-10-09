@@ -3,6 +3,7 @@
    a date computed client-side would say «today» forever. */
 const built = new Date().toISOString().slice(0, 10);
 import { u } from "../lib/url.js";
+import { flagHref } from "../lib/flags.js";
 import { TABLES, LANGS } from "../lib/i18n.js";
 import site from "../data/site.json";
 /* Counted, not typed. This line is on all 6,000 pages and it is a licence
@@ -414,7 +415,7 @@ import LineSwitcher from "../components/LineSwitcher.astro";
               immediately put one inside `{flag && ( … )}`. Same error, same
               unhelpful message about a generated line number. */}
           {flag && (
-            <a class="pagehead-flag" href={u("/" + flag.url)}
+            <a class="pagehead-flag" href={u(flagHref(flag.url))}
                title={`${flag.name} in the flags atlas — who held this ground, and when`}>
               <svg viewBox="0 0 300 200" role="img"
                    aria-label={`Flag of ${flag.name}`} set:html={flag.flag} />

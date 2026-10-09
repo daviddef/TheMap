@@ -32,7 +32,7 @@ import argparse, collections, glob, html, json, os, re, sys
 
 os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
-PAGES = "site/public/flags"
+PAGES = "site/src/flags-pages"
 OUT = "data/flag-eras.json"
 
 ENTRY = re.compile(r'<div class="entry"([^>]*)>(.*?)(?=<div class="entry"|<footer|\Z)', re.S)
@@ -186,12 +186,12 @@ def main():
 
     json.dump({
         "note": ("The flag timelines, extracted once from the pages in "
-                 "site/public/flags/. `dates` is always the author's own words; "
+                 "site/src/flags-pages/. `dates` is always the author's own words; "
                  "`from`/`to` are present only where a year could be read out of "
                  "them without guessing. A card about «c. 1st - 7th century CE» "
                  "keeps its words and carries no number, because a century is a "
                  "range and flattening one to a year would be an invention."),
-        "source": "site/public/flags/*.html — this project's own pages",
+        "source": "site/src/flags-pages/*.html — this project's own pages",
         "licence": "This atlas's own compilation",
         "generatedBy": "scripts/extract-flag-eras.py",
         "counts": {"eras": len(rows), "withYears": parsed,

@@ -20,7 +20,7 @@ import argparse, html, json, os, re, sys
 
 os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
-SRC = "site/public/flags/index.html"
+SRC = "site/src/flags-pages/index.html"
 OUT = "data/flag-index.json"
 
 
@@ -133,9 +133,9 @@ def main():
     json.dump({
         "note": ("The flags landing page's own card data — 210 countries with the "
                  "region, hub, colour and crowns each is filed under, and 34 hubs. "
-                 "Lifted from the COUNTRIES array in site/public/flags/index.html "
+                 "Lifted from the COUNTRIES array in site/src/flags-pages/index.html "
                  "so the map can show and filter these under its results."),
-        "source": "site/public/flags/index.html — this project's own page",
+        "source": "site/src/flags-pages/index.html — this project's own page",
         "licence": "This atlas's own compilation",
         "generatedBy": "scripts/extract-flag-index.py",
         "counts": {"countries": len(rows), "hubs": len(hubs),

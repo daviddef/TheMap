@@ -77,10 +77,20 @@ export function flagSvg(cc) {
   return f && f.flag ? f.flag : null;
 }
 
+/* THE FLAGS ATLAS MOVED INTO THE SITE AND ITS URLS CHANGED SHAPE.
+   Its 245 pages used to be hand-built files served as /flags/croatia-flags.html;
+   they are Astro pages now and sit at /flags/croatia-flags/ like every other
+   page here. flag-index.json and flag-eras.json still carry the old spelling,
+   because they are extracted FROM those files and the filename is what they
+   see. One conversion, used by everything, rather than six call sites each
+   doing their own string surgery and one of them forgetting. */
+export const flagHref = (u) =>
+  !u ? null : "/" + String(u).replace(/^\/+/, "").replace(/\.html$/, "/");
+
 /** Path to that country's page in the flags atlas, or null. */
 export function flagPage(cc) {
   const f = flagFor(cc);
-  return f && f.url ? "/" + f.url : null;
+  return f && f.url ? flagHref(f.url) : null;
 }
 
 /** How many of the site's countries found a flag — for the gates to assert on. */

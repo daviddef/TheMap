@@ -1,0 +1,30 @@
+---
+/* One flags page — a country or a regional hub — inside the atlas's own shell.
+   See src/lib/flag-pages.js for why the body is lifted rather than rebuilt. */
+import Base from "../../layouts/Base.astro";
+import { slugs, page } from "../../lib/flag-pages.js";
+
+export function getStaticPaths() {
+  return slugs().map((slug) => ({ params: { slug } }));
+}
+
+const { slug } = Astro.params;
+const f = page(slug);
+/* The page prints its own <h1>, so Base must not print a second one above it.
+   `bare` is the prop the other full-bleed pages use for exactly this. */
+---
+<Base title={f.title} bare wide>
+  <style is:inline set:html={f.css}></style>
+  <div class="flagpage" set:html={f.html}></div>
+</Base>
+
+<style>
+  /* The lifted stylesheet sets its own width on `body`, which it no longer
+     owns — Base owns that now. Give it back the measure it was designed for
+     and nothing else, so the page reads the way it always did inside a shell
+     it has never had. */
+  .flagpage { max-width: 900px; margin: 0 auto; padding: 0 16px 48px; }
+  /* Its footer was the page's own sign-off and the site now has a real one
+     underneath; keeping both reads as a mistake. */
+  .flagpage :global(footer) { display: none; }
+</style>

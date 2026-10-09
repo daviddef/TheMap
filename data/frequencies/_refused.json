@@ -1,6 +1,6 @@
 {
  "note": "Countries whose surname data was sought. Those still not obtained are in `refused`, with what was actually tried; those since obtained are in `resolved`, with how. A gap somebody can see is worth more than a gap they cannot, and without this file the next person spends the same afternoon finding the same walls. A «not found» verdict is weaker than a «refused» one: it means this project looked and did not find, not that the data is absent. Both are worth writing down and they are not the same claim. Italy was the weakest entry here — «not found» — and retrying it is what closed it, which is the argument for keeping this file honest about the difference. TWO CORRECTIONS ON 22 SEPTEMBER, BOTH THE SAME MISTAKE. A reader asked why Croatia was blank and sent the Bureau of Statistics' own name application, which answers. Checking the other six the same way — the institution's website, not its API — closed Denmark outright and rewrote Sweden and Finland. Four of these entries had searched an API exhaustively and concluded about an organisation. That is the failure this file now exists to catch, and it was not caught by this project.",
- "checked": "2026-09-22",
+ "checked": "2026-10-09",
  "refused": [
   {
    "country": "CZ",
@@ -15,21 +15,6 @@
    ],
    "verdict": "possible, and refused — the ministry says both",
    "why": "RECHECKED 22 September against the national catalogue, and the answer is unchanged and more precise. R23 «Četnost příjmení v ČR», filed 7 May 2024 by the Ministry of the Interior (00007064), still carries status NelzePublikovat — cannot publish. What is new is what sits beside that status. The record asserts `existuje-překážka-dle-z--106-1999-sb: 1` — an obstacle exists under the Act on Free Access to Information — and, in the same breath, `možnost-poskytovat-formou-otevřených-dat: 1`: it IS possible to provide this as open data. The ministry is not saying the data cannot be made; it is saying the data will not be released. That distinction matters for what to do next. Every other country left on this list needs a file found or a gate to lift. Czechia needs somebody to ask — R23 is a request already lodged through the proper channel, and a formal žádost under Act 106/1999 is the route, not a better harvester. Nothing a script does will change this one.",
-   "rechecked": "2026-09-22"
-  },
-  {
-   "country": "FI",
-   "name": "Finland",
-   "tried": [
-    "pxdata.stat.fi StatFin — all 135 subject folders, none name-related",
-    "avoindata.fi — HTTP 403 to every request",
-    "avoindata.fi CKAN — 403 to an identified crawler",
-    "pxdata.stat.fi PxWeb — answers, and holds no names",
-    "dvv.fi/en/name-service — the DVV's own page, which offers an interactive lookup and points at avoindata.fi for the dataset",
-    "nimipalvelu.dvv.fi — the lookup itself, which answers 200 to a plain request and is a JavaScript application with no documented API"
-   ],
-   "verdict": "a working lookup for humans; the file is behind the gate",
-   "why": "RECHECKED 22 September against the DVV's website rather than the open-data portal. Statistics Finland has no names and never did — they belong to the DVV — and the DVV does publish: nimipalvelu.dvv.fi answers, and gives the number of people carrying any forename or surname in the Population Information System. It is a JavaScript application, and the DVV's own page sends anyone wanting the DATA to avoindata.fi, which answers 403 to an identified agent. Guessing at the application's private endpoints until one answered was considered and rejected: it is the same act as climbing the gate, done less honestly. THIS ATLAS DOES NOT CLIMB BOT GATES, and it does not go round the back of them either. Finland stays refused until a human downloads the avoindata file or the gate lifts — and unlike before, we now know exactly which file that is.",
    "rechecked": "2026-09-22"
   },
   {
@@ -140,6 +125,24 @@
    "verdict": "closed, and it counts births rather than people",
    "why": "Found by sweeping national open-data catalogues instead of guessing a country at a time — the method the last four wrong verdicts argued for. The CSO publishes VSA110, surnames of babies with ten or more occurrences, CC BY 4.0: 908 names, 80,922 births across 2023–2025. IT IS NOT A HEAD-COUNT AND THE FILE SAYS SO. Murphy at 1,717 is children given the name in three years, not Murphys alive in Ireland, and summing these into a population would be wrong by two orders of magnitude in the direction that flatters this atlas. The rows carry `b` for births and no `c`, so a name is attested in Ireland with no number claimed. It is also only newborns: a surname that died out in Ireland in 1900 is absent, and that absence means nothing.",
    "resolved": "2026-09-22"
+  },
+  {
+   "country": "FI",
+   "name": "Finland",
+   "tried": [
+    "pxdata.stat.fi StatFin — all 135 subject folders, none name-related",
+    "avoindata.fi — HTTP 403 to every request",
+    "avoindata.fi CKAN — 403 to an identified crawler",
+    "pxdata.stat.fi PxWeb — answers, and holds no names",
+    "dvv.fi/en/name-service — the DVV's own page, which offers an interactive lookup and points at avoindata.fi for the dataset",
+    "nimipalvelu.dvv.fi — the lookup itself, which answers 200 to a plain request and is a JavaScript application with no documented API",
+    "avoindata.suomi.fi CKAN — 200, and the dataset is there"
+   ],
+   "verdict": "a working lookup for humans; the file is behind the gate",
+   "why": "RECHECKED 22 September against the DVV's website rather than the open-data portal. Statistics Finland has no names and never did — they belong to the DVV — and the DVV does publish: nimipalvelu.dvv.fi answers, and gives the number of people carrying any forename or surname in the Population Information System. It is a JavaScript application, and the DVV's own page sends anyone wanting the DATA to avoindata.fi, which answers 403 to an identified agent. Guessing at the application's private endpoints until one answered was considered and rejected: it is the same act as climbing the gate, done less honestly. THIS ATLAS DOES NOT CLIMB BOT GATES, and it does not go round the back of them either. Finland stays refused until a human downloads the avoindata file or the gate lifts — and unlike before, we now know exactly which file that is.",
+   "rechecked": "2026-09-22",
+   "resolved": "2026-10-09",
+   "how": "RETESTED 9 October and it answers. THE PORTAL MOVED: avoindata.fi now redirects to avoindata.suomi.fi, and the September probe did not follow the redirect — a 301 unfollowed is indistinguishable from a refusal if you only read the status code. Nobody changed their mind about crawlers; the address changed. package_search?q=sukunimi returns «Väestötietojärjestelmän suomalaisten nimiaineistot», the DVV's own name lists, CC BY 4.0, dated 2026-08-04, as two spreadsheets. scripts/harvest-finland-surnames.py reads the surname sheet with the standard library — an .xlsx is a zip of XML — and writes data/frequencies/fi.json: 23,265 surnames and 4,917,684 bearers, Korhonen 21,144 at the top. The DVV withholds any surname with fewer than twenty bearers, so the file is complete above twenty and silent below it."
   }
  ]
 }

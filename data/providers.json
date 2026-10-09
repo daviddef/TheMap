@@ -2455,7 +2455,7 @@
    },
    "wikidata": "Q2860502",
    "triage": "declined",
-   "triageNote": "Tried 2026-10-09 in a real browser, not a script: www.archives06.fr answers «The requested URL was rejected. Please consult with your administrator.» with a support ID, which is a web application firewall refusing the connection outright. Not link rot and not a bot gate that a browser walks through, as ad-tarn's and ad-charente's are. Left `unsurveyed` and recorded rather than worked around; it wants a human on an ordinary connection, or a note to the archive."
+   "triageNote": "Declined 2026-10-09, twice. www.archives06.fr answers every request with a WAF page titled «Request Rejected» — «The requested URL was rejected. Please consult with your administrator. Your support ID is: 16102489503195326698». curl receives HTTP 200, which is the block page itself and not the site. Nothing about the collections can be recorded from here; the row stays unsurveyed rather than guessed at."
   },
   {
    "id": "ad-archives-du-departement-du-rhone-et-de-la-metropole-de-lyon",
@@ -2627,21 +2627,21 @@
    "name": "Archives départementales de la Collectivité territoriale de Saint-Pierre-et-Miquelon",
    "url": "https://www.arche-musee-et-archives.net/fr/",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Collectivité territoriale de Saint-Pierre-et-Miquelon — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "L'Arche, the combined museum and archive at Saint-Pierre, which holds the records of Saint-Pierre, Miquelon-Langlade and the Île-aux-Chiens. The archives building burned in 1992 and the service says so plainly: some documents no longer exist and others are damaged. What survives is published as downloadable PDFs under «Archives en ligne» — censuses from the 18th to the early 20th century, population movements, and a roll of sailors lost and deceased.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 46.7764,
     "lon": -56.1774,
     "place": "Saint-Pierre-et-Miquelon, France"
    },
    "wikidata": "Q115114895",
-   "triage": "read",
-   "triageNote": "homepage read; phrases found: archives en ligne. Access class still needs a person."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser; open with no account asked for. /fr/54-recensements.html is headed «Archives en ligne : population» and links the 1882 and 1887 census PDFs directly. The same page reads «Suite à l'incendie du bâtiment des archives en 1992 certains documents n'existent plus et d'autres ont été endommagées». /fr/76-mouvements-de-population.html and /fr/83-marins-disparus-et-decedes.html sit beside it."
   },
   {
    "id": "ad-correze",
@@ -2669,21 +2669,21 @@
    "name": "Archives de Corse",
    "url": "https://www.isula.corsica/patrimoine/Archives-de-Corse_r61.html",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Corse — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "The Archives de Corse, run by the Collectivité de Corse for the whole island, with the catalogue on archives.isula.corsica. Eleven series online, among them Corsica christiana, the plan terrier — the 18th-century Genoese-era land survey — and the inscrits maritimes.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 41.9353,
     "lon": 8.7466,
     "place": "Ajaccio, France"
    },
    "wikidata": "Q62330782",
-   "triage": "read",
-   "triageNote": "homepage read; phrases found: inventaire. Access class still needs a person."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser; open with no account asked for. The Cloudflare check did not resolve on an earlier attempt; on retry it cleared in under eight seconds. archives.isula.corsica is a frameset (Internet_THOT/FrmSommaireFrame.asp) whose left frame lists «Inventaires d'archives antérieures à 1940 · Etat civil · Corsica christiana · Recensements de population · Registres matricules · Inscrits maritimes · Territoires · Plan terrier · Fonds de l'enregistrement · Hypothèques · Presse régionale». The Collectivité's own page at isula.corsica announces new material going online."
   },
   {
    "id": "ad-cote-d-or",
@@ -2872,7 +2872,7 @@
    },
    "wikidata": "Q19606461",
    "triage": "declined",
-   "triageNote": "Tried 2026-10-09 in a real browser: www.archives32.fr answers «Attack detected» and serves nothing. A web application firewall refusing the connection outright, like ad-alpes-maritimes and unlike the «Making sure you're not a bot!» hosts, which a browser walks straight through. Left `unsurveyed` and recorded rather than worked around."
+   "triageNote": "Declined 2026-10-09, twice. www.archives32.fr answers with «Attack detected» — «Your request has been blocked. Date: 2026-10-09T02:47:51+0000. Request UID: ashV112x9hlqhv57PjFA5gAAAG8». curl receives HTTP 200, which is the block page. Row stays unsurveyed."
   },
   {
    "id": "ad-gironde",
@@ -3449,7 +3449,7 @@
    ],
    "what": "The archives départementales for Oise — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 49.4427,
     "lon": 2.0988,
@@ -3457,7 +3457,7 @@
    },
    "wikidata": "Q2860477",
    "triage": "declined",
-   "triageNote": "A SCRIPTED CHECK ON 2026-10-05 answered 403 Forbidden — which is NOT evidence the archive is gone. ad-tarn answered 418 to the same sweep and opens normally in a browser: an anti-DDoS page was answering for it. So this row is left `unsurveyed` and the URL is left alone; somebody with a browser should look before anything here is called dead or rewritten. The two 404s (Alsace CEA, Mayotte) are the likeliest to be genuinely wrong addresses."
+   "triageNote": "Declined 2026-10-09, twice. archives.oise.fr sits behind Cloudflare and the interstitial never resolves: «Performing security verification … This page is displayed while the website verifies you are not a bot. Ray ID: a47a11fddf79d70c», still showing after sixteen seconds in a real browser; curl gets HTTP 403. Row stays unsurveyed."
   },
   {
    "id": "ad-l-orne",
@@ -3527,84 +3527,84 @@
    "name": "Archives départementales des Landes",
    "url": "https://www.archives.landes.fr/",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Landes — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "Mont-de-Marsan. «Archives numérisées» is split the way a reader actually arrives — «rechercher une personne» and «recherches sur une commune» — rather than by archival series.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 43.8871,
     "lon": -0.5045,
     "place": "Mont-de-Marsan, France"
    },
    "wikidata": "Q19606457",
-   "triage": "http",
-   "triageNote": "A SCRIPTED CHECK ON 2026-10-05 answered 403 Forbidden — which is NOT evidence the archive is gone. ad-tarn answered 418 to the same sweep and opens normally in a browser: an anti-DDoS page was answering for it. So this row is left `unsurveyed` and the URL is left alone; somebody with a browser should look before anything here is called dead or rewritten. The two 404s (Alsace CEA, Mayotte) are the likeliest to be genuinely wrong addresses."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser, superseding the 5 October scripted check that recorded an http refusal. 135 links; /faire-une-recherche/archives-numerisees and its person and commune entry points are open with no account."
   },
   {
    "id": "ad-loir-et-cher",
    "name": "Archives départementales de Loir-et-Cher",
    "url": "https://www.archives41.fr/",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Loir-et-Cher — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "Blois. «Archives en ligne» with its own guidance for the genealogist and a separate route for finding a single act of état civil.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 47.5938,
     "lon": 1.3367,
     "place": "Blois, France"
    },
    "wikidata": "Q2860462",
-   "triage": "read",
-   "triageNote": "homepage read; phrases found: archives en ligne, espace personnel, fonds d'archives, indexation collaborative, inventaire, registres paroissiaux et d'etat civil. Access class still needs a person."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser; open with no account asked for. 163 links; /n/archives-en-ligne/n:142, /n/genealogiste/n:164 and /n/un-acte-d-etat-civil/n:263 all reachable. Another anti-bot host."
   },
   {
    "id": "ad-loire",
    "name": "Archives départementales de la Loire",
    "url": "https://archives.loire.fr/",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Loire — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "Saint-Étienne. «Archives numérisées en ligne» alongside the online inventories.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 45.454,
     "lon": 4.385,
     "place": "Saint-Étienne, France"
    },
    "wikidata": "Q2860492",
-   "triage": "read",
-   "triageNote": "homepage read; phrases found: inventaire, mon espace. Access class still needs a person."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser; open with no account asked for. 120 links; /n/archives-numerisees-en-ligne/n:90 reachable. Another anti-bot host."
   },
   {
    "id": "ad-loire-atlantique",
    "name": "Archives départementales de la Loire-Atlantique",
    "url": "https://archives.loire-atlantique.fr/44/accueil-archives/j_6",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Loire-Atlantique — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "Nantes. Archives numérisées with a recently replaced viewer; the site is published in French and English.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 47.2248,
     "lon": -1.5575,
     "place": "Nantes, France"
    },
    "wikidata": "Q2860493",
-   "triage": "read",
-   "triageNote": "homepage read; phrases found: fonds d'archives, inventaire, visionneuse. Access class still needs a person."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser; open with no account asked for. 144 links; the archives numérisées sections are reachable. Cookie banner left unanswered."
   },
   {
    "id": "ad-loiret",
@@ -3653,63 +3653,63 @@
    "name": "Archives départementales de Lot-et-Garonne",
    "url": "https://archivesdepartementales.lotetgaronne.fr/accueil",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Lot-et-Garonne — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "Agen, with the images on a separate platform at lotetgaronne.archives.prismia.fr. État civil has its own «premiers pas» guide for readers who have not used a register before.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 44.1987,
     "lon": 0.6163,
     "place": "Agen, France"
    },
    "wikidata": "Q19606451",
-   "triage": "read",
-   "triageNote": "homepage read; phrases found: etat civil numerise, s'inscrire. Access class still needs a person."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser; open with no account asked for. 204 links; /rechercher/conseils-de-recherche/premiers-pas-dans-letat-civil and the prismia État civil search both reachable."
   },
   {
    "id": "ad-lozere",
    "name": "Archives départementales de la Lozère",
    "url": "https://archives.lozere.fr/",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Lozère — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "Mende. État civil searchable directly, with the état général des fonds and a route in from the digitised archives.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 44.518,
     "lon": 3.506,
     "place": "Mende, France"
    },
    "wikidata": "Q2860494",
-   "triage": "read",
-   "triageNote": "homepage read; phrases found: archives en ligne, inventaire, visionneuse. Access class still needs a person."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser; open with no account asked for. 145 links; /archive/recherche/etatcivil/n:88 is an open search. Another anti-bot host."
   },
   {
    "id": "ad-maine-et-loire",
    "name": "Archives départementales de Maine-et-Loire",
    "url": "https://archives.maine-et-loire.fr",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Maine-et-Loire — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "Angers. Archives numérisées under «Rechercher et consulter».",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 47.4578,
     "lon": -0.5599,
     "place": "Maine-et-Loire, France"
    },
    "wikidata": "Q2860465",
-   "triage": "read",
-   "triageNote": "homepage read; phrases found: inventaire. Access class still needs a person."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser; open with no account asked for. 100 links; /recherche-et-consulter/archives-numerisees reachable."
   },
   {
    "id": "ad-manche",
@@ -3737,63 +3737,63 @@
    "name": "Archives départementales de la Marne",
    "url": "https://archives.marne.fr/",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Marne — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "Châlons-en-Champagne. État civil, the 1836–1946 censuses, maps and plans from before 1800, the 1914–1918 war, the cadastre 1800–2000 and the military matricules, each with its own search.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 48.9551,
     "lon": 4.3652,
     "place": "Reims, France"
    },
    "wikidata": "Q2406894",
-   "triage": "read",
-   "triageNote": "homepage read; phrases found: s'inscrire. Access class still needs a person."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser; open with no account asked for. /page/archives-numerisees lists «Etat civil · Recensements, 1836-1946 · Cartes et plans avant 1800 · Guerre 1914-1918 · Cadastre 1800-2000 · Matricules militaires». A separate page offers «Plus de 3000 images pour combler des lacunes» in the état civil and census collections."
   },
   {
    "id": "ad-martinique",
    "name": "Archives départementales de la Martinique",
    "url": "https://www.patrimoines-martinique.org/",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Martinique — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "Fort-de-France. The Archives territoriales publish a genealogical research guide for Martinique alongside the état civil search — useful, because the island's registers carry the particular history of the colony.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 14.6066,
     "lon": -61.0803,
     "place": "Fort-de-France, France"
    },
    "wikidata": "Q31696217",
-   "triage": "read",
-   "triageNote": "homepage read; phrases found: inventaire, s'inscrire. Access class still needs a person."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser; open with no account asked for. /search/form/8ea80f22-2f9c-456b-94a0-adbd50d31e1c is an open état civil search; /document/guide-de-recherche-genealogique-en-martinique and /page/archives-numerisees are both reachable."
   },
   {
    "id": "ad-mayenne",
    "name": "Archives départementales de la Mayenne",
    "url": "https://archives.lamayenne.fr/",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Mayenne — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "Laval. A single form searches the acts and the communal tables for the whole département.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 48.0729,
     "lon": -0.7594,
     "place": "Laval, France"
    },
    "wikidata": "Q2860497",
-   "triage": "read",
-   "triageNote": "homepage read; phrases found: cadre de classement, registres paroissiaux et d'etat civil. Access class still needs a person."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser; open with no account asked for. /archives-en-ligne/etat-civil-search-form.html opens straight onto «Recherche dans l'état civil — Consultation des actes et tables des communes mayennaises», with 61 form controls and no sign-in."
   },
   {
    "id": "ad-mayotte",
@@ -3804,9 +3804,9 @@
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Mayotte — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "Mamoudzou, 1 impasse des Terrasses. The service exists and is reachable by post and e-mail (archives.mayotte@cg976.fr), but it has no working web page: the only URL published for it — by FranceArchives, the national portal, as well as here — returns a 404, and the département's own Culture et patrimoine menu lists the museum, the bibliothèque départementale and the monuments historiques, with no archive service among them. Nothing is known from here about what, if anything, is online.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": -12.7618,
     "lon": 45.2277,
@@ -3814,70 +3814,70 @@
    },
    "wikidata": "Q2860467",
    "triage": "http",
-   "triageNote": "A SCRIPTED CHECK ON 2026-10-05 answered 404 — which is NOT evidence the archive is gone. ad-tarn answered 418 to the same sweep and opens normally in a browser: an anti-DDoS page was answering for it. So this row is left `unsurveyed` and the URL is left alone; somebody with a browser should look before anything here is called dead or rewritten. The two 404s (Alsace CEA, Mayotte) are the likeliest to be genuinely wrong addresses."
+   "triageNote": "Checked 2026-10-09. mayotte.fr/le-conseil-departemental/institution/services-administratifs/archives returns «404 — Page introuvable»; so does ?s=archives, which redirects to the homepage. FranceArchives service/34519 lists the same dead URL alongside the postal address, phone 02.69.66.16.09 and archives.mayotte@cg976.fr. No sitemap.xml. No positive evidence of online access, so access stays unsurveyed rather than guessed."
   },
   {
    "id": "ad-meurthe-et-moselle",
    "name": "Archives départementales de Meurthe-et-Moselle",
    "url": "https://archives.meurthe-et-moselle.fr/",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Meurthe-et-Moselle — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "Nancy, with the images on archivesenligne.meurthe-et-moselle.fr. Parish and civil registers online; the archive publicly warns readers that AI-generated answers to research questions are not to be trusted.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 48.7042,
     "lon": 6.1666,
     "place": "Nancy, France"
    },
    "wikidata": "Q17189711",
-   "triage": "read",
-   "triageNote": "homepage read; phrases found: archives en ligne, registres paroissiaux et d'etat civil. Access class still needs a person."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser; open with no account asked for. archivesenligne.meurthe-et-moselle.fr/archives-en-ligne/registres-paroissiaux-et-detat-civil loads its own «Registres paroissiaux et d'état civil» section with no sign-in."
   },
   {
    "id": "ad-meuse",
    "name": "Archives départementales de la Meuse",
    "url": "https://archives.meuse.fr/",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Meuse — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "Bar-le-Duc. The most consulted collections out of 25 linear kilometres of holdings have been digitised.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 48.7737,
     "lon": 5.1572,
     "place": "Bar-le-Duc, France"
    },
    "wikidata": "Q16303819",
-   "triage": "read",
-   "triageNote": "homepage read; phrases found: archives en ligne, inventaire, s'inscrire. Access class still needs a person."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser; open with no account asked for. /page/archives-en-ligne reads «ont numérisé et mis en ligne les fonds les plus consultés parmi les 25 kilomètres linéaires de documents»."
   },
   {
    "id": "ad-morbihan",
    "name": "Archives départementales du Morbihan",
    "url": "https://patrimoines-archives.morbihan.fr",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Morbihan — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "Vannes, inside the département's combined patrimoine and archives site. Every parish and civil register from the 16th century to the early 20th is online, and a PDF states the consultation position collection by collection.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 47.6482,
     "lon": -2.7811,
     "place": "Vannes, France"
    },
    "wikidata": "Q15918419",
-   "triage": "read",
-   "triageNote": "homepage read; phrases found: archives en ligne, espace personnel, inventaire. Access class still needs a person."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser; open with no account asked for. /rechercher/archives/archives-en-ligne reads «Ensemble des registres paroissiaux et d'état civil depuis le 16e siècle des communes du Morbihan jusqu'au début du 20e siècle». A 2024 news item announces état civil and census additions."
   },
   {
    "id": "ad-moselle",
@@ -3902,84 +3902,84 @@
    "name": "Archives départementales de la Nièvre",
    "url": "https://archives.nievre.fr",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Nièvre — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "Nevers. État civil, population censuses, and the declarations of pregnancy 1758–1790 — a series few archives have digitised.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 46.994,
     "lon": 3.1616,
     "place": "Nevers, France"
    },
    "wikidata": "Q19606448",
-   "triage": "read",
-   "triageNote": "homepage read; phrases found: archives en ligne, cadre de classement, s'inscrire. Access class still needs a person."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser; open with no account asked for. /page/archives-en-ligne reads «Retrouvez tous les documents numérisés avec ces formulaires de recherche» and lists «Généalogie · État civil · Recensements de population · Déclarations de grossesse 1758-1790»."
   },
   {
    "id": "ad-paris",
    "name": "Archives de Paris",
    "url": "https://archives.paris.fr/",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Paris — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "The Archives de Paris, which hold the capital's état civil. Alongside the usual collections there is a dedicated «Mémoire des attentats de 2015» section and the profits illicites files.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 48.8789,
     "lon": 2.4064,
     "place": "19e arrondissement de Paris, France"
    },
    "wikidata": "Q2860432",
-   "triage": "read",
-   "triageNote": "homepage read; phrases found: cadre de classement, inventaire. Access class still needs a person."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser; open with no account asked for. /archives-numerisees opens with no sign-in; the same menu carries «Recherche dans les inventaires en ligne», «Recherche topographique» and «Communicabilité des archives»."
   },
   {
    "id": "ad-pas-de-calais",
    "name": "Archives départementales du Pas-de-Calais",
    "url": "https://www.archivespasdecalais.fr/",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Pas-de-Calais — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "Dainville. Archives numérisées under «Chercher», with the enregistrement succession tables and the military matricule sheets among the recent additions.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 50.2906,
     "lon": 2.7384,
     "place": "Dainville, France"
    },
    "wikidata": "Q2860515",
-   "triage": "read",
-   "triageNote": "homepage read; phrases found: registres paroissiaux et d'etat civil, tables decennales. Access class still needs a person."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser; open with no account asked for. /Chercher/Archives-numerisees loads with no sign-in. Cookie banner declined; two 2026 news items announce the matricules militaires and the «tables de successions et absences (5C, 3Q)»."
   },
   {
    "id": "ad-puy-de-dome",
    "name": "Archives départementales du Puy-de-Dôme",
    "url": "https://www.archivesdepartementales.puy-de-dome.fr/",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Puy-de-Dôme — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "Clermont-Ferrand. Inventories and digitised archives both consultable, with tutorials and research-help workshops for readers new to the sources.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 45.8072,
     "lon": 3.1023,
     "place": "Clermont-Ferrand, France"
    },
    "wikidata": "Q19606464",
-   "triage": "read",
-   "triageNote": "homepage read; phrases found: acces libre, consulter les registres, espace personnel, indexation collaborative. Access class still needs a person."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser; open with no account asked for. /n/rechercher/n:149 reads «Consulter les inventaires · Consulter les archives numérisées». Another anti-bot host; it cleared on retry. An «Espace personnel» exists but is not asked for."
   },
   {
    "id": "ad-pyrenees-atlantiques",
@@ -3992,7 +3992,7 @@
    ],
    "what": "The archives départementales for Pyrénées-Atlantiques — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 43.3081,
     "lon": -0.3397,
@@ -4000,20 +4000,20 @@
    },
    "wikidata": "Q19606458",
    "triage": "declined",
-   "triageNote": "A SCRIPTED CHECK ON 2026-10-05 answered 403 Forbidden — which is NOT evidence the archive is gone. ad-tarn answered 418 to the same sweep and opens normally in a browser: an anti-DDoS page was answering for it. So this row is left `unsurveyed` and the URL is left alone; somebody with a browser should look before anything here is called dead or rewritten. The two 404s (Alsace CEA, Mayotte) are the likeliest to be genuinely wrong addresses."
+   "triageNote": "Declined 2026-10-09, twice. archives.le64.fr answers with «Attack detected» — «Your request has been blocked. Date: 2026-10-09T02:49:32+0000. Request UID: ashWPEDhyoGsIOCKa4Qo1gAAAAw». curl gets HTTP 403. Row stays unsurveyed."
   },
   {
    "id": "ad-pyrenees-orientales",
    "name": "Archives départementales des Pyrénées-Orientales",
    "url": "https://www.ledepartement66.fr/dossier/lesarchivesdepartementales/",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Pyrénées-Orientales — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "Perpignan. Parish and civil registers, military matricules, censuses, mortgage registers, the Napoleonic cadastre, death and succession tables, and the iconography of the Retirada and the internment camps — ELEVEN categories, all free. But the Département has blocked archives.cd66.fr to everyone outside France, indefinitely, and says so on its own page. From abroad the images cannot be reached at all.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 42.6784,
     "lon": 2.9018,
@@ -4021,7 +4021,7 @@
    },
    "wikidata": "Q2860512",
    "triage": "read",
-   "triageNote": "homepage read; phrases found: archives en ligne, inventaire. Access class still needs a person."
+   "triageNote": "Read 2026-10-09. ledepartement66.fr/lesarchivesenligne/ states: «Pour intensifier la sécurité, le Département des Pyrénées-Orientales a décidé de bloquer l'accès hors de France au site Internet : http://archives.cd66.fr. En conséquence, les internautes résidant à l'étranger ne pourront plus se connecter sur les “archives en ligne” des Archives départementales, pour une période indéterminée.» Navigation to archives.cd66.fr/mdr/index.php/rechercheTheme failed from here, consistent with that notice. The category list and the collection-history documents are readable on the département's own site; the viewer is not. Not a bot gate — a stated geographic block."
   },
   {
    "id": "ad-saone-et-loire",
@@ -4070,21 +4070,21 @@
    "name": "Archives départementales de la Savoie",
    "url": "https://patrimoines.savoie.fr/",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Savoie — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "Chambéry, inside the département's patrimoines portal, with the catalogue on recherche-archives.savoie.fr. Simple and guided search are both open; signing in only reserved documents for the reading room, and that is being withdrawn in February 2026. The Chambéry mortgage transcriptions are being digitised in phases.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 45.5675,
     "lon": 5.9333,
     "place": "Chambéry, France"
    },
    "wikidata": "Q2860500",
-   "triage": "read",
-   "triageNote": "homepage read; phrases found: none. Access class still needs a person."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser; open with no account asked for. recherche-archives.savoie.fr offers «Recherche simple · Recherche guidée» without signing in, and announces that «la réservation de documents en ligne ne sera plus accessible à partir du 1er février 2026»."
   },
   {
    "id": "ad-seine-et-marne",
@@ -4114,84 +4114,84 @@
    "name": "Archives départementales de la Seine-Maritime",
    "url": "https://www.archivesdepartementales76.net",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Seine-Maritime — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "Rouen. Thirteen digitised series, among them the Journal de Rouen, the inscription maritime, the registres d'écrou and the hospital administration, with a cross-collection search over the lot.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 49.4255,
     "lon": 1.0969,
     "place": "Rouen, France"
    },
    "wikidata": "Q2860472",
-   "triage": "read",
-   "triageNote": "homepage read; phrases found: espace personnel, inventaire. Access class still needs a person."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser; open with no account asked for. /n/archives-numerisees/n:164 lists «Recherche transversale · Etat civil · Recensements de population · Journal de Rouen · Matricules militaires · Inscription maritime · Enregistrement · Hypothèques · Cadastre · Iconographie · Registres d'écrou · Administration hospitalière». Another anti-bot host."
   },
   {
    "id": "ad-seine-saint-denis",
    "name": "Archives départementales de la Seine-Saint-Denis",
    "url": "https://archives.seinesaintdenis.fr/",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Seine-Saint-Denis — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "Bobigny. The département was carved out in 1968, so its état civil search is by commune — Saint-Denis, Montreuil, Aubervilliers, Pantin and the rest.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 48.9031,
     "lon": 2.4458,
     "place": "Bobigny, France"
    },
    "wikidata": "Q19606450",
-   "triage": "read",
-   "triageNote": "homepage read; phrases found: archives en ligne, espace personnel, inventaire, s'inscrire. Access class still needs a person."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser; open with no account asked for. /archive/recherche/etatcivil/n:217 redirects straight to results with the commune list populated and 29 form controls; no sign-in. Another anti-bot host."
   },
   {
    "id": "ad-service-du-patrimoine-archivistique-et-audiovisuel-du-territoire-de-polynesie-francaise",
    "name": "Service du patrimoine archivistique et audiovisuel du Territoire de Polynésie française",
    "url": "https://www.archives.pf/",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Service du patrimoine archivistique et audiovisuel du Territoire de Polynésie française — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "Te Piha Faufa'a Tupuna at Pape'ete. Its published récolement of the French Polynesian état civil 1852–1934 is the thing to read first: an island-by-island table that says, for each district and atoll, which years exist in Tahitian and which in French, which are digitised, and whether they are online or only on the shelf at Tipaeru'i. The colonial état civil itself is digitised at ANOM (caomec2), not here.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": -17.5515,
     "lon": -149.5778,
     "place": "Papeete, France"
    },
    "wikidata": "Q88650259",
-   "triage": "read",
-   "triageNote": "homepage read; phrases found: inventaire, tarif. Access class still needs a person."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser; open with no account asked for. /etat-civil-test/ prints the récolement under two explicit headings — «ARCHIVES CONSULTABLES SUR PLACE AU DÉPÔT DES ARCHIVES DE TIPAERU'I À PAPE'ETE» and «ARCHIVES ACCESSIBLES EN LIGNE SUR INTERNET» — with columns for Tahitian, French, digital format and year ranges, and rows from Afaahiti and Afareaitu through Ahe, Akamaru, Amanu and Anaa. It links on to anom.archivesnationales.culture.gouv.fr/caomec2/."
   },
   {
    "id": "ad-somme",
    "name": "Archives départementales de la Somme",
    "url": "https://archives.somme.fr",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Somme — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "Amiens. État civil, population, military and war records, the fiscal and notarial archives (3E), the conseil général and communal deliberations, maps, and a collection on the mills of the Somme. The archive says plainly that some media stay in the reading room for rights or closure-period reasons.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 49.8839,
     "lon": 2.3042,
     "place": "France, France"
    },
    "wikidata": "Q2860501",
-   "triage": "read",
-   "triageNote": "homepage read; phrases found: archives en ligne, etat des fonds, indexation collaborative, inventaire, s'inscrire. Access class still needs a person."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser; open with no account asked for. /page/archives-en-ligne-1 lists «Etat civil · Population, individus · Militaires, Guerres · Archives fiscales · Archives notariales (3E) · Délibérations des Conseils généraux … · Délibérations communales · Images · Cartes et plans · Les moulins de la Somme», above the notice that «certains médias … sont uniquement visibles en salle de lecture pour des questions de droits ou de délais de communicabilité»."
   },
   {
    "id": "ad-tarn",
@@ -4219,42 +4219,42 @@
    "name": "Archives départementales du Territoire de Belfort",
    "url": "https://archives.territoiredebelfort.fr/",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Territoire de Belfort — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "Belfort. Fourteen digitised series, including a collection on the history of the Anabaptist Mennonites, the assisted children, the combatant cards for those born 1843–1909, and the trade marks 1859–1936.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 47.6377,
     "lon": 6.8615,
     "place": "Belfort, France"
    },
    "wikidata": "Q21027478",
-   "triage": "read",
-   "triageNote": "homepage read; phrases found: cadre de classement, s'inscrire. Access class still needs a person."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser; open with no account asked for. /page/acceder-aux-fonds-numerises lists «Etat civil · Histoire des anabaptistes mennonites · Recensements · Enfants assistés · Registres matricules (1867-1940) · Cartes de combattants (nés entre 1843 et 1909) · Plans militaires (1828-1898) · Recherche foncière · Enregistrement (1791-1945) · Presse (1870-1942) · Fonds iconographiques · Immatriculations (1899-1928) · Marques de fabrique (1859-1936)»."
   },
   {
    "id": "ad-val-d-oise",
    "name": "Archives départementales du Val-d'Oise",
    "url": "https://archives.valdoise.fr/",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Val-d'Oise — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "Cergy-Pontoise. Seven series digitised in full — état civil, censuses, iconography, postcards, built heritage, maps and plans, press — and a published list of the finding aids whose collections are only partly digitised.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 49.0335,
     "lon": 2.0882,
     "place": "Pontoise, France"
    },
    "wikidata": "Q19944936",
-   "triage": "read",
-   "triageNote": "homepage read; phrases found: espace personnel, indexation collaborative, inventaire. Access class still needs a person."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser; open with no account asked for. /n/archives-numerisees/n:418 lists those seven and adds «D'autres fonds ont fait l'objet de numérisations partielles : découvrez la liste des instruments de recherche concernés». Another anti-bot host; it cleared on retry."
   },
   {
    "id": "ad-val-de-marne",
@@ -4303,21 +4303,21 @@
    "name": "Archives départementales de Vaucluse",
    "url": "https://memento.vaucluse.fr/",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Vaucluse — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "Avignon, inside Memento, the département's combined archives, museums and archaeology portal. Free-text search, the état des fonds, and the classification series are three separate ways in to the same digitised images.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 43.9143,
     "lon": 4.8867,
     "place": "Avignon, France"
    },
    "wikidata": "Q21027496",
-   "triage": "read",
-   "triageNote": "homepage read; phrases found: s'inscrire. Access class still needs a person."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser; open with no account asked for. /dans-les-archives/consultation-en-ligne-archives reads «Interrogez les fonds grâce à la recherche libre avec un mot clé, naviguez dans l'état des fonds ou dans les grandes séries du cadre de classement», and offers a «panorama des fonds»."
   },
   {
    "id": "ad-vendee",
@@ -4345,21 +4345,21 @@
    "name": "Archives départementales de la Vienne",
    "url": "https://archives-deux-sevres-vienne.fr/",
    "kind": "regional-archive",
-   "access": "unsurveyed",
+   "access": "free",
    "countries": [
     "FR"
    ],
-   "what": "The archives départementales for Vienne — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
+   "what": "Poitiers, sharing one portal with the Deux-Sèvres: the two départements run a joint site, so a search crosses both.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 46.567,
     "lon": 0.372,
     "place": "Poitiers, France"
    },
    "wikidata": "Q21009102",
-   "triage": "read",
-   "triageNote": "homepage read; phrases found: archives en ligne, cadre de classement, inventaire. Access class still needs a person."
+   "triage": "seen-in-use",
+   "triageNote": "Surveyed 2026-10-09 in a browser; open with no account asked for. The portal titles itself «Portail commun Archives départementales des Deux-Sèvres et de la Vienne»; /archive/recherche/ecalternatif/n:100 is an open état civil search beside «Inventaires en ligne» and «Archives en ligne». Another anti-bot host."
   },
   {
    "id": "ad-vosges",
@@ -4372,7 +4372,7 @@
    ],
    "what": "The archives départementales for Vosges — in France, where a département's parish registers and civil registers are deposited. Harvested from Wikidata and not yet opened: what is online, and at what price, is unchecked.",
    "deepLink": null,
-   "checked": "2026-09-27",
+   "checked": "2026-10-09",
    "at": {
     "lat": 48.1989,
     "lon": 6.4604,
@@ -4380,7 +4380,7 @@
    },
    "wikidata": "Q18213967",
    "triage": "unreachable",
-   "triageNote": "A SCRIPTED CHECK ON 2026-10-05 did not complete a connection — which is NOT evidence the archive is gone. ad-tarn answered 418 to the same sweep and opens normally in a browser: an anti-DDoS page was answering for it. So this row is left `unsurveyed` and the URL is left alone; somebody with a browser should look before anything here is called dead or rewritten. The two 404s (Alsace CEA, Mayotte) are the likeliest to be genuinely wrong addresses."
+   "triageNote": "Unreachable 2026-10-09. archives.vosges.fr resolves to 92.103.52.35 but every connection times out, on port 443 and on port 80 alike — not a refusal, no bytes at all. www.vosges.fr (92.103.52.33) times out the same way, so the whole département's network is dark from here rather than the archive alone. No alternative hostname resolves. Row stays unsurveyed."
   },
   {
    "id": "ad-yvelines",

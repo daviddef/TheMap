@@ -690,6 +690,35 @@ def weight():
         packed += b["bytes"] * ratio
 
     mb, pmb = total / 1048576, packed / 1048576
+
+    # ---- THE CEILING THAT ACTUALLY BIT, AND THIS CHECK WAS NOT WATCHING IT --
+    # On 9 October every deploy failed with «Artifact could not be deployed.
+    # Please ensure the content does not contain any hard links, symlinks and
+    # total size is less than 10GB». dist was 10,179 MB — the RAW tree, not
+    # the compressed artifact.
+    #
+    # Everything below measures COMPRESSED bytes against the 1,024 MB Pages
+    # limit, for the good reasons in this function's docstring. But there are
+    # two ceilings and nothing was looking at the second one: the upload
+    # refuses an artifact whose uncompressed content exceeds 10 GB, long
+    # before Pages has an opinion about what it stores.
+    #
+    # This one needs no estimate and cannot cry wolf — it is a number against
+    # a documented number — so it is reported at 100% and warned about at 80%,
+    # where there is still a release's worth of room to do something.
+    GB = 1024.0
+    if mb > 10 * GB:
+        bad("weight", f"dist is {mb / GB:,.1f} GB of files and the Pages "
+                      f"artifact upload refuses anything over 10 GB — this "
+                      f"will not deploy, whatever it compresses to")
+    elif mb > 8 * GB:
+        bad("weight", f"dist is {mb / GB:,.1f} GB of files against the 10 GB "
+                      f"artifact ceiling — the upload starts refusing at 10, "
+                      f"and this is {10 * GB - mb:,.0f} MB short of it")
+    else:
+        note("weight", f"dist is {mb / GB:,.1f} GB of files, of a 10 GB "
+                       f"artifact ceiling")
+
     detail = (f"at most {pmb:,.0f} MB stored, from {mb:,.0f} MB of files "
               f"({mb / pmb:.1f}:1 here, better once tarred)"
               if pmb else f"{mb:,.0f} MB")

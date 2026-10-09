@@ -243,6 +243,44 @@ jobs:
       - name: Audit
         run: python3 scripts/audit-site.py || echo "::warning::audit reported problems — see above"
 
+      # ---- THE ONE SIZE CHECK THAT BLOCKS, BECAUSE THIS ONE ALREADY COST US -
+      # The audit above is deliberately non-blocking and says why. On 9
+      # October that cost a day: it printed «this will not deploy» and the
+      # «||» turned it into a warning nobody read, so three deploys ran the
+      # full forty minutes and then died at the upload with «Artifact could
+      # not be deployed … total size is less than 10GB».
+      #
+      # This is narrower than the audit on purpose. It asserts ONE documented
+      # number against ONE measured number — no compression estimate, no
+      # heuristics, nothing that has ever produced a false positive — so it
+      # can block without risking a green build being stopped for a guess.
+      # Failing here costs the forty minutes already spent; failing at the
+      # upload costs the same forty minutes AND leaves the site un-updated
+      # with no obvious reason in the summary.
+      #
+      # THE LIMIT BITES BELOW 10 GB, WHICH IS WHY THE THRESHOLD IS 9.6. The
+      # run that failed had 10,179 MB of files by the audit's own count —
+      # 9.94 GiB, under ten — and was refused anyway, because what gets
+      # uploaded is a TAR: 512 bytes of header per member, and this tree is
+      # 167,866 files, so roughly 86 MB of the limit is spent before any
+      # content. A ceiling check that trusts the raw sum would have passed
+      # that build. 9.6 GiB leaves room for the header tax and a little more.
+      - name: The artifact has to fit
+        run: |
+          bytes=$(du -sb site/dist | cut -f1)
+          gb=$(awk "BEGIN{printf \"%.2f\", $bytes/1073741824}")
+          echo "site/dist is ${gb} GB"
+          if [ "$bytes" -gt 10307921510 ]; then
+            echo "::error::site/dist is ${gb} GB and the Pages artifact upload \
+          refuses anything over 10 GB. The upload would fail after this build \
+          has already run. See scripts/audit-site.py weight() for where the \
+          bytes are."
+            exit 1
+          fi
+          awk "BEGIN{exit !($bytes > 8589934592)}" && \
+            echo "::warning::site/dist is ${gb} GB of a 10 GB ceiling — the \
+          next harvest may not fit" || true
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

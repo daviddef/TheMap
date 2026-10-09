@@ -79,7 +79,13 @@ test("second ten: the world is legible rather than a grey smear", async ({ page 
 
 test("second twelve: clicking in twice hands back the real places", async ({ page }) => {
   await ready(page);
-  await page.evaluate(() => window.recordAtlas.map.setView([45.3, 14.0], 7, { animate: false }));
+  /* Braces, not a bare arrow: setView returns the Leaflet map, and Playwright
+     tries to serialise whatever evaluate hands back. The map's object graph
+     grew with the cell layers until it tripped «object reference chain is too
+     long», which failed this spec against a site that was working fine. */
+  await page.evaluate(() => {
+    window.recordAtlas.map.setView([45.3, 14.0], 7, { animate: false });
+  });
   await page.waitForTimeout(900);
   const s = await state(page);
   expect(s.clustered).toBe(false);

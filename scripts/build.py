@@ -404,6 +404,57 @@ def main():
     providers = json.load(open("data/providers.json"))
     paccess = {p["id"]: p["access"] for p in providers["providers"]}
 
+    # ---- THE COVERAGE CLAIMS INHERIT THEIR HOLDER'S ACCESS CLASS ----
+    # Two different things are called a collection in this build, and only one
+    # of them carried an access class.
+    #
+    #   A PLACE'S OWN collections, written by the harvesters into
+    #   data/places.json, already carry `provider` and `access` — familysearch
+    #   (account), dapa (onsite), antenati (free), beweb (catalogue). Those are
+    #   what colour a dot, and they were never broken.
+    #
+    #   THE COVERAGE CLAIMS in data/collections.json — «Italy, Napoli, Civil
+    #   Registration, 1809-1936» reaching a town it does not stand in — carried
+    #   no access at all, so the fallback below had to GUESS «account» for every
+    #   division that had nothing of its own.
+    #
+    # They carry no provider id, only a url, so the join is by host, and it is
+    # total: 3,504 of 3,504 match a provider. Where two providers share a host
+    # the most open class wins, because the question a colour answers is «can a
+    # reader get at this», and the answer is yes if any route is open.
+    #
+    # This replaces a guess with a derived fact. It does not change a single
+    # colour today, because every coverage claim in the file is FamilySearch's
+    # and «account» is what the guess already said — the point is that it stops
+    # being a coincidence, and that the next provider to publish coverage claims
+    # gets its own class instead of FamilySearch's.
+    #
+    # Derived here rather than written into data/collections.json, so that
+    # resurveying a provider recolours its ground on the next build instead of
+    # leaving a stale class behind in a second file.
+    def _host(u):
+        m = re.match(r"^[a-z]+://([^/?#]+)", (u or "").strip().lower())
+        h = (m.group(1) if m else "").split(":")[0]
+        return h[4:] if h.startswith("www.") else h
+    _hacc = {}
+    for _p in providers["providers"]:
+        _h = _host(_p.get("url"))
+        if not _h:
+            continue
+        _a = _p.get("access")
+        if _a not in RANK:
+            continue
+        if _h not in _hacc or RANK.index(_a) < RANK.index(_hacc[_h]):
+            _hacc[_h] = _a
+    _stamped = 0
+    for _c in FS:
+        _a = _hacc.get(_host(_c.get("url")))
+        if _a:
+            _c["access"] = _a
+            _stamped += 1
+    print(f"collection access: {_stamped:,} of {len(FS):,} stamped from their "
+          f"provider, {len(_hacc):,} hosts")
+
     os.makedirs(OUT, exist_ok=True)
     pdir = os.path.join(OUT, "p")
     shutil.rmtree(pdir, ignore_errors=True)
@@ -782,8 +833,15 @@ def main():
         if not cs:
             near = [c for rank, _, _, c, _, _ in hits if rank <= 2]  # on this place's own chain
             if near:
-                acc = min((c.get("access") or "account" for c in near),
-                          key=lambda a: RANK.index(a) if a in RANK else 99)
+                # NOT `or "account"`. That default was written when no
+                # collection carried an access class at all, so it was the
+                # only way to avoid colouring 1,978 divisions grey — but it
+                # GUESSED, and it guessed the same thing for every one of
+                # them. Now that a coverage claim inherits its provider's
+                # class the real value is there, so take it and nothing else, and
+                # let an unknown stay the honest grey like everywhere else.
+                acc = min((c["access"] for c in near if c.get("access") in RANK),
+                          key=RANK.index, default="unsurveyed")
                 by_reach = len(near)
 
         # EVERY BYTE HERE IS FETCHED BY EVERY VISITOR, so the index carries

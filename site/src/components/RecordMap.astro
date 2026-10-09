@@ -5214,6 +5214,28 @@ window.addEventListener("load", async function () {
        still be set from the search before it. */
     var pterm = term;
     if (!exact && qPlace && qName && fold(term).indexOf(qPlace) > -1) pterm = qPlace;
+    var hits = await gazetteer(pterm);
+    if (stale()) return;
+    /* AND WHEN THE MAP COULD NOT SPLIT IT, SPLIT IT HERE. The guard above
+       needs qPlace, and splitQuery() sets qPlace by searching the LOADED
+       MARKERS — so on a cold load, before the viewport cells have arrived,
+       it cannot split anything and the whole string reaches this function.
+       That is the case that was failing: the map had no Gračišće yet, so the
+       panel asked the gazetteer for «blazevic gracisce» and got nothing.
+       Do the split against the gazetteer instead of the markers: try the
+       trailing words, longest tail first, and keep the first that matches.
+       Only when the whole string matched nothing, so a real place whose name
+       happens to contain a space is still found whole. */
+    if (!exact && !hits.length) {
+      var pw = pterm.split(/\s+/).filter(Boolean);
+      for (var wi = 1; wi < pw.length; wi++) {
+        var tail = pw.slice(wi).join(" ");
+        if (tail.length < 3) continue;
+        var th = await gazetteer(tail);
+        if (stale()) return;
+        if (th.length) { hits = th; pterm = tail; break; }
+      }
+    }
     var f = fold(pterm);
     var iso = Object.keys(CNAME).filter(function (k) {
       return wordHit(fold(CNAME[k]), f) || k.toLowerCase() === f;
@@ -5223,7 +5245,6 @@ window.addEventListener("load", async function () {
       if (p.at && wordHit(fold(p.at.place), f)) return true;
       return wordHit(fold(p.name), f);
     });
-    var hits = await gazetteer(pterm);
     var names = await surnames(term);
     /* PICKING «Lerena» SHOULD NOT ANSWER WITH LERENARD. David, on the new
        dropdown: «why if i now have "smart" search and i select the exact named
@@ -5336,15 +5357,25 @@ window.addEventListener("load", async function () {
          the panel says so, and lighting a country on one would put a
          family in Poland because a machine thought two names rhymed. */
       var VARIANT_OK = { curated: 1, grammar: 1, spelling: 1 };
-      var byName = {};
-      names.forEach(function (r) { byName[fold(r.n)] = 1; });
+      /* NOT `byName`, WHICH IS ALREADY TAKEN, AND `var` DOES NOT CARE WHERE YOU
+         WROTE IT. The module keeps a byName of folded place name -> place id, so
+         that a district's parent can be turned into a link. This block used to
+         declare its own `var byName` for the set of spellings — which hoists to
+         the top of elsewhere() and shadows the real one for the WHOLE function.
+         Two consequences, both live: when this block had not run, the district
+         and commune sections threw «Cannot read properties of undefined» and the
+         panel rendered BLANK — reproduced on «Blazevic Gravatai», where the
+         parent is Rio Grande do Sul; and when it HAD run, the parent link was
+         built from a value of 1 and pointed at /place/1/. */
+      var spellSeen = {};
+      names.forEach(function (r) { spellSeen[fold(r.n)] = 1; });
       var extra = [];
       names.forEach(function (r) {
         (r.variants || []).forEach(function (v) {
           if (!VARIANT_OK[v.how]) return;
           var fv = fold(v.n);
-          if (byName[fv]) return;
-          byName[fv] = 1;
+          if (spellSeen[fv]) return;
+          spellSeen[fv] = 1;
           extra.push(fv);
         });
       });

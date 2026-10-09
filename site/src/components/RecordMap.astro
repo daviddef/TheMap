@@ -2526,6 +2526,160 @@ window.addEventListener("load", async function () {
      Clamped at both ends. Under 4 km the ring is smaller than the village and
      says nothing; over 25 it stops being a neighbourhood and becomes a
      county, and the reader should be looking at the region band by then. */
+  /* ---- WHO CAME, WHO LEFT, AND WHO TOOK THE GROUND ---------------------
+     David: «can we animate a toggleable animation of "migratory paths" and
+     "conquerers" showing ins and outs?»
+
+     The data was already written and nobody had drawn it. Every era card in
+     the flags atlas carries a `migro-row` of tags in exactly that vocabulary
+     — «Occupied by: Soviet Union (1979–1989)», «Conquered by: Mongol Empire
+     (1220s)», «Emigration: mass flight after 2021 Taliban takeover» — 1,250
+     of them. scripts/derive-era-moves.py turns them into 976 movements with
+     a subject, a direction, a span of years and, where the other party is a
+     country this map draws, a second end.
+
+     TWO LAYERS, BECAUSE ONLY A THIRD OF THE ARROWS HAVE TWO ENDS. 281 of the
+     976 name a counterpart that is a country here; the other 695 are an
+     empire, a caliphate or a wave of refugees — «Arab Caliphate (7th–8th
+     c.)», «enslaved Africans», «Indian indentured labourers». Those are real
+     history and they are not line segments. They are drawn as a stub leaving
+     or entering the country's own anchor, labelled with what the page
+     actually said. Drawing only the resolvable third would quietly imply the
+     Mongols never came. */
+  var moveLayer = L.layerGroup();
+  var MOVES = null, movesWanted = false;
+
+  /* THE MAP RENDERS TO CANVAS — `preferCanvas: true` — so a `className` on a
+     polyline is silently dropped and there is no DOM node to style or to test
+     against. Everything these arcs look like has to be said here, in options,
+     and anything checking them has to ask the layer rather than the document:
+     moveLayer._drawn is the count, which is how this was proved to work when
+     querySelectorAll('.ra-move') kept returning nothing. */
+  var MOVE_COLOUR = { conquest: "#B3442E", occupation: "#C9792B",
+                      migration: "#2E6F8E" };
+
+  var movesFetch = null;
+  function loadMoves() {
+    if (MOVES || MOVES === false) return Promise.resolve();
+    /* THE GUARD ABOVE ONLY CATCHES A LOAD THAT HAS FINISHED. drawMoves() runs
+       on every layer toggle and every year tick, so switching the layer on
+       fired five fetches of a 155 KB file before the first one came back.
+       Hold the promise, not just the result. */
+    if (movesFetch) return movesFetch;
+    movesFetch = fetch(BASE + "era-moves.json")
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) { MOVES = d || false; })
+      .catch(function () { MOVES = false; });
+    return movesFetch;
+  }
+
+  /* A STRAIGHT LINE BETWEEN TWO COUNTRIES IS UNREADABLE ONCE THERE ARE TEN OF
+     THEM: they cross, they overlap, and nothing says which way any of them
+     points. Bowing each one to the left of its own direction separates the
+     pair — an arrival and a departure between the same two countries no
+     longer sit on top of each other — and gives the eye something to follow. */
+  function arcPoints(a, b) {
+    var lat1 = a[0], lon1 = a[1], lat2 = b[0], lon2 = b[1];
+    var dx = lon2 - lon1, dy = lat2 - lat1;
+    var mx = (lon1 + lon2) / 2, my = (lat1 + lat2) / 2;
+    var bow = 0.18;
+    var cx = mx - dy * bow, cy = my + dx * bow;
+    var pts = [];
+    for (var i = 0; i <= 16; i++) {
+      var t = i / 16, u = 1 - t;
+      pts.push([u * u * lat1 + 2 * u * t * cy + t * t * lat2,
+                u * u * lon1 + 2 * u * t * cx + t * t * lon2]);
+    }
+    return pts;
+  }
+
+  function moveSpan(m) {
+    var f = m.f;
+    var t = (m.t === null || m.t === undefined)
+      ? (m.present ? 2026 : f)
+      : m.t;
+    return [Math.min(f, t), Math.max(f, t)];
+  }
+
+  function drawMoves() {
+    moveLayer.clearLayers();
+    var wantC = !!on.conquest, wantM = !!on.migration;
+    movesWanted = wantC || wantM;
+    if (!movesWanted) return;
+    if (!MOVES) { loadMoves().then(function () { if (movesWanted) drawMoves(); }); return; }
+    if (MOVES === false) return;
+    /* WITHOUT A YEAR THIS LAYER IS 976 ARROWS AT ONCE, which is a smear and
+       not an answer. The year control is what makes it a history rather than
+       a diagram, so switching the layer on switches the years on too — the
+       same thing the play button already does. */
+    /* DEFENSIVE, BECAUSE THIS RUNS BEFORE THE YEAR CONTROL EXISTS. syncLayers()
+       is called during setup and `yon`, `year` and `year2` are declared
+       further down the file — hoisted, so they are `undefined` rather than a
+       ReferenceError, which is the quiet kind of broken. If the control is not
+       wired yet there is nothing to draw against and the next yearUI() will
+       call this again anyway. */
+    if (typeof yon === "undefined" || !yon) return;
+    if (!yon.checked) { yon.checked = true; readRange(); }
+    var a = year, b = year2;
+    if (typeof a !== "number" || typeof b !== "number") return;
+    var at = MOVES.at || {}, drawn = 0;
+
+    MOVES.moves.forEach(function (m) {
+      var mig = m.v === "migration";
+      if (mig ? !wantM : !wantC) return;
+      /* THE MOVEMENT IS DRAWN IN THE YEARS IT BEGAN, NOT EVERY YEAR IT RAN.
+         Overlap was the first rule and it made a smear: an era running
+         1900–present overlaps every window after it, so the 1900–1960 view
+         carried 445 arrows and the map said nothing. Counted by START instead,
+         the same window holds 260 and the default fifty-year play span has a
+         MEDIAN OF 23 — few enough to read, and the busiest window in five
+         centuries is the 1940s at 170, which is not the measure failing but
+         the decade being like that. The full span is in the tooltip, so
+         nothing is hidden; what changes is that the layer shows history
+         HAPPENING rather than accumulating. */
+      if (m.f < a || m.f > b) return;
+      var subj = at[m.s];
+      if (!subj) return;
+      var col = MOVE_COLOUR[m.v] || MOVE_COLOUR.migration;
+      var sp = moveSpan(m);
+      var when = sp[0] + (sp[1] !== sp[0] ? "\u2013" + sp[1]
+                                          : (m.present ? "\u2013present" : ""));
+      var label = esc((CNAME[m.s] || m.s)) + " \u00b7 " +
+                  esc(m.ot) + ' <span class="ra-who">' + esc(when) + "</span>";
+
+      var other = m.o ? at[m.o] : null;
+      if (other) {
+        /* The arrow points the way the people or the army went: INTO the
+           subject for a conquest or an immigration, OUT of it for an
+           emigration. */
+        var from = m.d === "in" ? other : subj;
+        var to = m.d === "in" ? subj : other;
+        L.polyline(arcPoints(from, to), {
+          color: col, weight: 1.6, opacity: 0.75,
+        }).bindTooltip(label, { sticky: true }).addTo(moveLayer);
+        L.circleMarker(to, { radius: 3.5, color: col, weight: 1,
+                             fillColor: col, fillOpacity: 0.9 })
+          .bindTooltip(label, { sticky: true }).addTo(moveLayer);
+      } else {
+        /* NO SECOND END, SO NO LINE BETWEEN TWO PLACES — a stub at the
+           country itself, pointing out of it or into it, carrying the words
+           the source used. An arrow drawn to a guessed location would be the
+           map inventing a provenance. */
+        var dir = m.d === "in" ? 1 : -1;
+        var tail = [subj[0] + 6 * dir, subj[1] + 6 * dir];
+        L.polyline(arcPoints(m.d === "in" ? tail : subj,
+                             m.d === "in" ? subj : tail), {
+          color: col, weight: 1.2, opacity: 0.5, dashArray: "3,3",
+        }).bindTooltip(label, { sticky: true }).addTo(moveLayer);
+        L.circleMarker(subj, { radius: 2.5, color: col, weight: 1,
+                               fillColor: col, fillOpacity: 0.7 })
+          .bindTooltip(label, { sticky: true }).addTo(moveLayer);
+      }
+      drawn++;
+    });
+    moveLayer._drawn = drawn;
+  }
+
   var hoodLayer = L.layerGroup();
   var HOOD_MIN = 4, HOOD_MAX = 25, HOOD_NEIGHBOURS = 8;
 
@@ -3051,7 +3205,15 @@ window.addEventListener("load", async function () {
     ["wikidata", T("Others"), "loading · unchecked, and not all genealogical", wikiLayer],
     ["cemeteries", T("Cemeteries"), "loading", featLayers.cemeteries],
     ["churches", T("Churches"), "loading", featLayers.churches],
-    ["libraries", T("Libraries"), "loading", featLayers.libraries]
+    ["libraries", T("Libraries"), "loading", featLayers.libraries],
+    /* OFF BY DEFAULT AND DELIBERATELY LAST. These two are a history of the
+       ground rather than a holding of records, and the map's first answer
+       should stay «where is the paper». They also need the year control,
+       which drawMoves() switches on for the reader. */
+    ["conquest", "Conquest", "who took this ground, and when \u00b7 needs a year",
+     moveLayer],
+    ["migration", "Migration", "who came and who left \u00b7 needs a year",
+     moveLayer]
   ];
   var on = {};
   (Q.get("layers") !== null ? Q.get("layers").split(",").filter(Boolean)
@@ -3173,10 +3335,19 @@ window.addEventListener("load", async function () {
          represented by the cluster bubbles instead, and drawClusters owns
          which of the two is on the map. */
       if (l[0] === "shelf") return;
+      /* CONQUEST AND MIGRATION SHARE ONE LAYER GROUP, so neither may decide
+         on its own whether the group is on the map — the second of the pair
+         would remove what the first had just added. drawMoves() owns the
+         contents and the pair owns the membership. */
+      if (l[0] === "conquest" || l[0] === "migration") return;
       var has = map.hasLayer(l[3]);
       if (on[l[0]] && !has) l[3].addTo(map);
       if (!on[l[0]] && has) map.removeLayer(l[3]);
     });
+    var anyMove = !!(on.conquest || on.migration);
+    if (anyMove && !map.hasLayer(moveLayer)) moveLayer.addTo(map);
+    if (!anyMove && map.hasLayer(moveLayer)) map.removeLayer(moveLayer);
+    drawMoves();
     drawClusters(lastVisible);
     var live = LAYERS.filter(function (l) { return on[l[0]]; }).map(function (l) { return l[0]; });
     setQ("layers", live.join(","));
@@ -3400,6 +3571,9 @@ window.addEventListener("load", async function () {
   }
   function yearUI() {
     yin.disabled = yin2.disabled = !year;
+    /* The movements layer is a function of the year, so it follows the
+       scrubber and the play button without either of them knowing it. */
+    if (on.conquest || on.migration) drawMoves();
     /* COLLAPSED UNTIL IT IS DOING SOMETHING. Off, the scrubber was still a
        full-width strip across the foot of the map holding an inert slider
        and the words «any year» — a lot of map given to a control that was

@@ -1661,11 +1661,35 @@ def main():
         if not rings:
             continue
         # Coarse enough to read at world zoom and small enough to fetch: every
-        # third point, and a ring that survives to fewer than four is a rock.
+        # third point for anything with points to spare.
+        #
+        # THINNING USED TO DELETE TWENTY-THREE COUNTRIES. The rule was «every
+        # third point, and a ring that survives to fewer than four is a rock»,
+        # and Natural Earth gives a small territory six to nine points to begin
+        # with — so at step three they came out as two or three and were
+        # dropped whole. Malta, Singapore, Monaco, San Marino, the Vatican,
+        # Nauru, Barbados, Grenada, the Seychelles, Jersey, Guernsey and a
+        # dozen more had geometry in data/countries.json and no shard on the
+        # map. They are not rocks; they are places people come from, and the
+        # flags atlas draws flags for several of them.
+        #
+        # So the step is only taken when there is something to take it from —
+        # 24 points or more, which leaves every large country's output exactly
+        # as it was — and three points is the floor, because three points is a
+        # polygon and four was an arbitrary one.
+        #
+        # AND PRECISION HAS TO FOLLOW SIZE. Two decimal places is about 1.1 km,
+        # which is fine for France and erases the Vatican, whose whole span is
+        # 0.011° — roughly one rounding step. Anything under a degree across
+        # gets four places, about 11 m, and costs a few hundred bytes.
+        span = max(max(p[0] for r in rings for p in r) - min(p[0] for r in rings for p in r),
+                   max(p[1] for r in rings for p in r) - min(p[1] for r in rings for p in r))
+        prec = 2 if span >= 1.0 else 4
         thin = []
         for ring in rings:
-            r = [[round(p[0], 2), round(p[1], 2)] for p in ring[::3]]
-            if len(r) >= 4:
+            step = 3 if len(ring) >= 24 else 1
+            r = [[round(p[0], prec), round(p[1], prec)] for p in ring[::step]]
+            if len(r) >= 3:
                 thin.append(r)
         if not thin:
             continue

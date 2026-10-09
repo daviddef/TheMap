@@ -133,6 +133,40 @@ try {
   TOKENS = fs.readFileSync(path.join(process.cwd(), "public", "atlas-tokens.css"), "utf8");
 } catch { TOKENS = ""; }
 
+/* THE WRAPPER'S OWN TWO RULES, AND WHY THEY ARE HERE RATHER THAN IN A <style>
+   BLOCK ON THE ROUTES. They were, in both routes, identically — and the build
+   gate caught it: «selectors declared in a style block never reach the built
+   CSS — flagpage (declared in site/src/pages/flags/index.astro)». Astro scopes
+   and dedupes two identical blocks into one and attributes it to whichever it
+   saw first, so the index's copy existed in the source and nowhere in the
+   output. Emitting them with the stylesheet they belong to is one source of
+   truth and no scoping to reason about.
+
+   The lifted sheets set their own width on `body`, which they no longer own —
+   Base owns that now — so the measure they were designed for is given back
+   here. And their own footer is hidden, because the site now has a real one
+   underneath and two sign-offs read as a mistake. */
+const WRAPPER = `
+.flagpage{max-width:900px;margin:0 auto;padding:0 16px 48px}
+.flagpage footer{display:none}
+`;
+
+/* AND THE SAME ADDRESSES INSIDE THE SCRIPTS. The index does not write its 210
+   country links as markup — it holds them in a COUNTRIES array and renders
+   them in the browser — so relink(), which only knows href= and src=, left
+   every one of them pointing at the old .html. They still worked, because
+   every old address now has a redirect stub, but that is a bounce on the main
+   way into the flags atlas and the canonical URL never reaches the address
+   bar. Rewritten by exact slug rather than by pattern: the set is known, so
+   nothing else quoted in those scripts can be caught by accident. */
+function relinkScripts(html, all) {
+  for (const slug of all) {
+    html = html.split(`"${slug}.html"`).join(`"${u("/flags/" + slug + "/")}"`)
+               .split(`'${slug}.html'`).join(`'${u("/flags/" + slug + "/")}'`);
+  }
+  return html;
+}
+
 /** Title, stylesheet and body markup for one page, ready to put inside Base. */
 export function page(slug) {
   const raw = fs.readFileSync(path.join(DIR, `${slug}.html`), "utf8");
@@ -151,8 +185,9 @@ export function page(slug) {
     slug,
     title: title || h1 || slug,
     h1,
-    css: scope(TOKENS + "\n" + css, ".flagpage"),
-    html: relink(body.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")),
+    css: scope(TOKENS + "\n" + css, ".flagpage") + WRAPPER,
+    html: relinkScripts(
+      relink(body.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")), slugs()),
     /* The head carried nothing else worth keeping: one font link, two metas
        and the stylesheet. Base supplies all three, better. */
     headLinks: (head.match(/<link[^>]+>/gi) || []).length,

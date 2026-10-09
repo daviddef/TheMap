@@ -78,6 +78,21 @@ def parse_dates(raw):
     _h = t.split("-", 1)
     bce_a = bool(re.search(r"\bBCE?\b", _h[0]))
     bce_b = bool(re.search(r"\bBCE?\b", _h[1])) if len(_h) > 1 else bce_a
+
+    # …EXCEPT WHEN IT IS WRITTEN ONCE, AT THE END, AND GOVERNS BOTH — WHICH IS
+    # HOW ALMOST EVERYBODY WRITES IT. «305 - 30 BCE» is one era entirely before
+    # the common era, and reading the BCE as belonging only to the 30 filed it
+    # as 305 CE to 30 BCE: a span running BACKWARDS by three hundred and
+    # thirty-five years, on forty eras, including the whole of Ancient Egypt.
+    # The tell is arithmetic and needs no vocabulary: BCE years count DOWN, so
+    # a left number LARGER than the right, with BCE on the right and nothing
+    # claiming the left for the common era, is a left that is also BCE.
+    if bce_b and not bce_a and not re.search(r"\b(CE|AD)\b", _h[0]):
+        _a = re.search(YEAR, _h[0])
+        _b = re.search(YEAR, _h[1]) if len(_h) > 1 else None
+        if _a and _b and int(_a.group(1)) > int(_b.group(1)):
+            bce_a = True
+
     bce = bce_a and bce_b
 
     # A century is a range, not a year, and this refuses to flatten one.

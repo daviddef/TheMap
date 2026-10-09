@@ -17,14 +17,3 @@ const f = page(slug);
   <style is:inline set:html={f.css}></style>
   <div class="flagpage" set:html={f.html}></div>
 </Base>
-
-<style>
-  /* The lifted stylesheet sets its own width on `body`, which it no longer
-     owns — Base owns that now. Give it back the measure it was designed for
-     and nothing else, so the page reads the way it always did inside a shell
-     it has never had. */
-  .flagpage { max-width: 900px; margin: 0 auto; padding: 0 16px 48px; }
-  /* Its footer was the page's own sign-off and the site now has a real one
-     underneath; keeping both reads as a mistake. */
-  .flagpage :global(footer) { display: none; }
-</style>

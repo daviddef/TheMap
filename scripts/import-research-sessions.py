@@ -220,6 +220,11 @@ LABELLED_RANGE = re.compile(
 BARE_RANGE = re.compile(
     r"(\d{1,4})\s*[-\u2013\u2014]\s*(\d{1,4})\b(?!\s*(?:of\s+)?" + MONTH + ")", re.I)
 SINGLE_PAGE = re.compile(r"(?:" + PAGE_LABEL + r"\s*)?(\d{1,4})", re.I)
+# A FRAME ID: Defranceski's Slovenian/Croatian scans are cited «M01069090, 091,
+# 093, 095» — one full id and then bare suffixes of it. 091 there is frame
+# M01069091, not page 91, and the 19 rows written this way were each recorded
+# as scattered pages read of whatever volume the row sat on.
+FRAME_ID = re.compile(r"\bM\d{5,}\b")
 # a year range lying around in the prose, reported when it is refused
 YEAR_RANGE = re.compile(r"\b(1[4-9]\d\d|20\d\d|2100)\s*[-\u2013\u2014]\s*(\d{2,4})\b")
 
@@ -298,7 +303,10 @@ def parse_pages(text):
         reader's own note, so «1-400 (item 2, finished)» is 1-400;
       * neither end is a year (1400-2100) and it is not a date («5-6 October»);
       * the segment (what lies between semicolons) does not say the pages were
-        only sampled, glanced at, looked at or had their headers checked.
+        only sampled, glanced at, looked at or had their headers checked;
+      * it is not a frame id or the bare tail of one: after «M01069090» in a
+        list, «091, 093» are frames M01069091 and M01069093, and a number
+        written with a leading zero («092») is never a page.
     A lone page counts only as a bare number («186, 221»): «125 (left, page 12)»
     is one half of an image and is left out rather than rounded up to all of it.
     Numbers inside brackets are the item's description, never separate items.
@@ -311,15 +319,22 @@ def parse_pages(text):
         seg = seg.strip()
         if not seg:
             continue
-        found, years = [], []
+        found, years, frames = [], [], []
+        in_frames = False
         for part in split_top(seg, ","):
             part = part.strip()
             if not part:
                 continue
+            # Brackets hold the item's description; a frame id there does not
+            # make the next item a frame.
+            if FRAME_ID.search(re.sub(r"\([^)]*\)", "", part)):
+                in_frames = True
             lead = LABELLED_RANGE.match(part) or BARE_RANGE.match(part)
             if lead:
                 a, b = int(lead.group(1)), int(lead.group(2))
-                if _yearish(a, b):
+                if in_frames or (len(lead.group(1)) > 1 and lead.group(1)[0] == "0"):
+                    frames.append(part.split()[0])
+                elif _yearish(a, b):
                     years.append(lead.group(0))
                 elif 0 < a <= b <= 9999:
                     found.append([a, b])
@@ -327,7 +342,9 @@ def parse_pages(text):
             one = SINGLE_PAGE.fullmatch(part)
             if one:
                 n = int(one.group(1))
-                if _yearish(n):
+                if in_frames or (len(one.group(1)) > 1 and one.group(1)[0] == "0"):
+                    frames.append(part.split()[0])
+                elif _yearish(n):
                     years.append(part)
                 elif 0 < n <= 9999:
                     found.append([n, n])
@@ -335,6 +352,8 @@ def parse_pages(text):
         for ym in YEAR_RANGE.finditer(seg):
             if ym.group(0) not in years:
                 years.append(ym.group(0))
+        if frames:
+            refused.append((seg[:140], "frame ids, not page numbers: " + ", ".join(frames[:6])))
         said = NOT_READ.search(seg)
         if said:
             if found:
@@ -1044,8 +1063,12 @@ def main():
     # range or a «sampled» list that used to be recorded as pages read is now
     # left out, and the person who wrote it should be able to see that it was.
     nrows = len({(x["archive"], x["src"], x["segment"]) for x in page_refusals})
+    why_counts = {}
+    for x in page_refusals:
+        k = x["why"].split(":")[0]
+        why_counts[k] = why_counts.get(k, 0) + 1
     print(f"    pages text refused        {nrows:,} segments  "
-          f"(year-like numbers or not counted as read)")
+          f"({', '.join(f'{v} {k}' for k, v in sorted(why_counts.items()))})")
     for x in page_refusals[:40]:
         print(f"      {x['archive'].split()[0]:<10} {x['why'][:60]}\n"
               f"        pages: {x['segment'][:110]}")

@@ -96,6 +96,29 @@ check("opened and not read", pages("images 75, 76 and 77 opened and NOT read")[0
 # One segment's «sampled» must not take the honest segment beside it.
 check("other segments survive", pages("1-40; 41-90 sampled")[0], [[1, 40]])
 
+# --- MUST REFUSE: frame ids written as bare suffixes ------------------------
+# Defranceski's DAPA scans: «M01069090, 091, 093» is frames, not pages 91, 93.
+for text in (
+    "M01069090, 091, 093, 095, 098 \u2014 five of the nine frames in the range; "
+    "092, 094, 096 and 097 not yet opened",
+    "M01069020, 21, 22, 23, 25, 26, 27, 29, 31, 33, 36 \u2014 11 of the 17 frames in the range",
+    "M01069143, 144, 145, 146, 147 \u2014 five frames, read as overlapping full-page halves",
+    "M01069024, 028, 030, 032, 035",
+    "M01069054, 57-61, 64",
+    "\u26a0 UPPER PART OF EACH PAGE ONLY \u2014 the crop stopped at 62% of page "
+    "height. M01069094, 096, 097, 099, 100 \u2014 nine frames read today",
+):
+    check("frame list: " + text[:30], pages(text)[0], None)
+check("frame list is reported",
+      [why[:30] for _, why in pages("M01069143, 144, 145")[1]],
+      ["frame ids, not page numbers: 144"[:30]])
+check("zero-padded is not a page", pages("092, 094")[0], None)
+# A frame id in an item's own brackets does not turn its neighbours into frames,
+# and pages written before a frame list are still pages.
+check("pages beside a frame in brackets",
+      pages("12-14, 20-22 (M01069090 is the index), 30")[0], [[12, 14], [20, 22], [30, 30]])
+check("pages before a frame list", pages("79-85, M01069090, 091")[0], [[79, 85]])
+
 # --- the whole parser against the live archives -----------------------------
 # Nothing a row's `pages` field yields may contain a year, whatever the prose.
 live = 0

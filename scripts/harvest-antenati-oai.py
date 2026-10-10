@@ -109,28 +109,71 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--resume", action="store_true")
     ap.add_argument("--max-pages", type=int, default=100000)
+    # THE UNRESTRICTED LIST DOES NOT ANSWER ANY MORE, AND A DATE WINDOW DOES.
+    # Measured 9 October: ListRecords and ListIdentifiers with no from/until
+    # both return 504 Gateway Timeout at ~61 seconds, every time — and so does
+    # a resume with September's token, which is why this stopped at 6,000 of
+    # 464,770 and why retrying it unchanged would stop again at once. Only the
+    # trivial verbs answer: Identify in 1.4s, ListSets in 1.5s.
+    #
+    # Adding from/until brings the query inside the gateway's limit. Probing
+    # year by year, EVERY ONE of the 464,770 records is datestamped 2015 —
+    # 2013 and 2017 through 2026 all return noRecordsMatch — so the default
+    # window is that year and nothing is excluded by using it. With it, a page
+    # returns 200 in ~45s carrying 50 records and completeListSize=464770.
+    ap.add_argument("--from", dest="frm", default="2015-01-01")
+    ap.add_argument("--until", default="2015-12-31")
+    ap.add_argument("--fresh", action="store_true",
+                    help="ignore the saved resumption token and start the window again")
     a = ap.parse_args()
 
+    window = ("&from=" + a.frm + "&until=" + a.until) if a.frm and a.until else ""
     vols, token, pages, seen = {}, None, 0, 0
     if a.resume and os.path.exists(OUT):
         old = json.load(open(OUT))
         vols = {k: v for k, v in old.get("volumes", {}).items()}
-        token = old.get("resumptionToken")
+        token = None if a.fresh else old.get("resumptionToken")
         seen = old.get("counts", {}).get("images", 0)
         print(f"resuming: {len(vols):,} volumes, {seen:,} images already seen")
+        if token:
+            print("  trying September's token first; --fresh skips it")
 
     while pages < a.max_pages:
         if token:
             body = ask("verb=ListRecords&resumptionToken=" + token)
         else:
-            body = ask("verb=ListRecords&metadataPrefix=pico&set=pico_m-ANTENATI")
+            body = ask("verb=ListRecords&metadataPrefix=pico"
+                       "&set=pico_m-ANTENATI" + window)
         pages += 1
         if not body:
+            # A DEAD TOKEN HERE LOOKS LIKE A DEAD SERVER. The fallback below
+            # waits for OAI to say «badResumptionToken», and this repository
+            # does not say it — a stale token gets the same 504 Gateway
+            # Timeout as everything else, so the first attempt reported «no
+            # answer — stopping» about a service that answers Identify in
+            # 1.4 seconds. Silence while holding a token is treated as the
+            # token being gone, once, before believing it of the server.
+            if token:
+                print("  no answer on the saved token — dropping it and "
+                      "re-entering by the window", flush=True)
+                token = None
+                continue
             print("  no answer — stopping and keeping what is here", flush=True)
             break
         err = re.search(r"<error[^>]*>([^<]*)", body)
         if err:
-            print(f"  OAI says: {err.group(1)}", flush=True)
+            code = (re.search(r'code="([^"]*)"', body) or [None, ""])[1]
+            print(f"  OAI says: {err.group(1)} [{code}]", flush=True)
+            # A RESUMPTION TOKEN IS NOT A BOOKMARK, IT IS A SESSION. September's
+            # was three weeks old; the server is entitled to have forgotten it,
+            # and ending the run there would have reported «stopped» for a
+            # repository that was perfectly willing to start again. Drop the
+            # token and re-enter by the window, once.
+            if code == "badResumptionToken" and token:
+                print("  the token has expired — restarting from the window",
+                      flush=True)
+                token = None
+                continue
             token = None
             break
 

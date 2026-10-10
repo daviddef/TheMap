@@ -11143,6 +11143,27 @@
    "wikidata": null,
    "triage": "seen-in-use",
    "triageNote": "Added from the Booyzen archive on a first-hand transaction record, not a survey. ACCESS CLASS STILL NEEDS A PERSON: what an ordinary visitor pays, and whether an account is required to request at all, were not verified - the evidence is one family's receipts, and having used a site is not a survey."
+  },
+  {
+   "id": "de-zlb-berlin",
+   "name": "Zentral- und Landesbibliothek Berlin",
+   "url": "https://digital.zlb.de/",
+   "kind": "library",
+   "access": "free",
+   "countries": [
+    "DE"
+   ],
+   "what": "The Berlin central and regional library's digital collections, and for genealogy the thing that matters is THE BERLINER ADRESSBUCH, 1799 to 1943, complete, free, no account. A Berlin address book gives a householder's FORENAME, TRADE, POSTAL DISTRICT, STREET AND HOUSE NUMBER, year by year, so a household can be followed between censuses and a trade watched as it changes — which in the Berlin volumes of 1938 to 1943 is not a metaphor. Three sections per volume: the Namenteil (by surname), the Straßenteil (by street, listing a house's owner, manager and every tenant), and a trades section. THE POST-WAR BOOKS ARE HERE UNDER DIFFERENT IDENTIFIERS and are set in Antiqua, so their text layer simply works; the pre-1944 books are FRAKTUR and theirs does not. HOW TO USE IT WITHOUT AN ACCOUNT: a Solr query endpoint at /viewer/api/v1/index/query takes FULLTEXT: and PI_TOPSTRUCT: and returns page order numbers; /viewer/api/v1/records/<PI>/pages/<order>/text/ returns a page's OCR as IIIF annotations; and /viewer/content/<PI>/<width>/0/<8-digit>.jpg returns the page image at any width. The ALTO XML endpoint is permission-controlled and returns 403 for these volumes, so word coordinates are not available and a run must be found by cropping. FOUR THINGS MEASURED IN USE, ALL OF THEM ABOUT THE FRAKTUR TEXT LAYER. (1) SEARCHING FOR A RARE SURNAME IS NOT AN INSTRUMENT: the headword is routinely mangled past matching, and in one volume a street name came out as “Diessenbachsir”, so the year was found only by reading the run in place. (2) DIGITS ARE WORSE THAN LETTERS: a Fraktur 5 read as 6 and a 4 read as 1 were both caught only at the image, and a house number taken from the text layer should not be trusted. (3) THE LONG S is rendered as f or j, which is a help as well as a hindrance — it proves a street name that no spelling without an s could produce. (4) THE PER-PAGE OCR CAN INTERLEAVE TWO ADJACENT COLUMNS LINE BY LINE WITHOUT SAYING SO, silently attributing one surname's entries to its neighbour; the pages are four columns wide, a run can split across a column break with the headword repeated at the top of the next one, and an alphabetical check at the image is the only way to catch either.",
+   "deepLink": "https://digital.zlb.de/viewer/api/v1/index/query",
+   "checked": "2026-10-11",
+   "at": {
+    "lat": 52.496486,
+    "lon": 13.392397,
+    "place": "DE"
+   },
+   "wikidata": "Q189928",
+   "triage": "seen-in-use",
+   "triageNote": "Added from the Luwinski family archive, which has worked the Berliner Adressbuch volumes of 1925-1943 and 1955-1980 over three weeks. The access class IS surveyed: the images and the OCR endpoints were used repeatedly with no account and no fee."
   }
  ]
 }

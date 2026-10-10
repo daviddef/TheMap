@@ -433,10 +433,10 @@
   {
    "n": 54,
    "what": "21,085 place pages share one social card",
-   "state": "next",
+   "state": "done",
    "owner": "this atlas",
-   "since": "2026-09-23",
-   "note": "site/public/og has six images, one per page TYPE, so every place on earth shares a single grey rectangle when it is shared. A card naming the place, its country, its volume count and its shape on a small map would make a shared link legible before it is clicked — and the machinery exists: lib/surname-map.js already composes SVG at build time, and scripts/build-og-images.py already writes PNGs."
+   "since": "2026-10-11",
+   "note": "site/public/og has six images, one per page TYPE, so every place on earth shares a single grey rectangle when it is shared. A card naming the place, its country, its volume count and its shape on a small map would make a shared link legible before it is clicked — and the machinery exists: lib/surname-map.js already composes SVG at build time, and scripts/build-og-images.py already writes PNGs.\n\n**DONE 11 OCTOBER, FOR THE 1,907 PLACES WORTH DRAWING.** `scripts/build-og-images.py` now writes a card per place as well as per type: the place's name sized to fit on one line, its country, how many volumes are on it and the span those volumes themselves declare. It reads `places-full.json` — the same file `place/[id].astro` builds its routes from, so a card can never be drawn for a page that does not exist — and the page reads the card DIRECTORY rather than re-deriving the condition, so a build without Pillow falls back to the generic card instead of pointing `og:image` at a 404.\n\n**NOT ALL 54,043, AND THE ARITHMETIC IS THE REASON.** A card is 26 KB; every place page would be 1.48 GB against the 2.23 GiB of headroom left after 9 October. 1,907 places have a collection reaching them and the rest are pages nobody shares. Those 1,907 cost 49 MB and 47 seconds, generated in CI and gitignored rather than committed — this repository has already paid once for carrying generated binaries.\n\n**NOT DONE: «its shape on a small map».** The outlines in `site/public/c/` are country-level, so the shape would be the country — a cartouche of Italy behind the word Giustimana, which is decoration rather than information. Left out on purpose rather than forgotten."
   },
   {
    "n": 55,

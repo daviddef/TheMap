@@ -1,5 +1,5 @@
 ---
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 /* One page per place — 1,239 of them, and the reason they exist is that until
    now there were six.
 
@@ -32,6 +32,27 @@ export async function getStaticPaths() {
 
 const { place } = Astro.props;
 const PROV = Object.fromEntries(provs.providers.map((p) => [p.id, p]));
+/* THE SOCIAL CARD THIS PLACE ACTUALLY GETS.
+   Worklist row 54: every one of these 54,043 pages shared the same grey
+   rectangle. scripts/build-og-images.py now draws a card per place for the
+   1,907 places a collection reaches — the name, the country, how many volumes
+   and across which years — and leaves the rest on the generic one, because
+   54,043 cards would be 1.48 GB of the 2.23 GiB this site has left.
+
+   READ FROM THE DIRECTORY, NOT INFERRED FROM THE DATA. The condition the
+   generator uses is «this place has collections», and asking the same question
+   here would give the right answer right up until the generator did not run —
+   Pillow is absent on David's machine, where Homebrew's python refuses to
+   install it, and the script says so and skips. Then every page would point
+   og:image at a file that is not there. Listing what was built cannot be wrong
+   about what was built. One readdir for the whole route. */
+let CARDS = new Set();
+try {
+  CARDS = new Set(
+    readdirSync(new URL("../../../public/og/place", import.meta.url))
+      .filter((f) => f.endsWith(".png"))
+      .map((f) => f.slice(0, -4)));
+} catch { /* no cards built: every page falls back to og/place.png */ }
 /* THE NATIONAL SOURCES. A provider's `countries` list was read by the find box
    and the country pages and by nothing else, so the five free Irish national
    sources were invisible on all 2,130 Irish places. Ranked archive-first, then
@@ -141,7 +162,7 @@ const filedName = place.filedUnder
 const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${place.lat},${place.lon},12`);
 ---
 <Base
-  og="place"
+  og={CARDS.has(place.id) ? `place/${place.id}` : "place"}
   jsonld={{
     "@context": "https://schema.org", "@type": "Place",
     name: place.name,

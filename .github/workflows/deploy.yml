@@ -59,6 +59,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      # THE ONE NON-STDLIB PYTHON DEPENDENCY IN THE PIPELINE.
+      # scripts/build-og-images.py draws the social cards — the six generic
+      # ones and, since 11 October, one per place that has collections. It is
+      # the only script here that needs anything installed, and it skips with
+      # a printed warning rather than failing when Pillow is absent, so
+      # WITHOUT THIS STEP THE DEPLOY WOULD STILL GO GREEN and every place page
+      # would quietly fall back to the grey rectangle row 54 was about.
+      - name: Install Pillow, for the social cards
+        run: python3 -m pip install --quiet pillow
       - name: Install
         run: npm ci || npm install
         working-directory: site
@@ -181,6 +190,12 @@ jobs:
           # brought index.json but not its cells would fail the build with a
           # missing-file throw rather than quietly building a smaller atlas.
           # That is the right failure, and this turns it into a rebuild instead.
+          # AND THE PER-PLACE SOCIAL CARDS, which a cache saved before 11
+          # October does not contain at all — the place pages read that
+          # directory to decide which og:image to print, so an empty one is a
+          # silent return to one card for 54,043 pages.
+          [ -n "$(ls site/public/og/place/*.png 2>/dev/null | head -1)" ] \
+            || missing="$missing site/public/og/place/"
           want=$(jq -r '.tail.cells | length // 0' site/public/index.json 2>/dev/null || echo 0)
           have=$(ls site/public/pi/*.json 2>/dev/null | wc -l | tr -d ' ')
           if [ "$want" != "0" ] && [ "$want" != "$have" ]; then

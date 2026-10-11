@@ -368,12 +368,26 @@ def main():
     for _cf in sorted(glob.glob("data/coverage-claims*.json")):
         try:
             _cc = json.load(open(_cf, encoding="utf-8"))
-            FS = FS + _cc["collections"]
-            print(f"coverage-claims   {len(_cc['collections']):>4} claims, "
-                  f"{_cc['counts']['records']:>12,} records  "
-                  f"{_cc['source'][:46]}")
-        except (FileNotFoundError, KeyError) as _e:
-            print(f"  {_cf}: not usable ({_e.__class__.__name__}) — skipped")
+        except (FileNotFoundError, ValueError) as _e:
+            print(f"  {_cf}: not read ({_e.__class__.__name__}) — skipped")
+            continue
+        _rows = _cc.get("collections")
+        if not _rows:
+            print(f"  {_cf}: no collections in it — skipped")
+            continue
+        FS = FS + _rows
+        # NOT `_cc["counts"]["records"]`. A holder that publishes no record
+        # counts has no business being dropped for it, and the first version
+        # of this read that key directly: Rigsarkivet carries parish names and
+        # no counts, so the line raised a KeyError AFTER the claims were
+        # already in FS, and the log said «not usable — skipped» about 139
+        # claims the build was using. A report that contradicts the build is
+        # worse than no report.
+        _n = (_cc.get("counts") or {}).get("records")
+        print(f"coverage-claims   {len(_rows):>4} claims, "
+              + (f"{_n:>12,} records  " if isinstance(_n, int) and _n
+                 else f"{'no counts given':>12}  ")
+              + f"{(_cc.get('source') or _cf)[:46]}")
     # WHAT KIND OF RECORD EACH ONE IS. David asked for a church-records
     # filter — "many people really want to look at church records, do we know
     # which are which" — and nothing here knew. The only structured thing a
@@ -614,12 +628,39 @@ def main():
             continue
         if _h not in _hacc or RANK.index(_a) < RANK.index(_hacc[_h]):
             _hacc[_h] = _a
-    _stamped = 0
+    def _access_for(_u):
+        """The provider's class for a url, falling back up the domain.
+
+        A SUBDOMAIN USED TO INHERIT NOTHING, and that is a whole archive's
+        worth of ground. Rigsarkivet is listed at www.rigsarkivet.dk and its
+        records browse at arkivalieronline.rigsarkivet.dk; matching the host
+        exactly, all 139 Danish claims resolved to no provider, carried no
+        access class, and would have coloured not one of the 811 dots they
+        reach. The claim was right, the provider was right, and the join
+        between them was looking for a string match on a hostname.
+
+        So an unmatched host is tried again against its parent domain, one
+        label at a time. The public-suffix problem is handled by stopping at
+        two labels: «co.uk» can never be reached, because a two-label domain
+        is the last thing tried and only matches a provider that actually
+        declares it.
+        """
+        _h = _host(_u)
+        while _h and _h.count(".") >= 1:
+            if _h in _hacc:
+                return _hacc[_h]
+            _h = _h.split(".", 1)[1]
+        return None
+
+    _stamped, _viaparent = 0, 0
     for _c in FS:
-        _a = _hacc.get(_host(_c.get("url")))
+        _exact = _hacc.get(_host(_c.get("url")))
+        _a = _exact or _access_for(_c.get("url"))
         if _a:
             _c["access"] = _a
             _stamped += 1
+            if not _exact:
+                _viaparent += 1
     print(f"collection access: {_stamped:,} of {len(FS):,} stamped from their "
           f"provider, {len(_hacc):,} hosts")
 

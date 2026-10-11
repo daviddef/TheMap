@@ -384,6 +384,19 @@ try {
       <p class="at-start-more">
         <a href="{HELP}"><span data-i18n>The colour of a dot is what it costs to look</span> &rarr;</a>
       </p>
+      {/* THE THREE LAYERS NOBODY COULD FIND. David: «Conquest and Migration i
+          still cant see it?» They were live and drawing the whole time — and
+          they were the last rows of a ten-item dropdown behind an icon, shut
+          by default, and they draw nothing at all until a year is set. Three
+          conditions, none of them announced. This is the announcement: one
+          line, one link, and the link sets the layers AND the years, because
+          either alone shows an empty map and looks broken. */}
+      <p class="at-start-more at-start-hist">
+        <a class="ra-try-layers"
+           href="?layers=countries,flags,conquest,migration&amp;years=1800,1950"
+           ><span data-i18n>Or watch the ground change hands</span> &rarr;</a>
+        <span data-i18n>the flag flying over every country in a given year, who took it, and who left</span>
+      </p>
       {/* THE THIRD COUNTS LINE IS GONE. David, counting them: «in this one
           area i see 3 different places you talk about volumes» — the masthead
           dek, the filter counter under the search box, and this. And it said
@@ -2583,6 +2596,92 @@ window.addEventListener("load", async function () {
                       migration: "#2E6F8E" };
 
   var movesFetch = null;
+  /* ---- THE FLAG THAT FLEW HERE, IN THE SELECTED YEAR --------------------
+     David, four weeks ago: «is there a way we could start placing every flag
+     on the country shape on the map?» The conquest and migration layers below
+     are the second half of that message and were built first; this is the
+     first half.
+
+     ONE IMAGE PER COUNTRY, AT ITS LABEL ANCHOR. flag-map.json carries, per
+     country, the eras it had a flag for as [from, to, image] and a point to
+     hang it on. For a given year that is a lookup, not a judgement — the
+     spans come from the flags atlas's own era cards, and an era whose page
+     gave no end is closed against the next era's start so it cannot claim
+     centuries another flag plainly held.
+
+     194 COUNTRIES AND NOT 207, deliberately. The thirteen without flags here
+     are the Roman Empire, the Ottoman Empire, the Mongol Empire, the Kingdom
+     of Hawaii and nine more like them: polities with no shape on this map and
+     no code to hang one on. derive-era-moves.py refuses to guess a successor
+     for exactly this reason — the Soviet Union is not Russia to a Latvian —
+     and the same refusal applies to drawing its flag over somebody's ground.
+
+     AN IMAGE, NOT A CANVAS FILL. The map is built with preferCanvas, where a
+     polygon cannot take an SVG pattern, so painting each country's shape with
+     its flag is not available. A flag at the country's anchor is what the map
+     can honestly draw, and a flag is a label anyway. */
+  var FLAGS = null, flagsFetch = null, flagsWanted = false;
+  var flagLayer = L.layerGroup();
+
+  function loadFlags() {
+    if (FLAGS || FLAGS === false) return Promise.resolve();
+    if (flagsFetch) return flagsFetch;
+    flagsFetch = fetch(BASE + "flag-map.json")
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) { FLAGS = d || false; })
+      .catch(function () { FLAGS = false; });
+    return flagsFetch;
+  }
+
+  /* The flag of the year the reader is standing in. The control is a RANGE,
+     and a range has no single flag — so this takes the LATEST year in it,
+     because «records from 1830 to 1918» is a question about ground that ended
+     up Austrian, and the tooltip names the year so the choice is never
+     something the reader has to infer. */
+  function flagAt(rows, y) {
+    /* Rows are sorted by start and their ends are closed by the build, so
+       the answer is the last era that had begun by `y` and had not ended
+       before it. An era with no end is the one still flying. */
+    var best = null;
+    for (var i = 0; i < rows.length; i++) {
+      var r = rows[i];
+      if (r[0] > y) break;
+      if (r[1] === null || r[1] === undefined || r[1] >= y) best = r;
+    }
+    return best;
+  }
+
+  function drawFlags() {
+    flagLayer.clearLayers();
+    flagsWanted = !!on.flags;
+    if (!flagsWanted) return;
+    if (!FLAGS) { loadFlags().then(function () { if (flagsWanted) drawFlags(); }); return; }
+    if (FLAGS === false) return;
+    /* Same bargain as the movement layers: without a year this is 194 flags
+       of no particular date, so switching it on switches the years on too. */
+    if (typeof yon === "undefined" || !yon) return;
+    if (!yon.checked) { yon.checked = true; readRange(); }
+    var y = year2;
+    if (typeof y !== "number") return;
+    var at = FLAGS.at || {}, f = FLAGS.f || {}, drawn = 0;
+    Object.keys(f).forEach(function (cc) {
+      var p = at[cc];
+      if (!p) return;
+      var row = flagAt(f[cc], y);
+      if (!row) return;
+      var name = (CNAME[cc] || cc);
+      var html = '<img src="' + BASE + 'fl/' + row[2] + '.svg" alt="" width="26" height="17" loading="lazy">';
+      L.marker(p, {
+        icon: L.divIcon({ className: "ra-flagpin", html: html,
+                          iconSize: [26, 17], iconAnchor: [13, 9] }),
+        interactive: true, keyboard: false,
+        title: name + " in " + y
+      }).addTo(flagLayer);
+      drawn++;
+    });
+    return drawn;
+  }
+
   function loadMoves() {
     if (MOVES || MOVES === false) return Promise.resolve();
     /* THE GUARD ABOVE ONLY CATCHES A LOAD THAT HAS FINISHED. drawMoves() runs
@@ -3237,7 +3336,9 @@ window.addEventListener("load", async function () {
     ["conquest", "Conquest", "who took this ground, and when \u00b7 needs a year",
      moveLayer],
     ["migration", "Migration", "who came and who left \u00b7 needs a year",
-     moveLayer]
+     moveLayer],
+    ["flags", "Flags", "the flag that flew over each country \u00b7 needs a year",
+     flagLayer]
   ];
   var on = {};
   (Q.get("layers") !== null ? Q.get("layers").split(",").filter(Boolean)
@@ -3364,6 +3465,9 @@ window.addEventListener("load", async function () {
          would remove what the first had just added. drawMoves() owns the
          contents and the pair owns the membership. */
       if (l[0] === "conquest" || l[0] === "migration") return;
+      /* Same bargain as the pair above: drawFlags() owns the contents and
+         clears them, so membership is settled once below rather than here. */
+      if (l[0] === "flags") return;
       var has = map.hasLayer(l[3]);
       if (on[l[0]] && !has) l[3].addTo(map);
       if (!on[l[0]] && has) map.removeLayer(l[3]);
@@ -3372,6 +3476,9 @@ window.addEventListener("load", async function () {
     if (anyMove && !map.hasLayer(moveLayer)) moveLayer.addTo(map);
     if (!anyMove && map.hasLayer(moveLayer)) map.removeLayer(moveLayer);
     drawMoves();
+    if (on.flags && !map.hasLayer(flagLayer)) flagLayer.addTo(map);
+    if (!on.flags && map.hasLayer(flagLayer)) map.removeLayer(flagLayer);
+    drawFlags();
     drawClusters(lastVisible);
     var live = LAYERS.filter(function (l) { return on[l[0]]; }).map(function (l) { return l[0]; });
     setQ("layers", live.join(","));
@@ -3598,6 +3705,7 @@ window.addEventListener("load", async function () {
     /* The movements layer is a function of the year, so it follows the
        scrubber and the play button without either of them knowing it. */
     if (on.conquest || on.migration) drawMoves();
+    if (on.flags) drawFlags();
     /* COLLAPSED UNTIL IT IS DOING SOMETHING. Off, the scrubber was still a
        full-width strip across the foot of the map holding an inert slider
        and the words «any year» — a lot of map given to a control that was
@@ -7298,6 +7406,15 @@ window.addEventListener("load", async function () {
      lower one is inert except for its thumb — pointer-events are off on the
      track and back on for the thumb — so each handle stays grabbable wherever
      the other one is. */
+  /* A FLAG IS A LABEL, so it gets no marker furniture — no shadow, no pin,
+     no background. The thin rule is what stops a white flag (Japan, and the
+     several that are mostly white) from disappearing into the sea. */
+  .at-start-hist span[data-i18n] { display: block; color: var(--ink-3);
+    font-size: 12px; margin-top: 1px; }
+  .ra-flagpin { background: none; border: 0; }
+  .ra-flagpin img { display: block; width: 26px; height: 17px;
+    border: 1px solid rgba(22,34,42,.45); border-radius: 1px;
+    box-shadow: 0 1px 2px rgba(22,34,42,.25); background: var(--bg); }
   .ra-slider { position: relative; flex: 1 1 120px; min-width: 96px; height: 18px;
                display: block; }
   .ra-slider input[type=range] {

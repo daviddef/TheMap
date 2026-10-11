@@ -146,9 +146,54 @@ try {
    Base owns that now — so the measure they were designed for is given back
    here. And their own footer is hidden, because the site now has a real one
    underneath and two sign-offs read as a mistake. */
+/* THE DOOR BACK TO THE MAP, WHICH DID NOT EXIST.
+ *
+ * David: «Conquest and Migration i still cant see it?» — and he was right,
+ * though not because they were broken. Those layers were live and drawing;
+ * they were the last two rows of a ten-item dropdown behind a funnel icon,
+ * collapsed by default, with nothing anywhere saying they existed, and they
+ * draw nothing at all until a year is set. That is not a layer a reader
+ * finds, it is a layer a reader has to be told about.
+ *
+ * The flags pages are exactly the readers who want them: the conquest and
+ * migration arrows are DERIVED FROM THE ERA CARDS ON THESE PAGES, and until
+ * now a page's only links out were the site nav. So each page carries a line
+ * to the map, opened on that country, with the flag and history layers on and
+ * a year range already set — because all three are useless unset.
+ *
+ * The anchor and the country code come from flag-map.json, which the same
+ * script writes that derives the movements, so there is no second copy of the
+ * slug-to-country mapping here. */
+let FLAGMAP = { slug: {}, at: {} };
+try {
+  FLAGMAP = JSON.parse(fs.readFileSync(
+    path.join(process.cwd(), "public", "flag-map.json"), "utf8"));
+} catch { /* not built yet: the line is simply left off */ }
+
+function toTheMap(slug, title) {
+  const cc = (FLAGMAP.slug || {})[slug];
+  const at = cc ? (FLAGMAP.at || {})[cc] : null;
+  const layers = "countries,flags,conquest,migration";
+  const years = "1800,1950";
+  const href = at
+    ? u(`/?layers=${layers}&years=${years}&view=${at[0]},${at[1]},5`)
+    : u(`/?layers=${layers}&years=${years}`);
+  const what = cc
+    ? "See this on the map"
+    : "See the flags, conquests and migrations on the map";
+  return `<p class="flagmaplink"><a href="${href}">${what} &rarr;</a>
+<span>the flag flying in any year, and who took this ground or left it \u2014 drawn from the eras on this page</span></p>`;
+}
+
 const WRAPPER = `
 .flagpage{max-width:900px;margin:0 auto;padding:0 16px 48px}
 .flagpage footer{display:none}
+.flagpage .flagmaplink{margin:0 0 22px;padding:10px 14px;border:1px solid var(--rule);
+  border-left:3px solid var(--accent);border-radius:3px;background:var(--panel);
+  font-family:var(--sans);font-size:13.5px;line-height:1.5}
+.flagpage .flagmaplink a{font-weight:600;text-decoration:none}
+.flagpage .flagmaplink a:hover{text-decoration:underline}
+.flagpage .flagmaplink span{display:block;color:var(--ink-3);font-size:12px;margin-top:2px}
 `;
 
 /* AND THE SAME ADDRESSES INSIDE THE SCRIPTS. The index does not write its 210
@@ -186,7 +231,9 @@ export function page(slug) {
     title: title || h1 || slug,
     h1,
     css: scope(TOKENS + "\n" + css, ".flagpage") + WRAPPER,
-    html: relinkScripts(
+    /* The link to the map goes FIRST, above the page's own <h1>, because it
+       is the one thing on here a reader cannot get to any other way. */
+    html: toTheMap(slug, title) + relinkScripts(
       relink(body.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")), slugs()),
     /* The head carried nothing else worth keeping: one font link, two metas
        and the stylesheet. Base supplies all three, better. */

@@ -50,6 +50,8 @@ INDEX = "data/flag-index.json"
 COUNTRIES = "data/countries.json"
 FLAGSJS = "site/src/lib/flags.js"
 OUT = "site/public/era-moves.json"
+ART = "data/era-flags.json"
+FLAGOUT = "site/public/flag-map.json"
 
 # The four things the map can draw, and the words the pages use for them. The
 # verbs are kept apart from the direction because a reader toggling «who took
@@ -220,6 +222,105 @@ def main():
         "moves": moves,
     }
     out["counts"]["points"] = len(at)
+
+    # ---- THE FLAG THAT FLEW HERE, FOR EVERY COUNTRY AND EVERY YEAR --------
+    #
+    # David asked for two things and only one was built: «is there a way we
+    # could start placing every flag on the country shape on the map? and then
+    # secondly can we animate a toggleable animation of migratory paths and
+    # conquerers». The animation is the rest of this file. This is the first
+    # half, four weeks late.
+    #
+    # It is cheap because the work was already done and read by one table.
+    # data/era-flags.json holds the art for all 210 countries — 1,454 images,
+    # 0.6 MB in total, averaging 0.4 KB, because they are small flat SVGs —
+    # and build.py was writing out only the 34 that regions.json names. The
+    # eras already carry `from` and `to`, so «which flag in 1848» is a lookup
+    # rather than a judgement.
+    #
+    # ANCHORS FOR EVERY COUNTRY, NOT ONLY THE ONES A MOVEMENT TOUCHED. The
+    # `at` table above is filtered to the countries an arrow reaches; a flag
+    # layer wants all of them, so this builds its own from the same rings.
+    # Same caveat as there: it is the midpoint of a bounding box, a label
+    # anchor rather than a centroid, which for Chile or Norway sits in the sea.
+    # A flag is a label, so that is the right place for it.
+    art = {}
+    try:
+        art = json.load(open(ART, encoding="utf-8"))["art"]
+    except (FileNotFoundError, KeyError):
+        print("  no data/era-flags.json — the flag layer will have nothing to draw")
+
+    fat = {}
+    for cc, v in countries.items():
+        rings = v.get("rings") or []
+        if not rings:
+            continue
+        lons = [p[0] for r in rings for p in r]
+        lats = [p[1] for r in rings for p in r]
+        fat[cc] = [round((min(lats) + max(lats)) / 2, 3),
+                   round((min(lons) + max(lons)) / 2, 3)]
+
+    flags, skipped_noimg, skipped_nocc = {}, 0, 0
+    for e in eras:
+        slug, eid = e.get("slug"), e.get("id")
+        if not (slug and eid):
+            continue
+        if eid not in (art.get(slug) or {}):
+            skipped_noimg += 1
+            continue
+        cc = slug2cc.get(slug)
+        if not cc or cc not in fat:
+            skipped_nocc += 1
+            continue
+        frm = e.get("from")
+        if not frm:
+            continue
+        # `to` absent and `present` set means «still flying»; absent and not
+        # present means the page gave a start and no end, which is still a
+        # usable span — it runs until the next era begins, and sorting below
+        # is what closes it.
+        flags.setdefault(cc, []).append([frm, e.get("to"), slug + "--" + eid])
+    for cc, rows in flags.items():
+        rows.sort(key=lambda r: r[0])
+        # CLOSE EVERY OPEN SPAN AGAINST THE NEXT ONE, so the client's lookup
+        # is «the last era that had started by this year» and never has to
+        # guess. An era left open would otherwise claim every year after it,
+        # including the centuries another flag plainly held.
+        for i, r in enumerate(rows):
+            if r[1] is None and i + 1 < len(rows):
+                r[1] = rows[i + 1][0] - 1
+
+    fout = {
+        "note": ("One row per era per country: [from, to, image]. `image` is "
+                 "the basename of an SVG in /fl/, so a year resolves to a "
+                 "flag with one lookup and one fetch. `at` is a label anchor "
+                 "per country — the midpoint of its bounding box, which for "
+                 "Chile sits in the sea and is the right place for a label. "
+                 "An era whose page gave no end year is closed against the "
+                 "next era's start, so a span never claims centuries another "
+                 "flag plainly held; the last era of a country stays open."),
+        "source": "data/flag-eras.json and data/era-flags.json, both extracted from the flags atlas pages",
+        "generatedBy": "scripts/derive-era-moves.py",
+        "generated": time.strftime("%Y-%m-%d"),
+        "counts": {"countries": len(flags),
+                   "eras": sum(len(v) for v in flags.values()),
+                   "noImage": skipped_noimg,
+                   "notACountryThisMapDraws": skipped_nocc},
+        "at": {k: v for k, v in fat.items() if k in flags},
+        "f": flags,
+        # WHICH FLAGS PAGE IS WHICH COUNTRY, so the pages can link to the map
+        # and the map back to the pages. The resolution is done here because
+        # it is done here already, for the arrows; a second copy in Astro
+        # would be a third place this mapping lives.
+        "slug": {sl: cc for sl, cc in slug2cc.items() if cc in flags},
+    }
+    json.dump(fout, open(FLAGOUT, "w"), ensure_ascii=False, separators=(",", ":"))
+    fc = fout["counts"]
+    print(f"{FLAGOUT}: {fc['eras']:,} flag eras across {fc['countries']} countries"
+          f" ({os.path.getsize(FLAGOUT)/1024:.0f} KB)")
+    print(f"  eras with no image: {fc['noImage']:,}; eras whose country this "
+          f"map does not draw: {fc['notACountryThisMapDraws']:,}")
+
     json.dump(out, open(OUT, "w"), ensure_ascii=False, separators=(",", ":"))
     c = out["counts"]
     print(f"{OUT}: {c['moves']:,} movements across {c['countries']} countries")

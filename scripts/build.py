@@ -1349,6 +1349,7 @@ def main():
     # written … the «who governed» table will show no flags» and carried on.
     # A table shipping without its flags whenever the cache missed, quietly,
     # for as long as this has existed. data/ is tracked and always there.
+    from html.entities import html5 as _h5
     try:
         with open("data/flag-eras.json", encoding="utf-8") as fh:
             _fe = json.load(fh)["eras"]
@@ -1370,25 +1371,97 @@ def main():
             "TR": "turkey", "UA": "ukraine", "US": "united-states",
             "ZA": "south-africa",
         }
+        # EVERY COUNTRY, NOT THE THIRTY-FOUR THE REGIMES NAME.
+        # This used to write only the slugs reachable from regions.json, which
+        # is right for the «who governed» table — that table only ever shows
+        # those. It is wrong for the map: the Flags layer draws the flag that
+        # flew over EVERY country in the selected year, and 34 of 210 is not a
+        # layer, it is a scattering. The whole set is 1,454 images and 0.6 MB,
+        # averaging 0.4 KB, because they are small flat SVGs; withholding five
+        # sixths of them saved half a megabyte and cost the feature.
+        #
+        # `_want` is still computed, because the table's own reason for
+        # existing has not changed — it is simply no longer what limits the
+        # files written.
         _want = set()
         for _r in _rg.values():
             for _cc in (_r.get("archives") or []):
                 _b = _SLUG.get(str(_cc).upper())
                 if _b:
                     _want.add(_b + "-flags")
+        _all = sorted(_fa)
         _fl = os.path.join(OUT, "fl")
         shutil.rmtree(_fl, ignore_errors=True)
         os.makedirs(_fl)
         _n = _bytes = 0
-        for _slug in sorted(_want):
+        # AN SVG IN A PAGE IS HTML; AN SVG IN A FILE IS XML, AND XML KNOWS
+        # FIVE NAMED ENTITIES. These images were authored inside the flags
+        # pages, where `&ndash;` is ordinary and correct. Written out as
+        # standalone files they are parsed as XML, where it is undefined and a
+        # browser refuses the whole document — check-built caught exactly two,
+        # monaco-flags--era-1815 and spanish-empire-flags--era-1808, and only
+        # caught them now because until today five sixths of these were never
+        # written. Anything not one of XML's own five becomes numeric, which
+        # every parser of both kinds reads identically.
+        _XMLOK = {"lt", "gt", "amp", "quot", "apos"}
+
+        def _xml_entities(_t):
+            def _sub(_m):
+                _n = _m.group(1)
+                if _n in _XMLOK or _n.startswith("#"):
+                    return _m.group(0)
+                _cp = _h5.get(_n) or _h5.get(_n + ";")
+                return ("&#%d;" % ord(_cp[0])) if _cp else _m.group(0)
+            return re.sub(r"&([a-zA-Z][a-zA-Z0-9]*|#\d+|#x[0-9a-fA-F]+);", _sub, _t)
+
+        # AND A STANDALONE SVG NEEDS ITS NAMESPACE, WHICH NONE OF THESE HAD.
+        # Inside an HTML page `<svg>` is put in the SVG namespace by the HTML
+        # parser and no xmlns is needed, which is why these render perfectly on
+        # the flags pages they were authored in. Fetched as a FILE by an <img>
+        # they are parsed as XML, where a root element with no namespace is not
+        # SVG at all and nothing draws.
+        #
+        # All 1,454 lacked it, including the 31 countries' worth that have been
+        # written here since this block was first added — so the flags in the
+        # «who governed» table on every place page (WhereToBegin.astro, which
+        # loads them with <img src>) have never once rendered. Verified against
+        # the live site, not reasoned about: the served file begins
+        # `<svg viewBox="0 0 300 200">` and carries no xmlns.
+        _NS = 'xmlns="http://www.w3.org/2000/svg"'
+
+        def _namespaced(_t):
+            # The trailing `/` of a self-closing root has to stay last: a
+            # first draft of this produced `<svg/ xmlns=...>`, which is worse
+            # than the problem it was fixing. None of these flags is
+            # self-closing, which is exactly why it would not have been caught.
+            _m = re.match(r"(\s*<svg\b)([^>]*?)(\s*/?)>", _t)
+            if not _m or "xmlns" in _m.group(2):
+                return _t
+            return (_m.group(1) + _m.group(2) + " " + _NS + _m.group(3) + ">"
+                    + _t[_m.end():])
+
+        _fixed = _nsed = 0
+        for _slug in _all:
             for _id, _svg in (_fa.get(_slug) or {}).items():
                 _p = os.path.join(_fl, _slug + "--" + _id + ".svg")
+                _out = _xml_entities(_svg)
+                if _out != _svg:
+                    _fixed += 1
+                _svg = _out
+                _out = _namespaced(_svg)
+                if _out != _svg:
+                    _nsed += 1
+                _svg = _out
                 with open(_p, "w", encoding="utf-8") as fh:
                     fh.write(_svg)
                 _n += 1
                 _bytes += len(_svg.encode())
         print(f"fl/*.svg        {_bytes/1024:8.1f} KB  {_n} era flags for "
-              f"{len(_want)} countries the regimes actually name")
+              f"{len(_all)} countries ({len(_want)} of them named by a regime, "
+              f"which is all the «who governed» table ever shows)"
+              + (f"; {_fixed} had an HTML entity XML does not define"
+                 if _fixed else "")
+              + (f"; {_nsed} needed an xmlns to stand alone" if _nsed else ""))
     except (FileNotFoundError, KeyError) as _e:
         # Not fatal: the table degrades to the words it always had.
         print(f"era flags not written ({_e}) — the «who governed» table will "

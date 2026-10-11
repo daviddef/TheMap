@@ -1410,12 +1410,24 @@ def main():
                     if _drawn:
                         hit = {"id": _drawn}
                     else:
+                        # THE DOT GOES WHERE THE GROUND IS, NOT WHERE THE BOOK
+                        # IS FILED. Normally those agree. They do not for a
+                        # parish in County Londonderry that FamilySearch files
+                        # under Ireland, or a Luxembourg commune filed under
+                        # France, or San Michele di Postumia, which was Italian
+                        # when its register was written and has been Slovene
+                        # since 1947. A placement may therefore name the country
+                        # its POINT is in, and that is the one the place is
+                        # filed under — which is geo.py's rule, not an exception
+                        # to it. The volume still reaches the dot, because the
+                        # lookup above is keyed on the name as the book is filed.
+                        _pcc = (_pl.get("placeCountry") or _cc).upper()
                         _pid = ("p-" + slug(_pl.get("gazetteer") or _deep)
-                                + "-" + _cc.lower())
+                                + "-" + _pcc.lower())
                         hit = {"id": _pid}
                         promote.setdefault(_pid, {
                             "id": _pid, "name": _pl.get("gazetteer") or _deep,
-                            "country": _cc, "lat": _pl["lat"], "lon": _pl["lon"],
+                            "country": _pcc, "lat": _pl["lat"], "lon": _pl["lon"],
                             "from": "placement", "why": _pl.get("why", "")})
                     placed_by_decision += 1
                     break

@@ -12,7 +12,7 @@ for the world. Here the map fetches an index that carries only what a marker
 needs to be DRAWN and FOUND, and the panel fetches one small file when somebody
 actually clicks. Worldwide, the index grows linearly and the panel never does.
 """
-import collections, datetime, hashlib, json, math, os, re, shutil, sys, unicodedata
+import collections, datetime, glob, hashlib, json, math, os, re, shutil, sys, unicodedata
 import record_kinds  # one classifier, shared with the other scripts
 KIND_BIT = record_kinds.BIT
 
@@ -358,13 +358,22 @@ def main():
     # what lets a surveyed provider colour ground, and 555 of 559 providers
     # had never made one. Other holders' claims go in their own file, keeping
     # each harvest honest about where it came from.
-    try:
-        _cc = json.load(open("data/coverage-claims.json"))
-        FS = FS + _cc["collections"]
-        print(f"coverage-claims   {len(_cc['collections'])} claims from "
-              f"{_cc['source'][:40]}, {_cc['counts']['records']:,} records")
-    except (FileNotFoundError, KeyError):
-        pass
+    # ONE FILE PER HOLDER, loaded by glob. The first of these was Ireland's
+    # and the file was named for the idea rather than the source; the second
+    # was Dutch, and a single file holding both would have had to pick one
+    # `source` and one `licence` for two holders who do not share either.
+    # The licence gate in check-data.py reads them per file, which is the
+    # behaviour worth keeping: Ireland states no terms, Open Archieven asks
+    # that the holding archive be named, and neither sentence is true of both.
+    for _cf in sorted(glob.glob("data/coverage-claims*.json")):
+        try:
+            _cc = json.load(open(_cf, encoding="utf-8"))
+            FS = FS + _cc["collections"]
+            print(f"coverage-claims   {len(_cc['collections']):>4} claims, "
+                  f"{_cc['counts']['records']:>12,} records  "
+                  f"{_cc['source'][:46]}")
+        except (FileNotFoundError, KeyError) as _e:
+            print(f"  {_cf}: not usable ({_e.__class__.__name__}) — skipped")
     # WHAT KIND OF RECORD EACH ONE IS. David asked for a church-records
     # filter — "many people really want to look at church records, do we know
     # which are which" — and nothing here knew. The only structured thing a

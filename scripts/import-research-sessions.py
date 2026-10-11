@@ -858,7 +858,16 @@ def main():
             when = when_of(r)
             st = state_of(r)
             line = line_for(r)
-            wps = [w for w in waypoints_in(url) if w in vols]
+            # THE ROW'S OWN `waypoint` FIELD COUNTS. record-atlas-feedback tells
+            # every session to write the waypoint as its own field "even though
+            # it is in the URL", and the importer ignored it: a row citing an
+            # image ark (…/ark:/61903/3:1:ID, no wc=) carried the right
+            # waypoint in that field and still fell back to a source mark.
+            # Still only a waypoint the atlas itself holds (`in vols`); a
+            # field naming a volume the atlas does not know is not matched.
+            _own = str(r.get("waypoint") or "").split(":")[0].strip()
+            wps = [w for w in ([_own] if _own else []) + waypoints_in(url) if w in vols]
+            wps = list(dict.fromkeys(wps))
 
             # THE `pages` FIELD IS PARSED FOR EVERY ROW, tied to a volume or
             # not, so the report of what was refused is complete. Only a row

@@ -351,6 +351,20 @@ def main():
         FS = json.load(open("data/collections.json"))["collections"]
     except FileNotFoundError:
         FS = []
+    # ---- AND THE CLAIMS THAT ARE NOT FAMILYSEARCH'S -----------------------
+    # data/collections.json is one harvest from one catalogue, and its header
+    # says so. Until today it was also the ONLY source of coverage claims on
+    # this map, which is why the colour legend had two colours: a claim is
+    # what lets a surveyed provider colour ground, and 555 of 559 providers
+    # had never made one. Other holders' claims go in their own file, keeping
+    # each harvest honest about where it came from.
+    try:
+        _cc = json.load(open("data/coverage-claims.json"))
+        FS = FS + _cc["collections"]
+        print(f"coverage-claims   {len(_cc['collections'])} claims from "
+              f"{_cc['source'][:40]}, {_cc['counts']['records']:,} records")
+    except (FileNotFoundError, KeyError):
+        pass
     # WHAT KIND OF RECORD EACH ONE IS. David asked for a church-records
     # filter — "many people really want to look at church records, do we know
     # which are which" — and nothing here knew. The only structured thing a
@@ -1114,7 +1128,14 @@ def main():
         if near_cm:
             detail["graves"] = near_cm
         if hits:
-            detail["fs"] = [{"cc": c["cc"], "t": c["title"], "from": c.get("from"),
+            # `cc` IS A FAMILYSEARCH COLLECTION NUMBER, and a National
+            # Archives of Ireland county does not have one. It was required
+            # here while every claim on this map came from one catalogue;
+            # now that claims come from more than one holder it is absent for
+            # some, and absent is the truthful value. Nothing reads it off a
+            # place's row — it is carried for the deep link that only
+            # FamilySearch rows can build.
+            detail["fs"] = [{"cc": c.get("cc"), "t": c["title"], "from": c.get("from"),
                              "to": c.get("to"), "n": c.get("records") or 0,
                              "img": c.get("images") or 0, "url": c["url"],
                              "rank": rank, "where": where, "k": c.get("rkinds") or [],

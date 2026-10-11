@@ -1,6 +1,6 @@
 {
  "note": "Sources assessed and declined, with what was found. Declining after looking is a result; declining without looking is a gap.",
- "checked": "2026-09-29",
+ "checked": "2026-10-11",
  "declined": [
   {
    "source": "Antenati — the nine sitemaps other than ant_archivio",
@@ -146,6 +146,25 @@
    ],
    "why": "The host does not answer on any of the three forms tried, so there is nothing to point a reader at and no way to say what access costs. It also could not carry a row regardless: the only URL Wikidata gives is plain http, and check-data.py rejects a non-https provider url. NOT a block or a bot gate — simply unreachable from here on this date. Guatemala has 122 places in this atlas and ZERO sources, so this is worth retrying rather than treating as settled; the institution is real and its Q-id is recorded here for whoever tries next.",
    "checked": "2026-09-29"
+  },
+  {
+   "id": "nli-registers",
+   "name": "National Library of Ireland, Catholic Parish Registers — harvest of its parish list",
+   "url": "https://registers.nli.ie/",
+   "asked": "2026-10-11",
+   "verdict": "declined by this project, not by the site",
+   "why": "Behind a Cloudflare MANAGED CHALLENGE. Both the homepage and robots.txt answer 403 with a JavaScript challenge page to an identified crawler, so the site's own crawling policy cannot even be read. It loads for a person in a browser, and driving a real browser through the challenge is exactly the spoofing this project does not do. The same verdict as irishgenealogy above, for the same reason, on a different site.",
+   "whyItMattered": "Ireland holds 2,130 of this atlas's drawn places and the NLI's registers are free, need no account, and are catalogued BY PARISH — the ground-level granularity that actually colours a dot. It is the single biggest `free` win available for Ireland, and it is shut to us.",
+   "insteadOf": "Its access class stays surveyed and its link stays on the atlas: a reader can open it, which is the point of listing it. What cannot be built is a per-parish coverage claim."
+  },
+  {
+   "id": "hungaricana",
+   "name": "Hungaricana — harvest of its holdings",
+   "url": "https://hungaricana.hu/en/",
+   "asked": "2026-10-11",
+   "verdict": "declined by this project, not by the site",
+   "why": "Answers 403 to an identified crawler on its own front page — 118 bytes, no challenge page, no explanation. Nothing was read, so nothing is claimed.",
+   "whyItMattered": "Its declared countries — HU, RO, SK, RS — hold 1,282 drawn places, and it is classed free."
   }
  ]
 }

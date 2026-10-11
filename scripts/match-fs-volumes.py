@@ -20,7 +20,7 @@ descending order of how many books are waiting on them.
 
     python3 scripts/match-fs-volumes.py
 """
-import math, collections, gzip, json, os, re, sys, time, unicodedata
+import math, collections, gzip, hashlib, json, os, re, sys, time, unicodedata
 import gazetteer as _gazetteer
 
 THIS_YEAR = time.gmtime().tm_year
@@ -91,6 +91,31 @@ def dump(obj, path, lines_key=None):
         with open(tmp, "w") as f:
             json.dump(obj, f, ensure_ascii=False, indent=1)
     os.replace(tmp, path)
+
+
+def slug(name):
+    """An id fragment that is never empty, even for a name with no Latin in it.
+
+    `fold` strips accents and lowercases; it does not transliterate. So a name
+    written in Cyrillic, Greek, Hebrew, Arabic or a CJK script survives fold
+    untouched and is then deleted entirely by the [^a-z0-9] filter, leaving an
+    id like «p--ru» — and the SECOND such name in the same country would land
+    on that same id and the two places would silently become one dot.
+
+    Caught with exactly one occurrence, «Качевицы» in Russia, so nothing has
+    collided yet. It was about to get much worse: the Wikipedia resolver's
+    country table just grew from 36 countries to 156 and now asks the Japanese,
+    Chinese, Greek, Hebrew, Arabic, Korean and Thai editions, whose titles are
+    mostly not Latin at all.
+
+    A name with no Latin characters gets a short digest of itself instead.
+    That is opaque, and an opaque id that is unique is worth more than a
+    readable one that is shared — the name is on the row either way.
+    """
+    out = re.sub(r"[^a-z0-9]+", "-", fold(name or "")).strip("-")[:48]
+    if out:
+        return out
+    return "x" + hashlib.sha1((name or "").encode("utf-8")).hexdigest()[:10]
 
 
 def fold(s):
@@ -1249,7 +1274,16 @@ def main():
     # A placement never outranks the shelf or the gazetteer. It is the last
     # thing tried, on names nothing else could answer.
     placements = {}
-    for _pf in ("data/unplaced-placed.json", "data/unplaced-placed-2.json"):
+    # AND THE NAMES RESOLVED THROUGH THE NAME A PLACE USED TO HAVE.
+    # scripts/match-via-wikipedia.py asks each country's own Wikipedia for the
+    # names left in the gaps file and follows its redirects: «Caccavone»
+    # redirects to «Poggio Sannita», which is the encyclopaedia's own statement
+    # that they are one place rather than a resemblance. Every coordinate it
+    # keeps has been put through geo.country_of and agrees with the country the
+    # volumes are filed under. Its rows carry `gazetteer`, so the dot that
+    # appears is the MODERN place — the old name is a way in, not a second dot.
+    for _pf in ("data/unplaced-placed.json", "data/unplaced-placed-2.json",
+                "data/fs-volumes-wikipedia.json"):
         if not os.path.exists(_pf):
             continue
         _d = json.load(open(_pf, encoding="utf-8"))
@@ -1376,9 +1410,8 @@ def main():
                     if _drawn:
                         hit = {"id": _drawn}
                     else:
-                        _pid = "p-" + re.sub(r"[^a-z0-9]+", "-",
-                                             fold(_pl.get("gazetteer") or _deep)
-                                             ).strip("-")[:48] + "-" + _cc.lower()
+                        _pid = ("p-" + slug(_pl.get("gazetteer") or _deep)
+                                + "-" + _cc.lower())
                         hit = {"id": _pid}
                         promote.setdefault(_pid, {
                             "id": _pid, "name": _pl.get("gazetteer") or _deep,

@@ -1,19 +1,77 @@
 {
- "note": "Whether each provider would serve an identified crawler, read from its own robots.txt and — only where robots permitted it — one request to its front page. Nothing was crawled. This says who would let us read them, not who should be read: what a provider holds, and whether it names ground finely enough to colour a dot, is a separate question per provider. CAVEAT, FOUND AFTERWARDS: `open` here means the robots.txt permitted us and the FRONT PAGE answered. It does not promise that the search or the API behind it will. Szukaj w Archiwach is listed open and is already in _declined.json — its pages answer while /api returns an Incapsula challenge. So this file narrows the field honestly and does not settle any single source; each one still has to be opened and looked at. AND A SECOND CAVEAT, FOUND THE HARD WAY: this sweep read a status code and looked for English challenge wording, so it would call `open` a site that answers 200 with a refusal in its own language. digi.archives.cz returns 200 and a page reading «Přístup zablokován!». It would also miss a site whose pages answer while a DIFFERENT route is the real one: every one of the 121 Italian providers here is marked refused, and Antenati is readable all along through the Ministry's OAI endpoint on another host. The file narrows the field. It does not settle a single source, and a `refused` in it is a reason to look for another door rather than to stop.",
+ "note": "Whether each provider would serve an identified crawler. Three things are read, not one: its robots.txt, the ANSWER its front page gives — a 200 carrying «Verifying your browser» or «Přístup zablokován» is a refusal — and, where a firewall is what refused, whether the institution publishes somewhere else. A provider that NAMES this crawler is not probed for a side entrance; being told no by name is the end of it.",
  "userAgent": "RecordAtlasBot/1.0 (+https://recordatlas.org; a genealogy atlas checking whether it may read this source)",
- "checked": "2026-10-11",
- "access": "free",
+ "checked": "2026-10-12",
+ "access": "all",
  "counts": {
-  "open": 133,
-  "bot gate": 6,
-  "robots forbids AI crawlers": 11,
-  "robots forbids everyone": 31,
-  "refused": 127,
-  "nothing answered": 6,
-  "no url on the row": 0,
-  "listedOpenButAlreadyDeclined": 7
+  "open": 248,
+  "bot gate": 71,
+  "robots forbids AI crawlers": 24,
+  "robots forbids everyone": 35,
+  "refused": 158,
+  "nothing answered": 25,
+  "no url on the row": 0
  },
+ "namesThisCrawler": 16,
+ "refusedButAnotherDoorAnswers": 43,
+ "listedButAlreadyDeclined": 11,
  "providers": [
+  {
+   "id": "arhinet",
+   "name": "ARHiNET — Croatian State Archives",
+   "url": "https://www.arhiv.hr/hr-hr/",
+   "countries": [
+    "HR"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "acta-croatica",
+   "name": "Acta Croatica",
+   "url": "https://actacroatica.com/en/search",
+   "countries": [
+    "HR"
+   ],
+   "access": "mixed",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "arhiva-md",
+   "name": "Agenția Națională a Arhivelor (Moldova)",
+   "url": "https://arhiva.gov.md/",
+   "countries": [
+    "MD"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://arhiva.gov.md/wp-sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-dz-algerian-national-archives",
+   "name": "Algerian National Archives",
+   "url": "https://archives-can.dz/category/uncategorized-ar/",
+   "countries": [
+    "DZ"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives-can.dz/wp-sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
   {
    "id": "archieven-nl",
    "name": "Archieven.nl",
@@ -21,7 +79,22 @@
    "countries": [
     "NL"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "archion",
+   "name": "Archion",
+   "url": "https://www.archion.de/de/",
+   "countries": [
+    "DE"
+   ],
+   "access": "paid",
+   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -32,18 +105,11 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "archives-nz",
-   "name": "Archives New Zealand — Collections",
-   "url": "https://collections.archives.govt.nz/",
-   "countries": [
-    "NZ"
+   "sitemaps": [
+    "https://archives.grenoblealpesmetropole.fr/contenus.xml"
    ],
-   "robotsStatus": 200,
    "pageStatus": 200,
    "policy": "open"
   },
@@ -54,18 +120,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "ad-haut-rhin",
-   "name": "Archives d'Alsace — Haut-Rhin",
-   "url": "https://archives.haut-rhin.fr/",
-   "countries": [
-    "FR"
-   ],
-   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -76,7 +133,11 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "http://archives.bordeaux-metropole.fr/sitemap/contenus.xml"
+   ],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -87,18 +148,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "ad-paris",
-   "name": "Archives de Paris",
-   "url": "https://archives.paris.fr/",
-   "countries": [
-    "FR"
-   ],
-   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -109,7 +161,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -120,18 +174,22 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 404,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
   {
-   "id": "ad-archives-du-departement-du-rhone-et-de-la-metropole-de-lyon",
-   "name": "Archives du département du Rhône et de la métropole de Lyon",
-   "url": "https://archives.rhone.fr",
+   "id": "na-ma-archives-du-maroc",
+   "name": "Archives du Maroc",
+   "url": "https://www.archivesdumaroc.ma/ar/",
    "countries": [
-    "FR"
+    "MA"
    ],
+   "access": "unsurveyed",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -142,18 +200,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "ad-indre-et-loire",
-   "name": "Archives départementales d'Indre-et-Loire",
-   "url": "https://archives.touraine.fr",
-   "countries": [
-    "FR"
-   ],
-   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -164,7 +213,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -175,7 +226,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -186,7 +239,11 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives.maine-et-loire.fr/?sitemap=pages&type=1533906435"
+   ],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -197,7 +254,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -208,7 +267,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -219,18 +280,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "ad-vaucluse",
-   "name": "Archives départementales de Vaucluse",
-   "url": "https://memento.vaucluse.fr/",
-   "countries": [
-    "FR"
-   ],
-   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -241,7 +293,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -252,7 +306,11 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives.aisne.fr/sitemap/contenus.xml"
+   ],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -263,7 +321,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -274,7 +334,11 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives.ardeche.fr/sitemap/contenus.xml"
+   ],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -285,18 +349,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "ad-l-aude",
-   "name": "Archives départementales de l'Aude",
-   "url": "https://archivesdepartementales.aude.fr/",
-   "countries": [
-    "FR"
-   ],
-   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -307,29 +362,11 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "ad-l-essonne",
-   "name": "Archives départementales de l'Essonne",
-   "url": "https://archives.essonne.fr/",
-   "countries": [
-    "FR"
+   "sitemaps": [
+    "https://archives.aveyron.fr/sitemap/contenus.xml"
    ],
-   "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "ad-l-eure",
-   "name": "Archives départementales de l'Eure",
-   "url": "https://archives.eure.fr",
-   "countries": [
-    "FR"
-   ],
-   "robotsStatus": 404,
    "pageStatus": 200,
    "policy": "open"
   },
@@ -340,7 +377,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -351,7 +390,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -362,7 +403,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -373,7 +416,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -384,7 +429,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -395,18 +442,11 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "ad-charente-maritime",
-   "name": "Archives départementales de la Charente-Maritime",
-   "url": "https://archives.charente-maritime.fr",
-   "countries": [
-    "FR"
+   "sitemaps": [
+    "https://lasource.archives.lacharente.fr/sitemap/contenus.xml"
    ],
-   "robotsStatus": 200,
    "pageStatus": 200,
    "policy": "open"
   },
@@ -417,29 +457,11 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "ad-correze",
-   "name": "Archives départementales de la Corrèze",
-   "url": "https://www.archives.correze.fr",
-   "countries": [
-    "FR"
+   "sitemaps": [
+    "https://www.arche-musee-et-archives.net/siteindex.xml"
    ],
-   "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "ad-creuse",
-   "name": "Archives départementales de la Creuse",
-   "url": "https://archives.creuse.fr",
-   "countries": [
-    "FR"
-   ],
-   "robotsStatus": 200,
    "pageStatus": 200,
    "policy": "open"
   },
@@ -450,18 +472,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 404,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "ad-dordogne",
-   "name": "Archives départementales de la Dordogne",
-   "url": "https://archives.dordogne.fr/",
-   "countries": [
-    "FR"
-   ],
-   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -472,7 +485,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 404,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -483,7 +498,11 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives.haute-garonne.fr/sitemap/contenus.xml"
+   ],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -494,18 +513,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "ad-haute-marne",
-   "name": "Archives départementales de la Haute-Marne",
-   "url": "https://archives.haute-marne.fr/",
-   "countries": [
-    "FR"
-   ],
-   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -516,7 +526,11 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives.hautesavoie.fr/sitemap/contenus.xml"
+   ],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -527,7 +541,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -538,7 +554,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -549,7 +567,11 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "http://www.archives-numerisees.ain.fr/sitemap/contenus.xml"
+   ],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -560,7 +582,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 404,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -571,7 +595,11 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives.lozere.fr/sitemap/contenus.xml"
+   ],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -582,40 +610,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "ad-marne",
-   "name": "Archives départementales de la Marne",
-   "url": "https://archives.marne.fr/",
-   "countries": [
-    "FR"
-   ],
-   "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "ad-martinique",
-   "name": "Archives départementales de la Martinique",
-   "url": "https://www.patrimoines-martinique.org/",
-   "countries": [
-    "FR"
-   ],
-   "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "ad-meuse",
-   "name": "Archives départementales de la Meuse",
-   "url": "https://archives.meuse.fr/",
-   "countries": [
-    "FR"
-   ],
-   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -626,18 +623,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "ad-nievre",
-   "name": "Archives départementales de la Nièvre",
-   "url": "https://archives.nievre.fr",
-   "countries": [
-    "FR"
-   ],
-   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -648,18 +636,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "ad-savoie",
-   "name": "Archives départementales de la Savoie",
-   "url": "https://patrimoines.savoie.fr/",
-   "countries": [
-    "FR"
-   ],
-   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -670,7 +649,11 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.archivesdepartementales76.net/data/sitemaps/sitemapindex.xml"
+   ],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -681,18 +664,11 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "ad-somme",
-   "name": "Archives départementales de la Somme",
-   "url": "https://archives.somme.fr",
-   "countries": [
-    "FR"
+   "sitemaps": [
+    "http://www.archives-numerisees.ain.fr/sitemap/contenus.xml"
    ],
-   "robotsStatus": 200,
    "pageStatus": 200,
    "policy": "open"
   },
@@ -703,7 +679,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -714,7 +692,11 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives-deux-sevres-vienne.fr/data/sitemaps/sitemapindex.xml"
+   ],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -725,7 +707,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -736,7 +720,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -747,7 +733,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -758,7 +746,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -769,7 +759,11 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives.hauts-de-seine.fr/sitemap/contenus.xml"
+   ],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -780,7 +774,11 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.ledepartement66.fr/sitemap_index.xml"
+   ],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -791,18 +789,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "ad-calvados",
-   "name": "Archives départementales du Calvados",
-   "url": "https://archives.calvados.fr",
-   "countries": [
-    "FR"
-   ],
-   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -813,7 +802,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -824,18 +815,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "ad-finistere",
-   "name": "Archives départementales du Finistère",
-   "url": "https://archives.finistere.fr",
-   "countries": [
-    "FR"
-   ],
-   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -846,18 +828,24 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives.gard.fr/sitemap.xml"
+   ],
    "pageStatus": 200,
    "policy": "open"
   },
   {
-   "id": "ad-jura",
-   "name": "Archives départementales du Jura",
-   "url": "https://archives39.fr/",
+   "id": "ad-gers",
+   "name": "Archives départementales du Gers",
+   "url": "https://www.archives32.fr/",
    "countries": [
     "FR"
    ],
+   "access": "unsurveyed",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -868,7 +856,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -879,7 +869,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -890,7 +882,11 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "https://patrimoines-archives.morbihan.fr/sitemap.xml"
+   ],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -901,7 +897,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -912,18 +910,11 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "ad-territoire-de-belfort",
-   "name": "Archives départementales du Territoire de Belfort",
-   "url": "https://archives.territoiredebelfort.fr/",
-   "countries": [
-    "FR"
+   "sitemaps": [
+    "http://www.archivesdepartementales.puydedome.fr/sitemap/contenus.xml"
    ],
-   "robotsStatus": 200,
    "pageStatus": 200,
    "policy": "open"
   },
@@ -934,7 +925,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -945,7 +938,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -956,18 +951,78 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
   {
-   "id": "ac-archives-municipales-d-alencon",
-   "name": "Archives municipales d'Alençon",
-   "url": "https://archives.ville-alencon.fr/",
+   "id": "ac-archives-municipales-d-aix-les-bains",
+   "name": "Archives municipales d'Aix-les-Bains",
+   "url": "https://www.aixlesbains.fr/mes-loisirs/archives-municipales",
    "countries": [
     "FR"
    ],
+   "access": "onsite",
    "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-d-albi",
+   "name": "Archives municipales d'Albi",
+   "url": "https://albi.fr/annuaire-des-equipements/archives-municipales",
+   "countries": [
+    "FR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-d-annecy",
+   "name": "Archives municipales d'Annecy",
+   "url": "https://www.annecy.fr/activites/archives-et-patrimoine/archives-municipales",
+   "countries": [
+    "FR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-d-annonay",
+   "name": "Archives municipales d'Annonay",
+   "url": "https://www.annonay.fr/vivre-annonay/sport-et-culture/archives-municipales-et-communautaires",
+   "countries": [
+    "FR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.annonayrhoneagglo.fr/sitemaps/index_default.xml",
+    "https://www.annonay.fr/sitemaps/index_ville_annonay.xml",
+    "https://www.villevocance.fr/sitemaps/index_villevocance.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-d-antibes-juan-les-pins",
+   "name": "Archives municipales d'Antibes Juan-les-Pins",
+   "url": "https://archives.ville-antibes.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -978,7 +1033,26 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives.auxerre.fr/sitemaps/sitemapindex.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-beaune",
+   "name": "Archives municipales de Beaune",
+   "url": "https://www.beaune.fr/culture-et-loisirs/les-archives-municipales/",
+   "countries": [
+    "FR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.beaune.fr/sitemap_index.xml"
+   ],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -989,7 +1063,11 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.grandbesancon.fr/sitemap_index.xml"
+   ],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1000,18 +1078,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "ac-archives-municipales-de-bressuire",
-   "name": "Archives municipales de Bressuire",
-   "url": "https://archivesmunicipales-bressuire.fr/",
-   "countries": [
-    "FR"
-   ],
-   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1022,7 +1091,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1033,7 +1104,24 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives.brive.fr/sitemaps.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-beziers",
+   "name": "Archives municipales de Béziers",
+   "url": "https://archives.ville-beziers.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1044,7 +1132,22 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-cherbourg-en-cotentin",
+   "name": "Archives municipales de Cherbourg-en-Cotentin",
+   "url": "https://www.cherbourg.fr/culture-et-loisirs/les-archives-municipales/presentation/",
+   "countries": [
+    "FR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1055,7 +1158,179 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "http://www.cholet.fr/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-ch-lons-en-champagne",
+   "name": "Archives municipales de Châlons-en-Champagne",
+   "url": "https://www.chalonsenchampagne.fr/ville",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.chalonsenchampagne.fr/site-map.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-dinard",
+   "name": "Archives municipales de Dinard",
+   "url": "https://www.ville-dinard.fr/contacts/archives-municipales/",
+   "countries": [
+    "FR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-dole",
+   "name": "Archives municipales de Dole",
+   "url": "https://www.doledujura.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-douai",
+   "name": "Archives municipales de Douai",
+   "url": "https://archives.ville-douai.fr",
+   "countries": [
+    "FR"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-fontenay-aux-roses",
+   "name": "Archives municipales de Fontenay-aux-Roses",
+   "url": "https://www.fontenay-aux-roses.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.fontenay-aux-roses.fr/sitemap_index.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-forcalquier",
+   "name": "Archives municipales de Forcalquier",
+   "url": "https://www.ville-forcalquier.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.ville-forcalquier.fr/sitemap_index.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-grand-couronne",
+   "name": "Archives municipales de Grand-Couronne",
+   "url": "https://grand-couronne.fr/les-services-municipaux/",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://grand-couronne.fr/sitemap_index.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-grasse",
+   "name": "Archives municipales de Grasse",
+   "url": "https://www.ville-grasse.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-guyancourt",
+   "name": "Archives municipales de Guyancourt",
+   "url": "https://www.ville-guyancourt.fr/vivre-a-guyancourt/histoire-et-patrimoine/les-archives-municipales/",
+   "countries": [
+    "FR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.ville-guyancourt.fr/sitemap_index.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-houilles",
+   "name": "Archives municipales de Houilles",
+   "url": "https://www.ville-houilles.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.ville-houilles.fr/sitemap_index.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-la-celle-saint-cloud",
+   "name": "Archives municipales de La Celle-Saint-Cloud",
+   "url": "https://lacellesaintcloud.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-la-roche-sur-yon",
+   "name": "Archives municipales de La Roche-sur-Yon",
+   "url": "https://larochesuryon.fr/archives-municipales/",
+   "countries": [
+    "FR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1066,7 +1341,26 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "http://www.archives-numerisees.ain.fr/sitemap/contenus.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-laval",
+   "name": "Archives municipales de Laval",
+   "url": "https://www.laval.fr/accueil",
+   "countries": [
+    "FR"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.laval.fr/sitemap.xml"
+   ],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1077,7 +1371,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1088,7 +1384,91 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-maubeuge",
+   "name": "Archives municipales de Maubeuge",
+   "url": "https://ville-maubeuge.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-menton",
+   "name": "Archives municipales de Menton",
+   "url": "https://www.menton.fr/Les-archives-municipales.html",
+   "countries": [
+    "FR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.menton.fr/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-metz",
+   "name": "Archives municipales de Metz",
+   "url": "https://archives.metz.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-mios",
+   "name": "Archives municipales de Mios",
+   "url": "https://www.villemios.fr/culture-loisirs/archives-municipales/",
+   "countries": [
+    "FR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-montlouis-sur-loire",
+   "name": "Archives municipales de Montlouis-sur-Loire",
+   "url": "https://www.ville-montlouis-loire.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.ville-montlouis-loire.fr/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-montpellier",
+   "name": "Archives municipales de Montpellier",
+   "url": "https://archives.montpellier.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1099,7 +1479,24 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-noisiel",
+   "name": "Archives municipales de Noisiel",
+   "url": "https://www.ville-noisiel.fr/mairie/archives-documentation/",
+   "countries": [
+    "FR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.ville-noisiel.fr/sitemap_index.xml"
+   ],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1110,7 +1507,39 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "http://www.archives-numerisees.ain.fr/sitemap/contenus.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-pamiers",
+   "name": "Archives municipales de Pamiers",
+   "url": "https://www.ville-pamiers.fr/ma-culture/",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.ville-pamiers.fr/sitemap_index.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-poitiers",
+   "name": "Archives municipales de Poitiers",
+   "url": "https://www.poitiers.fr/archives-municipales-et-communautaires",
+   "countries": [
+    "FR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1121,7 +1550,26 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.archives.rennes.fr/sitemap/contenus.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-reze",
+   "name": "Archives municipales de Rezé",
+   "url": "https://www.reze.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.reze.fr/sitemap_index.xml"
+   ],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1132,7 +1580,39 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.rivedegier.fr/sitemap_index.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-rixheim",
+   "name": "Archives municipales de Rixheim",
+   "url": "https://rixheim.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://rixheim.fr/sitemap_index.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-roncq",
+   "name": "Archives municipales de Roncq",
+   "url": "https://archives.roncq.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 404,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1143,18 +1623,39 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "http://archives.ville-saint-denis.fr/sitemap/contenus.xml"
+   ],
    "pageStatus": 200,
    "policy": "open"
   },
   {
-   "id": "ac-archives-municipales-de-saint-etienne",
-   "name": "Archives municipales de Saint-Étienne",
-   "url": "https://archives.saint-etienne.fr",
+   "id": "ac-archives-municipales-de-saint-malo",
+   "name": "Archives municipales de Saint-Malo",
+   "url": "https://www.saint-malo.fr/",
    "countries": [
     "FR"
    ],
+   "access": "unsurveyed",
    "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.saint-malo.fr/sitemap_index.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-saint-ouen",
+   "name": "Archives municipales de Saint-Ouen",
+   "url": "https://www.saint-ouen.fr/sorties-et-loisirs/culture/lieux-culturels/archives-documentation-et-patrimoine/",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1165,7 +1666,35 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-sevran",
+   "name": "Archives municipales de Sevran",
+   "url": "https://archives-municipales.ville-sevran.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-suresnes",
+   "name": "Archives municipales de Suresnes",
+   "url": "https://www.suresnes.fr/ma-mairie/administration/services-municipaux/detail/archives-municipales",
+   "countries": [
+    "FR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1176,18 +1705,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "ac-archives-municipales-de-thionville",
-   "name": "Archives municipales de Thionville",
-   "url": "https://archives.thionville.fr/",
-   "countries": [
-    "FR"
-   ],
-   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1198,7 +1718,9 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1209,7 +1731,28 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.ville-troyes.fr/wp-sitemap.xml",
+    "https://www.ville-troyes.fr/sitemap.xml",
+    "https://www.ville-troyes.fr/sitemap.html"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-vallauris",
+   "name": "Archives municipales de Vallauris",
+   "url": "https://www.vallauris-golfe-juan.fr/22025-documentation-et-archives.htm",
+   "countries": [
+    "FR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.vallauris-golfe-juan.fr/sitemap.xml"
+   ],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1220,18 +1763,65 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
   {
-   "id": "ac-archives-municipales-et-communautaires-d-amiens",
-   "name": "Archives municipales et communautaires d'Amiens",
-   "url": "https://www.amiens.fr/Vivre-a-Amiens/Culture-Patrimoine/Les-Archives-municipales-et-communautaires",
+   "id": "ac-archives-municipales-de-vichy",
+   "name": "Archives municipales de Vichy",
+   "url": "https://www.ville-vichy.fr/ma-ville/patrimoine/archives/",
    "countries": [
     "FR"
    ],
+   "access": "account",
    "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.ville-vichy.fr/sitemap_index.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-villeurbanne",
+   "name": "Archives municipales de Villeurbanne",
+   "url": "https://lerize.villeurbanne.fr/le-rize/archives-municipales/",
+   "countries": [
+    "FR"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://lerize.villeurbanne.fr/wp-sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-de-vitre",
+   "name": "Archives municipales de Vitré",
+   "url": "https://www.vitrecommunaute.org/les-archives/",
+   "countries": [
+    "FR"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-archives-municipales-du-puy-en-velay",
+   "name": "Archives municipales du Puy-en-Velay",
+   "url": "https://www.lepuyenvelay.fr/culture-et-patrimoine/archives-municipales-n17.html",
+   "countries": [
+    "FR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1242,7 +1832,136 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "oesta-ais",
+   "name": "Archivinformationssystem (Österreichisches Staatsarchiv)",
+   "url": "https://www.archivinformationssystem.at",
+   "countries": [
+    "AT"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "agn-ar",
+   "name": "Archivo General de la Nación (Argentina)",
+   "url": "https://www.argentina.gob.ar/interior/archivo-general-de-la-nacion",
+   "countries": [
+    "AR"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.argentina.gob.ar/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "agn-mx",
+   "name": "Archivo General de la Nación (México)",
+   "url": "https://www.gob.mx/agn",
+   "countries": [
+    "MX"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "archiwum-panstwowe-bydgoszcz",
+   "name": "Archiwum Państwowe w Bydgoszczy",
+   "url": "https://www.bydgoszcz.ap.gov.pl/",
+   "countries": [
+    "PL"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.bydgoszcz.ap.gov.pl/wp-sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "arhivbih",
+   "name": "Arhiv Bosne i Hercegovine",
+   "url": "https://arhivbih.gov.ba/",
+   "countries": [
+    "BA"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://arhivbih.gov.ba/wp-sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "dubrovnik-biskupija",
+   "name": "Arhiv Dubrovačke biskupije (Biskupski ordinarijat)",
+   "url": "https://www.dubrovacka-biskupija.hr/",
+   "countries": [
+    "HR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ars-si",
+   "name": "Arhiv Republike Slovenije",
+   "url": "https://www.gov.si/zbirke/delovna-mesta/arhiv-republike-slovenije/",
+   "countries": [
+    "SI"
+   ],
+   "access": "mixed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.gov.si/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "arhivsrbije",
+   "name": "Arhiv Srbije",
+   "url": "https://www.arhivsrbije.rs/",
+   "countries": [
+    "RS"
+   ],
+   "access": "onsite",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "arhiv-vojvodine",
+   "name": "Arhiv Vojvodine",
+   "url": "https://arhivvojvodine.org.rs/",
+   "countries": [
+    "RS"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://arhivvojvodine.org.rs/sitemap_index.xml"
+   ],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1254,7 +1973,11 @@
     "DE",
     "*"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "https://arolsen-archives.org/sitemap_index.xml"
+   ],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1265,7 +1988,281 @@
    "countries": [
     "DE"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "https://collections.arolsen-archives.org/sitemaps.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "arquivo-nacional-br",
+   "name": "Arquivo Nacional (Brasil)",
+   "url": "https://www.gov.br/arquivonacional/pt-br",
+   "countries": [
+    "BR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.gov.br/sitemap.xml.gz"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "apm-br",
+   "name": "Arquivo Público Mineiro",
+   "url": "https://www.siaapm.cultura.mg.gov.br/",
+   "countries": [
+    "BR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ape-es-br",
+   "name": "Arquivo Público do Estado do Espírito Santo",
+   "url": "https://ape.es.gov.br/",
+   "countries": [
+    "BR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "apers-br",
+   "name": "Arquivo Público do Estado do Rio Grande do Sul",
+   "url": "https://apers.rs.gov.br/inicial",
+   "countries": [
+    "BR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "de-bayerisches-staatsarchiv-nuernberg",
+   "name": "Bayerisches Staatsarchiv Nürnberg",
+   "url": "https://www.gda.bayern.de/de/",
+   "countries": [
+    "DE"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "de-bibliothek-des-saechsischen-staatsarchivs-standort-bergarchiv-freiber",
+   "name": "Bibliothek des Sächsischen Staatsarchivs, Standort Bergarchiv Freiberg",
+   "url": "https://www.archiv.sachsen.de/bibliothek-8493.html",
+   "countries": [
+    "DE"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "de-brandenburgisches-landeshauptarchiv",
+   "name": "Brandenburgisches Landeshauptarchiv",
+   "url": "https://blha.brandenburg.de/blha/de/",
+   "countries": [
+    "DE"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://blha.brandenburg.de/blha/de/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-lr-center-for-national-documents-and-records",
+   "name": "Center for National Documents and Records",
+   "url": "https://cndra.gov.lr/",
+   "countries": [
+    "LR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "ac-centre-d-archives-patrimoniales-fabrique-des-savoirs",
+   "name": "Centre d’archives patrimoniales. Fabrique des savoirs",
+   "url": "https://lafabriquedessavoirs.fr/fr/centre-d-archives-patrimoniales",
+   "countries": [
+    "FR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "city-of-cape-town-cemeteries",
+   "name": "City of Cape Town — City Parks, cemeteries and burial registers",
+   "url": "https://www.capetown.gov.za/Family%20and%20home/see-all-city-facilities/our-service-facilities/cemeteries/Maitland%20Cemetery",
+   "countries": [
+    "ZA"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.capetown.gov.za/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "cityark",
+   "name": "CityArk",
+   "url": "https://cityark.medway.gov.uk/",
+   "countries": [
+    "GB"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "cognomix",
+   "name": "Cognomix — Mappe dei cognomi italiani",
+   "url": "https://www.cognomix.it/mappe-dei-cognomi-italiani/",
+   "countries": [
+    "IT"
+   ],
+   "access": "index",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.cognomix.it/sitemap.xml.gz",
+    "https://www.cognomix.it/sitemap-mappe/sitemap-index.xml",
+    "https://www.cognomix.it/sitemap-origine-cognomi.xml.gz"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "dzs-imena",
+   "name": "DZS — Names and surnames in the Republic of Croatia",
+   "url": "https://web.dzs.hr/app/imena/default_en.aspx",
+   "countries": [
+    "HR"
+   ],
+   "access": "index",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "dizbi-hazu",
+   "name": "Digitalna zbirka HAZU",
+   "url": "https://dizbi.hazu.hr",
+   "countries": [
+    "HR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "dad-dubrovnik",
+   "name": "Državni arhiv u Dubrovniku",
+   "url": "https://dad.hr/",
+   "countries": [
+    "HR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "gospic",
+   "name": "Državni arhiv u Gospiću",
+   "url": "https://arhiv-gospic.hr/",
+   "countries": [
+    "HR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "dari",
+   "name": "Državni arhiv u Rijeci",
+   "url": "https://www.riarhiv.hr/",
+   "countries": [
+    "HR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "dazd",
+   "name": "Državni arhiv u Zadru",
+   "url": "https://www.dazd.hr/hr",
+   "countries": [
+    "HR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-eg-egyptian-national-library-and-archives",
+   "name": "Egyptian National Library and Archives",
+   "url": "https://www.darelkotob.gov.eg/ar-eg/Pages/Home.aspx",
+   "countries": [
+    "EG"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "de-evangelisches-landeskirchliches-archiv-in-berlin",
+   "name": "Evangelisches Landeskirchliches Archiv in Berlin",
+   "url": "https://www.landeskirchenarchivberlin.de/",
+   "countries": [
+    "DE"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1280,7 +2277,71 @@
     "MM",
     "GB"
    ],
+   "access": "free",
    "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "freebmd",
+   "name": "FreeBMD / FreeREG / FreeCEN",
+   "url": "https://www.freebmd.org.uk/",
+   "countries": [
+    "GB"
+   ],
+   "access": "index",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "freereg",
+   "name": "FreeREG",
+   "url": "https://www.freereg.org.uk/",
+   "countries": [
+    "GB"
+   ],
+   "access": "index",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.freereg.org.uk/sitemap_location.txt"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "fpc-ba-br",
+   "name": "Fundação Pedro Calmon — Arquivo Público do Estado da Bahia",
+   "url": "https://www.ba.gov.br/fpc/",
+   "countries": [
+    "BR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "genteam",
+   "name": "GenTeam.at",
+   "url": "https://www.genteam.at/de/",
+   "countries": [
+    "AT",
+    "HR",
+    "SI",
+    "CZ",
+    "SK",
+    "HU",
+    "IT",
+    "PL",
+    "UA"
+   ],
+   "access": "account",
+   "robotsStatus": 404,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1291,10 +2352,138 @@
    "countries": [
     "PL"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open",
    "alreadyDeclined": true
+  },
+  {
+   "id": "na-co-general-archive-of-the-nation-of-colombia",
+   "name": "General Archive of the Nation of Colombia",
+   "url": "https://www.archivogeneral.gov.co",
+   "countries": [
+    "CO"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "de-generallandesarchiv-karlsruhe",
+   "name": "Generallandesarchiv Karlsruhe",
+   "url": "https://www.landesarchiv-bw.de/de/landesarchiv/standorte/generallandesarchiv-karlsruhe-mit-dokumentationsstelle-rechtsextremismus/47245",
+   "countries": [
+    "DE"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.landesarchiv-bw.de/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "geneteka",
+   "name": "Geneteka",
+   "url": "https://geneteka.genealodzy.pl/",
+   "countries": [
+    "PL"
+   ],
+   "access": "index",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-gl-greenland-national-museum",
+   "name": "Greenland National Museum",
+   "url": "https://en.nka.gl/",
+   "countries": [
+    "GL"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "genealogiequebec",
+   "name": "Généalogie Québec / the Drouin Collection",
+   "url": "https://www.genealogiequebec.com/fr/",
+   "countries": [
+    "CA"
+   ],
+   "access": "paid",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.genealogiequebec.com/sitemap.xml",
+    "https://www.genealogiequebec.com/blog/post-sitemap.xml",
+    "https://www.genealogiequebec.com/blog/page-sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "hda-mk-search",
+   "name": "HDA — Pretraga matičnih knjiga (HR-HDA-1448)",
+   "url": "https://www.arhiv.hr/Pretraga-mati%C4%8Dnih-knjiga",
+   "countries": [
+    "HR",
+    "BA"
+   ],
+   "access": "index",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "hda-883",
+   "name": "HR-HDA-883 — Zbirka matičnih knjiga (Hrvatski državni arhiv)",
+   "url": "https://www.arhiv.hr/hr-hr/",
+   "countries": [
+    "HR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "de-hauptstaatsarchiv-stuttgart",
+   "name": "Hauptstaatsarchiv Stuttgart",
+   "url": "https://www.landesarchiv-bw.de/de/en/68809",
+   "countries": [
+    "DE"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.landesarchiv-bw.de/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "de-hessisches-hauptstaatsarchiv",
+   "name": "Hessisches Hauptstaatsarchiv",
+   "url": "https://landesarchiv.hessen.de",
+   "countries": [
+    "DE"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
   },
   {
    "id": "hrcak",
@@ -1303,7 +2492,22 @@
    "countries": [
     "HR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-cv-institute-of-national-archives-of-cabo-verde",
+   "name": "Institute of National Archives of Cabo Verde",
+   "url": "https://arquivonacional.cv/",
+   "countries": [
+    "CV"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1314,7 +2518,177 @@
    "countries": [
     "*"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "https://archive.org/sitemap/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-iq-iraq-national-library-and-archive",
+   "name": "Iraq National Library and Archive",
+   "url": "https://www.iraqnla.gov.iq/",
+   "countries": [
+    "IQ"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "http://iraqnla.gov.iq/sitemap.xml",
+    "http://iraqnla.gov.iq//report.php?sitemap_1.xml",
+    "http://iraqnla.gov.iq//waken/page.php?sitemap_1.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-gg-island-archives",
+   "name": "Island Archives",
+   "url": "https://www.gov.gg/islandarchives",
+   "countries": [
+    "GG"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "istrianet",
+   "name": "IstriaNet",
+   "url": "https://www.istrianet.org",
+   "countries": [
+    "HR",
+    "IT",
+    "SI"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "jewishgen",
+   "name": "JewishGen",
+   "url": "https://www.jewishgen.org/",
+   "countries": [
+    "*"
+   ],
+   "access": "account",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "de-landesamt-fuer-kultur-und-denkmalpflege-mecklenburg-vorpommern-landes",
+   "name": "Landesamt für Kultur und Denkmalpflege Mecklenburg-Vorpommern, Landesarchiv",
+   "url": "https://www.kulturwerte-mv.de/Landesarchiv/standorte-bestaende/standort-schwerin/",
+   "countries": [
+    "DE"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "de-landesarchiv-berlin",
+   "name": "Landesarchiv Berlin",
+   "url": "https://landesarchiv-berlin.de/",
+   "countries": [
+    "DE"
+   ],
+   "access": "mixed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://landesarchiv-berlin.de/wp-sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "de-landesarchiv-sachsen-anhalt-abteilung-magdeburg-standort-wernigerode",
+   "name": "Landesarchiv Sachsen-Anhalt, Abteilung Magdeburg, Standort Wernigerode",
+   "url": "https://lha.sachsen-anhalt.de/landesarchiv/standorte/wernigerode",
+   "countries": [
+    "DE"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "de-landesarchiv-speyer",
+   "name": "Landesarchiv Speyer",
+   "url": "https://lav.rlp.de/",
+   "countries": [
+    "DE"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "de-landeshauptarchiv-sachsen-anhalt-abteilung-dessau",
+   "name": "Landeshauptarchiv Sachsen-Anhalt, Abteilung Dessau",
+   "url": "https://lha.sachsen-anhalt.de/landesarchiv/standorte/dessau",
+   "countries": [
+    "DE"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "de-landeskirchliches-archiv-hannover",
+   "name": "Landeskirchliches Archiv Hannover",
+   "url": "https://www.landeskirchlichesarchiv-hannover.de/",
+   "countries": [
+    "DE"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "de-landeskirchliches-archiv-kiel",
+   "name": "Landeskirchliches Archiv Kiel",
+   "url": "https://www.archiv-nordkirche.de/",
+   "countries": [
+    "DE"
+   ],
+   "access": "paid",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.archiv-nordkirche.de/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "de-landeskirchliches-archiv-der-evangelisch-lutherischen-kirche-in-bayer",
+   "name": "Landeskirchliches Archiv der Evangelisch-Lutherischen Kirche in Bayern",
+   "url": "https://www.archiv-elkb.de",
+   "countries": [
+    "DE"
+   ],
+   "access": "paid",
+   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1325,7 +2699,25 @@
    "countries": [
     "CA"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open",
+   "alreadyDeclined": true
+  },
+  {
+   "id": "national-library-of-wales",
+   "name": "Llyfrgell Genedlaethol Cymru / National Library of Wales",
+   "url": "https://www.library.wales",
+   "countries": [
+    "GB"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.library.wales/sitemap.xml"
+   ],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1336,7 +2728,9 @@
    "countries": [
     "HR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1347,7 +2741,130 @@
    "countries": [
     "NL"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-is-national-archive-of-iceland",
+   "name": "National Archive of Iceland",
+   "url": "https://island.is/s/thjodskjalasafn",
+   "countries": [
+    "IS"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-vn-national-archives-centre",
+   "name": "National Archives Centre",
+   "url": "https://mocban.vn/",
+   "countries": [
+    "VN"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-ad-national-archives-of-andorra",
+   "name": "National Archives of Andorra",
+   "url": "https://www.govern.ad/ca/tematiques/cultura-i-esports/arxiu-nacional",
+   "countries": [
+    "AD"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "http://www.govern.ad/sitemap-index.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-am-national-archives-of-armenia",
+   "name": "National Archives of Armenia",
+   "url": "https://armarchives.am/",
+   "countries": [
+    "AM"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://armarchives.am/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-cm-national-archives-of-cameroon",
+   "name": "National Archives of Cameroon",
+   "url": "https://www.archivesnationales.cm/",
+   "countries": [
+    "CM"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-cl-national-archives-of-chile",
+   "name": "National Archives of Chile",
+   "url": "https://www.archivonacional.gob.cl/",
+   "countries": [
+    "CL"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-cr-national-archives-of-costa-rica",
+   "name": "National Archives of Costa Rica",
+   "url": "https://www.archivonacional.go.cr",
+   "countries": [
+    "CR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-ge-national-archives-of-georgia",
+   "name": "National Archives of Georgia",
+   "url": "https://archive.gov.ge/",
+   "countries": [
+    "GE"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-in-national-archives-of-india",
+   "name": "National Archives of India",
+   "url": "https://nationalarchives.nic.in/",
+   "countries": [
+    "IN"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 404,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1358,7 +2875,295 @@
    "countries": [
     "IE"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "https://nationalarchives.ie/sitemap_index.xml",
+    "https://nationalarchives.ie/ga/sitemap_index.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-jp-national-archives-of-japan",
+   "name": "National Archives of Japan",
+   "url": "https://www.archives.go.jp/",
+   "countries": [
+    "JP"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-kz-national-archives-of-kazakhstan",
+   "name": "National Archives of Kazakhstan",
+   "url": "https://ulttykarhiv.kz/ru/",
+   "countries": [
+    "KZ"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://ulttykarhiv.kz/sitemap.xml",
+    "https://ulttykarhiv.kz/sitemap.rss"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-kr-national-archives-of-korea",
+   "name": "National Archives of Korea",
+   "url": "https://www.archives.go.kr/next/viewMainNew.do",
+   "countries": [
+    "KR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-mu-national-archives-of-mauritius",
+   "name": "National Archives of Mauritius",
+   "url": "https://nationalarchives.govmu.org/nationalarchives/",
+   "countries": [
+    "MU"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-jp-national-archives-of-modern-architecture",
+   "name": "National Archives of Modern Architecture",
+   "url": "https://nama.bunka.go.jp/",
+   "countries": [
+    "JP"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-pa-national-archives-of-panama",
+   "name": "National Archives of Panama",
+   "url": "https://www.archivonacional.gob.pa",
+   "countries": [
+    "PA"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-tt-national-archives-of-trinidad-and-tobago",
+   "name": "National Archives of Trinidad and Tobago",
+   "url": "https://www.natt.gov.tt/",
+   "countries": [
+    "TT"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-tn-national-archives-of-tunisia",
+   "name": "National Archives of Tunisia",
+   "url": "https://www.archives.nat.tn/ar/",
+   "countries": [
+    "TN"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "http://www.archives.nat.tn/ar/sitemap_index.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-uy-national-archives-of-uruguay",
+   "name": "National Archives of Uruguay",
+   "url": "https://www.gub.uy/ministerio-educacion-cultura/archivo-general-nacion",
+   "countries": [
+    "UY"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-zw-national-archives-of-zimbabwe",
+   "name": "National Archives of Zimbabwe",
+   "url": "https://www.archives.gov.zw/",
+   "countries": [
+    "ZW"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-py-national-library-of-paraguay",
+   "name": "National Library of Paraguay",
+   "url": "https://bibliotecanacional.gov.py/",
+   "countries": [
+    "PY"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://bibliotecanacional.gov.py/wp-sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-cw-national-archive-of-curacao",
+   "name": "National archive of Curaçao",
+   "url": "https://nationaalarchief.cw/",
+   "countries": [
+    "CW"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://nationaalarchief.cw/sitemap_index.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "de-niedersaechsisches-landesarchiv-abteilung-osnabrueck",
+   "name": "Niedersächsisches Landesarchiv – Abteilung Osnabrück",
+   "url": "https://nla.niedersachsen.de/startseite/landesarchiv/abteilung_osnabruck/abteilung-osnabruck-197401.html",
+   "countries": [
+    "DE"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "de-niedersaechsisches-landesarchiv-abteilung-wolfenbuettel",
+   "name": "Niedersächsisches Landesarchiv – Abteilung Wolfenbüttel",
+   "url": "https://nla.niedersachsen.de/startseite/landesarchiv/abteilung_wolfenbuttel/abteilung-wolfenbuttel-197407.html",
+   "countries": [
+    "DE"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "de-niedersaechsisches-landesarchiv-abteilung-bueckeburg",
+   "name": "Niedersächsisches Landesarchiv, Abteilung Bückeburg",
+   "url": "https://nla.niedersachsen.de/startseite/landesarchiv/abteilung_buckeburg/abteilung-buckeburg-193940.html",
+   "countries": [
+    "DE"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "de-niedersaechsisches-landesarchiv-abteilung-hannover",
+   "name": "Niedersächsisches Landesarchiv, Abteilung Hannover",
+   "url": "https://nla.niedersachsen.de/startseite/landesarchiv/abteilung_hannover/standort-hannover-147647.html",
+   "countries": [
+    "DE"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "de-niedersaechsisches-landesarchiv-abteilung-stade",
+   "name": "Niedersächsisches Landesarchiv, Abteilung Stade",
+   "url": "https://nla.niedersachsen.de/startseite/landesarchiv/abteilung_stade/abteilung-stade-197403.html",
+   "countries": [
+    "DE"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "proni",
+   "name": "PRONI — Public Record Office of Northern Ireland",
+   "url": "https://www.proni.gov.uk/",
+   "countries": [
+    "GB",
+    "IE"
+   ],
+   "access": "mixed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-tr-prime-ministry-republic-archives",
+   "name": "Prime Ministry Republic Archives",
+   "url": "https://www.devletarsivleri.gov.tr/",
+   "countries": [
+    "TR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "qld-state-archives",
+   "name": "Queensland State Archives",
+   "url": "https://www.archivessearch.qld.gov.au/",
+   "countries": [
+    "AU"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "raduraksti-lv",
+   "name": "Raduraksti — Latvian State Historical Archives",
+   "url": "https://raduraksti.arhivi.lv/",
+   "countries": [
+    "LV"
+   ],
+   "access": "account",
+   "robotsStatus": 404,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1369,7 +3174,25 @@
    "countries": [
     "DK"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.rigsarkivet.dk/sitemap_index.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open",
+   "alreadyDeclined": true
+  },
+  {
+   "id": "arch-be",
+   "name": "Rijksarchief / Archives de l'État",
+   "url": "https://www.arch.be/",
+   "countries": [
+    "BE"
+   ],
+   "access": "account",
+   "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
    "policy": "open"
   },
@@ -1380,9 +3203,1575 @@
    "countries": [
     "EE"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.ra.ee/sitemap.xml",
+    "https://www.ra.ee/en/sitemap.xml"
+   ],
    "pageStatus": 200,
    "policy": "open"
+  },
+  {
+   "id": "scotlandspeople",
+   "name": "ScotlandsPeople",
+   "url": "https://www.scotlandspeople.gov.uk/",
+   "countries": [
+    "GB"
+   ],
+   "access": "paid",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "de-staatsarchiv-freiburg",
+   "name": "Staatsarchiv Freiburg",
+   "url": "https://www.landesarchiv-bw.de/de/landesarchiv/standorte/staatsarchiv-freiburg/47231",
+   "countries": [
+    "DE"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.landesarchiv-bw.de/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "de-staatsarchiv-ludwigsburg",
+   "name": "Staatsarchiv Ludwigsburg",
+   "url": "https://www.landesarchiv-bw.de/de/landesarchiv/standorte/staatsarchiv-ludwigsburg/47251",
+   "countries": [
+    "DE"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.landesarchiv-bw.de/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "de-staatsarchiv-sigmaringen",
+   "name": "Staatsarchiv Sigmaringen",
+   "url": "https://www.landesarchiv-bw.de/de/landesarchiv/standorte/staatsarchiv-sigmaringen/47267",
+   "countries": [
+    "DE"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.landesarchiv-bw.de/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "de-staatsarchiv-wertheim",
+   "name": "Staatsarchiv Wertheim",
+   "url": "https://www.landesarchiv-bw.de/de/landesarchiv/standorte/staatsarchiv-wertheim/47276",
+   "countries": [
+    "DE"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.landesarchiv-bw.de/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-mk-state-archive-of-the-republic-of-north-macedonia",
+   "name": "State Archive of the Republic of North Macedonia",
+   "url": "https://arhiv.mk/",
+   "countries": [
+    "MK"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://arhiv.mk/sitemap_index.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-sm-state-archives-of-san-marino",
+   "name": "State Archives of San Marino",
+   "url": "https://cultura.sm/Culturasm-Archivio.html",
+   "countries": [
+    "SM"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "the-gazette-uk",
+   "name": "The Gazette (London, Edinburgh and Belfast)",
+   "url": "https://www.thegazette.co.uk",
+   "countries": [
+    "GB"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.thegazette.co.uk/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "discovery",
+   "name": "The National Archives — Discovery",
+   "url": "https://discovery.nationalarchives.gov.uk/",
+   "countries": [
+    "GB"
+   ],
+   "access": "mixed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "tombo",
+   "name": "Torre do Tombo / Digitarq",
+   "url": "https://digitarq.arquivos.pt/",
+   "countries": [
+    "PT"
+   ],
+   "access": "free",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "na-va-vatican-apostolic-archives",
+   "name": "Vatican Apostolic Archives",
+   "url": "https://www.archivioapostolicovaticano.va/content/aav/it.html",
+   "countries": [
+    "VA"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "wiewaswie",
+   "name": "WieWasWie / Open Archieven",
+   "url": "https://www.wiewaswie.nl/",
+   "countries": [
+    "NL"
+   ],
+   "access": "free",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "wikitree",
+   "name": "WikiTree",
+   "url": "https://www.wikitree.com/",
+   "countries": [
+    "*"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.wikitree.com/wiki/sitemap_profiles_index.xml.gz",
+    "https://www.wikitree.com/genealogy/sitemap_surname_index.xml.gz",
+    "https://www.wikitree.com/wiki/sitemap_help.xml.gz"
+   ],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "yadvashem",
+   "name": "Yad Vashem — Central Database of Shoah Victims' Names",
+   "url": "https://collections.yadvashem.org/en/names",
+   "countries": [
+    "*"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "dlib-si",
+   "name": "dLib.si",
+   "url": "https://www.dlib.si/",
+   "countries": [
+    "SI"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "soa-praha-ebadatelna",
+   "name": "eBadatelna — Státní oblastní archiv v Praze",
+   "url": "https://ebadatelna.soapraha.cz/",
+   "countries": [
+    "CZ"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "muzej-genocida",
+   "name": "Žrtve rata 1941–1945 — Muzej žrtava genocida",
+   "url": "https://baza.muzejgenocida.rs/",
+   "countries": [
+    "RS",
+    "HR",
+    "BA",
+    "SI"
+   ],
+   "access": "index",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "open"
+  },
+  {
+   "id": "archives-nz",
+   "name": "Archives New Zealand — Collections",
+   "url": "https://collections.archives.govt.nz/",
+   "countries": [
+    "NZ"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "http://collections.archives.govt.nz:80/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: incapsula",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 529
+    }
+   ]
+  },
+  {
+   "id": "ac-archives-communales-de-nice",
+   "name": "Archives communales de Nice",
+   "url": "https://archives.nicecotedazur.org",
+   "countries": [
+    "FR"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives.nicecotedazur.org/sitemaps.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 1205
+    }
+   ]
+  },
+  {
+   "id": "ad-haut-rhin",
+   "name": "Archives d'Alsace — Haut-Rhin",
+   "url": "https://archives.haut-rhin.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives68.alsace.eu/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 364
+    }
+   ]
+  },
+  {
+   "id": "ad-paris",
+   "name": "Archives de Paris",
+   "url": "https://archives.paris.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives.paris.fr/sitemap/"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": []
+  },
+  {
+   "id": "ad-archives-du-departement-du-rhone-et-de-la-metropole-de-lyon",
+   "name": "Archives du département du Rhône et de la métropole de Lyon",
+   "url": "https://archives.rhone.fr",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives.rhone.fr/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/oai-pmh",
+     "bytes": 429
+    },
+    {
+     "path": "/sitemap.xml",
+     "bytes": 1440
+    }
+   ]
+  },
+  {
+   "id": "ad-indre-et-loire",
+   "name": "Archives départementales d'Indre-et-Loire",
+   "url": "https://archives.touraine.fr",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives.touraine.fr/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/oai-pmh",
+     "bytes": 432
+    },
+    {
+     "path": "/sitemap.xml",
+     "bytes": 844
+    }
+   ]
+  },
+  {
+   "id": "ad-vaucluse",
+   "name": "Archives départementales de Vaucluse",
+   "url": "https://memento.vaucluse.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://memento.vaucluse.fr/sitemap_index.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/api",
+     "bytes": 887
+    },
+    {
+     "path": "/sitemap.xml",
+     "bytes": 372
+    }
+   ]
+  },
+  {
+   "id": "ad-l-aude",
+   "name": "Archives départementales de l'Aude",
+   "url": "https://archivesdepartementales.aude.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "policy": "bot gate",
+   "detail": "even robots.txt is a bot check: captcha",
+   "doors": []
+  },
+  {
+   "id": "ad-l-essonne",
+   "name": "Archives départementales de l'Essonne",
+   "url": "https://archives.essonne.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives.essonne.fr/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/oai-pmh",
+     "bytes": 431
+    },
+    {
+     "path": "/sitemap.xml",
+     "bytes": 835
+    }
+   ]
+  },
+  {
+   "id": "ad-l-eure",
+   "name": "Archives départementales de l'Eure",
+   "url": "https://archives.eure.fr",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": []
+  },
+  {
+   "id": "ad-charente-maritime",
+   "name": "Archives départementales de la Charente-Maritime",
+   "url": "https://archives.charente-maritime.fr",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives.charente-maritime.fr/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 32404
+    }
+   ]
+  },
+  {
+   "id": "ad-correze",
+   "name": "Archives départementales de la Corrèze",
+   "url": "https://www.archives.correze.fr",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.archives.correze.fr/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/oai-pmh",
+     "bytes": 435
+    },
+    {
+     "path": "/sitemap.xml",
+     "bytes": 456
+    }
+   ]
+  },
+  {
+   "id": "ad-creuse",
+   "name": "Archives départementales de la Creuse",
+   "url": "https://archives.creuse.fr",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives.creuse.fr/sitemap/"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": []
+  },
+  {
+   "id": "ad-dordogne",
+   "name": "Archives départementales de la Dordogne",
+   "url": "https://archives.dordogne.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives.dordogne.fr/sitemap/"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": []
+  },
+  {
+   "id": "ad-haute-marne",
+   "name": "Archives départementales de la Haute-Marne",
+   "url": "https://archives.haute-marne.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 70675
+    }
+   ]
+  },
+  {
+   "id": "ad-marne",
+   "name": "Archives départementales de la Marne",
+   "url": "https://archives.marne.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives.marne.fr/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/oai-pmh",
+     "bytes": 429
+    },
+    {
+     "path": "/sitemap.xml",
+     "bytes": 663
+    }
+   ]
+  },
+  {
+   "id": "ad-martinique",
+   "name": "Archives départementales de la Martinique",
+   "url": "https://www.patrimoines-martinique.org/",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.patrimoines-martinique.org/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/oai-pmh",
+     "bytes": 442
+    },
+    {
+     "path": "/sitemap.xml",
+     "bytes": 574
+    }
+   ]
+  },
+  {
+   "id": "ad-meuse",
+   "name": "Archives départementales de la Meuse",
+   "url": "https://archives.meuse.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives.meuse.fr/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/oai-pmh",
+     "bytes": 429
+    },
+    {
+     "path": "/sitemap.xml",
+     "bytes": 355
+    }
+   ]
+  },
+  {
+   "id": "ad-nievre",
+   "name": "Archives départementales de la Nièvre",
+   "url": "https://archives.nievre.fr",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives.nievre.fr/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/oai-pmh",
+     "bytes": 430
+    },
+    {
+     "path": "/sitemap.xml",
+     "bytes": 436
+    }
+   ]
+  },
+  {
+   "id": "ad-savoie",
+   "name": "Archives départementales de la Savoie",
+   "url": "https://patrimoines.savoie.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a refusal in its own words: forbidden",
+   "doors": []
+  },
+  {
+   "id": "ad-somme",
+   "name": "Archives départementales de la Somme",
+   "url": "https://archives.somme.fr",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives.somme.fr/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/oai-pmh",
+     "bytes": 429
+    },
+    {
+     "path": "/sitemap.xml",
+     "bytes": 740
+    }
+   ]
+  },
+  {
+   "id": "ad-alpes-maritimes",
+   "name": "Archives départementales des Alpes-Maritimes",
+   "url": "https://www.archives06.fr",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "policy": "bot gate",
+   "detail": "even robots.txt is a bot check: captcha",
+   "doors": []
+  },
+  {
+   "id": "ad-landes",
+   "name": "Archives départementales des Landes",
+   "url": "https://www.archives.landes.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.archives.landes.fr/sitemap/"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: challenge-platform",
+   "doors": []
+  },
+  {
+   "id": "ad-calvados",
+   "name": "Archives départementales du Calvados",
+   "url": "https://archives.calvados.fr",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives.calvados.fr/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/oai-pmh",
+     "bytes": 432
+    },
+    {
+     "path": "/sitemap.xml",
+     "bytes": 1572
+    }
+   ]
+  },
+  {
+   "id": "ad-finistere",
+   "name": "Archives départementales du Finistère",
+   "url": "https://archives.finistere.fr",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 299979
+    }
+   ]
+  },
+  {
+   "id": "ad-jura",
+   "name": "Archives départementales du Jura",
+   "url": "https://archives39.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives39.fr/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/oai-pmh",
+     "bytes": 425
+    },
+    {
+     "path": "/sitemap.xml",
+     "bytes": 416
+    }
+   ]
+  },
+  {
+   "id": "ad-territoire-de-belfort",
+   "name": "Archives départementales du Territoire de Belfort",
+   "url": "https://archives.territoiredebelfort.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives.territoiredebelfort.fr/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/oai-pmh",
+     "bytes": 443
+    },
+    {
+     "path": "/sitemap.xml",
+     "bytes": 488
+    }
+   ]
+  },
+  {
+   "id": "ac-archives-municipales-d-alencon",
+   "name": "Archives municipales d'Alençon",
+   "url": "https://archives.ville-alencon.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives.ville-alencon.fr/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 294
+    }
+   ]
+  },
+  {
+   "id": "ac-archives-municipales-de-beausoleil",
+   "name": "Archives municipales de Beausoleil",
+   "url": "https://www.villedebeausoleil.fr/mairie/services-archives/",
+   "countries": [
+    "FR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.villedebeausoleil.fr/sitemap_index.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 553
+    }
+   ]
+  },
+  {
+   "id": "ac-archives-municipales-de-bressuire",
+   "name": "Archives municipales de Bressuire",
+   "url": "https://archivesmunicipales-bressuire.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://archivesmunicipales-bressuire.fr/sitemap_index.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 588
+    }
+   ]
+  },
+  {
+   "id": "ac-archives-municipales-de-briancon",
+   "name": "Archives municipales de Briançon",
+   "url": "https://www.ville-briancon.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "http://piment-config.site/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 457
+    }
+   ]
+  },
+  {
+   "id": "ac-archives-municipales-de-begles",
+   "name": "Archives municipales de Bègles",
+   "url": "https://www.mairie-begles.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.mairie-begles.fr/wp-sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 2709
+    }
+   ]
+  },
+  {
+   "id": "ac-archives-municipales-de-cannes",
+   "name": "Archives municipales de Cannes",
+   "url": "https://www.cannes.com/fr/culture/archives-municipales.html",
+   "countries": [
+    "FR"
+   ],
+   "access": "mixed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.cannes.com/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 300000
+    }
+   ]
+  },
+  {
+   "id": "ac-archives-municipales-de-cusset",
+   "name": "Archives municipales de Cusset",
+   "url": "https://www.ville-cusset.com/",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.ville-cusset.com/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 2868
+    }
+   ]
+  },
+  {
+   "id": "ac-archives-municipales-de-manosque",
+   "name": "Archives municipales de Manosque",
+   "url": "https://www.ville-manosque.fr/patrimoine-tourisme/lhistoire-de-ville/les-archives-municipales/",
+   "countries": [
+    "FR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.ville-manosque.fr/sitemap_index.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 2137
+    }
+   ]
+  },
+  {
+   "id": "ac-archives-municipales-de-poissy",
+   "name": "Archives municipales de Poissy",
+   "url": "https://www.ville-poissy.fr/index.php/vivre-a-poissy/poissy-pratique/les-archives-communales.html",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a refusal in its own words: accès refusé",
+   "doors": []
+  },
+  {
+   "id": "ac-archives-municipales-de-remiremont",
+   "name": "Archives municipales de Remiremont",
+   "url": "https://www.remiremont.fr/archives-municipales/",
+   "countries": [
+    "FR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.remiremont.fr/sitemap_index.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 792
+    }
+   ]
+  },
+  {
+   "id": "ac-archives-municipales-de-roubaix",
+   "name": "Archives municipales de Roubaix",
+   "url": "https://www.ville-roubaix.fr/services-infos-pratiques/culture-et-patrimoine/patrimoine-et-histoire/les-archives-municipales-de-roubaix/",
+   "countries": [
+    "FR"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 95417
+    }
+   ]
+  },
+  {
+   "id": "ac-archives-municipales-de-saint-claude",
+   "name": "Archives municipales de Saint-Claude",
+   "url": "https://www.saint-claude.fr/mairie/services-municipaux/archives-municipales/",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.saint-claude.fr/wp-sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 960
+    }
+   ]
+  },
+  {
+   "id": "ac-archives-municipales-de-saint-flour",
+   "name": "Archives municipales de Saint-Flour",
+   "url": "https://www.saint-flour.net/archives-municipales/",
+   "countries": [
+    "FR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.saint-flour.net/sitemap_index.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 1263
+    }
+   ]
+  },
+  {
+   "id": "ac-archives-municipales-de-saint-etienne",
+   "name": "Archives municipales de Saint-Étienne",
+   "url": "https://archives.saint-etienne.fr",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives.saint-etienne.fr/sitemap/"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": []
+  },
+  {
+   "id": "ac-archives-municipales-de-thionville",
+   "name": "Archives municipales de Thionville",
+   "url": "https://archives.thionville.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://archives.thionville.fr/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 288
+    }
+   ]
+  },
+  {
+   "id": "ac-archives-municipales-de-toulon",
+   "name": "Archives municipales de Toulon",
+   "url": "https://archives.toulon.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 403,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a refusal in its own words: forbidden",
+   "doors": []
+  },
+  {
+   "id": "ac-archives-municipales-de-villeneuve-la-garenne",
+   "name": "Archives municipales de Villeneuve-la-Garenne",
+   "url": "https://villeneuve92.com/ville/identite-patrimoine/archives-municipales/",
+   "countries": [
+    "FR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://villeneuve92.com/wp-sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 2238
+    }
+   ]
+  },
+  {
+   "id": "arhivele-ro",
+   "name": "Arhivele Naționale ale României",
+   "url": "https://www.arhivelenationale.ro/",
+   "countries": [
+    "RO",
+    "MD"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 503,
+   "sitemaps": [],
+   "pageStatus": 503,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: verifying your browser",
+   "doors": []
+  },
+  {
+   "id": "apesp-br",
+   "name": "Arquivo Público do Estado de São Paulo",
+   "url": "https://www.arquivoestado.sp.gov.br/apesp",
+   "countries": [
+    "BR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "policy": "bot gate",
+   "detail": "even robots.txt is a bot check: incident id",
+   "doors": []
+  },
+  {
+   "id": "beweb",
+   "name": "BeWeB — Beni ecclesiastici in web",
+   "url": "https://beweb.chiesacattolica.it/",
+   "countries": [
+    "IT"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.beweb.chiesacattolica.it/sitemap/sitemap_hp/sitemap_hp.xml",
+    "https://www.beweb.chiesacattolica.it/sitemap/regioni/regioni/sitemap_index.xml",
+    "https://www.beweb.chiesacattolica.it/sitemap/diocesi/diocesi/sitemap_index.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 1727
+    }
+   ]
+  },
+  {
+   "id": "brisbane-catholic-cemeteries",
+   "name": "Catholic Metropolitan Cemeteries Trust — Brisbane (cemsearch)",
+   "url": "https://search.cemsearch.com.au/mapguide/BrisbaneRCA/",
+   "countries": [
+    "AU"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 404,
+   "sitemaps": [],
+   "pageStatus": 403,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a refusal in its own words: forbidden",
+   "doors": []
+  },
+  {
+   "id": "dapa",
+   "name": "Državni arhiv u Pazinu",
+   "url": "https://www.dapa.hr/",
+   "countries": [
+    "HR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.dapa.hr/wp-sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 530
+    }
+   ]
+  },
+  {
+   "id": "familysearch",
+   "name": "FamilySearch",
+   "url": "https://www.familysearch.org/en/australia/",
+   "countries": [
+    "*"
+   ],
+   "access": "account",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.familysearch.org/sitemap-home-pages-experiment.xml",
+    "https://www.familysearch.org/sitemap-index-census-experiment.xml",
+    "https://www.familysearch.org/photos/sitemapIndex?category=artifacts&artifactCategory=IMAGE"
+   ],
+   "pageStatus": 403,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: incident id",
+   "doors": []
+  },
+  {
+   "id": "findagrave",
+   "name": "Find a Grave",
+   "url": "https://www.findagrave.com/",
+   "countries": [
+    "*"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: challenge-platform",
+   "doors": []
+  },
+  {
+   "id": "findmypast",
+   "name": "Findmypast",
+   "url": "https://www.findmypast.co.uk/",
+   "countries": [
+    "GB",
+    "IE",
+    "AU",
+    "NZ",
+    "US"
+   ],
+   "access": "paid",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.findmypast.co.uk/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a refusal in its own words: forbidden",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 812
+    }
+   ]
+  },
+  {
+   "id": "geneanet",
+   "name": "Geneanet",
+   "url": "https://www.geneanet.org/",
+   "countries": [
+    "FR",
+    "BE",
+    "CH",
+    "IT",
+    "ES",
+    "*"
+   ],
+   "access": "mixed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.geneanet.org/sitemap/0/sitemap.xml",
+    "https://en.geneanet.org/sitemap/0/sitemap.xml",
+    "https://es.geneanet.org/sitemap/0/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: challenge-platform",
+   "doors": []
+  },
+  {
+   "id": "geni",
+   "name": "Geni",
+   "url": "https://www.geni.com/",
+   "countries": [
+    "*"
+   ],
+   "access": "account",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.geni.com/sitemap.xml",
+    "https://www.geni.com/sm/discussions_index_1.xml",
+    "https://www.geni.com/sm/projects_index_1.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: incapsula",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 873
+    }
+   ]
+  },
+  {
+   "id": "gloucestershire-archives",
+   "name": "Gloucestershire Archives",
+   "url": "https://www.gloucestershire.gov.uk/archives/",
+   "countries": [
+    "GB"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 29621
+    }
+   ]
+  },
+  {
+   "id": "de-hauptstaatsarchiv-weimar",
+   "name": "Hauptstaatsarchiv Weimar",
+   "url": "https://landesarchiv.thueringen.de/weimar",
+   "countries": [
+    "DE"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "policy": "bot gate",
+   "detail": "even robots.txt is a bot check: captcha",
+   "doors": []
+  },
+  {
+   "id": "de-landeskirchliches-archiv-dresden",
+   "name": "Landeskirchliches Archiv, Dresden",
+   "url": "https://www.evlks.de/service/landeskirchliches-archiv/",
+   "countries": [
+    "DE"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://evlks.ddev.site/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 439
+    }
+   ]
+  },
+  {
+   "id": "mnl",
+   "name": "Magyar Nemzeti Levéltár (Hungarian National Archives)",
+   "url": "https://mnl.gov.hu/",
+   "countries": [
+    "HU",
+    "RO",
+    "SK",
+    "RS",
+    "HR",
+    "UA"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": []
+  },
+  {
+   "id": "na-jp-modern-japanese-political-history-materials-room",
+   "name": "Modern Japanese Political History Materials Room",
+   "url": "https://www.ndl.go.jp/en/tokyo/constitutional/",
+   "countries": [
+    "JP"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.ndl.go.jp/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a refusal in its own words: forbidden",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 212
+    }
+   ]
+  },
+  {
+   "id": "myheritage",
+   "name": "MyHeritage",
+   "url": "https://www.myheritage.com/",
+   "countries": [
+    "*"
+   ],
+   "access": "paid",
+   "robotsStatus": 200,
+   "policy": "bot gate",
+   "detail": "even robots.txt is a bot check: captcha",
+   "doors": []
+  },
+  {
+   "id": "na-bo-national-archive-and-library-of-bolivia",
+   "name": "National Archive and Library of Bolivia",
+   "url": "https://www.archivoybibliotecanacionales.org.bo/",
+   "countries": [
+    "BO"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: challenge-platform",
+   "doors": []
+  },
+  {
+   "id": "nli-registers",
+   "name": "National Library of Ireland — Catholic Parish Registers",
+   "url": "https://registers.nli.ie/",
+   "countries": [
+    "IE"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: challenge-platform",
+   "doors": [],
+   "alreadyDeclined": true
+  },
+  {
+   "id": "nrs-scotland",
+   "name": "National Records of Scotland",
+   "url": "https://www.nrscotland.gov.uk/",
+   "countries": [
+    "GB"
+   ],
+   "access": "mixed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.nrscotland.gov.uk/en/sitemap.xml",
+    "https://nrscotland.gov.uk/sitemap.xml",
+    "https://www.nrscotland.gov.uk/sitemap.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 178817
+    }
+   ]
+  },
+  {
+   "id": "sian-br",
+   "name": "SIAN — Sistema de Informações do Arquivo Nacional",
+   "url": "https://sian.an.gov.br/sianex/consulta/login.asp",
+   "countries": [
+    "BR"
+   ],
+   "access": "index",
+   "robotsStatus": 200,
+   "policy": "bot gate",
+   "detail": "even robots.txt is a bot check: captcha",
+   "doors": []
   },
   {
    "id": "ad-service-du-patrimoine-archivistique-et-audiovisuel-du-territoire-de-polynesie-francaise",
@@ -1391,9 +4780,38 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.archives.pf/sitemap.xml",
+    "https://www.archives.pf/news-sitemap.xml"
+   ],
    "pageStatus": 200,
-   "policy": "open"
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 451
+    }
+   ]
+  },
+  {
+   "id": "ellisisland",
+   "name": "Statue of Liberty–Ellis Island Foundation",
+   "url": "https://www.statueofliberty.org/arrival-search/",
+   "countries": [
+    "US"
+   ],
+   "access": "account",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.statueofliberty.org/sitemap_index.xml"
+   ],
+   "pageStatus": 200,
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": []
   },
   {
    "id": "szukajwarchiwach",
@@ -1405,32 +4823,58 @@
     "BY",
     "LT"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 200,
-   "policy": "open",
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: incapsula",
+   "doors": [
+    {
+     "path": "/sitemap.xml",
+     "bytes": 7010
+    }
+   ],
    "alreadyDeclined": true
   },
   {
-   "id": "the-gazette-uk",
-   "name": "The Gazette (London, Edinburgh and Belfast)",
-   "url": "https://www.thegazette.co.uk",
+   "id": "de-thueringisches-staatsarchiv-altenburg",
+   "name": "Thüringisches Staatsarchiv Altenburg",
+   "url": "https://thueringen.de/de/staatsarchive",
    "countries": [
-    "GB"
+    "DE"
    ],
+   "access": "catalogue",
    "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
+   "policy": "bot gate",
+   "detail": "even robots.txt is a bot check: captcha",
+   "doors": []
   },
   {
-   "id": "tombo",
-   "name": "Torre do Tombo / Digitarq",
-   "url": "https://digitarq.arquivos.pt/",
+   "id": "de-thueringisches-staatsarchiv-gotha",
+   "name": "Thüringisches Staatsarchiv Gotha",
+   "url": "https://landesarchiv.thueringen.de/gotha",
    "countries": [
-    "PT"
+    "DE"
    ],
-   "robotsStatus": 404,
-   "pageStatus": 200,
-   "policy": "open"
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "policy": "bot gate",
+   "detail": "even robots.txt is a bot check: captcha",
+   "doors": []
+  },
+  {
+   "id": "de-thueringisches-staatsarchiv-meiningen",
+   "name": "Thüringisches Staatsarchiv Meiningen",
+   "url": "https://landesarchiv.thueringen.de/meiningen/",
+   "countries": [
+    "DE"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "policy": "bot gate",
+   "detail": "even robots.txt is a bot check: captcha",
+   "doors": []
   },
   {
    "id": "trove",
@@ -1439,123 +4883,30 @@
    "countries": [
     "AU"
    ],
+   "access": "free",
    "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "wiewaswie",
-   "name": "WieWasWie / Open Archieven",
-   "url": "https://www.wiewaswie.nl/",
-   "countries": [
-    "NL"
+   "sitemaps": [
+    "https://trove.nla.gov.au/sitemap-index.xml",
+    "https://trove.nla.gov.au/newspaper-sitemap-index.xml",
+    "https://trove.nla.gov.au/cms/sitemap.xml"
    ],
-   "robotsStatus": 404,
    "pageStatus": 200,
-   "policy": "open"
+   "policy": "bot gate",
+   "detail": "robots.txt permits; the page is a bot check: captcha",
+   "doors": []
   },
   {
-   "id": "wikitree",
-   "name": "WikiTree",
-   "url": "https://www.wikitree.com/",
+   "id": "ancestry",
+   "name": "Ancestry",
+   "url": "https://www.ancestry.com/",
    "countries": [
     "*"
    ],
+   "access": "paid",
    "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "yadvashem",
-   "name": "Yad Vashem — Central Database of Shoah Victims' Names",
-   "url": "https://collections.yadvashem.org/en/names",
-   "countries": [
-    "*"
-   ],
-   "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "dlib-si",
-   "name": "dLib.si",
-   "url": "https://www.dlib.si/",
-   "countries": [
-    "SI"
-   ],
-   "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "open"
-  },
-  {
-   "id": "ad-landes",
-   "name": "Archives départementales des Landes",
-   "url": "https://www.archives.landes.fr/",
-   "countries": [
-    "FR"
-   ],
-   "robotsStatus": 200,
-   "pageStatus": 403,
-   "policy": "bot gate",
-   "detail": "robots.txt is open; the page serves a challenge"
-  },
-  {
-   "id": "chroniclingamerica",
-   "name": "Chronicling America",
-   "url": "https://chroniclingamerica.loc.gov/",
-   "countries": [
-    "US"
-   ],
-   "robotsStatus": 403,
-   "policy": "bot gate",
-   "detail": "a challenge page is served even for robots.txt"
-  },
-  {
-   "id": "findagrave",
-   "name": "Find a Grave",
-   "url": "https://www.findagrave.com/",
-   "countries": [
-    "*"
-   ],
-   "robotsStatus": 200,
-   "pageStatus": 200,
-   "policy": "bot gate",
-   "detail": "robots.txt is open; the page serves a challenge"
-  },
-  {
-   "id": "irishgenealogy",
-   "name": "IrishGenealogy.ie",
-   "url": "https://www.irishgenealogy.ie/",
-   "countries": [
-    "IE"
-   ],
-   "robotsStatus": 403,
-   "policy": "bot gate",
-   "detail": "a challenge page is served even for robots.txt",
-   "alreadyDeclined": true
-  },
-  {
-   "id": "kansallisarkisto",
-   "name": "Kansallisarkisto / HisKi",
-   "url": "https://kansallisarkisto.fi/etusivu",
-   "countries": [
-    "FI"
-   ],
-   "robotsStatus": 403,
-   "policy": "bot gate",
-   "detail": "a challenge page is served even for robots.txt"
-  },
-  {
-   "id": "nli-registers",
-   "name": "National Library of Ireland — Catholic Parish Registers",
-   "url": "https://registers.nli.ie/",
-   "countries": [
-    "IE"
-   ],
-   "robotsStatus": 403,
-   "policy": "bot gate",
-   "detail": "a challenge page is served even for robots.txt",
-   "alreadyDeclined": true
+   "policy": "robots forbids AI crawlers",
+   "detail": "named: google-extended",
+   "namesThisCrawler": false
   },
   {
    "id": "ad-gironde",
@@ -1564,9 +4915,11 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids AI crawlers",
-   "detail": "named: amazonbot, anthropic-ai, applebot-extended, bytespider, ccbot, claudebot"
+   "detail": "named: amazonbot, anthropic-ai, applebot-extended, bytespider, ccbot, chatgpt-user, claude-searchbot, claude-web",
+   "namesThisCrawler": true
   },
   {
    "id": "ad-mayenne",
@@ -1575,9 +4928,76 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids AI crawlers",
-   "detail": "named: amazonbot, anthropic-ai, bytespider, ccbot, claudebot, cohere-ai"
+   "detail": "named: amazonbot, anthropic-ai, bytespider, ccbot, claude-web, claudebot, cohere-ai, diffbot",
+   "namesThisCrawler": true
+  },
+  {
+   "id": "ac-archives-municipales-de-bourg-saint-andeol",
+   "name": "Archives municipales de Bourg-Saint-Andéol",
+   "url": "https://www.bsa-ville.fr/bourg-saint-andeol/archives-municipales.html",
+   "countries": [
+    "FR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "policy": "robots forbids AI crawlers",
+   "detail": "named: amazonbot, anthropic-ai, applebot-extended, bytespider, ccbot, claude-web, claudebot, diffbot",
+   "namesThisCrawler": true
+  },
+  {
+   "id": "ac-archives-municipales-de-luce",
+   "name": "Archives municipales de Lucé",
+   "url": "https://www.chartres.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "policy": "robots forbids AI crawlers",
+   "detail": "named: amazonbot, bytespider, ccbot, chatgpt-user, claudebot, gptbot, meta-externalagent, meta-webindexer",
+   "namesThisCrawler": true
+  },
+  {
+   "id": "ac-archives-municipales-de-mandelieu-la-napoule",
+   "name": "Archives municipales de Mandelieu-la-Napoule",
+   "url": "https://www.mandelieu.fr/18792-nos-archives.htm",
+   "countries": [
+    "FR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "policy": "robots forbids AI crawlers",
+   "detail": "named: claudebot",
+   "namesThisCrawler": true
+  },
+  {
+   "id": "ac-archives-municipales-de-parthenay",
+   "name": "Archives municipales de Parthenay",
+   "url": "https://www.cc-parthenay-gatine.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "policy": "robots forbids AI crawlers",
+   "detail": "named: ccbot, claudebot, google-extended, gptbot",
+   "namesThisCrawler": true
+  },
+  {
+   "id": "ac-archives-municipales-de-saint-quentin",
+   "name": "Archives municipales de Saint-Quentin",
+   "url": "https://www.saint-quentin.fr/71-archives-municipales.htm",
+   "countries": [
+    "FR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "policy": "robots forbids AI crawlers",
+   "detail": "named: amazonbot, anthropic-ai, applebot-extended, bytespider, ccbot, claude-web, claudebot, cohere-ai",
+   "namesThisCrawler": true
   },
   {
    "id": "banq",
@@ -1586,9 +5006,40 @@
    "countries": [
     "CA"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids AI crawlers",
-   "detail": "named: amazonbot, anthropic-ai, applebot-extended, bytespider, ccbot, claudebot"
+   "detail": "named: amazonbot, anthropic-ai, applebot-extended, bytespider, ccbot, chatgpt-user, claude-web, claudebot",
+   "namesThisCrawler": true
+  },
+  {
+   "id": "billiongraves",
+   "name": "BillionGraves",
+   "url": "https://billiongraves.com/",
+   "countries": [
+    "*"
+   ],
+   "access": "mixed",
+   "robotsStatus": 200,
+   "policy": "robots forbids AI crawlers",
+   "detail": "named: amazonbot, anthropic-ai, applebot-extended, bytespider, ccbot, chatgpt-user, claude-web, claudebot",
+   "namesThisCrawler": true
+  },
+  {
+   "id": "bundesarchiv",
+   "name": "Bundesarchiv",
+   "url": "https://www.bundesarchiv.de/",
+   "countries": [
+    "DE",
+    "PL",
+    "RU",
+    "LT"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "policy": "robots forbids AI crawlers",
+   "detail": "named: meta-webindexer",
+   "namesThisCrawler": false
   },
   {
    "id": "delpher",
@@ -1597,9 +5048,11 @@
    "countries": [
     "NL"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids AI crawlers",
-   "detail": "named: google-extended"
+   "detail": "named: google-extended",
+   "namesThisCrawler": false
   },
   {
    "id": "digitalarkivet",
@@ -1608,9 +5061,11 @@
    "countries": [
     "NO"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids AI crawlers",
-   "detail": "named: amazonbot, anthropic-ai, applebot-extended, bytespider, ccbot, claudebot"
+   "detail": "named: amazonbot, anthropic-ai, applebot-extended, bytespider, ccbot, chatgpt-user, claude-searchbot, claude-web",
+   "namesThisCrawler": true
   },
   {
    "id": "gazettes-africa",
@@ -1642,9 +5097,38 @@
     "ZM",
     "ZW"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids AI crawlers",
-   "detail": "named: amazonbot, anthropic-ai, applebot-extended, claudebot, cohere-ai, google-extended"
+   "detail": "named: amazonbot, anthropic-ai, applebot-extended, chatgpt-user, claude-web, claudebot, cohere-ai, google-extended",
+   "namesThisCrawler": true
+  },
+  {
+   "id": "rodoslovlje-indeks",
+   "name": "Indeks — Hrvatsko rodoslovno društvo",
+   "url": "https://indeks.rodoslovlje.hr/",
+   "countries": [
+    "HR"
+   ],
+   "access": "index",
+   "robotsStatus": 200,
+   "policy": "robots forbids AI crawlers",
+   "detail": "named: amazonbot, anthropic-ai, applebot-extended, bytespider, ccbot, chatgpt-user, claude-web, claudebot",
+   "namesThisCrawler": true,
+   "alreadyDeclined": true
+  },
+  {
+   "id": "de-landeskirchliches-archiv-braunschweig",
+   "name": "Landeskirchliches Archiv Braunschweig",
+   "url": "https://www.landeskirche-braunschweig.de/arbeitsbereiche/landeskirchliches-archiv",
+   "countries": [
+    "DE"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "policy": "robots forbids AI crawlers",
+   "detail": "named: ccbot",
+   "namesThisCrawler": false
   },
   {
    "id": "matricula",
@@ -1660,9 +5144,11 @@
     "LU",
     "BA"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids AI crawlers",
-   "detail": "named: amazonbot, applebot-extended, bytespider, ccbot, claudebot, google-extended",
+   "detail": "named: amazonbot, applebot-extended, bytespider, ccbot, claudebot, google-extended, gptbot, meta-externalagent",
+   "namesThisCrawler": true,
    "alreadyDeclined": true
   },
   {
@@ -1672,9 +5158,39 @@
    "countries": [
     "AU"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids AI crawlers",
-   "detail": "named: amazonbot, anthropic-ai, applebot-extended, bytespider, ccbot, claudebot"
+   "detail": "named: amazonbot, anthropic-ai, applebot-extended, bytespider, ccbot, claude-web, claudebot, cohere-ai",
+   "namesThisCrawler": true
+  },
+  {
+   "id": "openarchieven",
+   "name": "Open Archieven",
+   "url": "https://www.openarchieven.nl/",
+   "countries": [
+    "NL",
+    "BE"
+   ],
+   "access": "index",
+   "robotsStatus": 200,
+   "policy": "robots forbids AI crawlers",
+   "detail": "named: meta-externalagent, meta-webindexer",
+   "namesThisCrawler": false
+  },
+  {
+   "id": "riksarkivet-se",
+   "name": "Riksarkivet — Digitala forskarsalen",
+   "url": "https://sok.riksarkivet.se/",
+   "countries": [
+    "SE"
+   ],
+   "access": "mixed",
+   "robotsStatus": 200,
+   "policy": "robots forbids AI crawlers",
+   "detail": "named: amazonbot, bytespider, claude-searchbot, claudebot, meta-externalagent, meta-webindexer, metaai, oai-searchbot",
+   "namesThisCrawler": true,
+   "alreadyDeclined": true
   },
   {
    "id": "na-bg-ss-cyril-and-methodius-national-library",
@@ -1683,9 +5199,11 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids AI crawlers",
-   "detail": "named: ccbot"
+   "detail": "named: ccbot",
+   "namesThisCrawler": false
   },
   {
    "id": "de-zlb-berlin",
@@ -1694,9 +5212,11 @@
    "countries": [
     "DE"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids AI crawlers",
-   "detail": "named: meta-externalagent"
+   "detail": "named: meta-externalagent",
+   "namesThisCrawler": false
   },
   {
    "id": "eggsa",
@@ -1705,9 +5225,24 @@
    "countries": [
     "ZA"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids AI crawlers",
-   "detail": "named: amazonbot, meta-externalagent"
+   "detail": "named: amazonbot, meta-externalagent",
+   "namesThisCrawler": false
+  },
+  {
+   "id": "garf",
+   "name": "Государственный архив Российской Федерации (GARF)",
+   "url": "https://statearchive.ru/",
+   "countries": [
+    "RU"
+   ],
+   "access": "onsite",
+   "robotsStatus": 200,
+   "policy": "robots forbids AI crawlers",
+   "detail": "named: anthropic-ai, bytespider, ccbot, chatgpt-user, cohere-ai, gptbot, omgili",
+   "namesThisCrawler": true
   },
   {
    "id": "na-bg-asab-varna",
@@ -1716,6 +5251,7 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -1726,6 +5262,29 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
+   "robotsStatus": 200,
+   "policy": "robots forbids everyone"
+  },
+  {
+   "id": "ac-archives-municipales-de-dijon",
+   "name": "Archives municipales de Dijon",
+   "url": "https://archives.dijon.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "policy": "robots forbids everyone"
+  },
+  {
+   "id": "ahmp-praga-publica",
+   "name": "Archivní katalog — Archiv hlavního města Prahy",
+   "url": "https://katalog.ahmp.cz/pragapublica/",
+   "countries": [
+    "CZ"
+   ],
+   "access": "unsurveyed",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -1736,6 +5295,7 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -1746,6 +5306,7 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -1756,6 +5317,18 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
+   "robotsStatus": 200,
+   "policy": "robots forbids everyone"
+  },
+  {
+   "id": "soa-litomerice-digi",
+   "name": "Digitální badatelna — Státní oblastní archiv v Litoměřicích",
+   "url": "https://digi.soalitomerice.cz/digitalnibadatelna/",
+   "countries": [
+    "CZ"
+   ],
+   "access": "unsurveyed",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -1766,6 +5339,7 @@
    "countries": [
     "CZ"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -1776,6 +5350,7 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -1786,6 +5361,7 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -1796,6 +5372,7 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -1806,6 +5383,7 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -1816,6 +5394,7 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -1826,6 +5405,7 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -1836,6 +5416,7 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -1846,9 +5427,21 @@
    "countries": [
     "US"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone",
    "alreadyDeclined": true
+  },
+  {
+   "id": "nlp-ph",
+   "name": "National Library of the Philippines",
+   "url": "https://web.nlp.gov.ph/",
+   "countries": [
+    "PH"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "policy": "robots forbids everyone"
   },
   {
    "id": "na-bg-pazardzhik-state-archives",
@@ -1857,6 +5450,7 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -1867,6 +5461,7 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -1877,6 +5472,7 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -1887,6 +5483,7 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -1897,6 +5494,7 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -1907,6 +5505,7 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -1917,6 +5516,7 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -1927,6 +5527,7 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -1937,6 +5538,7 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -1947,6 +5549,7 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -1957,6 +5560,7 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -1967,6 +5571,7 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -1977,6 +5582,7 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -1987,6 +5593,7 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -1997,6 +5604,7 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -2007,6 +5615,7 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -2017,6 +5626,7 @@
    "countries": [
     "BG"
    ],
+   "access": "free",
    "robotsStatus": 200,
    "policy": "robots forbids everyone"
   },
@@ -2033,9 +5643,11 @@
     "SK",
     "HU"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "actapublica",
@@ -2044,9 +5656,11 @@
    "countries": [
     "CZ"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "antenati",
@@ -2055,9 +5669,39 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
+  },
+  {
+   "id": "arcanum-adt",
+   "name": "Arcanum Digitheca (ADT)",
+   "url": "https://adt.arcanum.com",
+   "countries": [
+    "HU"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 403,
+   "policy": "refused",
+   "detail": "robots.txt itself answers 403",
+   "doors": []
+  },
+  {
+   "id": "ad-mayotte",
+   "name": "Archives départementales de Mayotte",
+   "url": "https://www.mayotte.fr/le-conseil-departemental/institution/services-administratifs/archives",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 404,
+   "policy": "refused",
+   "detail": "the page answers 404",
+   "doors": []
   },
   {
    "id": "ad-l-ariege",
@@ -2066,10 +5710,39 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 418,
+   "sitemaps": [],
    "pageStatus": 418,
    "policy": "refused",
-   "detail": "the page answers 418"
+   "detail": "the page answers 418",
+   "doors": []
+  },
+  {
+   "id": "ad-l-oise",
+   "name": "Archives départementales de l'Oise",
+   "url": "https://archives.oise.fr",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 403,
+   "policy": "refused",
+   "detail": "robots.txt itself answers 403",
+   "doors": []
+  },
+  {
+   "id": "ad-pyrenees-atlantiques",
+   "name": "Archives départementales des Pyrénées-Atlantiques",
+   "url": "https://archives.le64.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 403,
+   "policy": "refused",
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "ad-tarn",
@@ -2078,10 +5751,125 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 418,
+   "sitemaps": [],
    "pageStatus": 418,
    "policy": "refused",
-   "detail": "the page answers 418"
+   "detail": "the page answers 418",
+   "doors": []
+  },
+  {
+   "id": "ac-archives-municipales-de-colombes",
+   "name": "Archives municipales de Colombes",
+   "url": "https://www.colombes.fr/la-ville/histoire-et-patrimoine/les-archives-de-la-ville/",
+   "countries": [
+    "FR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 418,
+   "sitemaps": [],
+   "pageStatus": 418,
+   "policy": "refused",
+   "detail": "the page answers 418",
+   "doors": []
+  },
+  {
+   "id": "ac-archives-municipales-de-haguenau",
+   "name": "Archives municipales de Haguenau",
+   "url": "https://www.ville-haguenau.fr/archives-municipales",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "/fr/sitemap.xml"
+   ],
+   "pageStatus": 503,
+   "policy": "refused",
+   "detail": "the page answers 503",
+   "doors": []
+  },
+  {
+   "id": "ac-archives-municipales-de-la-rochelle",
+   "name": "Archives municipales de La Rochelle",
+   "url": "https://archives.larochelle.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 403,
+   "policy": "refused",
+   "detail": "robots.txt itself answers 403",
+   "doors": []
+  },
+  {
+   "id": "ac-archives-municipales-de-meudon",
+   "name": "Archives municipales de Meudon",
+   "url": "https://www.meudon.fr/ma-ville/decouvrir-meudon-presentation-de-la-ville/archives-1/",
+   "countries": [
+    "FR"
+   ],
+   "access": "onsite",
+   "robotsStatus": 418,
+   "sitemaps": [],
+   "pageStatus": 418,
+   "policy": "refused",
+   "detail": "the page answers 418",
+   "doors": []
+  },
+  {
+   "id": "ac-archives-municipales-de-quimper",
+   "name": "Archives municipales de Quimper",
+   "url": "https://archives.quimper.bzh",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 403,
+   "policy": "refused",
+   "detail": "robots.txt itself answers 403",
+   "doors": []
+  },
+  {
+   "id": "ac-archives-municipales-de-reims",
+   "name": "Archives municipales de Reims",
+   "url": "https://fonds-archives.reims.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 403,
+   "policy": "refused",
+   "detail": "robots.txt itself answers 403",
+   "doors": []
+  },
+  {
+   "id": "ac-archives-municipales-de-saint-maurice",
+   "name": "Archives municipales de Saint Maurice",
+   "url": "https://www.ville-saint-maurice.com/page_accueil_archives_doc.html",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 403,
+   "policy": "refused",
+   "detail": "robots.txt itself answers 403",
+   "doors": []
+  },
+  {
+   "id": "ac-archives-municipales-de-saint-maur-des-fosses",
+   "name": "Archives municipales de Saint-Maur-des-Fossés",
+   "url": "https://www.saint-maur.com/Archives-municipales",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 403,
+   "policy": "refused",
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "ac-archives-municipales-de-sceaux",
@@ -2090,22 +5878,56 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 200,
+   "sitemaps": [],
    "pageStatus": 418,
    "policy": "refused",
-   "detail": "the page answers 418"
+   "detail": "the page answers 418",
+   "doors": []
   },
   {
-   "id": "ac-archives-municipales-de-toulon",
-   "name": "Archives municipales de Toulon",
-   "url": "https://archives.toulon.fr/",
+   "id": "ac-archives-municipales-de-tourcoing",
+   "name": "Archives municipales de Tourcoing",
+   "url": "https://mediatheque.tourcoing.fr/opacwebaloes/index.aspx?IdPage=414",
    "countries": [
     "FR"
    ],
-   "robotsStatus": 200,
-   "pageStatus": 403,
+   "access": "unsurveyed",
+   "robotsStatus": 503,
+   "sitemaps": [],
+   "pageStatus": 503,
    "policy": "refused",
-   "detail": "the page answers 403"
+   "detail": "the page answers 503",
+   "doors": []
+  },
+  {
+   "id": "ac-archives-municipales-de-valence",
+   "name": "Archives municipales de Valence",
+   "url": "https://www.valence.fr/fr/re-decouvrir-la-ville/ville-d-histoire-s/les-archives.html",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 418,
+   "sitemaps": [],
+   "pageStatus": 418,
+   "policy": "refused",
+   "detail": "the page answers 418",
+   "doors": []
+  },
+  {
+   "id": "ac-archives-municipales-de-villefranche-sur-saone",
+   "name": "Archives municipales de Villefranche-sur-Saône",
+   "url": "https://www.villefranche.net/index.php/culture-sports-et-loisirs/culture/262-archives-municipales.html",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 403,
+   "policy": "refused",
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-agrigento",
@@ -2114,9 +5936,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-alessandria",
@@ -2125,9 +5949,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-ancona",
@@ -2136,9 +5962,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-arezzo",
@@ -2147,9 +5975,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-ascoli-piceno",
@@ -2158,9 +5988,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-asti",
@@ -2169,9 +6001,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-avellino",
@@ -2180,9 +6014,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-bari",
@@ -2191,9 +6027,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-bari-sezione-di-barletta",
@@ -2202,9 +6040,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-bari-sezione-di-trani",
@@ -2213,9 +6053,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-belluno",
@@ -2224,9 +6066,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-benevento",
@@ -2235,9 +6079,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-bergamo",
@@ -2246,9 +6092,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-biella",
@@ -2257,9 +6105,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-bologna",
@@ -2268,9 +6118,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-bologna-sezione-di-imola",
@@ -2279,9 +6131,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-bolzano",
@@ -2290,9 +6144,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-brescia",
@@ -2301,9 +6157,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-brindisi",
@@ -2312,9 +6170,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-cagliari",
@@ -2323,9 +6183,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-caltanissetta",
@@ -2334,9 +6196,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-campobasso",
@@ -2345,9 +6209,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-caserta",
@@ -2356,9 +6222,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-catania",
@@ -2367,9 +6235,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-catanzaro",
@@ -2378,9 +6248,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-chieti",
@@ -2389,9 +6261,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-como",
@@ -2400,9 +6274,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-cosenza",
@@ -2411,9 +6287,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-cremona",
@@ -2422,9 +6300,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-cuneo",
@@ -2433,9 +6313,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-enna",
@@ -2444,9 +6326,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-fermo",
@@ -2455,9 +6339,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-ferrara",
@@ -2466,9 +6352,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-firenze",
@@ -2477,9 +6365,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-foggia",
@@ -2488,9 +6378,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-foggia-sezione-di-lucera",
@@ -2499,9 +6391,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-forli-cesena",
@@ -2510,9 +6404,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-frosinone",
@@ -2521,9 +6417,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-genova-2",
@@ -2532,9 +6430,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-gorizia",
@@ -2543,9 +6443,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-grosseto",
@@ -2554,9 +6456,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-imperia",
@@ -2565,9 +6469,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-imperia-sezione-di-sanremo",
@@ -2576,9 +6482,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-imperia-sezione-di-ventimiglia",
@@ -2587,9 +6495,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-isernia",
@@ -2598,9 +6508,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-la-spezia",
@@ -2609,9 +6521,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-latina",
@@ -2620,9 +6534,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-lecce",
@@ -2631,9 +6547,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-livorno",
@@ -2642,9 +6560,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-lucca",
@@ -2653,9 +6573,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-macerata",
@@ -2664,9 +6586,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-mantova",
@@ -2675,9 +6599,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-massa",
@@ -2686,9 +6612,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-massa-sezione-di-pontremoli",
@@ -2697,9 +6625,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-matera",
@@ -2708,9 +6638,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-messina",
@@ -2719,9 +6651,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-milano",
@@ -2730,9 +6664,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-modena",
@@ -2741,9 +6677,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-napoli",
@@ -2752,9 +6690,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-novara",
@@ -2763,9 +6703,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-nuoro",
@@ -2774,9 +6716,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-oristano",
@@ -2785,9 +6729,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-padova-2",
@@ -2796,9 +6742,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-palermo",
@@ -2807,9 +6755,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-parma",
@@ -2818,9 +6768,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-pavia",
@@ -2829,9 +6781,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-perugia",
@@ -2840,9 +6794,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-perugia-sezione-di-assisi",
@@ -2851,9 +6807,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-perugia-sezione-di-foligno-2",
@@ -2862,9 +6820,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-perugia-sezione-di-gubbio",
@@ -2873,9 +6833,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-perugia-sezione-di-spoleto",
@@ -2884,9 +6846,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-pesaro-urbino",
@@ -2895,9 +6859,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-pesaro-urbino-sezione-di-fano",
@@ -2906,9 +6872,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-pesaro-urbino-sezione-di-urbino",
@@ -2917,9 +6885,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-pescara",
@@ -2928,9 +6898,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-piacenza",
@@ -2939,9 +6911,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-pisa",
@@ -2950,9 +6924,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-pistoia",
@@ -2961,9 +6937,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-pistoia-sezione-di-pescia-2",
@@ -2972,9 +6950,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-pordenone",
@@ -2983,9 +6963,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-potenza",
@@ -2994,9 +6976,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-prato",
@@ -3005,9 +6989,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-ragusa",
@@ -3016,9 +7002,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-ravenna",
@@ -3027,9 +7015,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-ravenna-sezione-di-faenza",
@@ -3038,9 +7028,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-reggio-calabria",
@@ -3049,9 +7041,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-reggio-calabria-sezione-di-locri",
@@ -3060,9 +7054,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-reggio-emilia",
@@ -3071,9 +7067,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-rieti",
@@ -3082,9 +7080,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-rimini",
@@ -3093,9 +7093,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-roma",
@@ -3104,9 +7106,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-rovigo",
@@ -3115,9 +7119,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-salerno",
@@ -3126,9 +7132,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-sassari",
@@ -3137,9 +7145,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-savona",
@@ -3148,9 +7158,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-siena",
@@ -3159,9 +7171,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-siracusa",
@@ -3170,9 +7184,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-siracusa-sezione-di-noto",
@@ -3181,9 +7197,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-sondrio",
@@ -3192,9 +7210,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-taranto",
@@ -3203,9 +7223,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-teramo",
@@ -3214,9 +7236,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-terni",
@@ -3225,9 +7249,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-terni-sezione-di-orvieto",
@@ -3236,9 +7262,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-torino",
@@ -3247,9 +7275,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-trapani",
@@ -3258,9 +7288,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-trento",
@@ -3269,9 +7301,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-treviso",
@@ -3280,9 +7314,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-trieste",
@@ -3291,9 +7327,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-udine",
@@ -3302,9 +7340,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-varese",
@@ -3313,9 +7353,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-venezia",
@@ -3324,9 +7366,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-verbania",
@@ -3335,9 +7379,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-vercelli",
@@ -3346,9 +7392,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-vercelli-sezione-di-varallo",
@@ -3357,9 +7405,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-verona",
@@ -3368,9 +7418,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-vibo-valentia",
@@ -3379,9 +7431,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-vicenza",
@@ -3390,9 +7444,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-vicenza-sezione-di-bassano-del-grappa",
@@ -3401,9 +7457,11 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "asd-viterbo",
@@ -3412,9 +7470,91 @@
    "countries": [
     "IT"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "doors": []
+  },
+  {
+   "id": "bristol-archives",
+   "name": "Bristol Archives",
+   "url": "https://www.bristolmuseums.org.uk/bristol-archives/",
+   "countries": [
+    "GB"
+   ],
+   "access": "onsite",
+   "robotsStatus": 403,
+   "policy": "refused",
+   "detail": "robots.txt itself answers 403",
+   "doors": []
+  },
+  {
+   "id": "cemla",
+   "name": "CEMLA — Centro de Estudios Migratorios Latinoamericanos",
+   "url": "https://search.cemla.com",
+   "countries": [
+    "AR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 302,
+   "policy": "refused",
+   "detail": "the page answers 302",
+   "doors": []
+  },
+  {
+   "id": "chroniclingamerica",
+   "name": "Chronicling America",
+   "url": "https://chroniclingamerica.loc.gov/",
+   "countries": [
+    "US"
+   ],
+   "access": "free",
+   "robotsStatus": 403,
+   "policy": "refused",
+   "detail": "robots.txt itself answers 403",
+   "doors": []
+  },
+  {
+   "id": "soa-trebon-digiarchiv",
+   "name": "DigiArchiv — Státní oblastní archiv v Třeboni",
+   "url": "https://digi.ceskearchivy.cz/",
+   "countries": [
+    "CZ"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 403,
+   "policy": "refused",
+   "detail": "robots.txt itself answers 403",
+   "doors": []
+  },
+  {
+   "id": "gr-historical-archives-museum-of-hydra",
+   "name": "Historical Archives Museum of Hydra",
+   "url": "https://www.iamy.gr/",
+   "countries": [
+    "GR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 403,
+   "policy": "refused",
+   "detail": "robots.txt itself answers 403",
+   "doors": []
+  },
+  {
+   "id": "gr-historical-archives-of-the-bank-of-greece",
+   "name": "Historical Archives of the Bank of Greece",
+   "url": "https://www.bankofgreece.gr/trapeza/kepoet/istoriko-arxeio",
+   "countries": [
+    "GR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 403,
+   "policy": "refused",
+   "detail": "robots.txt itself answers 403",
+   "doors": []
   },
   {
    "id": "hungaricana",
@@ -3428,10 +7568,170 @@
     "HR",
     "UA"
    ],
+   "access": "free",
    "robotsStatus": 403,
    "policy": "refused",
    "detail": "robots.txt itself answers 403",
+   "doors": [],
    "alreadyDeclined": true
+  },
+  {
+   "id": "irishgenealogy",
+   "name": "IrishGenealogy.ie",
+   "url": "https://www.irishgenealogy.ie/",
+   "countries": [
+    "IE"
+   ],
+   "access": "free",
+   "robotsStatus": 403,
+   "policy": "refused",
+   "detail": "robots.txt itself answers 403",
+   "doors": [],
+   "alreadyDeclined": true
+  },
+  {
+   "id": "na-bh-isa-cultural-centre",
+   "name": "Isa Cultural Centre",
+   "url": "https://www.icc.gov.bh/",
+   "countries": [
+    "BH"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 403,
+   "policy": "refused",
+   "detail": "robots.txt itself answers 403",
+   "doors": []
+  },
+  {
+   "id": "na-il-israel-state-archives",
+   "name": "Israel State Archives",
+   "url": "https://www.archives.gov.il/",
+   "countries": [
+    "IL"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 403,
+   "policy": "refused",
+   "detail": "robots.txt itself answers 403",
+   "doors": []
+  },
+  {
+   "id": "kansallisarkisto",
+   "name": "Kansallisarkisto / HisKi",
+   "url": "https://kansallisarkisto.fi/etusivu",
+   "countries": [
+    "FI"
+   ],
+   "access": "free",
+   "robotsStatus": 403,
+   "policy": "refused",
+   "detail": "robots.txt itself answers 403",
+   "doors": []
+  },
+  {
+   "id": "archyvai-lt",
+   "name": "Lietuvos archyvai (Lithuanian State Archives)",
+   "url": "https://www.archyvai.lt/",
+   "countries": [
+    "LT"
+   ],
+   "access": "mixed",
+   "robotsStatus": 403,
+   "policy": "refused",
+   "detail": "robots.txt itself answers 403",
+   "doors": []
+  },
+  {
+   "id": "na-kh-national-archives-of-cambodia",
+   "name": "National Archives of Cambodia",
+   "url": "https://nac.gov.kh/",
+   "countries": [
+    "KH"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 403,
+   "policy": "refused",
+   "detail": "robots.txt itself answers 403",
+   "doors": []
+  },
+  {
+   "id": "na-sg-national-archives-of-singapore",
+   "name": "National Archives of Singapore",
+   "url": "https://www.nas.gov.sg/",
+   "countries": [
+    "SG"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 202,
+   "sitemaps": [],
+   "pageStatus": 202,
+   "policy": "refused",
+   "detail": "the page answers 202",
+   "doors": []
+  },
+  {
+   "id": "na-bs-national-archives-of-the-bahamas",
+   "name": "National Archives of the Bahamas",
+   "url": "https://www.nationalarchives.gov.bs/",
+   "countries": [
+    "BS"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 403,
+   "policy": "refused",
+   "detail": "robots.txt itself answers 403",
+   "doors": []
+  },
+  {
+   "id": "nap-ph",
+   "name": "National Archives of the Philippines",
+   "url": "https://nationalarchives.gov.ph/",
+   "countries": [
+    "PH"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 403,
+   "policy": "refused",
+   "detail": "robots.txt itself answers 403",
+   "doors": []
+  },
+  {
+   "id": "nhcp-ph",
+   "name": "National Historical Commission of the Philippines",
+   "url": "https://nhcp.gov.ph/",
+   "countries": [
+    "PH"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 403,
+   "policy": "refused",
+   "detail": "robots.txt itself answers 403",
+   "doors": []
+  },
+  {
+   "id": "qld-bdm",
+   "name": "Queensland Historical BDM Index",
+   "url": "https://www.familyhistory.bdm.qld.gov.au/",
+   "countries": [
+    "AU"
+   ],
+   "access": "index",
+   "robotsStatus": 403,
+   "policy": "refused",
+   "detail": "robots.txt itself answers 403",
+   "doors": []
+  },
+  {
+   "id": "ancestor-co-za",
+   "name": "Ancestor.co.za",
+   "url": "https://www.ancestor.co.za",
+   "countries": [
+    "ZA"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 0,
+   "policy": "nothing answered",
+   "detail": "<urlopen error [SSL: TLSV1_ALERT_INTERNAL_ERROR] tlsv1 alert internal error (_ssl.c:1082)>"
   },
   {
    "id": "ac-nantes",
@@ -3440,6 +7740,19 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
+   "robotsStatus": 0,
+   "policy": "nothing answered",
+   "detail": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl."
+  },
+  {
+   "id": "ac-l-agglomeration-evreux-portes-de-normandie",
+   "name": "Archives de l'agglomération Évreux Portes de Normandie",
+   "url": "https://archives.epn-agglo.fr",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
    "robotsStatus": 0,
    "policy": "nothing answered",
    "detail": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl."
@@ -3451,6 +7764,7 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 0,
    "policy": "nothing answered",
    "detail": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl."
@@ -3462,9 +7776,22 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 0,
    "policy": "nothing answered",
    "detail": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl."
+  },
+  {
+   "id": "ad-vosges",
+   "name": "Archives départementales des Vosges",
+   "url": "https://archives.vosges.fr/",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 0,
+   "policy": "nothing answered",
+   "detail": "<urlopen error timed out>"
   },
   {
    "id": "ac-archives-municipales-de-belfort",
@@ -3473,9 +7800,151 @@
    "countries": [
     "FR"
    ],
+   "access": "free",
    "robotsStatus": 0,
    "policy": "nothing answered",
    "detail": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl."
+  },
+  {
+   "id": "ac-archives-municipales-de-la-ville-d-angers-et-d-angers-loire-metropole",
+   "name": "Archives municipales de la ville d'Angers et d'Angers Loire Métropole",
+   "url": "https://archives.angers.fr/index.html",
+   "countries": [
+    "FR"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 200,
+   "sitemaps": [
+    "https://www.angers.fr/index.php?id=55001&type=200",
+    "https://musees.angers.fr/index.php?id=52330&type=200",
+    "https://archives.angers.fr/index.php?id=58863&type=200"
+   ],
+   "pageStatus": 0,
+   "policy": "nothing answered",
+   "detail": "[Errno 54] Connection reset by peer"
+  },
+  {
+   "id": "ac-archives-municipales-et-communautaires-d-amiens",
+   "name": "Archives municipales et communautaires d'Amiens",
+   "url": "https://www.amiens.fr/Vivre-a-Amiens/Culture-Patrimoine/Les-Archives-municipales-et-communautaires",
+   "countries": [
+    "FR"
+   ],
+   "access": "free",
+   "robotsStatus": 200,
+   "sitemaps": [],
+   "pageStatus": 0,
+   "policy": "nothing answered",
+   "detail": "The read operation timed out"
+  },
+  {
+   "id": "asud",
+   "name": "Archivio di Stato di Udine",
+   "url": "https://archiviodistatoudine.cultura.gov.it/home",
+   "countries": [
+    "IT"
+   ],
+   "access": "onsite",
+   "robotsStatus": 0,
+   "policy": "nothing answered",
+   "detail": "<urlopen error timed out>"
+  },
+  {
+   "id": "agad",
+   "name": "Archiwum Główne Akt Dawnych (AGAD)",
+   "url": "https://agad.gov.pl/",
+   "countries": [
+    "PL",
+    "UA"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 0,
+   "policy": "nothing answered",
+   "detail": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid f"
+  },
+  {
+   "id": "corsica-genealogie",
+   "name": "Corsica Genealogie (RHFC)",
+   "url": "https://www.corsicagenealogie.com",
+   "countries": [
+    "FR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 0,
+   "policy": "nothing answered",
+   "detail": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+  },
+  {
+   "id": "gro",
+   "name": "General Register Office (England and Wales)",
+   "url": "https://www.gro.gov.uk/",
+   "countries": [
+    "GB"
+   ],
+   "access": "paid",
+   "robotsStatus": 0,
+   "policy": "nothing answered",
+   "detail": "<urlopen error timed out>"
+  },
+  {
+   "id": "registro-civil-mx",
+   "name": "Mi Registro Civil",
+   "url": "https://www.miregistrocivil.gob.mx/",
+   "countries": [
+    "MX"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 0,
+   "policy": "nothing answered",
+   "detail": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl."
+  },
+  {
+   "id": "naairs",
+   "name": "NAAIRS — National Archives of South Africa",
+   "url": "https://www.nationalarchives.gov.za/",
+   "countries": [
+    "ZA"
+   ],
+   "access": "index",
+   "robotsStatus": 0,
+   "policy": "nothing answered",
+   "detail": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl."
+  },
+  {
+   "id": "na-mn-national-archives-of-mongolia",
+   "name": "National Archives of Mongolia",
+   "url": "https://www.archives.gov.mn/",
+   "countries": [
+    "MN"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 0,
+   "policy": "nothing answered",
+   "detail": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl."
+  },
+  {
+   "id": "na-ir-national-library-and-archives-of-iran",
+   "name": "National Library and Archives of Iran",
+   "url": "https://nlai.ir",
+   "countries": [
+    "IR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 0,
+   "policy": "nothing answered",
+   "detail": "<urlopen error timed out>"
+  },
+  {
+   "id": "openstarts",
+   "name": "OpenStarts (Università di Trieste)",
+   "url": "https://www.openstarts.units.it",
+   "countries": [
+    "IT"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 0,
+   "policy": "nothing answered",
+   "detail": "<urlopen error _ssl.c:1064: The handshake operation timed out>"
   },
   {
    "id": "pares",
@@ -3484,6 +7953,7 @@
    "countries": [
     "ES"
    ],
+   "access": "free",
    "robotsStatus": 0,
    "policy": "nothing answered",
    "detail": "<urlopen error timed out>"
@@ -3496,9 +7966,70 @@
     "CZ",
     "DE"
    ],
+   "access": "free",
    "robotsStatus": 0,
    "policy": "nothing answered",
    "detail": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl."
+  },
+  {
+   "id": "sira",
+   "name": "SIRAnet",
+   "url": "https://www.siranet.si/",
+   "countries": [
+    "SI"
+   ],
+   "access": "catalogue",
+   "robotsStatus": 0,
+   "policy": "nothing answered",
+   "detail": "<urlopen error timed out>"
+  },
+  {
+   "id": "stadtarchiv-reutlingen",
+   "name": "Stadtarchiv Reutlingen",
+   "url": "https://stadtarchiv.reutlingen.de",
+   "countries": [
+    "DE"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 0,
+   "policy": "nothing answered",
+   "detail": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate (_ssl.c:1082)>"
+  },
+  {
+   "id": "nsk-stare-novine",
+   "name": "Stare hrvatske novine (NSK)",
+   "url": "https://dnc.nsk.hr/newspapers",
+   "countries": [
+    "HR"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 0,
+   "policy": "nothing answered",
+   "detail": "<urlopen error timed out>"
+  },
+  {
+   "id": "niab",
+   "name": "Нацыянальны гістарычны архіў Беларусі (NIAB)",
+   "url": "https://niab.by/",
+   "countries": [
+    "BY"
+   ],
+   "access": "onsite",
+   "robotsStatus": 0,
+   "policy": "nothing answered",
+   "detail": "<urlopen error timed out>"
+  },
+  {
+   "id": "rgada",
+   "name": "Российский государственный архив древних актов (RGADA)",
+   "url": "https://rgada.info/",
+   "countries": [
+    "RU"
+   ],
+   "access": "unsurveyed",
+   "robotsStatus": 0,
+   "policy": "nothing answered",
+   "detail": "<urlopen error [Errno 61] Connection refused>"
   }
  ]
 }

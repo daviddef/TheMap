@@ -1,5 +1,5 @@
 {
- "note": "Whether each provider would serve an identified crawler, read from its own robots.txt and — only where robots permitted it — one request to its front page. Nothing was crawled. This says who would let us read them, not who should be read: what a provider holds, and whether it names ground finely enough to colour a dot, is a separate question per provider.",
+ "note": "Whether each provider would serve an identified crawler, read from its own robots.txt and — only where robots permitted it — one request to its front page. Nothing was crawled. This says who would let us read them, not who should be read: what a provider holds, and whether it names ground finely enough to colour a dot, is a separate question per provider. CAVEAT, FOUND AFTERWARDS: `open` here means the robots.txt permitted us and the FRONT PAGE answered. It does not promise that the search or the API behind it will. Szukaj w Archiwach is listed open and is already in _declined.json — its pages answer while /api returns an Incapsula challenge. So this file narrows the field honestly and does not settle any single source; each one still has to be opened and looked at.",
  "userAgent": "RecordAtlasBot/1.0 (+https://recordatlas.org; a genealogy atlas checking whether it may read this source)",
  "checked": "2026-10-11",
  "access": "free",
@@ -10,7 +10,8 @@
   "robots forbids everyone": 31,
   "refused": 127,
   "nothing answered": 6,
-  "no url on the row": 0
+  "no url on the row": 0,
+  "listedOpenButAlreadyDeclined": 7
  },
  "providers": [
   {
@@ -1292,7 +1293,8 @@
    ],
    "robotsStatus": 200,
    "pageStatus": 200,
-   "policy": "open"
+   "policy": "open",
+   "alreadyDeclined": true
   },
   {
    "id": "hrcak",
@@ -1405,7 +1407,8 @@
    ],
    "robotsStatus": 200,
    "pageStatus": 200,
-   "policy": "open"
+   "policy": "open",
+   "alreadyDeclined": true
   },
   {
    "id": "the-gazette-uk",
@@ -1528,7 +1531,8 @@
    ],
    "robotsStatus": 403,
    "policy": "bot gate",
-   "detail": "a challenge page is served even for robots.txt"
+   "detail": "a challenge page is served even for robots.txt",
+   "alreadyDeclined": true
   },
   {
    "id": "kansallisarkisto",
@@ -1550,7 +1554,8 @@
    ],
    "robotsStatus": 403,
    "policy": "bot gate",
-   "detail": "a challenge page is served even for robots.txt"
+   "detail": "a challenge page is served even for robots.txt",
+   "alreadyDeclined": true
   },
   {
    "id": "ad-gironde",
@@ -1657,7 +1662,8 @@
    ],
    "robotsStatus": 200,
    "policy": "robots forbids AI crawlers",
-   "detail": "named: amazonbot, applebot-extended, bytespider, ccbot, claudebot, google-extended"
+   "detail": "named: amazonbot, applebot-extended, bytespider, ccbot, claudebot, google-extended",
+   "alreadyDeclined": true
   },
   {
    "id": "naa",
@@ -1841,7 +1847,8 @@
     "US"
    ],
    "robotsStatus": 200,
-   "policy": "robots forbids everyone"
+   "policy": "robots forbids everyone",
+   "alreadyDeclined": true
   },
   {
    "id": "na-bg-pazardzhik-state-archives",
@@ -3423,7 +3430,8 @@
    ],
    "robotsStatus": 403,
    "policy": "refused",
-   "detail": "robots.txt itself answers 403"
+   "detail": "robots.txt itself answers 403",
+   "alreadyDeclined": true
   },
   {
    "id": "ac-nantes",

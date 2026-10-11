@@ -165,6 +165,24 @@
    "verdict": "declined by this project, not by the site",
    "why": "Answers 403 to an identified crawler on its own front page — 118 bytes, no challenge page, no explanation. Nothing was read, so nothing is claimed.",
    "whyItMattered": "Its declared countries — HU, RO, SK, RS — hold 1,282 drawn places, and it is classed free."
+  },
+  {
+   "id": "lac",
+   "name": "Library and Archives Canada — coverage harvest of Collection Search",
+   "url": "https://recherche-collection-search.bac-lac.gc.ca/",
+   "asked": "2026-10-11",
+   "verdict": "declined by this project, not by the site",
+   "why": "Collection Search's robots.txt is `User-agent: * / Disallow: /` with an explicit exception for Googlebot and Googlebot-Image only. That is a site saying one search engine may index it and nobody else may read it, and this project takes that at its word. Its 65 datasets on open.canada.ca were checked as a second route and are corporate — briefing notes, quarterly financial reports, departmental plans — with no record coverage in them.",
+   "whyItMattered": "Canada is 1,042 grey dots, the second largest block with an open provider, and LAC holds the censuses, immigration and military service records free."
+  },
+  {
+   "id": "sa-dk",
+   "name": "Rigsarkivet — parish-level coverage from Arkivalieronline",
+   "url": "https://arkivalieronline.rigsarkivet.dk/",
+   "asked": "2026-10-11",
+   "verdict": "NOT declined — deferred as expensive, and the split matters",
+   "why": "Two hostnames, two answers. soeg.rigsarkivet.dk, which is the search, says `User-agent: * / Disallow: /` and is therefore closed to us. arkivalieronline.rigsarkivet.dk says `Disallow:` with nothing after it, which permits everything, and it serves real pages at /da/collection/theme/N. So the viewer is open and the search is not, and the open half has no API: parish-level coverage would mean crawling down through themes to something like 2,100 parishes. Worth doing, several hours, and not to be confused with a refusal.",
+   "whyItMattered": "Denmark is 1,001 grey dots and its parish registers are free."
   }
  ]
 }

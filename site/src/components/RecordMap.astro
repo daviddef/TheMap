@@ -26,12 +26,30 @@
    Everything else — the find box, the filter pills, that every view is a link
    — is the family Atlas's and is kept deliberately, because a reader who knows
    one of these maps should know all of them. */
+import { readFileSync } from "node:fs";
 const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, belgiumBase, wikidataUrl, osmUrl, featureBase, settlementBase, districtBase, countryBase, townlandBase, comuneBase, estoniaBase, scotlandBase, worldArchivesUrl, countryPointsUrl, base } = Astro.props;
 
 /* The long explanation the idle panel used to carry in full now lives at
    /help/, and the panel links to it. Derived from `base` so it survives the
    /TheMap/ prefix on GitHub Pages, which a hard-coded "/help/" would not. */
 const HELP = base.replace(/\/$/, "") + "/help/";
+
+/* WHICH SHARDS ARE NOT THREE CHARACTERS LONG, read at build time and inlined.
+   build.py's write_shards decides, by measuring, which prefixes need a longer
+   key and which are too big to split at all, and writes the answer here. The
+   client reads that decision rather than re-deriving it — see
+   public/js/shard-key.js for why this project will not have two sharding
+   rules again.
+
+   READ WITH A FALLBACK RATHER THAN IMPORTED. A static import would make the
+   site unbuildable until build.py has run once, and the honest default is
+   already the old behaviour: no entry for a directory means every shard in it
+   is three characters, which is what every directory but g/ and s/ is. */
+let SHARDMAP = {};
+try {
+  SHARDMAP = JSON.parse(readFileSync(
+    new URL("../../public/shards.json", import.meta.url), "utf8"));
+} catch { /* not built yet: three characters everywhere, as before */ }
 ---
 
 {/* ONE BAR, NOT THREE PANELS. The search box, seven layer switches, the year
@@ -418,8 +436,14 @@ const HELP = base.replace(/\/$/, "") + "/help/";
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
+{/* ONE SHARDING RULE, LOADED BEFORE ANYTHING ASKS FOR A SHARD. Classic
+    script, not a module, so it has run by the time the inline script below
+    is parsed — and it is a file rather than eleven copied loops because
+    this project has already paid twice for the build and the client working
+    the key out separately. */}
+<script is:inline src={base.replace(/\/$/, "") + "/js/shard-key.js"}></script>
 
-<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, BSURN: belgiumBase, WDA: wikidataUrl, OSMA: osmUrl, FEAT: featureBase, SETT: settlementBase, DIST: districtBase, CTRY: countryBase, TOWN: townlandBase, COMU: comuneBase, ESTO: estoniaBase, SCOT: scotlandBase, WARCH: worldArchivesUrl, CPTS: countryPointsUrl, BASE: base }}>
+<script is:inline define:vars={{ INDEX: indexUrl, DETAIL: detailBase, REGIONS: regionsUrl, PROVIDERS: providersUrl, GAZ: gazBase, SURN: surnameBase, BSURN: belgiumBase, WDA: wikidataUrl, OSMA: osmUrl, FEAT: featureBase, SETT: settlementBase, DIST: districtBase, CTRY: countryBase, TOWN: townlandBase, COMU: comuneBase, ESTO: estoniaBase, SCOT: scotlandBase, WARCH: worldArchivesUrl, CPTS: countryPointsUrl, BASE: base, SHARDS: SHARDMAP }}>
 /* ASK FOR THE DATA NOW, NOT AFTER EVERYTHING ELSE HAS LOADED.
    Measured on the live site rather than reasoned about, which is what
    should have happened the first time:
@@ -479,11 +503,11 @@ window.addEventListener("load", async function () {
               .then(function (d) { warch = d.byCountry || {}; return warch; })
               .catch(function () { return {}; });
   var CNAME = idx.countries || {};
-  var XL = { "đ": "d", "ł": "l", "ø": "o", "ß": "ss", "æ": "ae", "œ": "oe" };
-  function fold(s) {
-    return (s || "").toLowerCase().replace(/[đłøßæœ]/g, function (c) { return XL[c]; })
-      .normalize("NFKD").replace(/[̀-ͯ]/g, "");
-  }
+  /* THE ONE FOLD, from js/shard-key.js, which also holds the one shard-key
+     rule. This was a local copy and had quietly lost the dotless ı that
+     build.py's table has — a third spelling of a function that must be the
+     same in three places or names shard one way and are looked up another. */
+  var fold = window.raFold;
   /* index.json already carries the country names the rest of the site uses,
      so a badge reads "Italy" and not "IT". */
   var ccName = function (cc) { return (idx.countries || {})[cc] || cc; };
@@ -1988,7 +2012,7 @@ window.addEventListener("load", async function () {
           /* Checked, because not every layer has both halves — churches and
              libraries are Wikidata-only — and an unchecked fetch logged two
              404s on every page load that looked like a fault and were not. */
-          var res = await fetch(FEAT + key + "-" + which + ".json");
+          var res = await fetch(FEAT + encodeURIComponent(key) + "-" + which + ".json");
           if (!res.ok) continue;
           var part = await res.json();
           if (part.features && part.features.length) {
@@ -4291,12 +4315,10 @@ window.addEventListener("load", async function () {
   var scache = {};
   async function surnames(term) {
     var f = fold(term);
-    var key = "";
-    for (var i = 0; i < f.length && key.length < 3; i++)
-      if (/[a-z0-9]/.test(f[i])) key += f[i];
-    if (key.length < 3) return [];
+    var key = raShardKey(f, SHARDS.s);
+    if (!key) return [];
     if (!(key in scache)) {
-      try { scache[key] = await (await fetch(SURN + key + ".json")).json(); }
+      try { scache[key] = await (await fetch(raShardUrl(SURN, key))).json(); }
       catch (e) { scache[key] = []; }
     }
     var hit = [];
@@ -4904,12 +4926,10 @@ window.addEventListener("load", async function () {
   var gcache = {}, gmark = null;
   async function gazetteer(term) {
     var f = fold(term);
-    var key = "";
-    for (var i = 0; i < f.length && key.length < 3; i++)
-      if (/[a-z0-9]/.test(f[i])) key += f[i];
-    if (key.length < 3) return [];
+    var key = raShardKey(f, SHARDS.g);
+    if (!key) return [];
     if (!(key in gcache)) {
-      try { gcache[key] = await (await fetch(GAZ + key + ".json")).json(); }
+      try { gcache[key] = await (await fetch(raShardUrl(GAZ, key))).json(); }
       catch (e) { gcache[key] = []; }
     }
     var hit = [];
@@ -4944,12 +4964,10 @@ window.addEventListener("load", async function () {
   var setcache = {};
   async function settlements(term) {
     var f = fold(term);
-    var key = "";
-    for (var i = 0; i < f.length && key.length < 3; i++)
-      if (/[a-z0-9]/.test(f[i])) key += f[i];
-    if (key.length < 3) return [];
+    var key = raShardKey(f);
+    if (!key) return [];
     if (!(key in setcache)) {
-      try { setcache[key] = await (await fetch(SETT + key + ".json")).json(); }
+      try { setcache[key] = await (await fetch(raShardUrl(SETT, key))).json(); }
       catch (e) { setcache[key] = []; }
     }
     return setcache[key].filter(function (r) {
@@ -4963,12 +4981,10 @@ window.addEventListener("load", async function () {
   var dcache = {};
   async function districts(term) {
     var f = fold(term);
-    var key = "";
-    for (var i = 0; i < f.length && key.length < 3; i++)
-      if (/[a-z0-9]/.test(f[i])) key += f[i];
-    if (key.length < 3) return [];
+    var key = raShardKey(f);
+    if (!key) return [];
     if (!(key in dcache)) {
-      try { dcache[key] = await (await fetch(DIST + key + ".json")).json(); }
+      try { dcache[key] = await (await fetch(raShardUrl(DIST, key))).json(); }
       catch (e) { dcache[key] = []; }
     }
     var hit = [];
@@ -5001,12 +5017,11 @@ window.addEventListener("load", async function () {
      build.py, which tried four to split the Belgian «Van » names and put
      it back rather than keep two rules in step by hand. */
   async function communes(name) {
-    var f = fold(name), key = "";
-    for (var i = 0; i < f.length && key.length < 3; i++)
-      if (/[a-z0-9]/.test(f[i])) key += f[i];
-    if (key.length < 3) return null;
+    var f = fold(name);
+    var key = raShardKey(f);
+    if (!key) return null;
     if (!(key in bcache)) {
-      try { bcache[key] = await (await fetch(BSURN + key + ".json")).json(); }
+      try { bcache[key] = await (await fetch(raShardUrl(BSURN, key))).json(); }
       catch (e) { bcache[key] = null; }
     }
     var sh = bcache[key];
@@ -5184,12 +5199,10 @@ window.addEventListener("load", async function () {
   var tcache = {};
   async function townlands(term) {
     var f = fold(term);
-    var key = "";
-    for (var i = 0; i < f.length && key.length < 3; i++)
-      if (/[a-z0-9]/.test(f[i])) key += f[i];
-    if (key.length < 3) return [];
+    var key = raShardKey(f);
+    if (!key) return [];
     if (!(key in tcache)) {
-      try { tcache[key] = await (await fetch(TOWN + key + ".json")).json(); }
+      try { tcache[key] = await (await fetch(raShardUrl(TOWN, key))).json(); }
       catch (e) { tcache[key] = []; }
     }
     var hit = [];
@@ -5220,12 +5233,10 @@ window.addEventListener("load", async function () {
   var mcache = {};
   async function comuni(term) {
     var f = fold(term);
-    var key = "";
-    for (var i = 0; i < f.length && key.length < 3; i++)
-      if (/[a-z0-9]/.test(f[i])) key += f[i];
-    if (key.length < 3) return [];
+    var key = raShardKey(f);
+    if (!key) return [];
     if (!(key in mcache)) {
-      try { mcache[key] = await (await fetch(COMU + key + ".json")).json(); }
+      try { mcache[key] = await (await fetch(raShardUrl(COMU, key))).json(); }
       catch (e) { mcache[key] = []; }
     }
     var hit = [];
@@ -5248,12 +5259,10 @@ window.addEventListener("load", async function () {
   var ecache = {};
   async function estonia(term) {
     var f = fold(term);
-    var key = "";
-    for (var i = 0; i < f.length && key.length < 3; i++)
-      if (/[a-z0-9]/.test(f[i])) key += f[i];
-    if (key.length < 3) return [];
+    var key = raShardKey(f);
+    if (!key) return [];
     if (!(key in ecache)) {
-      try { ecache[key] = await (await fetch(ESTO + key + ".json")).json(); }
+      try { ecache[key] = await (await fetch(raShardUrl(ESTO, key))).json(); }
       catch (e) { ecache[key] = []; }
     }
     return ecache[key].filter(function (r) {
@@ -5269,12 +5278,10 @@ window.addEventListener("load", async function () {
   var sccache = {};
   async function scotland(term) {
     var f = fold(term);
-    var key = "";
-    for (var i = 0; i < f.length && key.length < 3; i++)
-      if (/[a-z0-9]/.test(f[i])) key += f[i];
-    if (key.length < 3) return [];
+    var key = raShardKey(f);
+    if (!key) return [];
     if (!(key in sccache)) {
-      try { sccache[key] = await (await fetch(SCOT + key + ".json")).json(); }
+      try { sccache[key] = await (await fetch(raShardUrl(SCOT, key))).json(); }
       catch (e) { sccache[key] = []; }
     }
     return sccache[key].filter(function (r) {

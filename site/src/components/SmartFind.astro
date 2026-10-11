@@ -25,8 +25,20 @@
    the query covers more of it — which is the part of «percentage» that is
    real, used as a tie-break where it belongs.
 */
+import { readFileSync } from "node:fs";
 const { placesIndex, quietIndex, base, surnameShards = null, gazShards = null,
         hint: hintText = "Find a country or a place — Gallignana finds Gračišće" } = Astro.props;
+
+/* WHICH SHARDS ARE NOT THREE CHARACTERS LONG. build.py decides by measuring
+   and writes the answer to public/shards.json; this box reads the decision
+   rather than re-deriving it. Read with a fallback rather than imported, so
+   the site still builds before build.py has run once — and an absent file
+   means three characters everywhere, which is the old behaviour exactly. */
+let SHARDMAP = {};
+try {
+  SHARDMAP = JSON.parse(readFileSync(
+    new URL("../../public/shards.json", import.meta.url), "utf8"));
+} catch { /* not built yet */ }
 ---
 
 <form class="sfind" role="search" autocomplete="off" onsubmit="return false">
@@ -38,7 +50,9 @@ const { placesIndex, quietIndex, base, surnameShards = null, gazShards = null,
   <p class="sfhint" id="sfhint" role="status" aria-live="polite"></p>
 </form>
 
-<script is:inline define:vars={{ IDX: placesIndex, QUIET: quietIndex, BASE: base, SURN: surnameShards, GAZ: gazShards }}>
+{/* The one sharding rule, loaded before anything asks for a shard. */}
+<script is:inline src={base.replace(/\/$/, "") + "/js/shard-key.js"}></script>
+<script is:inline define:vars={{ IDX: placesIndex, QUIET: quietIndex, BASE: base, SURN: surnameShards, GAZ: gazShards, SHARDS: SHARDMAP }}>
   (function () {
     var box = document.getElementById("sfq");
     var drop = document.getElementById("sfdrop");
@@ -46,10 +60,10 @@ const { placesIndex, quietIndex, base, surnameShards = null, gazShards = null,
     if (!box) return;
     var rows = null, loading = false, pending = "", cur = -1, items = [];
 
-    function fold(s) {
-      return (s || "").toString().toLowerCase()
-        .normalize("NFD").replace(/[̀-ͯ]/g, "");
-    }
+    /* THE ONE FOLD, from js/shard-key.js. This box used to fold with NFD
+       and no translation table, so «Đakovo» folded to «đakovo» and went
+       looking for a key the build never wrote — it shards under `dak`. */
+    var fold = window.raFold;
     function esc(s) {
       return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
         return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
@@ -164,10 +178,8 @@ const { placesIndex, quietIndex, base, surnameShards = null, gazShards = null,
     var gcache = {};
     function gazetteer(k, done) {
       if (!GAZ || k.length < 3) { done([]); return; }
-      var key = "";
-      for (var i = 0; i < k.length && key.length < 3; i++)
-        if (/[a-z0-9]/.test(k[i])) key += k[i];
-      if (key.length < 3) { done([]); return; }
+      var key = raShardKey(k, SHARDS.g);
+      if (!key) { done([]); return; }
       function use(list) {
         var out = [], seen = {};
         (list || []).forEach(function (r) {
@@ -189,7 +201,7 @@ const { placesIndex, quietIndex, base, surnameShards = null, gazShards = null,
         done(out.sort(cmp).slice(0, 6));
       }
       if (gcache[key]) { use(gcache[key]); return; }
-      fetch(GAZ + key + ".json").then(function (r) { return r.json(); })
+      fetch(raShardUrl(GAZ, key)).then(function (r) { return r.json(); })
         .then(function (d) { gcache[key] = d; use(d); })
         .catch(function () { gcache[key] = []; done([]); });
     }
@@ -197,10 +209,8 @@ const { placesIndex, quietIndex, base, surnameShards = null, gazShards = null,
     var scache = {};
     function surnames(k, done) {
       if (!SURN || k.length < 3) { done([]); return; }
-      var key = "";
-      for (var i = 0; i < k.length && key.length < 3; i++)
-        if (/[a-z0-9]/.test(k[i])) key += k[i];
-      if (key.length < 3) { done([]); return; }
+      var key = raShardKey(k, SHARDS.s);
+      if (!key) { done([]); return; }
       function use(list) {
         var out = [];
         (list || []).forEach(function (r) {
@@ -215,7 +225,7 @@ const { placesIndex, quietIndex, base, surnameShards = null, gazShards = null,
         done(out.sort(cmp).slice(0, 8));
       }
       if (scache[key]) { use(scache[key]); return; }
-      fetch(SURN + key + ".json").then(function (r) { return r.json(); })
+      fetch(raShardUrl(SURN, key)).then(function (r) { return r.json(); })
         .then(function (d) { scache[key] = d; use(d); })
         .catch(function () { scache[key] = []; done([]); });
     }

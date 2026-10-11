@@ -240,27 +240,48 @@ def main():
     #
     # Both now compute the same thing, and this proves it on the real data
     # rather than trusting that they still agree.
-    def client_key(f):
-        k = ""
-        for ch in f:
-            if ch.isalnum():
-                k += ch
-                if len(k) == 3:
-                    break
-        return k if len(k) == 3 else ""
-
+    # IT NOW RUNS THE CLIENT INSTEAD OF IMITATING IT. This used to re-type the
+    # client's loop in Python and compare build.py against the copy — which
+    # proves the two Pythons agree and nothing about the JavaScript that is
+    # actually shipped. The copy had in fact already drifted: it used
+    # `isalnum()`, true of Cyrillic, while the client's regex was /[a-z0-9]/,
+    # and neither this check nor anything else noticed.
+    #
+    # public/js/shard-key.js is the one client rule now, so node runs it and
+    # the answers are compared on names chosen for the ways this has broken
+    # before: separators near the front, the folding table, and Cyrillic.
+    import subprocess, tempfile
+    NAMES = ["d'arcy", "o'brien", "ah-sing", "le roy", "de witt", "st john",
+             "d'angelo", "van der berg", "mcdonald", "sant'angelo",
+             "\u0442\u0432\u0435\u0440\u044c", "\u043d\u043e\u0432\u043e\u0441\u0438\u0431\u0438\u0440\u0441\u043a",
+             "chapman", "mer", "san giovanni"]
     try:
         sys.path.insert(0, "scripts")
-        from build import shard_key as _bk
-        _dis = [n for n in ("d'arcy", "o'brien", "ah-sing", "le roy", "de witt",
-                            "st john", "d'angelo", "van der berg", "mcdonald")
-                if _bk(n) != client_key(n)]
-        if _dis:
-            err(f"build.py and the client disagree on the shard key for "
-                f"{', '.join(_dis)} — names sharded one way and looked up another "
-                f"are unfindable by their own spelling")
+        from build import run_key as _bk
     except ImportError:
-        err("cannot import shard_key from build.py to check it against the client")
+        err("cannot import run_key from build.py to check it against the client")
+        _bk = None
+    if _bk:
+        js = ("global.window={};require(%s);"
+              "console.log(JSON.stringify(%s.map(function(n){"
+              "return window.raShardKey(n,{});})));"
+              % (json.dumps(os.path.abspath("site/public/js/shard-key.js")),
+                 json.dumps(NAMES)))
+        try:
+            got = json.loads(subprocess.run(["node", "-e", js], check=True,
+                                            capture_output=True, text=True).stdout)
+        except Exception as _e:                      # noqa: BLE001
+            err(f"cannot run site/public/js/shard-key.js to check it against "
+                f"build.py: {_e}")
+            got = None
+        if got is not None:
+            _dis = [(n, _bk(n, 3), g) for n, g in zip(NAMES, got) if _bk(n, 3) != g]
+            if _dis:
+                err("build.py and the client disagree on the shard key for "
+                    + "; ".join(f"{n!r} build={b!r} client={c!r}"
+                                for n, b, c in _dis)
+                    + " — names sharded one way and looked up another are "
+                      "unfindable by their own spelling")
 
     # -1.5 · NO FIELD IN THE INDEX THAT NOTHING READS.
     # index.json is fetched by every visitor before the map draws, so a field

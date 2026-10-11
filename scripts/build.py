@@ -58,6 +58,12 @@ def _load_history():
 
 OUT = "site/public"
 
+# WHICH SHARDS ARE NOT THREE CHARACTERS, WRITTEN DOWN WHERE THE CLIENT CAN
+# READ IT. Filled by `write_shards` and dumped to public/shards.json at the
+# end of main(). See that function for why the decision is published rather
+# than re-derived on both sides.
+SHARDS = {}
+
 # Most-open-wins. A place with one free volume and fifty on paper is a place
 # where you CAN see something tonight, and the panel tells the rest of the
 # truth. The opposite rule would paint the map the colour of its worst news.
@@ -111,19 +117,158 @@ def shard_key(form):
     will ever fetch, which is the same build-disagrees-with-client fault as
     above, only wasting bytes instead of losing names.
 
-    Cyrillic search in the box is a real thing to want and is not this: it
-    needs the client's regex widened in the same change, and it is worth
-    measuring the shard growth before paying for it. The gazetteer keeps the
-    Cyrillic either way — scripts/match-fs-volumes.py reads the whole file and
-    never touches a shard, which is where the 112,938 volumes come back.
+    AND THE ASCII RESTRICTION IS GONE AGAIN, DELIBERATELY. It was right while
+    SmartFind.astro built its key with /[a-z0-9]/ and could never ask for
+    «тве.json». Row 83 measured what widening both sides costs — +7,174 files
+    and +34.8 MB on a 9,625 MB build — and the client now folds and keys with
+    a Unicode letter-or-number class, so the two agree again and 103,255 volumes' worth of Russian,
+    Belarusian and Moldovan place names became reachable by the names the
+    documents actually use.
+    """
+    return run_key(form, 3)
+
+
+def run_key(form, n=3):
+    """The first n alphanumerics anywhere in the string, or "" if there are
+    fewer than n of them.
+
+    `shard_key` is this at n=3 and is what every shard directory is keyed by.
+    Longer n is how a shard that one common prefix has made enormous gets
+    split — see `write_shards`.
     """
     k = ""
     for ch in form:
-        if ch.isalnum() and ch.isascii():
+        if ch.isalnum():
             k += ch
-            if len(k) == 3:
+            if len(k) == n:
                 break
-    return k if len(k) == 3 else ""
+    return k if len(k) == n else ""
+
+
+def write_shards(path, pairs, byword=False, limit=512 * 1024, maxdepth=12):
+    """Write a shard directory, splitting the few that one common prefix has
+    made too big to be a search-as-you-type.
+
+    THE MEASUREMENT THAT STARTED THIS. 21 gazetteer shards and 37 surname
+    shards were over a megabyte. Typing three letters of «San Giovanni»
+    fetched g/san.json at 5.9 MB; «cha» fetched s/cha.json at 3.4. Italy is
+    46.4% of this corpus, so that is the hot path and not an edge case.
+
+    ONE RULE, PUBLISHED, NOT TWO RULES THAT HAVE TO AGREE. The Belgian shards
+    below considered a four-character key and refused it, correctly: «it puts
+    a second sharding rule in the codebase that the client must match exactly,
+    which is a bug this project has already had once between build and
+    client». That objection is answered rather than overruled. The build
+    decides per shard, by measuring, and writes the decision to
+    public/shards.json; the client reads the decision instead of re-deriving
+    it. A shard that is not listed is three characters, exactly as before.
+
+    NOTHING IS EVER DROPPED BY A SPLIT, AND THE FIRST VERSION OF THIS DROPPED
+    THINGS. A record reaches a child through a form long enough to have a
+    fourth character, so the form that IS the prefix — the surname «Mer», the
+    word «san» — has no child to go to. The first draft let those fall out
+    when the loss was under two per cent, and a unit test showed what that
+    means: the name «Char» stops being findable by typing C-H-A-R. That is
+    the d'arcy bug this file's shard_key docstring is about, where 10,962
+    surnames were unfindable by their own spelling. So a split writes the
+    prefix's own file too, holding the records whose spelling ends there, and
+    the client asks for it only when the query ends there.
+
+    AND THAT LEFTOVER IS ALLOWED TO BE BIG, which the second version refused
+    and was wrong to. `san` is the case: 48,024 of its 80,423 rows are there
+    because some spelling contains the WORD «san», so splitting leaves 3.5 MB
+    sitting at the three-character address. Refusing to split on that ground
+    left «Sanremo» and «Santiago» — one word, no other word to key on —
+    reachable only through the whole 6 MB. Splitting anyway costs nothing: the
+    leftover is fetched by a query of exactly «san» and by nothing else, while
+    «sanr» and «sant» became small files. A reader who types three letters
+    common to eighty thousand places is the one reader who cannot be given a
+    small answer, and is not the reader this is for.
+
+    `byword` SAYS WHICH CORPUS THIS IS, because the two differ in a way the
+    client cannot guess. The gazetteer's forms are single words — a place is
+    indexed under every word of every spelling it has — so a client should key
+    on one word, and «San Giovanni» can ask for `gio` instead of `san`. A
+    surname's form is the whole name, spaces and all, and build.py keys «Le
+    Roy» as `ler` straight across the space; a client that keyed on «le» there
+    would come up two characters short and ask for nothing. Published rather
+    than inferred, for the same reason as everything else here.
+
+    Returns (bytes written, deepened keys, keys whose file is over `limit`).
+    """
+    tree = {}
+    for form, rec in pairs:
+        k = run_key(form, 3)
+        if k:
+            tree.setdefault(k, []).append((form, rec))
+
+    deep, fat, total = [], [], 0
+
+    def rows_of(bucket):
+        """One row per record, in the order first seen — which for the
+        gazetteer is population order, so the head of an oversized leftover is
+        still the places most people mean. A record reaches a shard through
+        several of its own spellings (Wrocław has seventy-five) and must be
+        written once."""
+        seen, rows = set(), []
+        for _f, rec in bucket:
+            i = id(rec)
+            if i in seen:
+                continue
+            seen.add(i)
+            rows.append(rec)
+        return rows
+
+    def blob_of(rows):
+        return json.dumps(rows, ensure_ascii=False, separators=(",", ":"))
+
+    def put(key, rows):
+        """Write one shard, and record it as fat if it is over budget.
+
+        FAT MEANS «THIS FILE IS BIG», WHATEVER MADE IT BIG, and the first
+        version meant «this prefix could not be split», which turned out to be
+        a different and less useful thing. `colonia` is split and still 1.9 MB,
+        because the word «colonia» is in thousands of Latin American place
+        names and they all land in the leftover. Keying «colonia nueva» on the
+        longest word then picked the 1.9 MB file over `nuev`, which is small.
+        Measuring the file and saying so lets the client prefer a word that
+        leads somewhere smaller — any word will do, because the gazetteer
+        indexes a place under every word it has."""
+        nonlocal total
+        blob = blob_of(rows)
+        n = len(blob.encode())
+        total += n
+        if n > limit:
+            fat.append(key)
+        with open(os.path.join(path, key + ".json"), "w") as fh:
+            fh.write(blob)
+
+    def emit(key, bucket, depth):
+        rows = rows_of(bucket)
+        blob = blob_of(rows)
+        if len(blob.encode()) > limit and depth < maxdepth:
+            kids, term = {}, []
+            for f, rec in bucket:
+                kk = run_key(f, depth + 1)
+                if kk:
+                    kids.setdefault(kk, []).append((f, rec))
+                else:
+                    term.append((f, rec))
+            if kids:
+                deep.append(key)
+                # The query that ends here still has an address to ask for,
+                # even when nothing is left to put in it: an empty file
+                # answers in a few bytes where a 404 is a wasted round trip
+                # and a line in everybody's console.
+                put(key, rows_of(term))
+                for kk, kb in sorted(kids.items()):
+                    emit(kk, kb, depth + 1)
+                return
+        put(key, rows)
+
+    for k, b in sorted(tree.items()):
+        emit(k, b, 3)
+    return total, sorted(deep), sorted(fat)
 
 
 def main():
@@ -1344,7 +1489,7 @@ def main():
         gaz = _gazetteer.places()
     except FileNotFoundError:
         gaz = []
-    shards = {}
+    gpairs = []
     for r in gaz:
         # TWO LISTS, BECAUSE THEY ARE TWO DIFFERENT JOBS, and conflating them
         # caused this bug twice running. `a` is what a reader SEES: a curated
@@ -1363,18 +1508,10 @@ def main():
         # it did. `isl` says the row is an island rather than a town.
         if r.get("f"):
             rec.append(r["f"])
-        keys = set()
-        for form in r["q"].split(" "):
-            key = shard_key(form)
-            if key:
-                keys.add(key)
-        for key in keys:
-            shards.setdefault(key, []).append(rec)
-    gbytes = 0
-    for key, rows in shards.items():
-        blob = json.dumps(rows, ensure_ascii=False, separators=(",", ":"))
-        gbytes += len(blob.encode())
-        open(os.path.join(gz, key + ".json"), "w").write(blob)
+        for form in set(r["q"].split(" ")):
+            gpairs.append((form, rec))
+    gbytes, gdeep, gfat = write_shards(gz, gpairs, byword=True)
+    SHARDS["g"] = {"deep": gdeep, "fat": gfat, "byword": True}
 
     # ---- settlements inside a region: findable, never drawn ---------------
     rs = os.path.join(OUT, "rs")
@@ -2078,85 +2215,97 @@ def main():
         counted = sum(1 for c in ccs if c.get("n") is not None)
         return counted >= 3 and any(x.get("how") == "spelling" for x in v)
 
-    sshards, sbytes = {}, 0
+    # ONE RECORD PER SURNAME, BUILT ONCE. This used to build the shipped
+    # record inside the per-shard loop, so a name reachable under five
+    # spellings had its Wikidata context, its timeline and its etymology
+    # assembled five times and the five copies written to five files. Now it
+    # is assembled once and the same object is referenced from every shard it
+    # belongs in, which is also what lets `write_shards` de-duplicate by
+    # identity when it splits one.
+    spairs = []
     for r in surn["surnames"]:
-        keys = {r["q"]}
-        keys.update(fold(v["n"]) for v in r["variants"])
-        for form in keys:
-            k = shard_key(form)
-            if k:
-                sshards.setdefault(k, []).append(r)
-    for k, rows in sshards.items():
-        seen, uniq = set(), []
-        for r in rows:
-            if r["q"] in seen:
-                continue
-            seen.add(r["q"])
-            # `skel` and `q` are build-time working and the client folds names
-            # itself, so shipping them is 440,000 copies of something already
-            # known. The full record stays in surnames.json for anyone who
-            # wants it; this is a search corpus, not the dataset.
-            rec = {kk: vv for kk, vv in r.items() if kk not in ("skel", "q")}
-            if earns_page(r):
-                rec["pg"] = 1        # the map may link to /surname/<slug>/
-            _or = SORIG.get(r["n"])
-            if _or:
-                rec["or"] = _or
-            # ---- WHAT WIKIDATA SAYS THE NAME IS -------------------------
-            # David: «why would we not be showing the proper origin of the
-            # surname?» We were — on the surname PAGE, which reads
-            # data/surname-context.json at build time. The map panel could
-            # not: that file is 13 MB and the panel is client-side, so the
-            # one place most readers meet a name was the one place that
-            # looked like it refused to answer.
-            #
-            # It rides in the shard the panel already fetches. Only the
-            # fields that say something, and only for the 99,560 names that
-            # have any — about a tenth of the corpus, so the shards grow by
-            # a little and nobody fetches a file they did not want.
-            #
-            # `q` HERE IS THE WIKIDATA ID, not the folded search key the row
-            # was keyed by. Two different `q`s a line apart, which is the
-            # kind of thing that reads fine and breaks quietly.
-            _c = SCTX.get(r.get("q") or "")
-            if _c:
-                _keep = {k2: _c[k2] for k2 in ("lang", "kind", "after", "wiki", "q")
-                         if _c.get(k2)}
-                if _keep:
-                    rec["ctx"] = _keep
-            # Same folded key as SCTX above, and the same reason it rides in
-            # the shard rather than being fetched: the file is large and the
-            # panel is client-side. Trimmed hard, because this is a search
-            # corpus — the language sections, up to three `from=` values per
-            # section, and at most two etymons. The surname PAGE reads the
-            # whole file and can afford to print all of it.
-            _w = SWK.get(r.get("q") or "")
-            if _w:
-                _wk = {}
-                if _w.get("langs"):
-                    _wk["langs"] = _w["langs"][:6]
-                if _w.get("from"):
-                    _wk["from"] = {k2: v2[:3] for k2, v2 in
-                                   list(_w["from"].items())[:4]}
-                if _w.get("etymon"):
-                    _wk["etymon"] = _w["etymon"][:2]
-                if _wk:
-                    _wk["cite"] = _w["cite"]
-                    rec["wk"] = _wk
-            # Keyed by the DISPLAY name, not the folded one: the timeline is
-            # harvested from Wikidata's own spelling, which is why the surname
-            # brief warned that a direct lookup on the folded key silently
-            # returns nothing.
-            _t = STL.get((r.get("n") or "").lower())
-            if _t:
-                rec["tl"] = _t
-            _ta = STLA.get(r.get("q") or "")
-            if _ta:
-                rec["tla"] = _ta
-            uniq.append(rec)
-        blob = json.dumps(uniq, ensure_ascii=False, separators=(",", ":"))
-        sbytes += len(blob.encode())
-        open(os.path.join(sn, k + ".json"), "w").write(blob)
+        # `skel` and `q` are build-time working and the client folds names
+        # itself, so shipping them is 440,000 copies of something already
+        # known. The full record stays in surnames.json for anyone who
+        # wants it; this is a search corpus, not the dataset.
+        rec = {kk: vv for kk, vv in r.items() if kk not in ("skel", "q")}
+        if earns_page(r):
+            rec["pg"] = 1        # the map may link to /surname/<slug>/
+        _or = SORIG.get(r["n"])
+        if _or:
+            rec["or"] = _or
+        # ---- WHAT WIKIDATA SAYS THE NAME IS -------------------------
+        # David: «why would we not be showing the proper origin of the
+        # surname?» We were — on the surname PAGE, which reads
+        # data/surname-context.json at build time. The map panel could
+        # not: that file is 13 MB and the panel is client-side, so the
+        # one place most readers meet a name was the one place that
+        # looked like it refused to answer.
+        #
+        # It rides in the shard the panel already fetches. Only the
+        # fields that say something, and only for the 99,560 names that
+        # have any — about a tenth of the corpus, so the shards grow by
+        # a little and nobody fetches a file they did not want.
+        #
+        # `q` HERE IS THE WIKIDATA ID, not the folded search key the row
+        # was keyed by. Two different `q`s a line apart, which is the
+        # kind of thing that reads fine and breaks quietly.
+        _c = SCTX.get(r.get("q") or "")
+        if _c:
+            _keep = {k2: _c[k2] for k2 in ("lang", "kind", "after", "wiki", "q")
+                     if _c.get(k2)}
+            if _keep:
+                rec["ctx"] = _keep
+        # Same folded key as SCTX above, and the same reason it rides in
+        # the shard rather than being fetched: the file is large and the
+        # panel is client-side. Trimmed hard, because this is a search
+        # corpus — the language sections, up to three `from=` values per
+        # section, and at most two etymons. The surname PAGE reads the
+        # whole file and can afford to print all of it.
+        _w = SWK.get(r.get("q") or "")
+        if _w:
+            _wk = {}
+            if _w.get("langs"):
+                _wk["langs"] = _w["langs"][:6]
+            if _w.get("from"):
+                _wk["from"] = {k2: v2[:3] for k2, v2 in
+                               list(_w["from"].items())[:4]}
+            if _w.get("etymon"):
+                _wk["etymon"] = _w["etymon"][:2]
+            if _wk:
+                _wk["cite"] = _w["cite"]
+                rec["wk"] = _wk
+        # Keyed by the DISPLAY name, not the folded one: the timeline is
+        # harvested from Wikidata's own spelling, which is why the surname
+        # brief warned that a direct lookup on the folded key silently
+        # returns nothing.
+        _t = STL.get((r.get("n") or "").lower())
+        if _t:
+            rec["tl"] = _t
+        _ta = STLA.get(r.get("q") or "")
+        if _ta:
+            rec["tla"] = _ta
+        # FOLDED HERE, BECAUSE THE CORPUS'S OWN `q` IS NOT FOLDED THE SAME WAY.
+        # build-surnames.py lowercases and strips accents but has no
+        # transliteration table, so «Bołman» arrives as `bołman` and «Bøbel»
+        # as `bøbel` — 47,105 of 960,005 names differ from what fold() here
+        # gives. Sharding those raw put Bołman in `boł` while the client,
+        # which folds properly, asked for `bol`; under the old ASCII-only key
+        # it was worse, `bom` and `bbe`, and equally unfindable. A sampling
+        # test that looked up 952 surnames by their own spelling found 56 of
+        # them missing, which is how this surfaced at all.
+        #
+        # Re-folding costs nothing — fold() of an already-folded ASCII string
+        # is itself — and it is the same answer the client computes, which is
+        # the only property that matters. The real fix is for the corpus to
+        # fold once and correctly; this makes the shards right in the
+        # meantime and cannot drift, because both sides now call fold().
+        forms = {fold(r["q"]), fold(r["n"])} | {fold(v["n"]) for v in r["variants"]}
+        forms.discard("")
+        for form in forms:
+            spairs.append((form, rec))
+    sbytes, sdeep, sfat = write_shards(sn, spairs)
+    SHARDS["s"] = {"deep": sdeep, "fat": sfat, "byword": False}
 
     # ---- WHERE A NAME IS, AT THE GRAIN OF A TOWN --------------------------
     # Every register in data/frequencies/ answers «how many people in this
@@ -2332,14 +2481,35 @@ def main():
     if sshards:
         print(f"s/*.json        {sbytes/1024:8.1f} KB  {len(sshards)} shards, "
               f"{len(surn['surnames'])} surnames")
-    if shards:
-        sizes = sorted((len(json.dumps(v, ensure_ascii=False).encode()), k)
-                       for k, v in shards.items())
+    # THE DECISION, WRITTEN WHERE THE CLIENT READS IT RATHER THAN RE-DERIVED.
+    # Small enough to be inlined into the pages that search — a few hundred
+    # bytes — so no reader pays a round trip to learn which shards are not
+    # three characters long.
+    json.dump(SHARDS, open(os.path.join(OUT, "shards.json"), "w"),
+              ensure_ascii=False, separators=(",", ":"))
+
+    # MEASURED FROM WHAT WAS WRITTEN, not from the dict it was written out of.
+    # The worst shard is the number that matters here — it is what a reader
+    # waits for after three characters — and after `write_shards` the
+    # directory and the dict are no longer the same shape.
+    for d, label in (("g", "g/*.json  "), ("s", "s/*.json  ")):
+        dd = os.path.join(OUT, d)
+        if not os.path.isdir(dd):
+            continue
+        sizes = sorted((os.path.getsize(os.path.join(dd, f)), f[:-5])
+                       for f in os.listdir(dd) if f.endswith(".json"))
+        if not sizes:
+            continue
+        tot = sum(n for n, _ in sizes)
         big = sizes[-1]
         p95 = sizes[int(len(sizes) * 0.95)][0]
-        print(f"g/*.json        {gbytes/1024/1024:8.1f} MB  {len(shards)} shards; "
+        info = SHARDS.get(d, {})
+        print(f"{label}      {tot/1024/1024:8.1f} MB  {len(sizes)} shards; "
               f"biggest '{big[1]}' {big[0]/1024:.0f} KB, 95th pct {p95/1024:.0f} KB, "
               f"median {sizes[len(sizes)//2][0]/1024:.1f} KB")
+        print(f"                  {len(info.get('deep', []))} prefixes split "
+              f"for length; {len(info.get('fat', []))} files still over 512 KB, "
+              f"which the client keys around by word where a query has one")
 
 
 if __name__ == "__main__":

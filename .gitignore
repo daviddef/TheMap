@@ -178,3 +178,10 @@ __pycache__/
 # GENERIC cards above them in site/public/og/ stay tracked, because they are
 # the fallback and a checkout with no Pillow still has to serve them.
 site/public/og/place/
+
+# THE SHARD MANIFEST, generated beside the shards it describes.
+# build.py writes it; site/public/g/ and site/public/s/ above are ignored for
+# the same reason. The components read it at build time with a fallback, so a
+# checkout that has not run `npm run data` builds with three-character keys —
+# which is what it would have, having no shards either.
+site/public/shards.json

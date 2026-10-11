@@ -745,11 +745,55 @@ def build_volume_index():
     return idx
 
 
+def prior_made(out):
+    """The date each research line FIRST appeared, read back from the last run.
+
+    `made` IS WHEN THE LINE BEGAN, NOT WHEN THIS SCRIPT LAST RAN. Both line
+    constructors below used to stamp time.strftime on every run, so a rebuild
+    rewrote every line's creation date to today. On 2026-10-11 the committed
+    file still said 2026-10-09 for blazevic, kosina and zubrinic; one
+    regeneration moved all three to 2026-10-11, and the real dates — 2026-09-29
+    for twenty-one of the thirty-four lines — were gone from the file entirely.
+    They were recovered from git history, by taking the earliest `made` each
+    slug was ever committed with, and seeded back into the file; from here the
+    carry-forward below is what keeps them.
+    A field that always says today records nothing: /my-research/ showed every
+    family as started this morning, and a reader cannot tell a line opened in
+    September from one opened an hour ago.
+    THE "LAST RUN" DATE IS ALREADY EXPORTED, at the top level as `exported`.
+    That is the field the re-stamping was duplicating, which is why `made` is
+    free to mean what its name says and must be carried forward instead.
+    Read from both copies — the importer's own output and the one the build
+    publishes — and keep the EARLIER of the two, because either may be the
+    staler file and the earliest date on record is the honest one.
+    """
+    seen = {}
+    for f in (out, "site/public/research-sessions.json"):
+        try:
+            d = json.load(io.open(f, encoding="utf-8"))
+        except Exception:
+            # No previous run, or an unreadable one. A missing file is not an
+            # error here: the first ever import legitimately has no history,
+            # and every line in it is genuinely new today.
+            continue
+        for slug, rec in (d.get("lines") or {}).items():
+            m = (rec or {}).get("made")
+            if isinstance(m, str) and m:
+                if slug not in seen or m < seen[slug]:
+                    seen[slug] = m
+    return seen
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="record-atlas-research-import.json")
     ap.add_argument("--rejects", default="")
     args = ap.parse_args()
+
+    today = time.strftime("%Y-%m-%d")
+    # Read BEFORE anything is written, so the dates survive this run's output
+    # replacing the file they came from.
+    made_before = prior_made(args.out)
 
     vols = build_volume_index()
     provs = build_provider_index()
@@ -779,7 +823,7 @@ def main():
         archive_names = fam_names.get(squash(LINE_NAME.get(fam, fam)), {})
         if rows:
             lines[home] = {"name": LINE_NAME.get(fam, fam), "where": "",
-                           "made": time.strftime("%Y-%m-%d")}
+                           "made": made_before.get(home, today)}
 
         def line_for(row):
             """The family this ROW is about, falling back to the archive."""
@@ -793,7 +837,7 @@ def main():
                 sl = slug_of(proper)
                 if sl not in lines:
                     lines[sl] = {"name": proper, "where": "",
-                                 "made": time.strftime("%Y-%m-%d")}
+                                 "made": made_before.get(sl, today)}
                 return sl
             return home
 
@@ -1013,7 +1057,6 @@ def main():
                 out.append([a, b])
         return out
 
-    today = time.strftime("%Y-%m-%d")
     for m in marks.values():
         if m.get("walked"):
             m["walked"] = merged(m["walked"])

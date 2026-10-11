@@ -189,6 +189,29 @@ def facts_for(qids):
 
 def main():
     only = sys.argv[1].upper() if len(sys.argv) > 1 else None
+
+    # THIS FILE ACCUMULATES, AND IT HAS TO. A name that was placed on the last
+    # run is no longer in the gaps file, so it is never asked about again — and
+    # a run that simply overwrote this file would therefore hand
+    # match-fs-volumes.py a SHORTER list every time and quietly unplace
+    # everything it had placed before. The second run found 84 names where the
+    # first found 2,263; written straight out, that would have taken 57,133
+    # volumes back off the map and nothing would have said so.
+    #
+    # Keyed on country and the name as FamilySearch files it, so a re-run
+    # refreshes a row rather than doubling it.
+    prior = {}
+    try:
+        _old = json.load(open(OUT, encoding="utf-8"))
+        for _k in ("placed", "theGroundIsInAnotherCountryNow",
+                   "isAnAdminUnitNotASettlement"):
+            for _r in _old.get(_k, []):
+                prior[(_k, _r.get("cc") or _r.get("filedUnder"), _r.get("n"))] = _r
+        if prior:
+            print(f"carrying {len(prior):,} rows forward from the last run",
+                  flush=True)
+    except (FileNotFoundError, ValueError):
+        pass
     d = json.load(open("data/fs-volumes-unplaced.json", encoding="utf-8"))
     names = [r for r in d["names"] if not only or r["cc"] == only]
     bycc = {}
@@ -301,6 +324,17 @@ def main():
                                        + f" «{r['n']}» "
                                        + ("to " if viaredir else "as ")
                                        + f"«{t}»")})
+
+    # Merge this run over what was already known.
+    def _merge(key, fresh, ccf=lambda r: r.get("cc")):
+        out = {(key, ccf(r), r.get("n")): r for k, r in prior.items() if k[0] == key}
+        for r in fresh:
+            out[(key, ccf(r), r.get("n"))] = r
+        return list(out.values())
+    placed = _merge("placed", placed)
+    moved = _merge("theGroundIsInAnotherCountryNow", moved,
+                   lambda r: r.get("filedUnder") or r.get("cc"))
+    admin = _merge("isAnAdminUnitNotASettlement", admin)
 
     tot = lambda rs: sum(r["volumes"] for r in rs)
     doc = {

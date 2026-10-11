@@ -1,6 +1,6 @@
 {
  "note": "Sources assessed and declined, with what was found. Declining after looking is a result; declining without looking is a gap.",
- "checked": "2026-10-11",
+ "checked": "2026-10-12",
  "declined": [
   {
    "source": "Antenati — the nine sitemaps other than ant_archivio",
@@ -183,6 +183,26 @@
    "verdict": "NOT declined — deferred as expensive, and the split matters",
    "why": "Two hostnames, two answers. soeg.rigsarkivet.dk, which is the search, says `User-agent: * / Disallow: /` and is therefore closed to us. arkivalieronline.rigsarkivet.dk says `Disallow:` with nothing after it, which permits everything, and it serves real pages at /da/collection/theme/N. So the viewer is open and the search is not, and the open half has no API: parish-level coverage would mean crawling down through themes to something like 2,100 parishes. Worth doing, several hours, and not to be confused with a refusal.",
    "whyItMattered": "Denmark is 1,001 grey dots and its parish registers are free."
+  },
+  {
+   "id": "antenati-oai-resume",
+   "name": "Antenati — resuming the OAI harvest from 6,000 of 464,770 records",
+   "url": "http://www.san.beniculturali.it/oaicat/OAIHandler",
+   "asked": "2026-10-12",
+   "verdict": "NOT declined and NOT refused — the host does not answer",
+   "why": "www.san.beniculturali.it resolves to 2.42.228.36 and then times out: 45 seconds, no bytes, on http and https alike, for the OAI endpoint and for the portal's own front page. That is a server that is down, not one saying no. The saved resumption token «1789633212158!6000!464770!...» is from 17 September and OAI tokens expire, so a resume may have to start again from the beginning — 9,295 pages at the two-second cadence the script already keeps, about five hours.",
+   "whyItMattered": "Italy is the LARGEST block of grey ground on this map — 8,547 dots — and this is the route to it. The website answers 403 to any identified crawler while its robots.txt permits everything, which is why the Ministry's open data was the door used instead.",
+   "andThereIsNoOtherDoOR": "Both of the Antenati datasets on dati.gov.it point at this same OAI endpoint. There is no bulk file to download instead.",
+   "retry": "Worth re-probing; a portal that is down today may answer tomorrow."
+  },
+  {
+   "id": "cz-archives",
+   "name": "The Czech regional archive portals — parish coverage",
+   "url": "https://www.actapublica.eu/",
+   "asked": "2026-10-12",
+   "verdict": "declined by this project, not by the sites — all three refuse a crawler",
+   "why": "actapublica.eu answers 403 from Cloudflare, «Attention Required». digi.ceskearchivy.cz answers 403. digi.archives.cz — the Opava regional archive — answers HTTP 200 and the body is a page reading «Přístup zablokován!», access blocked. A 200 that means no is still no.",
+   "whyItMattered": "Czechia is 4,987 grey dots, the second largest block on the map."
   }
  ]
 }

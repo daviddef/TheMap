@@ -320,6 +320,29 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
             <span class="who">what the {lg} entry says it is from</span>
           </li>
         ))}
+        {/* THE OTHER SILENCE, AND UNTIL NOW ONLY ONE OF THE TWO WAS WRITTEN.
+            «Wiktionary has no entry for this name» is already said, in the
+            panel and here, because a reader who sees nothing cannot tell the
+            dictionary's gap from the atlas not having looked. But there is a
+            second gap and it is the bigger one: 52,640 of the 78,628 entries
+            hold the name and name no origin at all. Those printed the language
+            list and stopped, which reads as if the origin were simply not
+            shown. It is not there to show.
+
+            STATED, NOT LINKED. The row this closes carries David on the source
+            itself — «Wiktionary shouldn't be a reference or link, it's far too
+            small; just harvest the origin of the name» — so this adds no new
+            way in and quotes no prose. It says what is absent and leaves the
+            citation below where it already was. */}
+        {!(wk.from && Object.keys(wk.from).length) && !(wk.etymon || []).length && (
+          <li>
+            <b>No origin given</b>
+            <span class="who">the entry exists and its surname template names
+            nothing the name is from — 52,640 of the 78,628 entries this atlas
+            matched are silent this way, which is the dictionary's gap and not
+            a judgement about the name</span>
+          </li>
+        )}
         {wk.langs && wk.langs.length > 0 && (
           <li>
             <b>{wk.langs.join(" · ")}</b>

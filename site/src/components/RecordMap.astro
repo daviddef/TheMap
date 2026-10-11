@@ -257,11 +257,28 @@ try {
   <button class="ra-ico" id="ra-play" type="button" aria-pressed="false"
             aria-label="Play the years — watch the jurisdictions change and the records follow"
             title="Play the years — watch the jurisdictions change and the records follow"><span aria-hidden="true">&#9654;</span></button>
-    <label class="ra-ylab" id="ra-ylab"
+    {/* NOT A LABEL ANY MORE, AND THAT WAS A REAL BUG RATHER THAN A TIDY-UP.
+        This was one <label> wrapping the checkbox AND both range inputs. A
+        label activates its labelled control — the first labelable thing inside
+        it, the checkbox — no matter where in the label you click. The ranges
+        carry pointer-events:none on everything but their thumbs, so a click on
+        the TRACK fell through to the label and switched the year filter off.
+        Trying to click a year on the slider turned the whole thing off. Found
+        by clicking it: the click landed on ra-yon and `checked` went false.
+
+        So the label now wraps the checkbox and its word, which is all it was
+        ever naming, and the row around them is a plain span. The word and the
+        slider are never on screen together — `.ra-time.on` hides the word and
+        `.ra-time:not(.on)` hides the slider — so moving it changes nothing a
+        reader sees. */}
+    <span class="ra-ylab" id="ra-ylab"
            title="Set a year and the map keeps only the places that can answer for it, the volume lists narrow to it, and every panel says whose archive those years belonged to.">
-      <input type="checkbox" id="ra-yon"
-             aria-label="Filter by year"
-             title="Turn the year filter on or off" />
+      <label class="ra-yon-l">
+        <input type="checkbox" id="ra-yon"
+               aria-label="Filter by year"
+               title="Turn the year filter on or off" />
+        <span class="ra-ylab-w">Year</span>
+      </label>
       <span class="ra-slider">
         <span class="ra-track" id="ra-track"></span>
         <input type="range" id="ra-year" min="1500" max="2026" value="1780" step="1" disabled
@@ -269,9 +286,10 @@ try {
         <input type="range" id="ra-year2" min="1500" max="2026" value="1920" step="1" disabled
                aria-label="Latest year" />
       </span>
-      <span class="ra-ylab-w">Year</span>
-      <output id="ra-yout" class="mono">any year</output>
-    </label>
+      {/* Tied to both sliders, so a screen reader reading the output knows
+          which controls it belongs to rather than meeting a loose number. */}
+      <output id="ra-yout" class="mono" for="ra-year ra-year2">any year</output>
+    </span>
     </div>
     <div class="ra-loading" id="ra-loading">
       <span class="ra-loading-b"></span>
@@ -4540,16 +4558,22 @@ window.addEventListener("load", async function () {
          the name?» — because Wiktionary has no page for Defrančeski, so the
          whole block was omitted and the panel simply skipped from the
          timeline to the spelling list. A reader cannot tell that apart from
-         the atlas not looking. It holds 78,628 surnames, 25,987 of them with
-         an etymology; saying which of those a name missed out on is a fact
-         about the source, and it stops somebody asking a fourth time. */
+         the atlas not looking. This atlas matched 78,628 of its names to an
+         entry and 25,987 of those name an origin; saying which of those a
+         name missed out on is a fact about the source, and it stops somebody
+         asking a fourth time. (78,628 is the MATCHED set, not Wiktionary's
+         own total — it has 42,043 more surname entries for names this atlas
+         does not hold. The first draft of this sentence said «it holds
+         78,628 surnames», which credited the dictionary with a number that
+         was really a fact about the join.) */
       if (!r.wk) {
         h.push('<div class="ra-orig ra-orig-none"><p class="ra-orig-l">' +
                esc(T("Wiktionary has no entry for this name.")) +
-               ' <span class="ra-who">' + esc(T("It holds 78,628 surnames and "
-               + "25,987 of those say what the name is from. This one is not "
-               + "among them \u2014 which is the dictionary's gap, not a "
-               + "judgement about the name.")) + "</span></p></div>");
+               ' <span class="ra-who">' + esc(T("This atlas matched 78,628 of its "
+               + "names to an entry and 25,987 of those say what the name "
+               + "is from. This one matched nothing \u2014 which is the "
+               + "dictionary's gap, not a judgement about the name.")) +
+               "</span></p></div>");
       }
       if (r.wk) {
         var w = r.wk, wh = ['<div class="ra-orig ra-orig-wk">'];
@@ -4569,6 +4593,22 @@ window.addEventListener("load", async function () {
                   esc(T("what the") + " " + lg + " " + T("entry says it is from")) +
                   "</span></p>");
         });
+        /* THE SECOND SILENCE. The block above this one says «Wiktionary has
+           no entry for this name», which was written because a reader could
+           not tell the dictionary's gap from the atlas not looking. The same
+           applies one step in: 52,640 of the 78,628 entries hold the name and
+           name NO origin, and those printed the language list and stopped —
+           which reads as if the origin existed and were not being shown.
+           Stated, not linked: the row this closes carries David on the source,
+           «Wiktionary shouldn't be a reference or link, it's far too small». */
+        if (!(w.from && Object.keys(w.from).length) && !(w.etymon || []).length)
+          wh.push('<p class="ra-orig-l"><b>' + esc(T("No origin given")) +
+                  "</b> <span class=\"ra-who\">" +
+                  esc(T("the entry exists and names nothing the name is from "
+                      + "\u2014 52,640 of the 78,628 entries this atlas "
+                      + "matched are silent this way, which is the "
+                      + "dictionary's gap and not a judgement about the "
+                      + "name")) + "</span></p>");
         if (w.langs && w.langs.length)
           wh.push('<p class="ra-orig-l"><b>' + esc(w.langs.join(" \u00b7 ")) +
                   "</b> <span class=\"ra-who\">" +
@@ -7436,6 +7476,33 @@ window.addEventListener("load", async function () {
     height: 3px; background: var(--rule); border-radius: 2px; }
   .ra-slider input[type=range]:disabled::-webkit-slider-thumb { opacity: .35; }
   .ra-slider input[type=range]:disabled::-moz-range-thumb { opacity: .35; }
+  .ra-yon-l { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+
+  /* A FOCUS RING, BECAUSE THERE WAS NONE AND THE SLIDER IS REACHABLE BY TAB.
+     Row 51 guessed this control was «almost certainly unusable by keyboard».
+     It is not: both ranges are tabbable and five presses of the right arrow
+     moved 1780 to 1785, updated the output and rewrote the URL. What was
+     missing is the ability to SEE it — `appearance: none` strips the browser's
+     own ring and nothing replaced it, so computed outline-style was `none` and
+     a keyboard user operated it blind. That is 2.4.7 Focus Visible, and a
+     control you can work without seeing is not the same as one you cannot work.
+
+     The ring goes on the THUMB rather than the input, because each input is a
+     full-width transparent overlay — an outline around it would draw a box
+     across the whole control and point at neither handle. :focus-visible, so
+     a mouse drag does not leave a ring behind it. The inner ring is the page
+     background, which keeps the accent ring legible over the dark track. */
+  .ra-slider input[type=range]:focus { outline: none; }
+  .ra-slider input[type=range]:focus-visible::-webkit-slider-thumb {
+    box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent); }
+  .ra-slider input[type=range]:focus-visible::-moz-range-thumb {
+    box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent); }
+  /* Forced-colours mode throws away box-shadow, so that ring has to be an
+     outline there or it is simply gone. */
+  @media (forced-colors: active) {
+    .ra-slider input[type=range]:focus-visible { outline: 3px solid Highlight;
+      outline-offset: 2px; }
+  }
   .ra-track { position: absolute; top: 7px; height: 3px; background: var(--accent);
               border-radius: 2px; pointer-events: none; }
   #ra-yout { white-space: nowrap; }

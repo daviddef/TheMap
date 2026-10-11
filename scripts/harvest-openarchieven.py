@@ -30,17 +30,27 @@ WHAT IT ASKS FOR. /stats/archives.json lists the archives. For each,
 group_by=year gives the span. That is two requests per archive and nothing
 else; no record is fetched and no person is read.
 
-THE PER-ARCHIVE PLACE LIST IS CAPPED AT 199 BY THE API, which is a real limit
-and not an argument against the claim: these are the 199 places each archive
-holds the MOST records for, so a dot that misses out is one the archive barely
-touches. The cap is recorded in the file.
+THE API STOPS AT 200 DISTINCT PLACES PER QUERY, AND THAT IS GOT AROUND BY
+ASKING NARROWER QUESTIONS RATHER THAN BY ASKING MORE OFTEN. A first pass took
+one answer per archive and 107 of 193 came back at the ceiling, which meant the
+largest archives — the ones covering the most ground — were the worst served.
+So any answer that comes back full is split in half by year and both halves are
+asked again, recursively, until a slice answers under the ceiling or the span
+is too short to halve. For the Brabants Historisch Informatie Centrum that
+turns 199 places into 765. The place is the same place in every slice; only
+the question narrows.
+
+This is still two kinds of request and nothing else, it stays under their four
+a second, and a small archive that answers under the ceiling first time costs
+exactly one call.
 
 WHICH COUNTRY AN ARCHIVE IS IN is read from its ISIL code where it has one
 (NL-DtAD -> NL) and otherwise from its homepage's country TLD (.nl, .be, .fr).
 An archive with neither is skipped and counted, because a claim filed under a
 country this atlas guessed would reach the wrong ground.
 """
-import json, os, re, time, urllib.request, urllib.error
+import json, os, re, threading, time, urllib.request, urllib.error
+from concurrent.futures import ThreadPoolExecutor
 
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(_ROOT)
@@ -49,7 +59,13 @@ API = "https://api.openarchieven.nl/1.1"
 UA = ("RecordAtlasBot/1.0 (+https://recordatlas.org; "
       "a genealogy atlas recording which ground this collection covers)")
 OUT = "data/coverage-claims-openarchieven.json"
-PAUSE = 0.3                      # their Spelregels: no more than 4 a second
+# THEIR SPELREGELS: NO MORE THAN FOUR REQUESTS A SECOND. A first run did them
+# one at a time and used about one of those four, which put the job at four
+# hours. Three workers, each pausing a quarter second between its own calls,
+# comes to roughly three a second across the whole script — inside their limit
+# with room to spare, and about three times faster.
+WORKERS = 3
+PAUSE = 0.25
 TLD2CC = {"nl": "NL", "be": "BE", "fr": "FR", "de": "DE", "lu": "LU"}
 
 
@@ -79,33 +95,125 @@ def country_of(a):
     return None, None
 
 
+CEILING = 199            # what a full answer looks like; the API's own limit is 200
+MAX_CALLS = 32           # a bound per archive, so one vast archive cannot run away
+
+# A MENTION IS NOT COVERAGE, AND THIS IS WHERE THAT LINE IS DRAWN.
+#
+# Splitting past the ceiling turned Archief Delft from 199 places into 1,398,
+# and the bottom of that list is Cairo, Cardiff, Javazee and Hydaspes with one
+# record each — a sailor who died in the Java Sea, somebody born in Wales. All
+# true, none of it coverage. A claim here colours a dot and tells a researcher
+# this is a place to go and look, and «one stray record names your town» is not
+# that. The unsliced top-200 hid this by accident, because it was already a cut
+# by count; splitting removed the accident and so the rule has to be stated.
+#
+# Ten is a judgement and it errs toward saying less. It costs real small
+# places: a hamlet whose parish genuinely left eight entries is dropped with
+# the strays. The file records how many places each threshold would keep so
+# the choice can be argued with rather than guessed at.
+MIN_RECORDS = 10
+
+
+def deep_places(code, lo=1500, hi=1960):
+    """Every place an archive names, by halving any question that comes back full.
+
+    Returns (places, total_records, hit_ceiling, calls). `places` is a list
+    of {key, count}
+    where the count is the LARGEST seen for that place across the slices it
+    appeared in — not a sum, because a place that appears in two overlapping
+    answers would otherwise be counted twice. The count is only ever used to
+    order the list, so the largest slice's figure is the honest one to keep.
+    """
+    best, queue, calls, ceiling = {}, [(lo, hi)], 0, False
+    # The first question is the unsliced one, which is all a small archive needs.
+    first = get(f"{API}/stats/breakdown.json?group_by=place"
+                f"&archive_code={code}&number_show=500&min_count={MIN_RECORDS}")
+    calls += 1
+    time.sleep(PAUSE)
+    if not first or not first.get("results"):
+        return [], 0, False, calls
+    # The archive's own total comes from the UNSLICED answer. Summing the
+    # slices would double-count every record whose place appears in more
+    # than one of them.
+    total = first.get("total_records") or 0
+    for r in first["results"]:
+        k = (r.get("key") or "").strip()
+        if k:
+            best[k] = max(best.get(k, 0), r.get("count") or 0)
+    if len(first["results"]) < CEILING:
+        return ([{"key": k, "count": c} for k, c in
+                 sorted(best.items(), key=lambda kv: -kv[1]) if c >= MIN_RECORDS],
+                total, False, calls)
+
+    ceiling = True
+    while queue and calls < MAX_CALLS:
+        a, b = queue.pop(0)
+        d = get(f"{API}/stats/breakdown.json?group_by=place&archive_code={code}"
+                f"&number_show=500&min_count={MIN_RECORDS}"
+                f"&year_start={a}&year_end={b}")
+        calls += 1
+        time.sleep(PAUSE)
+        res = (d or {}).get("results") or []
+        for r in res:
+            k = (r.get("key") or "").strip()
+            if k:
+                best[k] = max(best.get(k, 0), r.get("count") or 0)
+        # A full answer means the slice is still hiding places behind the
+        # ceiling, so ask its two halves instead. A span of three years or
+        # less is not worth halving again.
+        if len(res) >= CEILING and b - a > 3:
+            mid = (a + b) // 2
+            queue.append((a, mid))
+            queue.append((mid + 1, b))
+    return ([{"key": k, "count": c} for k, c in
+             sorted(best.items(), key=lambda kv: -kv[1]) if c >= MIN_RECORDS],
+            total, ceiling, calls)
+
+
 def main():
     archives = get(f"{API}/stats/archives.json") or []
     print(f"{len(archives)} archives listed", flush=True)
-    rows, skipped, capped, empty = [], [], 0, 0
-    for i, a in enumerate(archives, 1):
+    rows, skipped, capped, empty, calls_spent = [], [], 0, 0, 0
+    lock, done = threading.Lock(), [0]
+
+    def one(a):
+        """Everything for a single archive. Run on WORKERS threads at once."""
         code = a.get("archive_code")
         if not code:
-            continue
+            return None
         cc, how = country_of(a)
         if not cc:
-            skipped.append(a.get("name") or code)
-            continue
-        pl = get(f"{API}/stats/breakdown.json?group_by=place"
-                 f"&archive_code={code}&number_show=500")
-        time.sleep(PAUSE)
-        if not pl or not pl.get("results"):
-            empty += 1
-            continue
-        places = [p for p in pl["results"] if (p.get("key") or "").strip()]
-        if pl.get("total_groups") and len(places) >= pl["total_groups"]:
-            capped += 1
+            with lock:
+                skipped.append(a.get("name") or code)
+            return None
+        places, total_records, hit_ceiling, ncalls = deep_places(code)
+        with lock:
+            done[0] += 1
+            if done[0] % 25 == 0:
+                print(f"  {done[0]}/{len(archives)} archives", flush=True)
+        if not places:
+            with lock:
+                empty_box[0] += 1
+            return None
+        # NO `sort=name_asc` HERE, AND THAT ONE PARAMETER COST EVERY CLAIM ITS
+        # DATES. Asked with sort=name_asc this endpoint answers 503 «Service
+        # temporarily unavailable» every single time — not intermittently —
+        # while the default sort answers 200. The first run of this script
+        # asked that way for all 193 archives, got nothing back each time, and
+        # wrote `from: null, to: null` into every row without complaining. It
+        # was asked for in ascending order so the first and last could be
+        # taken, which min() and max() never needed in the first place.
         yr = get(f"{API}/stats/breakdown.json?group_by=year"
-                 f"&archive_code={code}&number_show=500&sort=name_asc")
+                 f"&archive_code={code}&number_show=500")
         time.sleep(PAUSE)
         years = [int(y["key"]) for y in (yr or {}).get("results", [])
                  if str(y.get("key", "")).isdigit()]
-        rows.append({
+        with lock:
+            if hit_ceiling:
+                capped_box[0] += 1
+            calls_box[0] += ncalls + 1
+        return {
             "id": "openarch-" + code,
             "provider": "openarchieven",
             # THE ARCHIVE'S NAME IS THE ATTRIBUTION, and it is in the title so
@@ -114,7 +222,7 @@ def main():
             "url": a.get("search") or f"https://www.openarchieven.nl/{code}",
             "from": min(years) if years else None,
             "to": max(years) if years else None,
-            "records": pl.get("total_records") or 0,
+            "records": total_records,
             "images": 0,
             "kind": "MISCELLANEOUS",
             "countries": [cc],
@@ -126,9 +234,16 @@ def main():
                         "type": "MUNICIPALITY", "lat": None, "lon": None,
                         "records": p.get("count") or 0}
                        for p in places],
-        })
-        if i % 25 == 0:
-            print(f"  {i}/{len(archives)} — {len(rows)} claims so far", flush=True)
+        }
+
+    capped_box, empty_box, calls_box = [0], [0], [0]
+    with ThreadPoolExecutor(max_workers=WORKERS) as ex:
+        for r in ex.map(one, archives):
+            if r:
+                rows.append(r)
+    # Threads finish out of order; the file should not depend on which.
+    rows.sort(key=lambda r: r["id"])
+    capped, empty, calls_spent = capped_box[0], empty_box[0], calls_box[0]
 
     from collections import Counter
     doc = {
@@ -143,15 +258,21 @@ def main():
                  "and the archive's own record count for each. THESE ARE INDEX "
                  "ENTRIES, NOT SCANS: a record is a name, a date and a shelf "
                  "reference, and whether an image exists is the holding archive's "
-                 "business. The per-archive place list is capped at 199 by the "
-                 "API, so an archive that reaches further is represented by the "
-                 "199 places it holds the most records for."),
+                 "business. The API answers at most 200 distinct places to one "
+                 "question, so any answer that came back full was split in half "
+                 "by year and asked again, recursively, until the slices "
+                 "answered under the ceiling. `records` is the archive's own "
+                 "total and is NOT the sum of the places shown; a place's count "
+                 "is the largest figure seen for it across the slices it "
+                 "appeared in, which is used only to order the list."),
         "counts": {
             "claims": len(rows),
             "places": sum(len(r["places"]) for r in rows),
             "records": sum(r["records"] for r in rows),
             "byCountry": dict(Counter(r["countries"][0] for r in rows)),
-            "archivesHitTheApiCap": capped,
+            "archivesNeedingSplit": capped,
+            "apiCalls": calls_spent,
+            "minRecordsPerPlace": MIN_RECORDS,
             "archivesWithNoPlaceData": empty,
             "archivesWithNoCountry": len(skipped),
         },
@@ -163,9 +284,10 @@ def main():
     print(f"\n-> {OUT}")
     print(f"   {c['claims']} archives, {c['places']:,} place rows, {c['records']:,} records")
     print(f"   by country: {c['byCountry']}")
-    print(f"   hit the API's 199-place cap: {c['archivesHitTheApiCap']}; "
+    print(f"   needed splitting past the ceiling: {c['archivesNeedingSplit']}; "
           f"no place data: {c['archivesWithNoPlaceData']}; "
           f"no country to file under: {c['archivesWithNoCountry']}")
+    print(f"   api calls: {c['apiCalls']:,}")
 
 
 if __name__ == "__main__":

@@ -206,6 +206,48 @@ def quiet_count_gate():
         print(f"quiet half: {actual:,} places, declared and counted agree")
 
 
+def sitemaps_are_submittable():
+    """A sitemap over 50,000 URLs is REJECTED, not truncated.
+
+    sitemaps.org allows 50,000 URLs and 50 MB per file, and a search engine
+    given a file over either does not take the first 50,000 — it discards the
+    whole thing. This atlas crossed that line quietly as it grew:
+    sitemap-places.xml reached 56,582 URLs, so every place page on the site,
+    which is almost all of it, was being submitted and thrown away.
+
+    It went unnoticed because nothing could notice. The build counted pages and
+    checked the CSS and validated every SVG, and never once counted the lines
+    in the file whose only job is to tell Google what exists.
+
+    The same gate checks the index: a sitemap listed there and not built is a
+    404 handed to a crawler, which is its own way of being ignored.
+    """
+    idx = os.path.join(DIST, "sitemap-index.xml")
+    if not os.path.exists(idx):
+        err("no sitemap-index.xml in the built output")
+        return
+    listed = re.findall(r"<loc>([^<]+)</loc>", open(idx, encoding="utf-8").read())
+    if not listed:
+        err("sitemap-index.xml lists no sitemaps")
+        return
+    for loc in listed:
+        name = loc.rstrip("/").rsplit("/", 1)[-1]
+        path = os.path.join(DIST, name)
+        if not os.path.exists(path):
+            err(f"sitemap-index.xml lists {name} and the build did not write it")
+            continue
+        body = open(path, encoding="utf-8").read()
+        n = body.count("<url>")
+        mb = os.path.getsize(path) / 1_048_576
+        if n > 50_000:
+            err(f"{name}: {n:,} URLs — over the 50,000 a sitemap may hold, so a "
+                f"search engine discards the file entire. Split it.")
+        if mb > 50:
+            err(f"{name}: {mb:.1f} MB — over the 50 MB a sitemap may be.")
+        if n == 0:
+            err(f"{name}: listed in the index and holds no URLs")
+
+
 def main():
     if not os.path.isdir(DIST):
         sys.exit(f"{DIST} is not there — run this after astro build.")
@@ -269,6 +311,8 @@ def main():
     # a permanently empty box.
     if 'class="adslot"' in home and "adsbygoogle.js" not in home:
         err("the page renders an ad slot but never loads adsbygoogle.js")
+
+    sitemaps_are_submittable()
 
     attribution_gate()
 

@@ -18,10 +18,51 @@ const countries = new Set(idx.places.map(p => p.k).filter(Boolean)).size;
 const archives = provs.providers.filter(p => p.at);
 const archiveCountries = new Set(archives.map(p => p.at.place.split(", ").pop())).size;
 ---
+{/* STRUCTURED DATA ON THE ONE PAGE THAT HAD NONE. Place, surname and archive
+    pages have carried a schema.org block for a while; the front page, which is
+    the page a search engine meets first and the one that has to say what this
+    site IS, carried nothing.
+
+    Three things are declared and all three are facts this page already prints:
+    the site and its publisher, the SearchAction that tells a search engine the
+    search box exists and how to use it, and the atlas as a Dataset — which is
+    what it is, and which is how somebody looking for «where are the parish
+    registers for X» should be able to reach it. The counts are the same
+    variables the header renders, so they cannot drift from what a reader sees. */}
 <Base
   bare
   title="Record Atlas"
   dek="Every place your people came from, and who holds the paper."
+  jsonld={{
+    "@context": "https://schema.org",
+    "@graph": [
+      { "@type": "WebSite", "@id": "https://recordatlas.org/#site",
+        url: "https://recordatlas.org/", name: "Record Atlas",
+        description: "Every place your people came from, and who holds the paper.",
+        inLanguage: "en",
+        publisher: { "@id": "https://recordatlas.org/#org" },
+        potentialAction: {
+          "@type": "SearchAction",
+          target: { "@type": "EntryPoint",
+                    urlTemplate: "https://recordatlas.org/?q={search_term_string}" },
+          "query-input": "required name=search_term_string" } },
+      { "@type": "Organization", "@id": "https://recordatlas.org/#org",
+        name: "Record Atlas", url: "https://recordatlas.org/",
+        description: "A free index of where genealogical records are held: which "
+          + "archive holds which ground, for which years, and what it costs to look." },
+      { "@type": "Dataset", "@id": "https://recordatlas.org/#dataset",
+        name: "Record Atlas \u2014 where the records are",
+        description: `${places.toLocaleString()} places with the archives that hold `
+          + `their records, ${volumes.toLocaleString()} record volumes, across `
+          + `${countries} countries. Free to search and openly published.`,
+        url: "https://recordatlas.org/",
+        isAccessibleForFree: true,
+        creator: { "@id": "https://recordatlas.org/#org" },
+        distribution: {
+          "@type": "DataDownload", encodingFormat: "application/json",
+          contentUrl: "https://recordatlas.org/index.json" },
+        spatialCoverage: `${countries} countries` } ]
+  }}
   wide>
 
   {/* TIGHTER THAN THE PROSE PAGES, BECAUSE THIS ONE IS A TOOL. The shared

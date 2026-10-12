@@ -16,6 +16,47 @@ const surn = corpus();
 
 export const SETS = ["pages", "places", "archives", "countries", "regions", "surnames"];
 
+/* A SITEMAP MAY HOLD 50,000 URLS, AND «places» HELD 56,582.
+ *
+ * The sitemaps.org limit is 50,000 URLs and 50 MB per file, and a file over
+ * either is not truncated by Google — it is REJECTED. So the one sitemap that
+ * mattered most, every place page on this atlas, was being thrown away whole,
+ * and the number went past the limit quietly as the atlas grew: 46,000 places
+ * was fine, 56,582 was not, and nothing said so.
+ *
+ * It matters more here than it would elsewhere, because there is almost no
+ * link path to those pages. The front page is a map drawn in the browser, so
+ * a crawler reading the HTML finds twenty-five links and not one /place/ URL;
+ * the only route is /places/ then /places/2/ and so on, ninety-five pages
+ * deep, which crawlers follow badly. The sitemap is what that depth is
+ * supposed to be rescued by.
+ *
+ * 45,000 rather than 50,000, so this does not have to be revisited the week
+ * the atlas crosses the line again. */
+const PER_SITEMAP = 45000;
+
+/* The sitemap files that actually get written: one per set, or several when a
+   set is too big. A set that fits keeps its plain name, so sitemap-pages.xml
+   stays sitemap-pages.xml and only the oversized ones are numbered. */
+export function sitemapFiles() {
+  const out = [];
+  for (const set of SETS) {
+    const n = urlsFor(set).length;
+    const parts = Math.max(1, Math.ceil(n / PER_SITEMAP));
+    if (parts === 1) out.push({ name: `sitemap-${set}`, set, part: 0 });
+    else for (let i = 1; i <= parts; i++)
+      out.push({ name: `sitemap-${set}-${i}`, set, part: i });
+  }
+  return out;
+}
+
+/* The slice of a set that one file carries. part 0 means «all of it». */
+export function urlsForFile(set, part) {
+  const all = urlsFor(set);
+  if (!part) return all;
+  return all.slice((part - 1) * PER_SITEMAP, part * PER_SITEMAP);
+}
+
 export function urlsFor(set) {
   const slug = (x) => x.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -68,7 +109,7 @@ export async function GET({ site }) {
   const today = new Date().toISOString().slice(0, 10);
   const body = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${SETS.map((s) => `  <sitemap><loc>${b}sitemap-${s}.xml</loc><lastmod>${today}</lastmod></sitemap>`).join("\n")}
+${sitemapFiles().map((f) => `  <sitemap><loc>${b}${f.name}.xml</loc><lastmod>${today}</lastmod></sitemap>`).join("\n")}
 </sitemapindex>
 `;
   return new Response(body, { headers: { "Content-Type": "application/xml; charset=utf-8" } });

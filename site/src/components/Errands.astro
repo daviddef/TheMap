@@ -1,0 +1,92 @@
+---
+/* What this atlas has asked of other people, and what came back.
+
+   THE CONTRACT IS THE ARCHIVE KIT'S, not a new one. Four family archives keep
+   an errands page through @daviddef/archive-kit, and this takes the same
+   props so the two can be swapped: the kit's own comment settles the shape —
+   groups of rows, each naming who is being asked, what for, under what
+   reference, and what it would settle, with `draft` a first-class field
+   because "that is the difference between a list of things somebody ought to
+   do and a page somebody can act from".
+
+   IT IS LOCAL ONLY BECAUSE THE PIN IS OLD. site/package.json pins the kit at
+   81746764, which predates Errands.astro. Bumping the pin mid-session would
+   change every other kit component this site renders to fix one page, so the
+   component lives here instead and matches the contract exactly. When the pin
+   moves, this file can be deleted and the import swapped.
+
+     groups  [{ label, note, rows }]
+     rows    [{ n, who, what, ref, why, ask, draft, state, stateLabel,
+                colour, file, links }]
+*/
+const { groups = [], u = (p) => p } = Astro.props;
+const rows = groups.flatMap((g) => g.rows || []);
+---
+<div class="er" data-rows={rows.length}>
+  {groups.map((g) => (
+    <section class="er-g">
+      {g.label && (
+        <div class="er-lab">{g.label}
+          {g.note ? <span class="er-note"> — {g.note}</span> : null}
+        </div>
+      )}
+      {(g.rows || []).map((r) => (
+        <article class="er-row" style={r.colour ? `border-left-color:${r.colour}` : null}>
+          <div class="er-head">
+            {r.n != null && <span class="er-n">{String(r.n).padStart(2, "0")}</span>}
+            {r.stateLabel && (
+              <span class="er-tag" style={r.colour ? `color:${r.colour};border-color:${r.colour}` : null}>
+                {r.stateLabel}</span>
+            )}
+            <h3>{r.what}</h3>
+            {r.who && <div class="er-who">{r.who}</div>}
+          </div>
+          <dl class="er-dl">
+            {r.ref && <Fragment><dt>Addressed to</dt><dd class="mono">{r.ref}</dd></Fragment>}
+            {r.ask && <Fragment><dt>What to ask for</dt><dd>{r.ask}</dd></Fragment>}
+            {r.why && <Fragment><dt>What it settles</dt><dd set:html={r.why} /></Fragment>}
+          </dl>
+          {r.draft && (
+            <details class="er-draft">
+              <summary>The letter, in full</summary>
+              <pre>{r.draft}</pre>
+            </details>
+          )}
+          <p class="er-go">
+            {(r.links || []).map(([label, href], i) => (
+              <Fragment>{i > 0 ? " · " : null}<a href={u(href)}>{label} →</a></Fragment>
+            ))}
+            {r.file && <span class="er-file"> · <code>{r.file}</code></span>}
+          </p>
+        </article>
+      ))}
+    </section>
+  ))}
+</div>
+
+<style is:global>
+  .er-g { margin: 0 0 2rem; }
+  .er-lab { font: 600 10px/1 var(--sans); letter-spacing: .13em; text-transform: uppercase;
+    color: var(--ink-3); margin: 0 0 .9rem; }
+  .er-note { font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 12px; }
+  .er-row { border-left: 3px solid var(--rule); padding: 0 0 0 14px; margin: 0 0 1.6rem; }
+  .er-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
+  .er-n { font: 600 11px/1 var(--mono, var(--sans)); color: var(--ink-3); }
+  .er-tag { font: 600 10px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase;
+    border: 1px solid currentColor; border-radius: 2px; padding: 3px 6px; }
+  .er-row h3 { font-size: 15px; margin: 0; flex: 1 1 100%; }
+  .er-who { font: 400 13px/1.4 var(--sans); color: var(--ink-2); flex: 1 1 100%; }
+  .er-dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; margin: 10px 0 0;
+    font-size: 13.5px; line-height: 1.55; }
+  .er-dl dt { font: 600 10px/1.6 var(--sans); letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink-3); }
+  .er-dl dd { margin: 0; }
+  .er-draft { margin: 12px 0 0; }
+  .er-draft summary { font: 600 12px/1 var(--sans); cursor: pointer; color: var(--accent); }
+  .er-draft pre { white-space: pre-wrap; font: 400 13px/1.6 var(--mono, monospace);
+    background: var(--panel); border: 1px solid var(--rule); border-radius: 3px;
+    padding: 14px; margin: 10px 0 0; overflow-x: auto; }
+  .er-go { font-size: 12.5px; margin: 10px 0 0; }
+  .er-file code { color: var(--ink-3); font-size: 11.5px; }
+  @media (max-width: 560px) { .er-dl { grid-template-columns: 1fr; gap: 2px; } }
+</style>

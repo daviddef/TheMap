@@ -1,0 +1,45 @@
+---
+/* THE LETTERS, PUBLISHED AS DRAFTS.
+ *
+ * Four letters were sitting in requests/ unpublished, one of them since
+ * September. A draft nobody finds is a question nobody asks, and every one of
+ * these is a gap this atlas cannot close by reading — because the data is not
+ * published, because the server is down, or because the archive has said no to
+ * crawlers and a letter is the honest remaining channel.
+ *
+ * The text is read from requests/ by scripts/build-errands.py and never
+ * retyped, so this page cannot drift from the files. Nothing here sends
+ * anything.
+ */
+import Base from "../layouts/Base.astro";
+import Errands from "../components/Errands.astro";
+import { u } from "../lib/url.js";
+import errands from "../data/errands.json";
+
+const c = errands.counts;
+---
+{/* `title` WITHOUT THE SITE NAME AND NO <h1> HERE. Base.astro renders
+    «{title} — {site.name}» into the document title and prints {title} as the
+    page's own h1, so this page first shipped «Errands — Record Atlas — Record
+    Atlas» with two h1 elements on it. The convention every other page follows
+    is title/eyebrow/dek as props and no heading in the body. */}
+<Base
+  title="Errands"
+  eyebrow={`${c.letters} letters · ${c.drafted} drafted and unsent`}
+  dek="Some gaps in this atlas cannot be closed by reading. The data is not published, or the server that published it has gone down, or the archive has told crawlers no — and the honest remaining move is to ask a person."
+  description="Letters this atlas has drafted and not sent: the gaps that cannot be closed by reading, and the exact words to close them with.">
+  {/* The count is in the eyebrow; repeating it here was the same sentence twice. */}
+  <p class="cap">
+    Each is written out in full below, ready to send from David's own address or to
+    adapt. <b>Nothing on this page sends anything</b> — that is his decision, always.
+    The text is read from <code>requests/</code> in the repository and never retyped
+    here, so the page cannot drift from the file.
+  </p>
+  <Errands groups={errands.groups} u={u} />
+  <p class="cap" style="margin-top:2rem">
+    Why these and not others: this atlas does not work around a bot gate, and it does
+    not read a sibling host to get what a named host refused. Where that leaves a
+    question unanswered, the question goes here instead of quietly disappearing.
+    See <a href={u("/worklist/")}>what is still missing</a>.
+  </p>
+</Base>

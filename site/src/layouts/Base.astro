@@ -73,6 +73,12 @@ const nav = [
     ["/privacy/", "Privacy"],
     ["/changelog/", "What changed"],
     ["/worklist/", "What is being done"],
+    /* The letters this atlas has drafted and not sent. It sits beside the work
+       list for the same reason the work list exists: a gap nobody is told
+       about is a gap nobody can close. These are the ones a person has to
+       close, because the archive has said no to crawlers or its server has
+       stopped answering. */
+    ["/errands/", "Letters to send"],
   ]],
 ];
 const here = Astro.url.pathname;
@@ -103,7 +109,7 @@ const here = Astro.url.pathname;
  */
 const AD_PAGES = ["/about/", "/help/", "/data/", "/coverage/", "/countries/",
                   "/country/", "/changelog/", "/worklist/", "/jurisdictions/",
-                  "/add/", "/my-research/", "/flags/"];
+                  "/add/", "/my-research/", "/flags/", "/errands/"];
 const adsHere = here === "/" || AD_PAGES.some((p) => here.startsWith(p));
 /* Strip the query string: /?q=Breslau and / are the same page. */
 const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;

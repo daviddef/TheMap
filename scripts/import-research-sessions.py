@@ -610,21 +610,60 @@ def state_of(row):
     return ""
 
 
+FS_HOST = re.compile(r"familysearch\.org$", re.I)
+
+
 def host_of(url):
     m = re.match(r"https?://(?:www\.)?([^/]+)", url or "")
     return m.group(1).lower() if m else ""
 
 
 def build_provider_index():
-    """host -> provider row. The atlas's own spine, not a guess at one."""
+    """host -> provider row. The atlas's own spine, not a guess at one.
+
+    ONE URL IS NOT ONE HOST, and a provider reached through any other one was
+    invisible here. Findmypast is listed at www.findmypast.co.uk, and an
+    Australian researcher works findmypast.com.au and search.findmypast.com.au
+    all day; those rows matched no provider, so source:findmypast carried no
+    mark for that archive although it is the most-used English instrument in
+    it. Twelve rows in one archive alone.
+
+    Two mechanisms, because the two cases are not alike.
+
+    A `hosts` LIST ON THE PROVIDER ROW, for a different domain entirely.
+    findmypast.com.au cannot be derived from findmypast.co.uk by any rule that
+    is also safe: matching on the registrable brand paired findmypast.com.au
+    with search.cemsearch.com.au, and archiveshub.jisc.ac.uk with
+    anno.onb.ac.at. A regional site is a fact somebody has to state.
+
+    AND THE PARENT DOMAIN, for a subdomain, which IS derivable. This is the
+    rule build.py already uses for collection access and the note there is the
+    reason: Rigsarkivet is listed at www.rigsarkivet.dk and browses at
+    arkivalieronline.rigsarkivet.dk. It walks up one label at a time, and
+    «co.uk» is safe because a two-label domain only ever matches a provider
+    that actually declares it. That alone answers
+    content.landesarchiv-berlin.de, arhinet.arhiv.hr, newspapers.library.wales
+    and search.findmypast.co.uk without anyone listing them.
+    """
     doc = json.load(io.open("data/providers.json", encoding="utf-8"))
     provs = doc["providers"] if isinstance(doc, dict) else doc
     idx = {}
     for p in provs:
-        h = host_of(p.get("url"))
-        if h:
-            idx.setdefault(h, p)
+        for h in [host_of(p.get("url"))] + [
+                (x or "").lower().lstrip(".") for x in (p.get("hosts") or [])]:
+            if h:
+                idx.setdefault(h, p)
     return idx
+
+
+def provider_for(url, idx):
+    """The provider that claims this url's host, or its parent domain."""
+    h = host_of(url)
+    while h and h.count(".") >= 1:
+        if h in idx:
+            return idx[h]
+        h = h.split(".", 1)[1]
+    return None
 
 
 def squash(s):
@@ -885,7 +924,7 @@ def main():
             # the source was worked, whether or not the volume can be pinned.
             # The URL is the stronger claim, so it is tried first; the
             # prose name only answers for a row that has no usable link.
-            p = provs.get(host_of(url))
+            p = provider_for(url, provs)
             # A RELATIVE HREF IS NOT A SOURCE URL. D'Arcy's 422 rows carry an
             # href like «/sneyds» — a link into its own site, not to the
             # record — so testing «has no url» left every one of them out of
@@ -972,11 +1011,32 @@ def main():
                 filmed += 1
 
             if not wps:
+                # THE REASON HAS TO BE THE REASON. This branch is «no
+                # waypoint was found», and it blamed DGS film numbers for all
+                # of them. Of 31 rejected rows in one archive, NOT ONE was a
+                # FamilySearch URL — they were Findmypast, the Landesarchiv
+                # Berlin, Trove, Geneteka, Yad Vashem — and every one was told
+                # to go and look for a film number that was never there. A
+                # wrong reason is worse than no reason: it sends the reader
+                # after something that does not exist.
+                _h = host_of(url)
+                if not url:
+                    _why = "row carries no URL"
+                elif not p:
+                    _why = (f"no provider in this atlas claims «{_h}» — add it "
+                            f"to data/providers.json, or to `hosts` on the "
+                            f"provider that owns it if it is a regional site")
+                elif FS_HOST.search(_h or ""):
+                    _why = ("cites a DGS film number or image ark; the atlas "
+                            "indexes waypoints and the two do not overlap")
+                else:
+                    _why = (f"«{_h}» is {p.get('name') or p['id']}, which this "
+                            f"atlas holds, but the link names no waypoint it "
+                            f"can pin a volume to")
                 rejects.append({"archive": fam, "src": src[:140], "url": url,
                                 "sourceMarked": bool(p and st),
-                                "why": ("cites a DGS film number or image ark; the "
-                                        "atlas indexes waypoints and the two do not "
-                                        "overlap" if url else "row carries no URL")})
+                                "host": _h, "provider": (p or {}).get("id"),
+                                "why": _why})
                 continue
             wp = wps[0]
             mid = canonical("volume:" + wp)

@@ -133,7 +133,33 @@ def fold(s):
 # So levels are read by their LABEL, which FamilySearch supplies. Anything
 # named here is never treated as a place; everything else may be.
 NOT_A_PLACE = re.compile(
-    r"religion|denomination|record type|event|type and years|volume|film|"
+    # `event` ANCHORED, BECAUSE «Event City» IS A CITY. A bare `event` caught
+    # «Event City» (1,364 volume rows) along with «Event» and «Event Type»,
+    # and a level that names the city an event happened in is exactly the
+    # level this matcher wants. «Event County» and «Event Country-State» are
+    # not lost by the narrowing — they fall through to IS_AREA on their own
+    # words, which is where they belong.
+    r"religion|denomination|record type|^event$|event type|type and years|"
+    r"volume|film|"
+    # A NEWSPAPER IS NOT A PLACE, and it is named after one. «British
+    # Newspaper Archives, Obituaries» files under ["Ireland", "Cork", "Cork",
+    # "The Cork Examiner"] with the last level labelled «Newspaper», and that
+    # title went into the path as ground. The masthead almost always carries
+    # the town — the Cork Examiner, the Limerick Leader — so this is not a
+    # harmless stray: it is a second vote for a town the path has already
+    # named, cast by something that is not a place at all.
+    #
+    # ANCHORED, FOR THE SAME REASON «event» IS ANCHORED TWELVE LINES UP, and
+    # it cost 72,350 volumes to learn it twice. A bare `publication` matches
+    # «State of Publication», which holds «Alabama» — the state a paper was
+    # printed in, which is exactly the level this matcher wants — and a bare
+    # `newspaper` matches «Locality/Newspaper/Collection», whose first word
+    # is Locality. Both were excluded, matching fell by 6,993 volumes and the
+    # unplaced list GREW. «State or Territory (NARA Publication Number)» is
+    # the same trap on 9,163 more.
+    #
+    # So the title of a publication, never the place of one.
+    r"^newspaper$|publication title|title of paper|periodical|"
     r"language|collection|series|archive|repository|source|category|"
     # GROUP AND RANGE ARE FILING BUCKETS, NOT GROUND. A level labelled
     # "Group" holds "Group 1, Group 2"; one labelled "Range" holds
@@ -145,7 +171,42 @@ NOT_A_PLACE = re.compile(
     # AND A SURNAME INITIAL IS NOT A PLACE. "First Letter of Surname" holds
     # values like "S" and "B"; 503 volumes sat under "S". A single letter
     # offered to a gazetteer of 45,985 settlements is a coin toss.
-    r"letter|initial|alphabet", re.I)
+    r"letter|initial|alphabet|"
+    # AND NEITHER IS A DOCKET, A SURNAME, A PORT, A ROLL OR AN INSTITUTION.
+    # Counted off FamilySearch's OWN labels for the levels this matcher was
+    # reporting as «the map's next places»:
+    #   Docket Number            5,856 volumes — a court file number
+    #   Principal's surname      3,244 — a person, filed by name
+    #   Arrival port or destination 2,772 — a route, not a parish
+    #   Tribal membership roll   2,372 — a roll of people
+    #   Soldier Home / Institution     — a building, and the town it stands
+    #                                    in is not what the level names
+    #   Civil registration office      — «17. Wiesbaden» is an office number
+    # Every one was being offered to a gazetteer of 1.7 million settlements,
+    # where a surname or a docket number will eventually hit something and
+    # the hit will be nonsense. The work list exists to say what ground is
+    # missing; a docket number has never been ground.
+    # WORD BOUNDARIES, BECAUSE «ship» IS INSIDE «Township». The first draft of
+    # this list wrote a bare `ship|vessel` and swallowed «Township»,
+    # «Township or other division of County» and
+    # «Township/City/Town/Village/Ward» — three genuine American settlement
+    # levels — into «not a place». Checked against all 248 labels the harvest
+    # actually carries before it was kept; that check is the only reason it
+    # was caught.
+    r"docket|surname|given name|\bport\b|\broll\b|membership|"
+    r"\bhome\b|institution|asylum|hospital|prison|\bcourt\b|regiment|"
+    r"\bship\b|vessel|"
+    # NOT the registration offices. A level LABELLED «Civil registration
+    # office» holds VALUES that name a town with a number stuck on —
+    # «17. Wiesbaden», «Frankfurt I», «3. Offenbach am Main» — and the
+    # records really are from Wiesbaden, Frankfurt and Offenbach. Excluding
+    # the level took 23,309 German volumes out of the work list without
+    # placing one of them: they stopped being listed, which is worse than
+    # being listed as missing. The label is not the test; what its values
+    # NAME is. «Soldier Home» holds «Orting Home», an institution, and is
+    # excluded. «Docket Number» holds numbers, and is excluded. This holds
+    # towns, so the ordinal comes off in readings() instead.
+    r"number$|^no\.|certificate|application|claim", re.I)
 
 # The same labels tell us the CONFESSION for free, which is the one thing the
 # browser walk had that this was assumed not to: "Roman Catholic" beside a
@@ -167,7 +228,20 @@ IS_RELIGION = re.compile(r"religion|denomination", re.I)
 # the honest answer is that the place is unknown.
 IS_AREA = re.compile(r"province|state|region|county|district|department|"
                      r"prefecture|governorate|oblast|canton|diocese|deanery|"
-                     r"archdiocese|country", re.I)
+                     r"archdiocese|country|"
+                     # ADDED FROM THE LABELS THE PILE ACTUALLY CARRIES.
+                     # «Тверь» is labelled Province and held 2,730 volumes of
+                     # unmatched villages beneath it; Hungarian trees label
+                     # their top level County and Comitat; «uyezd», «okres»,
+                     # «powiat», «voivodeship», «amt» and «län» are the same
+                     # thing in other languages. A level that names an area
+                     # may still vouch for the country — that is what `areas`
+                     # is for — it just must not be reported as the missing
+                     # settlement, because the settlement is the level below.
+                     r"uyezd|uezd|okres|okr\u00e1g|powiat|voivod|gubern|"
+                     r"comitat|v\u00e1rmegye|megye|amt$|l\u00e4n|herred|"
+                     r"municipality of|arrondissement|circondario|"
+                     r"subdistrict|sub-district|borough|shire", re.I)
 
 
 # A DIVISION THAT ALREADY SAYS WHAT IT IS DOES NOT NEED TELLING.
@@ -303,10 +377,19 @@ def years_in_title(t, ceiling):
     ys = kept or every
     return min(ys), max(ys)
 
+# A FILING BUCKET IS NOT A PLACE EITHER, and it had been going into the list
+# of towns somebody should go and find. «Case file» held 809 volumes,
+# «Miscellaneous» 538, «All parishes» 409 — and «All parishes» in a Barbadian
+# collection means all eleven of them, which is the country, not a gap in it.
+# Nobody can walk to Case file. Counted as unplaceable, under what they are,
+# so the work list stays a list of work.
 UNKNOWN_VALUE = re.compile(
     r"^(不明|不詳|未詳|unknown|unspecified|not ?stated|no ?place|none|n/?a|"
     r"desconocid[oa]|sin ?lugar|sconosciut[oa]|ignoto|onbekend|inconnu|"
     r"nieznane|neznám[éy]|nepoznato|ukjent|okänd|tuntematon|"
+    r"case ?files?|miscellaneous|misc\.?|various|varios|diversos|"
+    r"all (?:parishes|provinces|counties|districts|states|regions)|"
+    r"unassigned|uncategori[sz]ed|"
     r"\?+|-+|\.+)$", re.I)
 
 # ADMINISTRATIVE WRAPPERS AROUND A PLACE THAT IS RIGHT THERE IN THE STRING.
@@ -317,6 +400,19 @@ UNKNOWN_VALUE = re.compile(
 # replacement — the whole string is still tried first, so a place genuinely
 # called "X Court" is unharmed.
 WRAPPERS = [
+    # A REGISTRY NUMBER IN FRONT OF A TOWN, OR A ROMAN NUMERAL BEHIND ONE.
+    # German civil registration files by office, and the office is the town
+    # with its number: «17. Wiesbaden», «3. Offenbach am Main»,
+    # «925. Wiesbaden, Stadt», «Frankfurt I», «Frankfurt II». That is 23,309
+    # volumes whose town is sitting in plain sight behind an ordinal.
+    #
+    # The numeral is only stripped when a town survives it, so «I» or «17.»
+    # alone never becomes a lookup, and the stripped form is tried LAST —
+    # after the whole name — so a real place called «Frankfurt I» would still
+    # win on its own name if one existed.
+    re.compile(r"^\d{1,4}\.\s*(.+)$"),
+    re.compile(r"^(.+?),?\s+(?:Stadt|Land)$", re.I),
+    re.compile(r"^(.+?)\s+(?:I{1,3}|IV|V|VI{0,3}|IX|X)$"),
     re.compile(r"^zona de reclutamiento de\s+(.+)$", re.I),
     re.compile(r"^(?:distrito|partido|juzgado|registro) de\s+(.+)$", re.I),
     re.compile(r"^(.+?)\s+(?:district|magistrate'?s|registration)?\s*court$", re.I),
@@ -376,11 +472,25 @@ def readings(name, label=None):
     # tried first. «Hampton Court» resolved to Hampton, which is a different
     # place three miles away. They belong at the end, where they are the
     # last thing tried rather than the first.
-    unwrapped = []
-    for w in WRAPPERS:
-        m = w.match((name or "").strip())
-        if m and m.group(1).strip():
-            unwrapped.append(m.group(1).strip())
+    # UNWRAPPED REPEATEDLY, BECAUSE A NAME CAN WEAR TWO WRAPPERS.
+    # «925. Wiesbaden, Stadt» carries a registry number in front AND the word
+    # Stadt behind. One pass gives «Wiesbaden, Stadt» and «925. Wiesbaden»
+    # and neither is the town; a second pass over those reaches «Wiesbaden».
+    # Bounded at three rounds and guarded against a wrapper that returns its
+    # own input, so this can never spin.
+    unwrapped, frontier, rounds = [], [(name or "").strip()], 0
+    while frontier and rounds < 3:
+        nxt = []
+        for cand in frontier:
+            for w in WRAPPERS:
+                m = w.match(cand)
+                if not m:
+                    continue
+                inner = m.group(1).strip()
+                if inner and inner != cand and inner not in unwrapped:
+                    unwrapped.append(inner)
+                    nxt.append(inner)
+        frontier, rounds = nxt, rounds + 1
     out, seen = [], set()
     for cand in extra + [name, bare(name)] + \
                 [x.strip() for x in re.split(r"\s*,\s*", name or "")] + \
@@ -550,6 +660,69 @@ def main():
               f"«Vas County» -> «Vas», tried only when the exact name misses")
     except Exception as _e:
         print(f"admin divisions  unavailable ({_e})")
+
+    # AND UNDER THE NAME THE ARCHIVE USES, WHICH IS NOT ENGLISH.
+    #
+    # Every row in admin-divisions.json carries GeoNames' name for the
+    # division, and GeoNames names the world in English: «Tuscany», never
+    # «Toscana». «Vienna», never «Wien». «Prague», never «Praha». But
+    # FamilySearch's tree names a province the way the archive holding the
+    # books names it, so 1,001 Tuscan volumes asked for a region this file
+    # already held and were told it does not exist. The kind-stripped index
+    # above could not help: the kind was never the problem, the LANGUAGE was.
+    #
+    # Hungary is the clearest case and the largest. Every county in the file
+    # is «Szabolcs-Szatmár-Bereg»; every Hungarian register is filed under
+    # «Szabolcs-Szatmár-Bereg vármegye», and vármegye is the word the kingdom
+    # used before 1950. Six Hungarian counties head the unplaced list for
+    # this one reason.
+    #
+    # Into the EXACT index, not the bare one, because an alias is a name this
+    # division genuinely answers to rather than a guess made by removing a
+    # word — see scripts/harvest-admin-names.py for how each one is proved to
+    # belong to the division it is filed against.
+    try:
+        _an = json.load(open("data/admin-names.json"))
+        _bykey = {}
+        for _r in _rows:
+            if isinstance(_r, dict) and _r.get("name"):
+                _bykey[_r.get("key")] = _r
+        # AN ALIAS MAY NOT MAKE A KEY AMBIGUOUS. The exact index answers a
+        # name today by holding exactly one division under it; a second
+        # division arriving under the same key makes division_for refuse the
+        # name instead, so a key that already works would stop working and the
+        # gain would be paid for out of the existing matches. «Luxembourg» is
+        # the shape of it — a province of Belgium and a country, and whichever
+        # alias arrived second would have silenced the other. Skipped and
+        # counted, so the cost of the rule is visible rather than assumed.
+        _added = _withname = _collided = 0
+        for _k, _forms in (_an.get("aliases") or {}).items():
+            _r = _bykey.get(_k)
+            if not _r or _r.get("lat") is None:
+                continue
+            _withname += 1
+            for _f in _forms:
+                _ff = fold(_f)
+                if len(_ff) < 3:
+                    continue
+                _at = adm_idx.get((_r.get("cc"), _ff))
+                if _at is None:
+                    adm_idx[(_r.get("cc"), _ff)] = [_r]
+                    _added += 1
+                elif _r in _at:
+                    continue
+                else:
+                    _collided += 1
+        print(f"                 {_added:,} names in the language of the "
+              f"archive, for {_withname:,} divisions GeoNames holds only in "
+              f"English «Tuscany» -> «Toscana»"
+              + (f"; {_collided:,} refused for naming a division this file "
+                 f"already answers differently" if _collided else ""))
+    except FileNotFoundError:
+        print("                 no data/admin-names.json — divisions are "
+              "keyed in English only (run scripts/harvest-admin-names.py)")
+    except Exception as _e:
+        print(f"                 admin names unavailable ({_e})")
 
     gaz_idx = collections.defaultdict(list)
     try:
@@ -1188,7 +1361,28 @@ def main():
         # (province)", because a book placed to a province must not look
         # like a book placed to a parish. The name carries the disclosure
         # into the tooltip, the panel, the page title and the search.
-        for name, lab in reversed(areas):
+        # AND THE SAME FOR A LEVEL THE LABEL CALLED A TOWN, because the label
+        # is not reliable and this was measured, not assumed. 1,001 volumes
+        # name «Toscana» under the label «Comune or Frazione» — FamilySearch
+        # filing a whole region at the level where a frazione goes. A further
+        # 1,664 name Toscana under «Province», and those the area branch above
+        # answers perfectly; the 1,001 went to the unplaced list and sat there
+        # because a settlement label kept them out of the only index that
+        # holds their answer.
+        #
+        # THIS IS NOT THE POLLA TRAP IN REVERSE. That trap is an AREA name
+        # matched against a gazetteer of SETTLEMENTS, which invents a dot:
+        # «Pola» the Istrian province landing on Polla the town in Campania.
+        # This is the opposite direction — a name matched against the
+        # DIVISIONS, which can only ever land on an area this atlas already
+        # draws, and the dot it makes says «(province)» on its face.
+        #
+        # And it is tried LAST, after the shelf and the gazetteer have both
+        # missed. A level that names a real town the atlas knows has already
+        # matched as a town; only a level nothing else could answer reaches
+        # here. So a town sharing a province's name cannot be intercepted —
+        # it was answered three branches ago.
+        for name, lab in list(reversed(areas)) + list(reversed(path)):
             for cand in readings(name, lab):
                 for _cc in ccs:
                     # A RESEARCHED COUNTY SEAT BEATS A DERIVED CENTRE.
@@ -1210,6 +1404,34 @@ def main():
                     # still there for every name nobody has decided.
                     if placements.get((_cc, fold(cand))):
                         continue
+                    # WIKIDATA'S POINT FOR THE ACTUAL PROVINCE BEATS AN
+                    # AVERAGE OF ITS TOWNS. Both land on an area and both say
+                    # «(area)» on the dot, so this is not a question of
+                    # disclosure — it is which point. division_for falls back
+                    # to a population-weighted centre of the towns in a
+                    # division, which is a fair guess when nothing better
+                    # exists; P625 on the province's own item is the province's
+                    # own coordinate. And it answers names GeoNames cannot
+                    # hold at all, because they no longer exist: Bute County
+                    # was dissolved in 1779 and holds 148 books.
+                    _ap = area_points.get((_cc, fold(cand)))
+                    if _ap:
+                        _acc = (_ap.get("placeCountry") or _cc).upper()
+                        _an = division_label(_ap.get("name") or cand)
+                        _dr = already_drawn(_an, _acc, _ap["lat"], _ap["lon"])
+                        if _dr:
+                            return {"id": _dr}, _acc, False
+                        _aid = ("a-" + re.sub(r"[^a-z0-9]+", "-",
+                                              fold(_ap.get("name") or cand)
+                                              ).strip("-")[:44]
+                                + "-" + _acc.lower())
+                        promote.setdefault(_aid, {
+                            "id": _aid, "name": _an, "country": _acc,
+                            "lat": _ap["lat"], "lon": _ap["lon"],
+                            "from": "wikidata-area",
+                            "why": _ap.get("is", "")})
+                        area_placed[0] += 1
+                        return {"id": _aid}, _acc, False
                     a = division_for(cand, _cc, areas)
                     if not a:
                         continue
@@ -1297,6 +1519,30 @@ def main():
             placements.setdefault((_cc, fold(_n)), _r)
     if placements:
         print(f"placements      {len(placements)} names with a decided point")
+
+    # AND THE AREAS, WHICH ARE NOT PLACEMENTS AND MUST NOT BE MISTAKEN FOR
+    # THEM. A placement is a town somebody researched — King County's
+    # registers are at Seattle. These are provinces, counties and comarques
+    # that Wikidata identified as such: «Toscana», «Abaúj-Torna», 110
+    # Philippine provinces, «Bute County, North Carolina» which was dissolved
+    # in 1779. They go through division_label like every other area, so the
+    # dot says «(area)» and nobody reads a county as a parish.
+    #
+    # A SEPARATE DICT, because the division branch deliberately steps aside
+    # for a decided placement and must NOT step aside for one of these — they
+    # are the thing it is for.
+    area_points = {}
+    try:
+        _ad = json.load(open("data/fs-volumes-areas.json", encoding="utf-8"))
+        for _r in _ad.get("areas") or []:
+            if _r.get("lat") is None or _r.get("lon") is None:
+                continue
+            area_points.setdefault(((_r.get("cc") or "").upper(),
+                                    fold(_r["n"])), _r)
+        print(f"areas           {len(area_points)} names Wikidata calls a "
+              f"province or a county, with the point it holds for them")
+    except FileNotFoundError:
+        pass
 
     promote = {}
     crossed = collections.Counter()

@@ -60,6 +60,18 @@ WAF = (
     "verifying your browser", "radware", "incident id", "incapsula", "_incapsula_",
     "enable javascript and cookies", "ddos protection", "checking your browser",
     "request unsuccessful", "bot detection", "are you a human", "captcha",
+    # «WE ARE VERIFYING THAT YOU ARE A HUMAN» IS A DIFFERENT PAGE FROM «ACCESS
+    # BLOCKED», and missing it cost a whole country's worth of claim. The Czech
+    # list below already had «přístup zablokován»; vademecum.soalitomerice.cz
+    # serves «Ověřujeme, že jste člověk» instead, so it was counted open and
+    # written up as one of seven Czech portals that answer. A gate that asks
+    # whether you are human is the clearest refusal there is — it is asking a
+    # question this crawler cannot honestly answer yes to.
+    "ověřujeme, že jste člověk", "ověření přístupu",
+    "verifying that you are a human", "verifying you are human",
+    "wir überprüfen", "nous vérifions", "estamos verificando",
+    "stiamo verificando", "controleren of u een mens",
+    "one moment, please", "un momento, per favore",
 )
 # «Access denied», in the languages the archives on this map are written in.
 DENIED = (

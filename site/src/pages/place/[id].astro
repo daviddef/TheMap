@@ -27,10 +27,23 @@ import Neighbourhood from "../../components/Neighbourhood.astro";
 
 export async function getStaticPaths() {
   const full = (await import("../../data/places-full.json")).default;
-  return full.places.map((p) => ({ params: { id: p.id }, props: { place: p } }));
+  /* HOW MANY PLACES IN THIS COUNTRY SHARE THIS NAME, counted ONCE here rather
+     than per page. The first version of this asked `full.places.filter(...)`
+     inside the page body, which runs for every page: 56,582 pages each
+     scanning 56,582 places is three billion comparisons to answer a question
+     whose answer is the same every time. */
+  const nameCount = new Map();
+  for (const p of full.places) {
+    const k = `${p.country}\u0000${p.name}`;
+    nameCount.set(k, (nameCount.get(k) || 0) + 1);
+  }
+  return full.places.map((p) => ({
+    params: { id: p.id },
+    props: { place: p, sameName: nameCount.get(`${p.country}\u0000${p.name}`) || 1 },
+  }));
 }
 
-const { place } = Astro.props;
+const { place, sameName = 1 } = Astro.props;
 const PROV = Object.fromEntries(provs.providers.map((p) => [p.id, p]));
 /* THE SOCIAL CARD THIS PLACE ACTUALLY GETS.
    Worklist row 54: every one of these 54,043 pages shared the same grey
@@ -132,13 +145,31 @@ const older = (place.names || []).map((n) => n.n);
    map reached the Cape. */
 const where = (idx.countries || {})[place.country] || place.country;
 
+/* ELEVEN PLACES IN IRELAND ARE CALLED DONAGHMORE, and every one of them had
+   the same title, the same description and its own canonical tag — which to a
+   search engine is eleven pages claiming to be the one true Donaghmore, and to
+   a reader is a result list where no row can be told from the next.
+   «Donaghmore in Ireland, also written Domhnach Mór» is true of all eleven and
+   useful about none.
+   The county was on the page already, in the eyebrow. It just was not in the
+   two lines anybody outside the page ever reads. */
+const adm1 = (place.admin || {}).adm1;
+/* IN THE TITLE ONLY WHERE IT SETTLES SOMETHING. Appending the county to every
+   place would make «Gračišće, Istria» out of a name that is already unique in
+   the world, and a title that long is cut off in a result anyway. */
+const titleName = sameName > 1 && adm1 ? `${place.name}, ${adm1}` : place.name;
+/* IN THE DESCRIPTION ALWAYS, because «in County Limerick, Ireland» is a better
+   answer than «in Ireland» even when nothing is ambiguous — it is the line
+   that tells a reader whether this is their parish before they click. */
+const whereFull = adm1 && adm1 !== where ? `${adm1}, ${where}` : where;
+
 /* The sentence a search engine gets, and the one a human reads first. It has
    to carry the former names, because that is what people type. */
 const dek = older.length
-  ? `${place.name} in ${where}, also written ${older.join(", ")}. ` +
+  ? `${place.name} in ${whereFull}, also written ${older.join(", ")}. ` +
     `${cs.length} record volume${cs.length === 1 ? "" : "s"} covering ` +
     (span ? `${span[0]}–${span[1]}` : "no dated years") + `, and who holds them.`
-  : `${place.name} in ${where}. ${cs.length} record volume${cs.length === 1 ? "" : "s"} ` +
+  : `${place.name} in ${whereFull}. ${cs.length} record volume${cs.length === 1 ? "" : "s"} ` +
     (span ? `covering ${span[0]}–${span[1]}, ` : "") + "and who holds them.";
 /* The FamilySearch collections that cover this ground, and how nearly. */
 /* From the detail file, not from places-full.json. The collections are 81 MB
@@ -172,7 +203,7 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
     geo: { "@type": "GeoCoordinates", latitude: place.lat, longitude: place.lon },
     description: dek,
   }}
-  title={place.name}
+  title={titleName}
   flag={flagFor(place.country)}
   eyebrow={[adm.adm2, adm.adm1, where,
             `${cs.length} volume${cs.length === 1 ? "" : "s"}`,

@@ -1533,6 +1533,40 @@ def main():
               + (f"; {_fixed} had an HTML entity XML does not define"
                  if _fixed else "")
               + (f"; {_nsed} needed an xmlns to stand alone" if _nsed else ""))
+
+        # AND THE BLOB THE PAGE ITSELF FETCHES, which is not the shards.
+        #
+        # Two consumers, and only one of them was being fed. The MAP draws a
+        # flag with <img src="fl/xxx.svg"> — those are the files above. The
+        # «who governed» table on a place page does something different: it
+        # puts the art INLINE, from a single fetch of era-flags.json, because
+        # eighteen <img> tags for one Croatian era is eighteen requests for
+        # 26x17 pictures.
+        #
+        # That file used to sit in site/public and was deleted on 10 October
+        # by the commit that fixed a real cold-cache bug — build.py had been
+        # READING site/public/era-flags.json, a file it also wrote, so a cold
+        # deploy read nothing. The read was moved to data/, which was right,
+        # and the public copy was removed to prove the fix. The build went
+        # green and stayed green: nothing in the pipeline fetches a URL, so
+        # nothing noticed that the BROWSER's fetch of era-flags.json had
+        # started returning 404 and every flag swatch on every place page had
+        # gone blank. David found it in a screenshot of Senj three days later.
+        #
+        # So it is written here, from the same `_fa` the shards come from,
+        # with the same entity repair. Written, never read — the circular
+        # dependency that caused the original bug does not come back, because
+        # the read above is from data/ and this is output only.
+        _blob = {_slug: {_id: _xml_entities(_svg)
+                         for _id, _svg in (_fa.get(_slug) or {}).items()}
+                 for _slug in _all}
+        _bp = os.path.join(OUT, "era-flags.json")
+        with open(_bp, "w", encoding="utf-8") as fh:
+            json.dump({"note": "Inline flag art for the «who governed» table. "
+                               "The map uses fl/*.svg instead; see build.py.",
+                       "art": _blob}, fh, ensure_ascii=False, separators=(",", ":"))
+        print(f"era-flags.json  {os.path.getsize(_bp)/1024:8.1f} KB  the same "
+              f"{_n} images in one fetch, for the inline «who governed» table")
     except (FileNotFoundError, KeyError) as _e:
         # Not fatal: the table degrades to the words it always had.
         print(f"era flags not written ({_e}) — the «who governed» table will "

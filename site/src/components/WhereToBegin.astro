@@ -140,7 +140,7 @@ const volRows = (d.collections || []).map((c) => ({
   k: c.kinds || [], u: c.url || null,
 }));
 const eraRows = (eras || []).map((e) => ({
-  f: e.from, to: e.to, p: e.polity, u: e.filedUnder || [], n: e.note || null,
+  f: e.from, to: e.to, p: e.polity, u: e.filedUnderNames || e.filedUnder || [], n: e.note || null,
 }));
 ---
 <section class="wtb">
@@ -204,7 +204,7 @@ const eraRows = (eras || []).map((e) => ({
                        alt="" title={f.polity} />
                 ) : null; })()}{e.polity}</td>
                 <td class="m">{(e.filedUnder || []).length
-                  ? e.filedUnder.join(" · ")
+                  ? (e.filedUnderNames || e.filedUnder).join(" · ")
                   : <span class="wtb-none">no archive holds this yet</span>}</td>
               </tr>
             ))}

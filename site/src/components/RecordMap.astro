@@ -1202,7 +1202,7 @@ window.addEventListener("load", async function () {
     });
     BANDS[uid] = eras.map(function (e) {
       var filed = (e.filedUnder || []).length
-        ? (e.filedUnder || []).map(esc).join(" \u00b7 ")
+        ? filedNames(e).map(esc).join(" \u00b7 ")
         /* An era with no archive is not a gap in the research — for Istria
            before 1374 no parish registers exist anywhere, because Trent only
            required them from 1563. Saying so beats an empty cell. */
@@ -1246,12 +1246,20 @@ window.addEventListener("load", async function () {
     return h.join("");
   }
 
+  /* The archive names for an era, from the build. regions.json carries
+     `filedUnderNames` beside `filedUnder`; ids are the fallback for a file
+     written before it did, so a stale cache shows «dari», not nothing. */
+  function filedNames(e) {
+    var ids = e.filedUnder || [], names = e.filedUnderNames || [];
+    return ids.map(function (id, i) { return names[i] || id; });
+  }
+
   /* The old stacked list, kept for a region with a single era. */
   function eraList(reg) {
     var h = ['<ul class="ra-eras">'];
     (reg.eras || []).forEach(function (e) {
       var filed = (e.filedUnder || []).length
-        ? (e.filedUnder || []).map(esc).join(" \u00b7 ")
+        ? filedNames(e).map(esc).join(" \u00b7 ")
         : '<span class="ra-era-none">' + esc(T("no archive holds this yet")) + "</span>";
       h.push('<li><span class="ra-era-y">' + e.from + "\u2013" + e.to + "</span>" +
              '<span class="ra-era-p">' + esc(e.polity) + "</span>" +

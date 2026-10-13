@@ -586,6 +586,19 @@ def main():
     providers = json.load(open("data/providers.json"))
     paccess = {p["id"]: p["access"] for p in providers["providers"]}
 
+    # AN ERA'S filedUnder IS A LIST OF PROVIDER IDS, AND A READER CANNOT READ
+    # ONE. The era panel printed «1991–2026 · dari» for the state archive in
+    # Rijeka. The map has no provider lookup and fetching providers.json for a
+    # label is the wrong trade, so the names are resolved here, where both
+    # files are already open, and written beside the ids. The ids stay —
+    # check-data and the place page key on them — and `filedUnderNames` runs
+    # parallel to `filedUnder`, same order, same length. A provider that has
+    # gone missing falls back to its id rather than to a blank.
+    pname = {p["id"]: p.get("name") or p["id"] for p in providers["providers"]}
+    for _r in regions["regions"]:
+        for _e in _r["eras"]:
+            _e["filedUnderNames"] = [pname.get(i, i) for i in _e.get("filedUnder") or []]
+
     # ---- THE COVERAGE CLAIMS INHERIT THEIR HOLDER'S ACCESS CLASS ----
     # Two different things are called a collection in this build, and only one
     # of them carried an access class.

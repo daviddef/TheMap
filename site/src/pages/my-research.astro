@@ -196,10 +196,23 @@ const BASE_ = u("/");
 
       function draw() {
         var marks = P.all(), slug = P.active(), me = line();
-        var mine = Object.keys(marks).filter(function (id) {
+        /* WHAT THIS FAMILY DID, AND WHAT WAS READ FOR SOMEBODY ELSE.
+           A volume WALKED in full is shared by every line, on purpose: the
+           progress kit says reading a page is a fact about the page, and
+           nobody should read it twice. That is right for coverage and wrong
+           for «where this family has been worked». This list took walked
+           volumes as this family's work, so Defranceschi showed Arienzo and
+           Santa Maria a Vico — Falco's ground, four volumes Falco read — in a
+           browser with none of David's own marks. He asked why a Falco place
+           was under Defranceschi and I told him it was his own mis-click. It
+           was not; it was this filter.
+           Own work lists. Walked-only volumes are counted and named once,
+           below, as what they are. */
+        var mine = [], sharedOnly = [];
+        Object.keys(marks).forEach(function (id) {
           var b = (marks[id].by && marks[id].by[slug]) || {};
-          return (b.done && b.done.length) || b.state || b.note ||
-                 (marks[id].walked && marks[id].walked.length);
+          if ((b.done && b.done.length) || b.state || b.note) mine.push(id);
+          else if (marks[id].walked && marks[id].walked.length) sharedOnly.push(id);
         });
 
         if (!mine.length) {
@@ -278,6 +291,16 @@ const BASE_ = u("/");
           loose.push(row);
         });
 
+        var sharedByPlace = {}, sharedName = {};
+        sharedOnly.forEach(function (id) {
+          var m = marks[id];
+          if (id.indexOf("volume:") !== 0) return;
+          var pid = placeIdOf(m);
+          if (!pid) return;
+          sharedByPlace[pid] = (sharedByPlace[pid] || 0) + 1;
+          if (m.where) sharedName[pid] = m.where;
+        });
+
         var h = [];
 
         /* ---- the line, and what it amounts to --------------------------- */
@@ -316,7 +339,20 @@ const BASE_ = u("/");
                count two lines down. The slug stays as the last resort, for a
                place whose file has not arrived yet. */
             var pc = PLACEC[pid];
-            var label = rows[0].m.where || (pc && pc.name) || pid;
+            /* THE ATLAS'S NAME FIRST, AND A SLUG IS NOT A LABEL. The importer
+               writes `where` = the place id whenever it has nothing better
+               (import-research-sessions.py, `or vols[wp]["place"]`), so on
+               every imported mark `where` is «arienzo», «liznjan», «bakar».
+               The line above this one used to prefer `where`, which meant the
+               fix below it for «a slug where a name belongs» never fired and
+               the headings kept printing the id. A `where` that is just the
+               id says nothing the id did not, so it is ignored; one that
+               carries more — «Senj, the Kvarner» — still wins over the
+               atlas's name, because somebody wrote it. */
+            var wh = rows[0].m.where;
+            var label = (wh && wh !== pid && wh.toLowerCase().replace(/[^a-z0-9]/g, "") !==
+                         pid.replace(/[^a-z0-9]/g, "") ? wh : null) ||
+                        (pc && pc.name) || wh || pid;
             var held = PLACEC[pid] ? (PLACEC[pid].volumes || []).length : null;
             /* «1 of 19 books marked» must count BOOKS. A place-level mark is
                in this list too — it is what opens the section — and counting
@@ -348,8 +384,32 @@ const BASE_ = u("/");
                 '<a href="' + BASE + "place/" + esc(pid) + '/">the neighbours of ' +
                 esc(label) + "</a></p>");
             }
+            if (sharedByPlace[pid]) {
+              h.push('<p class="mrshared">' + sharedByPlace[pid] + " more book" +
+                (sharedByPlace[pid] === 1 ? "" : "s") +
+                " here " + (sharedByPlace[pid] === 1 ? "was" : "were") +
+                " read in full while looking for another family.</p>");
+            }
             h.push("</section>");
           });
+        }
+
+        /* ---- READ FOR OTHERS, WHERE THIS FAMILY HAS NOT BEEN ------------- */
+        var elsewhere = Object.keys(sharedByPlace).filter(function (pid) {
+          return !byPlace[pid];
+        }).sort();
+        if (elsewhere.length) {
+          h.push('<p class="mrshared mrshared-else">Read in full for other ' +
+            "families, not this one: " + elsewhere.map(function (pid) {
+              var pc = PLACEC[pid];
+              /* data-shared-place so fill() fetches the place's own file and
+                 the NAME arrives. Without it these links are not [data-place]
+                 sections, nothing asks for their files, and the line read
+                 «arienzo (2)» — the slug again. */
+              return '<a data-shared-place="' + esc(pid) + '" href="' + BASE + "place/" + esc(pid) + '/">' +
+                     esc((pc && pc.name) || sharedName[pid] || pid) + "</a> (" +
+                     sharedByPlace[pid] + ")";
+            }).join(", ") + ".</p>");
         }
 
         /* ---- 2. films, which have no place of their own ------------------ */
@@ -458,9 +518,9 @@ const BASE_ = u("/");
       var filling = false;
       function fill() {
         if (filling) return;
-        var want = [].slice.call(document.querySelectorAll("[data-place]"))
-          .map(function (el) { return el.getAttribute("data-place"); })
-          .filter(function (p) { return !(p in PLACEC); });
+        var want = [].slice.call(document.querySelectorAll("[data-place],[data-shared-place]"))
+          .map(function (el) { return el.getAttribute("data-place") || el.getAttribute("data-shared-place"); })
+          .filter(function (p, i, all) { return !(p in PLACEC) && all.indexOf(p) === i; });
         var needProv = !PROVS, needCon = !CONTACTS;
         if (!want.length && !needProv && !needCon) return;
         filling = true;
@@ -669,6 +729,10 @@ const BASE_ = u("/");
     align-items: baseline; margin: 0 0 2px; font-size: 17px; }
   :global(.mrcount) { font-family: var(--mono); font-size: 11px;
     font-weight: 400; color: var(--ink-3); }
+  :global(.mrshared) { margin: 2px 0 10px; font-family: var(--sans); font-size: 12px;
+    color: var(--ink-3); max-width: 64ch; }
+  :global(.mrshared-else) { margin-top: 18px; padding-top: 10px;
+    border-top: 1px solid var(--rule); }
   :global(.mrlead) { margin: 4px 0 2px; font-family: var(--sans); font-size: 12.5px;
     color: var(--ink-3); max-width: 64ch; }
   :global(.mrnext) { margin: 6px 0 12px; font-family: var(--sans);

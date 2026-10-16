@@ -178,6 +178,19 @@ const BASE_ = u("/");
           .catch(function () { return null; });
       }
 
+      /* THE STATES, IN WORDS A PERSON WOULD SAY. The chip printed the stored
+         value, so a to-do read «planned» and a find read «found». The same
+         seven the place page offers, and «planned» is the to-do list. */
+      var STATE_SAY = { planned: "to do", written: "written, no reply",
+                        searched: "searched, nothing found", found: "found something",
+                        exhausted: "read everything", blocked: "cannot get access" };
+      /* WHICH «NOT YET MARKED» LISTS ARE OPEN. draw() rewrites the whole body,
+         which would close every <details> the moment a book was added to the
+         to-do list — so the list the reader is working in would collapse under
+         their hand. Remembered here, the way the place page remembers which
+         volume editor is open and for the same reason. */
+      var openMore = {};
+
       function placeIdOf(m) {
         var h = m.href || "";
         var x = h.match(/\/place\/([^/]+)\/?/);
@@ -328,7 +341,7 @@ const BASE_ = u("/");
           h.push('<p class="mrlead">Opening a place lets you mark its books \u2014 ' +
                  "and shows the villages within a day's walk, whose registers " +
                  "may hold this family under their own name.</p>");
-          pids.forEach(function (pid) {
+          pids.forEach(function (pid, idx) {
             var rows = byPlace[pid];
             /* THE PLACE'S OWN NAME, NOT ITS SLUG. This read
                «rows[0].m.where || pid», and where a mark carried no `where`
@@ -353,37 +366,86 @@ const BASE_ = u("/");
             var label = (wh && wh !== pid && wh.toLowerCase().replace(/[^a-z0-9]/g, "") !==
                          pid.replace(/[^a-z0-9]/g, "") ? wh : null) ||
                         (pc && pc.name) || wh || pid;
-            var held = PLACEC[pid] ? (PLACEC[pid].volumes || []).length : null;
+            /* THE TRUE TOTAL, NOT THE CAPPED LIST. The place file carries at most
+               60 volumes, oldest first, and says how many it is not showing in
+               `volumesTotal`. This counted the 60, so a place with 12,656 books
+               read «of 60». */
+            var pcv = PLACEC[pid];
+            var vols = pcv ? (pcv.volumes || []) : null;
+            var held = pcv ? (pcv.volumesTotal || vols.length) : null;
+            var num = idx + 1;
             /* «1 of 19 books marked» must count BOOKS. A place-level mark is
                in this list too — it is what opens the section — and counting
                it here would report a book nobody has opened. */
             var books = rows.filter(function (r) {
               return r.id.indexOf("volume:") === 0;
             }).length;
-            h.push('<section class="mrp" data-place="' + esc(pid) + '">' +
-              '<h3><a href="' + BASE + "place/" + esc(pid) + '/">' + esc(label) + "</a>" +
+            var pct = held ? Math.min(100, Math.round(100 * books / held)) : 0;
+            /* THE PLACE IS THE HEADING, AND IT HAS THE MAP'S OWN NUMBER. The pin
+               on the map and the section below were two separate things a
+               reader had to match by name; the same disc now sits in both, and
+               its number is the section's position, which is also what the map
+               uses. */
+            h.push('<section class="mrp" id="mrp-' + esc(pid) + '" data-place="' + esc(pid) +
+              '" data-n="' + num + '">' +
+              '<header class="mrph"><span class="mr-pin mr-pin-h" aria-hidden="true">' + num + "</span>" +
+              '<h3><a href="' + BASE + "place/" + esc(pid) + '/">' + esc(label) + "</a></h3>" +
               '<span class="mrcount">' + books +
               (held != null ? " of " + held : "") + " book" +
-              ((held != null ? held : books) === 1 ? "" : "s") + " marked</span></h3>");
+              ((held != null ? held : books) === 1 ? "" : "s") + " marked</span>" +
+              (held ? '<span class="mrbar" role="img" aria-label="' + books + " of " + held +
+                      ' books marked"><i style="width:' + pct + '%"></i></span>' : "") +
+              "</header>");
             h.push('<ul class="mrlist">');
             rows.forEach(function (r) { h.push(rowHtml(r)); });
             h.push("</ul>");
-            if (held != null && held > rows.length) {
-              /* SAID ONCE, NOT NINE TIMES. The sentence about villages
-                 within a day's walk is good and it was printed under EVERY
-                 place — nine identical paragraphs down one page, which is how
-                 a reader learns to skip the thing you most want read. It now
-                 sits once above the list, and each place keeps only the part
-                 that differs: how many books are still unopened here. */
-              h.push('<p class="mrnext">' + (held - rows.length) +
-                " book" + (held - rows.length === 1 ? "" : "s") +
-                ' not opened here \u2014 <a href="' + BASE + "place/" + esc(pid) +
-                '/">open ' + esc(label) + "</a></p>");
-            } else {
-              h.push('<p class="mrnext">Every book here is marked \u2014 ' +
-                '<a href="' + BASE + "place/" + esc(pid) + '/">the neighbours of ' +
-                esc(label) + "</a></p>");
+
+            /* THE BOOKS NOT YET MARKED, RIGHT HERE. «1 of 14 books marked» was
+               a sentence about thirteen books the reader could not see, and
+               the only way to see them was to leave, open the place, and find
+               their way back. Opened here, each one can go straight onto the
+               to-do list. A book is «not yet marked» when this family has
+               recorded nothing against it; one read in full for somebody else
+               is shown as such rather than hidden. */
+            var have = {};
+            rows.forEach(function (r) { have[r.id] = 1; });
+            var todo = (vols || []).filter(function (v) {
+              /* `waypoint` and `url` are what the PLACE file carries; `wp` is the
+                 world file's name for the same thing, and reading it here found
+                 nothing, so no book ever showed as unmarked. */
+              return v.waypoint && !have["volume:" + String(v.waypoint).split(":")[0]];
+            });
+            if (todo.length) {
+              var capped = held > vols.length;
+              h.push('<details class="mrmore" data-more="' + esc(pid) + '"' +
+                (openMore[pid] ? " open" : "") + "><summary>" + todo.length + " book" +
+                (todo.length === 1 ? "" : "s") + " not yet marked" +
+                (capped ? " <span>(the oldest " + vols.length + " of " + held + ")</span>" : "") +
+                "</summary>" +
+                '<div class="mrmorebar"><button type="button" class="mraddall" data-pid="' +
+                esc(pid) + '">Add all ' + todo.length + " to my to-do list</button></div>" +
+                '<ul class="mrlist mrmorelist">' + todo.map(function (v) {
+                  var id = String(v.waypoint).split(":")[0];
+                  var span = v.from ? (v.to && v.to !== v.from ? v.from + "\u2013" + v.to : String(v.from)) : "";
+                  var walkedBy = marks["volume:" + id] && marks["volume:" + id].walked &&
+                                 marks["volume:" + id].walked.length;
+                  return '<li class="mrrow"><div class="mrline mrline-t">' +
+                    (v.url ? '<a class="mrt" href="' + esc(v.url) +
+                             '" target="_blank" rel="noopener">' + esc(v.t || id) + " \u2197</a>"
+                           : '<span class="mrt">' + esc(v.t || id) + "</span>") +
+                    '<button type="button" class="mradd" data-pid="' + esc(pid) + '" data-wp="' +
+                    esc(id) + '" data-t="' + esc(v.t || id) + '">+ to do</button></div>' +
+                    '<div class="mrline mrline-r">' +
+                    (span ? '<span class="mrn">' + esc(span) + "</span>" : "") +
+                    (v.conf ? '<span class="mrn">' + esc(v.conf.replace(/\s*\([^)]*\)\s*$/, "")) + "</span>" : "") +
+                    (walkedBy ? '<span class="mrwalk">read in full for another family</span>' : "") +
+                    "</div></li>";
+                }).join("") + "</ul></details>");
             }
+            h.push('<p class="mrnext">' + (held != null && !todo.length && held <= books
+              ? "Every book here is marked \u2014 " : "") +
+              '<a href="' + BASE + "place/" + esc(pid) + '/">Open ' + esc(label) +
+              "</a> for the full list and the villages within a day's walk.</p>");
             if (sharedByPlace[pid]) {
               h.push('<p class="mrshared">' + sharedByPlace[pid] + " more book" +
                 (sharedByPlace[pid] === 1 ? "" : "s") +
@@ -489,7 +551,8 @@ const BASE_ = u("/");
           chips += '<span class="mrres">start again at ' + P.resume(cov) + "</span>";
         }
         if (shared) chips += '<span class="mrwalk">read in full</span>';
-        if (b.state) chips += '<span class="mrstate">' + esc(b.state) + "</span>";
+        if (b.state) chips += '<span class="mrstate mrstate-' + esc(b.state) + '">' +
+                              esc(STATE_SAY[b.state] || b.state) + "</span>";
 
         return '<li class="mrrow">' +
           '<div class="mrline mrline-t">' +
@@ -561,7 +624,8 @@ const BASE_ = u("/");
           var pid = el.getAttribute("data-place");
           var d = PLACEC[pid];
           if (!d || d.lat == null || d.lon == null) return;
-          pts.push({ id: pid, y: d.lat, x: d.lon, n: d.name || pid });
+          pts.push({ id: pid, y: d.lat, x: d.lon, n: d.name || pid,
+                     num: +el.getAttribute("data-n") || (pts.length + 1) });
         });
         if (pts.length < 2) {
           box.hidden = true; if (cap) cap.hidden = true;
@@ -579,10 +643,11 @@ const BASE_ = u("/");
         var g = L.layerGroup();
         pts.forEach(function (p, i) {
           L.marker([p.y, p.x], {
-            icon: L.divIcon({ className: "mr-pin", html: String(i + 1),
+            icon: L.divIcon({ className: "mr-pin", html: String(p.num),
                               iconSize: [22, 22] })
           }).addTo(g).bindPopup('<a href="' + BASE + "place/" + p.id + '/">' +
-                                p.n.replace(/[<>&]/g, "") + "</a>");
+                                p.num + " \u00b7 " + p.n.replace(/[<>&]/g, "") +
+                                '</a><br><a href="#mrp-' + p.id + '">see it below \u2193</a>');
         });
         g.addTo(mrMap); mrMap._raPins = g;
         mrMap.fitBounds(L.latLngBounds(pts.map(function (p) { return [p.y, p.x]; }))
@@ -633,12 +698,50 @@ const BASE_ = u("/");
         };
         r.readAsText(f);
       });
+      /* A BOOK ONTO THE TO-DO LIST. Two calls the place page already makes:
+         record what the mark is and where it lives, then give it the state
+         «planned». It lands under the ACTIVE family, like every other mark. */
+      function addTodo(pid, wp, title, label) {
+        var id = "volume:" + wp;
+        P.setWhat(id, { t: title, where: label, href: BASE + "place/" + pid + "/" });
+        P.setState(id, "planned");
+      }
       body.addEventListener("click", function (e) {
-        var b = e.target.closest && e.target.closest(".mrdel");
+        var t = e.target.closest ? e.target : null;
+        if (!t) return;
+        var add = t.closest(".mradd");
+        if (add) {
+          var sec = add.closest("[data-place]");
+          var lab = sec ? sec.querySelector("h3 a").textContent : add.getAttribute("data-pid");
+          openMore[add.getAttribute("data-pid")] = true;
+          addTodo(add.getAttribute("data-pid"), add.getAttribute("data-wp"),
+                  add.getAttribute("data-t"), lab);
+          document.dispatchEvent(new CustomEvent("ra-progress-changed"));
+          return;
+        }
+        var all = t.closest(".mraddall");
+        if (all) {
+          var pid = all.getAttribute("data-pid");
+          var sec2 = all.closest("[data-place]");
+          var lab2 = sec2.querySelector("h3 a").textContent;
+          openMore[pid] = true;
+          [].slice.call(sec2.querySelectorAll(".mradd")).forEach(function (b2) {
+            addTodo(pid, b2.getAttribute("data-wp"), b2.getAttribute("data-t"), lab2);
+          });
+          document.dispatchEvent(new CustomEvent("ra-progress-changed"));
+          return;
+        }
+        var b = t.closest(".mrdel");
         if (!b) return;
         P.clear(b.getAttribute("data-id"));
         draw();
       });
+      /* toggle does not bubble, so it is caught on the way down. */
+      body.addEventListener("toggle", function (e) {
+        var d = e.target;
+        if (d && d.matches && d.matches("details.mrmore"))
+          openMore[d.getAttribute("data-more")] = d.open;
+      }, true);
     })();
   </script>
 </Base>
@@ -723,12 +826,45 @@ const BASE_ = u("/");
   :global(.mrh) { margin: 22px 0 2px; }
   :global(.mrwhere2) { font-family: var(--sans); font-size: 15px;
     font-weight: 400; color: var(--ink-3); }
-  :global(.mrp) { margin: 14px 0 0; padding-left: 12px;
-    border-left: 2px solid var(--rule-strong); }
-  :global(.mrp h3) { display: flex; flex-wrap: wrap; gap: 10px;
-    align-items: baseline; margin: 0 0 2px; font-size: 17px; }
+  /* A PLACE IS A CARD, NOT A RULE DOWN THE LEFT. It was a 2px line and a 17px
+     link, which read as a note under the previous section rather than as the
+     thing the page is about. Now it has a tinted header carrying the map's own
+     numbered disc, the name at heading size, and how far through the books
+     this family has got. */
+  :global(.mrp) { margin: 20px 0 0; padding: 0 0 4px; background: var(--panel);
+    border: 1px solid var(--rule); border-left: 4px solid var(--accent);
+    border-radius: 4px; scroll-margin-top: 70px; }
+  :global(.mrph) { display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px; background: var(--accent-wash);
+    border-bottom: 1px solid var(--rule); border-radius: 0 3px 0 0; }
+  :global(.mrph h3) { margin: 0; font-family: var(--serif); font-size: 22px;
+    line-height: 1.2; flex: 1 1 auto; min-width: 0; }
+  /* The same disc the map draws, a little larger because it is a heading. */
+  :global(.mr-pin-h) { flex: 0 0 auto; width: 30px; height: 30px; line-height: 30px;
+    font-size: 15px; box-shadow: none; }
+  /* ink-2, not ink-3: ink-3 measures 4.1:1 on the tinted header and the file's
+     own rule is that body text clears 4.5. */
   :global(.mrcount) { font-family: var(--mono); font-size: 11px;
-    font-weight: 400; color: var(--ink-3); }
+    font-weight: 400; color: var(--ink-2); white-space: nowrap; }
+  :global(.mrbar) { flex: 0 0 76px; height: 5px; background: var(--rule);
+    border-radius: 3px; overflow: hidden; }
+  :global(.mrbar i) { display: block; height: 100%; background: var(--accent); }
+  :global(.mrp > .mrlist), :global(.mrp > .mrshared), :global(.mrp > .mrnext),
+  :global(.mrp > .mrmore) { margin-left: 16px; margin-right: 16px; }
+  :global(.mrmore) { margin-top: 8px; border: 1px solid var(--rule);
+    border-radius: 3px; background: var(--ground); }
+  :global(.mrmore > summary) { cursor: pointer; padding: 8px 12px;
+    font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--accent); }
+  :global(.mrmore > summary span) { font-weight: 400; color: var(--ink-2); }
+  :global(.mrmore[open] > summary) { border-bottom: 1px solid var(--rule); }
+  :global(.mrmorebar) { padding: 8px 12px 0; }
+  :global(.mrmorelist) { margin: 0 12px 10px; }
+  :global(.mradd), :global(.mraddall) { font-family: var(--sans); font-size: 12px;
+    padding: 3px 9px; border: 1px solid var(--accent); border-radius: 3px;
+    background: transparent; color: var(--accent); cursor: pointer; flex: 0 0 auto; }
+  :global(.mradd:hover), :global(.mraddall:hover) { background: var(--accent);
+    color: var(--panel); }
+  :global(.mrstate-planned) { color: var(--brass); background: var(--panel-2); }
   :global(.mrshared) { margin: 2px 0 10px; font-family: var(--sans); font-size: 12px;
     color: var(--ink-3); max-width: 64ch; }
   :global(.mrshared-else) { margin-top: 18px; padding-top: 10px;

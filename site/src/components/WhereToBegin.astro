@@ -203,7 +203,7 @@ const eraRows = (eras || []).map((e) => ({
                        width="20" height="13" loading="lazy"
                        alt="" title={f.polity} />
                 ) : null; })()}{e.polity}</td>
-                <td class="m">{(e.filedUnder || []).length
+                <td class="m wtb-f">{(e.filedUnder || []).length
                   ? (e.filedUnderNames || e.filedUnder).join(" · ")
                   : <span class="wtb-none">no archive holds this yet</span>}</td>
               </tr>
@@ -485,6 +485,9 @@ const eraRows = (eras || []).map((e) => ({
   .wtb-era td { padding: 5px 12px 5px 0; border-bottom: 1px solid var(--rule);
                 vertical-align: top; color: var(--ink-2); }
   .wtb-era .m { font-family: var(--mono); font-size: 11.5px; white-space: nowrap; }
+  /* Archive names, not ids, now fill this cell: it must wrap or the table
+     pushes the page 480px wider than a phone. The years column keeps nowrap. */
+  .wtb-era .wtb-f { white-space: normal; }
   .wtb-cols { margin: 4px 0 7px; padding-left: 18px; }
   .wtb-cols li { font-family: var(--sans); font-size: 13px; line-height: 1.7;
                  color: var(--ink-2); }

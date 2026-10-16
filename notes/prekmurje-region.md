@@ -22,7 +22,7 @@ Borderline and unresolved: **Šratovci and Mele** (no Hungarian name, left outsi
 | era | filedUnder | basis |
 |---|---|---|
 | 1000–1526 Kingdom of Hungary | none | note copied from the `hungary` region ("Before registers.") |
-| 1526–1699 | none | no claim made; the Hungary region's Ottoman "hole" note is **not** copied, since it is about the centre of the kingdom |
+| 1526–1699 | none | the Hungary region's Ottoman "hole" note is **not** copied, since it is about the centre of the kingdom. The note says only that nothing is recorded and that the Hungary region's claim has not been checked here. Note the place page still prints its fixed label "no registers survive" for any era with no archive |
 | 1699–1867 | mnl, hungaricana, familysearch | **inherited** from `hungary` for the same regime. Not checked that these cover Prekmurje specifically |
 | 1867–1918 | mnl, hungaricana, familysearch | same; note is the `hungary` region's civil-registration sentence (1 October 1895) plus FamilySearch collection 1985107 "Slovenia, Prekmurje and Međimurje, Civil Registers, 1895-1918" (in `data/collections.json`) |
 | 1918–1941 | ars-si, sira, dlib-si | copied from `carniola`'s Slovenia-wide providers; note points to the `hungary` region's Trianon note |

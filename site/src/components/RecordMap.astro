@@ -509,6 +509,20 @@ window.addEventListener("load", async function () {
   idx = got[0]; regions = got[1]; provs = got[2];
 
   var PROV = {}; provs.providers.forEach(function (p) { PROV[p.id] = p; });
+  /* A PROVIDER ID IS NOT A PROVIDER NAME, and the era panels printed the id.
+     Senj's 1991–2026 era read «1991–2026 · dari» and its 1469–1809 era read
+     «dari · arhinet · familysearch» — three ids in a row. `dari` is Državni
+     arhiv u Rijeci, the archive you would actually write to for Senj, filed
+     correctly against the Kvarner's eras and named wrongly on the page.
+
+     Three other call sites in this file already resolved it the same way —
+     PROV[x] ? PROV[x].name : x — so this is the lookup those were using,
+     given a name and used by the two era builders as well. The id is kept as
+     the fallback: a region can file an era under a provider that a later
+     providers.json no longer carries, and an id on the page beats a blank. */
+  function provName(id) {
+    return PROV[id] && PROV[id].name ? PROV[id].name : id;
+  }
   /* National archives and libraries by country, fetched once and kept for the
      whole session — 40 KB that turns «no sources here» into a list in 164
      countries. */
@@ -1212,7 +1226,8 @@ window.addEventListener("load", async function () {
     });
     BANDS[uid] = eras.map(function (e) {
       var filed = (e.filedUnder || []).length
-        ? (e.filedUnder || []).map(esc).join(" \u00b7 ")
+        ? (e.filedUnder || []).map(function (f) { return esc(provName(f)); })
+            .join(" \u00b7 ")
         /* An era with no archive is not a gap in the research — for Istria
            before 1374 no parish registers exist anywhere, because Trent only
            required them from 1563. Saying so beats an empty cell. */
@@ -1261,7 +1276,8 @@ window.addEventListener("load", async function () {
     var h = ['<ul class="ra-eras">'];
     (reg.eras || []).forEach(function (e) {
       var filed = (e.filedUnder || []).length
-        ? (e.filedUnder || []).map(esc).join(" \u00b7 ")
+        ? (e.filedUnder || []).map(function (f) { return esc(provName(f)); })
+            .join(" \u00b7 ")
         : '<span class="ra-era-none">' + esc(T("no archive holds this yet")) + "</span>";
       h.push('<li><span class="ra-era-y">' + e.from + "\u2013" + e.to + "</span>" +
              '<span class="ra-era-p">' + esc(e.polity) + "</span>" +

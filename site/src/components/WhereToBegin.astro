@@ -70,6 +70,15 @@ const { place: d, region, eras, names, sources, volumes, parishes, countryName, 
 const PROV_BY_ID = Object.fromEntries(
   (allProviders.providers || allProviders).map((p) => [p.id, p]));
 
+/* AN ERA'S `filedUnder` IS A LIST OF PROVIDER IDS, and three places on this
+   page printed them raw: the era table's «Whose archive» column, the footnote
+   listing the archives named above, and the inline script's «Search … for this
+   year». Senj read «dari», which is Državni arhiv u Rijeci. The lookup was
+   already in this file for the volume rows; this gives the era rows the same
+   one. The id stays as the fallback, because an era filed under a provider
+   that providers.json no longer carries should still say something. */
+const provName = (id) => (PROV_BY_ID[id] && PROV_BY_ID[id].name) || id;
+
 function contactsFor(cols) {
   const seen = new Map();
   for (const c of cols) {
@@ -128,7 +137,8 @@ const traps = timeline.filter((e) => e.note && e.note.length > 40
                                   && TRAP_WORDS.test(e.note));
 
 const otherNames = (names || []).map((n) => n.n).filter(Boolean);
-const archives = [...new Set(timeline.flatMap((e) => e.filedUnder || []))];
+const archives = [...new Set(timeline.flatMap((e) => e.filedUnder || []))]
+  .map(provName);
 
 /* Shaped here rather than inside define:vars. An arrow function in that
    attribute contains a «>», and every tool that finds the end of a tag with
@@ -140,7 +150,8 @@ const volRows = (d.collections || []).map((c) => ({
   k: c.kinds || [], u: c.url || null,
 }));
 const eraRows = (eras || []).map((e) => ({
-  f: e.from, to: e.to, p: e.polity, u: e.filedUnder || [], n: e.note || null,
+  f: e.from, to: e.to, p: e.polity,
+  u: (e.filedUnder || []).map(provName), n: e.note || null,
 }));
 ---
 <section class="wtb">
@@ -204,7 +215,7 @@ const eraRows = (eras || []).map((e) => ({
                        alt="" title={f.polity} />
                 ) : null; })()}{e.polity}</td>
                 <td class="m">{(e.filedUnder || []).length
-                  ? e.filedUnder.join(" · ")
+                  ? e.filedUnder.map(provName).join(" · ")
                   : <span class="wtb-none">no archive holds this yet</span>}</td>
               </tr>
             ))}

@@ -293,8 +293,8 @@ def flag_evidence():
     n = sum(tally.values())
     if not bad:
         parts = ", ".join(f"{v} {k}" for k, v in sorted(tally.items()))
-        done = n - tally.get("unreviewed", 0)
-        print(f"flag evidence: {done} of {len(eras):,} eras reviewed ({parts}); {len(sources)} sources, all read and dated")
+        print(f"flag evidence: {n} of {len(eras):,} eras carry a label ({parts}); "
+              f"{len(sources)} sources, all read and dated. Only {tally.get('attested', 0)} are confirmed by a source.")
 
 
 def flag_art_drift():

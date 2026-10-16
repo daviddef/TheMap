@@ -243,6 +243,7 @@ const CLASS_SAY = {
   reconstructed: "Reconstruction",
   symbolic: "Emblem, not a flag",
   none: "No flag known",
+  placeholder: "Placeholder image",
   unreviewed: "Not yet checked against sources",
 };
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;")
@@ -286,15 +287,16 @@ function withEvidence(slug, html) {
   for (const ev of Object.values(eras)) tally[ev.class] = (tally[ev.class] || 0) + 1;
   const reviewed = Object.values(eras).filter((e) => e.class !== "unreviewed").length;
   const SHORT = { attested: "attested", reconstructed: "reconstructed", symbolic: "emblem only",
-    none: "no flag known", unreviewed: "not yet checked" };
+    none: "no flag known", placeholder: "placeholder image", unreviewed: "not yet checked" };
   const parts = Object.keys(SHORT).filter((k) => tally[k])
     .map((k) => `${tally[k]} ${SHORT[k]}`);
   const note = `<div class="evidence-sum"><b>How we know this.</b> `
-    + `${reviewed} of ${total} eras on this page have been checked against the sources named under each one`
+    + `${Object.keys(eras).length} of ${total} eras on this page carry an evidence panel`
     + (parts.length ? ` (${parts.join(", ")})` : "") + `. `
-    + `Where sources disagree or a claim could not be confirmed, the panel says so. `
+    + `Only the ones marked attested are confirmed by the sources named under them; `
+    + `where sources disagree or a claim could not be confirmed, the panel says so. `
     + (Object.keys(eras).length < total
-      ? `<span>Eras without a panel have not been checked yet.</span>` : "") + `</div>`;
+      ? `<span>Eras without a panel have not been looked at yet.</span>` : "") + `</div>`;
   const tl = html.indexOf('<div class="timeline">');
   return tl < 0 ? html : html.slice(0, tl) + note + html.slice(tl);
 }

@@ -215,6 +215,70 @@ def flag_era_drift():
         print(f"flag eras: {in_data:,} in the pages and in the data, agreed")
 
 
+def flag_art_drift():
+    """data/era-flags.json must be what the flag pages would extract to today.
+
+    THE GATE ABOVE COUNTS ERA CARDS AND NOTHING ELSE, so it passed on the day the
+    Dutch Republic was split into Prinsenvlag and Statenvlag: the cards were
+    re-counted and re-extracted into flag-eras.json, and the ART, which lives in
+    a second file, was not. The orange era kept the old red flag and the new
+    era had no image at all, and the build was green throughout.
+
+    It had also become impossible to regenerate without noticing:
+    extract-era-flags.py still looked in site/public/flags, where the pages
+    stopped living when they were folded into Astro, found nothing and exited. A
+    file nothing can rebuild drifts by default.
+
+    So the expected art is rebuilt here from the pages with the extractor's own
+    parsing, not a copy of it, and compared to what is committed. Either the
+    image or the id being different is a failure.
+    """
+    import glob as _glob
+    from importlib.machinery import SourceFileLoader
+    art_p = "data/era-flags.json"
+    if not os.path.exists(art_p):
+        return
+    try:
+        have = json.load(open(art_p, encoding="utf-8")).get("art") or {}
+        ext = SourceFileLoader(
+            "_extract_era_flags",
+            os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                         "extract-era-flags.py")).load_module()
+    except Exception as e:
+        err(f"cannot check the flag art against the pages: {e}")
+        return
+    stale, missing, extra = [], [], []
+    expect = {}
+    for f in sorted(_glob.glob("site/src/flags-pages/*-flags.html")):
+        slug = os.path.splitext(os.path.basename(f))[0]
+        html = open(f, encoding="utf-8", errors="replace").read()
+        for eid, body in ext.ENTRY.findall(html):
+            hit = ext.FLAGBOX.search(body)
+            if hit:
+                expect.setdefault(slug, {})[eid] = ext.clean(hit.group(1))
+    for slug, eras in expect.items():
+        for eid, svg in eras.items():
+            if eid not in (have.get(slug) or {}):
+                missing.append(f"{slug}/{eid}")
+            elif have[slug][eid] != svg:
+                stale.append(f"{slug}/{eid}")
+    for slug, eras in have.items():
+        for eid in eras:
+            if eid not in (expect.get(slug) or {}):
+                extra.append(f"{slug}/{eid}")
+    bad = stale + missing + extra
+    if bad:
+        err(f"data/era-flags.json is not what the flag pages extract to: "
+            f"{len(stale)} image(s) changed, {len(missing)} missing, "
+            f"{len(extra)} no longer on a page ({', '.join(bad[:4])}"
+            f"{'…' if len(bad) > 4 else ''}). Run "
+            f"python3 scripts/extract-era-flags.py — the map's flag layer and "
+            f"the «who governed» swatches read this file, not the pages.")
+    else:
+        print(f"flag art: {sum(len(v) for v in expect.values()):,} images, "
+              f"the file and the pages agree")
+
+
 def harvest_artefact_is_this_run():
     """The fetched artefact and the committed data must be one matcher run.
 
@@ -261,6 +325,7 @@ def harvest_artefact_is_this_run():
 
 def main():
     flag_era_drift()
+    flag_art_drift()
     harvest_artefact_is_this_run()
     places = json.load(open("data/places.json"))["places"]
     regions = json.load(open("data/regions.json"))

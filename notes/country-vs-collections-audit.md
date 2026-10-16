@@ -90,3 +90,28 @@ These are the expected noise: Bosnian-side villages on the Sava whose books are 
 | 1 | davor | Davor | BA | HR ×8 |
 | 0 | sumece | Šumeće | BA | HR ×2 |
 | 0 | osredci | Osredci | BA | HR ×1 |
+
+## Follow-up: the suspect namesakes
+
+Each was tested the way `match-fs-volumes.py` already says it matches: **deepest first, and only inside the collection's own countries**. A row was moved only when the gazetteer holds a matching name or alias in the country its collection belongs to, and the row's own names or volumes point at it. Evidence is in each row's `note`.
+
+| id | was | now | evidence |
+|---|---|---|---|
+| bale | ME 42.41, 18.88 | HR 45.0406, 13.7836 (istria-south) | the row's older names Valle / Valle d'Istria are the gazetteer's aliases for Bale in Istria |
+| grad | HR 43.52, 16.70 | SI 46.7976, 16.0984 | the row's alt name Felsőlendva is the gazetteer's alias for Grad in Prekmurje; Slovenia/Prekmurje civil registers |
+| svjakovsiljevica | RS 43.85, 21.04 | HR 45.2311, 14.6183 (kvarner) | gazetteer lists "Sveti Jakov Siljevica" as a name of the Jadranovo entry; Croatian church books |
+| tisina | HR 45.53, 16.38 | SI 46.6542, 16.0936 | volumes are Prekmurje civil registers; the Croatian point is Tišina Kaptolska, outside that collection's area; its older name Kaptolska Tisina removed |
+| turnisce | HR 46.06, 16.15 | SI 46.6257, 16.3139 | 14 volumes all from the Slovenian collection; exactly one Turnišče in Slovenia |
+
+Grad, Tišina and Turnišče are deliberately **not** put in a record region. The `carniola` ring is a four-point rectangle that happens to cover Prekmurje, but its 1813-1918 era says Carniola and Lower Styria, and Prekmurje was Hungarian until 1918. "Not yet mapped" is the true answer until Prekmurje has a region of its own.
+
+**Left as they are, because the gazetteer has no candidate inside the collection's country, so the honest finding is "we do not know":**
+
+| id | filed as | collections | why unresolved |
+|---|---|---|---|
+| krug | AT 48.63, 15.50 | HR church books, marriages and deaths 1825-1836 | no Krug in Croatia in the gazetteer |
+| klasnic | RS 44.28, 20.04 | HR church books, Orthodox, 1831-33 | the only Klašnić in the gazetteer is the Serbian one; none in Croatia |
+| subotica | HR 46.19, 16.74 | Slovenia, Prekmurje and Međimurje civil registers | the point is Podravska Subotica, which is outside that collection's area; no Subotica in Slovenia to move it to. The volumes may be attached to the wrong place |
+| meljani, suhodol, zlosela, zankovic | BA / ME | HR church books | no namesake in Croatia; may be genuine border-area or historic filings |
+
+`zemun`, `starapazova` and `staribar` are real places that held Croatian books across a historic frontier; not touched. The way to settle the unresolved rows is the FamilySearch place path of each volume (the `in` field of `fs-volumes-world.json.gz` has it for placed volumes), which this offline checkout does not carry for these places.

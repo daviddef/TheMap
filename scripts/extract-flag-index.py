@@ -107,7 +107,48 @@ def main():
     # atlas's own country names, so those countries silently contributed
     # nothing to their hub's totals — the same failure as the French survey
     # that read a page of «&eacute;tat civil» as saying nothing.
+    # CROWNS COME FROM THE ERAS, NOT FROM A SECOND LIST BESIDE THEM.
+    #
+    # David: «Example attached going back to 11ad the Dutch of Brabant. Ours
+    # does not.» Ours does — data/flag-eras.json holds eleven Dutch eras and
+    # the page draws them all, starting before 1000 with the Batavi and
+    # Frisii. The CARD showed eight, beginning at Burgundian/Habsburg, because
+    # `crowns` was a separate hand-kept array in the hub's own markup and had
+    # drifted from the page it summarises.
+    #
+    # Not a Dutch problem. Measured across all 210: 137 cards named fewer
+    # crowns than their page has eras, 268 eras missing in total, Croatia
+    # showing 8 of 18. A card that omits ten of a country's eighteen rulers is
+    # not a summary, it is a wrong answer, and nothing could have caught it
+    # because the two lists were never compared.
+    #
+    # So the eras are the fact and the card is derived from them. The curated
+    # wording is lost — «Dutch Republic» becomes «Dutch Republic (United
+    # Provinces)», which is the page's own name for it — and that is the right
+    # trade: one list cannot drift from itself.
+    def _crowns_for(url, written):
+        """Every era the page draws, in the page's own order."""
+        nonlocal _derived, _kept
+        es = by_page.get(url)
+        if not es:
+            _kept += 1
+            return written
+        _derived += 1
+        return [html.unescape(e.get("polity") or "") for e in es
+                if (e.get("polity") or "").strip()]
+
+    by_page = {}
+    try:
+        with open("data/flag-eras.json", encoding="utf-8") as fh:
+            for e in json.load(fh)["eras"]:
+                by_page.setdefault(e.get("page"), []).append(e)
+        for v in by_page.values():
+            v.sort(key=lambda e: int(e.get("n") or 0))
+    except (OSError, ValueError, KeyError):
+        by_page = {}
+
     rows = []
+    _derived = _kept = 0
     for c in countries:
         rows.append({
             "name": html.unescape(c.get("name") or ""),
@@ -115,12 +156,15 @@ def main():
             "region": html.unescape(c.get("region") or "") or None,
             "hub": html.unescape(c.get("hub") or "") or None,
             "color": c.get("color"),
-            "crowns": [html.unescape(x) for x in (c.get("crowns") or [])],
+            "crowns": _crowns_for("flags/" + c.get("url", ""),
+                                  [html.unescape(x) for x in (c.get("crowns") or [])]),
             "ownPage": bool(c.get("ownPage")),
             "flag": flags.get(c.get("flag") or ""),
         })
 
     print(f"{len(rows)} countries, {len(hubs)} hubs")
+    print(f"  crowns taken from the eras: {_derived} cards; "
+          f"{_kept} kept the page's own list because no eras were found")
     print(f"  with a page of their own : {sum(1 for r in rows if r['ownPage'])}")
     print(f"  distinct regions         : {len({r['region'] for r in rows if r['region']})}")
     print(f"  crowns named in total    : {sum(len(r['crowns']) for r in rows):,}")

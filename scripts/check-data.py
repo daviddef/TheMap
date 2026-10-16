@@ -215,6 +215,88 @@ def flag_era_drift():
         print(f"flag eras: {in_data:,} in the pages and in the data, agreed")
 
 
+def flag_evidence():
+    """data/flag-evidence.json: every claim of evidence has to be checkable.
+
+    THE AUDIT FOUND 0 OF 1,472 FLAG ERAS WITH A SOURCE, and the Netherlands page,
+    read against its sources, held a decree credited with fixing a shade it does
+    not name, a Sea Beggars flag Wikipedia calls uncertain and a ban that no source
+    could be found for. An evidence file is only worth having if it cannot
+    quietly become the same thing: a label with nothing behind it.
+
+    So an era marked `attested` must rest on a primary or reference source, or on
+    two compiled sources from different publishers; every era must say what its
+    sources establish; every era that is not attested must say what is not
+    established; every source must carry a title, publisher, https address, kind
+    and the date it was read; an unused source is an error; and an era the page
+    does not have is an error. The coverage line is printed so the gap is a number
+    on every build rather than a feeling.
+    """
+    ev_p = "data/flag-evidence.json"
+    if not os.path.exists(ev_p):
+        return
+    try:
+        ev = json.load(open(ev_p, encoding="utf-8"))
+        eras = json.load(open("data/flag-eras.json", encoding="utf-8")).get("eras") or []
+    except Exception as e:
+        err(f"cannot read the flag evidence or the eras it describes: {e}")
+        return
+    classes, kinds, sources = ev.get("classes") or {}, ev.get("kinds") or {}, ev.get("sources") or {}
+    on_page = {}
+    for r in eras:
+        on_page.setdefault(r.get("slug"), set()).add(r.get("id"))
+    import re as _re
+    used, tally, bad = set(), {}, 0
+    for sid, s in sources.items():
+        for k in ("title", "publisher", "url", "kind", "checked"):
+            if not s.get(k):
+                err(f"flag evidence source {sid!r} has no {k}"); bad += 1
+        if s.get("url") and not str(s["url"]).startswith("https://"):
+            err(f"flag evidence source {sid!r}: the address must be https"); bad += 1
+        if s.get("kind") and s["kind"] not in kinds:
+            err(f"flag evidence source {sid!r}: unknown kind {s['kind']!r}"); bad += 1
+        if s.get("checked") and not _re.fullmatch(r"\d{4}-\d\d-\d\d", str(s["checked"])):
+            err(f"flag evidence source {sid!r}: `checked` must be a date"); bad += 1
+    for slug, page in (ev.get("pages") or {}).items():
+        for eid, e in page.items():
+            where = f"flag evidence {slug} {eid}"
+            if eid not in on_page.get(slug, set()):
+                err(f"{where}: the page has no such era"); bad += 1
+                continue
+            cls = e.get("class")
+            if cls not in classes:
+                err(f"{where}: unknown class {cls!r}"); bad += 1
+                continue
+            tally[cls] = tally.get(cls, 0) + 1
+            ids = e.get("sources") or []
+            for sid in ids:
+                used.add(sid)
+                if sid not in sources:
+                    err(f"{where}: names source {sid!r}, which is not declared"); bad += 1
+            have = [sources[i] for i in ids if i in sources]
+            if cls != "unreviewed" or ids:
+                if not e.get("says"):
+                    err(f"{where}: says nothing about what its sources establish"); bad += 1
+            if cls == "unreviewed" and not e.get("open"):
+                err(f"{where}: unreviewed, and does not say why"); bad += 1
+            if cls in ("attested", "symbolic", "reconstructed") and not have:
+                err(f"{where}: {cls} with no source behind it"); bad += 1
+            if cls == "attested" and have:
+                strong = any(s.get("kind") in ("primary", "reference") for s in have)
+                pubs = {s.get("publisher") for s in have if s.get("kind") == "compiled"}
+                if not strong and len(pubs) < 2:
+                    err(f"{where}: attested on compiled sources from {len(pubs)} publisher(s); "
+                        f"it needs a primary or reference source, or two publishers"); bad += 1
+    for sid in sources:
+        if sid not in used:
+            err(f"flag evidence source {sid!r} is declared and never used"); bad += 1
+    n = sum(tally.values())
+    if not bad:
+        parts = ", ".join(f"{v} {k}" for k, v in sorted(tally.items()))
+        done = n - tally.get("unreviewed", 0)
+        print(f"flag evidence: {done} of {len(eras):,} eras reviewed ({parts}); {len(sources)} sources, all read and dated")
+
+
 def flag_art_drift():
     """data/era-flags.json must be what the flag pages would extract to today.
 
@@ -326,6 +408,7 @@ def harvest_artefact_is_this_run():
 def main():
     flag_era_drift()
     flag_art_drift()
+    flag_evidence()
     harvest_artefact_is_this_run()
     places = json.load(open("data/places.json"))["places"]
     regions = json.load(open("data/regions.json"))

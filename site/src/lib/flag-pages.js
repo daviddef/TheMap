@@ -214,6 +214,91 @@ function toTheMap(slug, title) {
 <span>the flag flying in any year, and who took this ground or left it \u2014 drawn from the eras on this page</span></p>`;
 }
 
+
+/* HOW WE KNOW THIS — THE EVIDENCE ON EACH ERA.
+ *
+ * The audit of 16 October 2026 found that none of the 1,472 flag eras named a
+ * source, and that the page footer described the whole atlas as compiled from
+ * Wikipedia, Flags of the World and Britannica: the three sites every other flag
+ * page also copies. The Netherlands entry was the proof. Reading its claims
+ * against their sources found a 1937 decree credited with fixing a shade it
+ * does not name, a Sea Beggars flag that Wikipedia calls uncertain, a "ban
+ * outright in 1943" nobody could source, a VOC and New Amsterdam claim with no
+ * source at all, and a Batavian "canton" that was in fact a navy emblem.
+ *
+ * So an era with evidence carries a panel saying which class it is, which
+ * sources were read, what they establish and what could not be confirmed.
+ * data/flag-evidence.json holds it, scripts/check-data.py gates it, and an era
+ * not in the file is shown as nothing at all rather than as «checked». The
+ * count of how many eras are reviewed is on the page, so the gap is visible.
+ */
+let EVIDENCE = null;
+try {
+  EVIDENCE = JSON.parse(fs.readFileSync(
+    path.join(process.cwd(), "..", "data", "flag-evidence.json"), "utf8"));
+} catch { EVIDENCE = null; }
+
+const CLASS_SAY = {
+  attested: "Attested",
+  reconstructed: "Reconstruction",
+  symbolic: "Emblem, not a flag",
+  none: "No flag known",
+  unreviewed: "Not yet checked against sources",
+};
+const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;")
+  .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+function evidencePanel(ev, sources) {
+  const cls = CLASS_SAY[ev.class] ? ev.class : "unreviewed";
+  const list = (ev.sources || []).map((id) => {
+    const s = sources[id];
+    if (!s) return "";
+    return `<li><a href="${esc(s.url)}" rel="noopener">${esc(s.title)}</a>`
+      + ` &mdash; ${esc(s.publisher)} <span class="ev-kind">${esc(s.kind)}</span></li>`;
+  }).join("");
+  return `<div class="evidence ev-${cls}">`
+    + `<div class="ev-head"><span class="ev-badge">${CLASS_SAY[cls]}</span>`
+    + `<span class="ev-label">how we know this</span></div>`
+    + (ev.says ? `<p class="ev-says">${esc(ev.says)}</p>` : "")
+    + (list ? `<ul class="ev-src">${list}</ul>` : "")
+    + (ev.open ? `<p class="ev-open"><b>Not established:</b> ${esc(ev.open)}</p>` : "")
+    + `</div>`;
+}
+
+/** Puts each reviewed era's panel just above its paint guide, and a count above
+ *  the timeline. Fails loudly if an era in the file is not on the page, so a
+ *  renamed id cannot silently drop its evidence. */
+function withEvidence(slug, html) {
+  const eras = EVIDENCE && EVIDENCE.pages && EVIDENCE.pages[slug];
+  if (!eras) return html;
+  const src = EVIDENCE.sources || {};
+  for (const [id, ev] of Object.entries(eras)) {
+    const at = html.indexOf(`id="${id}"`);
+    if (at < 0) throw new Error(`flag-evidence.json names ${slug} ${id}, which is not on the page`);
+    const next = html.indexOf('<div class="entry"', at);
+    const det = html.indexOf('<details class="paint">', at);
+    if (det < 0 || (next >= 0 && det > next))
+      throw new Error(`${slug} ${id} has no paint guide to put its evidence above`);
+    html = html.slice(0, det) + evidencePanel(ev, src) + html.slice(det);
+  }
+  const total = (html.match(/<div class="entry"/g) || []).length;
+  const tally = {};
+  for (const ev of Object.values(eras)) tally[ev.class] = (tally[ev.class] || 0) + 1;
+  const reviewed = Object.values(eras).filter((e) => e.class !== "unreviewed").length;
+  const SHORT = { attested: "attested", reconstructed: "reconstructed", symbolic: "emblem only",
+    none: "no flag known", unreviewed: "not yet checked" };
+  const parts = Object.keys(SHORT).filter((k) => tally[k])
+    .map((k) => `${tally[k]} ${SHORT[k]}`);
+  const note = `<div class="evidence-sum"><b>How we know this.</b> `
+    + `${reviewed} of ${total} eras on this page have been checked against the sources named under each one`
+    + (parts.length ? ` (${parts.join(", ")})` : "") + `. `
+    + `Where sources disagree or a claim could not be confirmed, the panel says so. `
+    + (Object.keys(eras).length < total
+      ? `<span>Eras without a panel have not been checked yet.</span>` : "") + `</div>`;
+  const tl = html.indexOf('<div class="timeline">');
+  return tl < 0 ? html : html.slice(0, tl) + note + html.slice(tl);
+}
+
 const WRAPPER = `
 .flagpage{max-width:900px;margin:0 auto;padding:0 16px 48px}
 .flagpage footer{display:none}
@@ -223,6 +308,21 @@ const WRAPPER = `
 .flagpage .flagmaplink a{font-weight:600;text-decoration:none}
 .flagpage .flagmaplink a:hover{text-decoration:underline}
 .flagpage .flagmaplink span{display:block;color:var(--ink-3);font-size:12px;margin-top:2px}
+.flagpage .evidence{margin:10px 0 0;padding:10px 14px;border:1px solid var(--rule);
+  border-left:3px solid var(--ink-3);border-radius:3px;background:var(--panel);
+  font-family:var(--sans);font-size:13px;line-height:1.5}
+.flagpage .evidence.ev-attested{border-left-color:var(--accent)}
+.flagpage .ev-head{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:4px}
+.flagpage .ev-badge{font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.flagpage .ev-label{color:var(--ink-3);font-size:12px}
+.flagpage .evidence p{margin:4px 0}
+.flagpage .ev-src{margin:6px 0 4px;padding-left:18px}
+.flagpage .ev-src li{margin:2px 0}
+.flagpage .ev-kind{color:var(--ink-3);font-size:11px;border:1px solid var(--rule);border-radius:9px;padding:0 6px;margin-left:4px}
+.flagpage .ev-open{color:var(--ink-2,var(--ink))}
+.flagpage .evidence-sum{margin:0 0 18px;padding:10px 14px;border:1px solid var(--rule);border-radius:3px;
+  background:var(--panel);font-family:var(--sans);font-size:13px;line-height:1.5}
+.flagpage .evidence-sum span{display:block;color:var(--ink-3);font-size:12px;margin-top:2px}
 `;
 
 /* AND THE SAME ADDRESSES INSIDE THE SCRIPTS. The index does not write its 210
@@ -262,8 +362,8 @@ export function page(slug) {
     css: scope(TOKENS + "\n" + css, ".flagpage") + WRAPPER,
     /* The link to the map goes FIRST, above the page's own <h1>, because it
        is the one thing on here a reader cannot get to any other way. */
-    html: toTheMap(slug, title) + relinkScripts(
-      relink(body.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")), slugs()),
+    html: toTheMap(slug, title) + withEvidence(slug, relinkScripts(
+      relink(body.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")), slugs())),
     /* The head carried nothing else worth keeping: one font link, two metas
        and the stylesheet. Base supplies all three, better. */
     headLinks: (head.match(/<link[^>]+>/gi) || []).length,

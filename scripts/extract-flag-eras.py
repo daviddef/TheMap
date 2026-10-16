@@ -69,6 +69,10 @@ def parse_dates(raw):
     # this atlas works at, and every era boundary here is already a year.
     _M = ("January|February|March|April|May|June|July|August|September|"
           "October|November|December")
+    # A RANGE OF DAYS IN ONE MONTH. «3 - 13 August 1903» is one year, and was
+    # read as the era running from 3 CE, which put the Kruševo Republic 1,900 years
+    # before it existed and made it overlap the Byzantine empire.
+    t = re.sub(r"\b\d{1,2}\s*-\s*\d{1,2}\s+(?:" + _M + r")\s+(\d{4})\b", r"\1", t, flags=re.I)
     t = re.sub(r"\b\d{1,2}\s+(?:" + _M + r")\s+(\d{4})\b", r"\1", t, flags=re.I)
     t = re.sub(r"\b(?:" + _M + r")\s+(\d{4})\b", r"\1", t, flags=re.I)
 

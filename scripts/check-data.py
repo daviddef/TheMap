@@ -405,10 +405,196 @@ def harvest_artefact_is_this_run():
             "    gh release upload harvest-data data/fs-volumes-world.json.gz --clobber")
 
 
+def place_evidence(places, OVR, PIN):
+    """A place's country and coordinates must agree with evidence from outside the row.
+
+    THE EXISTING COUNTRY GATE ASKS THE OUTLINE, and the outline is the same thing that
+    chose the country in the first place, within 25 km. So a Croatian village on the
+    Sava that the rounded border puts in Bosnia passed it twice: once when it was
+    filed, once when it was checked. Thirty-four places sat like that for weeks —
+    Jasenovac, Metković and Davor among them, listed as Bosnia and Herzegovina — while
+    every one of their registers was in a collection titled «Croatia, Church Books».
+
+    So two independent witnesses are asked. First, the COLLECTIONS: the countries of the
+    FamilySearch collections that hold the place's books. Second, the GAZETTEER: a
+    same-name GeoNames row within 25 km, and the country it is in. A place passes if
+    either one agrees with its declared country. It fails if neither does, unless a
+    person has said why: `filedUnder`, a note beginning «Audited», or an entry in
+    data/country-overrides.json.
+
+    The second test is also run on the NAME: a settlement whose own name has same-country
+    gazetteer rows, none of them within 25 km, is a coordinate nobody has confirmed — the
+    Stari Grad of Hvar that was drawn in the north of the country, 330 km from itself.
+    Pinned places (data/place-overrides.json) and audited ones are exempt. A place with
+    no same-name row in its country is untestable, not wrong, and is counted as such.
+    """
+    import collections, math, re as _re, unicodedata
+    try:
+        sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__))))
+        import gazetteer as _gz
+        rows = _gz.places()
+        cols = {str(c["cc"]): c for c in json.load(open("data/collections.json"))["collections"]}
+    except Exception as e:
+        err(f"cannot read the gazetteer or the collections to check places against: {e}")
+        return
+    if not rows:
+        print("place evidence: no gazetteer on this checkout, skipped")
+        return
+
+    def fold(s):
+        s = unicodedata.normalize("NFKD", s or "")
+        s = "".join(c for c in s if not unicodedata.combining(c))
+        return _re.sub(r"[^a-z0-9]+", " ", s.lower()).strip()
+
+    def hav(a, b, c, d):
+        p = math.pi / 180
+        x = math.sin((c - a) * p / 2) ** 2 + math.cos(a * p) * math.cos(c * p) * math.sin((d - b) * p / 2) ** 2
+        return 12742 * math.asin(math.sqrt(x))
+
+    idx = collections.defaultdict(list)
+    for r in rows:
+        for f in {r.get("n", "")} | set(r.get("a") or []):
+            k = fold(f)
+            if len(k) > 2:
+                idx[k].append(r)
+
+    def cc_of(url):
+        m = _re.search(r"[?&]cc=(\d+)", url or "") or _re.search(r"/collection/(\d+)", url or "")
+        return m.group(1) if m else None
+
+    tested = ok_c = ok_g = said = bad = 0
+    name_tested = name_untestable = name_bad = 0
+    for p in places:
+        if not p.get("collections"):
+            continue
+        pid = p["id"]
+        said_so = (bool(p.get("filedUnder")) or pid in OVR
+                   or (p.get("note") or "").lstrip().startswith("Audited"))
+        names = {fold(p["name"]), fold(p["name"].split(",")[0]), fold(_re.sub(r"\(.*?\)", "", p["name"]))}
+        for n in p.get("names") or []:
+            names |= {fold(n.get("n", "")), fold((n.get("n") or "").split(",")[0])}
+        names = {n for n in names if len(n) > 2}
+        mine = [(hav(p["lat"], p["lon"], r["y"], r["x"]), r) for n in names for r in idx.get(n, [])
+                if r.get("k") == p["country"]]
+        near = [d for d, _ in mine if d <= 25]
+
+        union = set()
+        for c in (cols.get(cc_of(v.get("url"))) for v in p["collections"]):
+            union |= set((c or {}).get("countries") or [])
+        if union:
+            tested += 1
+            if p["country"] in union:
+                ok_c += 1
+            elif near:
+                ok_g += 1
+            elif said_so:
+                said += 1
+            else:
+                bad += 1
+                err(f"place {pid}: filed as {p['country']}, but its books are in collections filed under "
+                    f"{', '.join(sorted(union))} and no same-name gazetteer row within 25 km is in "
+                    f"{p['country']}. Fix the country, or say why in a note beginning «Audited» or in "
+                    f"data/country-overrides.json")
+
+        if not p.get("level"):
+            if near:
+                name_tested += 1
+            elif not mine:
+                name_untestable += 1
+            elif pid in PIN or said_so:
+                name_tested += 1
+            else:
+                name_bad += 1
+                err(f"place {pid}: «{p['name']}» has {len(mine)} same-name gazetteer row(s) in {p['country']} "
+                    f"and the nearest is {min(d for d, _ in mine):.0f} km from its point. Pin it in "
+                    f"data/place-overrides.json, or say what was checked in a note beginning «Audited»")
+    if not (bad or name_bad):
+        print(f"place evidence: {tested:,} places with books tested for country "
+              f"({ok_c:,} by collection, {ok_g:,} by gazetteer, {said} said so by a person); "
+              f"{name_tested:,} settlements confirmed by name, {name_untestable} untestable")
+
+
+def place_ids_valid(places):
+    """data/place-ids.json: an id attached to a place has to be the right shape and the right place.
+
+    The ids exist so a claim here can be checked against records that are not ours, which
+    only works if they are not guesses. So each one must name a place we hold, look like a
+    Wikidata item and a GeoNames number, and have been matched within the 5 km it claims.
+    Two of our places on one item are allowed and counted: two filings of one ground.
+    """
+    p = "data/place-ids.json"
+    if not os.path.exists(p):
+        return
+    try:
+        doc = json.load(open(p, encoding="utf-8"))
+    except Exception as e:
+        err(f"data/place-ids.json will not parse: {e}")
+        return
+    have = {x["id"] for x in places}
+    ids = doc.get("ids") or {}
+    q = {}
+    for pid, v in ids.items():
+        if pid not in have:
+            err(f"place-ids.json names {pid}, which is not a place"); continue
+        if not re.fullmatch(r"Q\d+", str(v.get("wikidata", ""))):
+            err(f"place-ids.json {pid}: {v.get('wikidata')!r} is not a Wikidata item")
+        if not re.fullmatch(r"\d+", str(v.get("geonames", ""))):
+            err(f"place-ids.json {pid}: {v.get('geonames')!r} is not a GeoNames id")
+        if not isinstance(v.get("km"), (int, float)) or v["km"] > doc.get("maxKm", 5):
+            err(f"place-ids.json {pid}: matched {v.get('km')} km away, beyond the {doc.get('maxKm', 5)} km it claims")
+        q.setdefault(v.get("wikidata"), []).append(pid)
+    twice = sum(1 for v in q.values() if len(v) > 1)
+    print(f"place ids: {len(ids)} places carry a Wikidata item and a GeoNames id ({twice} items shared by two filings)")
+
+
+def flag_seams():
+    """data/flag-seams.json: every seam between eras has been listed, and none is new.
+
+    See scripts/flag_seams.py for what a seam is and why one year does not count.
+    """
+    p = "data/flag-seams.json"
+    if not os.path.exists(p):
+        return
+    try:
+        sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__))))
+        import flag_seams as fs
+        doc = json.load(open(p, encoding="utf-8"))
+        eras = json.load(open("data/flag-eras.json", encoding="utf-8"))["eras"]
+        art = json.load(open("data/era-flags.json", encoding="utf-8")).get("art") or {}
+    except Exception as e:
+        err(f"cannot check the flag seams: {e}")
+        return
+    have = doc.get("seams") or {}
+    now = {fs.key(s): s for s in fs.seams(eras)}
+    for k, s in now.items():
+        if k not in have:
+            err(f"flag seam {k}: a {s[1]} of {s[4]} years between two eras that nobody has "
+                f"looked at. Run scripts/extract-flag-seams.py and give it a verdict.")
+    for k, v in have.items():
+        if k not in now:
+            err(f"flag seam {k} is listed and no longer exists. Run scripts/extract-flag-seams.py.")
+        elif v.get("verdict") not in fs.VERDICTS:
+            err(f"flag seam {k}: unknown verdict {v.get('verdict')!r}")
+        elif v["verdict"] in ("concurrent", "unrecorded", "dating") and not v.get("why"):
+            err(f"flag seam {k}: a verdict of {v['verdict']} must say why")
+    noid, noimg = fs.structure(eras, art)
+    for what, now_l, have_l in (("an id", noid, doc.get("noId") or []), ("an image", noimg, doc.get("noImage") or [])):
+        new = [x for x in now_l if list(x) not in have_l]
+        for x in new:
+            err(f"flag era {x[0]} {x[1]} has no {what}, and was not there when this was last counted")
+    n = {}
+    for v in have.values():
+        n[v.get("verdict")] = n.get(v.get("verdict"), 0) + 1
+    if not any(k not in have for k in now):
+        print(f"flag seams: {len(have)} listed ({', '.join(f'{v} {k}' for k, v in sorted(n.items()))}); "
+              f"{len(noid)} eras without an id, {len(noimg)} without an image, none new")
+
+
 def main():
     flag_era_drift()
     flag_art_drift()
     flag_evidence()
+    flag_seams()
     harvest_artefact_is_this_run()
     places = json.load(open("data/places.json"))["places"]
     regions = json.load(open("data/regions.json"))
@@ -942,6 +1128,8 @@ def main():
     # gate, because the next person assumes the build is broken.
     licence_gate()
     access_colours_agree()
+    place_evidence(places, OVR, PIN)
+    place_ids_valid(places)
 
     for w in WARN[:12]:
         print("warn:", w)

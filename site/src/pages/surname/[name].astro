@@ -222,7 +222,7 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
       Ordered by what the evidence is worth: somebody checked, then a rule
       of the language, then one systematic substitution with both forms
       attested, then an algorithm's guess. */}
-  {["curated", "grammar", "spelling", "sounds"].map((how) => by[how] && (
+  {["curated", "grammar", "spelling"].map((how) => by[how] && (
     <section style="margin-top:24px">
       <h2>{TIER[how][0]}</h2>
       <p class="cap">{TIER[how][1]}</p>
@@ -233,6 +233,28 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
       ))}</p>
     </section>
   ))}
+
+  {/* SOUNDS-ALIKE IS CLOSED BY DEFAULT, AND SAYS WHY.
+      The audit counted 635,942 of the 1,036,465 variant links as «sounds alike»,
+      an algorithm's guess, against 8,292 that a person made. Lined up under the
+      evidence-backed variants at the same size they read as the same kind of
+      claim. They are still here, because casting a net is useful; they are
+      shut, counted, and labelled as unverified so that nobody takes one for a
+      fact about the family. */}
+  {by.sounds && (
+    <section style="margin-top:24px">
+      <details class="soundsalike">
+        <summary><b>{by.sounds.length.toLocaleString()} possible variants, unverified</b>
+        <span class="cap" style="display:inline"> — names that only sound alike</span></summary>
+        <p class="cap">{TIER.sounds[1]} Nobody has checked these against a record. Treat one as a lead to look for, never as a finding.</p>
+        <p class="vars">{by.sounds.slice(0, 40).map((n) => (
+          pageFor.has(slugify(n))
+            ? <a href={u(`/surname/${slugify(n)}/`)}><b>{n}</b></a>
+            : <b>{n}</b>
+        ))}</p>
+      </details>
+    </section>
+  )}
 
   {wd && (wd.lang || wd.kind || wd.after || wd.wiki) && (
     <section style="margin-top:30px">

@@ -283,6 +283,38 @@ def runtime_fetches_exist():
                 f"green. Write it, or stop fetching it.")
 
 
+def evidence_reaches_pages():
+    """Evidence written in the data has to be on the page a reader opens.
+
+    A panel that is in data/flag-evidence.json and not in the built page is the exact
+    failure the evidence system exists to prevent, only quieter: the label «attested»
+    sits in a file and the reader sees nothing. The same for the outside ids on place
+    pages. Counted per page, not sampled.
+    """
+    try:
+        ev = json.load(open("data/flag-evidence.json", encoding="utf-8"))
+    except OSError:
+        ev = {}
+    for slug, eras in (ev.get("pages") or {}).items():
+        f = os.path.join(DIST, "flags", slug, "index.html")
+        if not os.path.exists(f):
+            err(f"flag evidence names {slug}, which has no built page")
+            continue
+        n = open(f, encoding="utf-8").read().count('class="evidence ev-')
+        if n != len(eras):
+            err(f"{slug}: the evidence file holds {len(eras)} eras and the built page shows {n} panels")
+    try:
+        ids = json.load(open("data/place-ids.json", encoding="utf-8")).get("ids") or {}
+    except OSError:
+        ids = {}
+    for pid, v in ids.items():
+        f = os.path.join(DIST, "place", pid, "index.html")
+        if not os.path.exists(f):
+            continue            # a place can be held and not given a page
+        if v["wikidata"] not in open(f, encoding="utf-8").read():
+            err(f"place {pid} carries Wikidata {v['wikidata']} in the data and not on its page")
+
+
 def main():
     if not os.path.isdir(DIST):
         sys.exit(f"{DIST} is not there — run this after astro build.")
@@ -349,6 +381,7 @@ def main():
 
     sitemaps_are_submittable()
     runtime_fetches_exist()
+    evidence_reaches_pages()
 
     attribution_gate()
 

@@ -103,7 +103,12 @@ Each was tested the way `match-fs-volumes.py` already says it matches: **deepest
 | tisina | HR 45.53, 16.38 | SI 46.6542, 16.0936 | volumes are Prekmurje civil registers; the Croatian point is Tišina Kaptolska, outside that collection's area; its older name Kaptolska Tisina removed |
 | turnisce | HR 46.06, 16.15 | SI 46.6257, 16.3139 | 14 volumes all from the Slovenian collection; exactly one Turnišče in Slovenia |
 
-Grad, Tišina and Turnišče are deliberately **not** put in a record region. The `carniola` ring is a four-point rectangle that happens to cover Prekmurje, but its 1813-1918 era says Carniola and Lower Styria, and Prekmurje was Hungarian until 1918. "Not yet mapped" is the true answer until Prekmurje has a region of its own.
+**Regions are assigned by the build, not by this file.** `scripts/build.py` tests every place against the region rings on each build and overwrites the stored `region` field, so a row cannot be kept out of a region by editing it. Built on `b15c617`:
+
+- **Turnišče** lands in the Hungary region, whose table includes civil registration from 1 October 1895. That matches its volumes (Hungarian civil registers, 1895-1918).
+- **Grad and Tišina** land in `carniola`, whose 1813-1918 era says "Austria — the Duchy of Carniola and Lower Styria" and files under Matricula, ARS and SIRAnet. That is **wrong for Prekmurje**, which was Hungarian until 1918. The cause is the `carniola` ring: a four-point rectangle (lat 45.4-46.9, lon 13.4-16.6) that happens to cover Prekmurje. It does the same to every other Prekmurje place already in the atlas.
+
+These two rows are better than before (Grad sat near Split under `dalmatia`; Tišina sat in Croatia with no region), but their era table is misleading. The fix is in `data/regions.json`, not in the rows: give Prekmurje its own region, or redraw the `carniola` ring to exclude it. That is editorial geometry and was not done here.
 
 **Left as they are, because the gazetteer has no candidate inside the collection's country, so the honest finding is "we do not know":**
 

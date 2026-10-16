@@ -43,7 +43,36 @@ export function slugs() {
    somewhere wrong — `../` at the new depth is /flags/, not /.
    Resolving each href against the OLD location and emitting a root-relative
    path fixes both cases at once and leaves anchors and external links alone. */
+/* MARKUP ONLY. A SCRIPT IS NOT MARKUP, AND THIS DID NOT KNOW THE DIFFERENCE.
+ *
+ * David: «I try use record atlas and it gives a 404 … /flags//flags/
+ * netherlands-flags/». The hub builds its country cards in the browser:
+ *
+ *     return '<a class="country-card" href="' + c.url + '">' + …
+ *
+ * and the regex below sees `href="` followed by `' + c.url + '` and takes
+ * that for a relative URL. It is a JavaScript string concatenation. relink
+ * resolved it against /flags/ and wrote the prefix INTO the script, so every
+ * card the search renders has pointed at /flags/ + the url twice since the
+ * day the pages were folded into Astro. The static cards were fine, which is
+ * why it survived: only the ones the script draws are broken, and only once
+ * you search.
+ *
+ * So the script blocks are lifted out, the markup is relinked, and they go
+ * back untouched. relinkScripts() below is the one that may rewrite a script,
+ * and it does it by exact slug rather than by pattern for this same reason.
+ */
 function relink(html) {
+  const kept = [];
+  const masked = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, (m) => {
+    kept.push(m);
+    return `\u0000SCRIPT${kept.length - 1}\u0000`;
+  });
+  return relinkMarkup(masked)
+    .replace(/\u0000SCRIPT(\d+)\u0000/g, (_m, i) => kept[+i]);
+}
+
+function relinkMarkup(html) {
   return html.replace(/(href|src)="([^"]+)"/g, (m, attr, href) => {
     if (/^(https?:|mailto:|#|\/|data:)/.test(href)) return m;
     const [p, hash = ""] = href.split("#");

@@ -41,6 +41,13 @@ export const LANGS = [
    translated», never «broken». */
 const HR = {
   "The map": "Karta",
+  /* The navigation was flattened: «Look up a surname» and «Every place» were
+     menu sentences and are now top-level nouns. Both spellings are kept —
+     the old ones still label the same links inside page prose, and a key
+     nobody asks for costs a line. */
+  "Surnames": "Prezimena",
+  "Places": "Mjesta",
+  "My research": "Moje istraživanje",
   "Look up a surname": "Potraži prezime",
   "Every place": "Sva mjesta",
   "Countries": "Države",
@@ -98,6 +105,9 @@ const HR = {
 
 const IT = {
   "The map": "La mappa",
+  "Surnames": "Cognomi",
+  "Places": "Luoghi",
+  "My research": "Le mie ricerche",
   "Look up a surname": "Cerca un cognome",
   "Every place": "Tutti i luoghi",
   "Countries": "Paesi",

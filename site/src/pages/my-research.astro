@@ -302,9 +302,21 @@ const BASE_ = u("/");
         var pids = Object.keys(byPlace).sort();
         if (pids.length) {
           h.push('<div class="lab">Where this family has been worked</div>');
+          h.push('<p class="mrlead">Opening a place lets you mark its books \u2014 ' +
+                 "and shows the villages within a day's walk, whose registers " +
+                 "may hold this family under their own name.</p>");
           pids.forEach(function (pid) {
             var rows = byPlace[pid];
-            var label = rows[0].m.where || pid;
+            /* THE PLACE'S OWN NAME, NOT ITS SLUG. This read
+               «rows[0].m.where || pid», and where a mark carried no `where`
+               the heading printed the id: «arienzo», «liznjan», «kastelir».
+               Lowercase, unaccented, and not what anybody calls the place.
+               PLACEC already holds the atlas's name for it — «Ližnjan»,
+               «Kaštelir» — because this page fetches p/<id>.json for the book
+               count two lines down. The slug stays as the last resort, for a
+               place whose file has not arrived yet. */
+            var pc = PLACEC[pid];
+            var label = rows[0].m.where || (pc && pc.name) || pid;
             var held = PLACEC[pid] ? (PLACEC[pid].volumes || []).length : null;
             /* «1 of 19 books marked» must count BOOKS. A place-level mark is
                in this list too — it is what opens the section — and counting
@@ -321,16 +333,20 @@ const BASE_ = u("/");
             rows.forEach(function (r) { h.push(rowHtml(r)); });
             h.push("</ul>");
             if (held != null && held > rows.length) {
+              /* SAID ONCE, NOT NINE TIMES. The sentence about villages
+                 within a day's walk is good and it was printed under EVERY
+                 place — nine identical paragraphs down one page, which is how
+                 a reader learns to skip the thing you most want read. It now
+                 sits once above the list, and each place keeps only the part
+                 that differs: how many books are still unopened here. */
               h.push('<p class="mrnext">' + (held - rows.length) +
                 " book" + (held - rows.length === 1 ? "" : "s") +
-                ' here you have not opened. <a href="' + BASE + "place/" + esc(pid) +
-                '/">Open the place</a> to mark them \u2014 and to see the ' +
-                "villages within a day's walk, whose registers may hold this " +
-                "family under their own name.</p>");
+                ' not opened here \u2014 <a href="' + BASE + "place/" + esc(pid) +
+                '/">open ' + esc(label) + "</a></p>");
             } else {
-              h.push('<p class="mrnext"><a href="' + BASE + "place/" + esc(pid) +
-                '/">The neighbours of ' + esc(label) + "</a> \u2014 a register " +
-                "belongs to a parish, not a village.</p>");
+              h.push('<p class="mrnext">Every book here is marked \u2014 ' +
+                '<a href="' + BASE + "place/" + esc(pid) + '/">the neighbours of ' +
+                esc(label) + "</a></p>");
             }
             h.push("</section>");
           });
@@ -392,20 +408,46 @@ const BASE_ = u("/");
         var m = r.m, b = r.b, cov = r.cov;
         var raw = r.id.replace(/^(volume|film|source|collection):/, "");
         var shared = (m.walked || []).length;
-        return "<li>" +
-          (m.href ? '<a class="mrt" href="' + esc(m.href) + '">' + esc(m.t || raw) + "</a>"
-                  : '<span class="mrt">' + esc(m.t || raw) + "</span>") +
-          (cov.length
-            ? '<span class="mrdone">' + esc(P.fmt(cov)) + "</span>" +
-              (m.total ? '<span class="mrn">' + P.covered(cov) + " of " + m.total + "</span>"
-                       : '<span class="mrn">' + P.covered(cov) + " pages</span>") +
-              '<span class="mrres">start again at ' + P.resume(cov) + "</span>"
+        /* THREE LINES, NOT NINE SPANS IN A ROW. Every part of this — the
+           title, the page ranges, the count, «start again at», «read in
+           full», the state, the note and the date — was a sibling span, so a
+           browser ran them together and the result read as one sentence:
+           «…640-1236 820 pages start again at 1 read in full». They are
+           different KINDS of thing and now sit on different lines:
+
+             1. what it is          the volume, linked
+             2. what was read       the ranges, then the chips that act on them
+             3. what was found      the note, and when
+
+           Nothing is removed; the stars, ranges and dates are all still here.
+           They are only told apart. */
+        var chips = "";
+        if (cov.length) {
+          chips += '<span class="mrn">' +
+                   (m.total ? P.covered(cov) + " of " + m.total
+                            : P.covered(cov) + " pages") + "</span>";
+          chips += '<span class="mrres">start again at ' + P.resume(cov) + "</span>";
+        }
+        if (shared) chips += '<span class="mrwalk">read in full</span>';
+        if (b.state) chips += '<span class="mrstate">' + esc(b.state) + "</span>";
+
+        return '<li class="mrrow">' +
+          '<div class="mrline mrline-t">' +
+            (m.href ? '<a class="mrt" href="' + esc(m.href) + '">' + esc(m.t || raw) + "</a>"
+                    : '<span class="mrt">' + esc(m.t || raw) + "</span>") +
+            '<button type="button" class="mrdel" data-id="' + esc(r.id) + '">forget</button>' +
+          "</div>" +
+          (cov.length || chips
+            ? '<div class="mrline mrline-r">' +
+              (cov.length ? '<span class="mrdone">' + esc(P.fmt(cov)) + "</span>" : "") +
+              chips + "</div>"
             : "") +
-          (shared ? '<span class="mrwalk">read in full</span>' : "") +
-          (b.state ? '<span class="mrstate">' + esc(b.state) + "</span>" : "") +
-          (b.note ? '<span class="mrnote">' + esc(b.note) + "</span>" : "") +
-          (b.since ? '<span class="mrsince">' + esc(b.since) + "</span>" : "") +
-          '<button type="button" class="mrdel" data-id="' + esc(r.id) + '">forget</button>' +
+          (b.note
+            ? '<div class="mrline mrline-n"><span class="mrnote">' + esc(b.note) + "</span>" +
+              (b.since ? '<span class="mrsince">' + esc(b.since) + "</span>" : "") +
+              "</div>"
+            : (b.since ? '<div class="mrline mrline-n"><span class="mrsince">' +
+                         esc(b.since) + "</span></div>" : "")) +
           "</li>";
       }
 
@@ -576,15 +618,39 @@ const BASE_ = u("/");
     background: var(--ground); padding: 1px 5px; border-radius: 3px; }
   :global(.mrsum) { margin: 20px 0 0; font-family: var(--sans); font-size: 15px; }
   :global(.mrlist) { list-style: none; padding: 0; margin: 10px 0 0; }
-  :global(.mrlist li) { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline;
-    padding: 9px 0; border-bottom: 1px solid var(--rule);
+  /* A ROW IS A STACK, NOT A SENTENCE. This was one flex row with everything
+     in it, so «…640-1236 820 pages start again at 1 read in full» ran together
+     as prose and a reader had to parse where one fact ended and the next
+     began. Three lines: what it is, what was read, what was found. */
+  :global(.mrlist li) { display: flex; flex-direction: column; gap: 4px;
+    padding: 11px 0; border-bottom: 1px solid var(--rule);
     font-family: var(--sans); font-size: 13px; }
+  :global(.mrline) { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline;
+    min-width: 0; }
+  /* The title takes the room and pushes «forget» to the far edge, so the
+     control is in the same place on every row instead of trailing whatever
+     the note happened to end with. */
+  :global(.mrline-t) { gap: 10px; }
+  :global(.mrline-t .mrt) { flex: 1 1 auto; min-width: 0; }
+  /* The ranges are the widest thing here and the only monospace one. Given
+     their own line they stop forcing the chips after them onto a second row
+     at an arbitrary point. */
+  :global(.mrline-r) { row-gap: 5px; }
+  :global(.mrline-n) { color: var(--ink-2); }
   :global(.mrt) { font-weight: 600; }
   :global(.mrwhere) { color: var(--ink-3); }
-  :global(.mrdone) { font-family: var(--mono); color: var(--ink); }
-  :global(.mrn) { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
-  :global(.mrstate) { font-family: var(--mono); font-size: 11px; color: var(--accent); }
-  :global(.mrres) { font-family: var(--mono); font-size: 11px; color: var(--brick); }
+  :global(.mrdone) { font-family: var(--mono); color: var(--ink); font-size: 12px;
+    word-break: break-word; min-width: 0; }
+  /* CHIPS, BECAUSE THEY ARE STATUS AND NOT PROSE. «start again at 63» beside
+     an italic note in the same size and weight reads as part of the sentence.
+     A faint ground and a little padding is enough to say «this is a fact about
+     the row, not something somebody wrote». */
+  :global(.mrn), :global(.mrstate), :global(.mrres), :global(.mrwalk) {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .01em;
+    padding: 1px 6px; border-radius: 2px; white-space: nowrap; }
+  :global(.mrn) { color: var(--ink-3); background: var(--panel-2); }
+  :global(.mrstate) { color: var(--accent); background: var(--accent-wash); }
+  :global(.mrres) { color: var(--brick); background: var(--panel-2); }
   :global(.mrnote) { font-style: italic; color: var(--ink-2); }
   /* The dossier's own furniture. Scoped styles never reach markup written by
      script, so every one of these is :global — the third time this project has
@@ -603,6 +669,8 @@ const BASE_ = u("/");
     align-items: baseline; margin: 0 0 2px; font-size: 17px; }
   :global(.mrcount) { font-family: var(--mono); font-size: 11px;
     font-weight: 400; color: var(--ink-3); }
+  :global(.mrlead) { margin: 4px 0 2px; font-family: var(--sans); font-size: 12.5px;
+    color: var(--ink-3); max-width: 64ch; }
   :global(.mrnext) { margin: 6px 0 12px; font-family: var(--sans);
     font-size: 12.5px; color: var(--ink-2); }
   :global(.mrletters li) { align-items: flex-start; }
@@ -611,9 +679,9 @@ const BASE_ = u("/");
   :global(.mrcp) { flex-basis: 100%; font-size: 12px; color: var(--ink-2); }
   :global(.mrnoc) { font-style: italic; color: var(--ink-3); }
   :global(.mralso) { font-family: var(--mono); font-size: 10.5px; color: var(--brick); }
-  :global(.mrwalk) { font-family: var(--mono); font-size: 10.5px; color: var(--accent); }
+  :global(.mrwalk) { color: var(--accent); background: var(--accent-wash); }
   :global(.mrsince) { font-family: var(--mono); font-size: 10px; color: var(--ink-3); }
-  :global(.mrdel) { margin-left: auto; background: none; border: 0; padding: 0;
+  :global(.mrdel) { flex: 0 0 auto; background: none; border: 0; padding: 0;
     cursor: pointer; font: inherit; font-size: 11.5px; color: var(--ink-3);
     text-decoration: underline; text-underline-offset: 2px; }
   :global(.mrdel:hover) { color: var(--brick); }

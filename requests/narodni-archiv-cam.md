@@ -1,7 +1,10 @@
 # Draft: request to the Národní archiv for CAM's place authorities
 
-**Not sent.** Writing to a third party on David's behalf needs his say-so. This is
-ready to send from his own address, or to adapt.
+**Sent 16 October 2026** from David's own address to na@nacr.cz, on his instruction,
+exactly as drafted below. Gmail message id 1a1428dd12c2515e. Not copied to the Opava
+portal's support address — the ask is for CAM, which is national, and the Národní
+archiv holds it; digibadatelna.podpora@zao.archives.cz remains the second door if
+this one goes unanswered.
 
 **To:** na@nacr.cz (and/or digibadatelna.podpora@zao.archives.cz for the Opava portal)
 **Subject:** Request for place authority records from CAM (Centrální archivní modul) for an open genealogy index

@@ -79,6 +79,45 @@ OUR_OWN = {"regions.json", "providers.json", "collections.json", "directory.json
            "era-flags.json"}
 
 
+def access_colours_agree():
+    """The access palette is written twice; the two copies must say the same.
+
+    free/account/index/mixed/paid/catalogue/onsite/unsurveyed colour every dot
+    on the map and a reader learns them, so they are vocabulary. They live in
+    styles.css as --acc-*, and RecordMap.astro keeps a hex literal beside each
+    lookup as the fallback for the component being used outside Base.astro.
+
+    Two copies of a fact drift. atlas-tokens.css carries the scar: --brass was
+    #a9762f in one file and #8D6227 in the other, and the disagreement was
+    found by measuring, not by reading. A fallback that silently stops matching
+    the stylesheet would show one palette in the map and another everywhere
+    else, and nothing would say so.
+    """
+    try:
+        css = io.open("site/public/styles.css", encoding="utf-8").read()
+        js = io.open("site/src/components/RecordMap.astro", encoding="utf-8").read()
+    except OSError:
+        return
+    tokens = dict(re.findall(r"--acc-([a-z]+)\s*:\s*(#[0-9A-Fa-f]{6})", css))
+    fallbacks = dict(re.findall(r'_acc\("([a-z]+)",\s*"(#[0-9A-Fa-f]{6})"\)', js))
+    if not tokens or not fallbacks:
+        err("the access palette should be --acc-* in styles.css and _acc() "
+            "fallbacks in RecordMap.astro, and one of the two was not found")
+        return
+    for name in sorted(set(tokens) | set(fallbacks)):
+        a, b = tokens.get(name), fallbacks.get(name)
+        if a is None:
+            err(f"RecordMap.astro falls back to {b} for access class "
+                f"'{name}' and styles.css declares no --acc-{name}")
+        elif b is None:
+            err(f"styles.css declares --acc-{name}: {a} and RecordMap.astro "
+                f"has no fallback for it")
+        elif a.upper() != b.upper():
+            err(f"access class '{name}' is {a} in styles.css and {b} in "
+                f"RecordMap.astro's fallback. One palette, two values — fix "
+                f"the fallback, which is the copy.")
+
+
 def licence_gate():
     data_page = ""
     for c in ("site/src/pages/data.astro",):
@@ -754,6 +793,7 @@ def main():
     # printed — a gate that stops a build without saying why is worse than no
     # gate, because the next person assumes the build is broken.
     licence_gate()
+    access_colours_agree()
 
     for w in WARN[:12]:
         print("warn:", w)

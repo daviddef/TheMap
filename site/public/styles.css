@@ -90,6 +90,44 @@
   --r-belgium:#9A3E8C;
   --r-netherlands:#E8902B; --r-denmark:#B03A3A; --r-norway:#1E7A6E;
   --r-finland:#5A6FB5; --r-portugal:#4E8A3C;
+  /* ---- WHAT IT COSTS TO LOOK, WHICH IS THE ONE THING COLOUR MEANS HERE ---
+     free/account/index/mixed/paid/catalogue/onsite/unsurveyed colour every dot
+     on the map and a reader learns them. They are vocabulary, not decoration,
+     and until now they were vocabulary written down in four places —
+     RecordMap.astro's ACC table in JS, and .d-* / .chip.acc-* rules in
+     place/[id].astro, providers.astro and country/[cc].astro. Four copies of a
+     fact is how the brass in atlas-tokens.css came to disagree with itself.
+     One place now, and RecordMap reads them from here, which is what the
+     comment above its ACC table always claimed it did.
+
+     THE COST RAMP IS ORDERED BY LUMINANCE, and it was not before. Measured on
+     the old palette, «free» #1E8449 and «paid» #C0392B were 1.05:1 apart to a
+     red-green colourblind reader — about one man in twelve — which is to say
+     identical. The single most important distinction this atlas draws, open it
+     tonight against pay for it, was invisible to them. Luminance ran
+     0.173, 0.316, 0.564, 0.310, 0.143: not a ramp, noise.
+
+     Now it falls free -> paid, so cost reads as fading and the dot you can use
+     is the solid one. free vs paid is 4.41:1 colourblind, the weakest
+     neighbouring pair is 1.17:1, and the order survives greyscale printing,
+     deuteranopia, protanopia and tritanopia.
+
+     WHAT IT COST: yellow. «index» sits third of five and yellow is the
+     lightest hue there is, so an ordered ramp drags it to dark gold; red
+     lightens to coral at the other end. No ordering keeps both, and the
+     ordering is worth more than the yellow.
+
+     catalogue, onsite and unsurveyed are untouched. Purple and the greys are a
+     different axis and survive red-green colour blindness already. Eight steps
+     on one luminance axis was tried and abandoned — it put the weakest pair at
+     1.12:1 and turned the gold brown. Luminance carries five steps, not eight.
+
+     ONE SET FOR BOTH THEMES, because that is what the dots have always had:
+     they carry a white ring, so they separate from any map tile without help
+     from the fill. */
+  --acc-free:#14562F; --acc-account:#426817; --acc-index:#936D00;
+  --acc-mixed:#EE6200; --acc-paid:#FC8F84;
+  --acc-catalogue:#8E6FA8; --acc-onsite:#7C8A91; --acc-unsurveyed:#B6B2A6;
   --band-label:#F5F3EE;
   --serif:"Fraunces","EB Garamond",Georgia,"Times New Roman",serif;
   --sans:"Source Sans 3","Libre Franklin","Helvetica Neue",Arial,sans-serif;

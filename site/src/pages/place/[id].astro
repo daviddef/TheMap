@@ -647,10 +647,14 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
   .y { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); margin-left: 8px; }
   .who { font-size: 11px; color: var(--ink-3); margin-left: 8px; }
   .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 7px; }
-  .d-free { background: #1E8449 } .d-account { background: #6FA82E }
-  .d-index { background: #EFC03B } .d-mixed { background: #E8792B }
-  .d-paid { background: #C0392B } .d-catalogue { background: #8E6FA8 }
-  .d-onsite { background: #7C8A91 }
+  /* The same vocabulary the map draws, from the same place — see the cost-ramp
+     note in styles.css. These are fills beside their own label, so they need no
+     contrast tuning of their own; the .chip.acc-* rules elsewhere DO, and are
+     deliberately left alone, because a chip is coloured text and a dot is not. */
+  .d-free { background: var(--acc-free) } .d-account { background: var(--acc-account) }
+  .d-index { background: var(--acc-index) } .d-mixed { background: var(--acc-mixed) }
+  .d-paid { background: var(--acc-paid) } .d-catalogue { background: var(--acc-catalogue) }
+  .d-onsite { background: var(--acc-onsite) }
   .reg { display: inline-flex; align-items: baseline; gap: 7px; }
   .reg i { width: 9px; height: 9px; border-radius: 2px; background: var(--c); display: inline-block; flex: 0 0 auto; }
   .none { color: var(--ink-3); font-style: italic; }

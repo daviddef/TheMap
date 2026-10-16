@@ -17,7 +17,10 @@ carries.
 A LETTER IN requests/ THAT IS NOT LISTED BELOW IS REPORTED, so a new draft
 cannot be written and quietly left off the page.
 
-NOTHING HERE SENDS ANYTHING. Sending a letter is David's decision, always.
+NOTHING HERE SENDS ANYTHING, and that has not changed. Sending a letter is
+David's decision, always; this file records the decision after he has made it.
+The Národní archiv letter went on 16 October 2026 because he said to send that
+one and to leave the other three as drafts.
 """
 import json, os, re, sys
 
@@ -34,7 +37,7 @@ STATES = {
 
 # file, state, who, what it asks for, what it would settle, links
 ROWS = [
-    ("narodni-archiv-cam.md", "draft",
+    ("narodni-archiv-cam.md", "sent",
      "Národní archiv ČR, and the Opava portal's support address",
      "CAM's PLACE authority records — the place, its former or German name, and "
      "the archive or fonds it attaches to",
@@ -44,7 +47,8 @@ ROWS = [
      "PLACE as one of their classes — so one file would answer the whole country, "
      "where a portal answers one region. Porta fontium, harvested openly, reached 90 "
      "of those dots because it covers west Bohemia alone.",
-     [["What is still grey", "/worklist/"], ["The sources", "/providers/"]]),
+     [["What is still grey", "/worklist/"], ["The sources", "/providers/"]],
+     "16 October 2026"),
 
     ("san-antenati-oai.md", "draft",
      "SAN / Ministero della Cultura",
@@ -93,7 +97,12 @@ def main():
         sys.exit(1)
 
     rows = []
-    for i, (fn, state, who, ask, why, links) in enumerate(ROWS, 1):
+    # A SEVENTH ELEMENT, OPTIONAL: the date it actually went. «Sent, waiting»
+    # with no date gives nobody a point to chase from, and the whole purpose of
+    # this page is that the state of each letter is a glance.
+    for i, row in enumerate(ROWS, 1):
+        fn, state, who, ask, why, links = row[:6]
+        when = row[6] if len(row) > 6 else None
         raw = open(os.path.join(REQ, fn), encoding="utf-8").read()
         # The letter itself is what follows the first «---» rule; the header
         # above it is the addressing, which the page shows as its own line.
@@ -102,6 +111,8 @@ def main():
         subj = re.search(r"\*\*Subject:\*\*\s*(.+)", raw)
         title = re.sub(r"^#\s*Draft:\s*", "", raw.splitlines()[0]).strip()
         label, colour = STATES[state]
+        if when:
+            label = f"{label} — sent {when}"
         rows.append({
             "n": i, "what": title, "who": who,
             "ref": ((to.group(1).strip() + " — " + subj.group(1).strip())
@@ -109,11 +120,12 @@ def main():
             "why": why, "ask": ask,
             "draft": body,
             "state": state, "stateLabel": label, "colour": colour,
+            "when": when,
             "file": f"{REQ}/{fn}",
             "links": links,
         })
     doc = {
-        "note": ("Letters this atlas has drafted and not sent. The text is read from "
+        "note": ("Letters this atlas has drafted, and what became of them. The text is read from "
                  "requests/ and never retyped, so the page cannot drift from the file. "
                  "Nothing here sends anything: that is David's decision, always."),
         "built": __import__("time").strftime("%Y-%m-%d"),
@@ -121,9 +133,19 @@ def main():
                    "drafted": sum(1 for r in rows if r["state"] == "draft"),
                    "sent": sum(1 for r in rows if r["state"] == "sent"),
                    "answered": sum(1 for r in rows if r["state"] == "answered")},
-        "groups": [{"label": "Waiting to be sent",
-                    "note": "Each one is a gap this atlas cannot close by reading.",
-                    "rows": rows}],
+        # TWO GROUPS, ONCE ONE HAS GONE. A single list headed «Waiting to be
+        # sent» said something untrue about a letter that had been sent, and the
+        # whole point of this page is that the state of each one is a glance.
+        # The sent group is omitted entirely while nothing has gone, so the page
+        # does not grow an empty heading before it has anything to put in it.
+        "groups": [g for g in (
+            {"label": "Sent, waiting for an answer",
+             "note": "Asked, and not yet answered. The text below is what went.",
+             "rows": [r for r in rows if r["state"] in ("sent", "answered")]},
+            {"label": "Waiting to be sent",
+             "note": "Each one is a gap this atlas cannot close by reading.",
+             "rows": [r for r in rows if r["state"] == "draft"]},
+        ) if g["rows"]],
     }
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     json.dump(doc, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, indent=1)

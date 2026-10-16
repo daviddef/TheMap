@@ -943,7 +943,15 @@ def main():
                 if when:
                     b["since"] = max(b.get("since", ""), when)
                 if src and not b.get("note"):
-                    b["note"] = src[:150]
+                    # NOT MID-WORD. A flat src[:150] ended notes like «…found
+                    # to have cut the bottom off ev», which reads as a bug in
+                    # the page rather than a sentence that was too long. Cut
+                    # back to the last space and say so with an ellipsis.
+                    _n = src[:150]
+                    if len(src) > 150:
+                        _cut = _n.rsplit(" ", 1)[0] if " " in _n[120:] else _n
+                        _n = _cut.rstrip(" ,;:\u2014-") + "\u2026"
+                    b["note"] = _n
                 srcmarked += 1
                 src_hit += 1
 
@@ -963,7 +971,15 @@ def main():
                 if when:
                     b["since"] = max(b.get("since", ""), when)
                 if src and not b.get("note"):
-                    b["note"] = src[:150]
+                    # NOT MID-WORD. A flat src[:150] ended notes like «…found
+                    # to have cut the bottom off ev», which reads as a bug in
+                    # the page rather than a sentence that was too long. Cut
+                    # back to the last space and say so with an ellipsis.
+                    _n = src[:150]
+                    if len(src) > 150:
+                        _cut = _n.rsplit(" ", 1)[0] if " " in _n[120:] else _n
+                        _n = _cut.rstrip(" ,;:\u2014-") + "\u2026"
+                    b["note"] = _n
 
             # THE FILM MARK, which needs no waypoint and no resolution.
             fm = FILM.search(url or "")
@@ -993,7 +1009,15 @@ def main():
                 if st and not b.get("state"):
                     b["state"] = st
                 if src and not b.get("note"):
-                    b["note"] = src[:150]
+                    # NOT MID-WORD. A flat src[:150] ended notes like «…found
+                    # to have cut the bottom off ev», which reads as a bug in
+                    # the page rather than a sentence that was too long. Cut
+                    # back to the last space and say so with an ellipsis.
+                    _n = src[:150]
+                    if len(src) > 150:
+                        _cut = _n.rsplit(" ", 1)[0] if " " in _n[120:] else _n
+                        _n = _cut.rstrip(" ,;:\u2014-") + "\u2026"
+                    b["note"] = _n
                 # THE URL AND THE PROSE EACH KNOW HALF OF IT. The link for
                 # this row carries «?i=172» and the sentence beside it says
                 # «DGS 005497894, images 172–174» — the URL names where the

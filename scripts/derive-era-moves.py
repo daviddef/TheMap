@@ -31,6 +31,9 @@ and this atlas's whole argument is that it says what the source says. A name
 resolves when it IS a country this map draws, and otherwise it stays text.
 """
 import json, os as _os, re, time
+import sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import geo
 import os
 
 # RUN FROM ANYWHERE, BECAUSE `npm run data` RUNS FROM site/. Every path below
@@ -178,15 +181,106 @@ def main():
     # box rides along in the same file. It is a label anchor, not a centroid:
     # for Chile or Norway it sits in the sea, which is the right place for the
     # tail of an arrow about a whole country anyway.
-    at = {}
-    for cc, v in countries.items():
-        rings = v.get("rings") or []
-        if not rings:
-            continue
-        lons = [p[0] for r in rings for p in r]
-        lats = [p[1] for r in rings for p in r]
-        at[cc] = [round((min(lats) + max(lats)) / 2, 3),
-                  round((min(lons) + max(lons)) / 2, 3)]
+    # SEA IS FINE. ANOTHER COUNTRY IS NOT. The comment above is right that a
+    # midpoint in the Pacific is the honest place for a label about Chile — a
+    # label has to go somewhere and the sea claims nothing. But a midpoint that
+    # lands inside a NEIGHBOUR is a different thing entirely: David found the
+    # Croatian flag flying near Drvar, which is in Bosnia and Herzegovina.
+    # Croatia is a horseshoe around Bosnia, so the midpoint of its box is
+    # inside Bosnia, and the map was making a claim rather than placing a
+    # label. Measured across all 194: 166 landed at home, 20 at sea, and
+    #
+    #     HR -> BA, LS -> ZA, IL -> PS, GQ -> CM, GN -> SL, LA -> TH, VN -> LA
+    #
+    # and, best of all, US -> FR: the United States box runs from Alaska to
+    # Florida, so its midpoint is in south-west France.
+    #
+    # So the midpoint stands unless it falls in someone else's country, and
+    # then the anchor moves to the point inside this country's own rings that
+    # is furthest from any of its edges. That is the pole of inaccessibility,
+    # approximated on a grid, which is cheap at eight countries and puts the
+    # flag in the widest part of the land rather than the middle of the box.
+    def _inside(lat, lon, rings):
+        return any(geo.in_ring(lat, lon, r) for r in rings)
+
+    def _deep_point(rings, lo_lat, hi_lat, lo_lon, hi_lon):
+        """The inside point furthest from the edge, found by narrowing a grid."""
+        best, best_d = None, -1.0
+        for _ in range(4):                       # four passes, tightening
+            step_lat = (hi_lat - lo_lat) / 24.0
+            step_lon = (hi_lon - lo_lon) / 24.0
+            if step_lat <= 0 or step_lon <= 0:
+                break
+            for i in range(25):
+                for j in range(25):
+                    la = lo_lat + i * step_lat
+                    lo = lo_lon + j * step_lon
+                    if not _inside(la, lo, rings):
+                        continue
+                    # distance to the nearest edge, as the smallest step that
+                    # walks off the land in any of eight directions
+                    d = 0.0
+                    for k in range(1, 13):
+                        r = k * max(step_lat, step_lon) * 0.5
+                        if all(_inside(la + r * dy, lo + r * dx, rings)
+                               for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1),
+                                              (.7, .7), (.7, -.7), (-.7, .7), (-.7, -.7))):
+                            d = r
+                        else:
+                            break
+                    if d > best_d:
+                        best, best_d = (la, lo), d
+            if not best:
+                break
+            la, lo = best
+            span_lat = (hi_lat - lo_lat) / 6.0
+            span_lon = (hi_lon - lo_lon) / 6.0
+            lo_lat, hi_lat = la - span_lat, la + span_lat
+            lo_lon, hi_lon = lo - span_lon, lo + span_lon
+        return best
+
+    def anchors(where_used=None):
+        """A label anchor per country, inside the country wherever possible.
+
+        TWO COPIES OF THIS EXISTED and only one got fixed, which is how the
+        flag kept flying over Drvar after the arrows had been corrected: `at`
+        fed era-moves.json and `fat` fed flag-map.json, the same fifteen lines
+        written twice. One function now, called twice.
+        """
+        out, moved = {}, []
+        for cc, v in countries.items():
+            rings = v.get("rings") or []
+            if not rings:
+                continue
+            if where_used is not None and cc not in where_used:
+                continue
+            lons = [p[0] for r in rings for p in r]
+            lats = [p[1] for r in rings for p in r]
+            mid = [round((min(lats) + max(lats)) / 2, 3),
+                   round((min(lons) + max(lons)) / 2, 3)]
+            # THE TEST IS «IS IT ON SOMEBODY ELSE'S LAND», NOT «WHAT DOES
+            # country_of SAY». Those differ for an enclave: Lesotho is
+            # surrounded by South Africa and ZA's ring carries no hole for it,
+            # so every point in Lesotho is inside ZA too and country_of can
+            # never answer LS. Asking country_of alone moved Lesotho's anchor
+            # for no reason. Asking whether the point is on THIS country's own
+            # land as well settles it — and leaves Chile's midpoint in the
+            # Pacific, which the note above is right to want.
+            where = geo.country_of(mid[0], mid[1])
+            if (where is not None and where != cc
+                    and not _inside(mid[0], mid[1], rings)):
+                deep = _deep_point(rings, min(lats), max(lats), min(lons), max(lons))
+                if deep:
+                    out[cc] = [round(deep[0], 3), round(deep[1], 3)]
+                    moved.append((cc, where))
+                    continue
+            out[cc] = mid
+        return out, moved
+
+    at, moved_home = anchors()
+    if moved_home:
+        print("  anchors moved out of a neighbour's country: " +
+              ", ".join(f"{c} (was in {w})" for c, w in sorted(moved_home)))
     used = {m["s"] for m in moves} | {m["o"] for m in moves if m["o"]}
     at = {k: v for k, v in at.items() if k in used}
 
@@ -250,15 +344,7 @@ def main():
     except (FileNotFoundError, KeyError):
         print("  no data/era-flags.json — the flag layer will have nothing to draw")
 
-    fat = {}
-    for cc, v in countries.items():
-        rings = v.get("rings") or []
-        if not rings:
-            continue
-        lons = [p[0] for r in rings for p in r]
-        lats = [p[1] for r in rings for p in r]
-        fat[cc] = [round((min(lats) + max(lats)) / 2, 3),
-                   round((min(lons) + max(lons)) / 2, 3)]
+    fat, _ = anchors()
 
     flags, skipped_noimg, skipped_nocc = {}, 0, 0
     for e in eras:

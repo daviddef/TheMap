@@ -561,15 +561,25 @@ window.addEventListener("load", async function () {
      the honest answer is the English it was given. */
   var T = window.RA_T || function (x) { return x; };
 
+  /* THE COMMENT ABOVE WAS A CLAIM, NOT A FACT, until now: these were eight hex
+     literals here and eight more in place/[id].astro, providers.astro and
+     country/[cc].astro, four copies of the vocabulary that colours every dot.
+     They come off the stylesheet, where styles.css explains why the ramp is
+     ordered by luminance and what that cost. The literal beside each one is
+     the fallback for the component being used outside Base.astro, and is kept
+     in step by the build gate below, not by hope. */
+  function _acc(name, fallback) {
+    return (css.getPropertyValue("--acc-" + name).trim() || fallback);
+  }
   var ACC = {
-    free:      ["#1E8449", T("Images, free, no account")],
-    account:   ["#6FA82E", T("Images, free, account needed")],
-    index:     ["#EFC03B", T("An index only — no images")],
-    mixed:     ["#E8792B", T("Partly free, partly paid")],
-    paid:      ["#C0392B", T("Images, behind a paywall")],
-    catalogue: ["#8E6FA8", T("A catalogue entry — not photographed")],
-    onsite:    ["#7C8A91", T("On paper, in the building")],
-    unsurveyed:["#B6B2A6", T("Nobody has walked this one yet")]
+    free:      [_acc("free",      "#14562F"), T("Images, free, no account")],
+    account:   [_acc("account",   "#426817"), T("Images, free, account needed")],
+    index:     [_acc("index",     "#936D00"), T("An index only — no images")],
+    mixed:     [_acc("mixed",     "#EE6200"), T("Partly free, partly paid")],
+    paid:      [_acc("paid",      "#FC8F84"), T("Images, behind a paywall")],
+    catalogue: [_acc("catalogue", "#8E6FA8"), T("A catalogue entry — not photographed")],
+    onsite:    [_acc("onsite",    "#7C8A91"), T("On paper, in the building")],
+    unsurveyed:[_acc("unsurveyed","#B6B2A6"), T("Nobody has walked this one yet")]
   };
   var RANK = idx.rank || Object.keys(ACC);
 

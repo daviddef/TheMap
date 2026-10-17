@@ -509,6 +509,20 @@ window.addEventListener("load", async function () {
   idx = got[0]; regions = got[1]; provs = got[2];
 
   var PROV = {}; provs.providers.forEach(function (p) { PROV[p.id] = p; });
+  /* A PROVIDER ID IS NOT A PROVIDER NAME, and the era panels printed the id.
+     Senj's 1991–2026 era read «1991–2026 · dari» and its 1469–1809 era read
+     «dari · arhinet · familysearch» — three ids in a row. `dari` is Državni
+     arhiv u Rijeci, the archive you would actually write to for Senj, filed
+     correctly against the Kvarner's eras and named wrongly on the page.
+
+     Three other call sites in this file already resolved it the same way —
+     PROV[x] ? PROV[x].name : x — so this is the lookup those were using,
+     given a name and used by the two era builders as well. The id is kept as
+     the fallback: a region can file an era under a provider that a later
+     providers.json no longer carries, and an id on the page beats a blank. */
+  function provName(id) {
+    return PROV[id] && PROV[id].name ? PROV[id].name : id;
+  }
   /* National archives and libraries by country, fetched once and kept for the
      whole session — 40 KB that turns «no sources here» into a list in 164
      countries. */
@@ -561,15 +575,25 @@ window.addEventListener("load", async function () {
      the honest answer is the English it was given. */
   var T = window.RA_T || function (x) { return x; };
 
+  /* THE COMMENT ABOVE WAS A CLAIM, NOT A FACT, until now: these were eight hex
+     literals here and eight more in place/[id].astro, providers.astro and
+     country/[cc].astro, four copies of the vocabulary that colours every dot.
+     They come off the stylesheet, where styles.css explains why the ramp is
+     ordered by luminance and what that cost. The literal beside each one is
+     the fallback for the component being used outside Base.astro, and is kept
+     in step by the build gate below, not by hope. */
+  function _acc(name, fallback) {
+    return (css.getPropertyValue("--acc-" + name).trim() || fallback);
+  }
   var ACC = {
-    free:      ["#1E8449", T("Images, free, no account")],
-    account:   ["#6FA82E", T("Images, free, account needed")],
-    index:     ["#EFC03B", T("An index only — no images")],
-    mixed:     ["#E8792B", T("Partly free, partly paid")],
-    paid:      ["#C0392B", T("Images, behind a paywall")],
-    catalogue: ["#8E6FA8", T("A catalogue entry — not photographed")],
-    onsite:    ["#7C8A91", T("On paper, in the building")],
-    unsurveyed:["#B6B2A6", T("Nobody has walked this one yet")]
+    free:      [_acc("free",      "#14562F"), T("Images, free, no account")],
+    account:   [_acc("account",   "#426817"), T("Images, free, account needed")],
+    index:     [_acc("index",     "#936D00"), T("An index only — no images")],
+    mixed:     [_acc("mixed",     "#EE6200"), T("Partly free, partly paid")],
+    paid:      [_acc("paid",      "#FC8F84"), T("Images, behind a paywall")],
+    catalogue: [_acc("catalogue", "#8E6FA8"), T("A catalogue entry — not photographed")],
+    onsite:    [_acc("onsite",    "#7C8A91"), T("On paper, in the building")],
+    unsurveyed:[_acc("unsurveyed","#B6B2A6"), T("Nobody has walked this one yet")]
   };
   var RANK = idx.rank || Object.keys(ACC);
 
@@ -1202,7 +1226,8 @@ window.addEventListener("load", async function () {
     });
     BANDS[uid] = eras.map(function (e) {
       var filed = (e.filedUnder || []).length
-        ? filedNames(e).map(esc).join(" \u00b7 ")
+        ? (e.filedUnder || []).map(function (f) { return esc(provName(f)); })
+            .join(" \u00b7 ")
         /* An era with no archive is not a gap in the research — for Istria
            before 1374 no parish registers exist anywhere, because Trent only
            required them from 1563. Saying so beats an empty cell. */
@@ -1246,20 +1271,13 @@ window.addEventListener("load", async function () {
     return h.join("");
   }
 
-  /* The archive names for an era, from the build. regions.json carries
-     `filedUnderNames` beside `filedUnder`; ids are the fallback for a file
-     written before it did, so a stale cache shows «dari», not nothing. */
-  function filedNames(e) {
-    var ids = e.filedUnder || [], names = e.filedUnderNames || [];
-    return ids.map(function (id, i) { return names[i] || id; });
-  }
-
   /* The old stacked list, kept for a region with a single era. */
   function eraList(reg) {
     var h = ['<ul class="ra-eras">'];
     (reg.eras || []).forEach(function (e) {
       var filed = (e.filedUnder || []).length
-        ? filedNames(e).map(esc).join(" \u00b7 ")
+        ? (e.filedUnder || []).map(function (f) { return esc(provName(f)); })
+            .join(" \u00b7 ")
         : '<span class="ra-era-none">' + esc(T("no archive holds this yet")) + "</span>";
       h.push('<li><span class="ra-era-y">' + e.from + "\u2013" + e.to + "</span>" +
              '<span class="ra-era-p">' + esc(e.polity) + "</span>" +

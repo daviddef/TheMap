@@ -29,57 +29,94 @@
  * #7E5A20 is the lightest brass that clears 4.5:1 on BOTH, so it holds
  * wherever it is used, on either half of the site.
  *
+ * THE GROUND HAS SINCE MOVED, AND EVERYTHING ABOVE IS NOW HISTORY — kept,
+ * because it is the record of how --brass was arrived at and the argument is
+ * still the right one. The values it measures against are not current.
+ *
+ * These pages and the rest of the atlas now share the ground of the family
+ * archives at archive.defranceski.com: --paper #EDEBE5, --card #F7F6F2,
+ * --ink #16222A. One site moved instead of eight, which was David's call.
+ * The two files still speak different dialects — this one says paper/card/
+ * muted/hair/adriatic, styles.css says ground/panel/ink-3/rule-strong/accent
+ * — because renaming them means touching 245 flag pages that use the old
+ * names, and that is a rename, not a palette change. Same colours, two
+ * vocabularies, and the colours are what a reader sees.
+ *
+ * RE-MEASURED ON THE NEW GROUND, because that is the rule this file states
+ * four paragraphs up and it applies to itself:
+ *
+ *     --ink        #16222A  on paper 13.59   on card 14.98   passes
+ *     --muted      #606C72  on paper  4.53   on card  5.00   passes
+ *     --adriatic   #1F5C6B  on paper  6.29   on card  6.93   passes
+ *     --adriatic-2 #163846  on paper 10.43   on card 11.50   passes
+ *     --brick      #9C3B28  on paper  5.74   on card  6.33   passes
+ *     --brick-2    #7C2E1F  on paper  7.77   on card  8.56   passes
+ *     --brass      #7E5A20  on paper  5.23   on card  5.76   passes
+ *
+ * --brass needed no change, which is the first time it has survived a ground
+ * moving. --muted was #6e6047, a warm grey that belongs to the old paper;
+ * #606C72 is the cool equivalent and carries the same headroom. In dark,
+ * --brick went #d3644a -> #D66E55: it measured 4.43 on the old card and 4.42
+ * on the new one, so it had been below AA on cards the whole time and the
+ * ground change merely put an audit in front of it.
+ *
+ * WHAT IS NOT UNIFIED, and is a separate job: 233 of these pages carry an
+ * inline reset that hardcodes «background:#faf9f5;color:#141413» on body.
+ * It is dead — every page declares «body{background:var(--paper)}» later and
+ * wins on source order, checked on all 233 — but it is a third ground sitting
+ * in the markup waiting to be believed by somebody.
+ *
  * Three blocks, deliberately: the system default, the OS dark preference
  * scoped so an explicit light choice still wins, and the explicit dark
  * choice. Removing any one of them breaks a way of asking for dark. */
 
 :root {
-  --ink: #201a12;
-  --paper: #ede2c8;
-  --card: #f8f1de;
-  --card-border: #d9c9a0;
+  --ink:#16222A;
+  --paper:#EDEBE5;
+  --card:#F7F6F2;
+  --card-border:#D3D0C7;
   --brick: #9c3b28;
   --brick-2: #7c2e1f;
   --brass: #7E5A20;          /* twice corrected; see the note above */
-  --adriatic: #204b5c;
+  --adriatic:#1F5C6B;
   --adriatic-2: #163846;
-  --muted: #6e6047;
-  --hair: #cbb98d;
-  --focus: #204b5c;
-  --tile-sea: #b9d3da;
+  --muted:#606C72;
+  --hair:#B6B2A6;
+  --focus:#1F5C6B;
+  --tile-sea:#DDE7E9;
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --ink: #ece1c4;
-    --paper: #14171b;
-    --card: #1c2027;
-    --card-border: #33393f;
-    --brick: #d3644a;
+    --ink:#E8E6DF;
+    --paper:#101820;
+    --card:#17212A;
+    --card-border:#2A3841;
+    --brick:#D66E55;
     --brick-2: #e07a5f;
     --brass: #d1a154;
-    --adriatic: #6fa3b8;
-    --adriatic-2: #8fbccf;
-    --muted: #9a9280;
-    --hair: #33393f;
-    --tile-sea: #17303a;
+    --adriatic:#6FB6C6;
+    --adriatic-2:#8FCEDC;
+    --muted:#7E8E96;
+    --hair:#3F515C;
+    --tile-sea:#1B2E36;
     color-scheme: dark;
   }
 }
 
 :root[data-theme="dark"] {
-  --ink: #ece1c4;
-  --paper: #14171b;
-  --card: #1c2027;
-  --card-border: #33393f;
-  --brick: #d3644a;
+  --ink:#E8E6DF;
+  --paper:#101820;
+  --card:#17212A;
+  --card-border:#2A3841;
+  --brick:#D66E55;
   --brick-2: #e07a5f;
   --brass: #d1a154;
-  --adriatic: #6fa3b8;
-  --adriatic-2: #8fbccf;
-  --muted: #9a9280;
-  --hair: #33393f;
-  --tile-sea: #17303a;
+  --adriatic:#6FB6C6;
+  --adriatic-2:#8FCEDC;
+  --muted:#7E8E96;
+  --hair:#3F515C;
+  --tile-sea:#1B2E36;
   color-scheme: dark;
 }

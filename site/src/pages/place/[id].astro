@@ -140,6 +140,22 @@ const span = years.length
   ? [Math.min(...years.map((y) => y[0])), Math.max(...years.map((y) => y[1]))]
   : null;
 const older = (place.names || []).map((n) => n.n);
+const HOW = {
+  hand: "entered by hand, with its collections attached by a person, rather than imported from a gazetteer list.",
+  "familysearch-catalogue": "FamilySearch catalogues a collection under this place; the point comes from matching its name in a gazetteer.",
+  "townlands-ie": "listed from the Irish townlands gazetteer so that a name can be found. No registers have been walked here.",
+  "geonames-admin": "listed from GeoNames as an administrative area so that a name can be found. No registers have been walked here.",
+  "nrs-parishes": "listed from the Scottish parish list so that a name can be found. No registers have been walked here.",
+};
+/* CHECKABLE FROM OUTSIDE. data/place-ids.json holds a Wikidata item and a GeoNames
+   id for the places where a same-name record lies within 5 km in the same country.
+   A claim here that a reader can check against records that are not ours is worth
+   more than one they have to take from us. Absent for most places, and the page
+   does not pretend otherwise. */
+let outside = null;
+try {
+  outside = (JSON.parse(readFileSync(`${process.cwd()}/../data/place-ids.json`, "utf8")).ids || {})[place.id] || null;
+} catch { outside = null; }
 /* All 234 of them, from the index, rather than the eight European ones this
    page was born with — which printed "Graaff-Reinet in ZA" the moment the
    map reached the Cape. */
@@ -302,6 +318,18 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
       <p class="names">{older.map((n) => <b>{n}</b>)}</p>
       <p class="cap">If the document in your hand says one of these, this is the place it means.</p>
     </div>
+  )}
+
+  {/* HOW THIS DOT GOT HERE. The audit found the data already tells a hand-placed
+      point from a catalogue match from a name listed so it can be found, and the
+      reader could not see which. Stated from `via`, not inferred. */}
+  <p class="cap tier"><b>How this place is on the map:</b> {HOW[place.via || "hand"]}</p>
+
+  {outside && (
+    <p class="cap outside">Check this place against records that are not ours:
+      <a href={`https://www.wikidata.org/wiki/${outside.wikidata}`} rel="noopener">Wikidata {outside.wikidata}</a> ·
+      <a href={`https://www.geonames.org/${outside.geonames}`} rel="noopener">GeoNames {outside.geonames}</a>.
+      Matched on name and country, {outside.km} km from this point.</p>
   )}
 
   {region ? (
@@ -647,10 +675,14 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
   .y { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); margin-left: 8px; }
   .who { font-size: 11px; color: var(--ink-3); margin-left: 8px; }
   .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 7px; }
-  .d-free { background: #1E8449 } .d-account { background: #6FA82E }
-  .d-index { background: #EFC03B } .d-mixed { background: #E8792B }
-  .d-paid { background: #C0392B } .d-catalogue { background: #8E6FA8 }
-  .d-onsite { background: #7C8A91 }
+  /* The same vocabulary the map draws, from the same place — see the cost-ramp
+     note in styles.css. These are fills beside their own label, so they need no
+     contrast tuning of their own; the .chip.acc-* rules elsewhere DO, and are
+     deliberately left alone, because a chip is coloured text and a dot is not. */
+  .d-free { background: var(--acc-free) } .d-account { background: var(--acc-account) }
+  .d-index { background: var(--acc-index) } .d-mixed { background: var(--acc-mixed) }
+  .d-paid { background: var(--acc-paid) } .d-catalogue { background: var(--acc-catalogue) }
+  .d-onsite { background: var(--acc-onsite) }
   .reg { display: inline-flex; align-items: baseline; gap: 7px; }
   .reg i { width: 9px; height: 9px; border-radius: 2px; background: var(--c); display: inline-block; flex: 0 0 auto; }
   .none { color: var(--ink-3); font-style: italic; }

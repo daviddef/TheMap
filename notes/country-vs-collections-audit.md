@@ -1,5 +1,8 @@
 # Places whose country disagrees with their FamilySearch collections
 
+> **Status, 17 October 2026.** Measured on `0de3967`, before `main` gained `a63c5a8` ("Thirty-three places were filed in the wrong country, and the checks that should have caught them now run on every build") and `724111c` (a Prekmurje record region). A parallel session fixed the rows below to the **same coordinates** this audit arrived at independently, and went further: Klasnić is now Croatian (45.2334, 16.1507) and the border villages on the Sava were moved to Croatia. Read the tables as the evidence behind those fixes, and the "left as they are" table as a record of what was undecidable from the repo at the time. Check `main` before acting on any row.
+
+
 Run 13 October 2026, offline. For each row of `data/places.json` carrying FamilySearch volumes, the `cc=` in each volume URL was joined to `data/collections.json` and its `countries`. A place is listed when its own `country` is **not among** those countries.
 
 **1,219 places carry FamilySearch volumes; 69 disagree (5.7%). 52 are within 25 km of the collection's country, 17 are further (`senja` among them, now fixed).** 25 km is the same tolerance `check-data.py` and `promote-collection-places.py` already use for "the outline is coarse, or it is a border town".
@@ -103,19 +106,14 @@ Each was tested the way `match-fs-volumes.py` already says it matches: **deepest
 | tisina | HR 45.53, 16.38 | SI 46.6542, 16.0936 | volumes are Prekmurje civil registers; the Croatian point is Tišina Kaptolska, outside that collection's area; its older name Kaptolska Tisina removed |
 | turnisce | HR 46.06, 16.15 | SI 46.6257, 16.3139 | 14 volumes all from the Slovenian collection; exactly one Turnišče in Slovenia |
 
-**Regions are assigned by the build, not by this file.** `scripts/build.py` tests every place against the region rings on each build and overwrites the stored `region` field, so a row cannot be kept out of a region by editing it. Built on `b15c617`:
-
-- **Turnišče** lands in the Hungary region, whose table includes civil registration from 1 October 1895. That matches its volumes (Hungarian civil registers, 1895-1918).
-- **Grad and Tišina** land in `carniola`, whose 1813-1918 era says "Austria — the Duchy of Carniola and Lower Styria" and files under Matricula, ARS and SIRAnet. That is **wrong for Prekmurje**, which was Hungarian until 1918. The cause is the `carniola` ring: a four-point rectangle (lat 45.4-46.9, lon 13.4-16.6) that happens to cover Prekmurje. It does the same to every other Prekmurje place already in the atlas.
-
-These two rows are better than before (Grad sat near Split under `dalmatia`; Tišina sat in Croatia with no region), but their era table is misleading. The fix is in `data/regions.json`, not in the rows: give Prekmurje its own region, or redraw the `carniola` ring to exclude it. That is editorial geometry and was not done here.
+**Regions are assigned by the build, not by the row.** `scripts/build.py` tests every place against the region rings on each build and overwrites the stored `region`, so a row cannot be kept out of a region by editing it. At the time of this audit that put Grad and Tišina in `carniola`, whose 1813-1918 era says Austria, although Prekmurje was Hungarian until 1918. That is resolved on `main` by its own Prekmurje region (`724111c`).
 
 **Left as they are, because the gazetteer has no candidate inside the collection's country, so the honest finding is "we do not know":**
 
 | id | filed as | collections | why unresolved |
 |---|---|---|---|
 | krug | AT 48.63, 15.50 | HR church books, marriages and deaths 1825-1836 | no Krug in Croatia in the gazetteer |
-| klasnic | RS 44.28, 20.04 | HR church books, Orthodox, 1831-33 | the only Klašnić in the gazetteer is the Serbian one; none in Croatia |
+| klasnic | RS 44.28, 20.04 | HR church books, Orthodox, 1831-33 | the only Klašnić in the gazetteer is the Serbian one; none in Croatia. **Resolved on `main` (HR, 45.2334, 16.1507) by a source this audit did not have.** |
 | subotica | HR 46.19, 16.74 | Slovenia, Prekmurje and Međimurje civil registers | the point is Podravska Subotica, which is outside that collection's area; no Subotica in Slovenia to move it to. The volumes may be attached to the wrong place |
 | meljani, suhodol, zlosela, zankovic | BA / ME | HR church books | no namesake in Croatia; may be genuine border-area or historic filings |
 

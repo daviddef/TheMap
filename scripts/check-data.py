@@ -79,6 +79,45 @@ OUR_OWN = {"regions.json", "providers.json", "collections.json", "directory.json
            "era-flags.json"}
 
 
+def access_colours_agree():
+    """The access palette is written twice; the two copies must say the same.
+
+    free/account/index/mixed/paid/catalogue/onsite/unsurveyed colour every dot
+    on the map and a reader learns them, so they are vocabulary. They live in
+    styles.css as --acc-*, and RecordMap.astro keeps a hex literal beside each
+    lookup as the fallback for the component being used outside Base.astro.
+
+    Two copies of a fact drift. atlas-tokens.css carries the scar: --brass was
+    #a9762f in one file and #8D6227 in the other, and the disagreement was
+    found by measuring, not by reading. A fallback that silently stops matching
+    the stylesheet would show one palette in the map and another everywhere
+    else, and nothing would say so.
+    """
+    try:
+        css = io.open("site/public/styles.css", encoding="utf-8").read()
+        js = io.open("site/src/components/RecordMap.astro", encoding="utf-8").read()
+    except OSError:
+        return
+    tokens = dict(re.findall(r"--acc-([a-z]+)\s*:\s*(#[0-9A-Fa-f]{6})", css))
+    fallbacks = dict(re.findall(r'_acc\("([a-z]+)",\s*"(#[0-9A-Fa-f]{6})"\)', js))
+    if not tokens or not fallbacks:
+        err("the access palette should be --acc-* in styles.css and _acc() "
+            "fallbacks in RecordMap.astro, and one of the two was not found")
+        return
+    for name in sorted(set(tokens) | set(fallbacks)):
+        a, b = tokens.get(name), fallbacks.get(name)
+        if a is None:
+            err(f"RecordMap.astro falls back to {b} for access class "
+                f"'{name}' and styles.css declares no --acc-{name}")
+        elif b is None:
+            err(f"styles.css declares --acc-{name}: {a} and RecordMap.astro "
+                f"has no fallback for it")
+        elif a.upper() != b.upper():
+            err(f"access class '{name}' is {a} in styles.css and {b} in "
+                f"RecordMap.astro's fallback. One palette, two values — fix "
+                f"the fallback, which is the copy.")
+
+
 def licence_gate():
     data_page = ""
     for c in ("site/src/pages/data.astro",):
@@ -176,6 +215,152 @@ def flag_era_drift():
         print(f"flag eras: {in_data:,} in the pages and in the data, agreed")
 
 
+def flag_evidence():
+    """data/flag-evidence.json: every claim of evidence has to be checkable.
+
+    THE AUDIT FOUND 0 OF 1,472 FLAG ERAS WITH A SOURCE, and the Netherlands page,
+    read against its sources, held a decree credited with fixing a shade it does
+    not name, a Sea Beggars flag Wikipedia calls uncertain and a ban that no source
+    could be found for. An evidence file is only worth having if it cannot
+    quietly become the same thing: a label with nothing behind it.
+
+    So an era marked `attested` must rest on a primary or reference source, or on
+    two compiled sources from different publishers; every era must say what its
+    sources establish; every era that is not attested must say what is not
+    established; every source must carry a title, publisher, https address, kind
+    and the date it was read; an unused source is an error; and an era the page
+    does not have is an error. The coverage line is printed so the gap is a number
+    on every build rather than a feeling.
+    """
+    ev_p = "data/flag-evidence.json"
+    if not os.path.exists(ev_p):
+        return
+    try:
+        ev = json.load(open(ev_p, encoding="utf-8"))
+        eras = json.load(open("data/flag-eras.json", encoding="utf-8")).get("eras") or []
+    except Exception as e:
+        err(f"cannot read the flag evidence or the eras it describes: {e}")
+        return
+    classes, kinds, sources = ev.get("classes") or {}, ev.get("kinds") or {}, ev.get("sources") or {}
+    on_page = {}
+    for r in eras:
+        on_page.setdefault(r.get("slug"), set()).add(r.get("id"))
+    import re as _re
+    used, tally, bad = set(), {}, 0
+    for sid, s in sources.items():
+        for k in ("title", "publisher", "url", "kind", "checked"):
+            if not s.get(k):
+                err(f"flag evidence source {sid!r} has no {k}"); bad += 1
+        if s.get("url") and not str(s["url"]).startswith("https://"):
+            err(f"flag evidence source {sid!r}: the address must be https"); bad += 1
+        if s.get("kind") and s["kind"] not in kinds:
+            err(f"flag evidence source {sid!r}: unknown kind {s['kind']!r}"); bad += 1
+        if s.get("checked") and not _re.fullmatch(r"\d{4}-\d\d-\d\d", str(s["checked"])):
+            err(f"flag evidence source {sid!r}: `checked` must be a date"); bad += 1
+    for slug, page in (ev.get("pages") or {}).items():
+        for eid, e in page.items():
+            where = f"flag evidence {slug} {eid}"
+            if eid not in on_page.get(slug, set()):
+                err(f"{where}: the page has no such era"); bad += 1
+                continue
+            cls = e.get("class")
+            if cls not in classes:
+                err(f"{where}: unknown class {cls!r}"); bad += 1
+                continue
+            tally[cls] = tally.get(cls, 0) + 1
+            ids = e.get("sources") or []
+            for sid in ids:
+                used.add(sid)
+                if sid not in sources:
+                    err(f"{where}: names source {sid!r}, which is not declared"); bad += 1
+            have = [sources[i] for i in ids if i in sources]
+            if cls != "unreviewed" or ids:
+                if not e.get("says"):
+                    err(f"{where}: says nothing about what its sources establish"); bad += 1
+            if cls == "unreviewed" and not e.get("open"):
+                err(f"{where}: unreviewed, and does not say why"); bad += 1
+            if cls in ("attested", "symbolic", "reconstructed") and not have:
+                err(f"{where}: {cls} with no source behind it"); bad += 1
+            if cls == "attested" and have:
+                strong = any(s.get("kind") in ("primary", "reference") for s in have)
+                pubs = {s.get("publisher") for s in have if s.get("kind") == "compiled"}
+                if not strong and len(pubs) < 2:
+                    err(f"{where}: attested on compiled sources from {len(pubs)} publisher(s); "
+                        f"it needs a primary or reference source, or two publishers"); bad += 1
+    for sid in sources:
+        if sid not in used:
+            err(f"flag evidence source {sid!r} is declared and never used"); bad += 1
+    n = sum(tally.values())
+    if not bad:
+        parts = ", ".join(f"{v} {k}" for k, v in sorted(tally.items()))
+        print(f"flag evidence: {n} of {len(eras):,} eras carry a label ({parts}); "
+              f"{len(sources)} sources, all read and dated. Only {tally.get('attested', 0)} are confirmed by a source.")
+
+
+def flag_art_drift():
+    """data/era-flags.json must be what the flag pages would extract to today.
+
+    THE GATE ABOVE COUNTS ERA CARDS AND NOTHING ELSE, so it passed on the day the
+    Dutch Republic was split into Prinsenvlag and Statenvlag: the cards were
+    re-counted and re-extracted into flag-eras.json, and the ART, which lives in
+    a second file, was not. The orange era kept the old red flag and the new
+    era had no image at all, and the build was green throughout.
+
+    It had also become impossible to regenerate without noticing:
+    extract-era-flags.py still looked in site/public/flags, where the pages
+    stopped living when they were folded into Astro, found nothing and exited. A
+    file nothing can rebuild drifts by default.
+
+    So the expected art is rebuilt here from the pages with the extractor's own
+    parsing, not a copy of it, and compared to what is committed. Either the
+    image or the id being different is a failure.
+    """
+    import glob as _glob
+    from importlib.machinery import SourceFileLoader
+    art_p = "data/era-flags.json"
+    if not os.path.exists(art_p):
+        return
+    try:
+        have = json.load(open(art_p, encoding="utf-8")).get("art") or {}
+        ext = SourceFileLoader(
+            "_extract_era_flags",
+            os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                         "extract-era-flags.py")).load_module()
+    except Exception as e:
+        err(f"cannot check the flag art against the pages: {e}")
+        return
+    stale, missing, extra = [], [], []
+    expect = {}
+    for f in sorted(_glob.glob("site/src/flags-pages/*-flags.html")):
+        slug = os.path.splitext(os.path.basename(f))[0]
+        html = open(f, encoding="utf-8", errors="replace").read()
+        for eid, body in ext.ENTRY.findall(html):
+            hit = ext.FLAGBOX.search(body)
+            if hit:
+                expect.setdefault(slug, {})[eid] = ext.clean(hit.group(1))
+    for slug, eras in expect.items():
+        for eid, svg in eras.items():
+            if eid not in (have.get(slug) or {}):
+                missing.append(f"{slug}/{eid}")
+            elif have[slug][eid] != svg:
+                stale.append(f"{slug}/{eid}")
+    for slug, eras in have.items():
+        for eid in eras:
+            if eid not in (expect.get(slug) or {}):
+                extra.append(f"{slug}/{eid}")
+    bad = stale + missing + extra
+    if bad:
+        err(f"data/era-flags.json is not what the flag pages extract to: "
+            f"{len(stale)} image(s) changed, {len(missing)} missing, "
+            f"{len(extra)} no longer on a page ({', '.join(bad[:4])}"
+            f"{'…' if len(bad) > 4 else ''}). Run "
+            f"python3 scripts/extract-era-flags.py — the map's flag layer and "
+            f"the «who governed» swatches read this file, not the pages.")
+    else:
+        print(f"flag art: {sum(len(v) for v in expect.values()):,} images, "
+              f"the file and the pages agree")
+
+
 def harvest_artefact_is_this_run():
     """The fetched artefact and the committed data must be one matcher run.
 
@@ -220,8 +405,196 @@ def harvest_artefact_is_this_run():
             "    gh release upload harvest-data data/fs-volumes-world.json.gz --clobber")
 
 
+def place_evidence(places, OVR, PIN):
+    """A place's country and coordinates must agree with evidence from outside the row.
+
+    THE EXISTING COUNTRY GATE ASKS THE OUTLINE, and the outline is the same thing that
+    chose the country in the first place, within 25 km. So a Croatian village on the
+    Sava that the rounded border puts in Bosnia passed it twice: once when it was
+    filed, once when it was checked. Thirty-four places sat like that for weeks —
+    Jasenovac, Metković and Davor among them, listed as Bosnia and Herzegovina — while
+    every one of their registers was in a collection titled «Croatia, Church Books».
+
+    So two independent witnesses are asked. First, the COLLECTIONS: the countries of the
+    FamilySearch collections that hold the place's books. Second, the GAZETTEER: a
+    same-name GeoNames row within 25 km, and the country it is in. A place passes if
+    either one agrees with its declared country. It fails if neither does, unless a
+    person has said why: `filedUnder`, a note beginning «Audited», or an entry in
+    data/country-overrides.json.
+
+    The second test is also run on the NAME: a settlement whose own name has same-country
+    gazetteer rows, none of them within 25 km, is a coordinate nobody has confirmed — the
+    Stari Grad of Hvar that was drawn in the north of the country, 330 km from itself.
+    Pinned places (data/place-overrides.json) and audited ones are exempt. A place with
+    no same-name row in its country is untestable, not wrong, and is counted as such.
+    """
+    import collections, math, re as _re, unicodedata
+    try:
+        sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__))))
+        import gazetteer as _gz
+        rows = _gz.places()
+        cols = {str(c["cc"]): c for c in json.load(open("data/collections.json"))["collections"]}
+    except Exception as e:
+        err(f"cannot read the gazetteer or the collections to check places against: {e}")
+        return
+    if not rows:
+        print("place evidence: no gazetteer on this checkout, skipped")
+        return
+
+    def fold(s):
+        s = unicodedata.normalize("NFKD", s or "")
+        s = "".join(c for c in s if not unicodedata.combining(c))
+        return _re.sub(r"[^a-z0-9]+", " ", s.lower()).strip()
+
+    def hav(a, b, c, d):
+        p = math.pi / 180
+        x = math.sin((c - a) * p / 2) ** 2 + math.cos(a * p) * math.cos(c * p) * math.sin((d - b) * p / 2) ** 2
+        return 12742 * math.asin(math.sqrt(x))
+
+    idx = collections.defaultdict(list)
+    for r in rows:
+        for f in {r.get("n", "")} | set(r.get("a") or []):
+            k = fold(f)
+            if len(k) > 2:
+                idx[k].append(r)
+
+    def cc_of(url):
+        m = _re.search(r"[?&]cc=(\d+)", url or "") or _re.search(r"/collection/(\d+)", url or "")
+        return m.group(1) if m else None
+
+    tested = ok_c = ok_g = said = bad = 0
+    name_tested = name_untestable = name_bad = 0
+    for p in places:
+        if not p.get("collections"):
+            continue
+        pid = p["id"]
+        said_so = (bool(p.get("filedUnder")) or pid in OVR
+                   or (p.get("note") or "").lstrip().startswith("Audited"))
+        names = {fold(p["name"]), fold(p["name"].split(",")[0]), fold(_re.sub(r"\(.*?\)", "", p["name"]))}
+        for n in p.get("names") or []:
+            names |= {fold(n.get("n", "")), fold((n.get("n") or "").split(",")[0])}
+        names = {n for n in names if len(n) > 2}
+        mine = [(hav(p["lat"], p["lon"], r["y"], r["x"]), r) for n in names for r in idx.get(n, [])
+                if r.get("k") == p["country"]]
+        near = [d for d, _ in mine if d <= 25]
+
+        union = set()
+        for c in (cols.get(cc_of(v.get("url"))) for v in p["collections"]):
+            union |= set((c or {}).get("countries") or [])
+        if union:
+            tested += 1
+            if p["country"] in union:
+                ok_c += 1
+            elif near:
+                ok_g += 1
+            elif said_so:
+                said += 1
+            else:
+                bad += 1
+                err(f"place {pid}: filed as {p['country']}, but its books are in collections filed under "
+                    f"{', '.join(sorted(union))} and no same-name gazetteer row within 25 km is in "
+                    f"{p['country']}. Fix the country, or say why in a note beginning «Audited» or in "
+                    f"data/country-overrides.json")
+
+        if not p.get("level"):
+            if near:
+                name_tested += 1
+            elif not mine:
+                name_untestable += 1
+            elif pid in PIN or said_so:
+                name_tested += 1
+            else:
+                name_bad += 1
+                err(f"place {pid}: «{p['name']}» has {len(mine)} same-name gazetteer row(s) in {p['country']} "
+                    f"and the nearest is {min(d for d, _ in mine):.0f} km from its point. Pin it in "
+                    f"data/place-overrides.json, or say what was checked in a note beginning «Audited»")
+    if not (bad or name_bad):
+        print(f"place evidence: {tested:,} places with books tested for country "
+              f"({ok_c:,} by collection, {ok_g:,} by gazetteer, {said} said so by a person); "
+              f"{name_tested:,} settlements confirmed by name, {name_untestable} untestable")
+
+
+def place_ids_valid(places):
+    """data/place-ids.json: an id attached to a place has to be the right shape and the right place.
+
+    The ids exist so a claim here can be checked against records that are not ours, which
+    only works if they are not guesses. So each one must name a place we hold, look like a
+    Wikidata item and a GeoNames number, and have been matched within the 5 km it claims.
+    Two of our places on one item are allowed and counted: two filings of one ground.
+    """
+    p = "data/place-ids.json"
+    if not os.path.exists(p):
+        return
+    try:
+        doc = json.load(open(p, encoding="utf-8"))
+    except Exception as e:
+        err(f"data/place-ids.json will not parse: {e}")
+        return
+    have = {x["id"] for x in places}
+    ids = doc.get("ids") or {}
+    q = {}
+    for pid, v in ids.items():
+        if pid not in have:
+            err(f"place-ids.json names {pid}, which is not a place"); continue
+        if not re.fullmatch(r"Q\d+", str(v.get("wikidata", ""))):
+            err(f"place-ids.json {pid}: {v.get('wikidata')!r} is not a Wikidata item")
+        if not re.fullmatch(r"\d+", str(v.get("geonames", ""))):
+            err(f"place-ids.json {pid}: {v.get('geonames')!r} is not a GeoNames id")
+        if not isinstance(v.get("km"), (int, float)) or v["km"] > doc.get("maxKm", 5):
+            err(f"place-ids.json {pid}: matched {v.get('km')} km away, beyond the {doc.get('maxKm', 5)} km it claims")
+        q.setdefault(v.get("wikidata"), []).append(pid)
+    twice = sum(1 for v in q.values() if len(v) > 1)
+    print(f"place ids: {len(ids)} places carry a Wikidata item and a GeoNames id ({twice} items shared by two filings)")
+
+
+def flag_seams():
+    """data/flag-seams.json: every seam between eras has been listed, and none is new.
+
+    See scripts/flag_seams.py for what a seam is and why one year does not count.
+    """
+    p = "data/flag-seams.json"
+    if not os.path.exists(p):
+        return
+    try:
+        sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__))))
+        import flag_seams as fs
+        doc = json.load(open(p, encoding="utf-8"))
+        eras = json.load(open("data/flag-eras.json", encoding="utf-8"))["eras"]
+        art = json.load(open("data/era-flags.json", encoding="utf-8")).get("art") or {}
+    except Exception as e:
+        err(f"cannot check the flag seams: {e}")
+        return
+    have = doc.get("seams") or {}
+    now = {fs.key(s): s for s in fs.seams(eras)}
+    for k, s in now.items():
+        if k not in have:
+            err(f"flag seam {k}: a {s[1]} of {s[4]} years between two eras that nobody has "
+                f"looked at. Run scripts/extract-flag-seams.py and give it a verdict.")
+    for k, v in have.items():
+        if k not in now:
+            err(f"flag seam {k} is listed and no longer exists. Run scripts/extract-flag-seams.py.")
+        elif v.get("verdict") not in fs.VERDICTS:
+            err(f"flag seam {k}: unknown verdict {v.get('verdict')!r}")
+        elif v["verdict"] in ("concurrent", "unrecorded", "dating") and not v.get("why"):
+            err(f"flag seam {k}: a verdict of {v['verdict']} must say why")
+    noid, noimg = fs.structure(eras, art)
+    for what, now_l, have_l in (("an id", noid, doc.get("noId") or []), ("an image", noimg, doc.get("noImage") or [])):
+        new = [x for x in now_l if list(x) not in have_l]
+        for x in new:
+            err(f"flag era {x[0]} {x[1]} has no {what}, and was not there when this was last counted")
+    n = {}
+    for v in have.values():
+        n[v.get("verdict")] = n.get(v.get("verdict"), 0) + 1
+    if not any(k not in have for k in now):
+        print(f"flag seams: {len(have)} listed ({', '.join(f'{v} {k}' for k, v in sorted(n.items()))}); "
+              f"{len(noid)} eras without an id, {len(noimg)} without an image, none new")
+
+
 def main():
     flag_era_drift()
+    flag_art_drift()
+    flag_evidence()
+    flag_seams()
     harvest_artefact_is_this_run()
     places = json.load(open("data/places.json"))["places"]
     regions = json.load(open("data/regions.json"))
@@ -754,6 +1127,9 @@ def main():
     # printed — a gate that stops a build without saying why is worse than no
     # gate, because the next person assumes the build is broken.
     licence_gate()
+    access_colours_agree()
+    place_evidence(places, OVR, PIN)
+    place_ids_valid(places)
 
     for w in WARN[:12]:
         print("warn:", w)

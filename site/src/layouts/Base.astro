@@ -25,15 +25,23 @@ const nav = [
      pages exist, each naming the spellings, the countries, and the archives
      to write to. The navigation listed them fourth, under a word that reads
      like a table of statistics. Second, and named as the question. */
-  ["Explore", [
-    ["/", "The map"],
-    ["/surnames/", "Look up a surname"],
-    ["/places/", "Every place"],
-    /* Last, and only useful once there is something in it — but a page a
-       reader cannot navigate to is a page they will not trust their work to,
-       and the banner on a place page is not enough on its own. */
-    ["/my-research/", "My research"],
-  ]],
+  /* FOUR DOORS, NOT A CUPBOARD WITH FOUR DOORS INSIDE IT. David: «could we
+     move "every place" to the top menu level as "Places"? Surnames as
+     "Surnames", and Research as "My Research"?» He is right, and the comment
+     further down this file already argued his case: «a disclosure holding a
+     single item is a click in front of a click». Explore held the four things
+     a reader actually comes here to do, behind one word that names none of
+     them, and pulling three out would have left the fourth alone in a menu.
+     So all four come out, and Explore goes.
+
+     NAMED AS THE THING, NOT AS THE INVITATION. «Look up a surname» and «Every
+     place» are sentences for a menu with room; a top-level bar wants nouns.
+     Sentence case throughout, because «My Research» beside «The sources»
+     reads as two different hands. */
+  ["The map", "/"],
+  ["Surnames", "/surnames/"],
+  ["Places", "/places/"],
+  ["My research", "/my-research/"],
   ["The sources", [
     ["/providers/", "Who holds records"],
     ["/jurisdictions/", "Whose archive"],
@@ -111,6 +119,10 @@ const AD_PAGES = ["/about/", "/help/", "/data/", "/coverage/", "/countries/",
                   "/country/", "/changelog/", "/worklist/", "/jurisdictions/",
                   "/add/", "/my-research/", "/flags/", "/errands/"];
 const adsHere = here === "/" || AD_PAGES.some((p) => here.startsWith(p));
+/* The three page kinds that carry ProgressKit, which is what the RESEARCHING
+   control acts on. Everywhere else it is furniture. */
+const marksHere = here === u("/") || here === "/"
+  || here.startsWith(u("/place/")) || here.startsWith(u("/my-research/"));
 /* Strip the query string: /?q=Breslau and / are the same page. */
 const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
 import LineSwitcher from "../components/LineSwitcher.astro";
@@ -283,16 +295,28 @@ import LineSwitcher from "../components/LineSwitcher.astro";
               </div>
             </details>
       ))}
-      {/* WHICH FAMILY EVERY MARK BELONGS TO, IN THE NAVIGATION. It was a
-          full-width bar under the header: a second rule doing the header's
-          job, and on the map page a whole row of a screen that is meant to
-          be the map and nothing else.
-          It renders on all 46,000 pages and shows itself on the three that
-          carry ProgressKit — index, place and my-research, which is exactly
-          where marks are made. Everywhere else the store is absent, the
-          script finds nothing and the element stays hidden, collapsing to
-          nothing the way .site-tools above it already does. */}
-      <LineSwitcher compact />
+      {/* WHICH FAMILY EVERY MARK BELONGS TO — ON THE PAGES THAT MAKE MARKS.
+          The comment here used to say it «renders on all 46,000 pages and
+          shows itself on the three that carry ProgressKit … everywhere else
+          the element stays hidden». It described an intention the code never
+          had. line-switcher.js hides the bar on exactly one condition:
+
+              bar.hidden = bar.getAttribute("data-quiet") === "1"
+                           && lines.length < 2;
+
+          and this call passes `compact` without `quiet`, so data-quiet is
+          null, the condition is always false, and RESEARCHING has been
+          sitting in the header of every page on the site — Flags, About,
+          providers, the surname pages — offering to switch a family on pages
+          where nothing can be marked. David: «the research dropdown isn't
+          relevant on some screens, why show it?»
+
+          Passing `quiet` would not fix it either: quiet hides the bar until a
+          SECOND line exists, and there are fifty. The question is not how many
+          families there are, it is whether this page can record anything
+          against one. Three kinds of page can: the map, which draws the rings;
+          a place page, where volumes are marked; and /my-research/ itself. */}
+      {marksHere && <LineSwitcher compact />}
       <a class="findbtn" href={u("/add/")}>Add a source</a>
     </nav>
   </div>

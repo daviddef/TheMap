@@ -248,6 +248,73 @@ def sitemaps_are_submittable():
             err(f"{name}: listed in the index and holds no URLs")
 
 
+def runtime_fetches_exist():
+    """Every file the PAGE fetches at runtime has to be in the built output.
+
+    THE BUILD CANNOT SEE A 404 AND THAT IS HOW THIS SHIPPED. On 10 October a
+    real bug was fixed — build.py had been READING site/public/era-flags.json,
+    a file it also wrote, so a cold deploy read nothing — and the public copy
+    was deleted to prove the fix. It was the right fix. But era-flags.json is
+    also what RecordMap.astro FETCHES in the browser, to put flag art inline
+    in the «who governed» table, and nothing in this pipeline fetches a URL.
+    The build went green, stayed green, and every flag swatch on every place
+    page was blank for three days, until David sent a screenshot of Senj.
+
+    Reading the source for `fetch(BASE + "…")` and checking the built output
+    has the file would have failed that commit in CI. It costs a walk.
+    """
+    want = set()
+    for root, _dirs, files in os.walk("site/src"):
+        for f in files:
+            if not f.endswith((".astro", ".js", ".ts")):
+                continue
+            try:
+                with open(os.path.join(root, f), encoding="utf-8") as fh:
+                    src = fh.read()
+            except OSError:
+                continue
+            for m in re.finditer(r'fetch\(\s*BASE\s*\+\s*"([^"]+)"', src):
+                want.add(m.group(1))
+    for rel in sorted(want):
+        # A trailing slash is a directory of shards fetched by name.
+        if not os.path.exists(os.path.join(DIST, rel.rstrip("/"))):
+            err(f"the page fetches «{rel}» at runtime and {DIST}/{rel} is not "
+                f"there — it would 404 in the browser while this build stays "
+                f"green. Write it, or stop fetching it.")
+
+
+def evidence_reaches_pages():
+    """Evidence written in the data has to be on the page a reader opens.
+
+    A panel that is in data/flag-evidence.json and not in the built page is the exact
+    failure the evidence system exists to prevent, only quieter: the label «attested»
+    sits in a file and the reader sees nothing. The same for the outside ids on place
+    pages. Counted per page, not sampled.
+    """
+    try:
+        ev = json.load(open("data/flag-evidence.json", encoding="utf-8"))
+    except OSError:
+        ev = {}
+    for slug, eras in (ev.get("pages") or {}).items():
+        f = os.path.join(DIST, "flags", slug, "index.html")
+        if not os.path.exists(f):
+            err(f"flag evidence names {slug}, which has no built page")
+            continue
+        n = open(f, encoding="utf-8").read().count('class="evidence ev-')
+        if n != len(eras):
+            err(f"{slug}: the evidence file holds {len(eras)} eras and the built page shows {n} panels")
+    try:
+        ids = json.load(open("data/place-ids.json", encoding="utf-8")).get("ids") or {}
+    except OSError:
+        ids = {}
+    for pid, v in ids.items():
+        f = os.path.join(DIST, "place", pid, "index.html")
+        if not os.path.exists(f):
+            continue            # a place can be held and not given a page
+        if v["wikidata"] not in open(f, encoding="utf-8").read():
+            err(f"place {pid} carries Wikidata {v['wikidata']} in the data and not on its page")
+
+
 def main():
     if not os.path.isdir(DIST):
         sys.exit(f"{DIST} is not there — run this after astro build.")
@@ -313,6 +380,8 @@ def main():
         err("the page renders an ad slot but never loads adsbygoogle.js")
 
     sitemaps_are_submittable()
+    runtime_fetches_exist()
+    evidence_reaches_pages()
 
     attribution_gate()
 

@@ -285,7 +285,17 @@ const BASE_ = u("/");
           var row = { id: id, m: m, b: b, cov: cov };
           if (cov.length) { vols++; pages += P.covered(cov); }
           if (b.state === "blocked") { blocked.push(row); return; }
-          if (id.indexOf("film:") === 0) { films.push(row); return; }
+          /* A FILM THAT HAS BEEN RESOLVED KNOWS ITS GROUND. The importer reads the
+             waypoint off FamilySearch's own film page and writes `place` onto the
+             mark (16 of the 22 films have one), and this line used to throw that
+             away: every film went under «not yet tied to a place» whether it was
+             tied or not. David, looking at it: «why do these volumes all get
+             'films worked, not yet tied to a place' when all of them have
+             places?» — they did, and the page was not reading them. */
+          if (id.indexOf("film:") === 0) {
+            if (m.place) { (byPlace[m.place] = byPlace[m.place] || []).push(row); return; }
+            films.push(row); return;
+          }
           /* A PLACE YOU HAVE DECIDED ABOUT BELONGS TO THAT PLACE'S SECTION,
              which is the whole reason for marking it: «planning to» against
              Rovinj is a to-do, and a to-do filed under «other» is lost. It
@@ -477,8 +487,9 @@ const BASE_ = u("/");
         /* ---- 2. films, which have no place of their own ------------------ */
         if (films.length) {
           h.push('<div class="lab">Films worked, not yet tied to a place</div>');
-          h.push('<p class="cap">A DGS film number is not a waypoint, so the ' +
-                 "atlas cannot say which of its catalogued books this is. The " +
+          h.push('<p class="cap">These films have not been resolved to a ' +
+                 "place yet: the atlas only knows a film's ground once someone has " +
+                 "read its waypoint off FamilySearch's own film page. The " +
                  "work is recorded all the same.</p>");
           h.push('<ul class="mrlist">');
           films.forEach(function (r) { h.push(rowHtml(r)); });
@@ -554,6 +565,12 @@ const BASE_ = u("/");
         if (b.state) chips += '<span class="mrstate mrstate-' + esc(b.state) + '">' +
                               esc(STATE_SAY[b.state] || b.state) + "</span>";
 
+        /* A FILM CAN HOLD MORE THAN ONE PARISH, and the place it is filed under is
+           only the one it OPENS at. Saying so beside it stops «Vodnjan, Liber
+           Copulatorum» sitting under a neighbouring parish with no explanation. */
+        var opens = (r.id.indexOf("film:") === 0 && m.opensAt)
+          ? '<div class="mrline mrline-n"><span class="mrnote">This film opens at: ' +
+            esc(m.opensAt) + ". It can hold more than one parish.</span></div>" : "";
         return '<li class="mrrow">' +
           '<div class="mrline mrline-t">' +
             (m.href ? '<a class="mrt" href="' + esc(m.href) + '">' + esc(m.t || raw) + "</a>"
@@ -565,6 +582,7 @@ const BASE_ = u("/");
               (cov.length ? '<span class="mrdone">' + esc(P.fmt(cov)) + "</span>" : "") +
               chips + "</div>"
             : "") +
+          opens +
           (b.note
             ? '<div class="mrline mrline-n"><span class="mrnote">' + esc(b.note) + "</span>" +
               (b.since ? '<span class="mrsince">' + esc(b.since) + "</span>" : "") +

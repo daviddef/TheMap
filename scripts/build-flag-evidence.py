@@ -96,6 +96,74 @@ def placeholders(pages):
     return n
 
 
+# THE DATES ALONE ARE NOT ENOUGH, AND THE FIRST RUN PROVED IT. Of 22 eras whose Wikipedia article
+# matched on both years, four were the wrong flag: Northern Rhodesia matched «Flag of Southern
+# Rhodesia», Soviet Georgia matched «Flag of the Soviet Union», Libya's 1951 kingdom matched the
+# country's flag article, and the 1946 Yugoslav era was already done by hand. A person read the 22
+# and these are the ones whose article is plainly the same polity as the era.
+CHECKED_BY_HAND = {
+    "cambodia-flags|era-1970", "cambodia-flags|era-1975", "costa-rica-flags|era-1823",
+    "ecuador-flags|era-1822", "honduras-flags|era-1823", "iraq-flags|era-1963",
+    "latvia-flags|era-1561-1", "latvia-flags|era-1953", "montenegro-flags|era-1992",
+    "nicaragua-flags|era-1823", "nigeria-flags|era-1914", "panama-flags|era-1821",
+    "russia-flags|era-1922", "serbia-flags|era-1992", "syria-flags|era-1958",
+    "uk-flags|era-1707", "ukraine-flags|era-1949",
+}
+
+
+def historical(pages, srcs):
+    """Entries for historical eras from data/flag-historical.json (scripts/harvest-flag-historical.py).
+
+    An era whose Wikipedia article matches on BOTH dates and whose linked Flags of the World page
+    carries the end year and has the start year in a sentence about adopting is `attested`: two
+    publishers, dates agreeing from each. An era matching on Wikipedia alone is `unreviewed`, with
+    the article cited, because one compiled source is not enough. Nothing else is written.
+    """
+    try:
+        doc = json.load(open("data/flag-historical.json", encoding="utf-8"))
+    except OSError:
+        return {"attested": 0, "wikipedia_only": 0}
+    day = doc.get("harvested")
+    n = {"attested": 0, "wikipedia_only": 0}
+    for key, r in doc.get("eras", {}).items():
+        m = r.get("match")
+        if not m or key not in CHECKED_BY_HAND:
+            continue
+        slug, eid = key.split("|")
+        if eid in pages.get(slug, {}):
+            continue
+        wid = "wp-" + re.sub(r"[^a-z0-9]+", "-", m["title"].lower()).strip("-")
+        srcs[wid] = {"title": m["title"], "publisher": "Wikipedia", "url": m["url"], "kind": "compiled",
+                     "checked": day, "note": "Read from the infobox `Adoption` and `Relinquished` fields in the page's wikitext."}
+        good = [x for x in r.get("fotw", []) if x.get("has_to") and x.get("from_in_adopting_sentence")]
+        said = (f"Wikipedia's \u00ab{m['title']}\u00bb gives adoption in {', '.join(map(str, m['adoption'][:2]))} and "
+                f"relinquishment in {', '.join(map(str, m['relinquished'][:2]))}, within a year of this era's "
+                f"{r['from']} and {r['to']}.")
+        use = [wid]
+        if good:
+            f = good[0]
+            f["url"] = f["url"].replace("http://", "https://")
+            fid = "fotw-" + re.sub(r"[^a-z0-9]+", "-", f["url"].split("/flags/")[-1].lower()).strip("-")
+            srcs[fid] = {"title": "Flags of the World page linked from that article", "publisher": "Flags of the World (CRW Flags)",
+                         "url": f["url"], "kind": "compiled", "checked": day,
+                         "note": "Reached through the Wikipedia article's own link; matched on the years in its text."}
+            use.append(fid)
+            cls = "attested"
+            said += (f" The Flags of the World page that article links also carries {r['to']}, and has {r['from']} "
+                     "next to a word about adopting.")
+            opn = ("Only the dates were compared. The Flags of the World page was matched on the two years appearing in its "
+                   "text and on one of them sitting beside the word adopt, introduce, establish or the like; it was not read "
+                   "for what it says about this flag. The design and the swatch colours were not checked against a specification.")
+            n["attested"] += 1
+        else:
+            cls = "unreviewed"
+            opn = ("Wikipedia is the only source whose dates were compared; no linked Flags of the World page confirmed them. "
+                   "The design and the swatch colours were not checked against a specification.")
+            n["wikipedia_only"] += 1
+        pages.setdefault(slug, {})[eid] = {"class": cls, "sources": use, "says": said, "open": opn}
+    return n
+
+
 def main():
     report = "--report" in sys.argv
     ad = json.load(open("data/flag-adoption.json", encoding="utf-8"))
@@ -183,6 +251,7 @@ def main():
             pages.setdefault(slug, {})[e["id"]] = ent
     if not report:
         stats["placeholder"] = placeholders(pages)
+        stats["historical"] = historical(pages, srcs)
     print(stats)
     if report:
         for b in bad:

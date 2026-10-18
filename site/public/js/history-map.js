@@ -18,7 +18,8 @@
       elSpeed = $("hm-speed"), elTrail = $("hm-trail"), elList = $("hm-list"), elCard = $("hm-card"),
       elLoad = $("hm-load"), elDens = $("hm-dens"), elTicks = $("hm-ticks"), elListH = $("hm-list-h");
   var on = { conquest: $("hm-l-conquest"), occupation: $("hm-l-occupation"),
-             migration: $("hm-l-migration"), flags: $("hm-l-flags"), ground: $("hm-l-ground") };
+             migration: $("hm-l-migration"), flags: $("hm-l-flags"), ground: $("hm-l-ground"), voyages: $("hm-l-voyages"), leaders: $("hm-l-leaders") };
+  var LEADERS = null, leaderLayer, leadersFetch = null;
   var elG = $("hm-gnote"), GROUND = null, groundLayer, groundKey = "";
 
   var D = null, FM = null, chapter = null, year = 1914, timer = null, selected = null;
@@ -100,9 +101,124 @@
           html: "<div class='hm-pulse' style='--c:" + col + ";width:26px;height:26px'></div>" }), interactive: false, keyboard: false }).addTo(arcLayer);
       }
     });
-    list(vis);
+    var voy = drawVoyages();
+    list(vis, voy);
     drawFlags();
+    drawLeaders();
     drawGround();
+  }
+
+  /* ---- heads of state (Wikidata, CC0) ------------------------------------ */
+  function dec(day) { var p = day.split("-"); return +p[0] + ((+p[1] - 1) * 30.44 + (+p[2] - 1)) / 365.25; }
+  function leaderAt(cc, y) {
+    var rows = LEADERS && LEADERS[cc]; if (!rows) return null;
+    var mid = y + 0.5, best = null;
+    rows.forEach(function (r) {
+      if (r._a <= mid && mid < r._b && (!best || r._a > best._a)) best = r;   // the one who began most recently
+    });
+    return best;
+  }
+  function loadLeaders() {
+    if (leadersFetch) return;
+    leadersFetch = fetch(BASE + "leaders.json").then(function (r) { return r.json(); }).then(function (j) {
+      LEADERS = j.countries;
+      Object.keys(LEADERS).forEach(function (cc) {
+        LEADERS[cc].forEach(function (r) { r._a = r[4] ? dec(r[4]) : r[2]; r._b = r[5] ? dec(r[5]) : 2100; });
+      });
+      draw();
+    }).catch(function () { elG.textContent = "The leaders could not be loaded."; });
+  }
+  function drawLeaders() {
+    leaderLayer.clearLayers();
+    if (!on.leaders.checked) return;
+    if (!LEADERS) { loadLeaders(); return; }
+    if (!FM || map.getZoom() < 3) return;
+    var b = map.getBounds().pad(0.1);
+    Object.keys(FM.at).forEach(function (cc) {
+      var at = FM.at[cc]; if (!at || !b.contains(at)) return;
+      var r = leaderAt(cc, year); if (!r) return;
+      L.marker(at, { icon: L.divIcon({ className: "hm-leader", iconSize: [0, 0], iconAnchor: [0, -8],
+        html: "<span>" + esc(r[0]) + "</span>" }), keyboard: false })
+        .bindTooltip(esc(r[0]) + " <span style='opacity:.7'>" + r[2] + "\u2013" + (r[3] === null ? "" : r[3]) + " \u00b7 head of state of " + esc(cc) + "</span>", { direction: "top" })
+        .on("click", function () { window.open("https://www.wikidata.org/wiki/" + r[1], "_blank", "noopener"); })
+        .addTo(leaderLayer);
+    });
+  }
+
+  /* ---- voyages and expeditions ------------------------------------------ */
+  var VCOL = "#7A4FA3", VTRAIL = 25;
+  /* A route that crosses the antimeridian (Magellan to Guam) must not be drawn the long way round:
+     each waypoint's longitude is shifted by a whole turn to sit within 180 degrees of the one before. */
+  function unwrapRoutes() {
+    (D.voyages || []).forEach(function (v) {
+      var prev = null;
+      v.route.forEach(function (w) {
+        var l = w.lon;
+        if (prev !== null) { while (l - prev > 180) l -= 360; while (l - prev < -180) l += 360; }
+        w.ulon = l; prev = l;
+      });
+    });
+  }
+  function posAt(route, y) {
+    if (y <= route[0].year) return { lat: route[0].lat, lon: route[0].ulon, year: y, upto: 1 };
+    for (var i = 1; i < route.length; i++) {
+      var a = route[i - 1], b = route[i];
+      if (y <= b.year) {
+        var t = b.year === a.year ? 1 : (y - a.year) / (b.year - a.year);
+        return { lat: a.lat + (b.lat - a.lat) * t, lon: a.ulon + (b.ulon - a.ulon) * t, year: y, upto: i };
+      }
+    }
+    var l = route[route.length - 1]; return { lat: l.lat, lon: l.ulon, year: y, upto: route.length };
+  }
+  function drawVoyages() {
+    var shown = [];
+    if (!on.voyages || !on.voyages.checked || !D.voyages) return shown;
+    D.voyages.forEach(function (v, i) {
+      if (year < Math.floor(v.from) || year > v.to + VTRAIL) return;
+      var done = year > v.to, y = Math.min(year + 0.5, v.to + 0.99), age = done ? Math.min(1, (year - v.to) / VTRAIL) : 0;
+      var fade = 1 - age * 0.7;
+      var cur = posAt(v.route, y), pts = [];
+      for (var k = 0; k < Math.min(cur.upto, v.route.length); k++) pts.push([v.route[k].lat, v.route[k].ulon]);
+      if (!done) pts.push([cur.lat, cur.lon]);
+      if (pts.length < 2) return;
+      var click = function () { selectVoyage(i); };
+      L.polyline(pts, { color: VCOL, weight: 2.6, opacity: .9 * fade, className: "hm-voy" })
+        .on("click", click).bindTooltip("<b>Voyage</b> \u00b7 " + esc(v.title) + " <span style='opacity:.7'>" + esc(spanV(v)) + "</span>", { sticky: true }).addTo(arcLayer);
+      v.route.forEach(function (w, k) {
+        if (k >= cur.upto && !done) return;
+        if (w.aid) return;                       // a helper point that keeps the line at sea, not a waypoint a source gives
+        L.circleMarker([w.lat, w.ulon], { radius: 3, color: VCOL, weight: 1, fillColor: "#fff", fillOpacity: .9 * fade, opacity: fade })
+          .on("click", click).bindTooltip(esc(w.name) + " <span style='opacity:.7'>" + Math.floor(w.year) + (w.approx ? ", approximate" : "") + "</span>", { direction: "top" }).addTo(arcLayer);
+      });
+      (v.reached || []).forEach(function (r) {
+        if (year + 0.99 < r.year) return;
+        L.circleMarker([r.lat, r.lon], { radius: 6, color: "#fff", weight: 2, fillColor: VCOL, fillOpacity: fade, opacity: fade })
+          .on("click", click).bindTooltip("<b>" + esc(r.name) + "</b> " + Math.floor(r.year) + "<br>" + esc(r.claim || ""), { direction: "top" }).addTo(arcLayer);
+      });
+      if (!done) {
+        L.marker([cur.lat, cur.lon], { icon: L.divIcon({ className: "hm-ship", iconSize: [22, 22], iconAnchor: [11, 11], html: v.kind === "sea" ? "\u26f5" : v.kind === "space" ? "\ud83d\ude80" : "\ud83e\udded" }), keyboard: false })
+          .on("click", click).addTo(arcLayer);
+      }
+      shown.push({ v: v, i: i });
+    });
+    return shown;
+  }
+  function spanV(v) { return Math.floor(v.from) + (Math.floor(v.to) !== Math.floor(v.from) ? "\u2013" + Math.floor(v.to) : ""); }
+  function selectVoyage(i) {
+    var v = D.voyages[i], fl = "";
+    if (FM && v.sponsor && v.sponsor.polity && FM.slug[v.sponsor.polity]) {
+      var r = flagAt(FM.f[FM.slug[v.sponsor.polity]] || [], Math.floor(v.from));
+      if (r) fl = "<img alt='' src='" + BASE + "fl/" + r[2] + ".svg' style='width:34px;border:1px solid rgba(0,0,0,.35);vertical-align:middle;margin-right:6px;background:#fff'>";
+    }
+    var q = v.leader && v.leader.q ? " <a href='https://www.wikidata.org/wiki/" + esc(v.leader.q) + "'>Wikidata</a>" : "";
+    var h = "<h2 style='border-left:4px solid " + VCOL + ";padding-left:8px'>Voyage \u00b7 " + esc(spanV(v)) + "</h2><p><b>" + esc(v.title) + "</b></p>";
+    h += "<p>Led by <b>" + esc(v.leader.name) + "</b>" + q + ".</p>";
+    if (v.sponsor) h += "<p>Sponsor: " + fl + esc(v.sponsor.name || "") + (v.sponsor.ruler ? " under " + esc(v.sponsor.ruler) : "") + ".</p>";
+    if ((v.reached || []).length) h += "<p>Reached: " + v.reached.map(function (r) { return "<b>" + esc(r.name) + "</b> " + Math.floor(r.year) + " (" + esc(r.claim || "") + (r.already_inhabited ? "; already inhabited: " + esc(r.already_inhabited) : "") + ")"; }).join("; ") + ".</p>";
+    h += "<p class='hm-fine'>Evidence: " + esc(v.evidence || "unreviewed") + ". " + esc(v.open || "") + " The route joins dated waypoints; the line between them is not a track.</p>";
+    h += "<p class='hm-fine'>" + (v.sources || []).map(function (s) { return "<a href='" + esc(s.url) + "'>" + esc(s.title) + "</a> (" + esc(s.publisher) + ")"; }).join(" \u00b7 ") + "</p>";
+    elCard.innerHTML = h;
+    if (v.reached && v.reached.length) map.panTo([v.reached[0].lat, v.reached[0].lon]);
   }
 
   /* ---- who held the ground (OpenHistoricalMap, CC0) --------------------- */
@@ -161,9 +277,17 @@
     });
   }
 
-  function list(vis) {
-    elListH.textContent = "Under way, " + (year) + (vis.length ? " (" + vis.length + ")" : "");
+  function list(vis, voy) {
+    voy = voy || [];
+    elListH.textContent = "Under way, " + (year) + (vis.length + voy.length ? " (" + (vis.length + voy.length) + ")" : "");
     elList.innerHTML = "";
+    voy.forEach(function (x) {
+      var li = document.createElement("li"), b = document.createElement("button");
+      b.type = "button"; b.style.setProperty("--c", VCOL);
+      b.innerHTML = esc(x.v.title) + "<small>Voyage \u00b7 " + esc(x.v.leader.name) + " \u00b7 " + esc(spanV(x.v)) + "</small>";
+      b.addEventListener("click", function () { selectVoyage(x.i); });
+      li.appendChild(b); elList.appendChild(li);
+    });
     vis.slice(0, 30).forEach(function (v) {
       var m = v.m, li = document.createElement("li"), b = document.createElement("button");
       b.type = "button"; b.style.setProperty("--c", COL[m.v]);
@@ -171,9 +295,14 @@
       b.addEventListener("click", function () { select(v.i, true); });
       li.appendChild(b); elList.appendChild(li);
     });
-    if (!vis.length) { var li2 = document.createElement("li"); li2.textContent = "Nothing in this atlas began in these years, with these layers."; elList.appendChild(li2); }
+    if (!vis.length && !voy.length) { var li2 = document.createElement("li"); li2.textContent = "Nothing in this atlas began in these years, with these layers."; elList.appendChild(li2); }
   }
 
+  function leaderLine(m) {
+    if (!LEADERS) { if (on.leaders.checked) loadLeaders(); return ""; }
+    var r = leaderAt(m.s, m.f);
+    return r ? "<p>At its start, " + esc(m.s) + " was led by <b>" + esc(r[0]) + "</b> (" + r[2] + "\u2013" + (r[3] === null ? "" : r[3]) + ", per Wikidata).</p>" : "";
+  }
   function select(i, pan) {
     selected = i;
     var m = D.moves[i];
@@ -185,6 +314,7 @@
     elCard.innerHTML = "<h2 style='border-left:4px solid " + COL[m.v] + ";padding-left:8px'>" + esc(KIND[m.v]) + " · " + esc(span) + "</h2>" +
       "<p><b>" + esc(m.ot) + "</b></p>" +
       "<p>Recorded on the page for <b>" + esc(m.s) + "</b>, " + (m.d === "in" ? "coming in." : "going out.") + "</p>" +
+      leaderLine(m) +
       "<p class='hm-fine'>" + esc(dated) + " " + esc(how) + "</p>" +
       "<p><a href='" + BASE + "flags/" + esc(m.p) + "/#" + esc(m.e) + "'>Read it on the flag page &rarr;</a></p>";
     if (pan && m.b) map.panTo(m.b);
@@ -225,7 +355,7 @@
     if (!chapter) { elCh.textContent = ""; return; }
     elCh.textContent = chapter.title + " — " + chapter.blurb;
     ["conquest", "occupation", "migration"].forEach(function (k) { on[k].checked = chapter.layers.indexOf(k) > -1; });
-    map.setView([chapter.view[0], chapter.view[1]], chapter.view[2]);
+    map.invalidateSize(); map.setView([chapter.view[0], chapter.view[1]], chapter.view[2], { animate: false });
     year = chapter.from; elRange.value = year; elYear.textContent = yr(year);
     draw(); url();
     if (autoplay) play();
@@ -270,14 +400,14 @@
     map.on("mouseout", function () { map.scrollWheelZoom.disable(); });
     map.createPane("ground"); map.getPane("ground").style.zIndex = 380;
     groundLayer = L.layerGroup().addTo(map);
-    arcLayer = L.layerGroup().addTo(map); flagLayer = L.layerGroup().addTo(map);
-    map.on("zoomend moveend", drawFlags);
+    arcLayer = L.layerGroup().addTo(map); flagLayer = L.layerGroup().addTo(map); leaderLayer = L.layerGroup().addTo(map);
+    map.on("zoomend moveend", function () { drawFlags(); drawLeaders(); });
 
     Promise.all([
       fetch(BASE + "history.json").then(function (r) { return r.json(); }),
       fetch(BASE + "flag-map.json").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
     ]).then(function (res) {
-      D = res[0]; FM = res[1];
+      D = res[0]; FM = res[1]; unwrapRoutes();
       elLoad.hidden = true;
       strip();
       elRange.addEventListener("input", function () { setYear(parseInt(elRange.value, 10), true); });

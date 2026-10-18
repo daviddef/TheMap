@@ -729,6 +729,62 @@ def history_ground():
         print(f"history-ground.json: {have['counts']['shapes']} shapes from the current OHM cache")
 
 
+def voyages_gate():
+    """data/voyages.json: every voyage meets scripts/voyages_check.py, and ids are unique."""
+    p = "data/voyages.json"
+    if not os.path.exists(p):
+        return
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import voyages_check as vc
+        vs = json.load(open(p, encoding="utf-8"))["voyages"]
+        slugs = {f[:-5] for f in os.listdir("site/src/flags-pages") if f.endswith(".html")}
+    except Exception as e:
+        err(f"cannot check voyages: {e}")
+        return
+    ids = [v.get("id") for v in vs]
+    for i in {x for x in ids if ids.count(x) > 1}:
+        err(f"voyage id {i} is not unique")
+    n = 0
+    for v in vs:
+        for m in vc.problems(v, slugs):
+            err(f"voyage {m}"); n += 1
+    if not n:
+        att = sum(1 for v in vs if v["evidence"] == "attested")
+        print(f"voyages: {len(vs)} expeditions, {att} attested, every route dated and every voyage sourced")
+
+
+def leaders_gate():
+    """site/public/leaders.json is what scripts/build-leaders.py writes from data/leaders.json, and each holder is checkable."""
+    p = "site/public/leaders.json"
+    if not os.path.exists(p) or not os.path.exists("data/leaders.json"):
+        return
+    try:
+        import importlib.util, re as _re
+        spec = importlib.util.spec_from_file_location(
+            "build_leaders", os.path.join(os.path.dirname(os.path.abspath(__file__)), "build-leaders.py"))
+        bl = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(bl)
+        have = json.load(open(p, encoding="utf-8"))
+        now = bl.build()
+    except Exception as e:
+        err(f"cannot check leaders.json: {e}")
+        return
+    have.pop("generated", None); now.pop("generated", None)
+    if have != now:
+        err("site/public/leaders.json is not what scripts/build-leaders.py writes today. Run python3 scripts/build-leaders.py.")
+    bad = 0
+    for cc, rows in now["countries"].items():
+        for r in rows:
+            if not _re.fullmatch(r"Q\d+", r[1] or ""):
+                err(f"leaders {cc} {r[0]}: Wikidata id {r[1]!r} is not Q<digits>"); bad += 1
+            if r[3] is not None and r[3] < r[2]:
+                err(f"leaders {cc} {r[0]}: ends before it starts"); bad += 1
+    if not bad:
+        c = now["counts"]
+        print(f"leaders: {c['holders']} heads of state across {c['countries']} countries, every holder carries a Wikidata id")
+
+
 def main():
     flag_era_drift()
     flag_art_drift()
@@ -737,6 +793,8 @@ def main():
     context_contract()
     history_json()
     history_ground()
+    voyages_gate()
+    leaders_gate()
     harvest_artefact_is_this_run()
     places = json.load(open("data/places.json"))["places"]
     regions = json.load(open("data/regions.json"))

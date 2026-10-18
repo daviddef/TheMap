@@ -71,8 +71,10 @@ const CH = hist.chapters;
       <label><input type="checkbox" id="hm-l-conquest" checked /> <i class="k conquest"></i>Conquest</label>
       <label><input type="checkbox" id="hm-l-occupation" checked /> <i class="k occupation"></i>Occupation</label>
       <label><input type="checkbox" id="hm-l-migration" checked /> <i class="k migration"></i>Migration</label>
+      <label><input type="checkbox" id="hm-l-voyages" checked /> <i class="k voyage"></i>Voyages</label>
       <label><input type="checkbox" id="hm-l-ground" checked /> Who held the ground</label>
       <label><input type="checkbox" id="hm-l-flags" /> Flags in this year</label>
+      <label><input type="checkbox" id="hm-l-leaders" /> Heads of state (zoom in)</label>
       <label>Trail
         <select id="hm-trail" aria-label="How many years an arrow stays on the map">
           <option value="15">15 years</option>
@@ -150,7 +152,7 @@ const CH = hist.chapters;
   .hm-layers label { display:inline-flex; gap:6px; align-items:center; }
   .hm-layers .k { display:inline-block; width:18px; height:4px; border-radius:2px; }
   .k.conquest { background:var(--hm-conquest); } .k.occupation { background:var(--hm-occupation); }
-  .k.migration { background:var(--hm-migration); }
+  .k.migration { background:var(--hm-migration); } .k.voyage { background:#7A4FA3; }
   .hm-below { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:16px; }
   @media (max-width:760px) { .hm-below { grid-template-columns:1fr; } .hm-bar { grid-template-columns:auto 1fr; } .hm-speed { grid-column:1 / -1; } }
   .hm-card, .hm-list { background:var(--panel, #fff); border:1px solid var(--rule-strong, #bbb);
@@ -166,6 +168,9 @@ const CH = hist.chapters;
   /* the arrows. Leaflet's SVG renderer takes a className, so the flow is plain CSS. */
   .hm-arc { fill:none; stroke-linecap:round; stroke-dasharray:7 5; animation:hm-flow 1.1s linear infinite; }
   .hm-arc.hm-grow { animation:hm-flow 1.1s linear infinite, hm-in .8s ease-out 1; }
+  .hm-voy { fill:none; stroke-linecap:round; stroke-dasharray:1 6; }
+  .hm-ship { font-size:20px; line-height:20px; text-shadow:0 0 3px #fff, 0 0 3px #fff; }
+  .hm-leader span { display:inline-block; transform:translate(-50%,0); white-space:nowrap; font:600 11px/1.1 var(--font-body, system-ui, sans-serif); padding:1px 5px; border-radius:8px; background:color-mix(in srgb, var(--panel, #fff) 88%, transparent); color:var(--ink, #16222A); border:1px solid var(--rule-strong, #999); }
   .hm-stub { fill:none; stroke-dasharray:2 5; stroke-linecap:round; }
   @keyframes hm-flow { to { stroke-dashoffset:-24; } }
   @keyframes hm-in { from { stroke-opacity:0; } }

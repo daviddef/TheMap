@@ -59,6 +59,8 @@ def build():
     chapters = j("data/history-chapters.json")["chapters"]
     at = em["at"]
     pats = [(re.compile(a["re"], re.I), a) for a in actors]
+    vp = os.path.join(ROOT, "data", "voyages.json")
+    voyages = json.load(open(vp, encoding="utf-8"))["voyages"] if os.path.exists(vp) else []
     out, how_n = [], {"country": 0, "seat": 0, "origin": 0, "stub": 0}
     dens = {}
     for m in em["moves"]:
@@ -126,9 +128,10 @@ def build():
                  "stub. Built by scripts/build-history.py from era-moves.json and data/history-actors.json."),
         "generated": time.strftime("%Y-%m-%d"),
         "minYear": MIN_YEAR,
-        "counts": {"moves": len(out), **how_n},
+        "counts": {"moves": len(out), **how_n, "voyages": len(voyages)},
         "chapters": chapters,
         "density": {str(k): v for k, v in sorted(dens.items())},
+        "voyages": voyages,
         "moves": out,
     }
 

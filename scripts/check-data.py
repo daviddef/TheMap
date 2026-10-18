@@ -641,12 +641,75 @@ def context_contract():
               f"{c['countries']} countries / {c['countryEras']} eras, ids unique, current")
 
 
+def history_json():
+    """site/public/history.json is what scripts/build-history.py writes today, and its inputs are sound.
+
+    The history page draws this file and nothing else, so a stale copy would show last week's
+    arrows. The checks that matter: every chapter is a real span with real layers (a chapter
+    that plays nothing looks broken), every actor pattern compiles and names a point on Earth
+    or a country the map draws, and the movements still resolve as well as they did.
+    """
+    p = "site/public/history.json"
+    if not os.path.exists(p):
+        return
+    try:
+        import importlib.util, re as _re
+        spec = importlib.util.spec_from_file_location(
+            "build_history", os.path.join(os.path.dirname(os.path.abspath(__file__)), "build-history.py"))
+        bh = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(bh)
+        have = json.load(open(p, encoding="utf-8"))
+        now = bh.build()
+        actors = json.load(open("data/history-actors.json", encoding="utf-8"))["actors"]
+        anchors = json.load(open("site/public/era-moves.json", encoding="utf-8"))["at"]
+    except Exception as e:
+        err(f"cannot check history.json: {e}")
+        return
+    have.pop("generated", None)
+    now.pop("generated", None)
+    if have != now:
+        err("site/public/history.json is not what scripts/build-history.py writes today. "
+            "Run python3 scripts/build-history.py.")
+    seen = set()
+    for c in now["chapters"]:
+        if c["id"] in seen:
+            err(f"history chapter {c['id']}: duplicate id")
+        seen.add(c["id"])
+        if not (bh.MIN_YEAR <= c["from"] < c["to"] <= 2026):
+            err(f"history chapter {c['id']}: years {c['from']}-{c['to']} are not a span inside {bh.MIN_YEAR}-2026")
+        if not c.get("layers") or any(l not in ("conquest", "occupation", "migration") for l in c["layers"]):
+            err(f"history chapter {c['id']}: layers must be conquest, occupation or migration")
+        v = c.get("view") or []
+        if len(v) != 3 or not (-90 <= v[0] <= 90 and -180 <= v[1] <= 180 and 1 <= v[2] <= 8):
+            err(f"history chapter {c['id']}: view must be [lat, lon, zoom]")
+        n = sum(1 for m in now["moves"] if c["from"] <= m["f"] <= c["to"] and m["v"] in c["layers"])
+        if n < 3:
+            err(f"history chapter {c['id']}: only {n} movements begin in it; it would play an empty map")
+    for a in actors:
+        try:
+            _re.compile(a["re"])
+        except _re.error as e:
+            err(f"history actor {a['re']!r}: {e}")
+            continue
+        if "seat" in a and not (-90 <= a["lat"] <= 90 and -180 <= a["lon"] <= 180):
+            err(f"history actor {a['seat']!r}: coordinates are not on Earth")
+        if "cc" in a and a["cc"] not in anchors:
+            err(f"history actor {a['re']!r}: {a['cc']} has no anchor on the map")
+    c = now["counts"]
+    if c["moves"] < 800 or c["stub"] > 0.5 * c["moves"]:
+        err(f"history.json resolves too little: {c}")
+    if True:
+        print(f"history.json: {c['moves']} movements ({c['country']} country-to-country, {c['seat']} to a seat, "
+              f"{c['origin']} from a people's country, {c['stub']} stubs), {len(now['chapters'])} chapters, current")
+
+
 def main():
     flag_era_drift()
     flag_art_drift()
     flag_evidence()
     flag_seams()
     context_contract()
+    history_json()
     harvest_artefact_is_this_run()
     places = json.load(open("data/places.json"))["places"]
     regions = json.load(open("data/regions.json"))

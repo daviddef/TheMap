@@ -349,12 +349,31 @@ def context_urls_land():
                 err(f"context.json {e['id']}: no id=\"{eid}\" on /flags/{c['slug']}/")
 
 
+def history_page_built():
+    """/history/ exists and carries every chapter chip the data names."""
+    try:
+        h = json.load(open("site/public/history.json", encoding="utf-8"))
+    except OSError:
+        return
+    f = os.path.join(DIST, "history", "index.html")
+    if not os.path.exists(f):
+        err("the history page is not in the build")
+        return
+    html = open(f, encoding="utf-8").read()
+    for c in h["chapters"]:
+        if f'data-ch="{c["id"]}"' not in html:
+            err(f"history page has no chip for chapter {c['id']}")
+    if "history-map.js" not in html:
+        err("history page does not load history-map.js")
+
+
 def main():
     if not os.path.isdir(DIST):
         sys.exit(f"{DIST} is not there — run this after astro build.")
 
     quiet_count_gate()
     context_urls_land()
+    history_page_built()
 
     pages = glob.glob(DIST + "/**/*.html", recursive=True)
     if len(pages) < 100:

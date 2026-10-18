@@ -34,8 +34,9 @@ import json, os, re, sys, time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "site", "public", "context.json")
-VERSION = "1.5.0"
+VERSION = "1.6.0"
 CHANGES = [
+    {"version": "1.6.0", "change": "Croatia outside the first five regions: civil-croatia, slavonia, istria-west (copies istria-south, so seeded), plus ring fixes for dalmatia (now reaches Zadar), vojna-krajina (Karlobag) and carniola (no longer takes Karlovac)."},
     {"version": "1.5.0", "change": "Two River Plate regions: uruguay and buenos-aires, with new uruguay and brazil regimes."},
     {"version": "1.4.0", "change": "Five regions: west-prussia, frankfurt, hesse-darmstadt, rhenish-hesse, palatinate, with new hesse, confed and germany regimes."},
     {"version": "1.3.0", "change": "Three Italian regions: trentino, veneto, lazio, with new hre, bavaria and papal regimes."},

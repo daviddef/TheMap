@@ -1,0 +1,838 @@
+<!doctype html><html><head><link rel="stylesheet" href="../atlas-tokens.css"><!-- THE PALETTE LIVES IN ONE FILE NOW. These three :root blocks used to be inline on all 210 flag pages; see site/public/atlas-tokens.css for why, and for the one colour that changed. --><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  .record-links { margin-top: 44px; padding: 20px 22px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; }
+  .record-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  .record-links p { font-size: .92rem; color: var(--muted); margin: 0 0 12px; max-width: 62ch; }
+  .record-cta { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--adriatic); text-decoration: none; border: 1px solid var(--card-border); border-radius: 3px; padding: 7px 12px; }
+  .record-cta:hover { border-color: var(--brick); color: var(--brick); }
+  .record-region-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .record-region-grid a { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--card-border); border-radius: 10px; padding: 4px 10px; }
+  .record-region-grid a:hover { border-color: var(--brick); color: var(--brick); }
+  .record-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 4px; background: var(--paper); font-size: .86rem; }
+  .record-panel h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .record-region { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+  .record-region:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .record-region .rr-name { font-weight: 600; color: var(--ink); }
+  .record-region .rr-stat { color: var(--muted); margin-top: 3px; }
+  .record-region .rr-note { font-style: italic; color: var(--muted); font-size: .92em; margin-top: 4px; }
+  .record-panel a { color: var(--adriatic); }
+  .record-panel a:hover { color: var(--brick); }
+  /* The fold. The summary carries the same heading it always did, plus the
+     count, so a shut panel still answers «is there anything here for me». */
+  .record-fold > summary { list-style: none; cursor: pointer; display: flex;
+    align-items: baseline; gap: 8px; }
+  .record-fold > summary::-webkit-details-marker { display: none; }
+  .record-fold > summary h4 { margin: 0; }
+  .record-fold > summary::after { content: "\203A"; margin-left: auto;
+    font-size: 1.1rem; line-height: 1; color: var(--muted);
+    transform: rotate(90deg); transition: transform .15s ease; }
+  .record-fold[open] > summary::after { transform: rotate(-90deg); }
+  .record-fold > summary:hover h4, .record-fold > summary:hover .rr-count,
+  .record-fold > summary:focus-visible h4 { color: var(--brick); }
+  .record-fold > summary:focus-visible { outline: 2px solid var(--focus);
+    outline-offset: 3px; border-radius: 2px; }
+  .record-fold .rr-count { font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; color: var(--muted); letter-spacing: .04em; }
+  .record-fold-in { margin-top: 10px; }
+  .noble-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .noble-tag-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .noble-mini { width: 16px; height: 19px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+</style><!-- THE ORIGIN IS NOT OURS TO HARD-CODE.
+     Every link and fetch on this page used to name
+     https://daviddef.github.io/TheMap explicitly — 1,271 of them across 197
+     flag pages. recordatlas.org is bought and its cutover is scripted, and on
+     the day it lands every one of those would have gone on pointing at the old
+     origin: not broken, which would at least be visible, but quietly serving
+     the old site from the new one.
+     A flag page always lives at <base>/flags/<country>-flags.html, so «../» is
+     the site root wherever the site is — old origin, new domain, a local
+     preview on any port, or a project page under any path. -->
+</head><body>
+<title>Flags of France</title>
+<meta name="description" content="A chronological, paint-ready atlas of the flags that flew over France, from the royal banners of the Capetian kings to the tricolour of the Fifth Republic, with the sources read for each era and what they leave unconfirmed.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  
+  
+  
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 16px; line-height: 1.55; padding-inline: 20px; padding-block: 48px 80px; }
+  h1, h2, h3, .display { font-family: "Fraunces", Georgia, serif; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .breadcrumb { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--adriatic); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--brass); margin: 0 0 14px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 600; line-height: 1.05; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 1.08rem; max-width: none; opacity: .88; margin: 0 0 10px; }
+  .lede + .lede { margin-top: 12px; }
+
+  .scope-note { margin-top: 28px; padding: 16px 18px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; font-size: .94rem; color: var(--muted); }
+  .scope-note b { color: var(--ink); font-weight: 600; }
+
+  .legend { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .legend h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 20px; }
+  .legend-item { display: flex; gap: 10px; align-items: baseline; font-size: .88rem; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  .map-note { margin-top: 10px; font-size: .82rem; color: var(--muted); font-style: italic; }
+
+  /* ---------- Timeline ---------- */
+  .timeline { margin-top: 56px; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1px; background: var(--hair); }
+  @media (max-width: 560px) { .timeline::before { left: 9px; } }
+  .entry { position: relative; padding-left: 46px; margin-bottom: 46px; }
+  @media (max-width: 560px) { .entry { padding-left: 30px; } }
+  .entry::before {
+    content: attr(data-n);
+    position: absolute; left: 1px; top: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--paper); outline: 1px solid var(--hair);
+    background: var(--card);
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    color: var(--brick); display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) { .entry::before { left: -5px; width: 18px; height: 18px; font-size: 9px; } }
+
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 4px; overflow: hidden; }
+  .card-head { display: flex; gap: 20px; padding: 20px; align-items: flex-start; }
+  @media (max-width: 620px) { .card-head { flex-direction: column; } }
+  .flag-box { flex: none; width: 168px; }
+  .flag-box svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .flag-caption { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-dates { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .card-title { font-size: 1.32rem; font-weight: 600; line-height: 1.18; margin: 0 0 10px; text-wrap: balance; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .migro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 12px; }
+  .migro-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 2px; }
+  .migro-flag { width: 20px; height: 14px; flex: none; display: inline-block; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); margin-right: 1px; }
+  .migro-flags { display: inline-flex; gap: 2px; margin-right: 2px; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px; border: 1px solid var(--card-border); color: var(--muted);
+    display: inline-flex; align-items: center; gap: 5px;
+    position: relative; cursor: help;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tag:hover, .tag:focus-visible, .tag.tip-open { border-color: var(--brick); color: var(--ink); z-index: 30; }
+  .tag:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Custom hover/tap tooltip for tags */
+  .tag::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%) translateY(4px);
+    width: max-content; max-width: 260px; text-align: left;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-size: 12.5px; font-weight: 400; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; color: var(--ink);
+    background: var(--card); border: 1.5px solid var(--ink); border-radius: 4px;
+    padding: 9px 11px; box-shadow: 0 8px 24px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.2);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 20;
+  }
+  .tag::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .14s ease; z-index: 21;
+  }
+  .tag:hover::after, .tag:hover::before,
+  .tag:focus-visible::after, .tag:focus-visible::before,
+  .tag.tip-open::after, .tag.tip-open::before {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+  }
+  /* Flip tooltip below tags near the top of the viewport so it isn't clipped */
+  .entry:first-child .tag::after,
+  .entry:nth-child(2) .tag::after {
+    bottom: auto; top: calc(100% + 9px);
+  }
+  .entry:first-child .tag::before,
+  .entry:nth-child(2) .tag::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent; border-bottom-color: var(--ink);
+  }
+  /* Keep tooltips from overflowing the left/right edges on narrow screens */
+  .tag:first-of-type::after { left: 0; transform: translateX(0) translateY(4px); }
+  .tag:first-of-type:hover::after, .tag:first-of-type:focus-visible::after, .tag:first-of-type.tip-open::after { transform: translateX(0) translateY(0); }
+  .tag:first-of-type::before { left: 14px; transform: none; }
+  .tag:last-of-type::after { left: auto; right: 0; transform: translateY(4px); }
+  .tag:last-of-type:hover::after, .tag:last-of-type:focus-visible::after, .tag:last-of-type.tip-open::after { transform: translateY(0); }
+  .tag:last-of-type::before { left: auto; right: 14px; transform: none; }
+  @media (max-width: 480px) { .tag::after { max-width: 78vw; } }
+  .card-body p { margin: 0 0 10px; font-size: .96rem; }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body .label { color: var(--brick); font-weight: 600; }
+
+  details.paint { border-top: 1px solid var(--hair); }
+  details.paint > summary {
+    cursor: pointer; list-style: none; padding: 12px 20px;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--adriatic); display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.paint > summary::-webkit-details-marker { display: none; }
+  details.paint > summary::before { content: "+"; font-family: "Fraunces", serif; font-size: 15px; width: 14px; }
+  details.paint[open] > summary::before { content: "\2212"; }
+  details.paint > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .paint-body { padding: 4px 20px 20px; }
+  .spec-row { display: flex; gap: 8px; font-size: .87rem; margin-bottom: 10px; }
+  .spec-row .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); flex: none; width: 88px; padding-top: 2px; }
+  .spec-row .v { color: var(--ink); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .swatch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--card-border); border-radius: 2px; padding: 5px 9px 5px 5px; background: var(--paper); }
+  .swatch .chip { width: 20px; height: 20px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+  .swatch .meta { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; line-height: 1.3; }
+  .swatch .meta .name { color: var(--ink); display: block; }
+  .swatch .meta .hex { color: var(--muted); display: block; }
+
+  .roadmap { margin-top: 60px; padding-top: 32px; border-top: 1px solid var(--hair); }
+  .roadmap h2 { font-size: 1.5rem; margin: 0 0 12px; }
+  .roadmap p { max-width: 62ch; opacity: .88; margin: 0 0 20px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .link-card { display: block; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 3px; text-decoration: none; color: var(--ink); font-size: .92rem; }
+  .link-card b { display: block; font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .link-card span { color: var(--muted); font-size: .82rem; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--hair); font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--adriatic); }
+
+  .imap-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .imap-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .imap-section .imap-sub { font-size: .92rem; color: var(--muted); max-width: none; margin: 0 0 18px; }
+  .imap-section .rule-box { margin-bottom: 20px; padding: 14px 16px; border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; font-size: .9rem; }
+  .imap-section .rule-box b { color: var(--brick); }
+  .imap-frame { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 20px; }
+  .imap-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .imap-play {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--card-border);
+    background: var(--paper); color: var(--brick); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .imap-play:hover { border-color: var(--brick); }
+  .imap-frame input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--hair); outline: none; }
+  .imap-frame input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-frame input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--brick); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--brick); cursor: pointer; }
+  .imap-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--brass); white-space: nowrap; min-width: 40px; }
+  .imap-head { text-align: center; margin-bottom: 12px; }
+  .imap-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.2rem; transition: opacity .3s ease; }
+  .imap-owners { font-size: .84rem; color: var(--muted); max-width: 60ch; margin: 5px auto 0; transition: opacity .3s ease; }
+  .imap-owners b { color: var(--ink); }
+  .iflags-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 14px auto; max-width: 480px; }
+  .iflag-chip { text-align: center; width: 88px; }
+  .iflag-chip svg { width: 100%; height: auto; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .iflag-chip .ic-label { font-family: "IBM Plex Mono", monospace; font-size: 8.5px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+  .imap-story {
+    margin: 0 auto 20px; font-size: .95rem; line-height: 1.6; color: var(--ink);
+    text-align: left; transition: opacity .3s ease; padding: 13px 16px; background: var(--paper);
+    border: 1px solid var(--card-border); border-radius: 3px;
+  }
+  #imap-svg { display: block; margin: 0 auto; width: 100%; max-width: 260px; height: auto; }
+  .ireg-fill { transition: fill 0.6s ease; }
+  .ireg-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 700; text-anchor: middle; transition: fill .4s ease, stroke .4s ease; paint-order: stroke fill; stroke-linejoin: round; stroke-width: 2px; }
+  .context-label { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 700; fill: var(--muted); text-anchor: middle; opacity: .85; paint-order: stroke fill; stroke: var(--paper); stroke-width: 2.5px; stroke-linejoin: round; }
+  .imap-key { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .78rem; color: var(--muted); justify-content: center; }
+  .imap-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .imap-key .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.15); }
+
+  .noble-section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--hair); }
+  .noble-section h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 8px; }
+  .noble-sub { font-size: .92rem; color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .noble-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .noble-card { border: 1px solid var(--card-border); background: var(--card); border-radius: 4px; padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .coa { flex: none; width: 56px; height: 68px; display: block; border: 1px solid var(--card-border); box-shadow: 0 1px 0 rgba(0,0,0,.04); }
+  .noble-body { flex: 1; min-width: 0; }
+  .noble-name { font-family: "Fraunces", serif; font-weight: 600; font-size: 1rem; margin: 0 0 2px; line-height: 1.2; }
+  .noble-dates { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--brass); letter-spacing: .03em; margin-bottom: 6px; }
+  .noble-desc { font-size: .86rem; color: var(--muted); line-height: 1.45; margin: 0; }
+
+/* A TAG WITH NOTHING TO SAY MUST NOT SAY IT. `.tag::after` sets
+   `content: attr(data-tip)`, and the hover rule sets opacity:1 on EVERY tag —
+   so the 700 tags that carry no data-tip (the government-type chips: KINGDOM,
+   CITY-REPUBLIC, FRAGMENTED / SUCCESSIVE POLITIES) opened an empty bubble and
+   its arrow on hover. Two symptoms, one cause: hovering them showed nothing,
+   and the empty bubble rendered ABOVE the tag — which is exactly where the
+   card title sits, so it appeared as a small blank box over the first letters
+   of «Medieval Kingdom of Croatia» and «Republic of Ragusa».
+   Scoped to tags that actually have a tip. */
+.tag:not([data-tip])::after,.tag:not([data-tip])::before,
+.tag[data-tip=""]::after,.tag[data-tip=""]::before{content:none!important;display:none!important}
+
+/* TOOLTIPS MUST NOT BE CUT IN HALF. Two faults behind one symptom: the hover
+   text lost its opening characters, sliced off mid-word at the card's edge.
+   (1) `.card` carried `overflow: hidden`, so any bubble reaching past the card
+   was clipped rather than allowed to overhang. Nothing inside `.card` bleeds —
+   every child sits inside the 20px `.card-head` padding — so the clip bought
+   nothing and cost the tooltips.
+   (2) The bubble is a pseudo-element of the TAG, nudged to the row's edges by
+   `:first-of-type` / `:last-of-type`. But `.tag-row` is `flex-wrap: wrap`, and
+   once it wraps the "last" tag is usually at the START of a wrapped line — so
+   `right: 0` threw a 260px bubble leftwards off a 290px card. Measured on
+   serbia-flags.html: 0 tooltips overflowed at 760px wide, 5 at 600px, 13 at
+   520px, and at 400px all 56 of 56 overflowed, the worst by 200px.
+   Below 900px the tag stops being the anchor and the ROW becomes it, so the
+   bubble spans exactly the card's text column however the tags have wrapped.
+   The arrow goes with it: a full-width bubble has no one place to point. */
+.card{overflow:visible!important}
+@media (max-width:900px){
+  .tag{position:static!important}
+  .tag-row,.migro-row,.noble-row{position:relative!important}
+  .tag::after,.tag:first-of-type::after,.tag:last-of-type::after{
+    left:0!important;right:0!important;width:auto!important;max-width:none!important;
+    transform:translateY(4px)!important}
+  .tag:hover::after,.tag:focus-visible::after,.tag.tip-open::after{
+    transform:translateY(0)!important}
+  .tag::before,.tag:first-of-type::before,.tag:last-of-type::before{display:none!important}
+}
+
+</style>
+
+<div class="wrap">
+
+  <p class="breadcrumb"><a href="index.html">&larr; Flags Atlas index</a> &middot; <a href="european-union-hub.html">European Union hub</a></p>
+  <p class="kicker">Family research &middot; Flags atlas</p>
+  <h1>Flags of France</h1>
+  <p class="lede">Before 1789 the royal colour of France was white and the royal banner was blue with golden fleurs-de-lis; the tricolour began as a cockade in July 1789, became the navy&rsquo;s flag in 1790 and took its present order, blue at the hoist, by a decree of 15 February 1794. It has flown over two empires and several republics, was replaced by the white flag from 1814 or 1815 to 1830, and was kept by both Vichy and Free France in 1940&ndash;1944.</p>
+  <p class="lede">Unlike most pages in this atlas, every era below was written from the sources named under it, and the panel beneath each one says what they establish and what they leave open. Where the two main sources, Wikipedia and Flags of the World, disagree, both are given.</p>
+
+  <div class="scope-note">
+    <b>Scope of this page:</b> metropolitan France, from Roman Gaul to the present, with the eras that changed the flag over the mainland. The overseas empire, Algeria and the colonies are not covered, and there is no interactive map yet on this page.
+  </div>
+
+  <div class="timeline">
+
+    <!-- 1 -->
+    <div class="entry" data-n="14" id="era-1958">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect x="0" width="100" height="200" fill="#002395"/><rect x="100" width="100" height="200" fill="#f4efe1"/><rect x="200" width="100" height="200" fill="#ed2939"/>
+            </svg>
+            <div class="flag-caption">blue&ndash;white&ndash;red, vertical, blue at the hoist</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1958 &ndash; present</div>
+            <h3 class="card-title">Fifth Republic</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A state with no monarch, headed by an elected president; the Fifth Republic dates from the constitution of 1958."><span class="dot" style="background:#2f6b4a"></span>Republic</span><span class="tag" tabindex="0" data-tip="The state is separate from every church; the Republic does not establish a religion."><span class="dot" style="background:#8e3b62"></span>Secular (laïcité)</span></div>
+            <p><span class="label">Who &amp; why:</span> the constitution of the Fifth Republic names the flag in its Article 2: the national emblem is the tricolour flag, blue, white, red (Wikipedia, quoting the article; Flags of the World, citing the Société française de vexillologie, gives the same wording for 1958). The shade of the blue has moved: President Giscard d'Estaing had it lightened in the 1970s (1974 in Wikipedia and the SFV, 1976 in a Flags of the World contributor), and on 13 July 2020 the Élysée Palace went back to the darker navy, without an announcement and without orders for other institutions.</p>
+            <p><span class="label">What it represents:</span> the same blue-white-red tricolour whose order the Convention fixed on 15 February 1794 &mdash; blue at the hoist, white in the middle, red at the fly. The 1958 text does not set a shade, and the swatches below are approximations of the commonly shown colours, not a specification.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">Three equal vertical bands; the ensign uses 30:33:37 &ldquo;optical&rdquo; widths (regulation of 17 May 1853).</span></div><div class="spec-row"><span class="k">Layout</span><span class="v">Blue at the hoist, white centre, red at the fly.</span></div>
+            <div class="swatches"><div class="swatch"><span class="chip" style="background:#002395"></span><span class="meta"><span class="name">Blue</span><span class="hex">#002395</span></span></div><div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div><div class="swatch"><span class="chip" style="background:#ed2939"></span><span class="meta"><span class="name">Red</span><span class="hex">#ED2939</span></span></div></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="entry" data-n="13" id="era-1944">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect x="0" width="100" height="200" fill="#002395"/><rect x="100" width="100" height="200" fill="#f4efe1"/><rect x="200" width="100" height="200" fill="#ed2939"/>
+            </svg>
+            <div class="flag-caption">the same tricolour, restored over Paris</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1944 &ndash; 1958</div>
+            <h3 class="card-title">Provisional Government &amp; Fourth Republic</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A state with no monarch. The Fourth Republic followed the constitution approved by referendum in 1946."><span class="dot" style="background:#2f6b4a"></span>Republic</span></div>
+            <p><span class="label">Who &amp; why:</span> a tricolour that had been the last to fly over Paris in June 1940, from the PFG building on boulevard Richard-Lenoir after a German flag went up over the Arc de Triomphe on 14 June, was raised again on 19 August 1944, according to Flags of the World. Wikipedia says the constitutions of 1946 and 1958 both named the blue, white and red flag as the national emblem.</p>
+            <p><span class="label">What it represents:</span> the same tricolour continuing through the change of regime; the sources read describe no change to its design in these years.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">As the Fifth Republic.</span></div><div class="spec-row"><span class="k">Layout</span><span class="v">Blue at the hoist, white centre, red at the fly.</span></div>
+            <div class="swatches"><div class="swatch"><span class="chip" style="background:#002395"></span><span class="meta"><span class="name">Blue</span><span class="hex">#002395</span></span></div><div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div><div class="swatch"><span class="chip" style="background:#ed2939"></span><span class="meta"><span class="name">Red</span><span class="hex">#ED2939</span></span></div></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="entry" data-n="12" id="era-1940">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect x="0" width="100" height="200" fill="#002395"/><rect x="100" width="100" height="200" fill="#f4efe1"/><rect x="200" width="100" height="200" fill="#ed2939"/>
+            </svg>
+            <div class="flag-caption">the tricolour, kept by Vichy; Free France added the Cross of Lorraine</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1940 &ndash; 1944</div>
+            <h3 class="card-title">The French State (Vichy) &amp; Free France</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="After the defeat of June 1940 the country was divided between a German-occupied zone and the Vichy regime, while a rival movement, Free France, continued the war from abroad."><span class="dot" style="background:#3f3f3f"></span>Occupation &amp; division</span><span class="tag" tabindex="0" data-tip="Marshal Philippe Pétain, given full powers by most deputies in June 1940, headed the French State."><span class="dot" style="background:#4a3b78"></span>Pétain</span></div>
+            <p><span class="label">Who &amp; why:</span> in June 1940, after the defeat, most deputies gave Marshal Pétain full powers, and the French State was legally the successor to the Third Republic (Flags of the World). It kept the tricolour as the national flag and replaced the republican motto with Travail, Famille, Patrie; the only new flag was the head of state's standard, prescribed by a decree of 19 March 1942 as a tricolour with seven gold stars on the white stripe below a francisque. Free France had to add a charge to the tricolour because Vichy kept it: Wikipedia says Vice-Admiral Muselier created a naval jack with a red Cross of Lorraine by general order of 3 July 1940, and Flags of the World says a regulation of 5 June 1941 prescribed the cross as the emblem of Free France.</p>
+            <p><span class="label">What it represents:</span> the one tricolour claimed by two governments. The image shows the plain tricolour that both started from; neither source read describes the cross of Lorraine flag in enough detail to draw it here.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">As the Third Republic.</span></div><div class="spec-row"><span class="k">Layout</span><span class="v">Plain tricolour; the Free French variants and Pétain's standard are not drawn.</span></div>
+            <div class="swatches"><div class="swatch"><span class="chip" style="background:#002395"></span><span class="meta"><span class="name">Blue</span><span class="hex">#002395</span></span></div><div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div><div class="swatch"><span class="chip" style="background:#ed2939"></span><span class="meta"><span class="name">Red</span><span class="hex">#ED2939</span></span></div></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="entry" data-n="11" id="era-1870">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect x="0" width="100" height="200" fill="#002395"/><rect x="100" width="100" height="200" fill="#f4efe1"/><rect x="200" width="100" height="200" fill="#ed2939"/>
+            </svg>
+            <div class="flag-caption">the tricolour, kept after the monarchists' white flag was refused</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1870 &ndash; 1940</div>
+            <h3 class="card-title">Third Republic</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A state with no monarch. The Third Republic lasted until the defeat of 1940."><span class="dot" style="background:#2f6b4a"></span>Republic</span></div>
+            <p><span class="label">Who &amp; why:</span> when the Comte de Chambord, the Bourbon claimant, was offered the throne he made a white flag a condition and refused the tricolour, so the monarchist plan fell through and the Republic kept the tricolour. Wikipedia dates his refusal to 1870 in a caption; Flags of the World dates the flag dispute to 1873 and records compromise ideas, a tricolour with fleurs-de-lis or a white flag with a tricolour cravat, that he rejected.</p>
+            <p><span class="label">What it represents:</span> the same tricolour, now kept by default when the one alternative on offer was the Bourbon white flag.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">Three equal vertical bands; ensign widths as in 1853.</span></div><div class="spec-row"><span class="k">Layout</span><span class="v">Blue at the hoist, white centre, red at the fly.</span></div>
+            <div class="swatches"><div class="swatch"><span class="chip" style="background:#002395"></span><span class="meta"><span class="name">Blue</span><span class="hex">#002395</span></span></div><div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div><div class="swatch"><span class="chip" style="background:#ed2939"></span><span class="meta"><span class="name">Red</span><span class="hex">#ED2939</span></span></div></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="entry" data-n="10" id="era-1852">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect x="0" width="100" height="200" fill="#002395"/><rect x="100" width="100" height="200" fill="#f4efe1"/><rect x="200" width="100" height="200" fill="#ed2939"/>
+            </svg>
+            <div class="flag-caption">the tricolour, under Napoléon III</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1852 &ndash; 1870</div>
+            <h3 class="card-title">Second Empire</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A state headed by an emperor; the Second Empire followed Louis-Napoléon&#x27;s proclamation on 2 December 1852."><span class="dot" style="background:#a35a1e"></span>Empire</span><span class="tag" tabindex="0" data-tip="Louis-Napoléon Bonaparte, proclaimed Emperor of the French on 2 December 1852."><span class="dot" style="background:#4a3b78"></span>Napoléon III</span></div>
+            <p><span class="label">Who &amp; why:</span> Prince Louis-Napoléon Bonaparte was proclaimed Emperor of the French as Napoléon III on 2 December 1852, and the national flag remained the blue-white-red tricolour (Flags of the World, Ivan Sache). A regulation of 17 May 1853 fixed the ensign's &ldquo;optical&rdquo; proportions of 30:33:37, and the dark navy blue was firmly established in practice at least from this period.</p>
+            <p><span class="label">What it represents:</span> the tricolour continuing under the second Bonaparte; Flags of the World treats the imperial bee, used again under this empire, as an emblem rather than a flag.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">Ensign 30:33:37 (17 May 1853).</span></div><div class="spec-row"><span class="k">Layout</span><span class="v">Blue at the hoist, white centre, red at the fly.</span></div>
+            <div class="swatches"><div class="swatch"><span class="chip" style="background:#002395"></span><span class="meta"><span class="name">Blue</span><span class="hex">#002395</span></span></div><div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div><div class="swatch"><span class="chip" style="background:#ed2939"></span><span class="meta"><span class="name">Red</span><span class="hex">#ED2939</span></span></div></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="entry" data-n="9" id="era-1848">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect x="0" width="100" height="200" fill="#002395"/><rect x="100" width="100" height="200" fill="#f4efe1"/><rect x="200" width="100" height="200" fill="#ed2939"/>
+            </svg>
+            <div class="flag-caption">the tricolour, after the red flag was refused</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1848 &ndash; 1852</div>
+            <h3 class="card-title">Second Republic</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A state with no monarch, proclaimed in February 1848."><span class="dot" style="background:#2f6b4a"></span>Republic</span></div>
+            <p><span class="label">Who &amp; why:</span> Wikipedia says the Second Republic adopted a tricolour variant for a few days, from 24 February to 5 March 1848, and its caption to Philippoteaux's painting says it depicts Lamartine rejecting the red flag in front of the city hall. A decree of 7 March 1848 confirmed the tricolour ensign (Flags of the World, citing Heimer, du Payrat and Gay).</p>
+            <p><span class="label">What it represents:</span> the tricolour again, kept at the moment a red flag was on offer.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">As in 1853 for the ensign.</span></div><div class="spec-row"><span class="k">Layout</span><span class="v">Blue at the hoist, white centre, red at the fly.</span></div>
+            <div class="swatches"><div class="swatch"><span class="chip" style="background:#002395"></span><span class="meta"><span class="name">Blue</span><span class="hex">#002395</span></span></div><div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div><div class="swatch"><span class="chip" style="background:#ed2939"></span><span class="meta"><span class="name">Red</span><span class="hex">#ED2939</span></span></div></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 7 -->
+    <div class="entry" data-n="8" id="era-1830">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect x="0" width="100" height="200" fill="#002395"/><rect x="100" width="100" height="200" fill="#f4efe1"/><rect x="200" width="100" height="200" fill="#ed2939"/>
+            </svg>
+            <div class="flag-caption">the tricolour restored after the July Revolution</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1830 &ndash; 1848</div>
+            <h3 class="card-title">July Monarchy</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A kingdom whose king, Louis-Philippe, came to the throne through the revolution of July 1830."><span class="dot" style="background:#c9973a"></span>Constitutional monarchy</span><span class="tag" tabindex="0" data-tip="Duke of Orléans, Lieutenant-General of the kingdom and then King of the French."><span class="dot" style="background:#4a3b78"></span>Louis-Philippe</span></div>
+            <p><span class="label">Who &amp; why:</span> the tricolour had been banned since 1815 and reappeared during Les Trois Glorieuses of 27&ndash;29 July 1830. On 30 July Lafayette gave Louis-Philippe a tricolour on the balcony of the city hall, and on 1 August Louis-Philippe, as Lieutenant-General, ordered that France resume its national colours (Flags of the World). He briefly used a fleur-de-lis coat of arms from 13 August 1830 to 16 February 1831 before dropping it under pressure. Wikipedia says the tricolour has been used since 1830 except for 1848.</p>
+            <p><span class="label">What it represents:</span> the tricolour restored as the flag of a monarchy: the same flag the Restoration had banned.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">Three equal vertical bands.</span></div><div class="spec-row"><span class="k">Layout</span><span class="v">Blue at the hoist, white centre, red at the fly.</span></div>
+            <div class="swatches"><div class="swatch"><span class="chip" style="background:#002395"></span><span class="meta"><span class="name">Blue</span><span class="hex">#002395</span></span></div><div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div><div class="swatch"><span class="chip" style="background:#ed2939"></span><span class="meta"><span class="name">Red</span><span class="hex">#ED2939</span></span></div></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 8 -->
+    <div class="entry" data-n="7" id="era-1814">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#f4efe1"/><rect width="300" height="200" fill="none" stroke="#c9c2ac" stroke-width="3"/>
+            </svg>
+            <div class="flag-caption">the white flag, restored as the national flag</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1814 &ndash; 1830</div>
+            <h3 class="card-title">Bourbon Restoration (with the Hundred Days)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="The Bourbon kings Louis XVIII and Charles X ruled after Napoléon&#x27;s fall, with a break for the Hundred Days of 1815."><span class="dot" style="background:#c9973a"></span>Monarchy</span><span class="tag" tabindex="0" data-tip="King of France from the restoration of 1814."><span class="dot" style="background:#4a3b78"></span>Louis XVIII</span></div>
+            <p><span class="label">Who &amp; why:</span> Flags of the World says the white flag was restored as the national flag in 1814, which it had not been under the Ancien Régime, and calls this a major political mistake because people had accepted the tricolour. Wikipedia says the tricolour was replaced by the pre-revolutionary white naval flag in 1815&ndash;1830. In the Hundred Days Napoléon landed on 1 March 1815, had the Elba ensign lowered and the tricolour hoisted, and a decree of 9 March 1815 ordered the tricolour displayed on town halls; he abdicated for the second time on 22 June 1815, and the tricolour was banned again until the revolution of July 1830.</p>
+            <p><span class="label">What it represents:</span> a plain white flag standing for the Bourbon monarchy, with the tricolour carried by its opponents.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">Not fixed in the sources read.</span></div><div class="spec-row"><span class="k">Layout</span><span class="v">Plain white field; the royal arms are not drawn.</span></div>
+            <div class="swatches"><div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 9 -->
+    <div class="entry" data-n="6" id="era-1804">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect x="0" width="100" height="200" fill="#002395"/><rect x="100" width="100" height="200" fill="#f4efe1"/><rect x="200" width="100" height="200" fill="#ed2939"/>
+            </svg>
+            <div class="flag-caption">the tricolour, under Napoléon I</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1804 &ndash; 1814</div>
+            <h3 class="card-title">First Empire</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A state headed by an emperor; Napoléon was proclaimed Emperor of the French on 2 December 1804."><span class="dot" style="background:#a35a1e"></span>Empire</span><span class="tag" tabindex="0" data-tip="Napoléon Bonaparte, Emperor of the French from 1804 to 1814 and again briefly in 1815."><span class="dot" style="background:#4a3b78"></span>Napoléon I</span></div>
+            <p><span class="label">Who &amp; why:</span> Napoléon Bonaparte was proclaimed Emperor of the French on 2 December 1804, and Flags of the World says the national flag during the First Empire was the blue-white-red tricolour. The eagle and the bee were imperial emblems rather than the national flag; the same page says Napoléon had no personal standard before Elba, and that the eagle-on-thunderbolt standard sometimes shown is alleged and rests on a cigarette card.</p>
+            <p><span class="label">What it represents:</span> the tricolour carried over from the Revolution into the empire, with the imperial emblems beside it.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">Three equal vertical bands.</span></div><div class="spec-row"><span class="k">Layout</span><span class="v">Blue at the hoist, white centre, red at the fly.</span></div>
+            <div class="swatches"><div class="swatch"><span class="chip" style="background:#002395"></span><span class="meta"><span class="name">Blue</span><span class="hex">#002395</span></span></div><div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div><div class="swatch"><span class="chip" style="background:#ed2939"></span><span class="meta"><span class="name">Red</span><span class="hex">#ED2939</span></span></div></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 10 -->
+    <div class="entry" data-n="5" id="era-1789">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect x="0" width="100" height="200" fill="#002395"/><rect x="100" width="100" height="200" fill="#f4efe1"/><rect x="200" width="100" height="200" fill="#ed2939"/>
+            </svg>
+            <div class="flag-caption">the tricolour in its present order, from the decree of 15 February 1794</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1789 &ndash; 1804</div>
+            <h3 class="card-title">Revolution &amp; First Republic</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="The monarchy fell in 1792 and the First Republic followed."><span class="dot" style="background:#2f6b4a"></span>Revolution &amp; Republic</span></div>
+            <p><span class="label">Who &amp; why:</span> in July 1789 the Paris militia, formed on 13 July, wore blue and red and white was added to make the tricolour cockade, which was part of the National Guard uniform from 27 July (Wikipedia); Flags of the World says the cockade existed by 12 July and that Lafayette formalised it without inventing it. In 1790 the navy's jack and ensign were the first vertical tricolours, with red at the hoist; a decree of 24 October 1790, made law on 31 October, set three vertical bands in red-white-blue order. A decree of 26 June 1793 ordered tricolour flags on Paris public buildings, and the decree of 15 February 1794 (27 Pluviôse, Year II) reversed the order to blue at the hoist, the design in use today.</p>
+            <p><span class="label">What it represents:</span> the flag the Revolution made from a cockade, in its present order from 1794; the earlier red-hoist form of 1790 is not the one drawn.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">Three equal vertical bands.</span></div><div class="spec-row"><span class="k">Layout</span><span class="v">Blue at the hoist, white centre, red at the fly (1794).</span></div>
+            <div class="swatches"><div class="swatch"><span class="chip" style="background:#002395"></span><span class="meta"><span class="name">Blue</span><span class="hex">#002395</span></span></div><div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div><div class="swatch"><span class="chip" style="background:#ed2939"></span><span class="meta"><span class="name">Red</span><span class="hex">#ED2939</span></span></div></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 11 -->
+    <div class="entry" data-n="4" id="era-1589">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#f4efe1"/><rect width="300" height="200" fill="none" stroke="#c9c2ac" stroke-width="3"/>
+            </svg>
+            <div class="flag-caption">the white flag of the Bourbon kings</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">1589 &ndash; 1789</div>
+            <h3 class="card-title">Bourbon Kingdom</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="An absolute monarchy under the House of Bourbon from 1589; the Bourbons held the throne until 1792 and again from 1815."><span class="dot" style="background:#c9973a"></span>Kingdom</span></div>
+            <p><span class="label">Who &amp; why:</span> Wikipedia says the House of Bourbon ruled France in 1589&ndash;1792 and 1815&ndash;1848 and that the white Bourbon banner was used. Flags of the World says white was the royal and military colour before 1789, that the King's vessels carried plain white flags (Pierre Gay), and that a decree of 3 March 1781 prescribed the white flag on French consulates in the Levant, the first reported use of a white flag on land.</p>
+            <p><span class="label">What it represents:</span> a white flag for the king and his ships, not yet a national flag: Flags of the World says the white flag was made the national flag only in 1814.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">Not fixed in the sources read.</span></div><div class="spec-row"><span class="k">Layout</span><span class="v">Plain white field; the royal arms are not drawn.</span></div>
+            <div class="swatches"><div class="swatch"><span class="chip" style="background:#f4efe1"></span><span class="meta"><span class="name">White</span><span class="hex">#F4EFE1</span></span></div></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 12 -->
+    <div class="entry" data-n="3" id="era-987">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#1e3d9a"/><g transform="translate(150,62) scale(1.15)"><path d="M0,-30 C10,-18 10,-4 0,6 C-10,-4 -10,-18 0,-30 Z M-4,2 C-18,-14 -34,-6 -30,10 C-26,22 -12,22 -6,12 C-8,8 -6,4 -4,2 Z M4,2 C18,-14 34,-6 30,10 C26,22 12,22 6,12 C8,8 6,4 4,2 Z M-14,10 h28 v5 h-28 Z M-9,15 h18 l4,13 h-26 Z" fill="#c9a13c"/></g><g transform="translate(96,136) scale(1.15)"><path d="M0,-30 C10,-18 10,-4 0,6 C-10,-4 -10,-18 0,-30 Z M-4,2 C-18,-14 -34,-6 -30,10 C-26,22 -12,22 -6,12 C-8,8 -6,4 -4,2 Z M4,2 C18,-14 34,-6 30,10 C26,22 12,22 6,12 C8,8 6,4 4,2 Z M-14,10 h28 v5 h-28 Z M-9,15 h18 l4,13 h-26 Z" fill="#c9a13c"/></g><g transform="translate(204,136) scale(1.15)"><path d="M0,-30 C10,-18 10,-4 0,6 C-10,-4 -10,-18 0,-30 Z M-4,2 C-18,-14 -34,-6 -30,10 C-26,22 -12,22 -6,12 C-8,8 -6,4 -4,2 Z M4,2 C18,-14 34,-6 30,10 C26,22 12,22 6,12 C8,8 6,4 4,2 Z M-14,10 h28 v5 h-28 Z M-9,15 h18 l4,13 h-26 Z" fill="#c9a13c"/></g>
+            </svg>
+            <div class="flag-caption">a blue banner with three golden fleurs-de-lis, as the arms stood after Charles V</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">987 &ndash; 1589</div>
+            <h3 class="card-title">Capetian &amp; Valois Kingdom</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="A kingdom ruled by the Capetian kings from 987 and by the Valois branch from 1328."><span class="dot" style="background:#c9973a"></span>Kingdom</span></div>
+            <p><span class="label">Who &amp; why:</span> Wikipedia says the red oriflamme, the banner of Saint Denis, was the royal banner under the Capetians; that the Valois arms of 1328 were blue with gold fleurs-de-lis bordered in red; that Charles V changed the scattering of lilies to three about 1376; that the blue field became the common standard of French armies in the Hundred Years' War; and that Joan of Arc's standard led to the prominent use of white. Flags of the World says the lilies first appear on Louis VIII's seal and on Philip II's banners, that Charles V reduced them to three in 1365, and that in 1422 Charles VII adopted a white cross as his emblem and a white flag as his banner.</p>
+            <p><span class="label">What it represents:</span> the blue banner of gold lilies that stands for the kings of this long period; the oriflamme before it and the white flag after it are not drawn. The dates for the reduction to three lilies differ (1365 or about 1376).</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">Not fixed in the sources read.</span></div><div class="spec-row"><span class="k">Layout</span><span class="v">Blue field; three gold fleurs-de-lis, two over one, as drawn schematically here.</span></div>
+            <div class="swatches"><div class="swatch"><span class="chip" style="background:#1e3d9a"></span><span class="meta"><span class="name">Blue</span><span class="hex">#1E3D9A</span></span></div><div class="swatch"><span class="chip" style="background:#c9a13c"></span><span class="meta"><span class="name">Gold</span><span class="hex">#C9A13C</span></span></div></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 13 -->
+    <div class="entry" data-n="2" id="era-481">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; no flag documented for the Frankish kingdoms</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 481 &ndash; 987</div>
+            <h3 class="card-title">Francia (Merovingian &amp; Carolingian)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="The Frankish kingdoms under the Merovingian and then Carolingian dynasties."><span class="dot" style="background:#c9973a"></span>Kingdom</span></div>
+            <p><span class="label">Who &amp; why:</span> the Frankish kings ruled Gaul from the late fifth century, first the Merovingians and then the Carolingians, until the Capetian dynasty took the throne in 987. This page has not read a source for any banner of the period.</p>
+            <p><span class="label">What it represents:</span> no flag is claimed for this period. The maroon field is a placeholder, not evidence that none existed.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; nothing documented.</span></div>
+            
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- 14 -->
+    <div class="entry" data-n="1" id="era-58bce">
+      <div class="card">
+        <div class="card-head">
+          <div class="flag-box">
+            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="300" height="200" fill="#5c2a24"/><rect width="300" height="200" fill="none" stroke="#c9a13c" stroke-width="4" stroke-dasharray="8 6"/><text x="150" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">NO FLAG</text><text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#c9a13c">DOCUMENTED</text>
+            </svg>
+            <div class="flag-caption">placeholder maroon field &mdash; no flag documented for Gaul</div>
+          </div>
+          <div class="card-body">
+            <div class="card-dates">c. 58 BCE &ndash; c. 481 CE</div>
+            <h3 class="card-title">Gaul (Celtic peoples &amp; Roman rule)</h3>
+            <div class="tag-row"><span class="tag" tabindex="0" data-tip="Julius Caesar&#x27;s campaigns of 58&amp;ndash;50 BCE brought Gaul under Roman rule, which lasted until the late fifth century."><span class="dot" style="background:#a35a1e"></span>Roman province</span></div>
+            <p><span class="label">Who &amp; why:</span> Julius Caesar's Gallic Wars (58&ndash;50 BCE) ended the independence of the Celtic peoples of Gaul, which Rome then governed until the Frankish kingdoms took over in the late fifth century. This page has not read a source for any standard of the period.</p>
+            <p><span class="label">What it represents:</span> no flag is claimed for this period. The maroon field is a placeholder, not evidence that none existed.</p>
+          </div>
+        </div>
+        <details class="paint">
+          <summary>Paint guide</summary>
+          <div class="paint-body">
+            <div class="spec-row"><span class="k">Proportions</span><span class="v">N/A &mdash; nothing documented.</span></div>
+            
+          </div>
+        </details>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>Reading the tags</h2>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#c9973a"></span><b>Kingdom / monarchy</b> &mdash; a crowned head of state</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#2f6b4a"></span><b>Republic</b> &mdash; no monarch</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#a35a1e"></span><b>Empire</b> &mdash; an emperor, or a Roman province</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#3f3f3f"></span><b>Occupation &amp; division</b> &mdash; wartime foreign administration</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a3b78"></span><b>Leader</b> &mdash; the ruler most associated with the era</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#8e3b62"></span><b>State religion</b> &mdash; the official stance on faith</div>
+    </div>
+  </div>
+
+  <div class="record-links">
+    <h2>Find the records</h2>
+    <p>Family history research for France lives in a different project, <a href="../">Record Atlas</a>, which maps which archive actually holds the paper for a given place and era.</p>
+    <a class="record-cta" href="../country/fr/">Search Record Atlas for France &rarr;</a>
+    <p style="margin-top:14px;">Records here are filed by historical jurisdiction, not modern borders &mdash; check the region that covers your ancestral town:</p>
+    <div class="record-region-grid">
+      <a href="../region/alsace-lorraine/">Alsace and Lorraine</a>
+    </div>
+  </div>
+  <div class="roadmap">
+    <h2>More of the atlas</h2>
+    <p>This page is one lineage in a larger set. See the region-wide map and the other countries here:</p>
+    <div class="link-grid">
+      <a class="link-card" href="index.html"><b>Flags Atlas index</b><span>Search every country and hub</span></a>
+      <a class="link-card" href="european-union-hub.html"><b>European Union hub</b><span>The member states&rsquo; flag histories</span></a>
+    </div>
+  </div>
+
+  <footer>
+    Written from Wikipedia and Flags of the World; each era&rsquo;s panel names the pages read. Colours are approximations for reference, not specifications.
+  </footer>
+
+</div>
+
+
+<script>
+(function () {
+  var here = window.location.pathname.split("/").pop();
+  var RA_PAGE_URL = "https://daviddef.github.io/Flag-History/" + here;
+  var box = document.querySelector(".record-links");
+  var cta = box ? box.querySelector(".record-cta") : null;
+  var iso2Match = cta ? cta.getAttribute("href").match(/\/country\/([a-z]{2})\//) : null;
+  var ISO2 = iso2Match ? iso2Match[1] : null;
+
+  fetch("../eras.json").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (data) {
+    if (!data) return;
+
+    var any = false;
+
+    if (data.eras) {
+      var anchors = Array.prototype.slice.call(document.querySelectorAll(".entry[id^='era-']")).map(function (el) {
+        var raw = el.id.replace("era-", "");
+        var bce = raw.indexOf("bce") !== -1;
+        var year = parseInt(raw, 10);
+        if (bce) year = -year;
+        return { year: year, el: el };
+      }).sort(function (a, b) { return a.year - b.year; });
+
+      var rows = data.eras.filter(function (e) { return e.flags === RA_PAGE_URL; });
+
+      var matches = {};
+      rows.forEach(function (row) {
+        var target = row.flagsEraHint;
+        var idx = -1;
+        for (var i = 0; i < anchors.length; i++) {
+          if (anchors[i].year <= target) idx = i; else break;
+        }
+        if (idx === -1) return;
+        (matches[idx] = matches[idx] || []).push(row);
+      });
+
+      Object.keys(matches).forEach(function (idxStr) {
+        var anchor = anchors[parseInt(idxStr, 10)];
+        var cardBody = anchor.el.querySelector(".card-body");
+        if (!cardBody) return;
+        any = true;
+
+        var n = matches[idxStr].length;
+        /* FOLDED, BECAUSE IT IS REFERENCE AND NOT THE POINT OF THE PAGE.
+           This block can run to five or six regions on a card, which pushed
+           the era's own story off the screen on a phone. Shut, it still says
+           what it holds — the ground and how many regions answered — so a
+           reader can tell whether it is worth opening. */
+        var html = '<details class="record-fold"><summary>' +
+                   '<h4>Genealogical records for this ground</h4>' +
+                   '<span class="rr-count">' + n + ' region' +
+                   (n === 1 ? '' : 's') + '</span></summary>' +
+                   '<div class="record-fold-in">';
+        matches[idxStr].forEach(function (row) {
+          html += '<div class="record-region">';
+          html += '<div class="rr-name">' + row.regionLabel + '</div>';
+          html += '<div class="rr-stat">' + row.answeringThisPeriod + ' place' + (row.answeringThisPeriod === 1 ? '' : 's') + ' with records for ' + row.from + '–' + row.to + ' (of ' + row.places + ' total on this ground, ' + row.surveyed + ' surveyed)</div>';
+          if (row.filedUnder && row.filedUnder.length) {
+            html += '<div class="rr-stat">Filed under: ' + row.filedUnder.map(function (f) {
+              return '<a href="../archive/' + f + '/" target="_blank" rel="noopener">' + f + '</a>';
+            }).join(', ') + '</div>';
+          }
+          if (row.note) html += '<div class="rr-note">' + row.note + '</div>';
+          html += '<div class="rr-stat"><a href="' + row.region_page + '" target="_blank" rel="noopener">See ' + row.regionLabel + ' on Record Atlas &rarr;</a></div>';
+          html += '</div>';
+        });
+        html += '</div></details>';
+
+        var panel = document.createElement("div");
+        panel.className = "record-panel";
+        panel.innerHTML = html;
+        cardBody.appendChild(panel);
+      });
+    }
+
+    if (any) {
+      if (box) {
+        var line = document.createElement("p");
+        line.style.marginTop = "10px";
+        line.style.fontSize = ".82rem";
+        line.style.color = "var(--muted)";
+        line.innerHTML = 'Per-era record counts above via <a href="../" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0).';
+        box.appendChild(line);
+      }
+    } else if (ISO2 && data.countries && box) {
+      var crow = data.countries.filter(function (c) {
+        return c.map && c.map.indexOf("/country/" + ISO2 + "/") !== -1;
+      })[0];
+      if (crow && crow.places > 0) {
+        var line2 = document.createElement("p");
+        line2.style.marginTop = "10px";
+        line2.style.fontSize = ".82rem";
+        line2.style.color = "var(--muted)";
+        line2.innerHTML = crow.places + ' places on this ground overall, ' + crow.surveyed + ' surveyed, per <a href="../" target="_blank" rel="noopener">Record Atlas</a> (CC BY 4.0) &mdash; no per-era breakdown for this country yet.';
+        box.appendChild(line2);
+      }
+    }
+  }).catch(function () { /* Record Atlas unavailable; page still works without it */ });
+})();
+</script>

@@ -717,16 +717,17 @@ def history_ground():
     with the source on disk rather than rebuilding: a changed boundary file with a stale cut
     would draw last month's borders on the history map.
     """
-    p = "site/public/history-ground.json"
+    p = "data/history-ground.json"
     if not os.path.exists(p):
+        err("data/history-ground.json is missing: it is the committed cut the build copies to the site. "
+            "Run python3 scripts/build-history-ground.py where data/ohm exists, and commit it.")
         return
-    try:
+    have = json.load(open(p, encoding="utf-8"))
+    if not os.path.exists("data/ohm/boundaries.json"):
+        sha = have.get("sourceSha1")          # no cache here (CI): nothing to compare against
+    else:
         import hashlib
-        have = json.load(open(p, encoding="utf-8"))
         sha = hashlib.sha1(open("data/ohm/boundaries.json", "rb").read()).hexdigest()
-    except Exception as e:
-        err(f"cannot check history-ground.json: {e}")
-        return
     if have.get("sourceSha1") != sha:
         err("site/public/history-ground.json was cut from a different data/ohm/boundaries.json. "
             "Run python3 scripts/build-history-ground.py.")

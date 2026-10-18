@@ -15,6 +15,7 @@ import hashlib, json, math, os, time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "site", "public", "history-ground.json")
+KEPT = os.path.join(ROOT, "data", "history-ground.json")   # committed: the OHM cache itself (20 MB) is not in the repository
 TOL = 0.3
 MIN_AREA = 0.6          # square degrees; a ring smaller than this is an islet at world scale
 MIN_YEAR = 600
@@ -99,9 +100,17 @@ def build():
 
 
 def main():
+    src = os.path.join(ROOT, "data", "ohm", "boundaries.json")
+    if not os.path.exists(src):
+        # CI and fresh clones have no OHM cache; the committed cut is the artefact.
+        s = open(KEPT, encoding="utf-8").read()
+        open(OUT, "w", encoding="utf-8").write(s)
+        print(f"history-ground.json {len(s)/1024:8.1f} KB   copied from data/history-ground.json (no OHM cache here)")
+        return
     d = build()
     s = json.dumps(d, ensure_ascii=False, separators=(",", ":"))
     open(OUT, "w", encoding="utf-8").write(s)
+    open(KEPT, "w", encoding="utf-8").write(s)
     pts = sum(len(r) for sh in d["shapes"] for r in sh["p"])
     print(f"history-ground.json {len(s)/1024:8.1f} KB   {d['counts']['shapes']} shapes, {pts:,} points")
 

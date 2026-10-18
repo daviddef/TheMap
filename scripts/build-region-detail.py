@@ -143,9 +143,53 @@ LANG = [
 ]
 
 
+POLITY_ID = {
+    "Kingdom of Sicily (island and mainland south)": "kingdom-of-sicily",
+    "Kingdom of Naples": "kingdom-of-naples",
+    "Parthenopean Republic": "parthenopean-republic",
+    "Kingdom of the Two Sicilies": "kingdom-of-the-two-sicilies",
+    "Kingdom of Italy": "kingdom-of-italy",
+    "Italian Republic": "italian-republic",
+}
+# reigns whose boundary is known to differ in fact from the date a page gives, with the margin in years
+DEFACTO = {
+    ("Francis II", "to"): (1, "Garibaldi landed in Calabria on 19 August 1860 and Reggio fell on 21 August; the Bourbon reign in law ran to 20 March 1861"),
+    ("Victor Emmanuel II", "from"): (1, "Calabria passed to his authority in autumn 1860; the kingdom was proclaimed on 17 March 1861"),
+}
+
+
+def margin_of(date):
+    """0 when the source gives a day; 1 when it gives only a year or a season (the change may fall either side of a year boundary)."""
+    return 0 if re.fullmatch(r"-?\d{3,4}-\d\d-\d\d", date or "") else 1
+
+
+def enrich(row):
+    row["polityId"] = POLITY_ID.get(row["polity"], None)
+    row["fromMargin"] = margin_of(row["from"])
+    row["toMargin"] = margin_of(row["to"]) if row["to"] else 0
+    why = []
+    for side in ("from", "to"):
+        k = (row["name"], side)
+        if k in DEFACTO:
+            row[side + "Margin"] = max(row[side + "Margin"], DEFACTO[k][0])
+            why.append(DEFACTO[k][1])
+    row["marginWhy"] = ("; ".join(why) if why else
+                        ("both ends are days a page gives" if row["fromMargin"] == 0 and row["toMargin"] == 0 else
+                         "an end the page gives only as a year or a season, so it may fall either side of a year boundary"))
+
+
 def main():
+    if "--enrich" in sys.argv:
+        doc = json.load(open(OUT, encoding="utf-8"))
+        for cid, d in doc["regions"].items():
+            for row in d["rulers"]:
+                enrich(row)
+        json.dump(doc, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        print("enriched", sum(len(d["rulers"]) for d in doc["regions"].values()), "reigns")
+        return
     for row in R:
         resolve(row)
+        enrich(row)
         time.sleep(0.2)
     doc = {
         "note": ("A pilot of two things the family sites asked for: a ruler for every year, and the language a region's records "

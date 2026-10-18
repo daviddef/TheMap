@@ -34,8 +34,9 @@ import json, os, re, sys, time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "site", "public", "context.json")
-VERSION = "1.7.0"
+VERSION = "1.8.0"
 CHANGES = [
+    {"version": "1.8.0", "change": "Each region carries its ring ([lat, lon] vertices, approximate by design) and a bbox [south, west, north, east], so a consumer needs no second file; the 16 regions written in October 2026 carry assessed contested and approx values (false means looked at and clean, null still means unassessed), with a `why` where true."},
     {"version": "1.7.0", "change": "Region serbia (Belgrade, Šumadija and the Morava), placed ahead of vojvodina so Belgrade stops being filed under Vojvodina."},
     {"version": "1.6.0", "change": "Croatia outside the first five regions: civil-croatia, slavonia, istria-west (copies istria-south, so seeded), plus ring fixes for dalmatia (now reaches Zadar), vojna-krajina (Karlobag) and carniola (no longer takes Karlovac)."},
     {"version": "1.5.0", "change": "Two River Plate regions: uruguay and buenos-aires, with new uruguay and brazil regimes."},
@@ -66,6 +67,7 @@ def build():
         p = prov["regions"].get(r["id"])
         es = []
         for e in r["eras"]:
+            asm = (prov.get("assessments") or {}).get(r["id"], {}).get(str(e["from"]), {})
             present = e["to"] >= THIS_YEAR
             es.append({
                 "id": f"{r['id']}--era-{e['from']}",
@@ -77,15 +79,20 @@ def build():
                 "polity": e.get("polity"),
                 "filedUnder": e.get("filedUnder", []),
                 "basis": (p or {}).get("basis", "not-recorded"),
-                "contested": None,
-                "approx": None,
+                "contested": asm.get("contested"),
+                "approx": asm.get("approx"),
                 "url": f"/region/{r['id']}/#era-{e['from']}",
+                **({"why": asm["why"]} if asm.get("why") else {}),
             })
         ids = [e["id"] for e in es]
         assert len(set(ids)) == len(ids), r["id"]
         out_regions.append({
             "id": r["id"], "label": r["label"], "alt": r.get("alt", []),
-            "countries": r.get("countries", []), "eras": es,
+            "countries": r.get("countries", []),
+            "ring": r["ring"],
+            "bbox": [min(p[0] for p in r["ring"]), min(p[1] for p in r["ring"]),
+                     max(p[0] for p in r["ring"]), max(p[1] for p in r["ring"])],
+            "eras": es,
             "url": f"/region/{r['id']}/",
         })
 

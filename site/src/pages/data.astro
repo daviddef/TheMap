@@ -365,7 +365,7 @@ curl -s https://recordatlas.org/regions.json | jq '.regions[0]'`}</code></pre>
 
   <div class="one" id="context" style="margin-top:18px">
     <div class="lab">The context contract</div>
-    <p>{`/context.json`} answers «what held this ground in this year?» for the sites that quote the atlas beside a dated event. It is versioned: the <code>contract.version</code> field follows semantic versioning, and anything a consumer could notice — a renamed field, a changed id, a different lookup rule — raises it. Version <b>1.7.0</b>.</p>
+    <p>{`/context.json`} answers «what held this ground in this year?» for the sites that quote the atlas beside a dated event. It is versioned: the <code>contract.version</code> field follows semantic versioning, and anything a consumer could notice — a renamed field, a changed id, a different lookup rule — raises it. Version <b>1.8.0</b>.</p>
     <ul>
       <li><b>Ids are permanent.</b> A region era is <code>&lt;region&gt;--era-&lt;from&gt;</code> (<code>calabria--era-1815</code>); a country era is <code>&lt;page slug&gt;--&lt;era id&gt;</code> (<code>croatia-flags--era-1991</code>), the id the flag layer already uses. Each carries a <code>url</code> that lands on the era.</li>
       <li><b>An era covers <code>from</code> ≤ year &lt; <code>to</code>.</b> The year an era ends is the year the next begins, so a bare year equal to a boundary belongs to the newer era. A consumer holding only a year should say «in that year» or stay silent.</li>
@@ -373,7 +373,8 @@ curl -s https://recordatlas.org/regions.json | jq '.regions[0]'`}</code></pre>
       <li><b>Stay silent where <code>quality</code> says so.</b> <code>gaps</code> are intervals a page leaves empty; <code>overlaps</code> are two eras at once, <code>concurrent</code> where the page really lists two polities. <code>evidence</code> is <code>attested</code> only where a primary or reference source, or two independent compiled ones, support the era; <code>unreviewed</code> and <code>unlabelled</code> mean nobody has checked.</li>
       <li><b><code>basis</code> says where a region's dates came from.</b> <code>seeded:defranceschi-sovereignty</code> means the bands were taken from the Defranceschi archive's own research, so the atlas cannot be cited as independent confirmation of them. <code>not-recorded</code> means the file does not say.</li>
       <li><b>A decade is not a year.</b> An era written «1816 – 1820s» carries <code>to</code>: 1820 and <code>approx</code>: true, the first year of the decade. A century («1500s») still carries no number at all.</li>
-      <li><b>null is not false.</b> <code>contested</code> and <code>approx</code> on a region era are null because nobody has assessed them. Treat null as uncertain.</li>
+      <li><b>null is not false.</b> <code>contested</code> and <code>approx</code> on a region era are null where nobody has assessed them; <code>false</code> means someone looked and the sources give a clean date, <code>true</code> comes with a <code>why</code>. Only the sixteen regions written in October 2026 are assessed so far. Treat null as uncertain.</li>
+      <li><b>Rings are in the file.</b> Each region carries its <code>ring</code> as [lat, lon] vertices and a <code>bbox</code> as [south, west, north, east]. The rings are approximate by design, so a place within about fifteen kilometres of an edge may belong to the next region.</li>
     </ul>
     <p class="cap">Not in this version, and not to be inferred: a language of administration, a ruler per year, sources on region eras, and events (wars, famines, epidemics). Ten country eras with no id on their page are left out because they cannot be cited.</p>
     <pre class="ra-code"><code>{`curl -s https://recordatlas.org/context.json \

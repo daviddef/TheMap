@@ -635,6 +635,13 @@ def context_contract():
         for e in r["eras"]:
             if e["basis"] not in ("not-recorded", "unknown", "seeded:defranceschi-sovereignty"):
                 err(f"context.json {e['id']}: unknown basis {e['basis']!r}")
+            want = {True: ("bounds", "regime", "part"), False: ("none",), None: (None,)}[e["contested"]]
+            if e.get("contestedScope") not in want:
+                err(f"context.json {e['id']}: contested is {e['contested']} and its scope is {e.get('contestedScope')!r}")
+            for k in ("fromMargin", "toMargin"):
+                m = e.get(k)
+                if m is not None and (not isinstance(m, int) or m < 0):
+                    err(f"context.json {e['id']}: {k} must be a whole number of years or null")
     if not dup:
         c = now["counts"]
         print(f"context.json: v{ver}, {c['regions']} regions / {c['regionEras']} eras, "

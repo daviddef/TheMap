@@ -34,8 +34,9 @@ import json, os, re, sys, time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "site", "public", "context.json")
-VERSION = "1.9.0"
+VERSION = "1.10.0"
 CHANGES = [
+    {"version": "1.10.0", "change": "Every assessed region era carries fromMargin and toMargin (whole years of uncertainty on its start and end year; 0 = the sources agree on one year; null = unknowable), contestedScope (none, bounds = the dispute is about when the change happened, regime = who held the ground in the middle was disputed, part = only some of the ring), marginWhy, and marginSourced (false where the margin rests on dates the assessor knew but did not find in a fetched page). approx describes the BOUNDARY years only."},
     {"version": "1.9.0", "change": "Twenty-five older regions are assessed (contested, approx, a why and an assessmentSource for each era): calabria, campania, sicily, queensland, western-cape, cape, england, santafe, east-prussia, posen, pomerania, hungary, the three Istrian regions, kvarner, carnia, carniola, dalmatia, vojna-krajina, imotski, bosnia, vojvodina. null still means a source could not be found; notes/85-region-corrections.md lists where the sources contradict a date or label."},
     {"version": "1.8.0", "change": "Each region carries its ring ([lat, lon] vertices, approximate by design) and a bbox [south, west, north, east], so a consumer needs no second file; the 16 regions written in October 2026 carry assessed contested and approx values (false means looked at and clean, null still means unassessed), with a `why` where true."},
     {"version": "1.7.0", "change": "Region serbia (Belgrade, Šumadija and the Morava), placed ahead of vojvodina so Belgrade stops being filed under Vojvodina."},
@@ -85,6 +86,10 @@ def build():
                 "url": f"/region/{r['id']}/#era-{e['from']}",
                 **({"why": asm["why"]} if asm.get("why") else {}),
                 **({"assessmentSource": asm["source"]} if asm.get("source") else {}),
+                "fromMargin": asm.get("fromMargin"),
+                "toMargin": asm.get("toMargin"),
+                "contestedScope": asm.get("contestedScope"),
+                **({"marginWhy": asm["marginWhy"], "marginSourced": asm.get("marginSourced")} if asm.get("marginWhy") else {}),
             })
         ids = [e["id"] for e in es]
         assert len(set(ids)) == len(ids), r["id"]

@@ -43,6 +43,7 @@ const CH = hist.chapters;
       <div class="hm-hud">
         <div class="hm-year" id="hm-year" aria-live="off">1914</div>
         <div class="hm-ch" id="hm-ch"></div>
+        <div class="hm-gnote" id="hm-gnote"></div>
       </div>
       <div class="hm-load" id="hm-load">Loading the movements&hellip;</div>
     </div>
@@ -70,6 +71,7 @@ const CH = hist.chapters;
       <label><input type="checkbox" id="hm-l-conquest" checked /> <i class="k conquest"></i>Conquest</label>
       <label><input type="checkbox" id="hm-l-occupation" checked /> <i class="k occupation"></i>Occupation</label>
       <label><input type="checkbox" id="hm-l-migration" checked /> <i class="k migration"></i>Migration</label>
+      <label><input type="checkbox" id="hm-l-ground" checked /> Who held the ground</label>
       <label><input type="checkbox" id="hm-l-flags" /> Flags in this year</label>
       <label>Trail
         <select id="hm-trail" aria-label="How many years an arrow stays on the map">
@@ -127,6 +129,7 @@ const CH = hist.chapters;
   .hm-year { font:700 clamp(2.4rem, 7vw, 4.4rem)/1 var(--font-display, Georgia, serif);
              color:var(--ink, #16222A); font-variant-numeric:tabular-nums; }
   .hm-ch { font-size:.95rem; color:var(--ink, #16222A); max-width:34ch; margin-top:4px; }
+  .hm-gnote { font-size:.75rem; margin-top:6px; max-width:34ch; opacity:.8; }
   .hm-load { position:absolute; inset:0; display:grid; place-items:center; z-index:600;
              background:color-mix(in srgb, var(--panel, #fff) 80%, transparent);
              color:var(--ink, #16222A); }

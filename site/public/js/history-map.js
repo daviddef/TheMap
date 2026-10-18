@@ -18,7 +18,8 @@
       elSpeed = $("hm-speed"), elTrail = $("hm-trail"), elList = $("hm-list"), elCard = $("hm-card"),
       elLoad = $("hm-load"), elDens = $("hm-dens"), elTicks = $("hm-ticks"), elListH = $("hm-list-h");
   var on = { conquest: $("hm-l-conquest"), occupation: $("hm-l-occupation"),
-             migration: $("hm-l-migration"), flags: $("hm-l-flags") };
+             migration: $("hm-l-migration"), flags: $("hm-l-flags"), ground: $("hm-l-ground") };
+  var elG = $("hm-gnote"), GROUND = null, groundLayer, groundKey = "";
 
   var D = null, FM = null, chapter = null, year = 1914, timer = null, selected = null;
   var map, arcLayer, flagLayer;
@@ -101,6 +102,41 @@
     });
     list(vis);
     drawFlags();
+    drawGround();
+  }
+
+  /* ---- who held the ground (OpenHistoricalMap, CC0) --------------------- */
+  function hue(str) {
+    var h = 0; for (var i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+    return h % 360;
+  }
+  function drawGround() {
+    if (!on.ground.checked) { groundLayer.clearLayers(); groundKey = ""; elG.textContent = ""; return; }
+    if (!GROUND) { loadGround(); return; }
+    var act = GROUND.shapes.filter(function (sh) { return sh.s <= year && year < sh.e; });
+    var key = act.map(function (sh) { return sh.n + sh.s; }).join("|");
+    elG.textContent = act.length
+      ? act.length + " polities have a boundary in this atlas for " + yr(year) + ". Where none is drawn, nothing is known here, not nothing happened."
+      : "No boundary data for " + yr(year) + ", so the ground is left untinted.";
+    if (key === groundKey) return;
+    groundKey = key; groundLayer.clearLayers();
+    var dark = document.documentElement.getAttribute("data-theme") === "dark" ||
+      (!document.documentElement.getAttribute("data-theme") && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    act.forEach(function (sh) {
+      var col = "hsl(" + hue(sh.q || sh.n) + "," + (dark ? 55 : 50) + "%," + (dark ? 58 : 42) + "%)";
+      sh.p.forEach(function (ring) {
+        var ll = ring.map(function (c) { return [c[1], c[0]]; });
+        L.polygon(ll, { pane: "ground", color: col, weight: 1, opacity: .7, fillColor: col, fillOpacity: dark ? .2 : .24, interactive: true, smoothFactor: 1 })
+          .bindTooltip(esc(sh.n) + " <span style='opacity:.7'>" + yr(sh.s) + "\u2013" + (sh.e >= 2027 ? "present" : yr(sh.e)) + "</span>", { sticky: true })
+          .addTo(groundLayer);
+      });
+    });
+  }
+  var groundFetch = null;
+  function loadGround() {
+    if (groundFetch) return;
+    groundFetch = fetch(BASE + "history-ground.json").then(function (r) { return r.json(); })
+      .then(function (g) { GROUND = g; drawGround(); }).catch(function () { elG.textContent = "The boundaries could not be loaded."; });
   }
 
   function flagAt(rows, y) {
@@ -232,6 +268,8 @@
     map.scrollWheelZoom.disable();
     map.on("click focus", function () { map.scrollWheelZoom.enable(); });
     map.on("mouseout", function () { map.scrollWheelZoom.disable(); });
+    map.createPane("ground"); map.getPane("ground").style.zIndex = 380;
+    groundLayer = L.layerGroup().addTo(map);
     arcLayer = L.layerGroup().addTo(map); flagLayer = L.layerGroup().addTo(map);
     map.on("zoomend moveend", drawFlags);
 

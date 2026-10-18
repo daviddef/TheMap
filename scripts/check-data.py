@@ -703,6 +703,32 @@ def history_json():
               f"{c['origin']} from a people's country, {c['stub']} stubs), {len(now['chapters'])} chapters, current")
 
 
+def history_ground():
+    """site/public/history-ground.json was cut from the OHM boundaries now in data/ohm.
+
+    Rebuilding it takes half a minute, so the gate compares the SHA-1 of the source it records
+    with the source on disk rather than rebuilding: a changed boundary file with a stale cut
+    would draw last month's borders on the history map.
+    """
+    p = "site/public/history-ground.json"
+    if not os.path.exists(p):
+        return
+    try:
+        import hashlib
+        have = json.load(open(p, encoding="utf-8"))
+        sha = hashlib.sha1(open("data/ohm/boundaries.json", "rb").read()).hexdigest()
+    except Exception as e:
+        err(f"cannot check history-ground.json: {e}")
+        return
+    if have.get("sourceSha1") != sha:
+        err("site/public/history-ground.json was cut from a different data/ohm/boundaries.json. "
+            "Run python3 scripts/build-history-ground.py.")
+    elif have["counts"]["shapes"] < 2500:
+        err(f"history-ground.json holds only {have['counts']['shapes']} shapes")
+    else:
+        print(f"history-ground.json: {have['counts']['shapes']} shapes from the current OHM cache")
+
+
 def main():
     flag_era_drift()
     flag_art_drift()
@@ -710,6 +736,7 @@ def main():
     flag_seams()
     context_contract()
     history_json()
+    history_ground()
     harvest_artefact_is_this_run()
     places = json.load(open("data/places.json"))["places"]
     regions = json.load(open("data/regions.json"))

@@ -99,6 +99,15 @@ def parse_dates(raw):
 
     bce = bce_a and bce_b
 
+    # A DECADE IS A RANGE TOO, BUT ONE WHOSE START IS A YEAR (1820s, never 1800s, which is a century). «1816 - 1820s» and
+    # «1820s - 1861» are two eras that meet at the same moment, and refusing both left
+    # Argentina with a 45-year hole between 1816 and 1861 that no consumer could cross.
+    # The decade's first year is taken and the era is marked approximate, which is true
+    # and is what tells a consumer to say «around» or stay silent.
+    if re.search(r"\b\d{2}[1-9]0s\b", t) and not re.search(r"\bcentur", t, re.I):
+        t = re.sub(r"\b(\d{2}[1-9]0)s\b", r"\1", t)
+        approx = True
+
     # A century is a range, not a year, and this refuses to flatten one.
     if re.search(r"\bcentur|\b\d+(st|nd|rd|th)\b", t, re.I):
         return None, None, present, True, False

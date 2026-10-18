@@ -34,8 +34,9 @@ import json, os, re, sys, time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "site", "public", "context.json")
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 CHANGES = [
+    {"version": "1.2.0", "change": "Four South African regions: western-cape, transvaal, natal, orange-free-state, with a new `boer` regime."},
     {"version": "1.1.0", "change": "Eras dated in decades (\"1816 - 1820s\") now carry the first year of the decade and approx: true instead of no number, which closes the Argentina and Uruguay holes."},
     {"version": "1.0.0", "change": "First release."},
 ]

@@ -213,9 +213,14 @@
     var q = v.leader && v.leader.q ? " <a href='https://www.wikidata.org/wiki/" + esc(v.leader.q) + "'>Wikidata</a>" : "";
     var h = "<h2 style='border-left:4px solid " + VCOL + ";padding-left:8px'>Voyage \u00b7 " + esc(spanV(v)) + "</h2><p><b>" + esc(v.title) + "</b></p>";
     h += "<p>Led by <b>" + esc(v.leader.name) + "</b>" + q + ".</p>";
-    if (v.sponsor) h += "<p>Sponsor: " + fl + esc(v.sponsor.name || "") + (v.sponsor.ruler ? " under " + esc(v.sponsor.ruler) : "") + ".</p>";
+    var rv = "";
+    if (v.sponsor && v.sponsor.ruler) {
+      var vf = v.sponsor.verified && v.sponsor.verified[v.sponsor.ruler_q];
+      rv = vf ? (vf.termCoveringStart ? " (reign confirmed in Wikidata)" : vf.aliveAtStart ? " (alive then; reign not in Wikidata)" : "") : "";
+    }
+    if (v.sponsor) h += "<p>Sponsor: " + fl + esc(v.sponsor.name || "") + (v.sponsor.ruler ? " under " + esc(v.sponsor.ruler) + rv : "") + ". " + esc(v.sponsor.note || "") + "</p>";
     if ((v.reached || []).length) h += "<p>Reached: " + v.reached.map(function (r) { return "<b>" + esc(r.name) + "</b> " + Math.floor(r.year) + " (" + esc(r.claim || "") + (r.already_inhabited ? "; already inhabited: " + esc(r.already_inhabited) : "") + ")"; }).join("; ") + ".</p>";
-    h += "<p class='hm-fine'>Evidence: " + esc(v.evidence || "unreviewed") + ". " + esc(v.open || "") + " The route joins dated waypoints; the line between them is not a track.</p>";
+    h += "<p class='hm-fine'>Evidence: " + esc(v.evidence || "unreviewed") + ". " + esc(v.open || "") + " The route joins dated waypoints; the line between them is not a track. Coordinates of named places come from Wikidata where it has them; otherwise they are approximate.</p>";
     h += "<p class='hm-fine'>" + (v.sources || []).map(function (s) { return "<a href='" + esc(s.url) + "'>" + esc(s.title) + "</a> (" + esc(s.publisher) + ")"; }).join(" \u00b7 ") + "</p>";
     elCard.innerHTML = h;
     if (v.reached && v.reached.length) map.panTo([v.reached[0].lat, v.reached[0].lon]);

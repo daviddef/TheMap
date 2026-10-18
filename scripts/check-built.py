@@ -315,11 +315,46 @@ def evidence_reaches_pages():
             err(f"place {pid} carries Wikidata {v['wikidata']} in the data and not on its page")
 
 
+def context_urls_land():
+    """Every url context.json hands out has to land on the thing it names.
+
+    A consumer cites an era by its url. If the anchor is not on the built page the link
+    still opens, and the reader is left at the top of a page that never says which era was
+    meant, which is a citation that looks like one and is not.
+    """
+    try:
+        ctx = json.load(open("site/public/context.json", encoding="utf-8"))
+    except OSError:
+        return
+    miss = 0
+    for r in ctx["regions"]:
+        f = os.path.join(DIST, "region", r["id"], "index.html")
+        if not os.path.exists(f):
+            err(f"context.json names region {r['id']}, which has no built page")
+            continue
+        html = open(f, encoding="utf-8").read()
+        for e in r["eras"]:
+            if f'id="era-{e["from"]}"' not in html:
+                miss += 1
+                err(f"context.json {e['id']}: no id=\"era-{e['from']}\" on /region/{r['id']}/")
+    for c in ctx["countries"]:
+        f = os.path.join(DIST, "flags", c["slug"], "index.html")
+        if not os.path.exists(f):
+            err(f"context.json names {c['slug']}, which has no built page")
+            continue
+        html = open(f, encoding="utf-8").read()
+        for e in c["eras"]:
+            eid = e["id"].split("--", 1)[1]
+            if f'id="{eid}"' not in html:
+                err(f"context.json {e['id']}: no id=\"{eid}\" on /flags/{c['slug']}/")
+
+
 def main():
     if not os.path.isdir(DIST):
         sys.exit(f"{DIST} is not there — run this after astro build.")
 
     quiet_count_gate()
+    context_urls_land()
 
     pages = glob.glob(DIST + "/**/*.html", recursive=True)
     if len(pages) < 100:

@@ -590,11 +590,63 @@ def flag_seams():
               f"{len(noid)} eras without an id, {len(noimg)} without an image, none new")
 
 
+def context_contract():
+    """site/public/context.json is what the generator would write today, and what /data/ says it is.
+
+    The file is a CONTRACT other sites snapshot, so three things must hold: its ids are
+    unique (a note can cite one era permanently), it is current (a stale copy would publish
+    yesterday's gaps as today's), and the version /data/ documents is the version the file
+    carries. A consumer reads the page and the file; if they disagree, one of them is lying.
+    """
+    p = "site/public/context.json"
+    if not os.path.exists(p):
+        return
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "build_context", os.path.join(os.path.dirname(os.path.abspath(__file__)), "build-context.py"))
+        bc = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(bc)
+        have = json.load(open(p, encoding="utf-8"))
+        now = bc.build()
+    except Exception as e:
+        err(f"cannot check context.json: {e}")
+        return
+    have.pop("generated", None)
+    now.pop("generated", None)
+    if have != now:
+        err("site/public/context.json is not what scripts/build-context.py writes today. "
+            "Run python3 scripts/build-context.py.")
+    ids = [e["id"] for r in now["regions"] for e in r["eras"]] + \
+          [e["id"] for c in now["countries"] for e in c["eras"]]
+    dup = {i for i in ids if ids.count(i) > 1}
+    if dup:
+        err(f"context.json era ids are not unique: {sorted(dup)[:5]}")
+    ver = now["contract"]["version"]
+    try:
+        page = open("site/src/pages/data.astro", encoding="utf-8").read()
+    except OSError:
+        page = ""
+    if f"Version <b>{ver}</b>" not in page:
+        err(f"context.json is version {ver} and /data/ does not say so. Update the contract "
+            f"section of site/src/pages/data.astro when the version moves.")
+    for r in now["regions"]:
+        for e in r["eras"]:
+            if e["basis"] not in ("not-recorded", "unknown", "seeded:defranceschi-sovereignty"):
+                err(f"context.json {e['id']}: unknown basis {e['basis']!r}")
+    if not dup:
+        c = now["counts"]
+        print(f"context.json: v{ver}, {c['regions']} regions / {c['regionEras']} eras, "
+              f"{c['countries']} countries / {c['countryEras']} eras, ids unique, current")
+
+
 def main():
     flag_era_drift()
     flag_art_drift()
     flag_evidence()
     flag_seams()
+    context_contract()
     harvest_artefact_is_this_run()
     places = json.load(open("data/places.json"))["places"]
     regions = json.load(open("data/regions.json"))

@@ -131,6 +131,15 @@ const FILES = [
   { path: "/regions.json", size: sizeOf("regions.json"), ...licOf("regions.json"),
     what: `The jurisdiction layer — ${regions.regions.length} record regions, each an era with the polity that held that ground and the archives its paper went to. This is the file nobody else publishes.`,
     shape: `{ regions: [{ id, from, to, polity, filedUnder[], note, geo }] }` },
+  { path: "/context.json", size: sizeOf("context.json"), ...licOf("context.json"),
+    what: "The versioned contract for «what held this ground in this year?». Every region era and every country era has a permanent id, an evidence class and a link; `quality` lists the gaps and overlaps where a lookup should stay silent. Written for sites that snapshot it. Documented in full under «The context contract» below.",
+    shape: `{ contract: { name, version }, rule, regions: [{ id, label, alt[], eras: [{ id, from, to, present, regime, regimeLabel, polity, filedUnder[], basis, contested, approx, url }] }], countries: [{ slug, cc, eras: [{ id, from, to, present, approx, dates, polity, evidence, concurrent, url }] }], quality: { gaps[], overlaps[] } }` },
+  { path: "/flag-eras.json", size: sizeOf("flag-eras.json"), ...licOf("flag-eras.json"),
+    what: "Every era card on every flag page, extracted once: the author's own dates, the years that could be read from them, the polity, and the tags. The source of context.json's country eras; read context.json instead if you want ids, evidence and gaps.",
+    shape: `{ eras: [{ slug, id, dates, from?, to?, approx?, present?, polity, tags[] }] }` },
+  { path: "/flag-map.json", size: sizeOf("flag-map.json"), ...licOf("flag-map.json"),
+    what: "The flag that flew over each country, for the map's flag layer. KEYED ON THE MODERN COUNTRY (ISO 3166-1 alpha-2), so it is wrong for a place whose country has moved: Vodnjan in 1925 was Italian, not the Kingdom of Serbs, Croats and Slovenes. Great Britain merges four timelines under GB. For anything but drawing a flag on a country shape, use context.json.",
+    shape: `{ at: { cc: [lat, lon] }, f: { cc: [[from, to, eraId]] }, slug: { pageSlug: cc } }` },
   { path: "/providers.json", size: sizeOf("providers.json"), ...licOf("providers.json"),
     what: `${provs.providers.length} providers with their coverage, access class, and the date each was last checked to be alive.`,
     shape: `{ providers: [{ id, name, kind, access, countries[], url, checked }] }` },
@@ -349,6 +358,22 @@ curl -s https://recordatlas.org/regions.json | jq '.regions[0]'`}</code></pre>
     are static files on GitHub Pages, which is also why there is no query
     endpoint. Fetch the index and filter it yourself; the first paint is {sizeOf("index.json")},
     and every place is that plus the {nTailCells.toLocaleString()} cells under <code>/pi/</code>.</p>
+  </div>
+
+  <div class="one" id="context" style="margin-top:18px">
+    <div class="lab">The context contract</div>
+    <p>{`/context.json`} answers «what held this ground in this year?» for the sites that quote the atlas beside a dated event. It is versioned: the <code>contract.version</code> field follows semantic versioning, and anything a consumer could notice — a renamed field, a changed id, a different lookup rule — raises it. Version <b>1.0.0</b>.</p>
+    <ul>
+      <li><b>Ids are permanent.</b> A region era is <code>&lt;region&gt;--era-&lt;from&gt;</code> (<code>calabria--era-1815</code>); a country era is <code>&lt;page slug&gt;--&lt;era id&gt;</code> (<code>croatia-flags--era-1991</code>), the id the flag layer already uses. Each carries a <code>url</code> that lands on the era.</li>
+      <li><b>An era covers <code>from</code> ≤ year &lt; <code>to</code>.</b> The year an era ends is the year the next begins, so a bare year equal to a boundary belongs to the newer era. A consumer holding only a year should say «in that year» or stay silent.</li>
+      <li><b>Look in <code>regions</code> first.</b> Fall back to <code>countries</code> only when no region covers the place. Countries are keyed by <b>flag page slug</b>, not ISO code: Great Britain is four pages, and a modern country cannot say what held a place whose country has since moved.</li>
+      <li><b>Stay silent where <code>quality</code> says so.</b> <code>gaps</code> are intervals a page leaves empty; <code>overlaps</code> are two eras at once, <code>concurrent</code> where the page really lists two polities. <code>evidence</code> is <code>attested</code> only where a primary or reference source, or two independent compiled ones, support the era; <code>unreviewed</code> and <code>unlabelled</code> mean nobody has checked.</li>
+      <li><b><code>basis</code> says where a region's dates came from.</b> <code>seeded:defranceschi-sovereignty</code> means the bands were taken from the Defranceschi archive's own research, so the atlas cannot be cited as independent confirmation of them. <code>not-recorded</code> means the file does not say.</li>
+      <li><b>null is not false.</b> <code>contested</code> and <code>approx</code> on a region era are null because nobody has assessed them. Treat null as uncertain.</li>
+    </ul>
+    <p class="cap">Not in this version, and not to be inferred: a language of administration, a ruler per year, sources on region eras, and events (wars, famines, epidemics). Ten country eras with no id on their page are left out because they cannot be cited.</p>
+    <pre class="ra-code"><code>{`curl -s https://recordatlas.org/context.json \
+  | jq '.regions[] | select(.id=="calabria") | .eras[] | select(.from<=1860 and (.to==null or .to>1860))'`}</code></pre>
   </div>
 
   <div class="one" style="margin-top:18px">

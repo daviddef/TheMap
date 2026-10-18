@@ -34,8 +34,9 @@ import json, os, re, sys, time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "site", "public", "context.json")
-VERSION = "1.10.0"
+VERSION = "1.11.0"
 CHANGES = [
+    {"version": "1.11.0", "change": "Pilot: calabria carries `rulers` (who reigned, with from/to days, fromYear/toYear and a Wikidata id where one could be confirmed) and `language` (what language a source says its administration and records used, with what the source does not cover). Other regions have hasRulers and hasLanguage false. A ruler row is the legal reign a page gives, not who held Calabria in fact; see each row's note."},
     {"version": "1.10.0", "change": "Every assessed region era carries fromMargin and toMargin (whole years of uncertainty on its start and end year; 0 = the sources agree on one year; null = unknowable), contestedScope (none, bounds = the dispute is about when the change happened, regime = who held the ground in the middle was disputed, part = only some of the ring), marginWhy, and marginSourced (false where the margin rests on dates the assessor knew but did not find in a fetched page). approx describes the BOUNDARY years only."},
     {"version": "1.9.0", "change": "Twenty-five older regions are assessed (contested, approx, a why and an assessmentSource for each era): calabria, campania, sicily, queensland, western-cape, cape, england, santafe, east-prussia, posen, pomerania, hungary, the three Istrian regions, kvarner, carnia, carniola, dalmatia, vojna-krajina, imotski, bosnia, vojvodina. null still means a source could not be found; notes/85-region-corrections.md lists where the sources contradict a date or label."},
     {"version": "1.8.0", "change": "Each region carries its ring ([lat, lon] vertices, approximate by design) and a bbox [south, west, north, east], so a consumer needs no second file; the 16 regions written in October 2026 carry assessed contested and approx values (false means looked at and clean, null still means unassessed), with a `why` where true."},
@@ -55,9 +56,28 @@ def j(path):
     return json.load(open(os.path.join(ROOT, path), encoding="utf-8"))
 
 
+def _yr(s):
+    m = re.match(r"-?\d{3,4}", s or "")
+    return int(m.group()) if m else None
+
+
+def detail_block(d):
+    """Rulers and languages for a region that has them (so far only the pilot). Each ruler gets numeric
+    fromYear/toYear for a year lookup; a reign with no end year is open (toYear null)."""
+    if not d:
+        return {"hasRulers": False, "hasLanguage": False}
+    rs = []
+    for x in d["rulers"]:
+        rs.append({"name": x["name"], "polity": x["polity"], "from": x["from"], "to": x["to"],
+                   "fromYear": _yr(x["from"]), "toYear": _yr(x["to"]) if x["to"] else None,
+                   **({"q": x["q"]} if x.get("q") else {}), "source": x["source"], **({"note": x["note"]} if x.get("note") else {})})
+    return {"hasRulers": True, "hasLanguage": True, "rulers": rs, "language": d["language"]}
+
+
 def build():
     regions = j("data/regions.json")
     prov = j("data/region-provenance.json")
+    detail = (j("data/region-detail.json") if os.path.exists(os.path.join(ROOT, "data", "region-detail.json")) else {"regions": {}})["regions"]
     eras = j("site/public/flag-eras.json")["eras"]
     fmap = j("site/public/flag-map.json")
     ev = j("data/flag-evidence.json")["pages"]
@@ -101,6 +121,7 @@ def build():
                      max(p[0] for p in r["ring"]), max(p[1] for p in r["ring"])],
             "eras": es,
             "url": f"/region/{r['id']}/",
+            **detail_block(detail.get(r["id"])),
         })
 
     # ---- countries -----------------------------------------------------

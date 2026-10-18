@@ -792,6 +792,37 @@ def leaders_gate():
         print(f"leaders: {c['holders']} heads of state across {c['countries']} countries, every holder carries a Wikidata id")
 
 
+def region_detail_gate():
+    """data/region-detail.json: every ruler and language row names an https source, reigns are ordered, rows say what they establish."""
+    p = "data/region-detail.json"
+    if not os.path.exists(p):
+        return
+    try:
+        doc = json.load(open(p, encoding="utf-8"))["regions"]
+        rids = {r["id"] for r in json.load(open("data/regions.json", encoding="utf-8"))["regions"]}
+    except Exception as e:
+        err(f"cannot read region-detail.json: {e}")
+        return
+    n = 0
+    for rid, d in doc.items():
+        if rid not in rids:
+            err(f"region-detail: {rid} is not a region"); continue
+        for x in d["rulers"]:
+            n += 1
+            if not str(x.get("source", "")).startswith("https://"):
+                err(f"region-detail {rid} {x['name']}: no https source")
+            a, b = str(x["from"])[:4], str(x["to"] or "9999")[:4]
+            if not a.lstrip("-").isdigit() or a > b:
+                err(f"region-detail {rid} {x['name']}: reign {x['from']} to {x['to']} is not ordered")
+            if x.get("q") and not x["q"].startswith("Q"):
+                err(f"region-detail {rid} {x['name']}: bad Wikidata id")
+        for l in d["language"]:
+            if not str(l.get("source", "")).startswith("https://") or not l.get("says") or not l.get("notCovered"):
+                err(f"region-detail {rid} language {l.get('kind')}: needs a source, what it says and what it does not cover")
+    if n:
+        print(f"region-detail: {n} reigns and their language rows, every row sourced")
+
+
 def main():
     flag_era_drift()
     flag_art_drift()
@@ -802,6 +833,7 @@ def main():
     history_ground()
     voyages_gate()
     leaders_gate()
+    region_detail_gate()
     harvest_artefact_is_this_run()
     places = json.load(open("data/places.json"))["places"]
     regions = json.load(open("data/regions.json"))

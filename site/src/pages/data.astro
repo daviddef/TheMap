@@ -362,7 +362,7 @@ curl -s https://recordatlas.org/regions.json | jq '.regions[0]'`}</code></pre>
 
   <div class="one" id="context" style="margin-top:18px">
     <div class="lab">The context contract</div>
-    <p>{`/context.json`} answers «what held this ground in this year?» for the sites that quote the atlas beside a dated event. It is versioned: the <code>contract.version</code> field follows semantic versioning, and anything a consumer could notice — a renamed field, a changed id, a different lookup rule — raises it. Version <b>1.3.0</b>.</p>
+    <p>{`/context.json`} answers «what held this ground in this year?» for the sites that quote the atlas beside a dated event. It is versioned: the <code>contract.version</code> field follows semantic versioning, and anything a consumer could notice — a renamed field, a changed id, a different lookup rule — raises it. Version <b>1.4.0</b>.</p>
     <ul>
       <li><b>Ids are permanent.</b> A region era is <code>&lt;region&gt;--era-&lt;from&gt;</code> (<code>calabria--era-1815</code>); a country era is <code>&lt;page slug&gt;--&lt;era id&gt;</code> (<code>croatia-flags--era-1991</code>), the id the flag layer already uses. Each carries a <code>url</code> that lands on the era.</li>
       <li><b>An era covers <code>from</code> ≤ year &lt; <code>to</code>.</b> The year an era ends is the year the next begins, so a bare year equal to a boundary belongs to the newer era. A consumer holding only a year should say «in that year» or stay silent.</li>

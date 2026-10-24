@@ -824,10 +824,40 @@ def region_detail_gate():
         print(f"region-detail: {n} reigns and their language rows, every row sourced")
 
 
+def flag_art_audit():
+    """data/flag-art.json: every audited drawing exists, has a valid class, and names a reference when it claims to match one."""
+    p = "data/flag-art.json"
+    if not os.path.exists(p):
+        return
+    try:
+        doc = json.load(open(p, encoding="utf-8"))
+        art = json.load(open("data/era-flags.json", encoding="utf-8"))["art"]
+    except Exception as e:
+        err(f"cannot read flag-art.json: {e}")
+        return
+    n, tally = 0, {}
+    for slug, pg in doc["pages"].items():
+        for eid, r in pg.items():
+            n += 1
+            tally[r["art"]] = tally.get(r["art"], 0) + 1
+            if eid not in art.get(slug, {}):
+                err(f"flag art {slug} {eid}: there is no such drawing")
+            if r["art"] not in doc["classes"]:
+                err(f"flag art {slug} {eid}: unknown class {r['art']!r}")
+            if r["art"] in ("faithful", "simplified", "wrong", "redrawn") and not str(r.get("reference") or "").startswith("https://"):
+                err(f"flag art {slug} {eid}: {r['art']} without an https reference")
+            if not r.get("note"):
+                err(f"flag art {slug} {eid}: no note")
+    total = sum(len(v) for v in art.values())
+    parts = ", ".join(f"{v} {k}" for k, v in sorted(tally.items()))
+    print(f"flag art: {n} of {total} drawings compared with a reference ({parts})")
+
+
 def main():
     flag_era_drift()
     flag_art_drift()
     flag_evidence()
+    flag_art_audit()
     flag_seams()
     context_contract()
     history_json()

@@ -367,12 +367,29 @@ def history_page_built():
         err("history page does not load history-map.js")
 
 
+def art_tags_reach_pages():
+    """Every audited drawing shows its verdict on the built page."""
+    try:
+        doc = json.load(open("data/flag-art.json", encoding="utf-8"))
+    except OSError:
+        return
+    for slug, pg in doc["pages"].items():
+        f = os.path.join(DIST, "flags", slug, "index.html")
+        if not os.path.exists(f):
+            err(f"flag art names {slug}, which has no built page")
+            continue
+        n = open(f, encoding="utf-8").read().count('class="art-tag')
+        if n < len(pg):
+            err(f"{slug}: the art file holds {len(pg)} verdicts and the built page shows {n}")
+
+
 def main():
     if not os.path.isdir(DIST):
         sys.exit(f"{DIST} is not there — run this after astro build.")
 
     quiet_count_gate()
     context_urls_land()
+    art_tags_reach_pages()
     history_page_built()
 
     pages = glob.glob(DIST + "/**/*.html", recursive=True)

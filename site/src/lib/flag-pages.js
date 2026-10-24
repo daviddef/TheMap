@@ -238,6 +238,32 @@ try {
     path.join(process.cwd(), "..", "data", "flag-evidence.json"), "utf8"));
 } catch { EVIDENCE = null; }
 
+/* THE DRAWINGS ARE CLAIMS TOO. Every era's picture is hand-drawn, and until now nobody had
+ * compared one with the flag it stands for: a Croatian card drew a five-pointed star on teal
+ * where the sourced emblem is a six-pointed star over a crescent on blue. data/flag-art.json
+ * records, per drawing, what it was compared with and how it came out; the page says so under
+ * the picture, and says "not yet compared" where nobody has looked. */
+let ART = null;
+try {
+  ART = JSON.parse(fs.readFileSync(
+    path.join(process.cwd(), "..", "data", "flag-art.json"), "utf8"));
+} catch { ART = null; }
+const ART_SAY = {
+  faithful: "Drawing: the same design as the reference",
+  simplified: "Drawing: simplified from the reference",
+  schematic: "Drawing: a stand-in, not a documented flag",
+  redrawn: "Drawing: redrawn after it was found to differ from the reference",
+  wrong: "Drawing: known to differ from the reference, not yet redrawn",
+  "no-reference": "Drawing: no reference image found",
+};
+
+function artTag(a) {
+  const cls = ART_SAY[a.art] ? a.art : "no-reference";
+  const ref = a.reference && /^https:\/\//.test(a.reference)
+    ? ` <a href="${esc(a.reference)}" rel="noopener">reference</a>` : "";
+  return `<div class="art-tag art-${cls}" title="${esc(a.note || "")}">${ART_SAY[cls]}${ref}</div>`;
+}
+
 const CLASS_SAY = {
   attested: "Attested",
   reconstructed: "Reconstruction",
@@ -269,7 +295,23 @@ function evidencePanel(ev, sources) {
 /** Puts each reviewed era's panel just above its paint guide, and a count above
  *  the timeline. Fails loudly if an era in the file is not on the page, so a
  *  renamed id cannot silently drop its evidence. */
+function withArt(slug, html) {
+  const eras = ART && ART.pages && ART.pages[slug];
+  if (!eras) return html;
+  for (const [id, a] of Object.entries(eras)) {
+    const at = html.indexOf(`id="${id}"`);
+    if (at < 0) throw new Error(`flag-art.json names ${slug} ${id}, which is not on the page`);
+    const next = html.indexOf('<div class="entry"', at);
+    const cap = html.indexOf('<div class="flag-caption">', at);
+    if (cap < 0 || (next >= 0 && cap > next)) continue;          // an era with no caption has nowhere to put it
+    const end = html.indexOf("</div>", cap) + 6;
+    html = html.slice(0, end) + artTag(a) + html.slice(end);
+  }
+  return html;
+}
+
 function withEvidence(slug, html) {
+  html = withArt(slug, html);
   const eras = EVIDENCE && EVIDENCE.pages && EVIDENCE.pages[slug];
   if (!eras) return html;
   const src = EVIDENCE.sources || {};
@@ -322,6 +364,10 @@ const WRAPPER = `
 .flagpage .ev-src li{margin:2px 0}
 .flagpage .ev-kind{color:var(--ink-3);font-size:11px;border:1px solid var(--rule);border-radius:9px;padding:0 6px;margin-left:4px}
 .flagpage .ev-open{color:var(--ink-2,var(--ink))}
+.flagpage .art-tag{margin:4px 0 0;font-family:var(--sans);font-size:11px;line-height:1.35;color:var(--ink-3)}
+.flagpage .art-tag a{color:inherit}
+.flagpage .art-wrong,.flagpage .art-no-reference{color:var(--ink)}
+.flagpage .art-wrong{font-weight:600}
 .flagpage .evidence-sum{margin:0 0 18px;padding:10px 14px;border:1px solid var(--rule);border-radius:3px;
   background:var(--panel);font-family:var(--sans);font-size:13px;line-height:1.5}
 .flagpage .evidence-sum span{display:block;color:var(--ink-3);font-size:12px;margin-top:2px}

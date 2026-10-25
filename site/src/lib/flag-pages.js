@@ -249,6 +249,7 @@ try {
     path.join(process.cwd(), "..", "data", "flag-art.json"), "utf8"));
 } catch { ART = null; }
 const ART_SAY = {
+  commons: "Drawing: the Wikimedia Commons file itself, public domain",
   faithful: "Drawing: the same design as the reference",
   simplified: "Drawing: simplified from the reference",
   schematic: "Drawing: a stand-in, not a documented flag",
@@ -260,8 +261,8 @@ const ART_SAY = {
 function artTag(a) {
   const cls = ART_SAY[a.art] ? a.art : "no-reference";
   const ref = a.reference && /^https:\/\//.test(a.reference)
-    ? ` <a href="${esc(a.reference)}" rel="noopener">reference</a>` : "";
-  return `<div class="art-tag art-${cls}" title="${esc(a.note || "")}">${ART_SAY[cls]}${ref}</div>`;
+    ? ` <a href="${esc(a.reference)}" rel="noopener">${cls === "commons" ? "file" : "reference"}</a>` : "";
+  return `<div class="art-tag art-${cls}" title="${esc(a.note || "")}">${ART_SAY[cls]}${ref}${cls === "commons" && a.artist ? ` <span class="art-by">by ${esc(a.artist)}</span>` : ""}</div>`;
 }
 
 const CLASS_SAY = {

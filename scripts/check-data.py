@@ -850,6 +850,18 @@ def flag_art_audit():
                 err(f"flag art {slug} {eid}: {r['art']} without an https reference")
             if not r.get("note"):
                 err(f"flag art {slug} {eid}: no note")
+            if r["art"] == "commons":
+                # the drawing IS another person's file: only public-domain ones may be embedded, and the
+                # author stays named. Anything under CC BY / BY-SA would need an attribution notice on every page.
+                if r.get("license") not in ("Public domain", "CC0"):
+                    err(f"flag art {slug} {eid}: commons drawing with licence {r.get('license')!r}; only Public domain or CC0 may be embedded")
+                if not r.get("artist"):
+                    err(f"flag art {slug} {eid}: commons drawing without an author")
+                if "commons.wikimedia.org/wiki/File:" not in str(r.get("reference") or ""):
+                    err(f"flag art {slug} {eid}: commons drawing without its Commons file page")
+                svg = art.get(slug, {}).get(eid, "")
+                if svg.count("<svg") != 1 or re.search(r"<(script|style|image|text|foreignObject)\b|href=\"(?!#)", svg):
+                    err(f"flag art {slug} {eid}: commons drawing is not a clean single SVG")
     total = sum(len(v) for v in art.values())
     parts = ", ".join(f"{v} {k}" for k, v in sorted(tally.items()))
     print(f"flag art: {n} of {total} drawings compared with a reference ({parts})")

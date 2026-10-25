@@ -387,7 +387,7 @@ curl -s https://recordatlas.org/regions.json | jq '.regions[0]'`}</code></pre>
       <li><b>Rings are in the file.</b> Each region carries its <code>ring</code> as [lat, lon] vertices and a <code>bbox</code> as [south, west, north, east]. The rings are approximate by design, so a place within about fifteen kilometres of an edge may belong to the next region.</li>
     </ul>
     <p class="cap">Not in this version, and not to be inferred: a language of administration, a ruler per year, sources on region eras, and events (wars, famines, epidemics). Ten country eras with no id on their page are left out because they cannot be cited.</p>
-    <pre class="ra-code"><code>{`curl -s https://recordatlas.org/context.json \
+    <pre class="ra-code" tabindex="0" aria-label="Example command: fetch context.json and list the Calabria eras covering 1860"><code>{`curl -s https://recordatlas.org/context.json \
   | jq '.regions[] | select(.id=="calabria") | .eras[] | select(.from<=1860 and (.to==null or .to>1860))'`}</code></pre>
   </div>
 

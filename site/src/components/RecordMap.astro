@@ -1708,6 +1708,12 @@ window.addEventListener("load", async function () {
     if (!FLAGIDX || !fSec) return;
     var k = fold((q || "").trim());
     var op = openPlaceData();
+    /* A PLACE IS OPEN: ITS COUNTRY'S CARD IS THE ANSWER, WHATEVER IS TYPED. open() already
+       does this, but every later redraw of the section (a keystroke, the search finishing, the
+       flag index arriving after a shared link like ?q=senj&at=senj) went through here and
+       replaced it with the cards the text matched. The typed filter takes over again once the
+       place is closed. */
+    if (op && drawFlagResForPlace(op)) return;
     /* A TWO-PART QUERY STILL HAS TO ANSWER. «Blazevic Gracisce» is a surname
        and a village; neither is a country, so matching the whole string would
        hide this section for every combined search.

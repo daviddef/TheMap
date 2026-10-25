@@ -29,6 +29,10 @@ const CH = hist.chapters;
 
   <div class="hm" id="hm" data-base={BASE}>
     <div class="hm-chapters" role="group" aria-label="Chapters">
+      <button type="button" class="hm-chip hm-all" id="hm-tour-btn"
+              title="Play every era in turn, from the first Islamic conquests to the present">
+        <b>&#9654; Play all eras</b><i>one after another</i>
+      </button>
       {CH.map((c) => (
         <button type="button" class="hm-chip" data-ch={c.id}
                 title={`${c.from}–${c.to}: ${c.blurb}`}>
@@ -58,11 +62,13 @@ const CH = hist.chapters;
                aria-label="Year" />
         <div class="hm-ticks" id="hm-ticks" aria-hidden="true"></div>
       </div>
+      <label class="hm-tour"><input type="checkbox" id="hm-tour" checked /> Continue to the next era</label>
       <label class="hm-speed">Speed
         <select id="hm-speed" aria-label="Playback speed">
-          <option value="6">Slow</option>
-          <option value="12" selected>Medium</option>
-          <option value="24">Fast</option>
+          <option value="1">Very slow &mdash; 1 year a second</option>
+          <option value="2" selected>Slow &mdash; 2 years a second</option>
+          <option value="4">Medium &mdash; 4 years a second</option>
+          <option value="8">Fast &mdash; 8 years a second</option>
         </select>
       </label>
     </div>
@@ -148,6 +154,8 @@ const CH = hist.chapters;
   .hm-ticks { position:relative; height:18px; font-size:.7rem; color:var(--ink, #16222A); opacity:.7; }
   .hm-ticks span { position:absolute; transform:translateX(-50%); font-variant-numeric:tabular-nums; }
   .hm-speed { font-size:.8rem; display:grid; gap:2px; }
+  .hm-tour { font-size:.85rem; display:inline-flex; gap:6px; align-items:center; }
+  .hm-chip.hm-all { border-color:var(--accent, #1F5C6B); }
   .hm-layers { display:flex; flex-wrap:wrap; gap:6px 18px; align-items:center; font-size:.9rem; }
   .hm-layers label { display:inline-flex; gap:6px; align-items:center; }
   .hm-layers .k { display:inline-block; width:18px; height:4px; border-radius:2px; }

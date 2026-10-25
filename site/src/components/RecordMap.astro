@@ -1571,7 +1571,9 @@ window.addEventListener("load", async function () {
     flagIdxWanted = true;
     fetch(BASE + "flag-index.json")
       .then(function (r) { return r.json(); })
-      .then(function (d) { FLAGIDX = d; drawFlagRes(qbox ? qbox.value : "");
+      .then(function (d) { FLAGIDX = d;
+                           var opn = openPlaceData();
+                           if (!(opn && drawFlagResForPlace(opn))) drawFlagRes(qbox ? qbox.value : "");
                            /* A panel may already be open and showing the
                               fallback glyph; upgrade it in place. */
                            paintIcoFlags(document); })
@@ -1676,9 +1678,36 @@ window.addEventListener("load", async function () {
     fHubs.innerHTML = "";
   }
 
+  /* A PLACE ANSWERS THIS SECTION TOO. David: «when I select a place in a
+     country, e.g. Senj, Croatia, why does the "whose flag flew there" section
+     disappear?» The cards filter on the typed text against country names,
+     regions, hubs and crowns; «senj» is none of those, so the section hid
+     itself the moment a village was the answer, which is exactly when a reader
+     asks whose flag flew there. A chosen place now shows the card of the
+     country it is filed under, whatever is typed, and the typed filter only
+     takes over again once the place is closed. */
+  function drawFlagResForPlace(d) {
+    if (!FLAGIDX || !fSec || !d) return false;
+    buildCC2FLAG();
+    var c = CC2FLAG && CC2FLAG[String(d.country || "").toUpperCase()];
+    if (!c) return false;
+    fSec.hidden = false;
+    fSub.textContent = d.name + " \u2014 the flag card for " + c.name +
+      ", and the regimes that held it are in the band above";
+    fCountries.innerHTML = flagCardHTML(c);
+    fHubsH.hidden = true;
+    fHubs.innerHTML = "";
+    return true;
+  }
+  function openPlaceData() {
+    var at = Q.get("at");
+    return at && cache[at] && !panel.hidden ? cache[at] : null;
+  }
+
   function drawFlagRes(q) {
     if (!FLAGIDX || !fSec) return;
     var k = fold((q || "").trim());
+    var op = openPlaceData();
     /* A TWO-PART QUERY STILL HAS TO ANSWER. «Blazevic Gracisce» is a surname
        and a village; neither is a country, so matching the whole string would
        hide this section for every combined search.
@@ -1702,7 +1731,12 @@ window.addEventListener("load", async function () {
       return hit(fold(h.name + " " + (h.what || "") + " " + (h.meta || "")));
     });
 
-    if (k && !mc.length && !mh.length) { fSec.hidden = true; return; }
+    /* Nothing matches the typed text: if a place is open, its country's card
+       is the answer; hiding the section is for a search that found nothing. */
+    if (k && !mc.length && !mh.length) {
+      if (op && drawFlagResForPlace(op)) return;
+      fSec.hidden = true; return;
+    }
     fSec.hidden = false;
     fSub.textContent = k
       ? mc.length + " of " + cs.length + " countries, " + mh.length + " of " +
@@ -2167,6 +2201,7 @@ window.addEventListener("load", async function () {
     bandsInit(panel);
     paintIcoFlags(panel);
     buildCheck(d, drawHood(d));
+    drawFlagResForPlace(d);
   }
 
   function render(d) {

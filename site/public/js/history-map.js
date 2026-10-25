@@ -21,6 +21,7 @@
              migration: $("hm-l-migration"), flags: $("hm-l-flags"), ground: $("hm-l-ground"), voyages: $("hm-l-voyages"), leaders: $("hm-l-leaders") };
   var LEADERS = null, leaderLayer, leadersFetch = null;
   var elG = $("hm-gnote"), GROUND = null, groundLayer, groundKey = "";
+  var elTour = $("hm-tour"), elTourBtn = $("hm-tour-btn"), pauseT = null;
 
   var D = null, FM = null, chapter = null, year = 1914, timer = null, selected = null;
   var map, arcLayer, flagLayer;
@@ -237,7 +238,7 @@
     var act = GROUND.shapes.filter(function (sh) { return sh.s <= year && year < sh.e; });
     var key = act.map(function (sh) { return sh.n + sh.s; }).join("|");
     elG.textContent = act.length
-      ? act.length + " polities have a boundary in this atlas for " + yr(year) + ". Where none is drawn, nothing is known here, not nothing happened."
+      ? act.length + " polities have a boundary in this atlas for " + yr(year) + ". Each polity has its own colour so they can be told apart; the colours mean nothing else, and a polity keeps its colour through the years. Where none is drawn, nothing is known here, not nothing happened."
       : "No boundary data for " + yr(year) + ", so the ground is left untinted.";
     if (key === groundKey) return;
     groundKey = key; groundLayer.clearLayers();
@@ -320,7 +321,7 @@
       "<p><b>" + esc(m.ot) + "</b></p>" +
       "<p>Recorded on the page for <b>" + esc(m.s) + "</b>, " + (m.d === "in" ? "coming in." : "going out.") + "</p>" +
       leaderLine(m) +
-      "<p class='hm-fine'>" + esc(dated) + " " + esc(how) + "</p>" +
+      "<p class='hm-fine'>" + esc(how) + "</p>" +
       "<p><a href='" + BASE + "flags/" + esc(m.p) + "/#" + esc(m.e) + "'>Read it on the flag page &rarr;</a></p>";
     if (pan && m.b) map.panTo(m.b);
   }
@@ -329,7 +330,7 @@
   function setYear(y, fromUser) {
     year = Math.max(MIN, Math.min(MAX, y));
     elRange.value = year; elYear.textContent = yr(year);
-    if (fromUser) stop();
+    if (fromUser) { stop(); cancelPause(); }
     draw(); url();
   }
   function stop() {
@@ -345,15 +346,27 @@
     var step = reduce ? 5 : 1, per = reduce ? 1000 / (parseInt(elSpeed.value, 10) / 5) : 1000 / parseInt(elSpeed.value, 10);
     timer = setInterval(function () {
       var e = chapter ? chapter.to : MAX;
-      if (year >= e) { stop(); return; }
+      if (year >= e) { stop(); nextEra(); return; }
       setYear(year + step);
     }, per);
   }
+  /* ERA BY ERA. When a chapter has run to its end and «Continue to the next era» is on, the
+     map says what is coming, waits long enough to read it, then moves its view and years to the
+     next chapter and keeps playing. The last chapter just stops. */
+  function nextEra() {
+    if (!chapter || !elTour || !elTour.checked) return;
+    var i = D.chapters.indexOf(chapter), nx = D.chapters[i + 1];
+    if (!nx) { elCh.textContent = chapter.title + " \u2014 that was the last era."; return; }
+    elCh.textContent = "Next: " + nx.title + " (" + nx.from + "\u2013" + nx.to + ")";
+    clearTimeout(pauseT);
+    pauseT = setTimeout(function () { pauseT = null; setChapter(nx.id, true); }, reduce ? 1500 : 3500);
+  }
+  function cancelPause() { if (pauseT) { clearTimeout(pauseT); pauseT = null; } }
 
   function setChapter(id, autoplay) {
-    stop();
+    stop(); cancelPause();
     chapter = D.chapters.filter(function (c) { return c.id === id; })[0] || null;
-    document.querySelectorAll(".hm-chip").forEach(function (b) {
+    document.querySelectorAll(".hm-chip[data-ch]").forEach(function (b) {
       if (chapter && b.getAttribute("data-ch") === chapter.id) b.setAttribute("aria-current", "true");
       else b.removeAttribute("aria-current");
     });
@@ -416,11 +429,15 @@
       elLoad.hidden = true;
       strip();
       elRange.addEventListener("input", function () { setYear(parseInt(elRange.value, 10), true); });
-      elPlay.addEventListener("click", play);
+      elPlay.addEventListener("click", function () { cancelPause(); play(); });
+      if (elTourBtn) elTourBtn.addEventListener("click", function () {
+        if (elTour) elTour.checked = true;
+        setChapter(D.chapters[0].id, true);
+      });
       elSpeed.addEventListener("change", function () { if (timer) { stop(); play(); } });
       elTrail.addEventListener("change", draw);
       Object.keys(on).forEach(function (k) { on[k].addEventListener("change", draw); });
-      document.querySelectorAll(".hm-chip").forEach(function (b) {
+      document.querySelectorAll(".hm-chip[data-ch]").forEach(function (b) {
         b.addEventListener("click", function () { setChapter(b.getAttribute("data-ch"), true); });
       });
       document.addEventListener("keydown", function (e) {

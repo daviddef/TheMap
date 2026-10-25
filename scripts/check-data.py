@@ -279,6 +279,8 @@ def flag_evidence():
                     err(f"{where}: says nothing about what its sources establish"); bad += 1
             if cls == "unreviewed" and not e.get("open"):
                 err(f"{where}: unreviewed, and does not say why"); bad += 1
+            if cls == "unconfirmed" and not e.get("open"):
+                err(f"{where}: unconfirmed, and does not say what the sources fail to establish"); bad += 1
             if cls in ("attested", "symbolic", "reconstructed") and not have:
                 err(f"{where}: {cls} with no source behind it"); bad += 1
             if cls == "attested" and have:

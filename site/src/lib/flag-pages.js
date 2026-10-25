@@ -270,6 +270,7 @@ const CLASS_SAY = {
   symbolic: "Emblem, not a flag",
   none: "No flag known",
   placeholder: "Placeholder image",
+  unconfirmed: "Checked against sources, not confirmed",
   unreviewed: "Not yet checked against sources",
 };
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;")
@@ -329,7 +330,7 @@ function withEvidence(slug, html) {
   for (const ev of Object.values(eras)) tally[ev.class] = (tally[ev.class] || 0) + 1;
   const reviewed = Object.values(eras).filter((e) => e.class !== "unreviewed").length;
   const SHORT = { attested: "attested", reconstructed: "reconstructed", symbolic: "emblem only",
-    none: "no flag known", placeholder: "placeholder image", unreviewed: "not yet checked" };
+    none: "no flag known", placeholder: "placeholder image", unconfirmed: "not confirmed by the sources read", unreviewed: "not yet checked" };
   const parts = Object.keys(SHORT).filter((k) => tally[k])
     .map((k) => `${tally[k]} ${SHORT[k]}`);
   const note = `<div class="evidence-sum"><b>How we know this.</b> `
@@ -356,6 +357,7 @@ const WRAPPER = `
   border-left:3px solid var(--ink-3);border-radius:3px;background:var(--panel);
   font-family:var(--sans);font-size:13px;line-height:1.5}
 .flagpage .evidence.ev-attested{border-left-color:var(--accent)}
+.flagpage .evidence.ev-unconfirmed{border-left-color:var(--ink)}
 .flagpage .ev-head{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:4px}
 .flagpage .ev-badge{font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
 .flagpage .ev-label{color:var(--ink-3);font-size:12px}

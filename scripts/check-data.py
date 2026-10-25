@@ -862,6 +862,16 @@ def flag_art_audit():
                 svg = art.get(slug, {}).get(eid, "")
                 if svg.count("<svg") != 1 or re.search(r"<(script|style|image|text|foreignObject)\b|href=\"(?!#)", svg):
                     err(f"flag art {slug} {eid}: commons drawing is not a clean single SVG")
+    # THE BUILD WRITES EACH DRAWING OUT AS ITS OWN .svg FILE, with only the default namespace declared.
+    # A drawing that uses xlink:href parses fine inline in the page and is not well-formed on its own, which
+    # failed a 64-minute build on 8 files. Prove it here, in seconds, the way the build will meet it.
+    import xml.etree.ElementTree as _ET
+    for slug, pg in art.items():
+        for eid, svg in pg.items():
+            try:
+                _ET.fromstring(svg if "xmlns=" in svg else svg.replace("<svg ", '<svg xmlns="http://www.w3.org/2000/svg" ', 1))
+            except Exception as e:
+                err(f"flag art {slug} {eid}: not well-formed as a standalone .svg ({e}); use href, not xlink:href")
     total = sum(len(v) for v in art.values())
     parts = ", ".join(f"{v} {k}" for k, v in sorted(tally.items()))
     print(f"flag art: {n} of {total} drawings compared with a reference ({parts})")

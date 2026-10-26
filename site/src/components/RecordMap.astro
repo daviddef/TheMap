@@ -3937,7 +3937,8 @@ window.addEventListener("load", async function () {
           '<label><input type="checkbox" data-k="hm-l-leaders" /> Heads of state (zoom in)</label>' +
           '<label>Trail <select data-k="hm-trail"><option value="15">15 years</option><option value="30" selected>30 years</option>' +
             '<option value="60">60 years</option><option value="120">120 years</option></select></label>' +
-          '<label><input type="checkbox" data-k="sync" /> Also narrow the records to these years (1500 on)</label>' +
+          '<label title="Every record dot, archive, cemetery, church and library on the map. Turn off to watch the history alone; turn back on and exactly the layers you had return."><input type="checkbox" data-k="rec" checked /> Show the records on the map</label>' +
+          '<label title="Ties the map\'s Year filter to the playback: at each year it keeps only the places that can answer for 25 years either side. Works from 1500; before that every record is shown."><input type="checkbox" data-k="sync" /> Only records from about these years (25 either side, 1500 on)</label>' +
         '</div></details>' +
       '</div>';
   }
@@ -3968,6 +3969,21 @@ window.addEventListener("load", async function () {
       if (TH.sync && TH.ctl) thSyncRecords(TH.ctl.year());
     });
     els.close.addEventListener("click", thClose);
+    /* ALL THE RECORD LAYERS, ONE SWITCH. They live in the Layers menu above the map; with thousands of
+       dots on screen the history underneath is hard to see. Turning them off remembers which were on
+       and turning them back on returns exactly those. */
+    var REC = ["shelf", "archives", "wikidata", "cemeteries", "churches", "libraries"], recWas = [];
+    els.rec.checked = REC.some(function (k) { return !!on[k]; });
+    els.rec.addEventListener("change", function () {
+      REC.forEach(function (k) {
+        var inp = document.querySelector('#ra-layers [data-l="' + k + '"] input');
+        if (!inp) return;
+        var want = els.rec.checked ? recWas.indexOf(k) > -1 : false;
+        if (!els.rec.checked && inp.checked) recWas.push(k);
+        if (inp.checked !== want) { inp.checked = want; inp.dispatchEvent(new Event("change", { bubbles: true })); }
+      });
+      if (els.rec.checked) recWas = [];
+    });
     /* HIDE, DON'T STOP. David: «when i close the play screen why does it stop playing? i just want to
        change filters and keep playing». The bar was the only way to get it off the map and it also
        ended the show. Hidden, the year and the era still run in the corner and the play button and

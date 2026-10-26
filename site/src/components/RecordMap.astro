@@ -3903,12 +3903,13 @@ window.addEventListener("load", async function () {
   }
   function thMarkup() {
     return '<div class="ra-th-hud"><div class="ra-th-year" data-k="hm-year">1914</div>' +
-        '<div class="ra-th-ch" data-k="hm-ch"></div></div>' +
+        '<div class="ra-th-ch" data-k="hm-ch"></div>' +
+      '<div class="ra-th-listw"><button type="button" class="ra-th-lh" data-k="lh" aria-expanded="true"><span data-k="hm-list-h">Under way</span> <i aria-hidden="true">&#9662;</i></button>' +
+        '<ol class="ra-th-list" data-k="hm-list"></ol></div>' +
+      '</div>' +
       '<div class="ra-th-cardw" hidden><button type="button" class="ra-th-x" data-k="card-x" aria-label="Close the details">&times;</button>' +
         '<div class="ra-th-card" data-k="hm-card" aria-live="polite"></div></div>' +
       '<div class="hm-era" data-k="hm-era" hidden></div>' +
-      '<div class="ra-th-listw"><button type="button" class="ra-th-lh" data-k="lh" aria-expanded="true"><span data-k="hm-list-h">Under way</span> <i aria-hidden="true">&#9662;</i></button>' +
-        '<ol class="ra-th-list" data-k="hm-list"></ol></div>' +
       '<div class="ra-th-load" data-k="hm-load">Loading the movements&hellip;</div>' +
       '<div class="ra-th-bar">' +
         '<div class="ra-th-chips" data-k="chips"></div>' +
@@ -4005,6 +4006,8 @@ window.addEventListener("load", async function () {
     /* Zoom 2 puts the whole world in about 1,000 pixels; a narrower map crops its edges rather than
        shrinking the world to a postage stamp, and zoom 1 is the floor (zoom 0 repeats the world). */
     map.setView([30, 15], map.getSize().x >= 560 ? 2 : 1, { animate: false });
+    /* The left column covers a third of the map, so the world is shifted right to sit in what is left. */
+    if (map.getSize().x >= 700) map.panBy([-Math.round(Math.min(320, map.getSize().x * 0.38) / 2), 0], { animate: false });
     thAssets().then(function () {
       if (TH.ui !== ui) return;
       return window.HistoryTheatre.create({
@@ -8515,9 +8518,14 @@ window.addEventListener("load", async function () {
   /* ---- the History playback laid over this map (history-theatre.js) -------- */
   :global(.ra-th) { position: absolute; inset: 0; z-index: 810; pointer-events: none; }
   :global(.ra-th > *) { pointer-events: auto; }
-  :global(.ra-th .ra-th-hud) { position: absolute; left: 56px; top: 10px; pointer-events: none;
-    max-width: min(30ch, calc(100% - 140px)); padding: 6px 10px 7px; border-radius: 10px;
-    background: color-mix(in srgb, var(--panel) 80%, transparent); }
+  /* ONE COLUMN: the year, the era and «Under way» are a single translucent panel from top to bottom on the
+     left, and the controls bar sits to the right of it. David: merge the two bars, stretch the list to the
+     bottom, make the year the same width as the list. */
+  :global(.ra-th) { --col: min(320px, 38%); }
+  :global(.ra-th .ra-th-hud) { position: absolute; left: 56px; top: 10px; bottom: 26px; width: var(--col);
+    display: flex; flex-direction: column; pointer-events: none; padding: 8px 10px 8px; border-radius: 10px;
+    background: color-mix(in srgb, var(--panel) 82%, transparent); backdrop-filter: blur(2px); }
+  :global(.ra-th .ra-th-hud:has(.fold)) { bottom: auto; }
   :global(.ra-th-year) { font: 700 clamp(1.8rem, 5vw, 2.8rem)/1 var(--serif, Georgia, serif);
     color: var(--ink); font-variant-numeric: tabular-nums; }
   :global(.ra-th-ch) { font-size: .78rem; color: var(--ink); margin-top: 3px; line-height: 1.3;
@@ -8528,11 +8536,11 @@ window.addEventListener("load", async function () {
   :global(.ra-th.min .ra-th-bar) { right: auto; width: auto; max-width: calc(100% - 20px); }
   :global(.ra-th.min .ra-th-chips), :global(.ra-th.min .ra-th-more),
   :global(.ra-th.min .ra-th-scrub), :global(.ra-th.min .ra-th-sel), :global(.ra-th.min .ra-th-chk) { display: none; }
-  :global(.ra-th-listw) { position: absolute; left: 56px; top: 118px; width: min(262px, calc(100% - 140px));
-    background: color-mix(in srgb, var(--panel) 90%, transparent); border: 1px solid var(--rule-strong); border-radius: 10px; }
-  :global(.ra-th-lh) { width: 100%; text-align: left; background: none; border: 0; padding: 5px 10px; font: 600 11.5px/1.2 var(--sans);
+  :global(.ra-th-listw) { pointer-events: auto; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;
+    margin-top: 7px; border-top: 1px solid var(--rule-strong); }
+  :global(.ra-th-lh) { width: 100%; text-align: left; background: none; border: 0; padding: 6px 2px 4px; font: 600 11.5px/1.2 var(--sans);
     color: var(--ink); cursor: pointer; display: flex; justify-content: space-between; }
-  :global(.ra-th-list) { list-style: none; margin: 0; padding: 0 4px 4px; max-height: 150px; overflow: auto; display: grid; gap: 1px; align-content: start; }
+  :global(.ra-th-list) { list-style: none; margin: 0; padding: 0 2px 2px 0; flex: 1 1 auto; min-height: 0; overflow: auto; display: grid; gap: 1px; align-content: start; grid-auto-rows: min-content; }
   :global(.ra-th-listw.fold .ra-th-list) { display: none; }
   :global(.ra-th-list li button) { width: 100%; text-align: left; background: none; border: 0; padding: 3px 6px; font: inherit; font-size: 11.5px;
     line-height: 1.25; color: var(--ink); cursor: pointer; border-left: 3px solid var(--c, #999); border-radius: 2px; }
@@ -8551,7 +8559,7 @@ window.addEventListener("load", async function () {
   :global(.ra-th-cardw p) { margin: .3em 0; }
   :global(.ra-th-x) { position: absolute; right: 6px; top: 2px; border: 0; background: none;
     font-size: 1.3rem; line-height: 1; cursor: pointer; color: var(--ink); }
-  :global(.ra-th-bar) { position: absolute; left: 10px; right: 10px; bottom: 74px; display: grid; gap: 6px;
+  :global(.ra-th-bar) { position: absolute; left: calc(56px + var(--col) + 10px); right: 10px; bottom: 26px; display: grid; gap: 6px;
     padding: 8px 12px; border-radius: 14px; background: var(--panel); border: 1px solid var(--rule-strong);
     box-shadow: 0 4px 16px rgba(10, 20, 26, .2); }
   :global(.ra-th-chips) { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
@@ -8573,8 +8581,13 @@ window.addEventListener("load", async function () {
   :global(.ra-th-more) { font-size: .78rem; color: var(--ink); }
   :global(.ra-th-layers) { display: flex; flex-wrap: wrap; gap: 4px 14px; padding-top: 4px; }
   :global(.ra-th-layers label) { display: inline-flex; gap: 5px; align-items: center; }
+  /* The pill's own ▶ and the bar's ▶ were two play controls; while the playback is open the bar is the one,
+     unless the Year filter is on, which only the pill carries. */
+  :global(.ra-time:not(.on):has(~ .ra-th)) { display: none; }
   @media (max-width: 700px) {
-    :global(.ra-th-bar) { left: 6px; right: 6px; bottom: 66px; padding: 6px 8px; }
+    :global(.ra-th .ra-th-hud) { bottom: auto; width: min(300px, calc(100% - 140px)); }
+    :global(.ra-th-list) { max-height: 150px; }
+    :global(.ra-th-bar) { left: 6px; right: 6px; bottom: 22px; padding: 6px 8px; }
     :global(.ra-th-sel select) { max-width: 90px; }
   }
 

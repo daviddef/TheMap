@@ -344,6 +344,25 @@
 
   /* THE ROLLING LIST. Redrawn only when its contents change (not every tick), and a reader who has scrolled
      down keeps their place: it used to be wiped and rebuilt each second, which made it impossible to scroll. */
+  /* MINI FLAGS ON EACH ROW: the other party's flag in that year (where it is a country the atlas draws), then the
+     flag of the regime on the receiving or sending end, from its own era card. A flag that is not there
+     simply does not show. */
+  function miniFlag(img, alt) {
+    return "<img class='hm-mf' loading='lazy' alt='' title='" + esc(alt) + "' src='" + BASE + "fl/" + esc(img) + ".svg' onerror=\"this.style.display='none'\">";
+  }
+  function rowFlags(m) {
+    var h = "", oc = m.how === "country" ? m.o : (m.how === "origin" ? m.seat : null);
+    if (oc && FM && FM.f[oc]) { var of = flagAt(FM.f[oc], m.f); if (of) h += miniFlag(of[2], "The flag of " + cname(oc) + " in " + m.f); }
+    h += miniFlag(m.p + "--" + m.e, "The flag of " + cname(m.s) + " in this era");
+    return "<span class='hm-rowflags'>" + h + "</span>";
+  }
+  function voyFlag(v) {
+    if (FM && v.sponsor && v.sponsor.polity && FM.slug[v.sponsor.polity]) {
+      var r = flagAt(FM.f[FM.slug[v.sponsor.polity]] || [], Math.floor(v.from));
+      if (r) return "<span class='hm-rowflags'>" + miniFlag(r[2], "Sponsor: " + (v.sponsor.name || "")) + "</span>";
+    }
+    return "<span class='hm-rowflags'></span>";
+  }
   var listSig = "", listIds = {}, listYear = null;
   function list(vis, voy) {
     voy = voy || [];
@@ -363,7 +382,7 @@
       var li = document.createElement("li"), b = document.createElement("button");
       b.type = "button"; b.style.setProperty("--c", VCOL);
       now["v" + x.i] = 1; if (flashOK && !was["v" + x.i]) b.className = "hm-new";
-      b.innerHTML = esc(x.v.title) + "<small>Voyage \u00b7 " + esc(x.v.leader.name) + " \u00b7 " + esc(spanV(x.v)) + "</small>";
+      b.innerHTML = voyFlag(x.v) + "<span class='hm-rowtxt'>" + esc(x.v.title) + "<small>Voyage \u00b7 " + esc(x.v.leader.name) + " \u00b7 " + esc(spanV(x.v)) + "</small></span>";
       b.addEventListener("click", function () { selectVoyage(x.i); });
       li.appendChild(b); elList.appendChild(li);
     });
@@ -372,7 +391,7 @@
       b.type = "button"; b.style.setProperty("--c", COL[m.v]);
       now[v.i] = 1;
       b.className = (m.major ? "hm-major" : "") + (flashOK && !was[v.i] ? " hm-new" : "");
-      b.innerHTML = (numFor[v.i] ? "<i class='hm-numb'>" + numFor[v.i] + "</i>" : "") + esc(m.major || m.ot) + "<small>" + esc(KIND[m.v]) + " · " + esc(m.s) + " · from " + m.f + "</small>";
+      b.innerHTML = rowFlags(m) + "<span class='hm-rowtxt'>" + (numFor[v.i] ? "<i class='hm-numb'>" + numFor[v.i] + "</i>" : "") + esc(m.major || m.ot) + "<small>" + esc(KIND[m.v]) + " · " + esc(m.s) + " · from " + m.f + "</small></span>";
       if (m.tip) b.title = m.tip;
       b.addEventListener("click", function () { select(v.i, true); });
       li.appendChild(b); elList.appendChild(li);

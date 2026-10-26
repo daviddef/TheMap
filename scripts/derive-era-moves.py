@@ -72,6 +72,34 @@ VERB = {
     "migration": ("migration", "out"),
 }
 
+# VERBS THE PAGES USE FOR THE SAME THINGS UNDER OTHER NAMES. A tag whose verb was not in the table above was dropped
+# without a word: the audit (scripts/audit-history.py) found 62 of them, 20 inside the playable years («Raided by: Magyar
+# raids (907)», «Settled by: Norse voyagers», «Ruled by:»…). They are kept now and carry the page's own verb in `vb`, so
+# a raid is not labelled a conquest on the map. Verbs that name no movement (contact, cultural diffusion, trade
+# network, weakened by …) stay out, and the audit lists them.
+VERB_X = {
+    "annexed by": ("conquest", "in"), "invasion by": ("conquest", "in"), "invaded by": ("conquest", "in"),
+    "conquest": ("conquest", "in"), "destroyed by": ("conquest", "in"), "subjugated by": ("occupation", "in"),
+    "raided by": ("conquest", "in"), "colonized by": ("occupation", "in"), "ruled by": ("occupation", "in"),
+    "overlordship by": ("occupation", "in"), "overlordship": ("occupation", "in"), "tributary to": ("occupation", "in"),
+    "settled by": ("migration", "in"), "coastal settlement": ("migration", "in"), "ancestral migration": ("migration", "in"),
+    "annexation by": ("conquest", "in"), "conquest of malacca by": ("conquest", "in"), "tribute paid to": ("occupation", "in"),
+    "colonization": ("migration", "in"), "resettlement": ("migration", "in"), "occupation of": ("occupation", "out"),
+}
+
+# PAGES THAT ARE NOT A COUNTRY. The empire and kingdom pages have no country the map draws, so their movements had
+# nowhere to be anchored and were dropped (49 inside the playable years). Each now borrows the modern country it
+# is filed under for its name and sits at the seat it ruled from.
+PAGE_AT = {
+    "mughal-empire-flags": ("IN", 27.18, 78.02), "ottoman-empire-flags": ("TR", 41.01, 28.98),
+    "ancient-egypt-flags": ("EG", 25.70, 32.64), "mongol-empire-flags": ("MN", 47.20, 102.84),
+    "persian-empire-flags": ("IR", 32.65, 51.67), "roman-empire-flags": ("IT", 41.90, 12.50),
+    "spanish-empire-flags": ("ES", 40.42, -3.70), "ryukyu-kingdom-flags": ("JP", 26.22, 127.72),
+    "tannu-tuva-flags": ("RU", 51.72, 94.45), "british-empire-flags": ("GB", 51.51, -0.13),
+    "hawaii-flags": ("US", 21.31, -157.86), "newfoundland-flags": ("CA", 47.56, -52.71),
+    "sikkim-flags": ("IN", 27.33, 88.61),
+}
+
 
 def load_alias():
     """The 22 flags-atlas-name -> ISO-name aliases already kept in lib/flags.js."""
@@ -124,7 +152,7 @@ def main():
     moves, unresolved, skipped = [], 0, 0
     for e in eras:
         slug = e.get("slug")
-        subj = slug2cc.get(slug)
+        subj = slug2cc.get(slug) or (PAGE_AT.get(slug) or (None,))[0]
         for t in e.get("tags") or []:
             if t.get("row") != "migro-row":
                 continue
@@ -135,6 +163,9 @@ def main():
                 continue
             verb_raw, obj = m.group(1).strip().lower(), m.group(2).strip()
             kind = VERB.get(verb_raw)
+            vb = None
+            if not kind and verb_raw in VERB_X:
+                kind, vb = VERB_X[verb_raw], m.group(1).strip()
             if not kind or not subj:
                 skipped += 1
                 continue
@@ -148,6 +179,15 @@ def main():
                 y1 = ONEYEAR.search(obj)
                 if y1:
                     frm = int(y1.group(1))
+            if not ym and not y1 and not re.search(r"BCE|\bBC\b|\bya\b", obj):
+                # NO YEAR IN PARENTHESES: read a century («7th–8th c.») or a bare year («c. 1000», «1820s–30s») from the words
+                cm = re.search(r"(\d{1,2})(?:st|nd|rd|th)(?:\s*[\u2013\-]\s*(\d{1,2})(?:st|nd|rd|th))?\s*c\b", obj)
+                by = re.search(r"(?<![\d/])(\d{3,4})s?(?![\d\w])", obj)
+                if cm:
+                    c1 = int(cm.group(1)); c2 = int(cm.group(2) or c1)
+                    frm, to = (c1 - 1) * 100 + 50, c2 * 100 - 50
+                elif by and 600 <= int(by.group(1)) <= 2030:
+                    frm = int(by.group(1))
             if not frm:
                 skipped += 1
                 continue
@@ -172,6 +212,8 @@ def main():
                 "f": frm, "t": to or (frm if e.get("present") else to),
                 "present": bool(e.get("present")) and not ym,
                 "e": e.get("id"), "p": slug,
+                **({"vb": vb} if vb else {}),
+                **({"sa": [PAGE_AT[slug][1], PAGE_AT[slug][2]]} if slug in PAGE_AT and slug not in slug2cc else {}),
             })
 
     # A POINT PER COUNTRY, CARRIED HERE SO THE LAYER IS ONE FETCH.
@@ -313,6 +355,7 @@ def main():
             "migration": sum(1 for m in moves if m["v"] == "migration"),
         },
         "at": at,
+        "names": known,          # every name this map can resolve to a country, for reading the other end out of a sentence
         "moves": moves,
     }
     out["counts"]["points"] = len(at)

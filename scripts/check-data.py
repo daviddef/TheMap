@@ -877,7 +877,34 @@ def flag_art_audit():
     print(f"flag art: {n} of {total} drawings compared with a reference ({parts})")
 
 
+def history_audit():
+    """Every movement tag on a flag page reaches the History map or is excluded for a stated reason (scripts/audit-history.py).
+    The Venetian conquest of Dalmatia was drawn as a stub at the wrong end of Croatia; the audit exists so no movement
+    falls quietly through a door like that, and it fails the build when one is MISSING."""
+    if not os.path.exists("site/public/history.json") or not os.path.exists("site/public/era-moves.json"):
+        return
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("audit_history", os.path.join(os.path.dirname(os.path.abspath(__file__)), "audit-history.py"))
+        ah = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(ah)
+        out = ah.classify()
+    except Exception as e:
+        err(f"cannot run the history audit: {e}")
+        return
+    miss = {k: v for k, v in out.items() if k.startswith("MISSING")}
+    for k, v in miss.items():
+        for w in v[:3]:
+            err(f"history audit: {k}: {w}")
+    drawn = sum(len(v) for k, v in out.items() if k.startswith("drawn"))
+    stub = sum(len(v) for k, v in out.items() if "country label point only" in k)
+    print(f"history audit: {sum(len(v) for v in out.values())} movement tags; {drawn} drawn ({stub} as a bare stub), "
+          f"{sum(len(v) for k, v in out.items() if k.startswith('excluded'))} excluded for a stated reason, "
+          f"{sum(len(v) for v in miss.values())} missing")
+
+
 def main():
+    history_audit()
     flag_era_drift()
     flag_art_drift()
     flag_evidence()

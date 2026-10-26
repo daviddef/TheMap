@@ -63,7 +63,7 @@
   /* Type a country and the map keeps only the movements that involve it (it was the one that moved, or it is
      the other end of the arrow), flies there, and plays its history from its first recorded movement. The
      flags it flew sit under the year, each marked with the years it held. */
-  function involves(m, cc) { return m.s === cc || m.o === cc || (m.how === "origin" && m.seat === cc); }
+  function involves(m, cc) { return m.s === cc || m.o === cc || ((m.how === "origin" || m.how === "text") && m.seat === cc); }
   function norm(t) { return String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim(); }
   function buildNames() {
     namesIdx = {};
@@ -189,7 +189,7 @@
   }
   function label(m) {
     var span = m.f + (m.t !== m.f ? "–" + (m.present ? "present" : m.t) : "");
-    return "<b>" + esc(KIND[m.v]) + "</b> · " + esc(m.ot) + " <span style='opacity:.7'>" + esc(span) + "</span>";
+    return "<b>" + esc(m.vb || KIND[m.v]) + "</b> · " + esc(m.ot) + " <span style='opacity:.7'>" + esc(span) + "</span>";
   }
 
   function draw() {
@@ -428,7 +428,7 @@
     return "<img class='hm-mf' loading='lazy' alt='' title='" + esc(alt) + "' src='" + BASE + "fl/" + esc(img) + ".svg' onerror=\"this.style.display='none'\">";
   }
   function rowFlags(m) {
-    var h = "", oc = m.how === "country" ? m.o : (m.how === "origin" ? m.seat : null);
+    var h = "", oc = m.how === "country" ? m.o : ((m.how === "origin" || m.how === "text") ? m.seat : null);
     if (oc && FM && FM.f[oc]) { var of = flagAt(FM.f[oc], m.f); if (of) h += miniFlag(of[2], "The flag of " + cname(oc) + " in " + m.f); }
     h += miniFlag(m.p + "--" + m.e, "The flag of " + cname(m.s) + " in this era");
     return "<span class='hm-rowflags'>" + h + "</span>";
@@ -468,7 +468,7 @@
       b.type = "button"; b.style.setProperty("--c", COL[m.v]);
       now[v.i] = 1;
       b.className = (m.major ? "hm-major" : "") + (flashOK && !was[v.i] ? " hm-new" : "");
-      b.innerHTML = rowFlags(m) + "<span class='hm-rowtxt'>" + (numFor[v.i] ? "<i class='hm-numb'>" + numFor[v.i] + "</i>" : "") + esc(m.major || m.ot) + "<small>" + esc(KIND[m.v]) + " · " + esc(m.s) + " · from " + m.f + "</small></span>";
+      b.innerHTML = rowFlags(m) + "<span class='hm-rowtxt'>" + (numFor[v.i] ? "<i class='hm-numb'>" + numFor[v.i] + "</i>" : "") + esc(m.major || m.ot) + "<small>" + esc(m.vb || KIND[m.v]) + " · " + esc(m.s) + " · from " + m.f + "</small></span>";
       if (m.tip) b.title = m.tip;
       b.addEventListener("click", function () { select(v.i, true); });
       li.appendChild(b); elList.appendChild(li);
@@ -490,6 +490,7 @@
     var how = { country: "Both ends are countries this atlas draws; the arrow joins their label points.",
       seat: "The other party is drawn from the seat it ruled from or the home of the people: " + (m.seat || "") + ". It means “from there”, not a route.",
       origin: "The people are named by nationality, so the arrow starts at that country's label point. It is not a route.",
+      text: "The other country is read from the page's sentence (the one that comes after to, from or into); the arrow joins the two countries' label points. It says where the sentence points, not a route.",
       stub: "The page names no second place, so this is a stub at the country." }[m.how];
     var span = m.f + (m.t !== m.f ? "–" + (m.present ? "present" : m.t) : "");
     if (!(opts.cardless && !compact)) elCard.innerHTML = "<h2 style='border-left:4px solid " + COL[m.v] + ";padding-left:8px'>" + esc(m.major || KIND[m.v]) + " · " + esc(span) + "</h2>" +
@@ -538,20 +539,21 @@
     var col = COL[m.v], span = spanOf(m);
     var where = cname(m.s), other = "";
     if (m.how === "country" && m.o) other = cname(m.o);
-    else if (m.how === "origin" && m.seat) other = cname(m.seat);
+    else if ((m.how === "origin" || m.how === "text") && m.seat) other = cname(m.seat);
     else if (m.how === "seat" && m.seat) other = m.seat;
     var dir = m.d === "in" ? (other ? "from " + esc(other) + " into " + esc(where) : "into " + esc(where))
                            : (other ? "out of " + esc(where) + " to " + esc(other) : "out of " + esc(where));
     var era = ERAS && ERAS.filter(function (e) { return e.slug === m.p && e.id === m.e; })[0];
     var flags = flagImg(m.p + "--" + m.e, "The flag of " + where + " in this era");
-    var oc = m.how === "country" ? m.o : (m.how === "origin" ? m.seat : null);
+    var oc = m.how === "country" ? m.o : ((m.how === "origin" || m.how === "text") ? m.seat : null);
     if (oc && FM && FM.f[oc]) { var of = flagAt(FM.f[oc], m.f); if (of) flags += flagImg(of[2], "The flag of " + cname(oc) + " in " + m.f); }
     var ld = LEADERS ? [leaderTxt(m.s, m.f), oc ? leaderTxt(oc, m.f) : ""].filter(Boolean) : null;
     var how = { country: "Both ends are countries this atlas draws; the arrow joins their label points.",
       seat: "The other party is drawn from the seat it ruled from: " + (m.seat || "") + ". It means \u201cfrom there\u201d, not a route.",
       origin: "The people are named by nationality, so the arrow starts at that country's label point. It is not a route.",
+      text: "The other country is read from the page's sentence (the one that comes after to, from or into); the arrow joins the two countries' label points. It says where the sentence points, not a route.",
       stub: "The page names no second place, so this is a stub at the country." }[m.how];
-    return "<div class='hm-d'><div class='hm-b-k' style='color:" + col + "'>" + esc(KIND[m.v]) + " \u00b7 " + esc(span) + "</div>" +
+    return "<div class='hm-d'><div class='hm-b-k' style='color:" + col + "'>" + esc(m.vb || KIND[m.v]) + " \u00b7 " + esc(span) + "</div>" +
       "<b>" + esc(m.major || m.ot) + "</b>" +
       (m.tip ? "<p class='hm-d-what'>" + esc(m.tip) + "</p>" : "") +
       "<dl><dt>Where</dt><dd>" + dir + "</dd>" +
@@ -612,7 +614,7 @@
      so there it is a numbered pin and the same number sits in the list. */
   function bubbleHTML(m, i) {
     var col = COL[m.v];
-    return "<div class='hm-b'><div class='hm-b-k' style='color:" + col + "'>" + esc(KIND[m.v]) + " · " + esc(spanOf(m)) + "</div>" +
+    return "<div class='hm-b'><div class='hm-b-k' style='color:" + col + "'>" + esc(m.vb || KIND[m.v]) + " · " + esc(spanOf(m)) + "</div>" +
       "<b>" + esc(m.major || m.ot) + "</b>" + (m.tip ? "<p>" + esc(m.tip.length > 260 ? m.tip.slice(0, 257).replace(/\s+\S*$/, "") + "…" : m.tip) + "</p>" : "") +
       "<a href='" + BASE + "flags/" + esc(m.p) + "/#" + esc(m.e) + "'>Read it on the flag page &rarr;</a></div>";
   }

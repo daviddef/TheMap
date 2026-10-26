@@ -152,6 +152,33 @@ def named_places(tip, cc, idx):
     return out[:5]
 
 
+def other_countries(tip, subject, names):
+    """The countries a movement's own sentence names besides the one it is about, in the order they come, as ISO codes.
+    Longest names first and consumed as matched, so «South Sudan» is never read as «Sudan» nor «West Germany»
+    as anything but Germany. It is a reading of the sentence, and is drawn and labelled as one."""
+    order = sorted(names, key=len, reverse=True)
+    low, out, taken = tip.lower(), [], []
+    for n in order:
+        if len(n) < 4:
+            continue
+        for m in re.finditer(r"(?<![a-z])" + re.escape(n) + r"(?![a-z])", low):
+            if any(a < m.end() and m.start() < b for a, b in taken):
+                continue
+            taken.append((m.start(), m.end()))
+            cc = names[n]
+            # only a country the sentence points AT or FROM («to West Germany», «from Basra's Iraq»), never one that merely
+            # appears («After Britain's 1807 Act…», «via Senegal»): a wrong arrow is worse than none
+            before = low[max(0, m.start() - 24):m.start()]
+            if cc != subject and re.search(r"\b(from|to|into|in|across|toward|towards|for|out of)\s+(the\s+)?(west\s+|east\s+|south\s+|north\s+)?$", before):
+                out.append((m.start(), cc))
+    out.sort()
+    seen, res = set(), []
+    for _, cc in out:
+        if cc not in seen:
+            seen.add(cc); res.append(cc)
+    return res
+
+
 def build():
     em = j("site/public/era-moves.json")
     tp = tips()
@@ -166,7 +193,7 @@ def build():
     out, how_n = [], {"country": 0, "seat": 0, "origin": 0, "stub": 0}
     dens = {}
     for m in em["moves"]:
-        subj = at.get(m["s"])
+        subj = m.get("sa") or at.get(m["s"])      # `sa`: an empire or kingdom page borrows the seat it ruled from
         if not subj:
             continue
         t = m["t"] if m.get("t") is not None else (2026 if m.get("present") else m["f"])
@@ -207,11 +234,23 @@ def build():
                     break
         if how == "stub":
             a = b = subj
-        how_n[how] += 1
+            # A STUB WHOSE SENTENCE NAMES THE OTHER COUNTRY IS NOT A STUB: «Australia pays Nauru to host…», «emigrate
+            # as guest workers to West Germany, Austria». The arrow joins the two label points and `how` says it was read
+            # from the sentence ("text"); the card says so too.
+            tpx = tp.get((m["p"], m["e"], m["ot"])) or ""
+            oc = [c for c in other_countries(tpx, m["s"], em.get("names") or {}) if at.get(c)] if tpx else []
+            if oc:
+                how = "text"
+                other = at[oc[0]]
+                a, b = (other, subj) if m["d"] == "in" else (subj, other)
+                seat = oc[0]
+        how_n[how] = how_n.get(how, 0) + 1
         if f < MIN_YEAR:
             continue
         row = {"s": m["s"], "v": m["v"], "d": m["d"], "f": f, "t": t,
                "ot": m["ot"], "how": how, "a": a, "b": b, "e": m["e"], "p": m["p"], "fy": fy}
+        if m.get("vb"):
+            row["vb"] = m["vb"]              # the page's own verb when it is not one of the plain three («Raided by»)
         if m.get("present") and not fy:
             row["present"] = True
         if opn:

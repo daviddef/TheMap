@@ -14,7 +14,7 @@ for a movement INTO a country the arrow runs from the other party to it; for one
 the other party is the destination, and only countries and explicit seats are used for
 those, never a nationality (a Syrian refugee leaving Syria does not name where to).
 """
-import glob, html, json, os, re, time
+import glob, gzip, html, json, os, re, time, unicodedata
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "site", "public", "history.json")
@@ -82,9 +82,80 @@ def tips():
     return out
 
 
+def _norm(t):
+    return unicodedata.normalize("NFKD", t).encode("ascii", "ignore").decode().lower().strip()
+
+
+_PLACES = {}
+
+
+def place_index(ccs):
+    """{country: {normalised name: (lat, lon, population, name)}} for the towns and cities (5,000 people and up) of the
+    countries asked for, from the gazetteer. Built once per run."""
+    need = [c for c in ccs if c not in _PLACES]
+    if not need:
+        return _PLACES
+    for c in need:
+        _PLACES[c] = {}
+    g = json.load(gzip.open(os.path.join(ROOT, "data", "gazetteer.json.gz"), "rt", encoding="utf-8"))
+    for pl in g["places"]:
+        k = pl.get("k")
+        if k not in need or pl.get("f") == "isl":
+            continue
+        pop = pl.get("p") or 0
+        if pop < 5000:
+            continue
+        key = _norm(pl["n"])
+        cur = _PLACES[k].get(key)
+        if not cur or pop > cur[2]:
+            _PLACES[k][key] = (pl["y"], pl["x"], pop, pl["n"])
+    return _PLACES
+
+
+_WORD = re.compile(r"[^\W\d_][\w'\u2019\-]*", re.U)
+_STOP = {"the", "a", "an", "in", "on", "at", "of", "and", "after", "during", "under", "from", "its", "this", "that", "by", "to", "with",
+         "january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"}
+
+
+def named_places(tip, cc, idx):
+    """The places a movement's own sentence names, inside the country it is about: «conquers the Dalmatian coastal
+    cities of Zadar, Split, Sibenik» gives those three. Capitalised words only, never the first word of a
+    sentence, longest phrase first; a name has to be a town the gazetteer knows in THAT country."""
+    table = idx.get(cc) or {}
+    if not table or not tip:
+        return []
+    words = [(m.group(0), m.start()) for m in _WORD.finditer(tip)]
+    out, seen, i = [], set(), 0
+    while i < len(words):
+        w, pos = words[i]
+        sentence_start = i == 0 or re.search(r"[.!?]\s*$", tip[:pos]) is not None
+        if not w[0].isupper() or sentence_start or w.lower() in _STOP:
+            i += 1
+            continue
+        hit = None
+        for n in (3, 2, 1):
+            seq = words[i:i + n]
+            if len(seq) < n or not all(x[0][0].isupper() for x in seq):
+                continue
+            key = _norm(" ".join(x[0] for x in seq))
+            if key in table:
+                hit = (n, table[key])
+                break
+        if hit:
+            n, (la, lo, pop, nm) = hit
+            if nm not in seen:
+                seen.add(nm)
+                out.append([nm, round(la, 3), round(lo, 3)])
+            i += n
+        else:
+            i += 1
+    return out[:5]
+
+
 def build():
     em = j("site/public/era-moves.json")
     tp = tips()
+    PIDX = place_index({m["s"] for m in em["moves"]})
     major = j("data/history-major.json")["major"]
     actors = j("data/history-actors.json")["actors"]
     chapters = j("data/history-chapters.json")["chapters"]
@@ -155,6 +226,18 @@ def build():
         tip = tp.get((m["p"], m["e"], m["ot"]))
         if tip:
             row["tip"] = tip
+            pls = named_places(tip, m["s"], PIDX)
+            if pls:
+                row["pl"] = pls
+                # the arrow lands on (or leaves from) the places the sentence names, not the country's label point
+                cy = sum(x[1] for x in pls) / len(pls); cx = sum(x[2] for x in pls) / len(pls)
+                cen = [round(cy, 3), round(cx, 3)]
+                if how == "stub":
+                    row["a"] = row["b"] = cen
+                elif m["d"] == "in":
+                    row["b"] = cen
+                else:
+                    row["a"] = cen
         out.append(row)
         dec = (f // 10) * 10
         dens[dec] = dens.get(dec, 0) + 1

@@ -223,6 +223,17 @@
           html: "<div class='hm-pulse' style='--c:" + col + ";width:26px;height:26px'></div>" }), interactive: false, keyboard: false }).addTo(arcLayer);
       }
     });
+    /* The places the sentence names (Zadar, Split, Sibenik): a dot on each, so a conquest of a coast is seen on the
+       coast and not only at the arrow's end. */
+    vis.forEach(function (v) {
+      var m = v.m; if (!m.pl) return;
+      var col = COL[m.v], fade = 1 - v.age * 0.7;
+      m.pl.forEach(function (q) {
+        L.circleMarker([q[1], q[2]], { renderer: rArc, radius: 4, color: "#fff", weight: 1.5, fillColor: col, fillOpacity: .95 * fade, opacity: fade })
+          .on("click", function () { select(v.i); })
+          .bindTooltip("<b>" + esc(q[0]) + "</b> <span style='opacity:.7'>" + esc(m.major || m.ot) + "</span>", { direction: "top" }).addTo(arcLayer);
+      });
+    });
     var voy = drawVoyages();
     list(vis, voy);
     drawFlags();
@@ -544,6 +555,7 @@
       "<b>" + esc(m.major || m.ot) + "</b>" +
       (m.tip ? "<p class='hm-d-what'>" + esc(m.tip) + "</p>" : "") +
       "<dl><dt>Where</dt><dd>" + dir + "</dd>" +
+      (m.pl ? "<dt>Places</dt><dd>" + m.pl.map(function (q) { return esc(q[0]); }).join(", ") + " <span class='hm-d-src'>named in the sentence</span></dd>" : "") +
       "<dt>Who</dt><dd>" + esc(m.ot) + "</dd>" +
       (era ? "<dt>Under</dt><dd>" + esc(era.polity) + " <span>(" + esc(era.dates) + ")</span></dd>" : "") +
       "<dt>Flags</dt><dd class='hm-d-flags'>" + flags + "</dd>" +

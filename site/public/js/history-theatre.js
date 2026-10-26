@@ -50,6 +50,7 @@
   var elTour = $("hm-tour"), elTourBtn = $("hm-tour-btn"), pauseT = null, introT = null, dead = false;
   var elEra = $("hm-era");
   var compact = !!(window.matchMedia && window.matchMedia("(max-width: 700px)").matches);
+  var focus = null, namesIdx = null, elFocus = $("hm-focus"), elFocusFlags = $("hm-focus-flags");
   var gridLayer, bubbleLayer, bubQ = [], bubT = null, bubShown = [], numFor = {}, numN = 0, lastYear = null;
 
   var D = null, FM = null, chapter = null, year = 1914, timer = null, selected = null;
@@ -57,6 +58,59 @@
 
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function yr(y) { return y < 0 ? Math.abs(y) + " BCE" : String(y); }
+
+  /* ---- focus on one country ----------------------------------------------- */
+  /* Type a country and the map keeps only the movements that involve it (it was the one that moved, or it is
+     the other end of the arrow), flies there, and plays its history from its first recorded movement. The
+     flags it flew sit under the year, each marked with the years it held. */
+  function involves(m, cc) { return m.s === cc || m.o === cc || (m.how === "origin" && m.seat === cc); }
+  function norm(t) { return String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim(); }
+  function buildNames() {
+    namesIdx = {};
+    var ccs = {};
+    Object.keys(FM ? FM.at : {}).forEach(function (c) { ccs[c] = 1; });
+    D.moves.forEach(function (m) { ccs[m.s] = 1; if (m.o) ccs[m.o] = 1; if (m.how === "origin" && m.seat) ccs[m.seat] = 1; });
+    Object.keys(ccs).forEach(function (c) {
+      if (c === "CN-TW") { namesIdx.taiwan = c; return; }
+      var n = cname(c); if (n && n !== c) namesIdx[norm(n)] = c;
+    });
+    if (elFocus && elFocus.tagName !== "STUB") {
+      var dl = document.createElement("datalist"); dl.id = "hm-focus-dl-" + Math.floor(Math.random() * 1e6);
+      dl.innerHTML = Object.keys(namesIdx).sort().map(function (k) { var c = namesIdx[k]; return "<option value=\"" + esc(c === "CN-TW" ? "Taiwan" : cname(c)) + "\">"; }).join("");
+      document.body.appendChild(dl); elFocus.setAttribute("list", dl.id);
+    }
+  }
+  function focusStrip() {
+    if (!elFocusFlags || elFocusFlags.tagName === "STUB") return;
+    if (!focus || !FM || !FM.f[focus]) { elFocusFlags.innerHTML = ""; elFocusFlags.hidden = true; return; }
+    elFocusFlags.hidden = false;
+    elFocusFlags.innerHTML = FM.f[focus].map(function (r) {
+      var cur = r[0] <= year && (r[1] === null || r[1] === undefined || r[1] >= year);
+      var k = r[2].indexOf("--");
+      return "<a class='hm-ff" + (cur ? " cur" : "") + "' href='" + BASE + "flags/" + esc(r[2].slice(0, k)) + "/#" + esc(r[2].slice(k + 2)) + "' title='" +
+        esc(cname(focus) + ", " + r[0] + "\u2013" + (r[1] || "present") + " \u2014 open its flag page") + "'><img alt='' src='" + BASE + "fl/" + esc(r[2]) + ".svg' loading='lazy' onerror=\"this.style.display='none'\"><small>" + r[0] + "</small></a>";
+    }).join("");
+  }
+  function setFocus(cc) {
+    focus = cc || null; listSig = ""; listYear = null;
+    stop(); cancelPause(); clearBubbles(); closeDetail();
+    if (!focus) { elCh.textContent = chapter ? chapter.title + " \u2014 " + chapter.blurb : ""; if (elFocus && elFocus.value) elFocus.value = ""; focusStrip(); draw(); return; }
+    var mv = D.moves.filter(function (m) { return involves(m, focus); });
+    var first = mv.length ? Math.min.apply(null, mv.map(function (m) { return m.f; })) : year;
+    chapter = null;
+    scope.querySelectorAll(CHIPS).forEach(function (b) { b.removeAttribute("aria-current"); });
+    ["conquest", "occupation", "migration"].forEach(function (k) { on[k].checked = true; });
+    elCh.textContent = cname(focus) + " \u2014 " + mv.length + " movement" + (mv.length === 1 ? "" : "s") + " in the atlas" + (mv.length ? ", the first from " + first : "") + ".";
+    if (FM && FM.at[focus]) map.setView(FM.at[focus], Math.max(map.getZoom(), 4), { animate: true });
+    focusStrip();
+    setYear(Math.max(MIN, Math.min(first - 2, MAX)));
+    play();
+  }
+  function focusFromInput() {
+    var v = norm(elFocus.value);
+    if (!v) { if (focus) setFocus(null); return; }
+    var cc = namesIdx && namesIdx[v]; if (cc && cc !== focus) setFocus(cc);
+  }
 
   /* ---- gridlines: a labelled graticule, spaced by how far in the reader is ---- */
   function lonName(l) { l = ((l + 540) % 360) - 180; return Math.abs(l) === 180 ? "180\u00b0" : (l === 0 ? "0\u00b0" : Math.abs(l) + "\u00b0" + (l < 0 ? "W" : "E")); }
@@ -113,6 +167,7 @@
     D.moves.forEach(function (m, i) {
       if (!on[m.v] || !on[m.v].checked) return;
       if (m.f > year || year - m.f >= trail) return;
+      if (focus && !involves(m, focus)) return;
       out.push({ m: m, i: i, age: (year - m.f) / trail });
     });
     out.sort(function (x, y) { return y.m.f - x.m.f; });
@@ -195,6 +250,7 @@
     if (!FM || map.getZoom() < 3) return;
     var b = map.getBounds().pad(0.1);
     Object.keys(FM.at).forEach(function (cc) {
+      if (focus && cc !== focus) return;
       var at = FM.at[cc]; if (!at || !b.contains(at)) return;
       var r = leaderAt(cc, year); if (!r) return;
       L.marker(at, { icon: L.divIcon({ className: "hm-leader", iconSize: [0, 0], iconAnchor: [0, -8],
@@ -232,7 +288,7 @@
   }
   function drawVoyages() {
     var shown = [];
-    if (!on.voyages || !on.voyages.checked || !D.voyages) return shown;
+    if (!on.voyages || !on.voyages.checked || !D.voyages || focus) return shown;
     D.voyages.forEach(function (v, i) {
       if (year < Math.floor(v.from) || year > v.to + VTRAIL) return;
       var done = year > v.to, y = Math.min(year + 0.5, v.to + 0.99), age = done ? Math.min(1, (year - v.to) / VTRAIL) : 0;
@@ -334,6 +390,7 @@
     if (!on.flags.checked || !FM || map.getZoom() < 3) return;
     var b = map.getBounds().pad(0.1);
     Object.keys(FM.f).forEach(function (cc) {
+      if (focus && cc !== focus) return;
       var at = FM.at[cc]; if (!at || !b.contains(at)) return;
       var r = flagAt(FM.f[cc], year); if (!r) return;
       L.marker(at, { icon: L.divIcon({ className: "hm-flag", iconSize: [26, 18], iconAnchor: [13, 9],
@@ -366,7 +423,7 @@
   var listSig = "", listIds = {}, listYear = null;
   function list(vis, voy) {
     voy = voy || [];
-    elListH.textContent = "Under way, " + (year) + (vis.length + voy.length ? " (" + (vis.length + voy.length) + ")" : "");
+    elListH.textContent = (focus ? cname(focus) + ", " : "Under way, ") + (year) + (vis.length + voy.length ? " (" + (vis.length + voy.length) + ")" : "");
     var shown = vis.slice(0, 80);
     var sig = voy.map(function (x) { return "v" + x.i; }).concat(shown.map(function (v) { return v.i + ":" + (numFor[v.i] || ""); })).join(",");
     if (sig === listSig) return;
@@ -573,6 +630,7 @@
     if (!D || !D.moves || detailPop) return;      // a bubble the reader opened is not talked over
     D.moves.forEach(function (m, i) {
       if (!m.major || !on[m.v] || !on[m.v].checked) return;
+      if (focus && !involves(m, focus)) return;
       if (m.f > from && m.f <= to && bubQ.length < 6) bubQ.push({ i: i });
     });
     if (bubQ.length && !bubT) pumpBubbles();
@@ -608,7 +666,7 @@
     year = Math.max(MIN, Math.min(MAX, y));
     elRange.value = year; elYear.textContent = yr(year);
     if (fromUser) { stop(); cancelPause(); clearBubbles(); }
-    draw(); url();
+    draw(); url(); if (focus) focusStrip();
     if (!fromUser && timer && year > was && year - was <= 6) announce(was, year);
     if (opts.onYear) opts.onYear(year, !!fromUser);
   }
@@ -648,6 +706,7 @@
 
   function setChapter(id, autoplay) {
     stop(); cancelPause(); clearBubbles(); listYear = null;
+    if (focus) { focus = null; if (elFocus && elFocus.value) elFocus.value = ""; focusStrip(); }   // picking an era leaves the one-country view
     chapter = D.chapters.filter(function (c) { return c.id === id; })[0] || null;
     scope.querySelectorAll(CHIPS).forEach(function (b) {
       if (chapter && b.getAttribute("data-ch") === chapter.id) b.setAttribute("aria-current", "true");
@@ -731,6 +790,7 @@
       year: function () { return year; }, playing: function () { return !!timer; },
       data: function () { return D; },
       redraw: function () { if (D) draw(); },
+      focus: function (cc) { if (D) setFocus(cc || null); },
       destroy: function () {
         dead = true; stop(); cancelPause();
         listeners.forEach(function (l) { l[0].removeEventListener(l[1], l[2]); });
@@ -752,7 +812,11 @@
       if (dead) return;
       D = res[0]; FM = res[1]; unwrapRoutes();
       elLoad.hidden = true;
-      strip();
+      strip(); buildNames();
+      if (elFocus && elFocus.tagName !== "STUB") {
+        listen(elFocus, "input", focusFromInput); listen(elFocus, "change", focusFromInput);
+        listen(elFocus, "keydown", function (e) { if (e.key === "Enter") focusFromInput(); });
+      }
       listen(elRange, "input", function () { setYear(parseInt(elRange.value, 10), true); });
       listen(elPlay, "click", function () { cancelPause(); play(); });
       if (elTourBtn) listen(elTourBtn, "click", function () { ctl.tour(); });

@@ -44,19 +44,47 @@
       elSpeed = $("hm-speed"), elTrail = $("hm-trail"), elList = $("hm-list"), elCard = $("hm-card"),
       elLoad = $("hm-load"), elDens = $("hm-dens"), elTicks = $("hm-ticks"), elListH = $("hm-list-h");
   var on = { conquest: $("hm-l-conquest"), occupation: $("hm-l-occupation"),
-             migration: $("hm-l-migration"), flags: $("hm-l-flags"), ground: $("hm-l-ground"), voyages: $("hm-l-voyages"), leaders: $("hm-l-leaders") };
+             migration: $("hm-l-migration"), flags: $("hm-l-flags"), ground: $("hm-l-ground"), voyages: $("hm-l-voyages"), leaders: $("hm-l-leaders"), grid: $("hm-l-grid") };
   var LEADERS = null, leaderLayer, leadersFetch = null, leaderWaiters = [], ERAS = null, erasFetch = null, detailPop = null;
   var elG = $("hm-gnote"), GROUND = null, groundLayer, groundKey = "";
   var elTour = $("hm-tour"), elTourBtn = $("hm-tour-btn"), pauseT = null, introT = null, dead = false;
   var elEra = $("hm-era");
   var compact = !!(window.matchMedia && window.matchMedia("(max-width: 700px)").matches);
-  var bubbleLayer, bubQ = [], bubT = null, bubShown = [], numFor = {}, numN = 0, lastYear = null;
+  var gridLayer, bubbleLayer, bubQ = [], bubT = null, bubShown = [], numFor = {}, numN = 0, lastYear = null;
 
   var D = null, FM = null, chapter = null, year = 1914, timer = null, selected = null;
-  var map, arcLayer, flagLayer, ownMap = false, rArc, rGround;
+  var map, arcLayer, flagLayer, ownMap = false, rArc, rGround, rGrid;
 
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function yr(y) { return y < 0 ? Math.abs(y) + " BCE" : String(y); }
+
+  /* ---- gridlines: a labelled graticule, spaced by how far in the reader is ---- */
+  function lonName(l) { l = ((l + 540) % 360) - 180; return Math.abs(l) === 180 ? "180\u00b0" : (l === 0 ? "0\u00b0" : Math.abs(l) + "\u00b0" + (l < 0 ? "W" : "E")); }
+  function drawGrid() {
+    if (!gridLayer) return;
+    gridLayer.clearLayers();
+    if (!on.grid || !on.grid.checked) return;
+    var z = map.getZoom(), step = z >= 7 ? 2 : z >= 6 ? 5 : z >= 4 ? 10 : z >= 3 ? 15 : 30;
+    var b = map.getBounds(), w = b.getWest(), e = b.getEast(), so = Math.max(b.getSouth(), -84), no = Math.min(b.getNorth(), 84);
+    var line = function (pts, strong) {
+      L.polyline(pts, { renderer: rGrid, color: "#3d4f5a", weight: strong ? 1.1 : 0.7, opacity: strong ? 0.55 : 0.4,
+        dashArray: strong ? null : "2 5", interactive: false }).addTo(gridLayer);
+    };
+    var label = function (at, txt, anchor, cls) {
+      L.marker(at, { icon: L.divIcon({ className: "hm-gl" + (cls ? " " + cls : ""), iconSize: [0, 0], iconAnchor: anchor, html: "<span>" + txt + "</span>" }),
+        interactive: false, keyboard: false }).addTo(gridLayer);
+    };
+    var inset = (e - w) * 0.006, pad = (e - w) / 2;      // lines run past the edges so a pan does not show their ends
+    for (var lat = Math.ceil(so / step) * step; lat <= no; lat += step) {
+      line([[lat, w - pad], [lat, e + pad]], lat === 0);
+      // on the right edge: the left is under the year and the list
+      label([lat, e - inset], lat === 0 ? "0\u00b0" : Math.abs(lat) + "\u00b0" + (lat < 0 ? "S" : "N"), [0, 12], "hm-gl-r");
+    }
+    for (var lon = Math.ceil((w - pad) / step) * step; lon <= e + pad; lon += step) {
+      line([[-84, lon], [84, lon]], false);
+      if (lon >= w && lon <= e) label([b.getNorth() - (b.getNorth() - b.getSouth()) * 0.012, lon], lonName(lon), [-3, -2]);   // along the top: the foot carries the note
+    }
+  }
 
   /* ---- geometry --------------------------------------------------------- */
   function curve(a, b) {
@@ -136,6 +164,7 @@
     drawFlags();
     drawLeaders();
     drawGround();
+    drawGrid();
   }
 
   /* ---- heads of state (Wikidata, CC0) ------------------------------------ */
@@ -665,9 +694,12 @@
     /* A map that draws its own markers on canvas (the records map) still gets SVG here: the arrows
        are styled and animated by CSS class, which a canvas path cannot be. */
     if (opts.map) { rArc = L.svg({ padding: 0.5 }); rGround = L.svg({ pane: "ground", padding: 0.5 }); }
+    if (!map.getPane("grid")) { map.createPane("grid"); map.getPane("grid").style.zIndex = 385; map.getPane("grid").style.pointerEvents = "none"; }
+    rGrid = L.svg({ pane: "grid", padding: 0.5 });
+    gridLayer = L.layerGroup().addTo(map);
     groundLayer = L.layerGroup().addTo(map);
     arcLayer = L.layerGroup().addTo(map); flagLayer = L.layerGroup().addTo(map); leaderLayer = L.layerGroup().addTo(map); bubbleLayer = L.layerGroup().addTo(map);
-    var moved = function () { drawFlags(); drawLeaders(); };
+    var moved = function () { drawFlags(); drawLeaders(); drawGrid(); };
     map.on("zoomend moveend", moved);
 
     var ctl = {
@@ -683,8 +715,9 @@
         listeners.forEach(function (l) { l[0].removeEventListener(l[1], l[2]); });
         map.off("zoomend moveend", moved);
         clearBubbles(); hideEra();
+        if (rGrid) map.removeLayer(rGrid);
         closeDetail();
-        [groundLayer, arcLayer, flagLayer, leaderLayer, bubbleLayer].forEach(function (g) { map.removeLayer(g); });
+        [gridLayer, groundLayer, arcLayer, flagLayer, leaderLayer, bubbleLayer].forEach(function (g) { map.removeLayer(g); });
         elG.textContent = "";
         if (rArc) { map.removeLayer(rArc); map.removeLayer(rGround); }
         if (ownMap) map.remove();

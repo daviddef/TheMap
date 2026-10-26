@@ -314,7 +314,7 @@
 
   /* THE ROLLING LIST. Redrawn only when its contents change (not every tick), and a reader who has scrolled
      down keeps their place: it used to be wiped and rebuilt each second, which made it impossible to scroll. */
-  var listSig = "";
+  var listSig = "", listIds = {}, listYear = null;
   function list(vis, voy) {
     voy = voy || [];
     elListH.textContent = "Under way, " + (year) + (vis.length + voy.length ? " (" + (vis.length + voy.length) + ")" : "");
@@ -323,10 +323,16 @@
     if (sig === listSig) return;
     listSig = sig;
     var keep = elList.scrollTop || 0;
+    /* FLASH WHAT JUST ARRIVED. A row that was not in the last list is new; it pulses so the eye finds it.
+       Not after a jump (an era change, a scrub, the first draw): then every row would flash. */
+    var flashOK = !reduce && listSig !== "" && listYear !== null && Math.abs(year - listYear) <= 6;
+    var was = listIds, now = {};
+    listYear = year;
     elList.innerHTML = "";
     voy.forEach(function (x) {
       var li = document.createElement("li"), b = document.createElement("button");
       b.type = "button"; b.style.setProperty("--c", VCOL);
+      now["v" + x.i] = 1; if (flashOK && !was["v" + x.i]) b.className = "hm-new";
       b.innerHTML = esc(x.v.title) + "<small>Voyage \u00b7 " + esc(x.v.leader.name) + " \u00b7 " + esc(spanV(x.v)) + "</small>";
       b.addEventListener("click", function () { selectVoyage(x.i); });
       li.appendChild(b); elList.appendChild(li);
@@ -334,13 +340,15 @@
     shown.forEach(function (v) {
       var m = v.m, li = document.createElement("li"), b = document.createElement("button");
       b.type = "button"; b.style.setProperty("--c", COL[m.v]);
-      if (m.major) b.className = "hm-major";
+      now[v.i] = 1;
+      b.className = (m.major ? "hm-major" : "") + (flashOK && !was[v.i] ? " hm-new" : "");
       b.innerHTML = (numFor[v.i] ? "<i class='hm-numb'>" + numFor[v.i] + "</i>" : "") + esc(m.major || m.ot) + "<small>" + esc(KIND[m.v]) + " · " + esc(m.s) + " · from " + m.f + "</small>";
       if (m.tip) b.title = m.tip;
       b.addEventListener("click", function () { select(v.i, true); });
       li.appendChild(b); elList.appendChild(li);
     });
     if (!vis.length && !voy.length) { var li2 = document.createElement("li"); li2.textContent = "Nothing in this atlas began in these years, with these layers."; elList.appendChild(li2); }
+    listIds = now;
     elList.scrollTop = keep;
   }
 
@@ -486,7 +494,7 @@
   function cancelPause() { if (pauseT) { clearTimeout(pauseT); pauseT = null; } hideEra(); }
 
   function setChapter(id, autoplay) {
-    stop(); cancelPause(); clearBubbles();
+    stop(); cancelPause(); clearBubbles(); listYear = null;
     chapter = D.chapters.filter(function (c) { return c.id === id; })[0] || null;
     scope.querySelectorAll(CHIPS).forEach(function (b) {
       if (chapter && b.getAttribute("data-ch") === chapter.id) b.setAttribute("aria-current", "true");

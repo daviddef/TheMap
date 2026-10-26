@@ -2063,7 +2063,7 @@ window.addEventListener("load", async function () {
        which was true and buried the useful half. The harvest now carries
        5,276 addresses, so the label counts them: a layer worth turning on
        is a layer that says what turning it on gets you. */
-    var lab = document.querySelector('.ra-layer[data-l="wikidata"]');
+    var lab = document.querySelector('#ra-layers [data-l="wikidata"]');
     if (lab) lab.title = "Others — " + n.toLocaleString() +
       " mapped by others, " + nsite.toLocaleString() +
       " with a website · unchecked, and not all genealogical";
@@ -2138,7 +2138,7 @@ window.addEventListener("load", async function () {
          Wikidata with 5,443 ODbL ones from OpenStreetMap, and a label saying
          only «from Wikidata» is both wrong and, for the ODbL half, an
          attribution this project owes. */
-      var lab = document.querySelector('.ra-layer[data-l="' + key + '"]');
+      var lab = document.querySelector('#ra-layers [data-l="' + key + '"]');
       if (lab) lab.title = (lab.querySelector("b") || {}).textContent + " — " +
         d.features.length.toLocaleString() + " in the record regions · " +
         d.srcs.join(" and ") + ", unchecked";
@@ -3563,7 +3563,10 @@ window.addEventListener("load", async function () {
     setQ("layers", live.join(","));
   }
   lbox.addEventListener("change", function (ev) {
-    var lab = ev.target.closest(".ra-layer"); if (!lab) return;
+    /* THE ROWS ARE .ra-opt (optionHTML), NOT .ra-layer, AND THIS LOOKED FOR THE LATTER: every tick in the Layers
+       menu was ignored, the map never changed and the URL kept the same layers. Found when the playback's
+       «Records» switch unticked every layer and nothing left the map. */
+    var lab = ev.target.closest("[data-l]"); if (!lab) return;
     var k = lab.getAttribute("data-l");
     on[k] = ev.target.checked;
     lab.classList.toggle("on", !!on[k]);
@@ -4005,7 +4008,7 @@ window.addEventListener("load", async function () {
     /* ALL THE RECORD LAYERS, ONE SWITCH. They live in the Layers menu above the map; with thousands of
        dots on screen the history underneath is hard to see. Turning them off remembers which were on
        and turning them back on returns exactly those. */
-    var REC = ["shelf", "archives", "wikidata", "cemeteries", "churches", "libraries"], recWas = [];
+    var REC = ["countries", "shelf", "archives", "wikidata", "cemeteries", "churches", "libraries"], recWas = [];   // countries too: its ringed markers are the other thing left on a map you wanted bare
     els.rec.checked = REC.some(function (k) { return !!on[k]; });
     els.rec.addEventListener("change", function () {
       REC.forEach(function (k) {
@@ -6932,7 +6935,7 @@ window.addEventListener("load", async function () {
            "records it is written in.</p>");
     h.push("<p><b>The layers</b></p><ul>");
     LAYERS.forEach(function (l) {
-      var el = document.querySelector('.ra-layer[data-l="' + l[0] + '"]');
+      var el = document.querySelector('#ra-layers [data-l="' + l[0] + '"]');
       h.push("<li>" + esc((el && el.title) || (l[1] + " — " + l[2])) + "</li>");
     });
     h.push("</ul>");
@@ -7080,7 +7083,7 @@ window.addEventListener("load", async function () {
     off = {};
     on = { shelf: true, countries: true };
     LAYERS.forEach(function (l) {
-      var el = document.querySelector('.ra-layer[data-l="' + l[0] + '"]');
+      var el = document.querySelector('#ra-layers [data-l="' + l[0] + '"]');
       if (el) {
         el.classList.toggle("on", !!on[l[0]]);
         var box = el.querySelector("input");

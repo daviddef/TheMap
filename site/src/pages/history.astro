@@ -47,14 +47,14 @@ const CH = hist.chapters;
       <div class="hm-hud">
         <div class="hm-year" id="hm-year" aria-live="off">1914</div>
         <div class="hm-ch" id="hm-ch"></div>
+        <section class="hm-list" id="hm-listw">
+          <h2><span id="hm-list-h">Under way</span>
+            <button type="button" id="hm-list-fold" aria-expanded="true" title="Fold the list away">&#9662;</button></h2>
+          <ol id="hm-list"></ol>
+        </section>
         <div class="hm-gnote" id="hm-gnote"></div>
       </div>
       <div class="hm-era" id="hm-era" hidden></div>
-      <section class="hm-list" id="hm-listw">
-        <h2><span id="hm-list-h">Under way</span>
-          <button type="button" id="hm-list-fold" aria-expanded="true" title="Fold the list away">&#9662;</button></h2>
-        <ol id="hm-list"></ol>
-      </section>
 
       <div class="hm-load" id="hm-load">Loading the movements&hellip;</div>
     </div>
@@ -72,10 +72,12 @@ const CH = hist.chapters;
       <label class="hm-tour"><input type="checkbox" id="hm-tour" checked /> Continue to the next era</label>
       <label class="hm-speed">Speed
         <select id="hm-speed" aria-label="Playback speed">
-          <option value="1">Very slow &mdash; 1 year a second</option>
-          <option value="2" selected>Slow &mdash; 2 years a second</option>
-          <option value="4">Medium &mdash; 4 years a second</option>
-          <option value="8">Fast &mdash; 8 years a second</option>
+          <option value="8">Very fast &mdash; 8 years a second</option>
+          <option value="4">Fast &mdash; 4 years a second</option>
+          <option value="2">Medium &mdash; 2 years a second</option>
+          <option value="1">Slow &mdash; 1 year a second</option>
+          <option value="0.5" selected>Very slow &mdash; 1 year every 2 seconds</option>
+          <option value="0.2">Crawl &mdash; 1 year every 5 seconds</option>
         </select>
       </label>
     </div>
@@ -168,27 +170,35 @@ const CH = hist.chapters;
   .k.migration { background:var(--hm-migration); } .k.voyage { background:#7A4FA3; }
   .hm-below { display:grid; grid-template-columns:minmax(0,1fr); gap:16px; }
   @media (max-width:760px) { .hm-below { grid-template-columns:1fr; } .hm-bar { grid-template-columns:auto 1fr; } .hm-speed { grid-column:1 / -1; } }
-  /* THE EVENTS AS A COLUMN ON THE MAP. David: a translucent column down one side, the events rolling in it and
-     scrollable, instead of a box under the map. On a phone it goes back under the map, where a column would
-     cover most of it. */
-  .hm-stage .hm-list { position:absolute; z-index:550; top:12px; right:58px; bottom:12px; width:min(310px, 38%);
-    display:flex; flex-direction:column; padding:10px 12px; border-radius:12px;
-    background:color-mix(in srgb, var(--panel, #fff) 76%, transparent); backdrop-filter:blur(3px);
+  /* ONE TRANSLUCENT COLUMN ON THE LEFT, UNDER THE BIG YEAR. David: the year, the era, and the events rolling
+     below them in the same panel, scrollable, not a second box on the other side of the map. The list's grid
+     must not stretch its rows to fill the column (that was the big gaps between the items). On a phone the
+     column is shorter and the list starts folded. */
+  .hm-hud { top:12px; bottom:12px; left:12px; width:min(340px, 40%); display:flex; flex-direction:column; gap:0;
+    padding:10px 14px 12px; border-radius:12px; text-shadow:none;
+    background:color-mix(in srgb, var(--panel, #fff) 74%, transparent); backdrop-filter:blur(3px);
     -webkit-backdrop-filter:blur(3px); }
-  .hm-stage .hm-list ol { flex:1 1 auto; min-height:0; max-height:none; }
+  .hm-hud .hm-list { pointer-events:auto; flex:1 1 auto; min-height:0; display:flex; flex-direction:column;
+    background:none; border:0; padding:0; margin-top:8px; border-top:1px solid var(--rule-strong, #bbb); border-radius:0; }
+  .hm-hud .hm-list h2 { margin:8px 0 4px; font-size:.95rem; }
+  .hm-hud .hm-list ol { flex:1 1 auto; min-height:0; max-height:none; align-content:start; grid-auto-rows:min-content; gap:2px; }
+  .hm-hud .hm-list li button { padding:4px 6px; font-size:.86rem; line-height:1.3; }
+  .hm-hud .hm-list li small { font-size:.74rem; }
+  .hm-hud .hm-gnote { font-size:.68rem; margin-top:6px; }
   .hm-list h2 { display:flex; justify-content:space-between; align-items:center; gap:8px; }
   .hm-list h2 button { border:0; background:none; font-size:1rem; cursor:pointer; color:inherit; padding:0 4px; }
   .hm-list.fold ol { display:none; }
-  .hm-stage .hm-list.fold { bottom:auto; }
+  .hm-hud:has(.hm-list.fold) { bottom:auto; }
+  .hm-list.fold { flex:0 0 auto; }
   .hm-list li button.hm-major { font-weight:600; }
-  @media (max-width:760px) { .hm-stage .hm-list { position:static; width:auto; backdrop-filter:none; border-radius:0; background:var(--panel, #fff); border:0; border-top:1px solid var(--rule-strong, #bbb); }
-    .hm-stage .hm-list ol { max-height:220px; } }
+  @media (max-width:760px) { .hm-hud { bottom:auto; width:min(300px, calc(100% - 70px)); max-height:78%; }
+    .hm-hud .hm-gnote { display:none; } .hm-hud .hm-list ol { max-height:150px; } }
   .hm-card, .hm-list { background:var(--panel, #fff); border:1px solid var(--rule-strong, #bbb);
                        border-radius:12px; padding:14px 16px; min-width:0; }
   .hm-card h2, .hm-list h2 { margin:0 0 6px; font-size:1.05rem; }
   .hm-card p { margin:.4em 0; }
   .hm-fine { font-size:.8rem; opacity:.75; }
-  .hm-list ol { list-style:none; margin:0; padding:0; display:grid; gap:4px; max-height:280px; overflow:auto; }
+  .hm-list ol { list-style:none; margin:0; padding:0; display:grid; gap:4px; max-height:280px; overflow:auto; align-content:start; }
   .hm-list li button { width:100%; text-align:left; background:none; border:0; padding:5px 6px; font:inherit;
                        color:inherit; cursor:pointer; border-left:4px solid var(--c, #999); border-radius:2px; }
   .hm-list li button:hover, .hm-list li button:focus-visible { background:color-mix(in srgb, var(--c, #999) 14%, transparent); }

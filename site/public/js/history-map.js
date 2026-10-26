@@ -5,6 +5,7 @@
   if (!root || !window.HistoryTheatre) return;
   window.HistoryTheatre.create({ base: root.getAttribute("data-base") || "/" });
   var fold = document.getElementById("hm-list-fold"), w = document.getElementById("hm-listw");
+  if (w && window.matchMedia && window.matchMedia("(max-width: 760px)").matches) { w.classList.add("fold"); if (fold) fold.setAttribute("aria-expanded", "false"); }
   if (fold && w) fold.addEventListener("click", function () {
     var f = w.classList.toggle("fold"); fold.setAttribute("aria-expanded", f ? "false" : "true");
   });

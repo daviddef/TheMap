@@ -464,7 +464,8 @@
     if (year >= end) setYear(chapter ? chapter.from : MIN);
     elPlay.innerHTML = "&#9632;"; elPlay.setAttribute("aria-pressed", "true");
     if (opts.onPlay) opts.onPlay(true);
-    var step = reduce ? 5 : 1, per = reduce ? 1000 / (parseInt(elSpeed.value, 10) / 5) : 1000 / parseInt(elSpeed.value, 10);
+    var yps = parseFloat(elSpeed.value) || 0.5;          // years a second; 0.2 is one year every five seconds
+    var step = reduce ? 5 : 1, per = reduce ? 1000 / (yps / 5) : 1000 / yps;
     timer = setInterval(function () {
       var e = chapter ? chapter.to : MAX;
       if (year >= e) { stop(); nextEra(); return; }

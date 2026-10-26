@@ -53,17 +53,27 @@ def years_in(text, era_from):
     return None
 
 
+people = {}      # (page, era) -> [[name, what the page says of them]], filled by tips()
+
+
 def tips():
     """The sentence each flag page hangs on a migration-and-conquest tag (its data-tip), keyed by
     (page, era, the tag's words after the verb). The arrow says WHAT moved; this is the page's own
     explanation of it, which is what a bubble on the map quotes."""
     out = {}
+    people.clear()
     for f in glob.glob(os.path.join(ROOT, "site", "src", "flags-pages", "*-flags.html")):
         slug = os.path.basename(f)[:-5]
         h = open(f, encoding="utf-8").read()
         for m in re.finditer(r'<div class="entry"[^>]*id="([^"]+)"', h):
             nxt = h.find('<div class="entry"', m.end())
             seg = h[m.end(): nxt if nxt > 0 else len(h)]
+            tr = re.search(r'<div class="tag-row">(.*?)</div>', seg, re.S)
+            if tr:
+                for mp in re.finditer(r'<span class="tag"[^>]*?data-tip="([^"]*)"[^>]*><span class="dot" style="background:#4a3b78"></span>(.*?)</span>', tr.group(1), re.S):
+                    nm = re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", "", mp.group(2)))).strip()
+                    if nm:
+                        people.setdefault((slug, m.group(1)), []).append([nm, html.unescape(mp.group(1)).strip()])
             for mr in re.finditer(r'<div class="migro-row">(.*?)</div>(?=\s*(?:<div class="noble-row"|<p>))', seg, re.S):
                 for mt in re.finditer(r'<span class="tag"[^>]*?data-tip="([^"]*)"[^>]*>(.*?)</span>(?=<span class="tag"|\s*$)', mr.group(1), re.S):
                     txt = re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", "", mt.group(2)))).strip()
@@ -139,6 +149,9 @@ def build():
             row["seat"] = seat
         if how == "country":
             row["o"] = m["o"]       # the other country, so the detail bubble can name it and show its flag
+        who = people.get((m["p"], m["e"]))
+        if who:
+            row["lead"] = [[n, (t if len(t) <= 190 else t[:187].rsplit(" ", 1)[0] + "…")] for n, t in who[:2]]   # who the flag page itself names for this era (not Wikidata)
         tip = tp.get((m["p"], m["e"], m["ot"]))
         if tip:
             row["tip"] = tip

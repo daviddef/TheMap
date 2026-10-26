@@ -394,6 +394,18 @@
       .then(function (j) { ERAS = j.eras || []; }).catch(function () { ERAS = []; });
     erasFetch.then(cb);
   }
+  /* WHO LED, FROM TWO SOURCES, EACH SAID TO BE WHAT IT IS. The flag page names who was in charge of the era it
+     describes (a hand-written tag, so it reaches back to Charlemagne and the Song); Wikidata gives heads of
+     state only for countries as they are drawn today, which is why it is silent for almost everything before
+     1800 and for any empire. Neither is filled in from the other. */
+  function leadersHTML(m, ld) {
+    var h = (m.lead || []).map(function (l) { return "<b>" + esc(l[0]) + "</b> <span>\u2014 " + esc(l[1]) + "</span>"; });
+    if (h.length) h.push("<span class='hm-d-src'>named on the flag page</span>");
+    if (ld === null) h.push("<span>Wikidata heads of state: loading\u2026</span>");
+    else if (ld.length) h = h.concat(ld.map(function (x) { return x + " <span class='hm-d-src'>Wikidata</span>"; }));
+    else if (!h.length) h.push("<span>no leader named for these years</span>");
+    return h.join("<br>");
+  }
   function detailHTML(m, i) {
     var col = COL[m.v], span = spanOf(m);
     var where = cname(m.s), other = "";
@@ -418,36 +430,51 @@
       "<dt>Who</dt><dd>" + esc(m.ot) + "</dd>" +
       (era ? "<dt>Under</dt><dd>" + esc(era.polity) + " <span>(" + esc(era.dates) + ")</span></dd>" : "") +
       "<dt>Flags</dt><dd class='hm-d-flags'>" + flags + "</dd>" +
-      "<dt>Leaders</dt><dd>" + (ld === null ? "<span>loading\u2026</span>" : (ld.length ? ld.join("<br>") : "<span>none recorded in Wikidata for these years</span>")) + "</dd></dl>" +
+      "<dt>Leaders</dt><dd>" + leadersHTML(m, ld) + "</dd></dl>" +
       "<p class='hm-fine'>" + esc(how) + "</p>" +
       "<a href='" + BASE + "flags/" + esc(m.p) + "/#" + esc(m.e) + "'>Read it on the flag page &rarr;</a></div>";
+  }
+  /* THE DETAIL BUBBLE IS OUR OWN CARD, NOT A LEAFLET POPUP. A popup opens above its point and is cut off when
+     the point is near the top edge, and fixing that by panning the map made the world jump. This card is laid
+     over the map beside the arrow, kept inside the map whatever the arrow's position, scrolls when it is
+     taller than the map, and the map never moves. A pulsing ring marks which arrow it is about. */
+  var detailRing = null, detailOff = null;
+  function closeDetail() {
+    if (detailPop) { detailPop.remove(); detailPop = null; }
+    if (detailRing) { map.removeLayer(detailRing); detailRing = null; }
+    if (detailOff) { map.off("move zoom resize", detailOff); detailOff = null; }
   }
   function openDetail(i) {
     var m = D.moves[i];
     if (compact || opts.detail === false) return;
-    clearBubbles();
-    var back = detailPop && detailPop._hmBack ? detailPop._hmBack : map.getCenter();   // where the map was before the first bubble
-    if (detailPop) { var old = detailPop; detailPop = null; map.removeLayer(old); }
-    var pop = L.popup({ autoPan: true, autoPanPadding: [60, 60], closeOnClick: false, autoClose: false, closeButton: true,
-      className: "hm-bubble hm-detail-pop", maxWidth: 340, minWidth: 260, offset: [0, -4],
-      maxHeight: Math.max(160, Math.min(380, map.getSize().y - 210)) })    // a taller bubble would be cut off at the map's top edge: it scrolls inside instead
-      .setLatLng(m.b).setContent(detailHTML(m, i));
-    pop._hmBack = back; detailPop = pop; pop.addTo(map);
-    /* A tall bubble near the top edge pans the map to fit itself; closing it puts the map back where it was. */
-    pop.on("remove", function () { if (detailPop === pop) { detailPop = null; map.panTo(back); } });
-    /* The bubble grows when the regime, flags and leaders arrive, and Leaflet will not pan again while its first
-       pan is running, so its top edge ends up above the map. Pan it back by hand once the content has changed. */
-    var fit = function () {
-      setTimeout(function () {
-        var el = pop.getElement && pop.getElement(); if (!el || detailPop !== pop) return;
-        var d = el.getBoundingClientRect().top - map.getContainer().getBoundingClientRect().top;
-        if (d < 8) map.panBy([0, d - 12], { animate: false });
-      }, 80);
+    clearBubbles(); closeDetail();
+    var el = document.createElement("div");
+    el.className = "hm-dpop"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "About this movement");
+    el.innerHTML = "<button type='button' class='hm-dpop-x' aria-label='Close'>&times;</button><div class='hm-dpop-body'></div>";
+    map.getContainer().appendChild(el);
+    L.DomEvent.disableClickPropagation(el); L.DomEvent.disableScrollPropagation(el);
+    var body = el.querySelector(".hm-dpop-body");
+    detailPop = el;
+    detailRing = L.marker(m.b, { icon: L.divIcon({ className: "", iconSize: [26, 26], iconAnchor: [13, 13],
+      html: "<div class='hm-pulse' style='--c:" + COL[m.v] + ";width:26px;height:26px'></div>" }), interactive: false, keyboard: false }).addTo(map);
+    var place = function () {
+      if (detailPop !== el) return;
+      var sz = map.getSize(), pt = map.latLngToContainerPoint(m.b);
+      var w = Math.min(340, sz.x - 16);
+      el.style.width = w + "px"; el.style.maxHeight = Math.max(120, sz.y - 16) + "px";
+      var h = el.offsetHeight;
+      var left = pt.x + 20;
+      if (left + w > sz.x - 8) left = pt.x - 20 - w;
+      left = Math.max(8, Math.min(left, sz.x - w - 8));
+      var top = Math.max(8, Math.min(pt.y - h / 2, sz.y - h - 8));
+      el.style.left = left + "px"; el.style.top = top + "px";
     };
-    var refresh = function () { if (detailPop === pop) { pop.setContent(detailHTML(m, i)); fit(); } };
-    fit();
-    loadEras(refresh);
-    if (!LEADERS) { leaderWaiters.push(refresh); loadLeaders(); }
+    var fill = function () { if (detailPop === el) { body.innerHTML = detailHTML(m, i); place(); } };
+    el.querySelector(".hm-dpop-x").addEventListener("click", closeDetail);
+    detailOff = place; map.on("move zoom resize", place);
+    fill();
+    loadEras(fill);
+    if (!LEADERS) { leaderWaiters.push(fill); loadLeaders(); }
   }
 
   /* ---- A: a bubble where a major movement lands --------------------------- */
@@ -656,7 +683,7 @@
         listeners.forEach(function (l) { l[0].removeEventListener(l[1], l[2]); });
         map.off("zoomend moveend", moved);
         clearBubbles(); hideEra();
-        if (detailPop) { var dp = detailPop; detailPop = null; map.removeLayer(dp); }
+        closeDetail();
         [groundLayer, arcLayer, flagLayer, leaderLayer, bubbleLayer].forEach(function (g) { map.removeLayer(g); });
         elG.textContent = "";
         if (rArc) { map.removeLayer(rArc); map.removeLayer(rGround); }

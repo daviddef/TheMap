@@ -4002,8 +4002,9 @@ window.addEventListener("load", async function () {
     playBtn.setAttribute("aria-pressed", "true");
     /* The playback opens on the whole world (David: «can we default our map to this zoom?»); the records map
        itself still opens on Europe, where the parish registers are. */
-    if (map.getSize().x >= 640) map.setView([30, 15], 2, { animate: false });
-    else map.fitBounds(L.latLngBounds([[-56, -170], [76, 190]]), { animate: false });
+    /* Zoom 2 puts the whole world in about 1,000 pixels; a narrower map crops its edges rather than
+       shrinking the world to a postage stamp, and zoom 1 is the floor (zoom 0 repeats the world). */
+    map.setView([30, 15], map.getSize().x >= 560 ? 2 : 1, { animate: false });
     thAssets().then(function () {
       if (TH.ui !== ui) return;
       return window.HistoryTheatre.create({
@@ -8538,7 +8539,7 @@ window.addEventListener("load", async function () {
   :global(.ra-th-list li button:hover), :global(.ra-th-list li button:focus-visible) { background: color-mix(in srgb, var(--c, #999) 14%, transparent); }
   :global(.ra-th-list li small) { display: block; opacity: .7; font-size: 10.5px; }
   :global(.ra-th-list li:not(:has(button))) { padding: 3px 8px; font-size: 11.5px; opacity: .75; }
-  :global(.ra-th.min .ra-th-listw) { display: none; }
+  /* «Under way» STAYS WHEN THE CONTROLS ARE HIDDEN: watching the events roll is what hiding them is for. */
   :global(.ra-th-load) { position: absolute; inset: 0; display: grid; place-items: center;
     background: color-mix(in srgb, var(--panel) 70%, transparent); color: var(--ink); }
   :global(.ra-th-load[hidden]) { display: none; }
@@ -8581,12 +8582,12 @@ window.addEventListener("load", async function () {
   /* Collapsed it hugs its contents; switched on it takes the width it needs
      for a slider worth dragging. */
   :global(.ra-time) { position: absolute; z-index: 800;
-    left: 10px; right: auto; max-width: calc(100% - 20px); bottom: 26px;
+    left: auto; right: 10px; max-width: calc(100% - 20px); bottom: 26px;
     display: flex; align-items: center; gap: 10px;
     padding: 7px 12px; border-radius: 999px;
     background: var(--panel); border: 1px solid var(--rule-strong);
     box-shadow: 0 4px 16px rgba(10, 20, 26, .18); }
-  :global(.ra-time.on) { right: 10px; }
+  :global(.ra-time.on) { left: 10px; right: 10px; }
   :global(.ra-time .ra-ylab) { flex: 1 1 auto; border: 0; background: none;
     padding: 0; min-width: 0; display: flex; align-items: center; gap: 8px; }
   /* Off: the slider and the readout go, the word stays. */
@@ -8599,8 +8600,9 @@ window.addEventListener("load", async function () {
   /* On a phone the map is 420px tall and the strip would eat it; it keeps
      the full width and loses the padding instead. */
   @media (max-width: 700px) {
-    :global(.ra-time) { left: 6px; right: 6px; bottom: 22px; gap: 7px;
+    :global(.ra-time) { left: auto; right: 6px; bottom: 22px; gap: 7px;
       padding: 6px 9px; }
+    :global(.ra-time.on) { left: 6px; right: 6px; }
   }
 
   /* THE SEARCHED PLACE, AND THE COLOUR THAT WAS NOT AS FREE AS I CLAIMED.

@@ -67,7 +67,7 @@
     var z = map.getZoom(), step = z >= 7 ? 2 : z >= 6 ? 5 : z >= 4 ? 10 : z >= 3 ? 15 : 30;
     var b = map.getBounds(), w = b.getWest(), e = b.getEast(), so = Math.max(b.getSouth(), -84), no = Math.min(b.getNorth(), 84);
     var line = function (pts, strong) {
-      L.polyline(pts, { renderer: rGrid, color: "#3d4f5a", weight: strong ? 1.1 : 0.7, opacity: strong ? 0.55 : 0.4,
+      L.polyline(pts, { renderer: rGrid, className: "hm-gline", color: "#3d4f5a", weight: strong ? 1.1 : 0.7, opacity: strong ? 0.55 : 0.4,
         dashArray: strong ? null : "2 5", interactive: false }).addTo(gridLayer);
     };
     var label = function (at, txt, anchor, cls) {

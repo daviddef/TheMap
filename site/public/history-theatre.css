@@ -16,3 +16,31 @@
   .hm-pulse { border-radius:50%; border:2px solid var(--c, #333); animation:hm-ping 1.6s ease-out infinite; }
   @keyframes hm-ping { from { transform:scale(.4); opacity:1; } to { transform:scale(1.6); opacity:0; } }
   @media (prefers-reduced-motion: reduce) { .hm-pulse { animation:none; } }
+
+/* A: the bubble where a major movement lands, and its phone twin, a numbered pin. */
+.leaflet-popup.hm-bubble .leaflet-popup-content-wrapper { background: var(--panel, #fff); color: var(--ink, #16222A);
+  border: 1px solid var(--rule-strong, #bbb); border-radius: 10px; box-shadow: 0 4px 16px rgba(10,20,26,.22); }
+.leaflet-popup.hm-bubble .leaflet-popup-tip { background: var(--panel, #fff); border: 1px solid var(--rule-strong, #bbb); }
+.leaflet-popup.hm-bubble .leaflet-popup-content { margin: 9px 12px 10px; font: 12.5px/1.45 var(--font-body, system-ui, sans-serif); }
+.hm-b b { display: block; font-size: 13.5px; font-weight: 600; margin: 1px 0 3px; }
+.hm-b p { margin: 0 0 5px; }
+.hm-b-k { font: 600 10.5px/1 var(--font-body, system-ui, sans-serif); text-transform: uppercase; letter-spacing: .05em; }
+.hm-b a { font-size: 12px; }
+.hm-bubble { animation: hm-pop .35s ease-out 1; }
+@keyframes hm-pop { from { opacity: 0; transform: translateY(6px); } }
+@media (prefers-reduced-motion: reduce) { .hm-bubble { animation: none; } }
+.hm-num { width: 22px; height: 22px; border-radius: 50%; color: #fff; font: 600 12px/22px var(--font-body, system-ui, sans-serif);
+  text-align: center; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.35); }
+.hm-numb { display: inline-block; min-width: 17px; height: 17px; border-radius: 9px; background: var(--ink, #16222A); color: var(--panel, #fff);
+  font: 600 11px/17px var(--font-body, system-ui, sans-serif); text-align: center; margin-right: 6px; font-style: normal; }
+/* D: the card that introduces an era while the tour runs. */
+.hm-era { position: absolute; z-index: 700; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(380px, calc(100% - 28px));
+  background: var(--panel, #fff); color: var(--ink, #16222A); border: 1px solid var(--rule-strong, #bbb); border-radius: 12px;
+  padding: 14px 16px 14px; box-shadow: 0 8px 28px rgba(10,20,26,.3); animation: hm-pop .4s ease-out 1; }
+.hm-era[hidden] { display: none; }
+.hm-era-n { font: 600 11px/1 var(--font-body, system-ui, sans-serif); text-transform: uppercase; letter-spacing: .06em; opacity: .7; }
+.hm-era h2 { margin: 6px 0 4px; font: 700 1.35rem/1.15 var(--font-display, Georgia, serif); }
+.hm-era p { margin: 0 0 8px; font-size: 13.5px; line-height: 1.5; }
+.hm-era-m { font-size: 12px; opacity: .8; margin-bottom: 10px; }
+.hm-era-go { border: 1px solid var(--accent, #1F5C6B); background: var(--accent, #1F5C6B); color: #fff; border-radius: 8px;
+  font: inherit; font-size: 13px; padding: 5px 12px; cursor: pointer; }

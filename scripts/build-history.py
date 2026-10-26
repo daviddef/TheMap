@@ -14,7 +14,7 @@ for a movement INTO a country the arrow runs from the other party to it; for one
 the other party is the destination, and only countries and explicit seats are used for
 those, never a nationality (a Syrian refugee leaving Syria does not name where to).
 """
-import json, os, re, time
+import glob, html, json, os, re, time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "site", "public", "history.json")
@@ -53,8 +53,29 @@ def years_in(text, era_from):
     return None
 
 
+def tips():
+    """The sentence each flag page hangs on a migration-and-conquest tag (its data-tip), keyed by
+    (page, era, the tag's words after the verb). The arrow says WHAT moved; this is the page's own
+    explanation of it, which is what a bubble on the map quotes."""
+    out = {}
+    for f in glob.glob(os.path.join(ROOT, "site", "src", "flags-pages", "*-flags.html")):
+        slug = os.path.basename(f)[:-5]
+        h = open(f, encoding="utf-8").read()
+        for m in re.finditer(r'<div class="entry"[^>]*id="([^"]+)"', h):
+            nxt = h.find('<div class="entry"', m.end())
+            seg = h[m.end(): nxt if nxt > 0 else len(h)]
+            for mr in re.finditer(r'<div class="migro-row">(.*?)</div>(?=\s*(?:<div class="noble-row"|<p>))', seg, re.S):
+                for mt in re.finditer(r'<span class="tag"[^>]*?data-tip="([^"]*)"[^>]*>(.*?)</span>(?=<span class="tag"|\s*$)', mr.group(1), re.S):
+                    txt = re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", "", mt.group(2)))).strip()
+                    if ":" in txt:
+                        out[(slug, m.group(1), txt.split(":", 1)[1].strip()[:120])] = html.unescape(mt.group(1)).strip()
+    return out
+
+
 def build():
     em = j("site/public/era-moves.json")
+    tp = tips()
+    major = j("data/history-major.json")["major"]
     actors = j("data/history-actors.json")["actors"]
     chapters = j("data/history-chapters.json")["chapters"]
     at = em["at"]
@@ -116,9 +137,21 @@ def build():
             row["open"] = True
         if seat:
             row["seat"] = seat
+        tip = tp.get((m["p"], m["e"], m["ot"]))
+        if tip:
+            row["tip"] = tip
         out.append(row)
         dec = (f // 10) * 10
         dens[dec] = dens.get(dec, 0) + 1
+    # THE MAJOR ONES, chosen by a person (data/history-major.json) and resolved here to a movement.
+    # One that no longer resolves stops the build rather than quietly losing its bubble.
+    marked = set()
+    for cc, needle, title in major:
+        hit = next((i for i, r in enumerate(out) if r["s"] == cc and needle.lower() in r["ot"].lower() and i not in marked), None)
+        if hit is None:
+            raise SystemExit(f"history-major.json: {cc} / {needle!r} matches no movement")
+        marked.add(hit)
+        out[hit]["major"] = title
     return {
         "contract": {"name": "recordatlas-history", "version": VERSION},
         "note": ("The movements behind /history/, with an origin and destination point for each. "
@@ -128,7 +161,7 @@ def build():
                  "stub. Built by scripts/build-history.py from era-moves.json and data/history-actors.json."),
         "generated": time.strftime("%Y-%m-%d"),
         "minYear": MIN_YEAR,
-        "counts": {"moves": len(out), **how_n, "voyages": len(voyages)},
+        "counts": {"moves": len(out), "major": len(marked), **how_n, "voyages": len(voyages)},
         "chapters": chapters,
         "density": {str(k): v for k, v in sorted(dens.items())},
         "voyages": voyages,

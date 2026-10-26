@@ -46,7 +46,10 @@
              migration: $("hm-l-migration"), flags: $("hm-l-flags"), ground: $("hm-l-ground"), voyages: $("hm-l-voyages"), leaders: $("hm-l-leaders") };
   var LEADERS = null, leaderLayer, leadersFetch = null;
   var elG = $("hm-gnote"), GROUND = null, groundLayer, groundKey = "";
-  var elTour = $("hm-tour"), elTourBtn = $("hm-tour-btn"), pauseT = null, dead = false;
+  var elTour = $("hm-tour"), elTourBtn = $("hm-tour-btn"), pauseT = null, introT = null, dead = false;
+  var elEra = $("hm-era");
+  var compact = !!(window.matchMedia && window.matchMedia("(max-width: 700px)").matches);
+  var bubbleLayer, bubQ = [], bubT = null, bubShown = [], numFor = {}, numN = 0, lastYear = null;
 
   var D = null, FM = null, chapter = null, year = 1914, timer = null, selected = null;
   var map, arcLayer, flagLayer, ownMap = false, rArc, rGround;
@@ -322,7 +325,8 @@
     vis.slice(0, 30).forEach(function (v) {
       var m = v.m, li = document.createElement("li"), b = document.createElement("button");
       b.type = "button"; b.style.setProperty("--c", COL[m.v]);
-      b.innerHTML = esc(m.ot) + "<small>" + esc(KIND[m.v]) + " · " + esc(m.s) + " · from " + m.f + "</small>";
+      b.innerHTML = (numFor[v.i] ? "<i class='hm-numb'>" + numFor[v.i] + "</i>" : "") + esc(m.major || m.ot) + "<small>" + esc(KIND[m.v]) + " · " + esc(m.s) + " · from " + m.f + "</small>";
+      if (m.tip) b.title = m.tip;
       b.addEventListener("click", function () { select(v.i, true); });
       li.appendChild(b); elList.appendChild(li);
     });
@@ -342,8 +346,9 @@
       origin: "The people are named by nationality, so the arrow starts at that country's label point. It is not a route.",
       stub: "The page names no second place, so this is a stub at the country." }[m.how];
     var span = m.f + (m.t !== m.f ? "–" + (m.present ? "present" : m.t) : "");
-    elCard.innerHTML = "<h2 style='border-left:4px solid " + COL[m.v] + ";padding-left:8px'>" + esc(KIND[m.v]) + " · " + esc(span) + "</h2>" +
+    elCard.innerHTML = "<h2 style='border-left:4px solid " + COL[m.v] + ";padding-left:8px'>" + esc(m.major || KIND[m.v]) + " · " + esc(span) + "</h2>" +
       "<p><b>" + esc(m.ot) + "</b></p>" +
+      (m.tip ? "<p>" + esc(m.tip) + "</p>" : "") +
       "<p>Recorded on the page for <b>" + esc(m.s) + "</b>, " + (m.d === "in" ? "coming in." : "going out.") + "</p>" +
       leaderLine(m) +
       "<p class='hm-fine'>" + esc(how) + "</p>" +
@@ -351,22 +356,99 @@
     if (pan && m.b) map.panTo(m.b);
   }
 
+  /* ---- A: a bubble where a major movement lands --------------------------- */
+  /* The curated few (data/history-major.json) announce themselves as they start: one bubble every four
+     seconds at most, one on the map at a time, each quoting the sentence the flag page gives. Scrubbing
+     by hand makes none (a jump is not an event). On a phone a bubble is bigger than the thing it explains,
+     so there it is a numbered pin and the same number sits in the list. */
+  function bubbleHTML(m, i) {
+    var col = COL[m.v];
+    return "<div class='hm-b'><div class='hm-b-k' style='color:" + col + "'>" + esc(KIND[m.v]) + " · " + esc(spanOf(m)) + "</div>" +
+      "<b>" + esc(m.major || m.ot) + "</b>" + (m.tip ? "<p>" + esc(m.tip.length > 260 ? m.tip.slice(0, 257).replace(/\s+\S*$/, "") + "…" : m.tip) + "</p>" : "") +
+      "<a href='" + BASE + "flags/" + esc(m.p) + "/#" + esc(m.e) + "'>Read it on the flag page &rarr;</a></div>";
+  }
+  function dropBubble(b) {
+    if (b.t) clearTimeout(b.t);
+    if (b.layer && bubbleLayer) bubbleLayer.removeLayer(b.layer);
+    var k = bubShown.indexOf(b); if (k > -1) bubShown.splice(k, 1);
+  }
+  function showBubble(item) {
+    var m = D.moves[item.i], layer;
+    if (compact) {
+      numN = numN % 9 + 1; numFor[item.i] = numN;
+      layer = L.marker(m.b, { icon: L.divIcon({ className: "", iconSize: [22, 22], iconAnchor: [11, 11],
+        html: "<div class='hm-num' style='background:" + COL[m.v] + "'>" + numN + "</div>" }), keyboard: false })
+        .on("click", function () { select(item.i, false); });
+    } else {
+      layer = L.popup({ autoPan: false, closeOnClick: false, autoClose: false, closeButton: true,
+        className: "hm-bubble", maxWidth: 270, minWidth: 190, offset: [0, -4] })
+        .setLatLng(m.b).setContent(bubbleHTML(m, item.i));
+    }
+    var b = { layer: layer };
+    bubbleLayer.addLayer(layer);
+    if (!compact) layer.on("remove", function () { var k = bubShown.indexOf(b); if (k > -1) bubShown.splice(k, 1); });
+    b.t = setTimeout(function () { dropBubble(b); }, reduce ? 10000 : (compact ? 12000 : 8000));
+    bubShown.push(b);
+    while (bubShown.length > (compact ? 5 : 1)) dropBubble(bubShown[0]);
+  }
+  function pumpBubbles() {
+    bubT = null;
+    if (!bubQ.length) return;
+    showBubble(bubQ.shift());
+    bubT = setTimeout(pumpBubbles, compact ? 2300 : 4200);
+  }
+  function announce(from, to) {
+    if (!D || !D.moves) return;
+    D.moves.forEach(function (m, i) {
+      if (!m.major || !on[m.v] || !on[m.v].checked) return;
+      if (m.f > from && m.f <= to && bubQ.length < 6) bubQ.push({ i: i });
+    });
+    if (bubQ.length && !bubT) pumpBubbles();
+  }
+  function clearBubbles() {
+    bubQ = []; if (bubT) { clearTimeout(bubT); bubT = null; }
+    bubShown.slice().forEach(dropBubble); numFor = {}; numN = 0;
+  }
+
+  /* ---- D: the era card ------------------------------------------------------ */
+  function majorsOf(ch) {
+    return D.moves.filter(function (m) { return m.major && m.f >= ch.from && m.f <= ch.to && ch.layers.indexOf(m.v) > -1; })
+      .sort(function (a, b) { return a.f - b.f; });
+  }
+  function hideEra() { if (introT) { clearTimeout(introT); introT = null; } if (elEra && elEra.hidden === false) elEra.hidden = true; }
+  function showEra(ch, then) {
+    if (!elEra || !elEra.addEventListener || elEra.tagName === "STUB") { if (then) then(); return; }
+    var i = D.chapters.indexOf(ch) + 1, mj = majorsOf(ch);
+    elEra.innerHTML = "<div class='hm-era-n'>Era " + i + " of " + D.chapters.length + " · " + ch.from + "–" + ch.to + "</div>" +
+      "<h2>" + esc(ch.title) + "</h2><p>" + esc(ch.blurb) + "</p>" +
+      (mj.length ? "<div class='hm-era-m'>" + mj.length + " headline movement" + (mj.length === 1 ? "" : "s") + ": " +
+        mj.slice(0, 4).map(function (m) { return esc(m.major); }).join(" · ") + (mj.length > 4 ? " · …" : "") + "</div>" : "") +
+      "<button type='button' class='hm-era-go'>Start this era</button>";
+    elEra.hidden = false;
+    var go = function () { hideEra(); if (then) then(); };
+    elEra.querySelector(".hm-era-go").addEventListener("click", go);
+    introT = setTimeout(go, reduce ? 3000 : 5200);
+  }
+
   /* ---- time ------------------------------------------------------------- */
   function setYear(y, fromUser) {
+    var was = year;
     year = Math.max(MIN, Math.min(MAX, y));
     elRange.value = year; elYear.textContent = yr(year);
-    if (fromUser) { stop(); cancelPause(); }
+    if (fromUser) { stop(); cancelPause(); clearBubbles(); }
     draw(); url();
+    if (!fromUser && timer && year > was && year - was <= 6) announce(was, year);
     if (opts.onYear) opts.onYear(year, !!fromUser);
   }
   function stop() {
     if (!timer) return;
-    clearInterval(timer); timer = null;
+    clearInterval(timer); timer = null; bubQ = [];
     elPlay.innerHTML = "&#9654;"; elPlay.setAttribute("aria-pressed", "false");
     if (opts.onPlay) opts.onPlay(false);
   }
   function play() {
     if (timer) return stop();
+    hideEra();
     var end = chapter ? chapter.to : MAX;
     if (year >= end) setYear(chapter ? chapter.from : MIN);
     elPlay.innerHTML = "&#9632;"; elPlay.setAttribute("aria-pressed", "true");
@@ -387,12 +469,12 @@
     if (!nx) { elCh.textContent = chapter.title + " \u2014 that was the last era."; return; }
     elCh.textContent = "Next: " + nx.title + " (" + nx.from + "\u2013" + nx.to + ")";
     clearTimeout(pauseT);
-    pauseT = setTimeout(function () { pauseT = null; setChapter(nx.id, true); }, reduce ? 1500 : 3500);
+    pauseT = setTimeout(function () { pauseT = null; setChapter(nx.id, true); }, reduce ? 800 : 1200);
   }
-  function cancelPause() { if (pauseT) { clearTimeout(pauseT); pauseT = null; } }
+  function cancelPause() { if (pauseT) { clearTimeout(pauseT); pauseT = null; } hideEra(); }
 
   function setChapter(id, autoplay) {
-    stop(); cancelPause();
+    stop(); cancelPause(); clearBubbles();
     chapter = D.chapters.filter(function (c) { return c.id === id; })[0] || null;
     scope.querySelectorAll(CHIPS).forEach(function (b) {
       if (chapter && b.getAttribute("data-ch") === chapter.id) b.setAttribute("aria-current", "true");
@@ -406,7 +488,7 @@
     year = chapter.from; elRange.value = year; elYear.textContent = yr(year);
     draw(); url();
     if (opts.onYear) opts.onYear(year, false);
-    if (autoplay) play();
+    if (autoplay) { lastYear = null; showEra(chapter, play); }
   }
 
   function url() {
@@ -457,7 +539,7 @@
        are styled and animated by CSS class, which a canvas path cannot be. */
     if (opts.map) { rArc = L.svg({ padding: 0.5 }); rGround = L.svg({ pane: "ground", padding: 0.5 }); }
     groundLayer = L.layerGroup().addTo(map);
-    arcLayer = L.layerGroup().addTo(map); flagLayer = L.layerGroup().addTo(map); leaderLayer = L.layerGroup().addTo(map);
+    arcLayer = L.layerGroup().addTo(map); flagLayer = L.layerGroup().addTo(map); leaderLayer = L.layerGroup().addTo(map); bubbleLayer = L.layerGroup().addTo(map);
     var moved = function () { drawFlags(); drawLeaders(); };
     map.on("zoomend moveend", moved);
 
@@ -473,7 +555,8 @@
         dead = true; stop(); cancelPause();
         listeners.forEach(function (l) { l[0].removeEventListener(l[1], l[2]); });
         map.off("zoomend moveend", moved);
-        [groundLayer, arcLayer, flagLayer, leaderLayer].forEach(function (g) { map.removeLayer(g); });
+        clearBubbles(); hideEra();
+        [groundLayer, arcLayer, flagLayer, leaderLayer, bubbleLayer].forEach(function (g) { map.removeLayer(g); });
         elG.textContent = "";
         if (rArc) { map.removeLayer(rArc); map.removeLayer(rGround); }
         if (ownMap) map.remove();

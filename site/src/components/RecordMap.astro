@@ -399,21 +399,15 @@ try {
            title="Run this search: Breslau &mdash; the German name of Wrocław">Breslau</a>
         finds Wrocław &mdash; or click any country on the map.
       </p>
-      <p class="at-start-more">
-        <a href="{HELP}"><span data-i18n>The colour of a dot is what it costs to look</span> &rarr;</a>
-      </p>
-      {/* THE THREE LAYERS NOBODY COULD FIND. David: «Conquest and Migration i
-          still cant see it?» They were live and drawing the whole time — and
-          they were the last rows of a ten-item dropdown behind an icon, shut
-          by default, and they draw nothing at all until a year is set. Three
-          conditions, none of them announced. This is the announcement: one
-          line, one link, and the link sets the layers AND the years, because
-          either alone shows an empty map and looks broken. */}
-      <p class="at-start-more at-start-hist">
-        <a class="ra-try-layers"
-           href={`${base}history/?chapter=world-wars`}
-           ><span data-i18n>Or watch the ground change hands</span> &rarr;</a>
-        <span data-i18n>conquests, occupations and migrations playing over the years, with a chapter for each age</span>
+      {/* TWO LINES, NOT FIVE. David: «its a lot of real estate for just a few lines of text». The
+          two link paragraphs became one row, and the history link now does what the map's own Play
+          button does (the playback lives on this map since the History engine moved in), with the
+          full page as the fallback if script is off. */}
+      <p class="at-start-more at-links">
+        <a href="{HELP}"><span data-i18n>What a dot's colour means</span> &rarr;</a>
+        <a class="ra-try-layers" href={`${base}history/?chapter=world-wars`}
+           title="Play the ground changing hands on this map: conquests, occupations and migrations, a chapter for each age"
+           >&#9654; <span data-i18n>Watch the ground change hands</span></a>
       </p>
       {/* THE THIRD COUNTS LINE IS GONE. David, counting them: «in this one
           area i see 3 different places you talk about volumes» — the masthead
@@ -3912,6 +3906,9 @@ window.addEventListener("load", async function () {
         '<div class="ra-th-ch" data-k="hm-ch"></div></div>' +
       '<div class="ra-th-cardw" hidden><button type="button" class="ra-th-x" data-k="card-x" aria-label="Close the details">&times;</button>' +
         '<div class="ra-th-card" data-k="hm-card" aria-live="polite"></div></div>' +
+      '<div class="hm-era" data-k="hm-era" hidden></div>' +
+      '<div class="ra-th-listw"><button type="button" class="ra-th-lh" data-k="lh" aria-expanded="true"><span data-k="hm-list-h">Under way</span> <i aria-hidden="true">&#9662;</i></button>' +
+        '<ol class="ra-th-list" data-k="hm-list"></ol></div>' +
       '<div class="ra-th-load" data-k="hm-load">Loading the movements&hellip;</div>' +
       '<div class="ra-th-bar">' +
         '<div class="ra-th-chips" data-k="chips"></div>' +
@@ -3969,6 +3966,15 @@ window.addEventListener("load", async function () {
       if (TH.sync && TH.ctl) thSyncRecords(TH.ctl.year());
     });
     els.close.addEventListener("click", thClose);
+    /* B, the list of what is under way. Folded by default on a phone, where it would sit on the map. */
+    var listW = ui.querySelector(".ra-th-listw");
+    function foldList(f) { listW.classList.toggle("fold", f); els.lh.setAttribute("aria-expanded", f ? "false" : "true"); }
+    els.lh.addEventListener("click", function () { foldList(!listW.classList.contains("fold")); });
+    if (window.matchMedia && window.matchMedia("(max-width: 700px)").matches) {
+      /* A phone's map is about 480px tall: the controls start tucked away so there is a map to watch. */
+      foldList(true);
+      ui.classList.add("min"); els.min.textContent = "Show controls"; els.min.setAttribute("aria-expanded", "false");
+    }
     /* ALL THE RECORD LAYERS, ONE SWITCH. They live in the Layers menu above the map; with thousands of
        dots on screen the history underneath is hard to see. Turning them off remembers which were on
        and turning them back on returns exactly those. */
@@ -4027,6 +4033,14 @@ window.addEventListener("load", async function () {
   }
   /* The map's Play: first press opens the playback and runs every era;
      afterwards it pauses and resumes. */
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest(".ra-try-layers");
+    if (!a) return;
+    e.preventDefault();
+    if (!TH.ui) thOpen(true);
+    else if (TH.ctl && !TH.ctl.playing()) TH.ctl.play();
+    var m = document.getElementById("ra-map"); if (m && m.scrollIntoView) m.scrollIntoView({ block: "center", behavior: "smooth" });
+  });
   playBtn.addEventListener("click", function () {
     if (!TH.ui) return thOpen(true);
     if (TH.ctl) TH.ctl.playing() ? TH.ctl.stop() : TH.ctl.play();
@@ -7459,6 +7473,8 @@ window.addEventListener("load", async function () {
   .at-start b { color: var(--ink); }
   .at-start a { border-bottom: 1px solid var(--rule-strong); }
   .at-start-more { margin: 6px 0 0; font-size: 12.5px; }
+  .at-links { display: flex; flex-wrap: wrap; gap: 4px 18px; }
+  .at-panel:has(#ra-empty:not([hidden])) { padding: 10px 14px 12px; }
   #ra-play[aria-pressed="true"] { background: var(--accent); color: var(--band-label, #fff);
                                   border-color: var(--accent); }
   /* THE SAME HEIGHT AS THE SEARCH BOX. They were 32px against its 38 and sat
@@ -7670,8 +7686,6 @@ window.addEventListener("load", async function () {
   /* A FLAG IS A LABEL, so it gets no marker furniture — no shadow, no pin,
      no background. The thin rule is what stops a white flag (Japan, and the
      several that are mostly white) from disappearing into the sea. */
-  .at-start-hist span[data-i18n] { display: block; color: var(--ink-3);
-    font-size: 12px; margin-top: 1px; }
   .ra-flagpin { background: none; border: 0; }
   .ra-flagpin img { display: block; width: 26px; height: 17px;
     border: 1px solid rgba(22,34,42,.45); border-radius: 1px;
@@ -8509,6 +8523,18 @@ window.addEventListener("load", async function () {
   :global(.ra-th.min .ra-th-bar) { right: auto; width: auto; max-width: calc(100% - 20px); }
   :global(.ra-th.min .ra-th-chips), :global(.ra-th.min .ra-th-more),
   :global(.ra-th.min .ra-th-scrub), :global(.ra-th.min .ra-th-sel), :global(.ra-th.min .ra-th-chk) { display: none; }
+  :global(.ra-th-listw) { position: absolute; left: 56px; top: 118px; width: min(262px, calc(100% - 140px));
+    background: color-mix(in srgb, var(--panel) 90%, transparent); border: 1px solid var(--rule-strong); border-radius: 10px; }
+  :global(.ra-th-lh) { width: 100%; text-align: left; background: none; border: 0; padding: 5px 10px; font: 600 11.5px/1.2 var(--sans);
+    color: var(--ink); cursor: pointer; display: flex; justify-content: space-between; }
+  :global(.ra-th-list) { list-style: none; margin: 0; padding: 0 4px 4px; max-height: 150px; overflow: auto; display: grid; gap: 1px; }
+  :global(.ra-th-listw.fold .ra-th-list) { display: none; }
+  :global(.ra-th-list li button) { width: 100%; text-align: left; background: none; border: 0; padding: 3px 6px; font: inherit; font-size: 11.5px;
+    line-height: 1.25; color: var(--ink); cursor: pointer; border-left: 3px solid var(--c, #999); border-radius: 2px; }
+  :global(.ra-th-list li button:hover), :global(.ra-th-list li button:focus-visible) { background: color-mix(in srgb, var(--c, #999) 14%, transparent); }
+  :global(.ra-th-list li small) { display: block; opacity: .7; font-size: 10.5px; }
+  :global(.ra-th-list li:not(:has(button))) { padding: 3px 8px; font-size: 11.5px; opacity: .75; }
+  :global(.ra-th.min .ra-th-listw) { display: none; }
   :global(.ra-th-load) { position: absolute; inset: 0; display: grid; place-items: center;
     background: color-mix(in srgb, var(--panel) 70%, transparent); color: var(--ink); }
   :global(.ra-th-load[hidden]) { display: none; }

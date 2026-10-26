@@ -429,8 +429,11 @@
   function cname(cc) {
     try { return new Intl.DisplayNames(["en"], { type: "region" }).of(cc) || cc; } catch (e) { return cc; }
   }
+  /* A flag is the way into its page: the image links to that era's flag page. */
   function flagImg(img, alt) {
-    return "<img class='hm-d-flag' alt='" + esc(alt) + "' title='" + esc(alt) + "' src='" + BASE + "fl/" + esc(img) + ".svg' onerror=\"this.style.display='none'\">";
+    var k = img.indexOf("--"), href = k > 0 ? BASE + "flags/" + img.slice(0, k) + "/#" + img.slice(k + 2) : "";
+    var im = "<img class='hm-d-flag' alt='" + esc(alt) + "' src='" + BASE + "fl/" + esc(img) + ".svg' onerror=\"this.style.display='none'\">";
+    return href ? "<a class='hm-d-flaglink' href='" + esc(href) + "' title='" + esc(alt + " \u2014 open its flag page") + "'>" + im + "</a>" : im;
   }
   function leaderTxt(cc, y) {
     var r = leaderAt(cc, y);
@@ -479,8 +482,7 @@
       (era ? "<dt>Under</dt><dd>" + esc(era.polity) + " <span>(" + esc(era.dates) + ")</span></dd>" : "") +
       "<dt>Flags</dt><dd class='hm-d-flags'>" + flags + "</dd>" +
       "<dt>Leaders</dt><dd>" + leadersHTML(m, ld) + "</dd></dl>" +
-      "<p class='hm-fine'>" + esc(how) + "</p>" +
-      "<a href='" + BASE + "flags/" + esc(m.p) + "/#" + esc(m.e) + "'>Read it on the flag page &rarr;</a></div>";
+      "<p class='hm-fine'>" + esc(how) + "</p></div>";
   }
   /* THE DETAIL BUBBLE IS OUR OWN CARD, NOT A LEAFLET POPUP. A popup opens above its point and is cut off when
      the point is near the top edge, and fixing that by panning the map made the world jump. This card is laid

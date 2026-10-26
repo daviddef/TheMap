@@ -15,6 +15,7 @@
                     hm-tour-btn and the hm-l-* layer boxes; anything missing is a harmless stub
      opts.keys      false = no keyboard shortcuts
      opts.syncUrl   false = leave the address alone
+     opts.followChapterView  true = each era zooms to its own region (off by default: the world stays framed)
      opts.start     "chapter" (default, the /history/ behaviour) | "none"
      opts.onYear(y), opts.onPlay(bool), opts.onChapter(chapter|null)
    controller: setYear, play, stop, setChapter, tour, year(), playing(), destroy() */
@@ -311,9 +312,17 @@
     });
   }
 
+  /* THE ROLLING LIST. Redrawn only when its contents change (not every tick), and a reader who has scrolled
+     down keeps their place: it used to be wiped and rebuilt each second, which made it impossible to scroll. */
+  var listSig = "";
   function list(vis, voy) {
     voy = voy || [];
     elListH.textContent = "Under way, " + (year) + (vis.length + voy.length ? " (" + (vis.length + voy.length) + ")" : "");
+    var shown = vis.slice(0, 80);
+    var sig = voy.map(function (x) { return "v" + x.i; }).concat(shown.map(function (v) { return v.i + ":" + (numFor[v.i] || ""); })).join(",");
+    if (sig === listSig) return;
+    listSig = sig;
+    var keep = elList.scrollTop || 0;
     elList.innerHTML = "";
     voy.forEach(function (x) {
       var li = document.createElement("li"), b = document.createElement("button");
@@ -322,15 +331,17 @@
       b.addEventListener("click", function () { selectVoyage(x.i); });
       li.appendChild(b); elList.appendChild(li);
     });
-    vis.slice(0, 30).forEach(function (v) {
+    shown.forEach(function (v) {
       var m = v.m, li = document.createElement("li"), b = document.createElement("button");
       b.type = "button"; b.style.setProperty("--c", COL[m.v]);
+      if (m.major) b.className = "hm-major";
       b.innerHTML = (numFor[v.i] ? "<i class='hm-numb'>" + numFor[v.i] + "</i>" : "") + esc(m.major || m.ot) + "<small>" + esc(KIND[m.v]) + " · " + esc(m.s) + " · from " + m.f + "</small>";
       if (m.tip) b.title = m.tip;
       b.addEventListener("click", function () { select(v.i, true); });
       li.appendChild(b); elList.appendChild(li);
     });
     if (!vis.length && !voy.length) { var li2 = document.createElement("li"); li2.textContent = "Nothing in this atlas began in these years, with these layers."; elList.appendChild(li2); }
+    elList.scrollTop = keep;
   }
 
   function leaderLine(m) {
@@ -484,7 +495,11 @@
     if (!chapter) { elCh.textContent = ""; return; }
     elCh.textContent = chapter.title + " — " + chapter.blurb;
     ["conquest", "occupation", "migration"].forEach(function (k) { on[k].checked = chapter.layers.indexOf(k) > -1; });
-    map.invalidateSize(); map.setView([chapter.view[0], chapter.view[1]], chapter.view[2], { animate: false });
+    map.invalidateSize();
+    /* THE WHOLE WORLD STAYS IN VIEW. David, with the full-world playback in front of him: «can we default our
+       map to this zoom?». Each era used to zoom into its own region, which hid the rest of the ground changing
+       hands. An era now keeps whatever the reader has framed; opts.followChapterView brings the old zoom back. */
+    if (opts.followChapterView) map.setView([chapter.view[0], chapter.view[1]], chapter.view[2], { animate: false });
     year = chapter.from; elRange.value = year; elYear.textContent = yr(year);
     draw(); url();
     if (opts.onYear) opts.onYear(year, false);

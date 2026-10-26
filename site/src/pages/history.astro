@@ -50,6 +50,12 @@ const CH = hist.chapters;
         <div class="hm-gnote" id="hm-gnote"></div>
       </div>
       <div class="hm-era" id="hm-era" hidden></div>
+      <section class="hm-list" id="hm-listw">
+        <h2><span id="hm-list-h">Under way</span>
+          <button type="button" id="hm-list-fold" aria-expanded="true" title="Fold the list away">&#9662;</button></h2>
+        <ol id="hm-list"></ol>
+      </section>
+
       <div class="hm-load" id="hm-load">Loading the movements&hellip;</div>
     </div>
 
@@ -97,10 +103,6 @@ const CH = hist.chapters;
         <h2>Choose an arrow</h2>
         <p>Click any arrow or dot to read what the flag page says, and open the page it came from.</p>
         <p class="hm-fine">An arrow to a country joins the two countries' label points. An arrow to an empire or a people starts at the seat it ruled from or the country it came from. A dashed stub means the page names no second place. None of these is a route.</p>
-      </section>
-      <section class="hm-list">
-        <h2 id="hm-list-h">Under way</h2>
-        <ol id="hm-list"></ol>
       </section>
     </div>
   </div>
@@ -164,8 +166,23 @@ const CH = hist.chapters;
   .hm-layers .k { display:inline-block; width:18px; height:4px; border-radius:2px; }
   .k.conquest { background:var(--hm-conquest); } .k.occupation { background:var(--hm-occupation); }
   .k.migration { background:var(--hm-migration); } .k.voyage { background:#7A4FA3; }
-  .hm-below { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:16px; }
+  .hm-below { display:grid; grid-template-columns:minmax(0,1fr); gap:16px; }
   @media (max-width:760px) { .hm-below { grid-template-columns:1fr; } .hm-bar { grid-template-columns:auto 1fr; } .hm-speed { grid-column:1 / -1; } }
+  /* THE EVENTS AS A COLUMN ON THE MAP. David: a translucent column down one side, the events rolling in it and
+     scrollable, instead of a box under the map. On a phone it goes back under the map, where a column would
+     cover most of it. */
+  .hm-stage .hm-list { position:absolute; z-index:550; top:12px; right:58px; bottom:12px; width:min(310px, 38%);
+    display:flex; flex-direction:column; padding:10px 12px; border-radius:12px;
+    background:color-mix(in srgb, var(--panel, #fff) 76%, transparent); backdrop-filter:blur(3px);
+    -webkit-backdrop-filter:blur(3px); }
+  .hm-stage .hm-list ol { flex:1 1 auto; min-height:0; max-height:none; }
+  .hm-list h2 { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .hm-list h2 button { border:0; background:none; font-size:1rem; cursor:pointer; color:inherit; padding:0 4px; }
+  .hm-list.fold ol { display:none; }
+  .hm-stage .hm-list.fold { bottom:auto; }
+  .hm-list li button.hm-major { font-weight:600; }
+  @media (max-width:760px) { .hm-stage .hm-list { position:static; width:auto; backdrop-filter:none; border-radius:0; background:var(--panel, #fff); border:0; border-top:1px solid var(--rule-strong, #bbb); }
+    .hm-stage .hm-list ol { max-height:220px; } }
   .hm-card, .hm-list { background:var(--panel, #fff); border:1px solid var(--rule-strong, #bbb);
                        border-radius:12px; padding:14px 16px; min-width:0; }
   .hm-card h2, .hm-list h2 { margin:0 0 6px; font-size:1.05rem; }

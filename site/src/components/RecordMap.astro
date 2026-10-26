@@ -4000,6 +4000,10 @@ window.addEventListener("load", async function () {
       els.min.setAttribute("aria-expanded", m ? "false" : "true");
     });
     playBtn.setAttribute("aria-pressed", "true");
+    /* The playback opens on the whole world (David: «can we default our map to this zoom?»); the records map
+       itself still opens on Europe, where the parish registers are. */
+    if (map.getSize().x >= 640) map.setView([30, 15], 2, { animate: false });
+    else map.fitBounds(L.latLngBounds([[-56, -170], [76, 190]]), { animate: false });
     thAssets().then(function () {
       if (TH.ui !== ui) return;
       return window.HistoryTheatre.create({

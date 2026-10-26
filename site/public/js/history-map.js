@@ -4,4 +4,8 @@
   var root = document.getElementById("hm");
   if (!root || !window.HistoryTheatre) return;
   window.HistoryTheatre.create({ base: root.getAttribute("data-base") || "/" });
+  var fold = document.getElementById("hm-list-fold"), w = document.getElementById("hm-listw");
+  if (fold && w) fold.addEventListener("click", function () {
+    var f = w.classList.toggle("fold"); fold.setAttribute("aria-expanded", f ? "false" : "true");
+  });
 })();

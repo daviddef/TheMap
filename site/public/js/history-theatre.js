@@ -429,11 +429,23 @@
     var back = detailPop && detailPop._hmBack ? detailPop._hmBack : map.getCenter();   // where the map was before the first bubble
     if (detailPop) { var old = detailPop; detailPop = null; map.removeLayer(old); }
     var pop = L.popup({ autoPan: true, autoPanPadding: [60, 60], closeOnClick: false, autoClose: false, closeButton: true,
-      className: "hm-bubble hm-detail-pop", maxWidth: 340, minWidth: 260, offset: [0, -4] }).setLatLng(m.b).setContent(detailHTML(m, i));
+      className: "hm-bubble hm-detail-pop", maxWidth: 340, minWidth: 260, offset: [0, -4],
+      maxHeight: Math.max(160, Math.min(380, map.getSize().y - 210)) })    // a taller bubble would be cut off at the map's top edge: it scrolls inside instead
+      .setLatLng(m.b).setContent(detailHTML(m, i));
     pop._hmBack = back; detailPop = pop; pop.addTo(map);
     /* A tall bubble near the top edge pans the map to fit itself; closing it puts the map back where it was. */
     pop.on("remove", function () { if (detailPop === pop) { detailPop = null; map.panTo(back); } });
-    var refresh = function () { if (detailPop === pop) pop.setContent(detailHTML(m, i)); };
+    /* The bubble grows when the regime, flags and leaders arrive, and Leaflet will not pan again while its first
+       pan is running, so its top edge ends up above the map. Pan it back by hand once the content has changed. */
+    var fit = function () {
+      setTimeout(function () {
+        var el = pop.getElement && pop.getElement(); if (!el || detailPop !== pop) return;
+        var d = el.getBoundingClientRect().top - map.getContainer().getBoundingClientRect().top;
+        if (d < 8) map.panBy([0, d - 12], { animate: false });
+      }, 80);
+    };
+    var refresh = function () { if (detailPop === pop) { pop.setContent(detailHTML(m, i)); fit(); } };
+    fit();
     loadEras(refresh);
     if (!LEADERS) { leaderWaiters.push(refresh); loadLeaders(); }
   }
@@ -475,12 +487,13 @@
   }
   function pumpBubbles() {
     bubT = null;
+    if (detailPop) bubQ = [];
     if (!bubQ.length) return;
     showBubble(bubQ.shift());
     bubT = setTimeout(pumpBubbles, compact ? 2300 : 4200);
   }
   function announce(from, to) {
-    if (!D || !D.moves) return;
+    if (!D || !D.moves || detailPop) return;      // a bubble the reader opened is not talked over
     D.moves.forEach(function (m, i) {
       if (!m.major || !on[m.v] || !on[m.v].checked) return;
       if (m.f > from && m.f <= to && bubQ.length < 6) bubQ.push({ i: i });

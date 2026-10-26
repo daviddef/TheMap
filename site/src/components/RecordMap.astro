@@ -3924,7 +3924,8 @@ window.addEventListener("load", async function () {
             '<option value="1">Very slow</option><option value="2" selected>Slow</option>' +
             '<option value="4">Medium</option><option value="8">Fast</option></select></label>' +
           '<label class="ra-th-chk"><input type="checkbox" data-k="hm-tour" checked /> Next era</label>' +
-          '<button type="button" class="ra-th-close" data-k="close" title="Close the playback and go back to the records">Close</button>' +
+          '<button type="button" class="ra-th-close" data-k="min" aria-expanded="true" title="Tuck the controls away and keep playing, so the map and its filters are free">Hide controls</button>' +
+          '<button type="button" class="ra-th-close" data-k="close" title="Stop the playback and go back to the records">Stop</button>' +
         '</div>' +
         '<details class="ra-th-more"><summary>Layers and options</summary><p class="ra-th-note" data-k="hm-gnote"></p><div class="ra-th-layers">' +
           '<label><input type="checkbox" data-k="hm-l-ground" checked /> Who held the ground</label>' +
@@ -3967,6 +3968,15 @@ window.addEventListener("load", async function () {
       if (TH.sync && TH.ctl) thSyncRecords(TH.ctl.year());
     });
     els.close.addEventListener("click", thClose);
+    /* HIDE, DON'T STOP. David: «when i close the play screen why does it stop playing? i just want to
+       change filters and keep playing». The bar was the only way to get it off the map and it also
+       ended the show. Hidden, the year and the era still run in the corner and the play button and
+       Stop stay; the filters above the map work as they always do while it plays. */
+    els.min.addEventListener("click", function () {
+      var m = ui.classList.toggle("min");
+      els.min.textContent = m ? "Show controls" : "Hide controls";
+      els.min.setAttribute("aria-expanded", m ? "false" : "true");
+    });
     playBtn.setAttribute("aria-pressed", "true");
     thAssets().then(function () {
       if (TH.ui !== ui) return;
@@ -8480,6 +8490,9 @@ window.addEventListener("load", async function () {
   /* What the colours mean lives inside «Layers and options», so it is there to read and not sitting
      on the map it explains. */
   :global(.ra-th-note) { font-size: .72rem; margin: 4px 0 0; opacity: .85; max-width: 70ch; }
+  :global(.ra-th.min .ra-th-bar) { right: auto; width: auto; max-width: calc(100% - 20px); }
+  :global(.ra-th.min .ra-th-chips), :global(.ra-th.min .ra-th-more),
+  :global(.ra-th.min .ra-th-scrub), :global(.ra-th.min .ra-th-sel), :global(.ra-th.min .ra-th-chk) { display: none; }
   :global(.ra-th-load) { position: absolute; inset: 0; display: grid; place-items: center;
     background: color-mix(in srgb, var(--panel) 70%, transparent); color: var(--ink); }
   :global(.ra-th-load[hidden]) { display: none; }

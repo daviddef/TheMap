@@ -3884,7 +3884,7 @@ window.addEventListener("load", async function () {
      Loaded on first Play, never before, because history.json is half a
      megabyte and history-ground.json is two. The arrows are SVG whatever this
      map's own markers are (canvas), so they can be animated by CSS. */
-  var TH = { ctl: null, ui: null, pending: null, sync: false };
+  var TH = { ctl: null, ui: null, pending: null, win: 0, weSet: false };
   function thAssets() {
     if (TH.pending) return TH.pending;
     TH.pending = new Promise(function (ok, bad) {
@@ -3902,48 +3902,69 @@ window.addEventListener("load", async function () {
     return TH.pending;
   }
   function thMarkup() {
-    return '<div class="ra-th-hud"><div class="ra-th-year" data-k="hm-year">1914</div>' +
+    return '<div class="ra-th-hud">' +
+        '<button type="button" class="ra-th-x ra-th-xx" data-k="close" aria-label="Close the playback" title="Close the playback and go back to the records">&times;</button>' +
+        '<div class="ra-th-year" data-k="hm-year">1914</div>' +
         '<div class="ra-th-ch" data-k="hm-ch"></div>' +
-      '<div class="ra-th-listw"><button type="button" class="ra-th-lh" data-k="lh" aria-expanded="true"><span data-k="hm-list-h">Under way</span> <i aria-hidden="true">&#9662;</i></button>' +
-        '<ol class="ra-th-list" data-k="hm-list"></ol></div>' +
+        '<div class="ra-th-tr">' +
+          '<button type="button" class="ra-ico ra-th-play" data-k="hm-play" aria-pressed="false" aria-label="Play or stop" title="Play or stop">&#9654;</button>' +
+          '<span class="ra-th-scrub"><svg class="ra-th-dens" data-k="hm-dens" viewBox="0 0 1000 40" preserveAspectRatio="none" aria-hidden="true"></svg>' +
+            '<span class="ra-th-band" data-k="band" hidden></span>' +
+            '<input type="range" data-k="hm-range" min="600" max="2026" value="750" step="1" aria-label="Year" />' +
+            '<div class="ra-th-ticks" data-k="hm-ticks" aria-hidden="true"></div></span>' +
+          '<button type="button" class="ra-th-tog" data-k="min" aria-pressed="false" aria-label="Show or hide the controls" title="Show or hide the controls">' +
+            '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">' +
+            '<path d="M3 7h9M18 7h3M3 17h3M12 17h9"/><circle cx="15" cy="7" r="2.4"/><circle cx="9" cy="17" r="2.4"/></svg></button>' +
+        '</div>' +
+        '<div class="ra-th-ctl">' +
+          '<div class="ra-th-chips" data-k="chips"></div>' +
+          '<div class="ra-th-opts">' +
+            '<label>Speed <select data-k="hm-speed" aria-label="Playback speed">' +
+              '<option value="8">Very fast</option><option value="4">Fast</option><option value="2">Medium</option><option value="1">Slow</option>' +
+              '<option value="0.5" selected>Very slow</option><option value="0.2">Crawl</option></select></label>' +
+            '<label><input type="checkbox" data-k="hm-tour" checked /> Next era</label>' +
+          '</div>' +
+          '<div class="ra-th-layers">' +
+            '<label><input type="checkbox" data-k="hm-l-ground" checked /> Ground</label>' +
+            '<label><input type="checkbox" data-k="hm-l-conquest" checked /> Conquest</label>' +
+            '<label><input type="checkbox" data-k="hm-l-occupation" checked /> Occupation</label>' +
+            '<label><input type="checkbox" data-k="hm-l-migration" checked /> Migration</label>' +
+            '<label><input type="checkbox" data-k="hm-l-voyages" checked /> Voyages</label>' +
+            '<label><input type="checkbox" data-k="hm-l-flags" /> Flags</label>' +
+            '<label><input type="checkbox" data-k="hm-l-leaders" /> Leaders (zoom in)</label>' +
+            '<label><input type="checkbox" data-k="hm-l-grid" /> Gridlines</label>' +
+          '</div>' +
+          '<div class="ra-th-opts">' +
+            '<label title="Every record dot, archive, cemetery, church and library on the map. Turn off to watch the history alone; turn back on and exactly the layers you had return."><input type="checkbox" data-k="rec" checked /> Records</label>' +
+            '<label title="Keeps only the records that can answer for the years either side of the one playing, and shows that window on the timeline. Works from 1500; before that every record is shown.">Window <select data-k="win" aria-label="Records window">' +
+              '<option value="0" selected>off</option><option value="10">&plusmn;10 yrs</option><option value="25">&plusmn;25 yrs</option><option value="50">&plusmn;50 yrs</option><option value="100">&plusmn;100 yrs</option></select></label>' +
+            '<label>Trail <select data-k="hm-trail"><option value="15">15 yrs</option><option value="30" selected>30 yrs</option>' +
+              '<option value="60">60 yrs</option><option value="120">120 yrs</option></select></label>' +
+          '</div>' +
+          '<p class="ra-th-note" data-k="hm-gnote"></p>' +
+        '</div>' +
+        '<div class="ra-th-listw"><button type="button" class="ra-th-lh" data-k="lh" aria-expanded="true"><span data-k="hm-list-h">Under way</span> <i aria-hidden="true">&#9662;</i></button>' +
+          '<ol class="ra-th-list" data-k="hm-list"></ol></div>' +
       '</div>' +
       '<div class="ra-th-cardw" hidden><button type="button" class="ra-th-x" data-k="card-x" aria-label="Close the details">&times;</button>' +
         '<div class="ra-th-card" data-k="hm-card" aria-live="polite"></div></div>' +
       '<div class="hm-era" data-k="hm-era" hidden></div>' +
-      '<div class="ra-th-load" data-k="hm-load">Loading the movements&hellip;</div>' +
-      '<div class="ra-th-bar">' +
-        '<div class="ra-th-chips" data-k="chips"></div>' +
-        '<div class="ra-th-row">' +
-          '<button type="button" class="ra-ico ra-th-play" data-k="hm-play" aria-pressed="false" title="Play or pause">&#9654;</button>' +
-          '<span class="ra-th-scrub"><svg class="ra-th-dens" data-k="hm-dens" viewBox="0 0 1000 40" preserveAspectRatio="none" aria-hidden="true"></svg>' +
-            '<input type="range" data-k="hm-range" min="600" max="2026" value="750" step="1" aria-label="Year" />' +
-            '<div class="ra-th-ticks" data-k="hm-ticks" aria-hidden="true"></div></span>' +
-          '<label class="ra-th-sel">Speed <select data-k="hm-speed" aria-label="Playback speed">' +
-            '<option value="8">Very fast</option><option value="4">Fast</option><option value="2">Medium</option><option value="1">Slow</option>' +
-            '<option value="0.5" selected>Very slow</option><option value="0.2">Crawl</option></select></label>' +
-          '<label class="ra-th-chk"><input type="checkbox" data-k="hm-tour" checked /> Next era</label>' +
-          '<button type="button" class="ra-th-close" data-k="min" aria-expanded="true" title="Tuck the controls away and keep playing, so the map and its filters are free">Hide controls</button>' +
-          '<button type="button" class="ra-th-close" data-k="close" title="Stop the playback and go back to the records">Stop</button>' +
-        '</div>' +
-        '<details class="ra-th-more"><summary>Layers and options</summary><p class="ra-th-note" data-k="hm-gnote"></p><div class="ra-th-layers">' +
-          '<label><input type="checkbox" data-k="hm-l-ground" checked /> Who held the ground</label>' +
-          '<label><input type="checkbox" data-k="hm-l-grid" /> Gridlines</label>' +
-          '<label><input type="checkbox" data-k="hm-l-conquest" checked /> Conquest</label>' +
-          '<label><input type="checkbox" data-k="hm-l-occupation" checked /> Occupation</label>' +
-          '<label><input type="checkbox" data-k="hm-l-migration" checked /> Migration</label>' +
-          '<label><input type="checkbox" data-k="hm-l-voyages" checked /> Voyages</label>' +
-          '<label><input type="checkbox" data-k="hm-l-flags" /> Flags in this year</label>' +
-          '<label><input type="checkbox" data-k="hm-l-leaders" /> Heads of state (zoom in)</label>' +
-          '<label>Trail <select data-k="hm-trail"><option value="15">15 years</option><option value="30" selected>30 years</option>' +
-            '<option value="60">60 years</option><option value="120">120 years</option></select></label>' +
-          '<label title="Every record dot, archive, cemetery, church and library on the map. Turn off to watch the history alone; turn back on and exactly the layers you had return."><input type="checkbox" data-k="rec" checked /> Show the records on the map</label>' +
-          '<label title="Ties the map\'s Year filter to the playback: at each year it keeps only the places that can answer for 25 years either side. Works from 1500; before that every record is shown."><input type="checkbox" data-k="sync" /> Only records from about these years (25 either side, 1500 on)</label>' +
-        '</div></details>' +
-      '</div>';
+      '<div class="ra-th-load" data-k="hm-load">Loading the movements&hellip;</div>';
+  }
+  /* THE YEAR FILTER AND THE PLAYBACK ARE ONE TIMELINE NOW. The records' own two-handle year slider is hidden
+     while the playback is open; its job is the «Window» option, which keeps the records that can answer for
+     the years either side of the one playing and draws that window as a band on the same track. */
+  function thBand(y) {
+    var band = TH.ui && TH.ui.querySelector(".ra-th-band"); if (!band) return;
+    if (!TH.win) { band.hidden = true; return; }
+    var a = Math.max(600, y - TH.win), b = Math.min(2026, y + TH.win);
+    band.style.left = ((a - 600) / 1426 * 100) + "%"; band.style.width = (Math.max(b - a, 4) / 1426 * 100) + "%";
+    band.hidden = false;
   }
   function thSyncRecords(y) {
-    if (!TH.sync) return;
-    var a = Math.max(1500, Math.min(y - 25, 2026 - 50)), b = Math.min(a + 50, 2026);
+    thBand(y);
+    if (!TH.win) return;
+    var w2 = TH.win * 2, a = Math.max(1500, Math.min(y - TH.win, 2026 - w2)), b = Math.min(a + w2, 2026);
     if (y < 1500) { if (yon.checked) { yon.checked = false; readRange(); yearUI(); } return; }
     if (!yon.checked) yon.checked = true;
     year = a; year2 = b; yin.value = a; yin2.value = b;
@@ -3963,20 +3984,22 @@ window.addEventListener("load", async function () {
     var mo = new MutationObserver(function () { cardW.hidden = !els["hm-card"].innerHTML; });
     mo.observe(els["hm-card"], { childList: true });
     els["card-x"].addEventListener("click", function () { cardW.hidden = true; });
-    els.sync.addEventListener("change", function () {
-      TH.sync = els.sync.checked;
-      if (TH.sync && TH.ctl) thSyncRecords(TH.ctl.year());
+    /* If the records' year filter was already on when the playback opened, its window carries over. */
+    if (yon.checked) {
+      var half = Math.max(5, Math.round((year2 - year) / 2)), best = [10, 25, 50, 100].reduce(function (a, c) { return Math.abs(c - half) < Math.abs(a - half) ? c : a; });
+      TH.win = best; els.win.value = String(best);
+    } else { TH.win = 0; }
+    els.win.addEventListener("change", function () {
+      TH.win = +els.win.value || 0;
+      if (TH.win) { TH.weSet = true; if (TH.ctl) thSyncRecords(TH.ctl.year()); else thBand(750); }
+      else { thBand(0); if (TH.weSet && yon.checked) { yon.checked = false; readRange(); yearUI(); } TH.weSet = false; }
     });
     els.close.addEventListener("click", thClose);
     /* B, the list of what is under way. Folded by default on a phone, where it would sit on the map. */
     var listW = ui.querySelector(".ra-th-listw");
     function foldList(f) { listW.classList.toggle("fold", f); els.lh.setAttribute("aria-expanded", f ? "false" : "true"); }
     els.lh.addEventListener("click", function () { foldList(!listW.classList.contains("fold")); });
-    if (window.matchMedia && window.matchMedia("(max-width: 700px)").matches) {
-      /* A phone's map is about 480px tall: the controls start tucked away so there is a map to watch. */
-      foldList(true);
-      ui.classList.add("min"); els.min.textContent = "Show controls"; els.min.setAttribute("aria-expanded", "false");
-    }
+    if (window.matchMedia && window.matchMedia("(max-width: 700px)").matches) foldList(true);   // a phone's map is small: the list starts folded
     /* ALL THE RECORD LAYERS, ONE SWITCH. They live in the Layers menu above the map; with thousands of
        dots on screen the history underneath is hard to see. Turning them off remembers which were on
        and turning them back on returns exactly those. */
@@ -3992,14 +4015,12 @@ window.addEventListener("load", async function () {
       });
       if (els.rec.checked) recWas = [];
     });
-    /* HIDE, DON'T STOP. David: «when i close the play screen why does it stop playing? i just want to
-       change filters and keep playing». The bar was the only way to get it off the map and it also
-       ended the show. Hidden, the year and the era still run in the corner and the play button and
-       Stop stay; the filters above the map work as they always do while it plays. */
+    /* ONE ICON THAT TOGGLES THE CONTROLS. David: hide and show are the same button. The pane itself is always
+       open; this folds the era buttons, speed, layers and the records options inside it. */
     els.min.addEventListener("click", function () {
-      var m = ui.classList.toggle("min");
-      els.min.textContent = m ? "Show controls" : "Hide controls";
-      els.min.setAttribute("aria-expanded", m ? "false" : "true");
+      var o = ui.classList.toggle("ctl");
+      els.min.setAttribute("aria-pressed", o ? "true" : "false");
+      els.min.title = o ? "Hide the controls" : "Show the controls";
     });
     playBtn.setAttribute("aria-pressed", "true");
     /* The playback opens on the whole world (David: «can we default our map to this zoom?»); the records map
@@ -4008,7 +4029,7 @@ window.addEventListener("load", async function () {
        shrinking the world to a postage stamp, and zoom 1 is the floor (zoom 0 repeats the world). */
     map.setView([30, 15], map.getSize().x >= 560 ? 2 : 1, { animate: false });
     /* The left column covers a third of the map, so the world is shifted right to sit in what is left. */
-    if (map.getSize().x >= 700) map.panBy([-Math.round(Math.min(320, map.getSize().x * 0.38) / 2), 0], { animate: false });
+    if (map.getSize().x >= 700) map.panBy([-Math.round(Math.min(340, map.getSize().x * 0.4) / 2), 0], { animate: false });
     thAssets().then(function () {
       if (TH.ui !== ui) return;
       return window.HistoryTheatre.create({
@@ -8517,28 +8538,53 @@ window.addEventListener("load", async function () {
   }
 
   /* ---- the History playback laid over this map (history-theatre.js) -------- */
-  :global(.ra-th) { position: absolute; inset: 0; z-index: 810; pointer-events: none; }
+  /* ONE PANE, ALWAYS OPEN, ON THE LEFT: the year and era, one play/stop button beside the timeline, one
+     icon that folds the controls away, and «Under way» filling the rest to the bottom. David: «move the
+     button bars to the left pane, keep it open all the time, and simplify». */
+  :global(.ra-th) { position: absolute; inset: 0; z-index: 810; pointer-events: none; --col: min(340px, 40%); }
   :global(.ra-th > *) { pointer-events: auto; }
-  /* ONE COLUMN: the year, the era and «Under way» are a single translucent panel from top to bottom on the
-     left, and the controls bar sits to the right of it. David: merge the two bars, stretch the list to the
-     bottom, make the year the same width as the list. */
-  :global(.ra-th) { --col: min(320px, 38%); }
   :global(.ra-th .ra-th-hud) { position: absolute; left: 56px; top: 10px; bottom: 26px; width: var(--col);
-    display: flex; flex-direction: column; pointer-events: none; padding: 8px 10px 8px; border-radius: 10px;
-    background: color-mix(in srgb, var(--panel) 82%, transparent); backdrop-filter: blur(2px); }
-  :global(.ra-th .ra-th-hud:has(.fold)) { bottom: auto; }
-  :global(.ra-th-year) { font: 700 clamp(1.8rem, 5vw, 2.8rem)/1 var(--serif, Georgia, serif);
+    display: flex; flex-direction: column; padding: 8px 12px 8px; border-radius: 10px; box-sizing: border-box;
+    background: color-mix(in srgb, var(--panel) 90%, transparent); backdrop-filter: blur(3px);
+    border: 1px solid var(--rule-strong); }
+  :global(.ra-th .ra-th-hud:has(.ra-th-listw.fold)) { bottom: auto; }
+  :global(.ra-th-xx) { position: absolute; right: 6px; top: 4px; }
+  :global(.ra-th-year) { font: 700 clamp(1.8rem, 5vw, 2.6rem)/1 var(--serif, Georgia, serif);
     color: var(--ink); font-variant-numeric: tabular-nums; }
-  :global(.ra-th-ch) { font-size: .78rem; color: var(--ink); margin-top: 3px; line-height: 1.3;
+  :global(.ra-th-ch) { font-size: .76rem; color: var(--ink); margin-top: 3px; line-height: 1.3;
     display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-  /* What the colours mean lives inside «Layers and options», so it is there to read and not sitting
-     on the map it explains. */
-  :global(.ra-th-note) { font-size: .75rem; margin: 4px 0 0; opacity: .9; }
-  :global(.ra-th.min .ra-th-bar) { right: auto; width: auto; max-width: calc(100% - 20px); }
-  :global(.ra-th.min .ra-th-chips), :global(.ra-th.min .ra-th-more),
-  :global(.ra-th.min .ra-th-scrub), :global(.ra-th.min .ra-th-sel), :global(.ra-th.min .ra-th-chk) { display: none; }
-  :global(.ra-th-listw) { pointer-events: auto; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;
-    margin-top: 7px; border-top: 1px solid var(--rule-strong); }
+  /* the timeline row: one ▶/■ button, the scrubber, the controls toggle */
+  :global(.ra-th-tr) { display: flex; align-items: flex-end; gap: 8px; margin-top: 8px; }
+  :global(.ra-th-play) { flex: none; width: 34px; height: 34px; }
+  :global(.ra-th-play[aria-pressed="true"]) { background: var(--accent); color: var(--band-label, #fff); }
+  :global(.ra-th-tog) { flex: none; width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid var(--rule-strong);
+    border-radius: 8px; background: var(--panel); color: var(--ink); cursor: pointer; padding: 0; }
+  :global(.ra-th-tog[aria-pressed="true"]) { background: var(--accent); color: #fff; border-color: var(--accent); }
+  :global(.ra-th-scrub) { position: relative; flex: 1 1 auto; min-width: 0; padding-top: 20px; }
+  :global(.ra-th-dens) { position: absolute; left: 0; right: 0; top: 0; width: 100%; height: 18px; }
+  :global(.ra-th-dens rect) { fill: var(--accent); opacity: .5; }
+  :global(.ra-th-band) { position: absolute; top: 24px; height: 8px; border-radius: 4px; pointer-events: none;
+    background: color-mix(in srgb, var(--accent) 38%, transparent); border: 1px solid var(--accent); box-sizing: border-box; }
+  :global(.ra-th-scrub input) { position: relative; width: 100%; margin: 0; accent-color: var(--accent); background: transparent; }
+  :global(.ra-th-ticks) { position: relative; height: 12px; font-size: .6rem; opacity: .7; color: var(--ink); }
+  :global(.ra-th-ticks span) { position: absolute; transform: translateX(-50%); }
+  /* the controls: folded until the icon is pressed */
+  :global(.ra-th-ctl) { display: none; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--rule-strong);
+    gap: 7px; max-height: 46%; overflow: auto; font-size: .76rem; color: var(--ink); }
+  :global(.ra-th.ctl .ra-th-ctl) { display: grid; }
+  :global(.ra-th-chips) { display: flex; flex-wrap: wrap; gap: 4px; }
+  :global(.ra-th-chip) { border: 1px solid var(--rule-strong); border-radius: 7px; background: var(--panel); color: var(--ink);
+    font: inherit; font-size: .72rem; padding: 2px 7px; cursor: pointer; }
+  :global(.ra-th-chip i) { display: none; }
+  :global(.ra-th-chip[aria-current="true"]) { background: var(--accent); color: #fff; border-color: var(--accent); }
+  :global(.ra-th-opts) { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; }
+  :global(.ra-th-opts label), :global(.ra-th-layers label) { display: inline-flex; gap: 5px; align-items: center; }
+  :global(.ra-th-layers) { display: flex; flex-wrap: wrap; gap: 3px 12px; }
+  :global(.ra-th-ctl select) { font: inherit; font-size: .74rem; }
+  :global(.ra-th-note) { margin: 0; font-size: .7rem; opacity: .85; }
+  /* «Under way» fills the rest of the pane, to the bottom */
+  :global(.ra-th-listw) { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;
+    margin-top: 8px; border-top: 1px solid var(--rule-strong); }
   :global(.ra-th-lh) { width: 100%; text-align: left; background: none; border: 0; padding: 6px 2px 4px; font: 600 11.5px/1.2 var(--sans);
     color: var(--ink); cursor: pointer; display: flex; justify-content: space-between; }
   :global(.ra-th-list) { list-style: none; margin: 0; padding: 0 2px 2px 0; flex: 1 1 auto; min-height: 0; overflow: auto; display: grid; gap: 1px; align-content: start; grid-auto-rows: min-content; }
@@ -8548,7 +8594,6 @@ window.addEventListener("load", async function () {
   :global(.ra-th-list li button:hover), :global(.ra-th-list li button:focus-visible) { background: color-mix(in srgb, var(--c, #999) 14%, transparent); }
   :global(.ra-th-list li small) { display: block; opacity: .7; font-size: 10.5px; }
   :global(.ra-th-list li:not(:has(button))) { padding: 3px 8px; font-size: 11.5px; opacity: .75; }
-  /* «Under way» STAYS WHEN THE CONTROLS ARE HIDDEN: watching the events roll is what hiding them is for. */
   :global(.ra-th-load) { position: absolute; inset: 0; display: grid; place-items: center;
     background: color-mix(in srgb, var(--panel) 70%, transparent); color: var(--ink); }
   :global(.ra-th-load[hidden]) { display: none; }
@@ -8558,38 +8603,13 @@ window.addEventListener("load", async function () {
   :global(.ra-th-cardw[hidden]) { display: none; }
   :global(.ra-th-cardw h2) { margin: 0 0 4px; font-size: .95rem; }
   :global(.ra-th-cardw p) { margin: .3em 0; }
-  :global(.ra-th-x) { position: absolute; right: 6px; top: 2px; border: 0; background: none;
-    font-size: 1.3rem; line-height: 1; cursor: pointer; color: var(--ink); }
-  :global(.ra-th-bar) { position: absolute; left: calc(56px + var(--col) + 10px); right: 10px; bottom: 26px; display: grid; gap: 6px;
-    padding: 8px 12px; border-radius: 14px; background: var(--panel); border: 1px solid var(--rule-strong);
-    box-shadow: 0 4px 16px rgba(10, 20, 26, .2); }
-  :global(.ra-th-chips) { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
-  :global(.ra-th-chip) { flex: 0 0 auto; border: 1px solid var(--rule-strong); border-radius: 8px;
-    background: var(--panel); color: var(--ink); font: inherit; font-size: .78rem; padding: 3px 8px; cursor: pointer; }
-  :global(.ra-th-chip i) { font-style: normal; opacity: .65; font-variant-numeric: tabular-nums; }
-  :global(.ra-th-chip[aria-current="true"]) { background: var(--accent); color: #fff; border-color: var(--accent); }
-  :global(.ra-th-row) { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  :global(.ra-th-play) { flex: none; }
-  :global(.ra-th-scrub) { position: relative; flex: 1 1 220px; min-width: 0; padding-top: 24px; }
-  :global(.ra-th-dens) { position: absolute; left: 0; right: 0; top: 0; width: 100%; height: 22px; }
-  :global(.ra-th-dens rect) { fill: var(--accent); opacity: .5; }
-  :global(.ra-th-scrub input) { width: 100%; margin: 0; accent-color: var(--accent); }
-  :global(.ra-th-ticks) { position: relative; height: 14px; font-size: .65rem; opacity: .7; color: var(--ink); }
-  :global(.ra-th-ticks span) { position: absolute; transform: translateX(-50%); }
-  :global(.ra-th-sel), :global(.ra-th-chk) { font-size: .78rem; display: inline-flex; gap: 5px; align-items: center; color: var(--ink); }
-  :global(.ra-th-close) { border: 1px solid var(--rule-strong); border-radius: 8px; background: none;
-    color: var(--ink); font: inherit; font-size: .78rem; padding: 4px 10px; cursor: pointer; }
-  :global(.ra-th-more) { font-size: .78rem; color: var(--ink); }
-  :global(.ra-th-layers) { display: flex; flex-wrap: wrap; gap: 4px 14px; padding-top: 4px; }
-  :global(.ra-th-layers label) { display: inline-flex; gap: 5px; align-items: center; }
-  /* The pill's own ▶ and the bar's ▶ were two play controls; while the playback is open the bar is the one,
-     unless the Year filter is on, which only the pill carries. */
-  :global(.ra-time:not(.on):has(~ .ra-th)) { display: none; }
+  :global(.ra-th-x) { border: 0; background: none; font-size: 1.3rem; line-height: 1; cursor: pointer; color: var(--ink); }
+  :global(.ra-th-cardw .ra-th-x) { position: absolute; right: 6px; top: 2px; }
+  /* The pill's own ▶ and its two-handle Year slider are replaced by this pane while the playback is open. */
+  :global(.ra-time:has(~ .ra-th)) { display: none; }
   @media (max-width: 700px) {
-    :global(.ra-th .ra-th-hud) { bottom: auto; width: min(300px, calc(100% - 140px)); }
+    :global(.ra-th .ra-th-hud) { bottom: auto; width: min(300px, calc(100% - 140px)); max-height: 84%; }
     :global(.ra-th-list) { max-height: 150px; }
-    :global(.ra-th-bar) { left: 6px; right: 6px; bottom: 22px; padding: 6px 8px; }
-    :global(.ra-th-sel select) { max-width: 90px; }
   }
 
   /* ---- the scrubber along the foot of the map ---------------------------- */

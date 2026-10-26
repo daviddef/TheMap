@@ -2202,6 +2202,8 @@ window.addEventListener("load", async function () {
     paintIcoFlags(panel);
     buildCheck(d, drawHood(d));
     drawFlagResForPlace(d);
+    /* While the playback is open, opening a place also puts that place's country in focus. */
+    if (typeof TH !== "undefined" && TH && TH.ctl && d.country) TH.ctl.focus(String(d.country).toUpperCase());
   }
 
   function render(d) {
@@ -3909,7 +3911,6 @@ window.addEventListener("load", async function () {
         '<button type="button" class="ra-th-x ra-th-xx" data-k="close" aria-label="Close the playback" title="Close the playback and go back to the records">&times;</button>' +
         '<div class="ra-th-year" data-k="hm-year">1914</div>' +
         '<div class="ra-th-ch" data-k="hm-ch"></div>' +
-        '<div class="hm-focusrow ra-th-focus"><input type="search" data-k="hm-focus" placeholder="Focus on one country&hellip;" aria-label="Focus the map on one country" autocomplete="off"></div>' +
         '<div class="hm-ffs" data-k="hm-focus-flags" hidden></div>' +
         '<div class="ra-th-tr">' +
           '<button type="button" class="ra-ico ra-th-play" data-k="hm-play" aria-pressed="false" aria-label="Play or stop" title="Play or stop">&#9654;</button>' +
@@ -4046,6 +4047,10 @@ window.addEventListener("load", async function () {
       if (!ctl) return;
       if (TH.ui !== ui) { ctl.destroy(); return; }
       TH.ctl = ctl;
+      /* ONE SEARCH BOX: typing a country's name in the box above the map focuses the playback on it. */
+      TH.qbind = function () { if (qbox && qbox.value) ctl.focusByName(qbox.value); };
+      qbox.addEventListener("input", TH.qbind);
+      TH.qbind();
       var chips = els.chips;
       ctl.data().chapters.forEach(function (c) {
         var b = document.createElement("button");
@@ -4063,6 +4068,7 @@ window.addEventListener("load", async function () {
   function thClose() {
     if (!TH.ui) return;
     if (TH.ctl) TH.ctl.destroy();
+    if (TH.qbind) { qbox.removeEventListener("input", TH.qbind); TH.qbind = null; }
     TH.ui.remove(); TH.ui = null; TH.ctl = null;
     playBtn.setAttribute("aria-pressed", "false");
   }
@@ -8549,17 +8555,17 @@ window.addEventListener("load", async function () {
   :global(.ra-th) { position: absolute; inset: 0; z-index: 810; pointer-events: none; --col: min(340px, 40%); }
   :global(.ra-th > *) { pointer-events: auto; }
   :global(.ra-th .ra-th-hud) { position: absolute; left: 56px; top: 10px; bottom: 26px; width: var(--col);
-    display: flex; flex-direction: column; padding: 8px 12px 8px; border-radius: 10px; box-sizing: border-box;
+    display: flex; flex-direction: column; gap: 9px; padding: 8px 12px 8px; border-radius: 10px; box-sizing: border-box;
     background: color-mix(in srgb, var(--panel) 90%, transparent); backdrop-filter: blur(3px);
     border: 1px solid var(--rule-strong); }
   :global(.ra-th .ra-th-hud:has(.ra-th-listw.fold)) { bottom: auto; }
   :global(.ra-th-xx) { position: absolute; right: 6px; top: 4px; }
   :global(.ra-th-year) { font: 700 clamp(1.8rem, 5vw, 2.6rem)/1 var(--serif, Georgia, serif);
     color: var(--ink); font-variant-numeric: tabular-nums; }
-  :global(.ra-th-ch) { font-size: .76rem; color: var(--ink); margin-top: 3px; line-height: 1.3;
+  :global(.ra-th-ch) { font-size: .76rem; color: var(--ink); margin: 0; line-height: 1.35; flex: none; max-height: 4.1em;
     display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
   /* the timeline row: one ▶/■ button, the scrubber, the controls toggle */
-  :global(.ra-th-tr) { display: flex; align-items: flex-end; gap: 8px; margin-top: 8px; }
+  :global(.ra-th-tr) { display: flex; align-items: flex-end; gap: 8px; margin: 0; flex: none; }
   :global(.ra-th-play) { flex: none; width: 34px; height: 34px; }
   :global(.ra-th-play[aria-pressed="true"]) { background: var(--accent); color: var(--band-label, #fff); }
   :global(.ra-th-tog) { flex: none; width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid var(--rule-strong);
@@ -8574,9 +8580,10 @@ window.addEventListener("load", async function () {
   :global(.ra-th-ticks) { position: relative; height: 12px; font-size: .6rem; opacity: .7; color: var(--ink); }
   :global(.ra-th-ticks span) { position: absolute; transform: translateX(-50%); }
   /* the controls: folded until the icon is pressed */
-  :global(.ra-th-ctl) { display: none; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--rule-strong);
+  :global(.ra-th-ctl) { display: none; margin: 0; padding-top: 9px; flex: none; border-top: 1px solid var(--rule-strong);
     gap: 7px; max-height: 46%; overflow: auto; font-size: .76rem; color: var(--ink); }
   :global(.ra-th.ctl .ra-th-ctl) { display: grid; }
+  :global(.ra-th .hm-ffs) { margin-top: 0; }
   :global(.ra-th-chips) { display: flex; flex-wrap: wrap; gap: 4px; }
   :global(.ra-th-chip) { border: 1px solid var(--rule-strong); border-radius: 7px; background: var(--panel); color: var(--ink);
     font: inherit; font-size: .72rem; padding: 2px 7px; cursor: pointer; }
@@ -8589,7 +8596,7 @@ window.addEventListener("load", async function () {
   :global(.ra-th-note) { margin: 0; font-size: .7rem; opacity: .85; }
   /* «Under way» fills the rest of the pane, to the bottom */
   :global(.ra-th-listw) { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;
-    margin-top: 8px; border-top: 1px solid var(--rule-strong); }
+    margin: 0; border-top: 1px solid var(--rule-strong); }
   :global(.ra-th-lh) { width: 100%; text-align: left; background: none; border: 0; padding: 6px 2px 4px; font: 600 11.5px/1.2 var(--sans);
     color: var(--ink); cursor: pointer; display: flex; justify-content: space-between; }
   :global(.ra-th-list) { list-style: none; margin: 0; padding: 0 2px 2px 0; flex: 1 1 auto; min-height: 0; overflow: auto; display: grid; gap: 1px; align-content: start; grid-auto-rows: min-content; }

@@ -84,7 +84,7 @@
     if (!elFocusFlags || elFocusFlags.tagName === "STUB") return;
     if (!focus || !FM || !FM.f[focus]) { elFocusFlags.innerHTML = ""; elFocusFlags.hidden = true; return; }
     elFocusFlags.hidden = false;
-    elFocusFlags.innerHTML = FM.f[focus].map(function (r) {
+    elFocusFlags.innerHTML = "<button type='button' class='hm-ffx' title='Back to the whole world'>" + esc(cname(focus)) + " &times;</button>" + FM.f[focus].map(function (r) {
       var cur = r[0] <= year && (r[1] === null || r[1] === undefined || r[1] >= year);
       var k = r[2].indexOf("--");
       return "<a class='hm-ff" + (cur ? " cur" : "") + "' href='" + BASE + "flags/" + esc(r[2].slice(0, k)) + "/#" + esc(r[2].slice(k + 2)) + "' title='" +
@@ -101,10 +101,19 @@
     scope.querySelectorAll(CHIPS).forEach(function (b) { b.removeAttribute("aria-current"); });
     ["conquest", "occupation", "migration"].forEach(function (k) { on[k].checked = true; });
     elCh.textContent = cname(focus) + " \u2014 " + mv.length + " movement" + (mv.length === 1 ? "" : "s") + " in the atlas" + (mv.length ? ", the first from " + first : "") + ".";
-    if (FM && FM.at[focus]) map.setView(FM.at[focus], Math.max(map.getZoom(), 4), { animate: true });
+    if (FM && FM.at[focus]) map.setView(FM.at[focus], Math.max(4, Math.min(map.getZoom(), 5)), { animate: true });   // country-wide, even if a village search had zoomed right in
     focusStrip();
     setYear(Math.max(MIN, Math.min(first - 2, MAX)));
     play();
+  }
+  /* The records map has its own search box; it hands its text (or the country of the place it opened) to
+     this, so there is one place to type. True when the text named a country and the focus moved to it. */
+  function focusByName(text) {
+    if (!namesIdx) return false;
+    var cc = namesIdx[norm(text)];
+    if (!cc) return false;
+    if (cc !== focus) setFocus(cc);
+    return true;
   }
   function focusFromInput() {
     var v = norm(elFocus.value);
@@ -791,6 +800,7 @@
       data: function () { return D; },
       redraw: function () { if (D) draw(); },
       focus: function (cc) { if (D) setFocus(cc || null); },
+      focusByName: function (t) { return D ? focusByName(t) : false; },
       destroy: function () {
         dead = true; stop(); cancelPause();
         listeners.forEach(function (l) { l[0].removeEventListener(l[1], l[2]); });
@@ -813,6 +823,9 @@
       D = res[0]; FM = res[1]; unwrapRoutes();
       elLoad.hidden = true;
       strip(); buildNames();
+      if (elFocusFlags && elFocusFlags.tagName !== "STUB") listen(elFocusFlags, "click", function (e) {
+        if (e.target.closest && e.target.closest(".hm-ffx")) setFocus(null);
+      });
       if (elFocus && elFocus.tagName !== "STUB") {
         listen(elFocus, "input", focusFromInput); listen(elFocus, "change", focusFromInput);
         listen(elFocus, "keydown", function (e) { if (e.key === "Enter") focusFromInput(); });

@@ -137,6 +137,8 @@ def build():
             row["open"] = True
         if seat:
             row["seat"] = seat
+        if how == "country":
+            row["o"] = m["o"]       # the other country, so the detail bubble can name it and show its flag
         tip = tp.get((m["p"], m["e"], m["ot"]))
         if tip:
             row["tip"] = tip

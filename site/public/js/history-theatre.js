@@ -45,7 +45,7 @@
       elLoad = $("hm-load"), elDens = $("hm-dens"), elTicks = $("hm-ticks"), elListH = $("hm-list-h");
   var on = { conquest: $("hm-l-conquest"), occupation: $("hm-l-occupation"),
              migration: $("hm-l-migration"), flags: $("hm-l-flags"), ground: $("hm-l-ground"), voyages: $("hm-l-voyages"), leaders: $("hm-l-leaders") };
-  var LEADERS = null, leaderLayer, leadersFetch = null;
+  var LEADERS = null, leaderLayer, leadersFetch = null, leaderWaiters = [], ERAS = null, erasFetch = null, detailPop = null;
   var elG = $("hm-gnote"), GROUND = null, groundLayer, groundKey = "";
   var elTour = $("hm-tour"), elTourBtn = $("hm-tour-btn"), pauseT = null, introT = null, dead = false;
   var elEra = $("hm-era");
@@ -156,6 +156,7 @@
         LEADERS[cc].forEach(function (r) { r._a = r[4] ? dec(r[4]) : r[2]; r._b = r[5] ? dec(r[5]) : 2100; });
       });
       draw();
+      leaderWaiters.splice(0).forEach(function (f) { f(); });
     }).catch(function () { elG.textContent = "The leaders could not be loaded."; });
   }
   function drawLeaders() {
@@ -267,8 +268,8 @@
     var act = GROUND.shapes.filter(function (sh) { return sh.s <= year && year < sh.e; });
     var key = act.map(function (sh) { return sh.n + sh.s; }).join("|");
     elG.textContent = act.length
-      ? act.length + " polities have a boundary in this atlas for " + yr(year) + ". Each polity has its own colour so they can be told apart; the colours mean nothing else, and a polity keeps its colour through the years. Where none is drawn, nothing is known here, not nothing happened."
-      : "No boundary data for " + yr(year) + ", so the ground is left untinted.";
+      ? act.length + " boundaries drawn for " + yr(year) + ". Colours only tell the polities apart. Blank ground means nothing is known there, not that nothing happened."
+      : "No boundaries drawn for " + yr(year) + ": nothing is known here, not nothing happened.";
     if (key === groundKey) return;
     groundKey = key; groundLayer.clearLayers();
     var dark = document.documentElement.getAttribute("data-theme") === "dark" ||
@@ -360,12 +361,13 @@
   function select(i, pan) {
     selected = i;
     var m = D.moves[i];
+    openDetail(i);
     var how = { country: "Both ends are countries this atlas draws; the arrow joins their label points.",
       seat: "The other party is drawn from the seat it ruled from or the home of the people: " + (m.seat || "") + ". It means “from there”, not a route.",
       origin: "The people are named by nationality, so the arrow starts at that country's label point. It is not a route.",
       stub: "The page names no second place, so this is a stub at the country." }[m.how];
     var span = m.f + (m.t !== m.f ? "–" + (m.present ? "present" : m.t) : "");
-    elCard.innerHTML = "<h2 style='border-left:4px solid " + COL[m.v] + ";padding-left:8px'>" + esc(m.major || KIND[m.v]) + " · " + esc(span) + "</h2>" +
+    if (!(opts.cardless && !compact)) elCard.innerHTML = "<h2 style='border-left:4px solid " + COL[m.v] + ";padding-left:8px'>" + esc(m.major || KIND[m.v]) + " · " + esc(span) + "</h2>" +
       "<p><b>" + esc(m.ot) + "</b></p>" +
       (m.tip ? "<p>" + esc(m.tip) + "</p>" : "") +
       "<p>Recorded on the page for <b>" + esc(m.s) + "</b>, " + (m.d === "in" ? "coming in." : "going out.") + "</p>" +
@@ -373,6 +375,67 @@
       "<p class='hm-fine'>" + esc(how) + "</p>" +
       "<p><a href='" + BASE + "flags/" + esc(m.p) + "/#" + esc(m.e) + "'>Read it on the flag page &rarr;</a></p>";
     if (pan && m.b) map.panTo(m.b);
+  }
+
+  /* ---- the detail bubble: everything the atlas knows about ONE movement ------ */
+  function cname(cc) {
+    try { return new Intl.DisplayNames(["en"], { type: "region" }).of(cc) || cc; } catch (e) { return cc; }
+  }
+  function flagImg(img, alt) {
+    return "<img class='hm-d-flag' alt='" + esc(alt) + "' title='" + esc(alt) + "' src='" + BASE + "fl/" + esc(img) + ".svg' onerror=\"this.style.display='none'\">";
+  }
+  function leaderTxt(cc, y) {
+    var r = leaderAt(cc, y);
+    return r ? "<b>" + esc(r[0]) + "</b> <span>(" + esc(cname(cc)) + ", " + r[2] + "\u2013" + (r[3] === null ? "" : r[3]) + ")</span>" : "";
+  }
+  function loadEras(cb) {
+    if (ERAS) return cb();
+    if (!erasFetch) erasFetch = fetch(BASE + "flag-eras.json").then(function (r) { return r.json(); })
+      .then(function (j) { ERAS = j.eras || []; }).catch(function () { ERAS = []; });
+    erasFetch.then(cb);
+  }
+  function detailHTML(m, i) {
+    var col = COL[m.v], span = spanOf(m);
+    var where = cname(m.s), other = "";
+    if (m.how === "country" && m.o) other = cname(m.o);
+    else if (m.how === "origin" && m.seat) other = cname(m.seat);
+    else if (m.how === "seat" && m.seat) other = m.seat;
+    var dir = m.d === "in" ? (other ? "from " + esc(other) + " into " + esc(where) : "into " + esc(where))
+                           : (other ? "out of " + esc(where) + " to " + esc(other) : "out of " + esc(where));
+    var era = ERAS && ERAS.filter(function (e) { return e.slug === m.p && e.id === m.e; })[0];
+    var flags = flagImg(m.p + "--" + m.e, "The flag of " + where + " in this era");
+    var oc = m.how === "country" ? m.o : (m.how === "origin" ? m.seat : null);
+    if (oc && FM && FM.f[oc]) { var of = flagAt(FM.f[oc], m.f); if (of) flags += flagImg(of[2], "The flag of " + cname(oc) + " in " + m.f); }
+    var ld = LEADERS ? [leaderTxt(m.s, m.f), oc ? leaderTxt(oc, m.f) : ""].filter(Boolean) : null;
+    var how = { country: "Both ends are countries this atlas draws; the arrow joins their label points.",
+      seat: "The other party is drawn from the seat it ruled from: " + (m.seat || "") + ". It means \u201cfrom there\u201d, not a route.",
+      origin: "The people are named by nationality, so the arrow starts at that country's label point. It is not a route.",
+      stub: "The page names no second place, so this is a stub at the country." }[m.how];
+    return "<div class='hm-d'><div class='hm-b-k' style='color:" + col + "'>" + esc(KIND[m.v]) + " \u00b7 " + esc(span) + "</div>" +
+      "<b>" + esc(m.major || m.ot) + "</b>" +
+      (m.tip ? "<p class='hm-d-what'>" + esc(m.tip) + "</p>" : "") +
+      "<dl><dt>Where</dt><dd>" + dir + "</dd>" +
+      "<dt>Who</dt><dd>" + esc(m.ot) + "</dd>" +
+      (era ? "<dt>Under</dt><dd>" + esc(era.polity) + " <span>(" + esc(era.dates) + ")</span></dd>" : "") +
+      "<dt>Flags</dt><dd class='hm-d-flags'>" + flags + "</dd>" +
+      "<dt>Leaders</dt><dd>" + (ld === null ? "<span>loading\u2026</span>" : (ld.length ? ld.join("<br>") : "<span>none recorded in Wikidata for these years</span>")) + "</dd></dl>" +
+      "<p class='hm-fine'>" + esc(how) + "</p>" +
+      "<a href='" + BASE + "flags/" + esc(m.p) + "/#" + esc(m.e) + "'>Read it on the flag page &rarr;</a></div>";
+  }
+  function openDetail(i) {
+    var m = D.moves[i];
+    if (compact || opts.detail === false) return;
+    clearBubbles();
+    var back = detailPop && detailPop._hmBack ? detailPop._hmBack : map.getCenter();   // where the map was before the first bubble
+    if (detailPop) { var old = detailPop; detailPop = null; map.removeLayer(old); }
+    var pop = L.popup({ autoPan: true, autoPanPadding: [60, 60], closeOnClick: false, autoClose: false, closeButton: true,
+      className: "hm-bubble hm-detail-pop", maxWidth: 340, minWidth: 260, offset: [0, -4] }).setLatLng(m.b).setContent(detailHTML(m, i));
+    pop._hmBack = back; detailPop = pop; pop.addTo(map);
+    /* A tall bubble near the top edge pans the map to fit itself; closing it puts the map back where it was. */
+    pop.on("remove", function () { if (detailPop === pop) { detailPop = null; map.panTo(back); } });
+    var refresh = function () { if (detailPop === pop) pop.setContent(detailHTML(m, i)); };
+    loadEras(refresh);
+    if (!LEADERS) { leaderWaiters.push(refresh); loadLeaders(); }
   }
 
   /* ---- A: a bubble where a major movement lands --------------------------- */
@@ -580,6 +643,7 @@
         listeners.forEach(function (l) { l[0].removeEventListener(l[1], l[2]); });
         map.off("zoomend moveend", moved);
         clearBubbles(); hideEra();
+        if (detailPop) { var dp = detailPop; detailPop = null; map.removeLayer(dp); }
         [groundLayer, arcLayer, flagLayer, leaderLayer, bubbleLayer].forEach(function (g) { map.removeLayer(g); });
         elG.textContent = "";
         if (rArc) { map.removeLayer(rArc); map.removeLayer(rGround); }

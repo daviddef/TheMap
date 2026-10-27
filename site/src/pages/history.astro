@@ -59,6 +59,9 @@ const CH = hist.chapters;
       <div class="hm-era" id="hm-era" hidden></div>
 
       <div class="hm-load" id="hm-load">Loading the movements&hellip;</div>
+      <button type="button" class="hm-fs" id="hm-fs" aria-pressed="false" aria-label="Full screen" title="Full screen (Esc to leave)">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+      </button>
     </div>
 
     <div class="hm-bar">
@@ -209,4 +212,23 @@ const CH = hist.chapters;
                        color:inherit; cursor:pointer; border-left:4px solid var(--c, #999); border-radius:2px; }
   .hm-list li button:hover, .hm-list li button:focus-visible { background:color-mix(in srgb, var(--c, #999) 14%, transparent); }
   .hm-list li small { display:block; opacity:.7; font-variant-numeric:tabular-nums; }
+
+  /* FULL SCREEN, on every device: a fixed overlay rather than the Fullscreen API, which iPhones do not offer for a div. */
+  .hm-fs { position:absolute; right:10px; bottom:34px; z-index:850; width:34px; height:34px; display:grid; place-items:center;
+           border:1px solid var(--rule-strong, #bbb); border-radius:8px; background:var(--panel, #fff); color:var(--ink, #16222A); cursor:pointer; }
+  .hm-fs[aria-pressed="true"] { background:var(--adriatic, #1F5C6B); color:#fff; border-color:var(--adriatic, #1F5C6B); }
+  :global(body.hm-full-on) { overflow:hidden; }
+  .hm.hm-full { position:fixed; inset:0; z-index:3000; display:flex; flex-direction:column; gap:8px; box-sizing:border-box;
+                padding:calc(env(safe-area-inset-top, 0px) + 8px) calc(env(safe-area-inset-right, 0px) + 8px) calc(env(safe-area-inset-bottom, 0px) + 8px) calc(env(safe-area-inset-left, 0px) + 8px);
+                background:var(--paper, #EDEBE5); overflow:auto; }
+  .hm.hm-full .hm-chapters { flex:none; flex-wrap:nowrap; overflow-x:auto; }
+  .hm.hm-full .hm-stage { flex:1 1 auto; min-height:0; display:flex; }
+  .hm.hm-full .hm-map { flex:1 1 auto; height:auto; min-height:0; }
+  .hm.hm-full .hm-bar, .hm.hm-full .hm-layers { flex:none; }
+  .hm.hm-full .hm-below { display:none; }
+  @media (max-width:760px) {
+    .hm.hm-full .hm-layers { flex-wrap:nowrap; overflow-x:auto; white-space:nowrap; padding-bottom:2px; }
+    .hm.hm-full .hm-tour, .hm.hm-full .hm-speed { display:none; }
+    .hm.hm-full .hm-bar { grid-template-columns:auto 1fr; }
+  }
 </style>

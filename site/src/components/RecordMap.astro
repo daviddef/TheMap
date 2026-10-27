@@ -8738,9 +8738,24 @@ window.addEventListener("load", async function () {
   :global(.ra-th-cardw .ra-th-x) { position: absolute; right: 6px; top: 2px; }
   /* The pill's own ▶ and its two-handle Year slider are replaced by this pane while the playback is open. */
   :global(.ra-time:has(~ .ra-th)) { display: none; }
+  /* ON A PHONE the pane was a 235px column down the middle of a 420px map, with the year, a three-line era
+     sentence and ten overlapping year labels stacked in it. It is now a slim strip along the foot, full
+     width: year and era on one line, the timeline under them, the labels dropped (the scrubber and the
+     year say it). The controls and Under way list open upward from it and scroll rather than grow. */
   @media (max-width: 700px) {
-    :global(.ra-th .ra-th-hud) { bottom: auto; width: min(300px, calc(100% - 140px)); max-height: 84%; }
-    :global(.ra-th-list) { max-height: 150px; }
+    :global(.ra-th .ra-th-hud), :global(.ra-th .ra-th-hud:has(.ra-th-listw.fold)) {
+      top: auto; bottom: 24px; left: 8px; right: 8px; width: auto; max-height: 62%; overflow-y: auto;
+      display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 4px 10px; padding: 6px 12px 8px; }
+    :global(.ra-th .ra-th-hud > *) { grid-column: 1 / -1; min-width: 0; }
+    :global(.ra-th .ra-th-hud > .ra-th-year) { grid-column: 1; font-size: 1.55rem; }
+    :global(.ra-th .ra-th-hud > .ra-th-ch) { grid-column: 2; font-size: .72rem; line-height: 1.3; padding-right: 22px;
+      -webkit-line-clamp: 2; max-height: 2.7em; }
+    :global(.ra-th-ticks) { display: none; }
+    :global(.ra-th-scrub) { padding-top: 14px; }
+    :global(.ra-th-dens) { height: 12px; }
+    :global(.ra-th-band) { top: 18px; }
+    :global(.ra-th-list) { max-height: 130px; }
+    :global(.ra-th-cardw) { left: 8px; right: 8px; width: auto; top: 8px; max-height: 40%; }
   }
 
   /* ---- the scrubber along the foot of the map ---------------------------- */
@@ -8862,4 +8877,9 @@ window.addEventListener("load", async function () {
   @media (prefers-reduced-motion: reduce) {
     .at-panel:has(.at-body:not([hidden])) { animation: none; }
   }
+  /* FULL SCREEN WITH THE PLAYBACK ON, AND NO PLACE OPEN: the panel under the map is only the «start with what you
+     have» help, and it was taking 40% of the screen. The map has the whole window until a place is opened. */
+  :global(.at-wrap.ra-fs:has(.ra-th):has(.at-body[hidden])) { grid-template-rows: minmax(0, 1fr); }
+  :global(.at-wrap.ra-fs:has(.ra-th):has(.at-body[hidden]) .at-panel) { display: none; }
+  :global(.at-wrap.ra-fs:has(.ra-th):has(.at-body[hidden]) .at-map) { height: 100%; min-height: 0; }
 </style>

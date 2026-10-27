@@ -2188,6 +2188,77 @@ window.addEventListener("load", async function () {
      The index cannot carry this and should not try. */
   var panel = document.getElementById("ra-body"), empty = document.getElementById("ra-empty");
   var cache = {};
+
+  /* MASS MORTALITY AT THIS PLACE. David: «consider epidemics and genocide, as many death records would
+     surround these». The History map outlines them; this says, for the place that is open, which of
+     those events reached it and what the atlas holds for those same years. It states only what the
+     data holds: an event whose outline contains the place (or lies within a few miles of it), the
+     toll range as the sources give it, and the volumes here whose dates overlap. A place with no event
+     says nothing; it is not claimed to have been spared. */
+  var MORTP = null;
+  function loadMortP() {
+    if (!MORTP) MORTP = fetch(BASE + "mortality.json").then(function (r) { return r.json(); }).catch(function () { return { events: [], records: {} }; });
+    return MORTP;
+  }
+  function mortHit(e, lat, lon) {
+    var near = 0.35;                                  // degrees; the outlines are simplified, so allow the coast
+    return (e.poly || []).some(function (ring) {
+      var inside = false, n = ring.length, i, j, a, b;
+      for (i = 0, j = n - 1; i < n; j = i++) {
+        a = ring[i]; b = ring[j];
+        if ((a[1] > lon) !== (b[1] > lon) && lat < (b[0] - a[0]) * (lon - a[1]) / (b[1] - a[1]) + a[0]) inside = !inside;
+      }
+      if (inside) return true;
+      for (i = 0, j = n - 1; i < n; j = i++) {        // distance to the edge
+        a = ring[i]; b = ring[j];
+        var dx = b[1] - a[1], dy = b[0] - a[0], L2 = dx * dx + dy * dy,
+            t = L2 ? Math.max(0, Math.min(1, ((lon - a[1]) * dx + (lat - a[0]) * dy) / L2)) : 0,
+            ex = a[1] + t * dx - lon, ey = a[0] + t * dy - lat;
+        if (ex * ex + ey * ey < near * near) return true;
+      }
+      return false;
+    });
+  }
+  function mortTollTxt(t) {
+    if (!t || t.low === null || t.low === undefined) return "no agreed figure";
+    var f = function (n) { return n >= 1e6 ? (Math.round(n / 1e5) / 10) + " million" : n >= 1e3 ? Math.round(n / 1e3) + " thousand" : String(n); };
+    if (t.floor || t.high === null || t.high === undefined) return "more than " + f(t.low);
+    return t.low === t.high ? f(t.low) : f(t.low) + " to " + f(t.high);
+  }
+  function mortForPlace(d) {
+    if (d.lat == null || d.lon == null) return;
+    loadMortP().then(function (M) {
+      if (Q.get("at") !== d.id) return;
+      var head = panel.querySelector(".at-h");
+      if (!head || panel.querySelector(".ra-mortnote")) return;
+      var hits = (M.events || []).filter(function (e) { return e.f <= 2026 && mortHit(e, d.lat, d.lon); })
+        .sort(function (a, b) { return a.f - b.f || a.t - b.t; });
+      if (!hits.length) return;
+      var cols = d.collections || [];
+      var li = hits.map(function (e) {
+        var yrs = e.f === e.t ? String(e.f) : e.f + "–" + (e.t >= 2026 ? "present" : e.t);
+        var held = cols.filter(function (c) { return c.from != null && c.to != null && c.from <= e.t && c.to >= e.f; });
+        var line;
+        if (held.length) {
+          line = held.length + " volume" + (held.length === 1 ? "" : "s") + " here cover" + (held.length === 1 ? "s" : "") +
+            " these years: " + held.slice(0, 2).map(function (c) { return esc(c.title); }).join("; ") + (held.length > 2 ? " and " + (held.length - 2) + " more" : "") + ".";
+        } else if (cols.length) {
+          line = "None of the " + cols.length + " volume" + (cols.length === 1 ? "" : "s") + " listed here is dated to these years.";
+        } else line = "";
+        var rec = M.records && M.records[e.ty] ? M.records[e.ty] : "";
+        return '<li><b>' + esc(e.n) + '</b> <span class="ra-mn-y">' + esc(yrs) + ' · ' + esc((M.types && M.types[e.ty]) || e.ty) +
+          ' · est. deaths ' + esc(mortTollTxt(e.toll)) + '</span>' +
+          (e.says ? '<span class="ra-mn-s">' + esc(e.says) + '</span>' : "") +
+          (e.open ? '<span class="ra-mn-s ra-mn-o">' + esc(e.open) + '</span>' : "") +
+          (line ? '<span class="ra-mn-v">' + line + '</span>' : "") +
+          (rec ? '<span class="ra-mn-r">' + esc(rec) + '</span>' : "") + '</li>';
+      }).join("");
+      head.insertAdjacentHTML("afterend",
+        '<details class="ra-mortnote"><summary>Mass mortality that reached here: ' + hits.length + ' event' + (hits.length === 1 ? "" : "s") +
+        '</summary><ul>' + li + '</ul><p class="at-sub">From the Mass mortality layer on the <a href="' + BASE + 'history/?chapter=mass-mortality">History map</a>. ' +
+        'Outlines are approximate; a missing name in these years is not proof the person was not there.</p></details>');
+    });
+  }
   async function open(p) {
     empty.hidden = true; panel.hidden = false;
     panel.innerHTML = '<p class="at-sub">Fetching ' + esc(p.n) + "…</p>";
@@ -2202,6 +2273,7 @@ window.addEventListener("load", async function () {
     paintIcoFlags(panel);
     buildCheck(d, drawHood(d));
     drawFlagResForPlace(d);
+    mortForPlace(d);
     /* While the playback is open, opening a place also puts that place's country in focus. */
     if (typeof TH !== "undefined" && TH && TH.ctl && d.country) TH.ctl.focus(String(d.country).toUpperCase());
   }
@@ -7974,6 +8046,18 @@ window.addEventListener("load", async function () {
   :global(.at-h h3) { font-family: var(--serif); font-size: 22px; margin: 0; line-height: 1.25; }
   :global(.at-n) { font: 400 11px/1 var(--mono); color: var(--accent); white-space: nowrap; }
   :global(.at-sub) { font: 400 11.5px/1.5 var(--mono); color: var(--ink-3); margin: 6px 0 8px; }
+  :global(.ra-mortnote) { grid-column: 1 / -1; margin: 6px 0 10px; border: 1px solid #000; border-left-width: 4px; border-radius: 3px; background: color-mix(in srgb, #000 5%, transparent); }
+  :global(.ra-mortnote > summary) { cursor: pointer; padding: 6px 10px; font: 600 12px/1.4 var(--mono); }
+  :global(.ra-mortnote > ul) { margin: 0; padding: 0 10px 4px 26px; columns: 2 380px; column-gap: 28px; }
+  :global(.ra-mortnote li) { break-inside: avoid; }
+  :global(.ra-mortnote li) { margin: 0 0 10px; font: 400 12.5px/1.5 var(--sans, system-ui); }
+  :global(.ra-mortnote li span) { display: block; }
+  :global(.ra-mortnote .ra-mn-y) { font: 400 11.5px/1.5 var(--mono); color: var(--ink-3); }
+  :global(.ra-mortnote .ra-mn-o) { font-style: italic; }
+  :global(.ra-mortnote .ra-mn-v) { margin-top: 2px; font-weight: 600; }
+  :global(.ra-mortnote .ra-mn-r) { margin-top: 2px; color: var(--ink-2, inherit); }
+  :global(.ra-mortnote > .at-sub) { padding: 0 10px; }
+
   :global(.at-sec) { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--rule); }
   :global(.at-films) { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 5px; }
   :global(.at-films li) { font-size: 12.5px; line-height: 1.5; }

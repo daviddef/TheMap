@@ -906,8 +906,14 @@ def mortality_gate():
         if not (isinstance(e.get("from"), int) and isinstance(e.get("to"), int) and e["from"] <= e["to"]):
             err(f"{w}: from/to must be years with from <= to")
         geo = e.get("geo") or {}
-        if not any(k in geo for k in ("countries", "circles", "bbox", "global")):
-            err(f"{w}: no area (countries, circles, bbox or global)")
+        if not any(k in geo for k in ("countries", "circles", "bbox", "shapes", "lines", "global")):
+            err(f"{w}: no area (countries, circles, bbox, shapes, lines or global)")
+        for ring in geo.get("shapes", []):
+            if len(ring) < 3 or not all(-90 <= a <= 90 and -180 <= b <= 180 for a, b in ring):
+                err(f"{w}: a shape needs three or more [lat, lon] points inside the globe")
+        for ln in geo.get("lines", []):
+            if len(ln.get("pts", [])) < 2 or not ln.get("km", 0) > 0:
+                err(f"{w}: a line needs two or more [lat, lon] points and a width in km")
         for cc in geo.get("countries", []):
             if cc not in ctry:
                 err(f"{w}: no outline for country {cc}")

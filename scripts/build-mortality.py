@@ -3,7 +3,8 @@
 History map draws, ready to paint.
 
 An event's area is one of: `countries` (the modern outline, simplified, from the Natural Earth rings the site already uses
-at build time), `circles` ([lat, lon, km]), `bbox` ([south, west, north, east]) or `global` (no area: a pandemic that
+at build time), `circles` ([lat, lon, km]), `bbox` ([south, west, north, east]), `shapes` (rings of [lat, lon], drawn by hand from a map)
+or `lines` ({km, pts}: a route, widened to a corridor, for marches and sea crossings) or `global` (no area: a pandemic that
 belongs to no map). The outline says WHERE, not the borders of the day. Nothing here decides a toll or a label: those
 come from the entry, which cites its sources.
 """
@@ -65,6 +66,23 @@ def dp(pts, tol):
     return [p for p, k in zip(pts, keep) if k]
 
 
+def corridor(pts, km):
+    """A route widened to a strip `km` wide: the left edge out, the right edge back, mitred at the bends. [lat, lon] in and out."""
+    half = km / 2.0
+    def off(i, sign):
+        a, b = pts[max(i - 1, 0)], pts[min(i + 1, len(pts) - 1)]
+        k = math.cos(math.radians(pts[i][0]))
+        dx, dy = (b[1] - a[1]) * k, b[0] - a[0]
+        L = math.hypot(dx, dy) or 1
+        nx, ny = -dy / L, dx / L
+        dlat = sign * ny * half / 111.0
+        dlon = sign * nx * half / (111.0 * (k or 1))
+        return [round(pts[i][0] + dlat, 2), round(pts[i][1] + dlon, 2)]
+    left = [off(i, 1) for i in range(len(pts))]
+    right = [off(i, -1) for i in range(len(pts))][::-1]
+    return left + right
+
+
 def bbox_area(r):
     xs = [p[0] for p in r]; ys = [p[1] for p in r]
     return (max(xs) - min(xs)) * (max(ys) - min(ys))
@@ -107,6 +125,13 @@ def polys(geo, countries):
         for lat, lon, km in geo["circles"]:
             rings.append(circle(lat, lon, km))
         at = at or [geo["circles"][0][0], geo["circles"][0][1]]
+    for ring in geo.get("shapes", []):
+        rings.append([[round(a, 2), round(b, 2)] for a, b in ring])
+        at = at or [round(sum(a for a, _ in ring) / len(ring), 2), round(sum(b for _, b in ring) / len(ring), 2)]
+    for ln in geo.get("lines", []):
+        rings.append(corridor(ln["pts"], ln["km"]))
+        mid = ln["pts"][len(ln["pts"]) // 2]
+        at = at or [mid[0], mid[1]]
     if "bbox" in geo:
         s, w, n, e = geo["bbox"]
         rings.append([[s, w], [s, e], [n, e], [n, w]])

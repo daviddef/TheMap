@@ -8877,9 +8877,16 @@ window.addEventListener("load", async function () {
   @media (prefers-reduced-motion: reduce) {
     .at-panel:has(.at-body:not([hidden])) { animation: none; }
   }
-  /* FULL SCREEN WITH THE PLAYBACK ON, AND NO PLACE OPEN: the panel under the map is only the «start with what you
-     have» help, and it was taking 40% of the screen. The map has the whole window until a place is opened. */
-  :global(.at-wrap.ra-fs:has(.ra-th):has(.at-body[hidden])) { grid-template-rows: minmax(0, 1fr); }
-  :global(.at-wrap.ra-fs:has(.ra-th):has(.at-body[hidden]) .at-panel) { display: none; }
-  :global(.at-wrap.ra-fs:has(.ra-th):has(.at-body[hidden]) .at-map) { height: 100%; min-height: 0; }
+  /* FULL SCREEN WITH NO PLACE OPEN: the panel under the map is only the «start with what you have» help, which
+     took 40% of the window in the mode whose purpose is the map. David, on a phone: «what use is the bottom
+     text?». The map has the whole window until a place is opened, and then the panel comes back. */
+  :global(.at-wrap.ra-fs:has(.at-body[hidden])) { grid-template-rows: minmax(0, 1fr); }
+  :global(.at-wrap.ra-fs:has(.at-body[hidden]) .at-panel) { display: none; }
+  :global(.at-wrap.ra-fs:has(.at-body[hidden]) .at-map) { height: 100%; min-height: 0; }
+  /* THE FILTER BESIDE THE SEARCH ON A PHONE. The box asked for 320px before it would share a row, which a
+     375px screen never has, so the filter wrapped under it: two rows of chrome for one box and one button. */
+  @media (max-width: 760px) {
+    .ra-bar-find .ra-find { flex: 1 1 0; min-width: 0; }
+    .ra-bar-find .ra-bar-filters { flex: 0 0 auto; }
+  }
 </style>

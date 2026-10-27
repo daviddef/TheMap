@@ -296,10 +296,30 @@ def main():
                 continue
             if where_used is not None and cc not in where_used:
                 continue
-            lons = [p[0] for r in rings for p in r]
-            lats = [p[1] for r in rings for p in r]
-            mid = [round((min(lats) + max(lats)) / 2, 3),
-                   round((min(lons) + max(lons)) / 2, 3)]
+            # THE MAINLAND, NOT EVERY ISLAND IT OWNS. The box of ALL a country's rings put the Netherlands' anchor in the
+            # middle of the Atlantic (Aruba and Bonaire are in the same country as Utrecht), so an arrow into the
+            # Netherlands ended at sea, and France, Denmark, the US, Portugal and Spain were pulled the same way by
+            # Guiana, Hawaii, the Azores and the Canaries. The anchor now comes from the largest ring and the rings
+            # within reach of it; far overseas land stays in the country but out of its label point.
+            def _box(r):
+                xs = [p[0] for p in r]; ys = [p[1] for p in r]
+                return min(xs), min(ys), max(xs), max(ys)
+            big = max(rings, key=lambda r: (_box(r)[2] - _box(r)[0]) * (_box(r)[3] - _box(r)[1]))
+            bx0, by0, bx1, by1 = _box(big)
+            cx, cy = (bx0 + bx1) / 2, (by0 + by1) / 2
+            near = []
+            for r in rings:
+                x0, y0, x1, y1 = _box(r)
+                dx = abs(((x0 + x1) / 2 - cx + 540) % 360 - 180)
+                if dx <= 35 and abs((y0 + y1) / 2 - cy) <= 25:
+                    near.append(r)
+            lons = [p[0] for r in near for p in r]
+            lats = [p[1] for r in near for p in r]
+            if max(lons) - min(lons) > 180:                 # crosses the antimeridian (Russia, New Zealand, Fiji): unwrap, then wrap back
+                lons = [x + 360 if x < 0 else x for x in lons]
+            mlon = (min(lons) + max(lons)) / 2
+            mlon = mlon - 360 if mlon > 180 else mlon
+            mid = [round((min(lats) + max(lats)) / 2, 3), round(mlon, 3)]
             # THE TEST IS «IS IT ON SOMEBODY ELSE'S LAND», NOT «WHAT DOES
             # country_of SAY». Those differ for an enclave: Lesotho is
             # surrounded by South Africa and ZA's ring carries no hole for it,

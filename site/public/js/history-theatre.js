@@ -570,7 +570,7 @@
     mv.forEach(function (x) {
       var e = x.e, li = document.createElement("li"), b = document.createElement("button");
       b.type = "button"; b.style.setProperty("--c", "#000");
-      now["m" + e.id] = 1; if (flashOK && !was["m" + e.id]) b.className = "hm-new";
+      now["m" + e.id] = 1; b.className = "hm-mortrow" + (flashOK && !was["m" + e.id] ? " hm-new" : "");
       b.innerHTML = "<span class='hm-rowflags'><i class='hm-mortbox' aria-hidden='true'></i></span><span class='hm-rowtxt'>" + esc(e.n) + "<small>Mass mortality \u00b7 " +
         esc(TYPE_NAME[e.ty] || e.ty) + (tollShort(e) ? " \u00b7 " + esc(tollShort(e)) : "") + "</small></span>";
       b.addEventListener("click", function () { openMortDetail(e); if (e.at) map.panTo(e.at); });

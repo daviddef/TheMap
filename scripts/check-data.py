@@ -686,12 +686,16 @@ def history_json():
         seen.add(c["id"])
         if not (bh.MIN_YEAR <= c["from"] < c["to"] <= 2026):
             err(f"history chapter {c['id']}: years {c['from']}-{c['to']} are not a span inside {bh.MIN_YEAR}-2026")
-        if not c.get("layers") or any(l not in ("conquest", "occupation", "migration") for l in c["layers"]):
-            err(f"history chapter {c['id']}: layers must be conquest, occupation or migration")
+        if not c.get("layers") or any(l not in ("conquest", "occupation", "migration", "mortality") for l in c["layers"]):
+            err(f"history chapter {c['id']}: layers must be conquest, occupation, migration or mortality")
         v = c.get("view") or []
         if len(v) != 3 or not (-90 <= v[0] <= 90 and -180 <= v[1] <= 180 and 1 <= v[2] <= 8):
             err(f"history chapter {c['id']}: view must be [lat, lon, zoom]")
-        n = sum(1 for m in now["moves"] if c["from"] <= m["f"] <= c["to"] and m["v"] in c["layers"])
+        if c["layers"] == ["mortality"]:
+            evs = json.load(open("data/mass-death-events.json", encoding="utf-8"))["events"]
+            n = sum(1 for e in evs if e["from"] <= c["to"] and c["from"] <= e["to"])
+        else:
+            n = sum(1 for m in now["moves"] if c["from"] <= m["f"] <= c["to"] and m["v"] in c["layers"])
         if n < 3:
             err(f"history chapter {c['id']}: only {n} movements begin in it; it would play an empty map")
     for a in actors:
@@ -877,6 +881,74 @@ def flag_art_audit():
     print(f"flag art: {n} of {total} drawings compared with a reference ({parts})")
 
 
+def mortality_gate():
+    """data/mass-death-events.json: every event is a real, sourced, bounded claim, and site/public/mortality.json is what
+    scripts/build-mortality.py writes from it. A toll is a range or says there is none; a label that is contested says so;
+    each event cites Wikipedia or Wikidata AND at least one further source, so no entry stands on a summary alone."""
+    p = "data/mass-death-events.json"
+    if not os.path.exists(p):
+        return
+    try:
+        d = json.load(open(p, encoding="utf-8"))
+        ctry = json.load(open("data/countries.json", encoding="utf-8"))["countries"]
+    except Exception as e:
+        err(f"cannot read {p}: {e}")
+        return
+    seen, n = set(), 0
+    for e in d["events"]:
+        n += 1
+        w = f"mass-death event {e.get('id')}"
+        if e["id"] in seen:
+            err(f"{w}: duplicate id")
+        seen.add(e["id"])
+        if e.get("type") not in d["types"]:
+            err(f"{w}: unknown type {e.get('type')!r}")
+        if not (isinstance(e.get("from"), int) and isinstance(e.get("to"), int) and e["from"] <= e["to"]):
+            err(f"{w}: from/to must be years with from <= to")
+        geo = e.get("geo") or {}
+        if not any(k in geo for k in ("countries", "circles", "bbox", "global")):
+            err(f"{w}: no area (countries, circles, bbox or global)")
+        for cc in geo.get("countries", []):
+            if cc not in ctry:
+                err(f"{w}: no outline for country {cc}")
+        if not e.get("says"):
+            err(f"{w}: no description")
+        t = e.get("toll")
+        if not t or not t.get("text"):
+            err(f"{w}: no toll entry (a range, or an explanation of why there is no figure)")
+        elif t.get("low") is not None:
+            # a range, or a floor («at least 15 million») marked as one: never a bare number that reads as exact
+            if t.get("high") is None:
+                if not t.get("floor"):
+                    err(f"{w}: toll has a low and no high; mark it floor: true if the sources say 'at least'")
+            elif t["low"] > t["high"] or t["low"] < 0:
+                err(f"{w}: toll low/high must be a range, low <= high")
+        pubs = {x.get("publisher") for x in (e.get("sources") or [])}
+        if len(pubs - {"Wikipedia", "Wikidata"}) < 1:
+            err(f"{w}: needs at least one source beyond Wikipedia and Wikidata")
+        for x in e.get("sources") or []:
+            if not str(x.get("url", "")).startswith("https://") or not x.get("title") or not x.get("publisher"):
+                err(f"{w}: a source lacks an https url, title or publisher")
+        if not str(e.get("qid", "")).startswith("Q"):
+            err(f"{w}: no Wikidata id")
+    mp = "site/public/mortality.json"
+    if os.path.exists(mp):
+        try:
+            import importlib.util
+            spec = importlib.util.spec_from_file_location("build_mortality", os.path.join(os.path.dirname(os.path.abspath(__file__)), "build-mortality.py"))
+            bm = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(bm)
+            have = json.load(open(mp, encoding="utf-8")); now = bm.build()
+            have.pop("generated", None); now.pop("generated", None)
+            if have != now:
+                err("site/public/mortality.json is not what scripts/build-mortality.py writes today. Run python3 scripts/build-mortality.py.")
+        except SystemExit as e:
+            err(f"mortality build: {e}")
+        except Exception as e:
+            err(f"cannot check mortality.json: {e}")
+    print(f"mass mortality: {n} events, each sourced beyond Wikipedia, every toll a range")
+
+
 def history_audit():
     """Every movement tag on a flag page reaches the History map or is excluded for a stated reason (scripts/audit-history.py).
     The Venetian conquest of Dalmatia was drawn as a stub at the wrong end of Croatia; the audit exists so no movement
@@ -904,6 +976,7 @@ def history_audit():
 
 
 def main():
+    mortality_gate()
     history_audit()
     flag_era_drift()
     flag_art_drift()

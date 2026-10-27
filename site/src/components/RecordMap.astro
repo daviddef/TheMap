@@ -3936,6 +3936,7 @@ window.addEventListener("load", async function () {
             '<label><input type="checkbox" data-k="hm-l-occupation" checked /> Occupation</label>' +
             '<label><input type="checkbox" data-k="hm-l-migration" checked /> Migration</label>' +
             '<label><input type="checkbox" data-k="hm-l-voyages" checked /> Voyages</label>' +
+            '<label title="Epidemics, famines, genocides and massacres, as black outlines on the years and places they struck"><input type="checkbox" data-k="hm-l-mort" checked /> Mass mortality</label>' +
             '<label><input type="checkbox" data-k="hm-l-flags" /> Flags</label>' +
             '<label><input type="checkbox" data-k="hm-l-leaders" /> Leaders (zoom in)</label>' +
             '<label><input type="checkbox" data-k="hm-l-grid" /> Gridlines</label>' +
@@ -4041,6 +4042,7 @@ window.addEventListener("load", async function () {
       return window.HistoryTheatre.create({
         base: BASE, map: map, scope: ui, els: els, keys: false, syncUrl: false, start: "none", cardless: true,
         onYear: thSyncRecords,
+        onRecords: thRecords,
         onPlay: function (p) { playBtn.setAttribute("aria-pressed", p ? "true" : "false"); }
       });
     }).then(function (ctl) {
@@ -4064,6 +4066,18 @@ window.addEventListener("load", async function () {
     }).catch(function () {
       var lo = els["hm-load"]; if (lo) { lo.hidden = false; lo.textContent = "The playback could not be loaded. Try again."; }
     });
+  }
+  /* «Find records for these years and places», from a mass-mortality card: stay on this map, turn the records on, set the
+     year window to the event's years (records are filterable from 1500) and fly to where it happened. */
+  function thRecords(e) {
+    if (TH.ctl) TH.ctl.stop();
+    var rec = TH.ui && TH.ui.querySelector('[data-k="rec"]');
+    if (rec && !rec.checked) { rec.checked = true; rec.dispatchEvent(new Event("change")); }
+    if (e.t >= 1500) {
+      year = Math.max(e.f, 1500); year2 = Math.min(Math.max(e.t, year + 1), 2026);
+      yin.value = year; yin2.value = year2; yon.checked = true; readRange(); yearUI();
+    }
+    if (e.at) map.setView(e.at, e.poly && e.poly.length > 1 ? 4 : 7, { animate: true });
   }
   function thClose() {
     if (!TH.ui) return;

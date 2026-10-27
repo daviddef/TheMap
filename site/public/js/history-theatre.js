@@ -44,13 +44,14 @@
       elSpeed = $("hm-speed"), elTrail = $("hm-trail"), elList = $("hm-list"), elCard = $("hm-card"),
       elLoad = $("hm-load"), elDens = $("hm-dens"), elTicks = $("hm-ticks"), elListH = $("hm-list-h");
   var on = { conquest: $("hm-l-conquest"), occupation: $("hm-l-occupation"),
-             migration: $("hm-l-migration"), flags: $("hm-l-flags"), ground: $("hm-l-ground"), voyages: $("hm-l-voyages"), leaders: $("hm-l-leaders"), grid: $("hm-l-grid") };
+             migration: $("hm-l-migration"), flags: $("hm-l-flags"), ground: $("hm-l-ground"), voyages: $("hm-l-voyages"), leaders: $("hm-l-leaders"), grid: $("hm-l-grid"), mort: $("hm-l-mort") };
   var LEADERS = null, leaderLayer, leadersFetch = null, leaderWaiters = [], ERAS = null, erasFetch = null, detailPop = null;
   var elG = $("hm-gnote"), GROUND = null, groundLayer, groundKey = "";
   var elTour = $("hm-tour"), elTourBtn = $("hm-tour-btn"), pauseT = null, introT = null, dead = false;
   var elEra = $("hm-era");
   var compact = !!(window.matchMedia && window.matchMedia("(max-width: 700px)").matches);
   var focus = null, namesIdx = null, elFocus = $("hm-focus"), elFocusFlags = $("hm-focus-flags");
+  var MORT = null, mortFetch = null, mortLayer, rMort;
   var gridLayer, bubbleLayer, bubQ = [], bubT = null, bubShown = [], numFor = {}, numN = 0, lastYear = null;
 
   var D = null, FM = null, chapter = null, year = 1914, timer = null, selected = null;
@@ -119,6 +120,114 @@
     var v = norm(elFocus.value);
     if (!v) { if (focus) setFocus(null); return; }
     var cc = namesIdx && namesIdx[v]; if (cc && cc !== focus) setFocus(cc);
+  }
+
+  /* ---- MASS MORTALITY: black outlines on the years and places that were hardest to record a death in ---------------
+     Epidemics, famines, genocides, massacres, sieges and the like, from data/mass-death-events.json (each entry cites its
+     sources; every toll is a range). Drawn as a black outline with a light fill, not as an arrow: it is a place and a span,
+     not a journey. The area is a modern country outline, circle or box: where, not the borders of the day. */
+  var TYPE_NAME = { epidemic: "Epidemic", famine: "Famine", genocide: "Genocide", massacre: "Massacre", war: "War, siege or bombing",
+    atrocity: "Mass atrocity", displacement: "Forced removal" };
+  function loadMort(cb) {
+    if (MORT) return cb && cb();
+    if (!mortFetch) mortFetch = fetch(BASE + "mortality.json").then(function (r) { return r.json(); })
+      .then(function (j) { MORT = j; }).catch(function () { MORT = { events: [], types: {}, records: {} }; });
+    mortFetch.then(function () { if (cb) cb(); });
+  }
+  function fmtN(n) {
+    if (n === null || n === undefined) return "";
+    if (n >= 1e6) { var v = n / 1e6; return (v >= 10 ? Math.round(v) : Math.round(v * 10) / 10) + " million"; }
+    if (n >= 1e3) return (n >= 1e4 ? Math.round(n / 1e3) : Math.round(n / 100) / 10) + " thousand";
+    return String(n);
+  }
+  function tollShort(ev) {
+    var t = ev.toll; if (!t || t.low === null || t.low === undefined) return "";
+    if (t.floor || t.high === null || t.high === undefined) return "est. more than " + fmtN(t.low);
+    return "est. " + (t.low === t.high ? fmtN(t.low) : fmtN(t.low) + "\u2013" + fmtN(t.high));
+  }
+  function mortActive(y) {
+    if (!MORT || !on.mort || !on.mort.checked) return [];
+    return MORT.events.filter(function (e) {
+      if (e.f > y || y > e.t + 3) return false;
+      if (focus && !(e.cc && e.cc.indexOf(focus) > -1)) return false;
+      return true;
+    }).map(function (e) { return { e: e, fade: y <= e.t ? 1 : 1 - (y - e.t) / 4 }; });
+  }
+  var mortKey = "";
+  function drawMortality() {
+    if (!mortLayer) return [];
+    if (!on.mort || !on.mort.checked) { mortLayer.clearLayers(); mortKey = ""; return []; }
+    if (!MORT) { loadMort(function () { if (!dead) draw(); }); return []; }
+    var act = mortActive(year);
+    var key = act.map(function (x) { return x.e.id + ":" + Math.round(x.fade * 4); }).join("|");
+    if (key === mortKey) return act;               // the same outlines: do not rebuild thousands of vertices every tick
+    mortKey = key; mortLayer.clearLayers();
+    act.forEach(function (x) {
+      var e = x.e, f = x.fade;
+      var open = function () { openMortDetail(e); };
+      /* a thin white halo under the black so the outline reads on a dark basemap too */
+      (e.poly || []).forEach(function (ring) {
+        L.polygon(ring, { renderer: rMort, color: "#fff", weight: 4.5, opacity: .55 * f, fill: false, interactive: false, smoothFactor: 1 }).addTo(mortLayer);
+      });
+      (e.poly || []).forEach(function (ring) {
+        L.polygon(ring, { renderer: rMort, className: "hm-mort", color: "#000", weight: 2, opacity: .85 * f, fillColor: "#000", fillOpacity: .09 * f, smoothFactor: 1 })
+          .on("click", open).bindTooltip(esc(e.n) + " <span style='opacity:.7'>" + e.f + "\u2013" + e.t + "</span>", { sticky: true }).addTo(mortLayer);
+      });
+      if (e.at) {
+        L.circleMarker(e.at, { renderer: rMort, radius: 6, color: "#fff", weight: 2, fillColor: "#000", fillOpacity: f, opacity: f })
+          .on("click", open).bindTooltip("<b>" + esc(e.n) + "</b> " + e.f + "\u2013" + e.t, { direction: "top" }).addTo(mortLayer);
+      }
+    });
+    return act;
+  }
+  function mortCountries(e) {
+    return (e.cc || []).map(cname).join(", ");
+  }
+  function mortHTML(e) {
+    var t = e.toll, toll = "";
+    if (t && t.low !== null && t.low !== undefined) {
+      toll = "<div class='hm-toll'><span>Estimated deaths</span><b>" + ((t.floor || t.high === null || t.high === undefined) ? "more than " + fmtN(t.low) : (t.low === t.high ? fmtN(t.low) : fmtN(t.low) + " to " + fmtN(t.high))) + "</b>" +
+        "<small>" + esc(t.text || "") + (t.note ? " " + esc(t.note) : "") + "</small></div>";
+    } else if (t) {
+      toll = "<div class='hm-toll'><span>Estimated deaths</span><b>no agreed figure</b><small>" + esc(t.text || "") + "</small></div>";
+    }
+    var src = (e.src || []).map(function (x) { return "<a href='" + esc(x.url) + "' target='_blank' rel='noopener'>" + esc(x.publisher) + "</a>"; }).join(" \u00b7 ");
+    var rec = MORT && MORT.records ? MORT.records[e.ty] : "";
+    var yrs = e.f === e.t ? String(e.f) : e.f + "\u2013" + (e.t >= 2026 ? "present" : e.t);
+    var z = e.poly && e.poly.length > 1 ? 4 : 7, q = [];
+    if (e.t >= 1500) q.push("years=" + Math.max(e.f, 1500) + "," + Math.min(e.t, 2026));
+    if (e.at) q.push("view=" + e.at[0] + "," + e.at[1] + "," + z);
+    return "<div class='hm-d'><div class='hm-b-k' style='color:#000'>Mass mortality \u00b7 " + esc(TYPE_NAME[e.ty] || e.ty) + " \u00b7 " + esc(yrs) + "</div>" +
+      "<b>" + esc(e.n) + "</b>" + (e.says ? "<p class='hm-d-what'>" + esc(e.says) + "</p>" : "") + toll +
+      "<dl>" + (e.cc ? "<dt>Where</dt><dd>" + esc(mortCountries(e)) + " <span class='hm-d-src'>modern country outlines</span></dd>" : (e.g ? "<dt>Where</dt><dd>worldwide</dd>" : "")) +
+      (e.open ? "<dt>Contested</dt><dd>" + esc(e.open) + "</dd>" : "") +
+      (rec ? "<dt>Records</dt><dd>" + esc(rec) + " <span class='hm-d-src'>general guidance for this kind of event</span></dd>" : "") +
+      (src ? "<dt>Sources</dt><dd>" + src + "</dd>" : "") + "</dl>" +
+      "<a class='hm-d-rec' href='" + BASE + "?" + q.join("&") + "' data-mort='" + esc(e.id) + "'>Find records for these years and places &rarr;</a></div>";
+  }
+  function openMortDetail(e) {
+    if (compact || opts.detail === false) { elCard.innerHTML = mortHTML(e); return; }
+    clearBubbles(); closeDetail();
+    var el = document.createElement("div");
+    el.className = "hm-dpop hm-dpop-mort"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "About this event");
+    el.innerHTML = "<button type='button' class='hm-dpop-x' aria-label='Close'>&times;</button><div class='hm-dpop-body'>" + mortHTML(e) + "</div>";
+    map.getContainer().appendChild(el);
+    L.DomEvent.disableClickPropagation(el); L.DomEvent.disableScrollPropagation(el);
+    detailPop = el;
+    var place = function () {
+      if (detailPop !== el) return;
+      var sz = map.getSize(), pt = e.at ? map.latLngToContainerPoint(e.at) : L.point(sz.x * 0.6, sz.y * 0.4);
+      var w = Math.min(360, sz.x - 16);
+      el.style.width = w + "px"; el.style.maxHeight = Math.max(140, sz.y - 16) + "px";
+      var h = el.offsetHeight, left = pt.x + 20;
+      if (left + w > sz.x - 8) left = pt.x - 20 - w;
+      left = Math.max(8, Math.min(left, sz.x - w - 8));
+      el.style.left = left + "px"; el.style.top = Math.max(8, Math.min(pt.y - h / 2, sz.y - h - 8)) + "px";
+    };
+    detailOff = place; map.on("move zoom resize", place); place();
+    el.querySelector(".hm-dpop-x").addEventListener("click", closeDetail);
+    var a = el.querySelector(".hm-d-rec");
+    if (a && opts.onRecords) a.addEventListener("click", function (ev) { ev.preventDefault(); opts.onRecords(e); });
   }
 
   /* ---- gridlines: a labelled graticule, spaced by how far in the reader is ---- */
@@ -235,7 +344,8 @@
       });
     });
     var voy = drawVoyages();
-    list(vis, voy);
+    var mv = drawMortality();
+    list(vis, voy, mv);
     drawFlags();
     drawLeaders();
     drawGround();
@@ -441,11 +551,13 @@
     return "<span class='hm-rowflags'></span>";
   }
   var listSig = "", listIds = {}, listYear = null;
-  function list(vis, voy) {
+  function list(vis, voy, mv) {
     voy = voy || [];
-    elListH.textContent = (focus ? cname(focus) + ", " : "Under way, ") + (year) + (vis.length + voy.length ? " (" + (vis.length + voy.length) + ")" : "");
+    mv = mv || [];
+    var tot = vis.length + voy.length + mv.length;
+    elListH.textContent = (focus ? cname(focus) + ", " : "Under way, ") + (year) + (tot ? " (" + tot + ")" : "");
     var shown = vis.slice(0, 80);
-    var sig = voy.map(function (x) { return "v" + x.i; }).concat(shown.map(function (v) { return v.i + ":" + (numFor[v.i] || ""); })).join(",");
+    var sig = mv.map(function (x) { return "m" + x.e.id; }).concat(voy.map(function (x) { return "v" + x.i; })).concat(shown.map(function (v) { return v.i + ":" + (numFor[v.i] || ""); })).join(",");
     if (sig === listSig) return;
     listSig = sig;
     var keep = elList.scrollTop || 0;
@@ -455,6 +567,15 @@
     var was = listIds, now = {};
     listYear = year;
     elList.innerHTML = "";
+    mv.forEach(function (x) {
+      var e = x.e, li = document.createElement("li"), b = document.createElement("button");
+      b.type = "button"; b.style.setProperty("--c", "#000");
+      now["m" + e.id] = 1; if (flashOK && !was["m" + e.id]) b.className = "hm-new";
+      b.innerHTML = "<span class='hm-rowflags'><i class='hm-mortbox' aria-hidden='true'></i></span><span class='hm-rowtxt'>" + esc(e.n) + "<small>Mass mortality \u00b7 " +
+        esc(TYPE_NAME[e.ty] || e.ty) + (tollShort(e) ? " \u00b7 " + esc(tollShort(e)) : "") + "</small></span>";
+      b.addEventListener("click", function () { openMortDetail(e); if (e.at) map.panTo(e.at); });
+      li.appendChild(b); elList.appendChild(li);
+    });
     voy.forEach(function (x) {
       var li = document.createElement("li"), b = document.createElement("button");
       b.type = "button"; b.style.setProperty("--c", VCOL);
@@ -473,7 +594,7 @@
       b.addEventListener("click", function () { select(v.i, true); });
       li.appendChild(b); elList.appendChild(li);
     });
-    if (!vis.length && !voy.length) { var li2 = document.createElement("li"); li2.textContent = "Nothing in this atlas began in these years, with these layers."; elList.appendChild(li2); }
+    if (!vis.length && !voy.length && !mv.length) { var li2 = document.createElement("li"); li2.textContent = "Nothing in this atlas began in these years, with these layers."; elList.appendChild(li2); }
     listIds = now;
     elList.scrollTop = keep;
   }
@@ -624,6 +745,7 @@
     var k = bubShown.indexOf(b); if (k > -1) bubShown.splice(k, 1);
   }
   function showBubble(item) {
+    if (item.mort) return showMortBubble(item.mort);
     var m = D.moves[item.i], layer;
     if (compact) {
       numN = numN % 9 + 1; numFor[item.i] = numN;
@@ -642,6 +764,19 @@
     bubShown.push(b);
     while (bubShown.length > (compact ? 5 : 1)) dropBubble(bubShown[0]);
   }
+  function showMortBubble(e) {
+    if (!e.at) return;
+    var html = "<div class='hm-b'><div class='hm-b-k' style='color:#000'>Mass mortality \u00b7 " + esc(TYPE_NAME[e.ty] || e.ty) + " \u00b7 " + e.f + (e.t > e.f ? "\u2013" + (e.t >= 2026 ? "present" : e.t) : "") + "</div><b>" + esc(e.n) + "</b>" +
+      (e.says ? "<p>" + esc(e.says.length > 200 ? e.says.slice(0, 197).replace(/\s+\S*$/, "") + "\u2026" : e.says) + "</p>" : "") +
+      (tollShort(e) ? "<p><b style='display:inline'>" + esc(tollShort(e)) + " deaths</b></p>" : "") + "</div>";
+    var layer = L.popup({ autoPan: false, closeOnClick: false, autoClose: false, closeButton: true, className: "hm-bubble hm-bubble-mort", maxWidth: 270, minWidth: 190, offset: [0, -4] })
+      .setLatLng(e.at).setContent(html);
+    var b = { layer: layer };
+    bubbleLayer.addLayer(layer);
+    b.t = setTimeout(function () { dropBubble(b); }, reduce ? 10000 : 8000);
+    bubShown.push(b);
+    while (bubShown.length > 1) dropBubble(bubShown[0]);
+  }
   function pumpBubbles() {
     bubT = null;
     if (detailPop) bubQ = [];
@@ -651,6 +786,10 @@
   }
   function announce(from, to) {
     if (!D || !D.moves || detailPop) return;      // a bubble the reader opened is not talked over
+    if (MORT && on.mort && on.mort.checked) MORT.events.forEach(function (e) {
+      if (!e.hd || (focus && !(e.cc && e.cc.indexOf(focus) > -1))) return;
+      if (e.f > from && e.f <= to && bubQ.length < 6) bubQ.push({ mort: e });
+    });
     D.moves.forEach(function (m, i) {
       if (!m.major || !on[m.v] || !on[m.v].checked) return;
       if (focus && !involves(m, focus)) return;
@@ -668,12 +807,18 @@
     return D.moves.filter(function (m) { return m.major && m.f >= ch.from && m.f <= ch.to && ch.layers.indexOf(m.v) > -1; })
       .sort(function (a, b) { return a.f - b.f; });
   }
+  function mortOf(ch) {
+    if (!MORT || !on.mort || !on.mort.checked) return [];
+    return MORT.events.filter(function (e) { return e.hd && e.t >= ch.from && e.f <= ch.to; }).sort(function (a, b) { return a.f - b.f; });
+  }
   function hideEra() { if (introT) { clearTimeout(introT); introT = null; } if (elEra && elEra.hidden === false) elEra.hidden = true; }
   function showEra(ch, then) {
     if (!elEra || !elEra.addEventListener || elEra.tagName === "STUB") { if (then) then(); return; }
     var i = D.chapters.indexOf(ch) + 1, mj = majorsOf(ch);
     elEra.innerHTML = "<div class='hm-era-n'>Era " + i + " of " + D.chapters.length + " · " + ch.from + "–" + ch.to + "</div>" +
       "<h2>" + esc(ch.title) + "</h2><p>" + esc(ch.blurb) + "</p>" +
+      (mortOf(ch).length ? "<div class='hm-era-m hm-era-mort'>" + mortOf(ch).length + " mass-mortality event" + (mortOf(ch).length === 1 ? "" : "s") + ": " +
+        mortOf(ch).slice(0, 4).map(function (e) { return esc(e.n); }).join(" \u00b7 ") + (mortOf(ch).length > 4 ? " \u00b7 \u2026" : "") + "</div>" : "") +
       (mj.length ? "<div class='hm-era-m'>" + mj.length + " headline movement" + (mj.length === 1 ? "" : "s") + ": " +
         mj.slice(0, 4).map(function (m) { return esc(m.major); }).join(" · ") + (mj.length > 4 ? " · …" : "") + "</div>" : "") +
       "<button type='button' class='hm-era-go'>Start this era</button>";
@@ -720,6 +865,7 @@
   function nextEra() {
     if (!chapter || !elTour || !elTour.checked) return;
     var i = D.chapters.indexOf(chapter), nx = D.chapters[i + 1];
+    while (nx && nx.tour === false) nx = D.chapters[D.chapters.indexOf(nx) + 1];   // a chapter that is not part of the tour (Mass mortality spans 1,400 years)
     if (!nx) { elCh.textContent = chapter.title + " \u2014 that was the last era."; return; }
     elCh.textContent = "Next: " + nx.title + " (" + nx.from + "\u2013" + nx.to + ")";
     clearTimeout(pauseT);
@@ -739,6 +885,7 @@
     if (!chapter) { elCh.textContent = ""; return; }
     elCh.textContent = chapter.title + " — " + chapter.blurb;
     ["conquest", "occupation", "migration"].forEach(function (k) { on[k].checked = chapter.layers.indexOf(k) > -1; });
+    if (chapter.layers.indexOf("mortality") > -1 && on.mort && on.mort.tagName !== "STUB") on.mort.checked = true;
     map.invalidateSize();
     /* THE WHOLE WORLD STAYS IN VIEW. David, with the full-world playback in front of him: «can we default our
        map to this zoom?». Each era used to zoom into its own region, which hid the rest of the ground changing
@@ -799,6 +946,9 @@
     if (opts.map) { rArc = L.svg({ padding: 0.5 }); rGround = L.svg({ pane: "ground", padding: 0.5 }); }
     if (!map.getPane("grid")) { map.createPane("grid"); map.getPane("grid").style.zIndex = 385; map.getPane("grid").style.pointerEvents = "none"; }
     rGrid = L.svg({ pane: "grid", padding: 0.5 });
+    if (!map.getPane("mort")) { map.createPane("mort"); map.getPane("mort").style.zIndex = 392; }
+    rMort = L.svg({ pane: "mort", padding: 0.5 });
+    mortLayer = L.layerGroup().addTo(map);
     gridLayer = L.layerGroup().addTo(map);
     groundLayer = L.layerGroup().addTo(map);
     arcLayer = L.layerGroup().addTo(map); flagLayer = L.layerGroup().addTo(map); leaderLayer = L.layerGroup().addTo(map); bubbleLayer = L.layerGroup().addTo(map);
@@ -821,8 +971,9 @@
         map.off("zoomend moveend", moved);
         clearBubbles(); hideEra();
         if (rGrid) map.removeLayer(rGrid);
+        if (rMort) map.removeLayer(rMort);
         closeDetail();
-        [gridLayer, groundLayer, arcLayer, flagLayer, leaderLayer, bubbleLayer].forEach(function (g) { map.removeLayer(g); });
+        [mortLayer, gridLayer, groundLayer, arcLayer, flagLayer, leaderLayer, bubbleLayer].forEach(function (g) { map.removeLayer(g); });
         elG.textContent = "";
         if (rArc) { map.removeLayer(rArc); map.removeLayer(rGround); }
         if (ownMap) map.remove();

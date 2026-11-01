@@ -70,6 +70,7 @@ def classify():
                 continue
             out["drawn: arrow between two countries" if h["how"] == "country" else
                 "drawn: arrow to a country read from the sentence" if h["how"] == "text" else
+                "drawn: arrow to a named place read from the sentence" if h["how"] == "place" else
                 "drawn: arrow from a seat or a people's country" if h["how"] in ("seat", "origin") else
                 "drawn: stub (no second end: " + ("lands on named places)" if h.get("pl") else "country label point only)")].append(who)
     return out

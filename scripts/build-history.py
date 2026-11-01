@@ -188,9 +188,10 @@ def build():
     chapters = j("data/history-chapters.json")["chapters"]
     at = em["at"]
     pats = [(re.compile(a["re"], re.I), a) for a in actors]
+    ends = [(re.compile(e["re"], re.I), e) for e in (j("data/history-ends.json")["ends"] if os.path.exists(os.path.join(ROOT, "data", "history-ends.json")) else [])]
     vp = os.path.join(ROOT, "data", "voyages.json")
     voyages = json.load(open(vp, encoding="utf-8"))["voyages"] if os.path.exists(vp) else []
-    out, how_n = [], {"country": 0, "seat": 0, "origin": 0, "stub": 0}
+    out, how_n = [], {"country": 0, "seat": 0, "origin": 0, "stub": 0, "text": 0, "place": 0}
     dens = {}
     for m in em["moves"]:
         subj = m.get("sa") or at.get(m["s"])      # `sa`: an empire or kingdom page borrows the seat it ruled from
@@ -232,6 +233,20 @@ def build():
                     how = "origin"
                     a, b = at[ac["cc"]], subj
                     break
+        if how == "stub":
+            # THE SENTENCE NAMES THE OTHER END and the extractor did not read it: data/history-ends.json, matched on the page
+            # and on the movement's own text, never on anything the sentence does not say.
+            for rx, en in ends:
+                if en["s"] != m["s"] or not rx.search(m["ot"]):
+                    continue
+                if "cc" in en and at.get(en["cc"]):
+                    other, how, seat = at[en["cc"]], "text", en["cc"]
+                elif "place" in en:
+                    other, how, seat = [en["lat"], en["lon"]], "place", en["place"]
+                else:
+                    continue
+                a, b = (other, subj) if m["d"] == "in" else (subj, other)
+                break
         if how == "stub":
             a = b = subj
             # A STUB WHOSE SENTENCE NAMES THE OTHER COUNTRY IS NOT A STUB: «Australia pays Nauru to host…», «emigrate

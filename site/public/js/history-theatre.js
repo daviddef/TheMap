@@ -612,6 +612,7 @@
       seat: "The other party is drawn from the seat it ruled from or the home of the people: " + (m.seat || "") + ". It means “from there”, not a route.",
       origin: "The people are named by nationality, so the arrow starts at that country's label point. It is not a route.",
       text: "The other country is read from the page's sentence (the one that comes after to, from or into); the arrow joins the two countries' label points. It says where the sentence points, not a route.",
+      place: "The other end is a place the page's sentence names: " + (m.seat || "") + ". The arrow joins that place to the country; it means “from there” or “to there”, not a route.",
       stub: "The page names no second place, so this is a stub at the country." }[m.how];
     var span = m.f + (m.t !== m.f ? "–" + (m.present ? "present" : m.t) : "");
     if (!(opts.cardless && !compact)) elCard.innerHTML = "<h2 style='border-left:4px solid " + COL[m.v] + ";padding-left:8px'>" + esc(m.major || KIND[m.v]) + " · " + esc(span) + "</h2>" +
@@ -661,7 +662,7 @@
     var where = cname(m.s), other = "";
     if (m.how === "country" && m.o) other = cname(m.o);
     else if ((m.how === "origin" || m.how === "text") && m.seat) other = cname(m.seat);
-    else if (m.how === "seat" && m.seat) other = m.seat;
+    else if ((m.how === "seat" || m.how === "place") && m.seat) other = m.seat;
     var dir = m.d === "in" ? (other ? "from " + esc(other) + " into " + esc(where) : "into " + esc(where))
                            : (other ? "out of " + esc(where) + " to " + esc(other) : "out of " + esc(where));
     var era = ERAS && ERAS.filter(function (e) { return e.slug === m.p && e.id === m.e; })[0];
@@ -673,6 +674,7 @@
       seat: "The other party is drawn from the seat it ruled from: " + (m.seat || "") + ". It means \u201cfrom there\u201d, not a route.",
       origin: "The people are named by nationality, so the arrow starts at that country's label point. It is not a route.",
       text: "The other country is read from the page's sentence (the one that comes after to, from or into); the arrow joins the two countries' label points. It says where the sentence points, not a route.",
+      place: "The other end is a place the page's sentence names: " + (m.seat || "") + ". The arrow joins that place to the country; it means “from there” or “to there”, not a route.",
       stub: "The page names no second place, so this is a stub at the country." }[m.how];
     return "<div class='hm-d'><div class='hm-b-k' style='color:" + col + "'>" + esc(m.vb || KIND[m.v]) + " \u00b7 " + esc(span) + "</div>" +
       "<b>" + esc(m.major || m.ot) + "</b>" +

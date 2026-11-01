@@ -200,8 +200,18 @@ const CH = hist.chapters;
   .hm-hud:has(.hm-list.fold) { bottom:auto; }
   .hm-list.fold { flex:0 0 auto; }
   .hm-list li button.hm-major { font-weight:600; }
-  @media (max-width:760px) { .hm-hud { bottom:auto; width:min(300px, calc(100% - 70px)); max-height:78%; }
-    .hm-hud .hm-list ol { max-height:150px; } .hm-stage > .hm-gnote { font-size:.7rem; } }
+  /* ON A PHONE the card was 170px of a 380px map: a big year, a search box and the list header stacked. The year
+     and the era line share a row, the search is a slim one-line field, and the note along the foot keeps to two lines. */
+  @media (max-width:760px) { .hm-hud { bottom:auto; left:8px; top:8px; width:min(300px, calc(100% - 70px)); max-height:78%;
+      display:grid; grid-template-columns:auto 1fr; align-items:center; gap:2px 10px; padding:6px 10px 6px; }
+    .hm-hud > * { grid-column:1 / -1; min-width:0; }
+    .hm-hud > .hm-year { grid-column:1; font-size:1.7rem; }
+    .hm-hud > .hm-ch { grid-column:2; margin:0; font-size:.72rem; line-height:1.3; max-width:none;
+      display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .hm-hud .hm-focusrow input { padding:4px 8px; font-size:.8rem; }
+    .hm-hud .hm-list { margin-top:4px; } .hm-hud .hm-list h2 { margin:4px 0 2px; font-size:.85rem; }
+    .hm-hud .hm-list ol { max-height:150px; }
+    .hm-stage > .hm-gnote { font-size:.68rem; padding:3px 8px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; } }
   .hm-card, .hm-list { background:var(--panel, #fff); border:1px solid var(--rule-strong, #bbb);
                        border-radius:12px; padding:14px 16px; min-width:0; }
   .hm-card h2, .hm-list h2 { margin:0 0 6px; font-size:1.05rem; }

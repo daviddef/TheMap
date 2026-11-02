@@ -4,6 +4,7 @@ import { buildPacket } from './contribute.js';
 import { makeSample } from './sample.js';
 import { searchLinks, sends } from './lookup.js';
 import { checklistText, checklistCsv } from './checklist.js';
+import { parseLink, profileUrl, treeUrl, toHash, fromHash } from './myheritage.js';
 
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
@@ -27,6 +28,7 @@ function start(bytes) {
     else if (m.type === 'done') done(m);
     else if (m.type === 'exported') exported(m);
     else if (m.type === 'offer') offer(m);
+    else if (m.type === 'who') mhWho(m);
     else if (m.type === 'checklist') fixlist(m);
     else if (m.type === 'suggested') suggested(m);
     else if (m.type === 'found') found(m);
@@ -37,6 +39,8 @@ function start(bytes) {
   worker.postMessage({ cmd: 'load', bytes, base }, [bytes]);
 }
 
+const hideLiv = () => $('#hideliving').checked;
+$('#hideliving').onchange = () => { $('#fliving').checked = !hideLiv(); worker && worker.postMessage({ cmd: 'living', hide: hideLiv() }); };
 function done(m) {
   last = m; window.RR = { tree: m.tree, atlas: m.atlas };
   const keepTab = $('.tabs [aria-selected=true]')?.dataset.tab || 'tree';
@@ -53,10 +57,11 @@ function chips(m) {
   add((m.timings.parse + m.timings.model + m.timings.atlasLoad + m.timings.resolve + m.timings.tree + m.timings.atlas) / 1000 + ' s', 'to read, place and draw');
 }
 
+const STAMP = Date.now();                                                    // a fresh copy of the viewer each time the page is opened, never an old cached one
 function mountViewer() {
   const old = $('#viewer'), f = document.createElement('iframe');
   let h = ''; try { h = old.contentWindow.location.hash || ''; } catch (e) { /* not loaded yet */ }      // the viewer keeps who is in focus and which view is open in its address
-  f.id = 'viewer'; f.title = old.title; f.src = 'viewer.html' + h; old.replaceWith(f);
+  f.id = 'viewer'; f.title = old.title; f.src = 'viewer.html?v=' + STAMP + h; old.replaceWith(f);
 }
 
 /* ---------- import report ---------- */
@@ -96,7 +101,7 @@ function report(m) {
   d = el('dl', 'kv'); const q = r.people;
   kv(d, 'In the file', n0(q.individuals));
   kv(d, 'Drawn', n0(q.drawn));
-  kv(d, 'Possibly living', n0(q.living) + ' (no death recorded and born within 110 years, or no birth year). ' + (q.livingRedacted ? n0(q.livingRedacted) + ' are drawn without a given name; their birth year is rounded to the decade.' : ''));
+  kv(d, 'Possibly living', n0(q.living) + ' (no death recorded and born within 110 years, or no birth year). ' + (q.livingRedacted ? n0(q.livingRedacted) + ' are drawn without a name; their birth year is rounded to the decade.' : q.livingShown ? n0(q.livingShown) + ' are shown as the file gives them: this stays on your device.' : ''));
   kv(d, 'Not drawn: no year', n0(q.undatedNotDrawn) + ' people with no birth year and no relative to estimate from');
   kv(d, 'Not drawn: no place', n0(q.noPlaceNotDrawn) + ' people whose birth place did not resolve and who have no relative with a resolved place');
   kv(d, 'Borrowed a place', n0(q.placeBorrowedFromRelative) + ' people whose own birth place did not resolve are drawn at a parent’s, child’s or spouse’s; they are marked');
@@ -254,13 +259,14 @@ function found(m) {
   for (const r of m.rows) { const row = el('div', 'wrow'), t = el('div', null, r.name); t.append(el('small', null, r.id + (r.living ? ' · living' : '') + (r.by ? ' · born ' + (r.est ? 'about ' : '') + r.by : ' · no year') + (r.bp ? ' · ' + r.bp : ''))); const b = el('button', 'link', 'Edit'); b.onclick = () => { who = r.id; worker.postMessage({ cmd: 'person', id: r.id }); }; row.append(t, b); box.append(row); }
 }
 function person(i) {
-  if (!i) return;
+  if (!i) return; lastInfo = i;
   $('#wedit').hidden = false; $('#wname').textContent = i.name + ' · ' + i.id;
-  $('#winfo').textContent = 'In your file: born ' + (i.birth || 'no date') + ', died ' + (i.death || 'no date') + (i.living ? '. Treated as living, so hidden everywhere and left out of a shareable file.' : '.');
+  $('#winfo').textContent = 'In your file: born ' + (i.birth || 'no date') + ', died ' + (i.death || 'no date') + (i.living ? '. Treated as living (no death recorded, born within 110 years)' + (hideLiv() ? ', so hidden while "Hide living people" is on, and left out of a shareable file.' : '. Left out of a shareable export.') : '.');
+  const wm = $('#wmh'); wm.textContent = ''; const ml = mhA(i.id, i.name); if (ml.length) wm.append('Open in MyHeritage:', ...ml);
   const l = i.look, ul = $('#wlinks'); ul.textContent = '';
   const ls = searchLinks(l); $('#wlook').hidden = !ls.length;
   $('#wsends').textContent = ls.length ? 'Nothing is sent until you click a link. A click opens that site in a new tab and gives it: ' + sends(l) + (l.bp || l.dp ? ', and the places in your file' : '') + '.'
-    + (l.living ? ' This person is treated as living: they stay hidden in the tree and in a shareable file, but clicking sends their name to that site.' : '') : '';
+    + (l.living ? ' This person is treated as living: clicking sends their name to that site.' : '') : '';
   for (const x of ls) { const li = el('li'), a = el('a', null, x.site); a.href = x.url; a.target = '_blank'; a.rel = 'noopener noreferrer'; li.append(a, el('small', null, ' · ' + x.note)); ul.append(li); }
   const f = $('#wdate'); f.birth.placeholder = i.birth || 'e.g. ABT 1850'; f.death.placeholder = i.death || 'e.g. 12 MAR 1910';
 }
@@ -323,7 +329,24 @@ const copy = async (text, btn) => {
   try { await navigator.clipboard.writeText(text); } catch { const t = document.createElement('textarea'); t.value = text; document.body.append(t); t.select(); try { document.execCommand('copy'); } catch { /* the text is on screen to select by hand */ } t.remove(); }
   btn.textContent = 'Copied'; setTimeout(() => { btn.textContent = was; }, 1200);
 };
-const whoList = l => l.slice(0, 8).map(p => p.name + ' (' + p.id + ', ' + p.ev + (p.date ? ' ' + p.date : '') + ')').join('; ');
+/* ---------- links back to MyHeritage ---------- */
+let mhc = fromHash(location.hash);
+const mhA = (id, name) => {
+  const p = profileUrl(mhc, id, name), t = treeUrl(mhc, id); if (!p) return [];
+  const out = []; for (const [u, lab] of [[p, 'MyHeritage'], [t, 'in tree']]) { const a = el('a', null, lab + ' ↗'); a.href = u; a.target = '_blank'; a.rel = 'noopener noreferrer'; out.push(' ', a); } return out;
+};
+const peopleEl = l => { const s = el('span'); l.slice(0, 8).forEach((p, k) => { if (k) s.append('; '); s.append(p.name + ' (' + p.id + ', ' + p.ev + (p.date ? ' ' + p.date : '') + ')', ...mhA(p.id, p.name)); }); return s; };
+let lastInfo = null;
+function mhStatus(extra) { $('#mhstat').textContent = mhc ? 'Linked: tree ' + mhc.tree + '.' + (extra || '') + ' Open one or two people to check they are the right ones.' : ''; }
+function mhWho(m) { mhStatus(m.name ? ' That link is person ' + m.id + ' in your file: ' + m.name + '. If that is not who you pasted, the numbering differs and these links are wrong.' : ' No person ' + m.id + ' in this file, so check the link.'); }
+$('#mhin').oninput = e => {
+  const c = parseLink(e.target.value);
+  if (!c) { mhc = null; $('#mhstat').textContent = e.target.value.trim() ? 'That does not look like a MyHeritage profile or tree link.' : ''; refreshMh(); return; }
+  mhc = c; history.replaceState(null, '', toHash(c)); mhStatus(); refreshMh(); if (worker && c.num) worker.postMessage({ cmd: 'who', id: 'I' + c.num });
+};
+function refreshMh() { drawFix(); if (lastInfo) person(lastInfo); }
+if (mhc) { $('#mhbox').open = true; mhStatus(' (from the address)'); }
+
 function fixRow(s, i) {
   const row = el('div', 'frow'), cb = el('input'); cb.type = 'checkbox'; cb.checked = ticked.has(i.key); cb.setAttribute('aria-label', 'Done');
   cb.onchange = () => { cb.checked ? ticked.add(i.key) : ticked.delete(i.key); fixCount(s); };
@@ -331,24 +354,28 @@ function fixRow(s, i) {
   const cp = (txt, label) => { const b = el('button', 'link', label); b.onclick = () => copy(txt, b); return b; };
   if (s.key === 'places' || s.key === 'check') {
     line.append(el('span', 'was', i.raw), ' → ', el('b', null, i.to), ' ', cp(i.to, 'Copy new text'), ' ', cp(i.raw, 'Copy current'));
-    small.textContent = i.count + ' event' + (i.count === 1 ? '' : 's') + ': ' + whoList(i.people) + (i.count > 8 ? '; and ' + (i.count - 8) + ' more (all in the spreadsheet)' : '') + (s.key === 'check' ? ' · suggestion only: ' + i.why : '');
+    small.append(i.count + ' event' + (i.count === 1 ? '' : 's') + ': ', peopleEl(i.people), (i.count > 8 ? '; and ' + (i.count - 8) + ' more (all in the spreadsheet)' : '') + (s.key === 'check' ? ' · suggestion only: ' + i.why : ''));
   } else if (s.key === 'decide') {
     line.append(el('span', 'was', i.raw));
     for (const c of i.cands) { line.append(' '); line.append(cp(c, 'Copy: ' + c)); }
-    small.textContent = (i.cands.length ? '' : 'no candidate found · ') + i.count + ' event' + (i.count === 1 ? '' : 's') + ': ' + whoList(i.people);
+    small.append((i.cands.length ? '' : 'no candidate found · ') + i.count + ' event' + (i.count === 1 ? '' : 's') + ': ', peopleEl(i.people));
   } else if (s.key === 'years') {
-    line.append(el('b', null, i.name), ' (' + i.id + ') ', cp(i.name, 'Copy name')); small.textContent = i.note + (i.place ? ' · born at ' + i.place : '');
+    line.append(el('b', null, i.name), ' (' + i.id + ') ', cp(i.name, 'Copy name'), ...mhA(i.id, i.name)); small.textContent = i.note + (i.place ? ' · born at ' + i.place : '');
+  } else if (s.key === 'names') {
+    line.append(el('b', null, i.name || '(no name)'), ' (' + i.id + ')', ...mhA(i.id, i.name)); small.textContent = i.note + (i.kin ? ' · ' + i.kin : '') + (i.born ? ' · born ' + i.born : '') + (i.place ? ' at ' + i.place : '');
   } else if (s.key === 'dates') {
-    line.append(el('b', null, i.name), ' (' + i.id + ') ', cp(i.name, 'Copy name')); small.textContent = i.note + (i.with ? ' · with ' + i.with : '');
+    line.append(el('b', null, i.name), ' (' + i.id + ') ', cp(i.name, 'Copy name'), ...mhA(i.id, i.name)); small.textContent = i.note + (i.with ? ' · with ' + i.with : '');
   } else if (s.key === 'dupes') {
-    line.append(el('b', null, i.an), ' (' + i.a + ') and ', el('b', null, i.bn), ' (' + i.b + ') ', cp(i.an, 'Copy name')); small.textContent = i.note + (i.ap || i.bp ? ' · ' + (i.ap || '—') + ' / ' + (i.bp || '—') : '');
+    line.append(el('b', null, i.an), ' (' + i.a + ')', ...mhA(i.a, i.an), ' and ', el('b', null, i.bn), ' (' + i.b + ')', ...mhA(i.b, i.bn), ' ', cp(i.an, 'Copy name')); small.textContent = i.note + (i.ap || i.bp ? ' · ' + (i.ap || '—') + ' / ' + (i.bp || '—') : '');
   } else {
-    line.append(el('b', null, i.size + (i.size === 1 ? ' person' : ' people'))); small.textContent = i.people.map(p => p.name + ' (' + p.id + (p.by ? ', b. ' + p.by : '') + ')').join('; ') + (i.size > i.people.length ? '; and ' + (i.size - i.people.length) + ' more' : '');
+    line.append(el('b', null, i.size + (i.size === 1 ? ' person' : ' people')));
+    i.people.forEach((p, k) => { if (k) small.append('; '); small.append(p.name + ' (' + p.id + (p.by ? ', b. ' + p.by : '') + ')', ...mhA(p.id, p.name)); });
+    if (i.size > i.people.length) small.append('; and ' + (i.size - i.people.length) + ' more');
   }
   body.append(line, small); row.append(cb, body); return row;
 }
 function fixCount(s) { const n = $('#fc-' + s.key); if (n) n.textContent = s.items.filter(i => ticked.has(i.key)).length + ' of ' + s.items.length + ' done'; }
-const hay = (s, i) => (s.key === 'dupes' ? i.an + ' ' + i.bn : s.key === 'apart' ? i.people.map(p => p.name).join(' ') : (i.raw || '') + ' ' + (i.name || '') + ' ' + (i.people ? i.people.map(p => p.name).join(' ') : '')).toLowerCase();
+const hay = (s, i) => (s.key === 'names' ? i.name + ' ' + i.kin : s.key === 'dupes' ? i.an + ' ' + i.bn : s.key === 'apart' ? i.people.map(p => p.name).join(' ') : (i.raw || '') + ' ' + (i.name || '') + ' ' + (i.people ? i.people.map(p => p.name).join(' ') : '')).toLowerCase();
 function drawFix() {
   if (!fix) return; const q = $('#ffilter').value.trim().toLowerCase(), box = $('#fsecs'); box.textContent = '';
   for (const s of fix.sections) {

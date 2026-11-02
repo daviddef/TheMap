@@ -78,6 +78,16 @@ export function buildChecklist(env) {
   }
   years.sort((a, b) => az(a.name, b.name) || az(a.id, b.id));
 
+  /* ---- people the file gives no full name ---- */
+  const kinWith = p => [['father', p.father], ['mother', p.mother], ['spouse', p.spouse[0]], ['child', p.kids[0]]].filter(([, id]) => id && P.get(id) && (P.get(id).given || P.get(id).sur)).slice(0, 2).map(([r, id]) => r + ' ' + shown(P.get(id))).join(', ');
+  const names = [];
+  for (const p of P.values()) {
+    if (!keep(p) || (p.given && p.sur)) continue;
+    const kind = !p.given && !p.sur ? 'none' : !p.sur ? 'given' : 'surname';
+    names.push({ key: 'n|' + p.id, id: p.id, name: kind === 'none' ? '' : shown(p), kind, note: kind === 'none' ? 'No name recorded' : kind === 'given' ? 'Given name only' : 'Surname only', kin: kinWith(p), born: p.by, place: p.bpRaw || '' });
+  }
+  names.sort((a, b) => az(a.name || '\uffff' + a.kin, b.name || '\uffff' + b.kin) || az(a.id, b.id));
+
   /* ---- dates that do not add up (recorded years only: an estimate never raises a flag) ---- */
   const dates = [], real = (p, which) => (which === 'b' ? p.by !== null && !est.has(p.id) : p.dy !== null && p.dy !== undefined && !dest.has(p.id));
   const tol = (p, which) => ((which === 'b' ? p.byApprox : false) ? 2 : 0);
@@ -127,6 +137,7 @@ export function buildChecklist(env) {
       { key: 'check', title: 'Check these places', how: 'Suggestions, not fixes: a probable match, or a different name that may be the one in use at the time. Check each against its date and source before you paste it.', items: check },
       { key: 'decide', title: 'Places to decide', how: 'We could not pin these down. The candidates are what the gazetteer found; pick the one your sources support, or leave it.', items: decide },
       { key: 'years', title: 'People without a birth year', how: 'A year puts the person on the map. Estimated years come from relatives and are not evidence.', items: years },
+      { key: 'names', title: 'People without a full name', how: 'The file gives no name, or only a given name or a surname. The family around them is shown so you can tell who they are.', items: names },
       { key: 'dates', title: 'Dates that do not add up', how: 'Recorded years only. Each one is a place to look for a typo or a wrong person.', items: dates },
       { key: 'dupes', title: 'Maybe the same person', how: 'Same name, same sex, births within two years, not related to each other. Check before merging; MyHeritage and others keep a merge tool.', items: dupes },
       { key: 'apart', title: 'Groups not joined to the main tree', how: 'Each group has no link to the largest tree. Finding one parent or spouse joins it.', items: apart },
@@ -148,6 +159,7 @@ export function checklistText(c, date = '') {
       if (s.key === 'places' || s.key === 'check') L.push('[ ] "' + i.raw + '"  ->  "' + i.to + '"' + (s.key === 'check' ? ' (suggestion: ' + i.why + ')' : '') + '  · ' + i.count + ' event' + (i.count === 1 ? '' : 's') + ': ' + ppl(i.people) + (i.count > SAMPLE ? '; and ' + (i.count - SAMPLE) + ' more (all of them are in the spreadsheet)' : ''));
       else if (s.key === 'decide') L.push('[ ] "' + i.raw + '"  ·  ' + (i.cands.length ? 'could be: ' + i.cands.join(' | ') : 'no candidate found') + '  · ' + i.count + ' event' + (i.count === 1 ? '' : 's') + ': ' + ppl(i.people) + (i.count > SAMPLE ? '; and ' + (i.count - SAMPLE) + ' more' : ''));
       else if (s.key === 'years') L.push('[ ] ' + i.name + ' (' + i.id + ')  ·  ' + i.note + (i.place ? '  ·  born at ' + i.place : ''));
+      else if (s.key === 'names') L.push('[ ] ' + (i.name || '(no name)') + ' (' + i.id + ')  ·  ' + i.note + (i.kin ? '  ·  ' + i.kin : '') + (i.born ? '  ·  born ' + i.born : '') + (i.place ? ' at ' + i.place : ''));
       else if (s.key === 'dates') L.push('[ ] ' + i.name + ' (' + i.id + ')  ·  ' + i.note + (i.with ? '  ·  with ' + i.with : ''));
       else if (s.key === 'dupes') L.push('[ ] ' + i.an + ' (' + i.a + ') and ' + i.bn + ' (' + i.b + ')  ·  ' + i.note);
       else if (s.key === 'apart') L.push('[ ] ' + i.size + (i.size === 1 ? ' person: ' : ' people: ') + i.people.map(p => p.name + ' (' + p.id + (p.by ? ', b. ' + p.by : '') + ')').join('; ') + (i.size > i.people.length ? '; and ' + (i.size - i.people.length) + ' more' : ''));
@@ -165,6 +177,7 @@ export function checklistCsv(c) {
     if (s.key === 'places' || s.key === 'check') for (const p of i.people) row(s.title, p.name, p.id, p.ev, p.date, i.raw, i.to + (s.key === 'check' ? ' (suggestion: ' + i.why + ')' : ''));
     else if (s.key === 'decide') for (const p of i.people) row(s.title, p.name, p.id, p.ev, p.date, i.raw, i.cands.join(' | '));
     else if (s.key === 'years') row(s.title, i.name, i.id, '', '', '', i.note);
+    else if (s.key === 'names') row(s.title, i.name || '(no name)', i.id, '', '', '', i.note + (i.kin ? ' · ' + i.kin : '') + (i.born ? ' · born ' + i.born : ''));
     else if (s.key === 'dates') row(s.title, i.name, i.id, '', '', '', i.note + (i.with ? ' (with ' + i.with + ')' : ''));
     else if (s.key === 'dupes') row(s.title, i.an + ' / ' + i.bn, i.a + ' / ' + i.b, '', '', '', i.note);
     else if (s.key === 'apart') for (const p of i.people) row(s.title, p.name, p.id, '', '', '', 'group of ' + i.size);

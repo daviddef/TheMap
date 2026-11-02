@@ -13,7 +13,7 @@ import { AtlasCore, targetOf, nameTargets, buildAtlas } from './atlas.js';
 const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
 
 export class Session {
-  constructor(io, progress) { this.io = io; this.progress = progress || (() => {}); this.gz = new Gazetteer(); this.overrides = new Map(); this.t = {}; this.overlay = new Overlay(); }
+  constructor(io, progress) { this.io = io; this.progress = progress || (() => {}); this.gz = new Gazetteer(); this.overrides = new Map(); this.t = {}; this.overlay = new Overlay(); this.liveMode = 'show'; }
 
   async load(bytes) {
     const T = this.t, tick = (k, t0) => { T[k] = Math.round(now() - t0); };
@@ -33,7 +33,7 @@ export class Session {
   }
 
   /* (Re)draw from the current resolutions plus the user's picks. Cheap enough to run after every pick. */
-  async draw(living = 'redact') {
+  async draw(living = this.liveMode) {
     const T = this.t; let t0 = now(); this.progress('Building the tree');
     const targets = new Map(), of = new Map();
     for (const raw of this.mentions.keys()) {
@@ -62,7 +62,7 @@ export class Session {
   contributions() { return offerable(this); }
 
   /* ---- the workbench ---- */
-  shown(p) { return p.liv ? 'Living person' : ((p.given + ' ' + p.sur).trim() || p.id); }
+  shown(p) { return p.liv && this.liveMode !== 'show' ? 'Living person' : ((p.given + ' ' + p.sur).trim() || p.id); }
   /* Put every person back as the file states them, apply the user's date edits, re-estimate. Cheap enough to run after each edit. */
   refresh() {
     for (const [id, p] of this.P) { const s = this.snap.get(id); p.by = s.by; p.byApprox = s.byApprox; p.dy = s.dy; p.deathKnown = s.deathKnown; p.srcs = s.srcs.slice(); }
@@ -75,7 +75,7 @@ export class Session {
   }
   workbench() {
     const undrawn = [];
-    for (const p of this.P.values()) if (p.by === null) undrawn.push({ id: p.id, name: this.shown(p), place: p.liv ? null : p.bpRaw });
+    for (const p of this.P.values()) if (p.by === null) undrawn.push({ id: p.id, name: this.shown(p), place: p.liv && this.liveMode !== 'show' ? null : p.bpRaw });
     undrawn.sort((a, b) => a.name.localeCompare(b.name, 'en') || a.id.localeCompare(b.id));
     const merges = suggestMerges(this.P, this.est, this.overlay).slice(0, 300).map(m => ({ ...m, an: this.shown(this.P.get(m.a)), bn: this.shown(this.P.get(m.b)), ay: this.P.get(m.a).by, by: this.P.get(m.b).by, ap: this.P.get(m.a).bpRaw, bp: this.P.get(m.b).bpRaw }));
     return { undrawn: undrawn.slice(0, 500), undrawnTotal: undrawn.length, merges, edits: this.overlay.edits.map(e => ({ ...e, name: this.shown(this.P.get(e.who) || { id: e.who }) })) };

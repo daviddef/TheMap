@@ -1,0 +1,40 @@
+/* Links into the MyHeritage tree the file came from. A GEDCOM that MyHeritage exported numbers people I1, I2 … and MyHeritage addresses the same
+   person as  <tree number> x 1,000,000 + that number  (tree 4, I30 -> 4000030), under a site code that is the same for every person. Neither the
+   site code nor the tree number is in the file, so the visitor pastes ONE profile or tree link, from which both are read. Plain links: the page
+   sends nothing. No DOM, no network. */
+
+const SITE = /[A-Z0-9]{16,64}/;
+const slug = s => (s || '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'person';
+
+/* A pasted profile link (…/profile-<site>-<id>/name) or tree link (…/family-trees/<slug>/<site>?rootIndividualID=<id>&familyTreeID=<n>).
+   Returns { site, tree, num, treeSlug } or null. `num` is the person's number inside the tree: the file's I<num>. */
+export function parseLink(text) {
+  const t = String(text || '');
+  let m = new RegExp('myheritage\\.[a-z.]+/profile-(' + SITE.source + ')-(\\d+)', 'i').exec(t);
+  if (m) { const id = +m[2]; return { site: m[1].toUpperCase(), tree: Math.floor(id / 1e6), num: id % 1e6, treeSlug: null }; }
+  m = new RegExp('myheritage\\.[a-z.]+/family-trees/([^/?#\\s]+)/(' + SITE.source + ')\\?[^\\s]*?rootIndividualID=(\\d+)[^\\s]*?familyTreeID=(\\d+)', 'i').exec(t)
+    || new RegExp('myheritage\\.[a-z.]+/family-trees/([^/?#\\s]+)/(' + SITE.source + ')\\?[^\\s]*?familyTreeID=(\\d+)[^\\s]*?rootIndividualID=(\\d+)', 'i').exec(t);
+  if (m) {
+    const swapped = /familyTreeID=\d+[^\s]*?rootIndividualID/i.test(m[0]), root = +(swapped ? m[4] : m[3]), tree = +(swapped ? m[3] : m[4]);
+    return { site: m[2].toUpperCase(), tree, num: root % 1e6, treeSlug: slug(decodeURIComponent(m[1])) };
+  }
+  return null;
+}
+
+/* The number of a file id like I30, or null for an id that does not follow MyHeritage's numbering. */
+export const numOf = id => { const m = /^I(\d{1,6})$/.exec(String(id || '')); return m ? +m[1] : null; };
+
+export function profileUrl(cfg, id, name) {
+  const n = numOf(id); if (!cfg || n === null) return null;
+  return 'https://www.myheritage.com/profile-' + cfg.site + '-' + (cfg.tree * 1e6 + n) + '/' + slug(name);   // any name will do; the part must be there
+}
+export function treeUrl(cfg, id) {
+  const n = numOf(id); if (!cfg || n === null) return null;
+  return 'https://www.myheritage.com/family-trees/' + (cfg.treeSlug || 'tree') + '/' + cfg.site + '?rootIndividualID=' + (cfg.tree * 1e6 + n) + '&familyTreeID=' + cfg.tree;
+}
+
+/* The setting kept in the page's address (#mh=<site>.<tree>.<slug>) so a bookmark remembers it: the site code and tree number only, nothing from the file. */
+export const toHash = cfg => '#mh=' + cfg.site + '.' + cfg.tree + '.' + (cfg.treeSlug || '');
+export function fromHash(h) {
+  const m = /^#mh=([A-Z0-9]{16,64})\.(\d{1,4})\.([a-z0-9-]*)$/.exec(String(h || '')); return m ? { site: m[1], tree: +m[2], num: null, treeSlug: m[3] || null } : null;
+}

@@ -23,6 +23,11 @@ self.onmessage = async e => {
     } else if (m.cmd === 'edit' && session) {
       const err = session.edit(m.edit);
       if (err) self.postMessage({ type: 'edit-error', msg: err }); else self.postMessage({ type: 'done', first: false, ...(await session.draw()) });
+    } else if (m.cmd === 'who' && session) {
+      const info = session.personInfo(m.id); self.postMessage({ type: 'who', id: m.id, name: info ? info.name : null });
+    } else if (m.cmd === 'living' && session) {
+      session.liveMode = m.hide ? 'redact' : 'show';
+      self.postMessage({ type: 'done', first: false, ...(await session.draw()) });
     } else if (m.cmd === 'checklist' && session) {
       self.postMessage({ type: 'checklist', ...session.checklist({ living: m.living }) });
     } else if (m.cmd === 'offer' && session) {

@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- The privacy promise, enforced by the browser rather than only stated: scripts, styles and data come from this site only; nothing may be
+     sent anywhere else; no forms, no third-party anything. This page has no analytics and does not use the site layout (which carries a counter). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; frame-src 'self'; form-action 'none'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<title>Roots &amp; Routes from your GEDCOM</title>
+<link rel="icon" href="../favicon.svg">
+<link rel="stylesheet" href="roots.css">
+</head>
+<body>
+<header class="top">
+  <a class="back" href="../">← Record Atlas</a>
+  <h1>Roots &amp; Routes</h1>
+  <p class="lede">Drop in your family tree file and see it drawn on the Atlas: every place tied to its country, its flag and who ruled it that year.</p>
+</header>
+
+<main>
+<section id="start">
+  <div class="promise" role="note">
+    <h2>Your file never leaves this computer</h2>
+    <ul>
+      <li>It is read and drawn by code running in this browser tab. It is not uploaded, not stored on a server and not seen by anyone.</li>
+      <li>This page has no analytics, no cookies and no third-party scripts, and the browser is told not to let it contact any other site.</li>
+      <li>To place your people it downloads the Atlas's own place files for the countries your tree mentions. Our server can see which countries were asked for; it never sees your file or a name from it.</li>
+      <li>People who may be alive (no death recorded, born within 110 years) are shown without their given names, and are never included in anything you could share.</li>
+    </ul>
+  </div>
+
+  <div id="drop" class="drop" tabindex="0" role="button" aria-label="Choose a GEDCOM file">
+    <p class="big">Drop a <b>.ged</b> file here</p>
+    <p>or <label class="pick">choose one<input id="file" type="file" accept=".ged,.gedcom,text/plain" hidden></label></p>
+    <p class="small">GEDCOM 5.5, 5.5.1 or 7, from MyHeritage, Ancestry, FamilySearch, Family Tree Maker and the rest. Big files are fine: 15,000 people takes about ten seconds.</p>
+  </div>
+  <p class="or"><button id="sample" class="link">or try an invented sample family</button></p>
+</section>
+
+<section id="busy" hidden>
+  <div class="spin" aria-hidden="true"></div>
+  <p id="busymsg" role="status" aria-live="polite">Starting…</p>
+</section>
+
+<section id="work" hidden>
+  <div class="bar">
+    <div id="chips" class="chips"></div>
+    <nav class="tabs" role="tablist">
+      <button role="tab" data-tab="tree" aria-selected="true">Tree</button>
+      <button role="tab" data-tab="report">Import report</button>
+      <button role="tab" data-tab="review">Places to review <span id="rcount" class="count"></span></button>
+      <button role="tab" data-tab="work">Workbench <span id="wcount" class="count"></span></button>
+      <button role="tab" data-tab="fix">Fix list</button>
+      <button role="tab" data-tab="offer">Offer places</button>
+      <button role="tab" data-tab="export">Export</button>
+    </nav>
+    <button id="again" class="link">Open another file</button>
+  </div>
+
+  <div id="p-tree" class="panel"><iframe id="viewer" title="Roots and Routes views of your tree"></iframe></div>
+  <div id="p-report" class="panel" hidden></div>
+  <div id="p-review" class="panel" hidden>
+    <div class="rbar">
+      <input id="rfilter" type="search" placeholder="Filter places" aria-label="Filter places">
+      <span id="rnote" class="small"></span>
+    </div>
+    <div id="rlist"></div>
+  </div>
+  <div id="p-work" class="panel" hidden>
+    <h2>Workbench</h2>
+    <p>Fix and add to your tree here. Nothing changes in your original: your edits are listed below, drawn on the tree straight away, and written into the new file only when you
+    <button class="link" data-goto="export">export</button>. They live in this page only, so export before you close it.</p>
+    <div class="wgrid">
+      <section>
+        <h3>Find a person</h3>
+        <input id="wfind" type="search" placeholder="Name, or a record number (I123)" aria-label="Find a person">
+        <div id="wres"></div>
+        <div id="wedit" hidden>
+          <h4 id="wname"></h4><p id="winfo" class="small"></p>
+          <div id="wlook"><h4>Look this person up elsewhere</h4><p id="wsends" class="small"></p><ul id="wlinks" class="llist"></ul></div>
+          <form id="wdate" class="wform"><label>Birth <input name="birth" placeholder="e.g. ABT 1850"></label><label>Death <input name="death" placeholder="e.g. 12 MAR 1910"></label><button class="btn">Save dates</button></form>
+          <form id="wnote" class="wform"><label>Add a note <textarea name="text" rows="3"></textarea></label><button class="btn">Add the note</button></form>
+          <form id="wsrc" class="wform"><label>Add a source <input name="title" placeholder="Title, e.g. Parish register of St Mary, 1850"></label><label>Link <input name="url" placeholder="https://… (optional)"></label><label>Page or entry <input name="page" placeholder="(optional)"></label><button class="btn">Add the source</button></form>
+          <p id="werr" class="err" role="alert" hidden></p>
+        </div>
+      </section>
+      <section>
+        <h3>Not drawn yet <span id="wundn" class="count"></span></h3>
+        <p class="small">People with no year, so no place on the tree. A year here puts them on it.</p>
+        <div id="wundrawn"></div>
+        <h3>Maybe the same person <span id="wmgn" class="count"></span></h3>
+        <p class="small">Same name, same sex, born within two years, not related as parent, child or spouse. Marking a pair merges nothing: it writes a link between the two records.</p>
+        <div id="wmerge"></div>
+        <h3>Your edits <span id="wedn" class="count"></span></h3>
+        <div id="wedits"></div>
+      </section>
+    </div>
+  </div>
+  <div id="p-fix" class="panel" hidden>
+    <h2>Fix list</h2>
+    <p>A list to work through in the tree you keep elsewhere (MyHeritage, Ancestry, a desktop program). Each line can be copied and pasted: open the person there, edit the event, paste.
+    Ticks live in this page only, so download the list if you want to keep your place. Nothing here is sent anywhere.</p>
+    <p class="small"><label><input type="checkbox" id="fliving" checked> Include living people (their names stay on this device and in the downloads you make)</label></p>
+    <p><button class="btn" id="ftext">Download as text</button><button class="btn" id="fcsv">Download as spreadsheet (CSV)</button></p>
+    <input id="ffilter" type="search" placeholder="Filter by name or place" aria-label="Filter the fix list">
+    <div id="fsecs"></div>
+  </div>
+  <div id="p-offer" class="panel" hidden>
+    <h2>Offer places back to Record Atlas</h2>
+    <p>Optional, and nothing is ticked. Places this page could not read, or that you chose by hand, can help the Atlas learn them. Only the <b>place text</b> goes into the
+    message: no names, no dates, no people, no counts, no file name. This page sends nothing. You tick the places you want to offer, read the message below, and send it from your
+    own email or copy it. Places used only by living people are never listed.</p>
+    <p id="oheld" class="small"></p>
+    <p><button class="link" id="onone">Tick none</button> · <button class="link" id="oall">Tick all without a number in them</button> · <span id="ocount" class="small"></span></p>
+    <div id="olist"></div>
+    <h3>The message</h3>
+    <textarea id="opreview" rows="10" readonly aria-label="The message that would be sent"></textarea>
+    <p><a id="omail" class="btn" aria-disabled="true">Open in my email</a> <button class="btn" id="ocopy">Copy the message</button> <a id="ofile" class="link" download="places-for-record-atlas.txt">Download it</a> <span id="osaid" class="small" role="status"></span></p>
+    <p class="small">An address with a number in it (a street, a plot) is left unticked because it can point at a home. Trim it to the town if you want to offer it: the text boxes are editable.</p>
+  </div>
+  <div id="p-export" class="panel" hidden>
+    <h2>Export your GEDCOM, improved</h2>
+    <p>Your own file, line for line, with only the changes you choose. Nothing is dropped or rewritten without being listed in a change log, and
+    nothing leaves this page: the new file is made here and saved by your browser.</p>
+    <fieldset id="xmode" class="xmodes">
+      <legend>What to change</legend>
+      <label><input type="radio" name="xm" value="enriched" checked> <b>Enriched</b> · adds coordinates and an Atlas id under each place that was matched exactly or that you picked. No existing line is changed. The safest choice.</label>
+      <label><input type="radio" name="xm" value="cleaned"> <b>Cleaned</b> · as enriched, and the places you picked on the review screen replace the old place text (the old text is kept beside it).</label>
+      <label><input type="radio" name="xm" value="shareable"> <b>Shareable</b> · as cleaned, and living people are reduced to a bare “Living” record, their family events removed, so you can send it to a relative. Read the change log: a living person named in a way we cannot recognise stays.</label>
+      <label><input type="radio" name="xm" value="faithful"> <b>No changes</b> · your file again, as it was.</label>
+    </fieldset>
+    <p><button id="xgo" class="btn">Make the file</button> <span id="xbusy" hidden>Working…</span></p>
+    <div id="xout" hidden>
+      <p id="xsum"></p>
+      <p><a id="xfile" class="btn" download>Download the GEDCOM</a> <a id="xlog" class="link" download>Download the change log</a></p>
+    </div>
+    <p class="small">Programs differ. Putting the new file into Ancestry, MyHeritage or Family Tree Maker usually makes a new tree rather than updating the old one, and
+    they may ignore the coordinates. This has been checked only by reading the new file back here, not yet in another program.</p>
+  </div>
+</section>
+
+<p id="err" class="err" role="alert" hidden></p>
+</main>
+
+<footer>
+  <p>Place names and coordinates: <a href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC BY 4.0). Regimes, flags, events and record collections: the Record Atlas.
+  This is a prototype: it can be wrong, and a place it cannot read is shown for you to decide, never guessed.</p>
+</footer>
+<script src="js/app.js" type="module"></script>
+</body>
+</html>

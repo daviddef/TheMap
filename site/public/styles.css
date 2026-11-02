@@ -971,10 +971,14 @@ header.site nav.topnav{display:flex;align-items:center;gap:1px;flex-wrap:nowrap}
   padding:7px 11px;border-radius:8px;white-space:nowrap}
 .topnav .panel a:hover{background:var(--accent-wash);color:var(--accent)}
 .topnav .panel a.on{color:var(--ink);font-weight:600;background:var(--panel-2)}
-.findbtn{display:inline-block;font-family:var(--sans);font-size:12.5px;line-height:1;
-  text-decoration:none;margin-left:10px;color:#fff!important;background:var(--accent);
-  padding:8px 15px;border-radius:999px;white-space:nowrap}
-.findbtn:hover{background:var(--accent-2)}
+/* `header.site nav a` outranks a bare `.findbtn`, so the pill was being given that rule's
+   «padding:2px 0»: eighteen pixels tall with the text touching its ends, which is the
+   squashed button David photographed. The selector now matches the one it must beat. */
+header.site nav a.findbtn{display:inline-flex;align-items:center;font-family:var(--sans);
+  font-size:12.5px;font-weight:600;line-height:1;text-decoration:none;margin-left:6px;
+  color:#fff!important;background:var(--accent);padding:0 14px;height:30px;
+  border:0;border-radius:999px;white-space:nowrap}
+header.site nav a.findbtn:hover{background:var(--accent-2);color:#fff!important}
 /* THE MAP'S FOUR TOOLS, IN A ROW. This span had no rule of its own at all, so
    the buttons the map moves into it were inline-blocks taking whatever width
    was left and wrapping into a 2x2 block on a phone — which is what David

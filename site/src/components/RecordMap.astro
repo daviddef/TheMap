@@ -1995,8 +1995,11 @@ window.addEventListener("load", async function () {
      read this and it is free» and «Wikidata says there is an archive here» is
      the whole editorial value of the other 178. */
   var wikiLayer = L.layerGroup(), nsite = 0;
-  var wikiMarkers = [];
-  (async function () {
+  var wikiMarkers = [], wikiStarted = false;
+  /* LOADED WHEN SWITCHED ON, like the three ground layers below. */
+  async function buildWiki() {
+    if (wikiStarted) return;
+    wikiStarted = true;
     var wd;
     try { wd = await (await fetch(WDA)).json(); } catch (e) { return; }
     wd.archives.forEach(function (a) {
@@ -2068,7 +2071,8 @@ window.addEventListener("load", async function () {
       " mapped by others, " + nsite.toLocaleString() +
       " with a website · unchecked, and not all genealogical";
     if (on.wikidata) wikiLayer.addTo(map);
-  })();
+  }
+  wikiLayer.on("add", buildWiki);
 
   /* THE GROUND ITSELF — cemeteries, churches, libraries, inside the record
      regions only. Wikidata knows 295,702 cemeteries and 273,894 churches
@@ -2087,11 +2091,117 @@ window.addEventListener("load", async function () {
     ["churches",   "Churches and parishes", "#B07CD9", 2.6],
     ["libraries",  "Libraries", "#2E86C1", 3.0]
   ];
-  var featLayers = {};
+  var featLayers = {}, featBuild = {};
+  /* LOADED WHEN SWITCHED ON, NOT WHEN THE PAGE OPENS, AND NOT AS 178,000
+     OBJECTS. These three layers are about 178,000 records. The page used to
+     fetch all of them and build a Leaflet circle, a tooltip and a click closure
+     for every one on every visit, with all three layers off: 335 MB of
+     JavaScript heap and a browser asking «Page Unresponsive» before the map had
+     drawn. Fetching only on switch-on was the first half. The second is that
+     108,000 Leaflet circles still cost 600 MB, so a layer is now ONE canvas that
+     draws the points itself and answers hover and click by looking for the
+     nearest point to the pointer — no object per dot, and a layer that is off
+     costs nothing at all. */
+  var PointCloud = L.Layer.extend({
+    initialize: function (color, radius) {
+      this._color = color; this._r = radius; this._pts = []; this._vis = null;
+    },
+    setPoints: function (pts) { this._pts = pts; if (this._map) this._draw(); },
+    onAdd: function (m) {
+      this._map = m;
+      var c = this._c = L.DomUtil.create("canvas", "leaflet-zoom-hide ra-pointcloud");
+      c.style.pointerEvents = "none";
+      m.getPanes().overlayPane.appendChild(c);
+      this._tip = L.tooltip({ sticky: false, direction: "top", offset: [0, -4] });
+      m.on("moveend resize", this._draw, this);
+      m.on("mousemove", this._hover, this);
+      m.on("mouseout", this._unhover, this);
+      m.on("click", this._click, this);
+      this._draw();
+    },
+    onRemove: function (m) {
+      m.off("moveend resize", this._draw, this);
+      m.off("mousemove", this._hover, this);
+      m.off("mouseout", this._unhover, this);
+      m.off("click", this._click, this);
+      this._unhover();
+      L.DomUtil.remove(this._c);
+      this._c = this._vis = null; this._map = null;
+    },
+    _draw: function () {
+      var m = this._map, c = this._c;
+      if (!m || !c) return;
+      /* A canvas a third larger than the view on every side, as Leaflet's own
+         renderer does, so a drag does not reveal an undrawn edge before it ends. */
+      var sz = m.getSize(), ox = Math.round(sz.x * 0.3), oy = Math.round(sz.y * 0.3);
+      c.width = sz.x + ox * 2; c.height = sz.y + oy * 2;
+      L.DomUtil.setPosition(c, m.containerPointToLayerPoint([-ox, -oy]));
+      var ctx = c.getContext("2d"), pts = this._pts, n = pts.length;
+      var b = m.getBounds().pad(0.35), s = b.getSouth(), nn = b.getNorth();
+      var w = b.getWest(), e = b.getEast();
+      var vx = [], vy = [], vi = [];
+      ctx.globalAlpha = 0.55; ctx.fillStyle = this._color;
+      var r = this._r, d = r * 2;
+      for (var i = 0; i < n; i++) {
+        var f = pts[i];
+        if (f.y < s || f.y > nn || f.x < w || f.x > e) continue;
+        var q = m.latLngToContainerPoint([f.y, f.x]);
+        vx.push(q.x); vy.push(q.y); vi.push(i);
+        ctx.fillRect(q.x + ox - r, q.y + oy - r, d, d);
+      }
+      this._vis = { x: vx, y: vy, i: vi };
+    },
+    _near: function (e) {
+      var v = this._vis; if (!v) return -1;
+      var px = e.containerPoint.x, py = e.containerPoint.y, best = -1, bd = 81;   // 9 px
+      for (var k = 0, n = v.i.length; k < n; k++) {
+        var dx = v.x[k] - px, dy = v.y[k] - py, dd = dx * dx + dy * dy;
+        if (dd < bd) { bd = dd; best = k; }
+      }
+      return best < 0 ? -1 : v.i[best];
+    },
+    _hover: function (e) {
+      var i = this._near(e), m = this._map;
+      if (i < 0) { this._unhover(); return; }
+      if (this._hot !== i) {
+        this._hot = i;
+        this._tip.setContent(esc(this._pts[i].n)).setLatLng([this._pts[i].y, this._pts[i].x]);
+        if (!m.hasLayer(this._tip)) this._tip.addTo(m);
+      }
+      m.getContainer().style.cursor = "pointer";
+    },
+    _unhover: function () {
+      if (this._hot == null) return;
+      this._hot = null;
+      if (this._map) {
+        this._map.getContainer().style.cursor = "";
+        if (this._map.hasLayer(this._tip)) this._map.removeLayer(this._tip);
+      }
+    },
+    _click: function (e) {
+      var i = this._near(e);
+      if (i >= 0) this.fire("pick", { f: this._pts[i] });
+    }
+  });
   FEATS.forEach(function (F) {
-    var key = F[0], layer = L.layerGroup();
+    var key = F[0], layer = new PointCloud(F[2], F[3] * 0.6), started = false;
     featLayers[key] = layer;
-    (async function () {
+    layer.on("pick", function (e) {
+      var f = e.f;
+      empty.hidden = true; panel.hidden = false;
+      panel.innerHTML =
+        '<div class="at-h"><h3>' + esc(f.n) + "</h3></div>" +
+        '<p class="at-also">' + esc(F[1]) + "</p>" +
+        '<div class="ra-juris ra-unmapped"><div class="lab">From Wikidata, unchecked' +
+        "</div><p>Wikidata records this here, inside the <b>" + esc(f.r) +
+        "</b> record region. Nobody on this project has been. It is drawn because the " +
+        "ground a family stood on is part of where its records are.</p></div>" +
+        '<p class="at-sub"><a href="https://www.wikidata.org/wiki/' + esc(f.q) +
+        '" target="_blank" rel="noopener">' + esc(f.q) + " on Wikidata &#8599;</a></p>";
+    });
+    async function build() {
+      if (started) return;
+      started = true;
       /* Two sources per layer, and neither is checked: Wikidata's CC0 set and
          OpenStreetMap's ODbL one, which live in separate files because
          share-alike must not leak into the rest but are the same claim to a
@@ -2113,27 +2223,7 @@ window.addEventListener("load", async function () {
         } catch (e) {}
       }
       if (!d.srcs.length) d.srcs = ["Wikidata"];
-      d.features.forEach(function (f) {
-        var m = L.circleMarker([f.y, f.x], {
-          renderer: featCanvas,
-          radius: F[3], color: F[2], weight: 1, opacity: .7,
-          fillColor: F[2], fillOpacity: .35
-        });
-        m.bindTooltip(f.n, { sticky: true });
-        m.on("click", function () {
-          empty.hidden = true; panel.hidden = false;
-          panel.innerHTML =
-            '<div class="at-h"><h3>' + esc(f.n) + "</h3></div>" +
-            '<p class="at-also">' + esc(F[1]) + "</p>" +
-            '<div class="ra-juris ra-unmapped"><div class="lab">From Wikidata, unchecked' +
-            "</div><p>Wikidata records this here, inside the <b>" + esc(f.r) +
-            "</b> record region. Nobody on this project has been. It is drawn because the " +
-            "ground a family stood on is part of where its records are.</p></div>" +
-            '<p class="at-sub"><a href="https://www.wikidata.org/wiki/' + esc(f.q) +
-            '" target="_blank" rel="noopener">' + esc(f.q) + " on Wikidata &#8599;</a></p>";
-        });
-        m.addTo(layer);
-      });
+      layer.setPoints(d.features);
       /* NAME BOTH SOURCES. The cemetery layer merges 11,698 CC0 rows from
          Wikidata with 5,443 ODbL ones from OpenStreetMap, and a label saying
          only «from Wikidata» is both wrong and, for the ODbL half, an
@@ -2142,8 +2232,9 @@ window.addEventListener("load", async function () {
       if (lab) lab.title = (lab.querySelector("b") || {}).textContent + " — " +
         d.features.length.toLocaleString() + " in the record regions · " +
         d.srcs.join(" and ") + ", unchecked";
-      if (on[key]) layer.addTo(map);
-    })();
+    }
+    layer.on("add", build);
+    featBuild[key] = build;
   });
 
   /* Which record regions name this archive as the holder of their records, and
@@ -3488,10 +3579,10 @@ window.addEventListener("load", async function () {
     ["shelf", T("Shelf"), TOTAL_PLACES.toLocaleString() + " places · every volume that covers them", shelfLayer],
     ["archives", T("Archives"), archives.length + " institutions · where the paper actually is", archiveLayer],
     ["jurisdiction", T("Jurisdiction"), regions.regions.length + " record regions · whose archive this ground was", regionLayer],
-    ["wikidata", T("Others"), "loading · unchecked, and not all genealogical", wikiLayer],
-    ["cemeteries", T("Cemeteries"), "loading", featLayers.cemeteries],
-    ["churches", T("Churches"), "loading", featLayers.churches],
-    ["libraries", T("Libraries"), "loading", featLayers.libraries],
+    ["wikidata", T("Others"), "archives mapped by others · unchecked, and not all genealogical · fetched when you switch it on", wikiLayer],
+    ["cemeteries", T("Cemeteries"), "inside the record regions · unchecked · fetched when you switch it on", featLayers.cemeteries],
+    ["churches", T("Churches"), "inside the record regions · unchecked · fetched when you switch it on", featLayers.churches],
+    ["libraries", T("Libraries"), "inside the record regions · unchecked · fetched when you switch it on", featLayers.libraries],
     /* OFF BY DEFAULT AND DELIBERATELY LAST. These two are a history of the
        ground rather than a holding of records, and the map's first answer
        should stay «where is the paper». They also need the year control,
@@ -3508,6 +3599,11 @@ window.addEventListener("load", async function () {
                            : ["shelf", "countries"])
     .forEach(function (k) { on[k] = true; });
   if (!Object.keys(on).length) on.shelf = true;
+  /* The layers that arrive switched on (a shared link with ?layers=churches) start
+     fetching now; every other one waits for its first "add". `on` is only filled
+     in here, which is why this cannot sit beside the layers it starts. */
+  if (on.wikidata) buildWiki();
+  Object.keys(featBuild).forEach(function (k) { if (on[k]) featBuild[k](); });
 
   var lbox = document.getElementById("ra-layers");
   /* The summary carries the state, so a closed dropdown still answers «what

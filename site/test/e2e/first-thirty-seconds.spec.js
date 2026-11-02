@@ -55,8 +55,10 @@ test("second five: the panel asks for something the reader actually has", async 
   await expect(empty).toContainText("Start with what you have");
   /* A surname first, because that is what people arrive holding. */
   await expect(empty.locator(".ra-try").first()).toBeVisible();
-  /* And the one idea the colours carry, said in a sentence. */
-  await expect(empty).toContainText(/colour of a dot is what it costs/i);
+  /* The idea the colours carry used to be a sentence here. It was trimmed to a
+     link on purpose (the sentence lives on /help/ and in the ⓘ), so what is
+     asserted is that the way to it is still on the first screen. */
+  await expect(empty.getByRole("link", { name: /colour means/i })).toBeVisible();
 });
 
 test("second ten: the world is legible rather than a grey smear", async ({ page }) => {
@@ -116,7 +118,9 @@ test("second twenty: a name and a place, asked together", async ({ page }) => {
   /* And the two facts must not be conflated: the panel says which places
      stand in a country the register attests, and says what that does and
      does not mean. */
-  await expect(page.locator(".at-what")).toContainText(/attested/i);
+  /* The surname index arrives after the place answer, and on a slow runner it
+     arrives late; the panel is allowed to be replaced, not to be wrong. */
+  await expect(page.locator(".at-what")).toContainText(/attested/i, { timeout: 25000 });
 });
 
 test("second twenty-five: the panel never answers the previous question", async ({ page }) => {

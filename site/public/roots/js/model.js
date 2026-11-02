@@ -113,12 +113,12 @@ export function prepare(P) {
 
 /* placeFor(raw) -> {name} | null.  Returns {tree, report}. */
 export function buildTree(P, placeFor, est, dest, opts = {}) {
-  const living = opts.living || 'redact', maxLines = 8;
+  const living = opts.living || 'redact', maxLines = 8, hide = p => p.liv && living !== 'show';
   const keep = new Map(), undrawn = [];
   const ok = raw => (raw ? placeFor(raw) : null);
   for (const p of P.values()) {
     if (p.liv && living === 'omit') continue;
-    if (p.by === null) { undrawn.push({ id: p.id, name: p.liv ? 'Living person' : clean(p.given + ' ' + p.sur), why: 'year', ...(p.bpRaw && !p.liv ? { place: p.bpRaw } : {}) }); continue; }
+    if (p.by === null) { undrawn.push({ id: p.id, name: hide(p) ? 'Living person' : clean(p.given + ' ' + p.sur), why: 'year', ...(p.bpRaw && !hide(p) ? { place: p.bpRaw } : {}) }); continue; }
     keep.set(p.id, p);
   }
   for (const p of keep.values()) { const r = ok(p.bpRaw); p.bp = r ? r.name : null; p.bpe = false; }
@@ -133,7 +133,7 @@ export function buildTree(P, placeFor, est, dest, opts = {}) {
     }
   }
   const dropped = [];
-  for (const [id, p] of keep) if (!p.bp) { dropped.push(id); undrawn.push({ id, name: p.liv ? 'Living person' : clean(p.given + ' ' + p.sur), why: 'place', b: p.liv ? null : p.by, ...(p.bpRaw && !p.liv ? { place: p.bpRaw } : {}) }); }
+  for (const [id, p] of keep) if (!p.bp) { dropped.push(id); undrawn.push({ id, name: hide(p) ? 'Living person' : clean(p.given + ' ' + p.sur), why: 'place', b: hide(p) ? null : p.by, ...(p.bpRaw && !hide(p) ? { place: p.bpRaw } : {}) }); }
   for (const id of dropped) keep.delete(id);
   for (const p of keep.values()) {
     const dr = ok(p.dpRaw);
@@ -168,15 +168,15 @@ export function buildTree(P, placeFor, est, dest, opts = {}) {
   const people = [];
   for (const [i, p] of keep) {
     const li = order.indexOf(fold(p.sur));
-    people.push({ id: i, sex: p.sex === 'f' ? 'f' : 'm', given: p.liv ? '' : p.given, sur: p.sur, line: li < 0 ? maxLines - 1 : li,
-      by: p.liv ? Math.floor(p.by / 10) * 10 : p.by, bp: p.bp, dy: p.liv ? null : p.dy, dp: p.liv ? null : p.dp, my: p.my,
-      occ: p.liv ? null : p.occ, father: p.father, mother: p.mother, spouse: p.spouseK, kids: p.kidsK, srcs: p.liv ? [] : p.srcs,
-      bye: est.has(p.id) || (p.byApprox && !p.liv), dye: dest.has(p.id), bpe: p.bpe, slug: p.liv ? null : slugify(p.given + ' ' + p.sur) });
+    people.push({ id: i, sex: p.sex === 'f' ? 'f' : 'm', given: hide(p) ? '' : p.given, sur: p.sur, line: li < 0 ? maxLines - 1 : li,
+      by: hide(p) ? Math.floor(p.by / 10) * 10 : p.by, hid: hide(p) ? 1 : 0, bp: p.bp, dy: hide(p) ? null : p.dy, dp: hide(p) ? null : p.dp, my: p.my,
+      occ: hide(p) ? null : p.occ, father: p.father, mother: p.mother, spouse: p.spouseK, kids: p.kidsK, srcs: hide(p) ? [] : p.srcs,
+      bye: est.has(p.id) || (p.byApprox && !hide(p)), dye: dest.has(p.id), bpe: p.bpe, slug: hide(p) ? null : slugify(p.given + ' ' + p.sur) });
   }
   const tree = { meta: { title: 'Roots & Routes', sub: 'Your tree, drawn in this browser. Click anyone and every view follows.', living, generated: new Date().toISOString().slice(0, 10), source: 'your GEDCOM' },
     lines, focus, people, undrawn };
   let nliv = 0, ndrawnLiv = 0; for (const p of P.values()) if (p.liv) nliv++; for (const p of keep.values()) if (p.liv) ndrawnLiv++;
-  const report = { individuals: P.size, drawn: people.length, living: nliv, livingRedacted: living === 'redact' ? ndrawnLiv : 0, livingOmitted: living === 'omit' ? nliv : 0,
+  const report = { individuals: P.size, drawn: people.length, living: nliv, livingRedacted: living === 'redact' ? ndrawnLiv : 0, livingShown: living === 'show' ? ndrawnLiv : 0, livingOmitted: living === 'omit' ? nliv : 0,
     undatedNotDrawn: undrawn.filter(u => u.why === 'year').length, noPlaceNotDrawn: dropped.length, birthYearEstimated: est.size, deathYearEstimated: dest.size, placeBorrowedFromRelative: borrowed, focus };
   return { tree, report, keep };
 }

@@ -47,6 +47,12 @@
 <section id="work" hidden>
   <div class="bar">
     <div id="chips" class="chips"></div>
+    <label class="small hidel"><input type="checkbox" id="hideliving"> Hide living people</label>
+    <details class="small hidel" id="mhbox"><summary>Link to MyHeritage</summary>
+      <p>Your file came from MyHeritage, which numbers people the same way. Paste a profile or tree link for <b>any one person</b> in this file and every person gets links back to MyHeritage. Nothing is sent: they are plain links.</p>
+      <input id="mhin" type="text" placeholder="https://www.myheritage.com/profile-…" aria-label="A MyHeritage profile or tree link for one person in this file">
+      <p id="mhstat" role="status"></p>
+    </details>
     <nav class="tabs" role="tablist">
       <button role="tab" data-tab="tree" aria-selected="true">Tree</button>
       <button role="tab" data-tab="report">Import report</button>
@@ -78,7 +84,7 @@
         <input id="wfind" type="search" placeholder="Name, or a record number (I123)" aria-label="Find a person">
         <div id="wres"></div>
         <div id="wedit" hidden>
-          <h4 id="wname"></h4><p id="winfo" class="small"></p>
+          <h4 id="wname"></h4><p id="winfo" class="small"></p><p id="wmh" class="small"></p>
           <div id="wlook"><h4>Look this person up elsewhere</h4><p id="wsends" class="small"></p><ul id="wlinks" class="llist"></ul></div>
           <form id="wdate" class="wform"><label>Birth <input name="birth" placeholder="e.g. ABT 1850"></label><label>Death <input name="death" placeholder="e.g. 12 MAR 1910"></label><button class="btn">Save dates</button></form>
           <form id="wnote" class="wform"><label>Add a note <textarea name="text" rows="3"></textarea></label><button class="btn">Add the note</button></form>

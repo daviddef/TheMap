@@ -656,7 +656,7 @@ function loadTree(T){
   while(FAMS.length<8)FAMS.push({sur:'Other',host:'',m:[],f:[],places:[]});
   const P={},list=[];
   for(const r of T.people){
-    const p={id:r.id,sex:r.sex==='f'?'f':'m',fi:r.line==null?7:r.line,sur:r.sur||'',given:r.given||'',by:r.by,bp:r.bp,dy:r.dy==null?null:r.dy,dp:r.dp||r.bp,my:r.my||null,occ:r.occ||null,
+    const p={id:r.id,sex:r.sex==='f'?'f':'m',fi:r.line==null?7:r.line,sur:r.sur||'',given:r.given||'',by:r.by,bp:r.bp,dy:r.dy==null?null:r.dy,hid:r.hid===1?1:0,dp:r.dp||r.bp,my:r.my||null,occ:r.occ||null,
       father:r.father||null,mother:r.mother||null,spouse:r.spouse||[],kids:r.kids||[],g:0,src:(r.srcs||[]).length,srcs:r.srcs||null,slug:r.slug||null,href:r.href||null,page:r.page||null,bye:!!r.bye,dye:!!r.dye,bpe:!!r.bpe,note:r.note||null,fg:r.fg==null?null:r.fg,mg:r.mg==null?null:r.mg};
     if(p.dy==null)p.dp=null;
     P[p.id]=p;list.push(p);
@@ -780,10 +780,10 @@ MOVES.sort((a,b)=>a.y-b.y);
   for(const p of list){const c=comp.get(p.id);p._comp=c;p._main=sizes[c]>=20;p._orph=sizes[c]===1;p._clus=sizes[c]>1&&sizes[c]<20;p._dead=p._main&&!p.father&&!p.mother}
 })();
 
-const living=p=>p.dy==null;
-const nm=p=>living(p)?'Living '+p.sur:p.given+' '+p.sur;
+const living=p=>p.hid===1;   // a person whose name and details are withheld (the importing page sets hid; no death recorded no longer means withheld)
+const nm=p=>living(p)?'Living '+p.sur:((p.given+' '+p.sur).trim()||'(no name recorded)');
 const linkG=(c,par)=>!c||!par?null:(c.father===par.id?c.fg:c.mother===par.id?c.mg:null);   // grade of a parent link: 0 index only, 1 household tree, 2 read from a register
-const yrs=p=>living(p)?'living':(p.bye?'c.':'')+p.by+'–'+(p.dye?'?':p.dy);   // c. = estimated birth year, ? = deceased, death year not recorded
+const yrs=p=>living(p)?'living':(p.bye?'c.':'')+p.by+'–'+(p.dy==null?'':p.dye?'?':p.dy);   // c. = estimated birth year, ? = deceased, death year not recorded
 const colorOf=p=>'var(--l'+p.fi+')';
 function slots(p,g){let row=[p];const out=[row];for(let i=1;i<=g;i++){const next=[];for(const q of row){next.push(q&&q.father?P[q.father]:null,q&&q.mother?P[q.mother]:null)}out.push(next);row=next}return out}
 function rel(g,sex){const m=sex==='m';
@@ -907,7 +907,7 @@ function renderPanel(){
   let h='<div class="head"><div class="swatch" style="background:'+colorOf(p)+'"></div><div><h2>'+(pageURL(p)?'<a class="pname" href="'+pageURL(p)+'" title="Open their page">'+esc(nm(p))+'</a>':esc(nm(p)))+'</h2><div class="meta">'+esc(yrs(p))+' · '+esc(p.id)+'</div></div></div>';
   h+='<button class="btn" id="backbtn"'+(st.hist.length?'':' disabled')+'>← Back</button> <button class="btn" data-goto="kinship">How are we related?</button> <button class="btn" id="copylink">Copy link</button>';
   if(living(p)) h+='<p class="note">Living person. Name and details are withheld on the public site.</p>';
-  else h+='<dl>'+(p.occ?'<dt>Occupation</dt><dd>'+esc(p.occ)+'</dd>':'')+'<dt>Born</dt><dd>'+(p.bye?'about ':'')+p.by+'</dd><dt>Died</dt><dd>'+(p.dye?'not recorded':p.dy)+'</dd></dl>';
+  else h+='<dl>'+(p.occ?'<dt>Occupation</dt><dd>'+esc(p.occ)+'</dd>':'')+'<dt>Born</dt><dd>'+(p.bye?'about ':'')+p.by+'</dd><dt>Died</dt><dd>'+(p.dy==null?'no death recorded':p.dye?'not recorded':p.dy)+'</dd></dl>';
   const stat=(k,n,l)=>'<button class="stat" data-open="'+k+'" aria-expanded="'+(st.open===k)+'"'+(n?'':' disabled')+'>'+n+'<small>'+l+(n?' '+(st.open===k?'▴':'▾'):'')+'</small></button>';
   if(TREE&&p.note)h+='<p class="note"><b>Why the archive holds this person.</b> '+esc(clip(p.note,300))+'</p>';
   h+='<div class="stats">'+stat('anc',A.size,'Ancestors')+stat('desc',D.size,'Descendants')+stat('sib',sibs.size,'Siblings')+'</div>';
@@ -929,10 +929,10 @@ function renderPanel(){
     h+='<div class="note"><b>'+(p._orph?'Orphan record.':p._clus?'Detached family.':'Dead end.')+'</b> '+(p._orph?'Not joined to anyone in the tree.':p._clus?'Not connected to any tree.':'No parents recorded.')+' To connect: search '+esc(p.bp)+' records around '+p.by+'. <a href="'+lk.u+'" target="_blank" rel="noopener">'+esc(clip(lk.t,48))+' ↗</a> <a href="#" data-goto="orphans" data-okind="'+(p._orph?'orph':p._clus?'clus':'dead')+'">More places to start</a></div>';
   }
   h+='<h3 class="at">Places · from Record Atlas</h3>'+placeBlock('Born'+(p.bpe?' · place taken from a relative, not recorded':''),p.bp,p.by);
-  if(!living(p)&&p.dp!==p.bp)h+=placeBlock('Died, moved c.'+p.my,p.dp,p.my||p.dy);
+  if(!living(p)&&p.dp&&p.dp!==p.bp)h+=placeBlock('Died, moved c.'+p.my,p.dp,p.my||p.dy);
   if(!living(p)){
-    const end=p.dy,evs=[];
-    for(const pl of new Set([p.bp,p.dp]))for(const e of eventsFor(pl,p.by,end))if(!evs.some(x=>x.id===e.id))evs.push(Object.assign({at:pl},e));
+    const end=p.dy==null?2026:p.dy,evs=[];
+    for(const pl of new Set([p.bp,p.dp].filter(Boolean)))for(const e of eventsFor(pl,p.by,end))if(!evs.some(x=>x.id===e.id))evs.push(Object.assign({at:pl},e));
     const eras=ERA[PL[p.bp].reg]?ERA[PL[p.bp].reg].filter(e=>e.from>p.by&&e.from<=end):[];
     if(evs.length||eras.length){
       h+='<h3 class="at">Around their lifetime</h3><ul class="life">';
@@ -1630,7 +1630,7 @@ function renderTL(){
     S('text',{class:'rrel',x:36,y:mid+10},g,(r.sp?'Spouse':rel(r.g,p.sex))+' · '+p.bp);
     const x1=x(p.by),end=p.dy==null?NOW:p.dy,x2=Math.max(x(end),x1+4);
     S('rect',{x:x1,y:mid-5,width:x2-x1,height:10,rx:5,fill:colorOf(p),opacity:p.dy==null?.55:1},g);
-    if(x2<W-110&&!living(p))S('text',{class:'rrel',x:x2+6,y:mid+3},g,(p.bye?'c.':'')+p.by+'–'+(p.dye?'?':p.dy));
+    if(x2<W-110&&!living(p))S('text',{class:'rrel',x:x2+6,y:mid+3},g,yrs(p));
   });
   const cur=S('line',{x1:0,x2:0,y1:HEADH-4,y2:H,stroke:'var(--ink)','stroke-width':1.2,visibility:'hidden',style:'pointer-events:none'},svg);
   svg.onmousemove=e=>{

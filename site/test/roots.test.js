@@ -72,9 +72,13 @@ test("a place the text contradicts is not drawn there", need, async () => {
 
 test("living people are redacted, and no flag is back-dated", need, async () => {
   const { Session } = await import(R + "js/pipeline.js");
-  const out = await new Session(io).load(enc(makeSample()));
+  const hid = new Session(io); hid.liveMode = "redact"; const out = await hid.load(enc(makeSample()));
   const living = out.tree.people.filter(p => p.dy === null);
   assert.ok(living.length >= 3, "the sample has living people");
+  assert.ok(living.every(p => p.hid === 1), "withheld people are marked, so the viewer hides them");
+  const shown = await new Session(io).load(enc(makeSample()));                                   // the default: this is the owner's own file, on their own device
+  const sl = shown.tree.people.filter(p => p.dy === null); assert.ok(sl.length >= 3 && sl.every(p => p.hid === 0) && sl.some(p => p.given), "living people are shown by default, with names");
+  assert.ok(JSON.stringify(shown.tree).includes("Orla"), "a living given name is in the tree data when shown");
   for (const p of living) {
     assert.equal(p.given, "", "a living person has no given name"); assert.equal(p.occ, null); assert.deepEqual(p.srcs, []); assert.equal(p.dp, null);
     assert.equal(p.by % 10, 0, "birth year rounded to the decade");
@@ -263,7 +267,7 @@ test("a place is never placed by borrowing a borrowed place", need, async () => 
 });
 
 test("the page promises what the source does", () => {
-  const files = ["index.html", "viewer.html", "roots.css", "js/app.js", "js/worker.js", "js/gedcom.js", "js/model.js", "js/resolver.js", "js/atlas.js", "js/pipeline.js", "js/sample.js", "js/export.js", "js/workbench.js", "js/contribute.js", "js/lookup.js", "js/checklist.js"]
+  const files = ["index.html", "viewer.html", "roots.css", "js/app.js", "js/worker.js", "js/gedcom.js", "js/model.js", "js/resolver.js", "js/atlas.js", "js/pipeline.js", "js/sample.js", "js/export.js", "js/workbench.js", "js/contribute.js", "js/lookup.js", "js/checklist.js", "js/myheritage.js"]
     .filter(f => fs.existsSync(R + f));
   const html = fs.readFileSync(R + "index.html", "utf8");
   assert.match(html, /Content-Security-Policy/); assert.match(html, /connect-src 'self'/); assert.match(html, /default-src 'none'/);
@@ -292,7 +296,7 @@ test("look-up links: every person gets them, living included, and building them 
   const g = ["0 HEAD", "1 CHAR UTF-8", "0 @I1@ INDI", "1 NAME Zed /Quux/", "1 SEX M", "1 BIRT", "2 DATE 1990", "0 TRLR"].join("\n") + "\n";
   const s = new Session(io); await s.load(enc(g));
   const hit = s.find("quux"); assert.equal(hit.length, 1); assert.equal(hit[0].living, true);
-  const info = s.personInfo("I1"); assert.equal(info.name, "Living person"); assert.equal(info.look.first, "Zed"); assert.equal(info.look.living, true);
+  const info = s.personInfo("I1"); assert.equal(info.name, "Zed Quux"); s.liveMode = "redact"; assert.equal(s.personInfo("I1").name, "Living person"); assert.equal(info.look.first, "Zed"); assert.equal(info.look.living, true);
 });
 
 test("fix list: places, years, impossible dates, duplicates and loose groups, as text and as a spreadsheet", async () => {
@@ -302,11 +306,12 @@ test("fix list: places, years, impossible dates, duplicates and loose groups, as
     "0 @I2@ INDI", "1 NAME Bob /Beta/", "1 SEX M", "1 BIRT", "2 DATE 1850", "1 FAMS @F1@",
     "0 @I3@ INDI", "1 NAME Cy /Beta/", "1 SEX M", "1 BIRT", "2 DATE 1855", "1 FAMC @F1@",                                         // 5 years after his father
     "0 @I4@ INDI", "1 NAME =Evil /Dup/", "1 SEX M", "1 BIRT", "2 DATE 1700", "0 @I5@ INDI", "1 NAME =Evil /Dup/", "1 SEX M", "1 BIRT", "2 DATE 1701",
-    "0 @I6@ INDI", "1 NAME Dee /Nobirth/", "1 SEX F",
-    "0 @F1@ FAM", "1 HUSB @I2@", "1 CHIL @I3@", "0 TRLR"].join("\n") + "\n";
+    "0 @I6@ INDI", "1 NAME Dee /Nobirth/", "1 SEX F", "0 @I7@ INDI", "1 NAME //", "1 SEX F", "1 FAMS @F1@",
+    "0 @F1@ FAM", "1 HUSB @I2@", "1 WIFE @I7@", "1 CHIL @I3@", "0 TRLR"].join("\n") + "\n";
   const s = new Session(io); await s.load(enc(g));
   const c = s.checklist({ living: true }), by = k => c.sections.find(x => x.key === k).items;
-  assert.deepEqual(c.sections.map(x => x.key), ["places", "check", "decide", "years", "dates", "dupes", "apart"]);
+  assert.deepEqual(c.sections.map(x => x.key), ["places", "check", "decide", "years", "names", "dates", "dupes", "apart"]);
+  assert.ok(by("names").some(i => i.id === "I7" && i.kind === "none" && /spouse Bob Beta/.test(i.kin)), "an unnamed person is listed with the family around them");
   assert.ok(by("dates").some(i => i.id === "I1" && /before being born/.test(i.note)), "death before birth");
   assert.ok(by("dates").some(i => i.id === "I3" && /father was only 5 years older/.test(i.note)), "a child 5 years after the father");
   assert.ok(by("years").some(i => i.id === "I6" && i.kind === "none"), "no birth year");
@@ -318,5 +323,17 @@ test("fix list: places, years, impossible dates, duplicates and loose groups, as
   const s2 = new Session(io); await s2.load(enc(makeSample())); const pl = s2.checklist().sections[0].items;
   for (const i of [...pl, ...s2.checklist().sections[1].items]) assert.ok(i.to.split(",").length >= i.raw.split(",").length, "a suggested place never has fewer parts than the text it replaces: " + i.raw + " -> " + i.to);
   const pe = s2.checklist().sections; assert.ok(!pe[0].items.some(i => /Port Elizabeth/.test(i.raw)), "a different (historical) name is never offered as a plain fix");
-  const hidden = s.checklist({ living: false }); assert.ok(hidden.sections.length === 7);
+  const hidden = s.checklist({ living: false }); assert.ok(hidden.sections.length === 8);
+});
+
+test("MyHeritage links: one pasted link gives the site and tree, and every I-number follows", async () => {
+  const m = await import(R + "js/myheritage.js"); const S = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+  const a = m.parseLink("see https://www.myheritage.com/profile-" + S + "-4000030/some-name-\u2714-\u2b50-x"), b = m.parseLink("https://www.myheritage.com/family-trees/example-family-site/" + S + "?rootIndividualID=4000030&familyTreeID=4");
+  assert.deepEqual([a.site, a.tree, a.num], [S, 4, 30]); assert.deepEqual([b.site, b.tree, b.num, b.treeSlug], [S, 4, 30, "example-family-site"]);
+  assert.equal(m.parseLink("https://example.com/profile-" + S + "-4000030/x"), null, "only MyHeritage links count");
+  assert.equal(m.profileUrl(a, "I7", "Zo\u00eb O'Neil"), "https://www.myheritage.com/profile-" + S + "-4000007/zoe-o-neil");
+  assert.equal(m.treeUrl(b, "I123"), "https://www.myheritage.com/family-trees/example-family-site/" + S + "?rootIndividualID=4000123&familyTreeID=4");
+  assert.equal(m.profileUrl(a, "@weird@", "x"), null, "an id that is not I<number> gets no link");
+  assert.deepEqual(m.fromHash(m.toHash(b)), { site: S, tree: 4, num: null, treeSlug: "example-family-site" });
+  assert.equal(m.fromHash("#mh=<script>.4."), null);
 });

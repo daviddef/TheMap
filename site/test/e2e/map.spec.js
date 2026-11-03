@@ -100,14 +100,18 @@ test("a place search opens a place", async ({ page }) => {
   await expect(page.locator(".at-panel")).toContainText(/Gračišće/, { timeout: 30000 });
 });
 
-test("the surname map draws land, not a black continent", async ({ page }) => {
-  /* Astro scopes styles and the SVG arrives through set:html, so the
-     first render was browser defaults: a black continent, invisible
-     dots, on a light background inside a dark page. */
+test("the surname map draws, not an empty grey box", async ({ page }) => {
+  /* The surname page's map is Leaflet, fetched only once the box nears the
+     viewport. Scroll to it, wait for the library to build the map, and
+     check the markers are painted in a colour (the old failure was a black
+     continent from unscoped styles). */
   await page.goto("/surname/peeters/");
-  const land = page.locator("svg.sm .sm-land").first();
-  await expect(land).toBeVisible();
-  const fill = await land.evaluate((el) => getComputedStyle(el).fill);
+  const box = page.locator("[data-sxmap]");
+  await box.scrollIntoViewIfNeeded();
+  await expect(page.locator("[data-sxmap].leaflet-container")).toBeVisible();
+  const dot = page.locator("[data-sxmap] path.leaflet-interactive").first();
+  await expect(dot).toBeVisible({ timeout: 20000 });
+  const fill = await dot.evaluate((el) => getComputedStyle(el).fill);
   expect(fill).not.toBe("rgb(0, 0, 0)");
 });
 

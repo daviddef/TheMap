@@ -23,7 +23,6 @@ export const nav = [
   ["The map", "/"],
   ["Surnames", "/surnames/"],
   ["Places", "/places/"],
-  ["My research", "/my-research/"],
   ["Roots & Routes", "/roots/"],
   ["The sources", [
     ["/providers/", "Who holds records"],

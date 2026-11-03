@@ -34,21 +34,24 @@
  * count, which is a statistic rather than a control and lives on
  * /my-research/ where it can be read properly.
  */
-const { quiet = false, compact = false } = Astro.props;
+const { quiet = false, compact = false, linkOnly = false } = Astro.props;
 const uid = compact ? "ra-lines-c" : "ra-lines";
 import { u } from "../lib/url.js";
 ---
+{linkOnly ? <div class="ra-lines ra-lines-c ra-lines-lo"><a class="ra-lines-l" href={u("/my-research/")}>Researching</a></div> :
 <div class:list={["ra-lines", compact && "ra-lines-c"]} id={uid}
      data-quiet={quiet ? "1" : null} hidden>
-  <label class="ra-lines-l" for={uid + "-sel"}>Researching</label>
+  {compact ? <a class="ra-lines-l" href={u("/my-research/")} title="Your research: every family you are tracking">Researching</a> : <label class="ra-lines-l" for={uid + "-sel"}>Researching</label>}
   <select id={uid + "-sel"} aria-label="Which family this progress belongs to"></select>
-  <button type="button" class="ra-line-new">+ another family</button>
+  <button type="button" class="ra-line-new" aria-label="Add another family" title="Add another family">+</button>
   {!compact && <button type="button" class="ra-line-ren">rename</button>}
   {!compact && <span class="ra-lines-n" role="status" aria-live="polite"></span>}
-</div>
+</div>}
 
+{!linkOnly && <Fragment>
 <script is:inline define:vars={{ uid }}>window.__raLineUid = uid;</script>
 <script is:inline src={u("/js/line-switcher.js")}></script>
+</Fragment>}
 
 <style>
   .ra-lines { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline;
@@ -76,12 +79,17 @@ import { u } from "../lib/url.js";
   .ra-lines-c .ra-lines-l { font-size: 9.5px; letter-spacing: .08em; }
   .ra-lines-c select { font-size: 12.5px; font-weight: 600; padding: 2px 4px;
     max-width: 11rem; }
-  .ra-lines-c .ra-line-new { font-size: 11px; }
+  /* THE + IS A BUTTON YOU CAN SEE: a filled circle, bold, in the accent colour. */
+  .ra-lines .ra-line-new, .ra-lines-c .ra-line-new { width: 30px; height: 30px; padding: 0; border-radius: 50%;
+    background: var(--accent); color: #fff; font-size: 22px; font-weight: 700; line-height: 1; text-decoration: none;
+    display: inline-flex; align-items: center; justify-content: center; flex: none; }
+  .ra-lines .ra-line-new:hover, .ra-lines-c .ra-line-new:hover { background: var(--ink); color: #fff; }
+  .ra-lines-c a.ra-lines-l { text-decoration: none; }
+  .ra-lines-c a.ra-lines-l:hover { color: var(--accent); text-decoration: underline; }
   /* THE NAVIGATION IS THE FIRST THING TO RUN OUT OF ROOM. Below this the
      menu already collapses to a burger, and a family selector wedged beside
      it would push the brand off the line. /my-research/ keeps the full bar,
      so switching and renaming stay reachable on a phone — which is why that
      page is the one place the wide bar was left in. */
   @media (max-width: 860px) { .ra-lines-c { display: none; } }
-  @media (max-width: 1080px) { .ra-lines-c .ra-line-new { display: none; } }
 </style>

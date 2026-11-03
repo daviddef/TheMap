@@ -246,7 +246,7 @@ import LineSwitcher from "../components/LineSwitcher.astro";
           families there are, it is whether this page can record anything
           against one. Three kinds of page can: the map, which draws the rings;
           a place page, where volumes are marked; and /my-research/ itself. */}
-      {marksHere && <LineSwitcher compact />}
+      {marksHere ? <LineSwitcher compact /> : <LineSwitcher compact linkOnly />}
       <a class="findbtn" href={u("/add/")}>Add a source</a>
     </nav>
   </div>
@@ -258,6 +258,7 @@ import LineSwitcher from "../components/LineSwitcher.astro";
             {links.map(([h, l]) => <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}
           </div>
     ))}
+      <div class="dgrp"><a href={u("/my-research/")} class={here === u("/my-research/") ? "on" : ""}>Researching</a></div>
       <div class="dgrp"><span class="gl">Contribute</span>
         <a href={u("/add/")} class={here === u("/add/") ? "on" : ""}>Add a source</a>
       </div>

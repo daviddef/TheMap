@@ -93,6 +93,7 @@ input[type=range]{accent-color:var(--atlas);flex:1 1 240px;min-width:140px}
 .cyr{font:400 8.5px var(--mono);fill:var(--muted)}
 .edge{fill:none;stroke:var(--hair);stroke-width:1.3}
 .edge.weak{stroke-dasharray:4 4}
+.colh.pc{font-weight:500;letter-spacing:.02em;text-transform:none;opacity:.85}
 .colh{font:600 9.5px var(--sans);letter-spacing:.09em;text-transform:uppercase;fill:var(--muted)}
 .card.simple .cbody{stroke:var(--atlas)}
 .card.simple:hover .cbody,.card.simple:focus-visible .cbody{stroke:var(--ink)}
@@ -1006,7 +1007,7 @@ function renderTrail(){
 function renderHG(){
   const svg=$('#hg');svg.textContent='';
   const f=P[st.focus],up=st.up,down=st.down,vert=st.orient==='v',mini=st.card==='mini',simple=st.card==='simple',compact=mini||simple;
-  const CW=mini?78:simple?108:182,CH=mini?78:simple?92:40,PAD=8,LAB=vert?(compact?96:150):0,TOP=vert?10:24;
+  const CW=mini?78:simple?108:182,CH=mini?78:simple?92:40,PAD=8,LAB=vert?(compact?96:150):0,TOP=vert?10:42;
   let leaf=0;
   function lay(p,d){const n={p,d,kids:[]};if(d<down)n.kids=kidsOf(p).map(c=>lay(c,d+1));
     n.slot=n.kids.length?(n.kids[0].slot+n.kids[n.kids.length-1].slot)/2:leaf++;return n}
@@ -1018,7 +1019,10 @@ function renderHG(){
   if(vert)DG=Math.max(DG,Math.min(96,Math.floor((target-TOP*2)/nDepth-CH)));
   else VG=Math.max(VG,Math.min(40,Math.floor((target-TOP-PAD-(hasSp?CH+14:0))/slotsMax-CH)));
   const cs=(vert?CW:CH)+VG,ds=(vert?CH:CW)+DG,span=nDepth*ds-DG;
-  const Hup=(1<<up)*cs,H=Math.max(Hup,leaf*cs),off=(H-Hup)/2;
+  /* room above and below the focus for every descendant slot, so no card rises into the column headings */
+  const sl=[];(function w(n){sl.push(n.slot);n.kids.forEach(w)})(tree);
+  const dUp=(tree.slot-Math.min(...sl))*cs+cs/2,dDown=(Math.max(...sl)-tree.slot)*cs+cs/2;
+  const Hup=(1<<up)*cs,H0=Math.max(Hup,leaf*cs,dUp+dDown),cF=Math.max(H0/2,dUp),H=Math.max(H0,cF+dDown),off=(H-Hup)/2;
   const W=vert?LAB+PAD*2+H+(hasSp?CW+16:0):PAD*2+span;
   const Ht=vert?TOP*2+span:TOP+H+PAD+(hasSp?cs+8:0);
   svg.setAttribute('viewBox','0 0 '+W+' '+Ht);
@@ -1046,12 +1050,11 @@ function renderHG(){
   const pct=g=>{const v=50/Math.pow(2,g-1);return ' · '+(v>=25?v.toFixed(0):v>=1?String(+v.toFixed(1)):String(+v.toFixed(2)))+'%'};
   const heads={0:'Focus'};
   for(let g=1;g<=up;g++)heads[-g]=g===1?'Parents':g===2?'Grandparents':g===3?(compact?'Gt-grandparents':'Great-grandparents'):(g-2)+(compact?'× gt-grandp.':'× great-grandparents');   // any depth
-  for(let g=1;g<=up;g++)heads[-g]+=pct(g);
   for(let d=1;d<=down;d++)heads[d]=d===1?'Children':d===2?'Grandchildren':d===3?(compact?'Gt-grandchildren':'Great-grandchildren'):(d-2)+(compact?'× gt-grandch.':'× great-grandchildren');
-  for(let d=1;d<=down;d++)heads[d]+=pct(d);
   for(let g=-up;g<=down;g++){
-    if(vert)S('text',{class:'colh',x:PAD,y:dep(g)+CH/2+3},svg,compact?clip(heads[g],22):heads[g]);
-    else S('text',{class:'colh',x:dep(g),y:12},svg,heads[g]);
+    const pc=g===0?'':pct(Math.abs(g));
+    if(vert)S('text',{class:'colh',x:PAD,y:dep(g)+CH/2+3},svg,compact?clip(heads[g]+pc,22):heads[g]+pc);
+    else{S('text',{class:'colh',x:dep(g),y:12},svg,heads[g]);if(pc)S('text',{class:'colh pc',x:dep(g),y:25},svg,pc.replace(/^ · /,'')+' related')}
   }
   // the name in a card is an ordinary link to that person's own page; the rest of the card re-centres the views
   function nameHost(g,p){const u=pageURL(p);return u?S('a',{class:'plk',href:u},g):g}
@@ -1078,7 +1081,7 @@ function renderHG(){
       drawFlag(g,flagAt(p.bp,p.by),CW-42,(CH-24)/2,36);
     }
   }
-  const rows=slots(f,up),cF=H/2;
+  const rows=slots(f,up);
   const nodes=[];
   for(let g=0;g<=up;g++){
     nodes[g]=[];

@@ -90,6 +90,7 @@ const ROM=['I','II','III','IV','V','VI','VII','VIII','IX','X'];
 let M=null;
 const shortN=n=>{if(n.length<=28)return n;let o='';for(const w of n.split(/[ ,(:]+/)){if((o+' '+w).trim().length>28)break;o=(o+' '+w).trim()}return o||n.slice(0,28)};
 /* LOCAL CHANGE (Roots from your GEDCOM): the skill treats 'no death year' as 'living, withheld'. Here living people are shown unless hid===1, so test that, and give a person with no recorded death an ESTIMATED end (marked ?) so they can be drawn. */
+const pulse=()=>(typeof RM!=='undefined'&&RM)?0:(Math.sin(performance.now()/1000*3.4)+1)/2;
 const NOWY=new Date().getFullYear(),ED=p=>p.dy!=null?p.dy:(p.by!=null?Math.min(p.by+80,NOWY):null);
 const linkOK=(c,par)=>par&&P[par]&&P[par].hid!==1&&P[par].by!=null&&c.by-P[par].by>=13&&c.by-P[par].by<=60;
 function build(id){
@@ -227,7 +228,7 @@ function drawSky(s,t){
   for(const r of R){if(t<r.s)continue;const col=colOf(r),a=Math.max(r.s,t-24),b=Math.min(r.e,t);if(b<a)continue;let prev=null;c.lineWidth=r.id===M.id?2.8:1.7;c.lineCap='round';
     for(let yr=a;yr<=b+1e-6;yr+=.2){const x=X(xf(r,yr)),y=rail+(t-yr)*ppy;if(prev){const k=1-(t-yr)/24;c.strokeStyle=rgba(col,Math.max(0,.92*Math.pow(k,1.3)));c.beginPath();c.moveTo(prev[0],prev[1]);c.lineTo(x,y);c.stroke()}prev=[x,y]}}
   for(const r of R){if(t<r.s)continue;const col=colOf(r),xx=X(xf(r,Math.min(t,r.e))),fo=r.id===M.id;
-    if(t<=r.e){glow(c,xx,rail,col,fo?20:15);const i=live.indexOf(r);txt(c,r.l,xx,rail-11-(i%4)*11,(fo?'700 11.5px ':'600 10.5px ')+FONT,rgba(fo?T.ink:col,1),'center',HALO());hits.push({x:xx,y:rail,r:12,id:r.id})}
+    if(t<=r.e){glow(c,xx,rail,col,fo?20+4*pulse():15);const i=live.indexOf(r);txt(c,r.l,xx,rail-11-(i%4)*11,(fo?'700 11.5px ':'600 10.5px ')+FONT,rgba(fo?T.ink:col,1),'center',HALO());hits.push({x:xx,y:rail,r:12,id:r.id})}
     else{const k=ss((t-r.e)/3.2),sy=r.sy*H*.86,y=lerp(rail,sy,k),x=lerp(xx,X(r.sx),k);glow(c,x,y,col,k<1?15:(fo?15:11)+2*Math.sin(t*1.3+r.ph),fo?1:lerp(1,.4,k));
       if(k>.9){txt(c,r.l,x,y-10,(fo?'italic 12px ':'italic 10.5px ')+SERIF,fo?INK(1):INK(.5),'center',HALO());hits.push({x,y,r:12,id:r.id})}}}
   {const near=M.moments.filter(m=>Math.abs(t-m.y)<1.4&&t>=m.y-.4).sort((a,b)=>Math.abs(t-a.y)-Math.abs(t-b.y))[0];if(near){const d=Math.abs(t-near.y);banner(c,W,H*.42,Math.sin(clamp(1-d/1.4,0,1)*Math.PI/2),near.y+' · '+near.a,near.b)}}
@@ -324,7 +325,7 @@ function drawGen(s,t){
     if(r.mi){c.strokeStyle=INK(alive?.7:.25);c.lineWidth=1;c.beginPath();c.arc(r.tx,r.ty,5.5,0,7);c.stroke()}
     if(moved){c.strokeStyle=rgba(T.brass,alive?1:.28);c.lineWidth=2;c.beginPath();c.arc(r.tx,r.ty,6.8,0,7);c.stroke()}
     if(r.dup){c.strokeStyle=rgba(T.brass,alive?.9:.35);c.setLineDash([2,2]);c.lineWidth=1;c.beginPath();c.arc(r.tx,r.ty,10,0,7);c.stroke();c.setLineDash([])}
-    if(fo){c.strokeStyle=INK(1);c.lineWidth=2;c.beginPath();c.arc(r.tx,r.ty,13,0,7);c.stroke()}
+    if(fo){const pu=pulse();c.strokeStyle=INK(.55*(1-pu));c.lineWidth=2;c.beginPath();c.arc(r.tx,r.ty,13+pu*13,0,7);c.stroke();c.strokeStyle=INK(1);c.lineWidth=2+pu*.8;c.beginPath();c.arc(r.tx,r.ty,13+pu*1.5,0,7);c.stroke()}
     hits.push({x:r.tx,y:r.ty,r:13,id:r.id});
     const a=alive?1:.34;if(!narrow||alive||fo){txt(c,r.n.split(' ')[0],r.tx,r.ty+(fo?24:20),(fo?'700 11px ':'600 10.5px ')+FONT,INK(fo?1:a),'center',HALO());
       if(!narrow)txt(c,(r.bye?'c.':'')+r.s+'–'+(r.dye?'?':(r.d%100<10?'0':'')+(r.d%100)),r.tx,r.ty+(fo?35:31),'400 9px "IBM Plex Mono",monospace',MUT(alive?1:.4),'center',HALO())}}
@@ -371,6 +372,7 @@ function drawRoutes(s,t){
   c.drawImage(s.base,0,0,W,H);
   const pos=n=>{const q=ll(n),p=projF(s,q[0],q[1]);return{x:p[0],y:p[1],in:p[0]>14&&p[0]<W-14&&p[1]>14&&p[1]<H-14,q}};
   const cnt={};M.R.forEach(r=>{if(t>=r.s&&t<=r.e){const pl=placeAt(r,t);if(pl)cnt[pl]=(cnt[pl]||0)+1}});
+  const lbls=[];
   M.legs.forEach((L,i)=>{const A=pos(L.a),B=pos(L.b),col=colOf(L.r),sign=i%2?1:-1,win=L.yb-L.ya,fo=L.r.id===M.id,dated=L.yb!=null&&L.ya!=null,ghost=dated?t<L.ya:t<L.r.s,done=L.yb!=null&&t>=L.yb,dash=!done||L.und||L.est||L.ya==null,u=dated?clamp((t-L.ya)/Math.max(win,.5),0,1):0;
     const draw=(P0,P1,inset)=>{const pts=arc(P0,P1,sign,40);c.lineWidth=inset?1:(fo?2.8:1.6);c.lineCap='round';c.setLineDash(dash?[4,4]:[]);c.strokeStyle=rgba(col,ghost?.2:(dash?.55:.7));c.beginPath();pts.forEach((q,j)=>j?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1]));c.stroke();c.setLineDash([]);
       if(!ghost&&!done&&dated){const q=pts[Math.round(u*40)];c.fillStyle=rgba(col,.25);c.beginPath();c.arc(q[0],q[1],inset?4:9,0,7);c.fill();c.strokeStyle=rgba(col,1);c.lineWidth=1.5;c.beginPath();c.arc(q[0],q[1],inset?2:4,0,7);c.stroke()}};
@@ -378,9 +380,17 @@ function drawRoutes(s,t){
     else if(A.in!==B.in){const I=A.in?A:B,O=A.in?B:A,dx=O.x-I.x,dy=O.y-I.y,tm=Math.min(dx>0?(W-18-I.x)/dx:(18-I.x)/dx||9e9,dy>0?(H-18-I.y)/dy:(18-I.y)/dy||9e9),e=[I.x+dx*tm,I.y+dy*tm];
       c.setLineDash(dash?[4,4]:[]);c.strokeStyle=rgba(col,ghost?.2:.7);c.lineWidth=fo?2.8:1.6;c.beginPath();c.moveTo(I.x,I.y);c.lineTo(e[0],e[1]);c.stroke();c.setLineDash([]);
       if(!ghost){const ang=Math.atan2(dy,dx);c.fillStyle=rgba(col,1);c.beginPath();c.moveTo(e[0],e[1]);c.lineTo(e[0]-9*Math.cos(ang-.4),e[1]-9*Math.sin(ang-.4));c.lineTo(e[0]-9*Math.cos(ang+.4),e[1]-9*Math.sin(ang+.4));c.fill();
-        const nmx=A.in?L.b:L.a;txt(c,(A.in?'to ':'from ')+nmx.split(',')[0]+' ('+(PL[nmx].cn||'')+')',clamp(e[0],10,W-10),e[1]+(e[1]>H/2?-12:16),'italic 11px '+SERIF,rgba(col,1),e[0]>W/2?'right':'left',HALO())}}
+        const nmx=A.in?L.b:L.a;lbls.push({t:(A.in?'to ':'from ')+nmx.split(',')[0]+' ('+(PL[nmx].cn||'')+')',x:e[0],y:e[1],col})}}   /* LOCAL CHANGE: edge labels are laid out after the loop, so they no longer pile up */
     {const qa=ll(L.a),qb=ll(L.b),I=s.insets.find(I=>inI(I,qa)&&inI(I,qb));if(I){const wa=iproj(I,qa),wb=iproj(I,qb);if(Math.hypot(wa[0]-wb[0],wa[1]-wb[1])>3)draw(wa,wb,true)}}
     if(done&&t-L.yb<10&&A.in&&B.in)txt(c,L.r.n.split(' ')[0]+' '+L.yb,B.x+8,B.y-9-(i%3)*10,'italic 11px '+SERIF,rgba(col,1-(t-L.yb)/10),'left',HALO())});
+  /* the labels where a line leaves the map: one per place (with a count), centred on the line, and stacked in rows so none covers another */
+  {c.font='italic 11px '+SERIF;const by=new Map();
+   for(const l of lbls){const k=l.t+'|'+(l.y>H/2?'b':'t');const g=by.get(k);if(g){g.n++;g.sx+=l.x}else by.set(k,{t:l.t,sx:l.x,n:1,y:l.y,col:l.col,bot:l.y>H/2})}
+   const items=[...by.values()].map(g=>{const t=g.t+(g.n>1?' ×'+g.n:'');const w=c.measureText(t).width;return{t,w,x:g.sx/g.n,col:g.col,bot:g.bot}}).sort((a,b)=>a.x-b.x);
+   for(const edge of [true,false]){const rows=[];
+    for(const it of items.filter(i=>i.bot===edge)){const x=clamp(it.x,it.w/2+6,W-it.w/2-6);let r=0;
+     while((rows[r]||[]).some(q=>x-it.w/2<q+6))r++;(rows[r]=rows[r]||[]).push(x+it.w/2);
+     txt(c,it.t,x,edge?H-26-r*14:72+r*14,'italic 11px '+SERIF,rgba(it.col,1),'center',HALO())}}}
   const regCol=(n,y)=>{const e=eraAt(n,y);return e&&e.rg?rgC(e.rg):T.hair};
   M.places.forEach(n=>{const P0=pos(n);if(!P0.in)return;const k=cnt[n]||0,col=regCol(n,Math.min(t,M.t1)),r=3+Math.sqrt(k)*3.2;
     if(k){const g=c.createRadialGradient(P0.x,P0.y,0,P0.x,P0.y,r*3);g.addColorStop(0,rgba(col,.4));g.addColorStop(1,rgba(col,0));c.fillStyle=g;c.beginPath();c.arc(P0.x,P0.y,r*3,0,7);c.fill()}
@@ -400,13 +410,17 @@ const V={};
 VW.forEach(k=>{V[k]={k,cv:document.getElementById('cv-'+k),ctx:document.getElementById('cv-'+k).getContext('2d'),rg:document.getElementById('rg-'+k),yl:document.getElementById('yr-'+k),btn:document.querySelector('[data-pl="'+k+'"]'),t:0,min:0,max:1,W:0,H:0}});
 const hOf={sky:w=>Math.round(clamp(Math.max(w*1.15,innerHeight*.88),640,1100)),ink:()=>INKL.top+(M.t1+1-M.t0)*M.ppy+20,house:w=>Math.round(clamp(w*.95,500,660)),gen:w=>Math.round(TR.top+TR.bot+M.G*(w<560?78:TR.row)),routes:w=>Math.round(clamp(w*.6,300,560))};
 let playing=null,raf=0,last=0;
+/* LOCAL CHANGE: the person in focus pulses. A pulse repaints the open view about 25 times a second while it is not playing, and stops when the view is hidden or the visitor prefers reduced motion. */
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;let curK=null,idleRaf=0,lastIdle=0;
+function idle(now){idleRaf=0;if(!curK||playing||RM)return;const s=V[curK];if(!s||!s.cv||!s.cv.offsetParent)return;if(now-lastIdle>40){lastIdle=now;paint(curK)}idleRaf=requestAnimationFrame(idle)}
+const startIdle=()=>{if(!idleRaf&&!RM&&!playing)idleRaf=requestAnimationFrame(idle)};
 function rangeOf(k){const h=M.house;return k==='house'?[h.t0,h.t1,h.rest]:k==='ink'?[M.t0,M.t1,M.t1]:[M.t0,M.t1,M.rest]}
 function paint(k){const s=V[k];T=tokens();hits=[];const c=s.cv.getContext('2d');c.setTransform(s.dpr,0,0,s.dpr,0,0);c.clearRect(0,0,s.W,s.H);DRAW[k](s,s.t);s.btn.textContent=playing===k?'Pause':(s.t>=s.max-.01?'Replay':'Play');s.rg.value=s.t;s.yl.textContent=Math.floor(s.t);s.cv.classList.toggle('hit',hits.length>0)}
 function size(k){const s=V[k],w=s.cv.parentElement.clientWidth||600;s.W=w;s.H=hOf[k](w);const d=Math.min(devicePixelRatio||1,2);s.dpr=d;s.cv.width=Math.round(w*d);s.cv.height=Math.round(s.H*d);s.cv.style.height=s.H+'px';s.base=null}
-function stop(){if(playing){playing=null;cancelAnimationFrame(raf)}VW.forEach(k=>{if(V[k].btn)V[k].btn.textContent=V[k].t>=V[k].max-.01?'Replay':'Play'})}
+function stop(){if(playing){playing=null;cancelAnimationFrame(raf)}VW.forEach(k=>{if(V[k].btn)V[k].btn.textContent=V[k].t>=V[k].max-.01?'Replay':'Play'});startIdle()}
 function tick(now){if(!playing)return;const s=V[playing],dt=Math.min(.05,(now-(last||now))/1000);last=now;s.t=Math.min(s.max,s.t+dt*st.pspeed*(playing==='house'?.5:1));if(s.t>=s.max){paint(playing);stop();return}paint(playing);if(playing==='ink')followInk();raf=requestAnimationFrame(tick)}
 VW.forEach(k=>{const s=V[k];
-  s.btn.onclick=()=>{if(playing===k){stop();return}stop();if(s.t>=s.max-.01)s.t=s.min;playing=k;last=0;raf=requestAnimationFrame(tick);paint(k)};
+  s.btn.onclick=()=>{if(playing===k){stop();return}stop();if(s.t>=s.max-.01)s.t=s.min;playing=k;curK=k;last=0;raf=requestAnimationFrame(tick);paint(k)};
   s.rg.oninput=()=>{stop();s.t=+s.rg.value;paint(k)};
   s.cv.addEventListener('click',e=>{const r=s.cv.getBoundingClientRect(),x=(e.clientX-r.left)*(s.W/r.width),y=(e.clientY-r.top)*(s.H/r.height);let b=null,bd=1e9;for(const h of hits){const d=Math.hypot(h.x-x,h.y-y);if(d<=Math.max(h.r,14)&&d<bd){bd=d;b=h}}if(b&&b.id!==st.focus)go(b.id)});
   s.cv.addEventListener('mousemove',e=>{const r=s.cv.getBoundingClientRect(),x=(e.clientX-r.left)*(s.W/r.width),y=(e.clientY-r.top)*(s.H/r.height);let b=null,bd=1e9;for(const h of hits){const d=Math.hypot(h.x-x,h.y-y);if(d<=Math.max(h.r,14)&&d<bd){bd=d;b=h}}s.cv.style.cursor=b?'pointer':'default';s.cv.title=b?nm(P[b.id])+' '+yrs(P[b.id]):''})});
@@ -418,7 +432,7 @@ function chrome(){
   document.getElementById('pl-moves').innerHTML='<thead><tr><th>Person</th><th>Move, and the record on each side</th><th>Window</th></tr></thead><tbody>'+(rows||'<tr><td colspan="3">No move on record in this family.</td></tr>')+'</tbody>'
 }
 function ensure(){if(M&&M.id===st.focus)return;stop();M=build(st.focus);world(M);capKey='';chrome();VW.forEach(k=>{const r=rangeOf(k),s=V[k];s.min=r[0];s.max=r[1];s.t=r[2];s.rg.min=r[0];s.rg.max=r[1];s.rg.step=.05;s.base=null})}
-const show=k=>()=>{if(playing&&playing!==k)stop();T=tokens();ensure();size(k);paint(k)};
+const show=k=>()=>{if(playing&&playing!==k)stop();T=tokens();ensure();size(k);paint(k);curK=k;startIdle()};
 VW.forEach(k=>{EXT.views[k]=show(k)});
 EXT.stop=stop;
 })();

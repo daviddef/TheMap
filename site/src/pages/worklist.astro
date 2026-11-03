@@ -3,6 +3,8 @@ import Base from "../layouts/Base.astro";
 import WorkList from "@daviddef/archive-kit/components/WorkList.astro";
 import { u } from "../lib/url.js";
 import work from "../data/worklist.json";
+import archives from "../data/archive-worklists.json";
+import "../styles/kit.css";
 
 /* The estate keeps one work list per archive, in one shape, at one path, and
    this atlas was one of two projects with none — so its state lived in
@@ -10,11 +12,40 @@ import work from "../data/worklist.json";
    component and the checker were already installed; this is wiring. */
 const open = work.rows.filter((r) => ["running", "next", "blocked"].includes(r.state)).length;
 const waiting = work.rows.filter((r) => r.state === "blocked").length;
+const fam = archives.archives;
+const famOpen = fam.reduce((a, x) => a + x.open, 0);
+const asOf = new Date(archives.exported + "T00:00:00Z")
+  .toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 ---
 
-<Base title={work.title}
-      eyebrow="What is being done, as opposed to what is known"
-      dek={`${open} items open, ${waiting} of them waiting on somebody outside this atlas. Every other page here answers what the map holds; this one answers what is being done to it, including the parts that are stuck.`}>
+<Base title="The Atlas work list"
+      eyebrow="What is being done to the Atlas, as opposed to what is known"
+      dek={`${open} items open on the Atlas itself, ${waiting} of them waiting on somebody outside it. This is the Atlas's own list: each family archive keeps its own, summarised just below.`}>
+
+  <p class="k-stats" aria-label="Summary">
+    <span><b>{open}</b> open on the Atlas</span>
+    <span class="k-tag is-new">{famOpen} open across {fam.length} family archives</span>
+  </p>
+
+  <h2 class="k-h" id="archives">The family archives keep their own <span class="k-count">{fam.length}</span></h2>
+  <p class="k-lede">Each archive's list is the live one and lives on its own site. These are counts taken on {asOf}, so a
+  number here can be a little behind the page it links to. Open means running, next or blocked.</p>
+  <ul class="k-tiles fam">
+    {fam.map((a) => (
+      <li>
+        <a href={a.url}>{a.name}</a>
+        <span class="n"><b>{a.open}</b> open</span>
+        <span class="pills">
+          {a.counts.running > 0 && <span class="k-tag">{a.counts.running} running</span>}
+          <span class="k-tag">{a.counts.next} next</span>
+          {a.counts.blocked > 0 && <span class="k-tag">{a.counts.blocked} blocked</span>}
+          <span class="k-tag">{a.counts.done} done</span>
+        </span>
+      </li>
+    ))}
+  </ul>
+
+  <h2 class="k-h" style="margin-top:34px">The Atlas's own list</h2>
 
   <WorkList work={work} u={u} />
 
@@ -23,3 +54,10 @@ const waiting = work.rows.filter((r) => r.state === "blocked").length;
   <a href={u("/coverage/")}>What's missing</a> and
   <a href={u("/changelog/")}>What changed</a>.</p>
 </Base>
+
+<style>
+  .fam .n { font-family: var(--sans); font-size: 13px; color: var(--ink-2); }
+  .fam .n b { font-family: var(--serif); font-size: 26px; color: var(--ink); margin-right: 4px; }
+  .fam .pills { display: flex; flex-wrap: wrap; gap: 5px; }
+  .fam .k-tag { font-size: 10px; padding: 3px 7px; }
+</style>

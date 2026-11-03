@@ -3,6 +3,7 @@
    Every other page says what is here. This one says what is not. */
 import fs from "node:fs";
 import Base from "../layouts/Base.astro";
+import "../styles/kit.css";
 import { u } from "../lib/url.js";
 import full from "../data/places-full.json";
 import cols from "../data/collections-full.json";
@@ -38,7 +39,7 @@ let troveTitles = 0;
 try { troveTitles = JSON.parse(fs.readFileSync("../data/trove-newspapers.json", "utf8")).counts.titles; }
 catch { troveTitles = 0; }
 let flagPages = 0;
-try { flagPages = fs.readdirSync("public/flags").filter((f) => f.endsWith(".html")).length; }
+try { flagPages = fs.readdirSync("src/flags-pages").filter((f) => f.endsWith(".html")).length; }
 catch { flagPages = 0; }
 const LOCAL = new Set(["CITY","TOWN","COMMUNE","HAMLET","VILLAGE","PARISH","MUNICIPALITY",
                        "BOROUGH","SUBURB","CIVIL_PARISH","TOWNSHIP","COUNTY","BR_COUNTY",
@@ -80,19 +81,22 @@ const T = list.reduce((a, r) => ({
   cols: a.cols + r.cols, local: a.local + r.local, places: a.places + r.places,
   walked: a.walked + r.walked, divs: a.divs + r.divs,
   vols: a.vols + r.vols }), { cols: 0, local: 0, places: 0, walked: 0, divs: 0, vols: 0 });
-let worldCC = 0, worldGap = 0, worldBy = {}, afNat = 0;
-try {
-  const wa = (await import("../../../data/world-archives.json")).default;
-  for (const r of wa.archives || []) worldBy[r.cc] = (worldBy[r.cc] || 0) + 1;
-  worldCC = Object.keys(worldBy).length;
-  afNat = Object.keys(worldBy).filter((c) => AFRICA.has(c)).length;
-  worldGap = Object.keys(CN).length - worldCC;
-} catch (e) { worldCC = 0; }
 /* AFRICA, MEASURED RATHER THAN LEFT TO BE INFERRED FROM A GREY CONTINENT. */
 const AFRICA = new Set(["DZ","AO","BJ","BW","BF","BI","CM","CV","CF","TD","KM","CG","CD",
   "CI","DJ","EG","GQ","ER","SZ","ET","GA","GM","GH","GN","GW","KE","LS","LR","LY","MG",
   "MW","ML","MR","MU","MA","MZ","NA","NE","NG","RW","ST","SN","SC","SL","SO","ZA","SS",
   "SD","TZ","TG","TN","UG","EH","ZM","ZW"]);
+/* (Defined above the try that reads it: it used to sit below, so the first use threw a
+   ReferenceError, the catch swallowed it, and the page told readers 0 countries have a named
+   national source.) */
+let worldCC = 0, worldGap = 0, worldBy = {}, afNat = 0;
+try {
+  const wa = (await import("../../../data/world-archives.json")).default;
+  for (const r of wa.archives || []) worldBy[r.cc] = (worldBy[r.cc] || 0) + 1;
+  worldCC = Object.keys(worldBy).filter((c) => CN[c]).length;
+  afNat = Object.keys(worldBy).filter((c) => AFRICA.has(c)).length;
+  worldGap = Object.keys(CN).length - worldCC;
+} catch (e) { worldCC = 0; }
 const afCols = cols.collections.filter((c) => (c.countries || []).some((k) => AFRICA.has(k))).length;
 const totalCols = cols.collections.length;
 const afPct = Math.round(1000 * afCols / totalCols) / 10;
@@ -109,12 +113,19 @@ const mapped = list.filter((r) => r.regions > 0).length;
   eyebrow={`${list.length} countries measured · ${T.walked} places walked, ${T.divs} districts drawn · ${Math.round(100*T.local/T.cols)}% of collections reach a named place`}
   dek="Every other page here says what is present. This one measures what is missing, country by country, because a map that only advertises its coverage is quietly claiming the rest.">
 
-  <div class="one" style="border-left-color:#C0392B">
+  <p class="k-stats" aria-label="Summary">
+    <span><b>{list.length}</b> countries measured</span>
+    <span class="k-tag is-new">{unsurveyedPct}% never surveyed</span>
+    <span class="k-tag">{walked} with a place walked</span>
+    <span class="k-tag">{mapped} with a record region</span>
+  </p>
+
+  <section>
     {/* It said «three» over five items, on the one page whose whole argument is
         that a number must be the number. Counted, like the rest. */}
-    <div class="lab">The honest numbers</div>
+    <h2 class="k-h">The honest numbers</h2>
     <ul class="big">
-      <li><b>{unsurveyedPct}% of the ground on this map has never been surveyed.</b>
+      <li><b>{unsurveyedPct}%</b> of the ground on this map has never been surveyed.
         {" "}{nSurveyed.toLocaleString()} of {nDots.toLocaleString()} dots carry an access
         class somebody established; the rest are correctly placed and unread. Every other
         figure on this page is a refinement of that one.</li>
@@ -131,8 +142,8 @@ const mapped = list.filter((r) => r.regions > 0).length;
         filed in. They, and every other dot with no volume recorded on it, are drawn hollow
         for exactly this reason: a district that a catalogue merely reaches must not look
         like a parish somebody read.</li>
-      <li><b>{worldCC}</b> of {list.length} now have a <b>named national source</b> — the
-        national archive or national library, from Wikidata. It was <b>38</b> until today:
+      <li><b>{worldCC}</b> of {Object.keys(CN).length} countries now have a <b>named national source</b> — the
+        national archive or national library, from Wikidata. It was <b>38</b> until recently:
         the other 199 answered with FamilySearch and Ancestry, which cover everywhere and
         therefore say nothing about anywhere. <b>Nobody here has opened these</b>; their
         links answered when asked, and that is all this map claims. {worldGap} countries
@@ -154,9 +165,9 @@ const mapped = list.filter((r) => r.regions > 0).length;
         yet one thing: the timelines are written into their pages as markup, so a search here
         cannot read them.</li>
     </ul>
-  </div>
+  </section>
 
-  <div class="one" style="margin-top:26px;border-left-color:#C0392B">
+  <div class="one" style="margin-top:26px">
     <div class="lab">The continent this map is worst at</div>
     <p class="cap">Africa reads as empty on the map and the reason is not that Africa has no
     records. It is that <b>{afCols} of {totalCols.toLocaleString()} FamilySearch collections —
@@ -171,7 +182,7 @@ const mapped = list.filter((r) => r.regions > 0).length;
   </div>
 
   <section style="margin-top:30px">
-    <h2>The ground itself</h2>
+    <h2 class="k-h">The ground itself</h2>
     <p class="cap">Inside the {regions.regions.length} record regions, mapped by other people
     and drawn as such — nobody here has visited any of them. A church is a <b>parish</b>, and
     a parish is the unit a register is kept in, which makes it the most useful of these.</p>
@@ -192,7 +203,7 @@ const mapped = list.filter((r) => r.regions > 0).length;
 
   {irl.coverage && (
     <section style="margin-top:34px">
-      <h2>Ireland, measured against the Ordnance Survey</h2>
+      <h2 class="k-h">Ireland, measured against the Ordnance Survey</h2>
       <p class="cap">The townland layer comes from Townlands.ie, an OpenStreetMap project
       still in progress. Shipping it without this table would let a reader take a thin county
       for an empty one — which is the single confusion this page exists to prevent. The
@@ -245,7 +256,7 @@ const mapped = list.filter((r) => r.regions > 0).length;
     </tbody>
   </table>
 
-  <div class="one" style="margin-top:26px;border-left-color:var(--rule-strong)">
+  <div class="one" style="margin-top:26px">
     <div class="lab">Why this page exists</div>
     <p class="cap">Croatia has {list.find(r=>r.cc==="HR")?.walked ?? 0} walked places and
     {" "}{list.find(r=>r.cc==="HR")?.vols ?? 0} volumes because somebody walked a catalogue
@@ -256,9 +267,15 @@ const mapped = list.filter((r) => r.regions > 0).length;
 </Base>
 
 <style>
-  .big { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 9px; }
-  .big li { font-family: var(--sans); font-size: 13.5px; line-height: 1.6; color: var(--ink-2); }
-  .big b { font-family: var(--mono); font-size: 17px; color: var(--accent); }
+  /* Each honest number is a card with the number first and large: the page's argument is that a
+     number must be the number, so it is the first thing seen, not a bold word in a paragraph. */
+  .big { list-style: none; padding: 0; margin: 4px 0 0; display: grid; gap: 12px;
+         grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); }
+  .big li { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 16px 18px;
+            font-family: var(--sans); font-size: 13.5px; line-height: 1.6; color: var(--ink-2); }
+  .big li > b:first-child { display: block; font-family: var(--serif); font-size: 38px; line-height: 1.05;
+                            font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+  .big b { color: var(--ink); }
   td.nil { color: var(--ink-3); }
   td.yes { color: var(--accent); font-weight: 600; }
   td { vertical-align: top; }

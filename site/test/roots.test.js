@@ -267,9 +267,12 @@ test("a place is never placed by borrowing a borrowed place", need, async () => 
 });
 
 test("the page promises what the source does", () => {
-  const files = ["index.html", "viewer.html", "roots.css", "js/app.js", "js/worker.js", "js/gedcom.js", "js/model.js", "js/resolver.js", "js/atlas.js", "js/pipeline.js", "js/sample.js", "js/export.js", "js/workbench.js", "js/contribute.js", "js/lookup.js", "js/checklist.js", "js/recent.js", "js/myheritage.js"]
+  const files = ["viewer.html", "roots.css", "js/app.js", "js/worker.js", "js/gedcom.js", "js/model.js", "js/resolver.js", "js/atlas.js", "js/pipeline.js", "js/sample.js", "js/export.js", "js/workbench.js", "js/contribute.js", "js/lookup.js", "js/checklist.js", "js/recent.js", "js/myheritage.js"]
     .filter(f => fs.existsSync(R + f));
-  const html = fs.readFileSync(R + "index.html", "utf8");
+  const html = fs.readFileSync(path.join(here, "../src/pages/roots/index.astro"), "utf8");   // the page is an Atlas page now: the site menu, not the Base layout
+  assert.doesNotMatch(html, /layouts\/Base/, "the page must not use the Base layout (counter, ads, Google Fonts)");
+  assert.doesNotMatch(html, /fonts\.googleapis|googlesyndication/i);
+  assert.doesNotMatch(fs.readFileSync(path.join(here, "../public/js/nav.js"), "utf8"), /fetch\(|XMLHttpRequest|sendBeacon|localStorage|cookie/);
   assert.match(html, /Content-Security-Policy/); assert.match(html, /connect-src 'self'/); assert.match(html, /default-src 'none'/);
   assert.doesNotMatch(html, /<script[^>]+src="https?:/i); assert.doesNotMatch(html, /goatcounter|adsbygoogle|googletagmanager|gtag\(/i);
   for (const f of files) {

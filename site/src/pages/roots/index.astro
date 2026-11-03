@@ -1,20 +1,52 @@
+---
+/* Roots & Routes from your GEDCOM. An Atlas page with the Atlas menu, but NOT the Base layout: Base carries the visitor counter, the ad slot,
+   Google Fonts and the language script, none of which this page may have (the file never leaves the device; the meta CSP below enforces it).
+   The menu list is shared with Base (src/lib/nav.js); the page's own files live in public/roots/. */
+import { nav } from "../../lib/nav.js";
+import { u } from "../../lib/url.js";
+const here = Astro.url.pathname;
+---
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <!-- The privacy promise, enforced by the browser rather than only stated: scripts, styles and data come from this site only; nothing may be
-     sent anywhere else; no forms, no third-party anything. This page has no analytics and does not use the site layout (which carries a counter). -->
+     sent anywhere else; no forms, no third-party anything. This page has no analytics and does not use the site layout (which carries a counter and ads): it takes only the site's menu, from src/lib/nav.js, and the menu script in /js/nav.js. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; frame-src 'self'; form-action 'none'; base-uri 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex">
 <title>Roots &amp; Routes from your GEDCOM</title>
-<link rel="icon" href="../favicon.svg">
+<link rel="icon" href="/favicon.svg">
+<link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="roots.css">
 </head>
 <body>
+<header class="site">
+  <div class="wrap sitein">
+    <a class="brand" href={u("/")}>Record <em>Atlas</em></a>
+    <button class="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Menu"><span class="bars" aria-hidden="true"></span></button>
+    <nav class="topnav" aria-label="Main">
+      {nav.map(([label, links]) => (
+        typeof links === "string"
+          ? <a class:list={["menulink", here === u(links) ? "on" : ""]} href={u(links)}>{label}</a>
+          : <details class="menu"><summary>{label}</summary><div class="panel">{links.map(([h, l]) => <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}</div></details>
+      ))}
+      <a class="findbtn" href={u("/add/")}>Add source</a>
+    </nav>
+  </div>
+  <div class="drawer" id="drawer" hidden>
+    <div class="wrap">{nav.map(([label, links]) => (
+      typeof links === "string"
+        ? <div class="dgrp"><a href={u(links)} class={here === u(links) ? "on" : ""}>{label}</a></div>
+        : <div class="dgrp"><span class="gl">{label}</span>{links.map(([h, l]) => <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}</div>
+    ))}
+      <div class="dgrp"><span class="gl">Contribute</span><a href={u("/add/")}>Add a source</a></div>
+    </div>
+  </div>
+</header>
+
 <header class="top">
-  <a class="back" href="../">← Record Atlas</a>
   <h1>Roots &amp; Routes</h1>
   <p class="lede">Drop in your family tree file and see it drawn on the Atlas: every place tied to its country, its flag and who ruled it that year.</p>
 </header>
@@ -162,6 +194,7 @@
   <p>Place names and coordinates: <a href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC BY 4.0). Regimes, flags, events and record collections: the Record Atlas.
   This is a prototype: it can be wrong, and a place it cannot read is shown for you to decide, never guessed.</p>
 </footer>
-<script src="js/app.js" type="module"></script>
+<script is:inline src="/js/nav.js"></script>
+<script is:inline src="js/app.js" type="module"></script>
 </body>
 </html>

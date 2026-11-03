@@ -702,7 +702,7 @@ function loadTree(T){
   const P={},list=[];
   for(const r of T.people){
     const p={id:r.id,sex:r.sex==='f'?'f':'m',fi:r.line==null?7:r.line,sur:r.sur||'',given:r.given||'',by:r.by,bp:r.bp,dy:r.dy==null?null:r.dy,hid:r.hid===1?1:0,dp:r.dp||r.bp,my:r.my||null,occ:r.occ||null,
-      father:r.father||null,mother:r.mother||null,spouse:r.spouse||[],kids:r.kids||[],g:0,src:(r.srcs||[]).length,srcs:r.srcs||null,slug:r.slug||null,href:r.href||null,page:r.page||null,bye:!!r.bye,dye:!!r.dye,bpe:!!r.bpe,bpr:r.bpr||null,dpr:r.dpr||null,note:r.note||null,fg:r.fg==null?null:r.fg,mg:r.mg==null?null:r.mg};
+      father:r.father||null,mother:r.mother||null,spouse:r.spouse||[],kids:r.kids||[],g:0,src:(r.srcs||[]).length,srcs:r.srcs||null,slug:r.slug||null,href:r.href||null,page:r.page||null,bye:!!r.bye,dye:!!r.dye,bpe:!!r.bpe,bpr:r.bpr||null,dpr:r.dpr||null,sk:r.sk||null,note:r.note||null,fg:r.fg==null?null:r.fg,mg:r.mg==null?null:r.mg};
     if(p.dy==null)p.dp=null;
     P[p.id]=p;list.push(p);
   }
@@ -2279,7 +2279,7 @@ function surnameData(){
   const rows=[[root,0]];anc.forEach((g,id)=>{if(g<=depth&&P[id])rows.push([P[id],g])});
   const G=new Map();let none=0,maxG=0;
   for(const [p,g] of rows){
-    const key=sfold(p.sur);if(!key){none++;continue}
+    const key=p.sk||sfold(p.sur);if(!key){none++;continue}
     let e=G.get(key);if(!e){e={key,forms:new Map(),ppl:[],near:0};G.set(key,e)}
     e.forms.set(p.sur,(e.forms.get(p.sur)||0)+1);e.ppl.push({p,g});e.near+=Math.pow(2,-g);maxG=Math.max(maxG,g);
   }

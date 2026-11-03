@@ -47,7 +47,7 @@ export class Session {
     }
     nameTargets(targets);
     const placeFor = raw => { const id = of.get(raw); return id ? { name: targets.get(id).n } : null; };
-    const { tree, report } = buildTree(this.P, placeFor, this.est, this.dest, { living });
+    const { tree, report } = buildTree(this.P, placeFor, this.est, this.dest, { living, families: this.families });
     T.tree = Math.round(now() - t0);
     const used = new Set(); for (const p of tree.people) { if (p.bp) used.add(p.bp); if (p.dp) used.add(p.dp); }
     const keep = new Map([...targets].filter(([, t]) => used.has(t.n)));

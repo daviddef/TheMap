@@ -90,7 +90,6 @@ export function readPeople(parsed) {
 }
 
 const slugify = s => s.normalize('NFD').replace(/\p{Mn}/gu, '').replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase().slice(0, 60);
-const fold = s => (s || '').normalize('NFKD').replace(/[^\x00-\x7f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '');   // "de Franceschi", "De-Franceschi" and "Defranceschi" are one name
 
 /* Fill the years the file leaves out, decide who is living. Mutates the people; returns the sets of estimated ids. */
 export function prepare(P) {
@@ -113,9 +112,17 @@ export function prepare(P) {
   return { est, dest };
 }
 
+/* The key a surname is grouped under. Typography is never a spelling (case, spaces, hyphens, apostrophes: "de Franceschi" is "Defranceschi"), an accent is
+   ("Lereña" is not "Lerena"), and the spellings the Atlas surname catalogue lists as one family (same / attested) share one key. families: [[form, ...], ...]. */
+export const surnameKey = s => (s || '').normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
+export function famKeyer(families) {
+  const m = new Map(); (families || []).forEach((f, i) => f.forEach(x => m.set(surnameKey(x), 'f' + i)));
+  return s => { const k = surnameKey(s); return m.get(k) || k; };
+}
+
 /* placeFor(raw) -> {name} | null.  Returns {tree, report}. */
 export function buildTree(P, placeFor, est, dest, opts = {}) {
-  const living = opts.living || 'redact', maxLines = 8, hide = p => p.liv && living !== 'show';
+  const living = opts.living || 'redact', sk = famKeyer(opts.families), maxLines = 8, hide = p => p.liv && living !== 'show';
   const keep = new Map(), undrawn = [];
   const ok = raw => (raw ? placeFor(raw) : null);
   for (const p of P.values()) {
@@ -155,7 +162,7 @@ export function buildTree(P, placeFor, est, dest, opts = {}) {
   }
   // lines: the seven most common surnames get a colour of their own, everyone else shares the last
   const counts = new Map();
-  for (const p of keep.values()) if (p.sur) { const k = fold(p.sur), c = counts.get(k); if (c) c[0]++; else counts.set(k, [1, p.sur]); }
+  for (const p of keep.values()) if (p.sur) { const k = sk(p.sur), c = counts.get(k); if (c) c[0]++; else counts.set(k, [1, p.sur]); }
   const order = [...counts].sort((a, b) => b[1][0] - a[1][0]).slice(0, maxLines - 1).map(e => e[0]);
   const lines = order.map(k => ({ sur: counts.get(k)[1], host: '' }));
   // focus: the deceased person with the most ancestors and descendants (each counted to 30)
@@ -169,9 +176,9 @@ export function buildTree(P, placeFor, est, dest, opts = {}) {
   if (focus === null) focus = keep.keys().next().value || null;
   const people = [];
   for (const [i, p] of keep) {
-    const li = order.indexOf(fold(p.sur));
+    const li = order.indexOf(sk(p.sur));
     people.push({ id: i, sex: p.sex === 'f' ? 'f' : 'm', given: hide(p) ? '' : p.given, sur: p.sur, line: li < 0 ? maxLines - 1 : li,
-      by: hide(p) ? Math.floor(p.by / 10) * 10 : p.by, hid: hide(p) ? 1 : 0, bp: p.bp, bpr: hide(p) ? null : p.bpRaw || null, dpr: hide(p) ? null : p.dpRaw || null, dy: hide(p) ? null : p.dy, dp: hide(p) ? null : p.dp, my: p.my,
+      by: hide(p) ? Math.floor(p.by / 10) * 10 : p.by, hid: hide(p) ? 1 : 0, sk: sk(p.sur) || null, bp: p.bp, bpr: hide(p) ? null : p.bpRaw || null, dpr: hide(p) ? null : p.dpRaw || null, dy: hide(p) ? null : p.dy, dp: hide(p) ? null : p.dp, my: p.my,
       occ: hide(p) ? null : p.occ, father: p.father, mother: p.mother, spouse: p.spouseK, kids: p.kidsK, srcs: hide(p) ? [] : p.srcs,
       bye: est.has(p.id) || (p.byApprox && !hide(p)), dye: dest.has(p.id), bpe: p.bpe, slug: hide(p) ? null : slugify(p.given + ' ' + p.sur) });
   }

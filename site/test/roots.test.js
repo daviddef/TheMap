@@ -351,6 +351,15 @@ test("consistency checks: whole-life logic, stacked reasons, nothing guessed, an
   const s2 = new Session(io); await s2.load(enc(makeSample())); const c2 = s2.checklist(); assert.ok(c2.sections.find(x => x.key === "leads").items.every(i => i.cols.every(x => /^https?:\/\//.test(x.url) || !x.url)), "lead links are plain web links");
 });
 
+test("surnames group by the Atlas catalogue's families; typography is never a spelling, an accent is", async () => {
+  const { famKeyer, surnameKey } = await import(R + "js/model.js");
+  assert.equal(surnameKey("de Franceschi"), surnameKey("De-Franceschi")); assert.equal(surnameKey("O'Neil"), surnameKey("ONeil"));
+  assert.notEqual(surnameKey("Lere\u00f1a"), surnameKey("Lerena"), "an accent is a spelling");
+  const k = famKeyer([["Defranceschi", "Defranceski"], ["Bla\u017eevi\u0107", "Blazevic"]]);
+  assert.equal(k("Defranceski"), k("de Franceschi")); assert.equal(k("Blazevic"), k("BLA\u017dEVI\u0106"));
+  assert.notEqual(k("Franceschi"), k("Defranceschi"), "a form the catalogue does not list stays apart"); assert.equal(k("Quux"), "quux");
+});
+
 test("MyHeritage links: one pasted link gives the site and tree, and every I-number follows", async () => {
   const m = await import(R + "js/myheritage.js"); const S = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
   const a = m.parseLink("see https://www.myheritage.com/profile-" + S + "-4000030/some-name-\u2714-\u2b50-x"), b = m.parseLink("https://www.myheritage.com/family-trees/example-family-site/" + S + "?rootIndividualID=4000030&familyTreeID=4");

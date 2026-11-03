@@ -333,6 +333,7 @@ const IC = {
   check: svg('M5 12.5l4.5 4.5L19 7.5'),
   person: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-4 3.6-6 7-6s6.2 2 7 6"/></svg>',
   tree: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9.5" y="3" width="5" height="4" rx="1"/><rect x="3" y="17" width="5" height="4" rx="1"/><rect x="16" y="17" width="5" height="4" rx="1"/><path d="M12 7v5M5.5 17v-5h13v5"/></svg>',
+  info: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.01"/></svg>',
   open: svg('M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5'),
 };
 /* an icon-only button or link: always has a title and an aria-label, so a screen reader and a hover both say what it does */
@@ -373,15 +374,15 @@ function plist(list, total) {
   return ul;
 }
 let lastInfo = null;
-function mhStatus(extra) { $('#mhstat').textContent = mhc ? 'Linked: tree ' + mhc.tree + '.' + (extra || '') + ' Open one or two people to check they are the right ones.' : ''; }
-function mhWho(m) { mhStatus(m.name ? ' That link is person ' + m.id + ' in your file: ' + m.name + '. If that is not who you pasted, the numbering differs and these links are wrong.' : ' No person ' + m.id + ' in this file, so check the link.'); }
+function mhStatus(extra) { $('#mhsum').textContent = mhc ? 'on · tree ' + mhc.tree : 'off'; $('#mhsum').classList.toggle('on', !!mhc); $('#mhstat').textContent = mhc ? (extra || 'Open one or two people to check they are the right ones.') : ''; }
+function mhWho(m) { mhStatus(m.name ? 'That link is ' + m.id + ' in your file: ' + m.name + '. If that is not who you pasted, the numbering differs and these links are wrong.' : 'No person ' + m.id + ' in this file, so check the link.'); }
 $('#mhin').oninput = e => {
   const c = parseLink(e.target.value);
   if (!c) { mhc = null; $('#mhstat').textContent = e.target.value.trim() ? 'That does not look like a MyHeritage profile or tree link.' : ''; refreshMh(); return; }
   mhc = c; history.replaceState(null, '', toHash(c)); mhStatus(); refreshMh(); if (worker && c.num) worker.postMessage({ cmd: 'who', id: 'I' + c.num });
 };
 function refreshMh() { pushMh(); drawFix(); if (lastInfo) person(lastInfo); }
-if (mhc) { $('#mhbox').open = true; mhStatus(' (from the address)'); }
+if (mhc) mhStatus();
 
 function fixRow(s, i) {
   const row = el('div', 'frow'), cb = el('input'); cb.type = 'checkbox'; cb.checked = ticked.has(i.key); cb.setAttribute('aria-label', 'Done'); row.classList.toggle('done', cb.checked);
@@ -417,9 +418,9 @@ const hay = (s, i) => (s.key === 'names' ? i.name + ' ' + i.kin : s.key === 'dup
 function drawFix() {
   if (!fix) return; const q = $('#ffilter').value.trim().toLowerCase(), box = $('#fsecs'); box.textContent = '';
   for (const s of fix.sections) {
-    const d = el('details'); d.id = 'fs-' + s.key; if (s.items.length) d.open = s.key === 'places' || d.dataset.open === '1';
+    const d = el('details', 'sec sec-' + s.key); d.id = 'fs-' + s.key; if (s.items.length) d.open = s.key === 'places' || d.dataset.open === '1';
     const sum = el('summary'), c = el('span', 'small'); c.id = 'fc-' + s.key; sum.append(el('b', null, s.title + ' '), el('span', 'count', n0(s.items.length)), ' ', c); d.append(sum);
-    d.append(el('p', 'small', s.how));
+    const how = el('p', 'small how', s.how); how.hidden = true; const inf = ib('info', 'What is this list?', function (e) { e.preventDefault(); e.stopPropagation(); how.hidden = !how.hidden; }); sum.append(' ', inf); d.append(how);
     const hits = q ? s.items.filter(i => hay(s, i).includes(q)) : s.items, cap = shownN.get(s.key) || 100;
     if (!s.items.length) d.append(el('p', 'small', 'Nothing to do here.'));
     for (const i of hits.slice(0, cap)) d.append(fixRow(s, i));

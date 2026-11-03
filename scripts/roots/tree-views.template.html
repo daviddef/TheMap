@@ -303,7 +303,9 @@ input[type=range]{accent-color:var(--atlas);flex:1 1 240px;min-width:140px}
 .kinhead h2{font:650 22px/1.2 var(--serif);margin:0 0 6px;text-wrap:balance}
 .kinhead p{margin:4px 0;color:var(--muted);font-size:13.5px}
 .kinmap{border-top:1px solid var(--rule)}
-.kinmap[hidden],#kvwrap[hidden]{display:none}
+.kinmap[hidden],#kvwrap[hidden],#kz[hidden]{display:none}
+.kz{display:flex;gap:6px;align-items:center;padding:6px 14px;border-bottom:1px solid var(--rule);font-size:12.5px;color:var(--muted)}
+#kv{background:var(--panel)}
 .kc{cursor:pointer}
 .kcbody{fill:var(--panel)}
 .kc:hover .kcbody{fill:var(--band)}
@@ -333,6 +335,28 @@ td:first-child{font:600 14.5px var(--serif);white-space:nowrap}
 .tie p{margin:0;color:var(--muted)}
 .build{margin-top:18px;max-width:74ch;color:var(--muted)}
 .build b{color:var(--ink);font-weight:600}
+
+/* LOCAL ADDITION: Surnames view */
+#sc{display:block;width:100%}
+#sc text.sw{font-family:var(--serif);font-weight:600;cursor:pointer;transition:opacity .15s}
+#sc text.sw:hover{text-decoration:underline}
+#sc .sel{stroke:var(--ink);stroke-width:2;fill:none;rx:6}
+.slegend{display:flex;flex-wrap:wrap;gap:6px 12px;padding:8px 12px;border-top:1px solid var(--rule);font-size:12.5px;align-items:center;color:var(--muted)}
+.slegend button{border:0;background:none;padding:2px 4px;border-radius:4px;display:inline-flex;gap:5px;align-items:center;font-size:12.5px;color:var(--ink)}
+.slegend button[aria-pressed="true"]{background:var(--sel);color:var(--on-sel)}
+.slegend i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.slegend .ramp{width:160px;height:10px;border-radius:5px}
+.sgrid{padding:10px 12px;border-top:1px solid var(--rule);overflow-x:auto}
+.sgrid h3{margin:0 0 6px;font:600 10.5px var(--sans);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.sgrid table{border-collapse:separate;border-spacing:2px;font-size:12px}
+.sgrid th{font-weight:400;color:var(--muted);padding:0 6px;text-align:center;font-size:11px}
+.sgrid th.rn{text-align:right;white-space:nowrap}
+.sgrid th.rn button{border:0;background:none;font:600 12.5px var(--serif);color:var(--ink);padding:1px 4px;border-radius:4px}
+.sgrid tr.on th.rn button{background:var(--sel);color:var(--on-sel)}
+.sgrid td{min-width:30px;height:22px;text-align:center;border-radius:4px;font-family:var(--mono);font-size:11px}
+.sgrid td.z{background:var(--band)}
+#sdetail .chip{margin:0 4px 4px 0}
+#sdetail .plist{max-height:420px;overflow:auto}
 /*EXT:STYLE*/
 </style>
 
@@ -377,6 +401,7 @@ td:first-child{font:600 14.5px var(--serif);white-space:nowrap}
     <button class="tab" role="tab" data-view="lanes">Place lanes<sup>ATLAS</sup></button>
     <button class="tab" role="tab" data-view="eras">Eras<sup>ATLAS</sup></button>
     <button class="tab" role="tab" data-view="timeline">Lifespans<sup>ATLAS</sup></button>
+    <button class="tab" role="tab" data-view="surnames">Surnames<sup>NEW</sup></button>
 <!--EXT:TABS-->
     <button class="tab" role="tab" data-view="orphans" title="Orphans and where to start">Orphans<sup>ATLAS</sup></button>
   </nav>
@@ -496,6 +521,21 @@ td:first-child{font:600 14.5px var(--serif);white-space:nowrap}
         </div>
       </section>
 
+      <section class="view" id="v-surnames" hidden>
+        <p class="vnote">The surnames of the focus person and every ancestor, as a cloud. Bigger = more people carried the name. Click a name to see who they were, and click anyone to re-centre the whole page on them.</p>
+        <div class="stage">
+          <div class="bar">
+            <span id="ssum"></span>
+            <span><b>Colour by</b><span class="seg" data-key="scol"><button data-v="country">Where born</button><button data-v="gen">How far back</button><button data-v="era">When</button></span></span>
+            <span><b>Size by</b><span class="seg" data-key="ssize"><button data-v="people">People</button><button data-v="near">Nearness</button></span></span>
+            <span><b>Generations</b><span class="seg" data-key="sdepth"><button data-v="all">All</button><button data-v="4">4</button><button data-v="6">6</button><button data-v="8">8</button></span></span>
+          </div>
+          <div class="amwrap"><div class="amcanvas"><svg id="sc" role="group" aria-label="Surname cloud"></svg><div class="slegend" id="slegend"></div></div><aside class="ampick" id="sdetail"></aside></div>
+          <div class="sgrid" id="sgrid"></div>
+          <div class="foot"><span id="sfoot"></span><span>Nearness: a parent counts far more than a great-great-grandparent</span><span>Names are matched ignoring case and accents, spelling variants are kept apart</span></div>
+        </div>
+      </section>
+
       <section class="view" id="v-orphans" hidden>
         <p class="vnote" id="orsum"></p>
         <div class="stage">
@@ -511,6 +551,7 @@ td:first-child{font:600 14.5px var(--serif);white-space:nowrap}
           <div class="kinpick"><span id="kinA"></span><span class="kvs">is related to</span><div class="ksearch"><label class="klab" for="kq">Compare with anyone</label><input id="kq" type="search" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="kres" placeholder="Type a name, a place or a year"><ul class="results" id="kres" role="listbox" hidden></ul></div><button class="btn" id="kswap">Swap</button></div>
           <div class="kinchips" id="kinchips"></div>
           <div class="kinhead" id="kinhead"></div>
+          <div class="kz" id="kz"><button class="btn" id="kzo" aria-label="Zoom out">−</button><button class="btn" id="kzi" aria-label="Zoom in">+</button><button class="btn" id="kz1">Reset</button><span id="kzp"></span></div>
           <div class="scroll" id="kvwrap"><svg id="kv" role="group" aria-label="Kinship diagram"></svg></div>
           <div class="trail" id="kvchain" hidden></div>
           <div class="kinmap" id="kinmap"><svg id="km" role="group" aria-label="Where each link was born"></svg><div class="legend"><span><i style="background:var(--atlas)"></i>A's line</span><span><i style="background:var(--brick)"></i>B's line</span><span><i style="background:var(--ink)"></i>Common ancestor</span></div></div>
@@ -835,13 +876,13 @@ let pedKey=null,pedSet=null;
 function pedigree(id){if(pedKey===id)return pedSet;const p=P[id],s=new Set([id]);ancSet(p).forEach((g,k)=>s.add(k));descSet(p).forEach((g,k)=>s.add(k));pedKey=id;pedSet=s;return s}
 
 /* ---------- State ---------- */
-const VIEWS=['hourglass','fan','map','atlasmap','movements','kinship','lanes','eras','timeline','orphans',...EXT.names];
+const VIEWS=['hourglass','fan','map','atlasmap','movements','kinship','lanes','eras','timeline','surnames','orphans',...EXT.names];
 const st={focus:ROOT.id,hist:[],view:'hourglass',card:'full',orient:'h',up:3,down:2,gens:5,q:'',line:null,zoom:1,tx:0,suppress:false,
-  mgroup:'line',mview:'global',mscope:'focus',year:1925,lgroup:'place',lscope:'focus',lzoom:1,hz:1,keep:false,open:null,tline:'pat',aview:'global',av:{cx:35,cy:-10,w:250},amode:'born',ascope:'all',apl:null,escope:'focus',ezoom:1,okind:'orph',fopen:false,kb:null,kinShow:false,kinSeq:null,kinIds:null,mapscope:'all',mcolor:'line',cty:null};
+  mgroup:'line',mview:'global',mscope:'focus',year:1925,lgroup:'place',lscope:'focus',lzoom:1,hz:1,keep:false,open:null,tline:'pat',aview:'global',av:{cx:35,cy:-10,w:250},amode:'born',ascope:'all',apl:null,escope:'focus',ezoom:1,okind:'orph',fopen:false,kb:null,kinShow:false,kinSeq:null,kinIds:null,mapscope:'all',mcolor:'line',cty:null,scol:'country',ssize:'people',sdepth:'all',sn:null,scty:null,kz:1};
 /* The address bar is the page's state, so a link shares exactly what you are looking at: #kinship&p=<person>&b=<second person>&…
    Only what differs from the defaults is written. An old link (#kinship, #close, #p=…) still works. */
 const DEF=Object.assign({},st);
-const HASHKEYS={p:'focus',b:'kb',card:'card',o:'orient',up:'up',down:'down',gens:'gens',mg:'mgroup',mv:'mview',ms:'mscope',y:'year',lg:'lgroup',ls:'lscope',tl:'tline',es:'escope',ok:'okind',map:'mapscope',mc:'mcolor',cty:'cty',ln:'line',am:'amode',as:'ascope',pl:'apl',av:'aview'};
+const HASHKEYS={p:'focus',b:'kb',card:'card',o:'orient',up:'up',down:'down',gens:'gens',mg:'mgroup',mv:'mview',ms:'mscope',y:'year',lg:'lgroup',ls:'lscope',tl:'tline',es:'escope',ok:'okind',map:'mapscope',mc:'mcolor',cty:'cty',ln:'line',am:'amode',as:'ascope',pl:'apl',av:'aview',sc:'scol',ss:'ssize',sd:'sdepth',sn:'sn'};
 function applyHash(){
   try{
     const parts=location.hash.slice(1).split('&').filter(Boolean);
@@ -1732,6 +1773,8 @@ $('#am').addEventListener('wheel',e=>{
   if(!(e.ctrlKey||e.metaKey))return;e.preventDefault();
   const r=e.currentTarget.getBoundingClientRect();azoom(e.deltaY<0?.8:1.25,e.clientX-r.left,e.clientY-r.top);
 },{passive:false});
+const kzSet=v=>{st.kz=Math.max(.5,Math.min(2,v));render()};
+$('#kzo').onclick=()=>kzSet(st.kz-.15);$('#kzi').onclick=()=>kzSet(st.kz+.15);$('#kz1').onclick=()=>kzSet(1);
 $('#azi').onclick=()=>azoom(.6,($('#am').clientWidth||700)/2,($('#am').clientHeight||450)/2);
 $('#azo').onclick=()=>azoom(1.6,($('#am').clientWidth||700)/2,($('#am').clientHeight||450)/2);
 
@@ -1966,7 +2009,7 @@ function kcard(parent,p,x,y,o){
   S('title',{},g,nm(p)+' · '+yrs(p)+' · born '+p.bp);
   S('rect',{class:'kcbody',width:W,height:H,rx:8,style:'stroke:'+o.col+';stroke-width:'+(o.thick?2.6:1.5)},g);
   S('text',{class:'sgen',x:10,y:13,style:'fill:'+o.col},g,o.tag||'');
-  S('text',{class:'sname',x:10,y:29},g,clip(nm(p),19));
+  S('text',{class:'sname',x:10,y:29},g,clip(nm(p),15));
   S('text',{class:'syr',x:10,y:44},g,clip((living(p)?'living':yrs(p))+' · '+p.bp,23));
   drawFlag(g,flagAt(p.bp,p.by),W-30,H/2-7.5,22);
 }
@@ -1974,7 +2017,7 @@ function drawV(k,A,B){
   const svg=$('#kv');svg.textContent='';
   const CWk=156,CHk=58,RHk=92,top=24,dA=k.dA,dB=k.dB,maxd=Math.max(dA,dB),direct=dA===0||dB===0,base=108,stepX=44;
   const gut=124,W=(direct?460:Math.max(600,2*(base+(maxd-1)*stepX+CWk/2)+40))+gut,H=top+maxd*RHk+CHk+26,cx=gut+(W-gut)/2;
-  svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.style.width='100%';svg.style.minWidth=Math.min(W,640)+'px';
+  svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.style.width=Math.round(W*st.kz)+'px';svg.style.height=Math.round(H*st.kz)+'px';svg.style.maxWidth='none';svg.style.margin='0 auto';$('#kzp').textContent=Math.round(st.kz*100)+'%';
   const yk=kk=>top+kk*RHk,teal='var(--atlas)',red='var(--brick)',ink='var(--ink)';
   const seqA=k.chainA.slice().reverse(),seqB=k.chainB.slice().reverse();   // X ... endpoint
   const edge=(px,py,qx,qy,col)=>S('path',{d:'M'+px+','+py+'V'+(py+qy)/2+'H'+qx+'V'+qy,fill:'none',stroke:col,'stroke-width':1.6,'stroke-opacity':.8},svg);
@@ -2057,12 +2100,12 @@ function renderKin(){
       '<p>Closest shared ancestor'+(k.partner?'s':'')+': <button class="plink" style="display:inline-flex;width:auto;margin:0 4px" data-id="'+k.X.id+'"><i style="background:'+colorOf(k.X)+'"></i>'+esc(nm(k.X))+'</button>'+(k.partner?' and <button class="plink" style="display:inline-flex;width:auto;margin:0 4px" data-id="'+k.partner.id+'"><i style="background:'+colorOf(k.partner)+'"></i>'+esc(nm(k.partner))+'</button>':'')+', '+k.dA+' generation'+(k.dA===1?'':'s')+' up from '+esc(A.given)+' and '+k.dB+' from '+esc(B.given)+'.'+(k.n>1&&!k.partner?' '+(k.n-1)+' other shared ancestor'+(k.n>2?'s':'')+'.':'')+'</p>'+
       '<p>Expected shared DNA about <b>'+pcts+'%</b> (roughly '+Math.round(k.r*6800)+' cM). A statistical average from the tree, not a measurement.</p>'+
       '<p><button class="btn" data-showpath="1">Show this path on the map</button></p>';
-    vwrap.hidden=false;chain.hidden=true;drawV(k,A,B);
+    vwrap.hidden=false;$('#kz').hidden=false;chain.hidden=true;drawV(k,A,B);
     mapw.hidden=false;drawKinMap(k.chainA,k.chainB);
     st.kinIds=[...new Set([...k.chainA,...k.chainB].map(p=>p.id))];st.kinSeq=[k.chainA.slice().reverse(),k.chainB];
   }else{
     const mp=marriagePath(A,B);
-    vwrap.hidden=true;mapw.hidden=true;st.kinIds=null;
+    vwrap.hidden=true;$('#kz').hidden=true;mapw.hidden=true;st.kinIds=null;
     if(mp){
       head.innerHTML='<h2>'+esc(nm(B))+' is connected to '+esc(nm(A))+' by marriage</h2><p>No shared ancestor in the tree, but the families join through '+(mp.length-1)+' step'+(mp.length>2?'s':'')+'.</p>';
       chain.hidden=false;
@@ -2084,7 +2127,7 @@ function render(){
   VIEWS.forEach(v=>{$('#v-'+v).hidden=v!==st.view});
   syncFilters();
   $$('.seg').forEach(s=>{const k=s.dataset.key;[...s.children].forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===String(st[k]))))});
-  (({hourglass:renderHG,fan:renderFan,map:renderMap,movements:renderMove,lanes:renderLanes,timeline:renderTL,atlasmap:renderAtlas,eras:renderEras,orphans:renderOrphans,kinship:renderKin})[st.view]||EXT.views[st.view])();
+  (({hourglass:renderHG,fan:renderFan,map:renderMap,movements:renderMove,lanes:renderLanes,timeline:renderTL,atlasmap:renderAtlas,surnames:renderSurnames,eras:renderEras,orphans:renderOrphans,kinship:renderKin})[st.view]||EXT.views[st.view])();
   requestAnimationFrame(()=>$$('.swipe').forEach(edges));
   writeHash();
 }
@@ -2118,6 +2161,8 @@ document.addEventListener('click',e=>{
   const ln=e.target.closest('[data-line]');
   if(ln){const i=+ln.dataset.line;st.line=st.line===i?null:i;renderMap();return}
   if(e.target.closest('a'))return;
+  const sn=e.target.closest('[data-sn]');if(sn){st.sn=st.sn===sn.dataset.sn?null:sn.dataset.sn;render();return}
+  const sc=e.target.closest('[data-scty]');if(sc){st.scty=st.scty===sc.dataset.scty?null:sc.dataset.scty;render();return}
   const t=e.target.closest('[data-id]');
   if(t){if(st.suppress){st.suppress=false;return}
     if(t.closest('#results')){$('#results').hidden=true;go(t.dataset.id);return}
@@ -2216,6 +2261,126 @@ document.querySelectorAll('[data-key="mcolor"] [data-v="line"]').forEach(b=>{b.t
 document.title=META.title;$('#ptitle').textContent=META.title;$('#subtxt').textContent=META.sub;
 $('#count').textContent=TREE?'':'Sample data: '+list.length.toLocaleString('en')+' invented people.';
 $('#rgkey').innerHTML=Object.keys(ATLAS.regimes).slice(0,5).map(k=>'<span><i style="background:var(--rg-'+k+')"></i>'+esc(ATLAS.regimes[k].label.split(/ [—·\/] /)[0])+'</span>').join('')+'<span><i style="background:var(--hair)"></i>Not surveyed yet</span>';
+
+/* ---------- LOCAL ADDITION · Surnames: a cloud of the ancestors' surnames, with colour carrying a second fact ---------- */
+const sfold=t=>fold(t||'').replace(/[^a-z0-9]+/g,'');
+const med=a=>{a=a.filter(x=>x!=null).sort((x,y)=>x-y);return a.length?a[a.length>>1]:null};
+const ctry=p=>(p.bp&&PL[p.bp]&&PL[p.bp].cn)||'Unknown';
+function surnameData(){
+  const root=P[st.focus],anc=ancSet(root),depth=st.sdepth==='all'?99:+st.sdepth;
+  const rows=[[root,0]];anc.forEach((g,id)=>{if(g<=depth&&P[id])rows.push([P[id],g])});
+  const G=new Map();let none=0,maxG=0;
+  for(const [p,g] of rows){
+    const key=sfold(p.sur);if(!key){none++;continue}
+    let e=G.get(key);if(!e){e={key,forms:new Map(),ppl:[],near:0};G.set(key,e)}
+    e.forms.set(p.sur,(e.forms.get(p.sur)||0)+1);e.ppl.push({p,g});e.near+=Math.pow(2,-g);maxG=Math.max(maxG,g);
+  }
+  const cc=new Map();
+  G.forEach(e=>{
+    e.label=[...e.forms].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]))[0][0];
+    e.gMin=Math.min(...e.ppl.map(x=>x.g));e.gMax=Math.max(...e.ppl.map(x=>x.g));e.medG=med(e.ppl.map(x=>x.g));
+    e.medBy=med(e.ppl.map(x=>x.p.by));e.cn=new Map();
+    e.ppl.forEach(x=>{const c=ctry(x.p);e.cn.set(c,(e.cn.get(c)||0)+1);cc.set(c,(cc.get(c)||0)+1)});
+    e.topC=[...e.cn].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]))[0][0];
+  });
+  const top=[...cc].filter(x=>x[0]!=='Unknown').sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).slice(0,7).map(x=>x[0]);
+  return {G,none,maxG,rows:rows.length,cc,top};
+}
+const cCol=(D,c)=>{const i=D.top.indexOf(c);return 'var(--l'+(i<0?7:i)+')'};
+const ramp=t=>'color-mix(in oklab, var(--l2) '+Math.round((1-t)*100)+'%, var(--l5))';
+function surnameColour(D,e){
+  if(st.scol==='country')return cCol(D,e.topC);
+  if(st.scol==='gen')return ramp(D.maxG>1?(e.medG-1)/(D.maxG-1):0);
+  const ys=[...D.G.values()].map(x=>x.medBy).filter(y=>y!=null),lo=Math.min(...ys),hi=Math.max(...ys);
+  return e.medBy==null?'var(--l7)':ramp(hi>lo?(hi-e.medBy)/(hi-lo):0);
+}
+let _scx=null;
+function cloudLayout(items,W,H){
+  _scx=_scx||document.createElement('canvas').getContext('2d');
+  for(let scale=1;scale>.35;scale*=.9){
+    const placed=[];let ok=true;
+    for(const it of items){
+      const fs=Math.max(11,it.fs*scale);_scx.font='600 '+fs+'px Fraunces,Georgia,serif';
+      const w=_scx.measureText(it.label).width+8,h=fs*1.12+(st.scol==='country'?7:2);
+      let hit=false;
+      for(let a=0;a<900;a+=.3){
+        const r=2.2*a,x=W/2+r*Math.cos(a)*1.7-w/2,y=H/2+r*Math.sin(a)-h/2;
+        if(x<4||y<4||x+w>W-4||y+h>H-4)continue;
+        if(placed.some(b=>x<b.x+b.w&&x+w>b.x&&y<b.y+b.h&&y+h>b.y))continue;
+        placed.push({it,fs,x,y,w,h});hit=true;break;
+      }
+      if(!hit){ok=false;break}
+    }
+    if(ok)return placed;
+    if(scale<=.4)return placed;
+  }
+  return [];
+}
+function renderSurnames(){
+  const D=surnameData(),svg=$('#sc'),cv=svg.parentNode;
+  const all=[...D.G.values()];
+  const val=e=>st.ssize==='near'?e.near:e.ppl.length;
+  if(!all.length){svg.setAttribute('height',60);svg.textContent='';$('#slegend').textContent='';$('#sgrid').textContent='';$('#sdetail').innerHTML='<h2>No surnames</h2><div class="amsub">This person and their ancestors have no surname recorded.</div>';$('#ssum').textContent='';$('#sfoot').textContent='';return}
+  if(st.sn&&!D.G.has(st.sn))st.sn=null;
+  const W=Math.max(360,cv.clientWidth||700),H=Math.round(Math.min(560,Math.max(360,W*.52)));
+  const vmax=Math.max(...all.map(val)),fmax=Math.min(84,Math.max(36,W/9));
+  const shown=all.slice().sort((a,b)=>val(b)-val(a)||a.label.localeCompare(b.label)).slice(0,90);
+  const items=shown.map(e=>({e,label:e.label,fs:11+(fmax-11)*Math.pow(val(e)/vmax,.7)}));
+  const placed=cloudLayout(items,W,H);
+  svg.setAttribute('width',W);svg.setAttribute('height',H);svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.textContent='';
+  placed.forEach(b=>{
+    const e=b.it.e,dim=(st.sn&&st.sn!==e.key)||(st.scty&&st.scol==='country'&&e.topC!==st.scty);
+    const g=S('g',{opacity:dim?.22:1},svg);
+    const t=S('text',{class:'sw',x:b.x+4,y:b.y+b.fs*.86,'font-size':b.fs,fill:surnameColour(D,e),'data-sn':e.key,tabindex:0,role:'button','aria-label':e.label+', '+e.ppl.length+' people'},g,e.label);
+    S('title',{},t,e.label+': '+e.ppl.length+' '+(e.ppl.length===1?'person':'people')+', generations '+e.gMin+(e.gMax>e.gMin?'–'+e.gMax:'')+(e.medBy!=null?', typically born '+e.medBy:'')+' · '+[...e.cn].sort((a,c)=>c[1]-a[1]).map(x=>x[0]+' '+x[1]).join(', '));
+    if(st.scol==='country'){
+      let x=b.x+4;const tw=b.w-8,n=e.ppl.length;
+      [...e.cn].sort((a,c)=>D.top.indexOf(a[0])-D.top.indexOf(c[0])||a[0].localeCompare(c[0])).forEach(([c,k])=>{const w=tw*k/n;S('rect',{x,y:b.y+b.h-5,width:Math.max(1,w-1),height:4,rx:1.5,fill:cCol(D,c)},g);x+=w});
+    }
+    if(st.sn===e.key)S('rect',{class:'sel',x:b.x,y:b.y,width:b.w,height:b.h},g);
+  });
+  const hidden=all.length-placed.length;
+  $('#ssum').textContent=D.rows+' people · '+all.length+' surnames'+(D.none?' · '+D.none+' with no surname recorded':'');
+  $('#sfoot').textContent=hidden>0?hidden+' more names are too small to fit, see the table below or pick fewer generations':'Every surname is shown';
+  /* legend */
+  let lg='';
+  if(st.scol==='country'){
+    lg='<span>Where born (most common place of birth for each name; the bar under a name shows the mix):</span>'+[...D.top].sort().concat(D.cc.has('Unknown')?['Unknown']:[]).map(c=>'<button data-scty="'+esc(c)+'" aria-pressed="'+(st.scty===c)+'"><i style="background:'+(c==='Unknown'?'var(--l7)':cCol(D,c))+'"></i>'+esc(c)+' '+D.cc.get(c)+'</button>').join('')+(D.cc.size>D.top.length+(D.cc.has('Unknown')?1:0)?'<span><i style="background:var(--l7);width:10px;height:10px;border-radius:2px;display:inline-block"></i> other countries</span>':'');
+  }else{
+    const lo=st.scol==='gen'?'Near (parents)':'Recent',hi=st.scol==='gen'?'Far back ('+D.maxG+' generations)':'Earliest';
+    lg='<span>'+lo+'</span><span class="ramp" style="background:linear-gradient(90deg,'+ramp(0)+','+ramp(1)+')"></span><span>'+hi+'</span><span>'+(st.scol==='gen'?'(median generation of the people with that name)':'(median birth year of the people with that name)')+'</span>';
+  }
+  $('#slegend').innerHTML=lg;
+  /* details */
+  const sel=st.sn&&D.G.get(st.sn);let h='';
+  if(sel){
+    const ppl=sel.ppl.slice().sort((a,b)=>a.g-b.g||(a.p.by-b.p.by));
+    h+='<h2>'+esc(sel.label)+'</h2><div class="amsub">'+sel.ppl.length+' '+(sel.ppl.length===1?'person':'people')+' · generations '+sel.gMin+(sel.gMax>sel.gMin?'–'+sel.gMax:'')+(sel.medBy!=null?' · typically born '+sel.medBy:'')+'</div>';
+    if(sel.forms.size>1)h+='<div class="amsub">Spelled: '+[...sel.forms].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).map(x=>esc(x[0])+' ('+x[1]+')').join(', ')+'</div>';
+    h+='<div>'+[...sel.cn].sort((a,b)=>a[0].localeCompare(b[0])).map(([c,k])=>'<span class="chip" style="border-left:6px solid '+(c==='Unknown'?'var(--l7)':cCol(D,c))+'">'+esc(c)+' '+k+'</span>').join('')+'</div>';
+    h+='<h3>People</h3><div class="plist">';
+    let lastg=-1;ppl.forEach(x=>{if(x.g!==lastg){lastg=x.g;h+='<div class="amsub">'+(x.g===0?'Focus person':x.g===1?'Parents':'Generation '+x.g)+'</div>'}h+=plink(x.p)});
+    h+='</div>';
+  }else h+='<h2>Pick a name</h2><div class="amsub">Click a surname in the cloud, or a row in the table below, to see who carried it.</div><div class="amsub">Colour tells a second story: switch <b>Colour by</b> to see where each name came from, how far back it goes, or when it was at its height.</div>';
+  $('#sdetail').innerHTML=h;
+  /* surname x generation table: when each name enters and leaves the tree. A name with one person is left out, so the table shows the names that recur. */
+  const rowsT=all.filter(e=>e.ppl.length>=2).sort((a,b)=>a.label.localeCompare(b.label)).slice(0,40);
+  const tot=Array.from({length:D.maxG+1},(_,g)=>[...D.G.values()].reduce((n,e)=>n+e.ppl.filter(x=>x.g===g).length,0));
+  let t='<h3>Names by generation (1 = parents; the shade is the share of that generation\'s ancestors who carried the name)</h3>';
+  if(!rowsT.length)t+='<div class="amsub">No surname recurs in this selection.</div>';
+  else{
+    t+='<table><thead><tr><th></th>'+tot.map((n,g)=>'<th title="'+n+' people in this generation">'+(g===0?'Me':g)+'</th>').join('')+'</tr></thead><tbody>';
+    rowsT.forEach(e=>{
+      t+='<tr'+(st.sn===e.key?' class="on"':'')+'><th class="rn"><button data-sn="'+esc(e.key)+'">'+esc(e.label)+'</button></th>';
+      for(let g=0;g<=D.maxG;g++){const n=e.ppl.filter(x=>x.g===g).length;
+        t+=n?'<td title="'+n+' of '+tot[g]+'" style="background:color-mix(in srgb,'+surnameColour(D,e)+' '+Math.round(25+70*n/tot[g])+'%,var(--panel));color:var(--ink)">'+n+'</td>':'<td class="z"></td>'}
+      t+='</tr>';
+    });
+    t+='</tbody></table>';
+  }
+  $('#sgrid').innerHTML=t;
+}
+$('#sc').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.dataset&&e.target.dataset.sn){e.preventDefault();e.target.dispatchEvent(new MouseEvent('click',{bubbles:true}))}});
 /*EXT:SCRIPT*/
 renderMetrics();
 render();

@@ -90,7 +90,7 @@ export function readPeople(parsed) {
 }
 
 const slugify = s => s.normalize('NFD').replace(/\p{Mn}/gu, '').replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase().slice(0, 60);
-const fold = s => (s || '').normalize('NFKD').replace(/[^\x00-\x7f]/g, '').toLowerCase();
+const fold = s => (s || '').normalize('NFKD').replace(/[^\x00-\x7f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '');   // "de Franceschi", "De-Franceschi" and "Defranceschi" are one name
 
 /* Fill the years the file leaves out, decide who is living. Mutates the people; returns the sets of estimated ids. */
 export function prepare(P) {

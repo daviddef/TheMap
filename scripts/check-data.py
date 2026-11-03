@@ -635,7 +635,8 @@ def context_contract():
             f"section of site/src/pages/data.astro when the version moves.")
     for r in now["regions"]:
         for e in r["eras"]:
-            if e["basis"] not in ("not-recorded", "unknown", "seeded:defranceschi-sovereignty"):
+            if e["basis"] not in ("not-recorded", "unknown", "seeded:defranceschi-sovereignty") \
+                    and not re.fullmatch(r"researched:\d{4}-\d{2}-\d{2}", e["basis"]):
                 err(f"context.json {e['id']}: unknown basis {e['basis']!r}")
             want = {True: ("bounds", "regime", "part"), False: ("none",), None: (None,)}[e["contested"]]
             if e.get("contestedScope") not in want:

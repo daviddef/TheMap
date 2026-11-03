@@ -26,6 +26,8 @@ import argparse, datetime, json, os, re, sys
 PALETTE = [  # (light, dark): hues kept apart from the 52 regimes already drawn
     ("#8C5A2B", "#C9935C"), ("#6B4E9B", "#A58BD0"), ("#B5483A", "#E08A7C"), ("#2F7F86", "#6FC1C8"),
     ("#8A8A2E", "#C5C56A"), ("#B0457F", "#DE88B8"), ("#4F6D3B", "#97B982"), ("#5C5C8A", "#9C9CCB"),
+    ("#A3622F", "#E0A06A"), ("#3F6E9E", "#85B1DC"), ("#8F3F5A", "#D487A3"), ("#6A7F2E", "#AFC464"),
+    ("#7A5CA8", "#B9A0E0"), ("#2F8A68", "#6FCFAA"), ("#B07A1E", "#E6B95C"), ("#6E5B4A", "#B8A28E"),
 ]
 
 

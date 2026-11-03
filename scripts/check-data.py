@@ -895,6 +895,7 @@ def mortality_gate():
     except Exception as e:
         err(f"cannot read {p}: {e}")
         return
+    known_p = {x["id"] for x in json.load(open("data/providers.json", encoding="utf-8"))["providers"]}
     seen, n = set(), 0
     for e in d["events"]:
         n += 1
@@ -906,6 +907,9 @@ def mortality_gate():
             err(f"{w}: unknown type {e.get('type')!r}")
         if not (isinstance(e.get("from"), int) and isinstance(e.get("to"), int) and e["from"] <= e["to"]):
             err(f"{w}: from/to must be years with from <= to")
+        for pid in e.get("records", []):  # the sources for THIS event's dead, named by provider id
+            if pid not in known_p:
+                err(f"{w}: records names {pid!r}, which is not a provider")
         geo = e.get("geo") or {}
         if not any(k in geo for k in ("countries", "circles", "bbox", "shapes", "lines", "global")):
             err(f"{w}: no area (countries, circles, bbox, shapes, lines or global)")

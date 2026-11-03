@@ -155,7 +155,7 @@ def build():
             row["at"] = at
         if "countries" in e["geo"]:
             row["cc"] = e["geo"]["countries"]
-        for k_src, k_out in (("says", "says"), ("open", "open"), ("toll", "toll"), ("sources", "src"), ("qid", "qid")):
+        for k_src, k_out in (("says", "says"), ("open", "open"), ("toll", "toll"), ("sources", "src"), ("qid", "qid"), ("records", "rec")):
             if e.get(k_src) not in (None, "", []):
                 row[k_out] = e[k_src]
         out.append(row)

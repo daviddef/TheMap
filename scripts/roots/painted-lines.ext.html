@@ -38,7 +38,7 @@
         <p class="vnote">The same people as generations: one row each, oldest at the top, the focus person ringed. The tree grows as you play it. The strip below counts the depth.</p>
         <div class="stage plx">
           <canvas id="cv-gen" role="img" aria-label="Family tree growing generation by generation"></canvas>
-          <div class="bar keep plbar"><button class="btn plplay" data-pl="gen">Play</button><input type="range" class="plrg" id="rg-gen" aria-label="Year" step="0.05"><b class="plyr" id="yr-gen"></b><span class="seg" data-key="pspeed"><button data-v="4">Slow</button><button data-v="8">Normal</button><button data-v="16">Fast</button></span></div>
+          <div class="bar keep plbar"><button class="btn plplay" data-pl="gen">Play</button><input type="range" class="plrg" id="rg-gen" aria-label="Year" step="0.05"><b class="plyr" id="yr-gen"></b><span class="seg" data-key="pspeed"><button data-v="4">Slow</button><button data-v="8">Normal</button><button data-v="16">Fast</button></span><button class="btn" id="gen-flip" type="button" aria-pressed="false" title="Turn the page over: newest generation at the top, going back down">Newest at top</button></div>
           <div class="plstats" id="pl-stats"></div>
           <div class="foot"><span>Dot colour = research line</span><span>Gold ring = born somewhere other than where they died</span><span>Dashed ring = may be the same person as a neighbour</span><span>Click anyone to re-centre</span></div>
         </div>
@@ -87,7 +87,7 @@ const SPECK=(()=>{const r=rnd(7),a=[];for(let i=0;i<110;i++)a.push([r(),r(),r()*
 const ROM=['I','II','III','IV','V','VI','VII','VIII','IX','X'];
 
 /* ---- the model: the focus person, every ancestor, every descendant, and who they married ---- */
-let M=null;
+let M=null,M_ad=99;
 const shortN=n=>{if(n.length<=28)return n;let o='';for(const w of n.split(/[ ,(:]+/)){if((o+' '+w).trim().length>28)break;o=(o+' '+w).trim()}return o||n.slice(0,28)};
 /* LOCAL CHANGE (Roots from your GEDCOM): the skill treats 'no death year' as 'living, withheld'. Here living people are shown unless hid===1, so test that, and give a person with no recorded death an ESTIMATED end (marked ?) so they can be drawn. */
 const pulse=()=>(typeof RM!=='undefined'&&RM)?0:(Math.sin(performance.now()/1000*3.4)+1)/2;
@@ -97,12 +97,13 @@ function build(id){
   const f=P[id];let skipped=0;
   const par=(c)=>[c.father,c.mother].filter(x=>{if(!x||!P[x])return false;if(linkOK(c,x))return true;if(P[x].hid!==1)skipped++;return false});
   const kidsOK=(q)=>kidsOf(q).filter(k=>par(k).includes(q.id)&&k.hid!==1&&k.by!=null);
-  let S,dd=99;
-  for(const d of [99,3,2,1]){dd=d;S=new Map();
-    (function up(c,r){if(S.has(c.id))return;S.set(c.id,r);par(c).forEach(x=>up(P[x],r-1))})(f,0);
+  let S,dd=99,ad=99;   /* LOCAL CHANGE: a deep tree (hundreds of ancestors) is unreadable, so ancestors are limited to the nearest generations that keep the picture to about 64 people; refocus on an ancestor to go further */
+  search:for(const a of [99,8,7,6,5,4,3,2,1])for(const d of [99,3,2,1]){dd=d;ad=a;S=new Map();
+    (function up(c,r){if(S.has(c.id)||r<-a)return;S.set(c.id,r);par(c).forEach(x=>up(P[x],r-1))})(f,0);
     (function down(q,r){if(r>d)return;kidsOK(q).forEach(k=>{if(!S.has(k.id)){S.set(k.id,r);down(k,r+1)}})})(f,1);
     const mi=new Set();S.forEach((r,i)=>par(P[i]).forEach(x=>{if(!S.has(x))mi.add(x)}));
-    if(S.size+mi.size<=64||d===1){S.mi=mi;break}}
+    if(S.size+mi.size<=64||(a===1&&d===1)){S.mi=mi;break search}}
+  M_ad=ad;
   skipped=0;const ids=[...S.keys(),...S.mi],inSet=new Set(ids);
   const R=ids.map(i=>{const p=P[i];return{id:i,p,n:p.given,sur:p.sur,b:p.by,d:ED(p),bp:p.bp,dp:p.dp||p.bp,bye:p.bye,dye:p.dy==null||p.dye,fi:p.fi,mi:S.has(i)?0:1,rel:S.get(i),
     f:null,m:null}});
@@ -155,7 +156,7 @@ function build(id){
   return{id,f:I[id],R,I,G,tEnd,tiers,legs,places,t0,t1,rest:best,gap:gaps.length?gaps.reduce((a,b)=>a+b,0)/gaps.length:0,widest:widest.length,widestG:widest[0]?widest[0].g:1,eras,events,moments,kids,skipped,dd:S.size?dd:99,
     nAnc:[...S.values()].filter(r=>r<0).length,nDesc:[...S.values()].filter(r=>r>0).length,nMi:S.mi.size,reg}
 }
-const colOf=r=>r.id===M.id?T.ink:T.l[r.fi==null?7:r.fi];
+const colOf=r=>r.id===M.id?T.brick:T.l[r.fi==null?7:r.fi];
 function world(m){ // the columns, branches and labels for the sky, ledger and household views
   const R=m.R,I=m.I;R.forEach((r,i)=>{r.ph=i*1.7+.4;r.par=I[r.m]?r.m:I[r.f]?r.f:null});
   let maxAlive=1;for(let y=m.t0;y<=m.t1;y++)maxAlive=Math.max(maxAlive,R.filter(r=>y>=r.s&&y<=r.e).length);
@@ -179,6 +180,10 @@ function xf(r,yr){let x=r.x+sway(r,yr);if(r.par){const q=M.I[r.par],k=ss((yr-r.s
 function houseModel(m){
   const X=m.f,kids=m.kids,I=m.I,sp=[...new Set(kids.map(k=>k.f===X.id?k.m:k.f).filter(x=>x&&I[x]))].map(i=>I[i]),par=[X.f,X.m].filter(x=>x&&I[x]).map(i=>I[i]),Mb=[];
   par.forEach((p,i)=>Mb.push({r:p,a:X.s,b:p.e,side:'L',i}));
+  /* LOCAL CHANGE: brothers and sisters (full and half) stand beside the focus person, to the left of the parents */
+  const sibs=[...new Set([X.f,X.m].filter(Boolean).flatMap(id=>P[id]?kidsOf(P[id]).map(k=>k.id):[]))].filter(id=>id!==X.id&&P[id]&&P[id].hid!==1&&P[id].by!=null).map(id=>P[id]).sort((a,b)=>a.by-b.by).slice(0,8)
+    .map(q=>{const d=ED(q),w=(q.given||'').split(' ')[0]||'?',r={id:q.id,p:q,n:((q.given||'')+' '+(q.sur||'')).trim()||q.id,sur:q.sur,b:q.by,d,s:q.by,e:d>q.by?d+.5:q.by+.4,fi:q.fi,dye:q.dy==null||q.dye,l:w,ph:[...q.id].reduce((h,ch)=>(h*31+ch.charCodeAt(0))%628,7)/100};return r});
+  sibs.forEach((r,j)=>Mb.push({r,a:r.s,b:r.e,side:'B',slot:j}));
   const wf=[];sp.forEach(p=>{const ks=kids.filter(k=>k.f===p.id||k.m===p.id),j=Math.min(...ks.map(k=>k.s))-1;Mb.push({r:p,a:j,b:p.e,side:'W',join:j})});
   Mb.filter(x=>x.side==='W').sort((a,b)=>a.a-b.a).forEach(x=>{let k=wf.findIndex(f=>f<x.a-.5);if(k<0)k=wf.length;wf[k]=x.b;x.slot=k});
   const free=[];kids.forEach(r=>{const x={r,a:r.s,b:r.e,side:'K'};let k=free.findIndex(f=>f<x.a-.5);if(k<0)k=free.length;free[k]=r.e+.5;x.slot=k;Mb.push(x)});
@@ -186,11 +191,11 @@ function houseModel(m){
   caps.push({y:X.s,t:'Born'+(X.bp?' in '+X.bp:'')+(par.length?' to '+par.map(p=>p.n.split(' ')[0]).join(' and '):'')});
   kids.forEach(k=>{const o=I[k.f===X.id?k.m:k.f];caps.push({y:k.b,t:k.n+' is born'+(o?', to '+o.n+' (b. '+o.b+')':'')})});
   Mb.filter(x=>x.side==='W').forEach(x=>caps.push({y:x.join+.5,t:x.r.n+' (b. '+x.r.b+') joins the house (year inferred from the first child)'}));
-  Mb.filter(x=>x.side!=='K').forEach(x=>{if(x.r.e<X.e+3&&x.r.e>X.s)caps.push({y:x.r.d+.2,t:x.r.n+(x.side==='L'?' (parent)':'')+' dies'})});
-  kids.filter(k=>k.d<X.d).forEach(k=>caps.push({y:k.d+.2,t:k.b===k.d?k.n+' dies in the year of birth':k.n+' dies ('+k.b+'–'+k.d+')'}));
-  caps.push({y:X.d,t:X.n+' dies'});caps.sort((a,b)=>a.y-b.y);
+  Mb.filter(x=>x.side!=='K').forEach(x=>{if(x.r.e<X.e+3&&x.r.e>X.s&&!x.r.dye)caps.push({y:x.r.d+.2,t:x.r.n+(x.side==='L'?' (parent)':x.side==='B'?' (brother or sister)':'')+' dies'})});
+  kids.filter(k=>k.d<X.d&&!k.dye).forEach(k=>caps.push({y:k.d+.2,t:k.b===k.d?k.n+' dies in the year of birth':k.n+' dies ('+k.b+'–'+k.d+')'}));
+  if(!X.dye)caps.push({y:X.d,t:X.n+' dies'});caps.sort((a,b)=>a.y-b.y);
   const t0=Math.floor(X.s),t1=Math.min(m.t1,Math.ceil(X.e+3));let best=t0,bn=-1;for(let y=t0;y<=X.e;y++){const n=Mb.filter(x=>y>=x.a&&y<=Math.min(x.b,x.r.e)).length;if(n>=bn){bn=n;best=y}}
-  return{X,kids,Mb,KS,WS,caps,t0,t1,rest:best,out:kids.filter(k=>k.d<X.d).length}
+  return{X,kids,Mb,nB:sibs.length,KS,WS,caps,t0,t1,rest:best,out:kids.filter(k=>k.d<X.d).length}
 }
 
 /* ---- shared drawing ---- */
@@ -228,9 +233,9 @@ function drawSky(s,t){
   for(const r of R){if(t<r.s)continue;const col=colOf(r),a=Math.max(r.s,t-24),b=Math.min(r.e,t);if(b<a)continue;let prev=null;c.lineWidth=r.id===M.id?2.8:1.7;c.lineCap='round';
     for(let yr=a;yr<=b+1e-6;yr+=.2){const x=X(xf(r,yr)),y=rail+(t-yr)*ppy;if(prev){const k=1-(t-yr)/24;c.strokeStyle=rgba(col,Math.max(0,.92*Math.pow(k,1.3)));c.beginPath();c.moveTo(prev[0],prev[1]);c.lineTo(x,y);c.stroke()}prev=[x,y]}}
   for(const r of R){if(t<r.s)continue;const col=colOf(r),xx=X(xf(r,Math.min(t,r.e))),fo=r.id===M.id;
-    if(t<=r.e){glow(c,xx,rail,col,fo?20+4*pulse():15);const i=live.indexOf(r);txt(c,r.l,xx,rail-11-(i%4)*11,(fo?'700 11.5px ':'600 10.5px ')+FONT,rgba(fo?T.ink:col,1),'center',HALO());hits.push({x:xx,y:rail,r:12,id:r.id})}
+    if(t<=r.e){glow(c,xx,rail,col,fo?20+4*pulse():15);const i=live.indexOf(r);txt(c,r.l,xx,rail-11-(i%4)*11,(fo?'700 11.5px ':'600 10.5px ')+FONT,rgba(col,1),'center',HALO());hits.push({x:xx,y:rail,r:12,id:r.id})}
     else{const k=ss((t-r.e)/3.2),sy=r.sy*H*.86,y=lerp(rail,sy,k),x=lerp(xx,X(r.sx),k);glow(c,x,y,col,k<1?15:(fo?15:11)+2*Math.sin(t*1.3+r.ph),fo?1:lerp(1,.4,k));
-      if(k>.9){txt(c,r.l,x,y-10,(fo?'italic 12px ':'italic 10.5px ')+SERIF,fo?INK(1):INK(.5),'center',HALO());hits.push({x,y,r:12,id:r.id})}}}
+      if(k>.9){txt(c,r.l,x,y-10,(fo?'italic 12px ':'italic 10.5px ')+SERIF,fo?rgba(T.brick,1):INK(.5),'center',HALO());hits.push({x,y,r:12,id:r.id})}}}
   {const near=M.moments.filter(m=>Math.abs(t-m.y)<1.4&&t>=m.y-.4).sort((a,b)=>Math.abs(t-a.y)-Math.abs(t-b.y))[0];if(near){const d=Math.abs(t-near.y);banner(c,W,H*.42,Math.sin(clamp(1-d/1.4,0,1)*Math.PI/2),near.y+' · '+near.a,near.b)}}
   titleBits(c,W,t,live.length+' alive · '+R.filter(r=>t>r.e).length+' gone')
 }
@@ -271,8 +276,8 @@ let capKey='';
 function layoutCaps(c,w,ppy){const key=M.id+'|'+w.toFixed(0)+'|'+ppy.toFixed(2);if(key===capKey)return;capKey=key;c.font='400 11.5px '+FONT;let prev=-9e9;M.house.caps.forEach(k=>{k.lines=wrapText(c,Math.floor(k.y)+' · '+k.t,w);k.v=Math.max(k.y,prev+(k.lines.length*13+6)/ppy);prev=k.v})}
 function drawHouse(s,t){
   const H0=M.house,X0=H0.X,c=s.ctx,W=s.W,H=s.H,rail=H*.46,L=30,ppy=(H-rail)/L,narrow=W<560;
-  const hasL=H0.Mb.some(m=>m.side==='L'),cx=narrow?W*(hasL?.30:.2):W*(hasL?.40:.26),right=3.4+.6*(H0.WS-1)+1.25*(H0.KS-1)+.8,u=Math.min(30,(W-cx-18)/right);
-  const HX=(m,yr)=>{if(m.side==='L')return-(1.55+1.05*m.i)*u;if(m.side==='W')return(1.65+.6*m.slot)*u;const mx=1.65*u,tx=(3.4+.6*(H0.WS-1)+1.25*m.slot)*u;return lerp(mx,tx,ss((yr-m.a)/3))};
+  const hasL=H0.Mb.some(m=>m.side==='L'),nB=H0.nB||0,lext=(hasL?3.3:.6)+(nB?1.1+.75*nB:0),cx=narrow?W*(hasL?.30:.2):W*(hasL?.40:.26),right=3.4+.6*(H0.WS-1)+1.25*(H0.KS-1)+.8,u=Math.min(30,(W-cx-18)/right,(cx*.55)/Math.max(lext,1));
+  const HX=(m,yr)=>{if(m.side==='L')return-(1.55+1.05*m.i)*u;if(m.side==='B')return-(2.6+1.05*Math.max(0,(H0.Mb.filter(z=>z.side==='L').length)-1)+.75*m.slot)*u;if(m.side==='W')return(1.65+.6*m.slot)*u;const mx=1.65*u,tx=(3.4+.6*(H0.WS-1)+1.25*m.slot)*u;return lerp(mx,tx,ss((yr-m.a)/3))};
   const yOf=yr=>rail+(t-yr)*ppy;
   skyBg(c,W,H);specks(c,W,rail,t);
   c.save();c.beginPath();c.rect(0,rail,W,H-rail);c.clip();
@@ -287,14 +292,14 @@ function drawHouse(s,t){
     for(let yr=a;yr<=b+1e-6;yr+=.2){const x=sx(m,yr),y=yOf(yr);if(prev){const k=1-(t-yr)/L;c.strokeStyle=rgba(col,Math.max(0,.92*Math.pow(k,1.2)));c.beginPath();c.moveTo(prev[0],prev[1]);c.lineTo(x,y);c.stroke()}prev=[x,y]}};
   H0.Mb.forEach(m=>{if(t>=m.a)draw(m,1.7)});
   const lx=yr=>cx+Math.sin(yr*.4)*.1*u;
-  {const a=Math.max(X0.s,t-L),b=Math.min(X0.e,t);let prev=null;c.lineWidth=3.2;c.lineCap='round';for(let yr=a;yr<=b+1e-6;yr+=.2){const x=lx(yr),y=yOf(yr);if(prev){const k=1-(t-yr)/L;c.strokeStyle=rgba(T.ink,Math.max(0,Math.pow(k,1.1)));c.beginPath();c.moveTo(prev[0],prev[1]);c.lineTo(x,y);c.stroke()}prev=[x,y]}}
+  {const a=Math.max(X0.s,t-L),b=Math.min(X0.e,t);let prev=null;c.lineWidth=3.2;c.lineCap='round';for(let yr=a;yr<=b+1e-6;yr+=.2){const x=lx(yr),y=yOf(yr);if(prev){const k=1-(t-yr)/L;c.strokeStyle=rgba(T.brick,Math.max(0,Math.pow(k,1.1)));c.beginPath();c.moveTo(prev[0],prev[1]);c.lineTo(x,y);c.stroke()}prev=[x,y]}}
   let n=t>=X0.s&&t<=X0.e?1:0;
   H0.Mb.forEach((m,i)=>{const r=m.r;if(t<m.a)return;const col=colOf(r),alive=t<=Math.min(m.b,r.e);
     if(alive){n++;const x=sx(m,t);glow(c,x,rail,col,m.side==='K'?11:9);txt(c,r.l,x,rail-10-((m.side==='K'?m.slot:i+1)%4)*11,'600 10px '+FONT,rgba(col,1),'center',HALO());hits.push({x,y:rail,r:11,id:r.id})}
     else if(t>r.e){const k=ss((t-r.e)/3),x=lerp(sx(m,r.e),narrow?W*(.1+((i*.17)%.8)):cx+HX(m,r.e),k),y=lerp(rail,H*(.07+(i%5)*.05),k);glow(c,x,y,col,k<1?11:8+Math.sin(t+r.ph),lerp(1,.4,k));if(k>.9){txt(c,r.l,x,y-9,'italic 10px '+SERIF,INK(.5),'center',HALO());hits.push({x,y,r:11,id:r.id})}}});
-  if(t<=X0.e){glow(c,lx(t),rail,T.ink,17);txt(c,X0.n.split(' ')[0],lx(t),rail-14,'700 12px '+FONT,INK(1),'center',HALO())}
-  else{const k=ss((t-X0.e)/4),y=lerp(rail,H*.1,k);glow(c,lx(X0.e),y,T.ink,14);txt(c,X0.n.split(' ')[0]+' '+X0.b+'–'+X0.d,lx(X0.e),y-12,'italic 12px '+SERIF,INK(1),'center',HALO())}
-  const cw=cx-(hasL?3.3:.6)*u-14;if(!narrow&&cw>=80)layoutCaps(c,cw,ppy);
+  if(t<=X0.e){glow(c,lx(t),rail,T.brick,17);txt(c,X0.n.split(' ')[0],lx(t),rail-14,'700 12px '+FONT,rgba(T.brick,1),'center',HALO())}
+  else{const k=ss((t-X0.e)/4),y=lerp(rail,H*.1,k);glow(c,lx(X0.e),y,T.brick,14);txt(c,X0.n.split(' ')[0]+' '+X0.b+'–'+(X0.dye?'?':X0.d),lx(X0.e),y-12,'italic 12px '+SERIF,rgba(T.brick,1),'center',HALO())}
+  const cw=cx-lext*u-14;if(!narrow&&cw>=80)layoutCaps(c,cw,ppy);
   for(const k of H0.caps){if(k.y>t+.01||narrow||cw<80||!k.lines)continue;const y=yOf(k.v);if(y>H+10)continue;const age=t-k.y,a=clamp(1-age/22,0,1)*(age<1?1:.85);if(a<=.04)continue;
     c.save();c.globalAlpha=a;c.fillStyle=rgba(age<1.2?T.atlas:T.muted,1);c.font='400 11.5px '+FONT;c.textAlign='left';k.lines.forEach((ln,i)=>c.fillText(ln,12,y+i*13));c.restore()}
   if(narrow){const cur=[...H0.caps].reverse().find(k=>k.y<=t+.01);if(cur){c.fillStyle=rgba(T.panel,.9);c.fillRect(0,H-46,W,46);c.font='400 12.5px '+FONT;c.textAlign='left';c.fillStyle=INK(1);wrapText(c,Math.floor(cur.y)+' · '+cur.t,W-24).slice(0,2).forEach((l,i)=>c.fillText(l,12,H-27+i*15))}}
@@ -305,12 +310,13 @@ function drawHouse(s,t){
 
 /* ---- D · Generations ---- */
 const TR={top:86,bot:26,left:100,right:16,row:88};
+let genFlip=false;   /* LOCAL CHANGE: newest generation at the top (the focus person first, then back through the generations) */
 function drawGen(s,t){
-  const c=s.ctx,W=s.W,H=s.H,R=M.R,rowH=(H-TR.top-TR.bot)/M.G,Lm=W<560?40:TR.left;
-  M.tiers.forEach((tier,gi)=>tier.forEach(r=>{r.tx=Lm+r.fx*(W-Lm-TR.right);r.ty=TR.top+gi*rowH+rowH*.32}));
+  const c=s.ctx,W=s.W,H=s.H,R=M.R,rowH=(H-TR.top-TR.bot)/M.G,Lm=W<560?40:TR.left,gy=gi=>genFlip?M.G-1-gi:gi;
+  M.tiers.forEach((tier,gi)=>tier.forEach(r=>{r.tx=Lm+r.fx*(W-Lm-TR.right);r.ty=TR.top+gy(gi)*rowH+rowH*.32}));
   skyBg(c,W,H);specks(c,W,H,t);
   const aliveG={};R.forEach(r=>{if(t>=r.s&&t<=r.e)aliveG[r.g]=(aliveG[r.g]||0)+1});
-  M.tiers.forEach((tier,gi)=>{const y0=TR.top+gi*rowH;if(gi%2===0){c.fillStyle=INK(.04);c.fillRect(0,y0,W,rowH)}
+  M.tiers.forEach((tier,gi)=>{const y0=TR.top+gy(gi)*rowH;if(gi%2===0){c.fillStyle=INK(.04);c.fillRect(0,y0,W,rowH)}
     const a=aliveG[gi+1]||0,mn=Math.min(...tier.map(r=>r.s)),mx=Math.max(...tier.map(r=>r.d));
     txt(c,ROM[gi]||String(gi+1),14,y0+rowH*.32+7,'650 24px '+SERIF,a?INK(1):MUT(.55),'left');
     if(W>=560){txt(c,mn+'–'+mx,14,y0+rowH*.32+22,'400 9.5px "IBM Plex Mono",monospace',MUT(.8),'left');if(a)txt(c,a+' alive',14,y0+rowH*.32+34,'600 9.5px '+FONT,rgba(T.atlas,1),'left')}});
@@ -325,7 +331,7 @@ function drawGen(s,t){
     if(r.mi){c.strokeStyle=INK(alive?.7:.25);c.lineWidth=1;c.beginPath();c.arc(r.tx,r.ty,5.5,0,7);c.stroke()}
     if(moved){c.strokeStyle=rgba(T.brass,alive?1:.28);c.lineWidth=2;c.beginPath();c.arc(r.tx,r.ty,6.8,0,7);c.stroke()}
     if(r.dup){c.strokeStyle=rgba(T.brass,alive?.9:.35);c.setLineDash([2,2]);c.lineWidth=1;c.beginPath();c.arc(r.tx,r.ty,10,0,7);c.stroke();c.setLineDash([])}
-    if(fo){const pu=pulse();c.strokeStyle=INK(.55*(1-pu));c.lineWidth=2;c.beginPath();c.arc(r.tx,r.ty,13+pu*13,0,7);c.stroke();c.strokeStyle=INK(1);c.lineWidth=2+pu*.8;c.beginPath();c.arc(r.tx,r.ty,13+pu*1.5,0,7);c.stroke()}
+    if(fo){const pu=pulse();c.strokeStyle=rgba(T.brick,.55*(1-pu));c.lineWidth=2;c.beginPath();c.arc(r.tx,r.ty,13+pu*13,0,7);c.stroke();c.strokeStyle=rgba(T.brick,1);c.lineWidth=2+pu*.8;c.beginPath();c.arc(r.tx,r.ty,13+pu*1.5,0,7);c.stroke()}
     hits.push({x:r.tx,y:r.ty,r:13,id:r.id});
     const a=alive?1:.34;if(!narrow||alive||fo){txt(c,r.n.split(' ')[0],r.tx,r.ty+(fo?24:20),(fo?'700 11px ':'600 10.5px ')+FONT,INK(fo?1:a),'center',HALO());
       if(!narrow)txt(c,(r.bye?'c.':'')+r.s+'–'+(r.dye?'?':(r.d%100<10?'0':'')+(r.d%100)),r.tx,r.ty+(fo?35:31),'400 9px "IBM Plex Mono",monospace',MUT(alive?1:.4),'center',HALO())}}
@@ -340,7 +346,7 @@ function drawGen(s,t){
 const hav=(a,b)=>{const r=Math.PI/180,dl=(b[1]-a[1])*r,dn=(b[0]-a[0])*r,x=Math.sin(dl/2)**2+Math.cos(a[1]*r)*Math.cos(b[1]*r)*Math.sin(dn/2)**2;return 12742*Math.asin(Math.sqrt(x))};
 const ll=n=>[PL[n].lon,PL[n].lat];
 function frame(s){
-  const pts=M.places.map(ll),W=s.W,H=s.H,sorted=k=>pts.map(q=>q[k]).sort((a,b)=>a-b),med=[sorted(0)[pts.length>>1],sorted(1)[pts.length>>1]];
+  const pts=M.places.map(ll),W=s.W,H=s.H,med=pts.reduce((b,q)=>{const n=pts.filter(z=>hav(z,q)<350).length;return n>b.n?{n,q}:b},{n:-1,q:pts[0]}).q;   /* LOCAL CHANGE: frame on the busiest place, not on the median lon/lat, which falls in the sea when the family spans continents */
   let core=pts.filter(q=>hav(q,med)<350);if(!core.length)core=pts;
   const lo=Math.min(...core.map(q=>q[0])),hi=Math.max(...core.map(q=>q[0])),la0=Math.min(...core.map(q=>q[1])),la1=Math.max(...core.map(q=>q[1]));
   const lonC=(lo+hi)/2,latC=(la0+la1)/2,cs=Math.cos(latC*Math.PI/180),asp=W/H,lonSpan=Math.max((hi-lo)*1.5+.2,(la1-la0)*1.5*asp*cs+.2,3),kx=W/lonSpan,ky=kx/cs;
@@ -426,13 +432,15 @@ VW.forEach(k=>{const s=V[k];
   s.cv.addEventListener('mousemove',e=>{const r=s.cv.getBoundingClientRect(),x=(e.clientX-r.left)*(s.W/r.width),y=(e.clientY-r.top)*(s.H/r.height);let b=null,bd=1e9;for(const h of hits){const d=Math.hypot(h.x-x,h.y-y);if(d<=Math.max(h.r,14)&&d<bd){bd=d;b=h}}s.cv.style.cursor=b?'pointer':'default';s.cv.title=b?nm(P[b.id])+' '+yrs(P[b.id]):''})});
 function chrome(){
   const f=P[M.id],sk=M.skipped?'No parent link is drawn where the age gap is impossible ('+M.skipped+' here).':'';
-  document.querySelectorAll('.plskip').forEach(e=>e.textContent=sk);
+  document.querySelectorAll('.plskip').forEach(e=>e.textContent=sk+(M_ad<99?' Showing the nearest '+M_ad+' generation'+(M_ad===1?'':'s')+' of ancestors; click an ancestor to go further back.':''));
   document.getElementById('pl-stats').innerHTML='<div><b>'+M.G+'</b><span>generation'+(M.G===1?'':'s')+'</span></div><div><b>'+(M.tEnd-M.t0)+'</b><span>years, '+M.t0+'–'+M.tEnd+'</span></div>'+(M.gap?'<div><b>'+Math.round(M.gap)+'</b><span>years between a parent’s birth and a child’s, on average</span></div>':'')+'<div><b>'+M.widest+'</b><span>people in the widest generation ('+(ROM[M.widestG-1]||M.widestG)+')</span></div><div><b>'+(M.nAnc+M.nDesc+1)+'</b><span>people drawn: '+M.nAnc+' ancestor'+(M.nAnc===1?'':'s')+', '+M.nDesc+' descendant'+(M.nDesc===1?'':'s')+(M.dd<99?', trimmed to '+M.dd+' generation'+(M.dd===1?'':'s')+' below':'')+'</span></div>';
   const rows=M.legs.slice().sort((a,b)=>(a.yb==null?9999:a.yb)-(b.yb==null?9999:b.yb)).map(L=>{if(L.route)return'<tr><td><button class="plink" data-id="'+L.r.id+'"><i style="background:'+colorOf(L.r.p)+'"></i><span>'+esc(nm(L.r.p))+'</span><small>'+esc(yrs(L.r.p))+'</small></button></td><td>'+placeA(L.a)+' → '+placeA(L.b)+' <small>(a stop in the roster\'s route)</small></td><td>'+(L.und?'<span class="wide">date not recorded</span>':'arrived '+(L.est?'about ':'')+L.yb)+'</td></tr>';const w=L.yb-L.ya;return'<tr><td><button class="plink" data-id="'+L.r.id+'"><i style="background:'+colorOf(L.r.p)+'"></i><span>'+esc(nm(L.r.p))+'</span><small>'+esc(yrs(L.r.p))+'</small></button></td><td>'+placeA(L.a)+' <small>('+L.sa+', '+L.ya+')</small> → '+placeA(L.b)+' <small>('+L.sb+', '+L.yb+')</small></td><td>'+(w>10?'<span class="wide">'+w+' years apart · stops in between not recorded</span>':w+' years')+'</td></tr>'}).join('');
   document.getElementById('pl-moves').innerHTML='<thead><tr><th>Person</th><th>Move, and the record on each side</th><th>Window</th></tr></thead><tbody>'+(rows||'<tr><td colspan="3">No move on record in this family.</td></tr>')+'</tbody>'
 }
 function ensure(){if(M&&M.id===st.focus)return;stop();M=build(st.focus);world(M);capKey='';chrome();VW.forEach(k=>{const r=rangeOf(k),s=V[k];s.min=r[0];s.max=r[1];s.t=r[2];s.rg.min=r[0];s.rg.max=r[1];s.rg.step=.05;s.base=null})}
 const show=k=>()=>{if(playing&&playing!==k)stop();T=tokens();ensure();size(k);paint(k);curK=k;startIdle()};
+{const fb=document.getElementById('gen-flip'),note=document.querySelector('#v-gen .vnote');
+ if(fb)fb.onclick=()=>{genFlip=!genFlip;fb.setAttribute('aria-pressed',String(genFlip));fb.textContent=genFlip?'Oldest at top':'Newest at top';if(note)note.textContent=genFlip?'The same people as generations: one row each, the newest at the top and the focus person ringed, going back through the generations as you read down. The tree grows as you play it.':'The same people as generations: one row each, oldest at the top, the focus person ringed. The tree grows as you play it. The strip below counts the depth.';if(V.gen&&V.gen.cv)paint('gen')}}
 VW.forEach(k=>{EXT.views[k]=show(k)});
 EXT.stop=stop;
 })();

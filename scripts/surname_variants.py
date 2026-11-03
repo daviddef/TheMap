@@ -493,7 +493,7 @@ def cmd_report(a):
         for s in ms:
             keys.setdefault(fold_key(s), []).append(s)
         inside = sum(1 for k in keys if k in ix)
-        typo = [v for v in keys.values() if len({x for x in v}) > 1 and not any(fold_key(x) in ix for x in v)]
+        typo = [v for v in keys.values() if len({form_key(x) for x in v}) > 1 and not any(fold_key(x) in ix for x in v)]
         print(f"{label}: {len(keys)} distinct names, {inside} in a family; "
               f"{len(typo)} typography groups not yet catalogued")
     print("\nA name page with no family still shows the atlas's computed links; this is the curated layer.")
@@ -511,7 +511,7 @@ def cmd_suggest(a):
             keys.setdefault(fold_key(s), []).append(s)
         for k, v in sorted(keys.items()):
             vs = sorted(set(v))
-            if len(vs) > 1 and k not in ix:
+            if len({form_key(x) for x in vs}) > 1 and k not in ix:
                 print(f"{label}: typography group  {' | '.join(vs)}")
         for s in sorted(ms, key=fold_key):
             if re.search(r"[/(]", s) and not any(fold_key(x) in ix for x in re.split(r"[/()]", s) if x.strip()):

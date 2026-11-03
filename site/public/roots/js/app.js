@@ -63,8 +63,9 @@ const STAMP = Date.now();                                                    // 
 function mountViewer() {
   const old = $('#viewer'), f = document.createElement('iframe');
   let h = ''; try { h = old.contentWindow.location.hash || ''; } catch (e) { /* not loaded yet */ }      // the viewer keeps who is in focus and which view is open in its address
-  f.id = 'viewer'; f.title = old.title; f.src = 'viewer.html?v=' + STAMP + h; old.replaceWith(f);
+  f.id = 'viewer'; f.title = old.title; f.src = 'viewer.html?v=' + STAMP + h; old.replaceWith(f); f.onload = pushMh;
 }
+function pushMh() { try { $('#viewer').contentWindow.postMessage({ mh: mhc && mhc.site ? { site: mhc.site, tree: mhc.tree, slug: mhc.treeSlug } : null }, '*'); } catch (e) { /* not loaded yet */ } }
 
 /* ---------- import report ---------- */
 const TIER = {
@@ -346,7 +347,7 @@ $('#mhin').oninput = e => {
   if (!c) { mhc = null; $('#mhstat').textContent = e.target.value.trim() ? 'That does not look like a MyHeritage profile or tree link.' : ''; refreshMh(); return; }
   mhc = c; history.replaceState(null, '', toHash(c)); mhStatus(); refreshMh(); if (worker && c.num) worker.postMessage({ cmd: 'who', id: 'I' + c.num });
 };
-function refreshMh() { drawFix(); if (lastInfo) person(lastInfo); }
+function refreshMh() { pushMh(); drawFix(); if (lastInfo) person(lastInfo); }
 if (mhc) { $('#mhbox').open = true; mhStatus(' (from the address)'); }
 
 function fixRow(s, i) {

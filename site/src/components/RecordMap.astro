@@ -27,12 +27,22 @@
    — is the family Atlas's and is kept deliberately, because a reader who knows
    one of these maps should know all of them. */
 import { readFileSync } from "node:fs";
+import whatsNew from "../data/whats-new.json";
+import site from "../data/site.json";
 const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, belgiumBase, wikidataUrl, osmUrl, featureBase, settlementBase, districtBase, countryBase, townlandBase, comuneBase, estoniaBase, scotlandBase, worldArchivesUrl, countryPointsUrl, base } = Astro.props;
 
 /* The long explanation the idle panel used to carry in full now lives at
    /help/, and the panel links to it. Derived from `base` so it survives the
    /TheMap/ prefix on GitHub Pages, which a hard-coded "/help/" would not. */
 const HELP = base.replace(/\/$/, "") + "/help/";
+/* The five newest entries of src/data/whats-new.json, as the card shows them. */
+const NEW_ITEMS = (whatsNew.entries || []).slice()
+  .sort((x, y) => y.date.localeCompare(x.date)).slice(0, 5)
+  .map((e) => ({
+    ...e,
+    when: new Date(e.date + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" }),
+    url: e.href && e.href.startsWith("/") ? base.replace(/\/$/, "") + e.href : e.href,
+  }));
 
 /* WHICH SHARDS ARE NOT THREE CHARACTERS LONG, read at build time and inlined.
    build.py's write_shards decides, by measuring, which prefixes need a longer
@@ -384,30 +394,40 @@ try {
         page and it is still a paragraph nobody asked for; it lives on /help/
         and in the ⓘ, which is where somebody goes when they want it. */}
     <div class="at-empty" id="ra-empty">
-      <p class="at-start">
-        <b data-i18n>Start with what you have.</b>
-        A surname &mdash;
-        <a href="#" class="ra-try" data-q="Peeters"
-           title="Run this search: Peeters &mdash; a Belgian name">Peeters</a>,
-        <a href="#" class="ra-try" data-q="Blažević"
-           title="Run this search: Blažević &mdash; a Croatian name">Blažević</a>
-        &mdash; a village by any name it ever had &mdash;
-        <a href="#" class="ra-try" data-q="Gallignana"
-           title="Run this search: Gallignana &mdash; the Italian name of Gračišće">Gallignana</a>
-        finds Gračišće,
-        <a href="#" class="ra-try" data-q="Breslau"
-           title="Run this search: Breslau &mdash; the German name of Wrocław">Breslau</a>
-        finds Wrocław &mdash; or click any country on the map.
-      </p>
+      {/* WHAT'S NEW, NOT HOW TO SEARCH. David, looking at the paragraph that stood here
+          («Start with what you have. A surname — Peeters, Blažević …»): «i feel like the text
+          attached is a waste, id rather have an area that shows "whats new" as a headline form
+          of what have we improved in the atlas recently.» The search box is the invitation to
+          search; four example names were a second one. This is the one thing on the first
+          screen a returning reader has not seen, and it is a short list of plain headlines
+          written by hand (src/data/whats-new.json), newest first. On a phone it is three. */}
+      <div class="at-new" role="region" aria-label="What's new">
+        <p class="at-new-h"><b data-i18n>What's new</b></p>
+        <ul class="at-new-list">
+          {NEW_ITEMS.map((e) => (
+            <li>
+              <time datetime={e.date}>{e.when}</time>
+              {e.href ? <a href={e.url}>{e.headline}</a> : <span>{e.headline}</span>}
+            </li>
+          ))}
+        </ul>
+      </div>
       {/* TWO LINES, NOT FIVE. David: «its a lot of real estate for just a few lines of text». The
           two link paragraphs became one row, and the history link now does what the map's own Play
           button does (the playback lives on this map since the History engine moved in), with the
           full page as the fallback if script is off. */}
       <p class="at-start-more at-links">
-        <a href="{HELP}"><span data-i18n>What a dot's colour means</span> &rarr;</a>
+        <a href={`${base}whats-new/`}><span data-i18n>All improvements</span> &rarr;</a>
+        <a href={HELP}><span data-i18n>What a dot's colour means</span> &rarr;</a>
         <a class="ra-try-layers" href={`${base}history/?chapter=world-wars`}
            title="Play the ground changing hands on this map: conquests, occupations and migrations, a chapter for each age"
            >&#9654; <span data-i18n>Watch the ground change hands</span></a>
+        {site.contact && site.contact.email && (
+          <a class="at-note" href={`mailto:${site.contact.email}?subject=${encodeURIComponent("Record Atlas: a note")}`}
+             title="Opens your own mail app. Nothing is sent from this page.">
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M1.5 3.5h13v9h-13zM1.8 3.8 8 9l6.2-5.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+            <span data-i18n>Like my work? Have a suggestion? Drop me a note.</span></a>
+        )}
       </p>
       {/* THE THIRD COUNTS LINE IS GONE. David, counting them: «in this one
           area i see 3 different places you talk about volumes» — the masthead
@@ -7711,17 +7731,21 @@ window.addEventListener("load", async function () {
   .ra-bar-find #ra-q { font-size: 14px; padding: 9px 12px; }
   .ra-bar-find #ra-info { margin-left: auto; }
   .ra-bar #ra-q { font-size: 14px; padding: 9px 12px; }
-  /* The opening panel's three ways in. Compact, because it is scaffolding
-     the reader should stop needing after their first search. */
-  /* ONE PARAGRAPH, NOT A LIST OF THREE. See the note on the markup. Held to
-     a readable measure because the panel it sits in is now the full width of
-     the page, and a single line of 150 characters is its own kind of waste. */
-  .at-start { margin: 0; font-size: 13.5px; line-height: 1.65;
-              color: var(--ink-2); max-width: 88ch; }
-  .at-start b { color: var(--ink); }
-  .at-start a { border-bottom: 1px solid var(--rule-strong); }
+  /* What's new: five one-line headlines, newest first, a short date to the left.
+     Held to a readable measure because the panel is the full width of the page. */
+  .at-new-h { margin: 0 0 4px; font-size: 13px; color: var(--ink); }
+  .at-new-list { list-style: none; margin: 0; padding: 0; max-width: 92ch;
+                 font-size: 13.5px; line-height: 1.55; color: var(--ink-2); }
+  .at-new-list li { display: flex; gap: 12px; padding: 2px 0; }
+  .at-new-list time { flex: 0 0 3.6em; font-family: var(--mono); font-size: 11.5px;
+                      color: var(--ink-3); padding-top: 2px; white-space: nowrap; }
+  .at-new-list a { border-bottom: 1px solid var(--rule-strong); text-decoration: none; }
+  @media (max-width: 700px) { .at-new-list li:nth-child(n+4) { display: none; } }
   .at-start-more { margin: 6px 0 0; font-size: 12.5px; }
-  .at-links { display: flex; flex-wrap: wrap; gap: 4px 18px; }
+  .at-links { display: flex; flex-wrap: wrap; gap: 4px 18px; align-items: center; }
+  .at-note { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; }
+  .at-note svg { flex: none; }
+  @media (max-width: 700px) { .at-note { margin-left: 0; flex-basis: 100%; } }
   .at-panel:has(#ra-empty:not([hidden])) { padding: 10px 14px 12px; }
   #ra-play[aria-pressed="true"] { background: var(--accent); color: var(--band-label, #fff);
                                   border-color: var(--accent); }

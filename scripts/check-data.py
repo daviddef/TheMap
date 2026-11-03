@@ -1000,6 +1000,47 @@ def surname_families_gate():
         err(m)
 
 
+def whats_new_gate():
+    """site/src/data/whats-new.json is what the home page's «What's new» card shows.
+
+    Hand-written, so it can rot in three ways this refuses: a date that is not a date (it
+    sorts wrong and prints «Invalid Date» on the card), a headline so long it wraps a phone
+    screen into a wall, and a link that points outside the atlas or at a page that does not
+    exist, which is a card that sends a reader nowhere on the first screen.
+    """
+    p = "site/src/data/whats-new.json"
+    try:
+        entries = json.load(open(p, encoding="utf-8"))["entries"]
+    except Exception as e:
+        err(f"cannot read {p}: {e}")
+        return
+    if not entries:
+        err("whats-new.json has no entries: the home page card would be empty")
+    pages = set()
+    for f in _g.glob("site/src/pages/*.astro") + _g.glob("site/src/pages/*/index.astro"):
+        pages.add(os.path.basename(f)[:-6] if not f.endswith("index.astro") else os.path.basename(os.path.dirname(f)))
+    for i, e in enumerate(entries):
+        where = f"whats-new.json entry {i + 1}"
+        try:
+            datetime.date.fromisoformat(e.get("date", ""))
+        except ValueError:
+            err(f"{where}: date {e.get('date')!r} is not YYYY-MM-DD")
+        if e.get("kind") not in ("new", "better", "fixed"):
+            err(f"{where}: kind {e.get('kind')!r} must be new, better or fixed (it is the badge on /whats-new/)")
+        h = (e.get("headline") or "").strip()
+        if not h:
+            err(f"{where}: no headline")
+        elif len(h) > 120:
+            err(f"{where}: headline is {len(h)} characters; a card line is at most 120")
+        href = e.get("href")
+        if href:
+            first = href.strip("/").split("/")[0]
+            if not href.startswith("/"):
+                err(f"{where}: href {href!r} must be a path inside the atlas, starting with /")
+            elif first and first not in pages:
+                err(f"{where}: href {href!r} points at a page that does not exist")
+
+
 def main():
     mortality_gate()
     history_audit()
@@ -1010,6 +1051,7 @@ def main():
     flag_seams()
     context_contract()
     surname_families_gate()
+    whats_new_gate()
     history_json()
     history_ground()
     voyages_gate()

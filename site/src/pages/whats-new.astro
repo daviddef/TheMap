@@ -1,0 +1,136 @@
+---
+/* EVERYTHING THAT HAS GOT BETTER, in the words a visitor would use.
+ *
+ * The home page shows the latest five of these. This is the whole list, from
+ * src/data/whats-new.json, which is written by hand when a change a reader can
+ * see goes live. /changelog/ is the other list: generated from git, it records
+ * what a developer did, and is a different question.
+ *
+ * Each entry has a kind (new | better | fixed) which becomes the small badge, so
+ * a reader can skim for "a new source" without reading every line. David asked
+ * for this page to be «more welcoming, fun, neater»: a greeting instead of a
+ * label, a timeline instead of a bare list, a badge instead of nothing.
+ */
+import Base from "../layouts/Base.astro";
+import { u } from "../lib/url.js";
+import data from "../data/whats-new.json";
+import site from "../data/site.json";
+
+const KINDS = {
+  new:    { label: "New",    glyph: "✦" },
+  better: { label: "Better", glyph: "↑" },
+  fixed:  { label: "Fixed",  glyph: "✓" },
+};
+const entries = data.entries.slice().sort((a, b) => b.date.localeCompare(a.date));
+const byDay = {};
+for (const e of entries) (byDay[e.date] = byDay[e.date] || []).push(e);
+const days = Object.entries(byDay).sort((a, b) => b[0].localeCompare(a[0]));
+const dt = (d) => new Date(d + "T00:00:00Z");
+const part = (d, o) => dt(d).toLocaleDateString("en-GB", { ...o, timeZone: "UTC" });
+const long = (d) => part(d, { day: "numeric", month: "long", year: "numeric" });
+const count = (k) => entries.filter((e) => e.kind === k).length;
+const email = site.contact && site.contact.email;
+---
+<Base
+  title="What's new"
+  eyebrow="Fresh from the workbench"
+  dek="Thanks for stopping by. Here is what I have been tinkering with lately: new sources, fixes, and small things that make the atlas nicer to use. Newest first."
+  description="Recent improvements to Record Atlas: new sources, new pages and fixes, newest first.">
+
+  <p class="tally" aria-label="Summary">
+    <span><b>{entries.length}</b> things since {part(days[days.length - 1][0], { day: "numeric", month: "long" })}</span>
+    {["new", "better", "fixed"].map((k) => count(k) > 0 && (
+      <span class={`chip ${k}`}><i aria-hidden="true">{KINDS[k].glyph}</i> {count(k)} {KINDS[k].label.toLowerCase()}</span>
+    ))}
+  </p>
+
+  <ol class="line">
+    {days.map(([day, es]) => (
+      <li class="day">
+        <time class="when" datetime={day} title={long(day)}>
+          <b>{part(day, { day: "numeric" })}</b>
+          <span>{part(day, { month: "short" })}</span>
+          <em>{part(day, { year: "numeric" })}</em>
+        </time>
+        <ul class="items">
+          {es.map((e) => {
+            const k = KINDS[e.kind] || KINDS.better;
+            return (
+              <li class="item">
+                <span class={`chip ${e.kind || "better"}`}><i aria-hidden="true">{k.glyph}</i> {k.label}</span>
+                {e.href
+                  ? <a class="head" href={u(e.href)}>{e.headline}<span class="go" aria-hidden="true"> →</span></a>
+                  : <span class="head">{e.headline}</span>}
+              </li>
+            );
+          })}
+        </ul>
+      </li>
+    ))}
+  </ol>
+
+  <aside class="foot">
+    <p class="warm">
+      {email ? (
+        <>Like my work? Have a suggestion? <a href={`mailto:${email}?subject=${encodeURIComponent("Record Atlas: a note")}`}>Drop me a note.</a> It is read by a person.</>
+      ) : (
+        <>Like my work? Have a suggestion? Tell me, and it may end up on this page.</>
+      )}
+    </p>
+    <p class="cap">Want the developer's view, one entry per commit? That is <a href={u("/changelog/")}>What changed</a>.</p>
+  </aside>
+</Base>
+
+<style>
+  .tally { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 0 0 26px;
+           font-size: 14px; color: var(--ink-2); }
+  .tally b { color: var(--ink); }
+
+  .chip { display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono);
+          font-size: 11px; letter-spacing: .06em; text-transform: uppercase; line-height: 1;
+          padding: 4px 8px 4px 7px; border-radius: 999px; border: 1px solid var(--rule-strong);
+          color: var(--ink-2); background: var(--panel, transparent); white-space: nowrap; }
+  .chip i { font-style: normal; font-size: 12px; }
+  .chip.new { color: var(--accent); border-color: var(--accent); background: var(--accent-wash); }
+  .chip.fixed { color: var(--ink); }
+
+  /* The timeline: a rule down the left, a date on it, a card per change. */
+  .line { list-style: none; margin: 0; padding: 0; position: relative; }
+  .line::before { content: ""; position: absolute; left: 41px; top: 6px; bottom: 6px;
+                  width: 2px; background: var(--rule); }
+  .day { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 0 18px; padding-bottom: 22px; }
+  .when { position: relative; display: flex; flex-direction: column; align-items: center;
+          line-height: 1.05; padding-top: 2px; background: var(--ground, var(--bg, transparent)); align-self: start; }
+  .when b { font-family: var(--serif); font-size: 30px; font-weight: 700; color: var(--ink); }
+  .when span { font-family: var(--mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-top: 2px; }
+  .when em { font-style: normal; font-family: var(--mono); font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+
+  .items { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px;
+          background: var(--panel, transparent); border: 1px solid var(--rule); border-radius: 10px;
+          transition: border-color .15s, transform .15s; }
+  .item:hover { border-color: var(--accent); transform: translateX(2px); }
+  .item .chip { flex: none; margin-top: 3px; min-width: 76px; justify-content: center; }
+  .head { font-family: var(--serif); font-size: 17px; line-height: 1.45; color: var(--ink);
+          text-decoration: none; max-width: 64ch; }
+  a.head { color: var(--ink); }
+  a.head:hover { color: var(--accent); }
+  .go { color: var(--accent); white-space: nowrap; }
+
+  .foot { margin-top: 10px; padding: 18px 20px; border-radius: 12px; background: var(--accent-wash);
+          border: 1px solid var(--rule); max-width: 64ch; }
+  .warm { margin: 0 0 6px; font-family: var(--serif); font-size: 18px; line-height: 1.45; color: var(--ink); }
+  .foot .cap { margin: 0; }
+
+  @media (prefers-reduced-motion: reduce) { .item { transition: none; } .item:hover { transform: none; } }
+
+  @media (max-width: 640px) {
+    .line::before { display: none; }
+    .day { grid-template-columns: 1fr; gap: 8px; }
+    .when { flex-direction: row; align-items: baseline; gap: 6px; padding: 0; }
+    .when b { font-size: 22px; }
+    .when em { margin: 0; }
+    .item { flex-direction: column; gap: 8px; }
+    .item .chip { margin-top: 0; }
+  }
+</style>

@@ -48,13 +48,15 @@ test("second one: the map says what it is doing instead of showing a grey box", 
   await expect(note).toHaveCount(0, { timeout: 45000 });
 });
 
-test("second five: the panel asks for something the reader actually has", async ({ page }) => {
+test("second five: the first panel says what is new and where the colour idea lives", async ({ page }) => {
   await ready(page);
   const empty = page.locator("#ra-empty");
   await expect(empty).toBeVisible();
-  await expect(empty).toContainText("Start with what you have");
-  /* A surname first, because that is what people arrive holding. */
-  await expect(empty.locator(".ra-try").first()).toBeVisible();
+  /* The card used to teach four example searches. It now says what has been
+     improved, newest first, because the search box is already the invitation. */
+  await expect(empty).toContainText("What's new");
+  await expect(empty.locator(".at-new-list li").first()).toBeVisible();
+  await expect(empty.getByRole("link", { name: /all improvements/i })).toBeVisible();
   /* The idea the colours carry used to be a sentence here. It was trimmed to a
      link on purpose (the sentence lives on /help/ and in the ⓘ), so what is
      asserted is that the way to it is still on the first screen. */

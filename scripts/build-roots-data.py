@@ -163,7 +163,17 @@ def viewer():
     for ph in ('/*ATLAS_DATA*/null', '/*TREE_DATA*/null'): assert ph in t, 'template is missing ' + ph
     t = t.replace('/*ATLAS_DATA*/null', 'window.parent.RR.atlas').replace('/*TREE_DATA*/null', 'window.parent.RR.tree')
     t = re.sub(r'<link rel="stylesheet" href="https://fonts\.googleapis\.com[^>]*>\n?', '', t)    # no third-party fetch, ever
-    for m in ('/*EXT:NAMES*/', '/*EXT:STYLE*/', '/*EXT:SCRIPT*/', '<!--EXT:TABS-->', '<!--EXT:VIEWS-->'): t = t.replace(m, '')
+    # the Painted Lines extension (Night sky, Ink ledger, Household, Generations, Where they lived): the skill's own module, vendored beside the template
+    ext = {'NAMES': [], 'TABS': '', 'VIEWS': '', 'STYLE': '', 'SCRIPT': ''}
+    x = open(os.path.join(ROOT, 'scripts', 'roots', 'painted-lines.ext.html'), encoding='utf-8').read()
+    m = re.search(r'<!--EXT:NAMES ([^>]*?)-->', x)
+    if m: ext['NAMES'] += [n.strip() for n in m.group(1).split(',') if n.strip()]
+    for sec in ('TABS', 'VIEWS', 'STYLE', 'SCRIPT'):
+        m = re.search(r'<!--EXT:%s-->(.*?)<!--/EXT:%s-->' % (sec, sec), x, re.S)
+        if m: ext[sec] += m.group(1)
+    t = t.replace('/*EXT:NAMES*/', ','.join("'%s'" % n for n in ext['NAMES'])).replace('<!--EXT:TABS-->', ext['TABS']).replace('<!--EXT:VIEWS-->', ext['VIEWS']) \
+         .replace('/*EXT:STYLE*/', ext['STYLE']).replace('/*EXT:SCRIPT*/', ext['SCRIPT'])
+    assert 'EXT:' not in t, 'an extension marker was left in the viewer'
     t = re.sub(r'<title>.*?</title>', '<title>Roots &amp; Routes</title>', t, count=1)
     csp = ("<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n"
            "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data: blob:; "

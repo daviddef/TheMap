@@ -83,8 +83,10 @@ export class Session {
     return { undrawn: undrawn.slice(0, 500), undrawnTotal: undrawn.length, merges, edits: this.overlay.edits.map(e => ({ ...e, name: this.shown(this.P.get(e.who) || { id: e.who }) })) };
   }
   find(q) {
-    const t = (q || '').toLowerCase().trim(); if (t.length < 2) return [];
-    const out = []; for (const p of this.P.values()) { if ((p.given + ' ' + p.sur).toLowerCase().includes(t) || p.id.toLowerCase() === t.replace(/^@|@$/g, '')) out.push(p); if (out.length >= 25) break; }
+    const fold = s => String(s).normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const t = fold(q || '').trim(); if (t.length < 2) return [];
+    const words = t.split(/\s+/).filter(Boolean);                                          // every word typed, in any order: "ivan defranceski" finds Ivan Anton Defranceski
+    const out = []; for (const p of this.P.values()) { const n = fold(p.given + ' ' + p.sur); if (words.every(w => n.includes(w)) || p.id.toLowerCase() === t.replace(/^@|@$/g, '')) out.push(p); if (out.length >= 25) break; }
     return out.map(p => ({ id: p.id, name: (p.given + ' ' + p.sur).trim() || p.id, living: !!p.liv, by: p.by, bp: p.bpRaw, est: this.est.has(p.id) }));
   }
   /* One edit from the page. Returns an error string for something the user can fix, or null. */

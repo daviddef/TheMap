@@ -27,7 +27,7 @@
       <li>It is read and drawn by code running in this browser tab. It is not uploaded, not stored on a server and not seen by anyone.</li>
       <li>This page has no analytics, no cookies and no third-party scripts, and the browser is told not to let it contact any other site.</li>
       <li>To place your people it downloads the Atlas's own place files for the countries your tree mentions. Our server can see which countries were asked for; it never sees your file or a name from it.</li>
-      <li>People who may be alive (no death recorded, born within 110 years) are shown without their given names, and are never included in anything you could share.</li>
+      <li>People who may be alive are shown on your own screen. The shareable export leaves them out, and you can hide them with one tick.</li>
     </ul>
   </div>
 
@@ -37,6 +37,11 @@
     <p class="small">GEDCOM 5.5, 5.5.1 or 7, from MyHeritage, Ancestry, FamilySearch, Family Tree Maker and the rest. Big files are fine: 15,000 people takes about ten seconds.</p>
   </div>
   <p class="or"><button id="sample" class="link">or try an invented sample family</button></p>
+  <div id="recent" class="recent" hidden>
+    <h2>Kept on this device</h2>
+    <ul id="rlist"></ul>
+    <p class="small">Saved in this browser only, at your choice. <button id="rall" class="link">Forget all</button></p>
+  </div>
 </section>
 
 <section id="busy" hidden>
@@ -63,6 +68,7 @@
       <button role="tab" data-tab="offer">Offer places</button>
       <button role="tab" data-tab="export">Export</button>
     </nav>
+    <button id="keep" class="link" title="Save this file in this browser so you can reopen it with one click. It stays on this device.">Keep on this device</button>
     <button id="again" class="link">Open another file</button>
   </div>
 

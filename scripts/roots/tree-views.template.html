@@ -30,7 +30,7 @@
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--sans);
   padding-block:22px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.wrap{max-width:1280px;margin:0 auto}
+.wrap{max-width:none;margin:0 auto}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 button{font:inherit;color:inherit;cursor:pointer}
 a{color:var(--atlas)}
@@ -74,7 +74,7 @@ svg a.plk .cname,svg a.plk .sname{text-decoration:underline dotted}svg a.plk:hov
 .seg button+button{border-left:1px solid var(--rule)}
 .seg button[aria-pressed="true"]{background:var(--sel);color:var(--on-sel)}
 .btn{border:1px solid var(--rule);border-radius:6px}
-.btn.ibtn{padding:5px 9px;line-height:0}.btn.ibtn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.ibg{white-space:nowrap;display:inline-block}a.btn.ibtn{display:inline-block;text-decoration:none;color:inherit;vertical-align:middle}.btn.ibtn{padding:5px 9px;line-height:0}.btn.ibtn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .btn:disabled{opacity:.4;cursor:default}
 .scroll{overflow-x:auto}
 svg{display:block}
@@ -102,20 +102,21 @@ input[type=range]{accent-color:var(--atlas);flex:1 1 240px;min-width:140px}
 .syr{font:400 8.5px var(--mono);fill:var(--muted)}
 .trailbar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--rule);font-size:12.5px;color:var(--muted)}
 .trailbar b{font-weight:600;margin-right:6px}
-.trail{display:flex;align-items:center;padding:14px 14px 16px;border-bottom:1px solid var(--rule)}
+.trail{display:flex;align-items:stretch;padding:14px 14px 16px;border-bottom:1px solid var(--rule)}
 .tc{flex:none;width:122px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:9px 6px 8px;border:1.5px solid var(--atlas);border-radius:10px;background:var(--panel);cursor:pointer}
 .tc.focus{background:var(--sea);border:2px solid var(--brick)}
 .tc.dash{border-style:dashed;border-color:var(--brass)}
 .tc:hover{border-color:var(--ink)}
 .tc .tg{font:600 9.5px var(--sans);letter-spacing:.14em;color:var(--muted);margin-top:3px}
-.tc b{font:500 16px/1.2 var(--serif)}
+.tc b{font:500 16px/1.2 var(--serif);text-align:center;min-height:2.4em;display:flex;align-items:center;justify-content:center;max-width:100%;overflow:hidden;overflow-wrap:anywhere}
+.tc b>*{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.tc .ty,.tc small{text-align:center}
 .tc .ty{font:500 14px/1.2 var(--serif)}
 .tc small{font-size:11px;color:var(--muted)}
 .pl{color:inherit;text-decoration:underline dotted;text-underline-offset:3px}
 .pl:hover{color:var(--atlas);text-decoration-style:solid}
 .fanlink text{cursor:pointer}
 .fanlink:hover text{text-decoration:underline;fill:var(--atlas)}
-.tlk{flex:none;width:18px;height:2px;background:var(--brick);opacity:.45}
+.tlk{flex:none;align-self:center;width:18px;height:2px;background:var(--brick);opacity:.45}
 .tlk.mv{height:3px;opacity:1}
 .gdiv{stroke:var(--hair);stroke-width:1;opacity:.75}
 .ggrid{stroke:var(--rule);stroke-width:1;stroke-dasharray:2 5;opacity:.8}
@@ -185,7 +186,7 @@ input[type=range]{accent-color:var(--atlas);flex:1 1 240px;min-width:140px}
 .pc .meta{font:400 12px var(--mono);color:var(--muted);margin-top:3px}
 .pc .head{display:flex;gap:10px;align-items:flex-start;margin-bottom:12px}
 .pc .swatch{width:6px;align-self:stretch;border-radius:3px;flex:none}
-.pc dl{margin:0 0 12px;display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:13.5px}
+.pc dl{margin:0 0 12px;display:flex;flex-wrap:wrap;align-items:baseline;gap:3px 6px;font-size:13.5px}.pc dl dd{margin:0 14px 0 0}
 .pc dt{color:var(--muted)}
 .pc dd{margin:0}
 .pc h3{font:600 10.5px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:15px 0 6px}
@@ -781,7 +782,7 @@ MOVES.sort((a,b)=>a.y-b.y);
   for(const p of list){const c=comp.get(p.id);p._comp=c;p._main=sizes[c]>=20;p._orph=sizes[c]===1;p._clus=sizes[c]>1&&sizes[c]<20;p._dead=p._main&&!p.father&&!p.mother}
 })();
 
-const ICO={back:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',copy:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg>',check:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'};
+const ICO={person:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-4 3.6-6 7-6s6.2 2 7 6"/></svg>',tree:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9.5" y="3" width="5" height="4" rx="1"/><rect x="3" y="17" width="5" height="4" rx="1"/><rect x="16" y="17" width="5" height="4" rx="1"/><path d="M12 7v5M5.5 17v-5h13v5"/></svg>',back:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',copy:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg>',check:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'};
 const living=p=>p.hid===1;   // a person whose name and details are withheld (the importing page sets hid; no death recorded no longer means withheld)
 const nm=p=>living(p)?'Living '+p.sur:((p.given+' '+p.sur).trim()||'(no name recorded)');
 const linkG=(c,par)=>!c||!par?null:(c.father===par.id?c.fg:c.mother===par.id?c.mg:null);   // grade of a parent link: 0 index only, 1 household tree, 2 read from a register
@@ -904,14 +905,15 @@ function pick(id,e){
 let MH=null;   // {site,tree,slug} sent by the page around us (the visitor pasted one MyHeritage link); nothing is sent anywhere
 addEventListener('message',e=>{if(e.source!==parent||!e.data||!('mh' in e.data))return;MH=e.data.mh;if(typeof renderPanel==='function'&&P&&P[st.focus])renderPanel()});
 const mhLinks=p=>{const m=/^I(\d{1,6})$/.exec(p.id);if(!MH||!m)return '';const n=MH.tree*1e6+ +m[1],sl=(nm(p)||'person').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60)||'person';
-  return '<p class="mh">Open in MyHeritage: <a href="https://www.myheritage.com/profile-'+MH.site+'-'+n+'/'+sl+'" target="_blank" rel="noopener noreferrer">profile ↗</a> · <a href="https://www.myheritage.com/family-trees/'+(MH.slug||'tree')+'/'+MH.site+'?rootIndividualID='+n+'&familyTreeID='+MH.tree+'" target="_blank" rel="noopener noreferrer">in tree ↗</a></p>'};
+  const a=(u,t,i)=>' <a class="btn ibtn" href="'+u+'" target="_blank" rel="noopener noreferrer" title="'+t+'" aria-label="'+t+'">'+ICO[i]+'</a>';
+  return a('https://www.myheritage.com/profile-'+MH.site+'-'+n+'/'+sl,'Open this profile on MyHeritage','person')+a('https://www.myheritage.com/family-trees/'+(MH.slug||'tree')+'/'+MH.site+'?rootIndividualID='+n+'&familyTreeID='+MH.tree,'Open this person in the tree on MyHeritage','tree')};
 function renderPanel(){
   const p=P[st.focus],A=ancSet(p),D=descSet(p);
   const gensBack=A.size?Math.max(...A.values()):0;
   const sibs=new Set();for(const id of [p.father,p.mother])if(id)for(const k of P[id].kids)if(k!==p.id)sibs.add(k);
   const byLine=Array(8).fill(0);A.forEach((g,id)=>byLine[P[id].fi]++);
   let h='<div class="head"><div class="swatch" style="background:'+colorOf(p)+'"></div><div><h2>'+(pageURL(p)?'<a class="pname" href="'+pageURL(p)+'" title="Open their page">'+esc(nm(p))+'</a>':esc(nm(p)))+'</h2><div class="meta">'+esc(yrs(p))+' · '+esc(p.id)+'</div></div></div>';
-  h+='<button class="btn ibtn" id="backbtn" title="Back" aria-label="Back"'+(st.hist.length?'':' disabled')+'>'+ICO.back+'</button> <button class="btn" data-goto="kinship">How are we related?</button> <button class="btn ibtn" id="copylink" title="Copy link to this person" aria-label="Copy link">'+ICO.copy+'</button>'+mhLinks(p);
+  h+='<button class="btn ibtn" id="backbtn" title="Back" aria-label="Back"'+(st.hist.length?'':' disabled')+'>'+ICO.back+'</button> <button class="btn" data-goto="kinship">How are we related?</button> <span class="ibg"><button class="btn ibtn" id="copylink" title="Copy link to this person" aria-label="Copy link">'+ICO.copy+'</button>'+mhLinks(p)+'</span>';
   if(living(p)) h+='<p class="note">Living person. Name and details are withheld on the public site.</p>';
   else h+='<dl>'+(p.occ?'<dt>Occupation</dt><dd>'+esc(p.occ)+'</dd>':'')+'<dt>Born</dt><dd>'+(p.bye?'about ':'')+p.by+'</dd><dt>Died</dt><dd>'+(p.dy==null?'no death recorded':p.dye?'not recorded':p.dy)+'</dd></dl>';
   const stat=(k,n,l)=>'<button class="stat" data-open="'+k+'" aria-expanded="'+(st.open===k)+'"'+(n?'':' disabled')+'>'+n+'<small>'+l+(n?' '+(st.open===k?'▴':'▾'):'')+'</small></button>';
@@ -1306,7 +1308,7 @@ function renderMap(){
   const r=2.5+(closeMode?1.2:0)+Math.min(st.zoom,8)*.2,showNames=st.zoom>=6||(closeMode&&pool.length<=120&&st.zoom>=1.6);
   for(const p of pool){
     const [x,yy]=pos(p);if(x<ML-6||x>W+6)continue;
-    const inPed=ped.has(p.id),match=q&&nm(p).toLowerCase().includes(q);
+    const inPed=ped.has(p.id),match=q&&nameHit(p,q);
     let op=(inPed||closeMode)?1:.32;
     if(cty){if(st.cty&&PL[p.bp].cn!==st.cty)op=.07}else if(st.line!==null&&p.fi!==st.line)op=.07;
     if(q&&!match)op=Math.min(op,.12);
@@ -2130,11 +2132,14 @@ document.addEventListener('click',e=>{
     try{navigator.clipboard.writeText(u).then(done,()=>{window.prompt('Copy this link',u)})}catch(x){window.prompt('Copy this link',u)}}
 });
 const qi=$('#q'),res=$('#results');
+const fold=s=>String(s).normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+/* a name matches when every word typed is found in it, in any order, ignoring accents and capitals: "ivan defranceski" finds Ivan Anton Defranceski */
+const nameHit=(p,q)=>{const n=fold(nm(p));return fold(q).split(/\s+/).filter(Boolean).every(t=>n.includes(t))};
 qi.addEventListener('input',()=>{
   st.q=qi.value;const q=st.q.trim().toLowerCase();
   if(!q){res.hidden=true}
   else{
-    const m=list.filter(p=>nm(p).toLowerCase().includes(q)).sort((a,b)=>ancSet(b).size-ancSet(a).size||a.by-b.by).slice(0,8);
+    const m=list.filter(p=>nameHit(p,q)).sort((a,b)=>ancSet(b).size-ancSet(a).size||a.by-b.by).slice(0,8);
     res.innerHTML=m.length?m.map(p=>'<li><button data-id="'+p.id+'"><i style="width:8px;height:8px;border-radius:2px;background:'+colorOf(p)+'"></i>'+esc(nm(p))+'<small>'+esc(yrs(p))+'</small></button></li>').join(''):'<li style="padding:8px;color:var(--muted)">No match</li>';
     res.hidden=false;
   }

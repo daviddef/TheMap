@@ -4,6 +4,7 @@ import { buildPacket } from './contribute.js';
 import { makeSample } from './sample.js';
 import { searchLinks, sends } from './lookup.js';
 import { checklistText, checklistCsv } from './checklist.js';
+import * as recent from './recent.js';
 import { BUILD } from './build.js';
 import { parseLink, profileUrl, treeUrl, toHash, fromHash } from './myheritage.js';
 
@@ -12,13 +13,15 @@ const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) 
 const n0 = n => (+n).toLocaleString('en');
 const pct = x => (x * 100).toFixed(1).replace(/\.0$/, '') + '%';
 
+let curBytes = null, curName = null;   // a private copy, only so the visitor can choose to keep the file on this device
 let worker = null, last = null, shown = { review: 0 };
 const base = new URL('./', location.href).href;
 
 function show(id) { for (const s of ['start', 'busy', 'work']) $('#' + s).hidden = s !== id; }
 function fail(msg) { const e = $('#err'); e.textContent = msg; e.hidden = false; show('start'); }
 
-function start(bytes) {
+function start(bytes, name) {
+  curBytes = bytes.slice(0); curName = name || null; $('#keep').hidden = !curName; $('#keep').textContent = 'Keep on this device';
   $('#err').hidden = true; show('busy'); $('#busymsg').textContent = 'Starting…';
   if (worker) worker.terminate();
   worker = new Worker('js/worker.js', { type: 'module' });
@@ -265,7 +268,7 @@ function person(i) {
   if (!i) return; lastInfo = i;
   $('#wedit').hidden = false; $('#wname').textContent = i.name + ' · ' + i.id;
   $('#winfo').textContent = 'In your file: born ' + (i.birth || 'no date') + ', died ' + (i.death || 'no date') + (i.living ? '. Treated as living (no death recorded, born within 110 years)' + (hideLiv() ? ', so hidden while "Hide living people" is on, and left out of a shareable file.' : '. Left out of a shareable export.') : '.');
-  const wm = $('#wmh'); wm.textContent = ''; const ml = mhA(i.id, i.name); if (ml.length) wm.append('Open in MyHeritage:', ...ml);
+  const wm = $('#wmh'); wm.textContent = ''; const ml = mhA(i.id, i.name); if (ml.length) wm.append(...ml);
   const l = i.look, ul = $('#wlinks'); ul.textContent = '';
   const ls = searchLinks(l); $('#wlook').hidden = !ls.length;
   $('#wsends').textContent = ls.length ? 'Nothing is sent until you click a link. A click opens that site in a new tab and gives it: ' + sends(l) + (l.bp || l.dp ? ', and the places in your file' : '') + '.'
@@ -301,18 +304,19 @@ function exported(m) {
 
 /* ---------- tabs and the file ---------- */
 function tab(name) {
+  document.body.classList.toggle('wide', name === 'tree');   // the tree uses the whole window; the lists keep a readable width
   for (const b of $$('.tabs button')) b.setAttribute('aria-selected', String(b.dataset.tab === name));
   for (const p of $$('.panel')) p.hidden = p.id !== 'p-' + name;
   if (name === 'fix' && worker) worker.postMessage({ cmd: 'checklist', living: $('#fliving').checked });
 }
 $$('.tabs button').forEach(b => b.onclick = () => tab(b.dataset.tab));
 $('#rfilter').oninput = e => last && drawReview(last.review, e.target.value);
-$('#again').onclick = () => { if (worker) worker.terminate(); worker = null; last = null; window.RR = null; show('start'); };
+$('#again').onclick = () => { document.body.classList.remove('wide'); if (worker) worker.terminate(); worker = null; last = null; curBytes = null; window.RR = null; show('start'); refreshRecent(); };
 
 async function take(file) {
   if (!file) return;
   if (file.size > 400e6) return fail('That file is over 400 MB, which is more than this page can hold in memory.');
-  start(await file.arrayBuffer());
+  start(await file.arrayBuffer(), file.name);
 }
 const drop = $('#drop');
 drop.onclick = e => { if (e.target.closest('label')) return; $('#file').click(); };
@@ -334,6 +338,7 @@ const IC = {
   person: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-4 3.6-6 7-6s6.2 2 7 6"/></svg>',
   tree: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9.5" y="3" width="5" height="4" rx="1"/><rect x="3" y="17" width="5" height="4" rx="1"/><rect x="16" y="17" width="5" height="4" rx="1"/><path d="M12 7v5M5.5 17v-5h13v5"/></svg>',
   info: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.01"/></svg>',
+  trash: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 7V4h4v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>',
   open: svg('M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5'),
 };
 /* an icon-only button or link: always has a title and an aria-label, so a screen reader and a hover both say what it does */
@@ -347,8 +352,8 @@ const copy = async (text, btn) => {
 /* ---------- links back to MyHeritage ---------- */
 let mhc = fromHash(location.hash);
 const mhA = (id, name) => {
-  const p = profileUrl(mhc, id, name), t = treeUrl(mhc, id); if (!p) return [];
-  const out = []; for (const [u, lab] of [[p, 'MyHeritage'], [t, 'in tree']]) { const a = el('a', null, lab + ' ↗'); a.href = u; a.target = '_blank'; a.rel = 'noopener noreferrer'; out.push(' ', a); } return out;
+  const p = profileUrl(mhc, id, name), tu = treeUrl(mhc, id); if (!p) return [];
+  return [' ', ia('person', 'Open this profile on MyHeritage', p), ' ', ia('tree', 'Open this person in the tree on MyHeritage', tu)];
 };
 /* one person (or one event) as a tidy line: name, record number, what the event was, then the icons */
 const MAXP = 3;
@@ -437,3 +442,23 @@ function saveAs(name, text, type) {
 }
 $('#ftext').onclick = () => fix && saveAs('fix-list.txt', checklistText(fix, new Date().toISOString().slice(0, 10)), 'text/plain;charset=utf-8');
 $('#fcsv').onclick = () => fix && saveAs('fix-list.csv', '\ufeff' + checklistCsv(fix), 'text/csv;charset=utf-8');
+
+
+/* ---------- files kept on this device (opt-in, see recent.js) ---------- */
+const mb = n => (n >= 1e6 ? (n / 1e6).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1e3)) + ' KB');
+async function refreshRecent() {
+  const items = await recent.list(), box = $('#recent'), ul = $('#rlist'); ul.textContent = ''; box.hidden = !items.length;
+  for (const f of items) {
+    const li = el('li', 'rf'), open = el('button', 'btn', 'Open'), when = new Date(f.saved).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+    open.onclick = async () => { const r = await recent.recall(f.id); if (r) start(r.bytes, r.name); else refreshRecent(); };
+    li.append(el('b', 'rn', f.name), el('span', 'muted', mb(f.size) + ' · kept ' + when), open, ib('trash', 'Forget this file (removes it from this browser)', async () => { await recent.forget(f.id); refreshRecent(); }));
+    ul.append(li);
+  }
+}
+$('#rall').onclick = async () => { await recent.forgetAll(); refreshRecent(); };
+$('#keep').onclick = async function () {
+  if (!curBytes || !curName) return; const b = this; b.disabled = true;
+  try { await recent.remember(curName, curBytes.slice(0)); b.textContent = 'Kept on this device ✓'; } catch (e) { b.textContent = 'Could not keep it: ' + (e.message || 'storage refused'); }
+  b.disabled = false; refreshRecent();
+};
+refreshRecent();

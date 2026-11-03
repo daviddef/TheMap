@@ -1079,10 +1079,21 @@ window.addEventListener("load", async function () {
              esc(CNAME[String(d.country).toUpperCase()] || d.country) + " " +
              esc(T("has flown")) + "</p>");
     } else {
-      h.push('<p class="at-lab">' + esc(T("Who governed this ground")) + "</p>");
+      /* HONEST ABOUT WHOSE HISTORY THIS IS. It used to say «Who governed this
+         ground», which claimed the place's own story, when what stands here is
+         the COUNTRY's flag history: Almería was Nasrid until 1489 and the
+         Azores were empty until the 1430s, and neither shows in Spain's or
+         Portugal's strip. David, comparing Senj with Lagoa, the Azores and
+         Almería: the places with a record region show who held the ground,
+         the regimes and the flags; the others showed a bare strip. So the
+         label says whose it is, and the hint says what it can and cannot tell. */
+      h.push('<p class="at-lab">' + esc(CNAME[String(d.country).toUpperCase()] || d.country) +
+             " \u00b7 " + esc(T("the country's regimes and flags")) + "</p>");
       h.push('<p class="at-hint" style="margin:0 0 6px">' +
-             esc(T("No record region covers this place yet, so this says who was " +
-                   "governing — not which archive holds the paper.")) + "</p>");
+             esc(T("This place has no era table of its own yet, so these are the " +
+                   "country's eras, not this ground's: borders moved, and it may have " +
+                   "been held by another power for part of this. It does not say which " +
+                   "archive holds the paper.")) + "</p>");
     }
     h.push('<div class="ra-tl-band" role="tablist" aria-label="' +
            esc(T("Flags over time")) + '">');
@@ -1129,10 +1140,33 @@ window.addEventListener("load", async function () {
              ' aria-live="polite"></div>');
     h.push("</div>");
 
+    /* WHAT THE FLAG PAGES ALREADY SAY ABOUT EACH ERA, SHOWN HERE. The rows
+       carry a head of state, a system and a religion («tag-row»), a title
+       («noble-row») and who left or arrived («migro-row»). They were being
+       fetched with every era and read by nobody, while the strip said only a
+       name and a link. These are the author's own words, so they are quoted,
+       not paraphrased. */
+    function eraFacts(e) {
+      var tags = e.tags || [], t1 = [], mig = [];
+      tags.forEach(function (t) {
+        if (!t || !t.t) return;
+        (t.row === "migro-row" ? mig : t1).push(t.t);
+      });
+      var out = "";
+      if (t1.length)
+        out += '<p class="ra-fx">' + t1.map(function (x) {
+          return '<span class="k-tag">' + esc(x) + "</span>"; }).join(" ") + "</p>";
+      if (mig.length)
+        out += '<ul class="ra-fx-m">' + mig.map(function (x) {
+          return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>";
+      return out;
+    }
+
     BANDS[uid] = spans.map(function (sp) {
       return '<p class="ra-tl-d-h"><span class="ra-era-y">' +
              esc(sp.e.dates || (sp.from + "\u2013" + sp.to)) +
              '</span> <span class="ra-era-p">' + esc(sp.e.polity) + "</span></p>" +
+             eraFacts(sp.e) +
              '<p class="at-hint" style="margin:0"><a href="' + BASE +
              esc(flagHref(sp.e.page) || ("flags/" + slug + "-flags/")) + "#" +
              esc(sp.e.id) + '">' + esc(T("This flag on Flag History")) +
@@ -2539,11 +2573,12 @@ window.addEventListener("load", async function () {
       }
     } else {
       h.push('<div class="ra-juris ra-unmapped"><div class="lab">Whose ground this was</div>' +
-             "<p>Not yet mapped. " + REGIONS_N + " record regions carry an era " +
-             "table so far — Istria, the Kvarner, Carnia, Dalmatia, Galicia, Bukovina, " +
-             "Bohemia, Moravia, Hungary, Transylvania, East Prussia, Pomerania and the " +
-             "rest — and this place is outside all of them. That is a gap in this map " +
-             "rather than a gap in the record.</p></div>");
+             "<p>Not yet mapped. " + REGIONS_N + " record regions carry a place-level " +
+             "era table so far — Istria, the Kvarner, Carnia, Dalmatia, Galicia, " +
+             "Bukovina, Bohemia, Moravia, Hungary, Transylvania, East Prussia, " +
+             "Pomerania and the rest — and this place is outside all of them. Above is " +
+             "the country's own history instead. That is a gap in this map, not a gap " +
+             "in the record, and it is on the list to close.</p></div>");
     }
 
     /* The link to this place's own page moved up onto the heading line.
@@ -8802,6 +8837,11 @@ window.addEventListener("load", async function () {
     border: 1px solid var(--rule); background: var(--ground); display: block; }
  :global(.ra-ef-f svg) { width: 100%; height: 100%; display: block; }
  :global(.ra-ef-none) { border-style: dashed; }
+ /* The facts under an era in the country-level band (leader, system, religion; who left or arrived). */
+ :global(.ra-fx) { margin: 6px 0 4px; display: flex; flex-wrap: wrap; gap: 5px; }
+ :global(.ra-fx .k-tag) { text-transform: none; letter-spacing: 0; font-size: 11px; white-space: normal; }
+ :global(.ra-fx-m) { margin: 2px 0 8px; padding-left: 16px; font: 400 12px/1.5 var(--sans); color: var(--ink-2); }
+
  :global(.ra-ef-t) { min-width: 0; font-size: 12.5px; line-height: 1.3; }
  :global(.ra-ef-t b) { display: block; font-weight: 600; }
  :global(.ra-ef-d) { display: block; font-family: var(--mono); font-size: 10px;

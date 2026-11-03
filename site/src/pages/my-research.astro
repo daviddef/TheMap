@@ -658,8 +658,17 @@ const BASE_ = u("/");
         box.hidden = false;
         if (!mrMap) {
           mrMap = L.map(box, { scrollWheelZoom: false, preferCanvas: true });
-          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            attribution: "&copy; OpenStreetMap contributors", maxZoom: 18
+          /* The same quiet ground as the main map: Esri's light grey canvas, with
+             its place names in a separate pane above the tiles and below the pins. */
+          L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+            attribution: "Esri, HERE, Garmin &middot; &copy; OpenStreetMap contributors",
+            maxNativeZoom: 16, maxZoom: 18
+          }).addTo(mrMap);
+          mrMap.createPane("baseLabels");
+          mrMap.getPane("baseLabels").style.zIndex = 250;
+          mrMap.getPane("baseLabels").style.pointerEvents = "none";
+          L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}", {
+            pane: "baseLabels", maxNativeZoom: 16, maxZoom: 18
           }).addTo(mrMap);
         }
         if (mrMap._raPins) mrMap.removeLayer(mrMap._raPins);

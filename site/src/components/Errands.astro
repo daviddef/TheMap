@@ -66,15 +66,16 @@ const rows = groups.flatMap((g) => g.rows || []);
 
 <style is:global>
   .er-g { margin: 0 0 2rem; }
-  .er-lab { font: 600 10px/1 var(--sans); letter-spacing: .13em; text-transform: uppercase;
-    color: var(--ink-3); margin: 0 0 .9rem; }
-  .er-note { font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 12px; }
-  .er-row { border-left: 3px solid var(--rule); padding: 0 0 0 14px; margin: 0 0 1.6rem; }
+  .er-lab { font: 500 clamp(20px, 2.6vw, 24px)/1.25 var(--serif); color: var(--ink); margin: 0 0 .9rem; }
+  .er-note { font: 400 13px/1.5 var(--sans); color: var(--ink-3); }
+  .er-row { border: 1px solid var(--rule); border-left: 4px solid var(--rule); border-radius: 12px; background: var(--panel);
+    padding: 14px 18px; margin: 0 0 12px; max-width: 78ch; }
+  .er-row:hover { border-color: var(--rule-strong); }
   .er-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
   .er-n { font: 600 11px/1 var(--mono, var(--sans)); color: var(--ink-3); }
   .er-tag { font: 600 10px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase;
-    border: 1px solid currentColor; border-radius: 2px; padding: 3px 6px; }
-  .er-row h3 { font-size: 15px; margin: 0; flex: 1 1 100%; }
+    border: 1px solid currentColor; border-radius: 999px; padding: 4px 9px; }
+  .er-row h3 { font: 500 18px/1.35 var(--serif); margin: 4px 0 0; flex: 1 1 100%; }
   .er-who { font: 400 13px/1.4 var(--sans); color: var(--ink-2); flex: 1 1 100%; }
   .er-dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; margin: 10px 0 0;
     font-size: 13.5px; line-height: 1.55; }
@@ -84,7 +85,7 @@ const rows = groups.flatMap((g) => g.rows || []);
   .er-draft { margin: 12px 0 0; }
   .er-draft summary { font: 600 12px/1 var(--sans); cursor: pointer; color: var(--accent); }
   .er-draft pre { white-space: pre-wrap; font: 400 13px/1.6 var(--mono, monospace);
-    background: var(--panel); border: 1px solid var(--rule); border-radius: 3px;
+    background: var(--ground); border: 1px solid var(--rule); border-radius: 10px;
     padding: 14px; margin: 10px 0 0; overflow-x: auto; }
   .er-go { font-size: 12.5px; margin: 10px 0 0; }
   .er-file code { color: var(--ink-3); font-size: 11.5px; }

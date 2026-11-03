@@ -29,17 +29,17 @@ const c = errands.counts;
   dek="Some gaps in this atlas cannot be closed by reading. The data is not published, or the server that published it has gone down, or the archive has told crawlers no — and the honest remaining move is to ask a person."
   description="Letters this atlas has drafted to close the gaps reading cannot: the exact words, and which of them have gone.">
   {/* The count is in the eyebrow; repeating it here was the same sentence twice. */}
-  <p class="cap">
-    Each is written out in full below, ready to send from David's own address or to
-    adapt. <b>Sending one is his decision, always</b>, and the date it went is
-    recorded beside it afterwards. The text is read from <code>requests/</code> in the
-    repository and never retyped here, so what you read is what was sent.
+  <p class="k-stats" aria-label="Summary">
+    <span><b>{c.letters}</b> letters</span>
+    <span class="k-tag is-new">{c.drafted} drafted, unsent</span>
   </p>
+  <div class="k-hi">
+    <p>Some questions can only be answered by asking a person. Here are the letters, written out in full.</p>
+    <p>Sending one is David's decision, always, and the date it went is recorded beside it afterwards. The text is read from <code>requests/</code> in the repository and never retyped here, so what you read is what was sent.</p>
+  </div>
   <Errands groups={errands.groups} u={u} />
-  <p class="cap" style="margin-top:2rem">
-    Why these and not others: this atlas does not work around a bot gate, and it does
-    not read a sibling host to get what a named host refused. Where that leaves a
-    question unanswered, the question goes here instead of quietly disappearing.
-    See <a href={u("/worklist/")}>what is still missing</a>.
-  </p>
+  <aside class="k-foot">
+    <p>Why these and not others?</p>
+    <p>This atlas does not work around a bot gate, and it does not read a sibling host to get what a named host refused. Where that leaves a question unanswered, the question goes here instead of quietly disappearing. See <a href={u("/worklist/")}>what is still missing</a>.</p>
+  </aside>
 </Base>

@@ -12,14 +12,16 @@ import { surnamePageRows } from "../../lib/surname-pages.js";
    the ones where this dataset knows something a reader could not get from a
    phone book. */
 import Base from "../../layouts/Base.astro";
+import SurnameMap from "../../components/SurnameMap.astro";
 import { u } from "../../lib/url.js";
 import { atlas as idx } from "../../lib/atlas.js";
 import { sourcesFor, access as PACCESS } from "../../lib/sources-by-country.js";
 import { curveFor } from "../../lib/fr-curve.js";
 import { corpus } from "../../lib/surname-corpus.js";
-import { surnameMap, placesMap } from "../../lib/surname-map.js";
+import { surnameMapData } from "../../lib/surname-map.js";
 import { belgiumFor } from "../../lib/belgium-surnames.js";
 import { contextFor } from "../../lib/surname-context.js";
+import { familyFor, membersByStatus, searchList, typedForms, formKey, legend as famLegend, STATUS_ORDER, STATUS_LABEL } from "../../lib/surname-families.js";
 import { wiktionaryFor } from "../../lib/surname-wiktionary.js";
 import { flagFor } from "../../lib/flags.js";
 import { totalVolumes, volumesFor, KIND_LABEL } from "../../lib/surname-volumes.js";
@@ -70,6 +72,18 @@ const TIER = {
 };
 const by = {};
 for (const v of r.variants) (by[v.how] = by[v.how] || []).push(v.n);
+/* A form the catalogue already holds is shown there, with its evidence, and not
+   a second time below as a computed link. */
+{
+  const held = familyFor(r.n);
+  if (held) {
+    const keys = new Set([...held.fam.members, ...(held.fam.notSame || [])].map((m) => formKey(m.form)));
+    for (const how of Object.keys(by)) {
+      by[how] = by[how].filter((n) => !keys.has(formKey(n)));
+      if (!by[how].length) delete by[how];
+    }
+  }
+}
 /* THREE QUESTIONS, NOT ONE. «Attested» was answering «where is it borne»,
    «where does a record name it» and «where did it come from» all at once, and
    therefore none of them clearly. They take different evidence. */
@@ -86,7 +100,7 @@ const total = ccs.reduce((a, c) => a + (c.n || 0), 0);
 /* The same countries, drawn. Built here rather than fetched, so the
    picture is in the page before any script runs — see lib/surname-map.js
    for why nineteen thousand Leaflets was not the answer. */
-const smap = surnameMap(ccs);
+const mapCountries = surnameMapData(ccs);
 /* AND ONE COUNTRY CAN BE DRAWN PROPERLY. Statbel counts every surname in
    each of 565 communes, so where the other ten registers can only put a
    dot on a country, Belgium puts dots on towns. It is the only one, and
@@ -94,6 +108,28 @@ const smap = surnameMap(ccs);
    a fact about the name. */
 const wd = contextFor(r.n);
 const wk = wiktionaryFor(r.n);
+
+/* THE ATLAS'S ONE CATALOGUE OF WHICH SPELLINGS ARE THE SAME NAME.
+   Written with scripts/surname_variants.py, by every family archive and every
+   session, and nowhere else: see lib/surname-families.js. Where this name
+   belongs to a family it is shown ABOVE the computed links below, because
+   evidence somebody read off a record outranks a rule of the language, which
+   outranks an algorithm's guess. */
+const fh = familyFor(r.n);
+const fam = fh && fh.role === "member" ? fh.fam : null;
+const famNot = fh && fh.role === "notSame" ? fh : null;
+const famGroups = fam ? membersByStatus(fam) : null;
+const famSearch = fam ? searchList(fam) : [];
+const famLeg = famLegend();
+const refText = (e) => {
+  const x = e.ref || "";
+  if (x.startsWith("archive:")) return `the ${x.slice(8).split(" (")[0]} family archive`;
+  if (x.startsWith("skill:")) return "a family archive's research notes";
+  return x;
+};
+const evLine = (e) => [
+  (e.where || []).map((c) => CN[c] || c).join(", "), e.place, e.period,
+].filter(Boolean).join(" · ");
 
 /* JOBS 1-3: one block per attested country, replacing three sections that
    used to say «where it is borne», «when it was being born» and «whose
@@ -149,13 +185,10 @@ const placePins = (r.places || [])
 const placeCcs = [...new Set((r.places || [])
   .filter((p) => p.y != null && p.via !== "sounds" && p.cc)
   .map((p) => p.cc))];
-const placeMap = placePins.length
-  /* Three degrees of margin, so a single town is shown in its country
-     rather than filling the frame with land. */
-  ? placesMap(placePins, { max: 12, cc: placeCcs, minPad: 3 })
-  : null;
+const placeMap = placePins.length > 0;
 const beRows = belgiumFor(r.n);
-const bemap = beRows && placesMap(beRows, { cc: "BE" });
+const BE_MAX = 150;
+const bemap = beRows ? { drawn: Math.min(beRows.length, BE_MAX), omitted: Math.max(0, beRows.length - BE_MAX) } : null;
 const beTotal = beRows ? beRows.reduce((a, x) => a + x.c, 0) : 0;
 const dek = `${r.n}${by.curated ? `, also written ${by.curated.slice(0,4).join(", ")}` : ""}. `
   + `Attested in ${ccs.map((c) => CN[c.cc] || c.cc).join(", ")}`
@@ -212,6 +245,77 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
                         license: "https://creativecommons.org/publicdomain/zero/1.0/" },
   }}
   title={r.n} eyebrow={ccs.map((c) => CN[c.cc] || c.cc).join(" · ")} dek={dek}>
+
+  {famNot && (
+    <section style="margin-top:24px" class="fam famnotice">
+      <p class="cap" style="margin-top:0"><b>A different name.</b> The family archives record {r.n} as <i>not</i> the same
+      name as <a href={u(`/surname/${slugify(famNot.fam.name)}/`)}>{famNot.fam.name}</a>: {famNot.m.why}</p>
+    </section>
+  )}
+
+  {fam && (
+    <section style="margin-top:8px" class="fam" id="spellings">
+      <h2>The spellings of {fam.name}</h2>
+      <p class="cap">{fam.note} This is the one list the atlas keeps of which spellings are the same name, and what
+      each rests on. Case, spacing, hyphens and apostrophes are not counted as separate spellings, so
+      <i> De Franceschi</i> and <i>Defranceschi</i> are one form. An accent is: a priest's Lereña is not a clerk's Lerena.</p>
+      {famSearch.length > 1 && (
+        <p class="famsearch"><b>Searching for this name?</b> Try every one of: {famSearch.join(" · ")}</p>
+      )}
+      {STATUS_ORDER.map((st) => {
+        if (!famGroups[st].length) return null;
+        const list = (
+          <ul class="famlist">
+            {famGroups[st].map((m) => (
+              <li class={formKey(m.form) === formKey(r.n) ? "here" : ""}>
+                <b>{pageFor.has(slugify(m.form)) && formKey(m.form) !== formKey(r.n)
+                    ? <a href={u(`/surname/${slugify(m.form)}/`)}>{m.form}</a> : m.form}</b>
+                {st !== "lead" && typedForms(m.form).length > 0 && (
+                  <span class="typed"> also typed {typedForms(m.form).join(", ")}</span>
+                )}
+                {formKey(m.form) === formKey(r.n) && <span class="you"> this page</span>}
+                <details>
+                  <summary>what it rests on</summary>
+                  <ul class="fev">
+                    {m.evidence.map((e) => (
+                      <li>{e.what}
+                        {(evLine(e) || refText(e)) && (
+                          <span class="who"> {[evLine(e), refText(e)].filter(Boolean).join(" · ")}</span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              </li>
+            ))}
+          </ul>
+        );
+        return st === "lead" ? (
+          <details class="famlead">
+            <summary><b>{famGroups[st].length} {famGroups[st].length === 1 ? "lead" : "leads"}, never yet seen on a record</b>
+              <span class="cap" style="display:inline"> — worth searching, never worth writing down alone</span></summary>
+            <p class="cap" style="margin-top:6px">{famLeg[st]}</p>
+            {list}
+          </details>
+        ) : (
+          <div class="famgroup">
+            <h3>{STATUS_LABEL[st]}</h3>
+            <p class="cap" style="margin-top:2px">{famLeg[st]}</p>
+            {list}
+          </div>
+        );
+      })}
+      {(fam.notSame || []).length > 0 && (
+        <details class="famnot">
+          <summary><b>{fam.notSame.length} {fam.notSame.length === 1 ? "look-alike" : "look-alikes"} that {fam.notSame.length === 1 ? "is" : "are"} not this name</b>
+            <span class="cap" style="display:inline"> — they turn up in searches; do not count them</span></summary>
+          <ul class="fev">
+            {fam.notSame.map((m) => <li><b>{m.form}</b> — {m.why}</li>)}
+          </ul>
+        </details>
+      )}
+    </section>
+  )}
 
   {/* SPELLING WAS BUILT, LABELLED, AND NEVER RENDERED. The tier has existed
       in the data for a while and TIER above has carried its heading and its
@@ -386,21 +490,69 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
     </section>
   )}
 
+  <section style="margin-top:30px">
+    <h2>On the map</h2>
+    {(mapCountries.length > 0 || placeMap || bemap) && (
+      <SurnameMap
+        label={`Map of ${r.n}: countries where it is attested${placePins.length ? ", and places of that name" : ""}`}
+        countries={mapCountries}
+        places={placePins}
+        communes={bemap ? (beRows || []).slice(0, BE_MAX).map((x) => ({ y: x.y, x: x.x, c: x.c, nl: x.nl })) : []}>
+        <p class="cap">
+          <b>Where it is borne, and where a record names it.</b>
+
+          {/* THE CAPTION IS PART OF THE PICTURE, not decoration under it.
+              A map with two dots on it makes three claims a reader will
+              believe unless told otherwise, and all three would be wrong. */}
+          <b>A dot is a country, not a place.</b> It sits at the country's
+          centre because a national register counts a country; nothing here
+          says where in it these people are.
+          {mapCountries.some((c) => c.n == null && c.how !== "archive") && (
+            <> <b>A dashed ring is attested by a register but not counted</b> — Denmark
+            publishes which surnames exist and not how many carry each. Sizing those
+            by a number nobody published would invent it.</>
+          )}
+          {mapCountries.some((c) => c.how === "archive" && c.n == null) && (
+            <> <b>A pale ring with a solid edge is a family archive's own tree</b> placing
+            the name in that country, with no register behind it: the archive finds a name
+            without counting heads, and the tree is the family's own research, not a published count.</>
+          )}
+          {" "}<b>Blank is not absence.</b> This draws
+          {" "}{ccs.length === 1 ? "the one country" : `the ${ccs.length} countries`}
+          {" "}where the eleven registers and eight archives behind this atlas
+          attest the name. Most of the world has no surname register this
+          project can read, and <a href={u("/surnames/")}>the ones that do and
+          will not are listed with the reason</a>.
+        
+        </p>
+        {bemap && (
+          <p class="cap">
+
+          <b>Belgium, by commune.</b> {beTotal.toLocaleString()} people in
+          {" "}{beRows.length} of Belgium's 565 communes, counted by Statbel.
+          The biggest is <b>{beRows[0].nl}</b> with
+          {" "}{beRows[0].c.toLocaleString()}.
+          {bemap.omitted > 0 && (
+            <> Only the {bemap.drawn} commonest are drawn; {bemap.omitted}
+            {" "}more communes hold a few each.</>
+          )}
+          {" "}This is the only country here that can be drawn this way —
+          every other register counts a country and stops, so a blank
+          elsewhere is a gap in what states publish, not in the name.
+        
+          </p>
+        )}
+      </SurnameMap>
+    )}
+  </section>
+
   {r.places && r.places.length > 0 ? (
     <section style="margin-top:30px">
       <h2>It is also the name of a place</h2>
-      {placeMap && (
-        <figure class="smap" style="margin:12px 0 4px">
-          <Fragment set:html={placeMap.svg} />
-          <figcaption class="cap" style="margin-top:8px">
-            Where those places are. A dot is a settlement whose name is
-            this surname, sized by its population — <b>not</b> a claim
-            that anybody of the name lives there. Phonetic neighbours are
-            listed below but not drawn: putting a machine's guess on the
-            ground would dress it up as geography.
-          </figcaption>
-        </figure>
-      )}
+      <p class="cap">The places are drawn on the map above. A dot there is a settlement whose name is
+      this surname, sized by its population — <b>not</b> a claim that anybody of the name lives there.
+      Phonetic neighbours are listed below but not drawn: putting a machine's guess on the ground would
+      dress it up as geography.</p>
       <p class="cap"><b>This is as close to an origin as this map will go.</b> A surname that
       is also a place name often came from it — and often did not: plenty are occupations or
       patronymics that happen to collide with a place, and plenty of places are named after a
@@ -427,54 +579,6 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
       usually unsourced, and it is a different question from the one answered here.</p>
     </section>
   )}
-
-  <section style="margin-top:30px">
-    <h2>Where it is borne, and where a record names it</h2>
-    {smap && (
-      <figure class="smap">
-        <Fragment set:html={smap.svg} />
-        <figcaption class="cap">
-          {/* THE CAPTION IS PART OF THE PICTURE, not decoration under it.
-              A map with two dots on it makes three claims a reader will
-              believe unless told otherwise, and all three would be wrong. */}
-          <b>A dot is a country, not a place.</b> It sits at the country's
-          centre because a national register counts a country; nothing here
-          says where in it these people are.
-          {smap.counted < smap.drawn && (
-            <> <b>A hollow ring is attested but not counted</b> — Denmark
-            publishes which surnames exist and not how many carry each, and a
-            family archive finds a name without counting heads. Sizing those
-            by a number nobody published would invent it.</>
-          )}
-          {" "}<b>Blank is not absence.</b> This draws
-          {" "}{ccs.length === 1 ? "the one country" : `the ${ccs.length} countries`}
-          {" "}where the eleven registers and eight archives behind this atlas
-          attest the name. Most of the world has no surname register this
-          project can read, and <a href={u("/surnames/")}>the ones that do and
-          will not are listed with the reason</a>.
-        </figcaption>
-      </figure>
-    )}
-
-    {bemap && (
-      <figure class="smap" style="margin-top:22px">
-        <figcaption class="cap" style="margin:0 0 8px">
-          <b>Belgium, by commune.</b> {beTotal.toLocaleString()} people in
-          {" "}{beRows.length} of Belgium's 565 communes, counted by Statbel.
-          The biggest is <b>{beRows[0].nl}</b> with
-          {" "}{beRows[0].c.toLocaleString()}.
-          {bemap.omitted > 0 && (
-            <> Only the {bemap.drawn} commonest are drawn; {bemap.omitted}
-            {" "}more communes hold a few each.</>
-          )}
-          {" "}This is the only country here that can be drawn this way —
-          every other register counts a country and stops, so a blank
-          elsewhere is a gap in what states publish, not in the name.
-        </figcaption>
-        <Fragment set:html={bemap.svg} />
-      </figure>
-    )}
-  </section>
 
   {/* ONE BLOCK PER COUNTRY, replacing three sections that used to say «where
       it is borne», «when it was being born» and «whose archive to write to»
@@ -662,6 +766,49 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
 </Base>
 
 <style>
+  /* The catalogue of spellings. Ordered by what the evidence is worth, and
+     quiet: a list of forms with a disclosure under each, not a table. */
+  .fam { background: var(--panel); border: 1px solid var(--rule); border-radius: 3px;
+         padding: 24px 26px 22px; }
+  .fam > h2 { font-size: clamp(22px, 2.6vw, 28px); margin: 0; }
+  .fam > .cap { font-size: 13.5px; line-height: 1.6; color: var(--ink-2); max-width: 78ch; margin-top: 8px; }
+  .fam h3 { font-family: var(--sans); font-size: 10.5px; font-weight: 600; letter-spacing: .14em;
+            text-transform: uppercase; margin: 0; color: var(--brass); }
+  .famgroup { margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--rule); }
+  .famgroup > .cap { margin-top: 4px; }
+  .famsearch { font-family: var(--sans); font-size: 13.5px; line-height: 1.6; margin: 16px 0 0;
+               padding: 10px 14px; background: var(--accent-wash); color: var(--ink);
+               border-left: 3px solid var(--accent); border-radius: 0 3px 3px 0; }
+  .famlist, .fev { list-style: none; padding: 0; margin: 12px 0 0; }
+  .famlist { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+  .famlist > li { padding: 12px 14px; background: var(--ground); border: 1px solid var(--rule);
+                  border-radius: 3px; transition: border-color .15s; }
+  .famlist > li:hover { border-color: var(--rule-strong); }
+  .famlist > li.here { border-color: var(--accent); background: var(--accent-wash); }
+  .famlist > li:has(details[open]) { grid-column: 1 / -1; }
+  .famlist > li > b { font-family: var(--serif); font-size: 20px; font-weight: 500; line-height: 1.2; }
+  .famlist a { text-decoration: none; color: var(--accent); }
+  .famlist a:hover { text-decoration: underline; }
+  .famlist .typed { display: block; font-family: var(--sans); font-size: 12px; line-height: 1.45;
+                    color: var(--ink-3); margin: 4px 0 0; }
+  .famlist .you { font-family: var(--sans); font-size: 10px; font-weight: 600; letter-spacing: .08em;
+                  text-transform: uppercase; color: var(--accent); background: var(--panel);
+                  border: 1px solid var(--accent); border-radius: 999px; padding: 1px 8px; margin-left: 8px;
+                  vertical-align: 3px; }
+  .famlist details, .famnot, .famlead { font-family: var(--sans); font-size: 12.5px; }
+  .famlist details { margin-top: 8px; }
+  .famlist summary, .famnot summary, .famlead summary { cursor: pointer; color: var(--accent); padding: 2px 0; }
+  .famlist summary { font-size: 12px; }
+  .fev { margin: 6px 0 2px; }
+  .fev li { padding: 4px 0; line-height: 1.55; max-width: 92ch; color: var(--ink-2); }
+  .fev .who { color: var(--ink-3); }
+  .famnot, .famlead { margin-top: 18px; padding: 10px 14px; background: var(--ground);
+                      border: 1px solid var(--rule); border-radius: 3px; }
+  .famlead > .cap, .famnot > .cap { margin-top: 6px; }
+  .famlead summary b, .famnot summary b { color: var(--ink); }
+  .famlead summary .cap, .famnot summary .cap { margin: 0; color: var(--ink-3); }
+  .famnotice { padding: 14px 18px; }
+  @media (max-width: 640px) { .fam { padding: 18px 16px; } .famlist { grid-template-columns: 1fr; } }
   /* The surname map. Land is a wash, not a subject: it is there so a dot
      has somewhere to sit. The dot colours match the main map's grammar —
      filled means somebody counted, hollow and dashed means nobody has.
@@ -683,31 +830,17 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
      twice the way styles.css does it: once for the media query and once
      for an explicit [data-theme="dark"], because this site has a toggle
      as well as a system preference. */
-  .smap { margin: 14px 0 6px; }
-  .smap :global(svg.sm) { display: block; width: 100%; height: auto;
-              /* True aspect in the viewBox, height capped here — see
-                 lib/surname-map.js, where clamping it squashed Belgium. */
-              max-height: 460px;
-              background: var(--panel, #EDEAE3);
-              border: 1px solid var(--rule, #D8D3C8); border-radius: 2px; }
-  .smap :global(.sm-land) { fill: #D5CFC2; stroke: #BDB6A6; stroke-width: .5; }
-  .smap :global(.sm-c circle) { fill: var(--accent, #2F6F4E); fill-opacity: .78;
-                       stroke: var(--panel, #fff); stroke-width: 1; }
-  .smap :global(.sm-u circle) { fill: none; stroke: var(--ink-3, #7C8A91);
-                       stroke-width: 1.6; stroke-dasharray: 2 2; }
-  .smap figcaption { margin-top: 8px; }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .smap :global(.sm-land) {
-      fill: #2A3841; stroke: #3F515C; }
-  }
-  :root[data-theme="dark"] .smap :global(.sm-land) {
-    fill: #2A3841; stroke: #3F515C; }
   h2 { font-family: var(--serif); font-size: 24px; font-weight: 500; margin: 0 0 4px; }
-  .vars { font-family: var(--serif); font-size: 18px; line-height: 1.9; margin: 8px 0 0; }
-  .vars b { font-weight: 500; margin-right: 16px; white-space: nowrap; }
+  .vars { display: flex; flex-wrap: wrap; gap: 6px 8px; font-family: var(--serif); font-size: 17px; margin: 12px 0 0; }
+  .vars b { font-weight: 500; white-space: nowrap; padding: 2px 12px; background: var(--panel);
+            border: 1px solid var(--rule); border-radius: 999px; }
+  .vars a { display: flex; text-decoration: none; color: var(--accent); }
+  .vars b { line-height: 1.5; }
+  .vars a:hover b { border-color: var(--accent); }
+  .soundsalike { padding: 10px 14px; background: var(--panel); border: 1px solid var(--rule); border-radius: 3px; }
+  .soundsalike summary { cursor: pointer; font-family: var(--sans); font-size: 13.5px; }
   .bigl { font-family: var(--serif); font-size: 19px; }
   td { vertical-align: top; }
-  .vars a { text-decoration: none; border-bottom: 1px solid var(--rule-strong); }
   .curve { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 4px; }
   .curve li { display: grid; grid-template-columns: 92px 1fr 68px; align-items: center;
               gap: 10px; font-family: var(--mono); font-size: 12px; }

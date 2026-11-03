@@ -1452,8 +1452,14 @@ window.addEventListener("load", async function () {
                           String(e.present).toLowerCase() === "true"
                             ? NOW : +e.from);
         return f && f <= to && t >= from;
-      }).sort(function (a, b) { return (+a.from) - (+b.from); })
-        .slice(0, 8).forEach(function (e) {
+      }).sort(function (a, b) {
+        /* By when each flag ENDED, with the one still flying last. Sorted by adoption year
+           Croatia's 1990 flag came before the Serbian Krajina's of 1991-1995 and the list read
+           as if a breakaway state's flag were the latest word. Ties go to the later adoption. */
+        var ea = a.present === true || String(a.present).toLowerCase() === "true" ? 9999 : (+a.to || +a.from);
+        var eb = b.present === true || String(b.present).toLowerCase() === "true" ? 9999 : (+b.to || +b.from);
+        return (ea - eb) || ((+a.from) - (+b.from));
+      }).slice(-8).forEach(function (e) {
           var svg = art && art[e.id];
           out.push('<li><span class="ra-ef-f' + (svg ? "" : " ra-ef-none") + '">' +
                    (svg || "") + "</span>" +
@@ -1474,12 +1480,28 @@ window.addEventListener("load", async function () {
        Hungary's Budin Eyalet — true of the Kingdom of Hungary, never true of
        Senj. So the header names whose flag history this is, and the line
        under it says plainly that not every one flew here. */
-    return '<div class="ra-ef"><p class="ra-ef-h">' +
+    var sig = flew.join("|") + ":" + entry.from + "-" + entry.to + ":" + out.length;
+    return '<div class="ra-ef" data-sig="' + esc(sig) + '"><p class="ra-ef-h">' +
            esc(T("The flags of") + " " + flew.join(" \u00b7 ")) + ", " +
            entry.from + "\u2013" + entry.to + "</p>" +
            '<p class="ra-ef-c">' + esc(T("Their whole flag history across " +
            "these years — not every one flew over this parish.")) + "</p>" +
            "<ul>" + out.join("") + "</ul></div>";
+  }
+
+  /* TWO BANDS, ONE COUNTRY, ONE FLAG LIST. A place in two regions has two bands and each draws
+     the flags of the governing state for its selected era; when both are on the same years
+     (1991-2026 under the Kvarner and under the Military Frontier) the same list appeared twice.
+     The block under the band just used stays; an identical block under another band is hidden,
+     and comes back the moment that band moves to a different era. */
+  function dedupeEraFlags(tl, det) {
+    var root = (tl.closest && (tl.closest(".at-body") || tl.closest(".ra-tl-group"))) || document;
+    var mine = det.querySelector(".ra-ef");
+    if (!mine) return;
+    [].forEach.call(root.querySelectorAll(".ra-ef"), function (el) {
+      el.hidden = el !== mine && el.getAttribute("data-sig") === mine.getAttribute("data-sig");
+    });
+    mine.hidden = false;
   }
 
   function bandShow(tl, i) {
@@ -1520,6 +1542,7 @@ window.addEventListener("load", async function () {
       if (!flagEras) loadFlagEras(function () { bandShow(tl, i); });
       else if (!eraArt) loadEraArt(function () { bandShow(tl, i); });
       det.insertAdjacentHTML("beforeend", eraFlagsHtml(entry));
+      dedupeEraFlags(tl, det);
     }
   }
 
@@ -1555,10 +1578,63 @@ window.addEventListener("load", async function () {
 
   /* Bands arrive with an empty detail panel; this fills whichever is newest
      as soon as one is written into the page. */
+  /* THE FLAG OF THE STATE THAT HELD THE GROUND, ON EACH SEGMENT. David: «no flags showing in
+     "who held this ground"? i thought at one stage we were showing the flags of each era».
+     The detail below the band already lists the flags of the governing states while the
+     selected era ran; this puts the one that covered most of the era on the segment itself so
+     the whole band reads at a glance. It is the governing STATE's flag, taken from the same
+     flag-eras the detail uses, not a claim that it flew over this parish (the hover says so),
+     and an era whose regime resolves to no state with flags (Before registers, a county's
+     counts, the Frankopans) gets none rather than a placeholder. */
+  function segFlag(entry) {
+    if (!entry || !entry.gov || !entry.gov.length || !flagEras || !eraArt) return null;
+    var from = +entry.from, to = +entry.to, NOW = new Date().getFullYear();
+    var home = String(entry.home || "").toUpperCase();
+    /* The modern country's own flags first when it is among the governing states (Yugoslavia
+       lists Serbia's republic and Croatia's alike, and this ground is in Croatia); otherwise
+       the governing states in the order the regime lists them. The flag that covered most of
+       the era wins within a state; a tie goes to the later one. */
+    var order = entry.gov.slice().sort(function (x, y) {
+      return (String(y).toUpperCase() === home) - (String(x).toUpperCase() === home);
+    });
+    for (var k = 0; k < order.length; k++) {
+      var slug = FLAG_SLUG[String(order[k]).toUpperCase()];
+      var rows = slug && flagEras[slug + "-flags"], art = slug && eraArt[slug + "-flags"];
+      if (!rows || !art) continue;
+      var best = null, bestOv = 0;
+      rows.forEach(function (e) {
+        var f = +e.from;
+        var t = +e.to || (e.present === true || String(e.present).toLowerCase() === "true" ? NOW : f);
+        if (!f || f > to || t < from || !art[e.id]) return;
+        var ov = Math.min(t, to) - Math.max(f, from) + 1;
+        if (ov > bestOv || (ov === bestOv && best && f > best.f)) { bestOv = ov; best = { svg: art[e.id], polity: e.polity, f: f }; }
+      });
+      if (best) return best;
+    }
+    return null;
+  }
+  function fillSegFlags(tl) {
+    var ents = BAND_ABROAD[tl.id];
+    if (!ents || tl.dataset.fl) return;
+    tl.dataset.fl = "1";
+    loadFlagEras(function () { loadEraArt(function () {
+      [].forEach.call(tl.querySelectorAll(".ra-tl-seg"), function (b, i) {
+        var f = segFlag(ents[i]);
+        var y = b.querySelector(".ra-tl-y");
+        if (!f || !y || b.querySelector(".ra-tl-flag")) return;
+        y.insertAdjacentHTML("afterend",
+          '<span class="ra-tl-flag ra-tl-flag-seg" aria-hidden="true" title="' +
+          esc(T("Flag of the state that governed this ground: ") + f.polity +
+              ". Not every flag in its history flew here.") + '">' + f.svg + "</span>");
+      });
+    }); });
+  }
+
   function bandsInit(root) {
     [].forEach.call((root || document).querySelectorAll(".ra-tl"), function (tl) {
       if (tl.dataset.on) return;
       tl.dataset.on = "1";
+      fillSegFlags(tl);
       var rows = BANDS[tl.id] || [];
       /* Open on whichever segment the markup marked selected, not blindly on
          the last — the flag band picks the era that is still running, which
@@ -1589,6 +1665,22 @@ window.addEventListener("load", async function () {
     var regs = regionsAt(d.lat, d.lon);
     if (!regs.length) return flagsOnly(d);
     var h = [];
+    /* WHY TWO BANDS FOR ONE PLACE. David, looking at Senj under the Kvarner and the Military
+       Frontier: «do we understand why they are different and can we explain it?» A region's
+       eras are written for its own centre, and regions are allowed to overlap where two
+       histories meet: Senj was in the Military Frontier until 1881 (regiments, not counties)
+       and is also on the Kvarner coast, whose eras follow Rijeka/Fiume. So the bands can
+       disagree about the same years, and the page says so rather than leaving a reader to
+       think one of them is a mistake. */
+    if (regs.length > 1)
+      h.push('<p class="at-hint" style="margin:0 0 8px">' +
+             esc(T("This place lies where") + " " + regs.length + " " +
+                 T("regions overlap") + " (" +
+                 regs.map(function (r) { return String(r.label).split(" \u2014 ")[0]; }).join(", ") +
+                 "). " +
+                 T("Each band tells its own region's story, centred on its own towns, so " +
+                   "the bands can differ over the same years: a place at the edge of one " +
+                   "region may have been governed differently from its centre.")) + "</p>");
     regs.forEach(function (reg) {
       /* ONE INFO BLOCK FOR BOTH BANDS. David: «can we unify these 2 sections?
          … so i can tap a flag and tap a who held the ground and they show
@@ -2400,15 +2492,45 @@ window.addEventListener("load", async function () {
           line = '<span class="ra-mn-v ra-mn-yes">' + held.length + " volume" + (held.length === 1 ? "" : "s") + " here cover" + (held.length === 1 ? "s" : "") +
             " these years</span>";
         } else if (cols.length) {
-          line = '<span class="ra-mn-v">No volume listed here is dated to these years</span>';
+          var lo = Math.min.apply(null, cols.filter(function (c) { return c.from != null; }).map(function (c) { return c.from; }));
+          var hi = Math.max.apply(null, cols.filter(function (c) { return c.to != null; }).map(function (c) { return c.to; }));
+          line = '<span class="ra-mn-v">No volume listed here is dated to these years' +
+            (isFinite(lo) && isFinite(hi) ? " (the ones listed run " + lo + "\u2013" + hi + ")" : "") + "</span>";
         }
         var rec = M.records && M.records[e.ty] ? M.records[e.ty] : "";
+        /* THE ARCHIVES THIS GROUND'S OWN ERAS FILE THESE YEARS UNDER. David: «is it true there are no
+           volumes for the period ... and where would someone go?» The generic advice says what kinds of
+           record to look for; the region's era table already says which archives hold the paper of the
+           regime that governed here in those years, so name them rather than leave "where to look"
+           without a place to go. */
+        var arch = [], seenA = {};
+        try {
+          regionsAt(d.lat, d.lon).forEach(function (reg) {
+            (reg.eras || []).forEach(function (er) {
+              if (+er.from <= e.t && +er.to >= e.f)
+                (er.filedUnder || []).forEach(function (f) { if (!seenA[f]) { seenA[f] = 1; arch.push(f); } });
+            });
+          });
+        } catch (err) {}
+        /* Sources researched for THIS event (its own `records`), listed before the era's general archives. */
+        var recIds = (e.rec || []).filter(function (f) {
+          var pc = PROV[f] && PROV[f].countries || [];
+          return pc.indexOf("*") > -1 || pc.indexOf(String(d.country || "").toUpperCase()) > -1;
+        });
+        var recHtml = recIds.length
+          ? '<p>Records of this event\'s dead: ' +
+            recIds.map(function (f) { return '<a href="' + BASE + "archive/" + esc(f) + '/">' + esc(provName(f)) + "</a>"; }).join(" \u00b7 ") + ".</p>"
+          : "";
+        var archHtml = arch.length
+          ? '<p>Archives this ground\'s ' + esc(yrs) + ' era is filed under: ' +
+            arch.map(function (f) { return '<a href="' + BASE + "archive/" + esc(f) + '/">' + esc(provName(f)) + "</a>"; }).join(" \u00b7 ") + ".</p>"
+          : "";
         return '<li><div class="ra-mn-t"><b>' + esc(e.n) + '</b><span class="ra-mn-y">' + esc(yrs) + '</span></div>' +
           '<div class="ra-mn-m">' + esc((M.types && M.types[e.ty]) || e.ty) + ' \u00b7 est. deaths ' + esc(mortTollTxt(e.toll)) + '</div>' +
           (e.says ? '<p class="ra-mn-s">' + esc(e.says) + '</p>' : "") +
           (e.open ? '<p class="ra-mn-s ra-mn-o">' + esc(e.open) + '</p>' : "") +
           line +
-          (rec ? '<details class="ra-mn-r"><summary>Where to look</summary><p>' + esc(rec) + '</p></details>' : "") + '</li>';
+          (rec ? '<details class="ra-mn-r"><summary>Where to look</summary><p>' + esc(rec) + '</p>' + recHtml + archHtml + '</details>' : "") + '</li>';
       }).join("");
       var label = hits.length + " mass-mortality event" + (hits.length === 1 ? "" : "s");
       var pill = document.createElement("button");
@@ -4468,6 +4590,19 @@ window.addEventListener("load", async function () {
 
   /* ---- find, filter, count ----------------------------------------------- */
   var qbox = document.getElementById("ra-q"), count = document.getElementById("ra-count");
+  /* A SHARED LINK MUST LAND ON THE PLACE, NOT ON A SEARCH FOR ITS FIRST LETTERS. David: «when i select
+     senj as a place it works, but the url ...&at=senj&q=Senj ... when i share it takes people not to
+     the place, but to a long list of all results with senj in the name». Picking a suggestion put the
+     chosen name in the box ("Senj (Senj)") but left the address holding what was TYPED ("Senj"), so the
+     link re-ran that search and listed every name starting with it. When the address names a place and
+     q is only the start of that place's name, q becomes the whole name, which finds that one place. A q
+     that is not the start of the place's name (a surname searched, then a place clicked) is left alone. */
+  (function () {
+    var at0 = Q.get("at"), q0 = (Q.get("q") || "").trim();
+    if (!at0 || !q0) return;
+    var h0 = idx.places.filter(function (p) { return p.i === at0; })[0];
+    if (h0 && h0.n && h0.n !== q0 && h0.n.toLowerCase().indexOf(q0.toLowerCase()) === 0) setQ("q", h0.n);
+  })();
   qbox.value = Q.get("q") || "";
   /* A year the place cannot answer for is a place that is not an answer. The
      index carries no spans, so this uses the volume count as a cheap proxy and
@@ -5019,6 +5154,10 @@ window.addEventListener("load", async function () {
     var same = list.length && fold(list[0].n) === fold(term);
     list.forEach(function (r) {
       h.push('<div class="ra-surn"><div class="lab">The name</div>');
+      /* THE EXPLANATIONS GO IN ONE FOLD. David: «can we neaten these results, they are full on, and text
+         overwhelm». Each answer was followed by a paragraph saying how to read it; five of them made a
+         wall. The answers stay in view; the how-to-read prose is gathered into a closed fold at the foot. */
+      var how = [];
       /* Suppressed when the panel's own heading is already this name —
          see the canon note where the heading is built. */
       if (!(same && fold(r.n) === fold(term)))
@@ -5102,13 +5241,11 @@ window.addEventListener("load", async function () {
          78,628 surnames», which credited the dictionary with a number that
          was really a fact about the join.) */
       if (!r.wk) {
-        h.push('<div class="ra-orig ra-orig-none"><p class="ra-orig-l">' +
-               esc(T("Wiktionary has no entry for this name.")) +
-               ' <span class="ra-who">' + esc(T("This atlas matched 78,628 of its "
-               + "names to an entry and 25,987 of those say what the name "
+        h.push('<p class="ra-vars ra-weak">' + esc(T("Wiktionary has no entry for this name.")) + "</p>");
+        how.push('<p class="ra-note">' + esc(T("This atlas matched 78,628 of its "
+               + "names to a Wiktionary entry and 25,987 of those say what the name "
                + "is from. This one matched nothing \u2014 which is the "
-               + "dictionary's gap, not a judgement about the name.")) +
-               "</span></p></div>");
+               + "dictionary's gap, not a judgement about the name.")) + "</p>");
       }
       if (r.wk) {
         var w = r.wk, wh = ['<div class="ra-orig ra-orig-wk">'];
@@ -5426,7 +5563,7 @@ window.addEventListener("load", async function () {
            looks like a census and is nothing of the kind. */
         /* THE CAPTION NAMED ONE SOURCE AND THERE ARE NOW TWO, with different
            biases, and saying so is the whole reason they are drawn apart. */
-        wh.push('<p class="cap ra-tw-c2">' + esc(T("Rows marked ") ) +
+        how.push('<p class="cap ra-tw-c2">' + esc(T("Rows marked ") ) +
                 '<b>' + esc(T("notable")) + "</b>" +
                 esc(T(" are people notable enough for an encyclopaedia — not a " +
                       "census, and thin before 1900. Rows marked ")) +
@@ -5553,7 +5690,7 @@ window.addEventListener("load", async function () {
       if (byHow.register) {
         h.push('<p class="ra-filed"><span class="ra-tag">counted in a national ' +
                'register</span> ' + linkCC(byHow.register, true) + "</p>");
-        h.push('<p class="ra-note">How many people of that name a state counted — ' +
+        how.push('<p class="ra-note">How many people of that name a state counted — ' +
                "the closest thing here to «where the name is now». This map holds " +
                "registers for six countries only, so a small number in one of them " +
                "says more about which registers we have than about the name.</p>");
@@ -5566,23 +5703,24 @@ window.addEventListener("load", async function () {
       /* ORIGIN, and the only kind this map will assert. */
       if (r.places && r.places.length) {
         h.push('<p class="ra-filed"><span class="ra-tag">also a place</span> ' +
-               r.places.map(function (pl) {
-                 var how = pl.via === "name" ? ""
+               r.places.slice(0, 4).map(function (pl) {
+                 var hw = pl.via === "name" ? ""
                    : pl.via === "variant" ? " — a spelling of the name"
                    : " — but only a phonetic neighbour, not a spelling";
                  return "<b>" + esc(pl.n) + "</b>" +
                         (pl.cc ? " <span class=\"ra-who\">" + esc(CNAME[pl.cc] || pl.cc) +
                                  (pl.pop ? ", pop. " + pl.pop.toLocaleString() : "") +
-                                 esc(how) + "</span>" : "");
-               }).join(" · ") + "</p>");
-        h.push('<p class="ra-note"><b>This is as close to an origin as this map will ' +
+                                 esc(hw) + "</span>" : "");
+               }).join(" · ") +
+               (r.places.length > 4 ? ' <span class="ra-who">and ' + (r.places.length - 4) + " more</span>" : "") + "</p>");
+        how.push('<p class="ra-note"><b>This is as close to an origin as this map will ' +
                "go.</b> A surname that is also a place name often came from it — and " +
                "often did not: plenty are occupations or patronymics that happen to " +
                "collide, and plenty of places are named after a family rather than " +
                "the other way round. It is a fact with a source, which is more than " +
                "an etymology page offers.</p>");
       } else {
-        h.push('<p class="ra-note">No place of this name is in the gazetteer, so this ' +
+        how.push('<p class="ra-note">No place of this name is in the gazetteer, so this ' +
                "map says nothing about where the name came from. Search anywhere else " +
                "and you will be told an ORIGIN — that it is Latin, or Italian, or " +
                "means «joyful». That is etymology, it is usually unsourced, and it is " +
@@ -5590,13 +5728,15 @@ window.addEventListener("load", async function () {
       }
 
       if (r.countries.length) {
-        h.push('<p class="ra-note">Every one of these means the name appears in a ' +
+        how.push('<p class="ra-note">Every one of these means the name appears in a ' +
                "dataset held here — never that it exists in those countries and " +
                "nowhere else. The blanks on this map are gaps in it, as always.</p>");
       } else {
         h.push('<p class="ra-note">No country attested yet. The name is known; where it ' +
                "is found is not, which is a gap in this map rather than in the world.</p>");
       }
+      if (how.length)
+        h.push('<details class="ra-how"><summary>' + esc(T("How to read this")) + "</summary>" + how.join("") + "</details>");
       h.push("</div>");
     });
     return h.join("");
@@ -6934,6 +7074,7 @@ window.addEventListener("load", async function () {
       /* The box keeps the name that was chosen, not the fragment typed — but
          without re-running the search, which would answer the question twice. */
       qbox.value = p.n;
+      setQ("q", p.n); /* the address carries the chosen name, so a shared link finds this place and not a list */
       markHit(p, fold(p.n));
       open(p);
       map.setView([p.y, p.x], Math.max(map.getZoom(), 11));
@@ -8329,6 +8470,10 @@ window.addEventListener("load", async function () {
   :global(.ra-first b) { font-family: var(--serif); font-size: 15px; }
   :global(.ra-surn b) { font-family: var(--serif); font-size: 18px; }
   :global(.ra-vars) { font-size: 12.5px !important; }
+  :global(.ra-how) { margin-top: 12px; border-top: 1px solid var(--rule); padding-top: 8px; }
+  :global(.ra-how summary) { cursor: pointer; font-family: var(--sans); font-size: 11px; letter-spacing: .06em;
+                             text-transform: uppercase; color: var(--ink-3); }
+  :global(.ra-how[open] summary) { margin-bottom: 4px; }
   :global(.ra-vars.ra-weak) { color: var(--ink-3); }
   :global(.ra-tag) { font-family: var(--sans); font-size: 10px; text-transform: uppercase;
                      letter-spacing: .08em; color: var(--ink-3); margin-right: 6px; }
@@ -8817,6 +8962,10 @@ window.addEventListener("load", async function () {
   :global(.ra-tl-flag-none) { border-style: dashed; }
   /* Narrower now that a segment is a year and a flag: 44px holds both with
     room, and the band keeps its proportional widths so duration still reads. */
+  /* The state's flag on a segment of the ground's own band: smaller than the country band's,
+     and clipped rather than allowed to widen a 38px segment. */
+  :global(.ra-tl-seg .ra-tl-flag-seg) { width: 27px; height: 18px; max-width: 100%;
+    margin: 3px 0 2px; flex: none; overflow: hidden; }
  :global(.ra-tl-flags .ra-tl-seg) { flex-basis: 44px; min-width: 44px;
     align-items: center; padding: 6px 4px 7px; }
  :global(.ra-tl-flags .ra-tl-flag) { margin: 4px 0 0; }

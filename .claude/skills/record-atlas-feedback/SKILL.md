@@ -78,28 +78,33 @@ attributes your work to a book you never opened.
 ## Your write is not the last step
 
 Writing to your archive's `searched.json` puts the work where the atlas can
-find it. It does **not** put it in front of David. Nothing watches your repo,
-and `/my-research/` reads a store that lives in his browser and that no script
-can write to.
+find it. It is **not yet on the map**. Nothing watches your repo, so someone
+has to *publish* it. Nobody has to import anything: since 13 October
+`/my-research/` fetches `site/public/research-sessions.json` and folds it into
+the reader's browser by itself, once per published update.
 
-Somebody has to run, in the Record Atlas repo:
+Publish from the Record Atlas repo:
 
 ```
-python3 scripts/import-research-sessions.py
+python3 scripts/publish-research-sessions.py --dry-run   # say what would change
+python3 scripts/publish-research-sessions.py             # regenerate, publish if changed
 ```
 
-which reads every family archive and writes `record-atlas-research-import.json`
-— and then David has to open `/my-research/` and use **Import a file**.
-Importing merges rather than replaces, so running it again is safe.
+It rebuilds the file from every archive's `searched.json`, then commits and
+pushes **only the two published files from a fresh temporary clone** of
+`origin`. The shared working tree is never touched, so it does not matter what
+another session has half-edited there. It pushes to `main`, which starts an
+Atlas deploy; the deploys queue, so the update can take a while to appear.
 
-**So say so when you finish.** «Recorded in the atlas» is not true yet at that
-point; «recorded in searched.json — run the importer to pull it into My
-research» is. A session that says the first sends him looking for work that is
-not there, which has happened.
+**Say what state the work is in when you finish.** «Recorded in searched.json»
+is true once you have committed your archive. «Published to the atlas» is true
+only after the publisher has run and pushed, and «live on the map» only after
+the deploy. Do not say the later one when you have done the earlier one: it
+sends David looking for work that is not there, which has happened.
 
-WHAT YOU DO NOT NEED TO DO is build an import file by hand. That has been done,
-because the importer was broken at the time, and it should not need doing
-again: the fields below are read directly now.
+**Do not ask David to «Import a file».** That step is gone. Do not build an
+import file by hand or run `import-research-sessions.py` to hand him one: the
+publisher already calls that script itself and publishes the result.
 
 ## What to write, and where
 
@@ -147,7 +152,7 @@ Append to your archive's `site/src/data/searched.json`. Include, at minimum:
 - `outcome` — one of `yield`/`hit`/`found`, `nothing`/`nil`/`empty`,
   `blocked`, `pending`, `planned`.
 - `when` — a real date. Not `"not yet"`, not `"—"`.
-  The importer accepts `9 Sept 2026` too, but ISO is what it stores.
+  The builder accepts `9 Sept 2026` too, but ISO is what it stores.
 
 ### 2. A source the atlas does not list
 
@@ -186,7 +191,7 @@ The waypoint rule above is about the ATLAS'S VOLUME-LEVEL DATA and it does not
 apply here. A row whose `url` points at a REGISTERED PROVIDER — its host
 matching the `url` field of a row in `data/providers.json` — becomes a
 `source:<providerId>` mark automatically, with no waypoint needed. Two archive
-sessions have independently read the importer's per-archive summary line
+sessions have independently read the build's per-archive summary line
 ("N rows, M matched to an atlas volume") and concluded their non-FamilySearch
 work produced nothing, because that line reports ONLY volume matches. It does
 not report source marks, which are counted once in total ("source marks: N,
@@ -203,11 +208,21 @@ Aliases go in the place's `names`. If the atlas has no such place at all, say
 so in your session notes with coordinates and country — adding a place is a
 bigger change and belongs in a Record Atlas session.
 
+### 4. A spelling of a surname
+
+Spellings are not recorded in `searched.json` or in the archive. They go in the
+Atlas's one catalogue, with the evidence for each form, through the
+`surname-variants` skill (`scripts/surname_variants.py add`, then `publish`).
+That catalogue is what the surname pages show and what every other session
+searches from, so a form kept only in your archive is a form the next session
+will miss. Do not keep a variants table of your own.
+
 ## Progress marks (what the map colours)
 
-Progress lives in **localStorage in a browser**, not in the repo. No script can
-write it. To get work onto the map, produce an import file and open
-`/my-research/` → *Import a file* (it merges, it does not replace):
+A reader's progress is held in the browser (localStorage), and no script writes
+there. What reaches it is the published `research-sessions.json`, which
+`/my-research/` merges in on load (it merges, it does not replace). The shape
+it carries, and the shape the publisher builds from your `searched.json`:
 
 ```json
 { "v": 2, "exported": "2026-09-29",
@@ -223,11 +238,14 @@ write it. To get work onto the map, produce an import file and open
   } }
 ```
 
+You do not write this file. You write `searched.json` rows with the fields in
+the section above; the publisher builds the marks from them.
+
 - Mark ids: `volume:<waypoint>`, `source:<providerId>`, `collection:<url>`.
 - **SAY WHICH FAMILY THE ROW IS FOR, in `tags`.** This is the one thing the
   skill used to leave unsaid, and it mattered: your archive folder is not a
   family. The Blažević archive holds 22 rows of Kosina research and 14 of
-  Žubrinić, and with nothing to go on the importer filed all of them under
+  Žubrinić, and with nothing to go on the builder filed all of them under
   Blažević — the exact conflation lines exist to prevent. Put the surname in
   the row's `tags` (`"tags": ["kosina", "senj", "familysearch"]`) and the work
   lands in that family's line. A tag counts as a family only when your own
@@ -240,8 +258,9 @@ write it. To get work onto the map, produce an import file and open
   read entry by entry in `walked`, where every line inherits it.
 - `state` — `planned`, `written`, `searched`, `found`, `exhausted`, `blocked`.
 
-`scripts/import-research-sessions.py` in the atlas builds this from
-`searched.json` automatically. Run it after you have added rows.
+`scripts/publish-research-sessions.py` in the atlas builds this from every
+archive's `searched.json`. Run it (with `--dry-run` first) after you have added
+rows and committed your archive.
 
 ## Rules that are not negotiable
 

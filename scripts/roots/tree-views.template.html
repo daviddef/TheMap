@@ -74,6 +74,7 @@ svg a.plk .cname,svg a.plk .sname{text-decoration:underline dotted}svg a.plk:hov
 .seg button+button{border-left:1px solid var(--rule)}
 .seg button[aria-pressed="true"]{background:var(--sel);color:var(--on-sel)}
 .btn{border:1px solid var(--rule);border-radius:6px}
+.btn.ibtn{padding:5px 9px;line-height:0}.btn.ibtn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .btn:disabled{opacity:.4;cursor:default}
 .scroll{overflow-x:auto}
 svg{display:block}
@@ -389,8 +390,8 @@ td:first-child{font:600 14.5px var(--serif);white-space:nowrap}
           <div class="bar">
             <span><b>Cards</b><span class="seg" data-key="card"><button data-v="full">Full</button><button data-v="simple">Simple</button><button data-v="mini">Flag tile</button></span></span>
             <span><b>Direction</b><span class="seg" data-key="orient"><button data-v="h">Sideways</button><button data-v="v">Upright</button></span></span>
-            <span><b>Ancestors</b><span class="seg" data-key="up"><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button></span></span>
-            <span><b>Descendants</b><span class="seg" data-key="down"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button></span></span>
+            <span><b>Ancestors</b><span class="seg" data-key="up"><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button><button data-v="6">6</button><button data-v="7">7</button><button data-v="8">8</button></span></span>
+            <span><b>Descendants</b><span class="seg" data-key="down"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button></span></span>
             <span><b>Zoom</b><button class="btn" id="hzo" aria-label="Zoom out">−</button> <span class="zoomtx" id="hztx">×1</span> <button class="btn" id="hzi" aria-label="Zoom in">+</button> <button class="btn" id="hzf">Fit</button></span>
           </div>
           <div class="trailbar"><b>Place trail</b><span class="seg" data-key="tline"><button data-v="pat">Father's line</button><button data-v="mat">Mother's line</button><button data-v="down">Down</button></span><span>Birthplace by generation. Dashed = not surveyed in the Atlas yet. A bold link means the family moved. Click a card to re-centre.</span></div>
@@ -780,6 +781,7 @@ MOVES.sort((a,b)=>a.y-b.y);
   for(const p of list){const c=comp.get(p.id);p._comp=c;p._main=sizes[c]>=20;p._orph=sizes[c]===1;p._clus=sizes[c]>1&&sizes[c]<20;p._dead=p._main&&!p.father&&!p.mother}
 })();
 
+const ICO={back:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',copy:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg>',check:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'};
 const living=p=>p.hid===1;   // a person whose name and details are withheld (the importing page sets hid; no death recorded no longer means withheld)
 const nm=p=>living(p)?'Living '+p.sur:((p.given+' '+p.sur).trim()||'(no name recorded)');
 const linkG=(c,par)=>!c||!par?null:(c.father===par.id?c.fg:c.mother===par.id?c.mg:null);   // grade of a parent link: 0 index only, 1 household tree, 2 read from a register
@@ -899,13 +901,17 @@ function pick(id,e){
   if(url&&e&&(e.metaKey||e.ctrlKey)){window.open(url,'_blank','noopener');return}
   go(id);
 }
+let MH=null;   // {site,tree,slug} sent by the page around us (the visitor pasted one MyHeritage link); nothing is sent anywhere
+addEventListener('message',e=>{if(e.source!==parent||!e.data||!('mh' in e.data))return;MH=e.data.mh;if(typeof renderPanel==='function'&&P&&P[st.focus])renderPanel()});
+const mhLinks=p=>{const m=/^I(\d{1,6})$/.exec(p.id);if(!MH||!m)return '';const n=MH.tree*1e6+ +m[1],sl=(nm(p)||'person').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60)||'person';
+  return '<p class="mh">Open in MyHeritage: <a href="https://www.myheritage.com/profile-'+MH.site+'-'+n+'/'+sl+'" target="_blank" rel="noopener noreferrer">profile ↗</a> · <a href="https://www.myheritage.com/family-trees/'+(MH.slug||'tree')+'/'+MH.site+'?rootIndividualID='+n+'&familyTreeID='+MH.tree+'" target="_blank" rel="noopener noreferrer">in tree ↗</a></p>'};
 function renderPanel(){
   const p=P[st.focus],A=ancSet(p),D=descSet(p);
   const gensBack=A.size?Math.max(...A.values()):0;
   const sibs=new Set();for(const id of [p.father,p.mother])if(id)for(const k of P[id].kids)if(k!==p.id)sibs.add(k);
   const byLine=Array(8).fill(0);A.forEach((g,id)=>byLine[P[id].fi]++);
   let h='<div class="head"><div class="swatch" style="background:'+colorOf(p)+'"></div><div><h2>'+(pageURL(p)?'<a class="pname" href="'+pageURL(p)+'" title="Open their page">'+esc(nm(p))+'</a>':esc(nm(p)))+'</h2><div class="meta">'+esc(yrs(p))+' · '+esc(p.id)+'</div></div></div>';
-  h+='<button class="btn" id="backbtn"'+(st.hist.length?'':' disabled')+'>← Back</button> <button class="btn" data-goto="kinship">How are we related?</button> <button class="btn" id="copylink">Copy link</button>';
+  h+='<button class="btn ibtn" id="backbtn" title="Back" aria-label="Back"'+(st.hist.length?'':' disabled')+'>'+ICO.back+'</button> <button class="btn" data-goto="kinship">How are we related?</button> <button class="btn ibtn" id="copylink" title="Copy link to this person" aria-label="Copy link">'+ICO.copy+'</button>'+mhLinks(p);
   if(living(p)) h+='<p class="note">Living person. Name and details are withheld on the public site.</p>';
   else h+='<dl>'+(p.occ?'<dt>Occupation</dt><dd>'+esc(p.occ)+'</dd>':'')+'<dt>Born</dt><dd>'+(p.bye?'about ':'')+p.by+'</dd><dt>Died</dt><dd>'+(p.dy==null?'no death recorded':p.dye?'not recorded':p.dy)+'</dd></dl>';
   const stat=(k,n,l)=>'<button class="stat" data-open="'+k+'" aria-expanded="'+(st.open===k)+'"'+(n?'':' disabled')+'>'+n+'<small>'+l+(n?' '+(st.open===k?'▴':'▾'):'')+'</small></button>';
@@ -1035,11 +1041,14 @@ function renderHG(){
   const node=(g,c,w,h)=>vert?{x:LAB+PAD+c-w/2,y:dep(g),w,h}:{x:dep(g),y:TOP+c-h/2,w,h};
   const nStart=n=>vert?[n.x+n.w/2,n.y]:[n.x,n.y+n.h/2], nEnd=n=>vert?[n.x+n.w/2,n.y+n.h]:[n.x+n.w,n.y+n.h/2];
   function edge(a,b,weak){const [x1,y1]=a,[x2,y2]=b;S('path',{class:'edge'+(weak?' weak':''),d:vert?'M'+x1+','+y1+'V'+(y1+y2)/2+'H'+x2+'V'+y2:'M'+x1+','+y1+'H'+(x1+x2)/2+'V'+y2+'H'+x2},gE)}
+  const pct=g=>{const v=50/Math.pow(2,g-1);return ' · '+(v>=25?v.toFixed(0):v>=1?String(+v.toFixed(1)):String(+v.toFixed(2)))+'%'};
   const heads={0:'Focus'};
-  for(let g=1;g<=up;g++)heads[-g]=(compact?['Parents','Grandparents','Gt-grandparents','2× gt-grandp.']:['Parents','Grandparents','Great-grandparents','2× great-grandparents'])[g-1];
-  for(let d=1;d<=down;d++)heads[d]=(compact?['Children','Grandchildren','Gt-grandchildren']:['Children','Grandchildren','Great-grandchildren'])[d-1];
+  for(let g=1;g<=up;g++)heads[-g]=g===1?'Parents':g===2?'Grandparents':g===3?(compact?'Gt-grandparents':'Great-grandparents'):(g-2)+(compact?'× gt-grandp.':'× great-grandparents');   // any depth
+  for(let g=1;g<=up;g++)heads[-g]+=pct(g);
+  for(let d=1;d<=down;d++)heads[d]=d===1?'Children':d===2?'Grandchildren':d===3?(compact?'Gt-grandchildren':'Great-grandchildren'):(d-2)+(compact?'× gt-grandch.':'× great-grandchildren');
+  for(let d=1;d<=down;d++)heads[d]+=pct(d);
   for(let g=-up;g<=down;g++){
-    if(vert)S('text',{class:'colh',x:PAD,y:dep(g)+CH/2+3},svg,compact?clip(heads[g],14):heads[g]);
+    if(vert)S('text',{class:'colh',x:PAD,y:dep(g)+CH/2+3},svg,compact?clip(heads[g],22):heads[g]);
     else S('text',{class:'colh',x:dep(g),y:12},svg,heads[g]);
   }
   // the name in a card is an ordinary link to that person's own page; the rest of the card re-centres the views
@@ -2117,7 +2126,7 @@ document.addEventListener('keydown',e=>{
 });
 document.addEventListener('click',e=>{
   if(e.target.closest('#copylink')){const b=$('#copylink'),u=location.href;
-    const done=()=>{b.textContent='Copied';setTimeout(()=>{b.textContent='Copy link'},1500)};
+    const done=()=>{b.innerHTML=ICO.check;b.title='Copied';setTimeout(()=>{b.innerHTML=ICO.copy;b.title='Copy link to this person'},1500)};
     try{navigator.clipboard.writeText(u).then(done,()=>{window.prompt('Copy this link',u)})}catch(x){window.prompt('Copy this link',u)}}
 });
 const qi=$('#q'),res=$('#results');

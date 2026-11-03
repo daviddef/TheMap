@@ -10,6 +10,7 @@ import { buildExport, logText } from './export.js';
 import { offerable } from './contribute.js';
 import { Overlay, suggestMerges, cleanDate, yearOf } from './workbench.js';
 import { buildChecklist } from './checklist.js';
+import { buildConsistency } from './consistency.js';
 import { AtlasCore, targetOf, nameTargets, buildAtlas } from './atlas.js';
 
 const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
@@ -27,6 +28,7 @@ export class Session {
     const y = prepare(people); this.est = y.est; this.dest = y.dest; tick('model', t0);
     t0 = now(); this.progress('Reading the Atlas');
     this.core = new AtlasCore(await this.io.json('data/atlas.json')); tick('atlasLoad', t0);
+    try { this.families = await this.io.json('data/surname-families.json'); } catch (e) { this.families = []; }       // spellings the Atlas catalogue treats as one name
     t0 = now(); this.progress('Placing ' + mentions.size.toLocaleString('en') + ' different places');
     addCountryNames(this.core.c.countries);
     const r = await resolveAll(mentions, this.gz, this.io, (kind, i, n, cc) => this.progress('Loading the ' + cc + ' places (' + i + ' of ' + n + ')'));
@@ -131,10 +133,25 @@ export class Session {
 
   /* The fix list for the tree they keep elsewhere. opt.living false names living people as 'Living person' and leaves their places out. */
   checklist(opt = {}) {
-    const label = p => { const c = this.core.c.countries[p.k]; return [p.n, p.region, c ? c[0] : p.k].filter(Boolean).join(', '); };
-    return buildChecklist({ parsed: this.parsed, P: this.P, est: this.est, dest: this.dest, living: opt.living !== false, label,
-      merges: suggestMerges(this.P, this.est, this.overlay),
-      resolve: raw => (this.overrides.has(raw) ? { tier: 'user', place: this.overrides.get(raw) } : this.res.get(raw)) });
+    const core = this.core, living = opt.living !== false;
+    const label = p => { const c = core.c.countries[p.k]; return [p.n, p.region, c ? c[0] : p.k].filter(Boolean).join(', '); };
+    const resolve = raw => (this.overrides.has(raw) ? { tier: 'user', place: this.overrides.get(raw) } : this.res.get(raw));
+    const out = buildChecklist({ parsed: this.parsed, P: this.P, est: this.est, dest: this.dest, living, label,
+      merges: suggestMerges(this.P, this.est, this.overlay), resolve });
+    /* checks that need the whole life or the Atlas: only places the resolver is sure of are used, so a guess never raises a flag */
+    const SURE = new Set([...REAL, 'user']);
+    const locate = raw => { const r = resolve(raw); if (!r || !SURE.has(r.tier)) return null; const t = targetOf(r, core.c); if (!t || t.kind !== 'place') return null; const c = core.c.countries[t.iso]; return { ...t, today: c ? c[0] : null }; };
+    const period = (t, y) => { const rg = core.eraRegime(core.regionOf(t.lat, t.lon), y); if (!rg) return null; const iso = core.c.riso[rg]; return iso ? { label: (core.c.regimes[rg] || {}).label || rg, iso } : null; };
+    const cols = (t, y) => { const a = core.match(t.name, t.iso, t.lat, t.lon); if (!a) return []; return a[6].filter(c => (c[2] === null || c[2] <= y) && (c[3] === null || y <= c[3])).map(c => ({ title: c[0], url: c[1], from: c[2], to: c[3], provider: core.c.prov[c[4]] || '' })); };
+    const shown = p => (p.liv && !living ? 'Living person' : ((p.given || '') + ' ' + (p.sur || '')).trim() || p.id);
+    const { suspect, leads, ages } = buildConsistency({ parsed: this.parsed, P: this.P, est: this.est, dest: this.dest, keep: p => living || !p.liv, shown, locate, period, cols, families: this.families || [] });
+    const at = out.sections.findIndex(s => s.key === 'dates') + 1;
+    out.sections.splice(at, 0,
+      { key: 'suspect', title: 'People whose life does not add up', how: 'Several kinds of check on a whole life: events after a death or before a birth, a marriage too young or after a spouse died, two different birth or death years, places too far apart for the years between them, and a surname that changes between father and child. Recorded years only, and only places the Atlas is sure of. Each is a place to look, not a verdict: “Leave as is” hides one you know is right.', items: suspect },
+      { key: 'ages', title: 'Today’s country on an older date', how: 'Places written with today’s country for a date when the Atlas shows another power ruling it (for example South Africa under Dutch or British rule). Often fine: it is how people name a place today. Your tree may want the name used at the time, and the maps already draw the flag of the day.', items: ages },
+      { key: 'leads', title: 'Where to look next', how: 'People with no parents in your file, born where the Atlas lists a record collection for those years. The links open the collection’s own site; nothing from your file is sent.', items: leads });
+    out.counts = Object.fromEntries(out.sections.map(s => [s.key, s.items.length]));
+    return out;
   }
 
   pick(raw, cand) { if (cand) this.overrides.set(raw, cand); else this.overrides.delete(raw); }

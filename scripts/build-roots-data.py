@@ -182,6 +182,13 @@ def viewer():
     open(os.path.join(OUT, 'viewer.html'), 'w', encoding='utf-8').write(csp + t + '\n</body>\n</html>\n')
     print('viewer.html: %.0f KB' % (os.path.getsize(os.path.join(OUT, 'viewer.html')) / 1024))
 
+def surnames():
+    """The spellings the Atlas surname catalogue treats as one name (status same / attested), one list per family, for the page's surname check."""
+    cat = json.load(open(D('surname-families.json'), encoding='utf-8'))
+    fams = [[m['form'] for m in f['members'] if m.get('status') in ('same', 'attested')] for f in cat['families']]
+    fams = [f for f in fams if len(f) > 1]
+    print('surname-families.json', w(os.path.join(OUT, 'data', 'surname-families.json'), fams), 'bytes,', len(fams), 'families')
+
 def contact():
     """Where a visitor can send places they choose to offer: the site's own contact (the same one the Add a source page uses). Public data, no personal data."""
     site = json.load(open(os.path.join(ROOT, 'site', 'src', 'data', 'site.json'), encoding='utf-8'))
@@ -191,9 +198,9 @@ def contact():
     print('contact.json:', 'email set' if c else 'no email')
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument('--only', choices=['shards', 'admin', 'atlas', 'viewer', 'contact'])
+    ap = argparse.ArgumentParser(); ap.add_argument('--only', choices=['shards', 'admin', 'atlas', 'viewer', 'contact', 'surnames'])
     a = ap.parse_args()
-    for name, fn in (('shards', shards), ('admin', admin), ('atlas', atlas), ('viewer', viewer), ('contact', contact)):
+    for name, fn in (('shards', shards), ('admin', admin), ('atlas', atlas), ('viewer', viewer), ('contact', contact), ('surnames', surnames)):
         if a.only in (None, name): fn()
 
 if __name__ == '__main__': main()

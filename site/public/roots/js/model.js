@@ -171,7 +171,7 @@ export function buildTree(P, placeFor, est, dest, opts = {}) {
   for (const [i, p] of keep) {
     const li = order.indexOf(fold(p.sur));
     people.push({ id: i, sex: p.sex === 'f' ? 'f' : 'm', given: hide(p) ? '' : p.given, sur: p.sur, line: li < 0 ? maxLines - 1 : li,
-      by: hide(p) ? Math.floor(p.by / 10) * 10 : p.by, hid: hide(p) ? 1 : 0, bp: p.bp, dy: hide(p) ? null : p.dy, dp: hide(p) ? null : p.dp, my: p.my,
+      by: hide(p) ? Math.floor(p.by / 10) * 10 : p.by, hid: hide(p) ? 1 : 0, bp: p.bp, bpr: hide(p) ? null : p.bpRaw || null, dpr: hide(p) ? null : p.dpRaw || null, dy: hide(p) ? null : p.dy, dp: hide(p) ? null : p.dp, my: p.my,
       occ: hide(p) ? null : p.occ, father: p.father, mother: p.mother, spouse: p.spouseK, kids: p.kidsK, srcs: hide(p) ? [] : p.srcs,
       bye: est.has(p.id) || (p.byApprox && !hide(p)), dye: dest.has(p.id), bpe: p.bpe, slug: hide(p) ? null : slugify(p.given + ' ' + p.sur) });
   }

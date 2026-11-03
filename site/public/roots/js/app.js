@@ -136,6 +136,13 @@ function report(m) {
   p.append(d);
 }
 
+/* The Atlas map in the viewer can send us a place text: "Fix this text" opens Places to review filtered to it, "Copy" copies it. Only messages from our own viewer are heard. */
+window.addEventListener('message', e => {
+  const v = $('#viewer'); if (!v || e.source !== v.contentWindow || !e.data) return;
+  if (typeof e.data.fixplace === 'string') { $('#rfilter').value = e.data.fixplace; tab('review'); drawReview(reviewItems, e.data.fixplace); $('#rfilter').scrollIntoView({ block: 'nearest' }); }
+  else if (typeof e.data.copytxt === 'string') { try { navigator.clipboard.writeText(e.data.copytxt); } catch (x) { /* clipboard refused */ } }
+});
+
 /* ---------- places to review ---------- */
 const GROUPS = [
   ['ambiguous', 'Could be several places', 'More than one candidate and nothing in the text to choose between them. Pick one and the people there are drawn at it.'],
@@ -151,8 +158,9 @@ const GROUPS = [
 
 function candLabel(c) { return c.n + (c.region ? ', ' + c.region : '') + ', ' + c.k + (c.p ? ' · pop. ' + n0(c.p) : ''); }
 
+let reviewItems = [];
 function review(m) {
-  const items = m.review; $('#rcount').textContent = String(items.filter(i => ['ambiguous', 'review-skipped-part', 'review-other-country', 'not-found'].includes(i.tier)).length);
+  const items = reviewItems = m.review; $('#rcount').textContent = String(items.filter(i => ['ambiguous', 'review-skipped-part', 'review-other-country', 'not-found'].includes(i.tier)).length);
   $('#rcount').hidden = $('#rcount').textContent === '0';
   drawReview(items, $('#rfilter').value);
 }

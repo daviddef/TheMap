@@ -10,8 +10,8 @@
       <section class="view" id="v-sky" hidden>
         <p class="vnote">The focus person's whole line as light. Each person hangs from a glowing head on a rail; births bud off a parent, deaths rise into the sky and stay as stars. The ground below the rail is the Atlas regime over the place that year, and Atlas events arrive from above. Press play, or drag the year.</p>
         <div class="stage plx">
-          <canvas id="cv-sky" role="img" aria-label="Animated lines for the focus person's ancestors and descendants"></canvas>
           <div class="bar keep plbar"><button class="btn plplay" data-pl="sky">Play</button><input type="range" class="plrg" id="rg-sky" aria-label="Year" step="0.05"><b class="plyr" id="yr-sky"></b><span class="seg" data-key="pspeed"><button data-v="4">Slow</button><button data-v="8">Normal</button><button data-v="16">Fast</button></span></div>
+          <canvas id="cv-sky" role="img" aria-label="Animated lines for the focus person's ancestors and descendants"></canvas>
           <div class="foot"><span>Colour = research line, as elsewhere on this page</span><span>Click a head or a star to re-centre</span><span class="plskip"></span></div>
         </div>
       </section>
@@ -19,8 +19,8 @@
       <section class="view" id="v-ink" hidden>
         <p class="vnote">The same line painted onto a ledger, time running down the page. Each person is a brush stroke from birth to death; the dot is the present. A recorded death ends in a bar, an estimated one fades. Washes are the Atlas regimes, the right-hand stripe is Atlas events. Stop it and you have a poster.</p>
         <div class="stage plx">
-          <div class="plscroll" id="sc-ink"><canvas id="cv-ink" role="img" aria-label="Lines painted down a ledger for the focus person's family"></canvas></div>
           <div class="bar keep plbar"><button class="btn plplay" data-pl="ink">Play</button><input type="range" class="plrg" id="rg-ink" aria-label="Year" step="0.05"><b class="plyr" id="yr-ink"></b><span class="seg" data-key="pspeed"><button data-v="4">Slow</button><button data-v="8">Normal</button><button data-v="16">Fast</button></span></div>
+          <div class="plscroll" id="sc-ink"><canvas id="cv-ink" role="img" aria-label="Lines painted down a ledger for the focus person's family"></canvas></div>
           <div class="foot"><span>Click a name to re-centre</span><span class="plskip"></span></div>
         </div>
       </section>
@@ -28,8 +28,8 @@
       <section class="view" id="v-house" hidden>
         <p class="vnote">One life at the centre. The focus person is the middle line; parents to the left, spouses and children to the right. The pale ribbon is the width of the household, so it fills as children arrive and narrows as they go. Captions are pinned to their years and slide past.</p>
         <div class="stage plx">
-          <canvas id="cv-house" role="img" aria-label="The focus person's household over their lifetime"></canvas>
           <div class="bar keep plbar"><button class="btn plplay" data-pl="house">Play</button><input type="range" class="plrg" id="rg-house" aria-label="Year" step="0.05"><b class="plyr" id="yr-house"></b><span class="seg" data-key="pspeed"><button data-v="4">Slow</button><button data-v="8">Normal</button><button data-v="16">Fast</button></span></div>
+          <canvas id="cv-house" role="img" aria-label="The focus person's household over their lifetime"></canvas>
           <div class="foot"><span>A spouse joins the household the year before their first child (inferred)</span><span>Click a head or a star to re-centre</span></div>
         </div>
       </section>
@@ -37,8 +37,8 @@
       <section class="view" id="v-gen" hidden>
         <p class="vnote">The same people as generations: one row each, oldest at the top, the focus person ringed. The tree grows as you play it. The strip below counts the depth.</p>
         <div class="stage plx">
-          <canvas id="cv-gen" role="img" aria-label="Family tree growing generation by generation"></canvas>
           <div class="bar keep plbar"><button class="btn plplay" data-pl="gen">Play</button><input type="range" class="plrg" id="rg-gen" aria-label="Year" step="0.05"><b class="plyr" id="yr-gen"></b><span class="seg" data-key="pspeed"><button data-v="4">Slow</button><button data-v="8">Normal</button><button data-v="16">Fast</button></span><button class="btn" id="gen-flip" type="button" aria-pressed="false" title="Turn the page over: newest generation at the top, going back down">Newest at top</button></div>
+          <canvas id="cv-gen" role="img" aria-label="Family tree growing generation by generation"></canvas>
           <div class="plstats" id="pl-stats"></div>
           <div class="foot"><span>Dot colour = research line</span><span>Gold ring = born somewhere other than where they died</span><span>Dashed ring = may be the same person as a neighbour</span><span>Click anyone to re-centre</span></div>
         </div>
@@ -47,8 +47,8 @@
       <section class="view" id="v-routes" hidden>
         <p class="vnote">Where this family lived, on the Atlas coastlines. A dot is a place, sized by how many of them were living there that year and coloured by the regime that ruled it, as on the Atlas map. A line joins the places where someone's record changes place. The travelling dot only marks the window in which the move must have happened. A dashed line with no dot is a stop whose year is not recorded: the order is the roster's, the timing is not known.</p>
         <div class="stage plx">
-          <canvas id="cv-routes" role="img" aria-label="Map of where the focus person's family lived and moved"></canvas>
           <div class="bar keep plbar"><button class="btn plplay" data-pl="routes">Play</button><input type="range" class="plrg" id="rg-routes" aria-label="Year" step="0.05"><b class="plyr" id="yr-routes"></b><span class="seg" data-key="pspeed"><button data-v="4">Slow</button><button data-v="8">Normal</button><button data-v="16">Fast</button></span></div>
+          <canvas id="cv-routes" role="img" aria-label="Map of where the focus person's family lived and moved"></canvas>
           <div class="tblwrap plmoves"><table id="pl-moves"></table></div>
           <div class="foot"><span>A child's birthplace is evidence of where a parent was, not proof</span><span>The small maps show Europe and the world; the gold box is the main frame</span></div>
         </div>
@@ -56,7 +56,7 @@
 <!--/EXT:VIEWS-->
 <!--EXT:STYLE-->
 .plx canvas{display:block;width:100%}
-.plbar{border-top:1px solid var(--rule);border-bottom:0}
+.plbar{border-bottom:1px solid var(--rule);border-top:0}
 .plbar .plrg{flex:1 1 180px;min-width:0;accent-color:var(--atlas)}
 .plyr{font:500 14px var(--mono);min-width:3.2em;text-align:right;color:var(--ink);font-variant-numeric:tabular-nums}
 .plscroll{max-height:min(74vh,640px);overflow-y:auto;overscroll-behavior:contain;background:var(--panel);border-radius:8px 8px 0 0}

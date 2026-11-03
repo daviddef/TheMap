@@ -17,7 +17,7 @@ let curBytes = null, curName = null;   // a private copy, only so the visitor ca
 let worker = null, last = null, shown = { review: 0 };
 const base = new URL('./', location.href).href;
 
-function show(id) { for (const s of ['start', 'busy', 'work']) $('#' + s).hidden = s !== id; }
+function show(id) { for (const s of ['start', 'busy', 'work']) $('#' + s).hidden = s !== id; document.body.classList.toggle('loaded', id === 'work'); }
 function fail(msg) { const e = $('#err'); e.textContent = msg; e.hidden = false; show('start'); }
 
 function start(bytes, name) {

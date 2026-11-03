@@ -81,7 +81,12 @@ const archiveCountries = new Set(archives.map(p => p.at.place.split(", ").pop())
       the size of a poster. Stats and the help link ride on the same baseline. */}
   <div class="pagehead ra-lede">
     <h1>Where the records are</h1>
-    <div class="lab">{places.toLocaleString()} places · {volumes.toLocaleString()} record volumes · {archives.length} archives in {archiveCountries} countries · {regions.regions.length} record regions</div>
+    <div class="ra-pills" aria-label="The atlas in numbers">
+      <span class="k-tag is-new">{places.toLocaleString()} places</span>
+      <span class="k-tag">{volumes.toLocaleString()} record volumes</span>
+      <span class="k-tag">{archives.length} archives in {archiveCountries} countries</span>
+      <span class="k-tag">{regions.regions.length} record regions</span>
+    </div>
     <p class="dek">
       {/* THREE LINES OF EXPLANATION ABOVE THE THING BEING EXPLAINED. On a phone
           that pushed the search box most of a screen down, so the first thing a
@@ -90,7 +95,7 @@ const archiveCountries = new Set(archives.map(p => p.at.place.split(", ").pop())
           goes when they want it. (No tag syntax in this comment: Astro opens a
           real element for it and swallows the file. That is written in capitals
           in Base.astro and it caught me again anyway.) */}
-      Click the place your people came from. <a href={u("/help/")}>How this works &rarr;</a>
+      Click the place your people came from, or search a name. <a href={u("/help/")}>How this works &rarr;</a>
     </p>
   </div>
 

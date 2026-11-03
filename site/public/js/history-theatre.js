@@ -936,8 +936,14 @@
       map = L.map("hm-map", { worldCopyJump: true, minZoom: 2, zoomControl: false, preferCanvas: false })
         .setView([30, 20], 2);
       L.control.zoom({ position: "topright" }).addTo(map);
-      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 8, attribution: "&copy; OpenStreetMap contributors" }).addTo(map);
+      /* The same quiet grey ground as the records map (see RecordMap.astro): OpenStreetMap's standard style
+         draws mountain peaks, roads and icons that compete with the arrows. */
+      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+        maxZoom: 8, attribution: "Esri, HERE, Garmin &middot; &copy; OpenStreetMap contributors" }).addTo(map);
+      map.createPane("baseLabels").style.zIndex = 250;
+      map.getPane("baseLabels").style.pointerEvents = "none";
+      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}", {
+        pane: "baseLabels", maxZoom: 8 }).addTo(map);
       map.scrollWheelZoom.disable();
       map.on("click focus", function () { map.scrollWheelZoom.enable(); });
       map.on("mouseout", function () { map.scrollWheelZoom.disable(); });

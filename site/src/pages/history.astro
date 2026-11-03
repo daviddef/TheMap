@@ -25,7 +25,7 @@ const CH = hist.chapters;
   title="History"
   wide
   eyebrow="Conquest · occupation · migration"
-  dek="Watch the ground change hands. Every arrow is something a flag page in this atlas says happened: an army that came, a people who left, a state that took another. Pick a chapter, or drag the years.">
+  dek="Watch the ground change hands. Pick a chapter and press play, or drag the years yourself. Every arrow is something a flag page in this atlas says happened: an army that came, a people who left, a state that took another.">
 
   <div class="hm" id="hm" data-base={BASE}>
     <div class="hm-chapters" role="group" aria-label="Chapters">
@@ -88,6 +88,7 @@ const CH = hist.chapters;
     </div>
 
     <div class="hm-layers" role="group" aria-label="Layers">
+      <span class="hm-layers-h">Show</span>
       <label><input type="checkbox" id="hm-l-conquest" checked /> <i class="k conquest"></i>Conquest</label>
       <label><input type="checkbox" id="hm-l-occupation" checked /> <i class="k occupation"></i>Occupation</label>
       <label><input type="checkbox" id="hm-l-migration" checked /> <i class="k migration"></i>Migration</label>
@@ -110,7 +111,7 @@ const CH = hist.chapters;
     <div class="hm-below">
       <section class="hm-card" id="hm-card" aria-live="polite">
         <h2>Choose an arrow</h2>
-        <p>Click any arrow or dot to read what the flag page says, and open the page it came from.</p>
+        <p>Click any arrow or dot to read what the flag page says, and open the page it came from. Nothing is clicked yet, so start anywhere.</p>
         <p class="hm-fine">An arrow to a country joins the two countries' label points. An arrow to an empire or a people starts at the seat it ruled from or the country it came from. A dashed stub means the page names no second place. None of these is a route.</p>
       </section>
     </div>
@@ -130,8 +131,9 @@ const CH = hist.chapters;
                  scrollbar-width:thin; scrollbar-color:var(--accent, #1F5C6B) transparent; }
   .hm-chip { flex:0 0 auto; display:flex; flex-direction:column; align-items:flex-start;
              gap:1px; padding:7px 12px; border:1px solid var(--rule-strong, #bbb);
-             border-radius:10px; background:var(--panel, #fff); color:var(--ink, #16222A);
-             font:inherit; cursor:pointer; text-align:left; }
+             border-radius:12px; background:var(--panel, #fff); color:var(--ink, #16222A);
+             font:inherit; cursor:pointer; text-align:left; transition:border-color .15s, transform .15s; }
+  .hm-chip:hover { transform:translateY(-1px); }
   .hm-chip b { font-size:.9rem; font-weight:600; }
   .hm-chip i { font-style:normal; font-size:.75rem; opacity:.7; font-variant-numeric:tabular-nums; }
   .hm-chip:hover, .hm-chip:focus-visible { border-color:var(--accent, #1F5C6B); }
@@ -139,13 +141,13 @@ const CH = hist.chapters;
   .hm-stage { position:relative; border:1px solid var(--rule-strong, #bbb); border-radius:12px;
               overflow:hidden; background:var(--panel, #f2f2f2); }
   .hm-map { height:min(72vh, 700px); min-height:360px; background:#cfd8dc; }
-  .hm-map .leaflet-tile-pane { filter:grayscale(.9) contrast(.88) brightness(1.06); opacity:.9; }
+  .hm-map .leaflet-tile-pane, .hm-map .leaflet-baseLabels-pane { filter:grayscale(.9) contrast(.88) brightness(1.06); opacity:.9; }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) .hm-map { background:#1b2428; }
-    :root:not([data-theme="light"]) .hm-map .leaflet-tile-pane { filter:grayscale(1) invert(1) contrast(.82) brightness(.72); }
+    :root:not([data-theme="light"]) .hm-map .leaflet-tile-pane, :root:not([data-theme="light"]) .hm-map .leaflet-baseLabels-pane { filter:grayscale(1) invert(1) contrast(.82) brightness(.72); }
   }
   :root[data-theme="dark"] .hm-map { background:#1b2428; }
-  :root[data-theme="dark"] .hm-map .leaflet-tile-pane { filter:grayscale(1) invert(1) contrast(.82) brightness(.72); }
+  :root[data-theme="dark"] .hm-map .leaflet-tile-pane, :root[data-theme="dark"] .hm-map .leaflet-baseLabels-pane { filter:grayscale(1) invert(1) contrast(.82) brightness(.72); }
   .hm-hud { position:absolute; left:14px; top:12px; z-index:500; pointer-events:none;
             text-shadow:0 0 6px var(--panel, #fff), 0 0 2px var(--panel, #fff); }
   .hm-year { font:700 clamp(2.4rem, 7vw, 4.4rem)/1 var(--font-display, Georgia, serif);
@@ -173,8 +175,14 @@ const CH = hist.chapters;
   .hm-speed { font-size:.8rem; display:grid; gap:2px; }
   .hm-tour { font-size:.85rem; display:inline-flex; gap:6px; align-items:center; }
   .hm-chip.hm-all { border-color:var(--accent, #1F5C6B); }
-  .hm-layers { display:flex; flex-wrap:wrap; gap:6px 18px; align-items:center; font-size:.9rem; }
-  .hm-layers label { display:inline-flex; gap:6px; align-items:center; }
+  .hm-layers { display:flex; flex-wrap:wrap; gap:8px; align-items:center; font-size:.85rem;
+               padding:10px 12px; background:var(--panel, #fff); border:1px solid var(--rule, #ddd); border-radius:12px; }
+  .hm-layers-h { font:600 10.5px/1 var(--mono, monospace); letter-spacing:.12em; text-transform:uppercase;
+                 color:var(--ink-3, #606C72); margin-right:4px; }
+  .hm-layers label { display:inline-flex; gap:6px; align-items:center; padding:5px 10px; border:1px solid var(--rule-strong, #bbb);
+                     border-radius:999px; cursor:pointer; background:var(--ground, transparent); }
+  .hm-layers label:has(input:checked) { border-color:var(--accent, #1F5C6B); background:var(--accent-wash, #DDE7E9); }
+  .hm-layers label:hover { border-color:var(--accent, #1F5C6B); }
   .hm-layers .k { display:inline-block; width:18px; height:4px; border-radius:2px; }
   .k.conquest { background:var(--hm-conquest); } .k.occupation { background:var(--hm-occupation); }
   .k.migration { background:var(--hm-migration); } .k.voyage { background:#7A4FA3; } .k.mort { background:#000; border:1px solid #fff; box-shadow:0 0 0 1px #000; }

@@ -2,7 +2,9 @@
    `io` supplies the Atlas's static files (json(path), flag(id)); in the page that is fetch of same-origin files, in the tests it reads disk.
    Nothing here sends the GEDCOM, or anything derived from it, anywhere. */
 import { parseGedcom } from './gedcom.js';
+import * as model from './model.js';
 import { readPeople, prepare, buildTree } from './model.js';
+import { BUILD } from './build.js';
 import { Gazetteer, resolveAll, REAL, COARSE, REVIEW, addCountryNames, parseParts } from './resolver.js';
 import { buildExport, logText } from './export.js';
 import { offerable } from './contribute.js';
@@ -50,7 +52,7 @@ export class Session {
     t0 = now(); this.progress('Drawing flags and regimes');
     const atlas = await buildAtlas(keep, this.core, id => this.io.flag(id)); T.atlas = Math.round(now() - t0);
     this.tree = tree; this.atlas = atlas;
-    return { tree, atlas, report: this.report(report), review: this.review(), wb: this.workbench(), timings: { ...T } };
+    return { tree, atlas, report: this.report(report), review: this.review(), wb: this.workbench(), timings: { ...T }, build: { pipeline: BUILD, model: model.MODEL_BUILD } };
   }
 
   /* spellings near the place part of a text, in the country the text names (or, with none, the countries the tree uses most) */

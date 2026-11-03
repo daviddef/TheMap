@@ -4,6 +4,7 @@ import { buildPacket } from './contribute.js';
 import { makeSample } from './sample.js';
 import { searchLinks, sends } from './lookup.js';
 import { checklistText, checklistCsv } from './checklist.js';
+import { BUILD } from './build.js';
 import { parseLink, profileUrl, treeUrl, toHash, fromHash } from './myheritage.js';
 
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
@@ -42,6 +43,7 @@ function start(bytes) {
 const hideLiv = () => $('#hideliving').checked;
 $('#hideliving').onchange = () => { $('#fliving').checked = !hideLiv(); worker && worker.postMessage({ cmd: 'living', hide: hideLiv() }); };
 function done(m) {
+  const stale = !m.build || m.build.pipeline !== BUILD || m.build.model !== BUILD; $('#stale').hidden = !stale;
   last = m; window.RR = { tree: m.tree, atlas: m.atlas };
   const keepTab = $('.tabs [aria-selected=true]')?.dataset.tab || 'tree';
   show('work'); chips(m); mountViewer(); report(m); review(m); workbench(m.wb); worker.postMessage({ cmd: 'offer' });

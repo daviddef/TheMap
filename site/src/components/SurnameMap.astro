@@ -1,0 +1,93 @@
+---
+/* ONE MAP FOR A SURNAME PAGE: where the name is borne (countries), where it
+   is also the name of a place, and — for a Belgian name — which communes.
+   Esri's light grey canvas, the same base the main atlas map uses, instead of
+   three hand-drawn SVGs. Leaflet is fetched only when the map nears the
+   viewport, so the ~19,000 surname pages stay light for anyone who never
+   scrolls to it. Pure presentation: every number comes in as props from the
+   same sources the SVGs used. */
+const { countries = [], places = [], communes = [], label = "" } = Astro.props;
+const data = { countries, places, communes };
+---
+<figure class="sxmap">
+  <div class="sxmap-box" data-sxmap role="img" aria-label={label}></div>
+  <ul class="sxmap-key">
+    {countries.some((c) => c.n != null) && <li><i class="k-c"></i>A country that counted the name</li>}
+    {countries.some((c) => c.n == null && c.how !== "archive") && <li><i class="k-u"></i>Attested by a register, not counted</li>}
+    {countries.some((c) => c.n == null && c.how === "archive") && <li><i class="k-a"></i>Placed by a family archive's own tree, not a register</li>}
+    {places.length > 0 && <li><i class="k-p"></i>A place of this name</li>}
+    {communes.length > 0 && <li><i class="k-m"></i>A Belgian commune, counted by Statbel</li>}
+  </ul>
+  <noscript><p class="cap">The map needs JavaScript; the same facts are listed below it.</p></noscript>
+  <slot />
+</figure>
+
+<script is:inline define:vars={{ data }}>
+(function () {
+  var box = document.querySelector("[data-sxmap]");
+  if (!box) return;
+  var started = false;
+  function load(src, cb) { var s = document.createElement("script"); s.src = src; s.onload = cb; document.head.appendChild(s); }
+  function start() {
+    if (started) return; started = true;
+    var css = document.createElement("link"); css.rel = "stylesheet";
+    css.href = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"; document.head.appendChild(css);
+    var go = function () { draw(); };
+    if (window.L) go(); else load("https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js", go);
+  }
+  function draw() {
+    var css = getComputedStyle(document.documentElement);
+    var teal = css.getPropertyValue("--accent").trim() || "#1F5C6B";
+    var brass = css.getPropertyValue("--brass").trim() || "#7E5A20";
+    var grey = css.getPropertyValue("--ink-3").trim() || "#606C72";
+    var map = L.map(box, { scrollWheelZoom: false, worldCopyJump: false, minZoom: 1, zoomControl: true, attributionControl: true });
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+      { attribution: "Esri, HERE, Garmin &middot; &copy; OpenStreetMap contributors", maxNativeZoom: 16, maxZoom: 18 }).addTo(map);
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}",
+      { maxNativeZoom: 16, maxZoom: 18, opacity: .9 }).addTo(map);
+    map.on("click", function () { map.scrollWheelZoom.enable(); });
+    var pts = [];
+    var top = Math.max.apply(null, data.countries.map(function (c) { return c.n || 0; }).concat([1]));
+    data.countries.slice().sort(function (a, b) { return (b.n || 0) - (a.n || 0); }).forEach(function (c) {
+      var known = c.n != null, arch = !known && c.how === "archive", ll = [c.y, c.x]; pts.push(ll);
+      L.circleMarker(ll, known
+        ? { radius: 8 + 20 * Math.sqrt(c.n / top), color: "#fff", weight: 1, fillColor: teal, fillOpacity: .62 }
+        : arch
+          ? { radius: 9, color: teal, weight: 1.6, fillColor: teal, fillOpacity: .14 }
+          : { radius: 9, color: grey, weight: 1.6, dashArray: "2 3", fillOpacity: 0, fill: false })
+        .bindTooltip(c.name + (known ? " — " + c.n.toLocaleString() + " people"
+          : arch ? " — placed by a family archive's tree, not a register" : " — attested by a register, not counted")).addTo(map);
+    });
+    var ptop = Math.max.apply(null, data.places.map(function (p) { return p.c || 0; }).concat([1]));
+    data.places.forEach(function (p) {
+      var ll = [p.y, p.x]; pts.push(ll);
+      L.circleMarker(ll, { radius: 5 + 6 * Math.sqrt((p.c || 0) / ptop), color: "#fff", weight: 1.5, fillColor: brass, fillOpacity: .9 })
+        .bindTooltip(p.nl + (p.c > 1 ? " — pop. " + p.c.toLocaleString() : "")).addTo(map);
+    });
+    var ctop = Math.max.apply(null, data.communes.map(function (p) { return p.c || 0; }).concat([1]));
+    data.communes.forEach(function (p) {
+      var ll = [p.y, p.x]; pts.push(ll);
+      L.circleMarker(ll, { radius: 4 + 12 * Math.sqrt((p.c || 0) / ctop), color: "#fff", weight: 1, fillColor: teal, fillOpacity: .62 })
+        .bindTooltip((p.nl || p.label || "") + " — " + (p.c || 0).toLocaleString() + " people").addTo(map);
+    });
+    if (pts.length) map.fitBounds(L.latLngBounds(pts).pad(0.3), { maxZoom: 8 }); else map.setView([30, 10], 2);
+  }
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (e) { if (e[0].isIntersecting) { io.disconnect(); start(); } }, { rootMargin: "400px" });
+    io.observe(box);
+  } else start();
+})();
+</script>
+
+<style>
+  .sxmap { margin: 14px 0 6px; }
+  .sxmap-box { height: 420px; border: 1px solid var(--rule); border-radius: 3px; background: var(--panel); }
+  .sxmap-key { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 20px;
+               font-family: var(--sans); font-size: 12px; color: var(--ink-2); }
+  .sxmap-key i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 7px; vertical-align: -2px; }
+  .k-c, .k-m { background: var(--accent); opacity: .65; }
+  .k-u { border: 1.6px dashed var(--ink-3); }
+  .k-a { border: 1.6px solid var(--accent); background: var(--accent-wash); }
+  .k-p { background: var(--brass); }
+  @media (max-width: 640px) { .sxmap-box { height: 320px; } }
+</style>

@@ -73,6 +73,16 @@ function outline(cc) {
    Longitude is squeezed by cos(mid latitude) or Europe comes out looking
    like it was stood on. Nothing here is measured off the picture. */
 
+/* THE SAME COUNTRY DOTS AS DATA, for the Leaflet map on the surname page:
+   one row per attested country that has a centroid, with the count (null =
+   attested, not counted) exactly as surnameMap reads it. */
+export function surnameMapData(ccs) {
+  const pts = centroids();
+  return (ccs || []).filter((c) => pts[c.cc]).map((c) => ({
+    cc: c.cc, name: pts[c.cc].n || c.cc, x: pts[c.cc].x, y: pts[c.cc].y,
+    n: c.n == null ? null : c.n, how: c.how || null }));
+}
+
 export function surnameMap(ccs, { width = 680 } = {}) {
   const pts = centroids();
   const rows = (ccs || [])

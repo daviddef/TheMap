@@ -43,15 +43,15 @@ const link = (name) => pageFor.has(slugForSurname(name)) ? u(`/surname/${slugFor
           <p class="cap" style="margin-top:2px">{f.note}</p>
           {STATUS_ORDER.map((s) => g[s].length > 0 && (
             <p class="famrow"><span class="famst">{STATUS_LABEL[s]}</span>
-              {g[s].map((m) => {
+              <span class="famforms">{g[s].map((m) => {
                 const l = link(m.form);
                 return l ? <a href={l}>{m.form}</a> : <span>{m.form}</span>;
-              })}
+              })}</span>
             </p>
           ))}
           {(f.notSame || []).length > 0 && (
             <p class="famrow famno"><span class="famst">Not the same name</span>
-              {f.notSame.map((m) => <span>{m.form}</span>)}
+              <span class="famforms">{f.notSame.map((m) => <span>{m.form}</span>)}</span>
             </p>
           )}
         </article>
@@ -64,16 +64,26 @@ const link = (name) => pageFor.has(slugForSurname(name)) ? u(`/surname/${slugFor
 </Base>
 
 <style>
-  .famkey { list-style: none; padding: 0; margin: 14px 0 0; font-family: var(--sans); font-size: 13px; line-height: 1.55; }
-  .famkey li { padding: 3px 0; max-width: 92ch; }
-  .famcard { padding: 16px 0 14px; border-top: 1px solid var(--rule, #D8D3C8); }
-  .famcard h2 { margin: 0; }
+  .famkey { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 8px;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            font-family: var(--sans); font-size: 12.5px; line-height: 1.55; color: var(--ink-2); }
+  .famkey li { padding: 10px 14px; background: var(--panel); border: 1px solid var(--rule); border-radius: 3px; }
+  .famkey b { display: block; font-size: 10.5px; font-weight: 600; letter-spacing: .14em;
+              text-transform: uppercase; color: var(--brass); margin-bottom: 3px; }
+  .famcard { background: var(--panel); border: 1px solid var(--rule); border-radius: 3px;
+             padding: 18px 22px 16px; margin-top: 14px; }
+  .famcard h2 { margin: 0; font-size: 24px; font-weight: 500; }
   .famcard h2 a { text-decoration: none; }
-  .famrow { display: flex; flex-wrap: wrap; gap: 2px 14px; align-items: baseline; margin: 6px 0 0;
+  .famcard h2 a:hover { text-decoration: underline; }
+  .famrow { display: grid; grid-template-columns: 17em 1fr; gap: 4px 12px; align-items: start; margin: 10px 0 0;
             font-family: var(--serif); font-size: 17px; }
-  .famrow a { text-decoration: none; border-bottom: 1px solid var(--rule-strong, #BDB6A6); }
-  .famst { flex: 0 0 15em; font-family: var(--sans); font-size: 11.5px; letter-spacing: .03em; text-transform: uppercase;
-           color: var(--ink-3, #7C8A91); }
-  .famno { color: var(--ink-3, #7C8A91); }
-  @media (max-width: 640px) { .famst { flex-basis: 100%; } }
+  .famforms a, .famforms span { padding: 1px 10px; background: var(--ground); border: 1px solid var(--rule);
+            border-radius: 999px; line-height: 1.5; }
+  .famrow a { text-decoration: none; color: var(--accent); }
+  .famrow a:hover { border-color: var(--accent); }
+  .famforms { display: flex; flex-wrap: wrap; gap: 6px 8px; }
+  .famst { padding-top: 6px; white-space: nowrap; font-family: var(--sans); font-size: 10.5px; font-weight: 600; letter-spacing: .14em;
+           text-transform: uppercase; color: var(--brass); }
+  .famno .famforms span { color: var(--ink-3); }
+  @media (max-width: 640px) { .famrow { grid-template-columns: 1fr; } .famst { padding-top: 0; white-space: normal; } .famcard { padding: 16px; } }
 </style>

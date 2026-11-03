@@ -49,10 +49,10 @@
   <div class="bar">
     <div id="chips" class="chips"></div>
     <label class="small hidel"><input type="checkbox" id="hideliving"> Hide living people</label>
-    <details class="small hidel" id="mhbox"><summary>Link to MyHeritage</summary>
-      <p>Your file came from MyHeritage, which numbers people the same way. Paste a profile or tree link for <b>any one person</b> in this file and every person gets links back to MyHeritage. Nothing is sent: they are plain links.</p>
+    <details class="mh" id="mhbox"><summary><span class="mhbtn">MyHeritage links <span id="mhsum" class="mhsum">off</span></span></summary>
+      <div class="mhbody"><p>Paste a profile or tree link for any one person from your MyHeritage tree. Everyone in this file then gets links back to it. Nothing is sent.</p>
       <input id="mhin" type="text" placeholder="https://www.myheritage.com/profile-…" aria-label="A MyHeritage profile or tree link for one person in this file">
-      <p id="mhstat" role="status"></p>
+      <p id="mhstat" role="status" class="small"></p></div>
     </details>
     <nav class="tabs" role="tablist">
       <button role="tab" data-tab="tree" aria-selected="true">Tree</button>
@@ -107,11 +107,12 @@
   </div>
   <div id="p-fix" class="panel" hidden>
     <h2>Fix list</h2>
-    <p>A list to work through in the tree you keep elsewhere (MyHeritage, Ancestry, a desktop program). Each line can be copied and pasted: open the person there, edit the event, paste.
-    Ticks live in this page only, so download the list if you want to keep your place. Nothing here is sent anywhere.</p>
-    <p class="small"><label><input type="checkbox" id="fliving" checked> Include living people (their names stay on this device and in the downloads you make)</label></p>
-    <p><button class="btn" id="ftext">Download as text</button><button class="btn" id="fcsv">Download as spreadsheet (CSV)</button></p>
-    <input id="ffilter" type="search" placeholder="Filter by name or place" aria-label="Filter the fix list">
+    <p class="small">Work down each list in the tree you keep elsewhere: copy, paste, tick. Ticks stay in this page, so download the list to keep your place.</p>
+    <div class="ftool">
+      <label class="small"><input type="checkbox" id="fliving" checked> Include living people</label>
+      <input id="ffilter" type="search" placeholder="Filter by name or place" aria-label="Filter the fix list">
+      <span class="fdl"><button class="btn" id="ftext">Download text</button><button class="btn" id="fcsv">Download CSV</button></span>
+    </div>
     <div id="fsecs"></div>
   </div>
   <div id="p-offer" class="panel" hidden>

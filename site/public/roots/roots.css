@@ -100,3 +100,28 @@ a.btn[aria-disabled=true]{opacity:.45;pointer-events:none}
 .cand{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--rule,#d8d4c8);border-radius:14px;background:none;padding:3px 10px;cursor:pointer;font:inherit;color:inherit}.cand:hover{background:rgba(0,0,0,.05)}.cand svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .more{margin-left:8px}.muted{opacity:.6}
 @media(max-width:700px){.fp{grid-template-columns:1fr auto}.fp .pid,.fp .chip{grid-column:1}}
+
+/* tabs as one segmented control; counts as small badges */
+.tabs{gap:2px;background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:3px;margin-left:0}
+.tabs button{border-radius:7px;padding:6px 13px;font-size:14px;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+.tabs button:hover{color:var(--ink);background:color-mix(in srgb,var(--atlas) 8%,transparent)}
+.tabs button[aria-selected=true]{background:var(--atlas);color:var(--on-atlas);font-weight:600}
+.tabs .count{margin:0;font-size:11px;padding:0 6px}.tabs .count:empty{display:none}
+.bar #again{margin-left:auto;font-size:14px}
+/* the MyHeritage link: a quiet pill, collapsed until wanted */
+.mh{flex-basis:100%;order:5}.mh summary{list-style:none;cursor:pointer;display:inline-block}.mh summary::-webkit-details-marker{display:none}
+.mhbtn{display:inline-flex;gap:8px;align-items:center;border:1px solid var(--rule);border-radius:99px;padding:3px 12px;font-size:13px;background:var(--panel)}
+.mhsum{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}.mhsum.on{color:var(--ok);font-weight:700}
+.mhbody{max-width:60ch;margin:8px 0 0}.mhbody p{margin:0 0 6px;font-size:14px;color:var(--muted)}.mhbody input{width:100%;box-sizing:border-box}
+/* fix list: toolbar and colour-coded sections */
+.ftool{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin:8px 0 14px}.ftool input[type=search]{flex:1;min-width:14em;max-width:26em}.fdl{margin-left:auto;display:flex;gap:6px}
+.fdl .btn{padding:5px 12px;font-size:14px}
+#fsecs details.sec{--acc:var(--muted);border:1px solid var(--rule);border-left:5px solid var(--acc);border-radius:8px;background:var(--panel);margin:12px 0;padding:0 14px 6px}
+#fsecs summary{display:flex;align-items:center;gap:8px;padding:10px 0;cursor:pointer}
+#fsecs summary .count{background:var(--acc);color:#fff}#fsecs summary .ib{width:24px;height:22px}
+#fsecs .how{margin:0 0 8px;color:var(--muted)}
+#fsecs details.sec-places{--acc:var(--ok)}#fsecs details.sec-check{--acc:var(--brass)}#fsecs details.sec-decide{--acc:var(--brick)}#fsecs details.sec-years,#fsecs details.sec-names{--acc:#3A6EA5}#fsecs details.sec-dates{--acc:#7B4B94}#fsecs details.sec-dupes{--acc:var(--atlas)}#fsecs details.sec-apart{--acc:var(--muted)}
+.sec .frow{border-top:1px solid color-mix(in srgb,var(--acc) 22%,var(--rule));border-radius:6px;padding:12px 6px;margin:0 -6px}.sec .frow:hover{background:color-mix(in srgb,var(--acc) 7%,transparent)}
+.sec .frow .was{color:var(--brick);opacity:.85}.sec-places .now{color:var(--ok)}.sec-check .now{color:var(--brass)}.sec .fpl{border-left-color:color-mix(in srgb,var(--acc) 55%,var(--rule))}
+.sec .ib{color:var(--acc)}.sec .cand{border-color:color-mix(in srgb,var(--acc) 45%,var(--rule))}
+.sec .frow.done{background:color-mix(in srgb,var(--ok) 8%,transparent)}

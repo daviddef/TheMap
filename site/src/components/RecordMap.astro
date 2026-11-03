@@ -657,13 +657,28 @@ window.addEventListener("load", async function () {
   var map = L.map(el, { scrollWheelZoom: true, worldCopyJump: true,
                         preferCanvas: true });
   var BASES = {
-    map: L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-      { attribution: "&copy; OpenStreetMap contributors", maxZoom: 18 }),
+    /* A QUIET GROUND, NOT THE STANDARD OSM STYLE. David, looking at Krk: «what are all the
+       orange triangles on our map? can we remove them, there is way too much going on on the
+       map that isnt relevant. i need simple.» They were OpenStreetMap's mountain peaks, and the
+       standard style also draws roads, footpaths, parks, forest texture and shop icons that
+       say nothing about where a record is held. Esri's light grey canvas is the same
+       coastlines and borders with none of that, so the dots are the only colour on the map.
+       Its place names live in a separate reference layer, drawn in their own pane above the
+       tiles and below the dots, so a reader can still tell where they are. Terrain and
+       satellite are still there for anyone who wants the ground itself. */
+    map: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+      { attribution: "Esri, HERE, Garmin &middot; &copy; OpenStreetMap contributors", maxNativeZoom: 16, maxZoom: 18 }),
     terrain: L.tileLayer("https://tile.opentopomap.org/{z}/{x}/{y}.png",
       { attribution: "&copy; OpenStreetMap contributors, SRTM · OpenTopoMap (CC-BY-SA)", maxZoom: 17 }),
     satellite: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
       { attribution: "Esri, Maxar, Earthstar Geographics", maxZoom: 18 })
   };
+  map.createPane("baseLabels"); map.getPane("baseLabels").style.zIndex = 250;
+  map.getPane("baseLabels").style.pointerEvents = "none";
+  var baseLabels = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}",
+    { pane: "baseLabels", maxNativeZoom: 16, maxZoom: 18 });
+  BASES.map.on("add", function () { baseLabels.addTo(map); });
+  BASES.map.on("remove", function () { map.removeLayer(baseLabels); });
   var baseNow = Q.get("base") && BASES[Q.get("base")] ? Q.get("base") : "map";
   BASES[baseNow].addTo(map);
 

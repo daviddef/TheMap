@@ -232,7 +232,15 @@ document.querySelector('[data-tab=offer]').addEventListener('click', async () =>
 
 /* ---------- workbench ---------- */
 let who = null;
-const send = edit => { $('#werr').hidden = true; worker.postMessage({ cmd: 'edit', edit }); };
+let flashT = 0;
+const FLASH = { date: 'Dates saved', note: 'Note added', source: 'Source added', merge: 'Marked as maybe the same', notsame: 'Marked as not the same: it will not be suggested again', undo: 'Undone' };
+function flash(op) {   // a visible answer to a click: the list a button sits in often scrolls past the place its result lands
+  const f = $('#wflash'); if (!f || !FLASH[op]) return;
+  f.textContent = FLASH[op] + (op === 'merge' || op === 'date' || op === 'note' || op === 'source' ? '. It is listed under "Your edits", where you can undo it.' : '.'); f.hidden = false;
+  clearTimeout(flashT); flashT = setTimeout(() => { f.hidden = true; }, 6000);
+}
+let focusEdit = false;
+const send = edit => { $('#werr').hidden = true; worker.postMessage({ cmd: 'edit', edit }); flash(edit.op); };
 function workbench(w) {
   if (!w) return;
   $('#wcount').textContent = String(w.edits.length || ''); $('#wcount').hidden = !w.edits.length;
@@ -240,7 +248,7 @@ function workbench(w) {
   const u = $('#wundrawn'); u.textContent = '';
   for (const r of w.undrawn) {
     const row = el('div', 'wrow'), t = el('div', null, r.name); t.append(el('small', null, r.id + (r.place ? ' · ' + r.place : '')));
-    const b = el('button', 'link', 'Add a year'); b.onclick = () => { who = r.id; worker.postMessage({ cmd: 'person', id: r.id }); };
+    const b = el('button', 'link', 'Add a year'); b.onclick = () => { who = r.id; focusEdit = true; worker.postMessage({ cmd: 'person', id: r.id }); };
     row.append(t, b); u.append(row);
   }
   if (w.undrawnTotal > w.undrawn.length) u.append(el('p', 'small', 'and ' + n0(w.undrawnTotal - w.undrawn.length) + ' more'));
@@ -262,11 +270,11 @@ function workbench(w) {
 }
 function found(m) {
   const box = $('#wres'); box.textContent = '';
-  for (const r of m.rows) { const row = el('div', 'wrow'), t = el('div', null, r.name); t.append(el('small', null, r.id + (r.living ? ' · living' : '') + (r.by ? ' · born ' + (r.est ? 'about ' : '') + r.by : ' · no year') + (r.bp ? ' · ' + r.bp : ''))); const b = el('button', 'link', 'Edit'); b.onclick = () => { who = r.id; worker.postMessage({ cmd: 'person', id: r.id }); }; row.append(t, b); box.append(row); }
+  for (const r of m.rows) { const row = el('div', 'wrow'), t = el('div', null, r.name); t.append(el('small', null, r.id + (r.living ? ' · living' : '') + (r.by ? ' · born ' + (r.est ? 'about ' : '') + r.by : ' · no year') + (r.bp ? ' · ' + r.bp : ''))); const b = el('button', 'link', 'Edit'); b.onclick = () => { who = r.id; focusEdit = true; worker.postMessage({ cmd: 'person', id: r.id }); }; row.append(t, b); box.append(row); }
 }
 function person(i) {
   if (!i) return; lastInfo = i;
-  $('#wedit').hidden = false; $('#wname').textContent = i.name + ' · ' + i.id;
+  $('#wedit').hidden = false; if (focusEdit) { focusEdit = false; $('#wedit').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } $('#wname').textContent = i.name + ' · ' + i.id;
   $('#winfo').textContent = 'In your file: born ' + (i.birth || 'no date') + ', died ' + (i.death || 'no date') + (i.living ? '. Treated as living (no death recorded, born within 110 years)' + (hideLiv() ? ', so hidden while "Hide living people" is on, and left out of a shareable file.' : '. Left out of a shareable export.') : '.');
   const wm = $('#wmh'); wm.textContent = ''; const ml = mhA(i.id, i.name); if (ml.length) wm.append(...ml);
   const l = i.look, ul = $('#wlinks'); ul.textContent = '';
@@ -330,7 +338,7 @@ $('#sample').onclick = () => start(new TextEncoder().encode(makeSample()).buffer
 
 
 /* ---------- fix list ---------- */
-let fix = null; const ticked = new Set(), shownN = new Map();
+let fix = null; const ticked = new Set(), shownN = new Map(), asIs = new Set();   // asIs: rows the visitor knows are right, kept in memory only
 const svg = d => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + d + '"/></svg>';
 const IC = {
   copy: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg>',
@@ -411,6 +419,20 @@ function fixRow(s, i) {
     body.append(plist([{ name: i.an, id: i.a }, { name: i.bn, id: i.b }], 2));
   } else if (s.key === 'apart') {
     head.append(el('b', null, i.size + (i.size === 1 ? ' person' : ' people') + ' not connected to the main tree')); body.append(head, plist(i.people, i.size));
+  } else if (s.key === 'suspect') {
+    const one = pline({ name: i.name, id: i.id, by: null }, { copyName: true }); one.classList.add('solo'); head.append(one);
+    const leave = el('button', 'link', 'Leave as is'); leave.type = 'button'; leave.title = 'I know this is right: hide it'; leave.onclick = () => { asIs.add(i.key); drawFix(); };
+    head.append(leave); body.append(head);
+    const ul = el('ul', 'reasons'); for (const r of i.reasons) ul.append(el('li', null, r.text)); body.append(ul);
+  } else if (s.key === 'ages') {
+    head.append(el('b', null, i.country + ' written for ' + (i.from === i.to ? i.from : i.from + '–' + i.to) + ', when it was ' + i.label)); body.append(head, el('div', 'fcount', i.count + ' event' + (i.count === 1 ? '' : 's') + ', ' + i.n + (i.n === 1 ? ' person' : ' people')), plist(i.people, i.n));
+  } else if (s.key === 'leads') {
+    const one = pline({ name: i.name, id: i.id, by: i.born }, { copyName: true }); one.classList.add('solo'); head.append(one);
+    const leave = el('button', 'link', 'Leave as is'); leave.type = 'button'; leave.onclick = () => { asIs.add(i.key); drawFix(); };
+    head.append(leave); body.append(head, el('div', 'fnote', 'Born ' + i.born + ' at ' + i.place + '. The Atlas lists these for that place and time:'));
+    const ul = el('ul', 'reasons');
+    for (const c of i.cols) { const li = el('li'), a = el('a', null, c.title); if (/^https?:\/\//.test(c.url)) { a.href = c.url; a.target = '_blank'; a.rel = 'noopener noreferrer'; } li.append(a, ' ' + [c.provider, c.from ? c.from + (c.to ? '–' + c.to : '') : ''].filter(Boolean).join(' · ')); ul.append(li); }
+    if (i.more) ul.append(el('li', 'muted', 'and ' + i.more + ' more in the Atlas')); body.append(ul);
   } else {                                                                                        // years, names, dates: one person, a note under
     const p = { name: i.name, id: i.id, by: null }; const one = pline(p, { copyName: !!i.name }); one.classList.add('solo'); head.append(one);
     note.textContent = i.note + (i.with ? ' · with ' + i.with : '') + (i.kin ? ' · ' + i.kin : '') + (i.born && s.key !== 'dates' ? ' · born ' + i.born : '') + (i.place ? ' · born at ' + i.place : '');
@@ -419,15 +441,16 @@ function fixRow(s, i) {
   row.append(cb, body); return row;
 }
 function fixCount(s) { const n = $('#fc-' + s.key); if (n) n.textContent = s.items.filter(i => ticked.has(i.key)).length + ' of ' + s.items.length + ' done'; }
-const hay = (s, i) => (s.key === 'names' ? i.name + ' ' + i.kin : s.key === 'dupes' ? i.an + ' ' + i.bn : s.key === 'apart' ? i.people.map(p => p.name).join(' ') : (i.raw || '') + ' ' + (i.name || '') + ' ' + (i.people ? i.people.map(p => p.name).join(' ') : '')).toLowerCase();
+const hay = (s, i) => (s.key === 'names' ? i.name + ' ' + i.kin : s.key === 'dupes' ? i.an + ' ' + i.bn : s.key === 'apart' ? i.people.map(p => p.name).join(' ') : (i.raw || '') + ' ' + (i.name || '') + ' ' + (i.country ? i.country + ' ' + i.label : '') + ' ' + (i.reasons ? i.reasons.map(r => r.text).join(' ') : '') + ' ' + (i.people ? i.people.map(p => p.name).join(' ') : '')).toLowerCase();
 function drawFix() {
   if (!fix) return; const q = $('#ffilter').value.trim().toLowerCase(), box = $('#fsecs'); box.textContent = '';
   for (const s of fix.sections) {
     const d = el('details', 'sec sec-' + s.key); d.id = 'fs-' + s.key; if (s.items.length) d.open = s.key === 'places' || d.dataset.open === '1';
     const sum = el('summary'), c = el('span', 'small'); c.id = 'fc-' + s.key; sum.append(el('b', null, s.title + ' '), el('span', 'count', n0(s.items.length)), ' ', c); d.append(sum);
     const how = el('p', 'small how', s.how); how.hidden = true; const inf = ib('info', 'What is this list?', function (e) { e.preventDefault(); e.stopPropagation(); how.hidden = !how.hidden; }); sum.append(' ', inf); d.append(how);
-    const hits = q ? s.items.filter(i => hay(s, i).includes(q)) : s.items, cap = shownN.get(s.key) || 100;
+    const live = s.items.filter(i => !asIs.has(i.key)), hits = q ? live.filter(i => hay(s, i).includes(q)) : live, cap = shownN.get(s.key) || 100;
     if (!s.items.length) d.append(el('p', 'small', 'Nothing to do here.'));
+    const left = s.items.length - live.length; if (left) { const b = el('button', 'link', left + ' left as is: show them again'); b.onclick = () => { for (const i of s.items) asIs.delete(i.key); d.dataset.open = '1'; drawFix(); }; d.append(b); }
     for (const i of hits.slice(0, cap)) d.append(fixRow(s, i));
     if (hits.length > cap) { const b = el('button', 'link', 'Show ' + Math.min(100, hits.length - cap) + ' more of ' + n0(hits.length - cap)); b.onclick = () => { shownN.set(s.key, cap + 100); d.dataset.open = '1'; drawFix(); }; d.append(b); }
     d.ontoggle = () => { d.dataset.open = d.open ? '1' : ''; };

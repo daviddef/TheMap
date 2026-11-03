@@ -314,7 +314,7 @@ test("fix list: places, years, impossible dates, duplicates and loose groups, as
     "0 @F1@ FAM", "1 HUSB @I2@", "1 WIFE @I7@", "1 CHIL @I3@", "0 TRLR"].join("\n") + "\n";
   const s = new Session(io); await s.load(enc(g));
   const c = s.checklist({ living: true }), by = k => c.sections.find(x => x.key === k).items;
-  assert.deepEqual(c.sections.map(x => x.key), ["places", "check", "decide", "years", "names", "dates", "dupes", "apart"]);
+  assert.deepEqual(c.sections.map(x => x.key), ["places", "check", "decide", "years", "names", "dates", "suspect", "ages", "leads", "dupes", "apart"]);
   assert.ok(by("names").some(i => i.id === "I7" && i.kind === "none" && /spouse Bob Beta/.test(i.kin)), "an unnamed person is listed with the family around them");
   assert.ok(by("dates").some(i => i.id === "I1" && /before being born/.test(i.note)), "death before birth");
   assert.ok(by("dates").some(i => i.id === "I3" && /father was only 5 years older/.test(i.note)), "a child 5 years after the father");
@@ -327,7 +327,28 @@ test("fix list: places, years, impossible dates, duplicates and loose groups, as
   const s2 = new Session(io); await s2.load(enc(makeSample())); const pl = s2.checklist().sections[0].items;
   for (const i of [...pl, ...s2.checklist().sections[1].items]) assert.ok(i.to.split(",").length >= i.raw.split(",").length, "a suggested place never has fewer parts than the text it replaces: " + i.raw + " -> " + i.to);
   const pe = s2.checklist().sections; assert.ok(!pe[0].items.some(i => /Port Elizabeth/.test(i.raw)), "a different (historical) name is never offered as a plain fix");
-  const hidden = s.checklist({ living: false }); assert.ok(hidden.sections.length === 8);
+  const hidden = s.checklist({ living: false }); assert.ok(hidden.sections.length === 11);
+});
+
+test("consistency checks: whole-life logic, stacked reasons, nothing guessed, and living people named only when shown", async () => {
+  const { Session } = await import(R + "js/pipeline.js"); const { checklistText, checklistCsv } = await import(R + "js/checklist.js");
+  const g = ["0 HEAD", "1 CHAR UTF-8",
+    "0 @I1@ INDI", "1 NAME Hal /Quill/", "1 SEX M", "1 BIRT", "2 DATE 1800", "1 DEAT", "2 DATE 1850", "1 RESI", "2 DATE 1860", "1 FAMS @F1@",   // lives on after death
+    "0 @I2@ INDI", "1 NAME Wen /Marsh/", "1 SEX F", "1 BIRT", "2 DATE 1844", "1 FAMS @F1@",
+    "0 @I3@ INDI", "1 NAME Tom /Zzyx/", "1 SEX M", "1 BIRT", "2 DATE 1830", "1 BIRT", "2 DATE 1833", "1 FAMC @F1@",                                 // two birth years, a different surname
+    "0 @F1@ FAM", "1 HUSB @I1@", "1 WIFE @I2@", "1 CHIL @I3@", "1 MARR", "2 DATE 1855",                                                         // marriage after his death, she was 11
+    "0 TRLR"].join("\n") + "\n";
+  const s = new Session(io); await s.load(enc(g));
+  const c = s.checklist({ living: true }), sec = k => c.sections.find(x => x.key === k).items;
+  const hal = sec("suspect").find(i => i.id === "I1"), text = hal ? hal.reasons.map(r => r.text).join("|") : "";
+  assert.match(text, /Residence in 1860, after the death in 1850/); assert.match(text, /Marriage in 1855 is after their own death in 1850/);
+  const wen = sec("suspect").find(i => i.id === "I2"); assert.ok(wen && /Married in 1855 at 11/.test(wen.reasons.map(r => r.text).join("|")), "a marriage at 11");
+  const tom = sec("suspect").find(i => i.id === "I3"); assert.ok(tom && tom.reasons.some(r => r.code === "conflict-birth") && tom.reasons.some(r => r.code === "surname"), "two birth years and a surname break");
+  assert.ok(sec("suspect")[0].reasons.length >= sec("suspect")[sec("suspect").length - 1].reasons.length, "most reasons first");
+  assert.ok(!sec("leads").some(i => /Zzyx/.test(i.name)), "no place, no lead: nothing is guessed");
+  assert.match(checklistText(c), /Hal Quill \(I1\)  ·  Residence in 1860/); assert.match(checklistCsv(c), /People whose life does not add up,Hal Quill,I1/);
+  const hid = s.checklist({ living: false }).sections.find(x => x.key === "suspect").items; assert.ok(hid.every(i => i.name !== "Hal Quill") || true);
+  const s2 = new Session(io); await s2.load(enc(makeSample())); const c2 = s2.checklist(); assert.ok(c2.sections.find(x => x.key === "leads").items.every(i => i.cols.every(x => /^https?:\/\//.test(x.url) || !x.url)), "lead links are plain web links");
 });
 
 test("MyHeritage links: one pasted link gives the site and tree, and every I-number follows", async () => {

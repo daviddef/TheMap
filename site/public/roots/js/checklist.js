@@ -4,6 +4,8 @@
      check      a probable match: shown with the suggestion, marked as a suggestion
      decide     places we could not pin down: the candidates found, for you to choose from
      years      people with no birth year, and people whose year is only estimated from relatives
+     suspect    whole-life checks (events past a death, marriage ages, places out of period, journeys, surname breaks)
+     leads      people with no parents, born where the Atlas lists record collections
      dates      dates that do not add up (born after death, a parent too young or too old, a child born after a parent died)
      dupes      people who may be one person entered twice
      apart      groups of people not joined to the main tree
@@ -164,6 +166,9 @@ export function checklistText(c, date = '') {
       else if (s.key === 'years') L.push('[ ] ' + i.name + ' (' + i.id + ')  ·  ' + i.note + (i.place ? '  ·  born at ' + i.place : ''));
       else if (s.key === 'names') L.push('[ ] ' + (i.name || '(no name)') + ' (' + i.id + ')  ·  ' + i.note + (i.kin ? '  ·  ' + i.kin : '') + (i.born ? '  ·  born ' + i.born : '') + (i.place ? ' at ' + i.place : ''));
       else if (s.key === 'dates') L.push('[ ] ' + i.name + ' (' + i.id + ')  ·  ' + i.note + (i.with ? '  ·  with ' + i.with : ''));
+      else if (s.key === 'suspect') L.push('[ ] ' + i.name + ' (' + i.id + ')  ·  ' + i.reasons.map(r => r.text).join('; '));
+      else if (s.key === 'ages') L.push('[ ] ' + i.country + ' written for ' + i.from + '–' + i.to + ', when it was ' + i.label + '  ·  ' + i.count + ' events: ' + i.people.map(x => x.name + ' (' + x.id + ')').join('; ') + (i.n > i.people.length ? '; and ' + (i.n - i.people.length) + ' more' : ''));
+      else if (s.key === 'leads') L.push('[ ] ' + i.name + ' (' + i.id + ', born ' + i.born + ' at ' + i.place + ')  ·  ' + i.cols.map(x => x.title + (x.url ? ' ' + x.url : '')).join(' | '));
       else if (s.key === 'dupes') L.push('[ ] ' + i.an + ' (' + i.a + ') and ' + i.bn + ' (' + i.b + ')  ·  ' + i.note);
       else if (s.key === 'apart') L.push('[ ] ' + i.size + (i.size === 1 ? ' person: ' : ' people: ') + i.people.map(p => p.name + ' (' + p.id + (p.by ? ', b. ' + p.by : '') + ')').join('; ') + (i.size > i.people.length ? '; and ' + (i.size - i.people.length) + ' more' : ''));
     }
@@ -182,6 +187,9 @@ export function checklistCsv(c) {
     else if (s.key === 'years') row(s.title, i.name, i.id, '', '', '', i.note);
     else if (s.key === 'names') row(s.title, i.name || '(no name)', i.id, '', '', '', i.note + (i.kin ? ' · ' + i.kin : '') + (i.born ? ' · born ' + i.born : ''));
     else if (s.key === 'dates') row(s.title, i.name, i.id, '', '', '', i.note + (i.with ? ' (with ' + i.with + ')' : ''));
+    else if (s.key === 'suspect') row(s.title, i.name, i.id, '', '', '', i.reasons.map(r => r.text).join('; '));
+    else if (s.key === 'ages') for (const x of i.people) row(s.title, x.name, x.id, '', i.from + '–' + i.to, '', i.country + ' written; then ' + i.label);
+    else if (s.key === 'leads') row(s.title, i.name, i.id, 'Birth', i.born, i.place, i.cols.map(x => x.title + (x.url ? ' ' + x.url : '')).join(' | '));
     else if (s.key === 'dupes') row(s.title, i.an + ' / ' + i.bn, i.a + ' / ' + i.b, '', '', '', i.note);
     else if (s.key === 'apart') for (const p of i.people) row(s.title, p.name, p.id, '', '', '', 'group of ' + i.size);
   }

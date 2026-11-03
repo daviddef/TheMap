@@ -110,7 +110,7 @@ function build(id){
   const I={};R.forEach(r=>I[r.id]=r);
   R.forEach(r=>{const p=r.p;if(p.father&&inSet.has(p.father)&&linkOK(p,p.father))r.f=p.father;else if(p.father&&P[p.father]&&P[p.father].hid!==1&&inSet.has(p.father))skipped++;
     if(p.mother&&inSet.has(p.mother)&&linkOK(p,p.mother))r.m=p.mother;else if(p.mother&&P[p.mother]&&P[p.mother].hid!==1&&inSet.has(p.mother))skipped++});
-  R.forEach(r=>{r.s=r.b;r.e=r.d>r.b?r.d+.5:r.b+.4});
+  R.forEach(r=>{r.s=r.b;r.e=r.d>r.b?r.d+.5:r.b+.4;if(r.p.dy==null&&r.b>NOWY-110)r.e=NOWY+3});   /* someone with no recorded death who could still be alive stays alive to the end, rather than 'dying' on an estimated date */
   const gen=r=>{if(r.g)return r.g;const ps=[r.f,r.m].filter(x=>I[x]&&!I[x].mi);r.g=ps.length?1+Math.max(...ps.map(x=>gen(I[x]))):1;return r.g};
   R.filter(r=>!r.mi).forEach(gen);
   // a person with no recorded parents sits one row above their earliest child (not in row I), so Hedviga, mother of the focus, is not placed with a 1750 ancestor
@@ -182,7 +182,7 @@ function houseModel(m){
   par.forEach((p,i)=>Mb.push({r:p,a:X.s,b:p.e,side:'L',i}));
   /* LOCAL CHANGE: brothers and sisters (full and half) stand beside the focus person, to the left of the parents */
   const sibs=[...new Set([X.f,X.m].filter(Boolean).flatMap(id=>P[id]?kidsOf(P[id]).map(k=>k.id):[]))].filter(id=>id!==X.id&&P[id]&&P[id].hid!==1&&P[id].by!=null).map(id=>P[id]).sort((a,b)=>a.by-b.by).slice(0,8)
-    .map(q=>{const d=ED(q),w=(q.given||'').split(' ')[0]||'?',r={id:q.id,p:q,n:((q.given||'')+' '+(q.sur||'')).trim()||q.id,sur:q.sur,b:q.by,d,s:q.by,e:d>q.by?d+.5:q.by+.4,fi:q.fi,dye:q.dy==null||q.dye,l:w,ph:[...q.id].reduce((h,ch)=>(h*31+ch.charCodeAt(0))%628,7)/100};return r});
+    .map(q=>{const d=ED(q),w=(q.given||'').split(' ')[0]||'?',r={id:q.id,p:q,n:((q.given||'')+' '+(q.sur||'')).trim()||q.id,sur:q.sur,b:q.by,d,s:q.by,e:q.dy==null&&q.by>NOWY-110?NOWY+3:d>q.by?d+.5:q.by+.4,fi:q.fi,dye:q.dy==null||q.dye,l:w,ph:[...q.id].reduce((h,ch)=>(h*31+ch.charCodeAt(0))%628,7)/100};return r});
   sibs.forEach((r,j)=>Mb.push({r,a:r.s,b:r.e,side:'B',slot:j}));
   const wf=[];sp.forEach(p=>{const ks=kids.filter(k=>k.f===p.id||k.m===p.id),j=Math.min(...ks.map(k=>k.s))-1;Mb.push({r:p,a:j,b:p.e,side:'W',join:j})});
   Mb.filter(x=>x.side==='W').sort((a,b)=>a.a-b.a).forEach(x=>{let k=wf.findIndex(f=>f<x.a-.5);if(k<0)k=wf.length;wf[k]=x.b;x.slot=k});
@@ -414,7 +414,7 @@ function drawRoutes(s,t){
 const DRAW={sky:drawSky,ink:drawInk,house:drawHouse,gen:drawGen,routes:drawRoutes};
 const V={};
 VW.forEach(k=>{V[k]={k,cv:document.getElementById('cv-'+k),ctx:document.getElementById('cv-'+k).getContext('2d'),rg:document.getElementById('rg-'+k),yl:document.getElementById('yr-'+k),btn:document.querySelector('[data-pl="'+k+'"]'),t:0,min:0,max:1,W:0,H:0}});
-const hOf={sky:w=>Math.round(clamp(Math.max(w*1.15,innerHeight*.88),640,1100)),ink:()=>INKL.top+(M.t1+1-M.t0)*M.ppy+20,house:w=>Math.round(clamp(w*.95,500,660)),gen:w=>Math.round(TR.top+TR.bot+M.G*(w<560?78:TR.row)),routes:w=>Math.round(clamp(w*.6,300,560))};
+const hOf={sky:w=>Math.round(clamp(Math.min(w*.8,innerHeight*.74),520,820)),ink:()=>INKL.top+(M.t1+1-M.t0)*M.ppy+20,house:w=>Math.round(clamp(w*.95,500,660)),gen:w=>Math.round(TR.top+TR.bot+M.G*(w<560?78:TR.row)),routes:w=>Math.round(clamp(w*.6,300,560))};
 let playing=null,raf=0,last=0;
 /* LOCAL CHANGE: the person in focus pulses. A pulse repaints the open view about 25 times a second while it is not playing, and stops when the view is hidden or the visitor prefers reduced motion. */
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;let curK=null,idleRaf=0,lastIdle=0;
@@ -424,10 +424,10 @@ function rangeOf(k){const h=M.house;return k==='house'?[h.t0,h.t1,h.rest]:k==='i
 function paint(k){const s=V[k];T=tokens();hits=[];const c=s.cv.getContext('2d');c.setTransform(s.dpr,0,0,s.dpr,0,0);c.clearRect(0,0,s.W,s.H);DRAW[k](s,s.t);s.btn.textContent=playing===k?'Pause':(s.t>=s.max-.01?'Replay':'Play');s.rg.value=s.t;s.yl.textContent=Math.floor(s.t);s.cv.classList.toggle('hit',hits.length>0)}
 function size(k){const s=V[k],w=s.cv.parentElement.clientWidth||600;s.W=w;s.H=hOf[k](w);const d=Math.min(devicePixelRatio||1,2);s.dpr=d;s.cv.width=Math.round(w*d);s.cv.height=Math.round(s.H*d);s.cv.style.height=s.H+'px';s.base=null}
 function stop(){if(playing){playing=null;cancelAnimationFrame(raf)}VW.forEach(k=>{if(V[k].btn)V[k].btn.textContent=V[k].t>=V[k].max-.01?'Replay':'Play'});startIdle()}
-function tick(now){if(!playing)return;const s=V[playing],dt=Math.min(.05,(now-(last||now))/1000);last=now;s.t=Math.min(s.max,s.t+dt*st.pspeed*(playing==='house'?.5:1));if(s.t>=s.max){paint(playing);stop();return}paint(playing);if(playing==='ink')followInk();raf=requestAnimationFrame(tick)}
+function tick(now){if(!playing)return;const s=V[playing],dt=Math.min(.05,(now-(last||now))/1000);last=now;s.t=Math.min(s.max,s.t+dt*clamp((s.max-s.min)/25,.5,40)*(st.pspeed/8));if(s.t>=s.max){paint(playing);stop();return}paint(playing);if(playing==='ink')followInk();raf=requestAnimationFrame(tick)}
 VW.forEach(k=>{const s=V[k];
-  s.btn.onclick=()=>{if(playing===k){stop();return}stop();if(s.t>=s.max-.01)s.t=s.min;playing=k;curK=k;last=0;raf=requestAnimationFrame(tick);paint(k)};
-  s.rg.oninput=()=>{stop();s.t=+s.rg.value;paint(k)};
+  s.btn.onclick=()=>{if(playing===k){stop();return}stop();if(s.t>=s.max-.01||!s.played)s.t=s.min;s.played=true;playing=k;curK=k;last=0;raf=requestAnimationFrame(tick);paint(k)};
+  s.rg.oninput=()=>{stop();s.played=true;s.t=+s.rg.value;paint(k)};
   s.cv.addEventListener('click',e=>{const r=s.cv.getBoundingClientRect(),x=(e.clientX-r.left)*(s.W/r.width),y=(e.clientY-r.top)*(s.H/r.height);let b=null,bd=1e9;for(const h of hits){const d=Math.hypot(h.x-x,h.y-y);if(d<=Math.max(h.r,14)&&d<bd){bd=d;b=h}}if(b&&b.id!==st.focus)go(b.id)});
   s.cv.addEventListener('mousemove',e=>{const r=s.cv.getBoundingClientRect(),x=(e.clientX-r.left)*(s.W/r.width),y=(e.clientY-r.top)*(s.H/r.height);let b=null,bd=1e9;for(const h of hits){const d=Math.hypot(h.x-x,h.y-y);if(d<=Math.max(h.r,14)&&d<bd){bd=d;b=h}}s.cv.style.cursor=b?'pointer':'default';s.cv.title=b?nm(P[b.id])+' '+yrs(P[b.id]):''})});
 function chrome(){
@@ -437,7 +437,7 @@ function chrome(){
   const rows=M.legs.slice().sort((a,b)=>(a.yb==null?9999:a.yb)-(b.yb==null?9999:b.yb)).map(L=>{if(L.route)return'<tr><td><button class="plink" data-id="'+L.r.id+'"><i style="background:'+colorOf(L.r.p)+'"></i><span>'+esc(nm(L.r.p))+'</span><small>'+esc(yrs(L.r.p))+'</small></button></td><td>'+placeA(L.a)+' → '+placeA(L.b)+' <small>(a stop in the roster\'s route)</small></td><td>'+(L.und?'<span class="wide">date not recorded</span>':'arrived '+(L.est?'about ':'')+L.yb)+'</td></tr>';const w=L.yb-L.ya;return'<tr><td><button class="plink" data-id="'+L.r.id+'"><i style="background:'+colorOf(L.r.p)+'"></i><span>'+esc(nm(L.r.p))+'</span><small>'+esc(yrs(L.r.p))+'</small></button></td><td>'+placeA(L.a)+' <small>('+L.sa+', '+L.ya+')</small> → '+placeA(L.b)+' <small>('+L.sb+', '+L.yb+')</small></td><td>'+(w>10?'<span class="wide">'+w+' years apart · stops in between not recorded</span>':w+' years')+'</td></tr>'}).join('');
   document.getElementById('pl-moves').innerHTML='<thead><tr><th>Person</th><th>Move, and the record on each side</th><th>Window</th></tr></thead><tbody>'+(rows||'<tr><td colspan="3">No move on record in this family.</td></tr>')+'</tbody>'
 }
-function ensure(){if(M&&M.id===st.focus)return;stop();M=build(st.focus);world(M);capKey='';chrome();VW.forEach(k=>{const r=rangeOf(k),s=V[k];s.min=r[0];s.max=r[1];s.t=r[2];s.rg.min=r[0];s.rg.max=r[1];s.rg.step=.05;s.base=null})}
+function ensure(){if(M&&M.id===st.focus)return;stop();M=build(st.focus);world(M);capKey='';chrome();VW.forEach(k=>{const r=rangeOf(k),s=V[k];s.min=r[0];s.max=r[1];s.t=r[2];s.rg.min=r[0];s.rg.max=r[1];s.rg.step=.05;s.base=null;s.played=false})}
 const show=k=>()=>{if(playing&&playing!==k)stop();T=tokens();ensure();size(k);paint(k);curK=k;startIdle()};
 {const fb=document.getElementById('gen-flip'),note=document.querySelector('#v-gen .vnote');
  if(fb)fb.onclick=()=>{genFlip=!genFlip;fb.setAttribute('aria-pressed',String(genFlip));fb.textContent=genFlip?'Oldest at top':'Newest at top';if(note)note.textContent=genFlip?'The same people as generations: one row each, the newest at the top and the focus person ringed, going back through the generations as you read down. The tree grows as you play it.':'The same people as generations: one row each, oldest at the top, the focus person ringed. The tree grows as you play it. The strip below counts the depth.';if(V.gen&&V.gen.cv)paint('gen')}}

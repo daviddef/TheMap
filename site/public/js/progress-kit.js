@@ -96,11 +96,11 @@
         if (Object.keys(mine).length) { m.by[FIRST_LINE] = mine; any = true; }
       });
       if (any && !mem.lines[FIRST_LINE]) {
-        mem.lines[FIRST_LINE] = { name: "My research so far", where: "",
+        mem.lines[FIRST_LINE] = { name: "Research Names", where: "",
                                   made: today() };
       }
       if (!Object.keys(mem.lines).length) {
-        mem.lines[FIRST_LINE] = { name: "My research so far", where: "",
+        mem.lines[FIRST_LINE] = { name: "Research Names", where: "",
                                   made: today() };
       }
       if (!mem.active || !mem.lines[mem.active]) {

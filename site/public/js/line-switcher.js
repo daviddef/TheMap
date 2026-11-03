@@ -38,7 +38,7 @@
     function draw() {
       var lines = P.lines();
       sel.innerHTML = lines.map(function (l) {
-        var label = l.name + (l.where ? " of " + l.where : "");
+        var label = (l.name === "My research so far" ? "Research Names" : l.name) + (l.where ? " of " + l.where : "");
         return '<option value="' + l.slug + '"' +
                (l.active ? " selected" : "") + ">" +
                label.replace(/[&<>]/g, "") + "</option>";

@@ -1,0 +1,79 @@
+---
+/* WHICH SPELLINGS ARE ONE NAME, for every family the archives work on.
+ *
+ * Read from data/surname-families.json, the one catalogue, written with
+ * scripts/surname_variants.py. Nothing here is typed: a form that appears on
+ * a surname page appears here, from the same file, so the two cannot differ.
+ * Alphabetical, because a list ordered by size reads as unsorted.
+ */
+import Base from "../layouts/Base.astro";
+import { u } from "../lib/url.js";
+import { corpus } from "../lib/surname-corpus.js";
+import { surnamePageRows, slugForSurname } from "../lib/surname-pages.js";
+import { allFamilies, legend, membersByStatus, STATUS_ORDER, STATUS_LABEL } from "../lib/surname-families.js";
+
+const pageFor = surnamePageRows(corpus().surnames || []).slugs;
+const fams = allFamilies();
+const leg = legend();
+const forms = fams.reduce((a, f) => a + f.members.length, 0);
+const link = (name) => pageFor.has(slugForSurname(name)) ? u(`/surname/${slugForSurname(name)}/`) : null;
+---
+<Base
+  title="Spellings of a name"
+  eyebrow={`${fams.length} families · ${forms} forms`}
+  dek="One list of which spellings are the same name, and what each rests on. The family archives do not keep their own: this is the one every search starts from."
+  description="Which surname spellings the atlas treats as one name, with the evidence for each form and the look-alikes that are not.">
+
+  <section>
+    <p class="cap" style="margin-top:0">A spelling is only as good as what it rests on, so each form carries one of five
+    claims, and says which. Case, spacing, hyphens and apostrophes are never counted as spellings: <i>De Franceschi</i>
+    and <i>Defranceschi</i> are one form. An accent is, because a priest's Lereña is not a clerk's Lerena.</p>
+    <ul class="famkey">
+      {STATUS_ORDER.map((s) => <li><b>{STATUS_LABEL[s]}.</b> {leg[s]}</li>)}
+    </ul>
+  </section>
+
+  <section style="margin-top:26px">
+    {fams.map((f) => {
+      const g = membersByStatus(f);
+      const head = link(f.name);
+      return (
+        <article class="famcard">
+          <h2>{head ? <a href={head}>{f.name}</a> : f.name}</h2>
+          <p class="cap" style="margin-top:2px">{f.note}</p>
+          {STATUS_ORDER.map((s) => g[s].length > 0 && (
+            <p class="famrow"><span class="famst">{STATUS_LABEL[s]}</span>
+              {g[s].map((m) => {
+                const l = link(m.form);
+                return l ? <a href={l}>{m.form}</a> : <span>{m.form}</span>;
+              })}
+            </p>
+          ))}
+          {(f.notSame || []).length > 0 && (
+            <p class="famrow famno"><span class="famst">Not the same name</span>
+              {f.notSame.map((m) => <span>{m.form}</span>)}
+            </p>
+          )}
+        </article>
+      );
+    })}
+    <p class="cap">Families are added from the archives' own records and from the atlas's sources, never from a guess.
+    The computed spelling links on each surname page cover far more names and carry far less weight; a form that
+    appears in both is shown here, with its evidence, and not twice.</p>
+  </section>
+</Base>
+
+<style>
+  .famkey { list-style: none; padding: 0; margin: 14px 0 0; font-family: var(--sans); font-size: 13px; line-height: 1.55; }
+  .famkey li { padding: 3px 0; max-width: 92ch; }
+  .famcard { padding: 16px 0 14px; border-top: 1px solid var(--rule, #D8D3C8); }
+  .famcard h2 { margin: 0; }
+  .famcard h2 a { text-decoration: none; }
+  .famrow { display: flex; flex-wrap: wrap; gap: 2px 14px; align-items: baseline; margin: 6px 0 0;
+            font-family: var(--serif); font-size: 17px; }
+  .famrow a { text-decoration: none; border-bottom: 1px solid var(--rule-strong, #BDB6A6); }
+  .famst { flex: 0 0 15em; font-family: var(--sans); font-size: 11.5px; letter-spacing: .03em; text-transform: uppercase;
+           color: var(--ink-3, #7C8A91); }
+  .famno { color: var(--ink-3, #7C8A91); }
+  @media (max-width: 640px) { .famst { flex-basis: 100%; } }
+</style>

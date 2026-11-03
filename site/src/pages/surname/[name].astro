@@ -20,6 +20,7 @@ import { corpus } from "../../lib/surname-corpus.js";
 import { surnameMap, placesMap } from "../../lib/surname-map.js";
 import { belgiumFor } from "../../lib/belgium-surnames.js";
 import { contextFor } from "../../lib/surname-context.js";
+import { familyFor, membersByStatus, searchList, typedForms, formKey, legend as famLegend, STATUS_ORDER, STATUS_LABEL } from "../../lib/surname-families.js";
 import { wiktionaryFor } from "../../lib/surname-wiktionary.js";
 import { flagFor } from "../../lib/flags.js";
 import { totalVolumes, volumesFor, KIND_LABEL } from "../../lib/surname-volumes.js";
@@ -70,6 +71,18 @@ const TIER = {
 };
 const by = {};
 for (const v of r.variants) (by[v.how] = by[v.how] || []).push(v.n);
+/* A form the catalogue already holds is shown there, with its evidence, and not
+   a second time below as a computed link. */
+{
+  const held = familyFor(r.n);
+  if (held) {
+    const keys = new Set([...held.fam.members, ...(held.fam.notSame || [])].map((m) => formKey(m.form)));
+    for (const how of Object.keys(by)) {
+      by[how] = by[how].filter((n) => !keys.has(formKey(n)));
+      if (!by[how].length) delete by[how];
+    }
+  }
+}
 /* THREE QUESTIONS, NOT ONE. «Attested» was answering «where is it borne»,
    «where does a record name it» and «where did it come from» all at once, and
    therefore none of them clearly. They take different evidence. */
@@ -94,6 +107,28 @@ const smap = surnameMap(ccs);
    a fact about the name. */
 const wd = contextFor(r.n);
 const wk = wiktionaryFor(r.n);
+
+/* THE ATLAS'S ONE CATALOGUE OF WHICH SPELLINGS ARE THE SAME NAME.
+   Written with scripts/surname_variants.py, by every family archive and every
+   session, and nowhere else: see lib/surname-families.js. Where this name
+   belongs to a family it is shown ABOVE the computed links below, because
+   evidence somebody read off a record outranks a rule of the language, which
+   outranks an algorithm's guess. */
+const fh = familyFor(r.n);
+const fam = fh && fh.role === "member" ? fh.fam : null;
+const famNot = fh && fh.role === "notSame" ? fh : null;
+const famGroups = fam ? membersByStatus(fam) : null;
+const famSearch = fam ? searchList(fam) : [];
+const famLeg = famLegend();
+const refText = (e) => {
+  const x = e.ref || "";
+  if (x.startsWith("archive:")) return `the ${x.slice(8).split(" (")[0]} family archive`;
+  if (x.startsWith("skill:")) return "a family archive's research notes";
+  return x;
+};
+const evLine = (e) => [
+  (e.where || []).map((c) => CN[c] || c).join(", "), e.place, e.period,
+].filter(Boolean).join(" · ");
 
 /* JOBS 1-3: one block per attested country, replacing three sections that
    used to say «where it is borne», «when it was being born» and «whose
@@ -212,6 +247,77 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
                         license: "https://creativecommons.org/publicdomain/zero/1.0/" },
   }}
   title={r.n} eyebrow={ccs.map((c) => CN[c.cc] || c.cc).join(" · ")} dek={dek}>
+
+  {famNot && (
+    <section style="margin-top:24px" class="fam famnotice">
+      <p class="cap" style="margin-top:0"><b>A different name.</b> The family archives record {r.n} as <i>not</i> the same
+      name as <a href={u(`/surname/${slugify(famNot.fam.name)}/`)}>{famNot.fam.name}</a>: {famNot.m.why}</p>
+    </section>
+  )}
+
+  {fam && (
+    <section style="margin-top:24px" class="fam" id="spellings">
+      <h2>The spellings of {fam.name}</h2>
+      <p class="cap">{fam.note} This is the one list the atlas keeps of which spellings are the same name, and what
+      each rests on. Case, spacing, hyphens and apostrophes are not counted as separate spellings, so
+      <i> De Franceschi</i> and <i>Defranceschi</i> are one form. An accent is: a priest's Lereña is not a clerk's Lerena.</p>
+      {famSearch.length > 1 && (
+        <p class="famsearch"><b>Searching for this name?</b> Try every one of: {famSearch.join(" · ")}</p>
+      )}
+      {STATUS_ORDER.map((st) => {
+        if (!famGroups[st].length) return null;
+        const list = (
+          <ul class="famlist">
+            {famGroups[st].map((m) => (
+              <li class={formKey(m.form) === formKey(r.n) ? "here" : ""}>
+                <b>{pageFor.has(slugify(m.form)) && formKey(m.form) !== formKey(r.n)
+                    ? <a href={u(`/surname/${slugify(m.form)}/`)}>{m.form}</a> : m.form}</b>
+                {st !== "lead" && typedForms(m.form).length > 0 && (
+                  <span class="typed"> also typed {typedForms(m.form).join(", ")}</span>
+                )}
+                {formKey(m.form) === formKey(r.n) && <span class="you"> this page</span>}
+                <details>
+                  <summary>what it rests on</summary>
+                  <ul class="fev">
+                    {m.evidence.map((e) => (
+                      <li>{e.what}
+                        {(evLine(e) || refText(e)) && (
+                          <span class="who"> {[evLine(e), refText(e)].filter(Boolean).join(" · ")}</span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              </li>
+            ))}
+          </ul>
+        );
+        return st === "lead" ? (
+          <details class="famlead">
+            <summary><b>{famGroups[st].length} {famGroups[st].length === 1 ? "lead" : "leads"}, never yet seen on a record</b>
+              <span class="cap" style="display:inline"> — worth searching, never worth writing down alone</span></summary>
+            <p class="cap" style="margin-top:6px">{famLeg[st]}</p>
+            {list}
+          </details>
+        ) : (
+          <div class="famgroup">
+            <h3>{STATUS_LABEL[st]}</h3>
+            <p class="cap" style="margin-top:2px">{famLeg[st]}</p>
+            {list}
+          </div>
+        );
+      })}
+      {(fam.notSame || []).length > 0 && (
+        <details class="famnot">
+          <summary><b>{fam.notSame.length} {fam.notSame.length === 1 ? "look-alike" : "look-alikes"} that {fam.notSame.length === 1 ? "is" : "are"} not this name</b>
+            <span class="cap" style="display:inline"> — they turn up in searches; do not count them</span></summary>
+          <ul class="fev">
+            {fam.notSame.map((m) => <li><b>{m.form}</b> — {m.why}</li>)}
+          </ul>
+        </details>
+      )}
+    </section>
+  )}
 
   {/* SPELLING WAS BUILT, LABELLED, AND NEVER RENDERED. The tier has existed
       in the data for a while and TIER above has carried its heading and its
@@ -662,6 +768,25 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
 </Base>
 
 <style>
+  /* The catalogue of spellings. Ordered by what the evidence is worth, and
+     quiet: a list of forms with a disclosure under each, not a table. */
+  .fam h3 { font-family: var(--sans); font-size: 13px; font-weight: 600; letter-spacing: .02em;
+            margin: 18px 0 0; color: var(--ink-2, inherit); }
+  .famsearch { font-family: var(--sans); font-size: 13.5px; line-height: 1.6; margin: 12px 0 0;
+               padding: 10px 14px; background: var(--panel, #EDEAE3); border-radius: 2px; }
+  .famlist, .fev { list-style: none; padding: 0; margin: 6px 0 0; }
+  .famlist > li { padding: 7px 0; border-bottom: 1px solid var(--rule, #D8D3C8); }
+  .famlist > li > b { font-family: var(--serif); font-size: 18px; font-weight: 500; }
+  .famlist a { text-decoration: none; border-bottom: 1px solid var(--rule-strong, #BDB6A6); }
+  .famlist .typed { font-family: var(--sans); font-size: 12px; color: var(--ink-3, #7C8A91); margin-left: 8px; }
+  .famlist .you { font-family: var(--sans); font-size: 11px; letter-spacing: .04em; text-transform: uppercase;
+                  color: var(--accent, #2F6F4E); margin-left: 8px; }
+  .famlist details, .famnot, .famlead { font-family: var(--sans); font-size: 12.5px; }
+  .famlist summary, .famnot summary, .famlead summary { cursor: pointer; color: var(--ink-3, #7C8A91); padding: 2px 0; }
+  .fev { margin: 4px 0 6px 2px; }
+  .fev li { padding: 3px 0; line-height: 1.55; max-width: 92ch; }
+  .fev .who { color: var(--ink-3, #7C8A91); }
+  .famnot, .famlead { margin-top: 18px; }
   /* The surname map. Land is a wash, not a subject: it is there so a dot
      has somewhere to sit. The dot colours match the main map's grammar —
      filled means somebody counted, hollow and dashed means nobody has.

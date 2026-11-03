@@ -71,7 +71,7 @@ export function urlsFor(set) {
     for (let i = 2; i <= pages; i++) placeIndex.push([`places/${i}/`, "0.4"]);
     return [["", "1.0"], ["start/", "0.9"], ["about/", "0.6"], ["providers/", "0.9"],
             ["jurisdictions/", "0.9"], ...placeIndex, ["countries/", "0.9"],
-            ["surnames/", "0.9"], ["coverage/", "0.8"], ["changelog/", "0.4"],
+            ["surnames/", "0.9"], ["surname-families/", "0.7"], ["coverage/", "0.8"], ["changelog/", "0.4"],
             ["add/", "0.5"], ["data/", "0.7"], ["worklist/", "0.4"],
             /* The lookup that answers for the 922,645 names with no page of
                their own. One URL, not 922,645 doorways. */

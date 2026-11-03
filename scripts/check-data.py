@@ -981,6 +981,25 @@ def history_audit():
           f"{sum(len(v) for v in miss.values())} missing")
 
 
+def surname_families_gate():
+    """data/surname-families.json is the one catalogue of which spellings are one name.
+
+    Every form carries evidence of the kind its status needs, a form belongs to one family,
+    typography is never listed as a spelling, and a headline is one of its own members. The
+    rules live in scripts/surname_variants.py, so the tool a session writes with and the gate
+    that stops the build cannot disagree.
+    """
+    try:
+        import surname_variants as sv
+        cat = sv.load()
+        countries = set(json.load(open("data/countries.json", encoding="utf-8"))["countries"])
+    except Exception as e:
+        err(f"cannot check surname-families.json: {e}")
+        return
+    for m in sv.validate(cat, countries):
+        err(m)
+
+
 def main():
     mortality_gate()
     history_audit()
@@ -990,6 +1009,7 @@ def main():
     flag_art_audit()
     flag_seams()
     context_contract()
+    surname_families_gate()
     history_json()
     history_ground()
     voyages_gate()

@@ -1,0 +1,95 @@
+/* THE FRIENDLY KIT — one set of parts for every page that explains something.
+
+   David, on seeing /whats-new/ beside The sources, Whose archive and Survey a source:
+   «this is much better!! but it really highlights that we can do better across the atlas
+   pages to make this more fun and simpler to read.» What /whats-new/ did right, written
+   once so a page imports it instead of inventing its own:
+
+     k-hi      a warm card for the one thing the reader should know first
+     k-tag     a small pill; k-tag.is-new is the accent one
+     k-stats   a row of pills under the title that says how big the thing is
+     k-tiles   a grid of small cards (a legend, a set of choices)
+     k-steps   numbered steps, each a card with its number in a circle
+     k-h       a section heading with a count beside it
+     k-more    a long paragraph folded to two lines, opened by the reader
+     k-foot    the closing card: a person, a way to reach them
+
+   Everything is drawn from the site's tokens, so dark mode and the high-contrast print
+   rules come with it. A page never writes a colour of its own here. */
+
+.k-stats { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 0 0 26px;
+           font-family: var(--sans); font-size: 14px; color: var(--ink-2); }
+.k-stats b { color: var(--ink); }
+
+.k-tag { display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono);
+         font-size: 11px; letter-spacing: .06em; text-transform: uppercase; line-height: 1;
+         padding: 4px 9px; border-radius: 999px; border: 1px solid var(--rule-strong);
+         color: var(--ink-2); background: var(--panel); white-space: nowrap; }
+.k-tag.is-new { color: var(--accent); border-color: var(--accent); background: var(--accent-wash); }
+
+.k-hi { background: var(--accent-wash); border: 1px solid var(--rule); border-radius: 12px;
+        padding: 18px 22px; margin: 0 0 22px; max-width: 78ch; }
+.k-hi p { margin: 0; font-family: var(--serif); font-size: 18px; line-height: 1.5; color: var(--ink); }
+.k-hi p + p { margin-top: 10px; font-family: var(--sans); font-size: 14px; line-height: 1.62; color: var(--ink-2); }
+.k-hi.is-plain { background: var(--panel); }
+
+.k-h { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; margin: 0 0 12px;
+       font-family: var(--serif); font-weight: 500; font-size: clamp(22px, 3vw, 28px); line-height: 1.2; }
+.k-h .k-count { font-family: var(--mono); font-size: 12px; font-weight: 400; color: var(--ink-3);
+                letter-spacing: .04em; }
+.k-lede { margin: -4px 0 14px; font-family: var(--sans); font-size: 14px; line-height: 1.6;
+          color: var(--ink-2); max-width: 70ch; }
+
+.k-tiles { list-style: none; margin: 0 0 24px; padding: 0; display: grid; gap: 10px;
+           grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+.k-tiles > li { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px;
+                padding: 12px 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+                font-family: var(--sans); font-size: 13px; line-height: 1.5; color: var(--ink-2); }
+a.k-tile, .k-tiles > li.is-link { transition: border-color .15s, transform .15s; }
+.k-tiles > li:has(a:hover) { border-color: var(--accent); transform: translateY(-1px); }
+.k-tiles a { color: var(--ink); text-decoration: none; font-weight: 500; }
+.k-tiles a:hover { color: var(--accent); }
+
+.k-steps { list-style: none; margin: 0 0 26px; padding: 0; display: grid; gap: 10px; counter-reset: k; max-width: 78ch; }
+.k-steps > li { counter-increment: k; position: relative; background: var(--panel); border: 1px solid var(--rule);
+                border-radius: 10px; padding: 14px 16px 14px 62px; font-family: var(--sans); font-size: 14px;
+                line-height: 1.6; color: var(--ink-2); }
+.k-steps > li::before { content: counter(k); position: absolute; left: 16px; top: 12px; width: 32px; height: 32px;
+                        border-radius: 50%; display: grid; place-items: center; background: var(--accent-wash);
+                        color: var(--accent); border: 1px solid var(--accent);
+                        font-family: var(--serif); font-weight: 700; font-size: 16px; }
+.k-steps b { color: var(--ink); }
+.k-steps ul { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 8px; }
+.k-steps ul li { font-size: 12.5px; }
+
+.k-more { margin: 0; }
+.k-more > summary { cursor: pointer; list-style: none; }
+.k-more > summary::-webkit-details-marker { display: none; }
+.k-more .k-clip { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.k-more .k-mt { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: .04em; }
+.k-more .k-mt::after { content: " ▾"; }
+.k-more[open] .k-clip, .k-more[open] .k-mt { display: none; }
+.k-more > div { max-width: 62ch; }
+
+.k-foot { margin-top: 28px; padding: 18px 22px; border-radius: 12px; background: var(--accent-wash);
+          border: 1px solid var(--rule); max-width: 78ch; }
+.k-foot p { margin: 0; font-family: var(--serif); font-size: 18px; line-height: 1.5; color: var(--ink); }
+.k-foot p + p { margin-top: 6px; font-family: var(--sans); font-size: 13px; color: var(--ink-2); }
+
+/* A card per row for a long table that a reader scans rather than reads. */
+.k-table { border-collapse: separate; border-spacing: 0 8px; margin-top: -8px; }
+.k-table th { border-bottom: 0; padding-bottom: 0; }
+.k-table td { background: var(--panel); border: 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+              padding: 12px 14px; }
+.k-table td:first-child { border-left: 1px solid var(--rule); border-radius: 10px 0 0 10px; }
+.k-table td:last-child { border-right: 1px solid var(--rule); border-radius: 0 10px 10px 0; }
+.k-table tr:hover td { border-color: var(--rule-strong); }
+
+@media (max-width: 640px) {
+  .k-hi, .k-foot { padding: 16px; }
+  .k-steps > li { padding: 14px 14px 14px 56px; }
+  .k-steps > li::before { left: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .k-tiles > li:has(a:hover) { transform: none; }
+}

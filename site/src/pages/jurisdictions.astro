@@ -5,6 +5,7 @@ import fs from "node:fs";
 import regions from "../../public/regions.json";
 import { atlas as idx } from "../lib/atlas.js";
 import provs from "../../public/providers.json";
+import "../styles/kit.css";
 
 const PROV = Object.fromEntries(provs.providers.map(p => [p.id, p]));
 const eras = regions.regions.reduce((a, r) => a + r.eras.length, 0);
@@ -83,33 +84,40 @@ const mid = (r) => [
 ---
 <Base
   title="Whose archive"
-  eyebrow={`${regions.regions.length} record regions · ${eras} eras`}
-  dek="A record region is a piece of ground whose records were filed the same way, and an era is a stretch of years over which that stayed true. This is the table the map reads when you set a year — and the reason it can tell you that a Croatian village's 1930 baptism is filed under Italy.">
+  eyebrow="Who held the ground decides where the paper went"
+  dek="A record region is a piece of ground whose records were filed the same way, and an era is a stretch of years over which that stayed true. This is the table the map reads when you set a year.">
 
-  <div class="one" style="margin-top:20px;border-left-color:var(--accent)">
-    <div class="prose">
-      <p><b>Knowing who ruled a place is trivia. Knowing whose archive that means is research.</b>
-      Every history of Istria will tell you it was Italian between the wars. What almost none of
-      them tell you is the consequence: that the parish registers of those years were filmed by
-      FamilySearch into a collection called <em>Italy, Pola and Trieste</em>, so a search of the
-      Croatian collection returns nothing at all — and nothing looks exactly like a record that
-      does not exist.</p>
-      <p>That is the column this table adds. <a href={u("/")}>Set a year on the map</a> and it
-      appears in every panel.</p>
-      <p><b>And now the other half of the same question.</b> This table knows whose archive;
-      <a href={u("/flags/")}>the flag pages</a>, merged into this atlas today, know who was
-      governing and what they flew, for 210 countries. Each region below links to the flag
-      history of the countries it covers. Treat that link as context rather than as an
-      equivalence: a flag page is keyed on a modern country, and a record region usually is
-      not one — Istria has been under seven regimes and is not the same shape as Croatia.</p>
-    </div>
+  <p class="k-stats" aria-label="Summary">
+    <span><b>{regions.regions.length}</b> record regions</span>
+    <span class="k-tag is-new">{eras} eras</span>
+    <span class="k-tag">{covered.size} of {Object.keys(CN).length} countries covered</span>
+  </p>
+
+  <div class="k-hi">
+    <p><b>Knowing who ruled a place is trivia. Knowing whose archive that means is research.</b></p>
+    <p>Every history of Istria will tell you it was Italian between the wars. What almost none of them tell
+    you is the consequence: the parish registers of those years were filmed by FamilySearch into a
+    collection called <em>Italy, Pola and Trieste</em>, so a search of the Croatian collection returns
+    nothing at all, and nothing looks exactly like a record that does not exist.
+    <a href={u("/")}>Set a year on the map</a> and the answer appears in every panel.</p>
   </div>
+  <p class="k-lede">
+    <b>The other half of the same question.</b> This table knows whose archive; <a href={u("/flags/")}>the
+    flag pages</a> know who was governing and what they flew, for 210 countries. Each region links to the
+    flag history of the countries it covers. Treat that link as context, not an equivalence: a flag page is
+    keyed on a modern country, and a record region usually is not one. Istria has been under seven regimes
+    and is not the same shape as Croatia.
+  </p>
 
-  <p class="cap" style="margin-top:20px">{regions.precision}</p>
+  <nav class="jump" aria-label="Regions">
+    {regions.regions.map((r) => <a class="k-tag" href={`#r-${r.id}`}>{r.label}</a>)}
+  </nav>
+
+  <p class="cap" style="margin-top:18px">{regions.precision}</p>
 
   {regions.regions.map(r => (
-    <section style="margin-top:38px">
-      <h2><a href={u(`/region/${r.id}/`)}>{r.label}</a></h2>
+    <section style="margin-top:38px" id={`r-${r.id}`}>
+      <h2 class="k-h"><a href={u(`/region/${r.id}/`)}>{r.label}</a> <span class="k-count">{r.eras.length} eras</span></h2>
       {flagsFor(r).length > 0 && (
         <p class="cap" style="margin:2px 0 8px">Flags flown over this ground:
           {flagsFor(r).map((f, i) => (
@@ -118,9 +126,9 @@ const mid = (r) => [
         </p>
       )}
       <p class="cap" style="margin-top:2px">{r.sub}</p>
-      <table style="margin-top:12px">
+      <table class="k-table" style="margin-top:12px">
         <thead><tr>
-          <th class="m">Years</th><th>Who held it</th><th>Whose archive that means</th>
+          <th class="m c-yrs">Years</th><th class="c-who">Who held it</th><th class="c-arch">Whose archive that means</th>
         </tr></thead>
         <tbody>
           {r.eras.map(e => (
@@ -150,33 +158,29 @@ const mid = (r) => [
     </section>
   ))}
 
-  <div class="one" style="margin-top:38px;border-left-color:var(--rule-strong)">
-    <div class="lab">Six regions is not the world</div>
-    <div class="prose">
-      <p>These are the regions whose filing this project has actually worked out, which is the
-      ground the Croatian shelf sits on. <b>A place outside them says so in its own panel</b>
-      rather than guessing, because a confident wrong answer about which archive to write to
-      costs somebody a month.</p>
-      <p><a href={u("/add/")}>Know a region's filing history? That is the most valuable thing
-      you could contribute →</a></p>
-    </div>
-  </div>
+  <aside class="k-foot">
+    <p>{regions.regions.length} regions is not the world.</p>
+    <p>These are the regions whose filing this project has actually worked out. <b>A place outside them says
+    so in its own panel</b> rather than guessing, because a confident wrong answer about which archive to
+    write to costs somebody a month. <a href={u("/add/")}>Know a region's filing history? That is the most
+    valuable thing you could contribute →</a></p>
+  </aside>
 
   <section style="margin-top:44px">
-    <h2>Where this layer is missing</h2>
+    <h2 class="k-h">Where this layer is missing</h2>
     <p class="cap" style="max-width:76ch">These {regions.regions.length} regions cover
     {covered.size} of the {Object.keys(CN).length} countries this atlas names. Below are the
     countries where the atlas already holds the most ground and has no jurisdiction research
     at all — which is where the next region would do the most good.</p>
     <p class="cap" style="max-width:76ch"><b>The sovereignty half is already in hand.</b>
-    The <a href={u("/flags/")}>flag timelines</a> merged in today give who governed and when
+    The <a href={u("/flags/")}>flag timelines</a> give who governed and when
     for 210 countries. What they cannot give is <em>whose archive that means</em> — that is
     read out of finding aids one country at a time, and it is the column this table exists
     for. The count below is the head start, not the answer.</p>
-    <table>
+    <table class="k-table">
       <thead><tr>
-        <th>Country</th><th class="m">Places held</th><th class="m">Eras already known</th>
-        <th>Starting point</th>
+        <th class="g1">Country</th><th class="m g2">Places held</th><th class="m g2">Eras already known</th>
+        <th class="g3">Starting point</th>
       </tr></thead>
       <tbody>
         {gaps.map((g) => (
@@ -200,7 +204,18 @@ const mid = (r) => [
 </Base>
 
 <style>
-  h2 { font-family: var(--serif); font-size: 26px; font-weight: 500; margin: 0; }
+  .k-table { table-layout: fixed; }
+  .c-yrs { width: 15%; } .c-who { width: 27%; } .c-arch { width: 58%; }
+  .g1 { width: 28%; } .g2 { width: 16%; } .g3 { width: 40%; }
+  td.m { white-space: normal; }
+  @media (max-width: 760px) { .k-table { table-layout: auto; } .c-yrs, .c-who, .c-arch, .g1, .g2, .g3 { width: auto; } }
+  .k-h a { text-decoration: none; color: var(--ink); }
+  .k-h a:hover { color: var(--accent); }
+  .jump { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .jump a { text-decoration: none; color: var(--ink-2); font-family: var(--sans); text-transform: none;
+            letter-spacing: 0; font-size: 12.5px; }
+  .jump a:hover { border-color: var(--accent); color: var(--accent); }
+  section[id^="r-"] { scroll-margin-top: 80px; }
   td { vertical-align: top; }
   .reg { display: inline-flex; align-items: baseline; gap: 7px; }
   .reg i { width: 9px; height: 9px; border-radius: 2px; background: var(--c);

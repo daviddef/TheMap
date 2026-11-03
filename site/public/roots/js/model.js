@@ -12,6 +12,8 @@ const NOW = new Date().getFullYear();
 const YEAR = /(?<!\d)(1[0-9]{3}|20[0-9]{2})(?!\d)/;
 const APPROX = /\b(ABT|ABOUT|CAL|EST|BEF|AFT|BET|FROM|TO|C\.?|CIRCA)\b/i;
 
+import { BUILD } from './build.js';
+export const MODEL_BUILD = BUILD;
 export function yearOf(s) {
   const m = YEAR.exec(s || ''); if (!m) return null;
   return { y: +m[1], approx: APPROX.test(s) };

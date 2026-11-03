@@ -267,14 +267,15 @@ test("a place is never placed by borrowing a borrowed place", need, async () => 
 });
 
 test("the page promises what the source does", () => {
-  const files = ["index.html", "viewer.html", "roots.css", "js/app.js", "js/worker.js", "js/gedcom.js", "js/model.js", "js/resolver.js", "js/atlas.js", "js/pipeline.js", "js/sample.js", "js/export.js", "js/workbench.js", "js/contribute.js", "js/lookup.js", "js/checklist.js", "js/myheritage.js"]
+  const files = ["index.html", "viewer.html", "roots.css", "js/app.js", "js/worker.js", "js/gedcom.js", "js/model.js", "js/resolver.js", "js/atlas.js", "js/pipeline.js", "js/sample.js", "js/export.js", "js/workbench.js", "js/contribute.js", "js/lookup.js", "js/checklist.js", "js/recent.js", "js/myheritage.js"]
     .filter(f => fs.existsSync(R + f));
   const html = fs.readFileSync(R + "index.html", "utf8");
   assert.match(html, /Content-Security-Policy/); assert.match(html, /connect-src 'self'/); assert.match(html, /default-src 'none'/);
   assert.doesNotMatch(html, /<script[^>]+src="https?:/i); assert.doesNotMatch(html, /goatcounter|adsbygoogle|googletagmanager|gtag\(/i);
   for (const f of files) {
     const s = fs.readFileSync(R + f, "utf8");
-    assert.doesNotMatch(s, /goatcounter|adsbygoogle|googletagmanager|google-analytics|sendBeacon|XMLHttpRequest|WebSocket|localStorage|sessionStorage|indexedDB|document\.cookie/, f + " must not phone home or keep the file");
+    const stores = f === "js/recent.js";   // the one opt-in place a file may be kept, on this device only
+    assert.doesNotMatch(s, stores ? /goatcounter|adsbygoogle|googletagmanager|google-analytics|sendBeacon|XMLHttpRequest|WebSocket|localStorage|sessionStorage|document\.cookie|fetch\(/ : /goatcounter|adsbygoogle|googletagmanager|google-analytics|sendBeacon|XMLHttpRequest|WebSocket|localStorage|sessionStorage|indexedDB|document\.cookie/, f + " must not phone home or keep the file");
     assert.doesNotMatch(s, /fetch\(\s*['"`]https?:/, f + " must not fetch an absolute URL");
     if (/\.(js)$/.test(f) && f !== "js/app.js") assert.doesNotMatch(s, /innerHTML/, f);
   }

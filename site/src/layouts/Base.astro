@@ -548,7 +548,10 @@ import LineSwitcher from "../components/LineSwitcher.astro";
           /* parseInt, because GoatCounter returns the count as a STRING and
              "0" is truthy in JavaScript — a brand-new site would have
              announced "0 visits" in its own footer. Below one, say nothing. */
-          var c = parseInt((d && d.count) || "0", 10);
+          /* And GoatCounter groups thousands with a narrow no-break space
+             ("1 004"), so parseInt read 1,004 as 1 the day the count passed
+             a thousand. Keep the digits only. */
+          var c = parseInt(String((d && d.count) || "0").replace(/\D/g, ""), 10) || 0;
           if (c > 0) { n.textContent = c.toLocaleString(); box.hidden = false; }
           else box.remove();
         })

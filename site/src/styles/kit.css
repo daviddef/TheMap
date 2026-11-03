@@ -101,7 +101,10 @@ a.k-tile, .k-tiles > li.is-link { transition: border-color .15s, transform .15s;
 
 /* The «one thing to know» box: a warm card, not a terracotta-bordered slab. */
 main .one { background: var(--accent-wash); border: 1px solid var(--rule); border-left-width: 1px; border-radius: 12px;
-            padding: 18px 22px; margin-top: 22px; max-width: 78ch; }
+            padding: 18px 22px; margin-top: 22px; max-width: 78ch;
+            /* The faintest grey (ink-3) passes on the page ground but not on this tint (4.2:1 light, 4.2:1 dark;
+               axe wants 4.5), so inside the box it is the next grey up. The e2e audit caught it on /data/. */
+            --ink-3: var(--ink-2); }
 main .one .lab { color: var(--accent); margin-bottom: 8px; }
 main .one h3 { font-family: var(--serif); font-size: 22px; line-height: 1.3; font-weight: 600; }
 main .one p { color: var(--ink-2); }

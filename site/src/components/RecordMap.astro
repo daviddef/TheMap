@@ -35,9 +35,9 @@ const { indexUrl, detailBase, regionsUrl, providersUrl, gazBase, surnameBase, be
    /help/, and the panel links to it. Derived from `base` so it survives the
    /TheMap/ prefix on GitHub Pages, which a hard-coded "/help/" would not. */
 const HELP = base.replace(/\/$/, "") + "/help/";
-/* The five newest entries of src/data/whats-new.json, as the card shows them. */
+/* The four newest entries of src/data/whats-new.json, as the card shows them. */
 const NEW_ITEMS = (whatsNew.entries || []).slice()
-  .sort((x, y) => y.date.localeCompare(x.date)).slice(0, 5)
+  .sort((x, y) => y.date.localeCompare(x.date)).slice(0, 4)
   .map((e) => ({
     ...e,
     when: new Date(e.date + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" }),
@@ -402,7 +402,10 @@ try {
           screen a returning reader has not seen, and it is a short list of plain headlines
           written by hand (src/data/whats-new.json), newest first. On a phone it is three. */}
       <div class="at-new" role="region" aria-label="What's new">
-        <p class="at-new-h"><b data-i18n>What's new</b></p>
+        <div class="at-new-top">
+          <b data-i18n>What's new</b>
+          <a href={`${base}whats-new/`}><span data-i18n>All improvements</span> &rarr;</a>
+        </div>
         <ul class="at-new-list">
           {NEW_ITEMS.map((e) => (
             <li>
@@ -413,15 +416,9 @@ try {
         </ul>
       </div>
       {/* TWO LINES, NOT FIVE. David: «its a lot of real estate for just a few lines of text». The
-          two link paragraphs became one row, and the history link now does what the map's own Play
-          button does (the playback lives on this map since the History engine moved in), with the
-          full page as the fallback if script is off. */}
+          two link paragraphs became one row, and the history link is gone: the map's own Play button does it. */}
       <p class="at-start-more at-links">
-        <a href={`${base}whats-new/`}><span data-i18n>All improvements</span> &rarr;</a>
         <a href={HELP}><span data-i18n>What a dot's colour means</span> &rarr;</a>
-        <a class="ra-try-layers" href={`${base}history/?chapter=world-wars`}
-           title="Play the ground changing hands on this map: conquests, occupations and migrations, a chapter for each age"
-           >&#9654; <span data-i18n>Watch the ground change hands</span></a>
         {site.contact && site.contact.email && (
           <a class="at-note" href={`mailto:${site.contact.email}?subject=${encodeURIComponent("Record Atlas: a note")}`}
              title="Opens your own mail app. Nothing is sent from this page.">
@@ -7781,16 +7778,27 @@ window.addEventListener("load", async function () {
   .ra-bar-find #ra-q { font-size: 14px; padding: 9px 12px; }
   .ra-bar-find #ra-info { margin-left: auto; }
   .ra-bar #ra-q { font-size: 14px; padding: 9px 12px; }
-  /* What's new: five one-line headlines, newest first, a short date to the left.
-     Held to a readable measure because the panel is the full width of the page. */
-  .at-new-h { margin: 0 0 4px; font-size: 13px; color: var(--ink); }
-  .at-new-list { list-style: none; margin: 0; padding: 0; max-width: 92ch;
-                 font-size: 13.5px; line-height: 1.55; color: var(--ink-2); }
-  .at-new-list li { display: flex; gap: 12px; padding: 2px 0; }
-  .at-new-list time { flex: 0 0 3.6em; font-family: var(--mono); font-size: 11.5px;
-                      color: var(--ink-3); padding-top: 2px; white-space: nowrap; }
-  .at-new-list a { border-bottom: 1px solid var(--rule-strong); text-decoration: none; }
-  @media (max-width: 700px) { .at-new-list li:nth-child(n+4) { display: none; } }
+  /* What's new: four one-line headlines, newest first, a short date to the left, a hairline
+     between every row, and "All improvements" in the heading where the eye already is. A
+     headline that does not fit is cut with an ellipsis rather than wrapped: wrapping made the
+     card two or three times as tall as the news in it. */
+  .at-new-top { display: flex; justify-content: space-between; align-items: baseline;
+                gap: 12px; margin: 0 0 4px; font-size: 13px; color: var(--ink); }
+  .at-new-top a { font-size: 12.5px; text-decoration: none; color: var(--accent); }
+  .at-new-top a:hover { text-decoration: underline; }
+  .at-new-list { list-style: none; margin: 0; padding: 0; font-size: 13.5px; line-height: 1.45;
+                 color: var(--ink-2); }
+  .at-new-list li { display: grid; grid-template-columns: 3.6em minmax(0, 1fr); gap: 12px;
+                    padding: 6px 0; border-top: 1px solid var(--rule); }
+  .at-new-list time { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3);
+                      white-space: nowrap; padding-top: 1px; }
+  .at-new-list a { color: var(--ink); text-decoration: none; }
+  .at-new-list a:hover { color: var(--accent); text-decoration: underline; }
+  .at-new-list li > :last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  @media (max-width: 700px) {
+    .at-new-list li:nth-child(n+4) { display: none; }
+    .at-new-list li > :last-child { white-space: normal; }
+  }
   .at-start-more { margin: 6px 0 0; font-size: 12.5px; }
   .at-links { display: flex; flex-wrap: wrap; gap: 4px 18px; align-items: center; }
   .at-note { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; }

@@ -18,6 +18,8 @@
  * is the same mistake one directory away.
  */
 
+import { holdsMember } from "./surname-families.js";
+
 /* The slug a surname's page lives at. Must match the page and the sitemap,
    so it lives here too. */
 export const slugForSurname = (x) =>
@@ -28,6 +30,11 @@ export const slugForSurname = (x) =>
  *
  *  curated   somebody checked and said these are the same name.
  *  archive   a family archive placed it in a country from documents.
+ *  catalogue the name is a form in the Atlas's catalogue of spellings
+ *            (data/surname-families.json). Somebody read a record and put it
+ *            there, so the name has something to say and its page is where
+ *            the family is shown. A few hundred names, not a doorway set.
+ *            It still needs a register row: a page is built from one.
  *  spelling  one systematic substitution, both forms independently
  *            attested, and counted by three or more registers. This is
  *            Kosina and Kozina.
@@ -60,6 +67,7 @@ export function earnsPage(r) {
   const counted = r.countries.filter((c) => c.n != null).length;
   return v.some((x) => x.how === "curated")
       || r.countries.some((c) => c.how === "archive")
+      || holdsMember(r.n)
       || (v.some((x) => x.how === "spelling") && counted >= 3);
 }
 

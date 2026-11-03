@@ -65,3 +65,12 @@ test("slugs are deduplicated and only for names that earn one", () => {
   ]);
   assert.deepEqual(out, ["kosina"]);
 });
+
+test("a form in the catalogue earns a page, if it has a register row", () => {
+  /* Farley is a family in data/surname-families.json and has no variants and
+     no archive evidence; it used to 404 for exactly that reason. */
+  assert.equal(earnsPage({ n: "Farley", countries: withCountries(1), variants: [] }), true);
+  assert.equal(earnsPage({ n: "Zzzqx", countries: withCountries(1), variants: [] }), false);
+  assert.equal(earnsPage({ n: "Farley", countries: [], variants: [] }), false,
+    "no register row, no page to build");
+});

@@ -1184,6 +1184,11 @@ def main():
             _jsset = set(json.loads(_js.stdout))
             _d = json.load(open("data/surnames.json"))
 
+            import re as _re2, unicodedata as _ud2
+            _fk = lambda x: _re2.sub(r"[\s'\u2019-]+", "", _ud2.normalize("NFC", str(x or "")).lower())
+            _cat = json.load(open("data/surname-families.json", encoding="utf-8"))
+            _mem = {_fk(m["form"]) for f in _cat.get("families", []) for m in f.get("members", [])}
+
             def _earns(r):
                 ccs = r.get("countries") or []
                 if not ccs:
@@ -1192,6 +1197,8 @@ def main():
                 if any(x.get("how") == "curated" for x in v):
                     return True
                 if any(c.get("how") == "archive" for c in ccs):
+                    return True
+                if _fk(r.get("n")) in _mem:
                     return True
                 n = sum(1 for c in ccs if c.get("n") is not None)
                 return n >= 3 and any(x.get("how") == "spelling" for x in v)

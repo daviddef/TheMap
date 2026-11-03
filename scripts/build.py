@@ -2381,6 +2381,17 @@ def main():
     # fetched because build.py writes these shards long before Astro
     # runs — and check-data.py runs both rules over the corpus and fails
     # the build if they disagree by a single name.
+    import re as _re, unicodedata as _ud
+    def _form_key(x):
+        # lib/surname-families.js formKey: case, spaces, hyphens, apostrophes
+        # only. Accents stay.
+        return _re.sub(r"[\s'\u2019-]+", "", _ud.normalize("NFC", str(x or "")).lower())
+    try:
+        _cat = json.load(open(_os.path.join(_ROOT, "data", "surname-families.json"), encoding="utf-8"))
+        _members = {_form_key(m["form"]) for f in _cat.get("families", []) for m in f.get("members", [])}
+    except (OSError, ValueError):
+        _members = set()
+
     def earns_page(r):
         ccs = r.get("countries") or []
         if not ccs:
@@ -2389,6 +2400,8 @@ def main():
         if any(x.get("how") == "curated" for x in v):
             return True
         if any(c.get("how") == "archive" for c in ccs):
+            return True
+        if _form_key(r.get("n")) in _members:
             return True
         counted = sum(1 for c in ccs if c.get("n") is not None)
         return counted >= 3 and any(x.get("how") == "spelling" for x in v)

@@ -98,6 +98,16 @@ export function familyFor(name) {
   return null;
 }
 
+/* Is this exact form (typography folded, accents kept) a member of a
+   catalogued family? The page rule uses THIS and not familyFor: familyFor
+   falls back to an accent-dropping match, and the rule is mirrored in
+   build.py and check-data.py, which must agree to the name. */
+export function holdsMember(name) {
+  load();
+  const hit = IX.get(formKey(name));
+  return !!hit && hit.role === "member";
+}
+
 /* What to type into a search for this family: the forms a record has shown
    (same, attested) and the documented rules. The same list the tool's `terms`
    prints, so a reader and a session search for the same things. */

@@ -260,6 +260,7 @@ input[type=range]{accent-color:var(--atlas);flex:1 1 240px;min-width:140px}
 .ampick h3{font:600 10.5px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
 .amsub{color:var(--muted);font-size:12.5px;margin:2px 0 4px}
 .amgrp{margin-bottom:6px}
+.amppl{max-height:340px;overflow:auto;border:1px solid var(--hair);border-radius:6px;padding:4px 8px}.amtxt{margin:6px 0 10px}.amtxh{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted)}.amtxh span{flex:1;min-width:0;overflow-wrap:anywhere}.amtxh b{color:var(--ink)}.amwhy{color:var(--ink);background:var(--hair);padding:4px 8px;border-radius:4px;margin-top:6px}
 .amgrp small{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
 .chipb{border:1px solid var(--rule);background:var(--panel);border-radius:12px;padding:1px 8px;font-size:12px;margin:0 4px 4px 0}
 .chipb:hover,.chipb.on{background:var(--sel);color:var(--on-sel)}
@@ -701,7 +702,7 @@ function loadTree(T){
   const P={},list=[];
   for(const r of T.people){
     const p={id:r.id,sex:r.sex==='f'?'f':'m',fi:r.line==null?7:r.line,sur:r.sur||'',given:r.given||'',by:r.by,bp:r.bp,dy:r.dy==null?null:r.dy,hid:r.hid===1?1:0,dp:r.dp||r.bp,my:r.my||null,occ:r.occ||null,
-      father:r.father||null,mother:r.mother||null,spouse:r.spouse||[],kids:r.kids||[],g:0,src:(r.srcs||[]).length,srcs:r.srcs||null,slug:r.slug||null,href:r.href||null,page:r.page||null,bye:!!r.bye,dye:!!r.dye,bpe:!!r.bpe,note:r.note||null,fg:r.fg==null?null:r.fg,mg:r.mg==null?null:r.mg};
+      father:r.father||null,mother:r.mother||null,spouse:r.spouse||[],kids:r.kids||[],g:0,src:(r.srcs||[]).length,srcs:r.srcs||null,slug:r.slug||null,href:r.href||null,page:r.page||null,bye:!!r.bye,dye:!!r.dye,bpe:!!r.bpe,bpr:r.bpr||null,dpr:r.dpr||null,note:r.note||null,fg:r.fg==null?null:r.fg,mg:r.mg==null?null:r.mg};
     if(p.dy==null)p.dp=null;
     P[p.id]=p;list.push(p);
   }
@@ -1745,7 +1746,13 @@ function atlasPanel(m){
     h+='<a class="lk" href="'+atlasURL(st.apl)+'" target="_blank" rel="noopener">'+(pl.id?'Open in Record Atlas ↗':'Add it to the Atlas ↗')+'</a>';
     const evs=eventsFor(st.apl,ps[0].by,2026);
     if(evs.length)h+='<div style="margin-top:6px">'+evs.map(e=>'<span class="chip ev" title="'+esc(e.says)+'">'+esc(clip(e.n,30))+'</span>').join('')+'</div>';
-    h+='<h3>People ('+ps.length+')</h3>'+ps.slice(0,14).map(plink).join('')+(ps.length>14?'<div class="amsub">and '+(ps.length-14)+' more</div>':'');
+    /* LOCAL ADDITION: who is drawn here, grouped by the place text exactly as written, so a wrong marker (a whole country, the wrong county) can be traced and fixed */
+    const why={country:'Drawn at the middle of the country: the text names no town we could pin down.',district:'Drawn at the centre of a district or region: no exact town was found.'}[pl.kind];
+    if(why)h+='<div class="amsub amwhy">'+why+'</div>';
+    const raw=p=>(st.amode==='died'?p.dpr:p.bpr)||'',gs=new Map();
+    ps.forEach(p=>{const r=raw(p);(gs.get(r)||gs.set(r,[]).get(r)).push(p)});
+    h+='<h3>People ('+ps.length+')</h3><div class="amppl">'+[...gs].sort((x,y)=>x[0].localeCompare(y[0],'en')).map(([r,l])=>
+      '<div class="amtxt"><div class="amtxh"><span>'+(r?'Written as <b>'+esc(r)+'</b>':'<i>no place text</i>')+' · '+l.length+'</span>'+(r?'<button class="chipb" data-copytxt="'+esc(r)+'" title="Copy this text">Copy</button><button class="chipb" data-fixtxt="'+esc(r)+'" title="Find this text in Places to review">Fix this text</button>':'')+'</div>'+l.slice().sort((x,y)=>nm(x).localeCompare(nm(y),'en')).map(plink).join('')+'</div>').join('')+'</div>';
   }else h+='<h2>Pick a place</h2><div class="amsub">Click any marker. Bigger markers hold more people. Colour is the Atlas regime that ruled the place in the median birth year, grey is not surveyed yet.</div><div class="amsub">Markers are places, not kinship: a big marker means many people of this tree were here.</div>';
   h+='<h3>Find a place</h3>';
   const by={};m.forEach((e,k)=>{(by[PL[k].cn]=by[PL[k].cn]||[]).push(e)});
@@ -2161,6 +2168,7 @@ document.addEventListener('click',e=>{
   const ln=e.target.closest('[data-line]');
   if(ln){const i=+ln.dataset.line;st.line=st.line===i?null:i;renderMap();return}
   if(e.target.closest('a'))return;
+  const ft=e.target.closest('[data-fixtxt],[data-copytxt]');if(ft){try{parent.postMessage(ft.dataset.fixtxt!=null?{fixplace:ft.dataset.fixtxt}:{copytxt:ft.dataset.copytxt},'*')}catch(x){}return}
   const sn=e.target.closest('[data-sn]');if(sn){st.sn=st.sn===sn.dataset.sn?null:sn.dataset.sn;render();return}
   const sc=e.target.closest('[data-scty]');if(sc){st.scty=st.scty===sc.dataset.scty?null:sc.dataset.scty;render();return}
   const t=e.target.closest('[data-id]');

@@ -327,10 +327,21 @@ $('#sample').onclick = () => start(new TextEncoder().encode(makeSample()).buffer
 
 /* ---------- fix list ---------- */
 let fix = null; const ticked = new Set(), shownN = new Map();
+const svg = d => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + d + '"/></svg>';
+const IC = {
+  copy: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg>',
+  check: svg('M5 12.5l4.5 4.5L19 7.5'),
+  person: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-4 3.6-6 7-6s6.2 2 7 6"/></svg>',
+  tree: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9.5" y="3" width="5" height="4" rx="1"/><rect x="3" y="17" width="5" height="4" rx="1"/><rect x="16" y="17" width="5" height="4" rx="1"/><path d="M12 7v5M5.5 17v-5h13v5"/></svg>',
+  open: svg('M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5'),
+};
+/* an icon-only button or link: always has a title and an aria-label, so a screen reader and a hover both say what it does */
+const ib = (icon, title, onclick) => { const b = el('button', 'ib'); b.type = 'button'; b.innerHTML = IC[icon]; b.title = title; b.setAttribute('aria-label', title); b.onclick = onclick; return b; };
+const ia = (icon, title, url) => { const x = el('a', 'ib'); x.innerHTML = IC[icon]; x.title = title; x.setAttribute('aria-label', title); x.href = url; x.target = '_blank'; x.rel = 'noopener noreferrer'; return x; };
 const copy = async (text, btn) => {
-  const was = btn.textContent;
   try { await navigator.clipboard.writeText(text); } catch { const t = document.createElement('textarea'); t.value = text; document.body.append(t); t.select(); try { document.execCommand('copy'); } catch { /* the text is on screen to select by hand */ } t.remove(); }
-  btn.textContent = 'Copied'; setTimeout(() => { btn.textContent = was; }, 1200);
+  const was = btn.innerHTML, wt = btn.title; if (btn.classList.contains('ib')) { btn.innerHTML = IC.check; btn.title = 'Copied'; } else btn.textContent = 'Copied';
+  btn.classList.add('ok'); setTimeout(() => { btn.innerHTML = was; btn.title = wt; btn.classList.remove('ok'); }, 1200);
 };
 /* ---------- links back to MyHeritage ---------- */
 let mhc = fromHash(location.hash);
@@ -338,7 +349,29 @@ const mhA = (id, name) => {
   const p = profileUrl(mhc, id, name), t = treeUrl(mhc, id); if (!p) return [];
   const out = []; for (const [u, lab] of [[p, 'MyHeritage'], [t, 'in tree']]) { const a = el('a', null, lab + ' ↗'); a.href = u; a.target = '_blank'; a.rel = 'noopener noreferrer'; out.push(' ', a); } return out;
 };
-const peopleEl = l => { const s = el('span'); l.slice(0, 8).forEach((p, k) => { if (k) s.append('; '); s.append(p.name + ' (' + p.id + ', ' + p.ev + (p.date ? ' ' + p.date : '') + ')', ...mhA(p.id, p.name)); }); return s; };
+/* one person (or one event) as a tidy line: name, record number, what the event was, then the icons */
+const MAXP = 3;
+function pline(p, o = {}) {
+  const li = el('li', 'fp');
+  li.append(el('b', 'pn', p.name || '(no name)'), el('span', 'pid', p.id));
+  const ev = p.ev ? p.ev + (p.date ? ' ' + p.date : '') : (p.by ? 'b. ' + p.by : ''); if (ev) li.append(el('span', 'chip', ev));
+  const acts = el('span', 'acts');
+  if (o.copyName !== false && p.name) acts.append(ib('copy', 'Copy name', function () { copy(p.name, this); }));
+  const pu = profileUrl(mhc, p.id, p.name), tu = treeUrl(mhc, p.id);
+  if (pu) acts.append(ia('person', 'Open this profile on MyHeritage', pu), ia('tree', 'Open this person in the tree on MyHeritage', tu));
+  li.append(acts); return li;
+}
+/* a nested list of people, the first few shown and the rest behind one button */
+function plist(list, total) {
+  const ul = el('ul', 'fpl'); list.slice(0, MAXP).forEach(p => ul.append(pline(p)));
+  if (list.length > MAXP) {
+    const more = list.slice(MAXP), rest = el('ul', 'fpl'); rest.hidden = true; more.forEach(p => rest.append(pline(p)));
+    const b = el('button', 'link more', 'Show ' + more.length + ' more'); b.onclick = () => { rest.hidden = !rest.hidden; b.textContent = rest.hidden ? 'Show ' + more.length + ' more' : 'Show fewer'; };
+    const w = el('div'); w.append(ul, rest, b); if (total > list.length) w.append(el('small', 'muted', ' and ' + (total - list.length) + ' more, all in the spreadsheet')); return w;
+  }
+  if (total > list.length) { const w = el('div'); w.append(ul, el('small', 'muted', 'and ' + (total - list.length) + ' more, all in the spreadsheet')); return w; }
+  return ul;
+}
 let lastInfo = null;
 function mhStatus(extra) { $('#mhstat').textContent = mhc ? 'Linked: tree ' + mhc.tree + '.' + (extra || '') + ' Open one or two people to check they are the right ones.' : ''; }
 function mhWho(m) { mhStatus(m.name ? ' That link is person ' + m.id + ' in your file: ' + m.name + '. If that is not who you pasted, the numbering differs and these links are wrong.' : ' No person ' + m.id + ' in this file, so check the link.'); }
@@ -351,31 +384,33 @@ function refreshMh() { pushMh(); drawFix(); if (lastInfo) person(lastInfo); }
 if (mhc) { $('#mhbox').open = true; mhStatus(' (from the address)'); }
 
 function fixRow(s, i) {
-  const row = el('div', 'frow'), cb = el('input'); cb.type = 'checkbox'; cb.checked = ticked.has(i.key); cb.setAttribute('aria-label', 'Done');
-  cb.onchange = () => { cb.checked ? ticked.add(i.key) : ticked.delete(i.key); fixCount(s); };
-  const body = el('div'), line = el('div'), small = el('small');
-  const cp = (txt, label) => { const b = el('button', 'link', label); b.onclick = () => copy(txt, b); return b; };
+  const row = el('div', 'frow'), cb = el('input'); cb.type = 'checkbox'; cb.checked = ticked.has(i.key); cb.setAttribute('aria-label', 'Done'); row.classList.toggle('done', cb.checked);
+  cb.onchange = () => { cb.checked ? ticked.add(i.key) : ticked.delete(i.key); row.classList.toggle('done', cb.checked); fixCount(s); };
+  const body = el('div', 'fbody'), head = el('div', 'fhead'), note = el('div', 'fnote');
+  const cpB = (txt, title) => ib('copy', title, function () { copy(txt, this); });
+  const evs = n => n + ' event' + (n === 1 ? '' : 's');
   if (s.key === 'places' || s.key === 'check') {
-    line.append(el('span', 'was', i.raw), ' → ', el('b', null, i.to), ' ', cp(i.to, 'Copy new text'), ' ', cp(i.raw, 'Copy current'));
-    small.append(i.count + ' event' + (i.count === 1 ? '' : 's') + ': ', peopleEl(i.people), (i.count > 8 ? '; and ' + (i.count - 8) + ' more (all in the spreadsheet)' : '') + (s.key === 'check' ? ' · suggestion only: ' + i.why : ''));
+    const swap = el('span', 'swap'); swap.append(el('span', 'was', i.raw), el('span', 'arrow', '→'), el('b', 'now', i.to));
+    const acts = el('span', 'acts'); acts.append(cpB(i.to, 'Copy the new text'), cpB(i.raw, 'Copy the current text (to find it in MyHeritage)'));
+    head.append(swap, acts);
+    if (s.key === 'check') note.textContent = 'Suggestion only: ' + i.why;
+    body.append(head); if (note.textContent) body.append(note); body.append(el('div', 'fcount', evs(i.count)), plist(i.people, i.count));
   } else if (s.key === 'decide') {
-    line.append(el('span', 'was', i.raw));
-    for (const c of i.cands) { line.append(' '); line.append(cp(c, 'Copy: ' + c)); }
-    small.append((i.cands.length ? '' : 'no candidate found · ') + i.count + ' event' + (i.count === 1 ? '' : 's') + ': ', peopleEl(i.people));
-  } else if (s.key === 'years') {
-    line.append(el('b', null, i.name), ' (' + i.id + ') ', cp(i.name, 'Copy name'), ...mhA(i.id, i.name)); small.textContent = i.note + (i.place ? ' · born at ' + i.place : '');
-  } else if (s.key === 'names') {
-    line.append(el('b', null, i.name || '(no name)'), ' (' + i.id + ')', ...mhA(i.id, i.name)); small.textContent = i.note + (i.kin ? ' · ' + i.kin : '') + (i.born ? ' · born ' + i.born : '') + (i.place ? ' at ' + i.place : '');
-  } else if (s.key === 'dates') {
-    line.append(el('b', null, i.name), ' (' + i.id + ') ', cp(i.name, 'Copy name'), ...mhA(i.id, i.name)); small.textContent = i.note + (i.with ? ' · with ' + i.with : '');
+    head.append(el('span', 'was plain', i.raw)); body.append(head);
+    const cs = el('div', 'cands'); if (i.cands.length) { cs.append(el('span', 'muted', 'Could be: ')); for (const c of i.cands) { const b = el('button', 'cand'); b.type = 'button'; b.innerHTML = IC.copy + '<span></span>'; b.lastChild.textContent = c; b.title = 'Copy “' + c + '”'; b.onclick = () => copy(c, b); cs.append(b); } } else cs.append(el('span', 'muted', 'No candidate found: look it up by hand.'));
+    body.append(cs, el('div', 'fcount', evs(i.count)), plist(i.people, i.count));
   } else if (s.key === 'dupes') {
-    line.append(el('b', null, i.an), ' (' + i.a + ')', ...mhA(i.a, i.an), ' and ', el('b', null, i.bn), ' (' + i.b + ')', ...mhA(i.b, i.bn), ' ', cp(i.an, 'Copy name')); small.textContent = i.note + (i.ap || i.bp ? ' · ' + (i.ap || '—') + ' / ' + (i.bp || '—') : '');
-  } else {
-    line.append(el('b', null, i.size + (i.size === 1 ? ' person' : ' people')));
-    i.people.forEach((p, k) => { if (k) small.append('; '); small.append(p.name + ' (' + p.id + (p.by ? ', b. ' + p.by : '') + ')', ...mhA(p.id, p.name)); });
-    if (i.size > i.people.length) small.append('; and ' + (i.size - i.people.length) + ' more');
+    head.append(el('b', null, 'Possibly the same person')); body.append(head, note);
+    note.textContent = i.note + (i.ap || i.bp ? ' · ' + (i.ap || '—') + ' / ' + (i.bp || '—') : '');
+    body.append(plist([{ name: i.an, id: i.a }, { name: i.bn, id: i.b }], 2));
+  } else if (s.key === 'apart') {
+    head.append(el('b', null, i.size + (i.size === 1 ? ' person' : ' people') + ' not connected to the main tree')); body.append(head, plist(i.people, i.size));
+  } else {                                                                                        // years, names, dates: one person, a note under
+    const p = { name: i.name, id: i.id, by: null }; const one = pline(p, { copyName: !!i.name }); one.classList.add('solo'); head.append(one);
+    note.textContent = i.note + (i.with ? ' · with ' + i.with : '') + (i.kin ? ' · ' + i.kin : '') + (i.born && s.key !== 'dates' ? ' · born ' + i.born : '') + (i.place ? ' · born at ' + i.place : '');
+    body.append(head, note);
   }
-  body.append(line, small); row.append(cb, body); return row;
+  row.append(cb, body); return row;
 }
 function fixCount(s) { const n = $('#fc-' + s.key); if (n) n.textContent = s.items.filter(i => ticked.has(i.key)).length + ' of ' + s.items.length + ' done'; }
 const hay = (s, i) => (s.key === 'names' ? i.name + ' ' + i.kin : s.key === 'dupes' ? i.an + ' ' + i.bn : s.key === 'apart' ? i.people.map(p => p.name).join(' ') : (i.raw || '') + ' ' + (i.name || '') + ' ' + (i.people ? i.people.map(p => p.name).join(' ') : '')).toLowerCase();

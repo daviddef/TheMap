@@ -60,6 +60,9 @@ export function buildChecklist(env) {
     const r = resolve(raw); if (!r) continue;
     const sure = (r.tier === 'confident' || r.tier === 'confident-by-region' || r.tier === 'user') && r.place;
     if (r.place && (sure || r.tier === 'probable' || r.tier === 'by-tree-context' || r.tier === 'by-neighbours')) {
+      if (raw.split(',').filter(x => x.trim()).length < 2) {                     // the text names no country or region: the Atlas's match is a guess (Devon is a county in England, not a town in Canada)
+        decide.push({ key: 'd|' + raw, raw, tier: 'ambiguous', count: g.count, cands: [label(r.place)], people: g.people }); continue;
+      }
       const c = classify(raw, r); if (!c) continue;
       if (sure && c.fix) places.push({ key: 'p|' + raw, raw, to: c.to, count: g.count, people: g.people });
       else check.push({ key: 'c|' + raw, raw, to: c.to, tier: r.tier, why: sure ? 'a different name: it may be the historical name, so check it against the date' : 'a probable match, not a certain one', count: g.count, people: g.people });

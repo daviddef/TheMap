@@ -296,6 +296,12 @@ def main():
         _promoted += json.load(open("data/antenati-volumes.json"))["promote"]
     except FileNotFoundError:
         pass
+    # Coverage claims may carry the places they name with coordinates (Greenland's parishes: the Atlas surveyed none).
+    for _cf in sorted(glob.glob("data/coverage-claims*.json")):
+        try:
+            _promoted += json.load(open(_cf, encoding="utf-8")).get("promote", [])
+        except (FileNotFoundError, ValueError):
+            pass
     _added = 0
     for _pl in _promoted:
         if _pl["id"] in _known or _pl.get("lat") is None:

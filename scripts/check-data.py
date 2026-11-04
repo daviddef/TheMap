@@ -1040,6 +1040,24 @@ def given_name_families_gate():
                     err(f"given-name-families {f['id']}/{m['form']}: evidence reads like a person, not a form: {e.get('what')[:70]!r}")
 
 
+def flag_paths_gate():
+    """Every <path d="..."> in a flag page parses to the end. A minifier once fused 12 and .49 into -12.49 and dropped
+    values that rounded to zero, which left 33 paths browsers reject (Wales: 87 console errors on one person page)."""
+    import glob, re
+    import svg_path_check as spc
+    bad = []
+    for f in sorted(glob.glob(os.path.join(_ROOT, "site", "src", "flags-pages", "*.html"))):
+        s = open(f, encoding="utf-8").read()
+        for m in re.finditer(r'\sd="([^"]+)"', s):
+            d = m.group(1)
+            if re.match(r"^[Mm]", d) and not spc.scan(d)[0]:
+                bad.append(os.path.basename(f))
+    if bad:
+        err(f"flag drawings with a malformed path (a browser stops drawing and logs an error): {', '.join(sorted(set(bad)))}")
+    else:
+        print("flag drawings: every path parses to the end")
+
+
 def place_names_gate():
     """data/place-names.json: what a place was called, by date. The rules live in scripts/place_names.py, so the tool a
     session writes with and the gate that stops the build cannot disagree: every name has a dated or lead status, an https
@@ -1111,6 +1129,7 @@ def main():
     surname_families_gate()
     given_name_families_gate()
     place_names_gate()
+    flag_paths_gate()
     whats_new_gate()
     history_json()
     history_ground()

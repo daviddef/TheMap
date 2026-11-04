@@ -8,7 +8,7 @@ Written 4 November 2026, after two deploys were cancelled at exactly ten minutes
 |---|---|---|---|
 | raw bytes in `site/dist` | 9.04 GiB, 203,823 files | 10 GB (the workflow stops at 9.6 GiB) | the upload step refuses the artifact, after a 75–90 minute build |
 | compressed artifact | 2.26 GB | none enforced | Pages takes longer to process it; the `deploy-pages` default of 10 minutes is no longer always enough |
-| Pages "1 GB" | — | documented only | `deploy-pages` prints a warning and carries on; 14 deploys have succeeded above it |
+| Pages "1 GB" | — | documented only | `deploy-pages` prints a warning and carries on; dozens of deploys have succeeded above it |
 
 Do not read the 1 GB warning as the problem. The 4 November failures (`2c9cc38`, `c5fd661`) were cancelled by
 `deploy-pages` at 10:00 while Pages was still working. Successful deploys of the same 2.26 GB artifact took 3 to
@@ -57,4 +57,4 @@ steadily: about 1.5 MB a day between steps, and +178 MB (about 0.7 GiB raw) in t
 
 That is the runway: 0.56 GiB of raw headroom to the 9.6 GiB gate, so one more step like the last one
 trips it. Before that, expect more 10-minute-plus Pages waits as the artifact grows. Shrinking the repeated
-sections above would buy back roughly 1.5–2 GiB raw.
+sections above would buy back an estimated 1.5–2 GiB raw (not measured by a build).

@@ -3418,14 +3418,22 @@ window.addEventListener("load", async function () {
            ' data-src-where="' + esc(mark.where || "") + '"' +
            ' data-src-href="' + esc(mark.href || href || "") + '"';
     }
-    return "<li" + at + ">" +
+    /* A ROW IS A NUMBER, A NAME AND A LINE OF PLAIN WORDS. David: «can we neaten the right pane? ... item 3
+       and 5 wrap completely wrong, and feel could be a bit more "exciting"». The row was a wrapping flex
+       line of loose pieces (number, dot, link, note), so a long name pushed itself under the number and left
+       the dot stranded above it. Now the name (with its distance) and the access line sit in one column
+       beside the number, so a long name wraps inside its own column and the access colour stays with its
+       words. */
+    var meta = (dot ? '<i class="ra-dot" style="background:' + dot + '"></i>' : "") +
+               (note ? '<span class="ra-ck-n">' + esc(note) + "</span>" : "");
+    return '<li class="' + (num != null ? "ra-ck-r" : "ra-ck-r ra-ck-nonum") + '"' + at + ">" +
            (num != null ? '<span class="ra-ck-i">' + num + "</span>" : "") +
-           (dot ? '<i class="ra-dot" style="background:' + dot + '"></i>' : "") +
+           '<span class="ra-ck-main">' +
            (href ? '<a href="' + esc(href) + '" target="_blank" rel="noopener">' +
                    esc(name) + "</a>" : esc(name)) +
            (km != null ? ' <span class="ra-ck-km">' + (Math.round(km * 10) / 10) +
-                         " km</span>" : "") +
-           (note ? '<span class="ra-ck-n">' + esc(note) + "</span>" : "") + "</li>";
+                         " km</span>" : "") + "</span>" +
+           (meta ? '<span class="ra-ck-meta">' + meta + "</span>" : "") + "</li>";
   }
 
   var checkLayer = L.layerGroup();
@@ -8838,8 +8846,25 @@ window.addEventListener("load", async function () {
   /* AIR BETWEEN THEM. «and also allow an additional space between the icons» —
     two circles 2px apart read as one control with a hole in it. */
   :global(#ra-check-b .srcmark) { margin-left: 0; margin-right: 10px; }
-  :global(#ra-check-b li) { display: flex; align-items: center;
-    flex-wrap: wrap; gap: 2px 0; }
+  :global(#ra-check-b li.ra-ck-r) { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto;
+    column-gap: 10px; row-gap: 1px; align-items: start; margin: 0 -6px 2px; padding: 7px 6px;
+    border-radius: 7px; transition: background .12s; }
+  :global(#ra-check-b li.ra-ck-r:hover) { background: var(--accent-wash); }
+  :global(#ra-check-b li.ra-ck-nonum) { grid-template-columns: minmax(0, 1fr) auto; }
+  :global(#ra-check-b li.ra-ck-r .ra-ck-i) { grid-row: 1 / span 2; margin-right: 0; align-self: center; }
+  :global(#ra-check-b li.ra-ck-r .ra-ck-main) { grid-column: 2; font-size: 13px; line-height: 1.35;
+    overflow-wrap: anywhere; }
+  :global(#ra-check-b li.ra-ck-nonum .ra-ck-main) { grid-column: 1; }
+  :global(#ra-check-b li.ra-ck-r .ra-ck-main a) { font-family: var(--serif); font-size: 14px; color: var(--accent);
+    text-decoration: none; background-image: linear-gradient(currentColor, currentColor);
+    background-size: 100% 1px; background-position: 0 100%; background-repeat: no-repeat; }
+  :global(#ra-check-b li.ra-ck-r .ra-ck-main a:hover) { color: var(--ink); }
+  :global(#ra-check-b li.ra-ck-r .ra-ck-meta) { grid-column: 2; display: flex; align-items: center; gap: 6px;
+    font-size: 11.5px; color: var(--ink-3); }
+  :global(#ra-check-b li.ra-ck-nonum .ra-ck-meta) { grid-column: 1; }
+  :global(#ra-check-b li.ra-ck-r .ra-dot) { flex: none; margin: 0; width: 8px; height: 8px; }
+  :global(#ra-check-b li.ra-ck-r .srcmark) { grid-column: 3; grid-row: 1 / span 2; align-self: center; margin: 0; }
+  :global(#ra-check-b .ra-ck-more) { margin: 2px 0 0 34px; }
  :global(.ra-pin) { display: flex !important; align-items: center;
     justify-content: center; border-radius: 50%; background: #1B2A5B;
     color: #fff; font-family: var(--mono); font-size: 10px; font-weight: 500;
@@ -8853,10 +8878,12 @@ window.addEventListener("load", async function () {
      in it is near one point. Nothing in a name's list is near anything, so
      the country is the only grouping that means something. */
   :global(.ra-ck-cc) { display: flex; justify-content: space-between;
-    align-items: baseline; margin: 12px 0 4px; padding-bottom: 3px;
-    border-bottom: 1px solid var(--rule); font-family: var(--mono);
-    font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase;
-    color: var(--ink-3); }
+    align-items: center; margin: 18px 0 6px; padding-bottom: 5px;
+    border-bottom: 2px solid var(--accent); font-family: var(--serif);
+    font-size: 16px; font-weight: 600; letter-spacing: 0; text-transform: none;
+    color: var(--ink); }
+  :global(.ra-ck-cc .ra-ck-km) { margin: 0; padding: 1px 8px; border-radius: 999px;
+    background: var(--accent-wash); color: var(--accent); font-size: 10.5px; font-weight: 400; }
   :global(.ra-ck-cc:first-child) { margin-top: 0; }
   /* A link, not a button, to look at — it sits mid-sentence and a grey box
      there would read as a form control in a paragraph. */

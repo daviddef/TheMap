@@ -52,6 +52,18 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # THE RUNNER'S DISK IS FULL BY THE UPLOAD STEP.
+      # 4 November, run 5e64935: the 75-minute build finished, then
+      # upload-pages-artifact died with "No space left on device" while it
+      # wrote the ~2.3 GB compressed copy beside a ~9 GiB dist, node_modules
+      # and the data cache. The runner image carries toolchains this job never
+      # uses; removing them frees roughly 25 GB. Runs first, before checkout,
+      # and never fails the build (rm -f, no set -e).
+      - name: Free disk on the runner
+        run: |
+          df -h / | tail -1
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost || true
+          df -h / | tail -1
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:

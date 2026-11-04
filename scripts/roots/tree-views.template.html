@@ -219,6 +219,7 @@ input[type=range]{accent-color:var(--atlas);flex:1 1 240px;min-width:140px}
 .life{margin:0;padding:0;list-style:none;font-size:12.5px}
 .life li{padding:5px 0;border-top:1px solid var(--rule)}
 .life li:first-child{border-top:0}
+.life li.more{padding:5px 0 0}.life li.more summary{cursor:pointer;color:var(--muted);font-size:12px}.life li.more ul.life{margin-top:4px}
 .life small{display:block;color:var(--muted)}
 
 .toolrow{display:flex;gap:12px 20px;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
@@ -634,6 +635,32 @@ const atlasURL=n=>{const p=PL[n];return p&&p.id?'https://recordatlas.org/place/'
 // a place name that opens its Record Atlas page, when the Atlas has the place
 const placeA=n=>{const p=PL[n];return p&&p.id?'<a class="pl" href="'+atlasURL(n)+'" target="_blank" rel="noopener" title="Open '+esc(n)+' in Record Atlas">'+esc(n)+'</a>':esc(n)};
 const eventsFor=(n,a,b)=>(PL[n]?PL[n].ev:[]).map(evOf).filter(e=>e.f<=b&&e.t>=a);
+/* Where a person was, and when: every stop of a route (a stop with no year runs from the last dated one), else birth place then death place. */
+function stayList(p,end){
+  const out=[];
+  if(p.route){
+    let from=p.by;
+    p.route.forEach((s,i)=>{
+      const a=i===0?p.by:(s[1]!=null?s[1]:from);
+      let b=end;for(let j=i+1;j<p.route.length;j++)if(p.route[j][1]!=null){b=p.route[j][1];break}
+      out.push({pl:s[0],a:a,b:Math.max(a,b)});if(s[1]!=null)from=s[1];
+    });
+  }else{
+    const m=p.my||null;
+    out.push({pl:p.bp,a:p.by,b:m||end});
+    if(p.dp&&p.dp!==p.bp)out.push({pl:p.dp,a:m||p.by,b:end});
+  }
+  return out.filter(s=>s.pl&&PL[s.pl]);
+}
+/* Mortality events that fell while they were at each place, longest overlap first, so the few a panel shows are the ones that touched them. */
+function lifeEvents(p,end){
+  const m=new Map();
+  stayList(p,end).forEach(s=>eventsFor(s.pl,s.a,s.b).forEach(e=>{
+    const ov=Math.min(e.t,s.b)-Math.max(e.f,s.a)+1,o=m.get(e.id);
+    if(!o)m.set(e.id,Object.assign({at:s.pl,ov:ov},e));else if(ov>o.ov){o.ov=ov;o.at=s.pl}
+  }));
+  return [...m.values()].sort((x,y)=>y.ov-x.ov||x.f-y.f);
+}
 (function(){
   let l=':root{',d='';
   for(const k in ATLAS.regimes){l+='--rg-'+k+':'+ATLAS.regimes[k].c[0]+';';d+='--rg-'+k+':'+ATLAS.regimes[k].c[1]+';'}
@@ -982,13 +1009,15 @@ function renderPanel(){
   h+='<h3 class="at">Places · from Record Atlas</h3>'+placeBlock('Born'+(p.bpe?' · place taken from a relative, not recorded':''),p.bp,p.by);
   if(!living(p)&&p.dp&&p.dp!==p.bp)h+=placeBlock('Died, moved c.'+p.my,p.dp,p.my||p.dy);
   if(!living(p)){
-    const end=p.dy==null?2026:p.dy,evs=[];
-    for(const pl of new Set([p.bp,p.dp].filter(Boolean)))for(const e of eventsFor(pl,p.by,end))if(!evs.some(x=>x.id===e.id))evs.push(Object.assign({at:pl},e));
+    const end=p.dy==null?2026:p.dy;
+    const evs=lifeEvents(p,end);
     const eras=ERA[PL[p.bp].reg]?ERA[PL[p.bp].reg].filter(e=>e.from>p.by&&e.from<=end):[];
     if(evs.length||eras.length){
       h+='<h3 class="at">Around their lifetime</h3><ul class="life">';
       eras.forEach(e=>{h+='<li><b>'+e.from+'</b> · '+esc(e.polity)+'<small>Birthplace changed hands. '+esc(e.note)+'</small></li>'});
-      evs.slice(0,4).forEach(e=>{h+='<li><b>'+(e.f===e.t?e.f:e.f+'–'+e.t)+'</b> · '+esc(e.n)+'<small>'+esc(clip(e.toll,120))+'</small></li>'});
+      const li=e=>'<li><b>'+(e.f===e.t?e.f:e.f+'–'+e.t)+'</b> · '+esc(e.n)+'<small>'+esc(e.at)+' · '+esc(clip(e.toll,120))+'</small></li>';
+      evs.slice(0,5).forEach(e=>{h+=li(e)});
+      if(evs.length>5)h+='<li class="more"><details><summary>'+(evs.length-5)+' more while they lived</summary><ul class="life">'+evs.slice(5).map(li).join('')+'</ul></details></li>';
       h+='</ul>';
     }
   }

@@ -2531,7 +2531,13 @@ window.addEventListener("load", async function () {
           (e.open ? '<p class="ra-mn-s ra-mn-o">' + esc(e.open) + '</p>' : "") +
           line +
           (rec ? '<details class="ra-mn-r"><summary>Where to look</summary><p>' + esc(rec) + '</p>' + recHtml + archHtml + '</details>' : "") + '</li>';
-      }).join("");
+      });
+      /* A battlefield town can sit inside dozens of wars: show the first six, fold the rest so the panel stays readable. */
+      if (li.length > 7) {
+        li = li.slice(0, 6).concat(['<li class="ra-mn-more"><details><summary>' + (li.length - 6) + " more events here</summary><ul>" +
+          li.slice(6).join("") + "</ul></details></li>"]);
+      }
+      li = li.join("");
       var label = hits.length + " mass-mortality event" + (hits.length === 1 ? "" : "s");
       var pill = document.createElement("button");
       pill.type = "button"; pill.className = "ra-mortpill"; pill.setAttribute("aria-expanded", "false");
@@ -8412,6 +8418,8 @@ window.addEventListener("load", async function () {
   :global(.ra-mortnote) { grid-column: 1 / -1; margin: 4px 0 10px; padding: 12px 16px 8px; border-radius: 8px; border-left: 4px solid #111;
     background: color-mix(in srgb, var(--ink, #222) 4%, transparent); }
   :global(.ra-mortnote > ul) { margin: 0; padding: 0; list-style: none; columns: 2 340px; column-gap: 32px; }
+  :global(.ra-mortnote li.ra-mn-more > details > summary) { cursor: pointer; color: var(--ink-3); font-size: 12px; }
+  :global(.ra-mortnote li.ra-mn-more ul) { margin-top: 10px; }
   :global(.ra-mortnote li) { break-inside: avoid; margin: 0 0 14px; font: 400 12.5px/1.5 var(--sans, system-ui); }
   :global(.ra-mn-t) { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
   :global(.ra-mn-t b) { font-size: 13.5px; }

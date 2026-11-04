@@ -28,6 +28,22 @@ LANGS = [
     ("hungarian", "Hungarian", "What a Hungarian-administered register or index wrote."),
     ("english", "English", "The form at arrival: what an English-language clerk, ship's list or index made of it."),
 ]
+# Languages beyond the seven the two founding archives work in. A researched form carries one of these keys; the label and
+# the line under it are the same kind of sentence for all of them, because none of them is any one archive's route.
+MORE = {
+    "greek": "Greek", "hebrew": "Hebrew", "scots": "Scots", "irish": "Irish", "scottishgaelic": "Scottish Gaelic",
+    "welsh": "Welsh", "cornish": "Cornish", "breton": "Breton", "french": "French", "occitan": "Occitan",
+    "spanish": "Spanish", "catalan": "Catalan", "galician": "Galician", "portuguese": "Portuguese",
+    "sardinian": "Sardinian", "romanian": "Romanian", "dutch": "Dutch", "frisian": "Frisian", "danish": "Danish",
+    "norwegian": "Norwegian", "swedish": "Swedish", "icelandic": "Icelandic", "finnish": "Finnish", "estonian": "Estonian",
+    "polish": "Polish", "czech": "Czech", "slovak": "Slovak", "slovene": "Slovene", "serbian": "Serbian",
+    "bulgarian": "Bulgarian", "macedonian": "Macedonian", "russian": "Russian", "ukrainian": "Ukrainian",
+    "belarusian": "Belarusian", "lithuanian": "Lithuanian", "latvian": "Latvian", "albanian": "Albanian",
+    "maltese": "Maltese", "basque": "Basque", "turkish": "Turkish", "yiddish": "Yiddish",
+}
+FOUNDING = len(LANGS)   # the seven the two archives work in are always shown, empty or not; the rest only when a form uses them
+for _k, _l in MORE.items():
+    LANGS.append((_k, _l, f"The form a {_l}-language register, index or census would show, in Latin letters."))
 OUT = os.path.join(ROOT, "site", "public", "given-names.json")
 
 
@@ -37,8 +53,9 @@ def seen(m):
 
 def main():
     cat = sv.load()
+    used = {m.get("lang") for f in cat["families"] for m in f["members"]}
     known = {k for k, _, _ in LANGS}
-    langs = list(LANGS)
+    langs = [x for i, x in enumerate(LANGS) if i < FOUNDING or x[0] in used]
     for f in cat["families"]:
         for m in f["members"]:
             if m.get("lang") and m["lang"] not in known:
@@ -56,6 +73,12 @@ def main():
                     break
             row = {"form": m["form"], "seen": s, "status": m["status"], "note": note,
                    "notNominative": next((e["what"].split(" of the Latin")[0].replace("The ", "") for e in m["evidence"] if e.get("rule") == "latin-case"), "")}
+            src = next((e["ref"] for e in m["evidence"] if e.get("kind") == "source" and str(e.get("ref", "")).startswith("http")), "")
+            if src:
+                row["src"] = src
+            if not note:
+                note = next((e["period"] for e in m["evidence"] if e.get("kind") == "source" and e.get("period")), "")
+                row["note"] = note
             by.setdefault(m.get("lang") or "latin", []).append(row)
             total += 1
             att += 1 if s > 0 else 0

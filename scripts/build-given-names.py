@@ -40,6 +40,9 @@ MORE = {
     "bulgarian": "Bulgarian", "macedonian": "Macedonian", "russian": "Russian", "ukrainian": "Ukrainian",
     "belarusian": "Belarusian", "lithuanian": "Lithuanian", "latvian": "Latvian", "albanian": "Albanian",
     "maltese": "Maltese", "basque": "Basque", "turkish": "Turkish", "yiddish": "Yiddish",
+    "manx": "Manx", "afrikaans": "Afrikaans", "faroese": "Faroese", "sicilian": "Sicilian", "corsican": "Corsican",
+    "asturian": "Asturian", "luxembourgish": "Luxembourgish", "neapolitan": "Neapolitan", "lombard": "Lombard",
+    "norman": "Norman", "oldnorse": "Old Norse",
 }
 FOUNDING = len(LANGS)   # the seven the two archives work in are always shown, empty or not; the rest only when a form uses them
 for _k, _l in MORE.items():

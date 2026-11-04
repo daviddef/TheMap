@@ -86,10 +86,12 @@ const here = Astro.url.pathname;
   <div class="bar">
     <div id="chips" class="chips"></div>
     <label class="small hidel"><input type="checkbox" id="hideliving"> Hide living people</label>
-    <details class="mh" id="mhbox"><summary><span class="mhbtn">MyHeritage links <span id="mhsum" class="mhsum">off</span></span></summary>
+    <details class="mh" id="mhbox"><summary><span class="mhbtn">MyHeritage and Ancestry links <span id="mhsum" class="mhsum">off</span></span></summary>
       <div class="mhbody"><p>Paste a profile or tree link for any one person from your MyHeritage tree. Everyone in this file then gets links back to it. Nothing is sent.</p>
       <input id="mhin" type="text" placeholder="https://www.myheritage.com/profile-…" aria-label="A MyHeritage profile or tree link for one person in this file">
-      <p id="mhstat" role="status" class="small"></p></div>
+      <p id="mhstat" role="status" class="small"></p>
+      <p class="small"><b>Ancestry</b> · <label>site <select id="mhanc" aria-label="Which Ancestry site the links open"><option value="com.au">ancestry.com.au</option><option value="com">ancestry.com</option><option value="co.uk">ancestry.co.uk</option><option value="ca">ancestry.ca</option></select></label></p>
+      <p id="ancstat" role="status" class="small"></p></div>
     </details>
     <nav class="tabs" role="tablist">
       <button role="tab" data-tab="tree" aria-selected="true">Tree</button>

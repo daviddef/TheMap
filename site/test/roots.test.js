@@ -489,3 +489,20 @@ test("fix list: outside search links are one plain line, for the dead only, and 
   const store = new Map(); globalThis.localStorage = { getItem: k => (store.has(k) ? store.get(k) : null), setItem: (k, v) => store.set(k, String(v)), removeItem: k => store.delete(k) };
   try { assert.equal(loadSite(), "com.au"); saveSite("co.uk"); assert.equal(loadSite(), "co.uk"); saveSite("bad.example"); assert.equal(loadSite(), "co.uk", "only a listed site is kept"); } finally { delete globalThis.localStorage; }
 });
+
+test("Ancestry links: tree number from the header, person number from the record number, and no link unless all three hold", async () => {
+  const { detectAncestry, personNum, personUrl } = await import(R + "js/ancestry.js");
+  const hdr = ["0 HEAD", "1 SOUR Ancestry.com Family Trees", "2 NAME Ancestry.com Member Trees", "2 _TREE An Invented Tree", "3 RIN 114002002", "3 _ENV prd", "1 CHAR UTF-8"];
+  const file = [...hdr, "0 @I120124089151@ INDI", "1 NAME Ann /Alpha/", "0 @I7@ INDI", "1 NAME Bo /Beta/", "0 TRLR"].join("\n") + "\n";
+  const a = detectAncestry(parseGedcom(enc(file))); assert.deepEqual(a, { tree: "114002002" });
+  assert.equal(personUrl(a, "I120124089151"), "https://www.ancestry.com.au/family-tree/person/tree/114002002/person/120124089151", "com.au by default");
+  assert.equal(personUrl(a, "I120124089151", "co.uk"), "https://www.ancestry.co.uk/family-tree/person/tree/114002002/person/120124089151");
+  assert.equal(personUrl(a, "I120124089151", "evil.example").split("/")[2], "www.ancestry.com.au", "only the four regional sites");
+  assert.equal(personUrl(a, "I7"), null, "a short record number is not an Ancestry person number: no link rather than a guess");
+  assert.equal(personUrl(a, "F1"), null); assert.equal(personNum("I12345"), null); assert.equal(personNum("I123456"), "123456");
+  assert.equal(detectAncestry(parseGedcom(enc(file.replace("Ancestry.com Family Trees", "MyHeritage Family Tree Builder")))), null, "the header must name Ancestry");
+  assert.equal(detectAncestry(parseGedcom(enc(file.replace("3 RIN 114002002", "3 RIN abc")))), null, "and carry a numeric tree number");
+  assert.equal(detectAncestry(parseGedcom(enc(makeSample()))), null, "a MyHeritage-style file gets none");
+  if (has) { const { Session } = await import(R + "js/pipeline.js"); const s = new Session(io); const out = await s.load(enc(file)); assert.deepEqual(out.anc, { tree: "114002002" }, "the session reports it to the page"); }
+  const app = fs.readFileSync(R + "js/app.js", "utf8"); assert.match(app, /personUrl\(anc, id, ancSite\)/); assert.match(app, /acts\.append\(\.\.\.ancA\(p\.id\)\)/);
+});

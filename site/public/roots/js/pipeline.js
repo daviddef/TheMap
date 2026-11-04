@@ -11,6 +11,7 @@ import { offerable } from './contribute.js';
 import { Overlay, suggestMerges, cleanDate, yearOf } from './workbench.js';
 import { buildChecklist, arrange } from './checklist.js';
 import { makeEnricher } from './enrich.js';
+import { detectAncestry } from './ancestry.js';
 import { buildConsistency } from './consistency.js';
 import { AtlasCore, targetOf, nameTargets, buildAtlas } from './atlas.js';
 
@@ -27,6 +28,7 @@ export class Session {
     const { people, mentions } = readPeople(this.parsed); this.P = people; this.mentions = mentions;
     this.snap = new Map([...people].map(([id, p]) => [id, { by: p.by, byApprox: p.byApprox, dy: p.dy, deathKnown: p.deathKnown, srcs: p.srcs.slice() }]));
     const y = prepare(people); this.est = y.est; this.dest = y.dest; tick('model', t0);
+    this.anc = detectAncestry(this.parsed);           // an Ancestry export carries its tree number in the header, and each person's Ancestry number is the record number
     t0 = now(); this.progress('Reading the Atlas');
     this.core = new AtlasCore(await this.io.json('data/atlas.json')); tick('atlasLoad', t0);
     try { this.families = await this.io.json('data/surname-families.json'); } catch (e) { this.families = []; }       // spellings the Atlas catalogue treats as one name
@@ -58,7 +60,7 @@ export class Session {
     t0 = now(); this.progress('Drawing flags and regimes');
     const atlas = await buildAtlas(keep, this.core, id => this.io.flag(id)); T.atlas = Math.round(now() - t0);
     this.tree = tree; this.atlas = atlas;
-    return { tree, atlas, report: this.report(report), review: this.review(), wb: this.workbench(), timings: { ...T }, build: { pipeline: BUILD, model: model.MODEL_BUILD } };
+    return { tree, atlas, anc: this.anc, report: this.report(report), review: this.review(), wb: this.workbench(), timings: { ...T }, build: { pipeline: BUILD, model: model.MODEL_BUILD } };
   }
 
   /* spellings near the place part of a text, in the country the text names (or, with none, the countries the tree uses most) */

@@ -8,6 +8,7 @@ import * as recent from './recent.js';
 import { BUILD } from './build.js';
 import { parseLink, profileUrl, treeUrl, toHash, fromHash } from './myheritage.js';
 import { loadLink, saveLink, loadSite, saveSite } from './remember.js';
+import { personUrl } from './ancestry.js';
 import { GROUPS as FIXGROUPS, describe } from './checklist.js';
 
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
@@ -49,7 +50,7 @@ const hideLiv = () => $('#hideliving').checked;
 $('#hideliving').onchange = () => { $('#fliving').checked = !hideLiv(); worker && worker.postMessage({ cmd: 'living', hide: hideLiv() }); };
 function done(m) {
   const stale = !m.build || m.build.pipeline !== BUILD || m.build.model !== BUILD; $('#stale').hidden = !stale;
-  last = m; window.RR = { tree: m.tree, atlas: m.atlas };
+  last = m; window.RR = { tree: m.tree, atlas: m.atlas }; anc = m.anc || null; ancStatus();
   const keepTab = $('.tabs [aria-selected=true]')?.dataset.tab || 'tree';
   show('work'); chips(m); mountViewer(); report(m); review(m); workbench(m.wb); worker.postMessage({ cmd: 'offer' });
   tab(m.first ? 'tree' : keepTab);
@@ -381,9 +382,12 @@ const copy = async (text, btn) => {
 let mhc = fromHash(location.hash), mhRemembered = false;
 { const kept = loadLink(), c = kept && parseLink(kept);                       // the last link pasted on this device, unless the address already carries one
   if (c) { $('#mhin').value = kept; if (!mhc) { mhc = c; mhRemembered = true; history.replaceState(null, '', toHash(c)); } } }
+/* the Ancestry tree an Ancestry export came from: its number is in the file's header, and each record number is Ancestry's own person number */
+let anc = null, ancSite = loadSite();
+const ancA = id => { const u = personUrl(anc, id, ancSite); return u ? [ia('open', 'Open this person in the Ancestry tree (ancestry.' + ancSite + ')', u)] : []; };
 const mhA = (id, name) => {
-  const p = profileUrl(mhc, id, name), tu = treeUrl(mhc, id); if (!p) return [];
-  return [' ', ia('person', 'Open this profile on MyHeritage', p), ' ', ia('tree', 'Open this person in the tree on MyHeritage', tu)];
+  const p = profileUrl(mhc, id, name), tu = treeUrl(mhc, id), a = ancA(id);
+  return [...(p ? [' ', ia('person', 'Open this profile on MyHeritage', p), ' ', ia('tree', 'Open this person in the tree on MyHeritage', tu)] : []), ...a];
 };
 /* a link to another page (an Atlas page of this site, or a collection's own site): new tab, no referrer */
 const lk = (t, u) => { const a = el('a', null, t); a.href = u; a.target = '_blank'; a.rel = 'noopener noreferrer'; return a; };
@@ -415,6 +419,7 @@ function pline(p, o = {}) {
   if (o.copyName !== false && p.name) acts.append(ib('copy', 'Copy name', function () { copy(p.name, this); }));
   const pu = profileUrl(mhc, p.id, p.name), tu = treeUrl(mhc, p.id);
   if (pu) acts.append(ia('person', 'Open this profile on MyHeritage', pu), ia('tree', 'Open this person in the tree on MyHeritage', tu));
+  acts.append(...ancA(p.id));
   li.append(acts); return li;
 }
 /* a nested list of people, the first few shown and the rest behind one button */
@@ -440,6 +445,7 @@ $('#mhin').oninput = e => {
   saveLink(e.target.value.trim());
   mhc = c; history.replaceState(null, '', toHash(c)); mhStatus(); refreshMh(); if (worker && c.num) worker.postMessage({ cmd: 'who', id: 'I' + c.num });
 };
+function ancStatus() { $('#ancstat').textContent = anc ? 'This is an Ancestry export (tree ' + anc.tree + '): every person has a link into that tree on ancestry.' + ancSite + ', read from the file itself. Nothing is sent.' : 'Not an Ancestry export (or no tree number in its header), so no Ancestry links are made.'; }
 function refreshMh() { pushMh(); drawFix(); if (lastInfo) person(lastInfo); }
 if (mhc) mhStatus();
 
@@ -523,7 +529,8 @@ function saveAs(name, text, type) {
 }
 $('#ftext').onclick = () => fix && saveAs('fix-list.txt', checklistText(fix, new Date().toISOString().slice(0, 10)), 'text/plain;charset=utf-8');
 $('#fcollapse').onchange = () => drawFix();
-$('#fanc').value = loadSite(); $('#fanc').onchange = () => { saveSite($('#fanc').value); askFix(); };
+function setSite(v) { ancSite = v; saveSite(v); $('#fanc').value = v; $('#mhanc').value = v; askFix(); drawFix(); if (lastInfo) person(lastInfo); ancStatus(); }
+$('#fanc').value = $('#mhanc').value = ancSite; $('#fanc').onchange = () => setSite($('#fanc').value); $('#mhanc').onchange = () => setSite($('#mhanc').value);
 /* The PDF is the browser's own "Save as PDF" over a print-ready copy of the list, built here on the device from the same rows. Nothing is uploaded and
    no library or font is fetched. The copy is added to the page for the moment of printing and removed after. */
 function printable() {

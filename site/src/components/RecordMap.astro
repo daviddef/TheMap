@@ -3424,8 +3424,13 @@ window.addEventListener("load", async function () {
        the dot stranded above it. Now the name (with its distance) and the access line sit in one column
        beside the number, so a long name wraps inside its own column and the access colour stays with its
        words. */
-    var meta = (dot ? '<i class="ra-dot" style="background:' + dot + '"></i>' : "") +
-               (note ? '<span class="ra-ck-n">' + esc(note) + "</span>" : "");
+    /* A COLOUR SAYS ITS MEANING ON HOVER, SO THE ROW DOES NOT REPEAT IT. David: «can hovering over a colour
+       describe what it means?» and then «we can then remove the text to describe it on every line?». With a
+       dot, the note (the access words) becomes the dot's tooltip and accessible name and is not printed;
+       the colour key lists every colour for touch screens. A row with no dot keeps its note as text. */
+    var meta = (dot ? '<i class="ra-dot" role="img" style="background:' + dot + '"' +
+                      (note ? ' title="' + esc(note) + '" aria-label="' + esc(note) + '"' : "") + "></i>" : "") +
+               (note && !dot ? '<span class="ra-ck-n">' + esc(note) + "</span>" : "");
     return '<li class="' + (num != null ? "ra-ck-r" : "ra-ck-r ra-ck-nonum") + '"' + at + ">" +
            (num != null ? '<span class="ra-ck-i">' + num + "</span>" : "") +
            '<span class="ra-ck-main">' +

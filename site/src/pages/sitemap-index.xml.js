@@ -94,7 +94,11 @@ export function urlsFor(set) {
       ...full.places.map((p) => p.country).filter(Boolean),
       ...provs.providers.flatMap((p) => p.countries).filter((k) => k !== "*"),
     ]);
-    return [...ccs].map((cc) => [`country/${cc.toLowerCase()}/`, "0.8"]);
+    /* THE SOURCES PAGE OF EACH COUNTRY, listed beside the country: place pages
+       no longer print the national and worldwide sources, so this is where a
+       search engine finds them. */
+    return [...ccs].flatMap((cc) => [[`country/${cc.toLowerCase()}/`, "0.8"],
+                                     [`country/${cc.toLowerCase()}/sources/`, "0.6"]]);
   }
   if (set === "surnames") {
     /* THE SAME RULE THE PAGES ARE BUILT FROM, imported rather than copied.

@@ -58,3 +58,14 @@ steadily: about 1.5 MB a day between steps, and +178 MB (about 0.7 GiB raw) in t
 That is the runway: 0.56 GiB of raw headroom to the 9.6 GiB gate, so one more step like the last one
 trips it. Before that, expect more 10-minute-plus Pages waits as the artifact grows. Shrinking the repeated
 sections above would buy back an estimated 1.5–2 GiB raw (not measured by a build).
+
+## Shared sources: one page per country (5 November)
+
+The worldwide and national archive lists were repeated on every place page of a country. They now live once, on
+`/country/<cc>/sources/`; each place page keeps a short static line and a plain link to it, so no text depends on
+JavaScript. Countries with a place-specific national list (more than 10 non-worldwide providers, e.g. Italy) keep
+the nearby list on the place page. Rows keep their `data-src` ids so progress marking still works.
+
+Measured on a full local build of 55,771 place pages: raw 7549 -> 6376 MiB (-1173 MiB, 15.5%); estimated artifact
+1.93 -> 1.63 GB. `scripts/check-sources-moved.py BEFORE_DIST AFTER_DIST` fails if any source row on a before-page is
+missing from the after-page and its country sources page. Run it when changing these sections.

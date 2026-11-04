@@ -20,7 +20,8 @@ import { u } from "../../lib/url.js";
 import full from "../../data/places-full.json";
 import regions from "../../../public/regions.json";
 import provs from "../../../public/providers.json";
-import { sourcesFor, sourcesNear, access as ACCESS } from "../../lib/sources-by-country.js";
+import { sourcesFor, sourcesNear, access as ACCESS, nationalIsPlaceSpecific, nationalUnverified,
+         countrySourcesHref } from "../../lib/sources-by-country.js";
 import { atlas as idx } from "../../lib/atlas.js";
 import WhereToBegin from "../../components/WhereToBegin.astro";
 import Neighbourhood from "../../components/Neighbourhood.astro";
@@ -105,13 +106,12 @@ const { shown: national, hidden: nationalHidden, worldwide } =
 /* Wikidata's national archive and library, where this atlas has nothing
    curated for the country. Kept apart from `national` above because those
    have been looked at and these have not. */
-let worldNat = [];
-try {
-  const wa = (await import("../../../../data/world-archives.json")).default;
-  worldNat = (wa.archives || []).filter((r) => r.cc === place.country)
-    .sort((a, b) => (a.kind !== "national-archive") - (b.kind !== "national-archive"))
-    .slice(0, 6);
-} catch (e) { worldNat = []; }
+const worldNat = nationalUnverified(place.country);
+/* WHAT IS PRINTED ONCE ON THE COUNTRY'S SOURCES PAGE AND ONLY POINTED AT HERE:
+   the worldwide services, the unverified national ones, and the country's own
+   list when it is the same for every place in it. See sources-by-country.js. */
+const nationalShared = !nationalIsPlaceSpecific(place.country);
+const sourcesMoved = worldwide.length > 0 || worldNat.length > 0 || (nationalShared && national.length > 0);
 const countryName = (idx.countries || {})[place.country] || place.country;
 /* What a mark made on this page says it belongs to, and the way back to it.
    Same two values every markable row on the page needs, computed once. */
@@ -520,32 +520,7 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
     </section>
   )}
 
-  {worldNat.length > 0 && (
-    <section style="margin-top:38px">
-      <h2>National sources for {countryName}, unverified</h2>
-      <p class="cap">From Wikidata, CC0 — the national archive and the national library
-      where the country has one. <b>Nobody here has opened these.</b> The link answered when
-      it was asked and that is the whole of what this map knows about them. They are listed
-      because <b>a country with no named source at all is the worse answer</b>: 199 of the
-      237 countries here had nothing but the worldwide services, which cover everywhere and
-      therefore say nothing about anywhere.</p>
-      <ul class="vols" style="margin-top:12px">
-        {worldNat.map((r) => (
-          <li data-src={"source:wd-" + (r.id || r.name)} data-src-t={r.name}
-              data-src-where={countryName} data-src-href={r.url}>
-            <a href={r.url} target="_blank" rel="noopener">{r.name} ↗</a>
-            <span class="who">{r.kind === "national-archive" ? "national archive" : "national library"}</span>
-            {r.status !== "ok" && <span class="who">{
-              r.status === "challenged" ? "behind a bot gate, but alive"
-              : r.status === "unreachable" ? "did not answer this checker"
-              : "answered with an error"}</span>}
-          </li>
-        ))}
-      </ul>
-    </section>
-  )}
-
-  {national.length > 0 && (
+  {national.length > 0 && !nationalShared && (
     <section style="margin-top:38px">
       <h2>The sources for {countryName}</h2>
       <p class="cap">National and regional sources that cover this ground <b>whether or not
@@ -553,7 +528,7 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
       a place with no volumes recorded on it.{nationalHidden > 0 && <> A country-wide body is
       listed whatever the distance; a provincial archive is a claim over its own province, so
       those are the <b>nearest</b> ones. <b>{nationalHidden.toLocaleString()} more</b> cover {countryName}
-      and are on the <a href={u(`/country/${place.country.toLowerCase()}/`)}>country page</a>.</>}</p>
+      and are on the <a href={u(countrySourcesHref(place.country))}>country sources page</a>.</>}</p>
       <ul class="vols" style="margin-top:12px">
         {national.map((p) => (
           <li data-src={"source:" + p.id} data-src-t={p.name}
@@ -569,31 +544,21 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
     </section>
   )}
 
-  {/* THE ONES THAT COVER EVERYWHERE, INCLUDING HERE. Kept out of the list
-      above so a global aggregator never outranks the archive that actually
-      holds the paper — but no longer kept off the page. Eleven of these twelve
-      appeared on no place page in this atlas, for any country, which meant a
-      reader working Croatia was never told Geneanet or Find a Grave exist. See
-      the note at the top of sources-by-country.js for why the old exclusion
-      did not survive being measured. */}
-  {worldwide.length > 0 && (
+  {/* THE SOURCES THAT ARE THE SAME FOR EVERY PLACE IN THE COUNTRY are listed
+      once, on its sources page: the national archives and libraries, the
+      Wikidata ones nobody has verified, and the {worldwide.length} services
+      that cover everywhere (FamilySearch, Ancestry, Geneanet, Find a Grave…).
+      They were printed here, 19 KB of them, on all 55,771 place pages. A plain
+      link, not a script, so nothing depends on JavaScript. */}
+  {sourcesMoved && (
     <section style="margin-top:34px">
-      <h2>Sources that cover everywhere</h2>
-      <p class="cap">Not about {countryName} in particular — these reach most of the
-      world, which includes here. They are listed after the local sources because a
-      body that holds this ground's own paper is a better first stop than one that
-      holds a little of everywhere's. Worth knowing they exist all the same.</p>
-      <ul class="vols" style="margin-top:12px">
-        {worldwide.map((p) => (
-          <li data-src={"source:" + p.id} data-src-t={p.name}
-              data-src-where="worldwide" data-src-href={u(`/archive/${p.id}/`)}>
-            <a href={u(`/archive/${p.id}/`)}>{p.name}</a>
-            <span class="who">{ACCESS[p.access] || p.access}</span>
-            <span class="srcmark"></span>
-            {p.what && <><br /><span class="who">{p.what}</span></>}
-          </li>
-        ))}
-      </ul>
+      <h2>Sources for {countryName}</h2>
+      <p class="cap">{nationalShared && national.length > 0 && <>The national and regional archives that cover {countryName}, </>}
+      {worldNat.length > 0 && <>the national archive and library from Wikidata, </>}
+      and the {worldwide.length} services that cover every country — FamilySearch, Ancestry,
+      MyHeritage, Geneanet, Find a Grave and the rest — are the same for every place in
+      {" "}{countryName}, so they are listed once:
+      {" "}<a href={u(countrySourcesHref(place.country))}>all the sources for {countryName}</a>.</p>
     </section>
   )}
 

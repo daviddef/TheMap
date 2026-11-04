@@ -128,3 +128,51 @@ export function sourcesNear(cc, lat, lon, limit = 10) {
   const shown = [...wide, ...near];
   return { shown, hidden: all.length - shown.length, worldwide };
 }
+
+/* WHAT A PLACE PAGE POINTS AT INSTEAD OF REPEATING.
+ *
+ * Three blocks on every place page were the same for every place in a
+ * country: the twelve worldwide services (16 KB, identical on all 55,771
+ * pages bar the country's name), «national sources, unverified» (from
+ * Wikidata, one list per country) and the country's own sources when it has
+ * ten or fewer. Gzip's window is 32 KB and pages are 80 KB, so each copy was
+ * paid for in full: measured on Sweden, Italy, the US and Russia, removing
+ * them is 23-37% of the raw size of those pages and 31-47% of the
+ * compressed. They are printed ONCE, on /country/<cc>/sources/, and the place
+ * page keeps a static sentence and a link — no script, so a crawler and a
+ * reader without JavaScript lose nothing.
+ *
+ * WHAT STAYS. A country with more than NEARBY_LIMIT sources of its own (Italy:
+ * 126 provincial archives) shows the nearest ten per place, and that list
+ * differs from place to place, so it is NOT shared and stays where it is. */
+export const NEARBY_LIMIT = 10;
+
+export function nationalIsPlaceSpecific(cc) {
+  return sourcesFor(cc).filter((p) => !p.worldwide).length > NEARBY_LIMIT;
+}
+
+let WORLD_ARCHIVES = [];
+try {
+  WORLD_ARCHIVES = (await import("../../../data/world-archives.json")).default.archives || [];
+} catch (e) { WORLD_ARCHIVES = []; }
+
+/* Wikidata's national archive and library, where this atlas has nothing
+   curated for the country; looked at by nobody. */
+export function nationalUnverified(cc) {
+  return WORLD_ARCHIVES.filter((r) => r.cc === cc)
+    .sort((a, b) => (a.kind !== "national-archive") - (b.kind !== "national-archive"))
+    .slice(0, 6);
+}
+
+/* Everything the country sources page prints: the whole national list (no
+   distance narrowing), the unverified ones, and the worldwide services. */
+export function countrySources(cc) {
+  const every = sourcesFor(cc);
+  return { national: every.filter((p) => !p.worldwide),
+           worldwide: every.filter((p) => p.worldwide),
+           unverified: nationalUnverified(cc) };
+}
+
+/* The country sources page has a page for every country that has a place
+   page, because COUNTRY_PAGES is that set. */
+export const countrySourcesHref = (cc) => `/country/${cc.toLowerCase()}/sources/`;

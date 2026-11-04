@@ -1,0 +1,116 @@
+---
+/* THE SOURCES FOR ONE COUNTRY, PRINTED ONCE.
+   Every place page used to carry these itself: the national archives and
+   libraries, the Wikidata ones nobody has verified, and the twelve services
+   that cover every country. They are identical for every place in the country,
+   so 55,771 copies of them were 1.0-1.3 GiB of the published site. Place pages
+   now say so in a sentence and link here. This is an ordinary static page, so
+   a search engine and a reader without JavaScript see all of it, and the rows
+   carry the same data-src ids as before, so a mark made on one still works.
+   See lib/sources-by-country.js. */
+import Base from "../../../layouts/Base.astro";
+import ProgressKit from "../../../components/ProgressKit.astro";
+import VolumeMarks from "../../../components/VolumeMarks.astro";
+import { flagFor } from "../../../lib/flags.js";
+import { u } from "../../../lib/url.js";
+import { atlas as idx } from "../../../lib/atlas.js";
+import { countrySources, access as ACCESS } from "../../../lib/sources-by-country.js";
+
+export async function getStaticPaths() {
+  const { COUNTRY_PAGES } = await import("../../../lib/country-pages.js");
+  return [...COUNTRY_PAGES].map((cc) => ({ params: { cc: cc.toLowerCase() }, props: { cc } }));
+}
+
+const { cc } = Astro.props;
+const NAME = (idx.countries || {})[cc] || cc;
+const { national, worldwide, unverified } = countrySources(cc);
+---
+<Base
+  title={`Sources for ${NAME}`}
+  flag={flagFor(cc)}
+  eyebrow={[national.length ? `${national.length} national and regional source${national.length === 1 ? "" : "s"}` : null,
+            `${worldwide.length} that cover everywhere`].filter(Boolean).join(" · ")}
+  dek={`The archives, libraries and services that cover ${NAME} whether or not anybody has walked a particular place there.`}>
+
+  <ProgressKit />
+
+  <p class="cap"><a href={u(`/country/${cc.toLowerCase()}/`)}>← Everything in {NAME}</a></p>
+
+  {national.length > 0 && (
+    <section style="margin-top:30px">
+      <h2>The sources for {NAME}</h2>
+      <p class="cap">National and regional sources that cover this ground <b>whether or not
+      anybody has walked it here</b> — which makes them the answer, not the consolation, for
+      a place with no volumes recorded on it.</p>
+      <ul class="vols" style="margin-top:12px">
+        {national.map((p) => (
+          <li data-src={"source:" + p.id} data-src-t={p.name}
+              data-src-where={NAME} data-src-href={u(`/archive/${p.id}/`)}>
+            <a href={u(`/archive/${p.id}/`)}>{p.name}</a>
+            <span class="who">{ACCESS[p.access] || p.access}</span>
+            {p.at && <span class="who">{p.at.place}</span>}
+            <span class="srcmark"></span>
+            {p.what && <><br /><span class="who">{p.what}</span></>}
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  {unverified.length > 0 && (
+    <section style="margin-top:38px">
+      <h2>National sources for {NAME}, unverified</h2>
+      <p class="cap">From Wikidata, CC0 — the national archive and the national library
+      where the country has one. <b>Nobody here has opened these.</b> The link answered when
+      it was asked and that is the whole of what this map knows about them. They are listed
+      because <b>a country with no named source at all is the worse answer</b>: 199 of the
+      237 countries here had nothing but the worldwide services, which cover everywhere and
+      therefore say nothing about anywhere.</p>
+      <ul class="vols" style="margin-top:12px">
+        {unverified.map((r) => (
+          <li data-src={"source:wd-" + (r.id || r.name)} data-src-t={r.name}
+              data-src-where={NAME} data-src-href={r.url}>
+            <a href={r.url} target="_blank" rel="noopener">{r.name} ↗</a>
+            <span class="who">{r.kind === "national-archive" ? "national archive" : "national library"}</span>
+            {r.status !== "ok" && <span class="who">{
+              r.status === "challenged" ? "behind a bot gate, but alive"
+              : r.status === "unreachable" ? "did not answer this checker"
+              : "answered with an error"}</span>}
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  {worldwide.length > 0 && (
+    <section style="margin-top:34px">
+      <h2>Sources that cover everywhere</h2>
+      <p class="cap">Not about {NAME} in particular — these reach most of the
+      world, which includes here. They are listed after the local sources because a
+      body that holds this ground's own paper is a better first stop than one that
+      holds a little of everywhere's. Worth knowing they exist all the same.</p>
+      <ul class="vols" style="margin-top:12px">
+        {worldwide.map((p) => (
+          <li data-src={"source:" + p.id} data-src-t={p.name}
+              data-src-where="worldwide" data-src-href={u(`/archive/${p.id}/`)}>
+            <a href={u(`/archive/${p.id}/`)}>{p.name}</a>
+            <span class="who">{ACCESS[p.access] || p.access}</span>
+            <span class="srcmark"></span>
+            {p.what && <><br /><span class="who">{p.what}</span></>}
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <p class="cap" style="margin-top:22px"><a href={u(`/country/${cc.toLowerCase()}/`)}>Everything in {NAME}</a> ·
+    <a href={u("/places/")}>All places</a></p>
+  <VolumeMarks />
+</Base>
+
+<style>
+  h2 { font-family: var(--serif); font-size: 26px; font-weight: 500; margin: 0 0 6px; }
+  .vols { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 6px; }
+  .vols li { font-family: var(--sans); font-size: 13px; line-height: 1.5; }
+  .who { font-size: 11px; color: var(--ink-3); margin-left: 8px; }
+</style>

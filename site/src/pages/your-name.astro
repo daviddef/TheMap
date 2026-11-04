@@ -1,5 +1,5 @@
 ---
-/* SAY YOUR NAME: a given name across languages and clerks.
+/* SAY YOUR NAME: a given name or a surname, across languages and clerks, on one page with a switch.
  *
  * Read from public/given-names.json, which scripts/build-given-names.py makes from data/given-name-families.json, the one
  * catalogue (written only through scripts/given_name_variants.py). The family archives that used to keep a table of their
@@ -9,27 +9,82 @@ import fs from "node:fs";
 import path from "node:path";
 import Base from "../layouts/Base.astro";
 import SayYourName from "../components/SayYourName.astro";
+import SayYourSurname from "../components/SayYourSurname.astro";
+import { allFamilies } from "../lib/surname-families.js";
 import { u } from "../lib/url.js";
 
 const file = [path.join(process.cwd(), "public", "given-names.json"), path.join(process.cwd(), "site", "public", "given-names.json")]
   .find((p) => fs.existsSync(p));
 const data = JSON.parse(fs.readFileSync(file, "utf8"));
+const nFam = allFamilies().length;
+const surChips = ["Defranceschi", "Lerena", "Blažević", "Kosina"];
 const chips = ["Ivan", "Giuseppe", "Antonio", "Franciscus", "Matija", "Katarina", "Zdravko", "Maria"];
 ---
 <Base
   title="Say your name"
-  eyebrow={`${data.rows.length} names · ${data.totalForms} forms`}
-  dek="Ivan, Johann, Giovanni, Zuane, John and Joannes are one name. Type any form you have met and see every other way a clerk, a priest or an index wrote it."
-  description="Given names across languages: the Latin of the register, the Italian, Venetian, Croatian, German, Hungarian and English forms, and which of them an archive has actually met on a record.">
+  eyebrow={`${data.rows.length} given names · ${data.totalForms} forms · ${nFam} surname families`}
+  dek="Ivan, Johann, Giovanni, Zuane, John and Joannes are one name. Choose a given name or a surname, type any form you have met, and see every other way a clerk, a priest or an index wrote it."
+  description="Given names and surnames across languages: the Latin of the register, the Italian, Venetian, Croatian, German, Hungarian and English forms, which spellings are one name, and which of them a record has actually shown.">
 
   <section>
-    <p class="cap" style="margin-top:0">A search that tries only the form on the family tree misses the register: the same man is
-    Joannes in the baptism, Zuane to the neighbours, Giovanni to the civil clerk and John on the ship's list. Forms in
-    plain type have been met on a record by one of the family archives; forms marked <sup>°</sup> are the right form in that
-    language and a thing to search, never yet seen. A slip, written once by mistake, is listed apart and is not a spelling.</p>
-    <SayYourName rows={data.rows} langs={data.languages} chips={chips} u={u} />
-    <p class="cap">The forms come from the family archives' own registers, and each carries the evidence behind it in the
-    catalogue, <code>data/given-name-families.json</code>. Nothing about a person is kept. Surnames have their own list:
-    <a href={u("/surname-families/")}>the spellings of a surname</a>. The data is free to reuse: <a href={u("/given-names.json")}>given-names.json</a>.</p>
+    <div class="ynsw" role="tablist" aria-label="What are you looking up?">
+      <button type="button" role="tab" id="yn-tab-given" aria-controls="yn-given" aria-selected="true">Given name</button>
+      <button type="button" role="tab" id="yn-tab-sur" aria-controls="yn-sur" aria-selected="false">Surname</button>
+    </div>
+
+    <div id="yn-given" role="tabpanel" aria-labelledby="yn-tab-given">
+      <p class="cap" style="margin-top:0">A search that tries only the form on the family tree misses the register: the same man is
+      Joannes in the baptism, Zuane to the neighbours, Giovanni to the civil clerk and John on the ship's list. Forms in
+      plain type have been met on a record by one of the family archives; forms marked <sup>°</sup> are the right form in that
+      language and a thing to search, never yet seen. A slip, written once by mistake, is listed apart and is not a spelling.</p>
+      <SayYourName rows={data.rows} langs={data.languages} chips={chips} u={u} />
+      <p class="cap">The forms come from the family archives' own registers, and each carries the evidence behind it in the
+      catalogue, <code>data/given-name-families.json</code>. Nothing about a person is kept. The data is free to reuse:
+      <a href={u("/given-names.json")}>given-names.json</a>.</p>
+    </div>
+
+    <div id="yn-sur" role="tabpanel" aria-labelledby="yn-tab-sur">
+      <p class="cap" style="margin-top:0">Surnames are spelt by the clerk, not the family: Defranceschi in one register is De Franceschi
+      in the next. Each form below carries one of five claims and says what it rests on. Case, spacing, hyphens and apostrophes are never
+      counted as spellings; an accent is, because a priest's Lereña is not a clerk's Lerena.</p>
+      <SayYourSurname u={u} chips={surChips} />
+      <p class="cap">The whole list, with each family's evidence, is on <a href={u("/surname-families/")}>the spellings of a name</a>.
+      Nothing about a person is kept in either catalogue.</p>
+    </div>
   </section>
 </Base>
+
+<style is:global>
+  .ynsw { display: inline-flex; border: 1px solid var(--rule); border-radius: 999px; overflow: hidden; margin: 0 0 18px; background: var(--panel); }
+  .ynsw button { font: inherit; font-family: var(--sans); font-size: 13px; letter-spacing: .04em; padding: 8px 22px; border: 0; background: none; color: var(--ink-2); cursor: pointer; }
+  .ynsw button + button { border-left: 1px solid var(--rule); }
+  .ynsw button[aria-selected="true"] { background: var(--accent); color: var(--ground, #fff); }
+  .ynsw button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+</style>
+
+<script>
+  /* One page, two catalogues. Without script both panels simply stack. The choice lives in the address (?kind=surname, or an ?s= or
+     ?n= that was shared), so a link opens on the right half. */
+  const given = document.getElementById("yn-given"), sur = document.getElementById("yn-sur");
+  const tg = document.getElementById("yn-tab-given"), ts = document.getElementById("yn-tab-sur");
+  if (given && sur && tg && ts) {
+    const set = (kind: "given" | "surname", focus = false) => {
+      const isSur = kind === "surname";
+      given.hidden = isSur; sur.hidden = !isSur;
+      tg.setAttribute("aria-selected", String(!isSur)); ts.setAttribute("aria-selected", String(isSur));
+      try {
+        const x = new URL(location.href);
+        if (isSur) x.searchParams.set("kind", "surname"); else x.searchParams.delete("kind");
+        x.searchParams.delete("n"); x.searchParams.delete("s");
+        history.replaceState(null, "", x.toString());
+      } catch (e) {}
+      if (focus) (document.getElementById(isSur ? "ssn-q" : "syn-q") as HTMLInputElement | null)?.focus();
+    };
+    tg.addEventListener("click", () => set("given", true));
+    ts.addEventListener("click", () => set("surname", true));
+    const sp = new URLSearchParams(location.search);
+    const wantSur = sp.get("kind") === "surname" || (sp.has("s") && !sp.has("n"));
+    given.hidden = wantSur; sur.hidden = !wantSur;
+    tg.setAttribute("aria-selected", String(!wantSur)); ts.setAttribute("aria-selected", String(wantSur));
+  }
+</script>

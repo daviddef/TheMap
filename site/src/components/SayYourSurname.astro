@@ -1,0 +1,105 @@
+---
+/* The surname half of "Say your name": type a spelling, see the catalogued family it belongs to and what each form rests on.
+ *
+ * Read from data/surname-families.json (the one catalogue, written only through scripts/surname_variants.py) by way of
+ * lib/surname-families.js, so this box, /surname-families/ and every surname page say the same thing. The two keys are the
+ * catalogue's own: formKey (case, spaces, hyphens, apostrophes) finds a form; searchKey (also drops accents) is the fallback,
+ * and a hit that needed it SAYS so, because in the catalogue an accent is a spelling.
+ */
+import { allFamilies, legend, membersByStatus, STATUS_ORDER, STATUS_LABEL, formKey, searchKey } from "../lib/surname-families.js";
+import { corpus } from "../lib/surname-corpus.js";
+import { surnamePageRows, slugForSurname } from "../lib/surname-pages.js";
+
+const { u = (p) => p, chips = [] } = Astro.props;
+const pageFor = surnamePageRows(corpus().surnames || []).slugs;
+const link = (n) => (pageFor.has(slugForSurname(n)) ? u(`/surname/${slugForSurname(n)}/`) : null);
+const leg = legend();
+const fams = allFamilies().map((f) => {
+  const g = membersByStatus(f);
+  return {
+    name: f.name, note: f.note || "", head: link(f.name),
+    groups: STATUS_ORDER.filter((s) => g[s].length).map((s) => ({ label: STATUS_LABEL[s], gloss: leg[s] || "", forms: g[s].map((m) => ({ f: m.form, u: link(m.form) })) })),
+    notSame: (f.notSame || []).map((m) => m.form),
+  };
+});
+const exact = {}, loose = {};
+allFamilies().forEach((f, i) => [...f.members, ...(f.notSame || [])].forEach((m) => {
+  (exact[formKey(m.form)] ||= []).includes(i) || exact[formKey(m.form)].push(i);
+  (loose[searchKey(m.form)] ||= []).includes(i) || loose[searchKey(m.form)].push(i);
+}));
+const forms = fams.reduce((a, f) => a + f.groups.reduce((b, g) => b + g.forms.length, 0), 0);
+const live = chips.filter((c) => exact[formKey(c)]);
+---
+<div class="ssn">
+  <label class="syn-lab" for="ssn-q">Type a surname</label>
+  <input id="ssn-q" class="syn-q" type="search" autocomplete="off" spellcheck="false" placeholder="Defranceschi, Lerena, Blažević…"
+         data-fams={JSON.stringify(fams)} data-exact={JSON.stringify(exact)} data-loose={JSON.stringify(loose)} />
+  {live.length > 0 && <div class="syn-chips">{live.map((c) => <button type="button" class="syn-chip" data-n={c}>{c}</button>)}</div>}
+  <p class="syn-share" hidden><button type="button" class="ssn-copy">Copy link</button> <span class="syn-url mono"></span></p>
+  <div class="ssn-out" aria-live="polite"></div>
+  <p class="syn-foot small dim">{fams.length} families · {forms} forms, each with the evidence behind it.
+    <a href={u("/surname-families/")}>Browse every family</a>.</p>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>(".ssn").forEach((box) => {
+    const q = box.querySelector<HTMLInputElement>("#ssn-q");
+    const out = box.querySelector<HTMLElement>(".ssn-out");
+    const share = box.querySelector<HTMLElement>(".syn-share");
+    const urlEl = box.querySelector<HTMLElement>(".syn-url");
+    if (!q || !out) return;
+    const fams = JSON.parse(q.dataset.fams || "[]"), exact = JSON.parse(q.dataset.exact || "{}"), loose = JSON.parse(q.dataset.loose || "{}");
+    const formKey = (s: string) => String(s || "").normalize("NFC").toLowerCase().replace(/[\s'’-]+/g, "");
+    const searchKey = (s: string) => String(s || "").replace(/[đł]/gi, (c) => (c.toLowerCase() === "đ" ? "d" : "l")).replace(/ø/gi, "o").replace(/ß/g, "ss")
+      .normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const esc = (s: unknown) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c as "&"]));
+    const setUrl = (t: string) => {
+      try {
+        const x = new URL(location.href); x.hash = "";
+        if (t) x.searchParams.set("s", t); else x.searchParams.delete("s");
+        history.replaceState(null, "", x.toString());
+        if (urlEl) urlEl.textContent = x.toString();
+        if (share) share.hidden = !t;
+      } catch (e) {}
+    };
+    const card = (f: any) => `<article class="famcard"><h2>${f.head ? `<a href="${esc(f.head)}">${esc(f.name)}</a>` : esc(f.name)}</h2>`
+      + (f.note ? `<p class="cap" style="margin-top:2px">${esc(f.note)}</p>` : "")
+      + f.groups.map((g: any) => `<p class="famrow"><span class="famst" title="${esc(g.gloss)}">${esc(g.label)}</span><span class="famforms">`
+        + g.forms.map((m: any) => (m.u ? `<a href="${esc(m.u)}">${esc(m.f)}</a>` : `<span>${esc(m.f)}</span>`)).join("") + `</span></p>`).join("")
+      + (f.notSame.length ? `<p class="famrow famno"><span class="famst">Not the same name</span><span class="famforms">${f.notSame.map((m: string) => `<span>${esc(m)}</span>`).join("")}</span></p>` : "")
+      + `</article>`;
+    const render = (t: string) => {
+      const k = formKey(t);
+      if (!k) { out.innerHTML = ""; setUrl(""); return; }
+      let hit = exact[k], loosely = false;
+      if (!hit) { hit = loose[searchKey(t)]; loosely = !!hit; }
+      if (!hit) {
+        out.innerHTML = `<p class="cap">No catalogued family holds “${esc(t)}”. That is not a finding about the name: the catalogue only lists families a record has shown. A surname page, if the atlas has one, still offers computed spellings to try.</p>`;
+        setUrl(t); return;
+      }
+      out.innerHTML = (loosely ? `<p class="cap">Matched ignoring an accent. The catalogue counts an accent as a spelling, so check the form below is the one on your record.</p>` : "")
+        + hit.map((i: number) => card(fams[i])).join("");
+      setUrl(t);
+    };
+    q.addEventListener("input", () => render(q.value));
+    box.querySelectorAll<HTMLElement>(".syn-chip").forEach((b) => b.addEventListener("click", () => { q.value = b.dataset.n || ""; render(q.value); q.focus(); }));
+    const copy = box.querySelector<HTMLElement>(".ssn-copy");
+    if (copy) copy.addEventListener("click", () => { try { navigator.clipboard.writeText(location.href); copy.textContent = "Copied"; setTimeout(() => { copy.textContent = "Copy link"; }, 1400); } catch (e) {} });
+    const pre = new URLSearchParams(location.search).get("s");
+    if (pre) { q.value = pre; render(pre); }
+  });
+</script>
+
+<style is:global>
+  .ssn { margin-top: 4px; }
+  .ssn .famcard { background: var(--panel); border: 1px solid var(--rule); border-radius: 3px; padding: 18px 22px 16px; margin-top: 14px; }
+  .ssn .famcard h2 { margin: 0; font-size: 24px; font-weight: 500; }
+  .ssn .famcard h2 a { text-decoration: none; }
+  .ssn .famrow { display: grid; grid-template-columns: 17em 1fr; gap: 4px 12px; align-items: start; margin: 10px 0 0; font-family: var(--serif); font-size: 17px; }
+  .ssn .famforms { display: flex; flex-wrap: wrap; gap: 6px 8px; }
+  .ssn .famforms a, .ssn .famforms span { padding: 1px 10px; background: var(--ground); border: 1px solid var(--rule); border-radius: 999px; line-height: 1.5; text-decoration: none; }
+  .ssn .famforms a { color: var(--accent); }
+  .ssn .famst { padding-top: 6px; white-space: nowrap; font-family: var(--sans); font-size: 10.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); }
+  .ssn .famno .famforms span { color: var(--ink-3); }
+  @media (max-width: 640px) { .ssn .famrow { grid-template-columns: 1fr; } .ssn .famst { padding-top: 0; white-space: normal; } }
+</style>

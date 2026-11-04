@@ -156,17 +156,17 @@ export class Session {
       { key: 'ages', title: 'Today’s country on an older date', how: 'Places written with today’s country for a date when the Atlas shows another power ruling it (for example South Africa under Dutch or British rule). Often fine: it is how people name a place today. Your tree may want the name used at the time, and the maps already draw the flag of the day.', items: ages },
       { key: 'leads', title: 'Where to look next', how: 'People with no parents in your file, born where the Atlas lists a record collection for those years. The links open the collection’s own site; nothing from your file is sent.', items: leads });
     arrange(out);
-    this.enricher(shown).enrich(out);
+    this.enricher(shown, opt.ancestry).enrich(out);
     out.counts = Object.fromEntries(out.sections.map(s => [s.key, s.items.length]));
     return out;
   }
 
   /* The Atlas's help for a row or a person (enrich.js), asked of this session's own resolutions. `shown` names people the way the page is showing them. */
-  enricher(shown) {
+  enricher(shown, ancestry) {
     const resolve = raw => (this.overrides.has(raw) ? { tier: 'user', place: this.overrides.get(raw) } : this.res.get(raw));
     const target = raw => { const t = targetOf(resolve(raw), this.core.c); return t && t.kind === 'place' ? { name: t.name, lat: t.lat, lon: t.lon, iso: t.iso, region: t.region } : null; };
     const h = this.help || { pages: {}, given: [], sur: [] };
-    return makeEnricher({ core: this.core, pages: h.pages, given: h.given, sur: h.sur, target, P: this.P, shown, est: this.est, dest: this.dest });
+    return makeEnricher({ core: this.core, pages: h.pages, given: h.given, sur: h.sur, target, P: this.P, shown, est: this.est, dest: this.dest, ancestry });
   }
 
   pick(raw, cand) { if (cand) this.overrides.set(raw, cand); else this.overrides.delete(raw); }

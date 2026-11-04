@@ -10,6 +10,7 @@ import { inside } from './atlas.js';
 
 const yr = v => { const m = /\b(\d{4})\b/.exec(v || ''); return m ? +m[1] : null; };
 const fold = s => (s || '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+export const ANCESTRY_SITES = ['com.au', 'com', 'co.uk', 'ca'];
 export const slugSurname = x => String(x).toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const span = (a, b) => (a === b || b === null || b === undefined ? String(a) : a + '–' + b);
 const list = (a, n = 6) => a.slice(0, n).join(', ') + (a.length > n ? ' and ' + (a.length - n) + ' more' : '');
@@ -23,6 +24,7 @@ export function makeEnricher(env) {
   const gMap = new Map(), sMap = new Map();
   for (const g of env.given || []) for (const [form] of g.m) gMap.set(fold(form), g);
   for (const f of env.sur || []) for (const [form] of f.m) sMap.set(fold(form), f);
+  const anc = ANCESTRY_SITES.includes(env.ancestry) ? env.ancestry : 'com.au';
   const cname = cc => (C.countries[cc] || [cc])[0];
   const countryLinks = cc => {
     const l = []; if (cPages.has(cc)) l.push({ t: cname(cc) + ' in the Atlas', u: '/country/' + cc.toLowerCase() + '/' });
@@ -107,6 +109,22 @@ export function makeEnricher(env) {
     }
     return out;
   }
+  /* Outside search links for people, as ONE short line. Plain links: nothing is sent until the visitor clicks, and a click gives that site a name.
+     Never for a person who may be living: they get no link at all. WikiTree: the surname index for the surname and each spelling the Atlas has
+     seen on a record (its person search takes a POST, so it cannot be filled from a link). Ancestry: a search by first_last on the chosen regional site. */
+  function searchLine(people) {
+    const l = [], seen = new Set();
+    for (const p of people) {
+      if (!p || p.liv) continue;
+      const first = (p.given || '').trim().split(/\s+/)[0], sur = (p.sur || '').trim(), us = x => x.toLowerCase().replace(/\s+/g, '_');
+      if (first && sur) { const q = encodeURIComponent(us(first) + '_' + us(sur)); if (!seen.has('a' + q)) { seen.add('a' + q); l.push({ t: 'Ancestry: ' + first + ' ' + sur, u: 'https://www.ancestry.' + anc + '/search?name=' + q }); } }
+      if (sur) {
+        const fam = sMap.get(fold(sur)), forms = [sur, ...(fam ? fam.m.filter(([x, st]) => (st === 'same' || st === 'attested') && fold(x) !== fold(sur)).map(([x]) => x) : [])].slice(0, 5);
+        for (const f of forms) { const k = f.toUpperCase().replace(/\s+/g, '_'); if (!seen.has('w' + k)) { seen.add('w' + k); l.push({ t: 'WikiTree: ' + f.toUpperCase(), u: 'https://www.wikitree.com/genealogy/' + encodeURIComponent(k) }); } }
+      }
+    }
+    return l.length ? [{ k: 'Search elsewhere', t: 'outside sites: user-submitted trees and paywalled records. Leads to check, not evidence.', l, outside: true }] : [];
+  }
   const rel = id => (id && P.get(id) ? shown(P.get(id)) : '');
   function lifeLines(p) {
     const bits = [], miss = [], b = p.by !== null && p.by !== undefined;
@@ -165,11 +183,12 @@ export function makeEnricher(env) {
         i.info = [{ k: 'Country today', t: i.country, l: countryLinks(Object.entries(C.countries).find(([, v]) => v[0] === i.country)?.[0] || '') }, { k: 'In the Atlas', t: 'Shows ' + i.label + ' for ' + span(i.from, i.to) + '.' }];
       } else if (s.key === 'dupes') {
         const a = P.get(i.a), b = P.get(i.b); i.info = [];
-        if (a && b) { i.info.push(...nameLines(a).filter(x => x.k === 'Surname')); for (const p of [a, b]) if (p.bpRaw) i.info.push(...placeLines(p.bpRaw, p.by === null ? [] : [p.by], { short: true }).slice(0, 1).map(x => ({ ...x, k: shown(p) + ' born at' }))); }
+        if (a && b) { i.info.push(...searchLine([a, b])); i.info.push(...nameLines(a).filter(x => x.k === 'Surname')); for (const p of [a, b]) if (p.bpRaw) i.info.push(...placeLines(p.bpRaw, p.by === null ? [] : [p.by], { short: true }).slice(0, 1).map(x => ({ ...x, k: shown(p) + ' born at' }))); }
       } else if (s.key === 'apart') i.info = [];
       else if (i.id && P.get(i.id)) {
         const p = P.get(i.id); i.nl = nameLinks(p);
         i.info = personLines(p, { noRecords: s.key === 'leads' });         // a lead's collections are already in its row
+        if (s.key !== 'names' || p.sur) i.info.push(...searchLine(s.key === 'names' ? [{ ...p, given: '' }] : [p]));
       }
       if (!i.info) i.info = [];
     }

@@ -7,7 +7,7 @@ import { checklistText, checklistCsv } from './checklist.js';
 import * as recent from './recent.js';
 import { BUILD } from './build.js';
 import { parseLink, profileUrl, treeUrl, toHash, fromHash } from './myheritage.js';
-import { loadLink, saveLink } from './remember.js';
+import { loadLink, saveLink, loadSite, saveSite } from './remember.js';
 import { GROUPS as FIXGROUPS, describe } from './checklist.js';
 
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
@@ -334,7 +334,7 @@ function tab(name) {
   document.body.classList.toggle('wide', name === 'tree');   // the tree uses the whole window; the lists keep a readable width
   for (const b of $$('.tabs button')) b.setAttribute('aria-selected', String(b.dataset.tab === name));
   for (const p of $$('.panel')) p.hidden = p.id !== 'p-' + name;
-  if (name === 'fix' && worker) worker.postMessage({ cmd: 'checklist', living: $('#fliving').checked });
+  if (name === 'fix' && worker) askFix();
 }
 $$('.tabs button').forEach(b => b.onclick = () => tab(b.dataset.tab));
 $('#rfilter').oninput = e => last && drawReview(last.review, e.target.value);
@@ -357,6 +357,7 @@ $('#sample').onclick = () => start(new TextEncoder().encode(makeSample()).buffer
 
 
 /* ---------- fix list ---------- */
+const askFix = () => worker && worker.postMessage({ cmd: 'checklist', living: $('#fliving').checked, ancestry: $('#fanc').value });
 let fix = null; const ticked = new Set(), shownN = new Map(), asIs = new Set();   // asIs: rows the visitor knows are right, kept in memory only
 const svg = d => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + d + '"/></svg>';
 const IC = {
@@ -397,7 +398,7 @@ function nameNodes(name, nl) {
 function infoList(lines) {
   const ul = el('ul', 'atl');
   for (const x of lines) {
-    const li = el('li', x.none ? 'none' : null); li.append(el('b', null, x.k + ' '), x.t);
+    const li = el('li', x.none ? 'none' : x.outside ? 'outside' : null); li.append(el('b', null, x.k + ' '), x.t);
     if (x.l && x.l.length) { li.append(' '); x.l.forEach((y, n) => { if (n) li.append(' · '); li.append(lk(y.t, y.u)); }); }
     ul.append(li);
   }
@@ -516,12 +517,13 @@ function drawFix() {
 }
 function fixlist(m) { fix = m; drawFix(); }
 $('#ffilter').oninput = () => drawFix();
-$('#fliving').onchange = () => worker && worker.postMessage({ cmd: 'checklist', living: $('#fliving').checked });
+$('#fliving').onchange = () => worker && askFix();
 function saveAs(name, text, type) {
   const u = URL.createObjectURL(new Blob([text], { type })), a = el('a'); a.href = u; a.download = name; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 4000);
 }
 $('#ftext').onclick = () => fix && saveAs('fix-list.txt', checklistText(fix, new Date().toISOString().slice(0, 10)), 'text/plain;charset=utf-8');
 $('#fcollapse').onchange = () => drawFix();
+$('#fanc').value = loadSite(); $('#fanc').onchange = () => { saveSite($('#fanc').value); askFix(); };
 /* The PDF is the browser's own "Save as PDF" over a print-ready copy of the list, built here on the device from the same rows. Nothing is uploaded and
    no library or font is fetched. The copy is added to the page for the moment of printing and removed after. */
 function printable() {

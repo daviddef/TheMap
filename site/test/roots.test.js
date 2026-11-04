@@ -469,3 +469,23 @@ test("workbench: the not-drawn list is paged and the page keeps only a valid MyH
   assert.match(app, /\$\('#mhin'\)\.onchange[\s\S]{0,200}!parseLink\(e\.target\.value\)[\s\S]{0,120}loadLink\(\)/, "stray text is replaced by the last good link");
   assert.match(app, /if \(c\) \{ \$\('#mhin'\)\.value = kept/, "only a link that parses is put back on load");
 });
+
+test("fix list: outside search links are one plain line, for the dead only, and on the regional Ancestry site the visitor chose", need, async () => {
+  const { Session } = await import(R + "js/pipeline.js"); const { checklistText } = await import(R + "js/checklist.js"); const { loadSite, saveSite } = await import(R + "js/remember.js");
+  const s = new Session(io); await s.load(enc(helpFile));
+  const one = (key, id, ancestry) => { const out = { sections: [{ key, items: [{ id, key: "k" }] }] }; s.enricher(p => p.given + " " + p.sur, ancestry).enrich(out); return out.sections[0].items[0].info.filter(x => x.k === "Search elsewhere"); };
+  const z = one("years", "I2"); assert.equal(z.length, 1, "one line, not one per site");
+  assert.deepEqual(z[0].l.map(l => l.u), ["https://www.ancestry.com.au/search?name=joannes_zzyx", "https://www.wikitree.com/genealogy/ZZYX"], "Ancestry first_last lower case, WikiTree surname index upper case; com.au by default");
+  assert.match(z[0].t, /not evidence/); assert.ok(z[0].outside);
+  assert.equal(one("years", "I2", "co.uk")[0].l[0].u, "https://www.ancestry.co.uk/search?name=joannes_zzyx"); assert.equal(one("years", "I2", "evil.example")[0].l[0].u.split("/")[2], "www.ancestry.com.au", "only the four regional sites are ever used");
+  assert.deepEqual(one("dates", "I4"), [], "a person who may be living gets no outside link, whatever the toggle says");
+  assert.deepEqual(one("years", "I3"), [], "no name, no search");
+  const out = { sections: [{ key: "places", items: [{ raw: "Qwertyville", to: "X", people: [], key: "p" }] }] }; s.enricher(p => p.given, "com").enrich(out);
+  assert.ok(!out.sections[0].items[0].info.some(x => x.outside), "place rows carry no name search");
+  const fam = s.help.sur.find(f => f.m.filter(([, st]) => st === "same" || st === "attested").length > 1), form = fam.m.find(([, st]) => st === "same" || st === "attested")[0];
+  const sp = s.enricher(p => p.given, "com"), o2 = { sections: [{ key: "years", items: [{ id: "I9", key: "k" }] }] }; s.P.set("I9", { id: "I9", given: "Xan", sur: form, by: null, spouse: [], kids: [], liv: false, sex: "m" });
+  sp.enrich(o2); const wl = o2.sections[0].items[0].info.find(x => x.outside).l.filter(l => /wikitree/.test(l.u)); assert.ok(wl.length >= 2, "one WikiTree link per recorded spelling");
+  assert.match(checklistText({ sections: [{ key: "years", title: "T", how: "h", items: z.length ? [{ id: "I2", name: "Joannes Zzyx", note: "n", next: "x", info: z }] : [] }] }), /ancestry\.com\.au\/search\?name=joannes_zzyx/, "the text carries the links too");
+  const store = new Map(); globalThis.localStorage = { getItem: k => (store.has(k) ? store.get(k) : null), setItem: (k, v) => store.set(k, String(v)), removeItem: k => store.delete(k) };
+  try { assert.equal(loadSite(), "com.au"); saveSite("co.uk"); assert.equal(loadSite(), "co.uk"); saveSite("bad.example"); assert.equal(loadSite(), "co.uk", "only a listed site is kept"); } finally { delete globalThis.localStorage; }
+});

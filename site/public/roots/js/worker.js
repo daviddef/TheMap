@@ -29,7 +29,7 @@ self.onmessage = async e => {
       session.liveMode = m.hide ? 'redact' : 'show';
       self.postMessage({ type: 'done', first: false, ...(await session.draw()) });
     } else if (m.cmd === 'checklist' && session) {
-      self.postMessage({ type: 'checklist', ...session.checklist({ living: m.living }) });
+      self.postMessage({ type: 'checklist', ...session.checklist({ living: m.living, ancestry: m.ancestry }) });
     } else if (m.cmd === 'offer' && session) {
       self.postMessage({ type: 'offer', ...session.contributions() });
     } else if (m.cmd === 'suggest' && session) {

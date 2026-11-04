@@ -209,6 +209,12 @@ jobs:
             echo "complete=yes" >> "$GITHUB_OUTPUT"
           fi
 
+      # THE CACHE HOLDS site/public WHOLE, AND SOME OF site/public IS SOURCE. site/public/roots/js, roots.css, js/nav.js and the rest are tracked files.
+      # A cache hit restores the copies that were there when the cache was saved, over this commit's checkout, so a push that touched only those files was
+      # built and tested against the OLD versions (five roots tests failed on code that was right in the repository, and a green build would have shipped
+      # the old page). Put every tracked file back as the commit has it; the generated, gitignored files the cache exists for are not tracked and stay.
+      - name: Put tracked files in site/public back as committed
+        run: git checkout -- site/public
       - name: Build the data
         if: steps.datacache.outputs.cache-hit != 'true' || steps.cacheok.outputs.complete != 'yes'
         run: npm run data

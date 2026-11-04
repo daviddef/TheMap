@@ -8885,6 +8885,14 @@ window.addEventListener("load", async function () {
   :global(#ra-check-b li.ra-ck-nonum .ra-ck-meta) { grid-column: 1; }
   :global(#ra-check-b li.ra-ck-r .ra-dot) { flex: none; margin: 0; width: 8px; height: 8px; }
   :global(#ra-check-b li.ra-ck-r .srcmark) { grid-column: 3; grid-row: 1 / span 2; align-self: center; margin: 0; }
+  /* A MARK WITH WORDS GETS ITS OWN LINE. The «+» pill is 24px and sits in the third column; a
+     recorded state carries a tick, «written, no reply», a note and a date, and as an `auto`
+     track that is its full text width, so the name column was left at one letter and the
+     archive's name ran down the pane a character per line. Under the name it wraps instead. */
+  :global(#ra-check-b li.ra-ck-r.src-has .srcmark) { grid-column: 2; grid-row: 3; align-self: start;
+    margin-top: 3px; min-width: 0; }
+  :global(#ra-check-b li.ra-ck-nonum.src-has .srcmark) { grid-column: 1; }
+  :global(#ra-check-b li.ra-ck-r.src-has .ra-ck-i) { grid-row: 1 / span 3; }
   :global(#ra-check-b .ra-ck-more) { margin: 2px 0 0 34px; }
  :global(.ra-pin) { display: flex !important; align-items: center;
     justify-content: center; border-radius: 50%; background: #1B2A5B;

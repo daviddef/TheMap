@@ -433,7 +433,7 @@ test("workbench: the person on the left carries the same Atlas help, and the pag
   assert.ok(i.help.some(x => x.k === "In your file") && i.help.some(x => x.k === "Surname") && i.help.some(x => x.k === "Birthplace"), "details, name help and birthplace");
   assert.ok(i.nl.given && i.nl.sur, "name links");
   const html = fs.readFileSync(path.join(here, "../src/pages/roots/index.astro"), "utf8"), css = fs.readFileSync(R + "roots.css", "utf8");
-  assert.match(html, /class="wfind"/); assert.match(css, /\.wfind\{position:sticky/); assert.match(html, /id="whelp"/); assert.match(html, /id="whint"/);
+  assert.doesNotMatch(html, /class="wgrid"/, "one column, not two halves"); assert.match(html, /class="wbar"/); assert.match(html, /id="wclose"/); assert.match(css, /\.wcols\{columns:3/); assert.match(html, /id="whelp"/);
 });
 test("fix list: Generate PDF is the browser's own print over a copy built on the device, with a print layout", () => {
   const html = fs.readFileSync(path.join(here, "../src/pages/roots/index.astro"), "utf8"), app = fs.readFileSync(R + "js/app.js", "utf8"), css = fs.readFileSync(R + "roots.css", "utf8");
@@ -461,4 +461,11 @@ test("MyHeritage links: a tree link reads by parameter name, in any order, and s
   assert.deepEqual(c, { site: "OYYV7AGVV4FMSGNWXC6TO74JQDUMOYA", tree: 4, num: 16, treeSlug: "example-family-site-23andme" });
   assert.equal(parseLink("https://www.myheritage.com/family-trees/x/OYYV7AGVV4FMSGNWXC6TO74JQDUMOYA?rootIndividualID=4000016&familyTreeID=4").num, 16);
   assert.equal(parseLink("https://www.myheritage.com/family-trees/x/OYYV7AGVV4FMSGNWXC6TO74JQDUMOYA?familyTreeID=4").num, null, "a tree with no person still gives the tree");
+});
+
+test("workbench: the not-drawn list is paged and the page keeps only a valid MyHeritage link in the box", () => {
+  const app = fs.readFileSync(R + "js/app.js", "utf8");
+  assert.match(app, /undrawnShown = 30/); assert.match(app, /\$\('#wclose'\)\.onclick/);
+  assert.match(app, /\$\('#mhin'\)\.onchange[\s\S]{0,200}!parseLink\(e\.target\.value\)[\s\S]{0,120}loadLink\(\)/, "stray text is replaced by the last good link");
+  assert.match(app, /if \(c\) \{ \$\('#mhin'\)\.value = kept/, "only a link that parses is put back on load");
 });

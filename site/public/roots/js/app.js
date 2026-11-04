@@ -251,17 +251,23 @@ function flash(op) {   // a visible answer to a click: the list a button sits in
 }
 let focusEdit = false;
 const send = edit => { $('#werr').hidden = true; worker.postMessage({ cmd: 'edit', edit }); flash(edit.op); };
+let undrawnAll = [], undrawnTotal = 0, undrawnShown = 30;
+function drawUndrawn(u) {
+  u.textContent = '';
+  for (const r of undrawnAll.slice(0, undrawnShown)) {
+    const row = el('div', 'wrow'), t = el('div', 'wwho', r.name); t.append(el('small', null, r.id + (r.place ? ' · ' + r.place : '')));
+    const b = el('button', 'link', 'Add a year'); b.onclick = () => { who = r.id; focusEdit = true; worker.postMessage({ cmd: 'person', id: r.id }); };
+    row.append(t, b); u.append(row);
+  }
+  const more = undrawnTotal - Math.min(undrawnShown, undrawnAll.length);
+  if (undrawnAll.length > undrawnShown) { const b = el('button', 'link wmore', 'Show ' + Math.min(60, undrawnAll.length - undrawnShown) + ' more'); b.onclick = () => { undrawnShown += 60; drawUndrawn(u); }; u.append(b); }
+  else if (undrawnTotal > undrawnAll.length) u.append(el('p', 'small wmore', 'and ' + n0(undrawnTotal - undrawnAll.length) + ' more'));
+}
 function workbench(w) {
   if (!w) return;
   $('#wcount').textContent = String(w.edits.length || ''); $('#wcount').hidden = !w.edits.length;
   $('#wundn').textContent = n0(w.undrawnTotal); $('#wmgn').textContent = n0(w.merges.length); $('#wedn').textContent = n0(w.edits.length);
-  const u = $('#wundrawn'); u.textContent = '';
-  for (const r of w.undrawn) {
-    const row = el('div', 'wrow'), t = el('div', null, r.name); t.append(el('small', null, r.id + (r.place ? ' · ' + r.place : '')));
-    const b = el('button', 'link', 'Add a year'); b.onclick = () => { who = r.id; focusEdit = true; worker.postMessage({ cmd: 'person', id: r.id }); };
-    row.append(t, b); u.append(row);
-  }
-  if (w.undrawnTotal > w.undrawn.length) u.append(el('p', 'small', 'and ' + n0(w.undrawnTotal - w.undrawn.length) + ' more'));
+  undrawnAll = w.undrawn; undrawnTotal = w.undrawnTotal; drawUndrawn($('#wundrawn'));
   const m = $('#wmerge'); m.textContent = '';
   for (const r of w.merges) {
     const row = el('div', 'wrow'), t = el('div', null, r.an + ' and ' + r.bn);
@@ -279,14 +285,14 @@ function workbench(w) {
   if (who) worker.postMessage({ cmd: 'person', id: who });
 }
 function found(m) {
-  const box = $('#wres'); box.textContent = '';
+  const box = $('#wres'); box.textContent = ''; if (!m.rows.length && !(m.q && m.q.trim())) return;
   if (!m.rows.length && m.q && m.q.trim()) box.append(el('p', 'small', 'No one in this file matches “' + m.q.trim() + '”. Try just the surname, or a record number such as I123.'));
   for (const r of m.rows) { const row = el('div', 'wrow'), t = el('div', null, r.name); t.append(el('small', null, r.id + (r.living ? ' · living' : '') + (r.by ? ' · born ' + (r.est ? 'about ' : '') + r.by : ' · no year') + (r.bp ? ' · ' + r.bp : ''))); const b = el('button', 'link', 'Edit'); b.onclick = () => { who = r.id; focusEdit = true; worker.postMessage({ cmd: 'person', id: r.id }); }; row.append(t, b); box.append(row); }
 }
 function person(i) {
   if (!i) return; lastInfo = i;
   $('#wedit').hidden = false; if (focusEdit) { focusEdit = false; $('#wedit').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } const wn = $('#wname'); wn.textContent = ''; wn.append(...nameNodes(i.name, i.nl), ' · ' + i.id);
-  $('#whint').hidden = true; const wh = $('#whelp'); wh.textContent = ''; if (i.help && i.help.length) { wh.append(el('h4', null, 'What the file and the Atlas hold'), infoList(i.help)); }
+  const wh = $('#whelp'); wh.textContent = ''; if (i.help && i.help.length) { wh.append(el('h4', null, 'What the file and the Atlas hold'), infoList(i.help)); }
   $('#winfo').textContent = 'In your file: born ' + (i.birth || 'no date') + ', died ' + (i.death || 'no date') + (i.living ? '. Treated as living (no death recorded, born within 110 years)' + (hideLiv() ? ', so hidden while "Hide living people" is on, and left out of a shareable file.' : '. Left out of a shareable export.') : '.');
   const wm = $('#wmh'); wm.textContent = ''; const ml = mhA(i.id, i.name); if (ml.length) wm.append(...ml);
   const l = i.look, ul = $('#wlinks'); ul.textContent = '';
@@ -296,6 +302,7 @@ function person(i) {
   for (const x of ls) { const li = el('li'), a = el('a', null, x.site); a.href = x.url; a.target = '_blank'; a.rel = 'noopener noreferrer'; li.append(a, el('small', null, ' · ' + x.note)); ul.append(li); }
   const f = $('#wdate'); f.birth.placeholder = i.birth || 'e.g. ABT 1850'; f.death.placeholder = i.death || 'e.g. 12 MAR 1910';
 }
+$('#wclose').onclick = () => { who = null; lastInfo = null; $('#wedit').hidden = true; $('#wres').textContent = ''; $('#wfind').value = ''; $('#wfind').focus(); };
 let fto = 0;
 $('#wfind').oninput = e => { clearTimeout(fto); fto = setTimeout(() => worker && worker.postMessage({ cmd: 'find', q: e.target.value }), 200); };
 $('#wdate').onsubmit = e => { e.preventDefault(); const f = e.target; for (const k of ['birth', 'death']) if (f[k].value.trim()) send({ op: 'date', who, field: k, value: f[k].value }); f.reset(); };
@@ -423,6 +430,9 @@ function plist(list, total) {
 let lastInfo = null;
 function mhStatus(extra) { $('#mhsum').textContent = mhc ? 'on · tree ' + mhc.tree : 'off'; $('#mhsum').classList.toggle('on', !!mhc); $('#mhstat').textContent = mhc ? (extra || (mhRemembered ? 'Remembered from last time, on this device only. Clear the box to forget it.' : 'Open one or two people to check they are the right ones. The link is remembered on this device only (not sent anywhere); clear the box to forget it.')) : ''; }
 function mhWho(m) { mhStatus(m.name ? 'That link is ' + m.id + ' in your file: ' + m.name + '. If that is not who you pasted, the numbering differs and these links are wrong.' : 'No person ' + m.id + ' in this file, so check the link.'); }
+$('#mhin').onchange = e => {                                   // leaving the box with text that is not a link: put back the last good link rather than keep the stray text
+  if (e.target.value.trim() && !parseLink(e.target.value)) { e.target.value = loadLink(); mhStatus(e.target.value ? 'That text was not a MyHeritage link, so the last good link is back in the box.' : ''); if (!mhc) $('#mhstat').textContent = 'That text was not a MyHeritage link.'; }
+};
 $('#mhin').oninput = e => {
   const c = parseLink(e.target.value); mhRemembered = false;
   if (!c) { mhc = null; if (!e.target.value.trim()) saveLink(''); $('#mhstat').textContent = e.target.value.trim() ? 'That does not look like a MyHeritage profile or tree link.' : ''; refreshMh(); return; }

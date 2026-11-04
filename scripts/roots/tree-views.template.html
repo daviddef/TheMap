@@ -46,6 +46,7 @@ h1{font:650 30px/1.1 var(--serif);margin:0;text-wrap:balance}
 .results button:hover{background:var(--band)}
 .results small{margin-left:auto;color:var(--muted);font:400 11px var(--mono)}
 .pname{color:inherit;text-decoration:none}.pname:hover{text-decoration:underline;text-decoration-color:var(--atlas)}
+ol.rte{margin:6px 0 0;padding-left:20px;font-size:13.5px}ol.rte li{margin:0 0 3px}ol.rte small{color:var(--muted)}.rtn{font-size:12.5px;margin-top:6px}
 a.plk{color:inherit;text-decoration:none;border-bottom:1px dotted currentColor}a.plk:hover{color:var(--atlas);border-bottom-style:solid}
 svg a.plk .cname,svg a.plk .sname{text-decoration:underline dotted}svg a.plk:hover .cname,svg a.plk:hover .sname{text-decoration:underline solid;fill:var(--atlas)}
 
@@ -64,6 +65,7 @@ svg a.plk .cname,svg a.plk .sname{text-decoration:underline dotted}svg a.plk:hov
 .vnote{margin:0 0 10px;color:var(--muted);max-width:84ch}
 .layout{display:grid;grid-template-columns:minmax(0,1fr) 316px;gap:16px;align-items:start}
 @media (max-width:960px){.layout{grid-template-columns:minmax(0,1fr)}}
+.gaps{margin:4px 0 12px;padding:0;list-style:none}.gaps li{padding:6px 0;border-bottom:1px solid var(--rule);font-size:13px;line-height:1.4}.gaps small{display:block;color:var(--muted);font-size:12px;margin-top:2px}.gaps em{font-style:normal;opacity:.85}
 .stage{min-width:0;background:var(--panel);border:1px solid var(--rule);border-radius:8px;position:relative}
 .bar{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--rule);font-size:12.5px;color:var(--muted)}
 .bar b{font-weight:600;margin-right:6px}
@@ -77,6 +79,8 @@ svg a.plk .cname,svg a.plk .sname{text-decoration:underline dotted}svg a.plk:hov
 .ibg{white-space:nowrap;display:inline-block}a.btn.ibtn{display:inline-block;text-decoration:none;color:inherit;vertical-align:middle}.btn.ibtn{padding:5px 9px;line-height:0}.btn.ibtn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .btn:disabled{opacity:.4;cursor:default}
 .scroll{overflow-x:auto}
+/* The host site shrink-wraps and centres every .scroll (width:fit-content); the plots size themselves from this box, so they must fill the stage instead */
+.stage>.scroll{width:auto;max-width:none;margin-left:0;transform:none}
 svg{display:block}
 svg text{user-select:none;-webkit-user-select:none}
 input[type=range]{accent-color:var(--atlas);flex:1 1 240px;min-width:140px}
@@ -179,6 +183,7 @@ input[type=range]{accent-color:var(--atlas);flex:1 1 240px;min-width:140px}
 .ctx .c small{color:var(--muted);display:block}
 .chip{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;font-weight:600;background:var(--band);border:1px solid var(--rule);margin:2px 4px 0 0}
 .chip.rg{color:var(--on-line);border:0}
+.chip.sh{display:inline-flex;align-items:center;gap:5px}.chip.sh i{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
 .chip.ev{color:var(--brick);border-color:var(--brick);background:transparent}
 
 /* person card */
@@ -210,12 +215,17 @@ input[type=range]{accent-color:var(--atlas);flex:1 1 240px;min-width:140px}
 .srcs{margin:0;padding-left:18px;color:var(--ink);font-size:13px}
 .srcs li{margin:0 0 8px}
 .srcs small,.fsite small{display:block;color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+.look>li{margin:0 0 14px}.look .lh{margin-top:6px;font-weight:600;color:var(--ink)}.lv{margin:2px 0 0;padding-left:16px;list-style:disc}.lv li{margin:0 0 3px;font-size:12.5px}.lv em{font-style:normal;font-size:11px;color:var(--muted);margin-left:4px}.lall{margin:6px 0 4px}.lall summary{cursor:pointer;color:var(--accent,#1d5f56);font-size:12.5px}
 .srcs em{font-style:normal;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-left:4px}
 .fsite{margin:0;font-size:13.5px;font-weight:600}
 .plc{display:grid;grid-template-columns:58px 1fr;gap:10px;margin-bottom:10px;font-size:13px}
+.plcs{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;align-items:start}
+.plcs .plc{grid-template-columns:1fr;gap:6px;margin-bottom:10px;min-width:0}.plcs .plc>div{min-width:0}.plcs .plc small{overflow-wrap:anywhere}
+.plcs.one{grid-template-columns:1fr}.plcs.one .plc{grid-template-columns:58px 1fr;gap:10px}
+@media (min-width:561px) and (max-width:960px){.plcs .plc{grid-template-columns:58px 1fr;gap:10px}}
 .plc b{font:600 14px var(--serif)}
 .plc small{display:block;color:var(--muted);font-size:12px}
-.plc .lk{font-size:12px;font-weight:600}
+.plc .lk{font-size:12px;font-weight:600;display:block;margin-top:3px}
 .life{margin:0;padding:0;list-style:none;font-size:12.5px}
 .life li{padding:5px 0;border-top:1px solid var(--rule)}
 .life li:first-child{border-top:0}
@@ -360,6 +370,12 @@ td:first-child{font:600 14.5px var(--serif);white-space:nowrap}
 #sdetail .chip{margin:0 4px 4px 0}
 #sdetail .plist{max-height:420px;overflow:auto}
 /*EXT:STYLE*/
+/* Embedding (supported contract): add embed=1 to the hash and the page drops its own chrome, so a site can frame the viewer;
+   add profile=1 (with p=<person>) and only the person panel is drawn, and the page tells its parent its height. */
+html.embed header.top,html.embed #metrics,html.embed nav.tabs,html.embed .atlasbar,html.embed .toolrow,html.embed .verdict{display:none!important}
+html.profile .layout{grid-template-columns:minmax(0,1fr)}
+html.profile .layout>div:first-child,html.profile #ctrls{display:none!important}
+html.embed body{background:transparent}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -403,8 +419,8 @@ td:first-child{font:600 14.5px var(--serif);white-space:nowrap}
     <button class="tab" role="tab" data-view="lanes">Place lanes<sup>ATLAS</sup></button>
     <button class="tab" role="tab" data-view="eras">Eras<sup>ATLAS</sup></button>
     <button class="tab" role="tab" data-view="timeline">Lifespans<sup>ATLAS</sup></button>
-    <button class="tab" role="tab" data-view="surnames">Surnames<sup>NEW</sup></button>
 <!--EXT:TABS-->
+    <button class="tab" role="tab" data-view="surnames">Surnames<sup>NEW</sup></button>
     <button class="tab" role="tab" data-view="orphans" title="Orphans and where to start">Orphans<sup>ATLAS</sup></button>
   </nav>
 
@@ -730,7 +746,7 @@ function loadTree(T){
   const P={},list=[];
   for(const r of T.people){
     const p={id:r.id,sex:r.sex==='f'?'f':'m',fi:r.line==null?7:r.line,sur:r.sur||'',given:r.given||'',by:r.by,bp:r.bp,dy:r.dy==null?null:r.dy,hid:r.hid===1?1:0,dp:r.dp||r.bp,my:r.my||null,occ:r.occ||null,
-      father:r.father||null,mother:r.mother||null,spouse:r.spouse||[],kids:r.kids||[],g:0,src:(r.srcs||[]).length,srcs:r.srcs||null,slug:r.slug||null,href:r.href||null,page:r.page||null,bye:!!r.bye,dye:!!r.dye,bpe:!!r.bpe,bpr:r.bpr||null,dpr:r.dpr||null,sk:r.sk||null,note:r.note||null,fg:r.fg==null?null:r.fg,mg:r.mg==null?null:r.mg};
+      father:r.father||null,mother:r.mother||null,spouse:r.spouse||[],kids:r.kids||[],g:0,src:(r.srcs||[]).length,srcs:r.srcs||null,slug:r.slug||null,href:r.href||null,page:r.page||null,route:r.route||null,mye:!!r.mye,bye:!!r.bye,dye:!!r.dye,bpe:!!r.bpe,bpr:r.bpr||null,dpr:r.dpr||null,sk:r.sk||null,note:r.note||null,fg:r.fg==null?null:r.fg,mg:r.mg==null?null:r.mg,gaps:r.gaps||null};
     if(p.dy==null)p.dp=null;
     P[p.id]=p;list.push(p);
   }
@@ -838,9 +854,12 @@ const MOVES=[];
 for(const p of list){
   const fa=p.father?P[p.father]:null;
   if(fa&&fa.bp!==p.bp)MOVES.push({a:fa.bp,b:p.bp,y:p.by,p:p.id,k:'family'});
-  if(p.my)MOVES.push({a:p.bp,b:p.dp,y:p.my,p:p.id,k:'self'});
+  if(p.route){   // the whole route in the roster's order; a stop with no year is an undated arrival (est: dashed on the map)
+    for(let i=1;i<p.route.length;i++){const a=p.route[i-1],b=p.route[i];MOVES.push({a:a[0],b:b[0],y:b[1],p:p.id,k:'route',est:b[2]===1||b[1]==null,und:b[1]==null})}
+  }else if(p.my)MOVES.push({a:p.bp,b:p.dp,y:p.my,p:p.id,k:'self',est:!!p.mye});
 }
-MOVES.sort((a,b)=>a.y-b.y);
+const mvYear=m=>m.y==null?P[m.p].by:m.y;
+MOVES.sort((a,b)=>mvYear(a)-mvYear(b));
 // connected components: the main tree, small detached families, and single orphan records
 (function(){
   const comp=new Map(),sizes=[];
@@ -910,6 +929,10 @@ const st={focus:ROOT.id,hist:[],view:'hourglass',card:'full',orient:'h',up:3,dow
   mgroup:'line',mview:'global',mscope:'focus',year:1925,lgroup:'place',lscope:'focus',lzoom:1,hz:1,keep:false,open:null,tline:'pat',aview:'global',av:{cx:35,cy:-10,w:250},amode:'born',ascope:'all',apl:null,escope:'focus',ezoom:1,okind:'orph',fopen:false,kb:null,kinShow:false,kinSeq:null,kinIds:null,mapscope:'all',mcolor:'line',cty:null,scol:'country',ssize:'people',sdepth:'all',sn:null,scty:null,kz:1};
 /* The address bar is the page's state, so a link shares exactly what you are looking at: #kinship&p=<person>&b=<second person>&…
    Only what differs from the defaults is written. An old link (#kinship, #close, #p=…) still works. */
+const EMB=/(^|&)(embed|profile)=1(&|$)/.test(location.hash.slice(1)),PROF=/(^|&)profile=1(&|$)/.test(location.hash.slice(1));
+const RROOT=document.getElementById('rr')||document.documentElement;   // a site-built page scopes the viewer under #rr; the Atlas viewer is the document
+if(EMB)RROOT.classList.add('embed');
+if(PROF)RROOT.classList.add('profile');
 const DEF=Object.assign({},st);
 const HASHKEYS={p:'focus',b:'kb',card:'card',o:'orient',up:'up',down:'down',gens:'gens',mg:'mgroup',mv:'mview',ms:'mscope',y:'year',lg:'lgroup',ls:'lscope',tl:'tline',es:'escope',ok:'okind',map:'mapscope',mc:'mcolor',cty:'cty',ln:'line',am:'amode',as:'ascope',pl:'apl',av:'aview',sc:'scol',ss:'ssize',sd:'sdepth',sn:'sn'};
 function applyHash(){
@@ -934,6 +957,7 @@ function writeHash(){
   try{
     const kvs=[];
     for(const k in HASHKEYS){const sk=HASHKEYS[k];if(st[sk]!=null&&st[sk]!==DEF[sk])kvs.push(k+'='+encodeURIComponent(st[sk]))}
+    if(PROF)kvs.push('profile=1');else if(EMB)kvs.push('embed=1');
     const h=[st.view,...kvs].join('&');
     if(h!==location.hash.slice(1))history.replaceState(null,'',location.pathname+location.search+'#'+h);
   }catch(e){}
@@ -944,16 +968,32 @@ function back(){const id=st.hist.pop();if(id){st.focus=id;render()}}
 
 /* ---------- Person card ---------- */
 function plink(p){return '<button class="plink" data-id="'+p.id+'"><i style="background:'+colorOf(p)+'"></i><span>'+esc(nm(p))+'</span><small>'+esc(yrs(p))+'</small></button>'}
+/* A route of three or more places, in the order the archive holds it. A stop with no year is an undated arrival: it is listed, drawn dashed, and said to be undated. */
+function routeBlock(p){
+  const n=p.route.length;
+  let h='<h3 class="at">The whole route · order as recorded</h3><ol class="rte">';
+  p.route.forEach((s,i)=>{const pl=PL[s[0]];
+    const how=i===0?'born '+p.by:i===n-1?'died '+p.dy+(s[1]?', arrived '+(s[2]?'about ':'')+s[1]:' · arrival not dated'):(s[1]?'arrived '+(s[2]?'about ':'')+s[1]:'date not recorded');
+    const tn=nameAt(pl,i===0?p.by:s[1]);
+    h+='<li>'+placeA(s[0])+' <small>'+esc(pl.cn)+' · '+how+(tn&&tn!==pl.n?' · then called <em>'+esc(tn)+'</em>':'')+'</small></li>'});
+  return h+'</ol><p class="note rtn">Dashed on the Movements map unless a year is recorded. Between undated stops this person is not placed on a map for a given year.</p>';
+}
+/* What the Atlas says the ground was called in a year (pl.nm = [[from,to,name]], dated names only; absent for a site on an older Atlas build). */
+const nameAt=(pl,y)=>{if(!pl||!pl.nm||y==null)return null;const h=pl.nm.filter(n=>(n[0]==null||n[0]<=y)&&(n[1]==null||y<=n[1]));return h.length?h[h.length-1][2]:null};
 function placeBlock(label,place,year,until){
-  const pl=PL[place],e=eraAt(place,year);
-  let h='<div class="plc"><span class="ico" data-place="'+esc(place)+'" data-year="'+year+'"></span><div><small>'+label+'</small><b>'+placeA(place)+'<span class="fl" data-place="'+esc(place)+'" data-year="'+year+'"></span></b><small>'+esc(pl.cn)+'</small>';
+  const pl=PL[place],e=eraAt(place,year),thenName=nameAt(pl,year);
+  let h='<div class="plc"><span class="ico" data-place="'+esc(place)+'" data-year="'+year+'"></span><div><small>'+label+'</small><b>'+placeA(place)+'<span class="fl" data-place="'+esc(place)+'" data-year="'+year+'"></span></b><small>'+esc(pl.cn)+'</small>'+(thenName&&thenName!==pl.n?'<small>called <em>'+esc(thenName)+'</em> in '+yrB(year)+'</small>':'');
   if(e){
     h+='<span class="chip rg" style="background:'+rgv(e.rg)+'">'+esc(ATLAS.regimes[e.rg].label)+'</span><small>'+esc(e.polity)+', '+e.from+'–'+e.to+'</small>';
     if(e.filed.length)h+='<small>Records: '+e.filed.slice(0,3).map(k=>esc(ATLAS.prov[k]||k)).join(', ')+'</small>';
   }else h+='<small>'+(pl.id?'No regime table for this ground yet.':'Not in the Atlas yet.')+'</small>';
-  h+='<a class="lk" href="'+atlasURL(place)+'" target="_blank" rel="noopener">'+(pl.id?'Open in Record Atlas ↗':'Add it to the Atlas ↗')+'</a></div></div>';
+  h+=shelfChip(pl)+'<a class="lk" href="'+atlasURL(place)+'" target="_blank" rel="noopener">'+(pl.id?'Open in Record Atlas ↗':'Add it to the Atlas ↗')+'</a>'+mapLink(pl)+'</div></div>';
   return h;
 }
+/* A site that has its own map names it in atlas-data (site.mapBase) and marks the places it matched (mp = the marker, sh = the shelf state it shows there). */
+const SITE=ATLAS.site||null;
+const shelfChip=pl=>{const s=SITE&&pl.sh&&SITE.shelf[pl.sh];return s?'<span class="chip sh"><i style="background:'+s[1]+'"></i>'+esc(s[0])+'</span>':''};
+const mapLink=pl=>SITE&&pl.mp?'<a class="lk" href="'+SITE.mapBase+encodeURIComponent(pl.mp)+'" title="Open this place on the archive map">On the archive map →</a>':'';
 /* Each family line has its own site; a person's page is /people/<slug>/ with the archive's own slug rule. */
 const slugify=s=>String(s).normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-zA-Z0-9]+/g,'-').replace(/^-+|-+$/g,'').toLowerCase().slice(0,60);
 /* Where the record for each source lives: an Atlas collection covering that place and year, else the archive the Atlas says that era was filed under, else the place's Atlas page. */
@@ -961,7 +1001,7 @@ function sourceRows(p){
   const rows=[];
   for(let i=0;i<p.src;i++){
     const kind=SRC[(p.by+i*3+p.fi)%SRC.length],late=/Passenger|Probate|Newspaper/.test(kind);
-    const place=late&&p.dp?p.dp:p.bp,year=late?(p.my||p.dy):p.by,pl=PL[place];
+    const place=late&&p.dp?p.dp:p.bp,year=late?(p.route?p.dy:(p.my||p.dy)):p.by,pl=PL[place];
     const link=recLink(place,year);
     rows.push({kind,year,place,link});
   }
@@ -978,6 +1018,40 @@ addEventListener('message',e=>{if(e.source!==parent||!e.data||!('mh' in e.data))
 const mhLinks=p=>{const m=/^I(\d{1,6})$/.exec(p.id);if(!MH||!m)return '';const n=MH.tree*1e6+ +m[1],sl=(nm(p)||'person').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60)||'person';
   const a=(u,t,i)=>' <a class="btn ibtn" href="'+u+'" target="_blank" rel="noopener noreferrer" title="'+t+'" aria-label="'+t+'">'+ICO[i]+'</a>';
   return a('https://www.myheritage.com/profile-'+MH.site+'-'+n+'/'+sl,'Open this profile on MyHeritage','person')+a('https://www.myheritage.com/family-trees/'+(MH.slug||'tree')+'/'+MH.site+'?rootIndividualID='+n+'&familyTreeID='+MH.tree,'Open this person in the tree on MyHeritage','tree')};
+/* Where to look: for EVERY place on the person's route, the volumes the Atlas holds for the years they were there, the archives that were responsible
+   in those years, and (folded) everything else the Atlas lists for the place. A place the Atlas does not have yet says so and links to adding it. */
+function lookBlock(p){
+  const end=p.dy||p.by+80;
+  const stops=p.route&&p.route.length?p.route.map((s,i)=>({place:s[0],y:i===0?p.by:s[1]})):[{place:p.bp,y:p.by}].concat(p.dp&&p.dp!==p.bp?[{place:p.dp,y:p.dy||p.my||null}]:[]);
+  stops.forEach((s,i)=>{let nx=null;for(let j=i+1;j<stops.length;j++)if(stops[j].y){nx=stops[j].y;break}
+    s.lo=s.y||(i>0&&stops[i-1].y)||p.by;s.hi=nx||end;if(s.hi<s.lo)s.hi=s.lo});
+  const yr=c=>c[0]==null?'':c[0]===c[1]?c[0]:c[0]+'–'+c[1];
+  const aLink=(u,t)=>'<a href="'+esc(u)+'" target="_blank" rel="noopener">'+esc(clip(t,72))+' ↗</a>';
+  let h='<h3>Where to look</h3><ul class="srcs look">';
+  const seen=new Set();
+  stops.forEach(s=>{
+    if(seen.has(s.place))return;seen.add(s.place);
+    const pl=PL[s.place];if(!pl)return;
+    const near=pl.cols.filter(c=>(c[2]==null||c[2]<=s.hi)&&(c[3]==null||c[3]>=s.lo));
+    const rest=pl.cols.filter(c=>near.indexOf(c)<0),cat=pl.cat||[];
+    const from=s.y?s.lo:null,when=s.lo===s.hi?String(s.lo):s.lo+'–'+s.hi;
+    h+='<li><b>'+esc(s.place)+'</b> <small class="lyr">'+esc(pl.cn)+' · '+(from?'there '+when:'years not recorded')+'</small>';
+    // the archives responsible in those years (the Atlas's region table)
+    const es=pl.reg&&ERA[pl.reg]?ERA[pl.reg].filter(e=>e.to>s.lo&&e.from<=s.hi&&e.filed.length):[];
+    if(near.length)h+='<small class="lh">Volumes for those years</small><ul class="lv">'+near.slice(0,8).map(c=>'<li>'+aLink(c[1],c[0])+' <em>'+yr([c[2],c[3]])+'</em></li>').join('')+'</ul>'+(near.length>8?'<small>and '+(near.length-8)+' more</small>':'');
+    if(es.length)h+='<small class="lh">Archives responsible then</small><ul class="lv">'+es.map(e=>'<li>'+esc(e.polity)+' <em>'+e.from+'–'+e.to+'</em>'
+      +e.filed.slice(0,4).map(k=>' · '+(ATLAS.provurl[k]?aLink(ATLAS.provurl[k],ATLAS.prov[k]||k):esc(ATLAS.prov[k]||k))).join('')+'</li>').join('')+'</ul>';
+    if(!near.length&&!es.length)h+='<small>'+(pl.id?'The Atlas lists no volume or archive for those years yet.':'This place is not in the Atlas yet.')+'</small>';
+    const all=rest.length+cat.length;
+    if(all&&!near.length){const ys=rest.map(c=>[c[2],c[3]]).concat(cat.map(c=>[c[1],c[2]])).filter(y=>y[0]!=null);
+      if(ys.length)h+='<small>'+(all===1?'The one volume the Atlas lists for '+esc(s.place)+' does not cover those years: it runs ':'None of the '+all+' volumes the Atlas lists for '+esc(s.place)+' cover those years: they run ')+Math.min.apply(null,ys.map(y=>y[0]))+'–'+Math.max.apply(null,ys.map(y=>y[1]))+'.</small>'}
+    if(all)h+='<details class="lall"'+(near.length?'':' open')+'><summary>Everything else the Atlas lists for '+esc(s.place)+' ('+all+')</summary><ul class="lv">'
+      +rest.map(c=>'<li>'+aLink(c[1],c[0])+' <em>'+yr([c[2],c[3]])+'</em></li>').join('')
+      +cat.map(c=>'<li>'+esc(clip(c[0],72))+' <em>'+yr([c[1],c[2]])+' · catalogued, not photographed</em></li>').join('')+'</ul></details>';
+    h+='<small><a class="lk" href="'+atlasURL(s.place)+'" target="_blank" rel="noopener">'+(pl.id?'All records for '+esc(s.place)+' in Record Atlas ↗':'Add '+esc(s.place)+' to the Atlas ↗')+'</a></small></li>';
+  });
+  return h+'</ul>';
+}
 function renderPanel(){
   const p=P[st.focus],A=ancSet(p),D=descSet(p);
   const gensBack=A.size?Math.max(...A.values()):0;
@@ -1007,8 +1081,15 @@ function renderPanel(){
     const lk=recLink(p.bp,p.by);
     h+='<div class="note"><b>'+(p._orph?'Orphan record.':p._clus?'Detached family.':'Dead end.')+'</b> '+(p._orph?'Not joined to anyone in the tree.':p._clus?'Not connected to any tree.':'No parents recorded.')+' To connect: search '+esc(p.bp)+' records around '+p.by+'. <a href="'+lk.u+'" target="_blank" rel="noopener">'+esc(clip(lk.t,48))+' ↗</a> <a href="#" data-goto="orphans" data-okind="'+(p._orph?'orph':p._clus?'clus':'dead')+'">More places to start</a></div>';
   }
-  h+='<h3 class="at">Places · from Record Atlas</h3>'+placeBlock('Born'+(p.bpe?' · place taken from a relative, not recorded':''),p.bp,p.by);
-  if(!living(p)&&p.dp&&p.dp!==p.bp)h+=placeBlock('Died, moved c.'+p.my,p.dp,p.my||p.dy);
+  if(p.gaps&&p.gaps.length){
+    const gl=p.gaps.filter(x=>!(x.k==='parents'&&(p._orph||p._clus||p._dead)));
+    if(gl.length)h+='<h3>What is missing</h3><ul class="gaps">'+gl.map(x=>'<li>'+esc(x.t)+(x.l.length?'<small>Where to look: '+x.l.slice(0,3).map(l=>(l.u?'<a href="'+esc(l.u)+'" target="_blank" rel="noopener">'+esc(clip(l.w,54))+' ↗</a>':esc(clip(l.w,54)))+' <em>'+esc(l.y)+' · '+esc(l.b)+'</em>').join('; ')+'</small>':'')+'</li>').join('')+'</ul>';
+  }
+  // birth place and death place sit side by side (one column when there is only one place)
+  const two=!living(p)&&p.dp!==p.bp;
+  h+='<h3 class="at">Places · from Record Atlas</h3><div class="plcs'+(two?'':' one')+'">'+placeBlock('Born'+(p.bpe?' · place taken from a relative, not recorded':''),p.bp,p.by)
+    +(two?placeBlock(p.route?'Died':'Died, moved '+(p.mye?'about ':'c.')+p.my,p.dp,p.route?p.dy:p.my||p.dy):'')+'</div>';
+  if(p.route)h+=routeBlock(p);
   if(!living(p)){
     const end=p.dy==null?2026:p.dy;
     const evs=lifeEvents(p,end);
@@ -1033,8 +1114,7 @@ function renderPanel(){
     if(site)h+='<h3 class="at">On the family site</h3><p class="fsite"><a href="https://'+site+pg+'" target="_blank" rel="noopener">'+(p.page||p.href?'Their page':'People page')+' ↗</a> · <a href="https://'+site+'/people/" target="_blank" rel="noopener">All '+esc(p.sur)+' people ↗</a><small>'+site+pg+'</small>'+(TREE?'':'<small>Sample person: this page does not exist yet. An imported GEDCOM would create it.</small>')+'</p>';
     if(TREE){
       if(p.srcs&&p.srcs.length)h+='<h3>Sources ('+p.srcs.length+')</h3><ul class="srcs">'+p.srcs.map(x=>'<li>'+(x.u?'<a href="'+esc(x.u)+'" target="_blank" rel="noopener">'+esc(clip(x.t,70))+' ↗</a>':esc(clip(x.t,70)))+'</li>').join('')+'</ul>';
-      const lk=recLink(p.bp,p.by);
-      h+='<h3>Where to look</h3><ul class="srcs"><li>'+esc(p.bp)+' records around '+p.by+'<small><a href="'+lk.u+'" target="_blank" rel="noopener">'+esc(clip(lk.t,64))+' ↗</a> <em>'+lk.w+'</em></small></li></ul>';
+      h+=lookBlock(p);
     }else h+='<h3>Sources found ('+p.src+')</h3><ul class="srcs">'+sourceRows(p).map(r=>'<li><b>'+esc(r.kind)+'</b> · '+esc(r.place)+', '+r.year+'<small><a href="'+r.link.u+'" target="_blank" rel="noopener">'+esc(clip(r.link.t,64))+' ↗</a> <em>'+r.link.w+'</em></small></li>').join('')+'</ul>';
   }
   $('#panel').innerHTML=h;
@@ -1256,6 +1336,9 @@ function renderFan(){
 
 /* ---------- 3 · Whole-tree map ---------- */
 const ML=112,MR=14;let Y0=1720,Y1=2030;
+/* Few people are born before 1700 (6%), so a plain year scale left the left third of the plot empty. When the axis starts earlier than CUT, everything before CUT is squeezed into the first EB of the plot (a band marked "before 1700"); from CUT on the scale is linear. */
+const CUT=1700,EB=.07;
+const fr=y=>Y0>=CUT?(y-Y0)/(Y1-Y0):(y<CUT?(y-Y0)/(CUT-Y0)*EB:EB+(y-CUT)/(Y1-CUT)*(1-EB));
 const CTY=(()=>{const c={};list.forEach(p=>{const k=PL[p.bp].cn;c[k]=(c[k]||0)+1});return Object.keys(c).sort((a,b)=>c[b]-c[a]).slice(0,8)})();
 const ctyVar=c=>'var(--l'+(CTY.indexOf(c)<0?7:CTY.indexOf(c))+')';
 const ALLY0=Math.floor(Math.min(...list.map(p=>p.by))/10)*10-5;
@@ -1307,9 +1390,9 @@ function renderMap(){
   const W=Math.max(520,wrap.clientWidth||900),plotW=W-ML-MR;
   const clampTx=tx=>Math.min(0,Math.max(-(plotW*st.zoom-plotW),tx));
   {const cm=st.mapscope==='close';if(cm){const ids=closeSet(st.focus);Y0=Math.floor(Math.min(...[...ids].map(id=>P[id].by))/10)*10-5;Y1=2030}else{Y0=ALLY0;Y1=2030}}
-  const xOf=y=>ML+(y-Y0)/(Y1-Y0)*plotW*st.zoom+st.tx;
+  const xOf=y=>ML+fr(y)*plotW*st.zoom+st.tx;
   const fp=P[st.focus],fx=xOf(fp.by);
-  if(fx<ML||fx>W-MR){ if(st.zoom>1){st.tx=clampTx(-((fp.by-Y0)/(Y1-Y0)*plotW*st.zoom-plotW/2))} }
+  if(fx<ML||fx>W-MR){ if(st.zoom>1){st.tx=clampTx(-(fr(fp.by)*plotW*st.zoom-plotW/2))} }
   st.tx=clampTx(st.tx);
   const closeMode=st.mapscope==='close',cty=st.mcolor==='country';
   const pool=closeMode?[...closeSet(st.focus)].map(id=>P[id]):list,poolIds=new Set(pool.map(p=>p.id));
@@ -1335,7 +1418,7 @@ function renderMap(){
     L.people.sort((a,b)=>a.by-b.by);
     const ends=[];
     for(const p of L.people){
-      const x=(p.by-Y0)/(Y1-Y0)*plotW;let r=0;
+      const x=fr(p.by)*plotW;let r=0;
       while(ends[r]!==undefined&&ends[r]>x-GAPX)r++;
       ends[r]=x;p._row=r;p._lane=L;
     }
@@ -1355,12 +1438,14 @@ function renderMap(){
     S('text',{class:'lane',x:10,y:L.y0+L.h/2-1,fill:L.color},svg,L.key);
     S('text',{class:'lanec',x:10,y:L.y0+L.h/2+11},svg,L.people.length+' people');
   });
-  const step=st.zoom>=6?5:st.zoom>=2.2?10:25;
-  for(let yr=Math.ceil(Y0/step)*step;yr<=2025;yr+=step){
+  /* the smallest step that keeps neighbouring labels about 42px apart, so a narrow panel thins its labels instead of printing them on top of each other */
+  const ppy=plotW*st.zoom*(1-(Y0<CUT?EB:0))/(Y1-Math.max(Y0,CUT)),step=[5,10,25,50,100].find(k=>k*ppy>=42)||100;
+  for(let yr=Math.ceil(Math.max(Y0,CUT)/step)*step;yr<=2025;yr+=step){
     const x=xOf(yr);if(x<ML-2||x>W-MR+2)continue;
     S('line',{class:'grid',x1:x,x2:x,y1:16,y2:H},svg);
     S('text',{class:'tick',x:x,y:11,'text-anchor':'middle'},svg,yr);
   }
+  if(Y0<CUT){const xe=xOf(Y0);if(xe>=ML-2&&xe<W-MR-30&&xOf(CUT)-xe>=52)S('text',{class:'tick',x:xe+2,y:11,'text-anchor':'start'},svg,'<'+CUT)}
   const g=S('g',{'clip-path':'url(#plotclip)'},svg);
   const ped=pedigree(st.focus),q=st.q.trim().toLowerCase();
   const pos=p=>[xOf(p.by),p._lane.y0+(closeMode?17:10)+p._row*RH];
@@ -1447,7 +1532,15 @@ mapSvg.addEventListener('click',e=>{const id=cvHit(e);if(id&&!st.suppress)pick(i
 /* ---------- 4 · Movements ---------- */
 const VBOX={global:{x:-82,y:-66,w:240,h:112,land:'world',lab:false},europe:{x:-12,y:-60,w:46,h:28,land:'eu',lab:true},fit:{x:FIT.x,y:FIT.y,w:FIT.w,h:FIT.h,land:FIT.eu?'eu':'world',lab:true}};
 const inEu=n=>{const p=PL[n];return p.lat>30&&p.lat<62&&p.lon>-13&&p.lon<50};
-function residentAt(p,yr){if(p.by>yr||(p.dy!=null&&p.dy<yr)||(p.dy==null&&yr>2025))return null;return(p.my&&yr>=p.my)?p.dp:p.bp}
+function residentAt(p,yr){
+  if(p.by>yr||(p.dy!=null&&p.dy<yr)||(p.dy==null&&yr>2025))return null;
+  if(p.route){   // born at the first stop; after that only the place of the latest stop with a year; between undated stops nobody is placed
+    if(yr===p.by)return p.route[0][0];
+    let at=p.route[0][0],unk=false;
+    for(let i=1;i<p.route.length;i++){const s=p.route[i];if(s[1]==null){unk=true;continue}if(yr>=s[1]){at=s[0];unk=false}else break}
+    return unk?(p.dy!=null&&yr>=p.dy?p.dp:null):at;
+  }
+  return(p.my&&yr>=p.my)?p.dp:p.bp}
 function renderMove(){
   const svg=$('#mv'),V=VBOX[st.mview],W=Math.max(520,svg.parentNode.clientWidth||900),H=Math.round(W*V.h/V.w),k=V.w/W;
   svg.setAttribute('width',W);svg.setAttribute('height',H);svg.setAttribute('viewBox',V.x+' '+V.y+' '+V.w+' '+V.h);svg.textContent='';
@@ -1461,14 +1554,14 @@ function renderMove(){
   // arcs
   const ga=S('g',{},svg);
   MOVES.forEach(m=>{
-    if(m.y>yr||(scope&&!scope.has(m.p)))return;
+    const vy=mvYear(m);if(vy>yr||(scope&&!scope.has(m.p)))return;
     const A=PL[m.a],B=PL[m.b],x1=A.lon,y1=-A.lat,x2=B.lon,y2=-B.lat,dx=x2-x1,dy=y2-y1,d=Math.hypot(dx,dy);
     if(d<.01)return;
     const hs=[...m.p].reduce((a,ch)=>(a*31+ch.charCodeAt(0))>>>0,7),sg=hs%2?1:-1,c=(.16+(hs%4)*.04)*sg;
     const cxp=(x1+x2)/2-dy*c,cyp=(y1+y2)/2+dx*c;
-    const age=yr-m.y,recent=age<=60,p=P[m.p];
-    const path=S('path',{class:'arc','data-id':m.p,d:'M'+x1+','+y1+'Q'+cxp+','+cyp+' '+x2+','+y2,stroke:colorOf(p),'stroke-width':recent?1.7:1,'stroke-opacity':recent?.85:.16,'vector-effect':'non-scaling-stroke'},ga);
-    S('title',{},path,nm(p)+': '+m.a+' → '+m.b+', '+m.y+(m.k==='family'?' (family had moved by the birth)':''));
+    const age=yr-vy,recent=age<=60,p=P[m.p];
+    const path=S('path',{class:'arc','data-id':m.p,d:'M'+x1+','+y1+'Q'+cxp+','+cyp+' '+x2+','+y2,stroke:colorOf(p),'stroke-width':recent?1.7:1,'stroke-opacity':m.und?.5:recent?.85:.16,'vector-effect':'non-scaling-stroke'},ga);if(m.est)path.setAttribute('stroke-dasharray','5 4');
+    S('title',{},path,nm(p)+': '+m.a+' → '+m.b+', '+(m.und?'date not recorded':(m.est?'about ':'')+m.y)+(m.k==='family'?' (family had moved by the birth)':m.k==='route'?' (stop '+(P[m.p].route.findIndex(s=>s[0]===m.b)+1)+' of '+P[m.p].route.length+' in the roster)':''));
     if(recent)S('circle',{cx:x2,cy:y2,r:2.2*k,fill:colorOf(p),opacity:.9,style:'pointer-events:none'},ga);
   });
   // nodes
@@ -1505,6 +1598,17 @@ $('#play').onclick=()=>{
 $('#yr').addEventListener('input',e=>{st.year=+e.target.value;renderMove()});
 
 /* ---------- 5 · Place lanes ---------- */
+/* Where a person was, and when, as bars. A route is drawn only for the years the record places them: the first stop from the birth, a later stop
+   from its (approximate) arrival, and an undated stop for the single year it is recorded (the last dated arrival or the death), marked `und`. */
+function lifeSegs(p,end){
+  if(!p.route)return p.my?[{place:p.bp,a:p.by,b:p.my},{place:p.dp,a:p.my,b:end}]:[{place:p.bp,a:p.by,b:end}];
+  const r=p.route,out=[];let at=r[0][0],from=p.by,open=true;
+  for(let i=1;i<r.length;i++){const s=r[i];
+    if(s[1]==null){if(open)out.push({place:at,a:from,b:from+1,und:true});at=s[0];open=false;continue}
+    if(open)out.push({place:at,a:from,b:s[1]});
+    at=s[0];from=s[1];open=true}
+  if(open)out.push({place:at,a:from,b:end});else out.push({place:at,a:end-1,b:end,und:true});
+  return out}
 function renderLanes(){
   const lab=$('#lnlab'),svg=$('#ln'),box=$('#lnbox');lab.textContent='';svg.textContent='';
   const lsc=scopeSet(st.lscope),people=(lsc?[...lsc].map(id=>P[id]):list).filter(p=>p);
@@ -1514,8 +1618,7 @@ function renderLanes(){
   const segs=[];
   for(const p of people){
     const end=p.dy==null?2026:p.dy;
-    p._segs=[{p,key:keyOf(p.bp,p),place:p.bp,a:p.by,b:p.my||end}];
-    if(p.my)p._segs.push({p,key:keyOf(p.dp,p),place:p.dp,a:p.my,b:end});
+    p._segs=lifeSegs(p,end).map(s=>Object.assign({p,key:keyOf(s.place,p)},s));
     p._segs.forEach(s=>segs.push(s));
   }
   const byKey=new Map();segs.forEach(s=>{if(!byKey.has(s.key))byKey.set(s.key,[]);byKey.get(s.key).push(s)});
@@ -1625,7 +1728,7 @@ function renderLanes(){
   const bg=S('g',{},svg);
   for(const L of lanes)for(const s of L.segs){
     const p=s.p,x1=x(s.a),x2=Math.max(x(s.b),x1+2.5);
-    const r=S('rect',{class:'dot',x:x1,y:s.cy-BH/2,width:x2-x1,height:BH,rx:BH/2,fill:colorOf(p),opacity:p.dy==null&&s.b===2026?.5:1,'data-id':p.id},bg);
+    const r=S('rect',{class:'dot',x:x1,y:s.cy-BH/2,width:x2-x1,height:BH,rx:BH/2,fill:colorOf(p),opacity:s.und?.45:p.dy==null&&s.b===2026?.5:1,'data-id':p.id},bg);
     if(p.id===st.focus){r.setAttribute('stroke','var(--ink)');r.setAttribute('stroke-width',1.6)}
     S('title',{},r,nm(p)+' · '+yrs(p)+' · '+s.place);
   }
@@ -1867,7 +1970,7 @@ function renderEras(){
     const yy=yFam+8+(p.by%3)*8;
     const c=S('circle',{class:'dot',cx:x(p.by),cy:yy,r:people.length>300?2:2.8,fill:colorOf(p),opacity:.9,'data-id':p.id},svg);
     S('title',{},c,nm(p)+' born '+p.by+', '+p.bp);
-    if(p.my){const d=S('path',{class:'dot',d:'M'+x(p.my)+','+(yy-3.4)+'l3.4,3.4l-3.4,3.4l-3.4,-3.4Z',fill:'var(--brick)','data-id':p.id},svg);S('title',{},d,nm(p)+' moved '+p.bp+' → '+p.dp+', '+p.my)}
+    (p.route?p.route.slice(1).filter(s=>s[1]!=null).map(s=>[s[1],s[0],s[2]]):p.my?[[p.my,p.dp,p.mye?1:0]]:[]).forEach(([my,to,est])=>{const d=S('path',{class:'dot',d:'M'+x(my)+','+(yy-3.4)+'l3.4,3.4l-3.4,3.4l-3.4,-3.4Z',fill:'var(--brick)',opacity:est?.7:1,'data-id':p.id},svg);S('title',{},d,nm(p)+' moved to '+to+', '+(est?'about ':'')+my)});
     if(p.dy!=null&&people.length<=300){const d=S('circle',{class:'dot',cx:x(p.dy),cy:yy,r:2.6,fill:'var(--panel)',stroke:colorOf(p),'stroke-width':1.4,'data-id':p.id},svg);S('title',{},d,nm(p)+' died '+p.dy+', '+p.dp)}
   }
   // what they were up against
@@ -1883,7 +1986,8 @@ function renderEras(){
   line.forEach(p=>{
     const g=living(p)?'Living':p.given;
     fam.push({y:p.by,t:p.by+' · '+g+(p.id===f.id?' (focus) born':' born'),s:p.bp+' · '+nm(p),id:p.id});
-    if(p.my)fam.push({y:p.my,t:p.my+' · '+g+' leaves '+p.bp,s:'For '+p.dp,id:p.id});
+    if(p.route)p.route.slice(1).forEach((s,i)=>{if(s[1]!=null)fam.push({y:s[1],t:(s[2]?'about ':'')+s[1]+' · '+g+' leaves '+p.route[i][0],s:'For '+s[0],id:p.id})});
+    else if(p.my)fam.push({y:p.my,t:(p.mye?'about ':'')+p.my+' · '+g+' leaves '+p.bp,s:'For '+p.dp,id:p.id});
     if(p.dy!=null&&(p.id===f.id||p.id===f.father||p.id===f.mother))fam.push({y:p.dy,t:p.dy+' · '+g+' dies',s:p.dp,id:p.id});
   });
   const seenE=new Set();
@@ -2167,6 +2271,7 @@ function render(){
   (({hourglass:renderHG,fan:renderFan,map:renderMap,movements:renderMove,lanes:renderLanes,timeline:renderTL,atlasmap:renderAtlas,surnames:renderSurnames,eras:renderEras,orphans:renderOrphans,kinship:renderKin})[st.view]||EXT.views[st.view])();
   requestAnimationFrame(()=>$$('.swipe').forEach(edges));
   writeHash();
+  if(PROF&&parent!==window)requestAnimationFrame(()=>parent.postMessage({type:'ra-roots-height',h:Math.ceil(document.documentElement.scrollHeight)},'*'));
 }
 ['click','change','keyup','input'].forEach(ev=>document.addEventListener(ev,()=>setTimeout(writeHash,0)));
 window.addEventListener('hashchange',()=>{applyHash();render()});
@@ -2285,6 +2390,8 @@ $('#kq').addEventListener('keydown',e=>{
   else if(e.key==='Enter'){e.preventDefault();bs[Math.max(0,kAct)].click();$('#kq').value=''}
 });
 document.addEventListener('click',e=>{if(!e.target.closest('.ksearch'))$('#kres').hidden=true});
+// the dot map is drawn at its panel's width; if the panel is measured before layout settles (or later widens) draw it again
+if(window.ResizeObserver){const mw=$('#map')&&$('#map').parentNode;if(mw)new ResizeObserver(()=>{const w=mw.clientWidth;if(w>0&&st.view==='map'&&Math.abs(w-(+$('#map').getAttribute('width')||0))>8&&(w>=520||+$('#map').getAttribute('width')>w))render()}).observe(mw)}
 let rt=0;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{if(['map','timeline','movements','lanes','atlasmap','eras','orphans','kinship',...EXT.names].includes(st.view))render()},120)});
 
 if(TREE){const v=$('.verdict');if(v)v.hidden=true}

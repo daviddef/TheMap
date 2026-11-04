@@ -146,11 +146,16 @@ def atlas():
     events = [{'id': ev['id'], 'n': ev['n'], 'ty': ev['ty'], 'f': ev['f'], 't': ev['t'], 'g': bool(ev.get('g')), 'poly': ev.get('poly') or [],
                'says': ev['says'][:190], 'toll': (ev.get('toll') or {}).get('text', '')[:170]} for ev in M]
     prov = {x['id']: x for x in J(D('providers.json'))['providers']}
+    # the names a place bore at a date (data/place-names.json, written only through scripts/place_names.py); dated entries only: [from, to, name]
+    NM = {x['id']: [[n.get('from'), n.get('to'), n['name']] for n in x['names'] if n.get('status') == 'attested' and (n.get('from') is not None or n.get('to') is not None)]
+          for x in J(D('place-names.json')).get('places', [])}
     P = J(D('places.json'))['places']; places = []; usedprov = {e[5][i] for r in regions.values() for e in r['eras'] for i in range(len(e[5]))}
     for p in P:
-        cl = [[c.get('title', '')[:80], c['url'], c.get('from'), c.get('to'), c.get('provider', '')] for c in p.get('collections', []) if c.get('url')][:12]
+        cl = [[c.get('title', '')[:80], c['url'], c.get('from'), c.get('to'), c.get('provider', '')] for c in p.get('collections', []) if c.get('url')][:40]
+        # catalogued but not photographed: no link to give, still worth telling the reader exists
+        cat = [[c.get('title', '')[:80], c.get('from'), c.get('to'), c.get('provider', '')] for c in p.get('collections', []) if not c.get('url')][:40]
         for c in cl: usedprov.add(c[4])
-        places.append([p['id'], p['name'], p.get('country') or '', round(p['lat'], 4), round(p['lon'], 4), [n['n'].split(',')[0] for n in p.get('names', [])][:8], cl])
+        places.append([p['id'], p['name'], p.get('country') or '', round(p['lat'], 4), round(p['lon'], 4), [n['n'].split(',')[0] for n in p.get('names', [])][:8], cl, cat, NM.get(p['id'], [])])
     out = {'land': land, 'regimes': regimes, 'regions': regions, 'flagMap': FM, 'riso': riso, 'territory': TERRITORY, 'events': events,
            'prov': {k: prov[k]['name'] for k in usedprov if k in prov}, 'provurl': {k: prov[k]['url'] for k in usedprov if k in prov and prov[k].get('url')},
            'places': places, 'flagDir': '/fl/',

@@ -101,7 +101,7 @@ export async function buildAtlas(targets, AC, getFlag) {
     const fl = AC.flagTimeline(rid, iso0).map(([y, i]) => [y, img(i)]);
     if (rid) usedReg.add(rid);
     const ap = t.kind === 'place' ? AC.match(t.name, t.iso, lat, lon) : null;
-    places.push({ n: t.n, id: ap ? ap[0] : null, lat: Math.round(lat * 1000) / 1000, lon: Math.round(lon * 1000) / 1000, reg: rid, cn: t.iso, ev: hit, fl, cols: ap ? ap[6] : [], kind: t.kind });
+    places.push({ n: t.n, id: ap ? ap[0] : null, lat: Math.round(lat * 1000) / 1000, lon: Math.round(lon * 1000) / 1000, reg: rid, cn: t.iso, ev: hit, fl, cols: ap ? ap[6] : [], cat: ap ? (ap[7] || []) : [], nm: ap ? (ap[8] || []) : [], kind: t.kind });
   }
   const regions = {}, used = new Set();
   for (const k of usedReg) { const g = core.regions[k]; regions[k] = { label: g.label, eras: g.eras }; for (const e of g.eras) used.add(e[2]); }

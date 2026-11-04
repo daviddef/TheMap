@@ -243,8 +243,23 @@ def build():
             del fam["sex"]
         if not fam["slips"]:
             del fam["slips"]
+        dedupe_evidence(fam)
         out.append(fam)
     return out
+
+
+def dedupe_evidence(fam):
+    """An archive's table may list one form in several rows, each carrying the form's whole count, so the same line of
+    evidence was appended two or three times and `seen` (the sum of the counts) came out double or triple: Michael was 161
+    where the two archives met it 64 times. A line that repeats another exactly is dropped."""
+    for row in fam["members"] + fam.get("slips", []) + fam["notSame"]:
+        seen, keep = set(), []
+        for e in row.get("evidence", []):
+            k = (e.get("kind"), e.get("what"), e.get("ref"), e.get("n"), e.get("rule"), str(e.get("where")), e.get("period"))
+            if k not in seen:
+                seen.add(k)
+                keep.append(e)
+        row["evidence"] = keep
 
 
 def main():
@@ -265,6 +280,17 @@ def main():
     if errs:
         sys.exit(1)
     if a.write:
+        # THIS REBUILDS THE WHOLE FILE FROM THE ARCHIVES' TABLES. A catalogue that has since taken researched forms (evidence
+        # whose ref is not an archive) would lose them, so it is not overwritten.
+        try:
+            now = json.load(open(OUT, encoding="utf-8"))
+            researched = sum(1 for f in now["families"] for row in f["members"] + f.get("slips", []) + f["notSame"]
+                             for e in row.get("evidence", []) if not str(e.get("ref", "")).startswith("archive:"))
+        except (OSError, ValueError, KeyError):
+            researched = 0
+        if researched:
+            sys.exit(f"not written: {OUT} holds {researched} line(s) of evidence that did not come from an archive's table "
+                     "(researched forms); this import would erase them. Add archive evidence with given_name_variants.py add.")
         sv.save(cat, OUT)
         print("wrote", OUT)
 

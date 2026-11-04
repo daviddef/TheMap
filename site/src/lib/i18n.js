@@ -46,6 +46,7 @@ const HR = {
      the old ones still label the same links inside page prose, and a key
      nobody asks for costs a line. */
   "Surnames": "Prezimena",
+  "Names": "Imena",
   "Places": "Mjesta",
   "My research": "Moje istraživanje",
   "Look up a surname": "Potraži prezime",
@@ -109,6 +110,7 @@ const HR = {
 const IT = {
   "The map": "La mappa",
   "Surnames": "Cognomi",
+  "Names": "Nomi",
   "Places": "Luoghi",
   "My research": "Le mie ricerche",
   "Look up a surname": "Cerca un cognome",

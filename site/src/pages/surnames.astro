@@ -14,7 +14,6 @@ const surn = corpus();
 import { atlas as idx } from "../lib/atlas.js";
 import refused from "../../../data/frequencies/_refused.json";
 import { flagFor } from "../lib/flags.js";
-import SmartFind from "../components/SmartFind.astro";
 import CountryCards from "../components/CountryCards.astro";
 import { countryMetrics, countryTotals } from "../lib/country-metrics.js";
 /* COUNTED, NOT TYPED — like the heading below, which was fixed for exactly this
@@ -95,9 +94,9 @@ function dlSize(name) {
       { "@type": "DataDownload", encodingFormat: "application/json", contentUrl: u("/surnames.json.gz") },
     ],
   }}
-  title="Look up a surname"
+  title="Surname dataset"
   eyebrow={`${c.surnames} surnames · ${c.curatedLinks} curated variant links · ${c.withCountries} with a country`}
-  dek="Every spelling a surname takes, and the countries it is attested in. Built to answer the other way in: not «where is this place» but «I have a name and nothing else».">
+  dek="The data behind the surname lookup: every spelling a surname takes, the countries it is attested in, and the evidence on each claim. To look a name up, use Names.">
 
   {/* A PAGE CALLED «LOOK UP A SURNAME» THAT COULD NOT LOOK ONE UP. David: «i
       feel the surname page has nothing to do with Looking up a surname? you
@@ -109,13 +108,8 @@ function dlSize(name) {
       So: the place finder's own furniture, in that order. The box searches
       NAMES and countries and places together, because somebody holding only a
       name does not always know which of the three they are holding. */}
-  <SmartFind base={u("/")}
-             placesIndex={u("/index.json")} quietIndex={u("/index-quiet.json")}
-             surnameShards={u("/s/")} gazShards={u("/g/")}
-             hint="A surname, a country or a place — Blažević · Peeters · Croatia" />
-
-  <p class="cap" style="margin-top:10px">Is your name spelt another way? <a href={u("/surname-families/")}>The spellings
-  the atlas treats as one name</a>, with what each rests on.</p>
+  <p class="go" style="margin:0 0 6px"><a href={u("/your-name/?kind=surname")}><b>Look up a name</b> &rarr;</a>
+  Type a surname, a country or a place, and see every spelling, where it is attested and whose archives to write to.</p>
 
   <details class="cdir" open>
     <summary><b>By country</b> — where the names come from</summary>
@@ -184,7 +178,7 @@ function dlSize(name) {
         what was here was a form that bounced to the map rather than answering
         anything. What is left is the pointer to where a name IS answered. */}
     <h2>The map answers in full</h2>
-    <p class="cap">The box at the top of this page finds a name. The map's own
+    <p class="cap">The <a href={u("/your-name/?kind=surname")}>Names page</a> finds a name. The map's own
     panel is where one is <em>answered</em> — the countries a register or an
     archive attests it in, when it was there, whose archives to write to, and
     how much paper stands in each.

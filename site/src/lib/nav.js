@@ -1,7 +1,7 @@
 /* The site menu, one list. Base.astro renders it on every page; the Roots & Routes page (src/pages/roots/) renders it too, without the
    counter and ads that Base carries. Moved here verbatim from Base.astro so the two cannot drift. */
 export const nav = [
-  /* SURNAMES ARE THE FRONT DOOR AND WERE FILED AS A DATASET. People arrive
+  /* NAMES ARE THE FRONT DOOR AND WERE FILED AS A DATASET. People arrive
      holding a name far more often than a place — it is the one thing on a
      certificate that survives every border change — and 23,930 of these
      pages exist, each naming the spellings, the countries, and the archives
@@ -21,7 +21,11 @@ export const nav = [
      Sentence case throughout, because «My Research» beside «The sources»
      reads as two different hands. */
   ["The map", "/"],
-  ["Surnames", "/surnames/"],
+  /* NAMES IS ONE DOOR, NOT THREE PAGES. «Surnames» opened the dataset page, «Say your name» was reachable only from the home
+     page, and the spellings catalogue was reachable from neither. A person holding a name does not know which of them to
+     want. /your-name/ is the one page now (a Given name / Surname switch, the finder that answers on the map, the spellings
+     and what each rests on); /surnames/ stays at its address as the dataset page it always was. */
+  ["Names", "/your-name/"],
   ["Places", "/places/"],
   ["Roots & Routes", "/roots/"],
   ["The sources", [

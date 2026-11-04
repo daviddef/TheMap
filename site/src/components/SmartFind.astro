@@ -27,7 +27,8 @@
 */
 import { readFileSync } from "node:fs";
 const { placesIndex, quietIndex, base, surnameShards = null, gazShards = null,
-        hint: hintText = "Find a country or a place — Gallignana finds Gračišće" } = Astro.props;
+        hint: hintText = "Find a country or a place — Gallignana finds Gračišće",
+        label: labelText = "Find a country or a place" } = Astro.props;
 
 /* WHICH SHARDS ARE NOT THREE CHARACTERS LONG. build.py decides by measuring
    and writes the answer to public/shards.json; this box reads the decision
@@ -42,7 +43,7 @@ try {
 ---
 
 <form class="sfind" role="search" autocomplete="off" onsubmit="return false">
-  <label class="vh" for="sfq">Find a country or a place</label>
+  <label class="vh" for="sfq">{labelText}</label>
   <input id="sfq" type="search" autocomplete="off" spellcheck="false"
          role="combobox" aria-expanded="false" aria-controls="sfdrop"
          placeholder={hintText} />

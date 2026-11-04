@@ -10,6 +10,7 @@ import path from "node:path";
 import Base from "../layouts/Base.astro";
 import SayYourName from "../components/SayYourName.astro";
 import SayYourSurname from "../components/SayYourSurname.astro";
+import SmartFind from "../components/SmartFind.astro";
 import { allFamilies } from "../lib/surname-families.js";
 import { u } from "../lib/url.js";
 
@@ -21,9 +22,9 @@ const surChips = ["Defranceschi", "Lerena", "Blažević", "Kosina"];
 const chips = ["Ivan", "Giuseppe", "Antonio", "Franciscus", "Matija", "Katarina", "Zdravko", "Maria"];
 ---
 <Base
-  title="Say your name"
+  title="Names"
   eyebrow={`${data.rows.length} given names · ${data.totalForms} forms · ${nFam} surname families`}
-  dek="Ivan, Johann, Giovanni, Zuane, John and Joannes are one name. Choose a given name or a surname, type any form you have met, and see every other way a clerk, a priest or an index wrote it."
+  dek="Ivan, Johann, Giovanni, Zuane, John and Joannes are one name. Choose a given name or a surname, type any form you have met, and see every other way a clerk, a priest or an index wrote it, and for a surname where it is found."
   description="Given names and surnames across languages: the Latin of the register, the Italian, Venetian, Croatian, German, Hungarian and English forms, which spellings are one name, and which of them a record has actually shown.">
 
   <section>
@@ -44,12 +45,25 @@ const chips = ["Ivan", "Giuseppe", "Antonio", "Franciscus", "Matija", "Katarina"
     </div>
 
     <div id="yn-sur" role="tabpanel" aria-labelledby="yn-tab-sur">
+      <h2 class="yn-h" style="margin-top:0">Is it spelt another way?</h2>
       <p class="cap" style="margin-top:0">Surnames are spelt by the clerk, not the family: Defranceschi in one register is De Franceschi
       in the next. Each form below carries one of five claims and says what it rests on. Case, spacing, hyphens and apostrophes are never
       counted as spellings; an accent is, because a priest's Lereña is not a clerk's Lerena.</p>
       <SayYourSurname u={u} chips={surChips} />
       <p class="cap">The whole list, with each family's evidence, is on <a href={u("/surname-families/")}>the spellings of a name</a>.
       Nothing about a person is kept in either catalogue.</p>
+
+      <h2 class="yn-h">Where is it found?</h2>
+      <p class="cap" style="margin-top:0">A surname, a country or a place. A name takes you to the map, which lights the countries
+      whose registers and archives attest it and says whose archives to write to. <em>Attested</em> means a dataset held here has it,
+      never that it exists nowhere else.</p>
+      <SmartFind base={u("/")}
+                 placesIndex={u("/index.json")} quietIndex={u("/index-quiet.json")}
+                 surnameShards={u("/s/")} gazShards={u("/g/")}
+                 label="Find a surname, a country or a place"
+                 hint="A surname, a country or a place: Blažević · Peeters · Croatia" />
+      <p class="cap">The files behind this, free to reuse (CC0), and the countries whose registers could not be read, are on
+      <a href={u("/surnames/")}>the surname dataset</a>.</p>
     </div>
   </section>
 </Base>
@@ -59,6 +73,8 @@ const chips = ["Ivan", "Giuseppe", "Antonio", "Franciscus", "Matija", "Katarina"
   .ynsw button { font: inherit; font-family: var(--sans); font-size: 13px; letter-spacing: .04em; padding: 8px 22px; border: 0; background: none; color: var(--ink-2); cursor: pointer; }
   .ynsw button + button { border-left: 1px solid var(--rule); }
   .ynsw button[aria-selected="true"] { background: var(--accent); color: var(--ground, #fff); }
+  .yn-h { margin: 34px 0 8px; }
+  #yn-sur label.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .ynsw button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 </style>
 

@@ -139,7 +139,13 @@ def atlas():
         eras = []
         for e in g['eras']:
             note = re.sub(r'\s+', ' ', e.get('note', '')).split('. ')[0][:170]
-            eras.append([e['from'], e['to'], e['regime'], e.get('polity', ''), note, e.get('filedUnder', [])])
+            # THE TRAP notes say where the records are really filed; the first sentence alone is only the label, so the fix list gets a longer one
+            full = re.sub(r'\s+', ' ', e.get('note', '')); trap = ''
+            if full.startswith('THE TRAP'):
+                body = full[len('THE TRAP.'):].strip()
+                cut = body[:260]; ends = [m.end() for m in re.finditer(r'[.!?](?=\s|$)', cut)]
+                trap = cut[:max([x for x in ends if x > 60] or [0])].strip() or (cut.rsplit(' ', 1)[0] + '…') if len(body) > 260 else body
+            eras.append([e['from'], e['to'], e['regime'], e.get('polity', ''), note, e.get('filedUnder', []), trap])
         regions[g['id']] = {'label': g['label'], 'ring': g['ring'], 'eras': eras}
     FM = J(os.path.join(PUB, 'flag-map.json'))['f']
     M = J(os.path.join(PUB, 'mortality.json'))['events']
@@ -194,6 +200,26 @@ def surnames():
     fams = [f for f in fams if len(f) > 1]
     print('surname-families.json', w(os.path.join(OUT, 'data', 'surname-families.json'), fams), 'bytes,', len(fams), 'families')
 
+def catalogues():
+    """The first-name and surname catalogues, in the small shape the fix list reads: [{id, name, m: [[form, status]]}]. No person is in either (the
+    catalogues never hold one); a 'slip' or a 'not-same' form is left out because it is not a spelling of the name."""
+    for src, dst, key in (('given-name-families.json', 'given-names.json', 'given'), ('surname-families.json', 'surname-catalogue.json', 'sur')):
+        cat = json.load(open(D(src), encoding='utf-8'))
+        fams = [{'id': f['id'], 'name': f['name'], 'm': [[m['form'], m.get('status', '')] for m in f['members'] if m.get('status') not in ('slip', 'not-same')]} for f in cat['families']]
+        fams = [f for f in fams if f['m']]
+        print(dst, w(os.path.join(OUT, 'data', dst), fams), 'bytes,', len(fams), 'families')
+
+def pages():
+    """Which Atlas pages exist to link to (surname, country, flags), worked out by the site's own libraries. If the site's generated data is missing the
+    list is empty and the fix list falls back to links that always exist."""
+    import subprocess
+    out = os.path.join(OUT, 'data', 'pages.json')
+    r = subprocess.run(['node', os.path.join(ROOT, 'scripts', 'roots', 'page-index.mjs'), out], cwd=os.path.join(ROOT, 'site'), capture_output=True, text=True)
+    if r.returncode != 0:
+        print('pages.json: could not be built (%s); writing an empty index' % (r.stderr.strip().splitlines() or ['?'])[-1][:160])
+        json.dump({'surnames': [], 'countries': [], 'flags': {}}, open(out, 'w'))
+    else: print(r.stdout.strip())
+
 def contact():
     """Where a visitor can send places they choose to offer: the site's own contact (the same one the Add a source page uses). Public data, no personal data."""
     site = json.load(open(os.path.join(ROOT, 'site', 'src', 'data', 'site.json'), encoding='utf-8'))
@@ -203,9 +229,9 @@ def contact():
     print('contact.json:', 'email set' if c else 'no email')
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument('--only', choices=['shards', 'admin', 'atlas', 'viewer', 'contact', 'surnames'])
+    ap = argparse.ArgumentParser(); ap.add_argument('--only', choices=['shards', 'admin', 'atlas', 'viewer', 'contact', 'surnames', 'catalogues', 'pages'])
     a = ap.parse_args()
-    for name, fn in (('shards', shards), ('admin', admin), ('atlas', atlas), ('viewer', viewer), ('contact', contact), ('surnames', surnames)):
+    for name, fn in (('shards', shards), ('admin', admin), ('atlas', atlas), ('viewer', viewer), ('contact', contact), ('surnames', surnames), ('catalogues', catalogues), ('pages', pages)):
         if a.only in (None, name): fn()
 
 if __name__ == '__main__': main()

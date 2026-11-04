@@ -267,7 +267,7 @@ test("a place is never placed by borrowing a borrowed place", need, async () => 
 });
 
 test("the page promises what the source does", () => {
-  const files = ["viewer.html", "roots.css", "js/app.js", "js/worker.js", "js/gedcom.js", "js/model.js", "js/resolver.js", "js/atlas.js", "js/pipeline.js", "js/sample.js", "js/export.js", "js/workbench.js", "js/contribute.js", "js/lookup.js", "js/checklist.js", "js/recent.js", "js/myheritage.js"]
+  const files = ["viewer.html", "roots.css", "js/app.js", "js/worker.js", "js/gedcom.js", "js/model.js", "js/resolver.js", "js/atlas.js", "js/pipeline.js", "js/sample.js", "js/export.js", "js/workbench.js", "js/contribute.js", "js/lookup.js", "js/checklist.js", "js/enrich.js", "js/remember.js", "js/recent.js", "js/myheritage.js"]
     .filter(f => fs.existsSync(R + f));
   const html = fs.readFileSync(path.join(here, "../src/pages/roots/index.astro"), "utf8");   // the page is an Atlas page now: the site menu, not the Base layout
   assert.doesNotMatch(html, /layouts\/Base/, "the page must not use the Base layout (counter, ads, Google Fonts)");
@@ -277,8 +277,9 @@ test("the page promises what the source does", () => {
   assert.doesNotMatch(html, /<script[^>]+src="https?:/i); assert.doesNotMatch(html, /goatcounter|adsbygoogle|googletagmanager|gtag\(/i);
   for (const f of files) {
     const s = fs.readFileSync(R + f, "utf8");
-    const stores = f === "js/recent.js";   // the one opt-in place a file may be kept, on this device only
-    assert.doesNotMatch(s, stores ? /goatcounter|adsbygoogle|googletagmanager|google-analytics|sendBeacon|XMLHttpRequest|WebSocket|localStorage|sessionStorage|document\.cookie|fetch\(/ : /goatcounter|adsbygoogle|googletagmanager|google-analytics|sendBeacon|XMLHttpRequest|WebSocket|localStorage|sessionStorage|indexedDB|document\.cookie/, f + " must not phone home or keep the file");
+    const stores = f === "js/recent.js" || f === "js/remember.js";   // recent.js: the one opt-in place a file may be kept; remember.js: the last MyHeritage link pasted (localStorage, on this device only, never the file)
+    const remembers = f === "js/remember.js";
+    assert.doesNotMatch(s, remembers ? /goatcounter|adsbygoogle|googletagmanager|google-analytics|sendBeacon|XMLHttpRequest|WebSocket|sessionStorage|indexedDB|document\.cookie|fetch\(/ : stores ? /goatcounter|adsbygoogle|googletagmanager|google-analytics|sendBeacon|XMLHttpRequest|WebSocket|localStorage|sessionStorage|document\.cookie|fetch\(/ : /goatcounter|adsbygoogle|googletagmanager|google-analytics|sendBeacon|XMLHttpRequest|WebSocket|localStorage|sessionStorage|indexedDB|document\.cookie/, f + " must not phone home or keep the file");
     assert.doesNotMatch(s, /fetch\(\s*['"`]https?:/, f + " must not fetch an absolute URL");
     if (/\.(js)$/.test(f) && f !== "js/app.js") assert.doesNotMatch(s, /innerHTML/, f);
   }
@@ -314,7 +315,7 @@ test("fix list: places, years, impossible dates, duplicates and loose groups, as
     "0 @F1@ FAM", "1 HUSB @I2@", "1 WIFE @I7@", "1 CHIL @I3@", "0 TRLR"].join("\n") + "\n";
   const s = new Session(io); await s.load(enc(g));
   const c = s.checklist({ living: true }), by = k => c.sections.find(x => x.key === k).items;
-  assert.deepEqual(c.sections.map(x => x.key), ["places", "check", "decide", "years", "names", "dates", "suspect", "ages", "leads", "dupes", "apart"]);
+  assert.deepEqual(c.sections.map(x => x.key), ["places", "check", "ages", "decide", "years", "names", "leads", "dates", "suspect", "dupes", "apart"]);
   assert.ok(by("names").some(i => i.id === "I7" && i.kind === "none" && /spouse Bob Beta/.test(i.kin)), "an unnamed person is listed with the family around them");
   assert.ok(by("dates").some(i => i.id === "I1" && /before being born/.test(i.note)), "death before birth");
   assert.ok(by("dates").some(i => i.id === "I3" && /father was only 5 years older/.test(i.note)), "a child 5 years after the father");
@@ -346,7 +347,7 @@ test("consistency checks: whole-life logic, stacked reasons, nothing guessed, an
   const tom = sec("suspect").find(i => i.id === "I3"); assert.ok(tom && tom.reasons.some(r => r.code === "conflict-birth") && tom.reasons.some(r => r.code === "surname"), "two birth years and a surname break");
   assert.ok(sec("suspect")[0].reasons.length >= sec("suspect")[sec("suspect").length - 1].reasons.length, "most reasons first");
   assert.ok(!sec("leads").some(i => /Zzyx/.test(i.name)), "no place, no lead: nothing is guessed");
-  assert.match(checklistText(c), /Hal Quill \(I1\)  ·  Residence in 1860/); assert.match(checklistCsv(c), /People whose life does not add up,Hal Quill,I1/);
+  assert.match(checklistText(c), /Hal Quill \(I1\)  ·  Why: Residence in 1860/); assert.match(checklistCsv(c), /People whose life does not add up,Hal Quill,I1/);
   const hid = s.checklist({ living: false }).sections.find(x => x.key === "suspect").items; assert.ok(hid.every(i => i.name !== "Hal Quill") || true);
   const s2 = new Session(io); await s2.load(enc(makeSample())); const c2 = s2.checklist(); assert.ok(c2.sections.find(x => x.key === "leads").items.every(i => i.cols.every(x => /^https?:\/\//.test(x.url) || !x.url)), "lead links are plain web links");
 });
@@ -370,4 +371,86 @@ test("MyHeritage links: one pasted link gives the site and tree, and every I-num
   assert.equal(m.profileUrl(a, "@weird@", "x"), null, "an id that is not I<number> gets no link");
   assert.deepEqual(m.fromHash(m.toHash(b)), { site: S, tree: 4, num: null, treeSlug: "example-family-site" });
   assert.equal(m.fromHash("#mh=<script>.4."), null);
+});
+
+/* ---- the fix list asks the Atlas: where to look, what was happening, the name's family, the next step; and says so where the Atlas has nothing ---- */
+const helpFile = [["0 HEAD", "1 CHAR UTF-8",
+  "0 @I1@ INDI", "1 NAME Agna /Adamic/", "1 SEX F", "1 BIRT", "2 DATE 1850", "2 PLAC Gračišće, Istria, Croatia", "1 FAMS @F1@",
+  "0 @I2@ INDI", "1 NAME Joannes /Zzyx/", "1 SEX M", "1 BIRT", "2 DATE ABT 1845", "2 PLAC Gračišće, Croatia", "1 FAMS @F1@",
+  "0 @I3@ INDI", "1 NAME Mary /Test/", "1 SEX F", "1 BIRT", "2 PLAC Qwertyville",
+  "0 @I4@ INDI", "1 NAME Livia /Livingston/", "1 SEX F", "1 BIRT", "2 DATE 1995", "2 PLAC Qwertyville", "1 FAMC @F1@",
+  "0 @F1@ FAM", "1 HUSB @I2@", "1 WIFE @I1@", "1 CHIL @I4@", "0 TRLR"].join("\n") + "\n"][0];
+const allInfo = c => c.sections.flatMap(s => s.items.flatMap(i => i.info || []));
+test("fix list: every row says why, what to do next, and what the Atlas holds, grouped by what the reader has to do", need, async () => {
+  const { Session } = await import(R + "js/pipeline.js"); const { checklistText, checklistCsv, GROUPS } = await import(R + "js/checklist.js");
+  const s = new Session(io); await s.load(enc(helpFile)); const c = s.checklist({ living: true });
+  assert.deepEqual(c.groups.map(g => g.key), GROUPS.map(g => g.key), "grouped by action");
+  const order = c.sections.map(x => x.group); assert.deepEqual(order, [...order].sort((a, b) => GROUPS.findIndex(g => g.key === a) - GROUPS.findIndex(g => g.key === b)), "sections follow the groups");
+  for (const sec of c.sections) for (const i of sec.items) assert.ok(i.next && Array.isArray(i.info), sec.key + " rows carry a next step and an info list");
+  const ages = c.sections.find(x => x.key === "ages").items.find(i => /Croatia/.test(i.country));
+  assert.ok(ages && ages.info.some(x => x.l && x.l.some(l => l.u === "/country/hr/")), "today's country links to its Atlas page");
+  const txt = checklistText(c, "2026-11-04"); assert.match(txt, /=== CORRECT A PLACE ===/); assert.match(txt, /Next: /); assert.match(txt, /https:\/\/recordatlas\.org\/country\/hr\//);
+  const csv = checklistCsv(c); assert.match(csv.split("\r\n")[0], /Suggested next step,What the Atlas holds$/);
+});
+test("fix list: place help is the Atlas's, and where the Atlas has nothing it says so and invents nothing", need, async () => {
+  const { Session } = await import(R + "js/pipeline.js");
+  const s = new Session(io); await s.load(enc(makeSample())); const c = s.checklist({ living: true });
+  const pe = c.sections.find(x => x.key === "check").items.find(i => /Port Elizabeth/.test(i.raw));
+  assert.ok(pe.info.some(x => x.k === "Place" && x.l.some(l => l.u === "/country/za/")), "country page linked");
+  assert.ok(pe.info.some(x => x.k.startsWith("In 1929") && /Union of South Africa/.test(x.t)), "the ruler in the year of the event");
+  assert.ok(pe.info.some(x => x.none && /a place page/.test(x.t)), "a place the Atlas has not surveyed says so");
+  const big = c.sections.flatMap(x => x.items).flatMap(i => i.info || []).filter(x => x.l).flatMap(x => x.l);
+  for (const l of big) assert.ok(/^\//.test(l.u) || /^https:\/\//.test(l.u), "a link is a path on this site or an https page: " + l.u);
+  const t2 = new Session(io); await t2.load(enc(helpFile)); const d = t2.checklist({ living: true }).sections.find(x => x.key === "decide").items.find(i => i.raw === "Qwertyville");
+  assert.ok(d.info[0].none && d.info.every(x => !x.l), "an unknown place has no links and says the Atlas does not know it");
+  const my = t2.checklist({ living: true }).sections.find(x => x.key === "years").items.find(i => i.id === "I3");
+  assert.ok(my.info.some(x => x.k === "Birthplace" && x.none), "an unplaced birthplace is said to be unplaced, not guessed");
+});
+test("fix list: names link to the Atlas's name pages and the catalogues speak only when they hold the name", need, async () => {
+  const { Session } = await import(R + "js/pipeline.js");
+  const s = new Session(io); await s.load(enc(helpFile)); const c = s.checklist({ living: true });
+  const rows = c.sections.flatMap(x => x.items).filter(i => i.id === "I2" || i.id === "I1"), lines = rows.flatMap(i => i.info);
+  const sur = lines.find(x => x.k === "Surname" && /Zzyx/.test(x.t)); if (sur) { assert.ok(sur.none && /no variants are recorded/.test(sur.t), "an uncatalogued surname is not given variants"); assert.ok(sur.l.some(l => l.u === "/your-name/?s=Zzyx")); }
+  const fam = s.help.sur.find(f => f.m.length > 1), form = fam && fam.m[0][0];
+  if (form) {
+    const enr = s.enricher(p => p.given + " " + p.sur), l = enr.nameLines({ given: "", sur: form }).find(x => x.k === "Surname");
+    assert.ok(!l.none && l.t.includes(fam.name) && l.l.some(k => k.u.startsWith("/your-name/?s=") || k.u.startsWith("/surname/")), "a catalogued surname shows its family: " + form);
+  }
+  const g = s.help.given.find(f => f.m.length > 1), gf = g.m[0][0], gl = s.enricher(p => p.given).nameLines({ given: gf, sur: "" }).find(x => x.k === "First name");
+  assert.ok(!gl.none && gl.t.includes(g.name) && gl.l[0].u === "/your-name/?n=" + encodeURIComponent(gf), "a catalogued first name shows its family");
+  assert.deepEqual(s.enricher(p => p.given).nameLinks({ given: "Anna Maria", sur: "Wick" }).given, { t: "Anna", u: "/your-name/?n=Anna" });
+});
+test("fix list: living people are named only when the toggle says so, in the rows and in the Atlas notes", need, async () => {
+  const { Session } = await import(R + "js/pipeline.js"); const { checklistText } = await import(R + "js/checklist.js");
+  const s = new Session(io); await s.load(enc(helpFile));
+  const on = checklistText(s.checklist({ living: true })), off = s.checklist({ living: false }), offTxt = checklistText(off);
+  assert.match(on, /Livia Livingston/); assert.doesNotMatch(offTxt, /Livia|Livingston/, "no living name anywhere in the text");
+  assert.doesNotMatch(JSON.stringify(off), /Livia|Livingston/, "nor in any row, note or link of the list");
+});
+test("workbench: the person on the left carries the same Atlas help, and the page keeps search and the not-drawn list side by side", need, async () => {
+  const { Session } = await import(R + "js/pipeline.js");
+  const s = new Session(io); await s.load(enc(helpFile)); const i = s.personInfo("I1");
+  assert.ok(i.help.some(x => x.k === "In your file") && i.help.some(x => x.k === "Surname") && i.help.some(x => x.k === "Birthplace"), "details, name help and birthplace");
+  assert.ok(i.nl.given && i.nl.sur, "name links");
+  const html = fs.readFileSync(path.join(here, "../src/pages/roots/index.astro"), "utf8"), css = fs.readFileSync(R + "roots.css", "utf8");
+  assert.match(html, /class="wfind"/); assert.match(css, /\.wfind\{position:sticky/); assert.match(html, /id="whelp"/); assert.match(html, /id="whint"/);
+});
+test("fix list: Generate PDF is the browser's own print over a copy built on the device, with a print layout", () => {
+  const html = fs.readFileSync(path.join(here, "../src/pages/roots/index.astro"), "utf8"), app = fs.readFileSync(R + "js/app.js", "utf8"), css = fs.readFileSync(R + "roots.css", "utf8");
+  assert.match(html, /id="fpdf"[^>]*>Generate PDF</); assert.match(app, /\$\('#fpdf'\)\.onclick = toPdf/); assert.match(app, /window\.print\(\)/);
+  assert.match(css, /@media print/); assert.match(css, /body\.printing>\*:not\(#fprint\)\{display:none!important\}/);
+  assert.doesNotMatch(app.slice(app.indexOf("function toPdf")), /fetch\(|XMLHttpRequest|sendBeacon|window\.open/, "making the PDF reaches nowhere");
+  assert.match(app, /asIs\.has\(i\.key\)/, "the printed list drops the rows left as is, and uses the same list the toggle built (living people included or not)");
+});
+test("MyHeritage links: the last link pasted is remembered on this device, tolerates refused storage, and can be forgotten", async () => {
+  const { loadLink, saveLink } = await import(R + "js/remember.js"); const { parseLink } = await import(R + "js/myheritage.js");
+  const link = "https://www.myheritage.com/profile-ABCDEFGHIJKLMNOP1234-4000030/jan-test", store = new Map();
+  globalThis.localStorage = { getItem: k => (store.has(k) ? store.get(k) : null), setItem: (k, v) => store.set(k, String(v)), removeItem: k => store.delete(k) };
+  try {
+    assert.equal(loadLink(), ""); assert.ok(saveLink(link)); assert.equal(loadLink(), link); assert.ok(parseLink(loadLink()) && parseLink(loadLink()).tree === 4, "what is read back parses to the same site and tree");
+    assert.ok(saveLink("")); assert.equal(loadLink(), "", "clearing forgets it"); assert.equal(store.size, 0);
+    globalThis.localStorage = { getItem() { throw new Error("blocked"); }, setItem() { throw new Error("blocked"); }, removeItem() { throw new Error("blocked"); } };
+    assert.equal(loadLink(), ""); assert.equal(saveLink(link), false, "refused storage is not an error");
+  } finally { delete globalThis.localStorage; }
+  const app = fs.readFileSync(R + "js/app.js", "utf8"); assert.match(app, /loadLink\(\)/); assert.match(app, /saveLink\(/); assert.doesNotMatch(app, /localStorage/, "only remember.js touches storage");
 });

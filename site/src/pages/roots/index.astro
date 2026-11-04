@@ -119,12 +119,14 @@ const here = Astro.url.pathname;
     <button class="link" data-goto="export">export</button>. They live in this page only, so export before you close it.</p>
     <p id="wflash" class="flash" role="status" aria-live="polite" hidden></p>
     <div class="wgrid">
-      <section>
+      <section class="wfind">
         <h3>Find a person</h3>
         <input id="wfind" type="search" placeholder="Name, or a record number (I123)" aria-label="Find a person">
+        <p id="whint" class="small whint">Type a name or a record number and the matches appear here. Or press <b>Add a year</b> beside anyone in “Not drawn yet”: they open here, so the list on the right stays where it is while you work.</p>
         <div id="wres"></div>
         <div id="wedit" hidden>
           <h4 id="wname"></h4><p id="winfo" class="small"></p><p id="wmh" class="small"></p>
+          <div id="whelp"></div>
           <div id="wlook"><h4>Look this person up elsewhere</h4><p id="wsends" class="small"></p><ul id="wlinks" class="llist"></ul></div>
           <form id="wdate" class="wform"><label>Birth <input name="birth" placeholder="e.g. ABT 1850"></label><label>Death <input name="death" placeholder="e.g. 12 MAR 1910"></label><button class="btn">Save dates</button></form>
           <form id="wnote" class="wform"><label>Add a note <textarea name="text" rows="3"></textarea></label><button class="btn">Add the note</button></form>
@@ -146,11 +148,12 @@ const here = Astro.url.pathname;
   </div>
   <div id="p-fix" class="panel" hidden>
     <h2>Fix list</h2>
-    <p class="small">Work down each list in the tree you keep elsewhere: copy, paste, tick. Ticks stay in this page, so download the list to keep your place.</p>
+    <p class="small">Work down each list in the tree you keep elsewhere: copy, paste, tick. Ticks stay in this page, so download the list to keep your place. Each row says why, what to do next, and what the Atlas holds for that place, year and name. “Generate PDF” opens your browser’s own print window over a copy made here: choose “Save as PDF”. Nothing is uploaded.</p>
     <div class="ftool">
       <label class="small"><input type="checkbox" id="fliving" checked> Include living people</label>
       <input id="ffilter" type="search" placeholder="Filter by name or place" aria-label="Filter the fix list">
-      <span class="fdl"><button class="btn" id="ftext">Download text</button><button class="btn" id="fcsv">Download CSV</button></span>
+      <label class="small"><input type="checkbox" id="fcollapse"> Fold the Atlas notes</label>
+      <span class="fdl"><button class="btn" id="fpdf" title="Opens your browser’s print window over a print-ready copy made on this device. Choose “Save as PDF”.">Generate PDF</button><button class="btn" id="ftext">Download text</button><button class="btn" id="fcsv">Download CSV</button></span>
     </div>
     <div id="fsecs"></div>
   </div>

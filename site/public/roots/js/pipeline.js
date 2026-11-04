@@ -9,7 +9,8 @@ import { Gazetteer, resolveAll, REAL, COARSE, REVIEW, addCountryNames, parsePart
 import { buildExport, logText } from './export.js';
 import { offerable } from './contribute.js';
 import { Overlay, suggestMerges, cleanDate, yearOf } from './workbench.js';
-import { buildChecklist } from './checklist.js';
+import { buildChecklist, arrange } from './checklist.js';
+import { makeEnricher } from './enrich.js';
 import { buildConsistency } from './consistency.js';
 import { AtlasCore, targetOf, nameTargets, buildAtlas } from './atlas.js';
 
@@ -29,6 +30,9 @@ export class Session {
     t0 = now(); this.progress('Reading the Atlas');
     this.core = new AtlasCore(await this.io.json('data/atlas.json')); tick('atlasLoad', t0);
     try { this.families = await this.io.json('data/surname-families.json'); } catch (e) { this.families = []; }       // spellings the Atlas catalogue treats as one name
+    /* what the fix list uses to help whoever resolves it: the catalogues of surnames and first names, and which Atlas pages exist to link to (all static files next to the page) */
+    this.help = { pages: {}, given: [], sur: [] };
+    for (const [k, f] of [['pages', 'data/pages.json'], ['given', 'data/given-names.json'], ['sur', 'data/surname-catalogue.json']]) { try { this.help[k] = await this.io.json(f); } catch (e) { /* the list still works without it */ } }
     t0 = now(); this.progress('Placing ' + mentions.size.toLocaleString('en') + ' different places');
     addCountryNames(this.core.c.countries);
     const r = await resolveAll(mentions, this.gz, this.io, (kind, i, n, cc) => this.progress('Loading the ' + cc + ' places (' + i + ' of ' + n + ')'));
@@ -114,7 +118,8 @@ export class Session {
     const p = this.P.get(id); if (!p) return null;
     const rec = this.parsed.nodes.find(n => n.xref === '@' + id + '@'), dt = tag => { const ev = rec && rec.kids.find(k => k.tag === tag), d = ev && ev.kids.find(k => k.tag === 'DATE'); return d ? d.val : null; };
     return { id, name: this.shown(p), birth: dt('BIRT'), death: dt('DEAT'), by: p.by, living: !!p.liv, estimated: this.est.has(id), edits: this.overlay.of(id),
-      look: { first: p.given, last: p.sur, by: p.by, dy: p.dy, bp: p.bpRaw || '', dp: p.dpRaw || '', living: !!p.liv } };
+      look: { first: p.given, last: p.sur, by: p.by, dy: p.dy, bp: p.bpRaw || '', dp: p.dpRaw || '', living: !!p.liv },
+      help: this.enricher(q => this.shown(q)).personLines(p), nl: this.enricher(q => this.shown(q)).nameLinks(p) };
   }
 
   /* The file with the chosen edits applied to its own lines, and the change log. mode: 'faithful' | 'enriched' | 'cleaned' | 'shareable'. */
@@ -150,8 +155,18 @@ export class Session {
       { key: 'suspect', title: 'People whose life does not add up', how: 'Several kinds of check on a whole life: events after a death or before a birth, a marriage too young or after a spouse died, two different birth or death years, places too far apart for the years between them, and a surname that changes between father and child. Recorded years only, and only places the Atlas is sure of. Each is a place to look, not a verdict: “Leave as is” hides one you know is right.', items: suspect },
       { key: 'ages', title: 'Today’s country on an older date', how: 'Places written with today’s country for a date when the Atlas shows another power ruling it (for example South Africa under Dutch or British rule). Often fine: it is how people name a place today. Your tree may want the name used at the time, and the maps already draw the flag of the day.', items: ages },
       { key: 'leads', title: 'Where to look next', how: 'People with no parents in your file, born where the Atlas lists a record collection for those years. The links open the collection’s own site; nothing from your file is sent.', items: leads });
+    arrange(out);
+    this.enricher(shown).enrich(out);
     out.counts = Object.fromEntries(out.sections.map(s => [s.key, s.items.length]));
     return out;
+  }
+
+  /* The Atlas's help for a row or a person (enrich.js), asked of this session's own resolutions. `shown` names people the way the page is showing them. */
+  enricher(shown) {
+    const resolve = raw => (this.overrides.has(raw) ? { tier: 'user', place: this.overrides.get(raw) } : this.res.get(raw));
+    const target = raw => { const t = targetOf(resolve(raw), this.core.c); return t && t.kind === 'place' ? { name: t.name, lat: t.lat, lon: t.lon, iso: t.iso, region: t.region } : null; };
+    const h = this.help || { pages: {}, given: [], sur: [] };
+    return makeEnricher({ core: this.core, pages: h.pages, given: h.given, sur: h.sur, target, P: this.P, shown, est: this.est, dest: this.dest });
   }
 
   pick(raw, cand) { if (cand) this.overrides.set(raw, cand); else this.overrides.delete(raw); }

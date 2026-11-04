@@ -69,7 +69,7 @@ export function buildChecklist(env) {
       if (sure && c.fix) places.push({ key: 'p|' + raw, raw, to: c.to, count: g.count, people: g.people });
       else check.push({ key: 'c|' + raw, raw, to: c.to, tier: r.tier, why: sure ? 'a different name: it may be the historical name, so check it against the date' : 'a probable match, not a certain one', count: g.count, people: g.people });
     } else if (['ambiguous', 'review-skipped-part', 'review-other-country', 'not-found'].includes(r.tier)) {
-      decide.push({ key: 'd|' + raw, raw, tier: r.tier, count: g.count, cands: (r.cands || []).slice(0, 5).map(label), people: g.people });
+      decide.push({ key: 'd|' + raw, raw, tier: r.tier, count: g.count, cands: (r.cands || []).slice(0, 5).map(label), candPlaces: (r.cands || []).slice(0, 5).map(c => ({ n: c.n, k: c.k, y: c.y, x: c.x })), people: g.people });
     }
   }
   for (const a of [places, check, decide]) a.sort((x, y) => az(x.raw, y.raw));
@@ -152,36 +152,74 @@ export function buildChecklist(env) {
   return out;
 }
 
-/* ---- plain text and CSV, so the list can go on paper or into a spreadsheet ---- */
+/* ---- the sections gathered by what the reader has to DO, each row carrying its reason and a suggested next step ---- */
+export const GROUPS = [
+  { key: 'place', title: 'Correct a place', sections: ['places', 'check', 'ages'], how: 'The place text in your tree differs from the standard form, or names a country the ground did not belong to then.' },
+  { key: 'choose', title: 'Choose a place', sections: ['decide'], how: 'The text could be several places, or none the gazetteer knows. Someone has to choose.' },
+  { key: 'find', title: 'Find what is missing', sections: ['years', 'names', 'leads'], how: 'A year, a name or a parent is not in the file. These are research tasks, with the Atlas’s help on where to start.' },
+  { key: 'verify', title: 'Check a date or a life', sections: ['dates', 'suspect'], how: 'Something recorded does not add up. Each is a place to look for a typo or a wrong person, not a verdict.' },
+  { key: 'join', title: 'Merge or connect people', sections: ['dupes', 'apart'], how: 'Records that may be one person, and groups with no link to the main tree.' },
+];
+/* Puts the sections in group order and marks each with its group. A section key no group names is kept, last. */
+export function arrange(out) {
+  const at = k => { const g = GROUPS.findIndex(x => x.sections.includes(k)); return g < 0 ? [GROUPS.length, 0] : [g, GROUPS[g].sections.indexOf(k)]; };
+  out.sections.sort((a, b) => { const x = at(a.key), y = at(b.key); return x[0] - y[0] || x[1] - y[1]; });
+  for (const s of out.sections) { const g = GROUPS.find(x => x.sections.includes(s.key)); s.group = g ? g.key : 'other'; }
+  out.groups = GROUPS.map(g => ({ key: g.key, title: g.title, how: g.how, sections: g.sections.filter(k => out.sections.some(s => s.key === k)) }));
+  return out;
+}
+
+/* One row as plain parts, so the text, the spreadsheet and the printed page all say the same thing:
+   { head: the line, why: the reason, next: the suggested step, info: [{ k, t, l }], people: who and where } */
+const LIMIT = 'https://recordatlas.org';
+const abs = u => (/^https?:/.test(u) ? u : LIMIT + u);
+export const infoText = (info, links = true) => (info || []).map(x => x.k + ': ' + x.t + (links && x.l && x.l.length ? ' [' + x.l.map(y => y.t + ' ' + abs(y.u)).join('; ') + ']' : '')).join('\n');
+export function describe(s, i) {
+  const ev = n => n + ' event' + (n === 1 ? '' : 's');
+  let head = '', why = '', people = '';
+  if (s.key === 'places') { head = '"' + i.raw + '"  ->  "' + i.to + '"'; people = ev(i.count) + ': ' + ppl(i.people) + (i.count > SAMPLE ? '; and ' + (i.count - SAMPLE) + ' more (all of them are in the spreadsheet)' : ''); }
+  else if (s.key === 'check') { head = '"' + i.raw + '"  ->  "' + i.to + '"'; why = i.why; people = ev(i.count) + ': ' + ppl(i.people) + (i.count > SAMPLE ? '; and ' + (i.count - SAMPLE) + ' more (all of them are in the spreadsheet)' : ''); }
+  else if (s.key === 'decide') { head = '"' + i.raw + '"'; why = i.cands.length ? 'could be: ' + i.cands.join(' | ') : 'no candidate found'; people = ev(i.count) + ': ' + ppl(i.people) + (i.count > SAMPLE ? '; and ' + (i.count - SAMPLE) + ' more' : ''); }
+  else if (s.key === 'years') { head = i.name + ' (' + i.id + ')'; why = i.note; }
+  else if (s.key === 'names') { head = (i.name || '(no name)') + ' (' + i.id + ')'; why = i.note; people = [i.kin, i.born ? 'born ' + i.born + (i.place ? ' at ' + i.place : '') : ''].filter(Boolean).join(' · '); }
+  else if (s.key === 'dates') { head = i.name + ' (' + i.id + ')'; why = i.note; people = i.with ? 'with ' + i.with : ''; }
+  else if (s.key === 'suspect') { head = i.name + ' (' + i.id + ')'; why = i.reasons.map(r => r.text).join('; '); }
+  else if (s.key === 'ages') { head = i.country + ' written for ' + span(i.from, i.to) + ', when it was ' + i.label; people = i.count + (i.count === 1 ? ' event' : ' events') + ': ' + i.people.map(x => x.name + ' (' + x.id + ')').join('; ') + (i.n > i.people.length ? '; and ' + (i.n - i.people.length) + ' more' : ''); }
+  else if (s.key === 'leads') { head = i.name + ' (' + i.id + ', born ' + i.born + ' at ' + i.place + ')'; why = 'No parents in the file'; people = i.cols.map(x => x.title + (x.url ? ' ' + x.url : '')).join(' | '); }
+  else if (s.key === 'dupes') { head = i.an + ' (' + i.a + ') and ' + i.bn + ' (' + i.b + ')'; why = i.note; }
+  else if (s.key === 'apart') { head = i.size + (i.size === 1 ? ' person' : ' people') + ' not joined to the main tree'; people = i.people.map(p => p.name + ' (' + p.id + (p.by ? ', b. ' + p.by : '') + ')').join('; ') + (i.size > i.people.length ? '; and ' + (i.size - i.people.length) + ' more' : ''); }
+  return { head, why, next: i.next || '', info: i.info || [], people };
+}
 const ppl = l => l.slice(0, SAMPLE).map(x => x.name + ' (' + x.id + ', ' + x.ev + (x.date ? ' ' + x.date : '') + ')').join('; ');
+const span = (a, b) => (a === b ? String(a) : a + '–' + b);
 
 export function checklistText(c, date = '') {
-  const L = ['FIX LIST' + (date ? ' · ' + date : ''), 'Made in your browser from your file. Tick each line when it is done in your own tree.', ''];
-  for (const s of c.sections) {
-    if (!s.items.length) continue;
-    L.push(s.title.toUpperCase() + ' (' + s.items.length + ')', s.how, '');
-    for (const i of s.items) {
-      if (s.key === 'places' || s.key === 'check') L.push('[ ] "' + i.raw + '"  ->  "' + i.to + '"' + (s.key === 'check' ? ' (suggestion: ' + i.why + ')' : '') + '  · ' + i.count + ' event' + (i.count === 1 ? '' : 's') + ': ' + ppl(i.people) + (i.count > SAMPLE ? '; and ' + (i.count - SAMPLE) + ' more (all of them are in the spreadsheet)' : ''));
-      else if (s.key === 'decide') L.push('[ ] "' + i.raw + '"  ·  ' + (i.cands.length ? 'could be: ' + i.cands.join(' | ') : 'no candidate found') + '  · ' + i.count + ' event' + (i.count === 1 ? '' : 's') + ': ' + ppl(i.people) + (i.count > SAMPLE ? '; and ' + (i.count - SAMPLE) + ' more' : ''));
-      else if (s.key === 'years') L.push('[ ] ' + i.name + ' (' + i.id + ')  ·  ' + i.note + (i.place ? '  ·  born at ' + i.place : ''));
-      else if (s.key === 'names') L.push('[ ] ' + (i.name || '(no name)') + ' (' + i.id + ')  ·  ' + i.note + (i.kin ? '  ·  ' + i.kin : '') + (i.born ? '  ·  born ' + i.born : '') + (i.place ? ' at ' + i.place : ''));
-      else if (s.key === 'dates') L.push('[ ] ' + i.name + ' (' + i.id + ')  ·  ' + i.note + (i.with ? '  ·  with ' + i.with : ''));
-      else if (s.key === 'suspect') L.push('[ ] ' + i.name + ' (' + i.id + ')  ·  ' + i.reasons.map(r => r.text).join('; '));
-      else if (s.key === 'ages') L.push('[ ] ' + i.country + ' written for ' + i.from + '–' + i.to + ', when it was ' + i.label + '  ·  ' + i.count + ' events: ' + i.people.map(x => x.name + ' (' + x.id + ')').join('; ') + (i.n > i.people.length ? '; and ' + (i.n - i.people.length) + ' more' : ''));
-      else if (s.key === 'leads') L.push('[ ] ' + i.name + ' (' + i.id + ', born ' + i.born + ' at ' + i.place + ')  ·  ' + i.cols.map(x => x.title + (x.url ? ' ' + x.url : '')).join(' | '));
-      else if (s.key === 'dupes') L.push('[ ] ' + i.an + ' (' + i.a + ') and ' + i.bn + ' (' + i.b + ')  ·  ' + i.note);
-      else if (s.key === 'apart') L.push('[ ] ' + i.size + (i.size === 1 ? ' person: ' : ' people: ') + i.people.map(p => p.name + ' (' + p.id + (p.by ? ', b. ' + p.by : '') + ')').join('; ') + (i.size > i.people.length ? '; and ' + (i.size - i.people.length) + ' more' : ''));
+  const L = ['FIX LIST' + (date ? ' · ' + date : ''), 'Made in your browser from your file. Tick each line when it is done in your own tree.', 'Atlas help comes from recordatlas.org; where it has nothing, the line says so.', ''];
+  const groups = c.groups || [{ title: '', sections: c.sections.map(s => s.key) }];
+  for (const g of groups) {
+    const secs = g.sections.map(k => c.sections.find(s => s.key === k)).filter(s => s && s.items.length); if (!secs.length) continue;
+    if (g.title) L.push('=== ' + g.title.toUpperCase() + ' ===', '');
+    for (const s of secs) {
+      L.push(s.title.toUpperCase() + ' (' + s.items.length + ')', s.how, '');
+      for (const i of s.items) {
+        const d = describe(s, i);
+        L.push('[ ] ' + d.head + (d.why ? '  ·  Why: ' + d.why : '') + (d.people ? '  ·  ' + d.people : ''));
+        if (d.next) L.push('      Next: ' + d.next);
+        for (const x of d.info) L.push('      ' + x.k + ': ' + x.t + (x.l && x.l.length ? '  [' + x.l.map(y => y.t + ' ' + abs(y.u)).join('; ') + ']' : ''));
+      }
+      L.push('');
     }
-    L.push('');
   }
   return L.join('\n');
 }
 
 const cell = v => { let s = String(v ?? ''); if (/^[=+\-@\t\r]/.test(s)) s = "'" + s; return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
 export function checklistCsv(c) {
-  const rows = [['Done', 'Section', 'Person', 'Id', 'Event', 'Date', 'Current text', 'Change to / note']];
-  const row = (...a) => rows.push(['', ...a]);
+  const rows = [['Done', 'Section', 'Person', 'Id', 'Event', 'Date', 'Current text', 'Change to / note', 'Suggested next step', 'What the Atlas holds']];
+  let cur = null, used = false;                                      // the next step and the Atlas notes ride on an item's first row only
+  const row = (...a) => { while (a.length < 7) a.push(''); rows.push(['', ...a, used ? '' : cur.next || '', used ? '' : infoText(cur.info, false)]); used = true; };
   for (const s of c.sections) for (const i of s.items) {
+    cur = i; used = false;
     if (s.key === 'places' || s.key === 'check') for (const p of i.people) row(s.title, p.name, p.id, p.ev, p.date, i.raw, i.to + (s.key === 'check' ? ' (suggestion: ' + i.why + ')' : ''));
     else if (s.key === 'decide') for (const p of i.people) row(s.title, p.name, p.id, p.ev, p.date, i.raw, i.cands.join(' | '));
     else if (s.key === 'years') row(s.title, i.name, i.id, '', '', '', i.note);

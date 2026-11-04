@@ -7,6 +7,8 @@ import { checklistText, checklistCsv } from './checklist.js';
 import * as recent from './recent.js';
 import { BUILD } from './build.js';
 import { parseLink, profileUrl, treeUrl, toHash, fromHash } from './myheritage.js';
+import { loadLink, saveLink } from './remember.js';
+import { GROUPS as FIXGROUPS, describe } from './checklist.js';
 
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
@@ -278,11 +280,13 @@ function workbench(w) {
 }
 function found(m) {
   const box = $('#wres'); box.textContent = '';
+  if (!m.rows.length && m.q && m.q.trim()) box.append(el('p', 'small', 'No one in this file matches “' + m.q.trim() + '”. Try just the surname, or a record number such as I123.'));
   for (const r of m.rows) { const row = el('div', 'wrow'), t = el('div', null, r.name); t.append(el('small', null, r.id + (r.living ? ' · living' : '') + (r.by ? ' · born ' + (r.est ? 'about ' : '') + r.by : ' · no year') + (r.bp ? ' · ' + r.bp : ''))); const b = el('button', 'link', 'Edit'); b.onclick = () => { who = r.id; focusEdit = true; worker.postMessage({ cmd: 'person', id: r.id }); }; row.append(t, b); box.append(row); }
 }
 function person(i) {
   if (!i) return; lastInfo = i;
-  $('#wedit').hidden = false; if (focusEdit) { focusEdit = false; $('#wedit').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } $('#wname').textContent = i.name + ' · ' + i.id;
+  $('#wedit').hidden = false; if (focusEdit) { focusEdit = false; $('#wedit').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } const wn = $('#wname'); wn.textContent = ''; wn.append(...nameNodes(i.name, i.nl), ' · ' + i.id);
+  $('#whint').hidden = true; const wh = $('#whelp'); wh.textContent = ''; if (i.help && i.help.length) { wh.append(el('h4', null, 'What the file and the Atlas hold'), infoList(i.help)); }
   $('#winfo').textContent = 'In your file: born ' + (i.birth || 'no date') + ', died ' + (i.death || 'no date') + (i.living ? '. Treated as living (no death recorded, born within 110 years)' + (hideLiv() ? ', so hidden while "Hide living people" is on, and left out of a shareable file.' : '. Left out of a shareable export.') : '.');
   const wm = $('#wmh'); wm.textContent = ''; const ml = mhA(i.id, i.name); if (ml.length) wm.append(...ml);
   const l = i.look, ul = $('#wlinks'); ul.textContent = '';
@@ -366,16 +370,38 @@ const copy = async (text, btn) => {
   btn.classList.add('ok'); setTimeout(() => { btn.innerHTML = was; btn.title = wt; btn.classList.remove('ok'); }, 1200);
 };
 /* ---------- links back to MyHeritage ---------- */
-let mhc = fromHash(location.hash);
+let mhc = fromHash(location.hash), mhRemembered = false;
+{ const kept = loadLink(), c = kept && parseLink(kept);                       // the last link pasted on this device, unless the address already carries one
+  if (c) { $('#mhin').value = kept; if (!mhc) { mhc = c; mhRemembered = true; history.replaceState(null, '', toHash(c)); } } }
 const mhA = (id, name) => {
   const p = profileUrl(mhc, id, name), tu = treeUrl(mhc, id); if (!p) return [];
   return [' ', ia('person', 'Open this profile on MyHeritage', p), ' ', ia('tree', 'Open this person in the tree on MyHeritage', tu)];
 };
+/* a link to another page (an Atlas page of this site, or a collection's own site): new tab, no referrer */
+const lk = (t, u) => { const a = el('a', null, t); a.href = u; a.target = '_blank'; a.rel = 'noopener noreferrer'; return a; };
+/* a name whose first name and surname are links to the Atlas's name pages */
+function nameNodes(name, nl) {
+  if (!nl) return [name]; const out = []; let rest = name || '';
+  if (nl.given && rest.startsWith(nl.given.t)) { out.push(lk(nl.given.t, nl.given.u)); rest = rest.slice(nl.given.t.length); }
+  if (nl.sur && rest.endsWith(nl.sur.t)) { out.push(rest.slice(0, rest.length - nl.sur.t.length), lk(nl.sur.t, nl.sur.u)); } else out.push(rest);
+  return out;
+}
+/* what the Atlas holds, as a list: a label, the text, its links. A line that says the Atlas has nothing is marked so it reads as a statement, not a gap. */
+function infoList(lines) {
+  const ul = el('ul', 'atl');
+  for (const x of lines) {
+    const li = el('li', x.none ? 'none' : null); li.append(el('b', null, x.k + ' '), x.t);
+    if (x.l && x.l.length) { li.append(' '); x.l.forEach((y, n) => { if (n) li.append(' · '); li.append(lk(y.t, y.u)); }); }
+    ul.append(li);
+  }
+  return ul;
+}
 /* one person (or one event) as a tidy line: name, record number, what the event was, then the icons */
 const MAXP = 3;
 function pline(p, o = {}) {
   const li = el('li', 'fp');
-  li.append(el('b', 'pn', p.name || '(no name)'), el('span', 'pid', p.id));
+  const pn = el('b', 'pn'); if (p.nl && p.name) pn.append(...nameNodes(p.name, p.nl)); else pn.textContent = p.name || '(no name)';
+  li.append(pn, el('span', 'pid', p.id));
   const ev = p.ev ? p.ev + (p.date ? ' ' + p.date : '') : (p.by ? 'b. ' + p.by : ''); if (ev) li.append(el('span', 'chip', ev));
   const acts = el('span', 'acts');
   if (o.copyName !== false && p.name) acts.append(ib('copy', 'Copy name', function () { copy(p.name, this); }));
@@ -395,11 +421,12 @@ function plist(list, total) {
   return ul;
 }
 let lastInfo = null;
-function mhStatus(extra) { $('#mhsum').textContent = mhc ? 'on · tree ' + mhc.tree : 'off'; $('#mhsum').classList.toggle('on', !!mhc); $('#mhstat').textContent = mhc ? (extra || 'Open one or two people to check they are the right ones.') : ''; }
+function mhStatus(extra) { $('#mhsum').textContent = mhc ? 'on · tree ' + mhc.tree : 'off'; $('#mhsum').classList.toggle('on', !!mhc); $('#mhstat').textContent = mhc ? (extra || (mhRemembered ? 'Remembered from last time, on this device only. Clear the box to forget it.' : 'Open one or two people to check they are the right ones. The link is remembered on this device only (not sent anywhere); clear the box to forget it.')) : ''; }
 function mhWho(m) { mhStatus(m.name ? 'That link is ' + m.id + ' in your file: ' + m.name + '. If that is not who you pasted, the numbering differs and these links are wrong.' : 'No person ' + m.id + ' in this file, so check the link.'); }
 $('#mhin').oninput = e => {
-  const c = parseLink(e.target.value);
-  if (!c) { mhc = null; $('#mhstat').textContent = e.target.value.trim() ? 'That does not look like a MyHeritage profile or tree link.' : ''; refreshMh(); return; }
+  const c = parseLink(e.target.value); mhRemembered = false;
+  if (!c) { mhc = null; if (!e.target.value.trim()) saveLink(''); $('#mhstat').textContent = e.target.value.trim() ? 'That does not look like a MyHeritage profile or tree link.' : ''; refreshMh(); return; }
+  saveLink(e.target.value.trim());
   mhc = c; history.replaceState(null, '', toHash(c)); mhStatus(); refreshMh(); if (worker && c.num) worker.postMessage({ cmd: 'who', id: 'I' + c.num });
 };
 function refreshMh() { pushMh(); drawFix(); if (lastInfo) person(lastInfo); }
@@ -428,23 +455,27 @@ function fixRow(s, i) {
   } else if (s.key === 'apart') {
     head.append(el('b', null, i.size + (i.size === 1 ? ' person' : ' people') + ' not connected to the main tree')); body.append(head, plist(i.people, i.size));
   } else if (s.key === 'suspect') {
-    const one = pline({ name: i.name, id: i.id, by: null }, { copyName: true }); one.classList.add('solo'); head.append(one);
+    const one = pline({ name: i.name, id: i.id, by: null, nl: i.nl }, { copyName: true }); one.classList.add('solo'); head.append(one);
     const leave = el('button', 'link', 'Leave as is'); leave.type = 'button'; leave.title = 'I know this is right: hide it'; leave.onclick = () => { asIs.add(i.key); drawFix(); };
     head.append(leave); body.append(head);
     const ul = el('ul', 'reasons'); for (const r of i.reasons) ul.append(el('li', null, r.text)); body.append(ul);
   } else if (s.key === 'ages') {
     head.append(el('b', null, i.country + ' written for ' + (i.from === i.to ? i.from : i.from + '–' + i.to) + ', when it was ' + i.label)); body.append(head, el('div', 'fcount', i.count + ' event' + (i.count === 1 ? '' : 's') + ', ' + i.n + (i.n === 1 ? ' person' : ' people')), plist(i.people, i.n));
   } else if (s.key === 'leads') {
-    const one = pline({ name: i.name, id: i.id, by: i.born }, { copyName: true }); one.classList.add('solo'); head.append(one);
+    const one = pline({ name: i.name, id: i.id, by: i.born, nl: i.nl }, { copyName: true }); one.classList.add('solo'); head.append(one);
     const leave = el('button', 'link', 'Leave as is'); leave.type = 'button'; leave.onclick = () => { asIs.add(i.key); drawFix(); };
     head.append(leave); body.append(head, el('div', 'fnote', 'Born ' + i.born + ' at ' + i.place + '. The Atlas lists these for that place and time:'));
     const ul = el('ul', 'reasons');
     for (const c of i.cols) { const li = el('li'), a = el('a', null, c.title); if (/^https?:\/\//.test(c.url)) { a.href = c.url; a.target = '_blank'; a.rel = 'noopener noreferrer'; } li.append(a, ' ' + [c.provider, c.from ? c.from + (c.to ? '–' + c.to : '') : ''].filter(Boolean).join(' · ')); ul.append(li); }
     if (i.more) ul.append(el('li', 'muted', 'and ' + i.more + ' more in the Atlas')); body.append(ul);
   } else {                                                                                        // years, names, dates: one person, a note under
-    const p = { name: i.name, id: i.id, by: null }; const one = pline(p, { copyName: !!i.name }); one.classList.add('solo'); head.append(one);
+    const p = { name: i.name, id: i.id, by: null, nl: i.nl }; const one = pline(p, { copyName: !!i.name }); one.classList.add('solo'); head.append(one);
     note.textContent = i.note + (i.with ? ' · with ' + i.with : '') + (i.kin ? ' · ' + i.kin : '') + (i.born && s.key !== 'dates' ? ' · born ' + i.born : '') + (i.place ? ' · born at ' + i.place : '');
     body.append(head, note);
+  }
+  if (i.next) { const n = el('p', 'fnext'); n.append(el('b', null, 'Next step '), i.next); body.append(n); }
+  if (i.info && i.info.length) {
+    const d = el('details', 'atlnotes'); d.open = !$('#fcollapse').checked; const sm = el('summary'); sm.append(el('b', null, 'What the Atlas holds '), el('span', 'muted', '(' + i.info.length + ')')); d.append(sm, infoList(i.info)); body.append(d);
   }
   row.append(cb, body); return row;
 }
@@ -452,7 +483,9 @@ function fixCount(s) { const n = $('#fc-' + s.key); if (n) n.textContent = s.ite
 const hay = (s, i) => (s.key === 'names' ? i.name + ' ' + i.kin : s.key === 'dupes' ? i.an + ' ' + i.bn : s.key === 'apart' ? i.people.map(p => p.name).join(' ') : (i.raw || '') + ' ' + (i.name || '') + ' ' + (i.country ? i.country + ' ' + i.label : '') + ' ' + (i.reasons ? i.reasons.map(r => r.text).join(' ') : '') + ' ' + (i.people ? i.people.map(p => p.name).join(' ') : '')).toLowerCase();
 function drawFix() {
   if (!fix) return; const q = $('#ffilter').value.trim().toLowerCase(), box = $('#fsecs'); box.textContent = '';
-  for (const s of fix.sections) {
+  const byKey = new Map(fix.sections.map(x => [x.key, x])), done = new Set();
+  const section = s => {
+    done.add(s.key);
     const d = el('details', 'sec sec-' + s.key); d.id = 'fs-' + s.key; if (s.items.length) d.open = s.key === 'places' || d.dataset.open === '1';
     const sum = el('summary'), c = el('span', 'small'); c.id = 'fc-' + s.key; sum.append(el('b', null, s.title + ' '), el('span', 'count', n0(s.items.length)), ' ', c); d.append(sum);
     const how = el('p', 'small how', s.how); how.hidden = true; const inf = ib('info', 'What is this list?', function (e) { e.preventDefault(); e.stopPropagation(); how.hidden = !how.hidden; }); sum.append(' ', inf); d.append(how);
@@ -463,7 +496,13 @@ function drawFix() {
     if (hits.length > cap) { const b = el('button', 'link', 'Show ' + Math.min(100, hits.length - cap) + ' more of ' + n0(hits.length - cap)); b.onclick = () => { shownN.set(s.key, cap + 100); d.dataset.open = '1'; drawFix(); }; d.append(b); }
     d.ontoggle = () => { d.dataset.open = d.open ? '1' : ''; };
     box.append(d); fixCount(s);
+  };
+  for (const g of fix.groups || FIXGROUPS) {                                                       // by what the reader has to do, then by kind
+    const secs = g.sections.map(k => byKey.get(k)).filter(Boolean); if (!secs.length) continue;
+    const total = secs.reduce((n, x) => n + x.items.length, 0), h = el('h3', 'fgroup'); h.append(g.title + ' ', el('span', 'count', n0(total)));
+    box.append(h, el('p', 'small', g.how)); secs.forEach(section);
   }
+  for (const s of fix.sections) if (!done.has(s.key)) section(s);
 }
 function fixlist(m) { fix = m; drawFix(); }
 $('#ffilter').oninput = () => drawFix();
@@ -472,6 +511,36 @@ function saveAs(name, text, type) {
   const u = URL.createObjectURL(new Blob([text], { type })), a = el('a'); a.href = u; a.download = name; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 4000);
 }
 $('#ftext').onclick = () => fix && saveAs('fix-list.txt', checklistText(fix, new Date().toISOString().slice(0, 10)), 'text/plain;charset=utf-8');
+$('#fcollapse').onchange = () => drawFix();
+/* The PDF is the browser's own "Save as PDF" over a print-ready copy of the list, built here on the device from the same rows. Nothing is uploaded and
+   no library or font is fetched. The copy is added to the page for the moment of printing and removed after. */
+function printable() {
+  const root = el('div'); root.id = 'fprint';
+  root.append(el('h1', null, 'Fix list'), el('p', 'small', 'Made in your browser from your GEDCOM, ' + new Date().toISOString().slice(0, 10) + (fix.main ? ' · ' + n0(fix.main) + ' people in the main tree' : '') + '. Tick a box when the line is done in your own tree. Help from Record Atlas (recordatlas.org); where the Atlas has nothing, the line says so.'));
+  for (const g of fix.groups || FIXGROUPS) {
+    const secs = g.sections.map(k => fix.sections.find(x => x.key === k)).filter(x => x && x.items.length); if (!secs.length) continue;
+    root.append(el('h2', null, g.title), el('p', 'small', g.how));
+    for (const s of secs) {
+      root.append(el('h3', null, s.title + ' (' + s.items.length + ')'));
+      for (const i of s.items) {
+        if (asIs.has(i.key) || ($('#ffilter').value.trim() && !hay(s, i).includes($('#ffilter').value.trim().toLowerCase()))) continue;
+        const d = describe(s, i), row = el('div', 'pitem'), bx = el('span', 'pbox'); bx.textContent = '☐';
+        const main = el('div'); main.append(el('b', null, d.head)); if (d.why) main.append(el('div', 'pwhy', d.why)); if (d.people) main.append(el('div', 'ppeople', d.people));
+        if (d.next) { const n = el('div', 'pnext'); n.append(el('b', null, 'Next step '), d.next); main.append(n); }
+        if (d.info.length) main.append(infoList(d.info));
+        row.append(bx, main); root.append(row);
+      }
+    }
+  }
+  return root;
+}
+function toPdf() {
+  if (!fix) return; const was = document.getElementById('fprint'); if (was) was.remove();
+  const root = printable(); document.body.append(root); document.body.classList.add('printing');
+  const undo = () => { document.body.classList.remove('printing'); root.remove(); window.removeEventListener('afterprint', undo); };
+  window.addEventListener('afterprint', undo); setTimeout(() => { try { window.print(); } catch (e) { undo(); } }, 60);
+}
+$('#fpdf').onclick = toPdf;
 $('#fcsv').onclick = () => fix && saveAs('fix-list.csv', '\ufeff' + checklistCsv(fix), 'text/csv;charset=utf-8');
 
 

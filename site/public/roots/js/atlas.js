@@ -8,7 +8,7 @@ import { norm, REAL, COARSE } from './resolver.js';
 
 const FROM_YEAR = 1700, TO_YEAR = 2026;
 
-function inside(lat, lon, ring) {
+export function inside(lat, lon, ring) {
   let ins = false;
   for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
     const yi = ring[i][0], xi = ring[i][1], yj = ring[j][0], xj = ring[j][1];

@@ -454,3 +454,11 @@ test("MyHeritage links: the last link pasted is remembered on this device, toler
   } finally { delete globalThis.localStorage; }
   const app = fs.readFileSync(R + "js/app.js", "utf8"); assert.match(app, /loadLink\(\)/); assert.match(app, /saveLink\(/); assert.doesNotMatch(app, /localStorage/, "only remember.js touches storage");
 });
+
+test("MyHeritage links: a tree link reads by parameter name, in any order, and survives a mistyped root name", async () => {
+  const { parseLink } = await import(R + "js/myheritage.js");
+  const c = parseLink("https://www.myheritage.com/family-trees/example-family-site-23andme/OYYV7AGVV4FMSGNWXC6TO74JQDUMOYA?familyTreeID=4&rootIndivudalID=4000016");
+  assert.deepEqual(c, { site: "OYYV7AGVV4FMSGNWXC6TO74JQDUMOYA", tree: 4, num: 16, treeSlug: "example-family-site-23andme" });
+  assert.equal(parseLink("https://www.myheritage.com/family-trees/x/OYYV7AGVV4FMSGNWXC6TO74JQDUMOYA?rootIndividualID=4000016&familyTreeID=4").num, 16);
+  assert.equal(parseLink("https://www.myheritage.com/family-trees/x/OYYV7AGVV4FMSGNWXC6TO74JQDUMOYA?familyTreeID=4").num, null, "a tree with no person still gives the tree");
+});

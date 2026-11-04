@@ -12,11 +12,13 @@ export function parseLink(text) {
   const t = String(text || '');
   let m = new RegExp('myheritage\\.[a-z.]+/profile-(' + SITE.source + ')-(\\d+)', 'i').exec(t);
   if (m) { const id = +m[2]; return { site: m[1].toUpperCase(), tree: Math.floor(id / 1e6), num: id % 1e6, treeSlug: null }; }
-  m = new RegExp('myheritage\\.[a-z.]+/family-trees/([^/?#\\s]+)/(' + SITE.source + ')\\?[^\\s]*?rootIndividualID=(\\d+)[^\\s]*?familyTreeID=(\\d+)', 'i').exec(t)
-    || new RegExp('myheritage\\.[a-z.]+/family-trees/([^/?#\\s]+)/(' + SITE.source + ')\\?[^\\s]*?familyTreeID=(\\d+)[^\\s]*?rootIndividualID=(\\d+)', 'i').exec(t);
+  m = new RegExp('myheritage\\.[a-z.]+/family-trees/([^/?#\\s]+)/(' + SITE.source + ')\\?([^\\s#]*)', 'i').exec(t);
   if (m) {
-    const swapped = /familyTreeID=\d+[^\s]*?rootIndividualID/i.test(m[0]), root = +(swapped ? m[4] : m[3]), tree = +(swapped ? m[3] : m[4]);
-    return { site: m[2].toUpperCase(), tree, num: root % 1e6, treeSlug: slug(decodeURIComponent(m[1])) };
+    /* parameters read by name, in any order; the person's is any "root…ID" so a mistyped name (rootIndivudalID) still works */
+    const q = {}; for (const kv of m[3].split('&')) { const [k, v] = kv.split('='); if (k) q[k.toLowerCase()] = v || ''; }
+    const rk = Object.keys(q).find(k => /^root.*id$/.test(k)), root = rk && /^\d+$/.test(q[rk]) ? +q[rk] : null;
+    const tree = /^\d+$/.test(q.familytreeid || '') ? +q.familytreeid : root !== null ? Math.floor(root / 1e6) : null;
+    if (tree !== null) return { site: m[2].toUpperCase(), tree, num: root === null ? null : root % 1e6, treeSlug: slug(decodeURIComponent(m[1])) };
   }
   return null;
 }

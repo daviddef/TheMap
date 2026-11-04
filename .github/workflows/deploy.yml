@@ -287,6 +287,11 @@ jobs:
       # 167,866 files, so roughly 86 MB of the limit is spent before any
       # content. A ceiling check that trusts the raw sum would have passed
       # that build. 9.6 GiB leaves room for the header tax and a little more.
+      # WHERE THE BYTES ARE, in the run summary, before the gate below can
+      # fail. Never fails itself. See docs/deploy-size.md.
+      - name: Size breakdown
+        run: scripts/size-budget.sh site/dist
+
       - name: The artifact has to fit
         run: |
           bytes=$(du -sb site/dist | cut -f1)
@@ -317,3 +322,12 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          # THE DEFAULT IS 10 MINUTES AND PAGES NOW SOMETIMES NEEDS MORE.
+          # Of the last twelve deploys of a 2.26 GB artifact, two (2c9cc38,
+          # c5fd661) were cancelled by this action at exactly 10:00 while
+          # Pages was still processing, and the successful ones took between
+          # 3 and 9.6 minutes. The artifact was the same size in the failures
+          # and the successes, so this is a wait that is too short, not a
+          # file that is too big. 30 minutes.
+          timeout: 1800000

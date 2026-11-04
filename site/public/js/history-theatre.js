@@ -171,11 +171,11 @@
       });
       (e.poly || []).forEach(function (ring) {
         L.polygon(ring, { renderer: rMort, className: "hm-mort", color: "#000", weight: 2, opacity: .85 * f, fillColor: "#000", fillOpacity: .09 * f, smoothFactor: 1 })
-          .on("click", open).bindTooltip(esc(e.n) + " <span style='opacity:.7'>" + e.f + "\u2013" + e.t + "</span>", { sticky: true }).addTo(mortLayer);
+          .on("click", open).bindTooltip(esc(e.n) + " <span style='opacity:.7'>" + yr(e.f) + "\u2013" + yr(e.t) + "</span>", { sticky: true }).addTo(mortLayer);
       });
       if (e.at) {
         L.circleMarker(e.at, { renderer: rMort, radius: 6, color: "#fff", weight: 2, fillColor: "#000", fillOpacity: f, opacity: f })
-          .on("click", open).bindTooltip("<b>" + esc(e.n) + "</b> " + e.f + "\u2013" + e.t, { direction: "top" }).addTo(mortLayer);
+          .on("click", open).bindTooltip("<b>" + esc(e.n) + "</b> " + yr(e.f) + "\u2013" + yr(e.t), { direction: "top" }).addTo(mortLayer);
       }
     });
     return act;
@@ -193,7 +193,7 @@
     }
     var src = (e.src || []).map(function (x) { return "<a href='" + esc(x.url) + "' target='_blank' rel='noopener'>" + esc(x.publisher) + "</a>"; }).join(" \u00b7 ");
     var rec = MORT && MORT.records ? MORT.records[e.ty] : "";
-    var yrs = e.f === e.t ? String(e.f) : e.f + "\u2013" + (e.t >= 2026 ? "present" : e.t);
+    var yrs = e.f === e.t ? yr(e.f) : yr(e.f) + "\u2013" + (e.t >= 2026 ? "present" : yr(e.t));
     var z = e.poly && e.poly.length > 1 ? 4 : 7, q = [];
     if (e.t >= 1500) q.push("years=" + Math.max(e.f, 1500) + "," + Math.min(e.t, 2026));
     if (e.at) q.push("view=" + e.at[0] + "," + e.at[1] + "," + z);
@@ -768,7 +768,7 @@
   }
   function showMortBubble(e) {
     if (!e.at) return;
-    var html = "<div class='hm-b'><div class='hm-b-k' style='color:#000'>Mass mortality \u00b7 " + esc(TYPE_NAME[e.ty] || e.ty) + " \u00b7 " + e.f + (e.t > e.f ? "\u2013" + (e.t >= 2026 ? "present" : e.t) : "") + "</div><b>" + esc(e.n) + "</b>" +
+    var html = "<div class='hm-b'><div class='hm-b-k' style='color:#000'>Mass mortality \u00b7 " + esc(TYPE_NAME[e.ty] || e.ty) + " \u00b7 " + yr(e.f) + (e.t > e.f ? "\u2013" + (e.t >= 2026 ? "present" : yr(e.t)) : "") + "</div><b>" + esc(e.n) + "</b>" +
       (e.says ? "<p>" + esc(e.says.length > 200 ? e.says.slice(0, 197).replace(/\s+\S*$/, "") + "\u2026" : e.says) + "</p>" : "") +
       (tollShort(e) ? "<p><b style='display:inline'>" + esc(tollShort(e)) + " deaths</b></p>" : "") + "</div>";
     var layer = L.popup({ autoPan: false, closeOnClick: false, autoClose: false, closeButton: true, className: "hm-bubble hm-bubble-mort", maxWidth: 270, minWidth: 190, offset: [0, -4] })

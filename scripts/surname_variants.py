@@ -53,8 +53,14 @@ who. The same rule harvest-archive-surnames.py keeps.
 import argparse, datetime, gzip, json, os, re, subprocess, sys, tempfile, unicodedata
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CAT = os.path.join(ROOT, "data", "surname-families.json")
-CAT_REL = "data/surname-families.json"
+# One tool, two catalogues. `scripts/given_name_variants.py` sets NAME_CATALOGUE=given and calls this file's main(): the
+# rules (statuses, typography, "nothing about a person goes in", merge, publish) are the same for a given name and for
+# a surname, and keeping them in one place is the point.
+GIVEN = os.environ.get("NAME_CATALOGUE") == "given"
+LABEL = "given-name-families" if GIVEN else "surname-families"
+WORD = "given name" if GIVEN else "surname"
+CAT = os.path.join(ROOT, "data", LABEL + ".json")
+CAT_REL = "data/" + LABEL + ".json"
 REPO_URL = "https://github.com/daviddef/TheMap.git"
 
 STATUSES = ["same", "attested", "rule", "lead", "case-by-case"]
@@ -67,6 +73,11 @@ LEGEND = {
     "case-by-case": "Sometimes this family, sometimes another. Decide per record.",
     "not-same": "A different name that turns up in searches. Recorded so it is not decided twice.",
 }
+# A clerk's slip is not a spelling of the name: one hand, one document, a mistake (ZORAFKO for Zdravko, a ligature in Antonÿ,
+# an index artefact). It is kept so nobody counts it as a variant and nobody searches the world for it, and the evidence
+# names the kind of document and the place and period, never the person.
+LEGEND["slip"] = "Written once by a clerk or an indexer by mistake. Not a spelling of the name; recorded so it is not mistaken for one."
+LANG_RE = re.compile(r"^[a-z]{2,20}$")
 KINDS = ["record", "index", "archive", "owner", "source", "rule", "note"]
 # What each status needs underneath it. A «same» that rests on a note is a hunch.
 NEEDS = {
@@ -79,6 +90,7 @@ NEEDS = {
 RULES = {
     "diacritic-fold": "The index folds the mark: a search for one returns the other's records.",
     "translit": "A documented substitution when a Slavic name crosses a Latin-alphabet border (ć written ch, š sh).",
+    "latin-case": "Latin declension: the register writes the name in the case the sentence needs (Joannem, Joannis).",
     "ending": "A systematic ending change between languages (-schi / -ski, -ić / -ich).",
 }
 PARTICLES = ["della", "del", "de", "di", "da", "van", "von", "du", "le", "la", "des", "ten", "ter"]
@@ -136,16 +148,20 @@ def typography_forms(form):
 
 # ------------------------------------------------------------- the catalogue
 
-def load(path=CAT):
+def load(path=None):
+    path = path or CAT
     with open(path, encoding="utf-8") as fh:
         return json.load(fh)
 
 
-def save(cat, path=CAT):
+def save(cat, path=None):
+    path = path or CAT
     cat["families"].sort(key=lambda f: fold_key(f["name"]))
     for f in cat["families"]:
         f["members"].sort(key=lambda m: (RANK[m["status"]], fold_key(m["form"])))
         f.get("notSame", []).sort(key=lambda m: fold_key(m["form"]))
+        if "slips" in f:
+            f["slips"].sort(key=lambda m: fold_key(m["form"]))
     cat["built"] = datetime.date.today().isoformat()
     cat["counts"] = counts(cat)
     tmp = path + ".tmp"
@@ -155,7 +171,7 @@ def save(cat, path=CAT):
 
 
 def counts(cat):
-    c = {"families": len(cat["families"]), "forms": 0, "notSame": 0}
+    c = {"families": len(cat["families"]), "forms": 0, "notSame": 0, "slips": 0}
     for s in STATUSES:
         c[s] = 0
     for f in cat["families"]:
@@ -163,6 +179,7 @@ def counts(cat):
             c["forms"] += 1
             c[m["status"]] += 1
         c["notSame"] += len(f.get("notSame", []))
+        c["slips"] += len(f.get("slips", []))
     return c
 
 
@@ -175,6 +192,8 @@ def index(cat):
             ix.setdefault(form_key(m["form"]), (f, m, "member"))
         for m in f.get("notSame", []):
             ix.setdefault(form_key(m["form"]), (f, m, "notSame"))
+        for m in f.get("slips", []):
+            ix.setdefault(form_key(m["form"]), (f, m, "slip"))
     return ix
 
 
@@ -202,18 +221,18 @@ def validate(cat, countries=None):
     for f in cat.get("families", []):
         fid = f.get("id")
         if not fid or not re.fullmatch(r"[a-z0-9-]+", fid):
-            errs.append(f"surname-families: family id {fid!r} must be lower-case letters, digits, hyphens")
+            errs.append(f"{LABEL}: family id {fid!r} must be lower-case letters, digits, hyphens")
         if fid in ids:
-            errs.append(f"surname-families: family {fid} appears twice")
+            errs.append(f"{LABEL}: family {fid} appears twice")
         ids.add(fid)
         forms = {form_key(m.get("form", "")): m for m in f.get("members", [])}
         if form_key(f.get("name", "")) not in forms:
-            errs.append(f"surname-families {fid}: the headline name {f.get('name')!r} is not one of its members")
+            errs.append(f"{LABEL} {fid}: the headline name {f.get('name')!r} is not one of its members")
         seen = {}
         for m in f.get("members", []):
             form, st = m.get("form", ""), m.get("status")
             k = form_key(form)
-            where = f"surname-families {fid}/{form}"
+            where = f"{LABEL} {fid}/{form}"
             if not k:
                 errs.append(f"{where}: an empty form")
                 continue
@@ -228,6 +247,8 @@ def validate(cat, countries=None):
                 errs.append(f"{where}: also a member of family {owner[k]}. One form belongs to one family; "
                             f"if both are real, one of them is `case-by-case`")
             owner.setdefault(k, fid)
+            if m.get("lang") and not LANG_RE.match(m["lang"]):
+                errs.append(f"{where}: lang {m['lang']!r} must be lower-case letters (latin, italian, croatian...)")
             ev = m.get("evidence") or []
             if not ev:
                 errs.append(f"{where}: a {st} form with no evidence. Say what was seen, and where")
@@ -245,11 +266,19 @@ def validate(cat, countries=None):
             if ev and not any(e.get("kind") in NEEDS[st] for e in ev):
                 errs.append(f"{where}: `{st}` needs evidence of kind {' / '.join(sorted(NEEDS[st]))}; "
                             f"it has only {', '.join(sorted({e.get('kind') for e in ev}))}")
+        for m in f.get("slips", []):
+            w = f"{LABEL} {fid}/{m.get('form')} (slip)"
+            if not (m.get("why") or "").strip():
+                errs.append(f"{w}: a slip with no `why`")
+            if not m.get("evidence"):
+                errs.append(f"{w}: a slip with no evidence. Name the kind of document, the place and the period")
+            if form_key(m.get("form", "")) in forms:
+                errs.append(f"{w}: is also a member of the same family; it is a spelling or a slip, not both")
         for m in f.get("notSame", []):
             if not (m.get("why") or "").strip():
-                errs.append(f"surname-families {fid}/{m.get('form')}: a not-same form with no `why`")
+                errs.append(f"{LABEL} {fid}/{m.get('form')}: a not-same form with no `why`")
             if form_key(m.get("form", "")) in forms:
-                errs.append(f"surname-families {fid}/{m.get('form')}: both a member and not-same of the same family")
+                errs.append(f"{LABEL} {fid}/{m.get('form')}: both a member and not-same of the same family")
     return errs
 
 
@@ -259,7 +288,7 @@ def tiers(cat, name):
     """What to search for a name, by claim. Typography is attached to every form."""
     hit = lookup(cat, name)
     out = {"name": name, "family": None, "role": None, "tiers": {s: [] for s in STATUSES},
-           "notSame": [], "asked": None}
+           "notSame": [], "slips": [], "asked": None}
     if not hit:
         return out
     f, m, role = hit
@@ -269,10 +298,13 @@ def tiers(cat, name):
     for mm in f["members"]:
         out["tiers"][mm["status"]].append(mm)
     out["notSame"] = list(f.get("notSame", []))
+    out["slips"] = list(f.get("slips", []))
     return out
 
 
 def graph_leads(name, limit=25):
+    if GIVEN:
+        return []   # the atlas's computed links are surname clusters; a given name has none yet
     """The atlas's computed spelling links for a name: Wikidata «same as», one
     systematic substitution, a grammatical form. These are LEADS, labelled so.
     «Sounds like» is left out: it chains, and nobody has checked it."""
@@ -313,7 +345,8 @@ def cmd_terms(a):
         print(json.dumps({"name": a.name, "family": t["family"] and t["family"]["id"],
                           "role": t["role"],
                           "terms": {s: [m["form"] for m in t["tiers"][s]] for s in STATUSES},
-                          "notSame": [m["form"] for m in t["notSame"]]},
+                          "notSame": [m["form"] for m in t["notSame"]],
+                          "slips": [m["form"] for m in t["slips"]]},
                          ensure_ascii=False, indent=1))
         return
     f = t["family"]
@@ -322,6 +355,17 @@ def cmd_terms(a):
         print("  " + " · ".join(typography_forms(a.name)))
     elif t["role"] == "notSame":
         print(f"{a.name}: recorded as NOT the same as the {f['name']} family — {t['asked']['why']}")
+        return
+    elif t["role"] == "slip":
+        print(f"{a.name}: a clerk's slip for the {f['name']} family, not a spelling — {t['asked']['why'].rstrip('.')}. "
+              f"Search the family's own forms instead:")
+        a.name = f["name"]
+        t = tiers(cat, a.name)
+        f = t["family"]
+        print(f"{f['name']} family ({f['id']}): {f.get('note', '')}".strip())
+        for s in STATUSES:
+            for m in t["tiers"][s]:
+                print(f"  {m['form']}   ({s})")
         return
     else:
         print(f"{f['name']} family ({f['id']}): {f.get('note', '')}".strip())
@@ -336,6 +380,10 @@ def cmd_terms(a):
             for m in ms:
                 ty = typography_forms(m["form"])[1:] if s != "lead" else []
                 print(f"  {m['form']}" + (f"   (also typed: {', '.join(ty)})" if ty and a.typed else ""))
+        if t["slips"]:
+            print("\nCLERK'S SLIPS — seen once, by mistake. Do not search for them and do not count them as spellings")
+            for m in t["slips"]:
+                print(f"  {m['form']}: {m['why']}")
         if t["notSame"]:
             print("\nNOT THE SAME NAME — expect these in results and do not count them")
             for m in t["notSame"]:
@@ -423,7 +471,13 @@ def cmd_add(a):
     if a.archive and a.archive not in fam["archives"]:
         fam["archives"].append(a.archive)
     ev = evidence_from(a)
-    if a.status == "not-same":
+    if a.status == "slip":
+        row = next((m for m in fam.setdefault("slips", []) if form_key(m["form"]) == form_key(a.form)), None)
+        if not row:
+            row = {"form": a.form, "why": a.what, "evidence": []}
+            fam["slips"].append(row)
+        row.setdefault("evidence", []).append(ev)
+    elif a.status == "not-same":
         row = next((m for m in fam["notSame"] if form_key(m["form"]) == form_key(a.form)), None)
         if not row:
             row = {"form": a.form, "why": a.what, "evidence": []}
@@ -466,7 +520,7 @@ def cmd_check(a):
         print("FAIL:", e)
     c = counts(cat)
     print(f"{c['families']} families, {c['forms']} forms "
-          f"({', '.join(f'{c[s]} {s}' for s in STATUSES)}), {c['notSame']} not-same")
+          f"({', '.join(f'{c[s]} {s}' for s in STATUSES)}), {c['notSame']} not-same, {c['slips']} slips")
     sys.exit(1 if errs else 0)
 
 
@@ -483,6 +537,8 @@ def known_keys(cat):
 
 
 def cmd_report(a):
+    if GIVEN:
+        sys.exit("report and suggest read the archives' surname harvest; there is no given-name harvest to report on.")
     cat = load()
     ix = known_keys(cat)
     arch = archive_rows()
@@ -500,6 +556,8 @@ def cmd_report(a):
 
 
 def cmd_suggest(a):
+    if GIVEN:
+        sys.exit("report and suggest read the archives' surname harvest; there is no given-name harvest to report on.")
     cat = load()
     ix = known_keys(cat)
     arch = archive_rows()
@@ -544,6 +602,10 @@ def merge(origin, local):
                 m["status"] = lm["status"]
             have = {(e.get("kind"), e.get("what")) for e in m["evidence"]}
             m["evidence"] += [e for e in lm["evidence"] if (e.get("kind"), e.get("what")) not in have]
+        sl = {form_key(m["form"]) for m in f.setdefault("slips", [])}
+        for ls in lf.get("slips", []):
+            if form_key(ls["form"]) not in sl:
+                f["slips"].append(json.loads(json.dumps(ls)))
         ns = {form_key(m["form"]): m for m in f.setdefault("notSame", [])}
         for ln in lf.get("notSame", []):
             if form_key(ln["form"]) not in ns:
@@ -582,7 +644,7 @@ def cmd_publish(a):
             print("--dry-run: nothing pushed.")
             return
         sh(["git", "add", CAT_REL], cwd=clone)
-        msg = a.message or (f"Surname variants: {after['forms']} forms in {after['families']} families "
+        msg = a.message or (f"{WORD.capitalize()} variants: {after['forms']} forms in {after['families']} families "
                             f"(was {before['forms']})\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>")
         sh(["git", "commit", "--quiet", "-m", msg], cwd=clone)
         for _ in range(4):
@@ -622,7 +684,7 @@ def main():
     p = sub.add_parser("add", help="add or strengthen a form, with the evidence for it")
     p.add_argument("form")
     p.add_argument("--family", required=True)
-    p.add_argument("--status", required=True, choices=STATUSES + ["not-same"])
+    p.add_argument("--status", required=True, choices=STATUSES + ["not-same", "slip"])
     p.add_argument("--kind", required=True, choices=KINDS)
     p.add_argument("--what", required=True, help="what was seen. No given names, no identifiers")
     p.add_argument("--where", help="country codes, comma separated"); p.add_argument("--place")

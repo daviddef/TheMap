@@ -1,0 +1,218 @@
+---
+/* One person, written down by however many clerks in however many languages.
+ *
+ * TWO ARCHIVES BUILT THIS PAGE INDEPENDENTLY AND BUILT IT TWICE. Defranceschi
+ * and Blazevic each wrote ~230 lines holding the same object: a box you type a
+ * name into, a row of chips, a shareable ?n= address, and a card per language
+ * showing every form the same human being would have been entered under. They
+ * disagreed about where it lived in the menu and about how the data was shaped,
+ * and agreed about everything that mattered.
+ *
+ * THE DATA CONTRACT IS BLAZEVIC'S, because it is the only one that can hold
+ * what both archives know:
+ *
+ *   rows  [{canon, sex, people, commonest,
+           langs: {<key>: [{form, seen, note, notNominative}]}}]
+
+         `notNominative` was called `case`, and the Blazevic session made the
+         argument against that name using the kit's own week: «abbreviated» is
+         not a grammatical case, so a field called `case` holds something that
+         is not one - the same fault as a field called `people` holding
+         occurrence counts, which is a name that lies about its values. What
+         the column answers is WHY THIS FORM IS NOT THE NOMINATIVE. `case` is
+         still read where it is present, so no archive has to migrate.
+ *   langs [{key, label, note}]        the archive's own languages, in its order
+ *
+ * `seen` is the number of times THIS ARCHIVE HAS ACTUALLY MET THAT FORM in its
+ * own records. A form with seen 0 is not a claim that nobody was ever called
+ * it - it is the correct form in that language and the right thing to type into
+ * a Hungarian index tomorrow. The two are drawn differently and never merged,
+ * because the difference between "we have read this" and "this is what to look
+ * for" is the difference between a record and a lead.
+ *
+ * `note` carries what KIND of form it is - a diminutive, a case ending, one
+ * clerk getting it wrong. It is not decoration: a nickname, a translation and a
+ * slip are three different things, and an archive that folds them into one
+ * bucket has thrown away the only thing that tells them apart.
+ */
+const { rows = [], langs = [], chips = [], u = (p) => p,
+        aidLabel = "not met in these records, and the right form to search" } = Astro.props;
+
+/* One flat lookup: every form, folded, points at its row. Folding here is the
+   same idea as the register's - accents off, case off - so that a reader who
+   types what is on a certificate finds the row whatever the keyboard did. */
+const fold = (s) => String(s || "").toLowerCase()
+  .normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/æ/g, "ae").trim();
+const index = {};
+rows.forEach((r, i) => {
+  index[fold(r.canon)] = i;
+  Object.values(r.langs || {}).forEach((forms) =>
+    (forms || []).forEach((f) => { index[fold(f.form)] = i; }));
+});
+const live = chips.filter((c) => index[fold(c)] !== undefined);
+const total = rows.reduce((a, r) => a + Object.values(r.langs || {})
+  .reduce((b, f) => b + (f || []).length, 0), 0);
+const met = rows.reduce((a, r) => a + Object.values(r.langs || {})
+  .reduce((b, f) => b + (f || []).filter((x) => x.seen > 0).length, 0), 0);
+---
+<div class="syn">
+  <label class="syn-lab" for="syn-q">Type a given name</label>
+  <input id="syn-q" class="syn-q" type="search" autocomplete="off" spellcheck="false"
+         placeholder="Michele, Mihovil, Joannes…"
+         data-index={JSON.stringify(index)}
+         data-rows={JSON.stringify(rows)}
+         data-langs={JSON.stringify(langs)}
+         data-aid={aidLabel} />
+  {live.length > 0 && (
+    <div class="syn-chips">{live.map((c) => (
+      <button type="button" class="syn-chip" data-n={c}>{c}</button>))}</div>
+  )}
+  <p class="syn-share" hidden>
+    <button type="button" class="syn-copy">Copy link</button>
+    <span class="syn-url mono"></span>
+  </p>
+  <div class="syn-out" aria-live="polite"></div>
+  <p class="syn-foot small dim">{rows.length} names · {total} forms ·
+    {" "}{met} met in these records, {total - met} as lookup aids.</p>
+</div>
+
+<style is:global>
+  .syn-lab { display:block; font-size:11px; font-weight:600; letter-spacing:.11em;
+    text-transform:uppercase; color:var(--ink-3,#888); margin:0 0 .4rem; }
+  .syn-q { width:100%; box-sizing:border-box; font:inherit; font-size:1.5rem;
+    padding:.7rem .9rem; border:1px solid var(--rule,#ccc); border-radius:3px;
+    background:var(--panel,#fff); color:inherit; }
+  .syn-chips { display:flex; flex-wrap:wrap; gap:.4rem; margin:.7rem 0 0; }
+  .syn-chip { font:inherit; font-size:.85rem; padding:.3rem .75rem; cursor:pointer;
+    border:1px solid var(--rule,#ccc); border-radius:2px; background:transparent;
+    color:inherit; }
+  .syn-chip:hover { border-color:var(--accent,#963); color:var(--accent,#963); }
+  .syn-share { display:flex; gap:.7rem; align-items:baseline; margin:.8rem 0 0;
+    font-size:.85rem; }
+  .syn-copy { font:inherit; font-size:.82rem; padding:.25rem .7rem; cursor:pointer;
+    border:1px solid var(--rule,#ccc); border-radius:2px; background:transparent;
+    color:inherit; }
+  .syn-url { color:var(--ink-3,#888); overflow-wrap:anywhere; }
+  .syn-head { margin:1.4rem 0 .2rem; font-size:1.05rem; }
+  .syn-sub { color:var(--ink-3,#888); margin:0 0 1rem; }
+  .syn-cards { display:grid; gap:1rem; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); }
+  .syn-card { border:1px solid var(--rule,#ddd); border-top-width:3px; border-radius:3px;
+    padding:1rem 1.1rem; background:var(--panel,transparent); }
+  .syn-card h4 { margin:0 0 .6rem; font-size:11px; font-weight:600; letter-spacing:.11em;
+    text-transform:uppercase; color:var(--ink-3,#888); }
+  .syn-forms { font-size:1.35rem; line-height:1.35; margin:0 0 .7rem;
+    padding:0 0 .7rem; border-bottom:1px solid var(--rule,#eee); }
+  .syn-f { display:inline-block; margin-right:.25rem; }
+  .syn-aid { font-style:italic; color:var(--ink-2,inherit); }
+  .syn-none { font-style:italic; color:var(--ink-3,#888); }
+  .syn-why { font-size:.86rem; line-height:1.55; color:var(--ink-2,inherit); margin:0; }
+  .syn-note { display:block; font-size:.78rem; color:var(--ink-3,#888); }
+  .syn-sub2 { margin:1.4rem 0 .2rem; font-size:11px; font-weight:600; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-3,#888); }
+  .syn-slips { margin:.3rem 0 0; padding-left:1.1rem; font-size:.9rem; line-height:1.55; }
+  .syn-foot { margin-top:1.6rem; }
+  @media (max-width:560px) { .syn-q { font-size:1.2rem; } }
+</style>
+
+<script>
+  document.querySelectorAll(".syn").forEach((box) => {
+    const q = box.querySelector(".syn-q");
+    const out = box.querySelector(".syn-out");
+    const share = box.querySelector(".syn-share");
+    const urlEl = box.querySelector(".syn-url");
+    if (!q || !out) return;
+    const index = JSON.parse(q.dataset.index || "{}");
+    const rows = JSON.parse(q.dataset.rows || "[]");
+    const langs = JSON.parse(q.dataset.langs || "[]");
+    const aidLabel = q.dataset.aid || "";
+    const fold = (s) => String(s || "").toLowerCase()
+      .normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/æ/g, "ae").trim();
+    const esc = (s) => String(s == null ? "" : s)
+      .replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    const cap = (s) => s ? s[0].toUpperCase() + s.slice(1) : s;
+
+    /* A name you have looked up is a thing worth sending to somebody. The
+       address carries ?n=, written with replaceState so that typing does not
+       fill the back button with every keystroke on the way to a name. */
+    const setUrl = (t) => {
+      try {
+        const x = new URL(location.href);
+        x.hash = "";
+        if (t) x.searchParams.set("n", t); else x.searchParams.delete("n");
+        history.replaceState(null, "", x.toString());
+        if (urlEl) urlEl.textContent = x.toString();
+        if (share) share.hidden = !t;
+      } catch (e) {}
+    };
+
+    const render = (t) => {
+      const k = fold(t);
+      if (!k) { out.innerHTML = ""; setUrl(""); return; }
+      const i = index[k];
+      if (i === undefined) {
+        out.innerHTML = '<p class="syn-sub">No name here is written that way — '
+          + "which is worth knowing too, and is not the same as nobody being called it.</p>";
+        setUrl(t); return;
+      }
+      const r = rows[i];
+      let n = 0, seen = 0;
+      for (const L of langs) for (const f of (r.langs || {})[L.key] || []) {
+        n++; if (f.seen > 0) seen++;
+      }
+      let h = '<h3 class="syn-head"><strong>' + esc(cap(r.canon)) + "</strong> — "
+        + n + " forms of this one name, of which " + seen
+        + " are attested in the records gathered here.</h3>"
+        + '<p class="syn-sub">Every form below is the same name, written by different hands.</p>'
+        + '<div class="syn-cards">';
+      for (const L of langs) {
+        const forms = (r.langs || {})[L.key] || [];
+        h += '<div class="syn-card"><h4>' + esc(L.label) + "</h4>";
+        if (!forms.length) {
+          h += '<p class="syn-forms syn-none">not recorded</p>';
+        } else {
+          /* THE COMMA GOES INSIDE THE FORM, AHEAD OF ITS NOTE. Joining with
+             ", " put the separator after a note that renders as a block, so
+             the Latin card read "Josephi / genitive / , Josephum" with the
+             comma stranded on its own line under an ending it had nothing to
+             do with. */
+          h += '<p class="syn-forms">' + forms.map((f, fi) => {
+            const aid = !(f.seen > 0);
+            const t = esc(f.form) + (aid ? '<sup title="' + esc(aidLabel) + '">\u00b0</sup>' : "");
+            const body = (aid ? '<span class="syn-aid">' + t + "</span>" : t)
+              + (fi < forms.length - 1 ? "," : "");
+            return '<span class="syn-f">' + body
+              + (f.note || f.notNominative || f.case
+                  ? '<span class="syn-note">'
+                    + esc([f.note, f.notNominative || f.case].filter(Boolean).join(" \u00b7 "))
+                    + "</span>" : "")
+              + "</span>";
+          }).join(" ") + "</p>";
+        }
+        h += '<p class="syn-why">' + esc(L.note || "") + "</p></div>";
+      }
+      h += "</div>";
+      if ((r.slips || []).length)
+        h += '<h4 class="syn-sub2">Written by mistake, once</h4><p class="syn-sub">Not spellings of the name. A clerk or an indexer slipped; '
+          + "they are here so nobody counts them as variants or searches the world for them.</p><ul class=\"syn-slips\">"
+          + r.slips.map((s) => "<li><b>" + esc(s.form) + "</b> — " + esc(s.why) + "</li>").join("") + "</ul>";
+      if ((r.notSame || []).length)
+        h += '<h4 class="syn-sub2">Look alike, but a different name</h4><ul class="syn-slips">'
+          + r.notSame.map((s) => "<li><b>" + esc(s.form) + "</b> — " + esc(s.why) + "</li>").join("") + "</ul>";
+      out.innerHTML = h;
+      setUrl(t);
+    };
+
+    q.addEventListener("input", () => render(q.value));
+    box.querySelectorAll(".syn-chip").forEach((b) => b.addEventListener("click", () => {
+      q.value = b.dataset.n || ""; render(q.value); q.focus();
+    }));
+    const copy = box.querySelector(".syn-copy");
+    if (copy) copy.addEventListener("click", () => {
+      try { navigator.clipboard.writeText(location.href); copy.textContent = "Copied"; 
+            setTimeout(() => { copy.textContent = "Copy link"; }, 1400); } catch (e) {}
+    });
+    /* AND APPLY IT. A ?n= address that set the box and did not search it would
+       be the same bug the register carried for weeks. */
+    const pre = new URLSearchParams(location.search).get("n");
+    if (pre) { q.value = pre; render(pre); }
+  });
+</script>

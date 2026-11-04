@@ -2485,7 +2485,8 @@ window.addEventListener("load", async function () {
       if (!hits.length) return;
       var cols = d.collections || [];
       var li = hits.map(function (e) {
-        var yrs = e.f === e.t ? String(e.f) : e.f + "\u2013" + (e.t >= 2026 ? "present" : e.t);
+        var by = function (y) { return y < 0 ? -y + " BCE" : String(y); };
+        var yrs = e.f === e.t ? by(e.f) : by(e.f) + "\u2013" + (e.t >= 2026 ? "present" : by(e.t));
         var held = cols.filter(function (c) { return c.from != null && c.to != null && c.from <= e.t && c.to >= e.f; });
         var line = "";
         if (held.length) {

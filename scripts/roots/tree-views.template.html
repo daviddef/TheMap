@@ -636,6 +636,7 @@ const atlasURL=n=>{const p=PL[n];return p&&p.id?'https://recordatlas.org/place/'
 const placeA=n=>{const p=PL[n];return p&&p.id?'<a class="pl" href="'+atlasURL(n)+'" target="_blank" rel="noopener" title="Open '+esc(n)+' in Record Atlas">'+esc(n)+'</a>':esc(n)};
 const eventsFor=(n,a,b)=>(PL[n]?PL[n].ev:[]).map(evOf).filter(e=>e.f<=b&&e.t>=a);
 /* Where a person was, and when: every stop of a route (a stop with no year runs from the last dated one), else birth place then death place. */
+const yrB=y=>y<0?(-y)+' BCE':String(y);
 function stayList(p,end){
   const out=[];
   if(p.route){
@@ -1015,7 +1016,7 @@ function renderPanel(){
     if(evs.length||eras.length){
       h+='<h3 class="at">Around their lifetime</h3><ul class="life">';
       eras.forEach(e=>{h+='<li><b>'+e.from+'</b> · '+esc(e.polity)+'<small>Birthplace changed hands. '+esc(e.note)+'</small></li>'});
-      const li=e=>'<li><b>'+(e.f===e.t?e.f:e.f+'–'+e.t)+'</b> · '+esc(e.n)+'<small>'+esc(e.at)+' · '+esc(clip(e.toll,120))+'</small></li>';
+      const li=e=>'<li><b>'+(e.f===e.t?yrB(e.f):yrB(e.f)+'–'+yrB(e.t))+'</b> · '+esc(e.n)+'<small>'+esc(e.at)+' · '+esc(clip(e.toll,120))+'</small></li>';
       evs.slice(0,5).forEach(e=>{h+=li(e)});
       if(evs.length>5)h+='<li class="more"><details><summary>'+(evs.length-5)+' more while they lived</summary><ul class="life">'+evs.slice(5).map(li).join('')+'</ul></details></li>';
       h+='</ul>';
@@ -1887,7 +1888,7 @@ function renderEras(){
   });
   const seenE=new Set();
   regList.forEach(r=>ERA[r].forEach(e=>{const k=e.from+e.polity;if(e.from>lo&&e.from<=hi&&!seenE.has(k)){seenE.add(k);world.push({y:e.from,t:e.from+' · '+e.polity,s:e.note,c:rgv(e.rg)})}}));
-  evl.forEach(e=>world.push({y:e.f,t:(e.f===e.t?e.f:e.f+'–'+e.t)+' · '+e.n,s:e.says,c:'var(--brick)'}));
+  evl.forEach(e=>world.push({y:e.f,t:(e.f===e.t?yrB(e.f):yrB(e.f)+'–'+yrB(e.t))+' · '+e.n,s:e.says,c:'var(--brick)'}));
   const ROW=66,CWD=158,MAXR=3;
   const lay=items=>{const ends=[],out=[];items.sort((a,b)=>a.y-b.y).forEach(it=>{const sx=x(it.y);let r=0;while(r<MAXR&&ends[r]!==undefined&&ends[r]>sx-4)r++;if(r<MAXR){ends[r]=sx+CWD;it.row=r;out.push(it)}});return out};
   const up=lay(fam),down=lay(world),nUp=Math.max(1,...up.map(i=>i.row+1)),nDn=Math.max(1,...down.map(i=>i.row+1));

@@ -1,0 +1,35 @@
+---
+/* SAY YOUR NAME: a given name across languages and clerks.
+ *
+ * Read from public/given-names.json, which scripts/build-given-names.py makes from data/given-name-families.json, the one
+ * catalogue (written only through scripts/given_name_variants.py). The family archives that used to keep a table of their
+ * own (Defranceski, Blažević) read this file now, so a name looked up here and on a family site shows the same forms.
+ */
+import fs from "node:fs";
+import path from "node:path";
+import Base from "../layouts/Base.astro";
+import SayYourName from "../components/SayYourName.astro";
+import { u } from "../lib/url.js";
+
+const file = [path.join(process.cwd(), "public", "given-names.json"), path.join(process.cwd(), "site", "public", "given-names.json")]
+  .find((p) => fs.existsSync(p));
+const data = JSON.parse(fs.readFileSync(file, "utf8"));
+const chips = ["Ivan", "Giuseppe", "Antonio", "Franciscus", "Matija", "Katarina", "Zdravko", "Maria"];
+---
+<Base
+  title="Say your name"
+  eyebrow={`${data.rows.length} names · ${data.totalForms} forms`}
+  dek="Ivan, Johann, Giovanni, Zuane, John and Joannes are one name. Type any form you have met and see every other way a clerk, a priest or an index wrote it."
+  description="Given names across languages: the Latin of the register, the Italian, Venetian, Croatian, German, Hungarian and English forms, and which of them an archive has actually met on a record.">
+
+  <section>
+    <p class="cap" style="margin-top:0">A search that tries only the form on the family tree misses the register: the same man is
+    Joannes in the baptism, Zuane to the neighbours, Giovanni to the civil clerk and John on the ship's list. Forms in
+    plain type have been met on a record by one of the family archives; forms marked <sup>°</sup> are the right form in that
+    language and a thing to search, never yet seen. A slip, written once by mistake, is listed apart and is not a spelling.</p>
+    <SayYourName rows={data.rows} langs={data.languages} chips={chips} u={u} />
+    <p class="cap">The forms come from the family archives' own registers, and each carries the evidence behind it in the
+    catalogue, <code>data/given-name-families.json</code>. Nothing about a person is kept. Surnames have their own list:
+    <a href={u("/surname-families/")}>the spellings of a surname</a>. The data is free to reuse: <a href={u("/given-names.json")}>given-names.json</a>.</p>
+  </section>
+</Base>

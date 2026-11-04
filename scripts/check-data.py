@@ -1005,6 +1005,41 @@ def surname_families_gate():
         err(m)
 
 
+def given_name_families_gate():
+    """data/given-name-families.json: the same catalogue rules as surnames, pointed at given names.
+
+    The tool reads which catalogue it serves from the environment when it is imported, so the given-name copy is loaded
+    under its own module name with NAME_CATALOGUE=given and the surname copy the other gate imported is left alone. A
+    given-name catalogue holds a form, its language and the kind of record it was met on; it never holds a person, and
+    this refuses an evidence line that looks like one (a «born» followed by a year, or a surname of the archive's family).
+    """
+    import importlib.util, re as _re
+    prev = os.environ.get("NAME_CATALOGUE")
+    os.environ["NAME_CATALOGUE"] = "given"
+    try:
+        spec = importlib.util.spec_from_file_location("given_name_variants_impl", "scripts/surname_variants.py")
+        sv = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(sv)
+        cat = sv.load()
+        countries = set(json.load(open("data/countries.json", encoding="utf-8"))["countries"])
+    except Exception as e:
+        err(f"cannot check given-name-families.json: {e}")
+        return
+    finally:
+        if prev is None:
+            os.environ.pop("NAME_CATALOGUE", None)
+        else:
+            os.environ["NAME_CATALOGUE"] = prev
+    for m in sv.validate(cat, countries):
+        err(m)
+    person = _re.compile(r"\b(born|b\.|died|d\.)\s*(on\s*)?(\d|c\.)|\bgrand(father|mother)\b|\bhis\b|\bher\b", _re.I)
+    for f in cat.get("families", []):
+        for m in f.get("members", []) + f.get("slips", []) + f.get("notSame", []):
+            for e in m.get("evidence", []) + [{"what": m.get("why", "")}]:
+                if person.search(e.get("what", "") or ""):
+                    err(f"given-name-families {f['id']}/{m['form']}: evidence reads like a person, not a form: {e.get('what')[:70]!r}")
+
+
 def whats_new_gate():
     """site/src/data/whats-new.json is what the home page's «What's new» card shows.
 
@@ -1056,6 +1091,7 @@ def main():
     flag_seams()
     context_contract()
     surname_families_gate()
+    given_name_families_gate()
     whats_new_gate()
     history_json()
     history_ground()

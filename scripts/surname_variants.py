@@ -249,6 +249,22 @@ def validate(cat, countries=None):
             owner.setdefault(k, fid)
             if m.get("lang") and not LANG_RE.match(m["lang"]):
                 errs.append(f"{where}: lang {m['lang']!r} must be lower-case letters (latin, italian, croatian...)")
+            seen_also = set()
+            for a in m.get("also") or []:
+                al = a.get("lang") or ""
+                if not LANG_RE.match(al):
+                    errs.append(f"{where}: also-language {al!r} must be lower-case letters (croatian, slovene...)")
+                elif al == m.get("lang"):
+                    errs.append(f"{where}: also-language {al!r} is the form's own language; `also` lists the OTHER languages")
+                elif al in seen_also:
+                    errs.append(f"{where}: also-language {al!r} listed twice")
+                seen_also.add(al)
+                aev = a.get("evidence") or []
+                if not aev:
+                    errs.append(f"{where}: also {al!r} with no evidence. A spelling shared with another language needs its own source")
+                for e in aev:
+                    if not (e.get("what") or "").strip() or not str(e.get("ref") or "").startswith("http"):
+                        errs.append(f"{where}: also {al!r} evidence needs `what` and an http `ref`")
             ev = m.get("evidence") or []
             if not ev:
                 errs.append(f"{where}: a {st} form with no evidence. Say what was seen, and where")

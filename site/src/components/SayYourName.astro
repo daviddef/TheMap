@@ -50,10 +50,17 @@ rows.forEach((r, i) => {
     (forms || []).forEach((f) => { index[fold(f.form)] = i; }));
 });
 const live = chips.filter((c) => index[fold(c)] !== undefined);
-const total = rows.reduce((a, r) => a + Object.values(r.langs || {})
-  .reduce((b, f) => b + (f || []).length, 0), 0);
-const met = rows.reduce((a, r) => a + Object.values(r.langs || {})
-  .reduce((b, f) => b + (f || []).filter((x) => x.seen > 0).length, 0), 0);
+/* A SPELLING SHARED BY SEVERAL LANGUAGES IS ONE FORM. Boris is written the same in Croatian, Czech and German; the
+   catalogue lists it on each card, but a count of "forms of this name" has to count it once. */
+const distinct = (r) => {
+  const m = new Map();
+  Object.values(r.langs || {}).forEach((fs) => (fs || []).forEach((f) => {
+    const k = fold(f.form); m.set(k, Math.max(m.get(k) || 0, f.seen || 0));
+  }));
+  return m;
+};
+let total = 0, met = 0;
+rows.forEach((r) => distinct(r).forEach((n) => { total++; if (n > 0) met++; }));
 ---
 <div class="syn">
   <label class="syn-lab" for="syn-q">Type a given name</label>
@@ -105,6 +112,7 @@ const met = rows.reduce((a, r) => a + Object.values(r.langs || {})
   .syn-f { display:inline-block; margin-right:.25rem; }
   .syn-aid { font-style:italic; color:var(--ink-2,inherit); }
   .syn-none { font-style:italic; color:var(--ink-3,#888); }
+  .syn-gap { margin:1rem 0 0; font-size:.9rem; }
   .syn-why { font-size:.86rem; line-height:1.55; color:var(--ink-2,inherit); margin:0; }
   .syn-note { display:block; font-size:.78rem; color:var(--ink-3,#888); }
   .syn-sub2 { margin:1.4rem 0 .2rem; font-size:11px; font-weight:600; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-3,#888); }
@@ -155,9 +163,12 @@ const met = rows.reduce((a, r) => a + Object.values(r.langs || {})
       }
       const r = rows[i];
       let n = 0, seen = 0;
+      const once = new Map();
       for (const L of langs) for (const f of (r.langs || {})[L.key] || []) {
-        n++; if (f.seen > 0) seen++;
+        const k = fold(f.form); once.set(k, Math.max(once.get(k) || 0, f.seen || 0));
       }
+      once.forEach((c) => { n++; if (c > 0) seen++; });
+      const none = [];
       let h = '<h3 class="syn-head"><strong>' + esc(cap(r.canon)) + "</strong> — "
         + n + " forms of this one name, of which " + seen
         + " are attested in the records gathered here.</h3>"
@@ -165,10 +176,12 @@ const met = rows.reduce((a, r) => a + Object.values(r.langs || {})
         + '<div class="syn-cards">';
       for (const L of langs) {
         const forms = (r.langs || {})[L.key] || [];
+        /* A LANGUAGE WITH NOTHING IN IT GETS NO CARD. Fifty empty cards reading "not recorded" said nothing and
+           buried the few that said something, and for a spelling the catalogue had filed under one language they
+           said something false. The gap is still stated, once, for the languages a researcher is likely to try. */
+        if (!forms.length) { if (L.core) none.push(L.label); continue; }
         h += '<div class="syn-card"><h4>' + esc(L.label) + "</h4>";
-        if (!forms.length) {
-          h += '<p class="syn-forms syn-none">not recorded</p>';
-        } else {
+        {
           /* THE COMMA GOES INSIDE THE FORM, AHEAD OF ITS NOTE. Joining with
              ", " put the separator after a note that renders as a block, so
              the Latin card read "Josephi / genitive / , Josephum" with the
@@ -190,6 +203,9 @@ const met = rows.reduce((a, r) => a + Object.values(r.langs || {})
         h += '<p class="syn-why">' + esc(L.note || "") + "</p></div>";
       }
       h += "</div>";
+      if (none.length)
+        h += '<p class="syn-sub syn-gap">Nothing recorded yet for this name in: ' + esc(none.join(", "))
+          + ". That is a gap in the catalogue, not a finding that nobody was called it.</p>";
       if ((r.slips || []).length)
         h += '<h4 class="syn-sub2">Written by mistake, once</h4><p class="syn-sub">Not spellings of the name. A clerk or an indexer slipped; '
           + "they are here so nobody counts them as variants or searches the world for them.</p><ul class=\"syn-slips\">"

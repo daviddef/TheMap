@@ -803,24 +803,13 @@ window.addEventListener("load", async function () {
     return 6371 * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
   }
 
-  function countrySources(cc, hint, heading, lat, lon, id) {
-    if (!cc) return "";
+  /* THE PROVIDERS A COUNTRY OWNS, NEAREST FIRST, AND THE ONES THAT COVER
+     EVERYWHERE — one place to say which is which, because the card list
+     below and the place panel's source block both need them and two copies
+     of a sort is how two lists stop agreeing. */
+  function natProviders(cc, lat, lon) {
     var nat = provs.providers.filter(function (p) {
       return (p.countries || []).indexOf(cc) > -1;
-    });
-    /* THE SAME FALLBACK THE PAGE MAKES, because the panel is the surface most
-       readers actually meet. 134 of the 237 countries this atlas names have no
-       provider of their own, and this list was simply empty for all of them
-       while twelve worldwide services sat in providers.json declaring
-       `countries: ["*"]`. Held back where a country has its own sources, so
-       Italy's archives are not buried under Ancestry; shown where it has none,
-       because there «nothing» was never true. */
-    /* The twelve that cover everywhere are drawn as their own group after the
-       country's own, never mixed in — see sources-by-country.js. Held to a
-       separate list here for the same reason the page holds one: they must not
-       outrank the archive that actually holds this ground's paper. */
-    var ww = provs.providers.filter(function (p) {
-      return (p.countries || []).indexOf("*") > -1;
     });
     nat = nat.sort(function (a, b) {
       var K = ["national-archive", "diocesan", "regional-archive", "library",
@@ -839,6 +828,29 @@ window.addEventListener("load", async function () {
         return da - db;
       return RANK.indexOf(a.access) - RANK.indexOf(b.access);
     });
+    return nat;
+  }
+  function wwProviders() {
+    return provs.providers.filter(function (p) {
+      return (p.countries || []).indexOf("*") > -1;
+    });
+  }
+
+  function countrySources(cc, hint, heading, lat, lon, id) {
+    if (!cc) return "";
+    /* THE SAME FALLBACK THE PAGE MAKES, because the panel is the surface most
+       readers actually meet. 134 of the 237 countries this atlas names have no
+       provider of their own, and this list was simply empty for all of them
+       while twelve worldwide services sat in providers.json declaring
+       `countries: ["*"]`. Held back where a country has its own sources, so
+       Italy's archives are not buried under Ancestry; shown where it has none,
+       because there «nothing» was never true. */
+    /* The twelve that cover everywhere are drawn as their own group after the
+       country's own, never mixed in — see sources-by-country.js. Held to a
+       separate list here for the same reason the page holds one: they must not
+       outrank the archive that actually holds this ground's paper. */
+    var ww = wwProviders();
+    var nat = natProviders(cc, lat, lon);
     if (!nat.length) return "";
     var h = ['<div class="at-sec"' + (id ? ' id="' + id + '"' : "") +
              '><div class="lab">' +
@@ -890,6 +902,122 @@ window.addEventListener("load", async function () {
       });
       h.push("</ul></div>");
     }
+    return h.join("");
+  }
+
+  /* ---- WHERE TO LOOK, AS ONE BLOCK ---------------------------------------
+     David, looking at Greenland: the panel set four equal columns side by
+     side, the worldwide column ran to fourteen rows while the others held two
+     to five, and the mark controls were squeezed into columns about a hundred
+     pixels wide so their state wrapped onto three lines.
+     So: one verdict line (what is true of this ground and where to start), a
+     strip that counts what has been tried, then TWO zones, not four. The main
+     zone is this country's own archives (the curated ones and Wikidata's
+     unverified ones in one list, the unverified ones tagged rather than
+     explained in a paragraph) and the sources that reach everywhere, folded
+     to a few rows because most of them have never been opened from here. The
+     side zone is FamilySearch.
+     EVERY ROW KEEPS ITS data-src ID. `source:<id>` and `collection:<url>` are
+     the ids the place page and /my-research/ already use, so a mark made here
+     is the same mark there. The mark control itself is drawn by
+     volume-marks.js, which also paints the strip and folds the worldwide list
+     (it is the only code that knows what has been marked). */
+  function srcRow(id, name, where, href, url, meta, extra) {
+    return '<li class="sr' + (extra ? " " + extra : "") + '" data-src="' + esc(id) + '" ' +
+           'data-src-t="' + esc(name) + '" data-src-where="' + esc(where) + '" ' +
+           'data-src-href="' + esc(href) + '">' +
+           '<a class="sr-n" href="' + esc(url) + '" target="_blank" rel="noopener">' +
+           esc(name) + " &#8599;</a>" + (meta ? '<span class="sr-m">' + meta + "</span>" : "") +
+           "</li>";
+  }
+  function accMeta(access) {
+    /* «Nobody has walked this one yet» is the legend's word for access nobody
+       has surveyed. As a tag on every row it said nothing about the row. */
+    if (!access || access === "unsurveyed") return "";
+    return '<i class="at-dot" style="background:' + (ACC[access] || ["#7C8A91"])[0] +
+           '"></i>' + esc((ACC[access] || [0, access])[1]);
+  }
+  function placeSources(d, cs) {
+    var cc = d.country, cname = CNAME[cc] || cc || "";
+    var nat = cc ? natProviders(cc, d.lat, d.lon) : [];
+    var wd = (cc && warch[cc]) ? warch[cc].slice(0, 6) : [];
+    var ww = cc && (nat.length || wd.length) ? wwProviders() : [];
+    var near = d.nfs ? (d.fs || []).filter(function (c) { return c.rank <= 2; }) : [];
+    var fsRows = d.nfs ? (near.length ? near : (d.fs || [])).slice(0, 5) : [];
+    if (!nat.length && !wd.length && !fsRows.length) return "";
+
+    /* THE VERDICT: the one line that says where this ground stands. It was the
+       last sentence of the panel, after everything it summarises. */
+    var start = fsRows.length ? "the " + (near.length ? near.length + " collections filed here" :
+                  d.nfs + " FamilySearch collection" + (d.nfs === 1 ? "" : "s"))
+                : (nat.length ? nat[0].name : (wd.length ? wd[0].name : ""));
+    var verdict = cs.length
+      ? cs.length + " volume" + (cs.length === 1 ? " is" : "s are") + " recorded here, listed below. These are the other places to look."
+      : "Nobody has walked this place volume by volume." + (start ? " Start with " + start + "." : "");
+
+    var h = ['<div class="at-sec at-sec-wide at-src" id="ra-home-src">',
+             '<p class="src-verdict">' + esc(verdict) + "</p>",
+             '<div class="src-strip" hidden></div>',
+             '<div class="src-zones"><div class="src-main">'];
+
+    if (nat.length || wd.length) {
+      h.push('<section class="src-sec"><div class="lab">' +
+             esc(cname ? cname + "’s own archives" : "Archives") + "</div>" +
+             '<ul class="src-list">');
+      nat.slice(0, 8).forEach(function (p) {
+        h.push(srcRow("source:" + p.id, p.name, cname, BASE + "archive/" + p.id + "/", p.url,
+                      accMeta(p.access)));
+      });
+      /* UNVERIFIED IS A TAG, NOT A PARAGRAPH. The old column spent three
+         lines of monospace saying so before its first link. Said once, in the
+         tag's own tooltip, and again in the foot note if any are present. */
+      wd.forEach(function (r) {
+        var shown = nat.some(function (p) { return p.url === r.url; });
+        if (shown) return;
+        h.push(srcRow("source:wd-" + (r.id || r.name), r.name, cname, r.url, r.url,
+          '<span class="sr-tag" title="From Wikidata (CC0). The link answered when it was asked; nobody here has opened it.">unverified' +
+          (r.status && r.status !== "ok" ? " · " + esc(r.status === "challenged" ? "bot gate" :
+            r.status === "unreachable" ? "no answer" : "error") : "") + "</span>"));
+      });
+      if (nat.length > 8)
+        h.push('<li class="sr-more">&hellip;and ' + (nat.length - 8) + " more on the " +
+               '<a href="' + BASE + "country/" + cc.toLowerCase() + '/">' + esc(cname) + " page</a></li>");
+      h.push("</ul></section>");
+    }
+    if (ww.length) {
+      h.push('<section class="src-sec src-ww"><div class="lab">Everywhere, including here</div>' +
+             '<ul class="src-list">');
+      ww.forEach(function (p) {
+        h.push(srcRow("source:" + p.id, p.name, "worldwide", BASE + "archive/" + p.id + "/", p.url,
+                      accMeta(p.access)));
+      });
+      h.push('</ul></section>');
+    }
+    h.push("</div>");   /* .src-main */
+
+    if (fsRows.length) {
+      /* THE SAME BADGE FIVE TIMES IS NOISE. When every row says it is filed
+         under the same place, that is a fact about the group. */
+      var keys = fsRows.map(function (c) { return (c.filed || []).map(ccName).join(", "); });
+      var same = keys[0] && keys.every(function (k) { return k === keys[0]; });
+      h.push('<aside class="src-sec src-fs"><div class="lab">FamilySearch</div>' +
+             '<p class="src-fsn"><b>' + d.nfs.toLocaleString() + "</b> collection" + (d.nfs === 1 ? "" : "s") +
+             " reach this ground" + (near.length ? ", <b>" + near.length + "</b> filed here or in its district" : "") +
+             "." + (same ? ' <span class="ra-crossed" title="Searching by country alone will not find these.">' +
+             "all filed under " + esc(keys[0]) + "</span>" : "") + "</p>" +
+             '<ul class="src-list">');
+      fsRows.forEach(function (c) {
+        h.push(srcRow("collection:" + (c.url || c.t), c.t, cname, c.url, c.url,
+          (c.from ? '<span class="at-y">' + c.from + "–" + c.to + "</span>" : "") +
+          (!same && c.filed && c.filed.length ? ' <span class="ra-crossed" title="Filed under ' +
+            esc(c.filed.map(ccName).join(", ")) + ', not under this place’s own country.">filed under ' +
+            esc(c.filed.map(ccName).join(", ")) + "</span>" : ""), "sr-fs"));
+      });
+      h.push("</ul>" + (d.nfs > fsRows.length
+        ? '<p class="src-all"><a href="' + BASE + "place/" + esc(d.id) + '/">All ' +
+          d.nfs.toLocaleString() + " on the place page</a></p>" : "") + "</aside>");
+    }
+    h.push("</div></div>");
     return h.join("");
   }
 
@@ -2836,94 +2964,16 @@ window.addEventListener("load", async function () {
        nothing. These are Wikidata's national archives and libraries, fetched
        once and kept apart from the curated list because rattling a door is not
        the same as having read what is behind it. */
-    if (d.country && warch[d.country]) {
-      h.push('<div class="at-sec"><div class="lab">National sources, unverified</div>');
-      h.push('<p class="at-sub">From Wikidata, CC0. Nobody here has opened these — ' +
-             "the link answered when it was asked and that is all this map knows " +
-             "about them. They are listed because <b>a country with no named " +
-             "source at all is the worse answer</b>.</p>");
-      h.push('<ul class="at-films">');
-      warch[d.country].slice(0, 6).forEach(function (r) {
-        /* SAME ID AS THE PLACE PAGE'S OWN WIKIDATA ROWS (`source:wd-…`), so a
-           national archive marked here and the same one marked there are one
-           record. David: «why do national sources… not have the ability to
-           +?» — because only two of the panel's six lists had ever been
-           wired, and which two was an accident of the order they were
-           written in rather than a decision about what is markable. */
-        h.push('<li data-src="source:wd-' + esc(r.id || r.name) + '" ' +
-               'data-src-t="' + esc(r.name) + '" ' +
-               'data-src-where="' + esc(CNAME[d.country] || d.country) + '" ' +
-               'data-src-href="' + esc(r.url) + '">' +
-               '<a href="' + esc(r.url) + '" target="_blank" rel="noopener">' +
-               esc(r.name) + " &#8599;</a> " +
-               '<span class="ra-who">' +
-               (r.kind === "national-archive" ? "national archive" : "national library") +
-               (r.status && r.status !== "ok"
-                 ? " · " + esc(r.status === "challenged"
-                     ? "behind a bot gate, but alive"
-                     : r.status === "unreachable"
-                       ? "did not answer this checker" : "answered with an error")
-                 : "") + "</span></li>");
-      });
-      h.push("</ul></div>");
-    }
-
-    if (d.country) h.push(countrySources(d.country,
-      "National and regional, and they cover this ground whether or not " +
-      "anybody has walked it here.", null, d.lat, d.lon, "ra-home-src"));
-
-    /* The collections that reach this ground. The panel shows the nearest few
-       and the page shows them all — a marker is a glance, not a catalogue. */
-    if (d.nfs) {
-      var near = (d.fs || []).filter(function (c) { return c.rank <= 2; });
-      h.push('<div class="at-sec"><div class="lab">FamilySearch reaches here</div>');
-      h.push('<p class="at-sub">' + d.nfs + " collection" + (d.nfs === 1 ? "" : "s") +
-             " cover this ground" + (near.length ? ", " + near.length +
-             " of them catalogued under this place or the district it sits in" : "") + ".</p>");
-      h.push('<ul class="at-films">');
-      /* WHOSE SHELF, WHEN IT IS NOT THIS COUNTRY'S. An 1863 baptism from an
-         Istrian village sits in a Croatian archive; a 1915 one from the same
-         village is filed under "Italy, Pola and Trieste". Somebody searching
-         Croatia will never think to look there, and until now this map could
-         not tell them — the harvest treated a collection whose places
-         disagreed with its title as an error and threw the places away. Now
-         it is a badge on the row, because it is the most useful single thing
-         this map knows.
-         NOT class ra-filed: that name is already the jurisdiction section's. */
-      (near.length ? near : (d.fs || [])).slice(0, 5).forEach(function (c) {
-        /* AND THE COLLECTIONS. `collection:<url or title>` is the place page's
-           id for the same rows. A collection is a thing you finish — «searched,
-           nothing found» against a whole church-book series is one of the most
-           useful things a reader can record, and there was nowhere to put it. */
-        h.push('<li data-src="collection:' + esc(c.url || c.t) + '" ' +
-               'data-src-t="' + esc(c.t) + '" ' +
-               'data-src-where="' + esc(CNAME[d.country] || d.country || "") + '" ' +
-               'data-src-href="' + esc(c.url) + '">' +
-               '<a href="' + esc(c.url) + '" target="_blank" rel="noopener">' +
-               esc(c.t) + " &#8599;</a>" +
-               (c.from ? ' <span class="at-y">' + c.from + "\u2013" + c.to + "</span>" : "") +
-               (c.filed && c.filed.length
-                 ? ' <span class="ra-crossed" title="Filed under ' +
-                   esc(c.filed.map(ccName).join(", ")) +
-                   ', not under this place\u2019s own country \u2014 searching by ' +
-                   'country alone will not find it.">filed under ' +
-                   esc(c.filed.map(ccName).join(", ")) + "</span>"
-                 : "") +
-               "</li>");
-      });
-      h.push("</ul></div>");
-    }
+    var srcHtml = placeSources(d, d.collections);
+    h.push(srcHtml);
 
     var cs = d.collections.slice();
     if (year) cs = cs.filter(function (c) { return covers(c, year, year2); });
     if (!cs.length) {
-      h.push('<p class="at-sub" style="margin-top:16px">' + (year
+      var none = year
         ? "Nothing walked here covers " + (year === year2 ? year : year + "\u2013" + year2) + "."
-        : (d.nfs ? "Nobody has walked this place volume by volume. The " + d.nfs +
-                   " collection" + (d.nfs === 1 ? "" : "s") + " above " +
-                   (d.nfs === 1 ? "is" : "are") + " what reaches it, and " +
-                   (d.nfs === 1 ? "it is" : "they are") + " where to start."
-                 : "No volumes recorded here yet.")) + "</p>");
+        : (srcHtml ? "" : "No volumes recorded here yet.");
+      if (none) h.push('<p class="at-sub" style="margin-top:16px">' + none + "</p>");
       return h.join("");
     }
 
@@ -8443,6 +8493,89 @@ window.addEventListener("load", async function () {
   :global(.ra-mn-f) { margin: 0 0 4px; font: 400 11px/1.5 var(--mono); color: var(--ink-3); }
 
   :global(.at-sec) { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--rule); }
+
+  /* ---- WHERE TO LOOK: ONE BLOCK, TWO ZONES -------------------------------
+     See placeSources(). The main zone takes the room, FamilySearch sits
+     beside it, and below ~760px they stack. Every row is a three-part grid —
+     the mark, the name, the cost — so the control is never squeezed into a
+     column of its own and its state sits UNDER the name it belongs to. */
+  :global(.at-src) { margin-top: 6px; padding-top: 0; border-top: 0; }
+  :global(.src-verdict) { margin: 0 0 10px; font: 600 14px/1.45 var(--sans); color: var(--ink); max-width: 62ch; }
+  :global(.src-strip) { margin: 0 0 16px; }
+  :global(.src-strip[hidden]) { display: none; }
+  :global(.src-bar) { display: flex; height: 6px; border-radius: 3px; overflow: hidden;
+    background: var(--rule); gap: 1px; }
+  :global(.src-bar i) { display: block; min-width: 2px; }
+  :global(.src-bar .sb-found) { background: #3FA66B; }
+  :global(.src-bar .sb-tried) { background: #D9A441; }
+  :global(.src-bar .sb-blocked) { background: #C8665A; }
+  :global(.src-key) { margin: 6px 0 0; font: 400 11.5px/1.4 var(--sans); color: var(--ink-3); }
+  :global(.src-key b) { color: var(--ink-2); font-weight: 600; }
+  :global(.src-zones) { display: grid; gap: 4px 36px; align-items: start;
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); }
+  :global(.src-main) { display: grid; gap: 4px; min-width: 0; }
+  :global(.src-sec) { min-width: 0; margin: 0 0 14px; }
+  :global(.src-fs) { padding-left: 24px; border-left: 1px solid var(--rule); position: sticky; top: 64px; }
+  :global(.src-fsn) { margin: 6px 0 4px; font: 400 12.5px/1.5 var(--sans); color: var(--ink-2); }
+  :global(.src-all) { margin: 8px 0 0; font: 400 12px/1.4 var(--sans); }
+  :global(.src-list) { list-style: none; margin: 6px 0 0; padding: 0; }
+  :global(.src-list li.sr) { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto;
+    column-gap: 8px; align-items: center; padding: 7px 0; border-top: 1px solid var(--rule);
+    font-size: 13px; line-height: 1.4; }
+  :global(.src-list li.sr:first-child) { border-top: 0; }
+  /* The mark slot is a transparent wrapper: its pill takes the first column
+     and its words fall into the row's own grid beneath the name. */
+  :global(.src-list li.sr .srcmark) { display: contents; }
+  :global(.src-list li.sr .src-open) { grid-column: 1; grid-row: 1 / span 2; align-self: start; margin-top: 1px; }
+  :global(.src-list li.sr .sr-n) { grid-column: 2; grid-row: 1; min-width: 0; overflow-wrap: anywhere; }
+  :global(.src-list li.sr .sr-m) { grid-column: 3; grid-row: 1; justify-self: end; white-space: nowrap;
+    font: 400 11px/1.3 var(--sans); color: var(--ink-3); display: inline-flex; align-items: center; gap: 5px; }
+  :global(.src-list li.sr .src-state),
+  :global(.src-list li.sr .vm-note),
+  :global(.src-list li.sr .vm-since) { grid-column: 2 / -1; }
+  :global(.src-list li.sr .src-state) { grid-row: 2; font-size: 11.5px; }
+  :global(.src-list li.sr .vm-note) { grid-row: 3; font: italic 400 12px/1.4 var(--sans); color: var(--ink-2);
+    overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  :global(.src-list li.sr .vm-since) { grid-row: 2; justify-self: end; }
+  :global(.src-list li.sr .src-line) { grid-column: 2; grid-row: 2; min-width: 0; font: 400 11.5px/1.4 var(--sans); }
+  :global(.src-list li.sr .src-line .src-state) { font-weight: 600; }
+  :global(.src-list li.sr .src-line .vm-note) { display: inline; font: italic 400 11.5px/1.4 var(--sans); color: var(--ink-2); }
+  :global(.src-list li.sr .src-line .vm-note::before) { content: " \00b7  "; font-style: normal; color: var(--ink-3); }
+  :global(.src-list li.sr-fs .src-line) { grid-row: 3; }
+  :global(.src-list li.sr .src-edit) { grid-column: 2 / -1; grid-row: 2; padding-top: 6px; }
+  :global(.src-list li.sr .src-edit select) { max-width: 100%; }
+  :global(.src-list li.sr .src-edit input) { flex: 1 1 8em; min-width: 0; }
+  :global(.src-list .sr-more) { padding: 7px 0 0 36px; font: 400 12px/1.4 var(--sans); color: var(--ink-3); border-top: 1px solid var(--rule); }
+  :global(.src-list li.sr .sr-tag) { font: 500 10px/1 var(--mono); letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 6px; border: 1px dashed var(--rule-strong); border-radius: 3px; color: var(--ink-3); cursor: help; }
+  :global(.src-list li.sr .at-y) { margin-right: 4px; }
+  /* A collection reads name, then its years beneath, because a church-ledger
+     title is long and the years are what distinguishes five of them. */
+  :global(.src-list li.sr-fs .sr-m) { grid-column: 2; grid-row: 2; justify-self: start; white-space: normal; }
+  :global(.src-list li.sr-fs.src-has .sr-m) { grid-row: 2; }
+  :global(.src-list li.sr-fs .src-state) { grid-row: 3; }
+  :global(.src-list li.sr-fs .vm-note) { grid-row: 4; }
+  :global(.src-list li.sr-fs .vm-since) { grid-row: 3; }
+  :global(.src-list li.sr-fs .src-edit) { grid-row: 3; }
+  /* WHAT YOU HAVE DONE, BY COLOUR: the pill is already filled when something
+     is recorded; the state tints it so «found» and «could not get in» do not
+     read alike from across the room. */
+  :global(li.sr[data-st="found"] .vm-pill-on), :global(li.sr[data-st="exhausted"] .vm-pill-on) { --walked: #3FA66B; }
+  :global(li.sr[data-st="blocked"] .vm-pill-on) { --walked: #C8665A; }
+  :global(li.sr[data-st="planned"] .vm-pill-on), :global(li.sr[data-st="written"] .vm-pill-on),
+  :global(li.sr[data-st="searched"] .vm-pill-on) { --walked: #C79A3A; }
+  /* THE WORLDWIDE LIST, FOLDED. Most of these have never been opened from
+     here, so the ones that have come first and the rest wait behind one
+     button. volume-marks.js marks the folded rows `.src-fold`. */
+  :global(.src-ww .src-folded li.src-fold) { display: none; }
+  :global(.src-fold-b) { margin: 6px 0 0 36px; padding: 0; background: none; border: 0; cursor: pointer;
+    font: 500 12px/1.4 var(--sans); color: var(--accent); }
+  :global(.src-fold-b:hover) { text-decoration: underline; }
+  @media (max-width: 760px) {
+    :global(.src-zones) { grid-template-columns: minmax(0, 1fr); }
+    :global(.src-fs) { position: static; padding-left: 0; border-left: 0; border-top: 1px solid var(--rule); padding-top: 12px; }
+  }
+
   :global(.at-films) { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 5px; }
   :global(.at-films li) { font-size: 12.5px; line-height: 1.5; }
   :global(.at-y) { font: 400 11px/1 var(--mono); color: var(--ink-3); }

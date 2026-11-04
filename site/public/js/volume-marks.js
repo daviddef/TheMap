@@ -258,6 +258,7 @@
          once appeared to work while I was testing row zero. */
       all().forEach(function (li) { paint(li); });
       srcAll().forEach(function (el) { srcPaint(el); });
+      srcTidy();
       rollup();
       bump();
       /* The map's own dots, so «where have I been» is answerable at a glance
@@ -463,15 +464,96 @@
             ? '<button type="button" class="src-open vm-pill vm-pill-on" ' +
               'aria-label="Edit what you recorded' + esc(of) + '" ' +
               'title="Edit or remove what you recorded">\u2713</button>' +
-              '<span class="src-state">' + esc(label(m.state)) + "</span>" +
-              (m.note ? '<span class="vm-note">' + esc(m.note) + "</span>" : "") +
+              /* IN THE SOURCE BLOCK THE STATE AND THE NOTE ARE ONE LINE: «cannot
+                 get access · Paywalled; no Greenland index», not two lines
+                 that say the same thing twice. Everywhere else they stay the
+                 separate spans the place page styles. */
+              (el.closest(".at-src")
+                ? '<span class="src-line"><span class="src-state">' + esc(label(m.state)) + "</span>" +
+                  (m.note ? '<span class="vm-note">' + esc(m.note) + "</span>" : "") + "</span>"
+                : '<span class="src-state">' + esc(label(m.state)) + "</span>" +
+                  (m.note ? '<span class="vm-note">' + esc(m.note) + "</span>" : "")) +
               (m.since ? '<span class="vm-since">' + esc(m.since) + "</span>" : "")
             : '<button type="button" class="src-open vm-pill" ' +
               'aria-label="Mark what you have done' + esc(of) + '" ' +
               'title="Mark what you have done here">+</button>');
       if (slot.innerHTML !== shtml) slot.innerHTML = shtml;
       el.classList.toggle("src-has", !!m.state);
+      if (m.state) el.setAttribute("data-st", m.state); else el.removeAttribute("data-st");
     }
+    /* THE STRIP AND THE FOLD, in the place panel's source block. Only this
+       code knows what has been marked, so only this code can count it (the
+       strip: how many of these sources are found, tried, blocked, untouched)
+       or put the tried worldwide ones first and fold the untried rest behind
+       one button. Safe to run on every paint: it rebuilds from the rows. */
+    var FOUND = { found: 1, exhausted: 1 }, BLOCKED = { blocked: 1 };
+    function srcTidy() {
+      [].slice.call(document.querySelectorAll(".at-src")).forEach(function (box) {
+        var rows = [].slice.call(box.querySelectorAll("li[data-src]"));
+        var strip = box.querySelector(".src-strip");
+        if (strip && rows.length) {
+          var f = 0, b = 0, t = 0;
+          rows.forEach(function (r) {
+            var st = r.getAttribute("data-st");
+            if (!st) return;
+            if (FOUND[st]) f++; else if (BLOCKED[st]) b++; else t++;
+          });
+          var u = rows.length - f - b - t;
+          if (!(f + b + t)) { strip.hidden = true; if (strip.innerHTML) strip.innerHTML = ""; }
+          else {
+            strip.hidden = false;
+            var pc = function (n) { return (100 * n / rows.length).toFixed(2) + "%"; };
+            var html = '<div class="src-bar" role="img" aria-label="' + rows.length +
+              ' sources: ' + f + ' found something, ' + t + ' tried, ' + b + ' blocked, ' + u + ' untouched">' +
+              (f ? '<i class="sb-found" style="width:' + pc(f) + '"></i>' : "") +
+              (t ? '<i class="sb-tried" style="width:' + pc(t) + '"></i>' : "") +
+              (b ? '<i class="sb-blocked" style="width:' + pc(b) + '"></i>' : "") + "</div>" +
+              '<p class="src-key"><b>' + rows.length + "</b> sources here · " +
+              (f ? "<b>" + f + "</b> found something · " : "") +
+              (t ? "<b>" + t + "</b> tried · " : "") +
+              (b ? "<b>" + b + "</b> could not get in · " : "") +
+              "<b>" + u + "</b> untouched</p>";
+            if (strip.innerHTML !== html) strip.innerHTML = html;
+          }
+        }
+        var ul = box.querySelector(".src-ww .src-list");
+        if (ul) {
+          var lis = [].slice.call(ul.querySelectorAll(":scope > li.sr"));
+          var tried = lis.filter(function (l) { return l.classList.contains("src-has"); });
+          var rest = lis.filter(function (l) { return !l.classList.contains("src-has"); });
+          /* Tried first, in the order they were listed; then the rest. Moving
+             only when the order is wrong keeps the observer quiet. */
+          var want = tried.concat(rest), same = want.every(function (l, i) { return lis[i] === l; });
+          var btn = ul.parentNode.querySelector(".src-fold-b");
+          var open = ul.getAttribute("data-open") === "1";
+          var KEEP = Math.max(tried.length, 0) + 4;
+          if (!same) want.forEach(function (l) { ul.appendChild(l); });
+          want.forEach(function (l, i) {
+            var hide = !open && i >= KEEP;
+            if (l.classList.contains("src-fold") !== hide) l.classList.toggle("src-fold", hide);
+          });
+          var hidden = Math.max(0, want.length - KEEP);
+          ul.classList.add("src-folded");
+          if (hidden && !btn) {
+            btn = document.createElement("button");
+            btn.type = "button"; btn.className = "src-fold-b";
+            ul.parentNode.appendChild(btn);
+          }
+          if (btn) {
+            btn.hidden = !hidden;
+            var txt = open ? "Show fewer" : "Show " + hidden + " more nobody has tried";
+            if (btn.textContent !== txt) btn.textContent = txt;
+          }
+        }
+      });
+    }
+    document.addEventListener("click", function (e) {
+      var b = e.target.closest && e.target.closest(".src-fold-b");
+      if (!b) return;
+      var ul = b.parentNode.querySelector(".src-list");
+      ul.setAttribute("data-open", ul.getAttribute("data-open") === "1" ? "0" : "1");
+      srcTidy();
+    });
     function srcAll() {
       return [].slice.call(document.querySelectorAll("[data-src]"));
     }
@@ -517,6 +599,7 @@
          is there, because by then there is a state for it to belong to. */
       _srcOpen = null;
       srcPaint(el, true);
+      srcTidy();
       bump();
     });
     document.addEventListener("input", function (e) {

@@ -2591,6 +2591,13 @@ window.addEventListener("load", async function () {
       h.push('<span class="at-also">also written ' +
              alsoNames.map(function (x) { return "<em>" + esc(x) + "</em>"; })
                       .join(" · ") + "</span>");
+    /* WHAT IT WAS CALLED THEN: the catalogue of dated names (data/place-names.json). A record is filed under the clerk's
+       name for his year, so the panel says Salisbury 1890-1982 here rather than leave a reader searching the new name. */
+    if ((d.named || []).length)
+      h.push('<span class="at-also">called ' + d.named.map(function (n) {
+        var yrs = n.f != null || n.t != null ? " (" + (n.f != null ? n.f : "\u2026") + "\u2013" + (n.t != null ? n.t : "\u2026") + ")" : "";
+        return '<a href="' + esc(n.s) + '" target="_blank" rel="noopener"><em>' + esc(n.n) + "</em></a>" + yrs;
+      }).join(" \u00b7 ") + "</span>");
     /* The page behind the panel. A marker is a view; a page is a thing you
        can send somebody, bookmark, or find from a search engine. */
     /* THE ICON BESIDE IT WENT TO THE SAME PAGE. David: «there is a "read more

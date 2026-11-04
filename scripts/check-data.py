@@ -1040,6 +1040,24 @@ def given_name_families_gate():
                     err(f"given-name-families {f['id']}/{m['form']}: evidence reads like a person, not a form: {e.get('what')[:70]!r}")
 
 
+def place_names_gate():
+    """data/place-names.json: what a place was called, by date. The rules live in scripts/place_names.py, so the tool a
+    session writes with and the gate that stops the build cannot disagree: every name has a dated or lead status, an https
+    source with a title, a period that runs forward, a place id the Atlas holds, and is not the place's current name."""
+    try:
+        import place_names as pn
+        cat = pn.load()
+        places = pn.atlas_places()
+    except FileNotFoundError:
+        return
+    except Exception as e:
+        err(f"cannot check place-names.json: {e}")
+        return
+    for m in pn.validate(cat, places):
+        err(m)
+    print(f"place names: {len(cat['places'])} places, {sum(len(p['names']) for p in cat['places'])} dated names, every one sourced")
+
+
 def whats_new_gate():
     """site/src/data/whats-new.json is what the home page's «What's new» card shows.
 
@@ -1092,6 +1110,7 @@ def main():
     context_contract()
     surname_families_gate()
     given_name_families_gate()
+    place_names_gate()
     whats_new_gate()
     history_json()
     history_ground()

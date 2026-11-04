@@ -1003,6 +1003,15 @@ def main():
 
     history = _load_history()
     index, nbytes, details = [], 0, []
+    # NAMES BY DATE (data/place-names.json, written only through scripts/place_names.py): Salisbury 1890-1982 for Harare.
+    # They are search terms (typing Fiume lands on Rijeka's dot) and ride in the detail file as `named`, so the panel can
+    # say what the place was called in the year of the record. Absent file = no dated names; the build never invents one.
+    pnames = {}
+    try:
+        with open("data/place-names.json", encoding="utf-8") as _fh:
+            pnames = {x["id"]: x["names"] for x in json.load(_fh).get("places", [])}
+    except (OSError, ValueError):
+        pass
     for p in places:
         cs = p.get("collections", [])
         acc = min((c["access"] for c in cs if c.get("access") in RANK),
@@ -1010,7 +1019,7 @@ def main():
 
         # Every name this place answers to, folded, so that typing "Gallignana"
         # or "gracisce" or "Gračišće" all land on the same dot.
-        variants = [p["name"]] + [n["n"] for n in p.get("names", [])]
+        variants = [p["name"]] + [n["n"] for n in p.get("names", [])] + [n["name"] for n in pnames.get(p["id"], [])]
         q = " ".join(sorted({fold(v) for v in variants}))
 
         # The span the place can answer for. This has to ride in the INDEX,
@@ -1140,6 +1149,9 @@ def main():
         index.append(row)
 
         detail = dict(p)
+        if pnames.get(p["id"]):
+            detail["named"] = [{k: v for k, v in (("n", n["name"]), ("f", n.get("from")), ("t", n.get("to")), ("k", n["kind"]), ("l", n.get("lang")),
+                                                  ("s", n["sources"][0]["url"])) if v is not None} for n in pnames[p["id"]]]
         # Volume-level detail rides in the per-place file, never the index:
         # 4,903 volumes would be a megabyte on every first paint to answer a
         # question nobody has asked until they click.

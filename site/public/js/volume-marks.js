@@ -499,16 +499,21 @@
             if (FOUND[st]) f++; else if (BLOCKED[st]) b++; else t++;
           });
           var u = rows.length - f - b - t;
+          /* THE MARKS ARE THE CHOSEN FAMILY'S, NOT EVERYBODY'S. «8 found something» read as a fact about the place; it is a fact
+             about the name in the header (RESEARCHING ...), so the line says whose. */
+          var ln = P && P.lines ? P.lines().filter(function (l) { return l.active; })[0] : null;
+          var who = ln && ln.name ? ln.name : "";
           if (!(f + b + t)) { strip.hidden = true; if (strip.innerHTML) strip.innerHTML = ""; }
           else {
             strip.hidden = false;
             var pc = function (n) { return (100 * n / rows.length).toFixed(2) + "%"; };
             var html = '<div class="src-bar" role="img" aria-label="' + rows.length +
-              ' sources: ' + f + ' found something, ' + t + ' tried, ' + b + ' blocked, ' + u + ' untouched">' +
+              ' sources' + (who ? ' for ' + who : '') + ': ' + f + ' found something, ' + t + ' tried, ' + b + ' blocked, ' + u + ' untouched">' +
               (f ? '<i class="sb-found" style="width:' + pc(f) + '"></i>' : "") +
               (t ? '<i class="sb-tried" style="width:' + pc(t) + '"></i>' : "") +
               (b ? '<i class="sb-blocked" style="width:' + pc(b) + '"></i>' : "") + "</div>" +
               '<p class="src-key"><b>' + rows.length + "</b> sources here · " +
+              (who ? "for <b>" + esc(who) + "</b>: " : "") +
               (f ? "<b>" + f + "</b> found something · " : "") +
               (t ? "<b>" + t + "</b> tried · " : "") +
               (b ? "<b>" + b + "</b> could not get in · " : "") +
@@ -516,35 +521,39 @@
             if (strip.innerHTML !== html) strip.innerHTML = html;
           }
         }
-        var ul = box.querySelector(".src-ww .src-list");
-        if (ul) {
+        /* EVERY LIST FOLDS THE SAME WAY. A list says how many rows to keep with data-keep; a row somebody has marked is never
+           hidden, and the worldwide list (data-order="tried") also moves its marked rows to the top. Hidden rows are all
+           untouched by definition, so the button can say so. */
+        [].slice.call(box.querySelectorAll(".src-list[data-keep]")).forEach(function (ul) {
           var lis = [].slice.call(ul.querySelectorAll(":scope > li.sr"));
-          var tried = lis.filter(function (l) { return l.classList.contains("src-has"); });
-          var rest = lis.filter(function (l) { return !l.classList.contains("src-has"); });
-          /* Tried first, in the order they were listed; then the rest. Moving
-             only when the order is wrong keeps the observer quiet. */
-          var want = tried.concat(rest), same = want.every(function (l, i) { return lis[i] === l; });
+          var has = function (l) { return l.classList.contains("src-has"); };
+          var reorder = ul.getAttribute("data-order") === "tried";
+          var want = reorder ? lis.filter(has).concat(lis.filter(function (l) { return !has(l); })) : lis;
+          var same = want.every(function (l, i) { return lis[i] === l; });
           var btn = ul.parentNode.querySelector(".src-fold-b");
           var open = ul.getAttribute("data-open") === "1";
-          var KEEP = Math.max(tried.length, 0) + 4;
+          var KEEP = Math.max(parseInt(ul.getAttribute("data-keep"), 10) || 4, 0) +
+                     (reorder ? want.filter(has).length : 0);
+          /* Moving only when the order is wrong keeps the observer quiet. */
           if (!same) want.forEach(function (l) { ul.appendChild(l); });
+          var hidden = 0;
           want.forEach(function (l, i) {
-            var hide = !open && i >= KEEP;
+            var hide = !open && i >= KEEP && !has(l);
+            if (i >= KEEP && !has(l)) hidden++;
             if (l.classList.contains("src-fold") !== hide) l.classList.toggle("src-fold", hide);
           });
-          var hidden = Math.max(0, want.length - KEEP);
           ul.classList.add("src-folded");
           if (hidden && !btn) {
             btn = document.createElement("button");
             btn.type = "button"; btn.className = "src-fold-b";
-            ul.parentNode.appendChild(btn);
+            ul.parentNode.insertBefore(btn, ul.nextSibling);
           }
           if (btn) {
             btn.hidden = !hidden;
             var txt = open ? "Show fewer" : "Show " + hidden + " more nobody has tried";
             if (btn.textContent !== txt) btn.textContent = txt;
           }
-        }
+        });
       });
     }
     document.addEventListener("click", function (e) {

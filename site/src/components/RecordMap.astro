@@ -937,14 +937,49 @@ window.addEventListener("load", async function () {
     return '<i class="at-dot" style="background:' + (ACC[access] || ["#7C8A91"])[0] +
            '"></i>' + esc((ACC[access] || [0, access])[1]);
   }
-  function placeSources(d, cs) {
+  var fsMoved = [];   /* the volumes placeSources drew in the FamilySearch column, so the cost-grouped lists skip them */
+  /* ONE ROW FOR A VOLUME, WHEREVER IT IS LISTED. The cost-grouped lists and the FamilySearch column both draw it, so a volume
+     carries the same mark id in either. `withWho` is false inside the FamilySearch column, where the provider is the heading. */
+  function volLi(d, c, withWho) {
+        var span = c.from ? " <span class=\"at-y\">" +
+          (c.to && c.to !== c.from ? c.from + "–" + c.to : c.from) + "</span>" : "";
+        var who = PROV[c.provider] ? PROV[c.provider].name : c.provider;
+        var t = esc(c.title || "Untitled volume");
+        /* THE SAME BOOKS AS THE LIST ABOVE, SORTED A SECOND WAY — and that is
+           the whole of David's «why do some have a + and some do not». This
+           panel shows a place's volumes twice: grouped by what the register
+           is (Births, Marriages, Deaths) and grouped by what it costs to look
+           at it. The first grouping was wired for marking and the second was
+           not, so the same book carried a + in one list and nothing in the
+           other, a few hundred pixels apart. That reads as a rule about the
+           books when it was only an accident of which loop got the attribute.
+           SAME ID, so it is one mark seen twice rather than two marks that can
+           disagree: `volume:<waypoint or url or title>`, exactly as above. */
+        return ('<li data-vol="' + esc("volume:" + (c.waypoint || c.url || c.title)) + '"' +
+          ' data-vol-t="' + esc(c.title || "Untitled volume") + '"' +
+          ' data-vol-where="' + esc(d.name + (d.country ? ", " +
+               (CNAME[d.country] || d.country) : "")) + '"' +
+          ' data-vol-href="' + esc(BASE + "place/" + d.id + "/") + '">' + (c.url
+          ? '<a href="' + esc(c.url) + '" target="_blank" rel="noopener">' + t + " &#8599;</a>"
+          : t) + span + (withWho === false ? "" : ' <span class="ra-who">' + esc(who) + "</span>") +
+          (c.held ? ' <span class="ra-who">held at ' + esc(c.held) + "</span>" : "") + "</li>");
+  }
+
+  function placeSources(d, cs, vols) {
     var cc = d.country, cname = CNAME[cc] || cc || "";
     var nat = cc ? natProviders(cc, d.lat, d.lon) : [];
     var wd = (cc && warch[cc]) ? warch[cc].slice(0, 6) : [];
     var ww = cc && (nat.length || wd.length) ? wwProviders() : [];
     var near = d.nfs ? (d.fs || []).filter(function (c) { return c.rank <= 2; }) : [];
-    var fsRows = d.nfs ? (near.length ? near : (d.fs || [])).slice(0, 5) : [];
+    var fsRows = d.nfs ? (near.length ? near : (d.fs || [])).slice(0, 12) : [];
     if (!nat.length && !wd.length && !fsRows.length) return "";
+    /* FAMILYSEARCH'S OWN VOLUMES BELONG IN FAMILYSEARCH'S COLUMN. They were drawn a screen lower, grouped by cost, under no
+       heading that said whose they were, while the column beside the archives said "FamilySearch" over two collections.
+       Only when the column exists (a place with no other source keeps its list as it was) and only when they fit: past
+       thirty it is a catalogue, and the cost-grouped lists with their "show all" handle that better. */
+    var fsVols = fsRows.length ? (vols || []).filter(function (c) { return c.provider === "familysearch"; }) : [];
+    if (fsVols.length > 30) fsVols = [];
+    fsMoved = fsVols;
 
     /* THE VERDICT: the one line that says where this ground stands. It was the
        last sentence of the panel, after everything it summarises. */
@@ -956,15 +991,15 @@ window.addEventListener("load", async function () {
       : "Nobody has walked this place volume by volume." + (start ? " Start with " + start + "." : "");
 
     var h = ['<div class="at-sec at-sec-wide at-src" id="ra-home-src">',
-             '<p class="src-verdict">' + esc(verdict) + "</p>",
-             '<div class="src-strip" hidden></div>',
+             '<div class="src-head"><p class="src-verdict">' + esc(verdict) + "</p>",
+             '<div class="src-strip" hidden></div></div>',
              '<div class="src-zones"><div class="src-main">'];
 
     if (nat.length || wd.length) {
       h.push('<section class="src-sec"><div class="lab">' +
              esc(cname ? cname + "’s own archives" : "Archives") + "</div>" +
-             '<ul class="src-list">');
-      nat.slice(0, 8).forEach(function (p) {
+             '<ul class="src-list" data-keep="8">');
+      nat.slice(0, 30).forEach(function (p) {
         h.push(srcRow("source:" + p.id, p.name, cname, BASE + "archive/" + p.id + "/", p.url,
                       accMeta(p.access)));
       });
@@ -979,14 +1014,14 @@ window.addEventListener("load", async function () {
           (r.status && r.status !== "ok" ? " · " + esc(r.status === "challenged" ? "bot gate" :
             r.status === "unreachable" ? "no answer" : "error") : "") + "</span>"));
       });
-      if (nat.length > 8)
-        h.push('<li class="sr-more">&hellip;and ' + (nat.length - 8) + " more on the " +
+      if (nat.length > 30)
+        h.push('<li class="sr-more">&hellip;and ' + (nat.length - 30) + " more on the " +
                '<a href="' + BASE + "country/" + cc.toLowerCase() + '/">' + esc(cname) + " page</a></li>");
       h.push("</ul></section>");
     }
     if (ww.length) {
       h.push('<section class="src-sec src-ww"><div class="lab">Everywhere, including here</div>' +
-             '<ul class="src-list">');
+             '<ul class="src-list" data-keep="4" data-order="tried">');
       ww.forEach(function (p) {
         h.push(srcRow("source:" + p.id, p.name, "worldwide", BASE + "archive/" + p.id + "/", p.url,
                       accMeta(p.access)));
@@ -1005,7 +1040,7 @@ window.addEventListener("load", async function () {
              " reach this ground" + (near.length ? ", <b>" + near.length + "</b> filed here or in its district" : "") +
              "." + (same ? ' <span class="ra-crossed" title="Searching by country alone will not find these.">' +
              "all filed under " + esc(keys[0]) + "</span>" : "") + "</p>" +
-             '<ul class="src-list">');
+             '<ul class="src-list" data-keep="5">');
       fsRows.forEach(function (c) {
         h.push(srcRow("collection:" + (c.url || c.t), c.t, cname, c.url, c.url,
           (c.from ? '<span class="at-y">' + c.from + "–" + c.to + "</span>" : "") +
@@ -1013,7 +1048,20 @@ window.addEventListener("load", async function () {
             esc(c.filed.map(ccName).join(", ")) + ', not under this place’s own country.">filed under ' +
             esc(c.filed.map(ccName).join(", ")) + "</span>" : ""), "sr-fs"));
       });
-      h.push("</ul>" + (d.nfs > fsRows.length
+      h.push("</ul>");
+      if (fsVols.length) {
+        h.push('<div class="src-fsv"><div class="lab">' + fsVols.length + " volume" + (fsVols.length === 1 ? "" : "s") +
+               " recorded here</div>");
+        RANK.forEach(function (a) {
+          var g = fsVols.filter(function (c) { return c.access === a; });
+          if (!g.length) return;
+          h.push('<div class="src-fsv-g"><div class="src-fsv-l"><i class="ra-dot" style="background:' + ACC[a][0] + '"></i>' +
+                 esc(ACC[a][1]) + '</div><ul class="at-films">' +
+                 g.map(function (c) { return volLi(d, c, false); }).join("") + "</ul></div>");
+        });
+        h.push("</div>");
+      }
+      h.push((d.nfs > fsRows.length
         ? '<p class="src-all"><a href="' + BASE + "place/" + esc(d.id) + '/">All ' +
           d.nfs.toLocaleString() + " on the place page</a></p>" : "") + "</aside>");
     }
@@ -2964,11 +3012,12 @@ window.addEventListener("load", async function () {
        nothing. These are Wikidata's national archives and libraries, fetched
        once and kept apart from the curated list because rattling a door is not
        the same as having read what is behind it. */
-    var srcHtml = placeSources(d, d.collections);
-    h.push(srcHtml);
-
     var cs = d.collections.slice();
     if (year) cs = cs.filter(function (c) { return covers(c, year, year2); });
+    var srcHtml = placeSources(d, d.collections, cs);
+    h.push(srcHtml);
+    var moved = fsMoved;
+
     if (!cs.length) {
       var none = year
         ? "Nothing walked here covers " + (year === year2 ? year : year + "\u2013" + year2) + "."
@@ -2979,6 +3028,8 @@ window.addEventListener("load", async function () {
 
     /* Grouped by what it costs to look, most open first, because that is the
        order a reader actually wants to try them in. */
+    cs = cs.filter(function (c) { return moved.indexOf(c) < 0; });
+    if (!cs.length) return h.join("");
     var by = {};
     cs.forEach(function (c) { (by[c.access] = by[c.access] || []).push(c); });
     RANK.forEach(function (a) {
@@ -2986,30 +3037,7 @@ window.addEventListener("load", async function () {
       h.push('<div class="at-sec at-sec-wide"><div class="lab"><i class="ra-dot" style="background:' +
              ACC[a][0] + '"></i>' + esc(ACC[a][1]) + "</div>");
       h.push('<ul class="at-films">');
-      by[a].forEach(function (c) {
-        var span = c.from ? " <span class=\"at-y\">" +
-          (c.to && c.to !== c.from ? c.from + "–" + c.to : c.from) + "</span>" : "";
-        var who = PROV[c.provider] ? PROV[c.provider].name : c.provider;
-        var t = esc(c.title || "Untitled volume");
-        /* THE SAME BOOKS AS THE LIST ABOVE, SORTED A SECOND WAY — and that is
-           the whole of David's «why do some have a + and some do not». This
-           panel shows a place's volumes twice: grouped by what the register
-           is (Births, Marriages, Deaths) and grouped by what it costs to look
-           at it. The first grouping was wired for marking and the second was
-           not, so the same book carried a + in one list and nothing in the
-           other, a few hundred pixels apart. That reads as a rule about the
-           books when it was only an accident of which loop got the attribute.
-           SAME ID, so it is one mark seen twice rather than two marks that can
-           disagree: `volume:<waypoint or url or title>`, exactly as above. */
-        h.push('<li data-vol="' + esc("volume:" + (c.waypoint || c.url || c.title)) + '"' +
-          ' data-vol-t="' + esc(c.title || "Untitled volume") + '"' +
-          ' data-vol-where="' + esc(d.name + (d.country ? ", " +
-               (CNAME[d.country] || d.country) : "")) + '"' +
-          ' data-vol-href="' + esc(BASE + "place/" + d.id + "/") + '">' + (c.url
-          ? '<a href="' + esc(c.url) + '" target="_blank" rel="noopener">' + t + " &#8599;</a>"
-          : t) + span + ' <span class="ra-who">' + esc(who) + "</span>" +
-          (c.held ? ' <span class="ra-who">held at ' + esc(c.held) + "</span>" : "") + "</li>");
-      });
+      by[a].forEach(function (c) { h.push(volLi(d, c)); });
       h.push("</ul></div>");
     });
     return h.join("");
@@ -8500,8 +8528,12 @@ window.addEventListener("load", async function () {
      the mark, the name, the cost — so the control is never squeezed into a
      column of its own and its state sits UNDER the name it belongs to. */
   :global(.at-src) { margin-top: 6px; padding-top: 0; border-top: 0; }
-  :global(.src-verdict) { margin: 0 0 10px; font: 600 14px/1.45 var(--sans); color: var(--ink); max-width: 62ch; }
-  :global(.src-strip) { margin: 0 0 16px; }
+  /* ONE ROW AND A HAIRLINE, NOT FOUR LINES. The sentence was capped at 62 characters and wrapped to two lines, then the bar,
+     then the counts on a line of their own. Now the sentence and the counts share a row and the bar runs under both; where
+     there is no room (a phone) they stack. */
+  :global(.src-head) { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 6px 24px; margin: 0 0 14px; }
+  :global(.src-verdict) { margin: 0; grid-column: 1; grid-row: 1; font: 600 14px/1.45 var(--sans); color: var(--ink); }
+  :global(.src-strip) { display: contents; }
   :global(.src-strip[hidden]) { display: none; }
   :global(.src-bar) { display: flex; height: 6px; border-radius: 3px; overflow: hidden;
     background: var(--rule); gap: 1px; }
@@ -8509,13 +8541,22 @@ window.addEventListener("load", async function () {
   :global(.src-bar .sb-found) { background: #3FA66B; }
   :global(.src-bar .sb-tried) { background: #D9A441; }
   :global(.src-bar .sb-blocked) { background: #C8665A; }
-  :global(.src-key) { margin: 6px 0 0; font: 400 11.5px/1.4 var(--sans); color: var(--ink-3); }
+  :global(.src-key) { grid-column: 2; grid-row: 1; margin: 0; font: 400 11.5px/1.4 var(--sans); color: var(--ink-3); white-space: nowrap; }
+  :global(.src-head .src-bar) { grid-column: 1 / -1; grid-row: 2; }
+  @media (max-width: 760px) {
+    :global(.src-head) { grid-template-columns: minmax(0, 1fr); }
+    :global(.src-key) { grid-column: 1; grid-row: 2; white-space: normal; }
+    :global(.src-head .src-bar) { grid-row: 3; }
+  }
   :global(.src-key b) { color: var(--ink-2); font-weight: 600; }
   :global(.src-zones) { display: grid; gap: 4px 36px; align-items: start;
     grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); }
   :global(.src-main) { display: grid; gap: 4px; min-width: 0; }
   :global(.src-sec) { min-width: 0; margin: 0 0 14px; }
   :global(.src-fs) { padding-left: 24px; border-left: 1px solid var(--rule); position: sticky; top: 64px; }
+  :global(.src-fsv) { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--rule); }
+  :global(.src-fsv-g) { margin-top: 8px; }
+  :global(.src-fsv-l) { font: 500 12px/1.4 var(--sans); color: var(--ink-2); display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
   :global(.src-fsn) { margin: 6px 0 4px; font: 400 12.5px/1.5 var(--sans); color: var(--ink-2); }
   :global(.src-all) { margin: 8px 0 0; font: 400 12px/1.4 var(--sans); }
   :global(.src-list) { list-style: none; margin: 6px 0 0; padding: 0; }
@@ -8567,7 +8608,7 @@ window.addEventListener("load", async function () {
   /* THE WORLDWIDE LIST, FOLDED. Most of these have never been opened from
      here, so the ones that have come first and the rest wait behind one
      button. volume-marks.js marks the folded rows `.src-fold`. */
-  :global(.src-ww .src-folded li.src-fold) { display: none; }
+  :global(.src-folded li.src-fold) { display: none; }
   :global(.src-fold-b) { margin: 6px 0 0 36px; padding: 0; background: none; border: 0; cursor: pointer;
     font: 500 12px/1.4 var(--sans); color: var(--accent); }
   :global(.src-fold-b:hover) { text-decoration: underline; }

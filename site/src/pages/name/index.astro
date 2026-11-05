@@ -1,0 +1,27 @@
+---
+/* Every given name that has a page, in alphabetical order. A list people can read and a crawler can follow. */
+import Base from "../../layouts/Base.astro";
+import { u } from "../../lib/url.js";
+import { names } from "../../lib/given-names.js";
+
+const N = names();
+const rows = [...N.rows].sort((a, b) => a.canon.localeCompare(b.canon, "en"));
+const groups = {};
+for (const r of rows) (groups[r.canon[0].toUpperCase()] ||= []).push(r);
+const letters = Object.keys(groups).sort();
+---
+<Base title="Given names, A to Z" eyebrow={`${rows.length} names`}
+      dek="Every given name in the catalogue, with each form by language and the page that carries it. Ivan, Johann, Giovanni and Joannes are one name.">
+  <section>
+    <p class="cap" style="margin-top:0">Looking for one form you have met on a record? <a href={u("/your-name/")}>Type it into the name finder</a>.</p>
+    <p class="nm-az">{letters.map((l) => <a href={`#l-${l}`}>{l}</a>)}</p>
+    {letters.map((l) => (
+      <>
+        <h2 class="nm-l" id={`l-${l}`}>{l}</h2>
+        <ul class="nm-names">
+          {groups[l].map((r) => <li><a href={u(`/name/${r.id}/`)}>{r.canon}</a> <span class="cap">{r.forms} forms</span></li>)}
+        </ul>
+      </>
+    ))}
+  </section>
+</Base>

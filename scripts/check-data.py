@@ -1058,6 +1058,88 @@ def flag_paths_gate():
         print("flag drawings: every path parses to the end")
 
 
+def name_stories_gate():
+    """data/name-stories.json: every paragraph cites claims that exist, every claim cites https pages with a quote,
+    no barred site, nothing that reads like a person."""
+    import re as _re
+    try:
+        d = json.load(open("data/name-stories.json", encoding="utf-8"))
+    except Exception as e:
+        err(f"cannot check name-stories.json: {e}")
+        return
+    bad = _re.compile(r"behindthename|nameberry|namepedia|babycenter|momjunction|houseofnames|surnamedb|igenea|ancestry\.|"
+                      r"nameplay|namedary|genderapi|forebears|geneanet|myheritage|findmypast|familytreedna|swyrich", _re.I)
+    person = _re.compile(r"\b(born|died)\b|\bhis\b|\bher\b|grandfather|grandmother", _re.I)
+    for sid, s in (d.get("stories") or {}).items():
+        w = f"name-stories {sid}"
+        claims = s.get("claims") or {}
+        for k, c in claims.items():
+            if not c.get("sources"):
+                err(f"{w}: claim {k} has no source")
+            for src in c.get("sources", []):
+                if not src.get("url", "").startswith("https://") or bad.search(src["url"]) or not src.get("quote"):
+                    err(f"{w}: claim {k} cites a bad source {src.get('url')!r}")
+                elif len(src["quote"].split()) > 14:
+                    err(f"{w}: claim {k}: a quote is longer than 14 words")
+        used = set()
+        for sec in s.get("sections") or []:
+            for p in sec.get("p") or []:
+                t = p.get("t", "")
+                if not p.get("c"):
+                    err(f"{w}: a paragraph under {sec.get('h')!r} cites no claim")
+                for k in p.get("c", []):
+                    used.add(k)
+                    if k not in claims:
+                        err(f"{w}: cites {k}, which is not a claim")
+                if person.search(t):
+                    err(f"{w}: reads like it is about a person: {t[:60]!r}")
+        for k in claims:
+            if k not in used:
+                err(f"{w}: claim {k} is never used")
+
+
+def name_meanings_gate():
+    """data/name-meanings.json: what a given name is said to come from. Every claim is our own wording, carries 1-3 pages and
+    a short quote from each, says whether a source gives it, the sources disagree, or it is a popular explanation; and none
+    reads like a person or leans on a site the catalogue does not use (baby-name sites, crest sellers, Ancestry)."""
+    import re as _re, urllib.parse as _up
+    try:
+        d = json.load(open("data/name-meanings.json", encoding="utf-8"))
+        fams = {f["id"] for f in json.load(open("data/given-name-families.json", encoding="utf-8"))["families"]}
+    except Exception as e:
+        err(f"cannot check name-meanings.json: {e}")
+        return
+    bad = _re.compile(r"behindthename|nameberry|namepedia|babycenter|momjunction|houseofnames|surnamedb|igenea|ancestry\.|"
+                      r"nameplay|namedary|genderapi|forebears|geneanet|myheritage|findmypast|familytreedna|swyrich", _re.I)
+    person = _re.compile(r"\b(born|died)\b|\bhis\b|\bher\b|grandfather|grandmother", _re.I)
+    for fid, n in (d.get("names") or {}).items():
+        w = f"name-meanings {fid}"
+        if fid not in fams:
+            err(f"{w}: no such family in given-name-families.json")
+        ms = n.get("meanings") or []
+        if not 1 <= len(ms) <= 4:
+            err(f"{w}: 1 to 4 explanations, not {len(ms)}")
+        for i, m in enumerate(ms):
+            c = (m.get("claim") or "").strip()
+            if not 15 <= len(c) <= 600:
+                err(f"{w}[{i}]: the claim must be 15-600 characters, it is {len(c)}")
+            if m.get("kind") not in ("etymology", "disputed", "folk"):
+                err(f"{w}[{i}]: kind {m.get('kind')!r} is not etymology / disputed / folk")
+            if person.search(c):
+                err(f"{w}[{i}]: the claim reads like it is about a person: {c[:60]!r}")
+            srcs = m.get("sources") or []
+            if not 1 <= len(srcs) <= 3:
+                err(f"{w}[{i}]: 1 to 3 sources, not {len(srcs)}")
+            for sr in srcs:
+                url = sr.get("url", "")
+                if not url.startswith("http"):
+                    err(f"{w}[{i}]: source without an http url")
+                elif bad.search(_up.urlparse(url).netloc):
+                    err(f"{w}[{i}]: {url} is a site this catalogue does not cite")
+                if not 1 <= len((sr.get("quote") or "").split()) <= 20:
+                    err(f"{w}[{i}]: a source needs a quote of 1-20 words")
+
+
 def place_names_gate():
     """data/place-names.json: what a place was called, by date. The rules live in scripts/place_names.py, so the tool a
     session writes with and the gate that stops the build cannot disagree: every name has a dated or lead status, an https
@@ -1128,6 +1210,8 @@ def main():
     context_contract()
     surname_families_gate()
     given_name_families_gate()
+    name_meanings_gate()
+    name_stories_gate()
     place_names_gate()
     flag_paths_gate()
     whats_new_gate()

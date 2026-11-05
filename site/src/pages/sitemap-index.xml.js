@@ -8,6 +8,8 @@ import cols from "../data/collections-full.json";
 import { corpus } from "../lib/surname-corpus.js";
 import { surnamePageSlugs } from "../lib/surname-pages.js";
 import { slugs as flagSlugs } from "../lib/flag-pages.js";
+import { names } from "../lib/given-names.js";
+import { stories } from "../lib/name-stories.js";
 
 /* Read once, off disk. This file and surname/[name].astro must agree on
    which names have pages — a sitemap listing URLs that were never built is
@@ -15,7 +17,7 @@ import { slugs as flagSlugs } from "../lib/flag-pages.js";
    and the corpus. */
 const surn = corpus();
 
-export const SETS = ["pages", "places", "archives", "countries", "regions", "surnames"];
+export const SETS = ["pages", "places", "archives", "countries", "regions", "surnames", "names"];
 
 /* A SITEMAP MAY HOLD 50,000 URLS, AND «places» HELD 56,582.
  *
@@ -72,7 +74,7 @@ export function urlsFor(set) {
     for (let i = 2; i <= pages; i++) placeIndex.push([`places/${i}/`, "0.4"]);
     return [["", "1.0"], ["start/", "0.9"], ["about/", "0.6"], ["providers/", "0.9"],
             ["jurisdictions/", "0.9"], ...placeIndex, ["countries/", "0.9"],
-            ["surnames/", "0.9"], ["surname-families/", "0.7"], ["your-name/", "0.7"], ["whats-new/", "0.5"], ["coverage/", "0.8"], ["changelog/", "0.4"],
+            ["surnames/", "0.9"], ["surname-families/", "0.7"], ["your-name/", "0.7"], ["name/", "0.8"], ["story/", "0.7"], ["whats-new/", "0.5"], ["coverage/", "0.8"], ["changelog/", "0.4"],
             ["add/", "0.5"], ["data/", "0.7"], ["worklist/", "0.4"],
             /* These were live and linked from the menu and absent from this list
                until 5 November 2026. test/sitemap-pages.test.js now fails when a
@@ -107,6 +109,7 @@ export function urlsFor(set) {
        Luwinski all had pages and none of them were in the sitemap. */
     return surnamePageSlugs(surn.surnames).map((s) => [`surname/${s}/`, "0.5"]);
   }
+  if (set === "names") return [...names().rows.map((r) => [`name/${r.id}/`, "0.6"]), ...stories().map((x) => [`story/${x.id}/`, "0.7"])];
   return [];
 }
 

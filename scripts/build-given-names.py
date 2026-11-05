@@ -91,7 +91,7 @@ def main():
             for a in m.get("also") or []:
                 cp = {k: v for k, v in row.items() if k != "src"}
                 cp["shared"] = True
-                cp["status"] = "lead" if m["status"] in ("same", "attested", "rule") else m["status"]
+                cp["status"] = "lead"   # each language was source-checked on its own; a homograph elsewhere is not this language's
                 asrc = next((e["ref"] for e in a["evidence"] if str(e.get("ref", "")).startswith("http")), "")
                 if asrc:
                     cp["src"] = asrc

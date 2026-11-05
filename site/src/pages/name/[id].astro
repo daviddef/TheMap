@@ -1,0 +1,131 @@
+---
+/* One page per given name, so that a search for "Boris name" or "Hedwig origin" can find a page that answers it.
+ *
+ * The name finder (/your-name/) takes any form and shows the family it belongs to, but a search engine cannot type into it,
+ * and ?n=Boris is one page with a changing query. This is the same family as a page of its own: where the name is said to
+ * come from (only where sources have been read, each explanation with its pages, never one confident answer where sources
+ * differ), every form by language with how far the claim goes and the pages behind it, the look-alikes that are a different
+ * name, and a list to search with. Nothing about a person is on it. */
+import Base from "../../layouts/Base.astro";
+import { u } from "../../lib/url.js";
+import { names, confidence, hostOf } from "../../lib/given-names.js";
+
+export function getStaticPaths() {
+  const n = names();
+  return n.rows.map((r) => ({ params: { id: r.id }, props: { id: r.id } }));
+}
+const { id } = Astro.props;
+const N = names();
+const row = N.rows.find((r) => r.id === id);
+const mean = N.meanings[id];
+const ev = N.evid[id] || {};
+const KIND = { etymology: "A source gives this", disputed: "Sources disagree", folk: "A popular explanation" };
+
+const langs = N.order.filter((k) => (row.langs[k] || []).length);
+const distinct = new Map();
+for (const k of langs) for (const f of row.langs[k]) if (!distinct.has(f.form.toLowerCase())) distinct.set(f.form.toLowerCase(), f.form);
+const search = [...distinct.values()].sort((a, b) => a.localeCompare(b));
+const nLangs = langs.length;
+const title = `${row.canon}: forms of the name in ${nLangs} language${nLangs === 1 ? "" : "s"}`;
+const firstMeaning = mean?.meanings?.[0]?.claim;
+const dek = `${row.canon}: ${distinct.size} form${distinct.size === 1 ? "" : "s"} of this one name in ${nLangs} language${nLangs === 1 ? "" : "s"}, each with its source. `
+  + (firstMeaning ? `${firstMeaning}` : "Spellings a clerk, a priest or an index may have used.");
+---
+<Base title={title} eyebrow="Given name" dek={dek.length > 300 ? dek.slice(0, 297) + "…" : dek}>
+  <section class="nm">
+    <p class="cap" style="margin-top:0"><a href={u("/name/")}>All names</a> · <a href={u(`/your-name/?n=${encodeURIComponent(row.canon)}`)}>Look up another form of {row.canon}</a></p>
+
+    <h2 class="nm-h">Where the name comes from</h2>
+    {mean ? (
+      <>
+        {mean.origin && <p class="nm-origin">Traced to: <strong>{mean.origin}</strong></p>}
+        <ol class="nm-mean">
+          {mean.meanings.map((m) => (
+            <li>
+              <span class={`nm-kind nm-kind-${m.kind}`}>{KIND[m.kind]}</span>
+              <p class="nm-claim">{m.claim}</p>
+              {m.note && <p class="nm-note">{m.note}</p>}
+              <p class="nm-src">Read at: {m.sources.map((s, i) => (<>{i > 0 && ", "}<a href={s.url} rel="noopener">{hostOf(s.url)}</a></>))}</p>
+            </li>
+          ))}
+        </ol>
+        <p class="cap">Each explanation is in our own words and links the page it was read on. Where sources give different
+        origins, each is listed and none is chosen for you. A meaning does not tell you what a clerk wrote, which is the next section.</p>
+      </>
+    ) : (
+      <p class="cap">No explanation of where this name comes from has been added yet. We would rather show none than repeat one that
+      cannot be traced to a page. What the catalogue does hold, the forms below, is sourced form by form.</p>
+    )}
+
+    <h2 class="nm-h">How it is written, language by language</h2>
+    <p class="cap" style="margin-top:0">The same name was written by different hands. Under each form is how far the catalogue's claim goes:
+    <b>met on a record</b> means one of the family archives has read it in a register; <b>sourced</b> means a named page gives it as that
+    language's form and no record here has shown it yet; <b>same spelling</b> means the language writes the name that way too;
+    <b>register form</b> is the Latin the priest wrote to suit the sentence; <b>check each record</b> means the spelling is also a different
+    name in another language, so decide per entry.</p>
+    <div class="nm-cards">
+      {langs.map((k) => (
+        <div class="nm-card">
+          <h3>{N.label[k] || k}{N.core.includes(k) && <span class="nm-core" title="One of the main registers' languages"> ·</span>}</h3>
+          <ul>
+            {row.langs[k].map((f) => {
+              const c = confidence(f, k, ev);
+              const e = ev[f.form.toLowerCase()] || { refs: [], alsoRefs: {} };
+              const refs = f.shared ? (e.alsoRefs[k] || []) : e.refs;
+              return (
+                <li>
+                  <span class="nm-form">{f.form}</span>
+                  <span class={`nm-conf nm-conf-${c.key}`}>{c.text}</span>
+                  {(f.note || f.notNominative) && <span class="nm-fnote">{[f.note, f.notNominative].filter(Boolean).join(" · ")}</span>}
+                  {refs.length > 0 && <span class="nm-fsrc">{refs.map((r, i) => (<>{i > 0 && ", "}<a href={r} rel="noopener">{hostOf(r)}</a></>))}</span>}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
+    </div>
+
+    {row.notSame.length > 0 && (
+      <>
+        <h2 class="nm-h">Looks the same, is not</h2>
+        <ul class="nm-list">{row.notSame.map((s) => <li><b>{s.form}</b> — {s.why}</li>)}</ul>
+      </>
+    )}
+    {row.slips.length > 0 && (
+      <>
+        <h2 class="nm-h">Written by mistake, once</h2>
+        <p class="cap" style="margin-top:0">Not spellings of the name. A clerk or an indexer slipped; they are here so nobody counts them as variants.</p>
+        <ul class="nm-list">{row.slips.map((s) => <li><b>{s.form}</b> — {s.why}</li>)}</ul>
+      </>
+    )}
+
+    <h2 class="nm-h">To search an index or a register</h2>
+    <p class="cap" style="margin-top:0">Type each of these, one at a time. Case, spaces and apostrophes make no difference; an accent can.</p>
+    <p class="nm-search">{search.join(" · ")}</p>
+
+    <p class="cap">The catalogue behind this page is free to reuse (<a href={u("/given-names.json")}>given-names.json</a>) and every form carries its
+    evidence there. Nothing about a person is kept in it. To correct a form or add one, see <a href={u("/add/")}>how to add</a>.</p>
+  </section>
+</Base>
+
+<style>
+  .nm-h { margin:2rem 0 .6rem; font-size:1.15rem; }
+  .nm-origin { margin:.2rem 0 .8rem; }
+  .nm-mean { list-style:none; margin:0 0 1rem; padding:0; display:grid; gap:.9rem; }
+  .nm-mean li { border:1px solid var(--rule,#ddd); border-radius:3px; padding:.8rem 1rem; background:var(--panel,transparent); }
+  .nm-kind { display:inline-block; font-size:11px; font-weight:600; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-3,#888); }
+  .nm-kind-disputed { color:var(--accent,#963); }
+  .nm-claim { margin:.3rem 0 .2rem; line-height:1.55; }
+  .nm-note, .nm-src, .nm-fnote, .nm-fsrc { font-size:.84rem; color:var(--ink-3,#888); margin:.1rem 0 0; }
+  .nm-cards { display:grid; gap:1rem; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); }
+  .nm-card { border:1px solid var(--rule,#ddd); border-top-width:3px; border-radius:3px; padding:.9rem 1rem; background:var(--panel,transparent); min-width:0; }
+  .nm-card h3 { margin:0 0 .5rem; font-size:11px; font-weight:600; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-3,#888); }
+  .nm-card ul { list-style:none; margin:0; padding:0; display:grid; gap:.55rem; }
+  .nm-form { font-size:1.25rem; margin-right:.4rem; overflow-wrap:anywhere; }
+  .nm-conf { font-size:.74rem; letter-spacing:.04em; border:1px solid var(--rule,#ccc); border-radius:2px; padding:0 .35rem; color:var(--ink-2,inherit); white-space:nowrap; }
+  .nm-conf-met { border-color:var(--accent,#963); color:var(--accent,#963); }
+  .nm-fnote, .nm-fsrc { display:block; overflow-wrap:anywhere; }
+  .nm-list { margin:.3rem 0 0; padding-left:1.1rem; line-height:1.55; }
+  .nm-search { font-size:1.05rem; line-height:1.8; overflow-wrap:anywhere; }
+</style>

@@ -1,0 +1,53 @@
+---
+/* One sourced story. Prose is ours; each paragraph carries the numbers of the notes behind it, and the notes list the pages. */
+import Base from "../../layouts/Base.astro";
+import { u } from "../../lib/url.js";
+import { stories } from "../../lib/name-stories.js";
+import { hostOf } from "../../lib/given-names.js";
+
+export function getStaticPaths() {
+  return stories().map((s) => ({ params: { id: s.id }, props: { id: s.id } }));
+}
+const { id } = Astro.props;
+const s = stories().find((x) => x.id === id);
+const order = [];
+for (const sec of s.sections) for (const p of sec.p) for (const k of p.c) if (!order.includes(k)) order.push(k);
+const num = Object.fromEntries(order.map((k, i) => [k, i + 1]));
+---
+<Base title={s.title} eyebrow={s.kind} dek={s.dek}>
+  <article class="st">
+    {s.sections.map((sec) => (
+      <>
+        <h2 class="st-h">{sec.h}</h2>
+        {sec.p.map((p) => (
+          <p class="st-p">{p.t}{" "}{p.c.map((k) => <sup class="st-n"><a href={`#n${num[k]}`} id={`r${num[k]}`}>{num[k]}</a></sup>)}</p>
+        ))}
+      </>
+    ))}
+
+    <h2 class="st-h">What this does not say</h2>
+    <ul class="cap">{s.notes.map((n) => <li>{n}</li>)}</ul>
+
+    <h2 class="st-h">Notes and pages</h2>
+    <ol class="st-notes">
+      {order.map((k) => (
+        <li id={`n${num[k]}`}>
+          {s.claims[k].claim}
+          <span class="st-src"> Read at: {s.claims[k].sources.map((x, i) => (<>{i > 0 && ", "}<a href={x.url} rel="noopener">{hostOf(x.url)}</a></>))}</span>
+        </li>
+      ))}
+    </ol>
+
+    <p class="cap">{s.related.map((r, i) => (<>{i > 0 && " · "}<a href={u(r.href)}>{r.label}</a></>))} · <a href={u("/story/")}>All stories</a></p>
+  </article>
+</Base>
+<style>
+  .st { max-width: 44rem; }
+  .st-h { margin: 1.8rem 0 .5rem; font-size: 1.15rem; }
+  .st-p { line-height: 1.6; margin: 0 0 .8rem; }
+  .st-n { font-size: .7rem; margin-left: .1rem; }
+  .st-n a { text-decoration: none; }
+  .st-notes { font-size: .88rem; line-height: 1.5; padding-left: 1.4rem; }
+  .st-notes li { margin-bottom: .55rem; }
+  .st-src { color: var(--muted, #666); }
+</style>

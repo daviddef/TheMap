@@ -36,7 +36,8 @@
  * bucket has thrown away the only thing that tells them apart.
  */
 const { rows = [], langs = [], chips = [], u = (p) => p,
-        aidLabel = "not met in these records, and the right form to search" } = Astro.props;
+        aidLabel = "not met in these records, and the right form to search",
+        nameHref = "" } = Astro.props;   /* e.g. "/name/{id}/": where a name has a page of its own, the finder links to it */
 
 /* One flat lookup: every form, folded, points at its row. Folding here is the
    same idea as the register's - accents off, case off - so that a reader who
@@ -69,7 +70,8 @@ rows.forEach((r) => distinct(r).forEach((n) => { total++; if (n > 0) met++; }));
          data-index={JSON.stringify(index)}
          data-rows={JSON.stringify(rows)}
          data-langs={JSON.stringify(langs)}
-         data-aid={aidLabel} />
+         data-aid={aidLabel}
+         data-namehref={nameHref} />
   {live.length > 0 && (
     <div class="syn-chips">{live.map((c) => (
       <button type="button" class="syn-chip" data-n={c}>{c}</button>))}</div>
@@ -132,6 +134,7 @@ rows.forEach((r) => distinct(r).forEach((n) => { total++; if (n > 0) met++; }));
     const rows = JSON.parse(q.dataset.rows || "[]");
     const langs = JSON.parse(q.dataset.langs || "[]");
     const aidLabel = q.dataset.aid || "";
+    const nameHref = q.dataset.namehref || "";
     const fold = (s) => String(s || "").toLowerCase()
       .normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/æ/g, "ae").trim();
     const esc = (s) => String(s == null ? "" : s)
@@ -172,7 +175,9 @@ rows.forEach((r) => distinct(r).forEach((n) => { total++; if (n > 0) met++; }));
       let h = '<h3 class="syn-head"><strong>' + esc(cap(r.canon)) + "</strong> — "
         + n + " forms of this one name, of which " + seen
         + " are attested in the records gathered here.</h3>"
-        + '<p class="syn-sub">Every form below is the same name, written by different hands.</p>'
+        + '<p class="syn-sub">Every form below is the same name, written by different hands.'
+        + (nameHref && r.id ? ' <a href="' + esc(nameHref.replace("{id}", encodeURIComponent(r.id))) + '">Open the page for ' + esc(cap(r.canon))
+          + "</a>: where the name comes from, and the page behind each form." : "") + "</p>"
         + '<div class="syn-cards">';
       for (const L of langs) {
         const forms = (r.langs || {})[L.key] || [];

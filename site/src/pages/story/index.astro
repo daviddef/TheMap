@@ -1,0 +1,21 @@
+---
+/* Short stories about names: where they came from and what happened to them on the way. Each paragraph cites the pages it was read on. */
+import Base from "../../layouts/Base.astro";
+import { u } from "../../lib/url.js";
+import { stories } from "../../lib/name-stories.js";
+const S = stories();
+---
+<Base title="Stories of names" eyebrow="Names and journeys"
+      dek="How names changed on the way, what the records show and what they do not. Every claim links the page it was read on.">
+  <section>
+    <ul class="st-list">
+      {S.map((s) => (
+        <li>
+          <a href={u(`/story/${s.id}/`)}>{s.title}</a>
+          <p class="cap">{s.dek}</p>
+        </li>
+      ))}
+    </ul>
+    <p class="cap">Looking for the forms of one name? <a href={u("/name/")}>All given names, A to Z</a> or <a href={u("/your-name/")}>the name finder</a>.</p>
+  </section>
+</Base>

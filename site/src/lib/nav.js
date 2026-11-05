@@ -51,6 +51,7 @@ export const nav = [
   ["History", "/history/"],
   ["About", [
     ["/start/", "Start here"],
+    ["/read/", "Reading old records"],
     /* The two prose panels that used to sit folded under the map. Folding
        them was right for the front page and wrong as a home: a reader who
        wants them is asking for help, and a reader who does not should never

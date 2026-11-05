@@ -724,7 +724,7 @@
    "state": "next",
    "owner": "this atlas",
    "since": "2026-11-05",
-   "note": "**Today it is lost on reload.** In the tree viewer (`site/public/roots/js/app.js`, `asIs`, `ticked`) a row marked *Leave as is* lives in memory only, so closing the tab throws away every decision. The viewer keeps nothing else on purpose, and a test asserts it (`roots.test.js`).\n**Proposal.** Save the decisions, never the tree: the key of each row (place text and issue code, not a person's name or id), what was decided, and the date. Three places, in this order: (1) a button-pressed *Remember on this device* that reuses the existing IndexedDB module `recent.js`, which already keeps up to five files on a button press; (2) the same decisions written into the research file (next item) so they travel; (3) a *Download my decisions* file for people who clear their browser.\n**Re-apply.** On loading a file whose decisions are known, say \"34 decisions from 3 Nov re-applied; show them again\", never silently, and keep *left as is* visible behind a count as it is now.\n**Check before building.** The row `key` must not carry a living person's name or id: read `workbench.js` and `checklist.js`, and extend the privacy test to say exactly which keys may be stored. Say in the interface which list this is."
+   "note": "**Today it is lost on reload.** In the tree viewer (`site/public/roots/js/app.js`, `asIs`, `ticked`) a row marked *Leave as is* lives in memory only, so closing the tab throws away every decision. The viewer keeps nothing else on purpose, and a test asserts it (`roots.test.js`).\n**Proposal.** Save the decisions, never the tree: the key of each row (place text and issue code, not a person's name or id), what was decided, and the date. Three places, in this order: (1) a button-pressed *Remember on this device* that reuses the existing IndexedDB module `recent.js`, which already keeps up to five files on a button press; (2) the same decisions written into the research file (next item) so they travel; (3) a *Download my decisions* file for people who clear their browser.\n**Re-apply.** On loading a file whose decisions are known, say \"34 decisions from 3 Nov re-applied; show them again\", never silently, and keep *left as is* visible behind a count as it is now.\n**Check before building.** The row `key` must not carry a living person's name or id: read `workbench.js` and `checklist.js`, and extend the privacy test to say exactly which keys may be stored. Say in the interface which list this is.\n**State (6 Nov 2026).** The code is written and tested (13 tests) but not yet in the site: `docs/research-backup-wip/` holds it with `apply.py` and `HANDOVER.md`, which lists the steps (apply, look at it in a browser, full build, push)."
   },
   {
    "n": 91,
@@ -732,7 +732,7 @@
    "state": "next",
    "owner": "this atlas",
    "since": "2026-11-05",
-   "note": "**The risk is real and measured.** Progress lives in `localStorage` (`ra-progress-v1`: lines and volume marks), plus `ra-check` and `ra-recent`. A private window, cleared site data, or Safari's seven-day clean-up of unused sites' storage empties it, and `/my-research/` is the only way out: a manual *Export my research* that nobody is reminded to press.\n**Proposal.** (1) Version the file (`v:2`) and make it hold every piece of state in one place: marks, lines, fix-it decisions, the visiting list, and the date of the last backup. Importing still merges and never replaces, as it does now. (2) Show *last backed up N days ago* on My research and a quiet banner after a set number of days or marks. (3) Ask the browser to keep the data (`navigator.storage.persist()`) and say plainly when it refuses. (4) Where the browser allows it, offer *Save to a folder* (File System Access API) that overwrites one dated file, and on a phone the share sheet to send the file to Mail or iCloud.\n**Not in scope.** No server. This is the cheapest fix for the loss David described, so it goes first."
+   "note": "**The risk is real and measured.** Progress lives in `localStorage` (`ra-progress-v1`: lines and volume marks), plus `ra-check` and `ra-recent`. A private window, cleared site data, or Safari's seven-day clean-up of unused sites' storage empties it, and `/my-research/` is the only way out: a manual *Export my research* that nobody is reminded to press.\n**Proposal.** (1) Version the file (`v:2`) and make it hold every piece of state in one place: marks, lines, fix-it decisions, the visiting list, and the date of the last backup. Importing still merges and never replaces, as it does now. (2) Show *last backed up N days ago* on My research and a quiet banner after a set number of days or marks. (3) Ask the browser to keep the data (`navigator.storage.persist()`) and say plainly when it refuses. (4) Where the browser allows it, offer *Save to a folder* (File System Access API) that overwrites one dated file, and on a phone the share sheet to send the file to Mail or iCloud.\n**Not in scope.** No server. This is the cheapest fix for the loss David described, so it goes first.\n**State (6 Nov 2026).** The code is written and tested (13 tests) but not yet in the site: `docs/research-backup-wip/` holds it with `apply.py` and `HANDOVER.md`, which lists the steps (apply, look at it in a browser, full build, push)."
   },
   {
    "n": 92,
@@ -740,7 +740,7 @@
    "state": "next",
    "owner": "this atlas",
    "since": "2026-11-05",
-   "note": "**What a pack holds.** Only what a progress mark already holds: volume, pages walked, state (planned, searched, found, exhausted, blocked), the date, the family line's surname and place. Never a tree, never a given name of a person, never a living person. A *Preview what leaves* step shows the exact contents before anything is made.\n**Two shapes.** A file for anything large. A link for small packs, carried in the part of the address after the `#`, which a server never receives, so the site still collects nothing.\n**A reader page.** `/shared/` opens a pack read-only (drag in a file, or follow the link): what was searched, what was found, what is still open for this name, with *Merge into mine* and *Continue from here* (starts a line at the first unwalked page). That is how someone else carries on the research without an account.\n**Rules that carry over.** A mark is a claim by whoever made it and the page says so: *reported by the sender, not checked*. Absence is not evidence: a nil is shown as a search done, never as a finding about the name. The verified route stays the family archives' `searched.json` and the publisher."
+   "note": "**What a pack holds.** Only what a progress mark already holds: volume, pages walked, state (planned, searched, found, exhausted, blocked), the date, the family line's surname and place. Never a tree, never a given name of a person, never a living person. A *Preview what leaves* step shows the exact contents before anything is made.\n**Two shapes.** A file for anything large. A link for small packs, carried in the part of the address after the `#`, which a server never receives, so the site still collects nothing.\n**A reader page.** `/shared/` opens a pack read-only (drag in a file, or follow the link): what was searched, what was found, what is still open for this name, with *Merge into mine* and *Continue from here* (starts a line at the first unwalked page). That is how someone else carries on the research without an account.\n**Rules that carry over.** A mark is a claim by whoever made it and the page says so: *reported by the sender, not checked*. Absence is not evidence: a nil is shown as a search done, never as a finding about the name. The verified route stays the family archives' `searched.json` and the publisher.\n**State (6 Nov 2026).** The code is written and tested (13 tests) but not yet in the site: `docs/research-backup-wip/` holds it with `apply.py` and `HANDOVER.md`, which lists the steps (apply, look at it in a browser, full build, push)."
   },
   {
    "n": 93,
@@ -869,6 +869,134 @@
    "covers": [],
    "note": "**An errand is not finished until its answer is a row.** The outcome codes (*found*, *not held*, *redirected to another holder*, *fee*, *refused*, *no reply after N days*) turn a custody *lead* into *verified* (the Trsat friary's redirect to Rijeka is the first example) and a «not on film» nil into a dated answer from the holder. The Atlas shows, per holder, how many asks, how many answered and how long it took, so a researcher can choose the channel that works. The skill is the same shape as `surname-variants` and `record-custody`: read first, write with evidence, publish once, say whether it is added locally, published or live.\n\n*Raised from the Defranceski archive on 5 November 2026 (its worklist rows 290–290); the Atlas is where the work is done, so it is tracked here too.*",
    "n": 107
+  },
+  {
+   "n": 108,
+   "what": "Recover marks made before the address moved (daviddef.github.io to recordatlas.org, 6 Oct 2026)",
+   "state": "next",
+   "owner": "David and this atlas",
+   "since": "2026-11-06",
+   "note": "**The problem.** Browser storage is per address. Anyone who marked volumes at `daviddef.github.io/TheMap` before 6 Oct 2026 has them under the old address, which now redirects, so no page there can export them. They are probably still in the browser, unreachable.\n**For David.** Run `backups/research-2026-11-05/save-browser-storage.js` in the console on `https://daviddef.github.io/` and on `https://recordatlas.org/my-research/`, then import the file on My research (it reads that format) and say how many marks and lines each held.\n**For everyone else.** Publish one small page on the old address (the `daviddef.github.io` user-site repository) that reads the old storage and hands over a research file or a link to `/shared/`. Only a page on that address can read it.\nThe 5 Nov backup is in `backups/research-2026-11-05/` (all eight archives' `searched.json`, the Atlas published copies, a git bundle)."
+  },
+  {
+   "n": 109,
+   "what": "Push the Defranceski Family repository: it was 37 commits ahead of GitHub on 5 Nov",
+   "state": "next",
+   "owner": "David",
+   "since": "2026-11-06",
+   "note": "Real research (the Ledenice registers, the Worklist custody catalogue) existed only on this machine, plus seven uncommitted files. It is bundled in `backups/research-2026-11-05/git-bundles/`. A session did not push it because the commits were not its own. Decide, then push; the other seven archives were fully pushed."
+  },
+  {
+   "n": 110,
+   "what": "Name pages: meanings for the other 610 names, and who carried the name beyond the first 20",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-11-06",
+   "note": "Pilot state: 20 names have 36 sourced explanations (`data/name-meanings.json`) and 20 have bearers from Wikidata (`data/name-bearers.json`, harvest scripts in `scripts/bearers/`: add the name's items to `map.json`, harvest, summarise, check-data). Thin names come first (see the row on common names). A meaning must have its quote found on the cited page; disagreement is shown, not settled."
+  },
+  {
+   "n": 111,
+   "what": "Stories of names: Magyarisation, the 1787 Habsburg Jewish naming edict, the 1812 Prussian edict; the Zara date for the 1927 story",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-11-06",
+   "note": "Two stories are live (Ellis Island; the 1927 Italianisation). Each new one needs sources beyond Wikipedia, numbered notes, and a \"what this does not say\" list. The 1927 story could not read the decree itself and omits the Zara date; no source gives given-name pairs such as Ivan to Giovanni."
+  },
+  {
+   "n": 112,
+   "what": "The Archive Kit copy of the name finder still shows empty language cards",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-11-06",
+   "note": "A separate repository (`SayYourName.astro` in the Archive Kit): the Atlas copy hides a language with nothing in it; the Kit copy does not. Merge the change three ways, never overwrite from a peer copy."
+  },
+  {
+   "n": 113,
+   "what": "Cross-check the 630 given-name families against Wikidata: same-as, different-from, and per-language labels",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-11-06",
+   "note": "Wikidata (CC0) has 104,954 given-name items, 25,961 same-as links and 19,037 different-from links. Use them only as `lead` candidates through `verify.py`, never as evidence; a form still needs a page that shows it."
+  },
+  {
+   "n": 114,
+   "what": "Ingest open-licence name counts: Poland and the US first",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-11-06",
+   "note": "Checked on 5 Nov, nothing ingested. CC0: Poland dane.gov.pl (given names, surnames of the living), US SSA and Census via data.gov. Credit lines needed: UK ONS (OGL), Norway SSB, Slovenia SURS, Hungary KSH (top 50), Finland DVV (licence seen on a third-party page only: verify). Nothing stated: Croatia DZS, Sweden SCB. No: Meertens. Counts must not describe a person."
+  },
+  {
+   "n": 115,
+   "what": "Review the hold list of Croatian and Serbian given-name forms",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-11-06",
+   "note": "Croatian and Serbian forms are thinner than Slovene in the catalogue and some candidate forms were held back as unverified. Each needs a fetched page that shows it; none is written from memory."
+  },
+  {
+   "n": 116,
+   "what": "Reading the record: terms data and its gate (first 150 terms of Latin church registers)",
+   "state": "running",
+   "owner": "this atlas",
+   "since": "2026-11-06",
+   "note": "Plan: docs/reading-the-record-plan.md. 48 terms are written in data/record-terms.json with a gate in check-data.py (every term sourced, own words, nothing about a person). 100 more to write, from fetched pages only; German, Italian and Hungarian words come after Latin."
+  },
+  {
+   "n": 117,
+   "what": "Reading the record: term finder and date decoder at /read/",
+   "state": "running",
+   "owner": "this atlas",
+   "since": "2026-11-06",
+   "note": "Plan: docs/reading-the-record-plan.md. Built and tested (finder tolerant of endings, i/j, u/v, 7bris; decoder for digits, Roman numerals and Latin words, with its working). Pushed means on the next deploy. Not yet: the French Republican calendar, feast-day dating, Julian/Gregorian by place."
+  },
+  {
+   "n": 118,
+   "what": "Reading the record: the annotated register page with three layouts (Latin prose baptism, Hungarian tabular births, a printed civil act)",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-11-06",
+   "note": "Plan: docs/reading-the-record-plan.md. Drawn by us, tap a field to see what it is, what it does not tell you and how it varies. Needs the layouts file and a source for each field."
+  },
+  {
+   "n": 119,
+   "what": "Reading the record: the trap list and the Read this line tool",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-11-06",
+   "note": "Plan: docs/reading-the-record-plan.md. Misreadings with evidence (uxoris read as ignoris, infans is a child, natum means a different birth day, n.n., sub conditione, delayed marriage). Read this line joins the case forms in the given-name catalogue, so a name found in a register links to its /name/ page."
+  },
+  {
+   "n": 120,
+   "what": "Reading the record: the learning loop from our own research",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-11-06",
+   "note": "Plan: docs/reading-the-record-plan.md. A lesson row with no person in it; a one-off harvest of the eight family archives' notes for recurring patterns; a section in the record-atlas-feedback skill; links from volume and name pages. Each lesson is labelled ours or public. Later one more proposal tool on the API."
+  },
+  {
+   "n": 121,
+   "what": "Reading the record: practice entries and a handwriting gallery",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-11-06",
+   "note": "Plan: docs/reading-the-record-plan.md. Invented entries to read with the answer hidden; handwriting from open-licence sources only, the licence shown. FamilySearch frames stay link-only."
+  },
+  {
+   "n": 122,
+   "what": "Reading the record: more languages and countries, one pass each",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-11-06",
+   "note": "Plan: docs/reading-the-record-plan.md. After Latin church registers: Hungarian, Italian, German (Kurrent), Croatian, Polish; then civil registration (Napoleonic, Austro-Hungarian), Dutch, French, Spanish, Portuguese, Swedish."
+  },
+  {
+   "n": 123,
+   "what": "Reading the record: credit and permission for the guides we learn from",
+   "state": "blocked",
+   "owner": "David",
+   "since": "2026-11-06",
+   "note": "Plan: docs/reading-the-record-plan.md. The Belgium handout (Liz Hutchison, BYU Family History Library) is credited with its address. Needed from David: the address of the Lebeny walkthrough text, and whether to ask any author for permission to cite or reuse a worked example."
   }
  ]
 }

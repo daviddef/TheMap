@@ -1136,6 +1136,39 @@ def name_stories_gate():
                 err(f"{w}: claim {k} is never used")
 
 
+def record_terms_gate():
+    """data/record-terms.json: terms for reading old registers. Every term cites a listed source that has an https address,
+    carries forms and a meaning, has a unique id, and is in our own words: no long text, nothing that reads like a person."""
+    import re as _re
+    try:
+        d = json.load(open("data/record-terms.json", encoding="utf-8"))
+    except Exception as e:
+        err(f"cannot check record-terms.json: {e}")
+        return
+    srcs = d.get("sources") or {}
+    for k, v in srcs.items():
+        if not str(v.get("url", "")).startswith("https://") or not v.get("title"):
+            err(f"record-terms source {k}: needs a title and an https address")
+    person = _re.compile(r"\b(born|died)\b\s+(on|in)\s+\d|\bhis\b|\bher\b|grandfather|grandmother", _re.I)
+    seen = set()
+    for t in d.get("terms") or []:
+        w = f"record-terms {t.get('id')}"
+        if t.get("id") in seen:
+            err(f"{w}: duplicate id")
+        seen.add(t.get("id"))
+        if not t.get("forms") or not t.get("means"):
+            err(f"{w}: needs forms and a meaning")
+        if t.get("events") not in ("baptism", "marriage", "burial", "all"):
+            err(f"{w}: events must be baptism, marriage, burial or all")
+        if not t.get("src") or any(s not in srcs for s in t["src"]):
+            err(f"{w}: cites a source that is not listed")
+        for k in ("means", "note"):
+            if len((t.get(k) or "").split()) > 70:
+                err(f"{w}: {k} is too long: keep it short and in our own words")
+            if person.search(t.get(k) or ""):
+                err(f"{w}: {k} reads like it is about a person")
+
+
 def name_meanings_gate():
     """data/name-meanings.json: what a given name is said to come from. Every claim is our own wording, carries 1-3 pages and
     a short quote from each, says whether a source gives it, the sources disagree, or it is a popular explanation; and none
@@ -1250,6 +1283,7 @@ def main():
     given_name_families_gate()
     name_meanings_gate()
     name_stories_gate()
+    record_terms_gate()
     name_bearers_gate()
     place_names_gate()
     flag_paths_gate()

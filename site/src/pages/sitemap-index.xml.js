@@ -74,7 +74,7 @@ export function urlsFor(set) {
     for (let i = 2; i <= pages; i++) placeIndex.push([`places/${i}/`, "0.4"]);
     return [["", "1.0"], ["start/", "0.9"], ["about/", "0.6"], ["providers/", "0.9"],
             ["jurisdictions/", "0.9"], ...placeIndex, ["countries/", "0.9"],
-            ["surnames/", "0.9"], ["surname-families/", "0.7"], ["your-name/", "0.7"], ["name/", "0.8"], ["story/", "0.7"], ["whats-new/", "0.5"], ["coverage/", "0.8"], ["changelog/", "0.4"],
+            ["surnames/", "0.9"], ["surname-families/", "0.7"], ["your-name/", "0.7"], ["read/", "0.7"], ["name/", "0.8"], ["story/", "0.7"], ["whats-new/", "0.5"], ["coverage/", "0.8"], ["changelog/", "0.4"],
             ["add/", "0.5"], ["data/", "0.7"], ["worklist/", "0.4"],
             /* These were live and linked from the menu and absent from this list
                until 5 November 2026. test/sitemap-pages.test.js now fails when a

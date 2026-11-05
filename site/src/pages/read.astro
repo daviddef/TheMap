@@ -1,0 +1,113 @@
+---
+/* READING THE RECORD: a term finder and a date decoder for old church registers.
+ *
+ * The terms are data/record-terms.json (every one sourced, in our own words, nothing about a person); the finder and decoder are
+ * public/js/record-reader.js, which only reads what is typed. Plan: docs/reading-the-record-plan.md. This is its first piece:
+ * the annotated page, the line reader and the trap list come later.
+ */
+import Base from "../layouts/Base.astro";
+import { recordTerms } from "../lib/record-terms.js";
+import { u } from "../lib/url.js";
+const { sources, terms } = recordTerms();
+const chips = ["uxoris", "7bris", "susceptores", "obiit", "infans", "natum"];
+const dateChips = ["die 30 7bris 1671", "undecima februarii anno millesimo septingentesimo quadragesimo sexto", "xvi martii 1801"];
+const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" };
+---
+<Base
+  title="Reading the record"
+  eyebrow={`${terms.length} terms · every one sourced · nothing you type leaves your browser`}
+  dek="Type a word as you see it in the register, or a whole date, and see what it is, what it does not tell you, and where it comes from."
+  description="A searchable guide to the Latin of old church registers: look up a word, an abbreviation or an ending, and decode a date such as 'die 30 7bris 1671'.">
+
+  <section>
+    <div class="one" id="rr-find">
+      <div class="lab">Find a word</div>
+      <p class="cap" style="margin-top:6px">Spell it as written. Capitals, accents, i for j and u for v do not matter, and another ending finds the same word
+      (uxoris, uxorem). English works too.</p>
+      <p><input type="search" id="rr-q" autocomplete="off" spellcheck="false" aria-label="A word from the register" placeholder="uxoris" /></p>
+      <p class="rr-filters" role="group" aria-label="Kind of record">
+        {Object.entries(eventNames).map(([k, v]) => <label><input type="checkbox" class="rr-ev" value={k} /> {v}</label>)}
+      </p>
+      <p class="cap rr-chips">Try: {chips.map((c) => <button type="button" class="chip rr-chip" data-q={c}>{c}</button>)}</p>
+      <div id="rr-out" role="status" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="one" id="rr-date">
+      <div class="lab">Decode a date</div>
+      <p class="cap" style="margin-top:6px">Digits, Roman numerals or Latin words. The old signs 7bris, 8bris, 9bris and 10bris (Xbris) are
+      September to December. The answer shows its working, and says what it could not read.</p>
+      <p><input type="text" id="rr-d" autocomplete="off" spellcheck="false" aria-label="A date as written in the register" placeholder="die 30 7bris 1671" /></p>
+      <p class="cap rr-chips">Try: {dateChips.map((c) => <button type="button" class="chip rr-dchip" data-q={c}>{c}</button>)}</p>
+      <div id="rr-dout" role="status" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="yn-h">All {terms.length} terms, A to Z</h2>
+    <ul class="rr-all">
+      {terms.map((t) => (
+        <li><b>{t.forms[0]}</b> <span class="rr-m">{t.means}</span></li>
+      ))}
+    </ul>
+    <h2 class="yn-h">Where this comes from</h2>
+    <p class="cap">Each meaning is written in our own words from the pages below, and each card says which. Word meanings are facts; the guides
+    themselves are not copied. Where the card gives a warning, it is a point the source makes, not a rule that always holds: registers vary by
+    parish and century, so look at the page in front of you.</p>
+    <ul class="cap">
+      {Object.entries(sources).sort((a, b) => a[1].title.localeCompare(b[1].title, "en")).map(([k, s]) => <li><a href={s.url} rel="noopener">{s.title}</a></li>)}
+    </ul>
+    <p class="cap">Next on the plan: an annotated register page you can point at, a tool that reads a whole line, and a list of the misreadings that cost
+    researchers time. <a href={u("/worklist/")}>The worklist</a> has it.</p>
+  </section>
+
+  <script type="application/json" id="rr-data" set:html={JSON.stringify({ terms, sources: Object.fromEntries(Object.entries(sources).map(([k, s]) => [k, s.title])) })}></script>
+  <script is:inline src={u("/js/record-reader.js")}></script>
+  <script is:inline>
+    (function () {
+      var R = window.raReadRecord; if (!R) return;
+      var D = JSON.parse(document.getElementById("rr-data").textContent), idx = R.index(D.terms);
+      var q = document.getElementById("rr-q"), out = document.getElementById("rr-out");
+      var d = document.getElementById("rr-d"), dout = document.getElementById("rr-dout");
+      var EV = { baptism: "baptism", marriage: "marriage", burial: "burial", all: "any record" };
+      function el(tag, text, cls) { var e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls; return e; }
+      function events() { return [].slice.call(document.querySelectorAll(".rr-ev:checked")).map(function (c) { return c.value; }); }
+      function card(t) {
+        var c = el("div", null, "rr-card");
+        c.append(el("h3", t.forms[0]), el("p", t.means, "rr-means"));
+        var meta = [EV[t.events] || t.events, t.role];
+        c.append(el("p", meta.join(" · "), "cap"));
+        c.append(el("p", "Also written: " + t.forms.slice(1).concat(t.abbr || []).join(", "), "cap"));
+        if (t.note) c.append(el("p", t.note, "rr-note"));
+        var s = el("p", "Source: ", "cap");
+        t.src.forEach(function (k, i) { s.append((i ? "; " : "") + (D.sources[k] || k)); });
+        c.append(s);
+        return c;
+      }
+      function run() {
+        out.textContent = "";
+        var v = q.value.trim(); if (!v) return;
+        var r = R.find(idx, v, { events: events() });
+        if (!r.length) { out.append(el("p", "No term here matches that. That is not a finding about the word: the list is short so far. Try fewer letters, or the English.", "cap")); return; }
+        r.slice(0, 12).forEach(function (x) { out.append(card(x.term)); });
+        if (r.length > 12) out.append(el("p", "…and " + (r.length - 12) + " more. Type more of the word.", "cap"));
+      }
+      function runDate() {
+        dout.textContent = "";
+        var v = d.value.trim(); if (!v) return;
+        var r = R.decodeDate(v), c = el("div", null, "rr-card");
+        c.append(el("h3", r.text || "Nothing read"));
+        if (r.working.length) { var ul = el("ul", null, "cap"); r.working.forEach(function (w) { ul.append(el("li", w)); }); c.append(ul); }
+        r.warnings.forEach(function (w) { c.append(el("p", w, "rr-note")); });
+        dout.append(c);
+      }
+      q.addEventListener("input", run);
+      d.addEventListener("input", runDate);
+      document.querySelectorAll(".rr-ev").forEach(function (b) { b.addEventListener("change", run); });
+      document.querySelectorAll(".rr-chip").forEach(function (b) { b.addEventListener("click", function () { q.value = b.dataset.q; run(); }); });
+      document.querySelectorAll(".rr-dchip").forEach(function (b) { b.addEventListener("click", function () { d.value = b.dataset.q; runDate(); }); });
+      var m = location.search.match(/[?&]q=([^&]*)/); if (m) { q.value = decodeURIComponent(m[1].replace(/\+/g, " ")); run(); }
+    })();
+  </script>
+</Base>

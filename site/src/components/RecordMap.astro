@@ -3475,6 +3475,15 @@ window.addEventListener("load", async function () {
      Everything here is already in the data with a distance against it; none
      of it is computed about the world, only measured from the place. */
   var ACCESS_DOT = function (a) { return (ACC[a] || ["#7C8A91"])[0]; };
+  /* THE NUMBER CARRIES THE COLOUR. The access dot used to sit on a line of its own under each name, a whole row for one
+     8px circle. The number's disc takes the access colour instead, with dark or white digits by how light the colour is,
+     and the words (free, account needed, paid...) are the disc's tooltip. */
+  var inkOn = function (c) {
+    var m = /^#([0-9a-f]{6})$/i.exec(String(c || "").trim());
+    if (!m) return "#fff";
+    var n = parseInt(m[1], 16), r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 > 0.62 ? "#10202B" : "#fff";
+  };
 
   /* NUMBERED, AND THE SAME NUMBER ON THE MAP. David: «could we show all
      those items numbered, and numbered on the map? so a person planning their
@@ -3502,7 +3511,7 @@ window.addEventListener("load", async function () {
      dossier is which. */
   function checkRow(href, name, km, note, dot, num, y, x, mark) {
     if (num != null && y != null && x != null)
-      checkPins.push({ n: num, y: y, x: x, name: name });
+      checkPins.push({ n: num, y: y, x: x, name: name, dot: dot });
     var at = "";
     if (mark && mark.id) {
       at = ' data-src="' + esc(mark.id) + '"' +
@@ -3520,11 +3529,16 @@ window.addEventListener("load", async function () {
        describe what it means?» and then «we can then remove the text to describe it on every line?». With a
        dot, the note (the access words) becomes the dot's tooltip and accessible name and is not printed;
        the colour key lists every colour for touch screens. A row with no dot keeps its note as text. */
-    var meta = (dot ? '<i class="ra-dot" role="img" style="background:' + dot + '"' +
+    /* With a number the colour is the number's; a row with no number (a burial ground, a parish) keeps the dot. */
+    var meta = (dot && num == null ? '<i class="ra-dot" role="img" style="background:' + dot + '"' +
                       (note ? ' title="' + esc(note) + '" aria-label="' + esc(note) + '"' : "") + "></i>" : "") +
                (note && !dot ? '<span class="ra-ck-n">' + esc(note) + "</span>" : "");
-    return '<li class="' + (num != null ? "ra-ck-r" : "ra-ck-r ra-ck-nonum") + '"' + at + ">" +
-           (num != null ? '<span class="ra-ck-i">' + num + "</span>" : "") +
+    var disc = num != null
+      ? '<span class="ra-ck-i"' + (dot ? ' style="background:' + dot + ";color:" + inkOn(dot) + '"' : "") +
+        (note ? ' title="' + esc(note) + '"' : "") + ">" + num + "</span>"
+      : "";
+    return '<li class="' + (num != null ? "ra-ck-r" : "ra-ck-r ra-ck-nonum") + (num != null && num % 2 === 0 ? " ra-alt" : "") + '"' + at +
+           (dot && note && num != null ? ' title="' + esc(note) + '"' : "") + ">" + disc +
            '<span class="ra-ck-main">' +
            (href ? '<a href="' + esc(href) + '" target="_blank" rel="noopener">' +
                    esc(name) + "</a>" : esc(name)) +
@@ -3537,11 +3551,13 @@ window.addEventListener("load", async function () {
   function drawCheckPins() {
     checkLayer.clearLayers();
     checkPins.forEach(function (p) {
-      L.marker([p.y, p.x], {
+      var pm = L.marker([p.y, p.x], {
         interactive: false, keyboard: false,
         icon: L.divIcon({ className: "ra-pin", iconSize: [19, 19],
                           iconAnchor: [9.5, 9.5], html: String(p.n) })
       }).addTo(checkLayer);
+      /* The same colour as the number in the pane, so a pin and its row are matched by colour and by number. */
+      if (p.dot && pm._icon) { pm._icon.style.background = p.dot; pm._icon.style.color = inkOn(p.dot); }
     });
     if (checkPins.length && !map.hasLayer(checkLayer)) checkLayer.addTo(map);
   }
@@ -9045,6 +9061,12 @@ window.addEventListener("load", async function () {
     column-gap: 10px; row-gap: 1px; align-items: start; margin: 0 -6px 2px; padding: 7px 6px;
     border-radius: 7px; transition: background .12s; }
   :global(#ra-check-b li.ra-ck-r:hover) { background: var(--accent-wash); }
+  /* SEPARATE EACH NUMBER: a light tint on every second row and a little more air, so a number, its note and its mark read
+     as one block and the next number starts a new one. */
+  :global(#ra-check-b li.ra-ck-r.ra-alt) { background: var(--panel-2); }
+  :global(#ra-check-b li.ra-ck-r.ra-alt:hover) { background: var(--accent-wash); }
+  :global(#ra-check-b li.ra-ck-r) { padding-block: 9px; }
+  :global(#ra-check-b li.ra-ck-r .ra-ck-i) { box-shadow: 0 0 0 1.5px var(--panel); }
   :global(#ra-check-b li.ra-ck-nonum) { grid-template-columns: minmax(0, 1fr) auto; }
   :global(#ra-check-b li.ra-ck-r .ra-ck-i) { grid-row: 1 / span 2; margin-right: 0; align-self: center; }
   :global(#ra-check-b li.ra-ck-r .ra-ck-main) { grid-column: 2; font-size: 13px; line-height: 1.35;

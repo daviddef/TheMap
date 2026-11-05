@@ -243,6 +243,11 @@ const nf = (n) => n.toLocaleString();
     </section>
   )}
 
+  {who.length === 0 && (
+    <p class="cap" style="margin-top:30px">The archives and services that cover {NAME}:
+    <a href={u(`/country/${cc.toLowerCase()}/sources/`)}>everything on one page</a>.</p>
+  )}
+
   {mine.length > 0 && (
     <section style="margin-top:34px">
       <h2>{mine.length} FamilySearch collections</h2>

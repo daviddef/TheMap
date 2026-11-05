@@ -1,0 +1,264 @@
+---
+/* SAY YOUR WHOLE NAME: David Ivan Defranceski is three names, and all three are searched at once.
+ *
+ * This box owns no data. It reads what the two single-name finders on the same page already carry (the given-name
+ * index and rows on #syn-q, the surname families on #ssn-q), so there is still ONE catalogue for each kind of name
+ * and nothing here can disagree with them. Each word is looked up on its own: a word that is not found never stops the
+ * others, and "not found" keeps the catalogue's wording (not a finding about the name).
+ *
+ * Which word is which is a guess the reader can overrule: a trailing run of words that the surname catalogue holds is
+ * the surname (so "De Franceschi" and "Van der Berg" stay whole), a comma puts the surname first ("Kovács, István"), a
+ * surname written first is recognised when the rest are given names, and otherwise the last word is the surname.
+ *
+ * The given names are paired BY LANGUAGE ("an Italian clerk: Davide · Giovanni"), because a clerk wrote the whole
+ * entry in one language. Surname spellings carry no language in the catalogue, so they are listed beside the pairs
+ * and never paired with them. Nothing is sent anywhere: the lookup runs in the browser.
+ */
+const { chips = [] } = Astro.props;
+---
+<div class="fn">
+  <label class="fn-lab" for="fn-q">Type your whole name</label>
+  <input id="fn-q" class="fn-q" type="search" autocomplete="off" spellcheck="false" placeholder="Ivan Matija Blažević" />
+  {chips.length > 0 && <div class="fn-chips">{chips.map((c) => <button type="button" class="fn-chip" data-n={c}>{c}</button>)}</div>}
+  <p class="fn-share" hidden><button type="button" class="fn-copy-link">Copy link</button> <span class="fn-url mono"></span>
+    <span class="fn-priv">The link contains the name you typed.</span></p>
+  <div class="fn-out" aria-live="polite"></div>
+</div>
+
+<style is:global>
+  .fn-lab { display: block; font-size: 11px; font-weight: 600; letter-spacing: .11em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 .4rem; }
+  .fn-q { width: 100%; box-sizing: border-box; font: inherit; font-size: 1.5rem; padding: .7rem .9rem; border: 1px solid var(--rule); border-radius: 3px; background: var(--panel); color: inherit; }
+  .fn-chips { display: flex; flex-wrap: wrap; gap: .4rem; margin: .7rem 0 0; }
+  .fn-chip, .fn-btn { font: inherit; font-size: .85rem; padding: .3rem .75rem; cursor: pointer; border: 1px solid var(--rule); border-radius: 2px; background: transparent; color: inherit; }
+  .fn-chip:hover, .fn-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .fn-share { display: flex; flex-wrap: wrap; gap: .3rem .7rem; align-items: baseline; margin: .8rem 0 0; font-size: .85rem; }
+  .fn-copy-link { font: inherit; font-size: .82rem; padding: .25rem .7rem; cursor: pointer; border: 1px solid var(--rule); border-radius: 2px; background: transparent; color: inherit; }
+  .fn-url { color: var(--ink-3); overflow-wrap: anywhere; }
+  .fn-priv { color: var(--ink-3); font-size: .8rem; }
+  .fn-unit { background: var(--panel); border: 1px solid var(--rule); border-radius: 3px; padding: 14px 20px 14px; margin-top: 14px; }
+  .fn-unit .fn-h { margin: 0; font-size: 22px; font-weight: 500; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+  .fn-role { font-family: var(--sans); font-size: 10.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); }
+  .fn-p { margin: 6px 0 0; font-size: .95rem; color: var(--ink-2); }
+  .fn-p a { color: var(--accent); }
+  .fn-nil { margin: 6px 0 0; font-size: .92rem; color: var(--ink-3); }
+  .fn-sub { margin: 26px 0 4px; font-size: 1.15rem; font-weight: 500; }
+  .fn-cap { margin: 0 0 10px; font-size: .88rem; color: var(--ink-3); }
+  .fn-lines { border: 1px solid var(--rule); border-radius: 3px; background: var(--panel); }
+  .fn-line { display: grid; grid-template-columns: 9em 1fr; gap: 2px 14px; padding: 8px 18px; align-items: baseline; font-family: var(--serif); font-size: 1.25rem; }
+  .fn-line + .fn-line { border-top: 1px solid var(--rule); }
+  .fn-line:nth-child(even) { background: color-mix(in srgb, var(--ground) 55%, transparent); }
+  .fn-lang { font-family: var(--sans); font-size: 10.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); }
+  .fn-dot { color: var(--ink-3); padding: 0 .8em; }
+  .fn-more, .fn-none { color: var(--ink-3); font-size: .85em; }
+  .fn-part { margin-top: 12px; }
+  .fn-part summary { cursor: pointer; font-size: .9rem; color: var(--ink-2); margin-bottom: 8px; }
+  .fn-out .famcard { margin-top: 10px; }
+  .fn-out .famcard { background: var(--ground); border: 1px solid var(--rule); border-radius: 3px; padding: 12px 16px 10px; }
+  .fn-out .famcard h2 { margin: 0; font-size: 20px; font-weight: 500; }
+  .fn-out .famcard h2 a { text-decoration: none; }
+  .fn-out .famrow { display: grid; grid-template-columns: 15em 1fr; gap: 4px 12px; align-items: start; margin: 8px 0 0; font-family: var(--serif); font-size: 17px; }
+  .fn-out .famforms { display: flex; flex-wrap: wrap; gap: 6px 8px; }
+  .fn-out .famforms a, .fn-out .famforms span { padding: 1px 10px; background: var(--panel); border: 1px solid var(--rule); border-radius: 999px; line-height: 1.5; text-decoration: none; }
+  .fn-out .famforms a { color: var(--accent); }
+  .fn-out .famst { padding-top: 6px; white-space: nowrap; font-family: var(--sans); font-size: 10.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); }
+  .fn-out .famno .famforms span { color: var(--ink-3); }
+  .fn-actions { margin: 14px 0 0; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  @media (max-width: 640px) {
+    .fn-q { font-size: 1.2rem; }
+    .fn-line, .fn-out .famrow { grid-template-columns: 1fr; }
+    .fn-out .famst { padding-top: 0; white-space: normal; }
+  }
+</style>
+
+<script>
+  const q = document.getElementById("fn-q") as HTMLInputElement | null;
+  const gq = document.getElementById("syn-q") as HTMLInputElement | null;
+  const sq = document.getElementById("ssn-q") as HTMLInputElement | null;
+  const box = document.querySelector<HTMLElement>(".fn");
+  const out = box?.querySelector<HTMLElement>(".fn-out");
+  if (q && gq && sq && box && out) {
+    const share = box.querySelector<HTMLElement>(".fn-share");
+    const urlEl = box.querySelector<HTMLElement>(".fn-url");
+    const rows: any[] = JSON.parse(gq.dataset.rows || "[]");
+    const gIndex: Record<string, number> = JSON.parse(gq.dataset.index || "{}");
+    const langs: any[] = JSON.parse(gq.dataset.langs || "[]");
+    const nameHref = gq.dataset.namehref || "";
+    const fams: any[] = JSON.parse(sq.dataset.fams || "[]");
+    const exact: Record<string, number[]> = JSON.parse(sq.dataset.exact || "{}");
+    const loose: Record<string, number[]> = JSON.parse(sq.dataset.loose || "{}");
+    const has = (o: object, k: string) => Object.prototype.hasOwnProperty.call(o, k);
+
+    // The same keys the two finders use, so a word is found here exactly when it is found there.
+    const gFold = (s: string) => String(s || "").toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/æ/g, "ae").trim();
+    const formKey = (s: string) => String(s || "").normalize("NFC").toLowerCase().replace(/[\s'’-]+/g, "");
+    const searchKey = (s: string) => String(s || "").replace(/[đł]/gi, (c) => (c.toLowerCase() === "đ" ? "d" : "l")).replace(/ø/gi, "o").replace(/ß/g, "ss")
+      .normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const esc = (s: unknown) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c as "&"]));
+    const cap = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);
+
+    const gLook = (s: string) => { const k = gFold(s); return k && has(gIndex, k) ? rows[gIndex[k]] : null; };
+    const sLook = (s: string): { ids: number[]; loosely: boolean } | null => {
+      const k = formKey(s); if (!k) return null;
+      if (has(exact, k)) return { ids: exact[k], loosely: false };
+      const l = searchKey(s);
+      return l && has(loose, l) ? { ids: loose[l], loosely: true } : null;
+    };
+
+    type Unit = { text: string; role: "given" | "surname" | "either" };
+    const override = new Map<string, "given" | "surname">();
+
+    const parse = (t: string): Unit[] => {
+      const clean = (s: string) => s.replace(/[.;:]+$/g, "").trim();
+      if (t.includes(",")) {                      // "Kovács, István": the surname comes first
+        const [a, ...rest] = t.split(",");
+        const us: Unit[] = [];
+        if (a.trim()) us.push({ text: clean(a), role: "surname" });
+        rest.join(" ").split(/\s+/).map(clean).filter(Boolean).forEach((w) => us.push({ text: w, role: "given" }));
+        return us;
+      }
+      const toks = t.split(/\s+/).map(clean).filter(Boolean);
+      const n = toks.length;
+      if (!n) return [];
+      if (n === 1) return [{ text: toks[0], role: "either" }];
+      const whole = toks.join(" ");
+      if (sLook(whole)) return [{ text: whole, role: "surname" }];
+      if (gLook(whole)) return [{ text: whole, role: "given" }];
+      const g = (a: string[]): Unit[] => a.map((w) => ({ text: w, role: "given" }));
+      for (let k = Math.min(3, n - 1); k >= 1; k--) {         // a trailing run the surname catalogue holds
+        const tail = toks.slice(n - k).join(" ");
+        if (sLook(tail)) return [...g(toks.slice(0, n - k)), { text: tail, role: "surname" }];
+      }
+      for (let k = Math.min(3, n - 1); k >= 1; k--) {         // a surname written first, then given names
+        const head = toks.slice(0, k).join(" ");
+        const rest = toks.slice(k);
+        if (sLook(head) && !(k === 1 && gLook(head)) && rest.every((w) => gLook(w))) return [{ text: head, role: "surname" }, ...g(rest)];
+      }
+      return [...g(toks.slice(0, n - 1)), { text: toks[n - 1], role: "surname" }];
+    };
+
+    const distinct = (r: any) => {
+      const m = new Map<string, number>();
+      Object.values(r.langs || {}).forEach((fs: any) => (fs || []).forEach((f: any) => { const k = gFold(f.form); m.set(k, Math.max(m.get(k) || 0, f.seen || 0)); }));
+      return m;
+    };
+    const nLangs = (r: any) => Object.values(r.langs || {}).filter((fs: any) => (fs || []).length).length;
+
+    const famCard = (f: any) => `<article class="famcard"><h2>${f.head ? `<a href="${esc(f.head)}">${esc(f.name)}</a>` : esc(f.name)}</h2>`
+      + (f.note ? `<p class="fn-cap" style="margin:2px 0 0">${esc(f.note)}</p>` : "")
+      + f.groups.map((g: any) => `<p class="famrow"><span class="famst" title="${esc(g.gloss)}">${esc(g.label)}</span><span class="famforms">`
+        + g.forms.map((m: any) => (m.u ? `<a href="${esc(m.u)}">${esc(m.f)}</a>` : `<span>${esc(m.f)}</span>`)).join("") + `</span></p>`).join("")
+      + (f.notSame.length ? `<p class="famrow famno"><span class="famst">Not the same name</span><span class="famforms">${f.notSame.map((m: string) => `<span>${esc(m)}</span>`).join("")}</span></p>` : "")
+      + `</article>`;
+
+    const flipBtn = (text: string, to: "given" | "surname") =>
+      `<p class="fn-actions"><button type="button" class="fn-btn" data-flip="${esc(text)}" data-to="${to}">`
+      + `${to === "surname" ? "Also in the surname catalogue: read “" + esc(text) + "” as a surname" : "Also in the given-name catalogue: read “" + esc(text) + "” as a given name"}</button></p>`;
+    const givenBlock = (r: any, text: string) => {
+      const m = distinct(r); let met = 0; m.forEach((c) => { if (c > 0) met++; });
+      const same = gFold(text) === gFold(r.canon);
+      const pl = (n: number, w: string) => `${n} ${w}${n === 1 ? "" : "s"}`;
+      return `<p class="fn-p">${same ? "" : `<strong>${esc(cap(text))}</strong> is a form of the name <strong>${esc(cap(r.canon))}</strong>. `}`
+        + `${same ? `<strong>${esc(cap(r.canon))}</strong>: one` : "It is one"} name catalogued in ${pl(nLangs(r), "language")}, ${pl(m.size, "form")}, ${met} met on a record in these archives.`
+        + (nameHref && r.id ? ` <a href="${esc(nameHref.replace("{id}", encodeURIComponent(r.id)))}">Open the page for ${esc(cap(r.canon))}</a>: where it comes from, and the page behind each form.` : "") + "</p>";
+    };
+    const givenNil = `<p class="fn-nil">No given name here is written that way. That is worth knowing, and it is not the same as nobody being called it.</p>`;
+    const surNil = (t: string) => `<p class="fn-nil">No catalogued family holds “${esc(t)}”. That is not a finding about the name: the catalogue only lists families a record has shown.</p>`;
+
+    const surBlock = (s: { ids: number[]; loosely: boolean }) =>
+      (s.loosely ? `<p class="fn-cap" style="margin:6px 0 0">Matched ignoring an accent. The catalogue counts an accent as a spelling, so check the form below is the one on your record.</p>` : "")
+      + s.ids.map((i) => famCard(fams[i])).join("");
+
+    const unitHtml = (u: Unit) => {
+      const gr = gLook(u.text), sr = sLook(u.text);
+      const head = (role: string) => `<h3 class="fn-h">${esc(u.text)}<span class="fn-role">${role}</span></h3>`;
+      if (u.role === "either") {
+        if (!gr && !sr) return `<section class="fn-unit">${head("Given name or surname")}${givenNil}${surNil(u.text)}</section>`;
+        return (gr ? `<section class="fn-unit">${head("Given name")}${givenBlock(gr, u.text)}</section>` : "")
+          + (sr ? `<section class="fn-unit">${head("Surname")}${surBlock(sr)}</section>` : "");
+      }
+      if (u.role === "given") {
+        return `<section class="fn-unit">${head("Given name")}${gr ? givenBlock(gr, u.text) : givenNil}${sr ? flipBtn(u.text, "surname") : ""}</section>`;
+      }
+      return `<section class="fn-unit">${head("Surname")}${sr ? surBlock(sr) : surNil(u.text)}${gr && !/\s/.test(u.text) ? flipBtn(u.text, "given") : ""}</section>`;
+    };
+
+    // Forms a record has shown come first, then the other right forms, and a case ending or a diminutive after its plain name.
+    const rank = (f: any) => Number(!!(f.note || f.notNominative || f.case)) * 2 + Number(!(f.seen > 0));
+    const ordered = (fs: any[]) => [...fs].sort((a, b) => rank(a) - rank(b));
+    const col = (fs: any[]) => {
+      if (!fs.length) return `<span class="fn-none">—</span>`;
+      const shown = fs.slice(0, 3).map((f) => esc(f.form) + (f.seen > 0 ? "" : "<sup>°</sup>")).join(" / ");
+      return shown + (fs.length > 3 ? ` <span class="fn-more">+${fs.length - 3}</span>` : "");
+    };
+    const colText = (fs: any[]) => (fs.length ? fs.slice(0, 3).map((f) => f.form).join(" / ") : "—");
+
+    const render = (t: string) => {
+      const text = t.trim();
+      if (!text) { out.innerHTML = ""; setUrl(""); return; }
+      const units = parse(text).map((u) => {
+        const o = override.get(gFold(u.text));
+        return o && u.role !== "either" && !(o === "given" && /\s/.test(u.text)) ? { ...u, role: o } : u;
+      });
+      let h = units.map(unitHtml).join("");
+
+      // The given names that were found, once each, in the order typed.
+      const grows: any[] = [];
+      units.forEach((u) => { if (u.role !== "surname") { const r = gLook(u.text); if (r && !grows.includes(r)) grows.push(r); } });
+      const copy: string[] = [];
+      if (grows.length) {
+        const full: any[] = [], part: any[] = [];
+        for (const L of langs) {
+          const cols = grows.map((r) => ordered(((r.langs || {})[L.key]) || []));
+          const have = cols.filter((c) => c.length).length;
+          if (have) (have === cols.length ? full : part).push({ L, cols });
+        }
+        const line = (x: any) => `<div class="fn-line"><span class="fn-lang">${esc(x.L.label)}</span><span>${x.cols.map(col).join('<span class="fn-dot">·</span>')}</span></div>`;
+        h += `<h2 class="fn-sub">${grows.length > 1 ? "Your given names, as one clerk would write them" : "Written in each language"}</h2>`
+          + `<p class="fn-cap">${grows.length > 1 ? "A clerk entered the whole line in one language, so the names are paired by language. " : ""}`
+          + `A form marked <sup>°</sup> is the right form in that language, never yet seen on a record: a thing to search, not a finding.</p>`
+          + (full.length ? `<div class="fn-lines">${full.map(line).join("")}</div>` : "")
+          + (part.length ? `<details class="fn-part"><summary>${grows.length > 1 ? `${part.length} more languages, where only some of the names are catalogued` : `${part.length} more languages`}</summary><div class="fn-lines">${part.map(line).join("")}</div></details>` : "");
+        copy.push("Given names, by language");
+        [...full, ...part].forEach((x) => copy.push(`${x.L.label}: ${x.cols.map(colText).join(" · ")}`));
+      }
+      const sIds: number[] = [];
+      units.forEach((u) => { if (u.role !== "given") { const s = sLook(u.text); if (s) s.ids.forEach((i) => { if (!sIds.includes(i)) sIds.push(i); }); } });
+      if (sIds.length) {
+        h += `<p class="fn-cap" style="margin-top:14px">The surname spellings above carry no language in the catalogue, so they are listed beside the given names and never paired with them.</p>`;
+        copy.push("", "Surname spellings");
+        sIds.forEach((i) => copy.push(`${fams[i].name}: ` + fams[i].groups.flatMap((g: any) => g.forms.map((m: any) => m.f)).join(", ")));
+      }
+      if (copy.length) h += `<p class="fn-actions"><button type="button" class="fn-btn fn-copy-list">Copy this list</button></p>`;
+      out.innerHTML = h;
+      listText = copy.join("\n");
+      setUrl(text);
+    };
+    let listText = "";
+
+    function setUrl(t: string) {
+      try {
+        const x = new URL(location.href); x.hash = "";
+        if (t) x.searchParams.set("q", t); else x.searchParams.delete("q");
+        history.replaceState(null, "", x.toString());
+        if (urlEl) urlEl.textContent = x.toString();
+        if (share) share.hidden = !t;
+      } catch (e) {}
+    }
+
+    q.addEventListener("input", () => render(q.value));
+    box.querySelectorAll<HTMLElement>(".fn-chip").forEach((b) => b.addEventListener("click", () => { q.value = b.dataset.n || ""; render(q.value); q.focus(); }));
+    out.addEventListener("click", (e) => {
+      const el = (e.target as HTMLElement).closest("button") as HTMLButtonElement | null;
+      if (!el) return;
+      if (el.dataset.flip) { override.set(gFold(el.dataset.flip), el.dataset.to as "given" | "surname"); render(q.value); }
+      else if (el.classList.contains("fn-copy-list")) {
+        try { navigator.clipboard.writeText(listText); el.textContent = "Copied"; setTimeout(() => { el.textContent = "Copy this list"; }, 1400); } catch (err) {}
+      }
+    });
+    const cl = box.querySelector<HTMLElement>(".fn-copy-link");
+    if (cl) cl.addEventListener("click", () => { try { navigator.clipboard.writeText(location.href); cl.textContent = "Copied"; setTimeout(() => { cl.textContent = "Copy link"; }, 1400); } catch (e) {} });
+    // And apply an address that carries a name: a ?q= that filled the box and did not search would be the bug the register once had.
+    const pre = new URLSearchParams(location.search).get("q");
+    if (pre) { q.value = pre; render(pre); }
+  }
+</script>

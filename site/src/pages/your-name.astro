@@ -10,6 +10,7 @@ import path from "node:path";
 import Base from "../layouts/Base.astro";
 import SayYourName from "../components/SayYourName.astro";
 import SayYourSurname from "../components/SayYourSurname.astro";
+import SayYourFullName from "../components/SayYourFullName.astro";
 import SmartFind from "../components/SmartFind.astro";
 import { allFamilies } from "../lib/surname-families.js";
 import { u } from "../lib/url.js";
@@ -19,15 +20,24 @@ const file = [path.join(process.cwd(), "public", "given-names.json"), path.join(
 const data = JSON.parse(fs.readFileSync(file, "utf8"));
 const nFam = allFamilies().length;
 const surChips = ["Defranceschi", "Lerena", "Blažević", "Kosina"];
+const fullChips = ["Ivan Blažević", "Katarina Marija Kosina", "Giuseppe De Franceschi"];
 const chips = ["Ivan", "Giuseppe", "Antonio", "Franciscus", "Matija", "Katarina", "Zdravko", "Maria"];
 ---
 <Base
   title="Names"
   eyebrow={`${data.rows.length} given names · ${data.totalForms} forms · ${nFam} surname families`}
-  dek="Ivan, Johann, Giovanni, Zuane, John and Joannes are one name. Choose a given name or a surname, type any form you have met, and see every other way a clerk, a priest or an index wrote it, and for a surname where it is found."
+  dek="Type your whole name and every part of it is looked up at once. Ivan, Johann, Giovanni, Zuane, John and Joannes are one name, and a surname is spelt by the clerk, not the family. Or look up one given name or one surname on its own, further down."
   description="Given names and surnames across languages: the Latin of the register, the Italian, Venetian, Croatian, German, Hungarian and English forms, which spellings are one name, and which of them a record has actually shown.">
 
   <section>
+    <SayYourFullName chips={fullChips} />
+    <p class="cap">Each word is searched on its own, so a word the catalogue does not hold never stops the others. We guess which word is a
+    given name and which is the surname (the last word, unless a run of words is a surname we hold, or you put a comma after it) and you can
+    overrule the guess. Nothing you type leaves your browser.</p>
+  </section>
+
+  <section id="yn-one">
+    <h2 class="yn-h">One name at a time</h2>
     <div class="ynsw" role="tablist" aria-label="What are you looking up?">
       <button type="button" role="tab" id="yn-tab-given" aria-controls="yn-given" aria-selected="true">Given name</button>
       <button type="button" role="tab" id="yn-tab-sur" aria-controls="yn-sur" aria-selected="false">Surname</button>
@@ -101,6 +111,8 @@ const chips = ["Ivan", "Giuseppe", "Antonio", "Franciscus", "Matija", "Katarina"
     const sp = new URLSearchParams(location.search);
     const wantSur = sp.get("kind") === "surname" || (sp.has("s") && !sp.has("n"));
     given.hidden = wantSur; sur.hidden = !wantSur;
+    // A link that was made for one of the single-name boxes opens on it, not on the whole-name box above.
+    if (sp.has("n") || sp.has("s") || sp.has("kind")) document.getElementById("yn-one")?.scrollIntoView();
     tg.setAttribute("aria-selected", String(!wantSur)); ts.setAttribute("aria-selected", String(wantSur));
   }
 </script>

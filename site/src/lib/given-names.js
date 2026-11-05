@@ -16,6 +16,9 @@ export function names() {
   if (cache) return cache;
   const feed = read([path.join(here, "public", "given-names.json"), path.join(here, "site", "public", "given-names.json")]);
   const cat = read([path.join(here, "..", "data", "given-name-families.json"), path.join(here, "data", "given-name-families.json")]);
+  /* The people file is optional: a build without it shows pages without that section. */
+  const bf = first([path.join(here, "..", "data", "name-bearers.json"), path.join(here, "data", "name-bearers.json")]);
+  const bearers = bf ? (JSON.parse(fs.readFileSync(bf, "utf8")).names || {}) : {};
   const mean = read([path.join(here, "..", "data", "name-meanings.json"), path.join(here, "data", "name-meanings.json")]).names || {};
   const evid = {};
   for (const f of cat.families) {
@@ -31,7 +34,7 @@ export function names() {
   const label = Object.fromEntries(feed.languages.map((l) => [l.key, l.label]));
   const core = feed.languages.filter((l) => l.core).map((l) => l.key);
   const order = [...core, ...feed.languages.filter((l) => !l.core).sort((a, b) => a.label.localeCompare(b.label)).map((l) => l.key)];
-  cache = { rows: feed.rows, label, order, core, meanings: mean, evid, total: feed.totalForms };
+  cache = { rows: feed.rows, label, order, core, meanings: mean, bearers, evid, total: feed.totalForms };
   return cache;
 }
 

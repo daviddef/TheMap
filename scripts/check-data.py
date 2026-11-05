@@ -1057,6 +1057,44 @@ def flag_paths_gate():
     else:
         print("flag drawings: every path parses to the end")
 
+def name_bearers_gate():
+    """data/name-bearers.json: public figures only, and only the dead. A person has a death year, or was born in 1880 or
+    earlier (nobody born then is alive). Facts only: the keys below, no free text about anyone."""
+    import re as _re
+    if not os.path.exists("data/name-bearers.json"):
+        return
+    try:
+        d = json.load(open("data/name-bearers.json", encoding="utf-8"))
+        fams = {f["id"] for f in json.load(open("data/given-name-families.json", encoding="utf-8"))["families"]}
+    except Exception as e:
+        err(f"cannot check name-bearers.json: {e}")
+        return
+    q = _re.compile(r"^Q[0-9]+$")
+    allowed = {"qid", "name", "born", "died", "why", "occupation", "state"}
+    if d.get("source") != "Wikidata" or d.get("licence") != "CC0 1.0":
+        err("name-bearers: source must be Wikidata and licence CC0 1.0")
+    for fid, n in (d.get("names") or {}).items():
+        w = f"name-bearers {fid}"
+        if fid not in fams:
+            err(f"{w}: no such family in given-name-families.json")
+        if not n.get("items") or not all(q.match(i) for i in n["items"]):
+            err(f"{w}: items must be Wikidata ids")
+        if not isinstance(n.get("total"), int) or n["total"] < 1:
+            err(f"{w}: total must be a count")
+        if len(n.get("examples") or []) > 6:
+            err(f"{w}: at most six examples")
+        for e in n.get("examples") or []:
+            extra = set(e) - allowed
+            if extra:
+                err(f"{w}: an example carries fields that are not allowed: {sorted(extra)}")
+            if not q.match(e.get("qid", "")) or not e.get("name") or not isinstance(e.get("born"), int):
+                err(f"{w}: an example needs a Wikidata id, a name and a birth year")
+            elif e.get("died") is None and e["born"] > 1880:
+                err(f"{w}: {e['qid']} has no death year and was born after 1880: nobody who may be alive goes in")
+            for k in ("occupation", "state"):
+                if not all(isinstance(x, str) for x in e.get(k, [])):
+                    err(f"{w}: {k} must be a list of words")
+
 
 def name_stories_gate():
     """data/name-stories.json: every paragraph cites claims that exist, every claim cites https pages with a quote,
@@ -1212,6 +1250,7 @@ def main():
     given_name_families_gate()
     name_meanings_gate()
     name_stories_gate()
+    name_bearers_gate()
     place_names_gate()
     flag_paths_gate()
     whats_new_gate()

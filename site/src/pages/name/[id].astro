@@ -18,6 +18,9 @@ const { id } = Astro.props;
 const N = names();
 const row = N.rows.find((r) => r.id === id);
 const mean = N.meanings[id];
+const br = N.bearers[id];
+const CENT = (c) => `${c}${c % 100 >= 11 && c % 100 <= 13 ? "th" : ({ 1: "st", 2: "nd", 3: "rd" }[c % 10] || "th")} century`;
+const maxC = br ? Math.max(...br.strip.map((x) => x.n)) : 1;
 const ev = N.evid[id] || {};
 const KIND = { etymology: "A source gives this", disputed: "Sources disagree", folk: "A popular explanation" };
 
@@ -55,6 +58,40 @@ const dek = `${row.canon}: ${distinct.size} form${distinct.size === 1 ? "" : "s"
     ) : (
       <p class="cap">No explanation of where this name comes from has been added yet. We would rather show none than repeat one that
       cannot be traced to a page. What the catalogue does hold, the forms below, is sourced form by form.</p>
+    )}
+
+
+    {br && (
+      <>
+        <h2 class="nm-h">Who carried the name</h2>
+        <p class="cap" style="margin-top:0">Among the {br.total.toLocaleString("en")} people with a Wikidata entry who are dead (or were born in 1880 or earlier): {br.scope}.
+        This is the notable, the written-about, the recorded; it is not a count of everyone who bore the name, and it leans to men, to Europe and to the 20th century.</p>
+        <div class="nm-tbl"><table class="nm-strip">
+          <thead><tr><th>Born in</th><th>People</th><th></th><th>Recorded as belonging to</th></tr></thead>
+          <tbody>{br.strip.map((x) => (
+            <tr>
+              <td>{CENT(x.c)}</td><td>{x.n.toLocaleString("en")}</td>
+              <td><span class="nm-bar" style={`width:${Math.max(2, Math.round((x.n / maxC) * 100))}%`}></span></td>
+              <td>{x.where.map(([s, n]) => `${s} ${n}`).join(", ")}</td>
+            </tr>
+          ))}</tbody>
+        </table></div>
+        {br.occupations.length > 0 && (
+          <p class="cap">Recorded occupations, most often first (a person may have several): {br.occupations.map(([o, n]) => `${o} ${n}`).join(", ")}.</p>
+        )}
+        {br.examples.length > 0 && (
+          <>
+            <h3 class="nm-h3">Some who carried it</h3>
+            <ul class="nm-list">{br.examples.map((e) => (
+              <li><a href={`https://www.wikidata.org/wiki/${e.qid}`} rel="noopener">{e.name}</a>, {e.born}{e.died ? `–${e.died}` : ""}
+                {(e.occupation.length > 0 || e.state.length > 0) && <> · {[...e.occupation, ...e.state].join(", ")}</>}
+                <span class="nm-fnote">{e.why}</span></li>
+            ))}</ul>
+            <p class="cap">How these are chosen: the earliest person recorded in at least three Wikipedia editions, then for each century from the 15th the one recorded in the most editions, at most six. It is a rule, not a ranking of importance.
+            Facts come from <a href="https://www.wikidata.org" rel="noopener">Wikidata</a> (CC0), read {br.asOf}.</p>
+          </>
+        )}
+      </>
     )}
 
     <h2 class="nm-h">How it is written, language by language</h2>
@@ -105,7 +142,7 @@ const dek = `${row.canon}: ${distinct.size} form${distinct.size === 1 ? "" : "s"
     <p class="nm-search">{search.join(" · ")}</p>
 
     <p class="cap">The catalogue behind this page is free to reuse (<a href={u("/given-names.json")}>given-names.json</a>) and every form carries its
-    evidence there. Nothing about a person is kept in it. To correct a form or add one, see <a href={u("/add/")}>how to add</a>.</p>
+    evidence there. Nothing about a person is kept in it; the people above come from Wikidata and are kept apart. To correct a form or add one, see <a href={u("/add/")}>how to add</a>.</p>
   </section>
 </Base>
 
@@ -126,6 +163,13 @@ const dek = `${row.canon}: ${distinct.size} form${distinct.size === 1 ? "" : "s"
   .nm-conf { font-size:.74rem; letter-spacing:.04em; border:1px solid var(--rule,#ccc); border-radius:2px; padding:0 .35rem; color:var(--ink-2,inherit); white-space:nowrap; }
   .nm-conf-met { border-color:var(--accent,#963); color:var(--accent,#963); }
   .nm-fnote, .nm-fsrc { display:block; overflow-wrap:anywhere; }
+  .nm-h3 { margin:1.2rem 0 .3rem; font-size:1rem; }
+  .nm-tbl { overflow-x:auto; }
+  .nm-strip { border-collapse:collapse; width:100%; min-width:30rem; font-size:.88rem; }
+  .nm-strip th, .nm-strip td { text-align:left; padding:.25rem .5rem; border-bottom:1px solid var(--rule,#ddd); vertical-align:middle; }
+  .nm-strip th { color:var(--ink-3,#888); font-weight:600; }
+  .nm-strip td:nth-child(3) { width:30%; }
+  .nm-bar { display:block; height:.6rem; background:var(--accent,#963); border-radius:1px; }
   .nm-list { margin:.3rem 0 0; padding-left:1.1rem; line-height:1.55; }
   .nm-search { font-size:1.05rem; line-height:1.8; overflow-wrap:anywhere; }
 </style>

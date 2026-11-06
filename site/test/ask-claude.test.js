@@ -1,0 +1,33 @@
+/* The page half of "Ask Claude": which cards a pasted line brings with it, and how a photo is shrunk. The Worker half is ai.test.js. */
+import test from "node:test";
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const load = (f) => { const m = { exports: {} }; new Function("module", fs.readFileSync(path.join(here, "../public/js", f), "utf8"))(m); return m.exports; };
+const R = load("record-reader.js"), A = load("ask-claude.js");
+const idx = R.index(JSON.parse(fs.readFileSync(path.join(here, "../../data/record-terms.json"), "utf8")).terms);
+
+test("a pasted line brings the cards for its words, once each, and nothing for words no card knows", () => {
+  const cards = A.cardsFor("Die 3 martii baptizatus est infans, uxoris eius, uxoris", idx, R);
+  assert.ok(cards.length >= 2 && cards.length <= 12);
+  assert.equal(new Set(cards.map((c) => c.term)).size, cards.length, "no card twice");
+  assert.ok(cards.every((c) => c.term && c.meaning));
+  assert.deepEqual(A.cardsFor("zzzxq qqqwx", idx, R), []);
+  assert.deepEqual(A.cardsFor("", idx, R), []);
+});
+
+test("a photo is shrunk to 1600 on its longest edge and never enlarged", () => {
+  assert.deepEqual(A.shrinkDims(4000, 3000), { w: 1600, h: 1200 });
+  assert.deepEqual(A.shrinkDims(800, 600), { w: 800, h: 600 });
+  assert.deepEqual(A.shrinkDims(0, 0), { w: 1, h: 1 });
+});
+
+test("the page uses the live service address and the site key, and puts server text in with textContent only", () => {
+  const src = fs.readFileSync(path.join(here, "../public/js/ask-claude.js"), "utf8");
+  assert.match(src, /https:\/\/ai\.recordatlas\.org/);
+  assert.match(src, /0x4AAAAAAF2I0BQDrTvBa0pm/);
+  assert.ok(!/innerHTML|insertAdjacentHTML|document\.write/.test(src), "server text must never be parsed as HTML");
+});

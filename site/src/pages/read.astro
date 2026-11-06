@@ -15,7 +15,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
 ---
 <Base
   title="Reading the record"
-  eyebrow={`${terms.length} terms · every one sourced · nothing you type leaves your browser`}
+  eyebrow={`${terms.length} terms · every one sourced · the finder and date decoder keep everything in your browser`}
   dek="Type a word as you see it in the register, or a whole date, and see what it is, what it does not tell you, and where it comes from."
   description="A searchable guide to the Latin of old church registers: look up a word, an abbreviation or an ending, and decode a date such as 'die 30 7bris 1671'.">
 
@@ -44,6 +44,28 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
     </div>
   </section>
 
+  <section id="ask" hidden>
+    <div class="one">
+      <div class="lab">Ask Claude to read a line</div>
+      <p class="cap" style="margin-top:6px">Paste one entry from a register, or photograph it. Claude drafts a plain-English reading, using the cards on this
+      page first and saying which words come from them and which from its own knowledge. Doubtful words are marked. It is a draft to check against the page, not an answer.</p>
+      <p class="ask-priv"><b>Before you paste.</b> What you paste or photograph is sent over the internet to our small service and on to Claude, an AI made by
+      Anthropic, which writes the draft. We keep no text, no picture and no answer, only a count of how many tries each visitor has used. Anthropic's
+      <a href="https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data" rel="noopener">published policy</a> says it deletes
+      what is sent within 30 days, keeps content its safety systems flag for longer, and does not train on it without permission. Please do not paste or photograph details of
+      people who may be alive. Nothing is sent until you press a button. Cloudflare's bot check loads when you first click in the box.
+      <a href={u("/privacy/")}>More in the privacy note.</a></p>
+      <p><textarea id="ask-text" rows="4" maxlength="4000" spellcheck="false" aria-label="A line from a register" placeholder="Paste or type one entry, as written"></textarea></p>
+      <p class="ask-row">
+        <button type="button" id="ask-go" class="chip ask-btn">Read this line</button>
+        <label class="chip ask-btn ask-file">Read from a photo<input type="file" id="ask-photo" accept="image/jpeg,image/png,image/webp" hidden /></label>
+      </p>
+      <div id="ask-ts"></div>
+      <p class="cap ask-status" id="ask-status" role="status" aria-live="polite"></p>
+      <div id="ask-out" aria-live="polite"></div>
+    </div>
+  </section>
+
   <section>
     <h2 class="yn-h">All {terms.length} terms, A to Z</h2>
     <ul class="rr-all">
@@ -64,6 +86,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
 
   <script type="application/json" id="rr-data" set:html={JSON.stringify({ terms, sources: Object.fromEntries(Object.entries(sources).map(([k, s]) => [k, s.title])) })}></script>
   <script is:inline src={u("/js/record-reader.js")}></script>
+  <script is:inline src={u("/js/ask-claude.js")} defer></script>
   <script is:inline>
     (function () {
       var R = window.raReadRecord; if (!R) return;

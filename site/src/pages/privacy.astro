@@ -26,6 +26,22 @@ import { u } from "../lib/url.js";
     everything I have stored" removes the copy from our storage. This is off unless you switch
     it on, and the rest of the site works exactly the same without it.</p>
 
+    <h3>If you ask Claude to read a line</h3>
+    <p>On <a href={u("/read/")}>Reading the record</a> you can paste a line of a register, or photograph one, and ask Claude to draft a reading.
+    <b>This is the one place where something you type leaves your browser.</b> It happens only when you press a button. The text (or the picture,
+    shrunk and stripped of its hidden data in your browser) goes to our small service at <code>ai.recordatlas.org</code>, which sends it to Claude, an
+    AI made by Anthropic, through Anthropic's programming interface, and returns the draft. Our service keeps <b>counts only</b>: how many tries an
+    address, a six-word identity and the whole site have used today, so that nobody can run up a bill. It keeps no text, no picture, no answer and no
+    name, and its request logs are off.</p>
+    <p>Anthropic's published policy for this kind of use says it deletes what is sent within 30 days, keeps content that its safety systems flag
+    for up to two years, and does not train its models on it without permission (<a href="https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data" rel="noopener">its policy</a>;
+    <a href="https://platform.claude.com/docs/en/manage-claude/api-and-data-retention" rel="noopener">its API retention page</a>). Policies change, so
+    read those if it matters to you. <b>Please do not paste or photograph details of people who may be alive.</b></p>
+    <p>To stop automated abuse the service asks Cloudflare's bot check (Turnstile) to confirm you are a person. That script loads only when you first
+    click in the box, and Cloudflare sees your address and browser as it does for any site that uses it. If you have set up sync, your six words give the
+    service a separate identity for your allowance; the service cannot open your saved research with it. Everything else on that page, the word finder
+    and the date decoder, runs in your browser and sends nothing.</p>
+
     <h3>What your browser fetches from elsewhere</h3>
     <ul>
       <li><b>Map tiles</b> from Esri (the default map, with its place names, and the satellite

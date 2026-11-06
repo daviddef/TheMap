@@ -156,7 +156,7 @@ const here = Astro.url.pathname;
   </div>
   <div id="p-fix" class="panel" hidden>
     <h2>Fix list</h2>
-    <p class="small">Work down each list in the tree you keep elsewhere: copy, paste, tick. Ticks stay in this page, so download the list to keep your place. Each row says why, what to do next, and what the Atlas holds for that place, year and name. “Generate PDF” opens your browser’s own print window over a copy made here: choose “Save as PDF”. Nothing is uploaded.</p>
+    <p class="small">Work down each list in the tree you keep elsewhere: copy, paste, tick. Ticks and "left as is" stay in this page unless you ask to keep them: tick the box below, or save the decisions to a file. Each row says why, what to do next, and what the Atlas holds for that place, year and name. “Generate PDF” opens your browser’s own print window over a copy made here: choose “Save as PDF”. Nothing is uploaded.</p>
     <div class="ftool">
       <label class="small"><input type="checkbox" id="fliving" checked> Include living people</label>
       <input id="ffilter" type="search" placeholder="Filter by name or place" aria-label="Filter the fix list">
@@ -164,6 +164,12 @@ const here = Astro.url.pathname;
       <label class="small">Ancestry links go to <select id="fanc" aria-label="Which Ancestry site the outside-search links use"><option value="com.au">ancestry.com.au</option><option value="com">ancestry.com</option><option value="co.uk">ancestry.co.uk</option><option value="ca">ancestry.ca</option></select></label>
       <span class="fdl"><button class="btn" id="fpdf" title="Opens your browser’s print window over a print-ready copy made on this device. Choose “Save as PDF”.">Generate PDF</button><button class="btn" id="ftext">Download text</button><button class="btn" id="fcsv">Download CSV</button></span>
     </div>
+    <div class="dec">
+      <label class="small"><input type="checkbox" id="dec-on"> Remember my decisions on this device</label>
+      <span class="small" id="dec-said"></span>
+      <span class="fdl"><button class="btn" id="dec-save">Save decisions</button><button class="btn" id="dec-load">Load decisions</button><button class="btn" id="dec-forget">Forget what is kept</button><input type="file" id="dec-file" accept="application/json,.json" hidden></span>
+    </div>
+    <p class="small">What is kept is a scrambled fingerprint of each row, with the day, and never a name, a date or a place. It is not encryption. Open the same tree again and the decisions are found again; switching the box off forgets them.</p>
     <div id="fsecs"></div>
   </div>
   <div id="p-offer" class="panel" hidden>

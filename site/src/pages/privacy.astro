@@ -1,6 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
 import site from "../data/site.json";
+import { u } from "../lib/url.js";
 ---
 <Base
   title="Privacy"
@@ -13,6 +14,17 @@ import site from "../data/site.json";
     static files served by GitHub Pages. What you type into the find box, which layers you
     switch on and which year you set stay in your browser's address bar and are never sent
     anywhere.</p>
+
+    <h3>If you choose to keep a copy online</h3>
+    <p>On <a href={u("/my-research/")}>My research</a> you can keep an encrypted copy of your
+    research online, with no account. The six words it gives you are made in your browser and
+    are never sent to us. Your research is encrypted in your browser, and only that scrambled
+    copy is sent to our storage, which cannot open it. We hold no names, no email address and no
+    way to recover a copy: <b>if you lose the six words, the copy is gone</b>. Your browser keeps
+    the six words (and the time of the last save) under one key, <code>ra-sync-v1</code>, so
+    "Sync now" works without retyping; "Stop syncing on this device" removes it, and "Delete
+    everything I have stored" removes the copy from our storage. This is off unless you switch
+    it on, and the rest of the site works exactly the same without it.</p>
 
     <h3>What your browser fetches from elsewhere</h3>
     <ul>

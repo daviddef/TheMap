@@ -1,0 +1,224 @@
+---
+/* KEEP A COPY ONLINE: the passphrase sync section of /my-research/.
+ *
+ * The crypto and the network calls live in public/js/research-sync.js (tested in test/sync.test.js against the Worker); the file
+ * format is public/js/research-file.js. This is only the buttons. The server (sync.recordatlas.org) stores one encrypted copy it
+ * cannot read; the reader's passphrase is made in this browser and never sent. Nothing here runs until the reader asks, and
+ * nothing is shown at all unless the server answers its health check, so this can ship before the service is switched on.
+ *
+ * WHAT THIS BROWSER KEEPS: one key, `ra-sync-v1` = {phrase, saved}. It is the passphrase itself, so that "Sync now" needs no
+ * retyping; anyone with this browser can already read the research it protects, and the section says so and offers "Stop
+ * syncing on this device", which removes it. */
+import { u } from "../lib/url.js";
+---
+<section id="sy" class="mrsafe" hidden>
+  <h2 class="mrh">Keep a copy online</h2>
+  <p class="cap" id="sy-intro">A copy of your research, <b>encrypted in this browser</b> before it leaves. Our server holds the scrambled copy and
+  cannot read it, and there is no account: <b>six words</b> are the only key. On a new phone or laptop, type the six words and your
+  research comes back. <b>If you lose the words, nobody can recover the copy</b>, not even us. Your backup file (above) keeps working either way.</p>
+
+  <div id="sy-off">
+    <p class="mrbtns">
+      <button type="button" id="sy-make">Keep a copy online</button>
+      <button type="button" id="sy-have">I already have six words</button>
+    </p>
+  </div>
+
+  <div id="sy-new" hidden>
+    <p class="cap">These are your six words. Write them down or save the sheet <b>now</b>; this is the only time they are made.</p>
+    <p class="sy-phrase" id="sy-phrase" aria-live="polite"></p>
+    <p class="mrbtns"><button type="button" id="sy-sheet">Save the recovery sheet</button> <span id="sy-sheet-said" role="status"></span></p>
+    <p class="cap"><label>To check you have them, type them here: <input type="text" id="sy-confirm" autocomplete="off" spellcheck="false" aria-label="Type the six words again" /></label></p>
+    <p class="mrbtns"><button type="button" id="sy-start" disabled>Start syncing</button> <button type="button" id="sy-cancel-new">Cancel</button> <span id="sy-new-said" role="status"></span></p>
+  </div>
+
+  <div id="sy-restore" hidden>
+    <p class="cap"><label>Your six words: <input type="text" id="sy-type" autocomplete="off" spellcheck="false" aria-label="Your six words" /></label></p>
+    <p class="mrbtns"><button type="button" id="sy-look">Look for my copy</button> <button type="button" id="sy-cancel-have">Cancel</button> <span id="sy-look-said" role="status" aria-live="polite"></span></p>
+    <div id="sy-found" hidden>
+      <p class="cap" id="sy-found-text"></p>
+      <p class="mrbtns"><button type="button" id="sy-merge">Merge it into my research and keep syncing</button></p>
+    </div>
+  </div>
+
+  <div id="sy-on" hidden>
+    <p class="mrstatus" id="sy-status" role="status" aria-live="polite"></p>
+    <p class="mrbtns"><button type="button" id="sy-now">Sync now</button> <span id="sy-now-said" role="status" aria-live="polite"></span></p>
+    <div id="sy-newer" hidden>
+      <p class="cap" id="sy-newer-text"></p>
+      <p class="mrbtns"><button type="button" id="sy-merge-newer">Merge that copy into my research</button></p>
+    </div>
+    <details id="sy-older"><summary>Older copies (one a day, kept 30 days)</summary>
+      <ul id="sy-older-list" class="sy-list"></ul><p class="cap" id="sy-older-said" role="status"></p></details>
+    <details><summary>My six words, and stopping</summary>
+      <p class="mrbtns"><button type="button" id="sy-show">Show my six words</button> <span id="sy-shown" class="sy-phrase"></span></p>
+      <p class="cap">This browser keeps your six words so that <b>Sync now</b> needs no typing. Anyone who can open this browser can already read your research.</p>
+      <p class="mrbtns"><button type="button" id="sy-stop">Stop syncing on this device</button>
+        <button type="button" id="sy-erase">Delete everything stored online</button></p>
+      <p class="cap" id="sy-erase-ask" hidden>This removes your online copy and every older copy, and stops syncing here. Your research on this device is not touched, and the words stop working.
+        <button type="button" id="sy-erase-yes">Yes, delete it</button> <button type="button" id="sy-erase-no">No</button></p>
+    </details>
+  </div>
+  <p class="cap" id="sy-down" hidden>Online copies are not switched on yet. Use <b>Back up my research</b> above: it works now.</p>
+</section>
+
+<style>
+  .sy-phrase { font-family: var(--serif, Georgia, serif); font-size: 22px; line-height: 1.5; letter-spacing: .02em; margin: 6px 0; word-spacing: .25em; }
+  .sy-list { list-style: none; padding: 0; font-family: var(--sans); font-size: 13.5px; }
+  .sy-list li { padding: 3px 0; }
+  #sy input[type="text"] { width: 100%; max-width: 560px; font: inherit; font-family: var(--sans); font-size: 16px; padding: 8px 10px; border: 1px solid var(--rule); border-radius: 3px; background: var(--panel); color: var(--ink); }
+  #sy details { margin: 10px 0; font-family: var(--sans); font-size: 14px; }
+</style>
+
+<script is:inline src={u("/js/research-sync.js")}></script>
+<script is:inline define:vars={{ words: u("/sync-words.json") }}>
+  (function () {
+    var SY = window.raResearchSync, RF = window.raResearchFile;
+    var root = document.getElementById("sy");
+    if (!SY || !RF || !root) return;
+    var $ = function (id) { return document.getElementById(id); };
+    var KEY = "ra-sync-v1", WORDS = null, keys = null, pending = null, newerText = null, newerSaved = null;
+    /* a development server may point at another service, on localhost only */
+    var opts = {};
+    try { var m = /[?&]syncbase=([^&]+)/.exec(location.search); if (m && /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) opts.base = decodeURIComponent(m[1]); } catch (e) { /* default */ }
+
+    function read() { try { var v = JSON.parse(localStorage.getItem(KEY)); return v && v.phrase ? v : null; } catch (e) { return null; } }
+    function write(v) { try { if (v) localStorage.setItem(KEY, JSON.stringify(v)); else localStorage.removeItem(KEY); return true; } catch (e) { return false; } }
+    function show(which) { ["sy-off", "sy-new", "sy-restore", "sy-on"].forEach(function (id) { $(id).hidden = id !== which; }); }
+    function loadWords() { return WORDS ? Promise.resolve(WORDS) : fetch(words).then(function (r) { return r.json(); }).then(function (j) { WORDS = j.words; return WORDS; }); }
+    function say(id, t) { $(id).textContent = t || ""; }
+    function working(id, t) { say(id, t || "Working: this takes a few seconds on purpose, it is what makes the six words hard to guess."); }
+    function plural(n, w) { return n + " " + w + (n === 1 ? "" : "s"); }
+    function describe(text) { var sm = RF.summary(RF.parseAny(text).progress); return plural(sm.volumes, "volume") + " (" + plural(sm.pages, "page") + ") across " + plural(sm.lines, "family line"); }
+    function changed() { document.dispatchEvent(new CustomEvent("ra-progress-changed")); }
+    function ownLast() { try { return localStorage.getItem("ra-own-last"); } catch (e) { return null; } }
+
+    /* ---- status ---- */
+    function paint() {
+      var st = read();
+      if (!st) { show("sy-off"); return; }
+      show("sy-on");
+      $("sy-status").textContent = SY.ago(st.saved) + (st.saved ? " · saved copy is encrypted; only your six words open it" : "");
+    }
+
+    function syncNow(quiet) {
+      var st = read(); if (!st) return Promise.resolve();
+      if (!quiet) working("sy-now-said", "Saving…");
+      return SY.deriveKeys(st.phrase).then(function (k) {
+        return SY.pull(k, opts).then(function (got) {
+          /* Another device saved since we last did: do not overwrite it blindly. Offer the merge and stop. */
+          if (got && got.saved && (!st.saved || Date.parse(got.saved) > Date.parse(st.saved) + 1000)) {
+            newerText = got.text; newerSaved = got.saved;
+            $("sy-newer").hidden = false;
+            $("sy-newer-text").textContent = "A newer copy was saved online" + (got.saved ? " (" + got.saved.slice(0, 16).replace("T", " ") + " UTC)" : "") + ", probably from another device: " + describe(got.text) + ". Merge it first, then sync.";
+            say("sy-now-said", "");
+            return;
+          }
+          /* the automatic pass saves only what changed since the last save; the button always saves */
+          if (quiet && st.saved && !(ownLast() && Date.parse(ownLast()) > Date.parse(st.saved))) { paint(); return; }
+          var out = RF.exportAll();
+          return SY.push(k, out.text, opts).then(function (r) {
+            st.saved = r.saved; write(st); RF.noteBackup("sync"); paint(); say("sy-now-said", quiet ? "" : "Saved.");
+          });
+        });
+      }).catch(function (e) { say("sy-now-said", e.message || "Sync failed. Your research on this device is unchanged."); });
+    }
+
+    /* ---- make ---- */
+    $("sy-make").addEventListener("click", function () {
+      loadWords().then(function (w) {
+        pending = SY.makePassphrase(w); $("sy-phrase").textContent = pending; $("sy-confirm").value = ""; $("sy-start").disabled = true; say("sy-new-said", ""); show("sy-new");
+      }).catch(function () { say("sy-new-said", "Could not load the word list."); show("sy-new"); });
+    });
+    $("sy-sheet").addEventListener("click", function () {
+      var a = document.createElement("a"), t = SY.recoverySheet(pending, new Date().toISOString().slice(0, 10));
+      a.href = URL.createObjectURL(new Blob([t], { type: "text/plain" })); a.download = "record-atlas-recovery-sheet.txt"; a.click(); URL.revokeObjectURL(a.href);
+      say("sy-sheet-said", "Saved as record-atlas-recovery-sheet.txt. Keep it somewhere safe, not in a shared photo or email.");
+    });
+    $("sy-confirm").addEventListener("input", function () {
+      var n = SY.normalisePassphrase($("sy-confirm").value, WORDS);
+      $("sy-start").disabled = !(n.ok && n.phrase === pending);
+      say("sy-new-said", n.bad.length ? "Not on the list: " + n.bad.join(", ") : "");
+    });
+    $("sy-cancel-new").addEventListener("click", function () { pending = null; $("sy-phrase").textContent = ""; show("sy-off"); });
+    $("sy-start").addEventListener("click", function () {
+      var phrase = pending; working("sy-new-said");
+      SY.deriveKeys(phrase).then(function (k) {
+        var out = RF.exportAll();
+        return SY.push(k, out.text, opts).then(function (r) {
+          write({ phrase: phrase, saved: r.saved }); pending = null; $("sy-phrase").textContent = ""; RF.noteBackup("sync"); paint();
+        });
+      }).catch(function (e) { say("sy-new-said", e.message || "Could not save the first copy."); });
+    });
+
+    /* ---- restore on another device ---- */
+    $("sy-have").addEventListener("click", function () { loadWords(); $("sy-found").hidden = true; say("sy-look-said", ""); show("sy-restore"); });
+    $("sy-cancel-have").addEventListener("click", function () { show("sy-off"); });
+    $("sy-look").addEventListener("click", function () {
+      loadWords().then(function (w) {
+        var n = SY.normalisePassphrase($("sy-type").value, w);
+        if (!n.ok) { say("sy-look-said", n.bad.length ? "Not on the list: " + n.bad.join(", ") + ". Check the spelling." : "That is " + plural(n.count, "word") + "; it should be six."); return; }
+        working("sy-look-said");
+        return SY.deriveKeys(n.phrase).then(function (k) { return SY.pull(k, opts); }).then(function (got) {
+          if (!got) { say("sy-look-said", "Nothing is stored under those six words. A wrong word looks the same as no copy, so check them, and try the order."); return; }
+          keys = { phrase: n.phrase, text: got.text, saved: got.saved };
+          say("sy-look-said", ""); $("sy-found").hidden = false;
+          $("sy-found-text").textContent = "Found a copy saved " + (got.saved ? got.saved.slice(0, 16).replace("T", " ") + " UTC" : "") + ": " + describe(got.text) + ". Merging adds it to what is here and never replaces anything.";
+        });
+      }).catch(function (e) { say("sy-look-said", e.message || "Could not look for the copy."); });
+    });
+    $("sy-merge").addEventListener("click", function () {
+      try { var r = RF.importText(keys.text); write({ phrase: keys.phrase, saved: keys.saved }); changed(); paint(); say("sy-now-said", "Merged " + r.marks + " marks. Syncing is on for this device."); keys = null; }
+      catch (e) { say("sy-look-said", "That copy could not be merged."); }
+    });
+
+    /* ---- on ---- */
+    $("sy-now").addEventListener("click", function () { syncNow(false); });
+    $("sy-merge-newer").addEventListener("click", function () {
+      var st = read();
+      try { var r = RF.importText(newerText); st.saved = newerSaved; write(st); $("sy-newer").hidden = true; changed(); say("sy-now-said", "Merged " + r.marks + " marks. Press Sync now to save the combined research."); }
+      catch (e) { say("sy-now-said", "That copy could not be merged."); }
+    });
+    $("sy-show").addEventListener("click", function () { var st = read(); $("sy-shown").textContent = $("sy-shown").textContent ? "" : (st ? st.phrase : ""); });
+    $("sy-stop").addEventListener("click", function () { write(null); $("sy-shown").textContent = ""; show("sy-off"); say("sy-now-said", ""); });
+    $("sy-erase").addEventListener("click", function () { $("sy-erase-ask").hidden = false; });
+    $("sy-erase-no").addEventListener("click", function () { $("sy-erase-ask").hidden = true; });
+    $("sy-erase-yes").addEventListener("click", function () {
+      var st = read(); if (!st) return; $("sy-erase-ask").hidden = true; working("sy-now-said", "Deleting…");
+      SY.deriveKeys(st.phrase).then(function (k) { return SY.erase(k, opts); }).then(function (r) {
+        write(null); $("sy-shown").textContent = ""; show("sy-off"); say("sy-now-said", "");
+        $("sy-intro").textContent = "Deleted: " + plural(r.deleted || 0, "stored item") + " removed. Nothing about you is kept online now.";
+      }).catch(function (e) { say("sy-now-said", e.message || "Could not delete. Try again."); });
+    });
+    $("sy-older").addEventListener("toggle", function () {
+      if (!$("sy-older").open) return;
+      var st = read(); if (!st) return; say("sy-older-said", "Looking…");
+      SY.deriveKeys(st.phrase).then(function (k) {
+        return SY.versions(k, opts).then(function (vs) {
+          var ul = $("sy-older-list"); ul.textContent = ""; say("sy-older-said", vs.length ? "" : "No older copies yet.");
+          vs.forEach(function (v) {
+            var li = document.createElement("li"), b = document.createElement("button");
+            b.type = "button"; b.textContent = "Merge this one"; li.append(v.day + " · " + Math.max(1, Math.round(v.bytes / 1024)) + " KB ", b);
+            b.addEventListener("click", function () {
+              SY.pullVersion(k, v.day, opts).then(function (got) { if (!got) return; var r = RF.importText(got.text); changed(); say("sy-older-said", "Merged " + r.marks + " marks from " + v.day + "."); })
+                .catch(function (e) { say("sy-older-said", e.message); });
+            });
+            ul.append(li);
+          });
+        });
+      }).catch(function (e) { say("sy-older-said", e.message || "Could not list older copies."); });
+    });
+
+    /* ---- show the section only when the service answers; sync on arrival and after the reader's changes ---- */
+    var timer = null;
+    function schedule() { clearTimeout(timer); if (read()) timer = setTimeout(function () { syncNow(true); }, 20000); }
+    var base = (opts.base || SY.BASE).replace(/\/$/, "");
+    var ctl = new AbortController(), kill = setTimeout(function () { ctl.abort(); }, 4000);
+    fetch(base + "/v1/health", { signal: ctl.signal }).then(function (r) { return r.ok ? r.json() : Promise.reject(); }).then(function (j) {
+      clearTimeout(kill); if (!j || !j.ok) throw 0;
+      root.hidden = false; paint();
+      if (read()) syncNow(true);
+      document.addEventListener("ra-progress-changed", schedule);
+    }).catch(function () { clearTimeout(kill); root.hidden = false; show("sy-off"); $("sy-off").hidden = true; $("sy-down").hidden = false; });
+  })();
+</script>

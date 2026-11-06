@@ -267,7 +267,7 @@ test("a place is never placed by borrowing a borrowed place", need, async () => 
 });
 
 test("the page promises what the source does", () => {
-  const files = ["viewer.html", "roots.css", "js/app.js", "js/worker.js", "js/gedcom.js", "js/model.js", "js/resolver.js", "js/atlas.js", "js/pipeline.js", "js/sample.js", "js/export.js", "js/workbench.js", "js/contribute.js", "js/lookup.js", "js/checklist.js", "js/enrich.js", "js/remember.js", "js/recent.js", "js/myheritage.js"]
+  const files = ["viewer.html", "roots.css", "js/app.js", "js/worker.js", "js/gedcom.js", "js/model.js", "js/resolver.js", "js/atlas.js", "js/pipeline.js", "js/sample.js", "js/export.js", "js/workbench.js", "js/contribute.js", "js/lookup.js", "js/checklist.js", "js/enrich.js", "js/remember.js", "js/decisions.js", "js/recent.js", "js/myheritage.js"]
     .filter(f => fs.existsSync(R + f));
   const html = fs.readFileSync(path.join(here, "../src/pages/roots/index.astro"), "utf8");   // the page is an Atlas page now: the site menu, not the Base layout
   assert.doesNotMatch(html, /layouts\/Base/, "the page must not use the Base layout (counter, ads, Google Fonts)");
@@ -277,8 +277,8 @@ test("the page promises what the source does", () => {
   assert.doesNotMatch(html, /<script[^>]+src="https?:/i); assert.doesNotMatch(html, /goatcounter|adsbygoogle|googletagmanager|gtag\(/i);
   for (const f of files) {
     const s = fs.readFileSync(R + f, "utf8");
-    const stores = f === "js/recent.js" || f === "js/remember.js";   // recent.js: the one opt-in place a file may be kept; remember.js: the last MyHeritage link pasted (localStorage, on this device only, never the file)
-    const remembers = f === "js/remember.js";
+    const stores = f === "js/recent.js" || f === "js/remember.js" || f === "js/decisions.js";   // recent.js: the one opt-in place a file may be kept; remember.js: the last MyHeritage link pasted (localStorage, on this device only, never the file)
+    const remembers = f === "js/remember.js" || f === "js/decisions.js";   // decisions.js: the fix list's ticks and "left as is", as hashes, if the visitor asks
     assert.doesNotMatch(s, remembers ? /goatcounter|adsbygoogle|googletagmanager|google-analytics|sendBeacon|XMLHttpRequest|WebSocket|sessionStorage|indexedDB|document\.cookie|fetch\(/ : stores ? /goatcounter|adsbygoogle|googletagmanager|google-analytics|sendBeacon|XMLHttpRequest|WebSocket|localStorage|sessionStorage|document\.cookie|fetch\(/ : /goatcounter|adsbygoogle|googletagmanager|google-analytics|sendBeacon|XMLHttpRequest|WebSocket|localStorage|sessionStorage|indexedDB|document\.cookie/, f + " must not phone home or keep the file");
     assert.doesNotMatch(s, /fetch\(\s*['"`]https?:/, f + " must not fetch an absolute URL");
     if (/\.(js)$/.test(f) && f !== "js/app.js") assert.doesNotMatch(s, /innerHTML/, f);

@@ -19,6 +19,7 @@
        is the loss this whole file exists to prevent. */
     var KEY = "ra-progress-v1";
     var mem = null;
+    var folding = false;   // true while the published sessions are folded in: that is not the reader's own change
 
     /* The line every pre-line mark lands in. Renameable, and named as a
        statement of fact rather than as a family, because it is not one. */
@@ -167,6 +168,16 @@
     function save() {
       try { localStorage.setItem(KEY, JSON.stringify(mem)); }
       catch (e) { /* quota or blocked; the page must not break over it */ }
+      /* WHEN THE READER LAST CHANGED SOMETHING, for the backup nudge (research-file.js, line-switcher.js). The fold-in of the
+         family archives' published sessions goes through save() too and must not count, or every visitor would be told to
+         back up work they never did. */
+      if (!folding) {
+        try {
+          var now = new Date().toISOString();
+          if (!localStorage.getItem("ra-own-first")) localStorage.setItem("ra-own-first", now);
+          localStorage.setItem("ra-own-last", now);
+        } catch (e) { /* stamps are a convenience */ }
+      }
     }
     function today() { return new Date().toISOString().slice(0, 10); }
 
@@ -284,7 +295,8 @@
           try { seen = localStorage.getItem(stamp); } catch (e) { return; }
           var v = String(doc.exported || doc.built || "");
           if (seen === v) return;
-          window.raProgress.fromJSON(JSON.stringify(doc), "merge");
+          folding = true;
+          try { window.raProgress.fromJSON(JSON.stringify(doc), "merge"); } finally { folding = false; }
           try { localStorage.setItem(stamp, v); } catch (e) {}
           document.dispatchEvent(new CustomEvent("ra-progress-changed"));
         })

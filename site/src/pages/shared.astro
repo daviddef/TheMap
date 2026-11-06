@@ -1,0 +1,124 @@
+---
+/* SHARED RESEARCH: a pack somebody sent, opened read-only.
+ *
+ * A pack (public/js/research-file.js) is what a progress mark already holds: which volume, which pages, what state, under
+ * which family line. It arrives as the part of the address after `#pack=` (which no server receives) or as a file dropped
+ * here, and it is shown BEFORE anything is merged. Nothing is sent anywhere and nothing is kept until the reader presses
+ * "Merge into my research", which keeps it as its own family line (progress-kit's importer never folds someone else's line
+ * into the reader's). Everything from the pack is untrusted text and reaches the page through textContent only.
+ *
+ * "Reported by the sender, not checked" is said at the top and not buried: a mark is a claim by whoever made it, and a nil is
+ * a search that was done, never a finding about a name.
+ */
+import Base from "../layouts/Base.astro";
+import ProgressKit from "../components/ProgressKit.astro";
+import { u } from "../lib/url.js";
+---
+<Base
+  title="Shared research"
+  eyebrow="Read-only · reported by the sender, not checked · nothing is sent anywhere"
+  dek="Research someone sent you: what they searched, what they found and where they stopped. Look first, then merge it into your own and carry on.">
+
+  <ProgressKit />
+  <script is:inline src={u("/js/research-file.js")}></script>
+
+  <div id="sh-start" class="one">
+    <div class="lab">Open a pack</div>
+    <p class="cap">A pack arrives as a link (the whole pack is inside the link, and a link like that is never sent to our server) or as a
+    file. If you were sent a link, open it and the pack appears here. If you were sent a file, choose it:</p>
+    <p><button type="button" id="sh-choose">Choose a pack file</button> <input type="file" id="sh-file" accept="application/json,.json" hidden />
+    <span id="sh-said" role="status" aria-live="polite"></span></p>
+    <p class="cap">Want to make one? It is on <a href={u("/my-research/")}>My research</a>.</p>
+  </div>
+
+  <div id="sh-view" hidden>
+    <p id="sh-head" class="shhead"></p>
+    <p class="mrbtns"><button type="button" id="sh-merge">Merge into my research</button>
+      <a href={u("/my-research/")} id="sh-mine" hidden>Open My research</a> <span id="sh-merged" role="status"></span></p>
+    <div id="sh-body"></div>
+  </div>
+</Base>
+
+<style>
+  .shhead { font-family: var(--sans); font-size: 14px; border-left: 3px solid var(--brass, #b08d3c); padding-left: 10px; margin: 0 0 12px; }
+  #sh-body h2 { margin: 22px 0 4px; }
+  #sh-body table { border-collapse: collapse; width: 100%; font-family: var(--sans); font-size: 13.5px; }
+  #sh-body th, #sh-body td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  #sh-body th { color: var(--ink-3); font-weight: 600; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+  #sh-body tr:nth-child(even) td { background: color-mix(in srgb, var(--ground) 55%, transparent); }
+  .shnote { font-style: italic; color: var(--ink-2); }
+  @media (max-width: 640px) { #sh-body table { display: block; overflow-x: auto; } }
+</style>
+
+<script define:vars={{ base: u("/") }}>
+  (function () {
+    var RF = window.raResearchFile, P = window.raProgress;
+    if (!RF || !P) return;
+    var said = document.getElementById("sh-said"), view = document.getElementById("sh-view"), start = document.getElementById("sh-start");
+    var body = document.getElementById("sh-body"), head = document.getElementById("sh-head"), merged = document.getElementById("sh-merged");
+    var current = null;           // the text of the pack on screen, for the merge
+
+    function el(tag, text, cls) { var e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls; return e; }
+    /* only an address on this site is made a link: a pack is untrusted */
+    function safeHref(h) { return typeof h === "string" && /^\/(?!\/)/.test(h) && h.indexOf("..") < 0 ? h : null; }
+
+    function show(text) {
+      var got = RF.parseAny(text), file = got.progress, sm = RF.summary(file);
+      current = text;
+      head.textContent = "Reported by the sender, not checked. " + sm.volumes + " volume" + (sm.volumes === 1 ? "" : "s") + " (" + sm.pages + " pages) across " +
+        sm.lines + " family line" + (sm.lines === 1 ? "" : "s") + (file.exported ? ", sent on " + file.exported : "") + ".";
+      body.textContent = "";
+      var lines = file.lines || {}, marks = file.marks || {};
+      var slugs = Object.keys(lines).sort(function (a, b) { return String(lines[a].name).localeCompare(String(lines[b].name)); });
+      slugs.forEach(function (sl) {
+        var rows = [];
+        Object.keys(marks).forEach(function (k) {
+          var m = marks[k], b = m.by && m.by[sl];
+          if (!b && !(m.walked && m.walked.length)) return;
+          rows.push({ m: m, b: b || {} });
+        });
+        if (!rows.length) return;
+        rows.sort(function (x, y) { return String(x.m.where || "").localeCompare(String(y.m.where || "")) || String(x.m.t || "").localeCompare(String(y.m.t || "")); });
+        body.append(el("h2", (lines[sl].name || "A family") + (lines[sl].where ? " of " + lines[sl].where : "")));
+        var tb = el("table"), hr = el("tr");
+        ["Where", "Volume", "Pages done", "State", "Continue from"].forEach(function (h) { hr.append(el("th", h)); });
+        tb.append(hr);
+        rows.forEach(function (r) {
+          var tr = el("tr"), href = safeHref(r.m.href);
+          tr.append(el("td", r.m.where || ""));
+          var tv = el("td");
+          if (href) { var a = el("a", r.m.t || "A volume"); a.href = base.replace(/\/$/, "") + href.replace(/^\/TheMap(?=\/)/, ""); tv.append(a); } else tv.textContent = r.m.t || "A volume";
+          if (r.b.note) tv.append(el("div", r.b.note, "shnote"));
+          tr.append(tv);
+          var done = (r.b.done || []).concat(r.m.walked || []);
+          tr.append(el("td", done.length ? P.fmt(P.parseRanges(P.fmt(done)) || done) + (r.m.walked && r.m.walked.length ? " (read in full)" : "") : "—"));
+          tr.append(el("td", (r.b.state || "") + (r.b.since ? " · " + r.b.since : "")));
+          tr.append(el("td", done.length ? "page " + P.resume(P.parseRanges(P.fmt(done)) || done) : "page 1"));
+          tb.append(tr);
+        });
+        body.append(tb);
+      });
+      start.hidden = true; view.hidden = false; merged.textContent = "";
+    }
+
+    function fail(e) { said.textContent = (e && e.message && /damaged|Not a Record Atlas/.test(e.message)) ? e.message : "That is not a Record Atlas pack."; start.hidden = false; view.hidden = true; }
+
+    document.getElementById("sh-choose").addEventListener("click", function () { document.getElementById("sh-file").click(); });
+    document.getElementById("sh-file").addEventListener("change", function (ev) {
+      var f = ev.target.files && ev.target.files[0]; if (!f) return;
+      var r = new FileReader(); r.onload = function () { try { show(String(r.result)); } catch (e) { fail(e); } }; r.readAsText(f);
+    });
+    document.getElementById("sh-merge").addEventListener("click", function () {
+      if (!current) return;
+      try {
+        var res = RF.importText(current);
+        merged.textContent = "Merged " + res.marks + " marks. They are in your research as their own family line.";
+        document.getElementById("sh-mine").hidden = false;
+        document.dispatchEvent(new CustomEvent("ra-progress-changed"));
+      } catch (e) { merged.textContent = "That pack could not be merged."; }
+    });
+
+    var m = location.hash.match(/^#pack=(.+)$/);
+    if (m) RF.decodeLink(m[1]).then(show).catch(fail);
+  })();
+</script>

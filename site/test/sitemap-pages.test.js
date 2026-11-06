@@ -15,6 +15,7 @@ const listed = new Set([...sitemap.matchAll(/\["([a-z0-9-]*\/?)",\s*"[0-9.]+"\]/
 /* Pages that are not meant to be found through search, each with its reason. */
 const LEFT_OUT = {
   "my-research": "everything on it is read from this one browser; for a search engine it is an empty shell",
+  "shared": "opens a research pack from the address or a dropped file; for a search engine it is an empty shell",
   "roots": "the GEDCOM page works on a file only the visitor has; the page is noindex",
 };
 

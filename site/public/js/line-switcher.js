@@ -48,6 +48,24 @@
         ? me.marks + (me.marks === 1 ? " mark" : " marks")
         : "";
       bar.hidden = bar.getAttribute("data-quiet") === "1" && lines.length < 2;
+      nudge();
+    }
+
+    /* A DOT, NOT A BANNER. Only the reader's own work counts (progress-kit.js stamps it), a day after the first change if
+       they have never backed up and a week after a backup that is behind. The dot sends them to My research, which says why. */
+    function nudge() {
+      var a = bar.querySelector("a.ra-lines-l");
+      if (!a) return;
+      var first = null, rec = null, last = null;
+      try {
+        first = localStorage.getItem("ra-own-first"); last = localStorage.getItem("ra-own-last");
+        rec = JSON.parse(localStorage.getItem("ra-backup-v1") || "null");
+      } catch (e) { return; }
+      var day = 86400000, now = Date.now(), why = "";
+      if (first && !(rec && rec.at) && now - Date.parse(first) >= day) why = "Not backed up yet";
+      else if (rec && rec.at && last && last > rec.at && now - Date.parse(rec.at) >= 7 * day) why = "Not backed up for " + Math.floor((now - Date.parse(rec.at)) / day) + " days";
+      a.classList.toggle("ra-lines-warn", !!why);
+      a.title = why ? why + ": open My research to back it up" : "Your research: every family you are tracking";
     }
 
     sel.addEventListener("change", function () {

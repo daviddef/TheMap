@@ -5,6 +5,7 @@ import { makeSample } from './sample.js';
 import { searchLinks, sends } from './lookup.js';
 import { checklistText, checklistCsv } from './checklist.js';
 import * as recent from './recent.js';
+import { store as dec, rowsFrom, fileTextOf, parseRows, lookup } from './decisions.js';
 import { BUILD } from './build.js';
 import { parseLink, profileUrl, treeUrl, toHash, fromHash } from './myheritage.js';
 import { loadLink, saveLink, loadSite, saveSite } from './remember.js';
@@ -451,7 +452,7 @@ if (mhc) mhStatus();
 
 function fixRow(s, i) {
   const row = el('div', 'frow'), cb = el('input'); cb.type = 'checkbox'; cb.checked = ticked.has(i.key); cb.setAttribute('aria-label', 'Done'); row.classList.toggle('done', cb.checked);
-  cb.onchange = () => { cb.checked ? ticked.add(i.key) : ticked.delete(i.key); row.classList.toggle('done', cb.checked); fixCount(s); };
+  cb.onchange = () => { cb.checked ? ticked.add(i.key) : ticked.delete(i.key); dec.put(i.key, 'd', cb.checked); row.classList.toggle('done', cb.checked); fixCount(s); };
   const body = el('div', 'fbody'), head = el('div', 'fhead'), note = el('div', 'fnote');
   const cpB = (txt, title) => ib('copy', title, function () { copy(txt, this); });
   const evs = n => n + ' event' + (n === 1 ? '' : 's');
@@ -473,14 +474,14 @@ function fixRow(s, i) {
     head.append(el('b', null, i.size + (i.size === 1 ? ' person' : ' people') + ' not connected to the main tree')); body.append(head, plist(i.people, i.size));
   } else if (s.key === 'suspect') {
     const one = pline({ name: i.name, id: i.id, by: null, nl: i.nl }, { copyName: true }); one.classList.add('solo'); head.append(one);
-    const leave = el('button', 'link', 'Leave as is'); leave.type = 'button'; leave.title = 'I know this is right: hide it'; leave.onclick = () => { asIs.add(i.key); drawFix(); };
+    const leave = el('button', 'link', 'Leave as is'); leave.type = 'button'; leave.title = 'I know this is right: hide it'; leave.onclick = () => { asIs.add(i.key); dec.put(i.key, 'a', true); drawFix(); };
     head.append(leave); body.append(head);
     const ul = el('ul', 'reasons'); for (const r of i.reasons) ul.append(el('li', null, r.text)); body.append(ul);
   } else if (s.key === 'ages') {
     head.append(el('b', null, i.country + ' written for ' + (i.from === i.to ? i.from : i.from + '–' + i.to) + ', when it was ' + i.label)); body.append(head, el('div', 'fcount', i.count + ' event' + (i.count === 1 ? '' : 's') + ', ' + i.n + (i.n === 1 ? ' person' : ' people')), plist(i.people, i.n));
   } else if (s.key === 'leads') {
     const one = pline({ name: i.name, id: i.id, by: i.born, nl: i.nl }, { copyName: true }); one.classList.add('solo'); head.append(one);
-    const leave = el('button', 'link', 'Leave as is'); leave.type = 'button'; leave.onclick = () => { asIs.add(i.key); drawFix(); };
+    const leave = el('button', 'link', 'Leave as is'); leave.type = 'button'; leave.onclick = () => { asIs.add(i.key); dec.put(i.key, 'a', true); drawFix(); };
     head.append(leave); body.append(head, el('div', 'fnote', 'Born ' + i.born + ' at ' + i.place + '. The Atlas lists these for that place and time:'));
     const ul = el('ul', 'reasons');
     for (const c of i.cols) { const li = el('li'), a = el('a', null, c.title); if (/^https?:\/\//.test(c.url)) { a.href = c.url; a.target = '_blank'; a.rel = 'noopener noreferrer'; } li.append(a, ' ' + [c.provider, c.from ? c.from + (c.to ? '–' + c.to : '') : ''].filter(Boolean).join(' · ')); ul.append(li); }
@@ -508,7 +509,7 @@ function drawFix() {
     const how = el('p', 'small how', s.how); how.hidden = true; const inf = ib('info', 'What is this list?', function (e) { e.preventDefault(); e.stopPropagation(); how.hidden = !how.hidden; }); sum.append(' ', inf); d.append(how);
     const live = s.items.filter(i => !asIs.has(i.key)), hits = q ? live.filter(i => hay(s, i).includes(q)) : live, cap = shownN.get(s.key) || 100;
     if (!s.items.length) d.append(el('p', 'small', 'Nothing to do here.'));
-    const left = s.items.length - live.length; if (left) { const b = el('button', 'link', left + ' left as is: show them again'); b.onclick = () => { for (const i of s.items) asIs.delete(i.key); d.dataset.open = '1'; drawFix(); }; d.append(b); }
+    const left = s.items.length - live.length; if (left) { const b = el('button', 'link', left + ' left as is: show them again'); b.onclick = () => { for (const i of s.items) { asIs.delete(i.key); dec.put(i.key, 'a', false); } d.dataset.open = '1'; drawFix(); }; d.append(b); }
     for (const i of hits.slice(0, cap)) d.append(fixRow(s, i));
     if (hits.length > cap) { const b = el('button', 'link', 'Show ' + Math.min(100, hits.length - cap) + ' more of ' + n0(hits.length - cap)); b.onclick = () => { shownN.set(s.key, cap + 100); d.dataset.open = '1'; drawFix(); }; d.append(b); }
     d.ontoggle = () => { d.dataset.open = d.open ? '1' : ''; };
@@ -521,7 +522,34 @@ function drawFix() {
   }
   for (const s of fix.sections) if (!done.has(s.key)) section(s);
 }
-function fixlist(m) { fix = m; drawFix(); }
+/* ---------- decisions kept on this device (opt-in, see decisions.js) ---------- */
+let loaded = null;                                   // rows read from a file this session: applied, not kept unless the switch is on
+function restoreDecisions(m) {
+  let n = 0;
+  for (const s of m.sections) for (const i of s.items) {
+    const r = dec.get(i.key) || lookup(loaded, i.key); if (!r) continue;
+    n++; if (r.a) asIs.add(i.key); if (r.d) ticked.add(i.key);
+  }
+  return n;
+}
+function decStatus(restored) {
+  const on = $('#dec-on'); if (!on) return;
+  on.checked = dec.isOn(); on.disabled = !dec.available();
+  const kept = dec.count();
+  $('#dec-said').textContent = !dec.available() ? 'This browser has no storage for it (a private window?). Save the decisions to a file instead.'
+    : (restored ? restored + ' earlier decision' + (restored === 1 ? '' : 's') + ' re-applied. ' : '')
+      + (dec.isOn() ? kept + ' kept on this device.' : kept ? kept + ' loaded from a file are stored on this device; turn this on to keep new ones too.' : 'Not kept: ticks and "left as is" are lost when you close the page.');
+}
+function fixlist(m) { fix = m; const n = restoreDecisions(m); drawFix(); decStatus(n); }
+$('#dec-on').onchange = e => { dec.setOn(e.target.checked); if (e.target.checked) { for (const k of asIs) dec.put(k, 'a', true); for (const k of ticked) dec.put(k, 'd', true); } decStatus(0); };
+$('#dec-save').onclick = () => saveAs('fix-decisions-' + new Date().toISOString().slice(0, 10) + '.json', fileTextOf(rowsFrom(asIs, ticked)), 'application/json');
+$('#dec-load').onclick = () => $('#dec-file').click();
+$('#dec-file').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try { const text = await f.text(); loaded = parseRows(text); if (dec.isOn()) dec.load(text); const n = fix ? restoreDecisions(fix) : 0; drawFix(); decStatus(n); }
+  catch { $('#dec-said').textContent = 'That is not a decisions file.'; }
+};
+$('#dec-forget').onclick = () => { dec.forget(); loaded = null; decStatus(0); };
 $('#ffilter').oninput = () => drawFix();
 $('#fliving').onchange = () => worker && askFix();
 function saveAs(name, text, type) {

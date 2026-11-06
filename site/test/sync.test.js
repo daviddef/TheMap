@@ -149,3 +149,10 @@ test("the ago line reads plainly", () => {
   assert.equal(S.ago(null, now), "never synced"); assert.equal(S.ago(at(10), now), "synced just now");
   assert.equal(S.ago(at(120), now), "synced 2 minutes ago"); assert.equal(S.ago(at(3 * 3600), now), "synced 3 hours ago"); assert.equal(S.ago(at(5 * 86400), now), "synced 5 days ago");
 });
+
+test("the AI identity is its own: derived from the same words, equal to none of the sync values, and stable", async () => {
+  const words = WORDS.slice(0, 6).join(" "), a = await S.deriveKeys(words, FAST), b = await S.deriveKeys(words, FAST);
+  assert.match(a.aiId, /^[0-9a-f]{32}$/); assert.match(a.aiToken, /^[A-Za-z0-9_-]{43}$/);
+  assert.deepEqual([a.aiId, a.aiToken], [b.aiId, b.aiToken]);
+  assert.ok(![a.id, a.readToken, a.writeToken].includes(a.aiId) && ![a.id, a.readToken, a.writeToken].includes(a.aiToken));
+});

@@ -45,7 +45,10 @@
     async function part(label, bytes) { return subtle.deriveBits({ name: "HKDF", hash: "SHA-256", salt: new Uint8Array(0), info: te.encode("record-atlas-sync/" + label) }, hk, bytes * 8); }
     var id = hex(await part("id", 16)), read = b64url(await part("read", 32)), write = b64url(await part("write", 32));
     var key = await subtle.importKey("raw", await part("enc", 32), "AES-GCM", false, ["encrypt", "decrypt"]);
-    return { id: id, readToken: read, writeToken: write, key: key };
+    /* A SEPARATE IDENTITY FOR THE "ASK CLAUDE" SERVICE. Its own labels, so the AI service holds an id and a token that open nothing
+       at the sync service, and the sync service cannot be asked about them: neither can find or read the other's data. */
+    var aiId = hex(await part("ai-id", 16)), aiToken = b64url(await part("ai-token", 32));
+    return { id: id, readToken: read, writeToken: write, key: key, aiId: aiId, aiToken: aiToken };
   }
 
   /* blob = [1][12-byte iv][AES-GCM ciphertext+tag]. The id is bound in as associated data, so a blob moved under another id fails to open. */

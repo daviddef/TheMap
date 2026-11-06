@@ -28,6 +28,10 @@ const PAGES = [
 
 for (const [what, path] of PAGES) {
   test(`${what} is usable by somebody who cannot see it`, async ({ page }) => {
+    /* THE REGION INDEX HAS A NODE FOR EVERY OF 994 REGIONS and axe walks them all: it passed in 60-80 s and timed out at the
+       default 90 s on every slow runner (5-6 Nov), mailing a red run each time though the page was fine. A budget sized to the
+       page, not a pass given to it: the audit still runs in full. */
+    test.setTimeout(path === "/jurisdictions/" ? 300000 : 90000);
     const res = await page.goto(path);
     expect(res.status(), `${path} should exist`).toBe(200);
     /* The map builds itself from three fetches; auditing before they land

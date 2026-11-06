@@ -1,0 +1,27 @@
+{
+  // The Record Atlas "Ask Claude" Worker: sends a pasted line (or a photo) of a register to Claude, with the Atlas's own
+  // cards as its first source. Holds David's Anthropic key as a SECRET (never in this file) and counts use per reader.
+  // Deployed by David from his own terminal; read README.md first, the ORDER matters (deploy, then the secrets).
+  "name": "record-atlas-ai",
+  "main": "src/entry.js",
+  "compatibility_date": "2025-09-01",
+  "routes": [{ "pattern": "ai.recordatlas.org", "custom_domain": true }],
+  "durable_objects": { "bindings": [{ "name": "ALLOW", "class_name": "Allowance" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Allowance"] }],
+  "vars": {
+    "ALLOW_ORIGINS": "https://recordatlas.org",
+    "AI_ENABLED": "1",                 // set to "0" and redeploy to pause everything at once
+    "MODEL": "claude-haiku-5-5",
+    "ANON_DAILY": "3",                 // free tries a day for someone with no six words, per address
+    "ID_NEW_DAILY": "5",               // a brand-new six-word identity starts here ...
+    "ID_DAILY": "20",                  // ... and grows by 2 a day of age up to this
+    "ID_MONTHLY": "250",
+    "IP_DAILY": "40",                  // per address, however many identities it makes
+    "SITE_DAILY_REQUESTS": "400",      // everyone together, per UTC day
+    "SITE_DAILY_TOKENS": "1500000",
+    "MAX_OUT_TOKENS": "1200"
+  },
+  // Secrets, set after the first deploy with `npx wrangler@4 secret put NAME`: ANTHROPIC_API_KEY, TURNSTILE_SECRET.
+  // Off on purpose: request logs would hold what readers paste. Turn it on only while debugging, then off again.
+  "observability": { "enabled": false }
+}

@@ -47,9 +47,10 @@ const json = (obj, status, extra) => reply(JSON.stringify(obj), status, { "Conte
 
 function bearer(request) { const m = /^Bearer ([A-Za-z0-9_-]+)$/.exec(request.headers.get("Authorization") || ""); return m && TOKEN_RE.test(m[1]) ? m[1] : null; }
 
+/* include: customMetadata, or R2 leaves out the saved-at time of every listed version */
 async function listAll(bucket, prefix) {
   const out = []; let cursor;
-  do { const r = await bucket.list({ prefix, cursor, limit: 1000 }); out.push(...r.objects); cursor = r.truncated ? r.cursor : undefined; } while (cursor);
+  do { const r = await bucket.list({ prefix, cursor, limit: 1000, include: ["customMetadata"] }); out.push(...r.objects); cursor = r.truncated ? r.cursor : undefined; } while (cursor);
   return out;
 }
 async function wipe(bucket, id) {

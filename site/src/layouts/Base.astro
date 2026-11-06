@@ -19,7 +19,7 @@ const { title, dek, eyebrow, bare, jsonld, og = "default", wide, flag } = Astro.
    so `header.site nav.topnav` won on specificity, the eleven ran together at
    its 1px gap, and below 1180px its display:none!important hid them behind a
    menu button that did not exist. Eleven top-level links was too many anyway. */
-import { nav } from "../lib/nav.js";
+import { nav, footLinks } from "../lib/nav.js";
 import whatsNewData from "../data/whats-new.json";
 const newestNews = (whatsNewData.entries || []).map((e) => e.date).sort().pop() || "";
 const here = Astro.url.pathname;
@@ -196,23 +196,74 @@ import LineSwitcher from "../components/LineSwitcher.astro";
 <header class="site">
   <div class="wrap sitein">
     <a class="brand" href={u("/")}>Record <em>Atlas</em></a>
-    {/* A PULSING DOT: GREEN WHEN THIS BROWSER IS ONLINE, RED WHEN IT IS NOT. David asked for a marker in the header showing whether we
-        are "live" or offline. It reports only what the browser knows (navigator.onLine and the online/offline events); it makes no
-        request, so it costs nothing and sends nothing. When the sync service is switched on it can be pointed at that instead. */}
-    <span class="ra-live" id="ra-live" data-state="online" role="status" aria-live="polite" title="Online: connected">
-      <span class="ra-live-dot" aria-hidden="true"></span><span class="ra-live-t">Live</span>
-    </span>
+    {/* A PAGE MAY PUT ONE PILL BETWEEN THE BRAND AND NEW: the home page puts its volume count here (slot "inv"). */}
+    <slot name="inv" />
+    {/* THE PULSING DOT SAYS WHERE YOUR RESEARCH LIVES. Green = a copy is kept online (six-word sync is on) and this browser is
+        connected; orange = it is saved only in this browser; red = this browser is offline. David asked for exactly that, and for a
+        warning beside it when something has changed and no backup (file or online) has been made for more than 24 hours.
+        It reads only this browser's own storage and the online/offline events: no request, nothing sent. The same reading is
+        published as window.raConn.get() so /backup/ tells the same story as the header. The keys are the ones research-file.js and
+        research-sync.js write: ra-backup-v1 {at}, ra-sync-v1 {phrase, saved}, ra-own-first / ra-own-last (the reader's own changes). */}
+    <a class="ra-live ra-live-top" href={u("/backup/")} data-state="local" role="status" aria-live="polite" title="Connection &amp; Backup">
+      <span class="ra-live-dot" aria-hidden="true"></span><span class="ra-live-t">Local</span><span class="ra-live-w" hidden><svg viewBox="0 0 16 16" width="14" height="14" role="img" aria-label="Warning: not backed up for over a day"><path d="M8 1.6 15 14H1z" fill="#e8a200" stroke="#8a5a00" stroke-width="1" stroke-linejoin="round"/><path d="M8 6v4" stroke="#3b2600" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="12" r=".95" fill="#3b2600"/></svg></span>
+    </a>
     <script is:inline>
       (function () {
-        var el = document.getElementById("ra-live"); if (!el) return;
-        var t = el.querySelector(".ra-live-t");
-        function set() {
-          var on = navigator.onLine !== false;
-          el.setAttribute("data-state", on ? "online" : "offline");
-          el.title = on ? "Online: connected" : "Offline: this page works from what is already loaded";
-          if (t) t.textContent = on ? "Live" : "Offline";
+        var DAY = 864e5;
+        function rd(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+        function js(k) { try { return JSON.parse(rd(k)); } catch (e) { return null; } }
+        function ts(v) { var t = v ? Date.parse(v) : NaN; return isNaN(t) ? null : t; }
+        function get() {
+          var now = Date.now(), online = navigator.onLine !== false;
+          var sy = js("ra-sync-v1"), synced = !!(sy && sy.phrase);
+          var bk = js("ra-backup-v1"), last = ts(bk && bk.at), sv = ts(sy && sy.saved);
+          if (sv && (!last || sv > last)) last = sv;
+          var first = ts(rd("ra-own-first")), own = ts(rd("ra-own-last"));
+          /* NEVER BACKED UP, WITH RESEARCH HERE. The reader's own changes are stamped (ra-own-*), but a browser that held marks before
+             the stamps existed, or got them from the published sessions, has none. David: "never backed up" must be called out, so
+             research with no backup at all counts as unprotected, with 24 hours of grace counted from the first time this header
+             saw it (ra-conn-first), so nobody is warned the moment they arrive. */
+          var marks = 0; try { marks = Object.keys((js("ra-progress-v1") || {}).marks || {}).length; } catch (e) { marks = 0; }
+          var seen = null;
+          if (!last && marks) {
+            seen = ts(rd("ra-conn-first"));
+            if (!seen) { seen = now; try { localStorage.setItem("ra-conn-first", new Date(now).toISOString()); } catch (e) { /* storage blocked */ } }
+          }
+          var changed = !!(own && (!last || own > last)) || (!last && marks > 0);
+          var ref = Math.min(first || now, seen || now), since = last ? now - last : now - ref;
+          return { online: online, synced: synced, last: last, own: own, changed: changed, never: !last, since: since, warn: changed && since > DAY,
+                   state: !online ? "offline" : synced ? "online" : "local" };
         }
-        window.addEventListener("online", set); window.addEventListener("offline", set); set();
+        window.raConn = { get: get };
+        var WORD = { online: "Live", local: "Local", offline: "Offline" };
+        var TIP = { online: "Connected, and a copy of your research is kept online. Tap for Connection & Backup.",
+                    local: "Saved only in this browser. Tap to back it up or keep a copy online.",
+                    offline: "Offline: this page works from what is already loaded. Tap for Connection & Backup." };
+        function days(ms) { var d = Math.floor(ms / DAY); return d <= 1 ? "more than a day" : d + " days"; }
+        function boot() {
+          function set() {
+            var c = get();
+            [].slice.call(document.querySelectorAll(".ra-live")).forEach(function (el) {
+              var t = el.querySelector(".ra-live-t"), w = el.querySelector(".ra-live-w");
+              el.setAttribute("data-state", c.state);
+              var tip = TIP[c.state];
+              if (t) t.textContent = WORD[c.state];
+              if (w) {
+                w.hidden = !c.warn;
+                if (c.warn) tip += " Warning: you have changed your research and it has not been backed up for " + days(c.since) + ".";
+              }
+              el.title = tip;
+            });
+            document.dispatchEvent(new CustomEvent("ra-conn", { detail: c }));
+          }
+          window.addEventListener("online", set); window.addEventListener("offline", set);
+          window.addEventListener("storage", set); document.addEventListener("ra-progress-changed", set);
+          document.addEventListener("ra-conn-refresh", set);
+          document.addEventListener("visibilitychange", function () { if (!document.hidden) set(); });
+          setInterval(set, 60000); set();
+        }
+        /* two dots (beside the brand on narrow screens, in the Researching group on wide ones): the second is not parsed yet */
+        if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot); else boot();
       })();
     </script>
     {/* WHERE THE MAP'S OWN TOOLS GO. The link, full-screen and reset buttons
@@ -224,17 +275,6 @@ import LineSwitcher from "../components/LineSwitcher.astro";
         has those buttons, and Base is shared by 46,000 pages. A container
         with nothing in it collapses to nothing. */}
     <span class="site-tools" id="ra-tools"></span>
-    {/* WHAT'S NEW IS A BUTTON IN THE HEADER. David: the card on the first screen took the room; a button straight to all improvements
-        is enough, and it pulses when something was added in the last three days. data-latest is the newest entry's date, written
-        at build; the three-day test runs in the browser, because these pages are built once and read for weeks. */}
-    <a class="ra-news" id="ra-news" href={u("/whats-new/")} data-latest={newestNews} aria-label="What's new: all improvements" title="What's new: all improvements"><span aria-hidden="true" class="ra-news-i">&#10022;</span><span class="ra-news-t">New</span></a>
-    <script is:inline>
-      (function () {
-        var a = document.getElementById("ra-news"); if (!a) return;
-        var d = Date.parse(a.getAttribute("data-latest") + "T23:59:59");
-        if (d && Date.now() - d < 3 * 86400000) { a.classList.add("fresh"); a.title = "What's new: something was added in the last three days"; }
-      })();
-    </script>
     {/* THE WORD «MENU» WENT, THE NAME DID NOT. David: «can we have menu as
         just the burgers and no word "menu"? and then that will give space for
         the icons?» — the four map tools were wrapping to a 2×2 block on a
@@ -247,14 +287,14 @@ import LineSwitcher from "../components/LineSwitcher.astro";
             aria-controls="drawer" aria-label="Menu">
       <span class="bars" aria-hidden="true"></span>
     </button>
-    <nav class="topnav" aria-label="Main">
+    <nav class="topnav" aria-label="Main" data-latest={newestNews}>
       {nav.map(([label, links]) => (
         typeof links === "string"
           ? <a class:list={["menulink", here === u(links) ? "on" : ""]} href={u(links)}>{label}</a>
           : <details class="menu">
               <summary>{label}</summary>
               <div class="panel">
-                {links.map(([h, l]) => <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}
+                {links.map(([h, l]) => h === null ? <span class="ph">{l}</span> : <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}
               </div>
             </details>
       ))}
@@ -279,16 +319,50 @@ import LineSwitcher from "../components/LineSwitcher.astro";
           families there are, it is whether this page can record anything
           against one. Three kinds of page can: the map, which draws the rings;
           a place page, where volumes are marked; and /my-research/ itself. */}
-      {marksHere ? <LineSwitcher compact /> : <LineSwitcher compact linkOnly />}
+      {/* THE RESEARCHING GROUP IS ONE THING, SET APART. David: the family selector and the Live dot are the important ones and should
+          read as a group, divided from the menu, in the menu's own type. Wide screens only; below the burger breakpoint the dot
+          sits beside the brand (.ra-live-top) and the family is in the drawer. */}
+      <span class="ra-grp">
+        {marksHere ? <LineSwitcher compact /> : <LineSwitcher compact linkOnly />}
+        <a class="ra-live ra-live-grp" href={u("/backup/")} data-state="local" role="status" aria-live="polite" title="Connection &amp; Backup">
+          <span class="ra-live-dot" aria-hidden="true"></span><span class="ra-live-t">Local</span><span class="ra-live-w" hidden><svg viewBox="0 0 16 16" width="14" height="14" role="img" aria-label="Warning: not backed up for over a day"><path d="M8 1.6 15 14H1z" fill="#e8a200" stroke="#8a5a00" stroke-width="1" stroke-linejoin="round"/><path d="M8 6v4" stroke="#3b2600" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="12" r=".95" fill="#3b2600"/></svg></span>
+        </a>
+      </span>
       <a class="findbtn" href={u("/add/")}>Add source</a>
     </nav>
+    {/* WHAT'S NEW LIVES IN THE ABOUT MENU, AND ABOUT FLASHES WHEN THERE IS NEWS. David: the «New» pill was one more thing in a crowded header. A soft
+        orange dot beside «About» (and on the burger, below the breakpoint) says something was added in the last fortnight that this
+        browser has not looked at; opening What's new, or the page itself, puts it out. The date is written at build, the test runs in
+        the browser because pages are built once and read for weeks. Seen-ness is a per-browser convenience, so storage may be blocked. */}
+    <script is:inline>
+      function raNewsDot() {
+        var nav = document.querySelector("nav.topnav"); if (!nav) return;
+        var latest = nav.getAttribute("data-latest") || "", seen = "";
+        try { seen = localStorage.getItem("ra-news-seen") || ""; } catch (e) { /* storage blocked */ }
+        if (/\/whats-new\/?$/.test(location.pathname)) {
+          try { localStorage.setItem("ra-news-seen", latest); } catch (e) { /* storage blocked */ }
+          return;
+        }
+        var d = Date.parse(latest + "T23:59:59");
+        if (!d || latest <= seen || Date.now() - d > 14 * 86400000) return;
+        var sums = nav.querySelectorAll("details.menu > summary"), about = null;
+        for (var i = 0; i < sums.length; i++) if (sums[i].textContent.trim() === "About") about = sums[i];
+        if (about) { about.classList.add("fresh"); about.title = "Something new: open About, then What's new"; }
+        var bg = document.querySelector(".burger"); if (bg) bg.classList.add("fresh");
+        var dr = document.querySelectorAll('.drawer a[href$="/whats-new/"]');
+        for (var k = 0; k < dr.length; k++) dr[k].classList.add("fresh");
+        var tp = nav.querySelectorAll('.panel a[href$="/whats-new/"]');
+        for (var m = 0; m < tp.length; m++) tp[m].classList.add("fresh");
+      }
+      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", raNewsDot); else raNewsDot();
+    </script>
   </div>
   <div class="drawer" id="drawer" hidden>
     <div class="wrap">{nav.map(([label, links]) => (
       typeof links === "string"
         ? <div class="dgrp"><a href={u(links)} class={here === u(links) ? "on" : ""}>{label}</a></div>
         : <div class="dgrp"><span class="gl">{label}</span>
-            {links.map(([h, l]) => <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}
+            {links.map(([h, l]) => h === null ? <span class="gl gl2">{l}</span> : <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}
           </div>
     ))}
       <div class="dgrp"><a href={u("/my-research/")} class={here === u("/my-research/") ? "on" : ""}>Researching</a></div>
@@ -409,6 +483,12 @@ import LineSwitcher from "../components/LineSwitcher.astro";
         <script is:inline set:html={"(adsbygoogle = window.adsbygoogle || []).push({});"}></script>
       </aside>
     )}
+    <nav class="foot-links" aria-label="More">{footLinks.map(([h, l]) => <a href={u(h)}>{l}</a>)}
+      {site.contact && site.contact.email && (
+        <a class="at-note" href={`mailto:${site.contact.email}?subject=${encodeURIComponent("Record Atlas: a note")}`}
+           title="Opens your own mail app. Nothing is sent from this page."><span data-i18n>Like my work? Have a suggestion? Drop me a note.</span></a>
+      )}
+    </nav>
     <p class="foot-note">
       <b>Record Atlas</b> — {site.tagline}. Built in the open:
       <a href={site.repo}>the data and the code are on GitHub</a>, and every source row

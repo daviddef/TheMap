@@ -30,7 +30,7 @@ const here = Astro.url.pathname;
       {nav.map(([label, links]) => (
         typeof links === "string"
           ? <a class:list={["menulink", here === u(links) ? "on" : ""]} href={u(links)}>{label}</a>
-          : <details class="menu"><summary>{label}</summary><div class="panel">{links.map(([h, l]) => <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}</div></details>
+          : <details class="menu"><summary>{label}</summary><div class="panel">{links.map(([h, l]) => h === null ? <span class="ph">{l}</span> : <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}</div></details>
       ))}
       <a class="findbtn" href={u("/add/")}>Add source</a>
     </nav>
@@ -39,7 +39,7 @@ const here = Astro.url.pathname;
     <div class="wrap">{nav.map(([label, links]) => (
       typeof links === "string"
         ? <div class="dgrp"><a href={u(links)} class={here === u(links) ? "on" : ""}>{label}</a></div>
-        : <div class="dgrp"><span class="gl">{label}</span>{links.map(([h, l]) => <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}</div>
+        : <div class="dgrp"><span class="gl">{label}</span>{links.map(([h, l]) => h === null ? <span class="gl gl2">{l}</span> : <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}</div>
     ))}
       <div class="dgrp"><span class="gl">Contribute</span><a href={u("/add/")}>Add a source</a></div>
     </div>

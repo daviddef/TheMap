@@ -20,7 +20,12 @@ export const nav = [
      place» are sentences for a menu with room; a top-level bar wants nouns.
      Sentence case throughout, because «My Research» beside «The sources»
      reads as two different hands. */
-  ["The map", "/"],
+  /* HISTORY IS THE MAP'S OTHER HALF. David: «the history menu, can that be under the map tab, it's really an extension of the same
+     thing?» It is: the same ground, played through time. So the map is a group of two, and History left the bar as a word of its own. */
+  ["The map", [
+    ["/", "The records map"],
+    ["/history/", "History"],
+  ]],
   /* NAMES IS ONE DOOR, NOT THREE PAGES. «Surnames» opened the dataset page, «Say your name» was reachable only from the home
      page, and the spellings catalogue was reachable from neither. A person holding a name does not know which of them to
      want. /your-name/ is the one page now (a Given name / Surname switch, the finder that answers on the map, the spellings
@@ -28,15 +33,6 @@ export const nav = [
   ["Names", "/your-name/"],
   ["Places", "/places/"],
   ["Roots & Routes", "/roots/"],
-  ["The sources", [
-    ["/providers/", "Who holds records"],
-    ["/jurisdictions/", "Whose archive"],
-    ["/coverage/", "What's missing"],
-    /* Phase 4B. The survey queue was a column in a JSON file; 316 sources
-       nobody has opened is the atlas's clearest bottleneck, and one person
-       cannot close it. This is the way in for anybody with an evening. */
-    ["/survey/", "Survey a source"],
-  ]],
   /* FLAGS IS A DIRECT LINK, NOT A DROPDOWN, and the shape of this array had to
      grow one case to allow it. Every other entry here is [label, [links]] and
      renders as a disclosure; a disclosure holding a single item is a click in
@@ -44,40 +40,35 @@ export const nav = [
      landing page, kept exactly as it was — so the menu item IS the door.
      A string second element means a direct link. */
   ["Flags", "/flags/"],
-  /* THE SECOND ROOM. Conquest and migration were the last rows of a dropdown
-     inside the records map, drawing nothing until a year was set. David: «it
-     really isn't visual enough. It's hidden away.» It has its own page now,
-     and its own word in the bar. */
-  ["History", "/history/"],
+  /* FOUR ROWS, NOT TEN. David, looking at the menu: «there are so many options here, and they're really just showing help stuff ... it
+     needs to be neat, exciting and simple.» The four that help a reader are here. The project's own pages (what is being done, the
+     letters, my work, what changed) and the fine print (the data, privacy) are in the footer, where a person who wants them looks,
+     and where a person who does not never has to read past them. What's new is in About, and About flashes when there is news. */
+  /* THE SOURCES JOINED ABOUT, AS A SECOND TIER. David: «can we merge sources into about? maybe in a 2 tier menu?» A row whose first
+     element is null is a heading, not a link: the panel reads "Learn" then four pages, "The sources" then four pages. */
   ["About", [
+    [null, "Learn"],
+    ["/whats-new/", "What's new"],
     ["/start/", "Start here"],
     ["/read/", "Reading old records"],
-    /* The two prose panels that used to sit folded under the map. Folding
-       them was right for the front page and wrong as a home: a reader who
-       wants them is asking for help, and a reader who does not should never
-       meet them. */
     ["/help/", "Help"],
     ["/about/", "About the atlas"],
-    /* The nine family archives used to sit under the map on the front page.
-       Below a map they read as documentation of somebody else's research, in
-       the place a reader was trying to find their own — so the strip was cut
-       to one line and the long version had nowhere to live. It lives here. */
-    ["/my-work/", "My work"],
-    /* The files this map draws from are public URLs and nothing said so.
-       A licence nobody can find is a licence nobody can act on. */
-    ["/data/", "Use the data"],
-    /* Both were footer-only links. The footer had grown to five stacked
-       blocks and half of it duplicated this menu — About, Use the data and
-       Add a source all appear above. These two did not, so they move up
-       rather than disappear. */
-    ["/privacy/", "Privacy"],
-    ["/changelog/", "What changed"],
-    ["/worklist/", "What is being done"],
-    /* The letters this atlas has drafted and not sent. It sits beside the work
-       list for the same reason the work list exists: a gap nobody is told
-       about is a gap nobody can close. These are the ones a person has to
-       close, because the archive has said no to crawlers or its server has
-       stopped answering. */
-    ["/errands/", "Letters to send"],
+    [null, "The sources"],
+    ["/providers/", "Who holds records"],
+    ["/jurisdictions/", "Whose archive"],
+    ["/coverage/", "What's missing"],
+    /* Phase 4B. The survey queue was a column in a JSON file; 316 sources nobody has opened is the atlas's clearest bottleneck, and
+       one person cannot close it. This is the way in for anybody with an evening. */
+    ["/survey/", "Survey a source"],
   ]],
+];
+
+/* The pages that left the About menu, for the footer. One list so the footer and its test read the same names. */
+export const footLinks = [
+  ["/data/", "Use the data"],
+  ["/privacy/", "Privacy"],
+  ["/changelog/", "What changed"],
+  ["/worklist/", "What is being done"],
+  ["/errands/", "Letters to send"],
+  ["/my-work/", "My work"],
 ];

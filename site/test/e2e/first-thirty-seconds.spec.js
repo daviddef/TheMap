@@ -48,15 +48,15 @@ test("second one: the map says what it is doing instead of showing a grey box", 
   await expect(note).toHaveCount(0, { timeout: 45000 });
 });
 
-test("second five: the first panel says what is new and where the colour idea lives", async ({ page }) => {
+test("second five: the first panel says where the colour idea lives, and What's new is one menu away", async ({ page }) => {
   await ready(page);
   const empty = page.locator("#ra-empty");
   await expect(empty).toBeVisible();
-  /* The card used to teach four example searches. It now says what has been
-     improved, newest first, because the search box is already the invitation. */
-  await expect(empty).toContainText("What's new");
-  await expect(empty.locator(".at-new-list li").first()).toBeVisible();
-  await expect(empty.getByRole("link", { name: /all improvements/i })).toBeVisible();
+  /* The first panel used to list what had been improved. That card took the room the map needs, so What's new moved to the About menu
+     (and About flashes when there is news). What is asserted is that the way to it exists: the link is in the menu, one open away,
+     and the first panel no longer carries the list. This test went on asserting the old card after it was removed and mailed a red run
+     for every deploy until it was brought in line. */
+  await expect(page.locator('nav.topnav .panel a[href$="/whats-new/"]')).toHaveCount(1);
   /* The idea the colours carry used to be a sentence here. It was trimmed to a
      link on purpose (the sentence lives on /help/ and in the ⓘ), so what is
      asserted is that the way to it is still on the first screen. */

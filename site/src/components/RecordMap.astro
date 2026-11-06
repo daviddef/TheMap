@@ -118,6 +118,10 @@ try {
         .ra-bar-row, so the bar was a search line and a filter line — two rows
         of chrome above a map, for one button. It is one control now and it
         belongs beside the box it filters. */}
+    {/* SHOW MY RESEARCH, ON THE SEARCH LINE. David: «can you show a toggle for "show research" when we search? I may already be done, but can't see that on the map». It was a checkbox inside Filters; a switch you have to open a menu to find is not one you reach for mid-search. Same switch, same saved choice. */}
+    <button type="button" class="ra-rc-tog" id="ra-rc-tog" aria-pressed="false"
+            title="Colour the places by your research: researched, busy researching, on my list, not started">
+      <span class="ra-rc-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>My research</span></button>
     <div class="ra-bar-filters">
     {/* THREE FILTERS, THREE DIFFERENT SHAPES. The layers were eight loose
         pills in a row while «what it costs» and «what kind» were tidy
@@ -154,18 +158,19 @@ try {
       <summary id="ra-laysum" aria-label="Filters — layers, cost and record kind"
                title="Filters — layers, cost and record kind"></summary>
       <div class="ra-drop-in">
+        {/* MY RESEARCH COLOURS THE DOTS. David: «can the markers colour themselves based on researched, busy researching,
+            unresearched?» One switch, and a key that counts what it shows. */}
+        <p class="ra-fgroup-h">My research</p>
+        <label class="ra-opt ra-rc-opt" id="ra-rc-l" title="Colour every place by how far you are with the family line you have selected">
+          <input type="checkbox" id="ra-rc" /><span>Colour places by my research</span></label>
+        <div class="ra-rc-key" id="ra-rc-key" hidden></div>
+
         <p class="ra-fgroup-h">Layers</p>
-        <p class="ra-key-lead">What the map draws. The shelf is the places and
-          their volumes; the rest are context, and the unchecked ones cost
-          nothing until you ask for them.</p>
+        <p class="ra-key-lead">What the map draws. Unchecked layers cost nothing until you switch them on.</p>
         <div class="ra-layers" id="ra-layers"></div>
 
         <p class="ra-fgroup-h" id="ra-catsum">What it costs to look</p>
-        <p class="ra-key-lead">Ordered from what you can open tonight down to what
-          needs a letter. <b>A place takes the colour of the most open thing it
-          has</b> — so red means red is the best on offer there, and green says
-          nothing about what else is underneath it. The panel lists the rest.
-          Click a colour to take it off the map.</p>
+        <p class="ra-key-lead">A place takes the colour of the most open thing it has. Click a colour to take it off the map.</p>
         <div class="atlas-key" id="ra-cats"></div>
 
         <p class="ra-fgroup-h" id="ra-kindsum">What kind of record</p>
@@ -397,15 +402,8 @@ try {
           written by hand (src/data/whats-new.json), newest first. On a phone it is three. */}
       {/* TWO LINES, NOT FIVE. David: «its a lot of real estate for just a few lines of text». The
           two link paragraphs became one row, and the history link is gone: the map's own Play button does it. */}
-      <p class="at-start-more at-links">
-        <a href={HELP}><span data-i18n>What a dot's colour means</span> &rarr;</a>
-        {site.contact && site.contact.email && (
-          <a class="at-note" href={`mailto:${site.contact.email}?subject=${encodeURIComponent("Record Atlas: a note")}`}
-             title="Opens your own mail app. Nothing is sent from this page.">
-            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M1.5 3.5h13v9h-13zM1.8 3.8 8 9l6.2-5.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
-            <span data-i18n>Like my work? Have a suggestion? Drop me a note.</span></a>
-        )}
-      </p>
+      {/* THE LINK STRIP IS GONE. David: «we already have help in the About menu, and the "like my work" move it to the footer, let's save
+          all this real estate». Help is in the About menu; the note is the last link of the footer row (Base.astro). */}
       {/* THE THIRD COUNTS LINE IS GONE. David, counting them: «in this one
           area i see 3 different places you talk about volumes» — the masthead
           dek, the filter counter under the search box, and this. And it said
@@ -917,6 +915,7 @@ window.addEventListener("load", async function () {
     return '<i class="at-dot" style="background:' + (ACC[access] || ["#7C8A91"])[0] +
            '"></i>' + esc((ACC[access] || [0, access])[1]);
   }
+  var volInFS = false;   /* set by placeSources when it drew "the volumes themselves" inside the FamilySearch column */
   var fsMoved = [];   /* the volumes placeSources drew in the FamilySearch column, so the cost-grouped lists skip them */
   /* ONE ROW FOR A VOLUME, WHEREVER IT IS LISTED. The cost-grouped lists and the FamilySearch column both draw it, so a volume
      carries the same mark id in either. `withWho` is false inside the FamilySearch column, where the provider is the heading. */
@@ -945,7 +944,27 @@ window.addEventListener("load", async function () {
           (c.held ? ' <span class="ra-who">held at ' + esc(c.held) + "</span>" : "") + "</li>");
   }
 
-  function placeSources(d, cs, vols) {
+  function placeSources(d, cs, vols, volHtml) {
+    volInFS = false;
+    /* A BOOK IS LISTED ONCE. "The volumes themselves" (by record type) and the source panel's own list (by what it costs to look)
+       were the same books twice, a screen apart: David, looking at Senj, «lots of duplicates!». Whatever the first list already
+       shows is left out of the second, by the same id the marks use, and the sentence says where the rest are. */
+    /* THE TWO LISTS DO NOT SHARE AN ID FIELD: a volume carries `waypoint`, a collection only the link, whose wc= is that same
+       waypoint (wc=9RK1-T3F:3916...). The first version compared c.waypoint, found nothing on the collection side, and listed all ten
+       books twice. So a collection is matched by the waypoint read out of its link, or failing that by its title and years. */
+    var haveW = {}, haveT = {}, shown = (d.volumes || []).length;
+    (d.volumes || []).forEach(function (v) {
+      if (v.waypoint) haveW[v.waypoint] = 1;
+      haveT[(v.t || v.title) + "|" + v.from + "|" + v.to] = 1;
+    });
+    var wpOf = function (c) {
+      if (c.waypoint) return c.waypoint;
+      var m = /[?&]wc=([A-Z0-9]+-[A-Z0-9]+)/i.exec(String(c.url || ""));
+      return m ? m[1].toUpperCase() : null;
+    };
+    var dup = function (c) { var w = wpOf(c); return !!((w && haveW[w]) || haveT[(c.title || c.t) + "|" + c.from + "|" + c.to]); };
+    var more = (cs || []).filter(function (c) { return !dup(c); }).length;
+    vols = (vols || []).filter(function (c) { return !dup(c); });
     var cc = d.country, cname = CNAME[cc] || cc || "";
     var nat = cc ? natProviders(cc, d.lat, d.lon) : [];
     var wd = (cc && warch[cc]) ? warch[cc].slice(0, 6) : [];
@@ -967,7 +986,7 @@ window.addEventListener("load", async function () {
                   d.nfs + " FamilySearch collection" + (d.nfs === 1 ? "" : "s"))
                 : (nat.length ? nat[0].name : (wd.length ? wd[0].name : ""));
     var verdict = cs.length
-      ? cs.length + " volume" + (cs.length === 1 ? " is" : "s are") + " recorded here, listed below. These are the other places to look."
+      ? cs.length + " volume" + (cs.length === 1 ? " is" : "s are") + " recorded here" + (shown ? (more ? ": " + (cs.length - more) + " listed " + (volHtml && fsRows.length ? "under FamilySearch" : "above") + ", " + more + " below" : ", all listed " + (volHtml && fsRows.length ? "under FamilySearch" : "above")) : ", listed below") + ". These are the other places to look."
       : "Nobody has walked this place volume by volume." + (start ? " Start with " + start + "." : "");
 
     var h = ['<div class="at-sec at-sec-wide at-src" id="ra-home-src">',
@@ -1029,8 +1048,9 @@ window.addEventListener("load", async function () {
             esc(c.filed.map(ccName).join(", ")) + "</span>" : ""), "sr-fs"));
       });
       h.push("</ul>");
+      if (volHtml) { h.push('<div class="src-fsb">' + volHtml + "</div>"); volInFS = true; }
       if (fsVols.length) {
-        h.push('<div class="src-fsv"><div class="lab">' + fsVols.length + " volume" + (fsVols.length === 1 ? "" : "s") +
+        h.push('<div class="src-fsv"><div class="lab">' + fsVols.length + " " + (shown ? "more " : "") + "volume" + (fsVols.length === 1 ? "" : "s") +
                " recorded here</div>");
         RANK.forEach(function (a) {
           var g = fsVols.filter(function (c) { return c.access === a; });
@@ -2162,6 +2182,52 @@ window.addEventListener("load", async function () {
      editorial here and worth saying out loud: weight on this map is not
      importance. A parish with ninety volumes nobody has read and a parish with
      two are both on it, and the big one is not the better lead. */
+  /* ---- COLOUR BY MY RESEARCH ---------------------------------------------
+     David: «can the markers colour themselves based on researched, busy researching, unresearched, so I know what is in my research
+     list simply?» A switch in Filters recolours the shelf dots from the volume marks of the family line that is selected: green when
+     every volume the atlas holds there is done, amber when some are started, blue when they are only on the list, grey when
+     nothing is. Read from the marks, never stored (the same rule as the rings), and repainted whenever a mark changes. */
+  var RC = { on: false };
+  try { RC.on = Q.get("rc") === "1" || localStorage.getItem("ra-rc") === "1"; } catch (e) { RC.on = false; }
+  var RC_COL = { done: "#1E8449", busy: "#E08A12", list: "#2F6DB5", none: "#A9B2B7" };
+  var RC_LAB = { done: "Researched", busy: "Busy researching", list: "On my list", none: "Not started" };
+  var rcIdx = null;
+  /* One volume mark, for the selected line: done | busy | list | none. */
+  function volStatus(id) {
+    var P = window.raProgress, v = P && P.get(id);
+    if (!v) return "none";
+    var pages = (v.done || []).reduce(function (n, r) { return n + (r[1] - r[0] + 1); }, 0);
+    if (v.state === "exhausted" || (v.total && pages >= v.total)) return "done";
+    if (pages || v.state === "searched" || v.state === "written" || v.state === "found" || v.state === "blocked") return "busy";
+    if (v.state === "planned") return "list";
+    return "none";
+  }
+  function rcBuild() {
+    rcIdx = {};
+    var P = window.raProgress; if (!P) return;
+    var marks = P.all();
+    for (var k in marks) {
+      if (k.indexOf("volume:") !== 0 || !marks[k].href) continue;
+      var m = /\/place\/([^/]+)\//.exec(marks[k].href); if (!m) continue;
+      var e = rcIdx[m[1]] || (rcIdx[m[1]] = { done: 0, busy: 0, list: 0 });
+      var st = volStatus(k);
+      if (st !== "none") e[st]++;
+    }
+  }
+  function rcState(p) {
+    if (!rcIdx) rcBuild();
+    var e = rcIdx[p.i]; if (!e) return "none";
+    var total = (p.v || 0) || (p.c || 0);
+    if (e.done && e.done >= total) return "done";
+    if (e.done || e.busy) return "busy";
+    return e.list ? "list" : "none";
+  }
+  function rcStyle(m) {
+    var p = m._p, n = (p.v || 0) || (p.c || 0);
+    if (!n) return;
+    if (RC.on) { var st = rcState(p); m.setStyle({ fillColor: RC_COL[st], fillOpacity: st === "none" ? .6 : .96 }); }
+    else m.setStyle({ fillColor: (ACC[RANK[p.a]] || ["#7C8A91"])[0], fillOpacity: .95 });
+  }
   var shelfLayer = L.layerGroup();
   function makeMarker(p) {
     /* WALKED MEANS A BOOK STANDS HERE, by whatever route it was found.
@@ -2207,8 +2273,9 @@ window.addEventListener("load", async function () {
       fillColor: col, fillOpacity: .95
     });
     m._p = p;
+    if (RC.on && n) rcStyle(m);
     m.bindTooltip(p.n, { sticky: true });
-    m.on("click", function () { open(p); });
+    m.on("click", function () { if (AREA && AREA.mode) return; open(p); });
     return m;
   }
   var markers = idx.places.map(makeMarker);
@@ -2272,8 +2339,37 @@ window.addEventListener("load", async function () {
   }
   /* Repainted whenever a mark changes — VolumeMarks calls this after every
      save, so the map reflects the work without a reload. */
-  window.raPaintProgress = paintProgressRings;
-  setTimeout(paintProgressRings, 0);
+  /* The colours, the key under the switch, and the saved choice. */
+  function rcRepaint() {
+    rcIdx = null;
+    markers.forEach(rcStyle);
+    var key = document.getElementById("ra-rc-key"), box = document.getElementById("ra-rc");
+    if (box) box.checked = RC.on;
+    var lab = document.getElementById("ra-rc-l"); if (lab) lab.classList.toggle("on", RC.on);
+    var tg = document.getElementById("ra-rc-tog"); if (tg) { tg.classList.toggle("on", RC.on); tg.setAttribute("aria-pressed", RC.on ? "true" : "false"); }
+    if (!key) return;
+    key.hidden = !RC.on;
+    if (!RC.on) return;
+    var t = { done: 0, busy: 0, list: 0 };
+    markers.forEach(function (m) { var p = m._p; if (((p.v || 0) || (p.c || 0))) { var st = rcState(p); if (t[st] !== undefined) t[st]++; } });
+    key.innerHTML = ["done", "busy", "list", "none"].map(function (k) {
+      return '<span class="ra-rc-k"><i style="background:' + RC_COL[k] + '"></i>' + RC_LAB[k] + (k === "none" ? "" : ' <b>' + t[k].toLocaleString() + "</b>") + "</span>";
+    }).join("");
+  }
+  (function () {
+    var box = document.getElementById("ra-rc"), tog = document.getElementById("ra-rc-tog");
+    function rcSet(on) {
+      RC.on = on;
+      try { localStorage.setItem("ra-rc", RC.on ? "1" : "0"); } catch (e) { /* storage blocked */ }
+      setQ("rc", RC.on ? "1" : "");
+      rcRepaint();
+    }
+    if (box) box.addEventListener("change", function () { rcSet(box.checked); });
+    if (tog) tog.addEventListener("click", function () { rcSet(!RC.on); });
+    document.addEventListener("ra-progress-changed", function () { paintProgressRings(); if (RC.on) rcRepaint(); });
+  })();
+  window.raPaintProgress = function () { var r = paintProgressRings(); if (RC.on) rcRepaint(); return r; };
+  setTimeout(function () { paintProgressRings(); rcRepaint(); }, 0);
 
   /* ---- the archives -------------------------------------------------------
      Where the paper physically is. Drawn as a hollow square rather than a
@@ -2291,7 +2387,7 @@ window.addEventListener("load", async function () {
                         html: '<i style="border-color:' + (ACC[p.access] || ["#7C8A91"])[0] + '"></i>' })
     });
     m.bindTooltip(p.name, { sticky: true });
-    m.on("click", function () { openArchive(p); });
+    m.on("click", function () { if (AREA && AREA.mode) return; openArchive(p); });
     m.addTo(archiveLayer);
     /* Searchable by its name, its city, and every country it covers — so
        "Ireland" finds the Dublin archives AND the aggregators that reach
@@ -2324,6 +2420,7 @@ window.addEventListener("load", async function () {
       });
       m.bindTooltip(a.n, { sticky: true });
       m.on("click", function () {
+        if (AREA && AREA.mode) return;
         empty.hidden = true; panel.hidden = false;
         var h = ['<div class="at-h"><h3>' + esc(a.n) + "</h3></div>"];
         h.push('<p class="at-also">' + esc(CNAME[a.cc] || a.cc || "") + "</p>");
@@ -2360,6 +2457,7 @@ window.addEventListener("load", async function () {
         });
         m.bindTooltip(a.n, { sticky: true });
         m.on("click", function () {
+          if (AREA && AREA.mode) return;
           empty.hidden = true; panel.hidden = false;
           var h = ['<div class="at-h"><h3>' + esc(a.n) + "</h3></div>"];
           if (a.by) h.push('<p class="at-also">' + esc(a.by) + "</p>");
@@ -2493,6 +2591,7 @@ window.addEventListener("load", async function () {
       }
     },
     _click: function (e) {
+      if (AREA && AREA.mode) return;
       var i = this._near(e);
       if (i >= 0) this.fire("pick", { f: this._pts[i] });
     }
@@ -2630,6 +2729,17 @@ window.addEventListener("load", async function () {
     if (t.floor || t.high === null || t.high === undefined) return "more than " + f(t.low);
     return t.low === t.high ? f(t.low) : f(t.low) + " to " + f(t.high);
   }
+  /* The toll for a card: "5.7\u20136 million", "77\u2013100 thousand", "45 thousand+". The long form stays in the details. */
+  function mortTollShort(t) {
+    if (!t || t.low === null || t.low === undefined) return "";
+    var f = function (n) { return n >= 1e6 ? [Math.round(n / 1e5) / 10, " million"] : n >= 1e3 ? [Math.round(n / 1e3), " thousand"] : [n, ""]; };
+    var lo = f(t.low);
+    if (t.floor || t.high === null || t.high === undefined) return lo[0] + lo[1] + "+";
+    if (t.low === t.high) return lo[0] + lo[1];
+    var hi = f(t.high);
+    return lo[1] === hi[1] ? lo[0] + "\u2013" + hi[0] + hi[1] : lo[0] + lo[1] + " \u2013 " + hi[0] + hi[1];
+  }
+  var MORT_SHORT = { epidemic: "Epidemic", famine: "Famine", genocide: "Genocide", massacre: "Massacre", war: "War", atrocity: "Mass atrocity", displacement: "Forced removal" };
   function mortForPlace(d) {
     if (d.lat == null || d.lon == null) return;
     loadMortP().then(function (M) {
@@ -2644,15 +2754,16 @@ window.addEventListener("load", async function () {
         var by = function (y) { return y < 0 ? -y + " BCE" : String(y); };
         var yrs = e.f === e.t ? by(e.f) : by(e.f) + "\u2013" + (e.t >= 2026 ? "present" : by(e.t));
         var held = cols.filter(function (c) { return c.from != null && c.to != null && c.from <= e.t && c.to >= e.f; });
+        /* WHAT THE ATLAS HOLDS FOR THESE YEARS, AS A STATUS CHIP: green with a tick when volumes here cover them, grey and plain when
+           none does (with the span the listed ones run, so a reader can see how near they are). */
         var line = "";
         if (held.length) {
-          line = '<span class="ra-mn-v ra-mn-yes">' + held.length + " volume" + (held.length === 1 ? "" : "s") + " here cover" + (held.length === 1 ? "s" : "") +
-            " these years</span>";
+          line = '<p class="ra-mn-v ra-mn-yes"><i aria-hidden="true">\u2713</i>' + held.length + " volume" + (held.length === 1 ? "" : "s") + " here cover" + (held.length === 1 ? "s" : "") +
+            " these years</p>";
         } else if (cols.length) {
           var lo = Math.min.apply(null, cols.filter(function (c) { return c.from != null; }).map(function (c) { return c.from; }));
           var hi = Math.max.apply(null, cols.filter(function (c) { return c.to != null; }).map(function (c) { return c.to; }));
-          line = '<span class="ra-mn-v">No volume listed here is dated to these years' +
-            (isFinite(lo) && isFinite(hi) ? " (the ones listed run " + lo + "\u2013" + hi + ")" : "") + "</span>";
+          line = '<p class="ra-mn-v"' + (isFinite(lo) && isFinite(hi) ? ' title="The volumes listed here run ' + lo + "\u2013" + hi + '"' : "") + '><i aria-hidden="true">\u2013</i>No volume here for these years</p>';
         }
         var rec = M.records && M.records[e.ty] ? M.records[e.ty] : "";
         /* THE ARCHIVES THIS GROUND'S OWN ERAS FILE THESE YEARS UNDER. David: «is it true there are no
@@ -2674,20 +2785,21 @@ window.addEventListener("load", async function () {
           var pc = PROV[f] && PROV[f].countries || [];
           return pc.indexOf("*") > -1 || pc.indexOf(String(d.country || "").toUpperCase()) > -1;
         });
-        var recHtml = recIds.length
-          ? '<p>Records of this event\'s dead: ' +
-            recIds.map(function (f) { return '<a href="' + BASE + "archive/" + esc(f) + '/">' + esc(provName(f)) + "</a>"; }).join(" \u00b7 ") + ".</p>"
-          : "";
-        var archHtml = arch.length
-          ? '<p>Archives this ground\'s ' + esc(yrs) + ' era is filed under: ' +
-            arch.map(function (f) { return '<a href="' + BASE + "archive/" + esc(f) + '/">' + esc(provName(f)) + "</a>"; }).join(" \u00b7 ") + ".</p>"
-          : "";
-        return '<li><div class="ra-mn-t"><b>' + esc(e.n) + '</b><span class="ra-mn-y">' + esc(yrs) + '</span></div>' +
-          '<div class="ra-mn-m">' + esc((M.types && M.types[e.ty]) || e.ty) + ' \u00b7 est. deaths ' + esc(mortTollTxt(e.toll)) + '</div>' +
-          (e.says ? '<p class="ra-mn-s">' + esc(e.says) + '</p>' : "") +
-          (e.open ? '<p class="ra-mn-s ra-mn-o">' + esc(e.open) + '</p>' : "") +
+        var chips = function (ids) { return '<span class="ra-mn-chips">' + ids.map(function (f) { return '<a href="' + BASE + "archive/" + esc(f) + '/">' + esc(provName(f)) + "</a>"; }).join("") + "</span>"; };
+        var recHtml = recIds.length ? '<p class="ra-mn-g">Records of this event\'s dead</p>' + chips(recIds) : "";
+        var archHtml = arch.length ? '<p class="ra-mn-g">Archives filed under this era (' + esc(yrs) + ")</p>" + chips(arch) : "";
+        var tollS = mortTollShort(e.toll), full = (M.types && M.types[e.ty]) || e.ty;
+        /* THREE LINES A CARD, THE REST ON REQUEST. David, twice: «still really busy! and wordy!» The card says what it was, when, how
+           many died and whether the atlas holds books for those years. The summary, the caveat on the figures and where to look
+           open under «Details». */
+        var inner = (e.says ? '<p class="ra-mn-s">' + esc(e.says) + '</p>' : "") +
+          (e.open ? '<p class="ra-mn-o">' + esc(e.open) + '</p>' : "") +
+          '<p class="ra-mn-ty">' + esc(full) + " \u00b7 est. deaths " + esc(mortTollTxt(e.toll)) + "</p>" +
+          (rec ? '<p class="ra-mn-g">Where to look</p><p class="ra-mn-w">' + esc(rec) + '</p>' + recHtml + archHtml : "");
+        return '<li class="ra-mn-c k-' + esc(e.ty) + '"><div class="ra-mn-t"><b>' + esc(e.n) + '</b><span class="ra-mn-y">' + esc(yrs) + '</span></div>' +
+          '<p class="ra-mn-m"><span>' + esc(MORT_SHORT[e.ty] || e.ty) + '</span>' + (tollS ? '<span>' + esc(tollS) + ' deaths</span>' : "") + '</p>' +
           line +
-          (rec ? '<details class="ra-mn-r"><summary>Where to look</summary><p>' + esc(rec) + '</p>' + recHtml + archHtml + '</details>' : "") + '</li>';
+          (inner ? '<details class="ra-mn-r"><summary>Details</summary>' + inner + '</details>' : "") + '</li>';
       });
       /* A battlefield town can sit inside dozens of wars: show the first six, fold the rest so the panel stays readable. */
       if (li.length > 7) {
@@ -2701,8 +2813,8 @@ window.addEventListener("load", async function () {
       pill.innerHTML = '<i aria-hidden="true"></i>' + label;
       var box = document.createElement("div");
       box.className = "ra-mortnote"; box.hidden = true;
-      box.innerHTML = '<ul>' + li + '</ul><p class="ra-mn-f">From the Mass mortality layer on the <a href="' + BASE +
-        'history/?chapter=mass-mortality">History map</a>. Outlines are approximate; a name missing from these years is not proof the person was not there.</p>';
+      box.innerHTML = '<ul>' + li + '</ul><p class="ra-mn-f">From the <a href="' + BASE +
+        'history/?chapter=mass-mortality">History map</a>. Outlines are approximate, and a gap in the records is not proof nobody was here.</p>';
       pill.addEventListener("click", function () {
         box.hidden = !box.hidden; pill.setAttribute("aria-expanded", box.hidden ? "false" : "true");
       });
@@ -2720,6 +2832,7 @@ window.addEventListener("load", async function () {
       catch (e) { panel.innerHTML = '<p class="at-sub">Could not load this place.</p>'; return; }
     }
     setQ("at", p.i);
+    panelAt = p.i; panelQ = qbox.value;
     panel.innerHTML = render(d);
     bandsInit(panel);
     paintIcoFlags(panel);
@@ -2876,7 +2989,11 @@ window.addEventListener("load", async function () {
     /* THE BOOKS THEMSELVES. «Croatia, Church Books, 1516–1994 covers this
        place» is true and one step short of what a researcher needs: which
        book, for which years, and where is it. */
+    /* THE BOOKS ARE BUILT HERE BUT PLACED LATER: they are FamilySearch's own volumes, so when the FamilySearch column exists they
+       sit in it (David: «shouldn't they have moved to the family search area?»), and otherwise they stand alone as they did. */
+    var volHtml = "", hMain = h;
     if (d.volumes && d.volumes.length) {
+      h = [];
       /* TWO VOCABULARIES, BECAUSE THERE ARE TWO WALKS. Croatia's books were
          read in a browser and carry the EVENT — Births, Marriages, Deaths —
          parsed from titles that were all in one language. The rest of the
@@ -2911,8 +3028,7 @@ window.addEventListener("load", async function () {
                   " are listed here. "
                 : d.volumes.length + " book" +
                   (d.volumes.length === 1 ? "" : "s") + " catalogued for this place. ") +
-             "<b>Nobody here has opened any of them</b> — these are the " +
-             "catalogue's own titles and the links that open the images.</p>");
+             "<b>Nobody here has opened any of them</b>: the titles are the catalogue's own.</p>");
       /* A COLUMN PER RECORD TYPE, NOT ONE LIST POURED THROUGH COLUMNS.
          David: «could we rather show these as columns? eg births all together
          in a column, then marriages, then deaths?» The list was `columns:
@@ -2971,6 +3087,7 @@ window.addEventListener("load", async function () {
       });
       h.push("</div>");          /* .at-kinds */
       h.push("</div>");
+      volHtml = h.join(""); h = hMain;
     }
 
     /* THE NATIONAL SOURCES, WHICH NO PANEL HAS EVER SHOWN. David clicked an
@@ -2994,7 +3111,8 @@ window.addEventListener("load", async function () {
        the same as having read what is behind it. */
     var cs = d.collections.slice();
     if (year) cs = cs.filter(function (c) { return covers(c, year, year2); });
-    var srcHtml = placeSources(d, d.collections, cs);
+    var srcHtml = placeSources(d, d.collections, cs, volHtml);
+    if (volHtml && !volInFS) h.push(volHtml);
     h.push(srcHtml);
     var moved = fsMoved;
 
@@ -3791,7 +3909,7 @@ window.addEventListener("load", async function () {
         dashArray: rich ? null : "2 3"
       });
       m.bindTooltip(c.n, { sticky: true });
-      m.on("click", function () { openCountry(c); });
+      m.on("click", function () { if (AREA && AREA.mode) return; openCountry(c); });
       m._cc = c.cc; m._n = fold(c.n);
       cmarks.push(m);
       m.addTo(countryLayer);
@@ -4705,6 +4823,12 @@ window.addEventListener("load", async function () {
     if (h0 && h0.n && h0.n !== q0 && h0.n.toLowerCase().indexOf(q0.toLowerCase()) === 0) setQ("q", h0.n);
   })();
   qbox.value = Q.get("q") || "";
+  /* A PLACE NAMED IN THE ADDRESS IS BEING OPENED, SO NO SEARCH MAY SAY IT IS NOT THERE. David: clicked Senj, the page came up; reloaded
+     the same address and the panel said «No places of that name here yet» about the very place the address names. The first pass of
+     the search runs before the place's own panel has loaded, finds nothing yet, and its «elsewhere» answer lands AFTER the place
+     panel and overwrites it. While the place named by ?at= is still loading, that fallback stays quiet. */
+  var atPending = Q.get("at") || null;
+  var panelAt = null, panelQ = null;
   /* A year the place cannot answer for is a place that is not an answer. The
      index carries no spans, so this uses the volume count as a cheap proxy and
      the panel does the exact test — except that the exact test is the one that
@@ -5056,7 +5180,10 @@ window.addEventListener("load", async function () {
        standing in Dublin, and the difference between "we have not walked this"
        and "there is nothing here" has to be said out loud every single time or
        the map quietly implies a completeness it does not have. */
-    if (!shown) elsewhere(qbox.value.trim());
+    /* A PLACE THAT IS OPEN, FOR THE SEARCH THAT OPENED IT, IS NOT «NOT HERE». A later pass of apply() (the quiet dots arriving, a filter
+       settling) can count zero matches for the label the pick wrote into the box, and the «elsewhere» answer then replaced a place
+       panel that was correct: «a refresh on the map suddenly doesn't show anything for a place». Only a changed search may say it. */
+    if (!shown && !atPending && !(panelAt && panelAt === Q.get("at") && qbox.value === panelQ)) elsewhere(qbox.value.trim());
   }
 
   /* THE ANSWER TO «A NAME, IN A PLACE».
@@ -7515,12 +7642,14 @@ window.addEventListener("load", async function () {
       });
       return a;
     }
+    /* the About menu has two tiers (Learn, The sources): the entry belongs at the end of the first, before the second heading */
+    function put(box, second) { if (second) box.insertBefore(entry(), second); else box.appendChild(entry()); }
     document.querySelectorAll("#drawer .dgrp").forEach(function (g) {
-      var gl = g.querySelector(".gl"); if (gl && gl.textContent.trim() === "About") g.appendChild(entry());
+      var gl = g.querySelector(".gl"); if (gl && gl.textContent.trim() === "About") put(g, g.querySelectorAll(".gl2")[1]);
     });
     document.querySelectorAll(".topnav details.menu").forEach(function (d) {
       var sm = d.querySelector("summary"), pn = d.querySelector(".panel");
-      if (sm && pn && sm.textContent.trim() === "About") pn.appendChild(entry());
+      if (sm && pn && sm.textContent.trim() === "About") put(pn, pn.querySelectorAll(".ph")[1]);
     });
   })();
   /* FULL SCREEN LIVES ON THE MAP. David, on seeing the one on the History map: «Love it onto the map». It sat in
@@ -7537,6 +7666,323 @@ window.addEventListener("load", async function () {
       }
     });
     new Ctl({ position: "topleft" }).addTo(map);
+  })();
+  /* ---- DRAW AN AREA ------------------------------------------------------------------------------------------------
+     David: «if I was to draw an area on the map, can that area show me all the resources in it in the right pane, with colours
+     for what I have already researched, and can I then add all of them to my research list?»
+
+     Two tools in one control: a box (two taps, opposite corners) and a shape (tap the corners, finish on the first corner, a
+     double tap or the Finish button). Taps, not dragging, so it works the same with a mouse and a finger. The area stays on
+     the map; the right pane lists what lies inside it, by how far the selected family line has got:
+       Not started / On my list / Busy researching / Researched
+     and «Add to my list» marks every volume and archive that is not on the list yet as «planned» for that line, with an Undo.
+     What it can say is bounded and the pane says so: only catalogued places are inside (a country-wide source reaches an area
+     from outside it), each place's books are read from its own file in batches (at most AREA_CAP places), and «researched» is
+     what is marked in this browser for the line that is selected. */
+  var AREA = { mode: null, pts: [], rubber: null, poly: null, tmp: null, rows: null, done: false, bar: null, hint: null, added: null };
+  var AREA_CAP = 120, ADD_CAP = 500;
+  function areaInside(lat, lon, ring) {
+    var inside = false, i, j, a, b;
+    for (i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      a = ring[i]; b = ring[j];
+      if ((a.lng > lon) !== (b.lng > lon) && lat < (b.lat - a.lat) * (lon - a.lng) / (b.lng - a.lng) + a.lat) inside = !inside;
+    }
+    return inside;
+  }
+  function areaBox(msg, withFinish) {
+    if (!AREA.hint) {
+      AREA.hint = document.createElement("div"); AREA.hint.className = "ra-area-hint";
+      map.getContainer().appendChild(AREA.hint);
+      L.DomEvent.disableClickPropagation(AREA.hint);
+    }
+    AREA.hint.innerHTML = "<span>" + msg + "</span>" + (withFinish ? '<button type="button" data-a="finish">Finish</button>' : "") +
+      '<button type="button" data-a="cancel">Cancel</button>';
+    AREA.hint.hidden = false;
+  }
+  function areaCancelDraw() {
+    map.off("click", areaClick); map.off("mousemove", areaMove); map.off("dblclick", areaDbl);
+    document.removeEventListener("keydown", areaKey);
+    map.getContainer().classList.remove("ra-drawing");
+    map.doubleClickZoom.enable();
+    if (AREA.rubber) { map.removeLayer(AREA.rubber); AREA.rubber = null; }
+    if (AREA.hint) AREA.hint.hidden = true;
+    AREA.mode = null; AREA.pts = [];
+    [].forEach.call(document.querySelectorAll(".ra-areactl a"), function (a) { a.classList.remove("on"); });
+  }
+  function areaClear() {
+    areaCancelDraw();
+    if (AREA.poly) { map.removeLayer(AREA.poly); AREA.poly = null; }
+    if (AREA.bar) AREA.bar.hidden = true;
+    AREA.rows = null; AREA.done = false;
+  }
+  function areaStart(mode) {
+    var was = AREA.mode; areaCancelDraw();
+    if (was === mode) return;                       /* the same button again stops drawing */
+    if (AREA.poly) { map.removeLayer(AREA.poly); AREA.poly = null; if (AREA.bar) AREA.bar.hidden = true; }
+    AREA.mode = mode; AREA.pts = [];
+    map.getContainer().classList.add("ra-drawing");
+    map.doubleClickZoom.disable();
+    map.on("click", areaClick); map.on("mousemove", areaMove); map.on("dblclick", areaDbl);
+    document.addEventListener("keydown", areaKey);
+    var btn = document.querySelector('.ra-areactl a[data-m="' + mode + '"]'); if (btn) btn.classList.add("on");
+    areaBox(mode === "box" ? "Tap one corner, then the opposite corner" : "Tap the corners of your area. Finish on the first corner, or press Finish", mode === "shape");
+  }
+  function areaKey(e) { if (e.key === "Escape") areaCancelDraw(); }
+  function areaMove(e) {
+    if (!AREA.pts.length) return;
+    var pts = AREA.pts.concat([e.latlng]);
+    var ring = AREA.mode === "box" ? areaRect(AREA.pts[0], e.latlng) : pts;
+    if (!AREA.rubber) AREA.rubber = L.polygon(ring, { color: "#1F5C6B", weight: 2, dashArray: "6 4", fillOpacity: .06, interactive: false }).addTo(map);
+    else AREA.rubber.setLatLngs(ring);
+  }
+  function areaRect(a, b) { return [L.latLng(a.lat, a.lng), L.latLng(a.lat, b.lng), L.latLng(b.lat, b.lng), L.latLng(b.lat, a.lng)]; }
+  function areaClick(e) {
+    if (AREA.mode === "box") {
+      AREA.pts.push(e.latlng);
+      if (AREA.pts.length === 2) areaFinish(areaRect(AREA.pts[0], AREA.pts[1])); else areaBox("Now tap the opposite corner", false);
+      return;
+    }
+    if (AREA.pts.length >= 3) {
+      var d = map.latLngToContainerPoint(e.latlng).distanceTo(map.latLngToContainerPoint(AREA.pts[0]));
+      if (d < 14) { areaFinish(AREA.pts.slice()); return; }
+    }
+    AREA.pts.push(e.latlng);
+    areaBox(AREA.pts.length < 3 ? "Keep tapping the corners (" + AREA.pts.length + " so far)" : AREA.pts.length + " corners. Finish on the first corner, or press Finish", true);
+  }
+  function areaDbl() { if (AREA.mode === "shape" && AREA.pts.length >= 4) { AREA.pts.pop(); areaFinish(AREA.pts.slice()); } }
+  function areaFinish(ring) {
+    if (!ring || ring.length < 3) return;
+    areaCancelDraw();
+    AREA.added = null; AREA.confirm = false;
+    AREA.poly = L.polygon(ring, { color: "#1F5C6B", weight: 2.5, dashArray: "7 5", fillColor: "#1F5C6B", fillOpacity: .09, interactive: false }).addTo(map);
+    if (!AREA.bar) {
+      AREA.bar = document.createElement("div"); AREA.bar.className = "ra-area-bar";
+      map.getContainer().appendChild(AREA.bar); L.DomEvent.disableClickPropagation(AREA.bar);
+    }
+    AREA.bar.innerHTML = '<span id="ra-area-n">Reading the area…</span><button type="button" data-a="show">Show</button><button type="button" data-a="clear">Clear</button>';
+    AREA.bar.hidden = false;
+    areaAnalyse(ring);
+  }
+  /* The tail cells that overlap the area's box must be in before the places inside it can be counted. */
+  function areaEnsureCells(bounds) {
+    return new Promise(function (resolve) {
+      var t0 = Date.now();
+      function need() {
+        var out = [];
+        if (TAIL) for (var k in TAIL.cells) {
+          var xy = k.split("_"), y = +xy[0], x = +xy[1], d = TAIL.deg;
+          if (y <= bounds.getNorth() && y + d >= bounds.getSouth() && x <= bounds.getEast() && x + d >= bounds.getWest() && tailState[k] !== 2) out.push(k);
+        }
+        return out;
+      }
+      (function tick() {
+        var n = need();
+        n.forEach(function (k) { fetchCell(k); });
+        if ((!n.length && quietIn) || Date.now() - t0 > 12000) { resolve(); return; }
+        setTimeout(tick, 200);
+      })();
+    });
+  }
+  function areaInfo(p) { return { p: p, st: rcState(p) }; }
+  var AREA_ORDER = ["none", "list", "busy", "done"];
+  function areaAnalyse(ring) {
+    var bounds = L.polygon(ring).getBounds();
+    empty.hidden = true; panel.hidden = false; setQ("at", "");
+    panel.innerHTML = '<div class="ra-area"><p class="at-sub">Reading the places inside your area…</p></div>';
+    areaEnsureCells(bounds).then(function () {
+      rcIdx = null;
+      var inside = idx.places.filter(function (p) { return p.y != null && areaInside(p.y, p.x, ring); });
+      var arch = archives.filter(function (a) { return areaInside(a.at.lat, a.at.lon, ring); });
+      AREA.rows = { ring: ring, places: inside, arch: arch, vols: null, loading: false };
+      areaRender();
+      areaLoadVolumes();
+    });
+  }
+  function nfl(n) { return n.toLocaleString(); }
+  function areaRender() {
+    var R = AREA.rows; if (!R) return;
+    var P = window.raProgress, line = P ? (P.lines().filter(function (l) { return l.active; })[0] || {}).name : "";
+    var groups = { none: [], list: [], busy: [], done: [] }, vtot = 0;
+    R.places.forEach(function (p) { groups[rcState(p)].push(p); vtot += (p.v || 0) || (p.c || 0); });
+    var n = document.getElementById("ra-area-n");
+    if (n) n.textContent = "Area: " + nfl(R.places.length) + " place" + (R.places.length === 1 ? "" : "s") + " · " + nfl(vtot) + " volume" + (vtot === 1 ? "" : "s");
+    var h = ['<div class="ra-area">'];
+    h.push('<div class="at-h"><h3>Your area</h3></div>');
+    h.push('<p class="ra-area-sum"><b>' + nfl(R.places.length) + "</b> catalogued place" + (R.places.length === 1 ? "" : "s") + " · <b>" + nfl(vtot) + "</b> volume" + (vtot === 1 ? "" : "s") +
+           " · <b>" + nfl(R.arch.length) + "</b> archive" + (R.arch.length === 1 ? "" : "s") + ". Colours show <b>" + esc(line || "your research") + "</b>.</p>");
+    h.push('<div class="ra-area-tally">' + ["done", "busy", "list", "none"].map(function (k) {
+      return '<span><i style="background:' + RC_COL[k] + '"></i>' + RC_LAB[k] + " <b>" + nfl(groups[k].length) + "</b></span>";
+    }).join("") + "</div>");
+    if (!R.places.length) h.push('<p class="at-sub">No catalogued place lies inside this area. Country-wide sources still apply: open a place or a country for them.</p>');
+    /* the add button, once the volumes are in */
+    h.push('<div class="ra-area-add" id="ra-area-add"></div>');
+    AREA_ORDER.slice().reverse().concat([]).forEach(function () {});
+    ["busy", "list", "none", "done"].forEach(function (k) {
+      var g = groups[k]; if (!g.length) return;
+      g.sort(function (a, b) { return a.n.localeCompare(b.n); });
+      h.push('<details class="ra-area-g" ' + (k !== "none" || g.length <= 40 ? "open" : "") + '><summary><i style="background:' + RC_COL[k] + '"></i>' + RC_LAB[k] + " <b>" + nfl(g.length) + "</b></summary><ul>");
+      g.slice(0, 400).forEach(function (p) {
+        var nv = (p.v || 0) || (p.c || 0);
+        h.push('<li><button type="button" class="ra-area-p" data-open="' + esc(p.i) + '"><i' + (k === "busy" ? ' class="pz"' : "") + ' style="background:' + RC_COL[k] + '"></i><span>' + esc(p.n) + "</span>" +
+               '<small>' + (CNAME[p.cc] || p.cc || "") + (nv ? " · " + nfl(nv) + " vol" : " · no volumes") + "</small></button>" +
+               '<div class="ra-area-v" data-vols="' + esc(p.i) + '"></div></li>');
+      });
+      if (g.length > 400) h.push('<li class="at-sub">…and ' + nfl(g.length - 400) + " more. Draw a smaller area to see them.</li>");
+      h.push("</ul></details>");
+    });
+    if (R.arch.length) {
+      h.push('<details class="ra-area-g" open><summary><i style="background:#8A6D3B"></i>Archives in this area <b>' + nfl(R.arch.length) + "</b></summary><ul>");
+      R.arch.slice().sort(function (a, b) { return a.name.localeCompare(b.name); }).forEach(function (a) {
+        var st = volStatus("source:" + a.id);
+        h.push('<li><a class="ra-area-p" href="' + BASE + "archive/" + esc(a.id) + '/"><i style="background:' + RC_COL[st] + '"></i><span>' + esc(a.name) + "</span><small>" +
+               esc((a.at && a.at.place) || "") + "</small></a></li>");
+      });
+      h.push("</ul></details>");
+    }
+    h.push('<p class="at-sub">Only catalogued places are inside; a source that covers a whole country reaches the area from outside it. Colours read the family line selected in the header.</p></div>');
+    panel.innerHTML = h.join("");
+    areaFillVolumes();
+  }
+  /* The volumes of every place in the area that has any: one file per place, six at a time, up to AREA_CAP places. */
+  function areaLoadVolumes() {
+    var R = AREA.rows; if (!R || R.loading) return;
+    R.loading = true; R.vols = {};
+    var want = R.places.filter(function (p) { return ((p.v || 0) || (p.c || 0)) > 0; }).sort(function (a, b) { return ((b.v || 0) - (a.v || 0)); }).slice(0, AREA_CAP);
+    R.capped = R.places.filter(function (p) { return ((p.v || 0) || (p.c || 0)) > 0; }).length > want.length;
+    var i = 0, done = 0, total = want.length, add = document.getElementById("ra-area-add");
+    if (!total) { areaAddUi(); return; }
+    function next() {
+      if (AREA.rows !== R) return;
+      if (i >= want.length) return;
+      var p = want[i++];
+      (cache[p.i] ? Promise.resolve(cache[p.i]) : fetch(DETAIL + p.i + ".json").then(function (r) { return r.json(); }))
+        .then(function (d) { cache[p.i] = d; R.vols[p.i] = { p: p, vols: d.volumes || [] }; })
+        .catch(function () { R.vols[p.i] = { p: p, vols: [] }; })
+        .then(function () {
+          done++;
+          var a = document.getElementById("ra-area-add");
+          if (a && AREA.rows === R && done < total) a.innerHTML = '<p class="at-sub">Reading the books… ' + done + " of " + total + " places</p>";
+          if (done >= total && AREA.rows === R) { R.loading = false; areaFillVolumes(); areaAddUi(); } else next();
+        });
+    }
+    if (add) add.innerHTML = '<p class="at-sub">Reading the books… 0 of ' + total + " places</p>";
+    for (var w = 0; w < 6; w++) next();
+  }
+  function areaVolId(v) { return "volume:" + (v.waypoint || v.url || v.t); }
+  var AREA_KIND = [/birth|baptis|christen|nati|rođen|rodjen/i, /marri|wedding|vjen|matrim/i, /death|burial|buried|umrl|mort|sepolt/i];
+  function areaKindRank(t) { for (var i = 0; i < AREA_KIND.length; i++) if (AREA_KIND[i].test(t)) return i; return 3; }
+  function areaFillVolumes() {
+    var R = AREA.rows; if (!R || !R.vols) return;
+    var ids = Object.keys(R.vols), openAll = ids.length <= 8;
+    ids.forEach(function (id) {
+      var box = panel.querySelector('[data-vols="' + id + '"]'); if (!box) return;
+      var e = R.vols[id], vs = e.vols.slice(); if (!vs.length) return;
+      vs.sort(function (a, b) { return areaKindRank(a.t) - areaKindRank(b.t) || (a.from || 9999) - (b.from || 9999) || a.t.localeCompare(b.t); });
+      var where = e.p.n + (e.p.cc ? ", " + (CNAME[e.p.cc] || e.p.cc) : "");
+      var li = vs.map(function (v) {
+        var vid = areaVolId(v), st = volStatus(vid);
+        return '<li data-vol="' + esc(vid) + '" data-vol-t="' + esc(v.t) + '" data-vol-where="' + esc(where) + '" data-vol-href="' + esc(BASE + "place/" + e.p.i + '/') + '">' +
+               '<i' + (st === "busy" ? ' class="pz"' : "") + ' style="background:' + RC_COL[st] + '"></i>' +
+               '<span class="ra-vt" title="' + esc(v.t) + '">' + (v.url ? '<a href="' + esc(v.url) + '" target="_blank" rel="noopener">' + esc(v.t) + "</a>" : esc(v.t)) + "</span>" +
+               '<span class="ra-vy">' + (v.from ? v.from + "\u2013" + v.to : "") + "</span>" +
+               '<span class="volmark"></span></li>';
+      }).join("");
+      box.innerHTML = "<details" + (openAll || rcState(e.p) !== "none" ? " open" : "") + "><summary>" + vs.length + " book" + (vs.length === 1 ? "" : "s") + '</summary><ul class="ra-vl">' + li + "</ul></details>";
+    });
+  }
+  /* A mark made in the list recolours the dots at once; the groups themselves stay put until Show, so a row does not jump away under the pointer. */
+  document.addEventListener("ra-progress-changed", function () {
+    if (!AREA.rows) return;
+    [].forEach.call(panel.querySelectorAll(".ra-vl > li[data-vol]"), function (li) {
+      var d = li.firstChild, st = volStatus(li.getAttribute("data-vol"));
+      if (d && d.style) { d.style.background = RC_COL[st]; d.classList.toggle("pz", st === "busy"); }
+    });
+  });
+  function areaCandidates() {
+    var R = AREA.rows, out = [];
+    if (!R || !R.vols) return out;
+    Object.keys(R.vols).forEach(function (id) {
+      var p = R.vols[id].p;
+      R.vols[id].vols.forEach(function (v) {
+        var vid = areaVolId(v);
+        if (volStatus(vid) === "none" && !(window.raProgress.get(vid) || {}).state)
+          out.push({ id: vid, t: v.t, where: p.n + (p.cc ? ", " + (CNAME[p.cc] || p.cc) : ""), href: BASE + "place/" + p.i + "/" });
+      });
+    });
+    R.arch.forEach(function (a) {
+      var vid = "source:" + a.id;
+      if (!(window.raProgress.get(vid) || {}).state) out.push({ id: vid, t: a.name, where: (a.at && a.at.place) || "", href: BASE + "archive/" + a.id + "/" });
+    });
+    return out;
+  }
+  function areaAddUi() {
+    var box = document.getElementById("ra-area-add"); if (!box || !AREA.rows) return;
+    var P = window.raProgress, line = (P.lines().filter(function (l) { return l.active; })[0] || {}).name || "my research";
+    var c = areaCandidates(), R = AREA.rows;
+    var cap = R.capped ? " Only the " + AREA_CAP + " places with the most books were read; draw a smaller area for the rest." : "";
+    if (AREA.added) {
+      box.innerHTML = '<p class="ra-area-ok">Added ' + nfl(AREA.added.length) + " to the list for <b>" + esc(line) + '</b>. <button type="button" data-a="undo">Undo</button></p>';
+      return;
+    }
+    if (!c.length) { box.innerHTML = '<p class="at-sub">Everything found here is already on the list or started.' + cap + "</p>"; return; }
+    var n = Math.min(c.length, ADD_CAP);
+    if (AREA.confirm) {
+      box.innerHTML = '<p class="ra-area-ok">Add <b>' + nfl(n) + "</b> to the list for <b>" + esc(line) + "</b>? You can undo it straight after.<br>" +
+        '<button type="button" data-a="yes">Yes, add them</button><button type="button" data-a="no">Cancel</button></p>';
+      return;
+    }
+    box.innerHTML = '<button type="button" class="ra-area-addb" data-a="add">Add ' + nfl(n) + " not started to " + esc(line) + "'s list</button>" +
+      (c.length > ADD_CAP ? '<p class="at-sub">That is the first ' + nfl(ADD_CAP) + " of " + nfl(c.length) + ". Draw a smaller area for the rest.</p>" : "") +
+      (cap ? '<p class="at-sub">' + cap.trim() + "</p>" : "");
+  }
+  function areaDoAdd() {
+    var c = areaCandidates().slice(0, ADD_CAP), P = window.raProgress;
+    c.forEach(function (x) { P.setWhat(x.id, { t: x.t, where: x.where, href: x.href }); P.setState(x.id, "planned"); });
+    AREA.added = c.map(function (x) { return x.id; });
+    document.dispatchEvent(new CustomEvent("ra-progress-changed"));
+    rcIdx = null; paintProgressRings(); rcRepaint(); areaRender(); areaAddUi();
+  }
+  function areaUndo() {
+    var P = window.raProgress, ids = AREA.added || [];
+    ids.forEach(function (id) { if ((P.get(id) || {}).state === "planned") P.setState(id, ""); });
+    AREA.added = null;
+    document.dispatchEvent(new CustomEvent("ra-progress-changed"));
+    rcIdx = null; paintProgressRings(); rcRepaint(); areaRender(); areaAddUi();
+  }
+  /* The control, the hint bar and the result bar share one click handler on the map's container. */
+  (function () {
+    var Ctl = L.Control.extend({
+      onAdd: function () {
+        var d = L.DomUtil.create("div", "leaflet-bar ra-areactl");
+        d.innerHTML =
+          '<a href="#" role="button" data-m="box" title="Draw a box: tap two opposite corners" aria-label="Draw a box on the map">' +
+          '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><rect x="2.5" y="3.5" width="11" height="9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 2"/></svg></a>' +
+          '<a href="#" role="button" data-m="shape" title="Draw a shape: tap its corners" aria-label="Draw a free shape on the map">' +
+          '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3 5l6-2.5 4 4-1.5 6L4.5 12z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 2" stroke-linejoin="round"/></svg></a>';
+        L.DomEvent.disableClickPropagation(d);
+        d.addEventListener("click", function (e) {
+          var a = e.target.closest("a[data-m]"); if (!a) return;
+          e.preventDefault(); areaStart(a.getAttribute("data-m"));
+        });
+        return d;
+      }
+    });
+    new Ctl({ position: "topleft" }).addTo(map);
+    map.getContainer().addEventListener("click", function (e) {
+      var b = e.target.closest && e.target.closest("[data-a]"); if (!b || !map.getContainer().contains(b)) return;
+      var a = b.getAttribute("data-a");
+      if (a === "cancel") areaCancelDraw();
+      else if (a === "finish") { if (AREA.pts.length >= 3) areaFinish(AREA.pts.slice()); }
+      else if (a === "clear") areaClear();
+      else if (a === "show") { if (AREA.rows) { areaRender(); areaAddUi(); } }
+    });
+    panel.addEventListener("click", function (e) {
+      var o = e.target.closest && e.target.closest("[data-open]");
+      if (o) { var pid = o.getAttribute("data-open"), pl = idx.places.filter(function (p) { return p.i === pid; })[0]; if (pl) open(pl); return; }
+      var b = e.target.closest && e.target.closest(".ra-area [data-a]"); if (!b) return;
+      var a = b.getAttribute("data-a");
+      if (a === "add") { AREA.confirm = true; areaAddUi(); } else if (a === "no") { AREA.confirm = false; areaAddUi(); } else if (a === "yes") { AREA.confirm = false; areaDoAdd(); } else if (a === "undo") areaUndo();
+    });
   })();
 
   function setFull(on2) {
@@ -7695,7 +8141,14 @@ window.addEventListener("load", async function () {
   var opened = false;
   if (openAt) {
     var hit = idx.places.filter(function (p) { return p.i === openAt; })[0];
-    if (hit) { open(hit); opened = true; }
+    if (hit) { opened = true; open(hit).then(function () { atPending = null; }, function () { atPending = null; }); }
+    else {
+      /* NOT IN THE FIRST-LOAD INDEX: it is one of the places that arrive with the map area (or never drawn at all), so the address
+         cannot be matched to a row. Its own detail file knows its name and position, which is all open() needs. */
+      fetch(DETAIL + openAt + ".json").then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+        if (d && d.id === openAt && d.lat != null && d.lon != null) { opened = true; return open({ i: d.id, n: d.name, x: d.lon, y: d.lat, cc: d.country }); }
+      }).catch(function () {}).then(function () { atPending = null; });
+    }
   }
 
   /* ---- the quiet dots, once the map is already up -------------------------
@@ -8414,6 +8867,11 @@ window.addEventListener("load", async function () {
   :global(.at-kinds) { display: grid; gap: 4px 30px;
     grid-template-columns: repeat(auto-fit, minmax(19em, 1fr)); }
   :global(.at-kinds .at-films) { columns: auto; column-gap: normal; }
+  /* the books inside the FamilySearch column: one narrow column, kinds stacked, no second top rule */
+  :global(.src-fsb) { margin-top: 14px; padding-top: 4px; border-top: 1px solid var(--rule); }
+  :global(.src-fsb .at-sec) { margin: 0; padding: 0; border: 0; }
+  :global(.src-fsb .at-kinds) { grid-template-columns: 1fr; gap: 0; }
+  :global(.src-fsb .at-sub) { font-size: 11px; }
   :global(.at-kinds .at-kind .lab) { margin: 10px 0 2px; }
   /* The country a run of archives belongs to, set as a rule over them. In a
      multi-column list a heading that lands at the foot of a column labels
@@ -8477,23 +8935,52 @@ window.addEventListener("load", async function () {
   :global(.ra-mortpill:hover) { background: #333; }
   :global(.ra-mortpill[aria-expanded="true"]) { background: #fff; color: #111; box-shadow: inset 0 0 0 1.5px #111; }
   :global(.ra-mortpill[aria-expanded="true"] i) { background: #111; }
-  :global(.ra-mortnote) { grid-column: 1 / -1; margin: 4px 0 10px; padding: 12px 16px 8px; border-radius: 8px; border-left: 4px solid #111;
-    background: color-mix(in srgb, var(--ink, #222) 4%, transparent); }
-  :global(.ra-mortnote > ul) { margin: 0; padding: 0; list-style: none; columns: 2 340px; column-gap: 32px; }
-  :global(.ra-mortnote li.ra-mn-more > details > summary) { cursor: pointer; color: var(--ink-3); font-size: 12px; }
-  :global(.ra-mortnote li.ra-mn-more ul) { margin-top: 10px; }
-  :global(.ra-mortnote li) { break-inside: avoid; margin: 0 0 14px; font: 400 12.5px/1.5 var(--sans, system-ui); }
-  :global(.ra-mn-t) { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
-  :global(.ra-mn-t b) { font-size: 13.5px; }
-  :global(.ra-mn-y) { padding: 0 7px; border-radius: 3px; background: #111; color: #fff; font: 600 10.5px/1.7 var(--mono); }
-  :global(.ra-mn-m) { margin: 1px 0 4px; font: 400 11px/1.5 var(--mono); color: var(--ink-3); }
-  :global(.ra-mn-s) { margin: 0 0 4px; color: var(--ink-2, inherit); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  :global(.ra-mn-o) { font-style: italic; -webkit-line-clamp: 1; }
-  :global(.ra-mn-v) { display: inline-block; margin-top: 2px; font: 600 11px/1.5 var(--mono); color: var(--ink-3); }
-  :global(.ra-mn-yes) { color: #0a6b3a; }
-  :global(.ra-mn-r) { margin-top: 3px; font-size: 11.5px; }
-  :global(.ra-mn-r > summary) { cursor: pointer; color: var(--ink-3); font: 500 11px/1.5 var(--mono); }
-  :global(.ra-mn-r > p) { margin: 4px 0 0; }
+  /* THE EVENTS AS CARDS. David, seeing a wall of small grey type: «can we neaten this all up. really not exciting». Each event is now a
+     card: a coloured top edge for the kind of event, the name with its years, what and how many on two quiet chips, the summary,
+     one status line for what the atlas holds, and «Where to look» as a button that opens link chips grouped under plain headings. */
+  :global(.ra-mortnote) { grid-column: 1 / -1; margin: 6px 0 12px; padding: 0; border: 0; background: none; }
+  :global(.ra-mortnote > ul) { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); grid-auto-rows: 1fr; gap: 10px; align-items: stretch; }
+  :global(.ra-mortnote li.ra-mn-more) { grid-column: 1 / -1; }
+  :global(.ra-mortnote li.ra-mn-more > details > summary) { cursor: pointer; color: var(--accent); font: 600 13px/1.5 var(--sans, system-ui); }
+  :global(.ra-mortnote li.ra-mn-more ul) { margin: 10px 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); grid-auto-rows: 1fr; gap: 10px; align-items: stretch; }
+  :global(.ra-mortnote li.ra-mn-c) { margin: 0; padding: 12px 14px 10px; border: 1px solid var(--rule); border-top: 4px solid var(--mn, #6b7780); border-radius: 10px;
+    background: var(--panel, #fff); font: 400 13px/1.5 var(--sans, system-ui); display: flex; flex-direction: column; gap: 6px; }
+  :global(.ra-mortnote .k-war) { --mn: #a4302a; }
+  :global(.ra-mortnote .k-genocide), :global(.ra-mortnote .k-atrocity), :global(.ra-mortnote .k-massacre) { --mn: #6d1f4b; }
+  :global(.ra-mortnote .k-epidemic) { --mn: #2f7d6d; }
+  :global(.ra-mortnote .k-famine) { --mn: #b8860b; }
+  :global(.ra-mortnote .k-displacement) { --mn: #35606e; }
+  :global(.ra-mn-t) { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+  :global(.ra-mn-t b) { min-height: 2.5em; }
+  /* opening one card's Details must not stretch every other card to match it */
+  :global(.ra-mortnote ul:has(details[open])) { grid-auto-rows: auto; align-items: start; }
+  :global(.ra-mn-t b) { font: 700 16px/1.25 var(--serif, Georgia, serif); }
+  :global(.ra-mn-y) { padding: 1px 8px; border-radius: 999px; background: color-mix(in srgb, var(--mn, #6b7780) 14%, transparent); color: var(--mn, #444);
+    font: 700 11px/1.7 var(--mono); white-space: nowrap; }
+  :global(.ra-mn-m) { margin: 0; display: flex; flex-wrap: wrap; gap: 4px 8px; font: 400 11.5px/1.4 var(--mono); color: var(--ink-3); }
+  :global(.ra-mn-m span + span::before) { content: "\00b7"; margin-right: 8px; }
+  :global(.ra-mn-s) { margin: 8px 0 0; color: var(--ink-2, inherit); }
+  :global(.ra-mn-ty) { margin: 8px 0 0; font: 400 11.5px/1.4 var(--mono); color: var(--ink-3); }
+  :global(.ra-mn-o) { margin: 8px 0 0; padding-left: 10px; border-left: 2px solid var(--rule); font: italic 400 12px/1.45 var(--sans, system-ui); color: var(--ink-3); }
+  :global(.ra-mn-v) { margin: 0; display: flex; align-items: baseline; gap: 7px; padding: 6px 10px; border-radius: 6px; background: var(--ground, #eee);
+    font: 600 12px/1.4 var(--sans, system-ui); color: var(--ink-2); }
+  :global(.ra-mn-v i) { font-style: normal; font-weight: 800; color: var(--ink-3); }
+  :global(.ra-mn-v small) { font-weight: 400; color: var(--ink-3); }
+  :global(.ra-mn-yes) { background: rgba(31,157,85,.13); color: #0a6b3a; }
+  :global(.ra-mn-yes i) { color: #0a6b3a; }
+  :global(.ra-mn-r) { margin: auto 0 0; }
+  :global(.ra-mn-r > summary) { cursor: pointer; display: inline-block; padding: 0; border: 0;
+    font: 600 12px/1.4 var(--sans, system-ui); color: var(--accent); list-style: none; }
+  :global(.ra-mn-r > summary::-webkit-details-marker) { display: none; }
+  :global(.ra-mn-r > summary::after) { content: " \203A"; }
+  :global(.ra-mn-r[open] > summary::after) { content: " \2039"; }
+  :global(.ra-mn-r > summary:hover) { border-color: var(--accent); }
+  :global(.ra-mn-w) { margin: 10px 0 0; font-size: 12.5px; color: var(--ink-2); }
+  :global(.ra-mn-g) { margin: 12px 0 5px; font: 600 10px/1.3 var(--sans, system-ui); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+  :global(.ra-mn-chips) { display: flex; flex-wrap: wrap; gap: 5px; }
+  :global(.ra-mn-chips a) { padding: 3px 9px; border: 1px solid var(--rule); border-radius: 999px; background: var(--ground, #f4f4f4); font: 400 12px/1.4 var(--sans, system-ui);
+    color: var(--ink-2); text-decoration: none; }
+  :global(.ra-mn-chips a:hover) { border-color: var(--accent); color: var(--accent); }
   :global(.ra-mn-f) { margin: 0 0 4px; font: 400 11px/1.5 var(--mono); color: var(--ink-3); }
 
   :global(.at-sec) { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--rule); }
@@ -9333,7 +9820,7 @@ window.addEventListener("load", async function () {
   /* Collapsed it hugs its contents; switched on it takes the width it needs
      for a slider worth dragging. */
   :global(.ra-time) { position: absolute; z-index: 800;
-    left: auto; right: 10px; max-width: calc(100% - 20px); bottom: 26px;
+    left: 10px; right: auto; max-width: calc(100% - 20px); bottom: 26px;
     display: flex; align-items: center; gap: 10px;
     padding: 7px 12px; border-radius: 999px;
     background: var(--panel); border: 1px solid var(--rule-strong);
@@ -9351,7 +9838,7 @@ window.addEventListener("load", async function () {
   /* On a phone the map is 420px tall and the strip would eat it; it keeps
      the full width and loses the padding instead. */
   @media (max-width: 700px) {
-    :global(.ra-time) { left: auto; right: 6px; bottom: 22px; gap: 7px;
+    :global(.ra-time) { left: 6px; right: auto; bottom: 22px; gap: 7px;
       padding: 6px 9px; }
     :global(.ra-time.on) { left: 6px; right: 6px; }
   }
@@ -9464,4 +9951,81 @@ window.addEventListener("load", async function () {
     background: var(--panel, #fff); color: var(--ink, #16222A); cursor: pointer; }
   :global(.leaflet-bar.ra-fullctl .ra-ico:hover) { background: color-mix(in srgb, var(--accent, #1F5C6B) 12%, var(--panel, #fff)); }
   @media (pointer: coarse) { :global(.leaflet-bar.ra-fullctl .ra-ico) { width: 34px; height: 34px; } }
+
+  /* ---- THE FILTERS PANEL, ROOMIER. David: «can the filter button also not show so thinly? and be neater, better spaced?» A bigger
+     button; a wider panel with air between its groups, one rule above each heading, larger chips, shorter lead lines. ---- */
+  .ra-cats-wrap summary { height: 44px; min-width: 44px; padding: 0 12px; border-radius: 10px; border-color: var(--rule-strong);
+    box-shadow: 0 1px 2px rgba(10, 20, 26, .06); }
+  :global(.ra-funnel) { width: 18px; height: 18px; }
+  :global(.ra-drop > .ra-drop-in) { width: min(94vw, 500px); max-width: 94vw; padding: 6px 22px 22px; border-radius: 14px;
+    max-height: min(80vh, 700px); overflow: auto; box-shadow: 0 18px 44px rgba(10, 20, 26, .22); }
+  :global(.ra-drop .ra-fgroup-h) { margin: 24px 0 8px; padding-top: 18px; border-top: 1px solid var(--rule);
+    font: 700 11px/1.3 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+  :global(.ra-drop .ra-fgroup-h:first-child) { margin-top: 16px; padding-top: 0; border-top: 0; }
+  :global(.ra-drop .ra-fgroup-h .ra-badge) { margin-left: 8px; }
+  :global(.ra-drop .ra-key-lead) { margin: 0 0 12px; font-size: 12.5px; line-height: 1.55; }
+  :global(.ra-drop .ra-layers), :global(.ra-drop .atlas-key) { gap: 8px; margin-top: 0; }
+  :global(.ra-drop .ra-opt) { padding: 8px 14px; font-size: 13px; gap: 8px; }
+  :global(.ra-drop .ra-opt:hover) { border-color: var(--accent); }
+  :global(.ra-rc-key) { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 12px 0 0; font: 400 12.5px/1.4 var(--sans); color: var(--ink-2); }
+  :global(.ra-rc-key[hidden]) { display: none; }
+  :global(.ra-rc-k) { display: inline-flex; align-items: center; gap: 6px; }
+  :global(.ra-rc-k i) { width: 11px; height: 11px; border-radius: 50%; box-shadow: 0 0 0 1.5px #fff, 0 0 0 2.5px var(--rule-strong); }
+  :global(.ra-rc-k b) { font: 600 11px/1 var(--mono); color: var(--ink-3); }
+
+  /* ---- the area tool ---- */
+  :global(.ra-areactl a) { display: grid; place-items: center; width: 30px; height: 30px; color: var(--ink-2); }
+  :global(.ra-areactl a.on) { background: var(--accent); color: #fff; }
+  @media (pointer: coarse) { :global(.ra-areactl a) { width: 34px; height: 34px; } }
+  :global(.leaflet-container.ra-drawing) { cursor: crosshair; }
+  :global(.leaflet-container.ra-drawing .leaflet-interactive) { pointer-events: none; }
+  :global(.ra-area-hint), :global(.ra-area-bar) { position: absolute; z-index: 900; left: 50%; transform: translateX(-50%); top: 10px; display: flex; align-items: center; gap: 10px;
+    padding: 7px 12px; border-radius: 999px; background: var(--panel); border: 1px solid var(--rule-strong); box-shadow: 0 4px 16px rgba(10, 20, 26, .2);
+    font: 500 12.5px/1.3 var(--sans); color: var(--ink); max-width: calc(100% - 120px); }
+  :global(.ra-area-hint[hidden]), :global(.ra-area-bar[hidden]) { display: none; }
+  :global(.ra-area-hint button), :global(.ra-area-bar button) { font: 600 12px/1 var(--sans); padding: 6px 11px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--rule-strong); background: var(--panel); color: var(--accent); white-space: nowrap; }
+  :global(.ra-area-hint button[data-a="finish"]), :global(.ra-area-bar button[data-a="show"]) { background: var(--accent); color: #fff; border-color: var(--accent); }
+  :global(.ra-area-sum) { font: 400 13px/1.5 var(--sans); margin: 4px 0 10px; }
+  :global(.ra-area-tally) { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0 0 12px; font: 400 12.5px/1.4 var(--sans); color: var(--ink-2); }
+  :global(.ra-area-tally span), :global(.ra-area-g > summary) { display: inline-flex; align-items: center; gap: 6px; }
+  :global(.ra-area-tally i), :global(.ra-area-g i), :global(.ra-area-p i), :global(.ra-area-v li i) { width: 10px; height: 10px; border-radius: 50%; flex: none; display: inline-block; }
+  :global(.ra-area-tally b), :global(.ra-area-g > summary b) { font: 600 11px/1 var(--mono); color: var(--ink-3); }
+  :global(.ra-area-add) { margin: 0 0 14px; }
+  :global(.ra-area-addb) { font: 700 13.5px/1.2 var(--sans); padding: 11px 16px; border-radius: 10px; border: 0; background: var(--accent); color: #fff; cursor: pointer; }
+  :global(.ra-area-ok) { margin: 0; padding: 10px 12px; border-radius: 8px; background: rgba(31, 157, 85, .13); font: 400 13px/1.4 var(--sans); }
+  :global(.ra-area-ok button) { font: 600 12.5px/1 var(--sans); margin-left: 8px; padding: 5px 10px; border-radius: 999px; border: 1px solid var(--rule-strong); background: var(--panel); cursor: pointer; }
+  :global(.ra-area-g) { margin: 0 0 8px; border-top: 1px solid var(--rule); padding-top: 8px; }
+  :global(.ra-area-g > summary) { cursor: pointer; font: 700 12px/1.4 var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); list-style: none; }
+  :global(.ra-area-g > ul) { list-style: none; margin: 6px 0 0; padding: 0; }
+  :global(.ra-area-g > ul > li) { margin: 0; padding: 2px 0; }
+  :global(.ra-area-p) { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; border: 0; background: none; padding: 5px 4px; border-radius: 6px; cursor: pointer;
+    font: 400 13.5px/1.3 var(--sans); color: var(--ink); text-decoration: none; }
+  :global(.ra-area-p:hover) { background: var(--ground, #eee); }
+  :global(.ra-area-p small) { margin-left: auto; font: 400 11px/1 var(--mono); color: var(--ink-3); white-space: nowrap; }
+  :global(.ra-area-v) { margin: 0 0 6px 22px; }
+  :global(.ra-area-v summary) { cursor: pointer; font: 500 12px/1.4 var(--sans); color: var(--accent); padding: 2px 0; }
+  :global(.ra-vl) { list-style: none; margin: 6px 0 0; padding: 0; border-top: 1px solid var(--rule); }
+  :global(.ra-vl > li) { display: flex; align-items: center; flex-wrap: wrap; gap: 0 10px; padding: 7px 0; border-bottom: 1px solid var(--rule); font: 400 12.5px/1.35 var(--sans); }
+  :global(.ra-vl > li > i) { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  :global(.ra-vt) { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  :global(.ra-vt a) { color: var(--ink); text-decoration: none; }
+  :global(.ra-vt a:hover) { color: var(--accent); text-decoration: underline; }
+  :global(.ra-vy) { flex: none; width: 74px; text-align: right; font: 400 11.5px/1 var(--mono); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  :global(.ra-vl .volmark) { flex: none; }
+  :global(.ra-vl .volmark:has(.vm-edit)) { flex: 1 0 100%; padding: 6px 0 2px 18px; }
+
+  /* ---- the research switch on the search line ---- */
+  :global(.ra-rc-tog) { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 14px; border-radius: 10px; cursor: pointer; white-space: nowrap;
+    border: 1px solid var(--rule-strong); background: var(--panel); color: var(--ink-2); font: 600 13px/1 var(--sans); }
+  :global(.ra-rc-tog:hover) { border-color: var(--accent); color: var(--accent); }
+  :global(.ra-rc-tog.on) { background: var(--accent); border-color: var(--accent); color: #fff; }
+  :global(.ra-rc-dots) { display: inline-flex; }
+  :global(.ra-rc-dots i) { width: 10px; height: 10px; border-radius: 50%; margin-left: -3px; box-shadow: 0 0 0 1.5px var(--panel); }
+  :global(.ra-rc-dots i:nth-child(1)) { background: #1E8449; margin-left: 0; }
+  :global(.ra-rc-dots i:nth-child(2)) { background: #E08A12; }
+  :global(.ra-rc-dots i:nth-child(3)) { background: #A9B2B7; }
+  :global(.ra-rc-tog.on .ra-rc-dots i) { box-shadow: 0 0 0 1.5px var(--accent); }
+    /* The panel is a four-column grid for a place; the area list takes the whole width, not one column of it. */
+  :global(.ra-area) { grid-column: 1 / -1; max-width: 760px; }
 </style>

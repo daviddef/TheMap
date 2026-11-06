@@ -1,0 +1,322 @@
+---
+/* CONNECTION & BACKUP: the one page for keeping your research safe.
+
+   It opens from the pulsing dot in the header (green = a copy is kept online, orange = saved only in this browser, red =
+   offline; a warning triangle joins the dot when something changed and no backup has been made for more than a day).
+
+   Everything here was on /my-research/, between the family dossier and the buttons that mattered, and David asked for it to have
+   a page of its own: «make it fun, intuitive, simple». So this page does three jobs in order: it SAYS in one line where the
+   research is right now (the hero), it warns when that is risky (the amber bar), and it offers the ways to keep it safe as
+   three cards, easiest first. The tiles under the hero are the same ways at a glance (this browser, a file, six words, share).
+
+   Nothing here is built and nothing is sent: it reads this browser, as the header dot does (window.raConn, defined in Base.astro).
+   The file logic is public/js/research-file.js (tested in test/research-backup.test.js); the six-word copy is
+   components/ResearchSync.astro. The ids keep their old mr-* names because that is what the tests and the script were written
+   against. */
+import Base from "../layouts/Base.astro";
+import { u } from "../lib/url.js";
+import ProgressKit from "../components/ProgressKit.astro";
+import ResearchSync from "../components/ResearchSync.astro";
+---
+<Base
+  title="Connection &amp; Backup"
+  eyebrow="Your research · where it lives and how to keep it safe"
+  dek="Your marks and notes live in this browser. Here is how to be sure you never lose them, none of it needing an account.">
+
+  <ProgressKit />
+  <script is:inline src={u("/js/research-file.js")}></script>
+
+  <div class="bk">
+
+    <section class="bk-hero" id="bk-hero" data-state="local" aria-live="polite">
+      <div class="bk-orb" aria-hidden="true"><span class="bk-dot"></span></div>
+      <div class="bk-hero-t">
+        <h2 id="bk-h">Saved in this browser</h2>
+        <p id="bk-p">Checking…</p>
+      </div>
+    </section>
+
+    <div class="bk-warn" id="bk-warn" role="alert" hidden>
+      <svg viewBox="0 0 16 16" width="22" height="22" aria-hidden="true"><path d="M8 1.6 15 14H1z" fill="#e8a200" stroke="#8a5a00" stroke-width="1" stroke-linejoin="round"/><path d="M8 6v4" stroke="#3b2600" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="12" r=".95" fill="#3b2600"/></svg>
+      <p id="bk-warn-t"></p>
+      <button type="button" id="bk-fix">Back up now</button>
+    </div>
+
+    <ul class="bk-tiles" aria-label="The four ways at a glance">
+      <li><a href="#file"><b>This browser</b><span id="bk-t-here">Always on</span></a></li>
+      <li><a href="#file"><b>A file</b><span id="bk-t-file">…</span></a></li>
+      <li><a href="#sy"><b>Six words</b><span id="bk-t-sync">…</span></a></li>
+      <li><a href="#share"><b>Share</b><span>Send a pack to someone</span></a></li>
+    </ul>
+
+    <section class="bk-card" id="file">
+      <h2><span class="bk-n">1</span> Back up to a file <small>the easiest, and you own it</small></h2>
+      <p class="cap">One tap saves everything: every family line, every mark and, if you use the tree page, your fix-it decisions. Put the
+      file somewhere safe (email it to yourself, drop it in a cloud folder). On any other phone or laptop, <b>Import</b> it and it
+      <b>merges</b>: nothing is replaced, so a laptop and a phone can both be right.</p>
+      <div id="mr-safe">
+        <p id="mr-status" class="mrstatus" role="status"></p>
+        <p class="mrbtns">
+          <button type="button" id="mr-export">Back up my research</button>
+          <button type="button" id="mr-send" hidden>Send the file…</button>
+          <button type="button" id="mr-import">Import a file</button>
+          <input type="file" id="mr-file" accept="application/json,.json" hidden />
+          <span id="mr-said" role="status" aria-live="polite"></span>
+        </p>
+        {/* WHERE THE FILE ACTUALLY GOES. A page cannot read your download folder and must not pretend to: what it CAN say for
+            certain is the file's name, which it chooses, and that the browser puts it wherever downloads go. */}
+        <p class="mrwhere3">The file is named <code id="mr-fname">record-atlas-research-…json</code> and lands wherever this browser
+        saves downloads, usually <b>Downloads</b>. A copy of the browser storage saved with <code>save-browser-storage.js</code> from an
+        older address of this site imports too.</p>
+        <p class="mrwhere3" id="mr-persist"></p>
+      </div>
+    </section>
+
+    <section class="bk-card" id="online">
+      <h2><span class="bk-n">2</span> Keep a copy online <small>six words, no account</small></h2>
+      <ResearchSync />
+    </section>
+
+    <section class="bk-card" id="share">
+      <h2><span class="bk-n">3</span> Share what you have found <small>for a cousin or a fellow researcher</small></h2>
+      <div id="mr-share">
+        <p class="cap">A pack is the work itself: which volumes, which pages, what state, under which family line. It holds no tree and no
+        fix-it decisions, and your notes stay out unless you tick them in. Whoever opens it sees it as <b>reported by you, not
+        checked</b>, and can merge it into their own research and carry on from where you stopped.</p>
+        <p class="mrbtns">
+          <label>Share <select id="mr-pscope"></select></label>
+          <label class="mrck"><input type="checkbox" id="mr-pnotes" /> Include my notes</label>
+        </p>
+        <p class="cap" id="mr-ppreview"></p>
+        <p class="mrbtns">
+          <button type="button" id="mr-pfile">Download the pack</button>
+          <button type="button" id="mr-plink">Copy a link</button>
+          <span id="mr-pnote" role="status" aria-live="polite"></span>
+        </p>
+      </div>
+    </section>
+
+    <details class="bk-how">
+      <summary>How this works, in plain words</summary>
+      <p class="cap"><b>Your research lives in this browser, and nowhere else.</b> It is not an account, it was never sent to us, and we could not read it
+      if we wanted to. That also means clearing your site data, using a private window, or picking up a different machine will not find it.</p>
+      <ul class="cap">
+        <li><b>Orange dot</b>: saved only here. Fine for today, risky for next year.</li>
+        <li><b>Green dot</b>: a scrambled copy is also kept online under your six words, and this browser is connected.</li>
+        <li><b>Red dot</b>: this browser is offline. The atlas still works from what is loaded and your research is safe on this device.</li>
+        <li><b>Warning triangle</b>: you have changed something and no backup (file or online) has happened for more than 24 hours.</li>
+      </ul>
+      <p class="cap">The online copy is encrypted in your browser before it leaves; our server holds a scrambled copy it cannot read.
+      More in <a href={u("/privacy/")}>the privacy note</a>. Your family lines and marks are on <a href={u("/my-research/")}>My research</a>.</p>
+    </details>
+  </div>
+
+  <script is:inline define:vars={{ BASE: u("/") }}>
+    (function () {
+      var P = window.raProgress, RF = window.raResearchFile;
+      var $ = function (id) { return document.getElementById(id); };
+      var said = $("mr-said");
+      if (!P || !RF) return;
+      var refresh = function () { document.dispatchEvent(new CustomEvent("ra-conn-refresh")); };
+      var escH = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+
+      /* ---- the hero, the warning and the tiles: the header dot's own reading (Base.astro), told in words ---- */
+      function ago(ms) {
+        if (ms == null) return "";
+        var m = Math.floor(ms / 60000);
+        if (m < 2) return "just now";
+        if (m < 60) return m + " minutes ago";
+        var h = Math.floor(m / 60);
+        if (h < 24) return h + (h === 1 ? " hour" : " hours") + " ago";
+        var d = Math.floor(h / 24);
+        return d === 1 ? "yesterday" : d + " days ago";
+      }
+      var TEXT = {
+        online: ["Connected, and a copy is kept online", "A scrambled copy of your research is saved under your six words, so a new phone or laptop can get it back. Your file backups still work too."],
+        local: ["Saved in this browser only", "Nothing has left this device. Clear your site data, use a private window or change machine and it is gone, unless you back it up. Two minutes below fixes that."],
+        offline: ["You are offline", "The atlas keeps working from what is loaded and your research is safe on this device. Backups wait until you are connected again."]
+      };
+      function paint() {
+        var c = window.raConn ? window.raConn.get() : null;
+        if (!c) return;
+        var hero = $("bk-hero"), t = TEXT[c.state];
+        hero.setAttribute("data-state", c.state);
+        $("bk-h").textContent = t[0];
+        var extra = c.last ? " Last backup: " + ago(Date.now() - c.last) + "." : " No backup yet.";
+        $("bk-p").textContent = t[1] + extra;
+        var warn = $("bk-warn");
+        warn.hidden = !c.warn;
+        if (c.warn) $("bk-warn-t").textContent = c.last
+          ? "You have changed your research since the last backup, " + ago(Date.now() - c.last) + ". Back it up so a cleared browser cannot take it."
+          : "You have changed your research and never backed it up. This browser is the only copy.";
+        $("bk-t-file").textContent = RF.backupStatus().never ? "Not yet" : RF.backupStatus().changed ? "Changes waiting" : "Up to date";
+        $("bk-t-sync").textContent = c.synced ? "On" + (c.last ? ", saved " + ago(Date.now() - c.last) : "") : "Off";
+        /* RED when there is no backup at all, or changes have waited more than a day; amber for a gentler nudge */
+        var st = RF.backupStatus(), red = c.warn || (st.never && st.changed) || st.level === "urgent";
+        $("mr-status").textContent = c.warn && !c.last ? "Never backed up. This browser is the only copy." : c.warn ? "Changes are not backed up: the last backup was " + ago(Date.now() - c.last) + "." : st.text;
+        $("mr-status").className = "mrstatus " + (red ? "urgent" : st.level);
+      }
+      document.addEventListener("ra-conn", paint);
+
+      $("bk-fix").addEventListener("click", function () {
+        var c = window.raConn.get();
+        var now = $("sy-now");
+        if (c.synced && now && !$("sy-on").hidden) now.click(); else $("mr-export").click();
+      });
+
+      /* ---- the file ---- */
+      var fn = $("mr-fname");
+      if (fn) fn.textContent = "record-atlas-research-" + new Date().toISOString().slice(0, 10) + ".json";
+      function showPersist(r) {
+        var el = $("mr-persist");
+        el.textContent = r === "yes" ? "This browser has agreed to keep this data unless you clear it yourself."
+          : r === "no" ? "This browser may remove this data when it needs space. A backup file is the only safe copy." : "";
+      }
+      function saveFile(name, text) {
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([text], { type: "application/json" }));
+        a.download = name; a.click(); URL.revokeObjectURL(a.href);
+      }
+      $("mr-export").addEventListener("click", function () {
+        var out = RF.exportAll(), sm = RF.summary(out.file);
+        saveFile(out.name, out.text);
+        RF.noteBackup("download");
+        said.textContent = "Backup file downloaded: " + out.name + " (look in your Downloads folder) · " + sm.volumes + " volumes, " + sm.lines + " family line" + (sm.lines === 1 ? "" : "s") +
+          (sm.decisions ? ", " + sm.decisions + " fix-it decisions" : "");
+        RF.persist().then(showPersist);
+        refresh();
+      });
+      var send = $("mr-send");
+      try {
+        if (navigator.canShare && navigator.canShare({ files: [new File(["{}"], "x.json", { type: "application/json" })] })) send.hidden = false;
+      } catch (e) { /* no share sheet here */ }
+      send.addEventListener("click", function () {
+        var out = RF.exportAll();
+        navigator.share({ files: [new File([out.text], out.name, { type: "application/json" })], title: "Record Atlas research backup" })
+          .then(function () { RF.noteBackup("share"); said.textContent = "Shared " + out.name; refresh(); })
+          .catch(function () { /* cancelled */ });
+      });
+      var file = $("mr-file");
+      $("mr-import").addEventListener("click", function () { file.click(); });
+      file.addEventListener("change", function () {
+        var f = file.files && file.files[0];
+        if (!f) return;
+        var r = new FileReader();
+        r.onload = function () {
+          try {
+            var res = RF.importText(String(r.result));
+            said.textContent = "Merged " + res.marks + " marks" + (res.decisions ? " and " + res.decisions + " fix-it decisions" : "") + " from " + f.name +
+              (res.kind === "record-atlas-pack" ? " (a shared pack: it is kept as its own family line)" : "");
+            document.dispatchEvent(new CustomEvent("ra-progress-changed"));
+          } catch (e) {
+            said.textContent = "That is not a Record Atlas research file (an export, a pack, or a copy of browser storage).";
+          }
+          file.value = "";
+        };
+        r.readAsText(f);
+      });
+
+      /* ---- the pack ---- */
+      var psel = $("mr-pscope"), pnotes = $("mr-pnotes"), pprev = $("mr-ppreview"), pnote = $("mr-pnote");
+      function fillScope() {
+        var cur = psel.value;
+        psel.innerHTML = '<option value="">everything, every family line</option>' + P.lines().map(function (l) {
+          return '<option value="' + escH(l.slug) + '">' + escH(l.name + (l.where ? " of " + l.where : "")) + "</option>";
+        }).join("");
+        psel.value = cur;
+      }
+      function currentPack() { return RF.pack({ line: psel.value || null, notes: pnotes.checked }); }
+      function preview() {
+        var sm = RF.summary(currentPack());
+        pprev.textContent = "This pack holds " + sm.volumes + " volumes (" + sm.pages + " pages) across " + sm.lines + " family line" + (sm.lines === 1 ? "" : "s") +
+          (pnotes.checked ? ", with " + sm.notes + " of your notes: read them first, a note is where a name ends up" : ", without notes") + ".";
+      }
+      $("mr-pfile").addEventListener("click", function () {
+        saveFile("record-atlas-pack-" + (psel.value || "all") + "-" + new Date().toISOString().slice(0, 10) + ".json", JSON.stringify(currentPack(), null, 1));
+        pnote.textContent = "Saved. Send the file to whoever should have it.";
+      });
+      $("mr-plink").addEventListener("click", function () {
+        RF.encodeLink(currentPack()).then(function (t) {
+          var url = location.origin + BASE + "shared/#pack=" + t;
+          if (url.length > RF.LINK_MAX) { pnote.textContent = "Too big for a link (" + url.length + " characters). Download the pack and send the file."; return; }
+          return navigator.clipboard.writeText(url).then(function () {
+            pnote.textContent = "Link copied (" + url.length + " characters). The pack travels inside the link; nothing is stored on our server.";
+          }, function () { pnote.textContent = url; });
+        });
+      });
+      [psel, pnotes].forEach(function (x) { x.addEventListener("change", preview); });
+      document.addEventListener("ra-progress-changed", function () { fillScope(); preview(); paint(); });
+      fillScope(); preview(); paint();
+      RF.persisted().then(function (p) { if (p) showPersist("yes"); });
+    })();
+  </script>
+</Base>
+
+<style>
+  .bk { max-width: 56rem; display: grid; gap: 18px; }
+  .bk :global(.cap), .bk :global(.mrsafe p) { max-width: none; }
+
+  /* THE HERO: one big dot, one sentence. The dot pulses in the same colours as the header's. */
+  .bk-hero { display: flex; gap: 18px; align-items: center; padding: 20px 22px; border: 1px solid var(--rule); border-radius: 10px;
+    background: var(--panel); border-left: 6px solid #e8870e; }
+  .bk-hero[data-state="online"] { border-left-color: #1f9d55; }
+  .bk-hero[data-state="offline"] { border-left-color: #c0392b; }
+  .bk-orb { flex: 0 0 auto; width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; background: var(--ground); }
+  .bk-dot { width: 22px; height: 22px; border-radius: 50%; background: #e8870e; box-shadow: 0 0 0 0 rgba(232,135,14,.55); animation: bk-o 2s infinite; }
+  .bk-hero[data-state="online"] .bk-dot { background: #1f9d55; box-shadow: 0 0 0 0 rgba(31,157,85,.55); animation-name: bk-g; }
+  .bk-hero[data-state="offline"] .bk-dot { background: #c0392b; box-shadow: 0 0 0 0 rgba(192,57,43,.55); animation-name: bk-r; animation-duration: 1.4s; }
+  @keyframes bk-o { 70% { box-shadow: 0 0 0 16px rgba(232,135,14,0); } 100% { box-shadow: 0 0 0 0 rgba(232,135,14,0); } }
+  @keyframes bk-g { 70% { box-shadow: 0 0 0 16px rgba(31,157,85,0); } 100% { box-shadow: 0 0 0 0 rgba(31,157,85,0); } }
+  @keyframes bk-r { 70% { box-shadow: 0 0 0 16px rgba(192,57,43,0); } 100% { box-shadow: 0 0 0 0 rgba(192,57,43,0); } }
+  @media (prefers-reduced-motion: reduce) { .bk-dot { animation: none !important; } }
+  .bk-hero-t { min-width: 0; }
+  .bk-hero h2 { margin: 0 0 4px; font-size: 1.35rem; line-height: 1.25; text-wrap: balance; }
+  .bk-hero p { margin: 0; font-family: var(--sans); font-size: 14.5px; color: var(--ink-2); max-width: 46em; }
+
+  .bk-warn { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 12px 16px; border-radius: 8px;
+    border: 1px solid #c58a00; background: rgba(232,162,0,.14); font-family: var(--sans); }
+  .bk-warn[hidden] { display: none; }
+  .bk-warn p { margin: 0; flex: 1 1 18rem; font-size: 14.5px; font-weight: 600; }
+  .bk-warn button { font: inherit; font-size: 14px; font-weight: 600; padding: 8px 14px; border-radius: 4px; border: 1px solid #8a5a00;
+    background: #e8a200; color: #2a1b00; cursor: pointer; }
+
+  .bk-tiles { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  .bk-tiles a { display: grid; gap: 3px; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 8px; background: var(--panel);
+    text-decoration: none; color: var(--ink); height: 100%; box-sizing: border-box; }
+  .bk-tiles a:hover { border-color: var(--accent); }
+  .bk-tiles b { font-family: var(--sans); font-size: 13.5px; }
+  .bk-tiles span { font-family: var(--sans); font-size: 12.5px; color: var(--ink-2); }
+  @media (max-width: 720px) { .bk-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .bk-hero { flex-direction: column; align-items: flex-start; } }
+
+  .bk-card { border: 1px solid var(--rule); border-radius: 10px; background: var(--panel); padding: 6px 22px 18px; scroll-margin-top: 80px; }
+  .bk-card h2 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 10px; margin: 16px 0 6px; font-size: 1.15rem; text-wrap: balance; }
+  .bk-card h2 small { font-family: var(--sans); font-size: 12.5px; font-weight: 400; color: var(--ink-3); }
+  .bk-n { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff;
+    font-family: var(--sans); font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+  /* the sync component brings its own heading and box; here the card is the box */
+  /* NB: script sets the status element's className, which drops Astro's scope class, so its rules are global under .bk */
+  .bk-card :global(#sy) { margin: 0; }
+  .bk-card :global(#sy > .mrh) { display: none; }
+  .bk-card :global(#sy > .cap:first-of-type) { margin-top: 4px; }
+
+  .bk :global(.mrbtns) { display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; margin: 14px 0 0; }
+  .bk :global(.mrbtns button), .bk :global(#sy button) { font-family: var(--sans); font-size: 14px; padding: 9px 14px;
+    border: 1px solid var(--rule-strong); border-radius: 4px; background: var(--panel); color: var(--ink); cursor: pointer; }
+  .bk :global(.mrbtns button:disabled) { opacity: .5; cursor: default; }
+  #mr-export, .bk :global(#sy-make), .bk :global(#sy-start) { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+  #mr-said { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); }
+  /* THE BACKUP STATUS IS A CALLOUT, NOT A CAPTION. David: "never backed up" needs space and to be red. Amber = a gentle nudge. */
+  .bk :global(.mrstatus) { font-family: var(--sans); font-size: 15px; margin: 16px 0 18px; padding: 12px 14px; border-left: 4px solid var(--rule); border-radius: 0 6px 6px 0; background: var(--ground); }
+  .bk :global(.mrstatus.nudge) { border-left-color: #c58a00; background: rgba(232,162,0,.14); }
+  .bk :global(.mrstatus.urgent) { border-left-color: #c0392b; background: rgba(192,57,43,.12); color: #8f1f13; font-weight: 700; }
+  .bk :global(.mrstatus.urgent::before) { content: "! "; font-weight: 800; }
+  :global(:root[data-theme="dark"] .bk .mrstatus.urgent) { color: #ff9b8e; }
+  @media (prefers-color-scheme: dark) { :global(:root:not([data-theme="light"]) .bk .mrstatus.urgent) { color: #ff9b8e; } }
+  .mrck { font-family: var(--sans); font-size: 13.5px; }
+  #mr-share select { font: inherit; font-family: var(--sans); font-size: 14px; max-width: 100%; }
+  .mrwhere3 { margin: 8px 0 0; font-family: var(--sans); font-size: 12.5px; color: var(--ink-2); max-width: 46em; }
+  .mrwhere3 code { font-family: var(--mono); font-size: 11.5px; background: var(--ground); padding: 1px 5px; border-radius: 3px; }
+
+  .bk-how { font-family: var(--sans); font-size: 14px; }
+  .bk-how summary { cursor: pointer; font-weight: 600; }
+</style>

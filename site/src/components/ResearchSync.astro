@@ -13,9 +13,15 @@ import { u } from "../lib/url.js";
 ---
 <section id="sy" class="mrsafe" hidden>
   <h2 class="mrh">Keep a copy online</h2>
-  <p class="cap" id="sy-intro">A copy of your research, <b>encrypted in this browser</b> before it leaves. Our server holds the scrambled copy and
-  cannot read it, and there is no account: <b>six words</b> are the only key. On a new phone or laptop, type the six words and your
-  research comes back. <b>If you lose the words, nobody can recover the copy</b>, not even us. Your backup file (above) keeps working either way.</p>
+  <p class="cap" id="sy-intro"><b>What are the six words?</b> They are your password, made for you: six ordinary words, like <i>maple harbour candle river
+  ocean lantern</i>. There is no email and no account. Your research is scrambled in this browser, and only the six words can unscramble it,
+  so our server keeps a copy it <b>cannot read</b>. If you lose the words, nobody can recover the copy, not even us.</p>
+  <ol class="cap sy-steps" id="sy-steps">
+    <li><b>Turn it on:</b> press <b>Keep a copy online</b>. We show you your six words.</li>
+    <li><b>Keep them:</b> write them down or save the recovery sheet. They appear only once.</li>
+    <li><b>Check them:</b> type them back, press <b>Start syncing</b>, and the first copy is saved.</li>
+    <li><b>On a new phone or laptop:</b> press <b>I already have six words</b>, type them, and your research comes back.</li>
+  </ol>
 
   <div id="sy-off">
     <p class="mrbtns">
@@ -59,11 +65,13 @@ import { u } from "../lib/url.js";
         <button type="button" id="sy-erase-yes">Yes, delete it</button> <button type="button" id="sy-erase-no">No</button></p>
     </details>
   </div>
-  <p class="cap" id="sy-down" hidden>Online copies are not switched on yet. Use <b>Back up my research</b> above: it works now.</p>
+  <p class="cap" id="sy-down" hidden><b>Can’t reach the online-copy service right now.</b> That happens if you are offline, or on a test copy of this site (only recordatlas.org may use it). Nothing is lost: use <b>Back up my research</b> in step 1, which works anywhere, and come back here later.</p>
 </section>
 
 <style>
   .sy-phrase { font-family: var(--serif, Georgia, serif); font-size: 22px; line-height: 1.5; letter-spacing: .02em; margin: 6px 0; word-spacing: .25em; }
+  .sy-steps { padding-left: 1.3em; margin: 6px 0 10px; }
+  .sy-steps li { margin: 3px 0; }
   .sy-list { list-style: none; padding: 0; font-family: var(--sans); font-size: 13.5px; }
   .sy-list li { padding: 3px 0; }
   #sy input[type="text"] { width: 100%; max-width: 560px; font: inherit; font-family: var(--sans); font-size: 16px; padding: 8px 10px; border: 1px solid var(--rule); border-radius: 3px; background: var(--panel); color: var(--ink); }
@@ -83,7 +91,7 @@ import { u } from "../lib/url.js";
     try { var m = /[?&]syncbase=([^&]+)/.exec(location.search); if (m && /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) opts.base = decodeURIComponent(m[1]); } catch (e) { /* default */ }
 
     function read() { try { var v = JSON.parse(localStorage.getItem(KEY)); return v && v.phrase ? v : null; } catch (e) { return null; } }
-    function write(v) { try { if (v) localStorage.setItem(KEY, JSON.stringify(v)); else localStorage.removeItem(KEY); return true; } catch (e) { return false; } }
+    function write(v) { try { if (v) localStorage.setItem(KEY, JSON.stringify(v)); else localStorage.removeItem(KEY); document.dispatchEvent(new CustomEvent("ra-conn-refresh")); return true; } catch (e) { return false; } }
     function show(which) { ["sy-off", "sy-new", "sy-restore", "sy-on"].forEach(function (id) { $(id).hidden = id !== which; }); }
     function loadWords() { return WORDS ? Promise.resolve(WORDS) : fetch(words).then(function (r) { return r.json(); }).then(function (j) { WORDS = j.words; return WORDS; }); }
     function say(id, t) { $(id).textContent = t || ""; }
@@ -219,6 +227,6 @@ import { u } from "../lib/url.js";
       root.hidden = false; paint();
       if (read()) syncNow(true);
       document.addEventListener("ra-progress-changed", schedule);
-    }).catch(function () { clearTimeout(kill); root.hidden = false; show("sy-off"); $("sy-off").hidden = true; $("sy-down").hidden = false; });
+    }).catch(function () { clearTimeout(kill); root.hidden = false; show("sy-off"); $("sy-off").hidden = true; $("sy-steps").hidden = true; $("sy-down").hidden = false; });
   })();
 </script>

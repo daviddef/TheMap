@@ -19,23 +19,48 @@ const places = idx.places.length;
    it, and it is the one a reader sees first. It was printing "8557 record
    volumes" for an atlas holding 2,328,191. */
 const volumes = idx.places.reduce((a, p) => a + (p.v || 0), 0);
-const countries = new Set(idx.places.map(p => p.k).filter(Boolean)).size;
+/* `cc` IS THE COUNTRY. This used `k`, which is the place's KIND (church, cemetery, census ... in combination), so it counted 34 kinds and
+   called them countries: on the page, in its search-engine description and in its structured data. David: «we have a dot everywhere,
+   on most countries». */
+const placeCountries = new Set(idx.places.map(p => p.cc || p.country).filter(Boolean));
+/* A COUNTRY CAN BE COVERED WITHOUT ONE PLACE IN IT. A national archive or index covers all of Egypt or Nigeria whether or not
+   anybody has catalogued a town there, so counting only countries with a dot understated the atlas (105 against about 146).
+   «*» is the directory's mark for a worldwide source, not a country. */
+const providerCountries = new Set(provs.providers.flatMap(p => p.countries || []).filter(c => c && c !== "*"));
+const sourceOnly = [...providerCountries].filter(c => !placeCountries.has(c)).length;
+const countries = placeCountries.size + sourceOnly;
 const archives = provs.providers.filter(p => p.at);
 const archiveCountries = new Set(archives.map(p => p.at.place.split(", ").pop())).size;
 /* THE INVENTORY BEHIND THE ONE PILL. David: one pill, «volumes», and on click a summary of everything the atlas holds. Every
    number is read from the data when the page is built, so none can drift from what is held. */
 const sur = corpus().surnames;
 const surnameCount = Array.isArray(sur) ? sur.length : Object.keys(sur || {}).length;
-const inventory = [
-  [volumes, "volumes", "/", "records of baptisms, marriages, burials and civil acts the atlas knows a place holds"],
-  [places, "places", "/", "each with the archives that hold its records"],
-  [archives.length, "archives", "/", `in ${archiveCountries} countries`],
-  [countries, "countries", "/", "with at least one place"],
-  [regions.regions.length, "regions", "/", "stretches of ground whose rulers changed together"],
-  [surnameCount, "surnames", "/surnames/", `${snFamilies.counts.families} families of spellings`],
-  [gnFamilies.counts.families, "given names", "/your-name/", `${gnFamilies.counts.forms.toLocaleString()} forms in many languages`],
-  [flagIndex.counts.withFlag, "flags", "/flags/", "countries, with the flags that flew over each"],
-  [Object.keys(placeNames.places).length, "places with dated names", "/", "called Fiume before 1945, and so on"],
+/* ROWS, NOT ONE POURED GRID. David: countries, regions, places and dated places belong on a row of their own. Three rows: where
+   (the ground), the records (what is kept and where), and names and flags. Each row: [heading, [number, label, link, what, example]]. */
+const inventoryRows = [
+  ["The ground", [
+    [countries, "countries and territories", "/", `${placeCountries.size} with a place on the map, and ${sourceOnly} more with sources that cover the whole country`, "Egypt: archives listed, no town catalogued yet"],
+    [regions.regions.length, "regions", "/", "stretches of ground whose rulers changed together", "the Military Frontier"],
+    /* THE ERAS THE REGIONS CARRY. David: «how many are we tracking? is there a way to show that in the counts?» An era is one ruler over
+       one region for a span of years, with the archives that hold its paper: the unit the map and the history play are built on. */
+    [regions.regions.reduce((n, r) => n + (r.eras || []).length, 0), "eras", "/history/", "spans of years when one ruler held a region, each with the archives that kept its paper", "the Imotski frontier: Ottoman, then Venetian, then Austrian"],
+    [places, "places", "/", "towns and villages, each with the books and archives that cover it", "Senj, in Croatia"],
+    [Object.keys(placeNames.places).length, "places with dated names", "/", "a place's name in the year of the record", "Fiume before 1945 is today's Rijeka"],
+  ]],
+  /* «volume» and «archive» are the two words a first-time reader cannot tell apart: a volume is a book; an archive is where books are kept. */
+  ["The records", [
+    [volumes, "volumes", "/", "register books of baptisms, marriages, burials and civil acts", "Senj, births 1859–1877: one book"],
+    [archives.length, "archives", "/", `the places that keep the books, in ${archiveCountries} countries`, "the State Archives in Rijeka"],
+  ]],
+  ["Names and flags", [
+    [surnameCount, "surnames", "/surnames/", `${snFamilies.counts.families} families of spellings`, "Blažević has its own page"],
+    [gnFamilies.counts.families, "given names", "/your-name/", `${gnFamilies.counts.forms.toLocaleString()} forms in many languages`, "Ivan, Johann and Giovanni are one name"],
+    /* THE SAME NUMBERS THE FLAGS SECTION BELOW SAYS ("211 countries and 34 hubs"). This tile read counts.withFlag (210, the cards
+       whose flag is an inline drawing: France's is a named reference, so it was left out) beside a section that counted 211, and
+       the hubs were not shown at all. David asked why they disagreed. */
+    [flagIndex.counts.countries, "countries with flags", "/flags/", "each with the flags that flew over it through history", "every flag that flew over Croatia"],
+    [flagIndex.counts.hubs, "flag hubs", "/flags/", "regions that group those countries' flags together", "Former Yugoslavia"],
+  ]],
 ];
 ---
 {/* STRUCTURED DATA ON THE ONE PAGE THAT HAD NONE. Place, surname and archive
@@ -99,29 +124,27 @@ const inventory = [
       below: «there isnt much point wasting real estate». The h1 stays, because
       a page needs one and a screen reader announces it; it is just no longer
       the size of a poster. Stats and the help link ride on the same baseline. */}
-  <div class="pagehead ra-lede">
-    <h1>Where the records are</h1>
-    <div class="ra-pills" aria-label="The atlas in numbers">
-      <details class="ra-inv">
-        <summary class="k-tag is-new">{volumes.toLocaleString()} volumes</summary>
-        <ul class="ra-inv-grid">
-          {inventory.map(([n, label, href, note]) => (
-            <li><a href={u(href)}><b>{n.toLocaleString()}</b> <span>{label}</span><small>{note}</small></a></li>
-          ))}
-        </ul>
-      </details>
+  {/* THE WHOLE LEDE ROW WENT. David: «can we remove this entire row? and move the volume count pill between the record atlas icon and
+      "new"? how it works is just taking me to help which is already in the burger menu». The pill (and its inventory popover) now
+      sits in the header through Base's "inv" slot; the "How this works" line was a second door to Help, which the About menu has. The
+      h1 stays for screen readers and search engines, and is only hidden. (Earlier notes on this row: the page is a tool, not an
+      article, so nothing between the header and the search box.) */}
+  <h1 class="ra-sr">Where the records are</h1>
+  <details class="ra-inv" slot="inv">
+    <summary class="k-tag is-new" aria-label={volumes.toLocaleString() + " volumes: what the atlas holds"}><span class="inv-full">{volumes.toLocaleString()} volumes</span><span class="inv-short" aria-hidden="true">{(volumes / 1e6).toFixed(1)}M</span></summary>
+    <div class="ra-inv-grid">
+      {inventoryRows.map(([head, items]) => (
+        <>
+          <p class="ra-inv-h">{head}</p>
+          <ul class="ra-inv-row">
+            {items.map(([n, label, href, note, eg]) => (
+              <li><a href={u(href)}><b>{n.toLocaleString()}</b> <span>{label}</span><small>{note}</small><em class="eg">e.g. {eg}</em></a></li>
+            ))}
+          </ul>
+        </>
+      ))}
     </div>
-    <p class="dek">
-      {/* THREE LINES OF EXPLANATION ABOVE THE THING BEING EXPLAINED. On a phone
-          that pushed the search box most of a screen down, so the first thing a
-          reader met was a paragraph about the map rather than the map itself.
-          The long version now lives on the Help page, which is where somebody
-          goes when they want it. (No tag syntax in this comment: Astro opens a
-          real element for it and swallows the file. That is written in capitals
-          in Base.astro and it caught me again anyway.) */}
-      Click the place your people came from, or search a name. <a href={u("/help/")}>How this works &rarr;</a>
-    </p>
-  </div>
+  </details>
 
   {/* ABOVE THE MAP, BECAUSE IT DECIDES WHERE EVERY MARK GOES. David: «can we
       move the researching dropdown thats hiding all the way at the bottom to

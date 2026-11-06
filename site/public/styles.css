@@ -1197,32 +1197,35 @@ body.is-home #onthispage{display:none}
 .rr-all li{break-inside:avoid;padding:3px 0}
 .rr-m{color:var(--ink-3)}
 
-/* LIVE / OFFLINE DOT in the header: green and pulsing when online, red and still-pulsing slower when offline. The word is a second cue for people who cannot tell the colours apart; it hides on a phone to keep the header on one row. */
-.ra-live{display:inline-flex;align-items:center;gap:6px;margin-left:10px;font:600 11px/1 var(--sans,system-ui);letter-spacing:.04em;text-transform:uppercase;color:var(--ink2,#555)}
-.ra-live-dot{width:9px;height:9px;border-radius:50%;background:#1f9d55;box-shadow:0 0 0 0 rgba(31,157,85,.55);animation:ra-pulse-g 2s infinite}
+/* LIVE / LOCAL / OFFLINE DOT in the header: green = a copy is kept online, orange = saved only in this browser, red = offline; a warning triangle joins it when changes are over 24 h unbacked-up. The word is a second cue for people who cannot tell the colours apart; it hides on a phone to keep the header on one row. */
+.ra-live{text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-left:10px;font:600 11px/1 var(--sans,system-ui);letter-spacing:.04em;text-transform:uppercase;color:var(--ink2,#555)}
+.ra-live-dot{width:9px;height:9px;border-radius:50%;background:#e8870e;box-shadow:0 0 0 0 rgba(232,135,14,.55);animation:ra-pulse-o 2s infinite}
+.ra-live[data-state="online"] .ra-live-dot{background:#1f9d55;box-shadow:0 0 0 0 rgba(31,157,85,.55);animation:ra-pulse-g 2s infinite}
+.ra-live-w{display:inline-flex;align-items:center;line-height:0;margin-left:1px}
+.ra-live-w[hidden]{display:none}
+@keyframes ra-pulse-o{70%{box-shadow:0 0 0 7px rgba(232,135,14,0)}100%{box-shadow:0 0 0 0 rgba(232,135,14,0)}}
 .ra-live[data-state="offline"] .ra-live-dot{background:#c0392b;box-shadow:0 0 0 0 rgba(192,57,43,.55);animation:ra-pulse-r 1.4s infinite}
 @keyframes ra-pulse-g{70%{box-shadow:0 0 0 7px rgba(31,157,85,0)}100%{box-shadow:0 0 0 0 rgba(31,157,85,0)}}
 @keyframes ra-pulse-r{70%{box-shadow:0 0 0 7px rgba(192,57,43,0)}100%{box-shadow:0 0 0 0 rgba(192,57,43,0)}}
 @media (max-width:640px){.ra-live-t{display:none}}
 
-/* WHAT'S NEW BUTTON in the header; pulses (class .fresh) when the newest entry is under three days old. The word hides on a phone. */
-.ra-news{display:inline-flex;align-items:center;gap:6px;margin-left:8px;padding:6px 10px;border:1px solid var(--rule,#ccc);border-radius:999px;font:600 12px/1 var(--sans,system-ui);color:var(--ink,#222);text-decoration:none;white-space:nowrap}
-.ra-news:hover{background:var(--soft,#eef)}
-.ra-news-i{color:#b8860b}
-.ra-news.fresh{border-color:#b8860b;animation:ra-pulse-n 2s infinite}
-.ra-news.fresh .ra-news-i{animation:ra-spin-n 2s ease-in-out infinite}
-@keyframes ra-pulse-n{0%{box-shadow:0 0 0 0 rgba(184,134,11,.55)}70%{box-shadow:0 0 0 8px rgba(184,134,11,0)}100%{box-shadow:0 0 0 0 rgba(184,134,11,0)}}
-@keyframes ra-spin-n{50%{transform:scale(1.25) rotate(20deg)}}
-@media (max-width:640px){.ra-news-t{display:none}.ra-news{padding:7px 9px}}
+/* ABOUT FLASHES WHEN THERE IS NEWS (class .fresh, set in Base.astro): a soft orange dot after the word, pulsing; the burger and the What's new row take the same dot. */
+@keyframes ra-pulse-n{0%{box-shadow:0 0 0 0 rgba(224,138,18,.55)}70%{box-shadow:0 0 0 8px rgba(224,138,18,0)}100%{box-shadow:0 0 0 0 rgba(224,138,18,0)}}
+header.site .topnav summary.fresh::before,.topnav .panel a.fresh::after,.drawer a.fresh::after{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#e08a12;animation:ra-pulse-n 2s infinite}
+header.site .topnav summary.fresh::before{margin-right:7px;vertical-align:middle}
+.topnav .panel a.fresh::after,.drawer a.fresh::after{margin-left:8px;vertical-align:middle}
+.burger.fresh{position:relative}
+.burger.fresh::after{content:"";position:absolute;top:5px;right:5px;width:9px;height:9px;border-radius:50%;background:#e08a12;animation:ra-pulse-n 2s infinite}
+@media (prefers-reduced-motion:reduce){header.site .topnav summary.fresh::before,.topnav .panel a.fresh::after,.drawer a.fresh::after,.burger.fresh::after{animation:none}}
 .ra-info-menu{cursor:pointer}
 
 /* ONE PILL, AND THE INVENTORY BEHIND IT (home page). */
-.ra-inv{display:inline-block;max-width:100%}
+.ra-inv{display:inline-block;max-width:100%;position:relative}
 .ra-inv summary{list-style:none;cursor:pointer}
 .ra-inv summary::-webkit-details-marker{display:none}
 .ra-inv summary::after{content:" \25BE";opacity:.7}
 .ra-inv[open] summary::after{content:" \25B4"}
-.ra-inv-grid{list-style:none;margin:10px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.ra-inv-grid{list-style:none;margin:0;padding:12px;display:block;position:absolute;left:0;top:calc(100% + 8px);z-index:60;width:min(900px,92vw);background:var(--panel,#fff);border:1px solid var(--rule,#ccc);border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
 .ra-inv-grid a{display:block;padding:8px 10px;border:1px solid var(--rule,#ccc);border-radius:6px;background:var(--paper,#fff);text-decoration:none;color:var(--ink,#222);height:100%}
 .ra-inv-grid a:hover{border-color:var(--accent,#35606e)}
 .ra-inv-grid b{font:700 18px/1.1 var(--serif,Georgia,serif);display:block}
@@ -1231,3 +1234,47 @@ body.is-home #onthispage{display:none}
 
 /* NOTHING MAY MAKE THE PAGE WIDER THAN THE PHONE. clip, not hidden, so a sticky header still sticks and nothing becomes a scroll box. */
 @media (max-width:700px){html,body{overflow-x:clip}}
+
+/* THE RESEARCHING GROUP: Live dot and family selector, divided from the menu and set in the menu's own type. */
+.ra-grp{display:inline-flex;align-items:center;gap:12px;margin-left:10px;margin-right:4px;padding-left:16px;padding-right:16px;border-left:1px solid var(--rule-strong,#bbb);border-right:1px solid var(--rule-strong,#bbb)}
+.ra-live-grp{margin-left:0;font:400 12.5px/1 var(--sans);letter-spacing:0;text-transform:none;color:var(--ink-2)}
+.ra-live-grp:hover{color:var(--ink)}
+.ra-live-top{display:none}
+@media (max-width:1180px){.ra-live-top{display:inline-flex}}
+header.site .ra-grp .ra-lines-l{font-family:var(--sans)!important;font-size:12.5px!important;letter-spacing:0!important;text-transform:none!important;color:var(--ink-2)!important}
+header.site .ra-grp .ra-lines-c select{font-family:var(--sans);font-size:12.5px}
+.foot-links{display:flex;flex-wrap:wrap;gap:6px 18px;margin:0 0 14px;font:400 12.5px/1.4 var(--sans)}
+.foot-links a{color:var(--ink-2);text-decoration:none}
+.foot-links a:hover{color:var(--accent);text-decoration:underline}
+/* THE INVENTORY POPOVER MUST SIT ABOVE THE SEARCH BAR AND THE MAP CONTROLS (leaflet panes run to 1000), BELOW THE STICKY HEADER (1300). */
+.ra-lede{position:relative;z-index:1200}
+.ra-inv-grid .eg{display:block;margin-top:6px;font:italic 400 12px/1.35 var(--sans);color:var(--accent,#35606e)}
+.ra-inv-h{margin:10px 0 6px;font:600 10.5px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3,#666)}
+.ra-inv-h:first-child{margin-top:0}
+.ra-inv-row{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:8px}
+@media (max-width:640px){.ra-inv-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* SECOND TIER IN A MENU PANEL: a heading row (nav.js entry with a null link) over the links that follow it. */
+.topnav .panel .ph{font:600 9.5px/1 var(--sans);letter-spacing:.15em;text-transform:uppercase;color:var(--ink-3);padding:10px 11px 4px}
+.topnav .panel .ph:first-child{padding-top:4px}
+.topnav .panel .ph:not(:first-child){margin-top:6px;border-top:1px solid var(--rule);padding-top:12px}
+.drawer .gl2{margin-top:8px;color:var(--ink-3)}
+
+/* THE VOLUME PILL IN THE HEADER (home page): beside the brand, before New. Its popover opens under it on a wide screen and across the
+   window on a narrow one; the count is shortened (3.4M) on a phone so the header stays on one row. */
+.ra-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+header.site .ra-inv{margin-left:10px;display:inline-flex}
+header.site .ra-inv summary{white-space:nowrap}
+.inv-short{display:none}
+@media (max-width:980px){
+  header.site .ra-inv{position:static}
+  header.site .ra-inv-grid{position:fixed;left:3vw;right:3vw;top:62px;width:auto;max-height:80vh;overflow:auto}
+}
+@media (max-width:760px){.inv-full{display:none}.inv-short{display:inline}header.site .ra-inv{margin-left:6px}}
+header.site .ra-inv .k-tag{font-size:10.5px;padding:3px 8px}
+@media (max-width:760px){header.site .sitein{gap:8px}header.site .ra-inv{margin-left:0}header.site .ra-live-top{margin-left:2px}}
+
+/* THE ONES BEING WORKED ON PULSE. David: «can you pulse the pills we're working on?» A book with some pages marked but not finished (the amber pill) and a place or book that is busy in the area list breathe softly; finished and untouched ones stay still, so the eye finds what is open. Off for anyone who asks their device for less motion. */
+@keyframes ra-pulse-w{0%{box-shadow:0 0 0 0 rgba(224,138,18,.5)}70%{box-shadow:0 0 0 7px rgba(224,138,18,0)}100%{box-shadow:0 0 0 0 rgba(224,138,18,0)}}
+.vm-pill-part,.src-open.vm-pill-part,i.pz{animation:ra-pulse-w 2.2s ease-out infinite}
+@media (prefers-reduced-motion:reduce){.vm-pill-part,.src-open.vm-pill-part,i.pz{animation:none}}

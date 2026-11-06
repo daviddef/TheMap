@@ -118,6 +118,17 @@ try {
         .ra-bar-row, so the bar was a search line and a filter line — two rows
         of chrome above a map, for one button. It is one control now and it
         belongs beside the box it filters. */}
+    {/* VIEWS BESIDE THE SEARCH BOX. David: «save the map view to a view list that sits beside the search box». The same dropdown as Filters:
+        saved views (where the map was looking) and saved areas (named shapes, each a research group), both kept in this browser and in
+        the backup and the six-word copy. */}
+    <div class="ra-bar-filters ra-bar-views">
+      <details class="ra-cats-wrap ra-drop ra-views-one" id="ra-viewsw">
+        <summary id="ra-viewsum" aria-label="Saved views and areas" title="Saved views and areas">
+          <svg class="ra-funnel" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 3h12v18l-6-4.5L6 21z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          <span class="ra-viewlab">Views</span></summary>
+        <div class="ra-drop-in" id="ra-viewin"></div>
+      </details>
+    </div>
     {/* SHOW MY RESEARCH, ON THE SEARCH LINE. David: «can you show a toggle for "show research" when we search? I may already be done, but can't see that on the map». It was a checkbox inside Filters; a switch you have to open a menu to find is not one you reach for mid-search. Same switch, same saved choice. */}
     <button type="button" class="ra-rc-tog" id="ra-rc-tog" aria-pressed="false"
             title="Colour the places by your research: researched, busy researching, on my list, not started">
@@ -2073,9 +2084,9 @@ window.addEventListener("load", async function () {
     }
     fSec.hidden = false;
     fSub.textContent = k
-      ? mc.length + " of " + cs.length + " countries, " + mh.length + " of " +
-        hs.length + " hubs"
-      : cs.length + " countries and " + hs.length + " hubs — type to filter";
+      ? T(mc.length + " of " + cs.length + " countries, " + mh.length + " of " +
+        hs.length + " hubs")
+      : T(cs.length + " countries and " + hs.length + " hubs — type to filter");
 
     /* Capped at 60. Painting 210 cards with inline SVG on every keystroke is
        work nobody asked for; an unfiltered reader is browsing, not looking. */
@@ -7468,7 +7479,7 @@ window.addEventListener("load", async function () {
                           + "parish is where it is",
                    satellite: "Satellite — what the ground looks like now" };
       return '<a href="#" data-b="' + k + '" title="' + esc(what[k] || k) + '"' +
-             (k === baseNow ? ' class="on"' : "") + ">" + k + "</a>";
+             (k === baseNow ? ' class="on"' : "") + ">" + T(k) + "</a>";
     }).join("");
     L.DomEvent.disableClickPropagation(b);
     L.DomEvent.on(b, "click", function (e) {
@@ -7679,7 +7690,7 @@ window.addEventListener("load", async function () {
      What it can say is bounded and the pane says so: only catalogued places are inside (a country-wide source reaches an area
      from outside it), each place's books are read from its own file in batches (at most AREA_CAP places), and «researched» is
      what is marked in this browser for the line that is selected. */
-  var AREA = { mode: null, pts: [], rubber: null, poly: null, tmp: null, rows: null, done: false, bar: null, hint: null, added: null };
+  var AREA = { mode: null, pts: [], rubber: null, polys: [], rings: [], last: "box", tmp: null, rows: null, done: false, bar: null, hint: null, added: null };
   var AREA_CAP = 120, ADD_CAP = 500;
   function areaInside(lat, lon, ring) {
     var inside = false, i, j, a, b;
@@ -7709,23 +7720,24 @@ window.addEventListener("load", async function () {
     AREA.mode = null; AREA.pts = [];
     [].forEach.call(document.querySelectorAll(".ra-areactl a"), function (a) { a.classList.remove("on"); });
   }
+  /* The shapes drawn so far and not yet saved. Drawing another one ADDS to them: a research group is often several places. */
+  function areaDropDrafts() { AREA.polys.forEach(function (pl) { map.removeLayer(pl); }); AREA.polys = []; AREA.rings = []; }
   function areaClear() {
     areaCancelDraw();
-    if (AREA.poly) { map.removeLayer(AREA.poly); AREA.poly = null; }
+    areaDropDrafts();
     if (AREA.bar) AREA.bar.hidden = true;
     AREA.rows = null; AREA.done = false;
   }
   function areaStart(mode) {
     var was = AREA.mode; areaCancelDraw();
     if (was === mode) return;                       /* the same button again stops drawing */
-    if (AREA.poly) { map.removeLayer(AREA.poly); AREA.poly = null; if (AREA.bar) AREA.bar.hidden = true; }
-    AREA.mode = mode; AREA.pts = [];
+    AREA.mode = mode; AREA.last = mode; AREA.pts = [];
     map.getContainer().classList.add("ra-drawing");
     map.doubleClickZoom.disable();
     map.on("click", areaClick); map.on("mousemove", areaMove); map.on("dblclick", areaDbl);
     document.addEventListener("keydown", areaKey);
     var btn = document.querySelector('.ra-areactl a[data-m="' + mode + '"]'); if (btn) btn.classList.add("on");
-    areaBox(mode === "box" ? "Tap one corner, then the opposite corner" : "Tap the corners of your area. Finish on the first corner, or press Finish", mode === "shape");
+    areaBox((AREA.rings.length ? T("Adding area " + (AREA.rings.length + 1) + ".") + " " : "") + T(mode === "box" ? "Tap one corner, then the opposite corner" : "Tap the corners of your area. Finish on the first corner, or press Finish"), mode === "shape");
   }
   function areaKey(e) { if (e.key === "Escape") areaCancelDraw(); }
   function areaMove(e) {
@@ -7739,7 +7751,7 @@ window.addEventListener("load", async function () {
   function areaClick(e) {
     if (AREA.mode === "box") {
       AREA.pts.push(e.latlng);
-      if (AREA.pts.length === 2) areaFinish(areaRect(AREA.pts[0], AREA.pts[1])); else areaBox("Now tap the opposite corner", false);
+      if (AREA.pts.length === 2) areaFinish(areaRect(AREA.pts[0], AREA.pts[1])); else areaBox(T("Now tap the opposite corner"), false);
       return;
     }
     if (AREA.pts.length >= 3) {
@@ -7747,21 +7759,29 @@ window.addEventListener("load", async function () {
       if (d < 14) { areaFinish(AREA.pts.slice()); return; }
     }
     AREA.pts.push(e.latlng);
-    areaBox(AREA.pts.length < 3 ? "Keep tapping the corners (" + AREA.pts.length + " so far)" : AREA.pts.length + " corners. Finish on the first corner, or press Finish", true);
+    areaBox(T(AREA.pts.length < 3 ? "Keep tapping the corners (" + AREA.pts.length + " so far)" : AREA.pts.length + " corners. Finish on the first corner, or press Finish"), true);
   }
   function areaDbl() { if (AREA.mode === "shape" && AREA.pts.length >= 4) { AREA.pts.pop(); areaFinish(AREA.pts.slice()); } }
   function areaFinish(ring) {
     if (!ring || ring.length < 3) return;
     areaCancelDraw();
     AREA.added = null; AREA.confirm = false;
-    AREA.poly = L.polygon(ring, { color: "#1F5C6B", weight: 2.5, dashArray: "7 5", fillColor: "#1F5C6B", fillOpacity: .09, interactive: false }).addTo(map);
+    AREA.rings.push(ring);
+    AREA.polys.push(L.polygon(ring, { color: "#1F5C6B", weight: 2.5, dashArray: "7 5", fillColor: "#1F5C6B", fillOpacity: .09, interactive: false }).addTo(map));
     if (!AREA.bar) {
       AREA.bar = document.createElement("div"); AREA.bar.className = "ra-area-bar";
       map.getContainer().appendChild(AREA.bar); L.DomEvent.disableClickPropagation(AREA.bar);
+      /* typing a name must not pan or zoom the map (Leaflet takes + - and the arrows from anywhere in its container) */
+      L.DomEvent.on(AREA.bar, "keydown keyup keypress", L.DomEvent.stopPropagation);
+      AREA.bar.addEventListener("submit", function (e) {
+        var f = e.target.closest && e.target.closest("form.ra-area-nm"); if (!f) return;
+        e.preventDefault(); areaSaveNamed(f.querySelector("input").value);
+      });
     }
-    AREA.bar.innerHTML = '<span id="ra-area-n">Reading the area…</span><button type="button" data-a="show">Show</button><button type="button" data-a="clear">Clear</button>';
+    AREA.meta = null;
+    AREA.bar.innerHTML = '<span id="ra-area-n">Reading the area…</span><button type="button" data-a="show">Show</button><button type="button" data-a="more" title="Draw another area and keep this one">Add area</button><button type="button" data-a="save">Save</button><button type="button" data-a="clear">Clear</button>';
     AREA.bar.hidden = false;
-    areaAnalyse(ring);
+    areaAnalyse(AREA.rings.slice());
   }
   /* The tail cells that overlap the area's box must be in before the places inside it can be counted. */
   function areaEnsureCells(bounds) {
@@ -7785,15 +7805,16 @@ window.addEventListener("load", async function () {
   }
   function areaInfo(p) { return { p: p, st: rcState(p) }; }
   var AREA_ORDER = ["none", "list", "busy", "done"];
-  function areaAnalyse(ring) {
-    var bounds = L.polygon(ring).getBounds();
+  function areaAnalyse(rings) {
     empty.hidden = true; panel.hidden = false; setQ("at", "");
     panel.innerHTML = '<div class="ra-area"><p class="at-sub">Reading the places inside your area…</p></div>';
-    areaEnsureCells(bounds).then(function () {
+    /* cells are fetched shape by shape, not for the box round all of them: two shapes a country apart must not pull in the country between */
+    Promise.all(rings.map(function (r) { return areaEnsureCells(L.polygon(r).getBounds()); })).then(function () {
       rcIdx = null;
-      var inside = idx.places.filter(function (p) { return p.y != null && areaInside(p.y, p.x, ring); });
-      var arch = archives.filter(function (a) { return areaInside(a.at.lat, a.at.lon, ring); });
-      AREA.rows = { ring: ring, places: inside, arch: arch, vols: null, loading: false };
+      var inAny = function (lat, lon) { return rings.some(function (r) { return areaInside(lat, lon, r); }); };
+      var inside = idx.places.filter(function (p) { return p.y != null && inAny(p.y, p.x); });
+      var arch = archives.filter(function (a) { return inAny(a.at.lat, a.at.lon); });
+      AREA.rows = { rings: rings, places: inside, arch: arch, vols: null, loading: false };
       areaRender();
       areaLoadVolumes();
     });
@@ -7805,11 +7826,19 @@ window.addEventListener("load", async function () {
     var groups = { none: [], list: [], busy: [], done: [] }, vtot = 0;
     R.places.forEach(function (p) { groups[rcState(p)].push(p); vtot += (p.v || 0) || (p.c || 0); });
     var n = document.getElementById("ra-area-n");
-    if (n) n.textContent = "Area: " + nfl(R.places.length) + " place" + (R.places.length === 1 ? "" : "s") + " · " + nfl(vtot) + " volume" + (vtot === 1 ? "" : "s");
+    var ns = R.rings.length, shapes = ns > 1 ? ns + " areas" : "Area";
+    if (n) n.textContent = T(ns > 1 ? ns + " areas" : "Area") + ": " + nfl(R.places.length) + " " + T(R.places.length === 1 ? "place" : "places") + " · " + nfl(vtot) + " " + T(vtot === 1 ? "volume" : "volumes");
     var h = ['<div class="ra-area">'];
-    h.push('<div class="at-h"><h3>Your area</h3></div>');
-    h.push('<p class="ra-area-sum"><b>' + nfl(R.places.length) + "</b> catalogued place" + (R.places.length === 1 ? "" : "s") + " · <b>" + nfl(vtot) + "</b> volume" + (vtot === 1 ? "" : "s") +
-           " · <b>" + nfl(R.arch.length) + "</b> archive" + (R.arch.length === 1 ? "" : "s") + ". Colours show <b>" + esc(line || "your research") + "</b>.</p>");
+    var M = AREA.meta, SV = M && !M.multi && MYA.areas[M.id], MULTI = M && M.multi;
+    h.push('<div class="at-h ra-area-hd"><h3 id="ra-area-title">' + esc(SV ? SV.name : MULTI ? M.names.length + " saved areas together" : (ns > 1 ? "Your " + ns + " areas" : "Your area")) + "</h3>" + (SV
+      ? (AREA.delAsk ? '<span class="ra-area-ask">Delete this area? <button type="button" data-a="yesdel">Yes, delete</button><button type="button" data-a="nodel">Cancel</button></span>'
+                     : '<span class="ra-area-ed"><button type="button" data-a="rename">Rename</button><button type="button" data-a="delete">Delete</button></span>')
+      : "") + "</div>");
+    if (SV && SV.line) h.push('<p class="ra-area-grp">Research group for <b>' + esc(SV.line) + "</b>" + (ns > 1 ? " · " + ns + " areas" : "") + "</p>");
+    if (MULTI) h.push('<p class="ra-area-grp">' + M.names.map(esc).join(" · ") + "</p>");
+    else if (!SV) h.push('<p class="at-sub">Not saved yet: use Save on the map to name ' + (ns > 1 ? "them as one group" : "it") + ' and keep ' + (ns > 1 ? "them" : "it") + '. Add area draws another and keeps this one.</p>');
+    h.push('<p class="ra-area-sum"><b>' + nfl(R.places.length) + "</b> " + T(R.places.length === 1 ? "catalogued place" : "catalogued places") + " · <b>" + nfl(vtot) + "</b> " + T(vtot === 1 ? "volume" : "volumes") +
+           " · <b>" + nfl(R.arch.length) + "</b> " + T(R.arch.length === 1 ? "archive" : "archives") + ". " + T("Colours show") + " <b>" + esc(line || T("your research")) + "</b>.</p>");
     h.push('<div class="ra-area-tally">' + ["done", "busy", "list", "none"].map(function (k) {
       return '<span><i style="background:' + RC_COL[k] + '"></i>' + RC_LAB[k] + " <b>" + nfl(groups[k].length) + "</b></span>";
     }).join("") + "</div>");
@@ -7954,6 +7983,7 @@ window.addEventListener("load", async function () {
     var Ctl = L.Control.extend({
       onAdd: function () {
         var d = L.DomUtil.create("div", "leaflet-bar ra-areactl");
+        d.id = "ra-areactl";
         d.innerHTML =
           '<a href="#" role="button" data-m="box" title="Draw a box: tap two opposite corners" aria-label="Draw a box on the map">' +
           '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><rect x="2.5" y="3.5" width="11" height="9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 2"/></svg></a>' +
@@ -7974,15 +8004,175 @@ window.addEventListener("load", async function () {
       if (a === "cancel") areaCancelDraw();
       else if (a === "finish") { if (AREA.pts.length >= 3) areaFinish(AREA.pts.slice()); }
       else if (a === "clear") areaClear();
+      else if (a === "more") areaStart(AREA.last || "box");
       else if (a === "show") { if (AREA.rows) { areaRender(); areaAddUi(); } }
+      else if (a === "save") areaSaveForm();
+      else if (a === "cancelsave") { AREA.bar.innerHTML = '<span id="ra-area-n"></span><button type="button" data-a="show">Show</button><button type="button" data-a="more" title="Draw another area and keep this one">Add area</button><button type="button" data-a="save">Save</button><button type="button" data-a="clear">Clear</button>'; areaRender(); }
     });
     panel.addEventListener("click", function (e) {
       var o = e.target.closest && e.target.closest("[data-open]");
       if (o) { var pid = o.getAttribute("data-open"), pl = idx.places.filter(function (p) { return p.i === pid; })[0]; if (pl) open(pl); return; }
       var b = e.target.closest && e.target.closest(".ra-area [data-a]"); if (!b) return;
       var a = b.getAttribute("data-a");
-      if (a === "add") { AREA.confirm = true; areaAddUi(); } else if (a === "no") { AREA.confirm = false; areaAddUi(); } else if (a === "yes") { AREA.confirm = false; areaDoAdd(); } else if (a === "undo") areaUndo();
+      if (a === "rename") areaRenameForm(); else if (a === "delete") { AREA.delAsk = true; areaRender(); areaAddUi(); }
+      else if (a === "nodel") { AREA.delAsk = false; areaRender(); areaAddUi(); }
+      else if (a === "yesdel") { var mid = AREA.meta && AREA.meta.id; AREA.delAsk = false; if (mid) { delete MYA.areas[mid]; MYA.gone[mid] = new Date().toISOString(); areaClear(); AREA.meta = null; panel.hidden = true; empty.hidden = false; myaSave(); } }
+      else if (a === "add") { AREA.confirm = true; areaAddUi(); } else if (a === "no") { AREA.confirm = false; areaAddUi(); } else if (a === "yes") { AREA.confirm = false; areaDoAdd(); } else if (a === "undo") areaUndo();
     });
+  })();
+
+  /* ---- SAVED AREAS AND VIEWS ---------------------------------------------------------------------------------------
+     David: «can I name a shape area, e.g. to mark an area as a research group? Could I have more than one area? And save the map
+     view to a view list that sits beside the search box?»
+     An area is a name and its corners (and the family line that was selected when it was saved, so it reads as that line's research
+     group). A view is a name and where the map was looking (centre, zoom, whether the research colours were on). Both are the
+     reader's own: kept in this browser (`ra-areas-v1`), carried in the backup file and the six-word copy, merged by id with
+     deletions remembered so a delete on one device is not undone by another. Only shapes and map positions: nothing about a person. */
+  var MYA_KEY = "ra-areas-v1";
+  var MYA = (function () {
+    try { var d = JSON.parse(localStorage.getItem(MYA_KEY) || "null"); if (d && d.areas && d.views) { d.gone = d.gone || {}; return d; } } catch (e) { /* unreadable: start empty */ }
+    return { v: 1, areas: {}, views: {}, gone: {} };
+  })();
+  var savedAreaLayer = L.layerGroup().addTo(map);
+  /* Which saved areas are drawn on the map is a choice about this screen, not part of the research: kept here, never synced. */
+  var MYA_OFF = (function () { try { return JSON.parse(localStorage.getItem("ra-areas-off") || "{}") || {}; } catch (e) { return {}; } })();
+  function myaOffSave() { try { localStorage.setItem("ra-areas-off", JSON.stringify(MYA_OFF)); } catch (e) { /* lasts until the page closes */ } }
+  function myaShown() { return myaSorted(MYA.areas).filter(function (id) { return !MYA_OFF[id]; }); }
+  function myaSave() {
+    try {
+      localStorage.setItem(MYA_KEY, JSON.stringify(MYA));
+      /* a change of the reader's own, so the backup nudge and the header dot know there is something to back up */
+      var now = new Date().toISOString();
+      if (!localStorage.getItem("ra-own-first")) localStorage.setItem("ra-own-first", now);
+      localStorage.setItem("ra-own-last", now);
+    } catch (e) { /* storage blocked: it lasts until the page closes */ }
+    document.dispatchEvent(new CustomEvent("ra-conn-refresh"));
+    viewsRender(); areaDrawSaved();
+  }
+  function myaId(kind) { return kind + Date.now().toString(36) + Math.floor(Math.random() * 1296).toString(36); }
+  function myaLine() { var P = window.raProgress; return P ? ((P.lines().filter(function (l) { return l.active; })[0] || {}).name || "") : ""; }
+  function myaSorted(o) { return Object.keys(o).sort(function (a, b) { return o[a].name.localeCompare(o[b].name); }); }
+  function areaDrawSaved() {
+    savedAreaLayer.clearLayers();
+    myaShown().forEach(function (id) {
+      var a = MYA.areas[id];
+      (a.rings || [a.ring]).forEach(function (r, i) {
+        var poly = L.polygon(r, { color: "#6B4E9B", weight: 2, fillColor: "#6B4E9B", fillOpacity: .06, interactive: false });
+        poly.addTo(savedAreaLayer);
+        if (i) return;                                /* one label per group, on its first shape */
+        poly.bindTooltip(a.name, { permanent: true, direction: "center", className: "ra-area-lab", interactive: true });
+        poly.getTooltip().on("add", function () {
+          var el = this.getElement(); if (!el || el._raBound) return;
+          el._raBound = true; el.addEventListener("click", function (ev) { ev.stopPropagation(); areaOpenSaved(id); });
+        });
+      });
+    });
+  }
+  function areaOpenSaved(id) {
+    var a = MYA.areas[id]; if (!a) return;
+    if (MYA_OFF[id]) { delete MYA_OFF[id]; myaOffSave(); areaDrawSaved(); viewsRender(); }   /* opening an area shows it */
+    areaCancelDraw();
+    areaDropDrafts();
+    if (AREA.bar) AREA.bar.hidden = true;
+    var rings = (a.rings || [a.ring]).map(function (r) { return r.map(function (c) { return L.latLng(c[0], c[1]); }); });
+    AREA.added = null; AREA.confirm = false; AREA.meta = { id: id, name: a.name };
+    map.fitBounds(L.polygon(rings).getBounds(), { padding: [30, 30] });
+    areaAnalyse(rings);
+  }
+  /* Several saved areas read as one: the places and books inside any of the checked ones. */
+  function areaOpenMany() {
+    var ids = myaShown(); if (!ids.length) return;
+    areaCancelDraw(); areaDropDrafts();
+    if (AREA.bar) AREA.bar.hidden = true;
+    var rings = [], names = [];
+    ids.forEach(function (id) { var a = MYA.areas[id]; names.push(a.name); (a.rings || [a.ring]).forEach(function (r) { rings.push(r.map(function (c) { return L.latLng(c[0], c[1]); })); }); });
+    AREA.added = null; AREA.confirm = false; AREA.meta = { multi: true, names: names };
+    map.fitBounds(L.polygon(rings).getBounds(), { padding: [30, 30] });
+    areaAnalyse(rings);
+  }
+  function areaRenameForm() {
+    var M = AREA.meta, t = document.getElementById("ra-area-title"); if (!M || !t) return;
+    t.outerHTML = '<form class="ra-area-rn"><input type="text" maxlength="60" aria-label="Rename this area" value="' + esc(MYA.areas[M.id].name) + '"><button type="submit">Save</button></form>';
+    var f = panel.querySelector("form.ra-area-rn"), inp = f.querySelector("input"); inp.focus(); inp.select();
+    f.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var nm = inp.value.trim().slice(0, 60); if (nm) { MYA.areas[M.id].name = nm; MYA.areas[M.id].upd = new Date().toISOString(); AREA.meta.name = nm; myaSave(); }
+      areaRender(); areaAddUi();
+    });
+  }
+  function areaSaveForm() {
+    var bar = AREA.bar; if (!bar || !AREA.rows) return;
+    bar.innerHTML = '<form class="ra-area-nm"><input type="text" maxlength="60" aria-label="Name this area" placeholder="Name it, e.g. Kvarner coast" value="' +
+      esc((AREA.rings.length > 1 ? "Group " : "Area ") + (Object.keys(MYA.areas).length + 1)) + '"><button type="submit">Save</button><button type="button" data-a="cancelsave">Cancel</button></form>';
+    var inp = bar.querySelector("input"); inp.focus(); inp.select();
+  }
+  function areaSaveNamed(name) {
+    var R = AREA.rows; if (!R) return;
+    name = String(name || "").trim().slice(0, 60) || "Area";
+    var id = myaId("a");
+    var rs = R.rings.map(function (r) { return r.map(function (ll) { return [+ll.lat.toFixed(4), +ll.lng.toFixed(4)]; }); });
+    MYA.areas[id] = { name: name, ring: rs[0], line: myaLine(), upd: new Date().toISOString() };
+    if (rs.length > 1) MYA.areas[id].rings = rs;       /* a group of shapes; `ring` stays the first so an older copy still draws something */
+    delete MYA.gone[id];
+    areaDropDrafts();
+    AREA.bar.hidden = true;
+    AREA.meta = { id: id, name: name };
+    myaSave(); areaRender(); areaAddUi();
+  }
+  function viewsRender() {
+    var box = document.getElementById("ra-viewin"); if (!box) return;
+    var vs = myaSorted(MYA.views), as = myaSorted(MYA.areas), h = [];
+    h.push('<p class="ra-fgroup-h">Views</p>');
+    h.push('<p class="ra-key-lead">Save where the map is looking now, and come back to it in one click.</p>');
+    h.push('<form class="ra-vsave" data-f="view"><input type="text" maxlength="60" aria-label="Name this view" placeholder="Name this view, e.g. Kvarner coast"><button type="submit">Save view</button></form>');
+    h.push(vs.length ? '<ul class="ra-vlist">' + vs.map(function (id) {
+      return '<li><button type="button" class="ra-vgo" data-go="view:' + id + '">' + esc(MYA.views[id].name) + '</button><button type="button" class="ra-vdel" data-del="view:' + id + '" aria-label="Delete the view ' + esc(MYA.views[id].name) + '">×</button></li>';
+    }).join("") + "</ul>" : '<p class="at-sub">No saved views yet.</p>');
+    h.push('<p class="ra-fgroup-h">Areas</p>');
+    h.push('<p class="ra-key-lead">Draw a box or shape with the two tools on the map, use Add area for as many more as you like, then Save to name them as one group. Tick the areas you want drawn on the map; a group lists what lies inside all of it and can be a research group.</p>');
+    var nShown = myaShown().length;
+    if (nShown > 1) h.push('<button type="button" class="ra-vmany" data-go="many:x">Show what is inside the ' + nShown + ' ticked areas together</button>');
+    h.push(as.length ? '<ul class="ra-vlist">' + as.map(function (id) {
+      var a = MYA.areas[id];
+      return '<li><input type="checkbox" class="ra-vchk" data-show="' + id + '"' + (MYA_OFF[id] ? "" : " checked") + ' aria-label="Show ' + esc(a.name) + ' on the map"><button type="button" class="ra-vgo" data-go="area:' + id + '">' + esc(a.name) + (a.rings && a.rings.length > 1 ? ' <small>' + a.rings.length + " areas</small>" : "") + (a.line ? ' <small>' + esc(a.line) + "</small>" : "") + '</button><button type="button" class="ra-vdel" data-del="area:' + id + '" aria-label="Delete the area ' + esc(a.name) + '">×</button></li>';
+    }).join("") + "</ul>" : '<p class="at-sub">No saved areas yet.</p>');
+    box.innerHTML = h.join("");
+  }
+  (function () {
+    var wrap = document.getElementById("ra-viewsw"), box = document.getElementById("ra-viewin");
+    if (!box) return;
+    box.addEventListener("submit", function (e) {
+      var f = e.target.closest && e.target.closest("form.ra-vsave"); if (!f) return;
+      e.preventDefault();
+      var name = f.querySelector("input").value.trim() || "View " + (Object.keys(MYA.views).length + 1), c = map.getCenter(), id = myaId("v");
+      MYA.views[id] = { name: name.slice(0, 60), lat: +c.lat.toFixed(4), lng: +c.lng.toFixed(4), z: map.getZoom(), rc: RC.on ? 1 : 0, upd: new Date().toISOString() };
+      delete MYA.gone[id]; myaSave();
+    });
+    box.addEventListener("change", function (e) {
+      var c = e.target.closest && e.target.closest("input[data-show]"); if (!c) return;
+      var id = c.getAttribute("data-show");
+      if (c.checked) delete MYA_OFF[id]; else MYA_OFF[id] = 1;
+      myaOffSave(); areaDrawSaved(); viewsRender();
+    });
+    box.addEventListener("click", function (e) {
+      var go = e.target.closest && e.target.closest("[data-go]"), del = e.target.closest && e.target.closest("[data-del]");
+      if (go) {
+        var p = go.getAttribute("data-go").split(":"), id = p[1];
+        if (p[0] === "view" && MYA.views[id]) {
+          var v = MYA.views[id]; map.setView([v.lat, v.lng], v.z);
+          var cb = document.getElementById("ra-rc");
+          if (cb && cb.checked !== !!v.rc) { cb.checked = !!v.rc; cb.dispatchEvent(new Event("change")); }
+        } else if (p[0] === "area") areaOpenSaved(id);
+        else if (p[0] === "many") areaOpenMany();
+        if (wrap) wrap.open = false;
+      } else if (del) {
+        var q = del.getAttribute("data-del").split(":"), kind = q[0] === "view" ? "views" : "areas";
+        delete MYA[kind][q[1]]; MYA.gone[q[1]] = new Date().toISOString();
+        if (AREA.meta && AREA.meta.id === q[1]) areaClear();
+        myaSave();
+      }
+    });
+    viewsRender(); areaDrawSaved();
   })();
 
   function setFull(on2) {
@@ -9366,10 +9556,10 @@ window.addEventListener("load", async function () {
   :global(.ra-chip-from) { font-family: var(--serif); font-size: 15px; font-weight: 700; background: #f3e9d6; border-color: #c9a45b; }
   :global(.ra-chip-kind) { background: #e1eef0; border-color: #6fa3ad; }
   :global(.ra-chip-lang) { background: #ece5f2; border-color: #a58abd; }
-  :global(.ra-chip-none) { color: var(--ink2); border-style: dashed; }
-  :global(.ra-orig-fn) { font-size: 11.5px !important; color: var(--ink2); margin: 8px 0 0 !important; }
+  :global(.ra-chip-none) { color: var(--ink-2); border-style: dashed; }
+  :global(.ra-orig-fn) { font-size: 11.5px !important; color: var(--ink-2); margin: 8px 0 0 !important; }
   :global(.ra-row) { margin: 4px 0 0 !important; }
-  :global(.ra-dim) { color: var(--ink2); font-size: 12.5px; }
+  :global(.ra-dim) { color: var(--ink-2); font-size: 12.5px; }
   :global(.ra-more) { margin-top: 4px; font-size: 12.5px; }
   :global(.ra-more summary) { cursor: pointer; color: var(--accent); }
  :global(.ra-orig-l) { margin: 0 0 3px; font-size: 13px; }
@@ -10028,4 +10218,32 @@ window.addEventListener("load", async function () {
   :global(.ra-rc-tog.on .ra-rc-dots i) { box-shadow: 0 0 0 1.5px var(--accent); }
     /* The panel is a four-column grid for a place; the area list takes the whole width, not one column of it. */
   :global(.ra-area) { grid-column: 1 / -1; max-width: 760px; }
+
+  /* ---- saved views and areas ---- */
+  .ra-bar-views .ra-cats-wrap { min-width: 0; }
+  .ra-bar-views summary { display: inline-flex; align-items: center; gap: 8px; font: 600 13px/1 var(--sans); color: var(--ink-2); }
+  :global(.ra-vsave), :global(.ra-area-nm), :global(.ra-area-rn) { display: flex; gap: 8px; align-items: center; margin: 0 0 10px; }
+  :global(.ra-vsave input), :global(.ra-area-nm input), :global(.ra-area-rn input) { flex: 1 1 0; min-width: 0; font: 400 13.5px/1.2 var(--sans); padding: 9px 11px;
+    border: 1px solid var(--rule-strong); border-radius: 8px; background: var(--panel); color: var(--ink); }
+  :global(.ra-vsave button), :global(.ra-area-nm button), :global(.ra-area-rn button), :global(.ra-area-ed button), :global(.ra-area-ask button) {
+    font: 600 12.5px/1 var(--sans); padding: 9px 13px; border-radius: 999px; cursor: pointer; border: 1px solid var(--rule-strong); background: var(--panel); color: var(--accent); white-space: nowrap; }
+  :global(.ra-vsave button[type="submit"]), :global(.ra-area-nm button[type="submit"]), :global(.ra-area-rn button) { background: var(--accent); color: #fff; border-color: var(--accent); }
+  :global(.ra-vlist) { list-style: none; margin: 0 0 6px; padding: 0; }
+  :global(.ra-vlist li) { display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--rule); }
+  :global(.ra-vchk) { flex: none; width: 16px; height: 16px; margin: 0 2px 0 0; accent-color: #6B4E9B; cursor: pointer; }
+  :global(.ra-vmany) { margin: 0 0 8px; font: 600 12.5px/1.2 var(--sans); padding: 9px 13px; border-radius: 999px; cursor: pointer; border: 1px solid var(--rule-strong); background: var(--panel); color: var(--accent); text-align: left; }
+  :global(.ra-vgo) { flex: 1 1 0; min-width: 0; text-align: left; border: 0; background: none; padding: 10px 4px; cursor: pointer; font: 500 14px/1.3 var(--sans); color: var(--ink); }
+  :global(.ra-vgo:hover) { color: var(--accent); }
+  :global(.ra-vgo small) { margin-left: 8px; font: 400 11px/1 var(--mono); color: var(--ink-3); }
+  :global(.ra-vdel) { border: 0; background: none; cursor: pointer; font: 400 20px/1 var(--sans); color: var(--ink-3); padding: 6px 10px; border-radius: 6px; }
+  :global(.ra-vdel:hover) { color: #B3261E; background: var(--ground, #eee); }
+  :global(.ra-area-hd) { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  :global(.ra-area-ed), :global(.ra-area-ask) { display: inline-flex; align-items: center; gap: 8px; font: 400 12.5px/1.3 var(--sans); }
+  :global(.ra-area-grp) { margin: 0 0 6px; font: 400 12.5px/1.4 var(--sans); color: var(--ink-2); }
+  :global(.ra-area-lab) { background: rgba(255, 255, 255, .92); border: 1px solid #6B4E9B; color: #4A3470; font: 600 12px/1 var(--sans); padding: 4px 8px; border-radius: 999px;
+    box-shadow: none; cursor: pointer; pointer-events: auto; }
+  :global(.ra-area-lab::before) { display: none; }
+  :global(.leaflet-container.ra-drawing .ra-area-lab) { pointer-events: none; }
+  :global(.ra-area-nm) { margin: 0; }
+  :global(.ra-area-bar form) { display: flex; }
 </style>

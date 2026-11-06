@@ -1229,6 +1229,20 @@ def place_names_gate():
     print(f"place names: {len(cat['places'])} places, {sum(len(p['names']) for p in cat['places'])} dated names, every one sourced")
 
 
+def _spot_in_source(spot):
+    """The id appears as id="spot", id = "spot", data-spot="spot", or (menus) is built from a label: menu-<label>."""
+    if spot.startswith("menu-"):
+        return True
+    pat = re.compile(r'(id|data-spot)\s*=\s*[{]?["\']' + re.escape(spot) + r'["\']')
+    for f in _g.glob("site/src/**/*.astro", recursive=True) + _g.glob("site/src/**/*.js", recursive=True):
+        try:
+            if pat.search(open(f, encoding="utf-8").read()):
+                return True
+        except OSError:
+            pass
+    return False
+
+
 def whats_new_gate():
     """site/src/data/whats-new.json is what the home page's «What's new» card shows.
 
@@ -1268,6 +1282,21 @@ def whats_new_gate():
                 err(f"{where}: href {href!r} must be a path inside the atlas, starting with /")
             elif first and first not in pages:
                 err(f"{where}: href {href!r} points at a page that does not exist")
+        spot = e.get("spot")
+        if spot:
+            # "show me where": /?spot=<id>&tip=<text>. The id must be a plain token that the site's own source mentions, and a spot
+            # without a link or without words for its bubble is a ring round something with nothing to say.
+            if not re.fullmatch(r"[A-Za-z0-9_-]{1,60}", spot):
+                err(f"{where}: spot {spot!r} must be a plain id (letters, digits, - and _)")
+            if not href:
+                err(f"{where}: a spot needs an href (the page it is on)")
+            tip = (e.get("tip") or "").strip()
+            if not tip:
+                err(f"{where}: a spot needs a tip, the words in its speech bubble")
+            elif len(tip) > 120:
+                err(f"{where}: tip is {len(tip)} characters; a bubble is at most 120")
+            if not _spot_in_source(spot):
+                err(f"{where}: spot {spot!r} is not an id or data-spot anywhere in site/src, so the link would ring nothing")
 
 
 def main():

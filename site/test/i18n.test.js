@@ -20,13 +20,18 @@ test("an unknown language falls back to the English it was given", () => {
                      "a string nobody has translated");
 });
 
+/* Words that really are the same in the other language, so the table says so on purpose. Anything else identical to its key is a copy-paste. */
+const COGNATES = {
+  it: new Set(["Offline", "Menu", "Privacy", "Area", "volume", "1 volume", "No", "satellite", "account"]),
+};
+
 test("the languages that exist actually translate", () => {
   assert.equal(t("hr", "Look up a surname"), "Potraži prezime");
   assert.equal(t("it", "Shelf"), "Scaffale");
   /* And they are not quietly identical to the English, which is what a
      copy-pasted table looks like. */
   for (const code of Object.keys(TABLES)) {
-    const same = Object.entries(TABLES[code]).filter(([k, v]) => k === v);
+    const same = Object.entries(TABLES[code]).filter(([k, v]) => k === v && !COGNATES[code]?.has(k));
     assert.equal(same.length, 0,
       `${code} leaves ${same.length} strings untranslated in place`);
   }
@@ -53,4 +58,26 @@ test("no translation is empty or only whitespace", () => {
   for (const [code, tab] of Object.entries(TABLES))
     for (const [k, v] of Object.entries(tab))
       assert.ok(String(v).trim().length > 0, `${code}: "${k}" is empty`);
+});
+
+test("a {} in a key is carried into every translation, the same number of times", () => {
+  for (const [code, tab] of Object.entries(TABLES))
+    for (const [k, v] of Object.entries(tab)) {
+      const n = (x) => (String(x).match(/\{\}/g) || []).length;
+      assert.equal(n(v), n(k), `${code}: "${k}" has ${n(k)} {} but its translation has ${n(v)}`);
+    }
+});
+
+test("Croatian and Italian hold the same set of strings, so neither is a half of the other", () => {
+  const hr = new Set(Object.keys(TABLES.hr)), it = new Set(Object.keys(TABLES.it));
+  assert.deepEqual([...hr].filter((k) => !it.has(k)), []);
+  assert.deepEqual([...it].filter((k) => !hr.has(k)), []);
+});
+
+test("the chrome a reader meets first is translated in both languages", () => {
+  /* The header, the map bar, the area tool, Connection & Backup and the footer: the places the report «languages half baked» came from. */
+  const must = ["Views", "Areas", "Add area", "Save", "Clear", "Show", "Connection & Backup", "Back up my research",
+    "Data credits and licences", "Add source", "Researching", "Local", "Layers", "Kind", "Share", "Last synced: {}."];
+  for (const code of Object.keys(TABLES))
+    for (const k of must) assert.ok(TABLES[code][k], `${code} has no translation for "${k}"`);
 });

@@ -96,3 +96,34 @@ export function flagPage(cc) {
 /** How many of the site's countries found a flag — for the gates to assert on. */
 export const matched = Object.keys(byCc).length;
 export const drawn = (fi.countries || []).length;
+
+/* THE OTHER DIRECTION, AND THE HUB: a flags-atlas page back to the country that
+   holds its records, and a country to the regional hub that tells its story.
+   Together with flagPage() these are what make a country one thing with several
+   faces (records, flags, hub, map) instead of four directories that do not know
+   about each other. */
+const ccBySlug = {};
+for (const [cc, f] of Object.entries(byCc)) {
+  if (f && f.url) ccBySlug[flagHref(f.url).replace(/^\/flags\/|\/$/g, "")] = cc;
+}
+/** Country code for a flags-atlas page slug (`croatia-flags`), or null. */
+export const ccForFlagSlug = (slug) => ccBySlug[slug] || null;
+
+const hubByCc = {};
+for (const h of fi.hubs || []) {
+  for (const cc of (h.holds && h.holds.ccs) || []) if (!hubByCc[cc]) hubByCc[cc] = h;
+}
+/** {name, href} of the flags-atlas hub a country belongs to, or null. */
+export function hubFor(cc) {
+  const h = hubByCc[(cc || "").toUpperCase()];
+  return h ? { name: h.name, href: flagHref(h.url) } : null;
+}
+
+/** Everything the one search needs to offer flag history: every drawn flag page
+    and every hub, as [name, path, kind]. Names with no country code (empires,
+    the home nations) are in here too, which is the point. */
+export function flagSearchRows() {
+  const rows = (fi.countries || []).map((c) => [c.name, flagHref(c.url), "flags"]);
+  for (const h of fi.hubs || []) rows.push([h.name + " hub", flagHref(h.url), "hub"]);
+  return rows;
+}

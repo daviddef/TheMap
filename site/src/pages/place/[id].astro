@@ -1,4 +1,5 @@
 ---
+import { brief } from "../../lib/brief.js";
 import { readFileSync, readdirSync } from "node:fs";
 /* One page per place — 1,239 of them, and the reason they exist is that until
    now there were six.
@@ -537,7 +538,7 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
             <span class="who">{ACCESS[p.access] || p.access}</span>
             {p.at && <span class="who">{p.at.place}{p.km != null && ` — ${p.km.toLocaleString()} km`}</span>}
             <span class="srcmark"></span>
-            {p.what && <><br /><span class="who">{p.what}</span></>}
+            {p.what && <><br /><span class="who">{brief(p.what)}</span></>}
           </li>
         ))}
       </ul>

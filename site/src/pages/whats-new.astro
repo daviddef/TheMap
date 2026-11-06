@@ -59,7 +59,7 @@ const email = site.contact && site.contact.email;
               <li class="item">
                 <span class={`chip ${e.kind || "better"}`}><i aria-hidden="true">{k.glyph}</i> {k.label}</span>
                 {e.href
-                  ? <a class="head" href={u(e.href)}>{e.headline}<span class="go" aria-hidden="true"> →</span></a>
+                  ? <a class="head" href={u(e.href) + (e.spot ? "?spot=" + encodeURIComponent(e.spot) + (e.tip ? "&tip=" + encodeURIComponent(e.tip) : "") : "")}>{e.headline}<span class="go" aria-hidden="true"> →</span></a>
                   : <span class="head">{e.headline}</span>}
               </li>
             );

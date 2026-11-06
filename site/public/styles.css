@@ -1198,7 +1198,7 @@ body.is-home #onthispage{display:none}
 .rr-m{color:var(--ink-3)}
 
 /* LIVE / LOCAL / OFFLINE DOT in the header: green = a copy is kept online, orange = saved only in this browser, red = offline; a warning triangle joins it when changes are over 24 h unbacked-up. The word is a second cue for people who cannot tell the colours apart; it hides on a phone to keep the header on one row. */
-.ra-live{text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-left:10px;font:600 11px/1 var(--sans,system-ui);letter-spacing:.04em;text-transform:uppercase;color:var(--ink2,#555)}
+.ra-live{text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-left:10px;font:600 11px/1 var(--sans,system-ui);letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2,#555)}
 .ra-live-dot{width:9px;height:9px;border-radius:50%;background:#e8870e;box-shadow:0 0 0 0 rgba(232,135,14,.55);animation:ra-pulse-o 2s infinite}
 .ra-live[data-state="online"] .ra-live-dot{background:#1f9d55;box-shadow:0 0 0 0 rgba(31,157,85,.55);animation:ra-pulse-g 2s infinite}
 .ra-live-w{display:inline-flex;align-items:center;line-height:0;margin-left:1px}
@@ -1230,7 +1230,7 @@ header.site .topnav summary.fresh::before{margin-right:7px;vertical-align:middle
 .ra-inv-grid a:hover{border-color:var(--accent,#35606e)}
 .ra-inv-grid b{font:700 18px/1.1 var(--serif,Georgia,serif);display:block}
 .ra-inv-grid span{font-size:12.5px}
-.ra-inv-grid small{display:block;margin-top:2px;font-size:11px;line-height:1.3;color:var(--ink2,#555)}
+.ra-inv-grid small{display:block;margin-top:2px;font-size:11px;line-height:1.3;color:var(--ink-2,#555)}
 
 /* NOTHING MAY MAKE THE PAGE WIDER THAN THE PHONE. clip, not hidden, so a sticky header still sticks and nothing becomes a scroll box. */
 @media (max-width:700px){html,body{overflow-x:clip}}
@@ -1278,3 +1278,38 @@ header.site .ra-inv .k-tag{font-size:10.5px;padding:3px 8px}
 @keyframes ra-pulse-w{0%{box-shadow:0 0 0 0 rgba(224,138,18,.5)}70%{box-shadow:0 0 0 7px rgba(224,138,18,0)}100%{box-shadow:0 0 0 0 rgba(224,138,18,0)}}
 .vm-pill-part,.src-open.vm-pill-part,i.pz{animation:ra-pulse-w 2.2s ease-out infinite}
 @media (prefers-reduced-motion:reduce){.vm-pill-part,.src-open.vm-pill-part,i.pz{animation:none}}
+
+/* SHOW ME WHERE (public/js/spot.js): a ring round the thing, a speech bubble beside it with a pointer. */
+.ra-spot-ring{position:absolute;z-index:2147483000;pointer-events:none;border-radius:10px;border:3px solid #e08a12;box-shadow:0 0 0 4px rgba(224,138,18,.25);animation:ra-pulse-n 2s infinite}
+.ra-spot{position:absolute;z-index:2147483001;max-width:min(300px,calc(100vw - 20px));display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;background:#16222A;color:#fff;
+  font:500 14px/1.4 var(--sans,system-ui);box-shadow:0 8px 24px rgba(10,20,26,.35)}
+.ra-spot::before{content:"";position:absolute;left:var(--ax,24px);top:-8px;margin-left:-8px;border:8px solid transparent;border-top:0;border-bottom-color:#16222A}
+.ra-spot.up::before{top:auto;bottom:-8px;border-bottom:0;border-top:8px solid #16222A;border-bottom-color:transparent}
+.ra-spot button{flex:none;border:0;background:rgba(255,255,255,.16);color:#fff;width:24px;height:24px;border-radius:50%;cursor:pointer;font:600 16px/1 system-ui;padding:0}
+.ra-spot button:hover{background:rgba(255,255,255,.3)}
+@media (prefers-reduced-motion:reduce){.ra-spot-ring{animation:none}}
+
+/* LIGHT / DARK TOGGLE (public/js/theme.js): a round icon at the end of the menu bar, a full row in the drawer. */
+header.site nav .ra-theme{display:inline-grid;place-items:center;width:38px;height:38px;margin-left:10px;padding:0;border:1px solid var(--rule-strong,var(--rule,#ccc));border-radius:50%;background:var(--panel,transparent);color:var(--ink,#222);cursor:pointer}
+header.site nav .ra-theme:hover{border-color:var(--accent,#1f5c6b);color:var(--accent,#1f5c6b)}
+header.site nav .ra-theme:focus-visible,.drawer .ra-theme-row:focus-visible{outline:3px solid var(--accent,#1f5c6b);outline-offset:2px}
+.drawer .ra-theme-row{display:flex;align-items:center;gap:10px;width:100%;padding:10px 0;border:0;background:none;color:var(--ink,#222);font:500 16px/1.3 var(--sans,system-ui);text-align:left;cursor:pointer}
+
+/* DARK MODE: THE CARDS IN THE VOLUMES PANEL AND THE MAP'S CHIPS WERE WHITE. They asked for --paper, which this page does not define, so the
+   fallback #fff painted a white card under the pale dark-theme text. In dark they take the raised dark surface; light is unchanged. */
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ra-inv-grid a,:root:not([data-theme="light"]) .ra-chip{background:var(--panel-2)}}
+:root[data-theme="dark"] .ra-inv-grid a,:root[data-theme="dark"] .ra-chip{background:var(--panel-2)}
+
+/* A long menu (the Flags hubs): two columns, and it scrolls inside itself rather than running off the screen. */
+.topnav .panel.long{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 6px;min-width:min(480px,92vw);max-height:min(72vh,560px);overflow:auto;overscroll-behavior:contain}
+.topnav .panel.long .ph{grid-column:1 / -1}
+.topnav .panel.long a{white-space:normal}
+
+/* The "Records for Croatia" buttons above a flags-atlas page (src/pages/flags/[slug].astro). They live here, not in the page, because the
+   page's own style block is global and the build gate rightly refuses a selector that never reaches the built CSS. */
+.flag-xlinks { max-width: 900px; box-sizing: border-box; margin: 18px auto 16px; padding: 0 16px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.flag-xlinks span { font-size: 12px; color: var(--ink-3, #6b6b66); text-transform: uppercase; letter-spacing: .06em; margin-right: 4px; }
+.flag-xlinks a { display: inline-flex; align-items: center; padding: 6px 14px; font-size: 14px; line-height: 1.2;
+                 color: var(--accent, #1d5a72); background: var(--panel, #fff); border: 1px solid var(--rule, #d8d6cf);
+                 border-radius: 999px; text-decoration: none; }
+.flag-xlinks a:hover, .flag-xlinks a:focus-visible { background: var(--accent-wash, #e6eef1); border-color: var(--accent, #1d5a72); }

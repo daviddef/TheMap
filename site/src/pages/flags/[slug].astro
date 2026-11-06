@@ -3,6 +3,9 @@
    See src/lib/flag-pages.js for why the body is lifted rather than rebuilt. */
 import Base from "../../layouts/Base.astro";
 import { slugs, page } from "../../lib/flag-pages.js";
+import { ccForFlagSlug } from "../../lib/flags.js";
+import { atlas as idx } from "../../lib/atlas.js";
+import { u } from "../../lib/url.js";
 
 export function getStaticPaths() {
   return slugs().map((slug) => ({ params: { slug } }));
@@ -10,10 +13,18 @@ export function getStaticPaths() {
 
 const { slug } = Astro.params;
 const f = page(slug);
+const cc = ccForFlagSlug(slug);
+const NAME = cc ? ((idx.countries || {})[cc] || cc) : "";
 /* The page prints its own <h1>, so Base must not print a second one above it.
    `bare` is the prop the other full-bleed pages use for exactly this. */
 ---
 <Base title={f.title} bare wide>
   <style is:inline set:html={f.css}></style>
+  {cc && (
+    <p class="flag-xlinks"><span>Records for {NAME}:</span>
+      <a href={u(`/country/${cc.toLowerCase()}/`)}>Country page</a>
+      <a href={u(`/?q=${encodeURIComponent(NAME)}`)}>On the map</a></p>
+  )}
   <div class="flagpage" set:html={f.html}></div>
 </Base>
+

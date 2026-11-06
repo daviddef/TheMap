@@ -61,6 +61,8 @@
   .country-card .status.pending { color: var(--muted); }
   .country-card .crowns { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
   .country-card .crown-tag { font-family: "IBM Plex Mono", monospace; font-size: 9px; color: var(--muted); background: var(--paper); border: 1px solid var(--card-border); border-radius: 10px; padding: 2px 7px; }
+  .country-card .atlas-stats { margin-top: 8px; padding-top: 7px; border-top: 1px solid var(--card-border); font-size: .74rem; color: var(--muted); }
+  .country-card .atlas-stats b { color: var(--ink, inherit); font-weight: 600; }
   .country-card.dimmed { opacity: .32; }
   .country-card.no-link { cursor: default; }
 
@@ -1335,6 +1337,33 @@
     return 6; // matched only via region/hub/crowns
   }
 
+  /* What the Record Atlas holds for a country: volumes, places, regions. Keyed by
+     ISO code, which is the two-letter entry in each country's alts; four countries
+     are written without one and are named here. Empires and states that no longer
+     exist have no code and show nothing rather than a zero. */
+  var ISO_EXTRA = { "Indonesia": "ID", "Taiwan": "TW", "Japan": "JP", "South Korea": "KR" };
+  var STATS = null;
+  function isoOf(c) {
+    if (ISO_EXTRA[c.name]) return ISO_EXTRA[c.name];
+    var a = (c.alts || []).filter(function (x) { return /^[A-Z]{2}$/.test(x); });
+    return a.length ? a[0] : "";
+  }
+  function statsLine(c) {
+    if (!STATS) return "";
+    var s = STATS[isoOf(c)];
+    if (!s || !(s.v || s.r)) return "";
+    var bits = [];
+    if (s.v) bits.push("<b>" + s.v.toLocaleString() + "</b> volumes");
+    if (s.p) bits.push("<b>" + s.p.toLocaleString() + "</b> places");
+    if (s.r) bits.push("<b>" + s.r + "</b> " + (s.r === 1 ? "region" : "regions"));
+    return '<div class="atlas-stats" title="What the Record Atlas holds for this country">' + bits.join(" &middot; ") + '</div>';
+  }
+  try {
+    fetch("../flag-stats.json").then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { if (j) { var y = window.scrollY; STATS = j; renderGrid(); window.scrollTo(0, y); } })
+      .catch(function () {});
+  } catch (e) {}
+
   function renderGrid() {
     var q = searchBox.value.trim().toLowerCase();
     var matched = COUNTRIES.filter(function (c) {
@@ -1358,6 +1387,7 @@
     }
 
     grid.innerHTML = matched.map(function (c) {
+      var statsHtml = statsLine(c);
       var statusHtml = c.ownPage
         ? ''
         : '<span class="status pending">Hub</span>';
@@ -1373,6 +1403,7 @@
         '</div>' +
         '<span style="color:var(--muted);font-size:.82rem;">' + subtitle + '</span>' +
         '<div class="crowns">' + crownsHtml + '</div>' +
+        statsHtml +
         '</a>';
     }).join("");
 

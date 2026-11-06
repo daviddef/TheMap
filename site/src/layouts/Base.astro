@@ -5,6 +5,13 @@ const built = new Date().toISOString().slice(0, 10);
 import { u } from "../lib/url.js";
 import { flagHref } from "../lib/flags.js";
 import { TABLES, LANGS } from "../lib/i18n.js";
+/* Small flags for the language links: 3:2, drawn inline so they cost no request.
+   English is the Union Jack, the one most readers expect beside "English". */
+const FLAG = {
+  en: '<svg class="ra-flag" width="16" height="11" viewBox="0 0 60 40" aria-hidden="true"><rect width="60" height="40" fill="#012169"/><path d="M0 0 60 40M60 0 0 40" stroke="#fff" stroke-width="8"/><path d="M0 0 60 40M60 0 0 40" stroke="#C8102E" stroke-width="3"/><path d="M30 0v40M0 20h60" stroke="#fff" stroke-width="13"/><path d="M30 0v40M0 20h60" stroke="#C8102E" stroke-width="8"/></svg>',
+  hr: '<svg class="ra-flag" width="16" height="11" viewBox="0 0 60 40" aria-hidden="true"><rect width="60" height="13.4" fill="#FF0000"/><rect y="13.3" width="60" height="13.4" fill="#fff"/><rect y="26.6" width="60" height="13.4" fill="#171796"/><path d="M25 12h10v11c0 4-5 6-5 6s-5-2-5-6z" fill="#fff" stroke="#FF0000" stroke-width="1.6"/><path d="M25 17h10M30 12v17" stroke="#FF0000" stroke-width="0"/><path d="M25 12h5v5h-5zM30 17h5v5h-5zM25 22h5v4c0 1 0 1-1 2l-4-3z" fill="#FF0000"/></svg>',
+  it: '<svg class="ra-flag" width="16" height="11" viewBox="0 0 60 40" aria-hidden="true"><rect width="20" height="40" fill="#009246"/><rect x="20" width="20" height="40" fill="#fff"/><rect x="40" width="20" height="40" fill="#CE2B37"/></svg>',
+};
 import site from "../data/site.json";
 import "../styles/kit.css"; // the friendly style (cards, pills, step lists), for every page
 /* Counted, not typed. This line is on all 6,000 pages and it is a licence
@@ -63,6 +70,7 @@ import LineSwitcher from "../components/LineSwitcher.astro";
 <html lang="en" data-base={u("")}>
 <head>
 <meta charset="utf-8" />
+<script is:inline>try{var t=localStorage.getItem("ra-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>{title === site.name ? `${site.name} — ${site.tagline}` : `${title} — ${site.name}`}</title>
 <meta name="description" content={dek || site.tagline} />
@@ -158,6 +166,11 @@ import LineSwitcher from "../components/LineSwitcher.astro";
      horizontal: it drops the 80ch reading measure and spans the wrap, which
      takes it from five lines to two on a wide screen. */
   .foot-cred { max-width: none; font-size: 11.5px; line-height: 1.7; }
+  .foot-cred summary { cursor: pointer; list-style: none; color: var(--ink-2); }
+  .foot-cred summary::-webkit-details-marker { display: none; }
+  .foot-cred summary::after { content: " \25BE"; opacity: .7; }
+  .foot-cred[open] summary::after { content: " \25B4"; }
+  .foot-cred[open] summary { margin-bottom: 6px; }
   .foot-sep { margin: 0 4px 0 10px; color: var(--ink-3); }
     /* NOT A FLEX CONTAINER. It was, and the ins element inside it is a
      block-level flex child with no intrinsic width, so it measured zero and
@@ -173,6 +186,7 @@ import LineSwitcher from "../components/LineSwitcher.astro";
   .adslot { min-height: 90px; margin: 0 0 24px; display: block; }
   .adslot ins { display: block; width: 100%; }
   .ra-lang a { margin-left: 10px; }
+  .ra-lang :global(.ra-flag) { width: 16px; height: 11px; margin-right: 5px; vertical-align: -1px; border-radius: 1px; box-shadow: 0 0 0 1px rgba(0,0,0,.18); }
   .ra-lang a.on { font-weight: 600; text-decoration: none; color: var(--ink-2); }
   .ra-lang [data-lang-note] { margin-left: 10px; }
 </style>
@@ -231,26 +245,38 @@ import LineSwitcher from "../components/LineSwitcher.astro";
           }
           var changed = !!(own && (!last || own > last)) || (!last && marks > 0);
           var ref = Math.min(first || now, seen || now), since = last ? now - last : now - ref;
-          return { online: online, synced: synced, last: last, own: own, changed: changed, never: !last, since: since, warn: changed && since > DAY,
+          return { online: online, synced: synced, syncedAt: sv, fileAt: ts(bk && bk.at), last: last, own: own, changed: changed, never: !last, since: since, warn: changed && since > DAY,
                    state: !online ? "offline" : synced ? "online" : "local" };
         }
-        window.raConn = { get: get };
+        /* WHEN, IN WORDS AND IN A DATE. David: «show the number of days since last sync, and the date». «3 days ago (6 Nov 2026, 14:20)», or
+           «today» for the same calendar day, so the count never says «0 days». */
+        function when(t) {
+          if (!t) return "";
+          var d = new Date(t), now = new Date(), n = Math.round((new Date(now.getFullYear(), now.getMonth(), now.getDate()) - new Date(d.getFullYear(), d.getMonth(), d.getDate())) / DAY);
+          var at = d.toLocaleString(window.RA_LANG && window.RA_LANG !== "en" ? window.RA_LANG : undefined, { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+          return T(n <= 0 ? "today" : n === 1 ? "1 day ago" : n + " days ago") + " (" + at + ")";
+        }
+        window.raConn = { get: get, when: when };
+        /* the language table's translator (public/js/i18n.js); English when it is absent or the reader reads English */
+        var T = window.RA_T || function (x) { return x; };
         var WORD = { online: "Live", local: "Local", offline: "Offline" };
         var TIP = { online: "Connected, and a copy of your research is kept online. Tap for Connection & Backup.",
                     local: "Saved only in this browser. Tap to back it up or keep a copy online.",
                     offline: "Offline: this page works from what is already loaded. Tap for Connection & Backup." };
-        function days(ms) { var d = Math.floor(ms / DAY); return d <= 1 ? "more than a day" : d + " days"; }
+        function days(ms) { var d = Math.floor(ms / DAY); return d <= 1 ? T("more than a day") : T(d + " days"); }
         function boot() {
           function set() {
             var c = get();
             [].slice.call(document.querySelectorAll(".ra-live")).forEach(function (el) {
               var t = el.querySelector(".ra-live-t"), w = el.querySelector(".ra-live-w");
               el.setAttribute("data-state", c.state);
-              var tip = TIP[c.state];
-              if (t) t.textContent = WORD[c.state];
+              var tip = T(TIP[c.state]);
+              if (c.synced) tip += " " + T(c.syncedAt ? "Last synced: " + when(c.syncedAt) + "." : "Not saved online yet.");
+              if (c.fileAt) tip += " " + T("Last file backup: " + when(c.fileAt) + ".");
+              if (t) t.textContent = T(WORD[c.state]);
               if (w) {
                 w.hidden = !c.warn;
-                if (c.warn) tip += " Warning: you have changed your research and it has not been backed up for " + days(c.since) + ".";
+                if (c.warn) tip += " " + T("Warning: you have changed your research and it has not been backed up for " + days(c.since) + ".");
               }
               el.title = tip;
             });
@@ -292,8 +318,8 @@ import LineSwitcher from "../components/LineSwitcher.astro";
         typeof links === "string"
           ? <a class:list={["menulink", here === u(links) ? "on" : ""]} href={u(links)}>{label}</a>
           : <details class="menu">
-              <summary>{label}</summary>
-              <div class="panel">
+              <summary data-spot={"menu-" + label.toLowerCase().replace(/[^a-z]+/g, "-")}>{label}</summary>
+              <div class:list={["panel", links.length > 14 ? "long" : ""]}>
                 {links.map(([h, l]) => h === null ? <span class="ph">{l}</span> : <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}
               </div>
             </details>
@@ -334,6 +360,8 @@ import LineSwitcher from "../components/LineSwitcher.astro";
         orange dot beside «About» (and on the burger, below the breakpoint) says something was added in the last fortnight that this
         browser has not looked at; opening What's new, or the page itself, puts it out. The date is written at build, the test runs in
         the browser because pages are built once and read for weeks. Seen-ness is a per-browser convenience, so storage may be blocked. */}
+    <script is:inline defer src={u("/js/spot.js")}></script>
+    <script is:inline defer src={u("/js/theme.js")}></script>
     <script is:inline>
       function raNewsDot() {
         var nav = document.querySelector("nav.topnav"); if (!nav) return;
@@ -347,7 +375,7 @@ import LineSwitcher from "../components/LineSwitcher.astro";
         if (!d || latest <= seen || Date.now() - d > 14 * 86400000) return;
         var sums = nav.querySelectorAll("details.menu > summary"), about = null;
         for (var i = 0; i < sums.length; i++) if (sums[i].textContent.trim() === "About") about = sums[i];
-        if (about) { about.classList.add("fresh"); about.title = "Something new: open About, then What's new"; }
+        if (about) { about.classList.add("fresh"); about.title = (window.RA_T || function (x) { return x; })("Something new: open About, then What's new"); }
         var bg = document.querySelector(".burger"); if (bg) bg.classList.add("fresh");
         var dr = document.querySelectorAll('.drawer a[href$="/whats-new/"]');
         for (var k = 0; k < dr.length; k++) dr[k].classList.add("fresh");
@@ -490,9 +518,7 @@ import LineSwitcher from "../components/LineSwitcher.astro";
       )}
     </nav>
     <p class="foot-note">
-      <b>Record Atlas</b> — {site.tagline}. Built in the open:
-      <a href={site.repo}>the data and the code are on GitHub</a>, and every source row
-      says when it was last checked. A directory that lies is worse than no directory.
+      <b>Record Atlas</b> — {site.tagline}. <a href={site.repo}>Data and code on GitHub</a>.
       {/* WHEN THIS COPY WAS MADE. A researcher who looked in March and
           found nothing for their parish has no way to know whether to
           look again — the atlas gains places and volumes most weeks and
@@ -500,12 +526,6 @@ import LineSwitcher from "../components/LineSwitcher.astro";
           one that cannot drift from what is actually being served. */}
       <br /><span class="foot-when">This copy built {built}.</span>
     </p>
-    {site.analytics?.goatcounter && site.analytics?.showCount && (
-      <p class="foot-note foot-thin vc" data-vc hidden>
-        <span data-vc-n>—</span> visits, counted without cookies by
-        <a href="https://www.goatcounter.com/" rel="noopener">GoatCounter</a>
-      </p>
-    )}
     {/* THE ATLAS SPOKE ENGLISH AT PEOPLE RESEARCHING CROATIA, which is the
         single biggest ceiling on its reach: somebody after a Gračišće
         baptism or a Puglia birth is likelier to read Croatian or Italian.
@@ -521,13 +541,16 @@ import LineSwitcher from "../components/LineSwitcher.astro";
     <p class="foot-note foot-thin ra-lang" data-ra-lang>
       <span>Language:</span>
       {LANGS.map(([code, label]) => (
-        <a href={`?lang=${code}`} data-lang={code} hreflang={code}>{label}</a>
+        <a href={`?lang=${code}`} data-lang={code} hreflang={code}><Fragment set:html={FLAG[code] || ""} />{label}</a>
       ))}
       <span class="foot-when" data-lang-note></span>
       {/* Feed rides the language line rather than owning a row of its own.
           It was one of five stacked blocks; it is one link. */}
       <span class="foot-sep">·</span>
       <a href={u("/feed.xml")}>Feed</a>
+      {site.analytics?.goatcounter && site.analytics?.showCount && (
+        <span data-vc hidden><span class="foot-sep">·</span> <span data-vc-n>—</span> visits, no cookies (<a href="https://www.goatcounter.com/" rel="noopener">GoatCounter</a>)</span>
+      )}
     </p>
 
     {/* ATTRIBUTION IS A LICENCE CONDITION, NOT A COURTESY, and four of these
@@ -538,7 +561,8 @@ import LineSwitcher from "../components/LineSwitcher.astro";
         those four are CC BY, where attribution is the whole of what is
         asked in return. Found while documenting /data/, which had made the
         same omission one layer up. */}
-    <p class="foot-note foot-thin foot-cred">
+    <details class="foot-note foot-thin foot-cred">
+      <summary>Data credits and licences</summary>
       Maps and {osm.archives.length} archives &copy; OpenStreetMap contributors,
       <a href="https://opendatacommons.org/licenses/odbl/">ODbL</a>, as are the Irish
       townlands via Townlands.ie ·
@@ -566,7 +590,7 @@ import LineSwitcher from "../components/LineSwitcher.astro";
       <a href="https://en.wiktionary.org/">Wiktionary</a>,
       <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> ·
       <a href={u("/data/")}>the whole list, per file</a>
-    </p>
+    </details>
   </div>
 </footer>
 {site.analytics?.goatcounter && site.analytics?.showCount && (

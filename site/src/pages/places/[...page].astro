@@ -38,6 +38,7 @@
 import Base from "../../layouts/Base.astro";
 import CountryCards from "../../components/CountryCards.astro";
 import SmartFind from "../../components/SmartFind.astro";
+import { flagSearchRows } from "../../lib/flags.js";
 import { countryMetrics, countryTotals } from "../../lib/country-metrics.js";
 import { u } from "../../lib/url.js";
 import full from "../../data/places-full.json";
@@ -119,7 +120,7 @@ const rows = page.data.map((p) => {
   {/* THE FLAT LIST BECAME A RANKED DROPDOWN. It answered «south» with sixty
       links in four columns, the country code run onto the name, a country and
       four American states looking identical. See SmartFind.astro. */}
-  <SmartFind placesIndex={u("/index.json")} quietIndex={u("/index-quiet.json")}
+  <SmartFind flagRows={flagSearchRows()} placesIndex={u("/index.json")} quietIndex={u("/index-quiet.json")}
              base={u("/")} />
 
   {/* THE SAME CARDS /countries/ USES, NOT A SECOND DESCRIPTION OF THE SAME
@@ -145,6 +146,16 @@ const rows = page.data.map((p) => {
     <CountryCards list={ccList} totals={ccTotals} showFind={false} />
   </details>
 
+  {/* The alphabetical pages below cannot be filtered (this is one of 93 of them,
+      mostly Italy), so while a search is active they are hidden: a search for
+      Croatia must not sit above a page of Italian comuni. SmartFind toggles #plist. */}
+  <div id="plist">
+  {/* THE A-TO-Z LIST IS FOR CRAWLERS AND FOR PEOPLE WHO WANT TO WALK IT, NOT THE FIRST THING EVERYONE SEES. It is 93 pages long and
+      Italy's comuni are four fifths of it, so with no search made the page opened on a screen of Italian villages and David asked why
+      Italy was there. It is folded away on the first page (the links stay in the HTML, so nothing becomes an orphan) and open on the
+      later pages, which a reader only reaches by choosing to walk the list. */}
+  <details class="azlist" open={page.currentPage > 1}>
+    <summary><b>Browse every place, A to Z</b> — page {page.currentPage} of {page.lastPage}</summary>
   <p class="cap">This index exists so that no place page is an orphan — everything here
   is reachable by walking from the front of the site. It is split across
   <b>{page.lastPage} pages</b> because listing all {full.places.length.toLocaleString()} at once
@@ -188,7 +199,8 @@ const rows = page.data.map((p) => {
       <a href={u(`/places/${page.currentPage + 1}/`)}>next →</a>
     )}
   </nav>
-
+  </details>
+  </div>
 
 </Base>
 
@@ -215,6 +227,8 @@ const rows = page.data.map((p) => {
     margin-left: 6px; }
 
   /* ---- the country directory -------------------------------------------- */
+  .azlist { margin: 16px 0 6px; border: 1px solid var(--rule); border-radius: 6px; padding: 10px 14px; background: var(--panel); }
+  .azlist > summary { font-family: var(--sans); font-size: 14px; cursor: pointer; }
   .cdir { margin: 16px 0 6px; border: 1px solid var(--rule);
     border-radius: 6px; padding: 12px 14px; background: var(--panel); }
   .cdir summary { font-family: var(--sans); font-size: 14px; cursor: pointer; }

@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import worker, { copyNightly } from "../../workers/sync/src/index.js";
+import worker, { copyNightly, computeStats } from "../../workers/sync/src/index.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const mod = { exports: {} };
@@ -155,4 +155,21 @@ test("the AI identity is its own: derived from the same words, equal to none of 
   assert.match(a.aiId, /^[0-9a-f]{32}$/); assert.match(a.aiToken, /^[A-Za-z0-9_-]{43}$/);
   assert.deepEqual([a.aiId, a.aiToken], [b.aiId, b.aiToken]);
   assert.ok(![a.id, a.readToken, a.writeToken].includes(a.aiId) && ![a.id, a.readToken, a.writeToken].includes(a.aiToken));
+});
+
+test("counts: identities and recent saves are totals only, the public number needs no secret, and the full totals need the owner's key", async () => {
+  const { env, opts } = rig(); env.STATS_KEY = "owner-secret-for-the-test";
+  for (let i = 0; i < 3; i++) { const k = await S.deriveKeys(pass(), FAST); assert.equal((await S.push(k, "x" + i, opts)).ok, true); }
+  const st = await computeStats(env);
+  assert.equal(st.registrations, 3); assert.equal(st.active7, 3); assert.equal(st.active30, 3); assert.equal(st.new7, 3); assert.ok(st.bytes > 0);
+  assert.equal(Object.keys(st).some(k => /id|key|phrase/i.test(k)), false, "no identifier in the totals");
+  const later = await computeStats(env, Date.now() + 40 * 86400000);
+  assert.equal(later.registrations, 3); assert.equal(later.active30, 0); assert.equal(later.new30, 0);
+  const pub = await opts.fetch("https://sync.test/v1/count");
+  assert.equal(pub.status, 200); const pj = await pub.json(); assert.equal(pj.registrations, 3); assert.deepEqual(Object.keys(pj).sort(), ["at", "registrations"]);
+  assert.equal((await opts.fetch("https://sync.test/v1/stats")).status, 404, "no key");
+  assert.equal((await opts.fetch("https://sync.test/v1/stats", { headers: { "X-Stats-Key": "wrong" } })).status, 404, "wrong key");
+  const full = await opts.fetch("https://sync.test/v1/stats", { headers: { "X-Stats-Key": "owner-secret-for-the-test" } });
+  assert.equal(full.status, 200); assert.equal((await full.json()).registrations, 3);
+  delete env.STATS_KEY; assert.equal((await opts.fetch("https://sync.test/v1/stats", { headers: { "X-Stats-Key": "owner-secret-for-the-test" } })).status, 404, "no secret set, no route");
 });

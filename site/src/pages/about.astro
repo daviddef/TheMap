@@ -42,124 +42,86 @@ catch { /* the newspapers are optional; the sentence about them is not printed
 const troveTitles = trove.counts?.titles || 0;
 
 let flagPages = 0;
-try { flagPages = fs.readdirSync("public/flags").filter((f) => f.endsWith(".html")).length; }
+try { flagPages = fs.readdirSync("src/flags-pages").filter((f) => f.endsWith(".html") && f !== "index.html").length; }
 catch { flagPages = 0; }
 ---
 <Base
   title="About Record Atlas"
   eyebrow="What this is, where it came from, and what it does not know"
-  dek="A map of where genealogical records are, who holds them, and what it costs to look — searchable by every name a place has ever had.">
+  dek="Where genealogical records are, who holds them and what it costs to look. Search by any name a place has ever had.">
 
-  <div class="prose k-prose" style="max-width:var(--measure)">
-    <h3>The problem</h3>
-    <p>Genealogy is not short of websites. Cyndi's List has three hundred thousand links. The
-    FamilySearch Wiki has a page for every country on earth. Almost nobody uses either, because
-    a list answers <em>what exists</em> and the question a researcher actually has is
-    <b>my great-grandfather was born in Gallignana in 1863 — where is that record, and can I
-    see it tonight?</b></p>
+  <div class="k-hi">
+    <p>My great-grandfather was born in Gallignana in 1863: where is that record, and can I see it tonight?</p>
+    <p>That one question is what this atlas answers. It began as one family's archive and was opened to the world. It is early, and it says so.</p>
+  </div>
 
-    <p>Three things stand between those two questions, and all three are geographic.</p>
+  <div class="k-stats" aria-label="The atlas in numbers">
+    <span><b>{dots.toLocaleString()}</b> places</span>
+    <span><b>{countries}</b> countries</span>
+    <span><b>{regions.regions.length}</b> record regions</span>
+    <span><b>{eras.toLocaleString()}</b> eras</span>
+    <span class="k-tag is-new">{unsurveyedPct}% not yet surveyed</span>
+  </div>
 
-    <p><b>The name changed.</b> Gallignana is Gračišće. Fiume is Rijeka. Pressburg is
-    Bratislava. You cannot search for a place whose name you do not know, so the find box here
-    matches every name a place has ever had — and it does this <b>for the whole world</b>,
-    not only where the shelf is deep. 45,985 places carrying 115,922 other names they have
-    been written under: type <em>Breslau</em> and it says Wrocław, <em>Czernowitz</em> and it
-    says Chernivtsi, <em>Memel</em> and it says Klaipėda. Of the three problems, this is the
-    one that does not need a shelf to answer, so it is answered first and everywhere.</p>
+  <h2 class="k-h">Four things stand between you and the record</h2>
+  <ul class="k-tiles ab-tiles">
+    <li><b>The name changed</b><span>Gallignana is Gračišće. Fiume is Rijeka. The find box matches every name a place has had, for the whole world: 45,985 places and 115,922 other names.</span></li>
+    <li class="is-link"><b>The jurisdiction changed</b><span>A 1930 record from the same village may be filed under <em>Italy</em>. It is the commonest reason a record cannot be found.
+      <a href={u("/jurisdictions/")}>See the table →</a></span></li>
+    <li><b>“Online” is eight different things</b><span>Free images, a login, an index only, part paid, paywall, a catalogue card, in the building, and for nine places in ten, nobody has looked. The colour of the dot says which.</span></li>
+    <li><b>The record is not always a register</b><span>Australia has no parish registers. {troveTitles.toLocaleString()} digitised newspapers are the record for most ancestors before 1950.</span></li>
+  </ul>
 
-    <p><b>The jurisdiction changed.</b> That 1863 baptism is in a Croatian archive. A 1930 one
-    from the same village is filed under <em>Italy</em>, because between the wars the village
-    was Italian. This is not a curiosity — it is the single commonest reason a record that
-    exists cannot be found, and <a href={u("/jurisdictions/")}>this map has a table for it</a>.</p>
+  <h2 class="k-h">Whose flag flew over it</h2>
+  <div class="k-hi is-plain">
+    <p>{flagPages} pages of flag history say who governed which ground, and when. This atlas knows which archive each regime’s paper went to, for {eras.toLocaleString()} eras in {regions.regions.length} regions.</p>
+    <p>The two sit side by side and are not yet one search. <a href={u("/flags/")}>Open the flags →</a></p>
+  </div>
 
-    <p><b>"Online" is eight different things.</b> Free images; images behind a free login;
-    an index with no images at all; part free and part paid; images behind a paywall; a
-    catalogue card for paper nobody has photographed; paper you can only read in the building;
-    and — for nine places in ten — <b>nobody has looked yet</b>. Most directories flatten all
-    of that into a link. Here it is the colour of the dot, and the eighth colour is the
-    commonest one on the map.</p>
+  <h2 class="k-h">Where it came from</h2>
+  <div class="k-hi is-plain">
+    <p>Out of <a href="https://daviddef.github.io/TheDefranceski/map/">one family’s archive</a>. Its Croatian depth ({places} places, {volumes.toLocaleString()} volumes) is that archive’s work, imported once. What was family-specific was dropped, including its colouring by how far one researcher had got.</p>
+    <p>There are <a href={u("/my-work/")}>nine such archives</a>, and what they share is why this atlas exists.</p>
+  </div>
 
-    <p><b>And a fourth thing, which took this atlas a while to admit: the record is not always
-    a register.</b> Australia has no parish-register series. Civil registration there is
-    state by state and closed for a lifetime. What exists instead is {troveTitles.toLocaleString()}
-    digitised newspapers, free and full-text, in which births, marriages, deaths and obituaries
-    were printed in volume — so for most Australian ancestors before 1950 the newspaper
-    <em>is</em> the record. A map that only counted registers would have called that country
-    empty and been wrong about it.</p>
+  <h2 class="k-h">What it does not know</h2>
+  <div class="k-hi">
+    <p><b>{unsurveyedPct}% of the ground on this map has never been surveyed.</b></p>
+    <p>Of {dots.toLocaleString()} dots in {countries} countries, only {walked.toLocaleString()} (in {walkedCC} countries) have been walked volume by volume. A grey dot means nobody has looked, never that nothing is there.</p>
+  </div>
+  <ul class="k-tiles ab-tiles">
+    <li><b>Regions follow the research</b><span>Each was written because someone was stuck on that ground and needed to know whose archive to write to.</span></li>
+    <li><b>Unopened sources are listed as such</b><span>Over three hundred sources are listed because a register or open dataset named them. Two hundred have had their door tried; none is called surveyed until someone has read it.</span></li>
+    <li><b>Declined after looking is a result</b><span>Fifteen sources were assessed and turned down with the reason written out. A bot gate is never worked around.</span></li>
+  </ul>
+  <details class="k-more ab-more">
+    <summary><span class="k-mt">The longer account</span></summary>
+    <div class="prose">
+      <p>The regions run {regionList} rather than the tidy sweep of Europe you might expect, because they were chosen by where research is being done, not by what would look impressive on a map. A place outside a mapped region says so in its own panel rather than guessing.</p>
+      <p>Keeping “nobody has surveyed it” apart from “nothing is there” is worth more than coverage: a map that quietly implies completeness sends people home when they should keep looking.</p>
+      <p>An archive that refuses a robot is stating terms, and an atlas that asks archives to trust it cannot be the thing that ignores them.</p>
+    </div>
+  </details>
 
-    <h3>Whose flag flew over it</h3>
-    <p>The jurisdiction problem has a companion, and as of today it lives here rather than
-    beside here. <a href={u("/flags/")}>{flagPages} pages of flag history</a> — who governed
-    which ground, when, and the banner they flew — were built as a separate project and have
-    been merged in whole. They are unchanged: this was a move, not a redesign.</p>
-    <p>The two halves answer the same question from opposite ends. This atlas knows, for
-    {eras} researched eras across {regions.regions.length} regions, <em>which archive a regime's
-    paper actually went to</em> — the part nobody else publishes. The flag pages know who was
-    flying what, for 210 countries rather than {regions.regions.length} regions. Each era on a
-    flag page now shows what this atlas holds for that ground in those years, fetched live from
-    a file this site publishes for anyone to use.</p>
-    <p><b>They are side by side, not yet one thing.</b> The flag timelines are written into
-    their pages as markup, so a search here cannot see them. Freeing that data is the next
-    piece of work, and until it is done this page will not pretend otherwise.</p>
+  <h2 class="k-h">How it is built</h2>
+  <ul class="k-tiles ab-tiles">
+    <li><b>A static site</b><span>No server, no database, no account. The data is plain JSON <a href={idx.repo || "https://github.com/daviddef/TheMap"}>in a public repository</a>.</span></li>
+    <li><b>Gated before it ships</b><span>The build refuses a source with no date, a provider that does not resolve, or coordinates in the wrong country. That last gate caught the Carnia comuni filed as Croatian.</span></li>
+    <li><b>Downloaded, not scraped</b><span>Country outlines are Natural Earth, the gazetteer is GeoNames (CC BY 4.0), maps are OpenStreetMap. Historical regions are drawn by hand, roughly, to say which filing system applied, not to settle a border.</span></li>
+  </ul>
 
-    <h3>Where it came from</h3>
-    <p>Out of a one-family archive. <a href="https://daviddef.github.io/TheDefranceski/map/">The
-    Defranceschi Archive's map</a> answers three questions about one family's ground: where the
-    record books are, where a named person can be put, and where the family is buried. Two of
-    those are family facts and cannot generalise. The first one can, and this is it, taken out
-    and pointed at the world. There are <a href={u("/my-work/")}>nine such archives</a>, and
-    what they have in common is the reason this atlas exists.</p>
-    <p>The Croatian depth here — {places} places and {volumes.toLocaleString()} volumes, of
-    {dots.toLocaleString()} dots in all — is that archive's work,
-    imported once as a snapshot. Everything family-specific was dropped on the way in, including
-    the thing its map is coloured by: how far one researcher had got. That is a true and useful
-    fact if you are that researcher. To a stranger it means nothing, so the colour here answers
-    a stranger's question instead.</p>
-
-    <h3>What it does not know</h3>
-    <p>It is early and it says so, and here is the number that says it: <b>{unsurveyedPct}% of
-    the ground on this map has never been surveyed.</b> There are {dots.toLocaleString()} dots
-    standing in {countries} countries, and only {walked.toLocaleString()} of them, across
-    {walkedCC} countries, are places somebody has actually walked volume by volume. The rest are
-    administrative districts — the units records are filed in, correctly placed and completely
-    unread — and they are drawn hollow so that the difference cannot be mistaken. A place
-    outside a mapped region <b>says so in its own panel</b> rather than guessing.</p>
-    <p><b>The regions were chosen by where research is actually being done</b>, not by what
-    would look impressive on a map. Each one was written because somebody was stuck on that
-    ground and needed to know whose archive to write to — which is why the list runs
-    {regionList} rather than the tidy sweep of Europe you might expect.</p>
-    <p><b>A grey dot means nobody has surveyed it. It does not mean nothing is there.</b> Keeping
-    those two apart is worth more than coverage, because a map that quietly implies completeness
-    sends people home when they should keep looking.</p>
-    <p>The same honesty applies to the institutions. Of the sources in the directory, a little
-    over three hundred are listed because a national register or an open dataset named them and
-    <b>nobody has opened them since</b>. Two hundred of those have now at least had their door
-    rattled — alive or dead, a page or an application, open or refusing robots — which turns a
-    list of URLs into a queue somebody can work. It does not turn any of them into a surveyed
-    source, and the directory does not say it does.</p>
-    <p><b>Declining after looking is a result; declining without looking is a gap.</b> Fifteen
-    sources have been assessed and turned down with the reason written out, and this project
-    does not defeat a bot gate or send a user-agent it is not, however easy that would be. An
-    archive that refuses a robot is stating terms, and an atlas that asks archives to trust it
-    cannot be the thing that ignores them.</p>
-
-    <h3>How it is built</h3>
-    <p>A static site — no server, no database, no account. The data is plain JSON
-    <a href={idx.repo || "https://github.com/daviddef/TheMap"}>in a public repository</a>, and a
-    build gate refuses to publish it if a source has no date on it, if a provider does not
-    resolve, or if a place's coordinates fall in a different country from the one it claims.
-    That last rule caught this project filing the Italian comuni of Carnia as Croatian on its
-    first import.</p>
-    <p>Country outlines are Natural Earth, public domain. The gazetteer is GeoNames, CC BY 4.0,
-    <b>downloaded rather than scraped</b> — the providers this project would otherwise have
-    ingested wholesale refuse robots, and the honest answer to that is to build on the data
-    that is actually offered rather than to take what is not. Maps are OpenStreetMap. The
-    historical regions are drawn by hand, deliberately roughly, because they exist to say
-    which filing system a place fell under rather than to adjudicate a border.</p>
+  <div class="k-foot">
+    <p>Behind the atlas</p>
+    <p><a href={u("/worklist/")}>What is being done</a> · <a href={u("/errands/")}>Letters to send</a> · <a href={u("/my-work/")}>My work</a> · <a href={u("/changelog/")}>What changed</a></p>
   </div>
 </Base>
 
 <style>
-  .prose h3 { margin-top: 30px; }
+  .ab-tiles { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); max-width: 980px; }
+  .ab-tiles li > span { display: block; }
+  .ab-tiles li b { font-family: var(--serif); font-size: 17px; font-weight: 500; color: var(--ink); }
+  .ab-tiles li a { font-size: 13px; color: var(--accent); }
+  .ab-more { margin: -8px 0 26px; max-width: 78ch; }
+  .ab-more .prose p { font-size: 14px; line-height: 1.65; color: var(--ink-2); margin: 0 0 10px; }
+  .k-stats > span { white-space: nowrap; }
 </style>

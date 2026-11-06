@@ -26,7 +26,7 @@
    real, used as a tie-break where it belongs.
 */
 import { readFileSync } from "node:fs";
-const { placesIndex, quietIndex, base, surnameShards = null, gazShards = null,
+const { placesIndex, quietIndex, base, surnameShards = null, gazShards = null, flagRows = [],
         hint: hintText = "Find a country or a place — Gallignana finds Gračišće",
         label: labelText = "Find a country or a place" } = Astro.props;
 
@@ -53,7 +53,7 @@ try {
 
 {/* The one sharding rule, loaded before anything asks for a shard. */}
 <script is:inline src={base.replace(/\/$/, "") + "/js/shard-key.js"}></script>
-<script is:inline define:vars={{ IDX: placesIndex, QUIET: quietIndex, BASE: base, SURN: surnameShards, GAZ: gazShards, SHARDS: SHARDMAP }}>
+<script is:inline define:vars={{ FLAGROWS: flagRows, IDX: placesIndex, QUIET: quietIndex, BASE: base, SURN: surnameShards, GAZ: gazShards, SHARDS: SHARDMAP }}>
   (function () {
     var box = document.getElementById("sfq");
     var drop = document.getElementById("sfdrop");
@@ -127,6 +127,22 @@ try {
 
     /* Countries come from the cards already in the page — no fetch, and they
        answer while the 1.7 MB place index is still arriving. */
+    /* FLAG HISTORY IS THE SAME COUNTRY'S OTHER FACE. The flags atlas has 211 pages
+       and 34 hubs, and it is searched here, from the same box, so «croatia» offers
+       the records AND the flags, and «ottoman» or «hawaii» reach the flag pages of
+       things that are not countries on this map at all. */
+    var lastK = "";
+    function flags() {
+      var out = [];
+      (FLAGROWS || []).forEach(function (r) {
+        var t = tier(r[0], lastK);
+        if (t === 99) return;
+        out.push({ t: t, n: r[0], kind: r[2] === "hub" ? "hub" : "flags", href: BASE.replace(/\/$/, "") + r[1],
+                   meta: r[2] === "hub" ? "region of flag pages" : "flag history" });
+      });
+      return out.sort(cmp);
+    }
+
     function countries(k) {
       var out = [];
       [].slice.call(document.querySelectorAll("#ccgrid .cccard")).forEach(function (c) {
@@ -248,6 +264,7 @@ try {
         take.forEach(function (r) { h.push(row(r, items.length)); items.push(r); });
       }
       group("Countries", cc, 5);
+      group("Flag history", flags(), 5);
       group("Names", sn || [], 8);
       group("Places", pl, 8);
       drop.innerHTML = h.join("");
@@ -269,6 +286,10 @@ try {
 
     function run(t) {
       var k = fold(t).trim();
+      /* The alphabetical list on /places/ cannot be filtered by a search, so it
+         steps aside while one is active instead of sitting under the answer. */
+      var plist = document.getElementById("plist");
+      if (plist) plist.hidden = k.length >= 2;
       if (k.length < 2) {
         drop.hidden = true; drop.innerHTML = ""; hint.textContent = "";
         box.setAttribute("aria-expanded", "false");
@@ -276,6 +297,7 @@ try {
         return;
       }
       if (!rows) { pending = t; load(); } else { pending = ""; }
+      lastK = k;
       var cc = countries(k), pl = places(k);
       /* The directory below filters to match, so the cards ARE the country
          answer; the dropdown is how you get there in one keystroke. */
@@ -317,6 +339,8 @@ try {
     function tell(cc, pl, sn) {
       var bits = [];
       if (cc.length) bits.push(cc.length + " countr" + (cc.length === 1 ? "y" : "ies"));
+      var fl = flags().length;
+      if (fl) bits.push(fl + " flag page" + (fl === 1 ? "" : "s"));
       if (sn && sn.length) bits.push(sn.length + " name" + (sn.length === 1 ? "" : "s"));
       if (pl.length) bits.push(pl.length + " place" + (pl.length === 1 ? "" : "s"));
       hint.textContent = bits.length ? bits.join(" · ")
@@ -390,6 +414,7 @@ try {
     letter-spacing: .06em; text-transform: uppercase; padding: 1px 5px;
     border-radius: 2px; border: 1px solid var(--rule); color: var(--ink-3); }
   :global(.sfk-country) { color: var(--accent); border-color: var(--accent); }
+  :global(.sfk-flags), :global(.sfk-hub) { color: var(--brass, var(--accent)); border-color: var(--brass, var(--accent)); }
   :global(.sfk-surname) { color: var(--brick); border-color: var(--brick); }
   :global(.sfm) { margin-left: auto; font-family: var(--mono); font-size: 10.5px;
     color: var(--ink-3); }

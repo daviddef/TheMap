@@ -139,3 +139,50 @@ test("the research file feeds the progress kit what it already reads", () => {
   const rf = fs.readFileSync(path.join(here, "../public/js/research-file.js"), "utf8");
   assert.doesNotMatch(rf, /fetch\(|XMLHttpRequest|sendBeacon|document\.cookie/, "the research file never leaves the browser");
 });
+
+/* Saved areas and views, and the GEDCOM file names: carried by the backup, merged by id, deletions remembered. Made-up names throughout. */
+const mya = () => ({ v: 1, areas: { a1: { name: "Test coast", ring: [[45, 14], [45, 15], [44, 15]], line: "Kosina", upd: "2026-11-05T10:00:00Z" } },
+                     views: { v1: { name: "Test view", lat: 45, lng: 14, z: 9, rc: 1, upd: "2026-11-05T10:00:00Z" } }, gone: {} });
+
+test("a backup carries areas, views and GEDCOM names, and reads them back", () => {
+  const f = RF.buildBackup(progress(), {}, undefined, { mya: mya(), gedcoms: [{ name: "example-tree.ged", size: 1234, saved: "2026-11-05T00:00:00Z" }] });
+  assert.deepEqual(Object.keys(f.areas), ["a1"]); assert.deepEqual(Object.keys(f.views), ["v1"]);
+  const back = RF.parseAny(JSON.stringify(f));
+  assert.equal(back.mya.areas.a1.name, "Test coast"); assert.equal(back.gedcoms[0].name, "example-tree.ged");
+  const sm = RF.summary(f); assert.equal(sm.areas, 1); assert.equal(sm.views, 1); assert.equal(sm.gedcoms, 1);
+});
+
+test("a backup with no areas, views or file names has none of those keys, so older files and tests are unchanged", () => {
+  const f = RF.buildBackup(progress(), {});
+  assert.equal("areas" in f, false); assert.equal("views" in f, false); assert.equal("gedcoms" in f, false);
+  assert.equal(RF.parseAny(JSON.stringify(f)).mya, null);
+});
+
+test("areas merge by id with the later change winning, and a deletion on one device is not undone by the other", () => {
+  const mine = mya(), theirs = mya();
+  theirs.areas.a1 = { ...theirs.areas.a1, name: "Renamed", upd: "2026-11-06T10:00:00Z" };
+  theirs.areas.a2 = { name: "Only theirs", ring: [[1, 1], [2, 2], [3, 3]], upd: "2026-11-06T10:00:00Z" };
+  const m = RF.mergeMya(mine, theirs);
+  assert.equal(m.areas.a1.name, "Renamed"); assert.ok(m.areas.a2);
+  const del = { areas: {}, views: {}, gone: { a1: "2026-11-07T00:00:00Z" } };
+  const after = RF.mergeMya(m, del);
+  assert.equal(after.areas.a1, undefined); assert.ok(after.areas.a2); assert.ok(after.views.v1);
+  const again = RF.mergeMya(after, mine);           // the other device still has a1, last changed before the deletion: stays deleted
+  assert.equal(again.areas.a1, undefined);
+});
+
+test("GEDCOM names merge to one per name and size, newest first, capped", () => {
+  const m = RF.mergeGedcoms([{ name: "a.ged", size: 1, saved: "2026-11-01" }], [{ name: "a.ged", size: 1, saved: "2026-11-03" }, { name: "b.ged", size: 2, saved: "2026-11-02" }]);
+  assert.deepEqual(m.map((g) => g.name + "@" + g.saved), ["a.ged@2026-11-03", "b.ged@2026-11-02"]);
+  const many = Array.from({ length: 40 }, (_, i) => ({ name: "f" + i + ".ged", size: i, saved: "2026-11-" + String(10 + (i % 18)) }));
+  assert.equal(RF.mergeGedcoms(many, []).length, 20);
+});
+
+test("the MyHeritage link and Ancestry site travel in the file, and anything that is not a web address or a listed site is dropped", () => {
+  const f = RF.buildBackup(progress(), {}, undefined, { sites: { mh: "https://www.myheritage.com/profile-example", anc: "co.uk" } });
+  assert.equal(f.sites.mh, "https://www.myheritage.com/profile-example"); assert.equal(f.sites.anc, "co.uk");
+  assert.equal(RF.parseAny(JSON.stringify(f)).sites.anc, "co.uk"); assert.equal(RF.summary(f).sites, 2);
+  const bad = RF.buildBackup(progress(), {}, undefined, { sites: { mh: "javascript:alert(1)", anc: "evil.example" } });
+  assert.equal("sites" in bad, false);
+  assert.equal("sites" in RF.buildBackup(progress(), {}), false);
+});

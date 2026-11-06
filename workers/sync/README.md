@@ -83,3 +83,22 @@ cd "/Volumes/DJ - Crucial - 4TB-SSD/Claude Projects/Family Projects/Record Atlas
 ```
 
 They use an in-memory stand-in for R2 and never touch the network or your account.
+
+## Counts: how many readers, how many active
+
+The nightly job also writes `stats/summary.json` (totals only: identities, new and active in the last 7 and 30 days, bytes). Nothing in it names an id.
+
+- **Public:** `GET https://sync.recordatlas.org/v1/count` returns `{"registrations": N, "at": "..."}`, cached an hour. The Connection & Backup page shows "N people keep a copy online" once N reaches 10 (`site/public/js/sync-count.js`).
+- **Owner only:** `GET /v1/stats` returns the full totals, live, when the header `X-Stats-Key` matches the Worker secret `STATS_KEY`. With no secret set the route does not exist. Set it once, in your own terminal (you choose the value; keep it in your password manager):
+
+```bash
+npx wrangler@4 secret put STATS_KEY
+```
+
+Read it:
+
+```bash
+read -s "K?Stats key: " && curl -s -H "X-Stats-Key: $K" https://sync.recordatlas.org/v1/stats; echo
+```
+
+Both need the Worker redeployed (`npx wrangler@4 deploy`). Until then `/v1/count` answers 404 and the page shows nothing.

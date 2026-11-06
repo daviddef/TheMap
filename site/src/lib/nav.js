@@ -1,3 +1,16 @@
+import fs from "node:fs";
+
+/* THE FLAGS MENU LISTS EVERY HUB. David: «on flags, can we have a sub menu with "hubs" and show the full hub list». The hubs are read from
+   public/flag-index.json (the same 34 the page shows) at build time, so a new hub appears in the menu with no second
+   list to keep. If the file cannot be read the entry falls back to the plain Flags link, never a half menu. */
+function hubLinks() {
+  try {
+    const j = JSON.parse(fs.readFileSync("public/flag-index.json", "utf8"));
+    return (j.hubs || []).map((h) => ["/" + String(h.url).replace(/^\/+/, "").replace(/\.html$/, "/"), h.name]);
+  } catch (e) { return []; }
+}
+const hubs = hubLinks();
+
 /* The site menu, one list. Base.astro renders it on every page; the Roots & Routes page (src/pages/roots/) renders it too, without the
    counter and ads that Base carries. Moved here verbatim from Base.astro so the two cannot drift. */
 export const nav = [
@@ -31,15 +44,13 @@ export const nav = [
      want. /your-name/ is the one page now (a Given name / Surname switch, the finder that answers on the map, the spellings
      and what each rests on); /surnames/ stays at its address as the dataset page it always was. */
   ["Names", "/your-name/"],
-  ["Places", "/places/"],
   ["Roots & Routes", "/roots/"],
-  /* FLAGS IS A DIRECT LINK, NOT A DROPDOWN, and the shape of this array had to
-     grow one case to allow it. Every other entry here is [label, [links]] and
-     renders as a disclosure; a disclosure holding a single item is a click in
-     front of a click. The 245 flag pages have one front door — their own
-     landing page, kept exactly as it was — so the menu item IS the door.
-     A string second element means a direct link. */
-  ["Flags", "/flags/"],
+  /* PLACES HOLDS THE FLAGS TOO. David: «could we bring flags under the places menu tab?» A flag page is a country's other face (see the
+     links between a country page and its flag history), so the two share a door: every place, the countries, the Flags Atlas, then every
+     hub. The hubs are read from the Flags Atlas index at build time, so a new one appears here by itself. */
+  hubs.length
+    ? ["Places", [["/places/", "Every place"], ["/countries/", "Countries"], [null, "Flags"], ["/flags/", "The Flags Atlas: every country"], [null, "Hubs (" + hubs.length + ")"], ...hubs]]
+    : ["Places", [["/places/", "Every place"], ["/countries/", "Countries"], ["/flags/", "The Flags Atlas"]]],
   /* FOUR ROWS, NOT TEN. David, looking at the menu: «there are so many options here, and they're really just showing help stuff ... it
      needs to be neat, exciting and simple.» The four that help a reader are here. The project's own pages (what is being done, the
      letters, my work, what changed) and the fine print (the data, privacy) are in the footer, where a person who wants them looks,
@@ -63,12 +74,9 @@ export const nav = [
   ]],
 ];
 
-/* The pages that left the About menu, for the footer. One list so the footer and its test read the same names. */
+/* The footer keeps only what no help or sources page already says: the licences and the privacy note. The project's own pages (what is
+   being done, letters to send, what changed, my work) are linked from the end of About. */
 export const footLinks = [
   ["/data/", "Use the data"],
   ["/privacy/", "Privacy"],
-  ["/changelog/", "What changed"],
-  ["/worklist/", "What is being done"],
-  ["/errands/", "Letters to send"],
-  ["/my-work/", "My work"],
 ];

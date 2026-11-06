@@ -1,4 +1,5 @@
 ---
+import { brief } from "../../lib/brief.js";
 /* One page per country the catalogue reaches — 93 of them.
 
    The harvest went worldwide and the map had nowhere to put it. A country is
@@ -8,7 +9,7 @@
    collections, the institutions, the record regions and the places — which is
    more than any single layer of the map can show at once. */
 import Base from "../../layouts/Base.astro";
-import { flagFor } from "../../lib/flags.js";
+import { flagFor, flagPage, hubFor } from "../../lib/flags.js";
 import { u } from "../../lib/url.js";
 import full from "../../data/places-full.json";
 import cols from "../../data/collections-full.json";
@@ -153,6 +154,18 @@ const nf = (n) => n.toLocaleString();
             span ? `${span[0]}–${span[1]}` : null].filter(Boolean).join(" · ")}
   dek={`Where the records of ${NAME} are, who holds them, and what it costs to look. ${records.toLocaleString()} indexed records reachable through FamilySearch alone.`}>
 
+  {/* ONE COUNTRY, SEVERAL FACES. This page, the flag history, its regional hub and
+      the map are the same country in four directories that did not know about each
+      other; a search for Croatia reached one and never mentioned the rest. */}
+  {(flagPage(cc) || hubFor(cc)) && (
+    <p class="xlinks">
+      <span>Also for {NAME}:</span>
+      {flagPage(cc) && <a href={u(flagPage(cc))}>Flag history</a>}
+      {hubFor(cc) && <a href={u(hubFor(cc).href)}>{hubFor(cc).name} hub</a>}
+      <a href={u(`/?q=${encodeURIComponent(NAME)}`)}>On the map</a>
+    </p>
+  )}
+
   <div class="one" style="margin-top:20px">
     <div class="lab">Where to start in {NAME}</div>
     <p><b>{!who.length
@@ -216,13 +229,25 @@ const nf = (n) => n.toLocaleString();
       <h2>Whose archive this ground was</h2>
       <p class="cap">Record regions mapped in {NAME} — which empire held the ground, and
       therefore which archive holds its paper.</p>
-      <ul class="regs">
-        {regs.map((r) => (
-          <li><a href={u(`/region/${r.id}/`)}>{r.label}</a>
-            <span class="y">{r.eras.length} eras</span>
-            <span class="sub">{r.sub}</span></li>
+      <ul class="regcards">
+        {regs.slice(0, 9).map((r) => (
+          <li><a href={u(`/region/${r.id}/`)}><b>{r.label}</b>
+            <span class="rsub">{r.sub}</span>
+            <span class="rn">{r.eras.length} eras</span></a></li>
         ))}
       </ul>
+      {regs.length > 9 && (
+        <details class="regmore">
+          <summary>Show the other {regs.length - 9} regions</summary>
+          <ul class="regcards">
+            {regs.slice(9).map((r) => (
+              <li><a href={u(`/region/${r.id}/`)}><b>{r.label}</b>
+                <span class="rsub">{r.sub}</span>
+                <span class="rn">{r.eras.length} eras</span></a></li>
+            ))}
+          </ul>
+        </details>
+      )}
     </section>
   )}
 
@@ -234,7 +259,7 @@ const nf = (n) => n.toLocaleString();
           <li><a href={u(`/archive/${p.id}/`)}>{p.name}</a>
             <span class={"chip acc-" + p.access}>{p.access}</span>
             {p.at && <span class="y">{p.at.place}</span>}
-            <p class="what">{p.what}</p></li>
+            <p class="what">{brief(p.what)}</p></li>
         ))}
       </ul>
       <p class="cap" style="margin-top:10px">And {world.length} worldwide providers
@@ -339,8 +364,26 @@ const nf = (n) => n.toLocaleString();
 
 <style>
   h2 { font-family: var(--serif); font-size: 26px; font-weight: 500; margin: 0 0 6px; }
+  .regcards { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 10px;
+              grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+  .regcards li { margin: 0; }
+  .regcards a { display: flex; flex-direction: column; gap: 4px; height: 100%; box-sizing: border-box; padding: 11px 13px;
+                background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; text-decoration: none; color: var(--ink); }
+  .regcards a:hover, .regcards a:focus-visible { border-color: var(--accent); background: var(--accent-wash); }
+  .regcards b { font-family: var(--serif); font-size: 16px; font-weight: 500; line-height: 1.25; }
+  .regcards .rsub { font-size: 12px; line-height: 1.45; color: var(--ink-3);
+                    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .regcards .rn { margin-top: auto; padding-top: 2px; font-family: var(--mono); font-size: 11px; color: var(--accent); }
+  .regmore { margin-top: 12px; }
+  .regmore summary { cursor: pointer; font-size: 14px; color: var(--accent); }
   .rows, .regs { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 7px; }
   .rows li, .regs li { font-family: var(--sans); font-size: 13px; line-height: 1.5; }
+  .xlinks { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 4px 0 22px; }
+  .xlinks span { font-size: 12px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .06em; margin-right: 4px; }
+  .xlinks a { display: inline-flex; align-items: center; padding: 6px 14px; font-size: 14px; line-height: 1.2;
+              color: var(--accent); background: var(--panel); border: 1px solid var(--rule); border-radius: 999px;
+              text-decoration: none; }
+  .xlinks a:hover, .xlinks a:focus-visible { background: var(--accent-wash); border-color: var(--accent); }
   .what { font-size: 11.5px; color: var(--ink-3); margin: 3px 0 0; max-width:var(--measure); }
   .sub { display: block; font-size: 11.5px; color: var(--ink-3); }
   .y { font-family: var(--mono); font-size: 11px; color: var(--ink-3); margin-left: 8px; }

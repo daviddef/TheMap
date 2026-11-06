@@ -13,14 +13,11 @@ import { u } from "../lib/url.js";
 ---
 <section id="sy" class="mrsafe" hidden>
   <h2 class="mrh">Keep a copy online</h2>
-  <p class="cap" id="sy-intro"><b>What are the six words?</b> They are your password, made for you: six ordinary words, like <i>maple harbour candle river
-  ocean lantern</i>. There is no email and no account. Your research is scrambled in this browser, and only the six words can unscramble it,
-  so our server keeps a copy it <b>cannot read</b>. If you lose the words, nobody can recover the copy, not even us.</p>
+  <p class="cap" id="sy-intro" data-th><b>Six words are your password</b>, made for you, like <i>maple harbour candle river ocean lantern</i>. No email, no account. Your research is encrypted in this browser and our server cannot read it. Lose the words and nobody can recover the copy, not even us.</p>
   <ol class="cap sy-steps" id="sy-steps">
-    <li><b>Turn it on:</b> press <b>Keep a copy online</b>. We show you your six words.</li>
-    <li><b>Keep them:</b> write them down or save the recovery sheet. They appear only once.</li>
-    <li><b>Check them:</b> type them back, press <b>Start syncing</b>, and the first copy is saved.</li>
-    <li><b>On a new phone or laptop:</b> press <b>I already have six words</b>, type them, and your research comes back.</li>
+    <li data-th><b>Turn it on</b> and write the six words down. They are shown once.</li>
+    <li data-th><b>Type them back</b> to check, press <b>Start syncing</b>, and the first copy is saved.</li>
+    <li data-th><b>On a new device</b>, press <b>I already have six words</b> and your research comes back.</li>
   </ol>
 
   <div id="sy-off">
@@ -31,7 +28,7 @@ import { u } from "../lib/url.js";
   </div>
 
   <div id="sy-new" hidden>
-    <p class="cap">These are your six words. Write them down or save the sheet <b>now</b>; this is the only time they are made.</p>
+    <p class="cap" data-th>Your six words. Write them down or save the sheet <b>now</b>: they are shown only once.</p>
     <p class="sy-phrase" id="sy-phrase" aria-live="polite"></p>
     <p class="mrbtns"><button type="button" id="sy-sheet">Save the recovery sheet</button> <span id="sy-sheet-said" role="status"></span></p>
     <p class="cap"><label>To check you have them, type them here: <input type="text" id="sy-confirm" autocomplete="off" spellcheck="false" aria-label="Type the six words again" /></label></p>
@@ -58,14 +55,14 @@ import { u } from "../lib/url.js";
       <ul id="sy-older-list" class="sy-list"></ul><p class="cap" id="sy-older-said" role="status"></p></details>
     <details><summary>My six words, and stopping</summary>
       <p class="mrbtns"><button type="button" id="sy-show">Show my six words</button> <span id="sy-shown" class="sy-phrase"></span></p>
-      <p class="cap">This browser keeps your six words so that <b>Sync now</b> needs no typing. Anyone who can open this browser can already read your research.</p>
+      <p class="cap">This browser remembers the words so Sync now needs no typing.</p>
       <p class="mrbtns"><button type="button" id="sy-stop">Stop syncing on this device</button>
         <button type="button" id="sy-erase">Delete everything stored online</button></p>
-      <p class="cap" id="sy-erase-ask" hidden>This removes your online copy and every older copy, and stops syncing here. Your research on this device is not touched, and the words stop working.
+      <p class="cap" id="sy-erase-ask" hidden>Removes your online copy and every older one, and stops syncing here. Research on this device is kept. The words stop working.
         <button type="button" id="sy-erase-yes">Yes, delete it</button> <button type="button" id="sy-erase-no">No</button></p>
     </details>
   </div>
-  <p class="cap" id="sy-down" hidden><b>Can’t reach the online-copy service right now.</b> That happens if you are offline, or on a test copy of this site (only recordatlas.org may use it). Nothing is lost: use <b>Back up my research</b> in step 1, which works anywhere, and come back here later.</p>
+  <p class="cap" id="sy-down" data-th hidden><b>Can’t reach the online copy right now.</b> You may be offline, or on a test copy of the site. Nothing is lost: use <b>Back up my research</b> in step 1.</p>
 </section>
 
 <style>
@@ -171,7 +168,7 @@ import { u } from "../lib/url.js";
           if (!got) { say("sy-look-said", "Nothing is stored under those six words. A wrong word looks the same as no copy, so check them, and try the order."); return; }
           keys = { phrase: n.phrase, text: got.text, saved: got.saved };
           say("sy-look-said", ""); $("sy-found").hidden = false;
-          $("sy-found-text").textContent = "Found a copy saved " + (got.saved ? got.saved.slice(0, 16).replace("T", " ") + " UTC" : "") + ": " + describe(got.text) + ". Merging adds it to what is here and never replaces anything.";
+          $("sy-found-text").textContent = "Found a copy saved " + (got.saved ? got.saved.slice(0, 16).replace("T", " ") + " UTC" : "") + ": " + describe(got.text) + ". Merging adds it and replaces nothing.";
         });
       }).catch(function (e) { say("sy-look-said", e.message || "Could not look for the copy."); });
     });

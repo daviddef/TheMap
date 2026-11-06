@@ -1,0 +1,76 @@
+---
+/* WHAT A PLACE WAS CALLED, AND WHEN — the list behind the "places with dated names" tile.
+ *
+ * Read from data/place-names.json, the one catalogue, written with scripts/place_names.py. Nothing here is typed. Alphabetical by
+ * country and place, because a list ordered by size reads as unsorted. A name is a dated claim: when a source gives the name but
+ * not the years it is marked "lead" and is searched, never used to date a record.
+ */
+import Base from "../layouts/Base.astro";
+import { u } from "../lib/url.js";
+import { atlas as idx } from "../lib/atlas.js";
+import cat from "../../../data/place-names.json";
+
+const KIND = { official: "official", colonial: "colonial", historic: "historic", exonym: "other language", native: "native" };
+const LANG = { it: "Italian", hr: "Croatian", de: "German", sl: "Slovene", hu: "Hungarian", la: "Latin", en: "English", fr: "French", es: "Spanish", pt: "Portuguese", nl: "Dutch", ru: "Russian", uk: "Ukrainian", pl: "Polish", tr: "Turkish", bg: "Bulgarian", sr: "Serbian", fur: "Friulian", ga: "Irish", no: "Norwegian" };
+const countryName = (cc) => (idx.countries || {})[cc] || cc;
+const span = (n) => n.from && n.to ? `${n.from}–${n.to}` : n.to ? `until ${n.to}` : n.from ? `from ${n.from}` : "undated";
+
+const byCountry = new Map();
+for (const p of cat.places || []) {
+  const k = p.country || "";
+  if (!byCountry.has(k)) byCountry.set(k, []);
+  byCountry.get(k).push(p);
+}
+const groups = [...byCountry.entries()]
+  .map(([cc, list]) => [cc, countryName(cc), list.sort((a, b) => a.name.localeCompare(b.name))])
+  .sort((a, b) => a[1].localeCompare(b[1]));
+const nNames = (cat.places || []).reduce((a, p) => a + p.names.length, 0);
+---
+<Base title="Places with dated names"
+  eyebrow="What a place was called in the year of the record"
+  dek="A register is filed under the name its clerk used in his year, so a search for today's name can miss it. These are the places whose older and other names the atlas has written down, with the years and a source for each.">
+
+  <div class="k-stats">
+    <span><b>{(cat.places || []).length}</b> places</span>
+    <span><b>{nNames}</b> names</span>
+    <span><b>{groups.length}</b> countries</span>
+  </div>
+
+  <p class="k-lede">The find box matches every name here. "Lead" means a source gives the name but not the years: search it, but do not date a record by it.</p>
+
+  <p class="pn-jump">{groups.map(([cc, name]) => <a class="k-tag" href={`#c-${cc}`}>{name}</a>)}</p>
+
+  {groups.map(([cc, name, list]) => (
+    <section id={`c-${cc}`}>
+      <h2 class="k-h">{name} <small>{list.length}</small></h2>
+      <ul class="pn-list">
+        {list.map((p) => (
+          <li>
+            <a class="pn-place" href={u(`/place/${p.id}/`)}>{p.name}</a>
+            <ul class="pn-names">
+              {p.names.map((n) => (
+                <li>
+                  <b>{n.name}</b>
+                  <span class="pn-meta">{span(n)} · {LANG[n.lang] || n.lang} · {KIND[n.kind] || n.kind}</span>
+                  {n.status === "lead" && <span class="k-tag">lead</span>}
+                </li>
+              ))}
+            </ul>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+</Base>
+
+<style>
+  .pn-jump { display: flex; flex-wrap: wrap; gap: 6px; margin: 18px 0 8px; }
+  .k-h small { font-family: var(--mono); font-size: 12px; color: var(--ink-3); font-weight: 400; margin-left: 6px; }
+  .pn-list { list-style: none; padding: 0; margin: 0 0 8px; display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+  .pn-list > li { background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: 11px 14px; }
+  .pn-place { font-family: var(--serif); font-size: 17px; font-weight: 500; color: var(--ink); text-decoration: none; }
+  .pn-place:hover { color: var(--accent); }
+  .pn-names { list-style: none; padding: 0; margin: 6px 0 0; display: grid; gap: 4px; }
+  .pn-names li { font-size: 14px; display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: baseline; }
+  .pn-meta { font-size: 12px; color: var(--ink-3); }
+</style>

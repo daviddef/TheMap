@@ -620,15 +620,16 @@
 
     /* A COUNT THE READER CAN SEE, because progress kept somewhere invisible
        is progress nobody trusts. Links to the page that can export it. */
+    var T = window.RA_T || function (x) { return x; };
     function bump() {
       var n = P.count();
       var el = document.getElementById("ra-mywork");
       if (!el) return;
       el.hidden = !n;
       el.innerHTML = n
-        ? '<b>' + n + "</b> volume" + (n === 1 ? "" : "s") +
-          " marked in this browser · " +
-          '<a href="' + (el.getAttribute("data-href") || "#") + '">see and export them</a>'
+        ? '<b>' + n + "</b> " + T(n === 1 ? "volume marked in this browser" : "volumes marked in this browser") +
+          " · " +
+          '<a href="' + (el.getAttribute("data-href") || "#") + '">' + T("see and export them") + "</a>"
         : "";
     }
     bump();

@@ -12,7 +12,11 @@
 
    NIGHTLY: objects changed in the last two days are copied to bucket COPY (a second bucket: it protects against a mistaken
    delete or overwrite, NOT against losing the Cloudflare account; a copy at another provider is a later step).
-   "Delete everything I have stored" removes the reader's keys from both buckets. */
+   "Delete everything I have stored" removes the reader's keys from both buckets.
+
+   COUNTS, NEVER PEOPLE. stats/summary.json holds only totals (how many identities, how many saved in the last 7 and 30 days, how many bytes), rebuilt
+   by the nightly job. GET /v1/count serves just the number of identities, to anyone, from that file. GET /v1/stats serves the full totals, live,
+   to whoever holds the secret STATS_KEY (set with `wrangler secret put STATS_KEY`; with none set the route does not exist). Neither names an id. */
 
 const MAX_BODY = 2 * 1024 * 1024;
 const MIN_BODY = 1 + 12 + 16 + 1;                    // version byte, iv, GCM tag, at least one byte
@@ -39,7 +43,7 @@ function corsFor(request, env) {
   return { ok: true, headers: {
     "Access-Control-Allow-Origin": o, "Vary": "Origin",
     "Access-Control-Allow-Methods": "GET, PUT, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Authorization, X-Read-Token, Content-Type",
+    "Access-Control-Allow-Headers": "Authorization, X-Read-Token, X-Stats-Key, Content-Type",
     "Access-Control-Expose-Headers": "X-Saved-At", "Access-Control-Max-Age": "600" } };
 }
 const reply = (body, status, extra) => new Response(body, { status, headers: { "Cache-Control": "no-store", ...extra } });
@@ -52,6 +56,27 @@ async function listAll(bucket, prefix) {
   const out = []; let cursor;
   do { const r = await bucket.list({ prefix, cursor, limit: 1000, include: ["customMetadata"] }); out.push(...r.objects); cursor = r.truncated ? r.cursor : undefined; } while (cursor);
   return out;
+}
+/* Totals over the whole bucket. Listing only: no blob is opened, so this reads names, sizes and times and nothing else. */
+export async function computeStats(env, now = Date.now()) {
+  const day = 86400000, since = d => now - d * day;
+  const metas = await listAll(env.SYNC, "meta/"), latest = await listAll(env.SYNC, "latest/");
+  const t = o => new Date((o.customMetadata && o.customMetadata.saved) || o.uploaded).getTime();
+  return {
+    at: new Date(now).toISOString(),
+    registrations: metas.length,
+    new7: metas.filter(o => new Date(o.uploaded).getTime() >= since(7)).length,
+    new30: metas.filter(o => new Date(o.uploaded).getTime() >= since(30)).length,
+    active7: latest.filter(o => t(o) >= since(7)).length,
+    active30: latest.filter(o => t(o) >= since(30)).length,
+    bytes: latest.reduce((a, o) => a + (o.size || 0), 0),
+  };
+}
+async function summary(env) {
+  const o = await env.SYNC.get("stats/summary.json");
+  if (o) { try { return await o.json(); } catch (e) { /* rebuilt below */ } }
+  const st = await computeStats(env); await env.SYNC.put("stats/summary.json", JSON.stringify(st), { httpMetadata: { contentType: "application/json" } });
+  return st;
 }
 async function wipe(bucket, id) {
   const keys = [`meta/${id}`, `latest/${id}`, ...(await listAll(bucket, `v/${id}/`)).map(o => o.key)];
@@ -67,6 +92,17 @@ async function handle(request, env) {
   const url = new URL(request.url), parts = url.pathname.split("/").filter(Boolean);
   if (parts[0] !== "v1") return json({ error: "not found" }, 404, h);
   if (parts[1] === "health" && parts.length === 2) return json({ ok: true, v: 1 }, 200, h);
+  /* the one number anybody may read: how many identities keep a copy. Cached an hour, from the nightly summary. */
+  if (parts[1] === "count" && parts.length === 2 && request.method === "GET") {
+    const st = await summary(env);
+    return json({ registrations: st.registrations, at: st.at }, 200, { ...h, "Cache-Control": "public, max-age=3600" });
+  }
+  /* the full totals, for the owner only. No secret set means no route; a wrong one looks like no route too. */
+  if (parts[1] === "stats" && parts.length === 2 && request.method === "GET") {
+    const key = request.headers.get("X-Stats-Key");
+    if (!env.STATS_KEY || !key || !same(await sha256Hex(key), await sha256Hex(env.STATS_KEY))) return json({ error: "not found" }, 404, h);
+    return json(await computeStats(env), 200, h);
+  }
   const id = parts[1];
   if (!id || !ID_RE.test(id)) return json({ error: "not found" }, 404, h);
   const sub = parts[2], day = parts[3];
@@ -153,5 +189,10 @@ export default {
     try { return await handle(request, env); }
     catch (e) { return json({ error: "server error" }, 500); }      // never echo the cause: it may name a key
   },
-  async scheduled(event, env, ctx) { ctx.waitUntil(copyNightly(env)); },
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil((async () => {
+      await copyNightly(env);
+      await env.SYNC.put("stats/summary.json", JSON.stringify(await computeStats(env)), { httpMetadata: { contentType: "application/json" } });
+    })());
+  },
 };

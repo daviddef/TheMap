@@ -1,4 +1,5 @@
 ---
+import { brief } from "../../lib/brief.js";
 /* One page per provider — the institution's own page.
 
    A researcher who starts from a building rather than from a village needs
@@ -43,16 +44,22 @@ const KIND = {
   og="archive"
   jsonld={{
     "@context": "https://schema.org", "@type": "ArchiveOrganization",
-    name: prov.name, url: prov.url, description: prov.what,
+    name: prov.name, url: prov.url, description: brief(prov.what, 300),
     address: prov.at ? { "@type": "PostalAddress", addressLocality: prov.at.place } : undefined,
     geo: prov.at ? { "@type": "GeoCoordinates", latitude: prov.at.lat,
                      longitude: prov.at.lon } : undefined,
   }}
   title={prov.name}
   eyebrow={[KIND[prov.kind], prov.at?.place, ACC[prov.access]].filter(Boolean).join(" · ")}
-  dek={prov.what}>
+  dek={brief(prov.what, 360)}>
 
   <p style="margin-top:6px"><a class="bigl" href={prov.url} target="_blank" rel="noopener">{prov.url} ↗</a></p>
+  {String(prov.what || "").length > 360 && (
+    <details class="more" style="margin-top:14px">
+      <summary>Everything recorded about this archive</summary>
+      <p class="what-full" style="max-width:78ch;line-height:1.6">{prov.what}</p>
+    </details>
+  )}
   <p class="cap">Last checked {prov.checked}. <a href={u("/add/")}>Tell us if this has changed.</a></p>
 
   {prov.holdings && prov.holdings.length > 0 && (

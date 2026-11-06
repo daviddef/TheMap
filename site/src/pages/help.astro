@@ -41,92 +41,54 @@ const access = idx.access || {};
 <Base
   title="Help"
   eyebrow="How to search it · what the colours mean · what to do when it finds nothing"
-  dek="Most of what a reader needs is one of three things: how to find a place whose name has changed, what the colour of a dot is telling them, and what to do when the answer is nothing.">
+  dek="Find a place whose name has changed, read the colour of a dot, and know what to do when the answer is nothing.">
 
-  <div class="prose k-prose" style="max-width:var(--measure)">
-    <h3>Three ways to search</h3>
-    <p><b>A surname.</b> Type it and the map lights the countries a register or
-    an archive attests it in. It will not tell you your family lived there — it
-    tells you the name is recorded there, which is where to start.</p>
-    <p><b>A village, by any name it has ever had.</b> This is the one most
-    people need and do not know to ask for. Type <em>Gallignana</em> and the map
-    goes to Gračišće; <em>Breslau</em> answers Wrocław, <em>Czernowitz</em>
-    answers Chernivtsi, <em>Memel</em> answers Klaipėda. It works worldwide, not
-    only where this atlas is deep.</p>
-    <p><b>A name and a place together.</b> <em>Blazevic Gracisce</em> narrows to
-    that name on that ground.</p>
-    <p><b>Or just click a country.</b> Every country on earth answers with
-    something — whose national archive, what research guide exists — even where
-    this atlas holds nothing below the country itself.</p>
+  <h2 class="k-h">Four ways to search</h2>
+  <ul class="k-tiles hp-tiles">
+    <li><b>A surname</b><span>The map lights the countries where a register or archive records it. That is where to start, not proof your family lived there.</span></li>
+    <li><b>A village, by any name</b><span>Gallignana goes to Gračišće, Breslau to Wrocław, Memel to Klaipėda. It works worldwide, not only where the shelf is deep.</span></li>
+    <li><b>A name and a place</b><span><em>Blazevic Gracisce</em> narrows to that name on that ground.</span></li>
+    <li><b>Click a country</b><span>Every country answers with something: whose national archive, what research guide exists.</span></li>
+  </ul>
 
-    <h3>Why a map, and not another list</h3>
-    <p><b>Three things stand between a researcher and a record, and all three
-    are geographic.</b></p>
-    <p><b>The name changed.</b> You cannot search for a place whose name you do
-    not know. That is why the find box matches every name a place has ever had
-    rather than the one it happens to carry today.</p>
-    <p><b>The jurisdiction changed.</b> An 1863 baptism from a Croatian village
-    sits in a Croatian archive. A 1930 one, from the same village, is filed
-    under <em>Italy</em> — because between the wars that village was Italian.
-    Searching the Croatian collection alone finds nothing, and <b>nothing is not
-    the same as not existing</b>. Set the year on the map and it tells you which
-    it is; <a href={u("/jurisdictions/")}>the table behind that</a> is the part
-    of this atlas nobody else publishes.</p>
-    <p><b>"Online" is eight different things</b>, not one, and the difference is
-    the whole cost of an evening. Here it is the colour of the dot:</p>
-    <ul class="akey">
-      {Object.entries(access).map(([k, v]) => (
-        <li><b>{k}</b> — {v}</li>
-      ))}
-    </ul>
-    <p>The last of those is the commonest colour on this map, and the next
-    section is about that.</p>
+  <h2 class="k-h">What the colour of a dot means <span class="k-count">what it costs to look</span></h2>
+  <ul class="k-tiles hp-tiles hp-key">
+    {Object.entries(access).map(([k, v]) => (
+      <li><b>{k}</b><span>{v}</span></li>
+    ))}
+  </ul>
+  <p class="k-lede">“Online” is eight different things, not one. The last of these is the commonest colour on the map.
+    Set a year and the map also says whose archive held that ground: <a href={u("/jurisdictions/")}>the table behind that</a>.</p>
 
-    <h3>When it finds nothing</h3>
-    <p><b>A grey dot means nobody has surveyed it. It does not mean nothing is
-    there.</b> That distinction is the difference between a map and a claim, and
-    keeping it is worth more than coverage — a map that quietly implies
-    completeness sends people home when they should keep looking.</p>
-    <p>So if a place is grey, the useful next steps are, in order: set the year
-    and see <b>whose archive held that ground</b>, because the records may be
-    filed under a country you were not searching; open <a href={u("/providers/")}>the
-    source directory</a> for that country and write to the archive named there;
-    and check whether the ground was covered by a newspaper rather than a
-    register — for some countries, Australia above all, the newspaper <em>is</em>
-    the record.</p>
-    <p>If you find the answer, <a href={u("/add/")}>send it back</a>. A grey dot
-    you have personally turned into an answer is the single most valuable thing
-    a stranger can give this map.</p>
+  <h2 class="k-h">When it finds nothing</h2>
+  <div class="k-hi"><p><b>A grey dot means nobody has surveyed it, not that nothing is there.</b></p></div>
+  <ol class="k-steps">
+    <li><b>Set the year.</b> See whose archive held that ground. The records may be filed under a country you were not searching.</li>
+    <li><b>Open the source directory</b> for that country and write to the archive named there. <a href={u("/providers/")}>The sources →</a></li>
+    <li><b>Try the newspapers.</b> For some countries, Australia above all, a newspaper is the record.</li>
+    <li><b>Found it?</b> <a href={u("/add/")}>Send it back.</a> A grey dot you turned into an answer is the most valuable thing a stranger can give this map.</li>
+  </ol>
 
-    <h3>What this map does not know yet</h3>
-    <p>It is honest about being early, and the layers are at different stages.
-    <b>{unsurveyedPct}% of the ground here has never been surveyed</b> — that is
-    the number every other one refines.</p>
-    <p><b>The archives layer is worldwide</b> — {archives.length} institutions
-    across {archiveCountries} countries, each saying what it holds and what it
-    costs to look. <b>The shelf is deep in one corner</b>: {places.toLocaleString()}
-    places and {volumes.toLocaleString()} volumes, with Croatia, Istria and
-    Carnia far ahead of everywhere else. <b>The jurisdiction layer covers
-    {regions.regions.length} pieces of ground</b>, not the planet —
-    {" "}{regions.regions.slice(0, 8).map((r) => r.label.split(" — ")[0]).join(", ")}
-    {regions.regions.length > 8 ? ` and ${regions.regions.length - 8} more` : ""}.
-    A place outside them says so in its own panel rather than guessing, because
-    a confident wrong answer about which archive to write to costs somebody a
-    month.</p>
+  <h2 class="k-h">What it does not know yet</h2>
+  <div class="k-stats">
+    <span class="k-tag is-new">{unsurveyedPct}% never surveyed</span>
+    <span><b>{archives.length}</b> archives in <b>{archiveCountries}</b> countries</span>
+    <span><b>{places.toLocaleString()}</b> places</span>
+    <span><b>{volumes.toLocaleString()}</b> volumes</span>
+    <span><b>{regions.regions.length}</b> jurisdiction regions</span>
+  </div>
+  <p class="k-lede">The shelf is deep in one corner: Croatia, Istria and Carnia are far ahead. The jurisdiction layer covers
+    {regions.regions.length} pieces of ground, not the planet, and a place outside them says so rather than guessing. A confident wrong answer about which archive to write to costs somebody a month.</p>
 
-    <h3>Still stuck?</h3>
-    <p><a href={u("/start/")}>Start here</a> walks the first search end to end.
-    <a href={u("/about/")}>About</a> says what this atlas is and where it came
-    from, and <a href={u("/coverage/")}>what's missing</a> measures the gaps
-    country by country rather than asserting coverage.</p>
+  <div class="k-foot">
+    <p>Still stuck?</p>
+    <p><a href={u("/start/")}>Start here</a> · <a href={u("/about/")}>About</a> · <a href={u("/coverage/")}>What’s missing</a></p>
   </div>
 </Base>
 
 <style>
-  .akey { list-style: none; padding: 0; margin: 10px 0 16px; display: grid;
-          gap: 4px; }
-  .akey li { font-family: var(--sans); font-size: 13px; color: var(--ink-2);
-             line-height: 1.55; }
-  .akey b { font-family: var(--mono); font-size: 11.5px; color: var(--ink);
-            text-transform: uppercase; letter-spacing: .04em; }
+  .hp-tiles { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); max-width: 980px; }
+  .hp-tiles li > span { display: block; }
+  .hp-tiles li b { font-family: var(--serif); font-size: 17px; font-weight: 500; color: var(--ink); }
+  .hp-key li b { font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; letter-spacing: .04em; }
 </style>

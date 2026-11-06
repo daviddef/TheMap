@@ -1,10 +1,10 @@
 # Plan: "Reading the record", a visual, searchable guide to interpreting old registers
 
-Status: **plan only. Nothing is built.** Written 6 November 2026. Worklist rows 116-123 point here.
+Status: **the first piece is built (the term finder and the date decoder at `/read/`); everything else here is plan.** Written 6 November 2026. Worklist rows 116-123 track it.
 
 ## 1. The gap
 
-A researcher who finds the right register still has to read it. The guides that exist were read for this plan (the four pages David named, the Belgium Latin handout he uploaded, and the Lébény walkthrough he pasted). What each does well, and where all of them stop:
+A researcher who finds the right register still has to read it. The guides that exist were read for this plan (four web pages, a one-page Belgian Latin handout, and a walkthrough of a Hungarian birth register). What each does well, and where all of them stop:
 
 | Guide | Good at | Where it stops |
 |---|---|---|
@@ -13,7 +13,7 @@ A researcher who finds the right register still has to read it. The guides that 
 | Genealogical Studies (Italian) | Case endings explained with names | Only four cases, a few words, four months; no whole entry read; ends in a course advert |
 | The Catholic Gene | One real entry translated, then a glossary | No grammar, so no reason why endings change; no dates, no handwriting |
 | Italian Roots Project | Argues records follow fixed formats; a letter-key habit; decode one whole act first | Repeats itself; no annotated entry; thin on Latin |
-| The Lébény walkthrough (pasted) | Walks the *columns* of one tabular register and then specific entries | One village, text only, "keep a record open beside this" is left to the reader |
+| A column-by-column walkthrough of one Hungarian village's birth register | Walks the *columns* of one tabular register and then specific entries | One village, text only, "keep a record open beside this" is left to the reader |
 
 The pattern is the same everywhere: long, linear, not searchable, with the picture and the explanation in different places. A researcher with a register open wants the opposite: point at the thing on the page and be told what it is, what it can and cannot tell them, and what else it might look like in another parish or century.
 
@@ -21,7 +21,7 @@ The pattern is the same everywhere: long, linear, not searchable, with the pictu
 
 A new section, `/read/`, with five tools that share one data set.
 
-1. **The annotated page.** A drawn layout of a register page (a column table like Lébény's, or a prose entry like the Belgian baptism). Tap any field or word: a panel says what it is, the words usually written there, what it does *not* tell you, and how it varies by country and period. A switch changes the layout: Latin prose baptism, Hungarian tabular birth register, Napoleonic printed civil act, and so on. The layouts are our own drawings, so they are free of anyone's image rights and can be made accessible text.
+1. **The annotated page.** A drawn layout of a register page (a column table like a Hungarian birth register, or a prose entry like the Belgian baptism). Tap any field or word: a panel says what it is, the words usually written there, what it does *not* tell you, and how it varies by country and period. A switch changes the layout: Latin prose baptism, Hungarian tabular birth register, Napoleonic printed civil act, and so on. The layouts are our own drawings, so they are free of anyone's image rights and can be made accessible text.
 2. **Read this line.** The sentence formula as slots (date, was baptised, child, legitimate son of, father, and, mother, godparents were…). The reader types or picks the words they see; each word is shown with its case, why the ending is what it is ("Corneliam" is the object of "baptised", so the name is Cornelia), and its dictionary form. This reuses the Latin case forms already in the given-name catalogue, so a name found in a register links to its `/name/` page and to every language form.
 3. **The term finder.** One search box over every term: Latin, Italian, German, Hungarian, abbreviations and endings. It is tolerant the way registers are: `7bris`, `septembris` and `Sept.` find one card; `Joannem` finds Joannes. Filters by event (birth, marriage, death), by field (father, godparent, residence), by language and by period. Each card carries the word, its forms, abbreviations, an example, and any trap.
 4. **The date decoder.** Type `die 30 7bris 1671`, `undecimo februarii 1746`, `an IX, 3 vendémiaire`; get the date, with the working shown. Roman numerals, ordinals, feast-day dating, the French Republican calendar, the Julian-to-Gregorian change by place (the Atlas's dated place data already knows which regime held a place in which year).
@@ -59,7 +59,7 @@ The existing guides are copyrighted, and so are their pictures. The plan:
 - **Facts are free; presentation is not.** A word's meaning is a fact, and the Atlas states it in its own words from several independent sources plus open dictionaries (Wiktionary is CC BY-SA, attributed). We do not copy a guide's wording, its table layout, its selection of words, or its images.
 - **Every card shows its sources.** A reader who wants the long version is sent to the original, by link.
 - **Our pictures are our own.** The annotated page is drawn by us. Photographs of handwriting come from open-licence sources (national archives that publish under an open licence, Wikimedia Commons) with the licence shown. Register frames from FamilySearch stay link-only, as everywhere else; the page links to the image instead of reproducing it.
-- **Ask where it is cheap to ask.** The Belgium handout and the Lébény walkthrough are useful starting points. For each, the plan is to ask the author for permission to cite, link, and where they agree reuse a worked example. Until they agree, they are sources we point to, nothing more.
+- **Ask where it is cheap to ask.** The Belgium handout is a useful starting point. The plan is to ask where it is cheap to ask, for permission to cite, link, and where the author agrees reuse a worked example. Until then it is a source we point to, nothing more.
 
 ## 6. Phases (each one is a worklist row)
 
@@ -72,10 +72,21 @@ The existing guides are copyrighted, and so are their pictures. The plan:
 | 120 | The learning loop: harvest from the eight archives, lesson row, skill section, links from volume and name pages | Needs real content to link to |
 | 121 | Practice entries and open-licence handwriting gallery | Needs images with a clear licence |
 | 122 | More languages and countries, one per pass | Scaling, after the model is proven |
-| 123 | **David:** the address of the Lébény walkthrough; whether to ask the authors for permission (the Belgium handout's address came on 6 Nov and is credited) | Nothing can credit a source whose address we do not have |
+| 123 | Whether to ask any guide's author for permission to cite or reuse a worked example (the Belgium handout is credited with its address) | Nothing is built on an author's text, so nothing waits |
 
-## 7. Things decided, and things for David
+## 6b. Asking Claude: paste a line or a photo (planned, not built)
 
-Decided here (change them if wrong): the section lives at `/read/`; examples are invented or open-licence, never a real family; nothing about a person goes in; `ours` lessons are labelled as ours; the Atlas is the one home for the data, and family archives keep no glossary of their own (the same rule as variants).
+A reader could paste a line of a register, or a snapshot of it, and get a translation that leans on the cards above.
 
-For David: (a) the address of the Lébény walkthrough text you pasted, so it is credited (the Belgium handout's address is in; it is a BYU Family History Library page); (b) whether any of the four pages' authors should be approached; (c) which country comes second after Latin church registers, if not the order above.
+- **Order of work:** (1) a "Copy as a prompt" button that builds the pasted text and the matching cards into a prompt for the reader's own AI, with no server and no cost; (2) a Worker on our Cloudflare account that sends pasted text to Claude with our cards as the first source, holding the API key as a secret, behind a bot check and a spend cap; (3) a "where the Atlas can help" panel; (4) photos; (5) a usage allowance tied to the reader's six-word identity (no registration); bring-your-own-key stays an option.
+- **Cards first.** The finder picks the cards a pasted word matches; they go to the model as its first source. Each word in the answer is tagged "from our card" or "the model's own knowledge", doubtful readings are flagged, and the model is told never to guess a mother's surname or a missing parent. The answer is shown as a draft to check against the cards.
+- **Photos in two steps.** The model transcribes the image into editable text with doubtful words marked, the reader corrects it, and only then does the translation run. Clear print and tidy 19th-century hands read well; older hands are hit and miss, so a hidden misreading must never turn into a confident translation. The browser shrinks the picture and strips its hidden data first, and nothing is stored.
+- **Where the Atlas can help.** Our own code, not the model, looks up what was read: dated place names and the volumes held there, name pages and every language form, the surnames catalogue, the date decoder, the traps that apply, and leads clearly labelled as leads (godparents and witnesses are the likeliest relatives to look for next). The model only labels the roles.
+- **Cost and use.** Our key is the default, capped. A reader gets a few free tries a day behind a bot check; making the six words that also keep their research online (one click, no email) lifts the allowance. The words give a separate AI identity (its own id and token, so the AI service cannot find or open anyone's saved research), and a counter per identity keeps the daily and monthly use. Because anyone can make new words, the per-person caps are soft: the hard limits are a monthly spend cap set with the AI provider, a site-wide daily budget, the bot check, a per-address limit, and a small allowance for new identities that grows with age and use. Bring-your-own-key is a later option for people who want no cap.
+- **Privacy.** This is the one place where typed text leaves the browser (to our server and to the AI provider), so it has its own plain notice, a line asking readers not to paste details of living people, and no logging of the text or image. The allowance counter is tied only to the six words and holds a count, nothing else; deleting your online copy deletes it too.
+
+## 7. Decided, and still open
+
+Decided: the section lives at `/read/`; examples are invented or open-licence, never a real family; nothing about a person goes in; `ours` lessons are labelled as ours; the Atlas is the one home for the data, and family archives keep no glossary of their own (the same rule as variants).
+
+Still open, and not blocking anything: which country comes second after Latin church registers (the order above is the working guess), and whether to ask any guide's author for permission to cite or reuse a worked example.

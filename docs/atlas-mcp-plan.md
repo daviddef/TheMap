@@ -117,3 +117,12 @@ Not a tool, on purpose: adding a whole new place. The skill says that belongs in
 ## 9. What this plan does not do
 
 It does not build anything, touch the Atlas repository, change `deploy.yml` or edit the skills. It does not send the pull requests or the invitations. It does not replace the skill: the skill explains *why*, the server enforces *what*.
+
+## Update, 6 November 2026: the remote read API is built (phase 1)
+
+The remote route in section 6 phase 5 was brought forward. `workers/api/` is a Cloudflare Worker that serves five read tools
+(`atlas_given_name`, `atlas_term`, `atlas_date`, `atlas_providers`, `atlas_context`) over REST and over remote MCP (`/mcp`), from the
+published files and the bundled reading-the-record cards. 9 tests pass; the bundle builds with `wrangler deploy --dry-run`; it is not
+deployed. The local Python server in the rest of this document is still a valid plan for the write tools, which need a checkout and a
+reviewer; the remote server stays read-only. Next: places and eras, surnames, what has been searched; then writes as proposals,
+approved by David only. Its README is `workers/api/README.md`.

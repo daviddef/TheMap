@@ -1,0 +1,16 @@
+{
+  // The Record Atlas sync Worker: stores ONE encrypted blob per reader and cannot read it.
+  // Deployed by David from his own terminal (see README.md); no session ever holds the token.
+  "name": "record-atlas-sync",
+  "main": "src/index.js",
+  "compatibility_date": "2025-09-01",
+  "routes": [{ "pattern": "sync.recordatlas.org", "custom_domain": true }],
+  "r2_buckets": [
+    { "binding": "SYNC", "bucket_name": "record-atlas-sync" },
+    { "binding": "COPY", "bucket_name": "record-atlas-sync-copy" }
+  ],
+  "triggers": { "crons": ["17 3 * * *"] },
+  "vars": { "ALLOW_ORIGINS": "https://recordatlas.org" },
+  // Off on purpose: request logs would hold every reader's lookup id. Turn it on only while debugging.
+  "observability": { "enabled": false }
+}

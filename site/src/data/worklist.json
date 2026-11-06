@@ -753,10 +753,10 @@
   {
    "n": 94,
    "what": "Build passphrase sync on Cloudflare: a Worker, R2 storage, a nightly second copy",
-   "state": "next",
+   "state": "running",
    "owner": "this atlas",
    "since": "2026-11-05",
-   "note": "**Design.** A Worker on a subdomain (`sync.recordatlas.org`, or `workers.dev` as a stopgap) that accepts a save (checks the write key and a size cap, stores `<id>/<timestamp>` in R2), serves a restore and lists versions. R2 lifecycle deletes versions after 30 days. A scheduled Worker copies the encrypted blobs nightly to a second provider (Backblaze B2 or a second Cloudflare account). No database: the server cannot read the data, so it never queries it. Accept requests only from recordatlas.org.\n**In the browser.** Web Crypto, a key and an id from the passphrase (a slow key-derivation function), merge on pull exactly as the file import does, *synced 2 minutes ago* on My research, roll back to an earlier version, and *Delete everything I have stored* that needs no email.\n**Needs David.** Check where the recordatlas.org DNS is managed; create the Cloudflare token and R2 bucket (David holds the token, the session never enters it); say whether a card on file is acceptable (free tiers should cover it, confirm current limits). **The privacy page** gets a paragraph: optional sync stores one encrypted file we cannot read, and Cloudflare logs the IP address as any host does.\n**Order.** After the research file and the shared pack, so that sync has one file format to carry. **Tests.** The server never sees plain text; a wrong passphrase restores nothing and says so; two devices that both changed merge and lose neither side's marks."
+   "note": "**Design.** A Worker on a subdomain (`sync.recordatlas.org`, or `workers.dev` as a stopgap) that accepts a save (checks the write key and a size cap, stores `<id>/<timestamp>` in R2), serves a restore and lists versions. R2 lifecycle deletes versions after 30 days. A scheduled Worker copies the encrypted blobs nightly to a second provider (Backblaze B2 or a second Cloudflare account). No database: the server cannot read the data, so it never queries it. Accept requests only from recordatlas.org.\n**In the browser.** Web Crypto, a key and an id from the passphrase (a slow key-derivation function), merge on pull exactly as the file import does, *synced 2 minutes ago* on My research, roll back to an earlier version, and *Delete everything I have stored* that needs no email.\n**Needs David.** Check where the recordatlas.org DNS is managed; create the Cloudflare token and R2 bucket (David holds the token, the session never enters it); say whether a card on file is acceptable (free tiers should cover it, confirm current limits). **The privacy page** gets a paragraph: optional sync stores one encrypted file we cannot read, and Cloudflare logs the IP address as any host does.\n**Order.** After the research file and the shared pack, so that sync has one file format to carry. **Tests.** The server never sees plain text; a wrong passphrase restores nothing and says so; two devices that both changed merge and lose neither side's marks.\n**Built and tested 6 Nov 2026, not deployed.** The Worker is `workers/sync/` (config `wrangler.jsonc`, code `src/index.js`), the browser side is `site/public/js/research-sync.js`, the word list `site/public/sync-words.json`, 12 tests in `site/test/sync.test.js` against an in-memory R2. Layout in the bucket: `meta/<id>`, `latest/<id>` (never expires), `v/<id>/<day>` (one old version a day; David's lifecycle rule expires `v/` after 30 days). The passphrase is six words from a 1,024-word list (60 bits), the keys come from it by PBKDF2 (600,000 rounds) and HKDF, the blob is AES-GCM bound to the id, and the server keeps only a hash of each token. Left: the My research screens (row 125), David's deploy (row 124), a rate-limit rule, a lifecycle rule on the copy bucket, and a copy at a second provider (the second bucket is in the same Cloudflare account, so it guards against a mistake, not against losing the account)."
   },
   {
    "n": 95,
@@ -793,10 +793,10 @@
   {
    "n": 99,
    "what": "Set up the Cloudflare account for the sync service, the API and the MCP server",
-   "state": "blocked",
+   "state": "done",
    "owner": "David",
    "since": "2026-11-05",
-   "note": "**One account, three Workers, separate trust.** `sync` (encrypted personal files, R2), `api` (public data, read), `mcp` (the same calls as tools). Subdomains of recordatlas.org, with `workers.dev` as a stopgap. R2 buckets for the sync blobs and for a nightly second copy; secrets for write keys. David creates the account and the deploy token and holds them; a session never enters a token. First check where recordatlas.org's DNS is managed. Confirm current free-tier limits and whether a card is needed."
+   "note": "**One account, three Workers, separate trust.** `sync` (encrypted personal files, R2), `api` (public data, read), `mcp` (the same calls as tools). Subdomains of recordatlas.org, with `workers.dev` as a stopgap. R2 buckets for the sync blobs and for a nightly second copy; secrets for write keys. David creates the account and the deploy token and holds them; a session never enters a token. First check where recordatlas.org's DNS is managed. Confirm current free-tier limits and whether a card is needed.\n**Done 6 Nov 2026.** recordatlas.org is Active on David's Cloudflare account (records DNS-only, the site and HTTPS unchanged), buckets `record-atlas-sync` and `record-atlas-sync-copy` exist (the older `rowland` bucket is not ours and is never touched), a 30-day rule on `v/` is set, and David holds the token `record-atlas-workers` (Workers, routes, DNS and zone read for this zone; no R2). A session never holds it."
   },
   {
    "what": "Record Atlas: a «who holds the records» catalogue — custody by parish, record kind and period, with how to ask (design agreed 5 November 2026)",
@@ -992,11 +992,27 @@
   },
   {
    "n": 123,
-   "what": "Reading the record: credit and permission for the guides we learn from",
-   "state": "blocked",
+   "what": "Reading the record: whether to ask any guide author for permission to cite or reuse a worked example",
+   "state": "next",
    "owner": "David",
    "since": "2026-11-06",
-   "note": "Plan: docs/reading-the-record-plan.md. The Belgium handout (Liz Hutchison, BYU Family History Library) is credited with its address. Needed from David: the address of the Lebeny walkthrough text, and whether to ask any author for permission to cite or reuse a worked example."
+   "note": "Plan: docs/reading-the-record-plan.md. The Belgium handout (Liz Hutchison, BYU Family History Library) is credited with its address. Low priority: nothing is built on any author's text, so nothing waits on this."
+  },
+  {
+   "n": 124,
+   "what": "Deploy the sync Worker to sync.recordatlas.org (David runs the commands)",
+   "state": "next",
+   "owner": "David",
+   "since": "2026-11-06",
+   "note": "Commands are in workers/sync/README.md: put the token in your own shell, dry-run, deploy, check /v1/health, add a rate-limit rule, add the 30-day rule to the copy bucket. A session prepares but never holds the token. Do it after the tests pass on the day, and say 'deployed', not 'live' until health answers."
+  },
+  {
+   "n": 125,
+   "what": "Wire passphrase sync into My research (make a passphrase, recovery sheet, sync now, restore, older copies, delete everything)",
+   "state": "next",
+   "owner": "this atlas",
+   "since": "2026-11-06",
+   "note": "Needs the research backup items applied first (docs/research-backup-wip/HANDOVER.md), because sync saves and restores the same research file. Uses site/public/js/research-sync.js. Also: a privacy-page paragraph saying what the server holds (an id, two token hashes, bytes it cannot read) and what it cannot do, and a rewrite of the privacy test that names the modules allowed to keep anything in the browser."
   }
  ]
 }

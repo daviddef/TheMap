@@ -1,0 +1,12 @@
+{
+  // The Record Atlas read API and remote MCP server. Public data only: it answers from the files the site already publishes
+  // (and the reading-the-record terms bundled at deploy), so it holds no database and no secret of its own.
+  // Deployed by David from his own terminal (see README.md).
+  "name": "record-atlas-api",
+  "main": "src/index.js",
+  "compatibility_date": "2025-09-01",
+  "routes": [{ "pattern": "api.recordatlas.org", "custom_domain": true }],
+  "vars": { "SITE_ORIGIN": "https://recordatlas.org" },
+  // Optional app keys, set as a secret by David: APP_KEYS = [{"name":"my-app","sha256":"<hex of the key>"}]. Never in this file.
+  "observability": { "enabled": false }
+}

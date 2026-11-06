@@ -202,5 +202,5 @@
 
   var api = { norm: norm, index: index, find: find, decodeDate: decodeDate, MONTHS: MONTHS };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
-  if (typeof window !== "undefined") window.raReadRecord = api;
+  globalThis.raReadRecord = api;                     // a browser page (window) and the API Worker both read it from here
 })();

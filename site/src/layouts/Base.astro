@@ -4,7 +4,7 @@
 const built = new Date().toISOString().slice(0, 10);
 import { u } from "../lib/url.js";
 import { flagHref } from "../lib/flags.js";
-import { TABLES, LANGS } from "../lib/i18n.js";
+import { LANGS } from "../lib/i18n.js";
 /* Small flags for the language links: 3:2, drawn inline so they cost no request.
    English is the Union Jack, the one most readers expect beside "English". */
 const FLAG = {
@@ -201,10 +201,10 @@ import LineSwitcher from "../components/LineSwitcher.astro";
     rather than floating in the middle of it, and only on the pages that
     ask for it. */}
 <body class={wide ? "ra-wide" : undefined}>
-{/* The table is inlined rather than fetched: it is under four kilobytes
-    and a reader whose language is not English should not watch the page
-    change under them a second after it arrives. */}
-<script is:inline define:vars={{ RA_I18N: TABLES }}>window.RA_I18N = RA_I18N;</script>
+{/* The table is one shared file, loaded synchronously so a reader whose language is not English does not watch the page change a
+    second after it arrives. It was inlined into every page until it grew to 64 KB: multiplied by 83,000 pages that was 5 GB of the
+    10 GB the deploy allows. */}
+<script is:inline src={u("/js/i18n-tables.js")}></script>
 <script is:inline src={u("/js/i18n.js")}></script>
 <a class="skip" href="#main" data-i18n>Skip to the map</a>
 <header class="site">

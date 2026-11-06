@@ -20,6 +20,8 @@ const { title, dek, eyebrow, bare, jsonld, og = "default", wide, flag } = Astro.
    its 1px gap, and below 1180px its display:none!important hid them behind a
    menu button that did not exist. Eleven top-level links was too many anyway. */
 import { nav } from "../lib/nav.js";
+import whatsNewData from "../data/whats-new.json";
+const newestNews = (whatsNewData.entries || []).map((e) => e.date).sort().pop() || "";
 const here = Astro.url.pathname;
 
 /* WHICH PAGES MAY CARRY AN AD, AND WHY MOST MAY NOT.
@@ -194,6 +196,25 @@ import LineSwitcher from "../components/LineSwitcher.astro";
 <header class="site">
   <div class="wrap sitein">
     <a class="brand" href={u("/")}>Record <em>Atlas</em></a>
+    {/* A PULSING DOT: GREEN WHEN THIS BROWSER IS ONLINE, RED WHEN IT IS NOT. David asked for a marker in the header showing whether we
+        are "live" or offline. It reports only what the browser knows (navigator.onLine and the online/offline events); it makes no
+        request, so it costs nothing and sends nothing. When the sync service is switched on it can be pointed at that instead. */}
+    <span class="ra-live" id="ra-live" data-state="online" role="status" aria-live="polite" title="Online: connected">
+      <span class="ra-live-dot" aria-hidden="true"></span><span class="ra-live-t">Live</span>
+    </span>
+    <script is:inline>
+      (function () {
+        var el = document.getElementById("ra-live"); if (!el) return;
+        var t = el.querySelector(".ra-live-t");
+        function set() {
+          var on = navigator.onLine !== false;
+          el.setAttribute("data-state", on ? "online" : "offline");
+          el.title = on ? "Online: connected" : "Offline: this page works from what is already loaded";
+          if (t) t.textContent = on ? "Live" : "Offline";
+        }
+        window.addEventListener("online", set); window.addEventListener("offline", set); set();
+      })();
+    </script>
     {/* WHERE THE MAP'S OWN TOOLS GO. The link, full-screen and reset buttons
         sat in the map's control bar, below the search box, where on a phone
         they took a whole row of their own and pushed the map further down.
@@ -203,6 +224,17 @@ import LineSwitcher from "../components/LineSwitcher.astro";
         has those buttons, and Base is shared by 46,000 pages. A container
         with nothing in it collapses to nothing. */}
     <span class="site-tools" id="ra-tools"></span>
+    {/* WHAT'S NEW IS A BUTTON IN THE HEADER. David: the card on the first screen took the room; a button straight to all improvements
+        is enough, and it pulses when something was added in the last three days. data-latest is the newest entry's date, written
+        at build; the three-day test runs in the browser, because these pages are built once and read for weeks. */}
+    <a class="ra-news" id="ra-news" href={u("/whats-new/")} data-latest={newestNews} aria-label="What's new: all improvements" title="What's new: all improvements"><span aria-hidden="true" class="ra-news-i">&#10022;</span><span class="ra-news-t">New</span></a>
+    <script is:inline>
+      (function () {
+        var a = document.getElementById("ra-news"); if (!a) return;
+        var d = Date.parse(a.getAttribute("data-latest") + "T23:59:59");
+        if (d && Date.now() - d < 3 * 86400000) { a.classList.add("fresh"); a.title = "What's new: something was added in the last three days"; }
+      })();
+    </script>
     {/* THE WORD «MENU» WENT, THE NAME DID NOT. David: «can we have menu as
         just the burgers and no word "menu"? and then that will give space for
         the icons?» — the four map tools were wrapping to a 2×2 block on a

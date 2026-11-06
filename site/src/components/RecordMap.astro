@@ -208,12 +208,9 @@ try {
         reliable accessible name and never was; ra-reset below already had
         both, and the other four are now brought up to it. The glyph is
         hidden from the accessibility tree so the label is not read twice. */}
-    <button class="ra-ico" id="ra-info" type="button" aria-expanded="false"
+    <button class="ra-ico" id="ra-info" type="button" aria-expanded="false" hidden
             aria-label="What these controls mean"
             title="What these controls mean"><span aria-hidden="true">&#9432;</span></button>
-    <button class="ra-ico" id="ra-copy" type="button"
-            aria-label="Copy a link to this exact view"
-            title="Copy a link to this exact view"><span aria-hidden="true">&#128279;</span></button>
     <button class="ra-ico" id="ra-full" type="button"
             aria-label="Full screen — the map and its panel fill the window"
             title="Full screen — the map and its panel fill the window"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
@@ -222,9 +219,6 @@ try {
         moved up beside the search box the count moved with it and ended up
         wedged under the funnel. It belongs at the end of the row, where it
         can take a line of its own when the message grows into a sentence. */}
-    <button class="ra-ico" id="ra-reset" type="button"
-            aria-label="Start again — clear the search, the year, the filters and the layers, and go back to the whole world"
-            title="Start again — clear the search, the year, the filters and the layers, and go back to the whole world"><span aria-hidden="true">&#8634;</span></button>
     <span class="cap" id="ra-count" role="status" aria-live="polite"></span>
     <span class="ra-copied" id="ra-copied" hidden>copied</span>
   </div>
@@ -401,20 +395,6 @@ try {
           search; four example names were a second one. This is the one thing on the first
           screen a returning reader has not seen, and it is a short list of plain headlines
           written by hand (src/data/whats-new.json), newest first. On a phone it is three. */}
-      <div class="at-new" role="region" aria-label="What's new">
-        <div class="at-new-top">
-          <b data-i18n>What's new</b>
-          <a href={`${base}whats-new/`}><span data-i18n>All improvements</span> &rarr;</a>
-        </div>
-        <ul class="at-new-list">
-          {NEW_ITEMS.map((e) => (
-            <li>
-              <time datetime={e.date}>{e.when}</time>
-              {e.href ? <a href={e.url}>{e.headline}</a> : <span>{e.headline}</span>}
-            </li>
-          ))}
-        </ul>
-      </div>
       {/* TWO LINES, NOT FIVE. David: «its a lot of real estate for just a few lines of text». The
           two link paragraphs became one row, and the history link is gone: the map's own Play button does it. */}
       <p class="at-start-more at-links">
@@ -5304,33 +5284,7 @@ window.addEventListener("load", async function () {
 
          And the caveat travels with the language, in the page's own words: a
          name's language is not where a family is from. */
-      if (r.ctx) {
-        var c = r.ctx, oh = ['<div class="ra-orig">'];
-        if (c.after && c.after.length)
-          oh.push('<p class="ra-orig-l"><b>' + esc(T("Named after") + " " +
-                  c.after.join(" · ")) + "</b> <span class=\"ra-who\">" +
-                  esc(T("what the name is from")) + "</span></p>");
-        if (c.kind && c.kind.length)
-          oh.push('<p class="ra-orig-l"><b>' + esc(c.kind.join(" · ")) +
-                  "</b> <span class=\"ra-who\">" + esc(T("kind of surname")) +
-                  "</span></p>");
-        if (c.lang && c.lang.length)
-          oh.push('<p class="ra-orig-l"><b>' + esc(c.lang.join(" · ")) +
-                  "</b> <span class=\"ra-who\">" +
-                  esc(T("the language of the name")) + "</span></p>" +
-                  '<p class="cap ra-orig-c">' + esc(T("Which is not where a " +
-                  "family is from. A Polish surname can be borne by people " +
-                  "whose forebears never saw Poland, and often is.")) + "</p>");
-        oh.push('<p class="ra-orig-s">' +
-                (c.wiki ? '<a href="' + esc(c.wiki) + '" target="_blank" ' +
-                          'rel="noopener">' + esc(T("Read about it on Wikipedia")) +
-                          " \u2197</a> \u00b7 " : "") +
-                esc(T("said by")) + ' <a href="https://www.wikidata.org/wiki/' +
-                esc(c.q) + '" target="_blank" rel="noopener">Wikidata ' +
-                esc(c.q) + "</a></p>");
-        oh.push("</div>");
-        h.push(oh.join(""));
-      }
+
 
       /* AND WHAT WIKTIONARY SAYS, WHICH IS WIDER AND SHARE-ALIKE.
          Wikidata's structured fields reach a tenth of the corpus and that is
@@ -5368,58 +5322,47 @@ window.addEventListener("load", async function () {
                + "is from. This one matched nothing \u2014 which is the "
                + "dictionary's gap, not a judgement about the name.")) + "</p>");
       }
-      if (r.wk) {
-        var w = r.wk, wh = ['<div class="ra-orig ra-orig-wk">'];
-        (w.etymon || []).forEach(function (e) {
-          wh.push('<p class="ra-orig-l"><b>' +
-                  esc(T("From") + " " + e.lang + " " + e.word) + "</b>" +
-                  (e.gloss ? ' <i>&#8220;' + esc(e.gloss) + "&#8221;</i>" : "") +
-                  (e.in ? ' <span class="ra-who">' +
-                          esc(T("in the") + " " + e.in + " " + T("entry")) +
-                          "</span>" : "") + "</p>");
-        });
-        Object.keys(w.from || {}).forEach(function (lg) {
-          wh.push('<p class="ra-orig-l"><span class="ra-tag">' +
-                  esc(T("origin")) + "</span> <b>" +
-                  esc(w.from[lg].join(" \u00b7 ")) +
-                  "</b> <span class=\"ra-who\">" +
-                  esc(T("what the") + " " + lg + " " + T("entry says it is from")) +
-                  "</span></p>");
-        });
-        /* THE SECOND SILENCE. The block above this one says «Wiktionary has
-           no entry for this name», which was written because a reader could
-           not tell the dictionary's gap from the atlas not looking. The same
-           applies one step in: 52,640 of the 78,628 entries hold the name and
-           name NO origin, and those printed the language list and stopped —
-           which reads as if the origin existed and were not being shown.
-           Stated, not linked: the row this closes carries David on the source,
-           «Wiktionary shouldn't be a reference or link, it's far too small». */
-        if (!(w.from && Object.keys(w.from).length) && !(w.etymon || []).length)
-          wh.push('<p class="ra-orig-l"><b>' + esc(T("No origin given")) +
-                  "</b> <span class=\"ra-who\">" +
-                  esc(T("the entry exists and names nothing the name is from "
-                      + "\u2014 52,640 of the 78,628 entries this atlas "
-                      + "matched are silent this way, which is the "
-                      + "dictionary's gap and not a judgement about the "
-                      + "name")) + "</span></p>");
-        if (w.langs && w.langs.length)
-          wh.push('<p class="ra-orig-l"><b>' + esc(w.langs.join(" \u00b7 ")) +
-                  "</b> <span class=\"ra-who\">" +
-                  esc(T("recorded as a surname in these languages")) +
-                  "</span></p>");
-        /* The caveat is the same one the Wikidata block carries and is worth
-           repeating here rather than assumed read: a name's language is not
-           a family's country. */
-        wh.push('<p class="cap ra-orig-c">' + esc(T("A language here is the " +
-                "language of the NAME, not a country a family came from.")) +
-                "</p>");
-        wh.push('<p class="ra-orig-s">' + esc(T("said by")) +
-                ' <a href="' + esc(w.cite) + '" target="_blank" rel="noopener">' +
-                esc(T("Wiktionary")) + " \u2197</a> \u00b7 " +
-                esc(T("CC BY-SA 4.0")) + "</p>");
-        wh.push("</div>");
-        h.push(wh.join(""));
-      }
+      /* THE NAME AS ONE CARD OF CHIPS. David: the name panel is «messy, not well structured» and takes too much room. Wikidata
+         and Wiktionary each printed a stack of one-line paragraphs, each ending in a grey explanation, and the same word
+         (English, English, English) came out three times. Now: one row of chips, coloured by what they say (what the name is
+         from, what kind it is, which language the NAME is in), the repeated values merged, who said what in each chip's
+         tooltip, and a single footnote for the sources and the one caveat that matters. Same facts, same attribution, never
+         in this map's voice; a name with no origin still says so, in one chip. */
+      (function () {
+        var c = r.ctx || null, w = r.wk || null, chips = [], seen = {};
+        function chip(kind, text, tip) {
+          return '<span class="ra-chip ra-chip-' + kind + '"' + (tip ? ' title="' + esc(tip) + '"' : "") + ">" + esc(text) + "</span>";
+        }
+        function lang(l, tip) { var k = fold(l); if (seen[k]) return; seen[k] = 1; chips.push(chip("lang", l, tip)); }
+        if (c) {
+          if (c.after && c.after.length) chips.push(chip("from", T("Named after") + " " + c.after.join(" \u00b7 "), T("what the name is from") + " (Wikidata)"));
+          if (c.kind && c.kind.length) chips.push(chip("kind", c.kind.join(" \u00b7 "), T("kind of surname") + " (Wikidata)"));
+          (c.lang || []).forEach(function (l) { lang(l, T("the language of the name") + " (Wikidata)"); });
+        }
+        if (w) {
+          (w.etymon || []).forEach(function (e) {
+            chips.push(chip("from", T("From") + " " + e.lang + " " + e.word + (e.gloss ? " \u201c" + e.gloss + "\u201d" : ""),
+                            e.in ? T("in the") + " " + e.in + " " + T("entry") + " (Wiktionary)" : "Wiktionary"));
+          });
+          var byVal = {}, order = [];
+          Object.keys(w.from || {}).forEach(function (lg) {
+            w.from[lg].forEach(function (v) { if (!byVal[v]) { byVal[v] = []; order.push(v); } byVal[v].push(lg); });
+          });
+          order.forEach(function (v) {
+            chips.push(chip("from", T("from") + " " + v, T("what the entry says it is from") + ": " + byVal[v].join(", ") + " (Wiktionary)"));
+          });
+          if (!order.length && !(w.etymon || []).length)
+            chips.push(chip("none", T("No origin given"), T("the entry exists and names nothing the name is from \u2014 52,640 of the 78,628 entries this atlas matched are silent this way, which is the dictionary's gap and not a judgement about the name")));
+          (w.langs || []).forEach(function (l) { lang(l, T("recorded as a surname in these languages") + " (Wiktionary)"); });
+        }
+        if (!chips.length) return;
+        var src = [];
+        if (c) src.push((c.wiki ? '<a href="' + esc(c.wiki) + '" target="_blank" rel="noopener">Wikipedia \u2197</a> \u00b7 ' : "") +
+                        'Wikidata <a href="https://www.wikidata.org/wiki/' + esc(c.q) + '" target="_blank" rel="noopener">' + esc(c.q) + "</a>");
+        if (w) src.push('<a href="' + esc(w.cite) + '" target="_blank" rel="noopener">Wiktionary \u2197</a> CC BY-SA 4.0');
+        h.push('<div class="ra-chips">' + chips.join("") + '</div><p class="ra-orig-s ra-orig-fn">' + esc(T("said by")) + " " + src.join(" \u00b7 ") +
+               " \u00b7 " + esc(T("a name's language is not where a family is from")) + "</p>");
+      })();
 
       /* WHERE THE NAME WAS, AND WHEN. David: «finding a name almost does
          nothing — i thought we had dates the name was at a certain place… we
@@ -6641,25 +6584,17 @@ window.addEventListener("load", async function () {
        districts are arranged by, so it is the word to search next. */
     if (tlands.rows && tlands.rows.length) {
       h.push('<div class="ra-juris"><div class="lab">An Irish townland</div>');
-      if (tlands.total > tlands.rows.length)
-        h.push('<p class="at-sub">' + tlands.total + " townlands carry this name. " +
-               "Which one it is depends on the county — that is what a townland " +
-               "name alone cannot tell you.</p>");
-      tlands.rows.forEach(function (r) {
-        /* The civil parish is usually a place this map draws. Offering the
-           name without the link made the reader search again for a word this
-           panel had just handed them. */
+      h.push('<p class="at-sub">' + (tlands.total > tlands.rows.length ? tlands.total + " townlands carry this name; which one depends on the county. " : "") +
+             "The civil parish is the word to search next: Griffith's Valuation and the registration districts are arranged by it.</p>");
+      var trows = tlands.rows.map(function (r) {
         var cpp = r.cp ? byName[fold(r.cp)] : null;
-        h.push('<p><a href="#" class="ra-goto" data-y="' + r.y + '" data-x="' + r.x +
-               '" data-n="' + esc(r.n) + '"><b>' + esc(r.n) + "</b></a>" +
-               (r.co ? " — County " + esc(r.co) : "") +
-               (r.cp ? '<br><span class="ra-who">in the civil parish of ' +
-                       (cpp ? '<a href="' + BASE + "place/" + esc(cpp) + '/"><b>' +
-                              esc(r.cp) + "</b></a>" : "<b>" + esc(r.cp) + "</b>") +
-                       (r.bar ? ", barony of " + esc(r.bar) : "") +
-                       " — the unit Griffith's Valuation and the registration " +
-                       "districts are arranged by</span>" : "") + "</p>");
+        return '<p class="ra-row"><a href="#" class="ra-goto" data-y="' + r.y + '" data-x="' + r.x + '" data-n="' + esc(r.n) + '"><b>' + esc(r.n) + "</b></a>" +
+               (r.co ? ' <span class="ra-dim">Co. ' + esc(r.co) + "</span>" : "") +
+               (r.cp ? ' <span class="ra-who">parish ' + (cpp ? '<a href="' + BASE + "place/" + esc(cpp) + '/"><b>' + esc(r.cp) + "</b></a>" : "<b>" + esc(r.cp) + "</b>") +
+                       (r.bar ? ", barony of " + esc(r.bar) : "") + "</span>" : "") + "</p>";
       });
+      h.push(trows.slice(0, 3).join(""));
+      if (trows.length > 3) h.push("<details class=\"ra-more\"><summary>" + (trows.length - 3) + " more</summary>" + trows.slice(3).join("") + "</details>");
       h.push("</div>");
     }
     /* THE YEAR CONTROL REACHED THE SHELF AND NOT THE NAMES. Somebody who has
@@ -6704,16 +6639,12 @@ window.addEventListener("load", async function () {
        filed at, so it is the word to search next. */
     if (dists.length) {
       h.push('<div class="ra-juris"><div class="lab">An administrative district</div>');
+      h.push('<p class="at-sub">No collection names these districts; the level above is where records are filed, so search that.</p>');
       dists.forEach(function (r) {
         var pp = r.p ? byName[fold(r.p)] : null;
-        h.push('<p><a href="#" class="ra-goto" data-y="' + r.y + '" data-x="' + r.x +
-               '" data-n="' + esc(r.n) + '"><b>' + esc(r.n) + "</b></a> — " +
-               esc(CNAME[r.k] || r.k) +
-               (r.p ? ", in " + (pp ? '<a href="' + BASE + "place/" + esc(pp) +
-                                      '/">' + esc(r.p) + "</a>" : esc(r.p)) : "") +
-               '<br><span class="ra-who">No collection here names this district. ' +
-               (r.p ? "Try " + esc(r.p) + ", which is the level they are filed at."
-                    : "Try the country.") + "</span></p>");
+        h.push('<p class="ra-row"><a href="#" class="ra-goto" data-y="' + r.y + '" data-x="' + r.x + '" data-n="' + esc(r.n) + '"><b>' + esc(r.n) + "</b></a> " +
+               '<span class="ra-dim">' + esc(CNAME[r.k] || r.k) + "</span>" +
+               (r.p ? ' <span class="ra-who">filed at ' + (pp ? '<a href="' + BASE + "place/" + esc(pp) + '/"><b>' + esc(r.p) + "</b></a>" : "<b>" + esc(r.p) + "</b>") + "</span>" : "") + "</p>");
       });
       h.push("</div>");
     }
@@ -7567,6 +7498,31 @@ window.addEventListener("load", async function () {
     });
   }
   if (toolSlot) toolsTo(toolSlot);
+
+  /* THE INFO BUTTON LIVES IN THE MENU NOW. David: «I button can we just move into the burger menu». The button itself stays (hidden)
+     because its handler opens the help box; the menu entries just press it. Added to the About group of the drawer and of the
+     desktop menu, once. */
+  (function () {
+    var info = document.getElementById("ra-info"); if (!info) return;
+    function entry() {
+      var a = document.createElement("a"); a.href = "#"; a.className = "ra-info-menu"; a.textContent = "What the map controls mean";
+      a.addEventListener("click", function (e) {
+        e.preventDefault();
+        var d = document.getElementById("drawer"); if (d) d.setAttribute("hidden", "");
+        var bg = document.querySelector(".burger"); if (bg) bg.setAttribute("aria-expanded", "false");
+        info.click();
+        var hb = document.getElementById("ra-help"); if (hb) hb.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      });
+      return a;
+    }
+    document.querySelectorAll("#drawer .dgrp").forEach(function (g) {
+      var gl = g.querySelector(".gl"); if (gl && gl.textContent.trim() === "About") g.appendChild(entry());
+    });
+    document.querySelectorAll(".topnav details.menu").forEach(function (d) {
+      var sm = d.querySelector("summary"), pn = d.querySelector(".panel");
+      if (sm && pn && sm.textContent.trim() === "About") pn.appendChild(entry());
+    });
+  })();
   /* FULL SCREEN LIVES ON THE MAP. David, on seeing the one on the History map: «Love it onto the map». It sat in
      the row of small buttons above the map, easy to miss and a long thumb-reach away. It is now a Leaflet control
      under the zoom buttons, the same element, so full screen keeps working and the button stays on the map
@@ -7618,7 +7574,7 @@ window.addEventListener("load", async function () {
     if (e.key === "Escape") setFull(false);
   });
 
-  document.getElementById("ra-reset").addEventListener("click", function () {
+  (document.getElementById("ra-reset") || document.createElement("i")).addEventListener("click", function () {
     qbox.value = "";
     yon.checked = false; year = year2 = null;
     yin.value = 1780; yin2.value = 1920;
@@ -7706,7 +7662,7 @@ window.addEventListener("load", async function () {
     }
   };
 
-  document.getElementById("ra-copy").addEventListener("click", function () {
+  (document.getElementById("ra-copy") || document.createElement("i")).addEventListener("click", function () {
     navigator.clipboard.writeText(location.href).then(function () {
       var t = document.getElementById("ra-copied");
       t.hidden = false; setTimeout(function () { t.hidden = true; }, 1600);
@@ -8195,6 +8151,10 @@ window.addEventListener("load", async function () {
      up and paint over the header on its way past. Raised on open, dropped
      on close, and the map is the only thing it needs to beat. */
   :global(.ra-bar.ra-bar-raised) { position: relative; z-index: 1200; }
+  /* A CLOSED FILTER PANEL TOOK NO ROOM ON SCREEN BUT STILL TOOK ROOM IN THE LAYOUT. On a phone it is an absolutely positioned box
+     wider than the window, and a browser that lays it out anyway makes the whole page wider than the screen: the burger fell off
+     the right edge and the sheet's text ran past it. Not rendered at all while closed; the open code measures it after it opens. */
+  :global(.ra-drop:not([open]) > .ra-drop-in) { display: none; }
   :global(.ra-drop > .ra-drop-in) {
     position: absolute; top: calc(100% + 6px); left: 0; z-index: 30;
     /* z-index 30 is only meaningful INSIDE the bar's stacking context. The
@@ -8913,6 +8873,18 @@ window.addEventListener("load", async function () {
  :global(.ra-orig) { margin: 8px 0 0; padding: 9px 11px;
     background: var(--ground); border-left: 3px solid var(--brass);
     border-radius: 0 3px 3px 0; }
+  /* THE NAME CARD: chips by kind, one footnote. */
+  :global(.ra-chips) { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; }
+  :global(.ra-chip) { font-size: 12.5px; line-height: 1; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--rule); background: var(--paper, #fff); color: var(--ink); cursor: default; }
+  :global(.ra-chip-from) { font-family: var(--serif); font-size: 15px; font-weight: 700; background: #f3e9d6; border-color: #c9a45b; }
+  :global(.ra-chip-kind) { background: #e1eef0; border-color: #6fa3ad; }
+  :global(.ra-chip-lang) { background: #ece5f2; border-color: #a58abd; }
+  :global(.ra-chip-none) { color: var(--ink2); border-style: dashed; }
+  :global(.ra-orig-fn) { font-size: 11.5px !important; color: var(--ink2); margin: 8px 0 0 !important; }
+  :global(.ra-row) { margin: 4px 0 0 !important; }
+  :global(.ra-dim) { color: var(--ink2); font-size: 12.5px; }
+  :global(.ra-more) { margin-top: 4px; font-size: 12.5px; }
+  :global(.ra-more summary) { cursor: pointer; color: var(--accent); }
  :global(.ra-orig-l) { margin: 0 0 3px; font-size: 13px; }
  :global(.ra-orig-c) { margin: 4px 0 0; }
  :global(.ra-orig-s) { margin: 6px 0 0; font-size: 11.5px; color: var(--ink-3); }

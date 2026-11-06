@@ -7,6 +7,11 @@ import { u } from "../lib/url.js";
 import { atlas as idx } from "../lib/atlas.js";
 import regions from "../../public/regions.json";
 import provs from "../../public/providers.json";
+import { corpus } from "../lib/surname-corpus.js";
+import gnFamilies from "../../../data/given-name-families.json";
+import snFamilies from "../../../data/surname-families.json";
+import flagIndex from "../../../data/flag-index.json";
+import placeNames from "../../../data/place-names.json";
 
 const places = idx.places.length;
 /* `v` IS VOLUMES; `c` IS COLLECTIONS. The map's own hint had this wrong
@@ -17,6 +22,21 @@ const volumes = idx.places.reduce((a, p) => a + (p.v || 0), 0);
 const countries = new Set(idx.places.map(p => p.k).filter(Boolean)).size;
 const archives = provs.providers.filter(p => p.at);
 const archiveCountries = new Set(archives.map(p => p.at.place.split(", ").pop())).size;
+/* THE INVENTORY BEHIND THE ONE PILL. David: one pill, «volumes», and on click a summary of everything the atlas holds. Every
+   number is read from the data when the page is built, so none can drift from what is held. */
+const sur = corpus().surnames;
+const surnameCount = Array.isArray(sur) ? sur.length : Object.keys(sur || {}).length;
+const inventory = [
+  [volumes, "volumes", "/", "records of baptisms, marriages, burials and civil acts the atlas knows a place holds"],
+  [places, "places", "/", "each with the archives that hold its records"],
+  [archives.length, "archives", "/", `in ${archiveCountries} countries`],
+  [countries, "countries", "/", "with at least one place"],
+  [regions.regions.length, "regions", "/", "stretches of ground whose rulers changed together"],
+  [surnameCount, "surnames", "/surnames/", `${snFamilies.counts.families} families of spellings`],
+  [gnFamilies.counts.families, "given names", "/your-name/", `${gnFamilies.counts.forms.toLocaleString()} forms in many languages`],
+  [flagIndex.counts.withFlag, "flags", "/flags/", "countries, with the flags that flew over each"],
+  [Object.keys(placeNames.places).length, "places with dated names", "/", "called Fiume before 1945, and so on"],
+];
 ---
 {/* STRUCTURED DATA ON THE ONE PAGE THAT HAD NONE. Place, surname and archive
     pages have carried a schema.org block for a while; the front page, which is
@@ -82,10 +102,14 @@ const archiveCountries = new Set(archives.map(p => p.at.place.split(", ").pop())
   <div class="pagehead ra-lede">
     <h1>Where the records are</h1>
     <div class="ra-pills" aria-label="The atlas in numbers">
-      <span class="k-tag is-new">{places.toLocaleString()} places</span>
-      <span class="k-tag">{volumes.toLocaleString()} record volumes</span>
-      <span class="k-tag">{archives.length} archives in {archiveCountries} countries</span>
-      <span class="k-tag">{regions.regions.length} record regions</span>
+      <details class="ra-inv">
+        <summary class="k-tag is-new">{volumes.toLocaleString()} volumes</summary>
+        <ul class="ra-inv-grid">
+          {inventory.map(([n, label, href, note]) => (
+            <li><a href={u(href)}><b>{n.toLocaleString()}</b> <span>{label}</span><small>{note}</small></a></li>
+          ))}
+        </ul>
+      </details>
     </div>
     <p class="dek">
       {/* THREE LINES OF EXPLANATION ABOVE THE THING BEING EXPLAINED. On a phone

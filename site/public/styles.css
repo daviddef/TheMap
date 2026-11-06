@@ -1196,3 +1196,38 @@ body.is-home #onthispage{display:none}
 .rr-all{columns:2 280px;column-gap:28px;list-style:none;padding:0;font-family:var(--sans);font-size:13.5px}
 .rr-all li{break-inside:avoid;padding:3px 0}
 .rr-m{color:var(--ink-3)}
+
+/* LIVE / OFFLINE DOT in the header: green and pulsing when online, red and still-pulsing slower when offline. The word is a second cue for people who cannot tell the colours apart; it hides on a phone to keep the header on one row. */
+.ra-live{display:inline-flex;align-items:center;gap:6px;margin-left:10px;font:600 11px/1 var(--sans,system-ui);letter-spacing:.04em;text-transform:uppercase;color:var(--ink2,#555)}
+.ra-live-dot{width:9px;height:9px;border-radius:50%;background:#1f9d55;box-shadow:0 0 0 0 rgba(31,157,85,.55);animation:ra-pulse-g 2s infinite}
+.ra-live[data-state="offline"] .ra-live-dot{background:#c0392b;box-shadow:0 0 0 0 rgba(192,57,43,.55);animation:ra-pulse-r 1.4s infinite}
+@keyframes ra-pulse-g{70%{box-shadow:0 0 0 7px rgba(31,157,85,0)}100%{box-shadow:0 0 0 0 rgba(31,157,85,0)}}
+@keyframes ra-pulse-r{70%{box-shadow:0 0 0 7px rgba(192,57,43,0)}100%{box-shadow:0 0 0 0 rgba(192,57,43,0)}}
+@media (max-width:640px){.ra-live-t{display:none}}
+
+/* WHAT'S NEW BUTTON in the header; pulses (class .fresh) when the newest entry is under three days old. The word hides on a phone. */
+.ra-news{display:inline-flex;align-items:center;gap:6px;margin-left:8px;padding:6px 10px;border:1px solid var(--rule,#ccc);border-radius:999px;font:600 12px/1 var(--sans,system-ui);color:var(--ink,#222);text-decoration:none;white-space:nowrap}
+.ra-news:hover{background:var(--soft,#eef)}
+.ra-news-i{color:#b8860b}
+.ra-news.fresh{border-color:#b8860b;animation:ra-pulse-n 2s infinite}
+.ra-news.fresh .ra-news-i{animation:ra-spin-n 2s ease-in-out infinite}
+@keyframes ra-pulse-n{0%{box-shadow:0 0 0 0 rgba(184,134,11,.55)}70%{box-shadow:0 0 0 8px rgba(184,134,11,0)}100%{box-shadow:0 0 0 0 rgba(184,134,11,0)}}
+@keyframes ra-spin-n{50%{transform:scale(1.25) rotate(20deg)}}
+@media (max-width:640px){.ra-news-t{display:none}.ra-news{padding:7px 9px}}
+.ra-info-menu{cursor:pointer}
+
+/* ONE PILL, AND THE INVENTORY BEHIND IT (home page). */
+.ra-inv{display:inline-block;max-width:100%}
+.ra-inv summary{list-style:none;cursor:pointer}
+.ra-inv summary::-webkit-details-marker{display:none}
+.ra-inv summary::after{content:" \25BE";opacity:.7}
+.ra-inv[open] summary::after{content:" \25B4"}
+.ra-inv-grid{list-style:none;margin:10px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.ra-inv-grid a{display:block;padding:8px 10px;border:1px solid var(--rule,#ccc);border-radius:6px;background:var(--paper,#fff);text-decoration:none;color:var(--ink,#222);height:100%}
+.ra-inv-grid a:hover{border-color:var(--accent,#35606e)}
+.ra-inv-grid b{font:700 18px/1.1 var(--serif,Georgia,serif);display:block}
+.ra-inv-grid span{font-size:12.5px}
+.ra-inv-grid small{display:block;margin-top:2px;font-size:11px;line-height:1.3;color:var(--ink2,#555)}
+
+/* NOTHING MAY MAKE THE PAGE WIDER THAN THE PHONE. clip, not hidden, so a sticky header still sticks and nothing becomes a scroll box. */
+@media (max-width:700px){html,body{overflow-x:clip}}

@@ -61,7 +61,10 @@ async function callClaude(env, fetchFn, { system, content, maxTokens }) {
   const r = await fetchFn("https://api.anthropic.com/v1/messages", { method: "POST",
     headers: { "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
     body: JSON.stringify({ model: env.MODEL || "claude-haiku-5-5", max_tokens: maxTokens, system, messages: [{ role: "user", content }] }) });
-  if (!r.ok) return { ok: false, status: r.status };
+  if (!r.ok) {   // say which kind of refusal (Anthropic's public error type), never the key or anything sent
+    let type = ""; try { type = String(((await r.json()).error || {}).type || "").replace(/[^a-z_]/g, "").slice(0, 40); } catch { /* no body */ }
+    return { ok: false, status: r.status, type };
+  }
   const j = await r.json();
   return { ok: true, text: (j.content || []).map(b => b.text || "").join(""), usage: (j.usage && (j.usage.input_tokens || 0) + (j.usage.output_tokens || 0)) || 0 };
 }
@@ -131,7 +134,7 @@ export async function handle(request, env, o = {}) {
 
   let out;
   try { out = await callClaude(env, fetchFn, { system, content, maxTokens }); } catch { out = { ok: false, status: 0 }; }
-  if (!out.ok) return json({ error: out.status === 429 || out.status === 529 ? "Claude is busy. Try again in a minute." : "Claude could not answer just now." }, 503, h);
+  if (!out.ok) return json({ error: out.status === 429 || out.status === 529 ? "Claude is busy. Try again in a minute." : "Claude could not answer just now.", reason: out.status ? "anthropic-" + out.status + (out.type ? "-" + out.type : "") : "anthropic-unreachable" }, 503, h);
   await stub(env, "site").addTokens(now, out.usage);
 
   const parsed = parseJson(out.text);

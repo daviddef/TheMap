@@ -50,17 +50,22 @@ test("second one: the map says what it is doing instead of showing a grey box", 
 
 test("second five: the first panel says where the colour idea lives, and What's new is one menu away", async ({ page }) => {
   await ready(page);
+  /* THE FIRST PANEL IS EMPTY ON PURPOSE NOW. David, counting the real estate: the example searches, the counts line, the link strip, the
+     colour sentence and the What's new list were each taken out, one by one, so #ra-empty is an empty box. «Visible» is the wrong test for
+     an empty box (it has no height, so Playwright calls it hidden, and this spec mailed a red run for every deploy). The state it stands for
+     is «no place is open», which the code marks with the hidden attribute: so what is asserted is that it is there and not hidden. */
   const empty = page.locator("#ra-empty");
-  await expect(empty).toBeVisible();
+  await expect(empty).toBeAttached();
+  await expect(empty).not.toHaveAttribute("hidden", /.*/);
+  await expect(empty).toHaveText("");
   /* The first panel used to list what had been improved. That card took the room the map needs, so What's new moved to the About menu
      (and About flashes when there is news). What is asserted is that the way to it exists: the link is in the menu, one open away,
      and the first panel no longer carries the list. This test went on asserting the old card after it was removed and mailed a red run
      for every deploy until it was brought in line. */
   await expect(page.locator('nav.topnav .panel a[href$="/whats-new/"]')).toHaveCount(1);
-  /* The idea the colours carry used to be a sentence here. It was trimmed to a
-     link on purpose (the sentence lives on /help/ and in the ⓘ), so what is
-     asserted is that the way to it is still on the first screen. */
-  await expect(empty.getByRole("link", { name: /colour means/i })).toBeVisible();
+  /* The idea the colours carry used to be a sentence here, then a link. Both went (it lives on /help/, in the ⓘ and in the Filters key), so
+     the way to it is asserted where it is now: Help is one menu open away. */
+  await expect(page.locator('nav.topnav .panel a[href$="/help/"]')).toHaveCount(1);
 });
 
 test("second ten: the world is legible rather than a grey smear", async ({ page }) => {
@@ -306,5 +311,7 @@ test("on a phone, the answer is not below the fold", async ({ page }) => {
   expect(box.y).toBeLessThan(780);
   await expect(page.locator("#ra-sheet-x")).toBeVisible();
   await page.locator("#ra-sheet-x").click();
-  await expect(page.locator("#ra-empty")).toBeVisible();
+  /* closing the sheet puts the empty first panel back: it is an empty box, so «not hidden», not «visible» (see the second-five test) */
+  await expect(page.locator("#ra-empty")).not.toHaveAttribute("hidden", /.*/);
+  await expect(page.locator(".at-body")).toBeHidden();
 });

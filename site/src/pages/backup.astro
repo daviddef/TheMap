@@ -91,6 +91,17 @@ import ResearchSync from "../components/ResearchSync.astro";
       </div>
     </section>
 
+    <section class="bk-card" id="lately">
+      <h2>What changed lately <small>newest first</small></h2>
+      <p class="bk-sub" id="ly-sum">Reading your marks…</p>
+      <p class="mrbtns ly-bar">
+        <label>Family line <select id="ly-line"><option value="">every line</option></select></label>
+        <label>Show <select id="ly-src"><option value="">everything</option><option value="session">from research sessions</option><option value="here">marked here</option><option value="new">not in a saved copy yet</option></select></label>
+      </p>
+      <div id="ly-list" class="ly-list" aria-live="polite"></div>
+      <p class="mrbtns"><button type="button" id="ly-more" hidden>Show 25 more</button></p>
+    </section>
+
     <section class="bk-card" id="kept">
       <h2>What is kept with your research</h2>
       <p class="bk-sub">The file and the six-word copy carry all of this. Nothing is about a person except a MyHeritage link, if you pasted one.</p>
@@ -273,6 +284,83 @@ import ResearchSync from "../components/ResearchSync.astro";
       document.addEventListener("ra-progress-changed", function () { fillScope(); preview(); paint(); });
       fillScope(); preview(); paint();
       RF.persisted().then(function (p) { if (p) showPersist("yes"); });
+
+      /* ---- what changed lately: the marks in this browser, newest first --------------------------------------------------
+         Every mark already carries a date (`since`), a state, a family line and the volume's title, so this list needs nothing
+         new stored. WHERE A ROW CAME FROM is not stored either: it is worked out by asking whether the published research file
+         holds the same mark, line, date and state. If it does, the row came in from a research session; if not, it was marked
+         in this browser. «Not in a saved copy yet» compares the row's date with the later of the last file backup and the
+         last online save, so a row dated the same day as the backup is given the benefit of the doubt. */
+      var LY = { n: 25, pub: null };
+      var STATE = { found: "Found", searched: "Searched", exhausted: "Exhausted", blocked: "Blocked", written: "Written", planned: "Planned" };
+      function pretty(w) { return String(w || "").replace(/[-_]+/g, " ").replace(/\b[a-z]/g, function (c) { return c.toUpperCase(); }); }
+      function dayWord(d) {
+        var today = new Date(), iso = function (x) { return x.toLocaleDateString("sv-SE"); };
+        if (d === iso(today)) return T("Today");
+        var y = new Date(today.getTime() - 864e5);
+        if (d === iso(y)) return T("Yesterday");
+        var p = d.split("-");
+        return p.length === 3 ? Number(p[2]) + " " + ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][Number(p[1]) - 1] + " " + p[0] : d;
+      }
+      function pages(done) {
+        return (done || []).map(function (r) { return r[0] === r[1] ? String(r[0]) : r[0] + "\u2013" + r[1]; }).join(", ");
+      }
+      function lastSafe() {
+        var c = window.raConn ? window.raConn.get() : null, t = c ? Math.max(c.fileAt || 0, c.syncedAt || 0) : 0;
+        return t ? new Date(t).toLocaleDateString("sv-SE") : "";
+      }
+      function lately() {
+        var marks = P.all(), names = {}, rows = [], safe = lastSafe(), pub = LY.pub || {};
+        P.lines().forEach(function (l) { names[l.slug] = l.name; });
+        Object.keys(marks).forEach(function (k) {
+          var m = marks[k], by = m.by || {};
+          Object.keys(by).forEach(function (l) {
+            var b = by[l];
+            if (!b || !b.since) return;
+            var q = pub[k] && pub[k].by && pub[k].by[l];
+            rows.push({ k: k, l: l, since: String(b.since).slice(0, 10), state: b.state || "", note: b.note || "", done: b.done, t: m.t || k, where: m.where, href: m.href,
+              session: !!(q && String(q.since).slice(0, 10) === String(b.since).slice(0, 10) && (q.state || "") === (b.state || "")),
+              fresh: !!safe && String(b.since).slice(0, 10) > safe });
+          });
+        });
+        var lsel = $("ly-line"), cur = lsel.value;
+        lsel.innerHTML = '<option value="">every line</option>' + Object.keys(names).sort(function (a, b) { return names[a].localeCompare(names[b]); })
+          .map(function (s) { return '<option value="' + escH(s) + '">' + escH(names[s]) + "</option>"; }).join("");
+        lsel.value = cur;
+        var src = $("ly-src").value, lf = lsel.value;
+        var list = rows.filter(function (r) {
+          return (!lf || r.l === lf) && (!src || (src === "session" ? r.session : src === "here" ? !r.session : r.fresh));
+        });
+        list.sort(function (a, b) { return a.since < b.since ? 1 : a.since > b.since ? -1 : a.t.localeCompare(b.t); });
+        var newN = rows.filter(function (r) { return r.fresh; }).length, sesN = rows.filter(function (r) { return r.session; }).length;
+        $("ly-sum").textContent = rows.length
+          ? T(rows.length + " changes recorded") + ": " + T(sesN + " came in from research sessions") + ", " + T((rows.length - sesN) + " you marked here") +
+            (safe ? ". " + (newN ? T(newN + " are newer than your last saved copy") : T("Everything is in your last saved copy")) + "." : ". " + T("No saved copy yet."))
+          : "Nothing is marked yet. Marks you make on a place page, and work that comes in from research sessions, will be listed here.";
+        var out = "", last = "";
+        list.slice(0, LY.n).forEach(function (r) {
+          if (r.since !== last) { out += '<h3 class="ly-d">' + escH(dayWord(r.since)) + "</h3>"; last = r.since; }
+          var ok = r.href && /^(\/|https?:\/\/)/.test(r.href), title = escH(r.t);
+          out += '<div class="ly-r"><div class="ly-t">' + (ok ? '<a href="' + escH(r.href) + '">' + title + "</a>" : title) +
+            (r.where ? ' <span class="ly-w">' + escH(pretty(r.where)) + "</span>" : "") + "</div>" +
+            '<div class="ly-m"><b>' + escH(names[r.l] || pretty(r.l)) + "</b>" +
+            (r.state ? ' <span class="ly-s ly-' + escH(r.state) + '">' + escH(T(STATE[r.state] || r.state)) + "</span>" : "") +
+            (pages(r.done) ? " <span>" + escH(T("pages") + " " + pages(r.done)) + "</span>" : "") +
+            ' <span class="ly-o">' + escH(r.session ? T("from a research session") : T("marked here")) + "</span>" +
+            (r.fresh ? ' <span class="ly-n">' + escH(T("not in a saved copy yet")) + "</span>" : "") + "</div>" +
+            (r.note ? '<div class="ly-note">' + escH(String(r.note).replace(/[*`]+/g, "").slice(0, 220)) + "</div>" : "") + "</div>";
+        });
+        $("ly-list").innerHTML = out;
+        var more = $("ly-more"); more.hidden = list.length <= LY.n;
+        more.textContent = "Show " + Math.min(25, list.length - LY.n) + " more (" + (list.length - LY.n) + " older)";
+      }
+      $("ly-more").addEventListener("click", function () { LY.n += 25; lately(); });
+      [$("ly-line"), $("ly-src")].forEach(function (x) { x.addEventListener("change", function () { LY.n = 25; lately(); }); });
+      document.addEventListener("ra-progress-changed", lately);
+      document.addEventListener("ra-conn", lately);
+      lately();
+      fetch(BASE + "research-sessions.json").then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) { LY.pub = (d && d.marks) || {}; lately(); }).catch(function () { LY.pub = {}; });
     })();
   </script>
 </Base>
@@ -354,6 +442,28 @@ import ResearchSync from "../components/ResearchSync.astro";
   #mr-share select { font: inherit; font-family: var(--sans); font-size: 14px; max-width: 100%; }
   .mrwhere3 { margin: 8px 0 0; font-family: var(--sans); font-size: 12.5px; color: var(--ink-2); max-width: 46em; }
   .mrwhere3 code { font-family: var(--mono); font-size: 11.5px; background: var(--ground); padding: 1px 5px; border-radius: 3px; }
+
+  /* WHAT CHANGED LATELY: a log, newest first, one date heading per day. */
+  .ly-bar { margin-top: 4px; }
+  .ly-bar select { font: inherit; font-family: var(--sans); font-size: 14px; max-width: 100%; }
+  .ly-bar label { font-family: var(--sans); font-size: 13.5px; }
+  :global(.ly-list) { font-family: var(--sans); }
+  :global(.ly-d) { margin: 18px 0 6px; font: 600 11.5px/1.2 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+  :global(.ly-r) { padding: 9px 0; border-top: 1px solid var(--rule); display: grid; gap: 3px; }
+  :global(.ly-d + .ly-r) { border-top: 0; }
+  :global(.ly-t) { font-size: 14.5px; font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+  :global(.ly-t a) { color: var(--accent); text-decoration: none; }
+  :global(.ly-t a:hover) { text-decoration: underline; }
+  :global(.ly-w) { font-weight: 400; font-size: 12.5px; color: var(--ink-3); }
+  :global(.ly-m) { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; font-size: 12.5px; color: var(--ink-2); }
+  :global(.ly-m b) { color: var(--ink); font-weight: 600; }
+  :global(.ly-s) { padding: 1px 8px; border-radius: 999px; border: 1px solid var(--rule-strong); font-size: 11.5px; font-weight: 600; }
+  :global(.ly-found) { background: rgba(31, 157, 85, .14); border-color: rgba(31, 157, 85, .5); }
+  :global(.ly-searched) { background: var(--accent-wash, rgba(31, 92, 107, .1)); border-color: var(--accent); }
+  :global(.ly-blocked) { background: rgba(192, 57, 43, .12); border-color: rgba(192, 57, 43, .5); }
+  :global(.ly-o) { color: var(--ink-3); }
+  :global(.ly-n) { padding: 1px 8px; border-radius: 999px; background: rgba(232, 162, 0, .18); border: 1px solid #c58a00; font-size: 11.5px; font-weight: 600; color: var(--ink); }
+  :global(.ly-note) { font-size: 12.5px; color: var(--ink-3); overflow-wrap: anywhere; }
 
   .bk-how { font-family: var(--sans); font-size: 14px; }
   .bk-how summary { cursor: pointer; font-weight: 600; }

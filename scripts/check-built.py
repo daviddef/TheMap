@@ -383,6 +383,28 @@ def art_tags_reach_pages():
             err(f"{slug}: the art file holds {len(pg)} verdicts and the built page shows {n}")
 
 
+def no_blob_repeated_on_every_page(pages):
+    """THE SAME BIG SCRIPT INLINED INTO EVERY PAGE IS HOW A DEPLOY DIES. On 6 November the Croatian and Italian chrome tables (about 64 KB)
+    were written inline into all 83,662 pages: 5 GB of one repeated string pushed the artifact to 13.35 GB against GitHub Pages' 10 GB
+    ceiling, and two deploys failed two hours in, with the size gate at the very end of the pipeline. Anything identical on every page belongs in a
+    shared file the pages link to. This reads a spread sample of the built pages and fails when one inline script of 4 KB or more turns up in
+    half of them, so the same mistake is caught here, in minutes, rather than at the end of a two-hour deploy."""
+    sample = pages[::max(1, len(pages) // 600)][:700]
+    seen = {}
+    for f in sample:
+        try:
+            html = open(f, encoding="utf-8", errors="replace").read()
+        except OSError:
+            continue
+        for body in set(re.findall(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>", html, re.S)):
+            if len(body) >= 4096:
+                seen[body] = seen.get(body, 0) + 1
+    for body, n in sorted(seen.items(), key=lambda kv: -kv[1]):
+        if n * 2 >= len(sample):
+            est = len(body) * len(pages) / (1024 * 1024)
+            err(f"one inline script of {len(body)} bytes is on {n} of {len(sample)} sampled pages (about {est:,.0f} MB across {len(pages)} pages). "
+                "Serve it once from a shared file, as the translation tables are (src/pages/js/i18n-tables.js.js). Starts: " + body[:60].replace("\n", " "))
+
 def main():
     if not os.path.isdir(DIST):
         sys.exit(f"{DIST} is not there — run this after astro build.")
@@ -455,6 +477,7 @@ def main():
     evidence_reaches_pages()
 
     attribution_gate()
+    no_blob_repeated_on_every_page(pages)
 
     print(f"\n{len(pages)} pages · {len(bundle)}b bundled css · {len(inlined)}b inlined")
     if FAIL:

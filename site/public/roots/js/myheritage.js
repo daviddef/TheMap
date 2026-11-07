@@ -23,6 +23,17 @@ export function parseLink(text) {
   return null;
 }
 
+/* THE TREE A FILE CAME FROM, READ FROM ITS HEADER, so a link is asked for once per tree and never again. A MyHeritage export names its tree in
+   _PROJECT_GUID (one per tree: the main tree and the Mazza tree differ) and its family site in _EXPORTED_FROM_SITE_ID. Neither is the site code or the
+   tree number a link needs, but the GUID is a stable name to remember them under. Returns { guid, site } or null. No DOM, no network. */
+export function detectMyHeritage(parsed) {
+  const head = (parsed && parsed.nodes || []).find(n => n.tag === 'HEAD'); if (!head) return null;
+  const kids = head.kids || [], src = kids.find(k => k.tag === 'SOUR'); if (!src || !/myheritage/i.test(src.val || '')) return null;
+  const val = t => { const k = kids.find(x => x.tag === t); return k && k.val ? k.val.trim() : ''; };
+  const guid = val('_PROJECT_GUID').toUpperCase(), site = val('_EXPORTED_FROM_SITE_ID');
+  return /^[0-9A-F]{16,64}$/.test(guid) ? { guid, site: /^\d{1,12}$/.test(site) ? site : '' } : null;
+}
+
 /* The number of a file id like I30, or null for an id that does not follow MyHeritage's numbering. */
 export const numOf = id => { const m = /^I(\d{1,6})$/.exec(String(id || '')); return m ? +m[1] : null; };
 

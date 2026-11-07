@@ -506,3 +506,23 @@ test("Ancestry links: tree number from the header, person number from the record
   if (has) { const { Session } = await import(R + "js/pipeline.js"); const s = new Session(io); const out = await s.load(enc(file)); assert.deepEqual(out.anc, { tree: "114002002" }, "the session reports it to the page"); }
   const app = fs.readFileSync(R + "js/app.js", "utf8"); assert.match(app, /personUrl\(anc, id, ancSite\)/); assert.match(app, /acts\.append\(\.\.\.ancA\(p\.id\)\)/);
 });
+
+test("MyHeritage: the tree is read from the file's header, and a link is remembered once per tree, with the Atlas's known tree filled in", async () => {
+  const { parseGedcom } = await import(R + "js/gedcom.js"); const { detectMyHeritage, parseLink } = await import(R + "js/myheritage.js");
+  const { loadTrees, saveTreeLink } = await import(R + "js/remember.js");
+  const head = "0 HEAD\n1 SOUR MYHERITAGE\n2 NAME MyHeritage Family Tree Builder\n1 _PROJECT_GUID 592176E5393EC63D7FA163E984EEB1CD\n1 _EXPORTED_FROM_SITE_ID 329786671\n0 @I1@ INDI\n1 NAME A /B/\n0 TRLR\n";
+  const mh = detectMyHeritage(parseGedcom(new TextEncoder().encode(head)));
+  assert.deepEqual(mh, { guid: "592176E5393EC63D7FA163E984EEB1CD", site: "329786671" });
+  assert.equal(detectMyHeritage(parseGedcom(new TextEncoder().encode(head.replace("MYHERITAGE", "Ancestry.com")))), null, "only a MyHeritage export is read this way");
+  assert.equal(detectMyHeritage(parseGedcom(new TextEncoder().encode(head.replace(/1 _PROJECT_GUID.*\n/, "")))), null, "no tree name, nothing to remember it under");
+  const known = JSON.parse(fs.readFileSync(R + "known-sites.json", "utf8")), k = known["592176E5393EC63D7FA163E984EEB1CD"], c = parseLink(k.link);
+  assert.ok(c && c.tree === 4 && c.site.length >= 16, "the shipped link parses to a site code and tree 4");
+  const store = new Map(); globalThis.localStorage = { getItem: x => (store.has(x) ? store.get(x) : null), setItem: (x, v) => store.set(x, String(v)), removeItem: x => store.delete(x) };
+  try {
+    assert.deepEqual(loadTrees(), {}); assert.ok(saveTreeLink(mh.guid, k.link)); assert.equal(loadTrees()[mh.guid], k.link);
+    assert.ok(saveTreeLink(mh.guid, "")); assert.ok(mh.guid in loadTrees() && loadTrees()[mh.guid] === "", "forgetting is kept as an empty entry so the known link is not filled in again");
+    globalThis.localStorage = { getItem() { throw new Error("blocked"); }, setItem() { throw new Error("blocked"); } };
+    assert.deepEqual(loadTrees(), {}); assert.equal(saveTreeLink(mh.guid, k.link), false);
+  } finally { delete globalThis.localStorage; }
+  const app = fs.readFileSync(R + "js/app.js", "utf8"); assert.match(app, /applyTreeLink\(\)/); assert.match(app, /saveTreeLink\(/); assert.match(app, /Copy new/); assert.match(app, /Copy old/);
+});

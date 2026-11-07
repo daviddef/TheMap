@@ -86,6 +86,10 @@
     }
 
     function call(path, body) {
+      /* The Worker answers only requests from recordatlas.org, so on any other address (a preview, a test copy) the press would end in a
+         browser error nobody can read. Say so up front. `window.__raAiAnyHost` is for the tests, which stand in for the Worker. */
+      if (!window.__raAiAnyHost && !/(^|\.)recordatlas\.org$/.test(location.hostname))
+        return Promise.reject(new Error("Claude can only read lines on recordatlas.org. This is a test copy of the site, so that button cannot work here. \u201cWhat the Atlas holds on this\u201d does."));
       return Promise.all([takeToken(), identity()]).then(function (v) {
         var h = { "Content-Type": "application/json", "X-Turnstile": v[0] };
         if (v[1]) { h["X-AI-Id"] = v[1].id; h["Authorization"] = "Bearer " + v[1].token; }
@@ -99,6 +103,52 @@
       }, function (e) { nextToken(); throw e; });
     }
 
+
+    /* ---- language, and who is in the entry ------------------------------------------------------------------------ */
+    var LANGS = { la: "Latin", it: "Italian", de: "German", hr: "Croatian", en: "English" };
+    var lastText = "";
+    function yearOf(t) { var m = /(?:^|[^0-9])(1[0-9]{3}|20[0-3][0-9])(?![0-9])/.exec(String(t || "")); return m ? m[1] : ""; }
+    /* The language is read from the cards the line matched, not guessed: each term card carries its own. */
+    function languageOf(t) {
+      var by = {}, n = 0, got = cardsFor(t, idx, R);
+      got.forEach(function (c) {
+        var hit = D.terms.filter(function (x) { return x.forms[0] === c.term; })[0];
+        if (hit && hit.lang) { by[hit.lang] = (by[hit.lang] || 0) + 1; n++; }
+      });
+      var ks = Object.keys(by).sort(function (a, b) { return by[b] - by[a]; });
+      return ks.length ? ks.map(function (k) { return LANGS[k] || k; }).join(", ") + " (from " + n + " register " + (n === 1 ? "word" : "words") + " on our cards)" : "";
+    }
+    /* The people the draft names, as blocks in a row like the tree page: parents, the person the entry is about, godparents and
+       witnesses, the priest. Drawn dashed, because every one of them is a reading of a draft and not a documented person. */
+    function miniTree(roles, year) {
+      var g = { parents: [], focus: [], god: [], clergy: [], other: [] };
+      roles.forEach(function (x) {
+        var r = String(x.role || "").toLowerCase();
+        /* godparent before parent: "godparent" contains "parent". "child baptised" is the person, "priest" the one who baptised. */
+        var k = /god|sponsor|susceptor|patrin|witness|testis|testes/.test(r) ? "god" : /priest|officiant|minister|curate|vicar|pastor/.test(r) ? "clergy"
+          : /father|mother|parent|pater|mater/.test(r) ? "parents" : /child|infant|baptis|born|groom|bride|deceased|buried|husband|wife|spouse|dead/.test(r) ? "focus" : "other";
+        g[k].push(x);
+      });
+      if (!roles.length) return null;
+      var wrap = el("div", null, "mt"), row = el("div", null, "mt-row");
+      function block(x, kind, extra) {
+        var b = el("div", null, "mt-b mt-" + kind);
+        b.append(el("span", String(x.role || "").toUpperCase(), "mt-lab"), el("b", x.w));
+        if (extra) b.append(el("span", extra, "mt-yr"));
+        return b;
+      }
+      function col(list, kind, extra) { var c = el("div", null, "mt-col"); list.forEach(function (x) { c.append(block(x, kind, extra)); }); return c; }
+      var cols = [];
+      if (g.parents.length) cols.push(col(g.parents, "parent"));
+      if (g.focus.length) cols.push(col(g.focus, "focus", year));
+      if (g.god.length) cols.push(col(g.god, "god"));
+      if (g.clergy.length) cols.push(col(g.clergy, "clergy"));
+      if (g.other.length) cols.push(col(g.other, "other"));
+      cols.forEach(function (c, i) { if (i) row.append(el("span", null, "mt-link")); row.append(c); });
+      wrap.append(el("p", "Who is in the entry", "lab"), row,
+        el("p", "Read from Claude's draft, so every block is a lead to check against the page, not a documented person.", "cap"));
+      return wrap;
+    }
     /* ---- the draft ---------------------------------------------------------------------------------------------- */
     function show(res, left) {
       out.textContent = "";
@@ -106,7 +156,11 @@
       if (r.unparsed) { out.append(el("h3", "Draft"), el("p", r.draft)); return; }
       var c = el("div", null, "rr-card");
       c.append(el("h3", "Draft reading"), el("p", r.draft || "", "rr-means"));
+      var lg = languageOf(lastText);
+      if (lg) c.append(el("p", "Written in: " + lg, "ask-lang"));
       if (r.note) c.append(el("p", r.note, "cap"));
+      var mt = miniTree(r.roles || [], yearOf(lastText));
+      if (mt) c.append(mt);
       (r.words || []).length && (function () {
         var ul = el("ul", null, "ask-words");
         r.words.forEach(function (w) {
@@ -129,8 +183,9 @@
 
     function guard(fn) {
       return function () {
+        var args = arguments;
         if (busy) return; busy = true; go.disabled = true; photo.disabled = true;
-        Promise.resolve().then(fn).catch(function (e) { say(e && e.message || "Something went wrong.", true); })
+        Promise.resolve().then(function () { return fn.apply(null, args); }).catch(function (e) { say(e && e.message || "Something went wrong.", true); })
           .then(function () { busy = false; go.disabled = false; photo.disabled = false; });
       };
     }
@@ -138,14 +193,15 @@
     go.addEventListener("click", guard(function () {
       var t = text.value.trim();
       if (!t) { say("Paste or type a line first.", true); return null; }
+      lastText = t;
       say("Reading… this can take a few seconds.");
-      return call("translate", { text: t, cards: cardsFor(t, idx, R) }).then(function (j) { say(""); show(j, j.left); });
+      return call("translate", { text: t, cards: cardsFor(t, idx, R) }).then(function (j) { say(""); show(j, j.left); out.scrollIntoView({ block: "nearest", behavior: "smooth" }); document.dispatchEvent(new CustomEvent("ra-ask-read")); });
     }));
 
     /* A photo is shrunk and re-drawn in the browser (which drops its hidden data), sent to be transcribed, and the lines come
-       back into the box to be corrected by the reader BEFORE anything is translated. */
-    photo.addEventListener("change", guard(function () {
-      var f = photo.files && photo.files[0]; photo.value = "";
+       back into the box to be corrected by the reader BEFORE anything is translated. It can arrive three ways: the button, a
+       picture pasted from the clipboard, or a file dropped on the box. All three end up here. */
+    var readImage = guard(function (f) {
       if (!f) return null;
       if (!/^image\/(jpeg|png|webp)$/.test(f.type)) { say("Use a JPEG, PNG or WebP picture.", true); return null; }
       say("Shrinking the picture…");
@@ -170,7 +226,16 @@
         say("Check the text below against your picture" + (doubt.length ? " (the reader was unsure of: " + doubt.join(", ") + ")" : "") +
           ", correct anything wrong, then press Read this line." + (r.note ? " " + r.note : ""));
       });
-    }));
+    });
+    photo.addEventListener("change", function () { var f = photo.files && photo.files[0]; photo.value = ""; readImage(f); });
+    text.addEventListener("paste", function (e) {
+      var items = (e.clipboardData && e.clipboardData.files) || [];
+      for (var i = 0; i < items.length; i++) if (/^image\//.test(items[i].type)) { e.preventDefault(); readImage(items[i]); return; }
+    });
+    var drop = document.getElementById("ask-drop");
+    ["dragenter", "dragover"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add("is-over"); }); });
+    ["dragleave", "drop"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove("is-over"); }); });
+    drop.addEventListener("drop", function (e) { var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) readImage(f); });
 
     /* Touching the box is what loads the bot check. */
     ["focus", "click"].forEach(function (ev) { text.addEventListener(ev, function () { loadTurnstile().catch(function () {}); }, { once: true }); });

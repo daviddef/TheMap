@@ -45,6 +45,10 @@ export const nav = [
      and what each rests on); /surnames/ stays at its address as the dataset page it always was. */
   ["Names", "/your-name/"],
   ["Roots & Routes", "/roots/"],
+  /* THE RECORD READER HAS ITS OWN DOOR. David: «can we add a icon in our top menu for the "Record Reader"?» It was filed under About as
+     "Reading old records", three clicks from the person holding a register line. It is one page, so it is a link, not a disclosure; the
+     icon is drawn by styles.css on the href, so a label that changes still has it. */
+  ["Record Reader", "/read/"],
   /* PLACES HOLDS THE FLAGS TOO. David: «could we bring flags under the places menu tab?» A flag page is a country's other face (see the
      links between a country page and its flag history), so the two share a door: every place, the countries, the Flags Atlas, then every
      hub. The hubs are read from the Flags Atlas index at build time, so a new one appears here by itself. */
@@ -61,7 +65,6 @@ export const nav = [
     [null, "Learn"],
     ["/whats-new/", "What's new"],
     ["/start/", "Start here"],
-    ["/read/", "Reading old records"],
     ["/help/", "Help"],
     ["/about/", "About the atlas"],
     [null, "The sources"],
@@ -71,6 +74,8 @@ export const nav = [
     /* Phase 4B. The survey queue was a column in a JSON file; 316 sources nobody has opened is the atlas's clearest bottleneck, and
        one person cannot close it. This is the way in for anybody with an evening. */
     ["/survey/", "Survey a source"],
+    /* Moved here from the header bar, where it was a pill on every page. */
+    ["/add/", "Add source"],
   ]],
 ];
 

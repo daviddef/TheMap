@@ -8,6 +8,7 @@
 import Base from "../layouts/Base.astro";
 import { recordTerms } from "../lib/record-terms.js";
 import { u } from "../lib/url.js";
+import ProgressKit from "../components/ProgressKit.astro";
 const { sources, terms } = recordTerms();
 const chips = ["uxoris", "7bris", "susceptores", "obiit", "infans", "natum"];
 const dateChips = ["die 30 7bris 1671", "undecima februarii anno millesimo septingentesimo quadragesimo sexto", "xvi martii 1801"];
@@ -19,7 +20,55 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   dek="Type a word as you see it in the register, or a whole date, and see what it is, what it does not tell you, and where it comes from."
   description="A searchable guide to the Latin of old church registers: look up a word, an abbreviation or an ending, and decode a date such as 'die 30 7bris 1671'.">
 
-  <section>
+  <div class="rd-pick" role="tablist" aria-label="What would you like to do?">
+    <button type="button" role="tab" id="tab-ask" class="rd-tab is-on" aria-selected="true" aria-controls="tool-ask" data-tool="ask">
+      <span class="rd-n">1</span><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M18 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg><b>Ask Claude to read a line</b><span class="rd-d">Paste a line or a picture. Get a reading, and the story of the place.</span></button>
+    <button type="button" role="tab" id="tab-date" class="rd-tab" aria-selected="false" aria-controls="tool-date" data-tool="date">
+      <span class="rd-n">2</span><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 10h16M9 3v4M15 3v4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><b>Decode a date</b><span class="rd-d">7bris 1671, xvi martii 1801: what day it was, with the working.</span></button>
+    <button type="button" role="tab" id="tab-word" class="rd-tab" aria-selected="false" aria-controls="tool-word" data-tool="word">
+      <span class="rd-n">3</span><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><circle cx="10.5" cy="10.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M15 15l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><b>Find a word</b><span class="rd-d">uxoris, obiit, susceptores: what it means and what it does not say.</span></button>
+  </div>
+
+  <section id="tool-ask" class="rd-panel" role="tabpanel" aria-labelledby="tab-ask">
+    <div class="one" id="ask" hidden>
+      <div class="lab">Ask Claude to read a line</div>
+      <p class="cap" style="margin-top:6px">Paste one entry from a register, or drop or paste a photograph of it. Claude drafts a plain-English reading, using the cards on this
+      page first and saying which words come from them and which from its own knowledge. Doubtful words are marked. It is a draft to check against the page, not an answer.</p>
+      <p class="ask-priv"><b>Before you paste.</b> What you paste or photograph is sent over the internet to our small service and on to Claude, an AI made by
+      Anthropic, which writes the draft. We keep no text, no picture and no answer, only a count of how many tries each visitor has used. Anthropic's
+      <a href="https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data" rel="noopener">published policy</a> says it deletes
+      what is sent within 30 days, keeps content its safety systems flag for longer, and does not train on it without permission. Please do not paste or photograph details of
+      people who may be alive. Nothing is sent until you press a button. Cloudflare's bot check loads when you first click in the box.
+      <a href={u("/privacy/")}>More in the privacy note.</a></p>
+      <div class="ask-drop" id="ask-drop">
+        <textarea id="ask-text" rows="4" maxlength="4000" spellcheck="false" aria-label="A line from a register" placeholder="Paste or type one entry, as written"></textarea>
+        <p class="ask-hint">or drop a picture here, or paste one from your clipboard</p>
+      </div>
+      <p><input type="text" id="ask-where" maxlength="120" spellcheck="false" aria-label="Where the entry is from, if you know" placeholder="Where is it from? A place, in any spelling, and a year if you know it (optional)" /></p>
+      <p class="ask-row">
+        <button type="button" id="ask-go" class="chip ask-btn">Read this line</button>
+        <button type="button" id="ask-atlas" class="chip ask-btn">What the Atlas holds on this</button>
+        <label class="chip ask-btn ask-file">Read from a photo<input type="file" id="ask-photo" accept="image/jpeg,image/png,image/webp" hidden /></label>
+      </p>
+      <div id="ask-ts"></div>
+      <p class="cap ask-status" id="ask-status" role="status" aria-live="polite"></p>
+      <div id="ask-out" aria-live="polite"></div>
+      <div id="ask-sum" aria-live="polite" hidden></div>
+    </div>
+  </section>
+
+  <section id="tool-date" class="rd-panel" role="tabpanel" aria-labelledby="tab-date" hidden>
+    <div class="one" id="rr-date">
+      <div class="lab">Decode a date</div>
+      <p class="cap" style="margin-top:6px">Digits, Roman numerals or Latin words. The old signs 7bris, 8bris, 9bris and 10bris (Xbris) are
+      September to December. The answer shows its working, and says what it could not read.</p>
+      <p><input type="text" id="rr-d" autocomplete="off" spellcheck="false" aria-label="A date as written in the register" placeholder="die 30 7bris 1671" /></p>
+      <p class="cap rr-chips">Try: {dateChips.map((c) => <button type="button" class="chip rr-dchip" data-q={c}>{c}</button>)}</p>
+      <div id="rr-dout" role="status" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section id="tool-word" class="rd-panel" role="tabpanel" aria-labelledby="tab-word" hidden>
     <div class="one" id="rr-find">
       <div class="lab">Find a word</div>
       <p class="cap" style="margin-top:6px">Spell it as written. Capitals, accents, i for j and u for v do not matter, and another ending finds the same word
@@ -34,45 +83,14 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   </section>
 
   <section>
-    <div class="one" id="rr-date">
-      <div class="lab">Decode a date</div>
-      <p class="cap" style="margin-top:6px">Digits, Roman numerals or Latin words. The old signs 7bris, 8bris, 9bris and 10bris (Xbris) are
-      September to December. The answer shows its working, and says what it could not read.</p>
-      <p><input type="text" id="rr-d" autocomplete="off" spellcheck="false" aria-label="A date as written in the register" placeholder="die 30 7bris 1671" /></p>
-      <p class="cap rr-chips">Try: {dateChips.map((c) => <button type="button" class="chip rr-dchip" data-q={c}>{c}</button>)}</p>
-      <div id="rr-dout" role="status" aria-live="polite"></div>
-    </div>
-  </section>
-
-  <section id="ask" hidden>
-    <div class="one">
-      <div class="lab">Ask Claude to read a line</div>
-      <p class="cap" style="margin-top:6px">Paste one entry from a register, or photograph it. Claude drafts a plain-English reading, using the cards on this
-      page first and saying which words come from them and which from its own knowledge. Doubtful words are marked. It is a draft to check against the page, not an answer.</p>
-      <p class="ask-priv"><b>Before you paste.</b> What you paste or photograph is sent over the internet to our small service and on to Claude, an AI made by
-      Anthropic, which writes the draft. We keep no text, no picture and no answer, only a count of how many tries each visitor has used. Anthropic's
-      <a href="https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data" rel="noopener">published policy</a> says it deletes
-      what is sent within 30 days, keeps content its safety systems flag for longer, and does not train on it without permission. Please do not paste or photograph details of
-      people who may be alive. Nothing is sent until you press a button. Cloudflare's bot check loads when you first click in the box.
-      <a href={u("/privacy/")}>More in the privacy note.</a></p>
-      <p><textarea id="ask-text" rows="4" maxlength="4000" spellcheck="false" aria-label="A line from a register" placeholder="Paste or type one entry, as written"></textarea></p>
-      <p class="ask-row">
-        <button type="button" id="ask-go" class="chip ask-btn">Read this line</button>
-        <label class="chip ask-btn ask-file">Read from a photo<input type="file" id="ask-photo" accept="image/jpeg,image/png,image/webp" hidden /></label>
-      </p>
-      <div id="ask-ts"></div>
-      <p class="cap ask-status" id="ask-status" role="status" aria-live="polite"></p>
-      <div id="ask-out" aria-live="polite"></div>
-    </div>
-  </section>
-
-  <section>
-    <h2 class="yn-h">All {terms.length} terms, A to Z</h2>
-    <ul class="rr-all">
-      {terms.map((t) => (
-        <li><b>{t.forms[0]}</b> <span class="rr-m">{t.means}</span></li>
-      ))}
-    </ul>
+    <details class="rr-alldet">
+      <summary><b>Browse all {terms.length} terms, A to Z</b> <span class="rr-m">the whole list the word finder searches, not only what matched</span></summary>
+      <ul class="rr-all">
+        {terms.map((t) => (
+          <li><b>{t.forms[0]}</b> <span class="rr-m">{t.means}</span></li>
+        ))}
+      </ul>
+    </details>
     <h2 class="yn-h">Where this comes from</h2>
     <p class="cap">Each meaning is written in our own words from the pages below, and each card says which. Word meanings are facts; the guides
     themselves are not copied. Where the card gives a warning, it is a point the source makes, not a rule that always holds: registers vary by
@@ -84,9 +102,34 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
     researchers time. <a href={u("/worklist/")}>The worklist</a> has it.</p>
   </section>
 
+  <ProgressKit />
   <script type="application/json" id="rr-data" set:html={JSON.stringify({ terms, sources: Object.fromEntries(Object.entries(sources).map(([k, s]) => [k, s.title])) })}></script>
+  <script is:inline>
+    (function () {
+      var tabs = [].slice.call(document.querySelectorAll(".rd-tab"));
+      function pick(name, focus) {
+        tabs.forEach(function (t) {
+          var on = t.dataset.tool === name;
+          t.classList.toggle("is-on", on); t.setAttribute("aria-selected", on ? "true" : "false"); t.tabIndex = on ? 0 : -1;
+          document.getElementById("tool-" + t.dataset.tool).hidden = !on;
+          if (on && focus) t.focus();
+        });
+        try { history.replaceState(null, "", "#" + name); } catch (e) {}
+      }
+      tabs.forEach(function (t, i) {
+        t.addEventListener("click", function () { pick(t.dataset.tool); });
+        t.addEventListener("keydown", function (e) {
+          var n = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+          if (n) { e.preventDefault(); pick(tabs[(i + n + tabs.length) % tabs.length].dataset.tool, true); }
+        });
+      });
+      var h = (location.hash || "").slice(1);
+      pick(/[?&]q=/.test(location.search) ? "word" : (h === "date" || h === "word" ? h : "ask"));
+    })();
+  </script>
   <script is:inline src={u("/js/record-reader.js")}></script>
   <script is:inline src={u("/js/ask-claude.js")} defer></script>
+  <script is:inline src={u("/js/atlas-summary.js")} defer></script>
   <script is:inline>
     (function () {
       var R = window.raReadRecord; if (!R) return;

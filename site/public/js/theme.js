@@ -28,6 +28,17 @@
   function mount() {
     var nav = document.querySelector("header.site nav.topnav"), wrap = document.querySelector("header.site .drawer .wrap");
     if (!nav && !wrap) return false;
+    /* THE RECORD READER IS AN ICON BESIDE THE TOGGLE. David: «move record reader button as an icon only to the left of the dark/light
+       toggle, similar style and size, and only hover text.» It is made here, next to the toggle, so the two always sit together; the
+       drawer keeps the text link from the menu list. */
+    if (nav && !nav.querySelector(".ra-reader")) {
+      var a = document.createElement("a"), base = (root.getAttribute("data-base") || "/").replace(/\/?$/, "/");
+      a.className = "ra-reader"; a.href = base + "read/";
+      a.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v15H5.5A1.5 1.5 0 0 0 4 20.5zM20 5.5A1.5 1.5 0 0 0 18.5 4H13v15h5.5a1.5 1.5 0 0 1 1.5 1.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>';
+      var tip = T("Record Reader: read a line from an old register"); a.title = tip; a.setAttribute("aria-label", tip);
+      if (location.pathname.replace(/\/+$/, "").slice(-5) === "/read") a.setAttribute("aria-current", "page");
+      nav.appendChild(a);
+    }
     if (nav && !nav.querySelector(".ra-theme")) nav.appendChild(make("ra-theme"));
     if (wrap && !wrap.querySelector(".ra-theme-row")) { var g = document.createElement("div"); g.className = "dgrp"; g.appendChild(make("ra-theme-row")); wrap.appendChild(g); }
     paint(); return true;

@@ -186,3 +186,10 @@ test("the MyHeritage link and Ancestry site travel in the file, and anything tha
   assert.equal("sites" in bad, false);
   assert.equal("sites" in RF.buildBackup(progress(), {}), false);
 });
+
+test("the per-tree MyHeritage links travel in the research file, valid ones only", () => {
+  const g = "592176E5393EC63D7FA163E984EEB1CD", ok = "https://www.myheritage.com/family-trees/x/OYYV7AGVV4FMSGNWXC6TO74JQDUMOYA?rootIndividualID=4000001&familyTreeID=4";
+  const s = mod.exports.cleanSites({ mhTrees: { [g]: ok, "not a guid": ok, ["AB".repeat(10)]: "javascript:alert(1)" }, anc: "com" });
+  assert.deepEqual(s.mhTrees, { [g]: ok }); assert.equal(s.anc, "com");
+  assert.equal(mod.exports.cleanSites({ mhTrees: [ok] }), null);
+});

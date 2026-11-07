@@ -71,6 +71,15 @@
     var out = {}, mh = typeof x.mh === "string" ? x.mh.trim().slice(0, 600) : "";
     if (/^https?:\/\/[^\s]+$/i.test(mh)) out.mh = mh;
     if (SITES.indexOf(x.anc) >= 0) out.anc = x.anc;
+    /* the link for each MyHeritage tree, by the tree's name in its file's header: pasted once, then known on every device the research file reaches */
+    if (x.mhTrees && typeof x.mhTrees === "object" && !Array.isArray(x.mhTrees)) {
+      var t = {}, n = 0;
+      Object.keys(x.mhTrees).forEach(function (g) {
+        var v = x.mhTrees[g];
+        if (n < 40 && /^[0-9A-F]{16,64}$/.test(g) && typeof v === "string" && /^https?:\/\/[^\s]{1,600}$/i.test(v.trim())) { t[g] = v.trim(); n++; }
+      });
+      if (n) out.mhTrees = t;
+    }
     return Object.keys(out).length ? out : null;
   }
   /* Areas and views by id, the later `upd` winning; a deletion (gone[id]) removes an item last updated before it. */
@@ -235,7 +244,7 @@
     var progress = function () { return JSON.parse(P.toJSON()); };
     var decisions = function () { var d = readJSON(KEY_DEC); return d && d.rows ? d.rows : {}; };
     var rawGet = function (k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } };
-    var KEY_MH = "recordatlas.roots.myheritage-link", KEY_ANC = "recordatlas.roots.ancestry-site";
+    var KEY_MH = "recordatlas.roots.myheritage-link", KEY_ANC = "recordatlas.roots.ancestry-site", KEY_TREES = "recordatlas.roots.myheritage-trees";
     var hasWork_ = function () { return Object.keys(P.all()).length > 0; };
     api.current = function () { var p = progress(); return { progress: p, decisions: decisions(), sig: sigOf(p, decisions()) }; };
     var own = function () { try { return { first: localStorage.getItem("ra-own-first"), last: localStorage.getItem("ra-own-last") }; } catch (e) { return null; } };
@@ -245,7 +254,7 @@
       try { localStorage.setItem(KEY_BACKUP, JSON.stringify({ at: new Date().toISOString(), how: how })); } catch (e) { /* storage blocked: the page still says what it did */ }
     };
     api.exportAll = function () {
-      var c = api.current(), file = buildBackup(c.progress, c.decisions, undefined, { mya: readJSON(KEY_MYA), gedcoms: readJSON(KEY_GED), sites: { mh: rawGet(KEY_MH), anc: rawGet(KEY_ANC) } }), name = "record-atlas-research-" + today() + ".json";
+      var c = api.current(), file = buildBackup(c.progress, c.decisions, undefined, { mya: readJSON(KEY_MYA), gedcoms: readJSON(KEY_GED), sites: { mh: rawGet(KEY_MH), anc: rawGet(KEY_ANC), mhTrees: readJSON(KEY_TREES) } }), name = "record-atlas-research-" + today() + ".json";
       return { file: file, name: name, text: JSON.stringify(file, null, 1) };
     };
     api.importText = function (text) {
@@ -268,6 +277,11 @@
         try {
           if (got.sites.mh && !rawGet(KEY_MH)) localStorage.setItem(KEY_MH, got.sites.mh);
           if (got.sites.anc && !rawGet(KEY_ANC)) localStorage.setItem(KEY_ANC, got.sites.anc);
+          if (got.sites.mhTrees) {
+            var mine = readJSON(KEY_TREES) || {}, add = 0;
+            Object.keys(got.sites.mhTrees).forEach(function (g) { if (!(g in mine)) { mine[g] = got.sites.mhTrees[g]; add++; } });
+            if (add) localStorage.setItem(KEY_TREES, JSON.stringify(mine));
+          }
         } catch (e) { /* storage blocked */ }
       }
       return { marks: n, decisions: nd, areas: na, gedcoms: ng, kind: got.kind };

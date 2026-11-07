@@ -8,7 +8,7 @@ import * as recent from './recent.js';
 import { store as dec, rowsFrom, fileTextOf, parseRows, lookup } from './decisions.js';
 import { BUILD } from './build.js';
 import { parseLink, profileUrl, treeUrl, toHash, fromHash } from './myheritage.js';
-import { loadLink, saveLink, loadSite, saveSite } from './remember.js';
+import { loadLink, saveLink, loadSite, saveSite, loadTrees, saveTreeLink } from './remember.js';
 import { personUrl } from './ancestry.js';
 import { GROUPS as FIXGROUPS, describe } from './checklist.js';
 
@@ -51,7 +51,7 @@ const hideLiv = () => $('#hideliving').checked;
 $('#hideliving').onchange = () => { $('#fliving').checked = !hideLiv(); worker && worker.postMessage({ cmd: 'living', hide: hideLiv() }); };
 function done(m) {
   const stale = !m.build || m.build.pipeline !== BUILD || m.build.model !== BUILD; $('#stale').hidden = !stale;
-  last = m; window.RR = { tree: m.tree, atlas: m.atlas }; anc = m.anc || null; ancStatus();
+  last = m; window.RR = { tree: m.tree, atlas: m.atlas }; anc = m.anc || null; ancStatus(); mhFile = m.mh || null; applyTreeLink();
   const keepTab = $('.tabs [aria-selected=true]')?.dataset.tab || 'tree';
   show('work'); chips(m); mountViewer(); report(m); review(m); workbench(m.wb); worker.postMessage({ cmd: 'offer' });
   tab(m.first ? 'tree' : keepTab);
@@ -380,7 +380,7 @@ const copy = async (text, btn) => {
   btn.classList.add('ok'); setTimeout(() => { btn.innerHTML = was; btn.title = wt; btn.classList.remove('ok'); }, 1200);
 };
 /* ---------- links back to MyHeritage ---------- */
-let mhc = fromHash(location.hash), mhRemembered = false;
+let mhc = fromHash(location.hash), mhRemembered = false, mhFile = null;
 { const kept = loadLink(), c = kept && parseLink(kept);                       // the last link pasted on this device, unless the address already carries one
   if (c) { $('#mhin').value = kept; if (!mhc) { mhc = c; mhRemembered = true; history.replaceState(null, '', toHash(c)); } } }
 /* the Ancestry tree an Ancestry export came from: its number is in the file's header, and each record number is Ancestry's own person number */
@@ -435,17 +435,33 @@ function plist(list, total) {
   return ul;
 }
 let lastInfo = null;
-function mhStatus(extra) { $('#mhsum').textContent = mhc ? 'on · tree ' + mhc.tree : 'off'; $('#mhsum').classList.toggle('on', !!mhc); $('#mhstat').textContent = mhc ? (extra || (mhRemembered ? 'Remembered from last time, on this device only. Clear the box to forget it.' : 'Open one or two people to check they are the right ones. The link is remembered on this device only (not sent anywhere); clear the box to forget it.')) : ''; }
+function mhStatus(extra) { $('#mhsum').textContent = mhc ? 'on · tree ' + mhc.tree : 'off'; $('#mhsum').classList.toggle('on', !!mhc); $('#mhstat').textContent = mhc ? (extra || (mhRemembered ? 'Remembered from last time. Clear the box to forget it.' : 'Open one or two people to check they are the right ones. The link is remembered for this tree, so you only paste it once: it stays on this device and goes into your research file and, if you turn on online sync, your encrypted copy. Clear the box to forget it.')) : ''; }
 function mhWho(m) { mhStatus(m.name ? 'That link is ' + m.id + ' in your file: ' + m.name + '. If that is not who you pasted, the numbering differs and these links are wrong.' : 'No person ' + m.id + ' in this file, so check the link.'); }
 $('#mhin').onchange = e => {                                   // leaving the box with text that is not a link: put back the last good link rather than keep the stray text
   if (e.target.value.trim() && !parseLink(e.target.value)) { e.target.value = loadLink(); mhStatus(e.target.value ? 'That text was not a MyHeritage link, so the last good link is back in the box.' : ''); if (!mhc) $('#mhstat').textContent = 'That text was not a MyHeritage link.'; }
 };
 $('#mhin').oninput = e => {
   const c = parseLink(e.target.value); mhRemembered = false;
-  if (!c) { mhc = null; if (!e.target.value.trim()) saveLink(''); $('#mhstat').textContent = e.target.value.trim() ? 'That does not look like a MyHeritage profile or tree link.' : ''; refreshMh(); return; }
-  saveLink(e.target.value.trim());
+  if (!c) { mhc = null; if (!e.target.value.trim()) { saveLink(''); if (mhFile) saveTreeLink(mhFile.guid, ''); } $('#mhstat').textContent = e.target.value.trim() ? 'That does not look like a MyHeritage profile or tree link.' : ''; refreshMh(); return; }
+  saveLink(e.target.value.trim()); if (mhFile) saveTreeLink(mhFile.guid, e.target.value.trim());
   mhc = c; history.replaceState(null, '', toHash(c)); mhStatus(); refreshMh(); if (worker && c.num) worker.postMessage({ cmd: 'who', id: 'I' + c.num });
 };
+/* THE LINK IS ASKED FOR ONCE PER TREE. The file's header names its tree (mhFile.guid). The link is looked up for that tree in this order: one the visitor
+   pasted before (kept per tree here, in their research file and in their online copy), then a tree the Atlas already knows (data in known-sites.json,
+   fetched here), and only then does the box stay empty for a paste. An empty remembered entry means "forget it", and is respected. */
+const knownP = fetch(new URL('known-sites.json', base)).then(r => r.ok ? r.json() : {}).catch(() => ({}));
+function applyTreeLink() {
+  if (!mhFile) return;
+  const guid = mhFile.guid, mine = loadTrees();
+  knownP.then(K => {
+    if (!mhFile || mhFile.guid !== guid) return;
+    const own = guid in mine, kept = own ? mine[guid] : ((K[guid] && K[guid].link) || ''), c = kept && parseLink(kept);
+    if (!c) return;                                              // nothing remembered, or forgotten on purpose: the box is left for a paste
+    $('#mhin').value = kept; mhc = c; mhRemembered = true; history.replaceState(null, '', toHash(c));
+    mhStatus(own ? 'Remembered for this tree, so you will not be asked again. It is kept on this device and goes into your research file and, if you turn on online sync, your encrypted copy. Clear the box to forget it.' : 'This is a tree the Atlas already knows, so the link was filled in for you. Nothing to paste.');
+    refreshMh(); if (own && worker && c.num) worker.postMessage({ cmd: 'who', id: 'I' + c.num });   // a link the Atlas ships is not re-checked against the file
+  });
+}
 function ancStatus() { $('#ancstat').textContent = anc ? 'This is an Ancestry export (tree ' + anc.tree + '): every person has a link into that tree on ancestry.' + ancSite + ', read from the file itself. Nothing is sent.' : 'Not an Ancestry export (or no tree number in its header), so no Ancestry links are made.'; }
 function refreshMh() { pushMh(); drawFix(); if (lastInfo) person(lastInfo); }
 if (mhc) mhStatus();
@@ -454,11 +470,12 @@ function fixRow(s, i) {
   const row = el('div', 'frow'), cb = el('input'); cb.type = 'checkbox'; cb.checked = ticked.has(i.key); cb.setAttribute('aria-label', 'Done'); row.classList.toggle('done', cb.checked);
   cb.onchange = () => { cb.checked ? ticked.add(i.key) : ticked.delete(i.key); dec.put(i.key, 'd', cb.checked); row.classList.toggle('done', cb.checked); fixCount(s); };
   const body = el('div', 'fbody'), head = el('div', 'fhead'), note = el('div', 'fnote');
-  const cpB = (txt, title) => ib('copy', title, function () { copy(txt, this); });
+  /* a copy button that SAYS which text it copies: two bare icons side by side could not be told apart */
+  const cpL = (label, title, txt) => { const b = el('button', 'cand'); b.type = 'button'; b.innerHTML = IC.copy + '<span></span>'; b.lastChild.textContent = label; b.title = title; b.setAttribute('aria-label', title); b.onclick = function () { copy(txt, this); }; return b; };
   const evs = n => n + ' event' + (n === 1 ? '' : 's');
   if (s.key === 'places' || s.key === 'check') {
     const swap = el('span', 'swap'); swap.append(el('span', 'was', i.raw), el('span', 'arrow', '→'), el('b', 'now', i.to));
-    const acts = el('span', 'acts'); acts.append(cpB(i.to, 'Copy the new text'), cpB(i.raw, 'Copy the current text (to find it in MyHeritage)'));
+    const acts = el('span', 'acts'); acts.append(cpL('Copy new', 'Copy the new text, the one in bold: ' + i.to, i.to), cpL('Copy old', 'Copy the old text, the crossed-out one, to search for it in MyHeritage: ' + i.raw, i.raw));
     head.append(swap, acts);
     if (s.key === 'check') note.textContent = 'Suggestion only: ' + i.why;
     body.append(head); if (note.textContent) body.append(note); body.append(el('div', 'fcount', evs(i.count)), plist(i.people, i.count));

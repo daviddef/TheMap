@@ -87,3 +87,17 @@ test("the words around the people in an entry are findable in any of their endin
   const idx = m.exports.index(JSON.parse(fs.readFileSync(path.join(here, "../../data/record-terms.json"), "utf8")).terms);
   for (const [w, id] of [["parentum", "parentes"], ["parentibus", "parentes"], ["patre", "pater"], ["matris", "mater"]]) assert.equal(m.exports.find(idx, w, {})[0].term.id, id, w);
 });
+
+test("a heading of two words that no single card holds falls back to the cards for its words, and says so", async () => {
+  const fs = await import("node:fs"), path = await import("node:path"), { fileURLToPath } = await import("node:url");
+  const here = path.dirname(fileURLToPath(import.meta.url)), m = { exports: {} };
+  new Function("module", fs.readFileSync(path.join(here, "../public/js/record-reader.js"), "utf8"))(m);
+  const idx = m.exports.index(JSON.parse(fs.readFileSync(path.join(here, "../../data/record-terms.json"), "utf8")).terms);
+  assert.equal(m.exports.find(idx, "nomina", {})[0].term.id, "nomen");
+  assert.equal(m.exports.find(idx, "nomina", {})[0].score, 100, "nomina is a written form, not a loose match");
+  const r = m.exports.find(idx, "Nomina Parentum", {});
+  assert.deepEqual(r.map((x) => x.term.id).sort(), ["nomen", "parentes"]);
+  assert.equal(r.partial, true);
+  assert.equal(m.exports.find(idx, "parentum", {}).partial, undefined, "a single word is never partial");
+  assert.deepEqual(m.exports.find(idx, "zzzq qqqx", {}), []);
+});

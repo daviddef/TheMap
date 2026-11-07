@@ -66,6 +66,19 @@
       }
       out.push({ term: e.t, score: total / toks.length });
     });
+    /* A phrase no single card holds ("nomina parentum": a heading made of two words) falls back to the cards for its words, each word
+       on its own, best first; the array says so (`partial`) so the page can say "these match its words" and not pretend one card did. */
+    if (!out.length && toks.length > 1) {
+      var seen = {};
+      toks.forEach(function (tok) {
+        idx.forEach(function (e) {
+          if (want && e.t.events !== "all" && want.indexOf(e.t.events) < 0) return;
+          var s = scoreToken(tok, e);
+          if (s >= 70 && (!seen[e.t.id] || seen[e.t.id].score < s)) { if (!seen[e.t.id]) out.push(seen[e.t.id] = { term: e.t, score: s, via: tok }); else { seen[e.t.id].score = s; seen[e.t.id].via = tok; } }
+        });
+      });
+      if (out.length) out.partial = true;
+    }
     out.sort(function (a, b) { return b.score - a.score || (a.term.id < b.term.id ? -1 : 1); });
     return out;
   }

@@ -158,6 +158,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
         var v = q.value.trim(); if (!v) return;
         var r = R.find(idx, v, { events: events() });
         if (!r.length) { out.append(el("p", "No term here matches that. That is not a finding about the word: the list is short so far. Try fewer letters, or the English.", "cap")); return; }
+        if (r.partial) out.append(el("p", "No single card holds that whole phrase, so these are the cards for its words, one word at a time.", "cap"));
         r.slice(0, 12).forEach(function (x) { out.append(card(x.term)); });
         if (r.length > 12) out.append(el("p", "…and " + (r.length - 12) + " more. Type more of the word.", "cap"));
       }

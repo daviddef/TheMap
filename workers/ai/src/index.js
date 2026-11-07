@@ -134,6 +134,9 @@ export async function handle(request, env, o = {}) {
 
   let out;
   try { out = await callClaude(env, fetchFn, { system, content, maxTokens }); } catch { out = { ok: false, status: 0 }; }
+  if (!out.ok) {   // a call that gave no answer costs the reader nothing: hand back every try it took
+    await Promise.allSettled([identity ? stub(env, `id:${aiId}`).give(now, cost) : null, stub(env, `ip:${ipKey}`).give(now, cost), stub(env, "site").give(now, 1)].filter(Boolean));
+  }
   if (!out.ok) return json({ error: out.status === 429 || out.status === 529 ? "Claude is busy. Try again in a minute." : "Claude could not answer just now.", reason: out.status ? "anthropic-" + out.status + (out.type ? "-" + out.type : "") : "anthropic-unreachable" }, 503, h);
   await stub(env, "site").addTokens(now, out.usage);
 

@@ -30,6 +30,8 @@ export class Ledger {
     r.d.n += cost; r.m.n += cost; await this.s.put("c", r);
     return { ok: true, day: r.d.n, month: r.m.n };
   }
+  /* Give back what take() charged, for a call that never produced an answer. Never below zero. */
+  async give(now, cost) { const r = await this._load(now), c = cost || 1; r.d.n = Math.max(0, r.d.n - c); r.m.n = Math.max(0, r.m.n - c); await this.s.put("c", r); return { ok: true }; }
   async addTokens(now, n) { const r = await this._load(now); r.t.n += Math.max(0, Math.floor(n) || 0); await this.s.put("c", r); return { tokens: r.t.n }; }
   async peek(now) { const r = await this._load(now); return { created: r.created, day: r.d.n, month: r.m.n, tokens: r.t.n }; }
   async wipe() { await this.s.deleteAll(); return { ok: true }; }

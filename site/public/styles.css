@@ -1451,3 +1451,39 @@ header.site nav .ra-reader:focus-visible { outline: 3px solid var(--accent, #1f5
 .hd-det { margin: 8px 0; font-family: var(--sans); font-size: 14px; }
 .hd-prompt { width: 100%; font: 13px/1.5 var(--mono, ui-monospace, Menlo, monospace); padding: 10px; border: 1px solid var(--rule-strong); border-radius: 6px; background: var(--panel); color: var(--ink); resize: vertical; }
 @media (max-width: 640px) { .hd-row { grid-template-columns: 1fr; } }
+
+/* ---- the Atlas page for a case on /read/ (case-atlas.js) ---- */
+.cx-page { display: grid; gap: 14px; }
+.cx-top { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.cx-map { height: 380px; }
+.cx-mapwrap, .cx-side { min-width: 0; }
+.cx-journey { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.cx-journey li { display: flex; align-items: flex-start; gap: 8px; padding: 6px 8px; border: 1px solid var(--rule); border-radius: 8px; background: var(--panel); }
+.cx-jt { display: grid; min-width: 0; } .cx-jt a { font-weight: 600; } .cx-jm { font-size: 12.5px; color: var(--muted, #52666c); }
+.cx-pin { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #245565; color: #fff; font: 700 12px/1 var(--sans, system-ui); border: 2px solid #fff; box-shadow: 0 0 0 1px #245565; }
+.cx-pin.is-inline { flex: none; width: 22px; height: 22px; }
+.cx-pin-wrap, .cx-arrow { background: none; border: 0; } .cx-arrow span { display: inline-block; font-size: 12px; line-height: 14px; text-shadow: 0 0 2px #fff; }
+.k-path { display: inline-block; width: 22px; border-top: 2px dashed #8a6a3c; vertical-align: middle; }
+.cx-flag { width: 34px; height: 23px; object-fit: cover; border: 1px solid var(--rule-strong); border-radius: 2px; flex: none; vertical-align: middle; }
+.cx-flag.is-small { width: 22px; height: 15px; }
+.cx-stop { border: 1px solid var(--rule); border-radius: 10px; background: var(--panel); margin: 0 0 8px; }
+.cx-stop > summary { display: flex; align-items: center; gap: 8px; padding: 9px 12px; cursor: pointer; list-style: none; flex-wrap: wrap; }
+.cx-stop > summary::-webkit-details-marker { display: none; } .cx-sum { color: var(--muted, #52666c); font-size: 13px; flex: 1; }
+.cx-body { display: grid; gap: 8px; padding: 4px 14px 14px; } .cx-body > p, .cx-body > ul { margin: 0; }
+.cx-ev, .cx-held { margin: 0; padding-left: 18px; font-size: 14px; } .cx-held { list-style: none; padding-left: 0; display: grid; gap: 4px; }
+.cx-alts { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; } .cx-alt { font-size: 12.5px; padding: 3px 10px; }
+.cx-bar { display: flex; gap: 3px; min-height: 120px; align-items: stretch; overflow-x: auto; }
+.cx-era { display: grid; align-content: start; gap: 4px; min-width: 74px; padding: 7px 8px; border: 1px solid var(--rule); border-top: 5px solid #8a9a9e; border-radius: 4px; background: var(--panel-2, #f1f3f2); font-size: 12px; }
+.cx-era b { font: 600 14px/1 var(--serif, Georgia, serif); } .cx-pol { overflow-wrap: anywhere; line-height: 1.25; } .cx-era.is-here { outline: 2px solid #b3452e; background: #fbf1ec; }
+.cx-hit { font: 700 11px/1.2 var(--mono, monospace); color: #b3452e; }
+.cx-axis { display: flex; justify-content: space-between; margin: 2px 0 0; font: 11px var(--mono, monospace); color: var(--muted, #52666c); }
+.cx-tree { display: grid; gap: 10px; } .cx-trow { display: grid; gap: 4px; } .cx-wed { padding: 0 8px; font-size: 18px; color: #8a6a3c; }
+.cx-start { margin: 0; padding-left: 20px; display: grid; gap: 6px; } .cx-start .as-vm { display: block; }
+.nm { font: inherit; color: inherit; background: none; border: 0; border-bottom: 2px dotted currentColor; padding: 0; cursor: pointer; }
+.nm-place { background: #e4eef0; border-bottom-color: #245565; } .nm-person { background: #f6ecd9; border-bottom-color: #8a6a3c; }
+.nm[aria-expanded=true] { outline: 2px solid var(--accent, #245565); }
+.nm-card { display: grid; gap: 4px; margin: 4px 0 8px; padding: 8px 12px; border: 1px solid var(--rule-strong); border-left: 4px solid var(--accent, #245565); border-radius: 6px; background: var(--panel); font-size: 14px; }
+@media (max-width: 760px) { .cx-top { grid-template-columns: minmax(0, 1fr); } .cx-map { height: 300px; } }
+.cx-src { border: 1px solid var(--rule); border-radius: 8px; background: var(--panel); margin: 0 0 8px; padding: 0 12px 10px; } .cx-src > summary { cursor: pointer; padding: 9px 0; font-weight: 600; }
+.cx-then { background: #fbf4e2; border-left: 4px solid #b98a4a; padding: 6px 10px; border-radius: 4px; font-size: 14px; }
+.cx-trow .mt-row { gap: 10px; flex-wrap: wrap; }

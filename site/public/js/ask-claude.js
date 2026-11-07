@@ -429,12 +429,26 @@
       sub(c, "Cautions", cf.cautions, "cap");
       return c;
     }
+    /* The Atlas page for the documents: map, who held the ground, registers, sources, names. Drawn under the case file (or first, with one
+       document). case-atlas.js announces the finished page, and the names in the readings are then highlighted and handed to the hand-over. */
+    function atlasPage(got, after) {
+      var CA = window.raCaseAtlas; if (!CA || !got.length) return;
+      var mount = el("div", null, "cx-mount"); mount.id = "ask-case-atlas";
+      if (after && after.parentNode === out) after.after(mount); else out.prepend(mount);
+      CA.render(got, caseFileNow, mount);
+    }
+    var caseFileNow = null;
+    document.addEventListener("ra-case-layer", function (e) {
+      var CA = window.raCaseAtlas, H = window.raHandover;
+      if (H && H.atlas) H.atlas(e.detail);
+      if (CA && CA.highlight) CA.highlight(out, e.detail);
+    });
     var readDocuments = guard(function (files) {
       files = [].slice.call(files || []).filter(function (f) { return /^image\/(jpeg|png|webp)$/.test(f.type); });
       if (!files.length) { say("Use a JPEG, PNG or WebP picture.", true); return null; }
       if (files.length > MAX_PICS) files = files.slice(0, MAX_PICS);
       var got = [], failed = null, left = null, where = (document.getElementById("ask-where") || {}).value || "";
-      out.textContent = ""; var H = window.raHandover; if (H) H.documents([], null);
+      out.textContent = ""; caseFileNow = null; var H = window.raHandover; if (H) { H.documents([], null); if (H.atlas) H.atlas(null); }
       return files.reduce(function (chain, f, i) {
         return chain.then(function () {
           if (failed) return;
@@ -449,14 +463,14 @@
           }).then(null, function (e) { failed = e; });
         });
       }, Promise.resolve()).then(function () {
-        if (failed) { say((got.length ? "Read " + got.length + " of " + files.length + ", then it stopped: " : "") + (failed.message || "Something went wrong.") + (typeof left === "number" ? " Tries left today: " + left + "." : ""), true); if (H && got.length) H.open(); return; }
-        if (got.length < 2) { say("One document read. Add a second to compare them and make a case file." + (typeof left === "number" ? " Tries left today: " + left + "." : "")); if (H) H.open(); return; }
+        if (failed) { say((got.length ? "Read " + got.length + " of " + files.length + ", then it stopped: " : "") + (failed.message || "Something went wrong.") + (typeof left === "number" ? " Tries left today: " + left + "." : ""), true); if (H && got.length) H.open(); atlasPage(got, null); return; }
+        if (got.length < 2) { say("One document read. Add a second to compare them and make a case file." + (typeof left === "number" ? " Tries left today: " + left + "." : "")); if (H) H.open(); atlasPage(got, null); return; }
         say("Comparing the " + got.length + " documents…");
         var facts = window.raAtlasFacts, atlas = facts ? [facts.place && "Place: " + facts.place, facts.country, facts.polity && "Whose ground in " + facts.year + ": " + facts.polity, facts.language && "Register language: " + facts.language].filter(Boolean).join("; ") : "";
         return call("casefile", { docs: got.map(function (x, i) { return compactDoc(Object.assign({ doc: i + 1 }, x.doc)); }), atlas: atlas }).then(function (j) {
-          left = j.left; out.prepend(caseCard(j.result || {}, got)); if (H) { H.documents(got.slice(), j.result || null); H.open(); }
+          left = j.left; caseFileNow = j.result || null; var cc = caseCard(caseFileNow || {}, got); out.prepend(cc); if (H) { H.documents(got.slice(), caseFileNow); H.open(); } atlasPage(got, cc);
           say("Done. A draft to check against the pictures, not a finding." + (typeof left === "number" ? " Tries left today: " + left + "." : ""));
-        }, function (e) { if (H) H.open(); say("The documents were read, but the comparison stopped: " + (e.message || "Something went wrong.") + " Each document above is still usable.", true); });
+        }, function (e) { if (H) H.open(); atlasPage(got, null); say("The documents were read, but the comparison stopped: " + (e.message || "Something went wrong.") + " Each document above is still usable.", true); });
       });
     });
     var docs = document.getElementById("ask-docs");

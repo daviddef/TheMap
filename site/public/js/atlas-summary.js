@@ -189,6 +189,7 @@
     });
     return leaflet;
   }
+  api.loadLeaflet = loadLeaflet;
 
   function boot() {
     var box = document.getElementById("ask-sum"), btn = document.getElementById("ask-atlas");
@@ -196,6 +197,7 @@
     var BASE = (document.documentElement.getAttribute("data-base") || "/").replace(/\/?$/, "/");
     var text = document.getElementById("ask-text"), where = document.getElementById("ask-where"), status = document.getElementById("ask-status");
     var data = null, loading = null;
+    api.getJSON = getJSON; api.load = load;
 
     function getJSON(path) { return fetch(BASE + path).then(function (r) { if (!r.ok) throw new Error(path); return r.json(); }); }
     function say(msg, bad) { status.textContent = msg || ""; status.className = "cap ask-status" + (bad ? " ask-bad" : ""); }
@@ -217,7 +219,7 @@
               var D = JSON.parse(document.getElementById("rr-data").textContent);
               D.terms.forEach(function (t) { (t.forms || []).concat(t.abbr || []).forEach(function (f) { fold(f).split(" ").forEach(function (w) { skip[w] = 1; if (t.lang) tlang[w] = t.lang; }); }); });
             } catch (e) { /* the skip list is an aid; without it a few register words may be offered as places */ }
-            data = { map: buildMap(rows), given: buildGiven(g.rows || []), access: d.access || {}, skip: skip, tlang: tlang, built: g.built };
+            data = { map: buildMap(rows), rows: rows, given: buildGiven(g.rows || []), countries: d.countries || {}, access: d.access || {}, skip: skip, tlang: tlang, built: g.built };
             return data;
           });
       }).catch(function () { say("The place index did not load. Check your connection and press again.", true); loading = null; throw new Error("index"); });

@@ -40,7 +40,7 @@
       names: order.map(function (k) { return people[k]; }), doubt: doubt,
       many: entries.length > 1,
       docs: (extra && extra.docs) || [], cf: (extra && extra.cf) || null,
-      pics: (extra && extra.pics) || {}, withPics: !!(extra && extra.withPics)
+      pics: (extra && extra.pics) || {}, withPics: !!(extra && extra.withPics), layer: (extra && extra.layer) || null
     };
   }
 
@@ -131,12 +131,50 @@
     return b;
   }
 
+  /* The Atlas page for the documents (case-atlas.js), as blocks: the journey and who held each place, the registers and sources, the people as leads,
+     and the names with their variants. It is plain data from the Atlas's catalogue, so it goes into the saved file and the prompt as it is. */
+  function atlasBlocks(m) {
+    var L = m.layer; if (!L || !(L.stops || []).length) return [];
+    var b = [{ h: 2, t: "Where it happened, who held the ground, and where to look" },
+      { p: "Drawn from Record Atlas's own catalogue files, not by an AI. The places, dates and names are what the documents gave, so they are leads until a record is seen. A missing row means not in the catalogue, never that it did not happen." }];
+    if (L.svg) b.push({ svg: L.svg, cap: "The places in date order (positions only; the dashed line is not the route taken)" });
+    b.push({ lab: "Places, in date order, and whose ground each was" }, { ul: L.stops.map(function (s) {
+      var g = (s.ground || []).map(function (x) { return x.none ? x.year + ": no era catalogued" : (x.year != null ? x.year + " under " : "under ") + x.polity + (x.regime ? " (" + x.regime + ")" : ""); }).join("; ");
+      return s.n + ". " + (s.place ? s.place.name + ", " + s.place.country : "not found in the Atlas") + " (written: " + s.text + ")" + ((s.years || []).length ? "; " + s.years.join(", ") : "") +
+        ((s.docs || []).length ? "; document" + (s.docs.length > 1 ? "s " : " ") + s.docs.join(", ") : "") + (g ? "; " + g : "") +
+        (s.place && s.place.older && s.place.older.length ? "; also written " + s.place.older.slice(0, 4).join(", ") : "");
+    }) });
+    var reg = [];
+    L.stops.forEach(function (s) {
+      var v = s.volumes || {}, rows = (v.cover && v.cover.length ? v.cover : v.near) || [], tag = v.cover && v.cover.length ? "covers " + s.first : "nearest in time";
+      rows.slice(0, 4).forEach(function (x) { reg.push(s.n + ". " + (s.place ? s.place.name : s.text) + ": " + x.title + " (" + x.from + "–" + x.to + "; " + tag + ")" + (x.held ? ", held at " + x.held : "") + (x.url ? " " + x.url : "")); });
+      (s.filed || []).forEach(function (p) { reg.push(s.n + ". records of these years are filed under " + p.name + " " + (p.url || "")); });
+    });
+    if (reg.length) b.push({ lab: "Registers and holders the Atlas lists for those places and years" }, { ul: reg });
+    (L.countries || []).forEach(function (c) {
+      if ((c.sources || []).length) b.push({ lab: "Sources catalogued for " + c.name + " (" + c.total + " in all; best access first)" }, { ul: c.sources.map(function (p) { return p.name + (p.access ? " [" + p.access + "]" : "") + " " + (p.url || ""); }) });
+    });
+    if ((L.start || []).length) b.push({ lab: "Where to start, in this order" }, { ul: L.start.map(function (x, i) { return (i + 1) + ". " + x.title + (x.how ? " — " + x.how : "") + " [" + x.from + "]" + (x.url ? " " + x.url : ""); }) });
+    var T = L.tree || {}, tl = [];
+    [["focus", "The person the documents are about"], ["spouse", "Spouse"], ["parents", "Parent named"], ["children", "Child named"], ["others", "Other named"]].forEach(function (k) {
+      (T[k[0]] || []).forEach(function (p) { tl.push(k[1] + ": " + p.name + " (" + (p.roles || []).join(", ") + "; document" + (p.docs.length > 1 ? "s " : " ") + p.docs.join(", ") + ")" + (p.born ? ", born " + p.born : "") + (p.birthplace ? ", " + p.birthplace : "")); });
+    });
+    if (tl.length) b.push({ lab: "People named, as leads (by role on the document; not a proven tree)" }, { ul: tl });
+    var N = L.names || {}, nl = [];
+    (N.surnames || []).forEach(function (x) { nl.push("Surname " + x.written + " (last word taken as the surname): " + (x.family ? "catalogued family " + x.family.name + (x.family.forms.length ? "; other spellings: " + x.family.forms.map(function (f) { return f.form + " (" + f.status + ")"; }).join(", ") : "; no other spelling catalogued") : "not in a catalogued family yet; no spelling confirmed")); });
+    (N.given || []).forEach(function (g) { nl.push("Given name " + g.written + " is held as " + g.canon + "; other forms: " + g.forms.map(function (f) { return f.form; }).join(", ")); });
+    (N.places || []).forEach(function (p) { if (p.atlas) nl.push("Place " + p.written + " = " + p.atlas + (p.then && p.then.length ? "; called " + p.then.join(", ") : "") + (p.older && p.older.length ? "; other names: " + p.older.slice(0, 6).join(", ") : "; no other name catalogued")); });
+    (N.reading || []).forEach(function (r) { nl.push("Reading's own note (not the catalogues'): " + r.written + (r.reading ? " = " + r.reading : "") + (r.why ? ". " + r.why : "")); });
+    if (nl.length) b.push({ lab: "Names and other forms to search" }, { ul: nl });
+    return b;
+  }
+
   var DEFAULT_GOAL = "Check the draft reading against the transcript, correct it, and say what I should look at next.";
 
   /* The prompt, for another AI or for a person. The entries come from the same blocks as the document, so the two cannot disagree. */
   function prompt(m, audience, goal) {
     var g = String(goal || "").trim() || DEFAULT_GOAL, mt = Object.assign({}, m, { withPics: false });
-    var ent = toMarkdown(caseBlocks(mt).concat(docBlocks(mt, 3), entryBlocks(mt, 3))), ctx = toMarkdown(contextBlocks(mt).slice(1));
+    var ent = toMarkdown(caseBlocks(mt).concat(atlasBlocks(mt), docBlocks(mt, 3), entryBlocks(mt, 3))), ctx = toMarkdown(contextBlocks(mt).slice(1));
     var close = "Prepared with Record Atlas (recordatlas.org). The draft readings were made by an AI and have not been checked by a person.";
     if (audience === "person") {
       return ["Hello,", "",
@@ -170,7 +208,7 @@
     var b = [{ h: 1, t: "Record handover" },
       { p: "Prepared " + m.today + " with Record Atlas (recordatlas.org). " + (m.docs.length ? m.docs.length + " document" + (m.docs.length === 1 ? "" : "s") + " read from pictures" + (m.entries.length ? ", and " : ".") : "") +
         (m.entries.length ? (m.many ? m.entries.length + " entries" : "one entry") + " from old registers, with a draft reading." : "") }];
-    b = b.concat(contextBlocks(m), caseBlocks(m));
+    b = b.concat(contextBlocks(m), caseBlocks(m), atlasBlocks(m));
     if (m.docs.length) b.push({ h: 2, t: m.docs.length === 1 ? "The document" : "The documents" }), b = b.concat(docBlocks(m, 3));
     if (m.entries.length) b = b.concat(summaryBlocks(m), [{ h: 2, t: m.many ? "The entries" : "The entry" }], entryBlocks(m, 3));
     var np = m.docs.length + m.entries.length > 1;
@@ -212,16 +250,18 @@
       else if (x.p != null) { e = doc.createElement("p"); e.textContent = x.p; }
       else if (x.ul) { e = doc.createElement("ul"); x.ul.forEach(function (i) { var li = doc.createElement("li"); li.textContent = i; e.appendChild(li); }); }
       else if (x.pre != null) { e = doc.createElement("pre"); e.textContent = x.pre; }
+      else if (x.svg) { e = doc.createElement("figure"); var sv = doc.createElement("img"); sv.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(x.svg); sv.alt = x.cap || "map"; e.appendChild(sv);
+        var sc = doc.createElement("figcaption"); sc.textContent = x.cap || ""; e.appendChild(sc); }
       else if (x.img) { e = doc.createElement("figure"); var im = doc.createElement("img"); im.src = "data:image/jpeg;base64," + x.img; im.alt = x.cap || "picture"; e.appendChild(im);
         var fc = doc.createElement("figcaption"); fc.textContent = x.cap || ""; e.appendChild(fc); }
       if (e) root.appendChild(e);
     });
   }
 
-  if (typeof module !== "undefined" && module.exports) module.exports = { sections: sections, model: model, prompt: prompt, document: document_, toMarkdown: toMarkdown, entryBlocks: entryBlocks, docBlocks: docBlocks, caseBlocks: caseBlocks, DEFAULT_GOAL: DEFAULT_GOAL };
+  if (typeof module !== "undefined" && module.exports) module.exports = { sections: sections, model: model, prompt: prompt, document: document_, toMarkdown: toMarkdown, entryBlocks: entryBlocks, docBlocks: docBlocks, caseBlocks: caseBlocks, atlasBlocks: atlasBlocks, DEFAULT_GOAL: DEFAULT_GOAL };
   if (typeof document === "undefined") return;
 
-  var done = Object.create(null), pics = {}, docs = [], cfile = null;
+  var done = Object.create(null), pics = {}, docs = [], cfile = null, layer = null;
   function el(tag, text, cls) { var e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls; return e; }
 
   function boot() {
@@ -231,7 +271,7 @@
 
     function current() {
       return model(text.value, done, window.raAtlasFacts || null, where ? where.value : "", null,
-        { docs: docs, cf: cfile, pics: pics, withPics: !!(withPics && withPics.checked) });
+        { docs: docs, cf: cfile, pics: pics, withPics: !!(withPics && withPics.checked), layer: layer });
     }
     function refresh() { if (!built) return; var m = current(); ta.value = prompt(m, aud.value, goal.value); }
     function say(t) { said.textContent = t || ""; }
@@ -294,6 +334,8 @@
       picture: function (n, b64) { pics[n] = b64; },
       /* documents read whole: [{ n, name, pic, doc }], and the case file made from them (or null) */
       documents: function (list, cf) { docs = list || []; cfile = cf || null; },
+      /* the Atlas page drawn for those documents (case-atlas.js), or null */
+      atlas: function (l) { layer = l || null; if (built) refresh(); },
       /* called after any read: show the card, and keep it current */
       open: function () { if (!built) build(); else refresh(); host.hidden = false; }
     };

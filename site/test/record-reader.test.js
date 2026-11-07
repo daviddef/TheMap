@@ -79,3 +79,11 @@ test("the script never leaves the browser", () => {
   const src = fs.readFileSync(path.join(here, "../public/js/record-reader.js"), "utf8");
   assert.doesNotMatch(src, /fetch\(|XMLHttpRequest|sendBeacon|localStorage|document\.cookie/);
 });
+
+test("the words around the people in an entry are findable in any of their endings: parentum, patre, matris", async () => {
+  const fs = await import("node:fs"), path = await import("node:path"), { fileURLToPath } = await import("node:url");
+  const here = path.dirname(fileURLToPath(import.meta.url)), m = { exports: {} };
+  new Function("module", fs.readFileSync(path.join(here, "../public/js/record-reader.js"), "utf8"))(m);
+  const idx = m.exports.index(JSON.parse(fs.readFileSync(path.join(here, "../../data/record-terms.json"), "utf8")).terms);
+  for (const [w, id] of [["parentum", "parentes"], ["parentibus", "parentes"], ["patre", "pater"], ["matris", "mater"]]) assert.equal(m.exports.find(idx, w, {})[0].term.id, id, w);
+});

@@ -34,12 +34,19 @@ const json = (obj, status, extra) => new Response(JSON.stringify(obj), { status,
 const bearer = r => { const m = /^Bearer ([A-Za-z0-9_-]+)$/.exec(r.headers.get("Authorization") || ""); return m && TOKEN_RE.test(m[1]) ? m[1] : null; };
 const stub = (env, name) => env.ALLOW.get(env.ALLOW.idFromName(name));
 
-async function turnstileOk(env, token, ip, fetchFn) {
-  if (!env.TURNSTILE_SECRET) return false;           // fail closed: no secret, no answers
-  if (!token || token.length > 2048) return false;
+/* null when the bot check passed; otherwise a short reason, so a refusal can be diagnosed from the page. The reasons are Cloudflare's own public
+   error codes (like "timeout-or-duplicate" or "invalid-input-secret") or one of ours: never the secret, the token or anything about the reader. */
+async function turnstileWhy(env, token, ip, fetchFn) {
+  if (!env.TURNSTILE_SECRET) return "no-secret-set";           // fail closed: no secret, no answers
+  if (!token) return "no-token-sent";
+  if (token.length > 2048) return "token-too-long";
   const form = new URLSearchParams({ secret: env.TURNSTILE_SECRET, response: token }); if (ip) form.set("remoteip", ip);
-  try { const r = await fetchFn("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body: form }); return !!(await r.json()).success; }
-  catch { return false; }
+  try {
+    const j = await (await fetchFn("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body: form })).json();
+    if (j.success) return null;
+    const codes = (Array.isArray(j["error-codes"]) ? j["error-codes"] : []).map(String).filter(c => /^[a-z0-9-]{1,40}$/.test(c)).slice(0, 4);
+    return codes.length ? codes.join(",") : "refused";
+  } catch { return "siteverify-unreachable"; }
 }
 
 function limitsFor(env, identity, now) {
@@ -111,7 +118,8 @@ export async function handle(request, env, o = {}) {
   }
 
   const ip = request.headers.get("CF-Connecting-IP") || "";
-  if (!(await turnstileOk(env, request.headers.get("X-Turnstile"), ip, fetchFn))) return json({ error: "The bot check did not pass. Reload the page and try again." }, 403, h);
+  const why = await turnstileWhy(env, request.headers.get("X-Turnstile"), ip, fetchFn);
+  if (why) return json({ error: "The bot check did not pass. Reload the page and try again.", reason: why }, 403, h);
 
   const lim = limitsFor(env, identity, now);
   if (identity) { const r = await stub(env, `id:${aiId}`).take(now, { cost, day: lim.day, month: lim.month }); if (!r.ok) return busy(r.which, h); }

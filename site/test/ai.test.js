@@ -17,7 +17,7 @@ function rig(over = {}) {
   let claude = over.claude || (() => ({ content: [{ text: JSON.stringify({ draft: "baptised Cornelia", words: [], roles: [], not_said: [], note: "ok" }) }], usage: { input_tokens: 100, output_tokens: 50 } }));
   const fetchFn = async (u, init) => {
     calls.push({ u, init });
-    if (u.includes("turnstile")) return new Response(JSON.stringify({ success: !String(init.body).includes("response=bad") }));
+    if (u.includes("turnstile")) return new Response(JSON.stringify(String(init.body).includes("response=bad") ? { success: false, "error-codes": ["timeout-or-duplicate"] } : { success: true }));
     if (u.includes("anthropic")) { const r = claude(JSON.parse(init.body)); return r instanceof Response ? r : new Response(JSON.stringify(r)); }
     throw new Error("unexpected fetch " + u);
   };
@@ -50,6 +50,12 @@ test("no bot check, or a failed one, is refused; with no secret it fails closed"
   assert.equal((await r.call("/v1/translate", { body: line, headers: { "X-Turnstile": "bad" } })).status, 403);
   assert.equal((await r.call("/v1/translate", { body: line, headers: { "X-Turnstile": "" } })).status, 403);
   assert.equal((await rig({ env: { TURNSTILE_SECRET: "" } }).call("/v1/translate", { body: line })).status, 403);
+  /* the refusal says why, in Cloudflare's own public codes or ours, so "Success!" on the page and a 403 can be told apart */
+  assert.equal((await (await r.call("/v1/translate", { body: line, headers: { "X-Turnstile": "bad" } })).json()).reason, "timeout-or-duplicate");
+  assert.equal((await (await r.call("/v1/translate", { body: line, headers: { "X-Turnstile": "" } })).json()).reason, "no-token-sent");
+  assert.equal((await (await rig({ env: { TURNSTILE_SECRET: "" } }).call("/v1/translate", { body: line })).json()).reason, "no-secret-set");
+  const body403 = JSON.stringify(await (await r.call("/v1/translate", { body: line, headers: { "X-Turnstile": "bad" } })).json());
+  assert.ok(!body403.includes("ts-test") && !body403.includes("bad"), "neither the secret nor the token is echoed");
   assert.ok(!r.calls.some(c => c.u.includes("anthropic")), "Claude is never called for a failed check");
 });
 

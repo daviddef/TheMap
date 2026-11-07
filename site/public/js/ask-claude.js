@@ -133,7 +133,7 @@
       }).then(function (r) {
         nextToken();
         return r.json().catch(function () { return {}; }).then(function (j) {
-          if (!r.ok) throw new Error(j.error || "Something went wrong. Try again in a minute.");
+          if (!r.ok) throw new Error((j.error || "Something went wrong. Try again in a minute.") + (j.reason ? " (reason: " + j.reason + ")" : ""));
           return j;
         });
       }, function (e) { nextToken(); throw e; });

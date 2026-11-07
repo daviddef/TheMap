@@ -88,6 +88,11 @@ def main():
     before = len(places)
     hr_before = sum(1 for p in places if p.get("country") == "HR")
 
+    try:
+        PIN = json.load(open("data/place-overrides.json"))["overrides"]
+    except FileNotFoundError:
+        PIN = {}
+
     by_cc = collections.defaultdict(list)
     for c in cols:
         for cc in c.get("countries", []):
@@ -174,6 +179,10 @@ def main():
             if in_ring_latlon(d["lat"], d["lon"], r["ring"]):
                 rec["region"] = r["id"]
                 break
+        # A division's weighted centre can fall outside it (New York's lands in
+        # New Jersey); a human's pin says where the dot goes instead.
+        if pid in PIN:
+            rec["lat"], rec["lon"] = PIN[pid]["lat"], PIN[pid]["lon"]
         by_id[pid] = rec
         here[(d["cc"], fn)].append(rec)
         added += 1

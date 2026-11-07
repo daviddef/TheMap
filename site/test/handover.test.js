@@ -48,3 +48,26 @@ test("the PDF page is drawn with DOM calls and textContent only", () => {
   const src = fs.readFileSync(path.join(here, "../public/js/handover.js"), "utf8");
   assert.ok(!/innerHTML|insertAdjacentHTML/.test(src.replace(/\/\*[\s\S]*?\*\//g, "")), "no markup is parsed from text");
 });
+
+test("pictures go into the saved text file only when ticked, and never into the prompt", () => {
+  const pic = "QUJD";
+  const m = H.model(t1, { [t1]: { res: { result: { draft: "A baptism." } }, lang: "Latin" } }, null, "", "2026-11-08", { pics: { 1: pic }, withPics: true });
+  const md = H.toMarkdown(H.document(m, "ai", ""));
+  assert.ok(md.includes("![Picture 1](data:image/jpeg;base64," + pic + ")"));
+  assert.ok(md.includes("included above as shrunk copies"));
+  assert.ok(!H.prompt(m, "ai", "").includes(pic));
+  const off = H.toMarkdown(H.document(Object.assign({}, m, { withPics: false }), "ai", ""));
+  assert.ok(!off.includes(pic)); assert.ok(off.includes("not included"));
+});
+
+test("documents read whole and their case file are in the saved document and the prompt, with the pictures only in the file", () => {
+  const docs = [{ n: 1, name: "a.jpg", pic: "QUJD", doc: { doc_type: "US petition", date_on_document: "1930", persons: [{ name_as_written: "Jozef Slavich", role: "petitioner", details: { age: "", born: "June 30 1902" } }], fields: [{ label: "Occupation", value: "elevator runner", doubt: false }] } },
+    { n: 2, name: "b.jpg", pic: "REVG", doc: { doc_type: "Seaman's certificate" } }];
+  const cf = { headline: "Probably one man.", groups: [{ docs: [1, 2], verdict: "likely", because: ["same birth date, doc 1 and doc 2"], against: [] }], next_steps: [{ look_for: "the passenger manifest", where: "Ellis Island", search_with: "Giovanni Slavic, 31 Dec 1920", could_settle: "the village" }] };
+  const m = H.model("", {}, null, "", "2026-11-08", { docs, cf, pics: {}, withPics: true });
+  const md = H.toMarkdown(H.document(m, "ai", ""));
+  assert.ok(md.includes("2 documents read from pictures")); assert.ok(md.includes("Verdict: likely") && md.includes("across documents 1, 2")); assert.ok(md.includes("Giovanni Slavic, 31 Dec 1920"));
+  assert.ok(md.includes("data:image/jpeg;base64,QUJD") && md.includes("data:image/jpeg;base64,REVG"));
+  const pr = H.prompt(m, "ai", "");
+  assert.ok(pr.includes("Probably one man.") && pr.includes("Jozef Slavich")); assert.ok(!pr.includes("QUJD"));
+});

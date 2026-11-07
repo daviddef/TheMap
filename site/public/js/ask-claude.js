@@ -67,7 +67,19 @@
     };
   }
 
-  if (typeof module !== "undefined" && module.exports) module.exports = { cardsFor: cardsFor, shrinkDims: shrinkDims, splitSections: splitSections, consolidate: consolidate, yearsIn: yearsIn };
+  /* A document as read, without its empty fields, so the case-file request is small and the model is not shown blanks. */
+  function compactDoc(o) {
+    if (Array.isArray(o)) { var a = o.map(compactDoc).filter(function (x) { return x !== undefined; }); return a.length ? a : undefined; }
+    if (o && typeof o === "object") {
+      var r = {}, any = false;
+      Object.keys(o).forEach(function (k) { var v = compactDoc(o[k]); if (v !== undefined && v !== false) { r[k] = v; any = true; } });
+      return any ? r : undefined;
+    }
+    if (o == null || (typeof o === "string" && !o.trim())) return undefined;
+    return o;
+  }
+
+  if (typeof module !== "undefined" && module.exports) module.exports = { compactDoc: compactDoc, cardsFor: cardsFor, shrinkDims: shrinkDims, splitSections: splitSections, consolidate: consolidate, yearsIn: yearsIn };
   if (typeof document === "undefined") return;
 
   function el(tag, text, cls) { var e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls; return e; }
@@ -329,7 +341,9 @@
           if (failed) return;
           var tag = files.length > 1 ? "Picture " + (i + 1) + " of " + files.length : "the picture";
           say("Shrinking " + tag + "\u2026");
+          var pic = null;
           return shrink(f).then(function (data) {
+            pic = data;
             say("Reading " + tag + "\u2026 this can take a few seconds.");
             return call("transcribe", { image: { media_type: "image/jpeg", data: data } });
           }).then(function (j) {
@@ -338,6 +352,7 @@
             if (!lines.length) { note += " " + (r.note || "No readable line was found in " + tag + "."); return; }
             var n = splitSections(text.value).length + 1, cur = text.value.trim();
             text.value = cur ? cur + "\n\n\u2014 Picture " + n + " \u2014\n" + lines.join("\n") : lines.join("\n");
+            if (window.raHandover) window.raHandover.picture(n, pic);
             added++;
             (r.lines || []).forEach(function (l) { doubts = doubts.concat(l.doubtful || []); });
             if (r.note) note += " " + r.note;
@@ -362,6 +377,93 @@
     ["dragenter", "dragover"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add("is-over"); }); });
     ["dragleave", "drop"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove("is-over"); }); });
     drop.addEventListener("drop", function (e) { var fs = e.dataTransfer && e.dataTransfer.files ? [].slice.call(e.dataTransfer.files) : []; if (fs.length) readImages(fs); });
+
+
+    /* ---- whole documents: census sheets, petitions, certificates, forms ---------------------------------------------------
+       Each picture is read as a whole document (every filled-in field, in the original spelling), then one more step compares them and writes
+       a case file. Registers of one line each still go through the buttons above. */
+    function sub(c, label, items, cls) {
+      items = (items || []).filter(Boolean); if (!items.length) return;
+      var ul = el("ul", null, cls || "ask-words"); items.forEach(function (t) { ul.append(typeof t === "string" ? el("li", t) : t); });
+      c.append(el("p", label, "lab"), ul);
+    }
+    function status2(t) { return el("span", " " + t, "ask-src " + (t === "inferred" ? "is-model" : "is-card")); }
+    function docCard(x) {
+      var d = x.doc || {}, c = el("div", null, "rr-card ask-doc");
+      if (d.unparsed) { c.append(el("h3", "Document " + x.n), el("p", d.draft || "")); return c; }
+      c.append(el("h3", "Document " + x.n + (d.doc_type ? ": " + d.doc_type : "")));
+      var meta = [d.date_on_document && "Date on it: " + d.date_on_document, d.issuer && "Issued by: " + d.issuer, (d.places_named || []).length && "Places written on it: " + d.places_named.join("; ")].filter(Boolean);
+      if (meta.length) c.append(el("p", meta.join(" · "), "cap"));
+      if (d.what_it_is) c.append(el("p", d.what_it_is, "rr-means"));
+      sub(c, "People on it, as written", (d.persons || []).map(function (p) {
+        var t = p.details || {}, bits = [t.age && "age " + t.age, t.born && "born " + t.born, t.birthplace && "birthplace " + t.birthplace, t.residence && "residence " + t.residence, t.occupation && "occupation " + t.occupation, t.other].filter(Boolean);
+        var li = el("li"); li.append(el("b", p.name_as_written || ""), document.createTextNode((p.role ? " (" + p.role + ")" : "") + (bits.length ? ": " + bits.join("; ") : ""))); return li;
+      }));
+      var det = el("details", null, "hd-det"); det.append(el("summary", "Every field, as written (" + (d.fields || []).length + ")"));
+      var ul = el("ul", null, "ask-words");
+      (d.fields || []).forEach(function (f) { var li = el("li", null, f.doubt ? "ask-doubt" : ""); li.append(el("b", f.label || ""), document.createTextNode(" " + (f.value || "") + (f.doubt ? " (doubtful)" : ""))); ul.append(li); });
+      det.append(ul); if ((d.fields || []).length) c.append(det);
+      sub(c, "Numbers on it", (d.ids || []).map(function (i) { return (i.kind || "") + ": " + (i.value || ""); }), "cap");
+      sub(c, "Not readable", d.not_legible, "cap");
+      if (d.legibility) c.append(el("p", d.legibility, "cap"));
+      return c;
+    }
+    function caseCard(cf, docs) {
+      var c = el("div", null, "rr-card ask-all ask-case");
+      if (cf.unparsed) { c.append(el("h3", "Case file"), el("p", cf.draft || "")); return c; }
+      c.append(el("h3", "Case file: what the " + docs.length + " documents show together"), el("p", cf.headline || "", "rr-means"));
+      (cf.groups || []).forEach(function (g) {
+        var v = { likely: "Likely", possible: "Possible", unlikely: "Unlikely", "not enough": "Not enough to say" }[g.verdict] || g.verdict || "";
+        c.append(el("p", "One person across document" + ((g.docs || []).length === 1 ? "" : "s") + " " + (g.docs || []).join(", ") + "? " + v, "lab"),
+          el("p", "A hypothesis built from the points below, not proof.", "cap"));
+        sub(c, "What points the same way", g.because); sub(c, "What does not fit", g.against);
+      });
+      sub(c, "What the documents say about them", (cf.profile || []).map(function (f) { var li = el("li"); li.append(document.createTextNode(f.fact + " "), status2(f.status || ""), el("span", " " + (f.evidence || ""), "cap")); return li; }));
+      sub(c, "Timeline", (cf.timeline || []).map(function (t) { var li = el("li"); li.append(el("b", (t.date || "?") + " "), document.createTextNode((t.event || "") + (t.place ? " (" + t.place + ")" : "") + " "), status2(t.status || ""), el("span", " " + (t.source || ""), "cap")); return li; }));
+      sub(c, "Names and places, and why they vary", (cf.names_and_places || []).map(function (n) { var li = el("li"); li.append(el("b", (n.as_written || []).join(" / ")), document.createTextNode(" = " + (n.reading || "") + (n.why_it_varies ? ". " + n.why_it_varies : ""))); return li; }));
+      sub(c, "Conflicts and gaps", (cf.conflicts || []).map(function (x) { var li = el("li"); li.append(el("b", x.issue || ""), document.createTextNode(" " + (x.detail || "") + (x.how_to_settle ? " To settle: " + x.how_to_settle : ""))); return li; }));
+      sub(c, "What the set adds", cf.adds);
+      sub(c, "What to look for next", (cf.next_steps || []).map(function (x) {
+        var li = el("li"); li.append(el("b", x.look_for || ""), document.createTextNode((x.where ? " Where: " + x.where + "." : "") + (x.search_with ? " Search with: " + x.search_with + "." : "") + (x.could_settle ? " Could settle: " + x.could_settle : ""))); return li;
+      }));
+      sub(c, "Cautions", cf.cautions, "cap");
+      return c;
+    }
+    var readDocuments = guard(function (files) {
+      files = [].slice.call(files || []).filter(function (f) { return /^image\/(jpeg|png|webp)$/.test(f.type); });
+      if (!files.length) { say("Use a JPEG, PNG or WebP picture.", true); return null; }
+      if (files.length > MAX_PICS) files = files.slice(0, MAX_PICS);
+      var got = [], failed = null, left = null, where = (document.getElementById("ask-where") || {}).value || "";
+      out.textContent = ""; var H = window.raHandover; if (H) H.documents([], null);
+      return files.reduce(function (chain, f, i) {
+        return chain.then(function () {
+          if (failed) return;
+          var tag = files.length > 1 ? "document " + (i + 1) + " of " + files.length : "the document";
+          say("Shrinking " + tag + "…");
+          return shrink(f).then(function (data) {
+            say("Reading " + tag + " field by field… this takes up to half a minute.");
+            return call("document", { image: { media_type: "image/jpeg", data: data }, context: { place: where } }).then(function (j) {
+              left = j.left; var x = { n: i + 1, name: f.name || "", pic: data, doc: j.result || {} }; got.push(x); out.append(docCard(x));
+              if (H) H.documents(got.slice(), null);
+            });
+          }).then(null, function (e) { failed = e; });
+        });
+      }, Promise.resolve()).then(function () {
+        if (failed) { say((got.length ? "Read " + got.length + " of " + files.length + ", then it stopped: " : "") + (failed.message || "Something went wrong.") + (typeof left === "number" ? " Tries left today: " + left + "." : ""), true); if (H && got.length) H.open(); return; }
+        if (got.length < 2) { say("One document read. Add a second to compare them and make a case file." + (typeof left === "number" ? " Tries left today: " + left + "." : "")); if (H) H.open(); return; }
+        say("Comparing the " + got.length + " documents…");
+        var facts = window.raAtlasFacts, atlas = facts ? [facts.place && "Place: " + facts.place, facts.country, facts.polity && "Whose ground in " + facts.year + ": " + facts.polity, facts.language && "Register language: " + facts.language].filter(Boolean).join("; ") : "";
+        return call("casefile", { docs: got.map(function (x, i) { return compactDoc(Object.assign({ doc: i + 1 }, x.doc)); }), atlas: atlas }).then(function (j) {
+          left = j.left; out.prepend(caseCard(j.result || {}, got)); if (H) { H.documents(got.slice(), j.result || null); H.open(); }
+          say("Done. A draft to check against the pictures, not a finding." + (typeof left === "number" ? " Tries left today: " + left + "." : ""));
+        }, function (e) { if (H) H.open(); say("The documents were read, but the comparison stopped: " + (e.message || "Something went wrong.") + " Each document above is still usable.", true); });
+      });
+    });
+    var docs = document.getElementById("ask-docs");
+    if (docs) {
+      docs.addEventListener("click", function () { loadTurnstile().catch(function () {}); });
+      docs.addEventListener("change", function () { var fs = [].slice.call(docs.files || []); docs.value = ""; if (fs.length) readDocuments(fs); });
+    }
 
     /* Touching the box is what loads the bot check. */
     ["focus", "click"].forEach(function (ev) { text.addEventListener(ev, function () { loadTurnstile().catch(function () {}); }, { once: true }); });

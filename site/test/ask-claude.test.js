@@ -53,3 +53,8 @@ test("the consolidated view gives the year span, who recurs, and what was doubte
   assert.deepEqual(K.doubt, [{ w: "sepultus", why: "smudged", n: 2 }]);
   assert.equal(A.consolidate([entry(1, "no year", [])]).years, null);
 });
+
+test("a document sent for comparison drops its empty fields", () => {
+  const d = A.compactDoc({ doc_type: "petition", issuer: "", persons: [{ name_as_written: "J", details: { age: "", born: "1902" } }], fields: [], ids: [{ kind: "no.", value: "2693" }], not_legible: [""], x: { y: "" } });
+  assert.deepEqual(d, { doc_type: "petition", persons: [{ name_as_written: "J", details: { born: "1902" } }], ids: [{ kind: "no.", value: "2693" }] });
+});

@@ -10,7 +10,7 @@
      7. the whole site's daily request and token caps.
    The per-person caps are SOFT on purpose: anyone can make new six words. What actually bounds the bill is 6 and 7, plus the
    monthly spend limit David sets with Anthropic on the key itself. */
-import { TRANSLATE_SYSTEM, TRANSCRIBE_SYSTEM, translateMessage, IMAGE_TYPES, parseJson } from "./prompt.js";
+import { TRANSLATE_SYSTEM, TRANSCRIBE_SYSTEM, DOCUMENT_SYSTEM, CASEFILE_SYSTEM, translateMessage, documentMessage, casefileMessage, IMAGE_TYPES, parseJson } from "./prompt.js";
 
 const ID_RE = /^[0-9a-f]{32}$/;
 const TOKEN_RE = /^[A-Za-z0-9_-]{43}$/;
@@ -57,10 +57,10 @@ function limitsFor(env, identity, now) {
 const busy = (which, h) => json({ error: which === "site" || which === "tokens" ? "The service has reached today's limit for everyone. Try again tomorrow." :
   which === "month" ? "You have used this month's allowance." : "You have used today's allowance.", limit: which }, 429, h);
 
-async function callClaude(env, fetchFn, { system, content, maxTokens }) {
+async function callClaude(env, fetchFn, { system, content, maxTokens, model }) {
   const r = await fetchFn("https://api.anthropic.com/v1/messages", { method: "POST",
     headers: { "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-    body: JSON.stringify({ model: env.MODEL || "claude-haiku-5-5", max_tokens: maxTokens, system, messages: [{ role: "user", content }] }) });
+    body: JSON.stringify({ model: model || env.MODEL || "claude-haiku-5-5", max_tokens: maxTokens, system, messages: [{ role: "user", content }] }) });
   if (!r.ok) {   // say which kind of refusal (Anthropic's public error type), never the key or anything sent
     let type = ""; try { type = String(((await r.json()).error || {}).type || "").replace(/[^a-z_]/g, "").slice(0, 40); } catch { /* no body */ }
     return { ok: false, status: r.status, type };
@@ -98,26 +98,36 @@ export async function handle(request, env, o = {}) {
     const lim = limitsFor(env, identity, now), used = identity ? await stub(env, `id:${aiId}`).peek(now) : null;
     return json({ identity: !!identity, dayLimit: lim.day, monthLimit: lim.month, dayUsed: used ? used.day : null, monthUsed: used ? used.month : null }, 200, h);
   }
-  if (request.method !== "POST" || !["translate", "transcribe"].includes(parts[1]) || parts.length !== 2) return json({ error: "not found" }, 404, h);
-  const kind = parts[1], cost = kind === "transcribe" ? IMAGE_COST : 1;
+  if (request.method !== "POST" || !["translate", "transcribe", "document", "casefile"].includes(parts[1]) || parts.length !== 2) return json({ error: "not found" }, 404, h);
+  const kind = parts[1], isPic = kind === "transcribe" || kind === "document", cost = kind === "document" ? num(env.DOC_COST, 2) : isPic ? IMAGE_COST : kind === "casefile" ? num(env.CASE_COST, 2) : 1;   // a whole document costs 2 tries, the case file that joins them 2, a register line 1
 
   const len = Number(request.headers.get("Content-Length") || 0);
-  if (len > (kind === "transcribe" ? MAX_IMAGE_B64 + MAX_JSON : MAX_JSON)) return json({ error: "too large" }, 413, h);
+  if (len > (isPic ? MAX_IMAGE_B64 + MAX_JSON : MAX_JSON)) return json({ error: "too large" }, 413, h);
   let body; try { body = await request.json(); } catch { return json({ error: "not json" }, 400, h); }
   if (!body || typeof body !== "object") return json({ error: "not json" }, 400, h);
 
-  let content, system, maxTokens = Math.min(num(env.MAX_OUT_TOKENS, 1200), 2000);
+  let content, system, model = env.MODEL, maxTokens = Math.min(num(env.MAX_OUT_TOKENS, 1200), 2000);
   if (kind === "translate") {
     if (typeof body.text !== "string" || !body.text.trim()) return json({ error: "paste a line to read" }, 400, h);
     if (body.text.length > 4000) return json({ error: "that is too long: paste one entry at a time (up to 4,000 characters)" }, 413, h);
     system = TRANSLATE_SYSTEM; content = translateMessage(body);
+  } else if (kind === "casefile") {
+    const docs = Array.isArray(body.docs) ? body.docs : [];
+    if (docs.length < 2 || docs.length > 6) return json({ error: "send two to six documents that were read" }, 400, h);
+    system = CASEFILE_SYSTEM; model = env.CASE_MODEL || "claude-sonnet-5-5"; maxTokens = num(env.CASE_MAX_TOKENS, 3500);
+    content = casefileMessage({ docs, atlas: typeof body.atlas === "string" ? body.atlas : "", question: typeof body.question === "string" ? body.question : "" });
   } else {
     const im = body.image;
     if (!im || !IMAGE_TYPES[im.media_type] || typeof im.data !== "string" || !/^[A-Za-z0-9+/=]+$/.test(im.data)) return json({ error: "send a jpeg, png or webp picture" }, 400, h);
     if (im.data.length > MAX_IMAGE_B64) return json({ error: "that picture is too large: it should be shrunk first" }, 413, h);
-    system = TRANSCRIBE_SYSTEM; maxTokens = Math.min(maxTokens, 900);
-    content = [{ type: "image", source: { type: "base64", media_type: im.media_type, data: im.data } },
-      { type: "text", text: "Transcribe this. " + (body.context && body.context.language ? "Language: " + String(body.context.language).slice(0, 40) + "." : "") }];
+    const pic = { type: "image", source: { type: "base64", media_type: im.media_type, data: im.data } };
+    if (kind === "document") {      // a whole form or sheet, read field by field: a stronger model, and room to answer
+      system = DOCUMENT_SYSTEM; model = env.DOC_MODEL || "claude-sonnet-5-5"; maxTokens = num(env.DOC_MAX_TOKENS, 3000);
+      content = [pic, { type: "text", text: documentMessage(body) }];
+    } else {
+      system = TRANSCRIBE_SYSTEM; maxTokens = Math.min(maxTokens, 900);
+      content = [pic, { type: "text", text: "Transcribe this. " + (body.context && body.context.language ? "Language: " + String(body.context.language).slice(0, 40) + "." : "") }];
+    }
   }
 
   const ip = request.headers.get("CF-Connecting-IP") || "";
@@ -133,7 +143,7 @@ export async function handle(request, env, o = {}) {
   if (!site.ok) return busy(site.which === "tokens" ? "tokens" : "site", h);
 
   let out;
-  try { out = await callClaude(env, fetchFn, { system, content, maxTokens }); } catch { out = { ok: false, status: 0 }; }
+  try { out = await callClaude(env, fetchFn, { system, content, maxTokens, model }); } catch { out = { ok: false, status: 0 }; }
   if (!out.ok) {   // a call that gave no answer costs the reader nothing: hand back every try it took
     await Promise.allSettled([identity ? stub(env, `id:${aiId}`).give(now, cost) : null, stub(env, `ip:${ipKey}`).give(now, cost), stub(env, "site").give(now, 1)].filter(Boolean));
   }

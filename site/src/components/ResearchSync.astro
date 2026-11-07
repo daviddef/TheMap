@@ -46,6 +46,7 @@ import { u } from "../lib/url.js";
 
   <div id="sy-on" hidden>
     <p class="mrstatus" id="sy-status" role="status" aria-live="polite"></p>
+    <p class="cap" id="sy-auto" data-th><b>Always on.</b> On every page of this site, a change is saved online about 15 seconds after you make it, and again as you leave the page. You do not need to press anything. If another device saved a newer copy, it is merged in for you; merging only adds, so it never removes a mark, which also means a mark you delete on one device can come back from another. <span id="sy-auto-note"></span></p>
     <p class="mrbtns"><button type="button" id="sy-now">Sync now</button> <span id="sy-now-said" role="status" aria-live="polite"></span></p>
     <div id="sy-newer" hidden>
       <p class="cap" id="sy-newer-text"></p>
@@ -104,6 +105,8 @@ import { u } from "../lib/url.js";
       if (!st) { show("sy-off"); return; }
       show("sy-on");
       $("sy-status").textContent = SY.ago(st.saved) + (st.saved ? " · saved copy is encrypted; only your six words open it" : "");
+      var nt = null; try { nt = JSON.parse(localStorage.getItem("ra-sync-note")); } catch (e) { /* none */ }
+      $("sy-auto-note").textContent = nt && nt.merged ? "Last merge from another device: " + SY.ago(nt.at).replace(/^synced /, "") + " (" + plural(nt.merged, "mark") + ")." : "";
     }
 
     function syncNow(quiet) {
@@ -215,15 +218,14 @@ import { u } from "../lib/url.js";
     });
 
     /* ---- show the section only when the service answers; sync on arrival and after the reader's changes ---- */
-    var timer = null;
-    function schedule() { clearTimeout(timer); if (read()) timer = setTimeout(function () { syncNow(true); }, 20000); }
+    /* The automatic saving moved to sync-auto.js, which conn.js loads on EVERY page when the six words are here. This page only repaints when it finishes. */
+    document.addEventListener("ra-sync-done", function () { if (read()) paint(); });
     var base = (opts.base || SY.BASE).replace(/\/$/, "");
     var ctl = new AbortController(), kill = setTimeout(function () { ctl.abort(); }, 4000);
     fetch(base + "/v1/health", { signal: ctl.signal }).then(function (r) { return r.ok ? r.json() : Promise.reject(); }).then(function (j) {
       clearTimeout(kill); if (!j || !j.ok) throw 0;
       root.hidden = false; paint();
-      if (read()) syncNow(true);
-      document.addEventListener("ra-progress-changed", schedule);
+      if (read()) document.dispatchEvent(new CustomEvent("ra-sync-enabled"));
     }).catch(function () { clearTimeout(kill); root.hidden = false; show("sy-off"); $("sy-off").hidden = true; $("sy-steps").hidden = true; $("sy-down").hidden = false; });
   })();
 </script>

@@ -31,3 +31,25 @@ test("the page uses the live service address and the site key, and puts server t
   assert.match(src, /0x4AAAAAAF2I0BQDrTvBa0pm/);
   assert.ok(!/innerHTML|insertAdjacentHTML|document\.write/.test(src), "server text must never be parsed as HTML");
 });
+
+test("several pictures in one box are split on their own — Picture N — lines, and one entry stays one", () => {
+  assert.deepEqual(A.splitSections("Die 3 martii\nbaptizatus"), ["Die 3 martii\nbaptizatus"]);
+  assert.deepEqual(A.splitSections("one\n\n— Picture 2 —\ntwo\n\n--- picture 3 ---\nthree"), ["one", "two", "three"]);
+  assert.deepEqual(A.splitSections("   \n— Picture 2 —\n  "), []);
+  assert.deepEqual(A.splitSections("a line that says picture 2 in it"), ["a line that says picture 2 in it"]);
+});
+
+test("the consolidated view gives the year span, who recurs, and what was doubted, and joins nobody", () => {
+  const entry = (n, text, roles, words) => ({ n, text, result: { result: { draft: "d" + n, roles, words: words || [] } } });
+  const K = A.consolidate([
+    entry(1, "1788 baptizatus Joannes", [{ w: "Joannes Kosina", role: "father" }, { w: "Maria", role: "godmother" }], [{ w: "baptizatus", gloss: "baptised", doubt: false }]),
+    entry(2, "die 4 maii 1792 sepultus", [{ w: "joannes  kosina", role: "deceased" }], [{ w: "sepultus", gloss: "buried", doubt: true, why: "smudged" }]),
+    entry(3, "undated", []),
+  ]);
+  assert.deepEqual(K.years, [1788, 1792]);
+  assert.equal(K.names.length, 2, "the same spelling in different case and spacing is one name");
+  assert.deepEqual(K.recurring.map((p) => p.inn), [[1, 2]]);
+  assert.deepEqual(K.recurring[0].roles, ["1:father", "2:deceased"], "each role stays tied to its picture");
+  assert.deepEqual(K.doubt, [{ w: "sepultus", why: "smudged", n: 2 }]);
+  assert.equal(A.consolidate([entry(1, "no year", [])]).years, null);
+});

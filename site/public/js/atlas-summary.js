@@ -341,6 +341,12 @@
         var flag = fm && fm.f ? flagAt(fm.f[String(row.cc || "").toUpperCase()], year) : null;
         var langs = languageIn(line, G.tlang);
         var pageHref = placeHref(id);
+        /* what the handover (handover.js) quotes: the facts this card shows, as plain text */
+        try {
+          window.raAtlasFacts = { place: p.name, country: p.country || "", older: older.slice(0, 4), year: year, polity: era ? era.polity : "", regime: regime ? regime.label : "",
+            language: langs.length ? (LANG[langs[0].lang] || langs[0].lang) : "", page: new URL(pageHref, location.href).href,
+            volumes: (year != null && cov.length ? cov : cols).slice(0, 6).map(function (x) { return { title: x.title, from: x.from, to: x.to }; }) };
+        } catch (e) { window.raAtlasFacts = null; }
 
         /* The head: accent bar, flag, the place, the regime it was under in that year. */
         var head = el("header", null, "as-head");

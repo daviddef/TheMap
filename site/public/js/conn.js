@@ -4,6 +4,7 @@
    one ran, so window.raConn exists for the pages that read it. */
 (function () {
   var DAY = 864e5;
+  var HERE = (document.currentScript && document.currentScript.src) || "";
   function rd(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function js(k) { try { return JSON.parse(rd(k)); } catch (e) { return null; } }
   function ts(v) { var t = v ? Date.parse(v) : NaN; return isNaN(t) ? null : t; }
@@ -64,9 +65,23 @@
     }
     window.addEventListener("online", set); window.addEventListener("offline", set);
     window.addEventListener("storage", set); document.addEventListener("ra-progress-changed", set);
-    document.addEventListener("ra-conn-refresh", set);
+    document.addEventListener("ra-conn-refresh", function () { set(); ensureAuto(); });
     document.addEventListener("visibilitychange", function () { if (!document.hidden) set(); });
-    setInterval(set, 60000); set();
+    setInterval(set, 60000); set(); ensureAuto();
+  }
+
+  /* ALWAYS-ON SYNC (sync-auto.js). When the six words are in this browser, load the pieces that keep the research online, on whatever page this is.
+     A reader without them downloads nothing. The scripts run in this order (async=false keeps it); progress-kit.js is added only where the page
+     does not carry it already, because research-file.js needs window.raProgress. */
+  var autoLoaded = false;
+  function ensureAuto() {
+    if (autoLoaded || !HERE || !get().synced) return;
+    autoLoaded = true;
+    var dir = HERE.replace(/[^\/]*$/, "");
+    ["research-sync.js", window.raProgress ? null : "progress-kit.js", window.raResearchFile ? null : "research-file.js", "sync-auto.js"].forEach(function (f) {
+      if (!f || (f === "research-sync.js" && window.raResearchSync)) return;
+      var sc = document.createElement("script"); sc.src = dir + f; sc.async = false; document.head.appendChild(sc);
+    });
   }
   /* two dots (beside the brand on narrow screens, in the Researching group on wide ones): the second is not parsed yet */
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot); else boot();

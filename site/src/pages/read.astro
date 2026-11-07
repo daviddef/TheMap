@@ -42,17 +42,18 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
       <a href={u("/privacy/")}>More in the privacy note.</a></p>
       <div class="ask-drop" id="ask-drop">
         <textarea id="ask-text" rows="4" maxlength="4000" spellcheck="false" aria-label="A line from a register" placeholder="Paste or type one entry, as written"></textarea>
-        <p class="ask-hint">or drop a picture here, or paste one from your clipboard</p>
+        <p class="ask-hint">or drop up to four pictures here, or paste them from your clipboard</p>
       </div>
       <p><input type="text" id="ask-where" maxlength="120" spellcheck="false" aria-label="Where the entry is from, if you know" placeholder="Where is it from? A place, in any spelling, and a year if you know it (optional)" /></p>
       <p class="ask-row">
         <button type="button" id="ask-go" class="chip ask-btn">Read this line</button>
         <button type="button" id="ask-atlas" class="chip ask-btn">What the Atlas holds on this</button>
-        <label class="chip ask-btn ask-file">Read from a photo<input type="file" id="ask-photo" accept="image/jpeg,image/png,image/webp" hidden /></label>
+        <label class="chip ask-btn ask-file">Read from photos<input type="file" id="ask-photo" accept="image/jpeg,image/png,image/webp" multiple hidden /></label>
       </p>
       <div id="ask-ts"></div>
       <p class="cap ask-status" id="ask-status" role="status" aria-live="polite"></p>
       <div id="ask-out" aria-live="polite"></div>
+      <div id="ask-hand" hidden></div>
       <div id="ask-sum" aria-live="polite" hidden></div>
     </div>
   </section>
@@ -130,6 +131,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   <script is:inline src={u("/js/record-reader.js")}></script>
   <script is:inline src={u("/js/ask-claude.js")} defer></script>
   <script is:inline src={u("/js/atlas-summary.js")} defer></script>
+  <script is:inline src={u("/js/handover.js")} defer></script>
   <script is:inline>
     (function () {
       var R = window.raReadRecord; if (!R) return;

@@ -1487,3 +1487,16 @@ header.site nav .ra-reader:focus-visible { outline: 3px solid var(--accent, #1f5
 .cx-src { border: 1px solid var(--rule); border-radius: 8px; background: var(--panel); margin: 0 0 8px; padding: 0 12px 10px; } .cx-src > summary { cursor: pointer; padding: 9px 0; font-weight: 600; }
 .cx-then { background: #fbf4e2; border-left: 4px solid #b98a4a; padding: 6px 10px; border-radius: 4px; font-size: 14px; }
 .cx-trow .mt-row { gap: 10px; flex-wrap: wrap; }
+
+/* ---- the picture tray on /read/: dropped pictures wait here, with a thumbnail each, until a button is pressed ---- */
+.ask-tray { display: flex; flex-wrap: wrap; gap: 10px; list-style: none; margin: 0 0 8px; padding: 0; }
+.ask-thumb { position: relative; width: 96px; height: 96px; border: 1px solid var(--rule-strong); border-radius: 8px; overflow: hidden; background: var(--panel); }
+.ask-thumb a, .ask-thumb img { display: block; width: 100%; height: 100%; }
+.ask-thumb img { object-fit: cover; }
+.ask-thumb-n { position: absolute; left: 4px; bottom: 4px; min-width: 20px; padding: 1px 6px; border-radius: 10px; background: var(--accent, #245565); color: #fff; font: 700 12px/18px var(--sans, system-ui); text-align: center; }
+.ask-thumb-x { position: absolute; right: 3px; top: 3px; width: 26px; height: 26px; border: 0; border-radius: 50%; background: rgba(29, 42, 46, .82); color: #fff; font: 400 18px/26px var(--sans, system-ui); cursor: pointer; padding: 0; }
+.ask-thumb-x:hover, .ask-thumb-x:focus-visible { background: #b3452e; }
+.ask-ready { border-left: 4px solid var(--accent, #245565); padding: 4px 12px; margin: 0 0 10px; background: var(--accent-wash, #e4eef0); border-radius: 0 8px 8px 0; }
+.ask-ready p { margin: 6px 0; } .ask-ready-n { font-weight: 600; }
+.ask-btn.is-primary { background: var(--accent, #245565); color: #fff; }
+.ask-btn.is-primary:hover:not(:disabled), .ask-btn.is-primary:focus-visible { background: var(--accent, #245565); filter: brightness(1.12); }

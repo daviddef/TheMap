@@ -263,12 +263,18 @@
       return c;
     }
 
+    var lastOk = false;
+    function setBusy(b) {
+      busy = b; go.disabled = b; photo.disabled = b;
+      ["ask-read-docs", "ask-read-lines", "ask-clear"].forEach(function (id) { var x = document.getElementById(id); if (x) x.disabled = b; });
+    }
     function guard(fn) {
       return function () {
         var args = arguments;
-        if (busy) return; busy = true; go.disabled = true; photo.disabled = true;
-        Promise.resolve().then(function () { return fn.apply(null, args); }).catch(function (e) { say(e && e.message || "Something went wrong.", true); })
-          .then(function () { busy = false; go.disabled = false; photo.disabled = false; });
+        if (busy) return Promise.resolve();
+        setBusy(true); lastOk = false;
+        return Promise.resolve().then(function () { return fn.apply(null, args); }).catch(function (e) { say(e && e.message || "Something went wrong.", true); })
+          .then(function () { setBusy(false); });
       };
     }
 
@@ -359,6 +365,7 @@
           }, function (e) { failed = e; });
         });
       }, Promise.resolve()).then(function () {
+        lastOk = !failed && added > 0;
         updateGo();
         if (added && window.raHandover) window.raHandover.open();
         var n = splitSections(text.value).length;
@@ -368,15 +375,51 @@
           ", correct anything wrong, then press " + (n > 1 ? "Read these entries. Each entry is read on its own and costs one more try" : "Read this line") + "." + note + last);
       });
     });
-    photo.addEventListener("change", function () { var fs = [].slice.call(photo.files || []); photo.value = ""; if (fs.length) readImages(fs); });
+    /* ---- the tray: pictures wait here, with a thumbnail each, until a button is pressed -------------------------------------
+       Nothing is read, and no try is spent, when a picture is dropped, pasted or chosen. The reader can add more pictures, type or edit the
+       line, give the place, remove one that was a mistake, and then choose how to read them. */
+    var tray = [], trayEl = document.getElementById("ask-tray"), readyEl = document.getElementById("ask-ready"), readyN = document.getElementById("ask-ready-n"), readyCost = document.getElementById("ask-ready-cost");
+    function renderTray() {
+      trayEl.textContent = "";
+      tray.forEach(function (t, i) {
+        var li = el("li", null, "ask-thumb"), a = el("a"); a.href = t.url; a.target = "_blank"; a.rel = "noopener"; a.title = "Open " + (t.file.name || "picture " + (i + 1)) + " full size";
+        var im = el("img"); im.src = t.url; im.alt = "Picture " + (i + 1) + (t.file.name ? ", " + t.file.name : ""); a.append(im);
+        var x = el("button", "\u00d7", "ask-thumb-x"); x.type = "button"; x.setAttribute("aria-label", "Remove picture " + (i + 1));
+        x.addEventListener("click", function () { if (busy) return; URL.revokeObjectURL(t.url); tray.splice(i, 1); renderTray(); say(tray.length ? "" : "No pictures left."); });
+        li.append(a, el("span", String(i + 1), "ask-thumb-n"), x); trayEl.append(li);
+      });
+      var n = tray.length; trayEl.hidden = !n; readyEl.hidden = !n;
+      if (n) {
+        readyN.textContent = n + (n === 1 ? " picture is" : " pictures are") + " ready. Nothing has been sent.";
+        readyCost.textContent = "Costs about " + (2 * n + (n > 1 ? 2 : 0)) + " of your tries as documents (2 each, plus 2 for the case file), or about " + 3 * n + " as register lines (3 each, then 1 more for each entry you read).";
+      }
+    }
+    function clearTray() { tray.forEach(function (t) { URL.revokeObjectURL(t.url); }); tray = []; renderTray(); }
+    function addToTray(files) {
+      files = [].slice.call(files || []);
+      var good = files.filter(function (f) { return /^image\/(jpeg|png|webp)$/.test(f.type); }), bad = files.length - good.length, room = MAX_PICS - tray.length, note = "";
+      if (!good.length) { say("Use a JPEG, PNG or WebP picture.", true); return; }
+      if (room <= 0) { say("The tray already holds " + MAX_PICS + " pictures, the most that are read together. Remove one first.", true); return; }
+      if (good.length > room) { note = " Only the first " + room + " were added: " + MAX_PICS + " is the most read together."; good = good.slice(0, room); }
+      if (bad) note += " " + bad + " file" + (bad === 1 ? " was" : "s were") + " not a JPEG, PNG or WebP picture and " + (bad === 1 ? "was" : "were") + " skipped.";
+      good.forEach(function (f) { tray.push({ file: f, url: URL.createObjectURL(f) }); });
+      renderTray(); loadTurnstile().catch(function () {});
+      say(note.trim());
+    }
+    function files() { return tray.map(function (t) { return t.file; }); }
+    function afterRead(p) { return p.then(function () { if (lastOk) clearTray(); }); }
+    photo.addEventListener("change", function () { var fs = [].slice.call(photo.files || []); photo.value = ""; if (fs.length) addToTray(fs); });
+    document.getElementById("ask-read-docs").addEventListener("click", function () { if (tray.length) afterRead(readDocuments(files())); });
+    document.getElementById("ask-read-lines").addEventListener("click", function () { if (tray.length) afterRead(readImages(files())); });
+    document.getElementById("ask-clear").addEventListener("click", function () { if (!busy) { clearTray(); say("Pictures removed."); } });
     text.addEventListener("paste", function (e) {
       var items = [].slice.call((e.clipboardData && e.clipboardData.files) || []).filter(function (f) { return /^image\//.test(f.type); });
-      if (items.length) { e.preventDefault(); readImages(items); }
+      if (items.length) { e.preventDefault(); addToTray(items); }
     });
     var drop = document.getElementById("ask-drop");
     ["dragenter", "dragover"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add("is-over"); }); });
     ["dragleave", "drop"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove("is-over"); }); });
-    drop.addEventListener("drop", function (e) { var fs = e.dataTransfer && e.dataTransfer.files ? [].slice.call(e.dataTransfer.files) : []; if (fs.length) readImages(fs); });
+    drop.addEventListener("drop", function (e) { var fs = e.dataTransfer && e.dataTransfer.files ? [].slice.call(e.dataTransfer.files) : []; if (fs.length) addToTray(fs); });
 
 
     /* ---- whole documents: census sheets, petitions, certificates, forms ---------------------------------------------------
@@ -463,6 +506,7 @@
           }).then(null, function (e) { failed = e; });
         });
       }, Promise.resolve()).then(function () {
+        lastOk = !failed && got.length > 0;
         if (failed) { say((got.length ? "Read " + got.length + " of " + files.length + ", then it stopped: " : "") + (failed.message || "Something went wrong.") + (typeof left === "number" ? " Tries left today: " + left + "." : ""), true); if (H && got.length) H.open(); atlasPage(got, null); return; }
         if (got.length < 2) { say("One document read. Add a second to compare them and make a case file." + (typeof left === "number" ? " Tries left today: " + left + "." : "")); if (H) H.open(); atlasPage(got, null); return; }
         say("Comparing the " + got.length + " documents…");
@@ -473,12 +517,6 @@
         }, function (e) { if (H) H.open(); atlasPage(got, null); say("The documents were read, but the comparison stopped: " + (e.message || "Something went wrong.") + " Each document above is still usable.", true); });
       });
     });
-    var docs = document.getElementById("ask-docs");
-    if (docs) {
-      docs.addEventListener("click", function () { loadTurnstile().catch(function () {}); });
-      docs.addEventListener("change", function () { var fs = [].slice.call(docs.files || []); docs.value = ""; if (fs.length) readDocuments(fs); });
-    }
-
     /* Touching the box is what loads the bot check. */
     ["focus", "click"].forEach(function (ev) { text.addEventListener(ev, function () { loadTurnstile().catch(function () {}); }, { once: true }); });
     photo.addEventListener("click", function () { loadTurnstile().catch(function () {}); });

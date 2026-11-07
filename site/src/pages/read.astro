@@ -44,14 +44,23 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
         <textarea id="ask-text" rows="4" maxlength="4000" spellcheck="false" aria-label="A line from a register" placeholder="Paste or type one entry, as written"></textarea>
         <p class="ask-hint">or drop up to four pictures here, or paste them from your clipboard</p>
       </div>
+      <ul class="ask-tray" id="ask-tray" aria-label="Pictures ready to read" hidden></ul>
       <p><input type="text" id="ask-where" maxlength="120" spellcheck="false" aria-label="Where the entry is from, if you know" placeholder="Where is it from? A place, in any spelling, and a year if you know it (optional)" /></p>
       <p class="ask-row">
         <button type="button" id="ask-go" class="chip ask-btn">Read this line</button>
         <button type="button" id="ask-atlas" class="chip ask-btn">What the Atlas holds on this</button>
-        <label class="chip ask-btn ask-file">Read from photos<input type="file" id="ask-photo" accept="image/jpeg,image/png,image/webp" multiple hidden /></label>
-        <label class="chip ask-btn ask-file">Read as documents<input type="file" id="ask-docs" accept="image/jpeg,image/png,image/webp" multiple hidden /></label>
+        <label class="chip ask-btn ask-file">Add pictures<input type="file" id="ask-photo" accept="image/jpeg,image/png,image/webp" multiple hidden /></label>
       </p>
-      <p class="cap">For a census page, a petition, a certificate or a form rather than a register line: <b>Read as documents</b> reads each picture whole, field by field, then compares them in a case file (up to four pictures).</p>
+      <div class="ask-ready" id="ask-ready" hidden>
+        <p class="ask-ready-n" id="ask-ready-n"></p>
+        <p class="ask-row">
+          <button type="button" id="ask-read-docs" class="chip ask-btn is-primary">Read as documents</button>
+          <button type="button" id="ask-read-lines" class="chip ask-btn">Read as register lines</button>
+          <button type="button" id="ask-clear" class="chip ask-btn">Remove all</button>
+        </p>
+        <p class="cap" id="ask-ready-cost"></p>
+      </div>
+      <p class="cap">Pictures wait here until you press a button, so you can add more, type a line, or give the place first. <b>Read as documents</b> is for a census page, a petition, a certificate or a form: each picture is read whole, field by field, then compared in a case file (up to four). <b>Read as register lines</b> is for a baptism, marriage or burial entry: the lines come into the box above to correct.</p>
       <div id="ask-ts"></div>
       <p class="cap ask-status" id="ask-status" role="status" aria-live="polite"></p>
       <div id="ask-out" aria-live="polite"></div>

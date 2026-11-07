@@ -9,6 +9,9 @@
 export default {
   testDir: ".",
   timeout: 90000,
+  /* Against the live site (RA_BASE) a test that fails once is run again: a one-off slow CDN or runner is not a regression, and a real
+     one fails twice. 82 issue comments between 6 October and 7 November were mostly the first kind. Locally nothing is retried. */
+  retries: process.env.RA_BASE ? 1 : 0,
   use: {
     baseURL: process.env.RA_BASE || "http://localhost:4332",
     headless: true,

@@ -108,7 +108,9 @@ test("the surname map draws, not an empty grey box", async ({ page }) => {
   await page.goto("/surname/peeters/");
   const box = page.locator("[data-sxmap]");
   await box.scrollIntoViewIfNeeded();
-  await expect(page.locator("[data-sxmap].leaflet-container")).toBeVisible();
+  /* Leaflet comes from a public CDN once the box nears the viewport; on a CI runner that can take longer than the default 5 s.
+     The marker wait below already allows 20 s, so the library gets the same. */
+  await expect(page.locator("[data-sxmap].leaflet-container")).toBeVisible({ timeout: 20000 });
   const dot = page.locator("[data-sxmap] path.leaflet-interactive").first();
   await expect(dot).toBeVisible({ timeout: 20000 });
   const fill = await dot.evaluate((el) => getComputedStyle(el).fill);

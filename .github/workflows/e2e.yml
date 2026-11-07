@@ -110,9 +110,20 @@ jobs:
             });
             const existing = open.data.find(i => i.title === title);
             if (existing) {
-              await github.rest.issues.createComment({
+              /* One comment per CHANGE, not per run: if the last comment names the same failing tests, say nothing new. The run still goes
+                 red (the last step), which is the signal; the issue stays readable. */
+              const failing = (t) => [...t.matchAll(/^\s+\d+\) (.+?) ─/gm)].map((m) => m[1].trim()).sort().join('|');
+              const comments = await github.rest.issues.listComments({
                 owner: context.repo.owner, repo: context.repo.repo,
-                issue_number: existing.number, body });
+                issue_number: existing.number, per_page: 1, direction: 'desc' });
+              const last = comments.data.length ? comments.data[0].body : existing.body;
+              if (failing(out) && failing(out) === failing(last)) {
+                console.log('same failing tests as the last comment; not commenting again');
+              } else {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner, repo: context.repo.repo,
+                  issue_number: existing.number, body });
+              }
             } else {
               await github.rest.issues.create({
                 owner: context.repo.owner, repo: context.repo.repo,

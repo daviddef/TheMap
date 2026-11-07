@@ -472,7 +472,7 @@
   function pill(t, cls) { return el("span", t, "as-pill" + (cls ? " " + cls : "")); }
   function sec(title, tag) { var s = el("section", null, "as-sec cx-sec"), h = el("h4", title); if (tag) h.append(" ", el("span", tag, "as-tag")); s.append(h); return s; }
 
-  function drawMap(div, layer) {
+  function drawMap(div, layer, onMap) {
     var pts = layer.stops.filter(function (s) { return s.place && s.place.lat != null; });
     if (!pts.length) { div.replaceChildren(el("p", "No place in the documents was found in the Atlas, so there is nothing to put on a map yet.", "cap")); return; }
     AS.loadLeaflet().then(function (L) {
@@ -497,6 +497,7 @@
       });
       if (bounds.length === 1) map.setView(bounds[0], 9); else map.fitBounds(L.latLngBounds(bounds).pad(.3), { maxZoom: 10 });
       setTimeout(function () { map.invalidateSize(); }, 60);
+      if (onMap) onMap(map);
     }).catch(function () { div.replaceChildren(el("p", "The map could not load (the tile service is on another site). The rest of the page is unaffected.", "cap")); });
   }
 
@@ -524,60 +525,55 @@
 
   function stopPanel(s, layer, redraw) {
     var d = el("details", null, "cx-stop"); if (s.n === 1) d.open = true; d.id = "cx-stop-" + s.n;
-    var sum = el("summary"), badge = el("span", String(s.n), "cx-pin is-inline");
-    var gTop = s.ground[0];
-    sum.append(badge, el("b", s.place ? s.place.name : s.text), el("span", (s.place ? s.place.country : "not found in the Atlas") + (s.years.length ? " · " + s.years.join(", ") : ""), "cx-sum"));
+    var sum = el("summary"), gTop = s.ground[0];
+    sum.append(el("span", String(s.n), "cx-pin is-inline"), el("b", s.place ? s.place.name : s.text),
+      el("span", (s.place ? s.place.country : "not in the Atlas") + (s.years.length ? " · " + s.years.join(", ") : ""), "cx-sum"));
+    if (gTop && gTop.polity) sum.append(el("span", gTop.polity, "cx-polsum"));
     if (gTop && gTop.flag) sum.append(flagImg(gTop.flag, gTop.year, true));
     d.append(sum);
     var body = el("div", null, "cx-body");
-    body.append(el("p", "Written in the documents as: " + s.text + (s.docs.length ? " (document" + (s.docs.length > 1 ? "s " : " ") + s.docs.join(", ") + ")" : ""), "cap"));
     if (!s.place) {
-      body.append(el("p", s.row ? "That place's file did not load." : "The Atlas does not know this place under that spelling. Try an older or local spelling in the place box, or see the name variants below.", "cap"));
+      body.append(el("p", s.row ? "That place's file did not load." : "Not in the Atlas under \u201c" + s.text + "\u201d. Try an older or local spelling.", "cap"));
       d.append(body); return d;
     }
-    body.append(el("p", "In the Atlas as " + s.place.name + ", " + s.place.country + (s.place.region ? " (region: " + s.place.region + ")" : "") + (s.place.lat != null ? " at " + s.place.lat.toFixed(2) + ", " + s.place.lon.toFixed(2) : "") + ". Check it is the place you mean.", "cap"));
-    var then = []; s.years.forEach(function (y) { CA.namesAt(s.place.named, y).forEach(function (x) { then.push({ y: y, n: x.n, l: x.l, s: x.s }); }); });
-    if (then.length) {
-      var tp = el("p", null, "cx-then"); tp.append(el("b", "Called then: "), document.createTextNode(then.map(function (x) { return x.n + " in " + x.y; }).join("; ") + ". Search the registers of those years under that name too. "));
-      if (then[0].s) tp.append(link("source", then[0].s)); body.append(tp);
-    }
-    if (s.alts.length || s.many) {
-      var alt = el("p", null, "cx-alts"); alt.append(el("span", "Not this one? ", "as-lab"));
-      s.alts.forEach(function (r) { var b = el("button", r.n + " · " + (r.cc || "") + " · " + (r.c || 0) + (r.c === 1 ? " volume" : " volumes"), "chip cx-alt"); b.type = "button"; b.addEventListener("click", function () { redraw(s, r); }); alt.append(b); });
-      body.append(alt);
-    }
-    var ev = el("ul", null, "cx-ev");
-    s.events.forEach(function (e) { ev.append(el("li", (e.year != null ? e.year + ": " : "") + (e.what || "named") + (e.docs.length ? " (document" + (e.docs.length > 1 ? "s " : " ") + e.docs.join(", ") + ")" : "") + (e.status === "inferred" ? " [inferred]" : ""))); });
-    body.append(el("p", "What the documents put here", "lab"), ev);
+    var then = []; s.years.forEach(function (y) { CA.namesAt(s.place.named, y).forEach(function (x) { then.push({ y: y, n: x.n }); }); });
+    if (then.length) body.append(el("p", "Called " + then.map(function (x) { return x.n + " in " + x.y; }).join(", ") + " then. Search under that name too.", "cx-then"));
 
-    body.append(el("p", "Who held this ground" + (s.place.region ? " · " + s.place.region : ""), "lab"), eraBar(s));
+    var cols = el("div", null, "cx-cols"), left = el("div"), right = el("div");
+    left.append(el("p", "Who held this ground", "lab"), eraBar(s));
     var held = el("ul", null, "cx-held");
     s.ground.forEach(function (g) {
-      if (g.none) { held.append(el("li", g.year + ": no era in the catalogue covers this year.")); return; }
-      var li = el("li"); if (g.flag) li.append(flagImg(g.flag, g.year, true));
-      li.append(el("b", " " + g.year + " "), document.createTextNode("under " + g.polity + (g.regime ? " (" + g.regime + ")" : "") + ", " + g.from + "–" + g.to + "." + (g.note ? " " + g.note : "")));
+      var li = el("li");
+      if (g.none) { li.append(el("b", g.year + " "), document.createTextNode("no era catalogued")); held.append(li); return; }
+      if (g.flag) li.append(flagImg(g.flag, g.year, true));
+      li.append(el("b", " " + g.year + " "), document.createTextNode(g.polity)); li.title = g.from + "\u2013" + g.to + (g.regime ? " \u00b7 " + g.regime : "") + (g.note ? " \u00b7 " + g.note : "");
       held.append(li);
     });
-    if (s.ground.length) body.append(held);
+    if (s.ground.length) left.append(held);
 
-    var vol = s.volumes, vs = el("div", null, "cx-vols");
-    vs.append(el("p", vol.cover.length ? "Registers that cover " + s.first : s.first != null ? "No catalogued volume covers " + s.first + (vol.near.length ? ". Nearest in time" : "") : "Volumes", "lab"));
+    var vol = s.volumes;
+    right.append(el("p", vol.cover.length ? "Registers covering " + s.first : vol.near.length ? "Nearest registers" : "Registers", "lab"));
     var ul = el("ul", null, "as-vols");
-    (vol.cover.length ? vol.cover : vol.near).slice(0, 8).forEach(function (x) {
-      var li = el("li"), tt = x.title + (String(x.title).indexOf(String(x.from)) > -1 ? "" : " (" + x.from + "–" + x.to + ")");
-      li.append(link(tt, BASE + "place/" + encodeURIComponent(s.place.id) + "/", "as-vt"), el("span", [x.held ? "held at " + x.held : "", x.access ? (layer.access[x.access] || x.access) : ""].filter(Boolean).join(" · "), "as-vm"));
-      if (x.url) { var ex = link("open", x.url, "as-vx"); li.append(ex); }
-      ul.append(li);
+    (vol.cover.length ? vol.cover : vol.near).slice(0, 4).forEach(function (x) {
+      var li = el("li"), tt = x.title + (String(x.title).indexOf(String(x.from)) > -1 ? "" : " (" + x.from + "\u2013" + x.to + ")");
+      li.append(x.url ? link(tt, x.url, "as-vt") : link(tt, BASE + "place/" + encodeURIComponent(s.place.id) + "/", "as-vt"), el("span", x.held ? "held at " + x.held : "", "as-vm")); ul.append(li);
     });
-    if (!ul.children.length) vs.append(el("p", "No volume is catalogued for this place yet. That means nobody has listed one, not that none exists.", "cap")); else vs.append(ul);
-    (s.fs || []).forEach(function (f) { var q = el("p", "FamilySearch: ", "cap"); q.append(link(f.t, f.url || "#"), " (" + f.from + "–" + f.to + ")."); vs.append(q); });
-    body.append(vs);
-
+    if (ul.children.length) right.append(ul); else right.append(el("p", "None catalogued yet.", "cap"));
     if (s.filed.length) {
-      body.append(el("p", "Records of these years are filed under", "lab"));
-      var fu = el("ul", null, "as-vols"); s.filed.forEach(function (p) { var li = el("li"); li.append(link(p.name, p.url, "as-vt"), el("span", layer.access[p.access] || p.access || "", "as-vm")); fu.append(li); }); body.append(fu);
+      right.append(el("p", "Records filed under", "lab")); var fu = el("ul", null, "as-vols");
+      s.filed.slice(0, 4).forEach(function (p) { var li = el("li"); li.append(link(p.name, p.url, "as-vt"), el("span", layer.access[p.access] || p.access || "", "as-vm")); fu.append(li); }); right.append(fu);
     }
-    body.append(el("p", null, "as-chips")); body.lastChild.append(link("The place page, with every volume", BASE + "place/" + encodeURIComponent(s.place.id) + "/"), link("On the map", BASE + "?q=" + encodeURIComponent(s.place.name)));
+    cols.append(left, right); body.append(cols);
+
+    var foot = el("p", null, "cx-foot");
+    foot.append(link("Place page", BASE + "place/" + encodeURIComponent(s.place.id) + "/"), link("On the map", BASE + "?q=" + encodeURIComponent(s.place.name)));
+    if (s.alts.length || s.many) {
+      var w = el("details", null, "cx-wrong"); w.append(el("summary", "Wrong place?"));
+      var alt = el("p", null, "cx-alts"); alt.append(document.createTextNode("Matched " + s.place.name + ", " + s.place.country + (s.place.region ? " (" + s.place.region + ")" : "") + ". Others with that name: "));
+      s.alts.forEach(function (r) { var b = el("button", r.n + " \u00b7 " + (r.cc || ""), "chip cx-alt"); b.type = "button"; b.addEventListener("click", function () { redraw(s, r); }); alt.append(b); });
+      w.append(alt); foot.append(w);
+    }
+    body.append(foot);
     d.append(body); return d;
   }
 
@@ -601,12 +597,12 @@
       T.spouse.forEach(function (p) { inner.append(el("span", "⚭", "cx-wed")); inner.append(block(p, "other")); }); r.append(inner); wrap.append(r);
     }
     row("Children named", T.children, "other"); row("Others named (witnesses, officials, relatives)", T.others, "god");
-    wrap.append(el("p", "Drawn from the people named on the documents, by role. Every block is a lead: the same name in two documents may be two people, and a relationship is shown only as the role on the document says.", "cap"));
+    wrap.append(el("p", "By role on each document. All leads: one name in two documents may be two people.", "cap"));
     return wrap;
   }
 
   function sourcesBlock(layer) {
-    var s = sec("Where the records could be", "from the Atlas's catalogue of sources"), any = false;
+    var s = sec("Sources by country"), any = false;
     layer.countries.forEach(function (c, ci) {
       if (!c.sources.length) return; any = true;
       var d = el("details", null, "cx-src"); if (ci === 0) d.open = true;
@@ -622,8 +618,7 @@
   }
 
   function namesBlock(layer, openName) {
-    var s = sec("Names, and other forms to search", "catalogues"), N = layer.names;
-    s.append(el("p", "Press a highlighted name anywhere in the documents' reading to see this for that name. A search typed from one spelling misses the others.", "cap"));
+    var s = sec("Other forms to search"), N = layer.names;
     if (N.places.length) {
       s.append(el("p", "Places", "lab")); var ul = el("ul", null, "as-list");
       N.places.forEach(function (p) {
@@ -632,7 +627,7 @@
       s.append(ul);
     }
     if (N.surnames.length) {
-      s.append(el("p", "Surnames (the last word of each name is taken as the surname: check)", "lab")); var us = el("ul", null, "as-list");
+      s.append(el("p", "Surnames (last word taken as the surname)", "lab")); var us = el("ul", null, "as-list");
       N.surnames.forEach(function (x) { us.append(surnameLine(x, layer)); }); s.append(us);
     }
     if (N.given.length) {
@@ -641,7 +636,7 @@
       s.append(ug);
     }
     if (N.reading.length) {
-      s.append(el("p", "Variations the reading pointed out (the model's own, not the catalogues')", "lab")); var ur = el("ul", null, "as-list");
+      s.append(el("p", "The reading's own notes (not from the catalogues)", "lab")); var ur = el("ul", null, "as-list");
       N.reading.forEach(function (r) { ur.append(el("li", r.written + (r.reading ? " = " + r.reading : "") + (r.why ? ". " + r.why : ""))); }); s.append(ur);
     }
     return s;
@@ -660,7 +655,7 @@
   }
 
   function startBlock(layer) {
-    var s = sec("Where to start", "in this order"); if (!layer.start.length) { s.append(el("p", "Nothing could be suggested from the Atlas for these documents.", "cap")); return s; }
+    var s = sec("Where to start"); if (!layer.start.length) { s.append(el("p", "Nothing to suggest from the Atlas for these documents.", "cap")); return s; }
     var ol = el("ol", null, "cx-start");
     layer.start.forEach(function (x) { var li = el("li"); li.append(x.url ? link(x.title, x.url, "as-vt") : el("b", x.title), el("span", " " + x.from, "ask-src " + (x.from === "Atlas" ? "is-card" : "is-model"))); if (x.how) li.append(el("span", x.how, "as-vm")); ol.append(li); });
     s.append(ol); return s;
@@ -713,57 +708,98 @@
     });
   }
 
-  /* Draw the whole page into `mount`. Resolves with the data (the handover quotes it). */
-  function render(docs, cf, mount) {
-    var picks = Object.create(null), S = null, serial = 0;
+  var TABS = [["journey", "Journey"], ["story", "Story"], ["people", "People"], ["records", "Where to look"], ["names", "Names"], ["docs", "Documents"]];
+  function headlineOf(docs, cf) {
+    var h = cf && cf.headline && String(cf.headline).trim(); if (h && h.length >= 12) return h;
+    var d = docs[0] && (docs[0].doc || docs[0]), w = d && (d.what_it_is || d.doc_type); return w ? String(w) : "The documents, read";
+  }
+  function tile(big, label, k, go, wide) {
+    var b = el("button", null, "rs-tile" + (wide ? " is-wide" : "")); b.type = "button"; b.append(el("b", big), el("span", label)); b.addEventListener("click", function () { go(k); }); return b;
+  }
+
+  /* The whole page, into `mount`: a headline, four numbers, and tabs (Journey, Story, People, Where to look, Names, Documents). `opts` brings the
+     parts the reading itself made: `story` (verdicts, timeline, conflicts), `people` (facts) and `docs` (each document, in full). Resolves with the
+     data (the handover quotes it). If the Atlas files cannot load, the story and the documents still show. */
+  function render(docs, cf, mount, opts) {
+    opts = opts || {};
+    var picks = Object.create(null), S = null, serial = 0, map = null, current = "journey";
     mount.textContent = ""; mount.hidden = false;
-    var wait = el("div", null, "rr-card as-card cx-page"); wait.append(el("h3", "The Atlas page for these documents"), el("p", "Looking up the places, who held them and where the records are…", "cap as-wait")); mount.append(wait);
+    var shell = el("section", null, "rs"), hero = el("header", null, "rs-hero");
+    hero.append(el("p", (cf ? "CASE FILE" : "READING") + " \u00b7 " + docs.length + (docs.length === 1 ? " DOCUMENT" : " DOCUMENTS"), "rs-kicker"), el("h2", headlineOf(docs, cf), "rs-headline"));
+    var tiles = el("div", null, "rs-tiles"); hero.append(tiles);
+    var bar = el("div", null, "rs-tabs"), panels = {}, btns = {}; bar.setAttribute("role", "tablist");
+    function show(k) {
+      current = k;
+      TABS.forEach(function (t) { var on = t[0] === k; btns[t[0]].setAttribute("aria-selected", String(on)); btns[t[0]].tabIndex = on ? 0 : -1; panels[t[0]].hidden = !on; });
+      if (k === "journey" && map) setTimeout(function () { map.invalidateSize(); }, 30);
+    }
+    TABS.forEach(function (t, i) {
+      var b = el("button", t[1], "rs-tab"); b.type = "button"; b.setAttribute("role", "tab"); b.id = "rs-tab-" + t[0]; b.setAttribute("aria-controls", "rs-p-" + t[0]);
+      var p = el("div", null, "rs-panel"); p.id = "rs-p-" + t[0]; p.setAttribute("role", "tabpanel"); p.setAttribute("aria-labelledby", b.id);
+      b.addEventListener("click", function () { show(t[0]); });
+      b.addEventListener("keydown", function (e) {
+        var d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0; if (!d) return;
+        var n = TABS[(i + d + TABS.length) % TABS.length][0]; show(n); btns[n].focus(); e.preventDefault();
+      });
+      btns[t[0]] = b; panels[t[0]] = p; bar.append(b);
+    });
+    var foot = el("p", "From the Atlas\u2019s own catalogue, not written by Claude. Places, dates and names are read off your documents, so they are leads, not findings.", "rs-foot");
+    shell.append(hero, bar); TABS.forEach(function (t) { shell.append(panels[t[0]]); }); shell.append(foot); mount.append(shell);
+    panels.journey.append(el("p", "Looking up the places\u2026", "cap as-wait"));
+    function story() {
+      panels.story.textContent = ""; if (opts.story) panels.story.append(opts.story); else panels.story.append(el("p", "Add a second document to compare them in a case file.", "cap"));
+    }
+    story(); if (opts.docs) panels.docs.append(opts.docs); if (opts.people) panels.people.append(opts.people);
+    function badge(k, n) { var old = btns[k].querySelector(".rs-n"); if (old) old.remove(); if (n) btns[k].append(el("span", String(n), "rs-n")); }
+    badge("docs", docs.length); show(current);
+
     function draw() {
       var my = ++serial;
       return assemble(docs, cf, S, picks).then(function (layer) {
         if (my !== serial) return layer;
-        var c = el("div", null, "rr-card as-card cx-page");
-        c.append(el("h3", "The Atlas page for these documents"));
         var found = layer.stops.filter(function (s) { return s.place; }), ys = [], vols = 0;
         layer.stops.forEach(function (s) { ys = ys.concat(s.years); vols += s.volumes.cover.length; });
-        var pills = el("p", null, "as-pills");
-        pills.append(pill(found.length + " of " + layer.stops.length + " places found in the Atlas"), pill(layer.countries.length + (layer.countries.length === 1 ? " country" : " countries")));
-        if (ys.length) pills.append(pill(Math.min.apply(null, ys) + (Math.max.apply(null, ys) !== Math.min.apply(null, ys) ? "–" + Math.max.apply(null, ys) : "") + ""));
-        pills.append(pill(vols + " catalogued " + (vols === 1 ? "register covers" : "registers cover") + " those years"), pill(layer.people.length + " people named"));
-        c.append(pills, el("p", "Drawn from the Atlas's own files, not written by Claude. The places, dates and names are what was read off the documents, so they are leads. A missing row means not in the catalogue, never that it did not happen.", "cap"));
-        if (!layer.stops.length) { c.append(el("p", "No place was read from these documents, so there is no map. Put the place in the place box and use the Atlas card above.")); wait.replaceWith(c); return layer; }
+        tiles.textContent = "";
+        tiles.append(tile(String(found.length), (found.length === 1 ? "place" : "places") + " in " + layer.countries.length + (layer.countries.length === 1 ? " country" : " countries"), "journey", show),
+          tile(ys.length ? Math.min.apply(null, ys) + (Math.max.apply(null, ys) !== Math.min.apply(null, ys) ? "\u2013" + Math.max.apply(null, ys) : "") : "no dates", "years covered", "story", show, true),
+          tile(String(layer.people.length), layer.people.length === 1 ? "person named" : "people named", "people", show),
+          tile(String(vols), vols === 1 ? "register covers those years" : "registers cover those years", "records", show));
+        badge("journey", found.length); badge("people", layer.people.length);
 
-        var top = el("div", null, "cx-top"), mapWrap = el("div", null, "cx-mapwrap"), mapDiv = el("div", null, "as-map cx-map"); mapDiv.setAttribute("role", "img"); mapDiv.setAttribute("aria-label", "Map of the places in the documents");
-        mapWrap.append(mapDiv);
-        var key = el("p", null, "as-key"); key.append(el("i", null, "k-here"), " a place, numbered in date order   ", el("i", null, "k-path"), " dashed line: joins the places in date order (not the route taken)");
-        mapWrap.append(key); top.append(mapWrap);
-        var side = el("ol", null, "cx-journey");
-        layer.stops.forEach(function (s) {
-          var li = el("li"); li.append(el("span", String(s.n), "cx-pin is-inline"));
-          var a = el("a"); a.href = "#cx-stop-" + s.n; a.textContent = s.place ? s.place.name : s.text; a.addEventListener("click", function () { var d = document.getElementById("cx-stop-" + s.n); if (d) d.open = true; });
-          var t = el("span", null, "cx-jt"); t.append(a);
-          var g = s.ground[0]; t.append(el("span", (s.years.length ? s.years.join(", ") + " · " : "") + (g && g.polity ? g.polity : s.place ? "no era in the catalogue" : "not found in the Atlas"), "cx-jm"));
-          if (g && g.flag) li.append(flagImg(g.flag, g.year, true)); li.append(t); side.append(li);
-        });
-        var sideWrap = el("div", null, "cx-side"); sideWrap.append(el("p", "The journey", "as-lab"), side);
-        if (layer.paths.length) sideWrap.append(el("p", layer.paths.length > 1 ? layer.paths.length + " lines, one per person or group, in different colours." : layer.paths[0].fromDocuments ? "One line: the places in date order, as the documents date them." : "One line: from the case file's timeline.", "cap"));
-        top.append(sideWrap); c.append(top);
-
-        c.append(startBlock(layer));
-        var sp = sec("Place by place: who held the ground, and the registers", "catalogue");
-        layer.stops.forEach(function (s) { sp.append(stopPanel(s, layer, function (s2, row) { s2.raw.forEach(function (t) { picks[fold(t)] = row; }); draw(); })); });
-        c.append(sp);
-        var ps = sec("People named, as a tree of leads"); ps.append(treeBlock(layer)); c.append(ps);
-        c.append(sourcesBlock(layer), namesBlock(layer));
-        c.append(el("p", "Each section is from the catalogue; the numbers and links are the Atlas's, not a model's.", "cap"));
-        var old = mount.querySelector(".cx-page"); if (old) old.replaceWith(c); else mount.append(c);
-        drawMap(mapDiv, layer);
+        var J = panels.journey; J.textContent = "";
+        if (!layer.stops.length) J.append(el("p", "No place was read from these documents, so there is no map. Put the place in the place box above and press \u201cWhat the Atlas holds on this\u201d.", "cap"));
+        else {
+          var top = el("div", null, "cx-top"), mapDiv = el("div", null, "as-map cx-map"); mapDiv.setAttribute("role", "img"); mapDiv.setAttribute("aria-label", "Map of the places in the documents");
+          var mw = el("div", null, "cx-mapwrap"); mw.append(mapDiv, el("p", "Dashed line: places in date order, not the route taken.", "cap")); top.append(mw);
+          var side = el("ol", null, "cx-journey");
+          layer.stops.forEach(function (s) {
+            var li = el("li"); li.append(el("span", String(s.n), "cx-pin is-inline"));
+            var a = el("a"); a.href = "#cx-stop-" + s.n; a.textContent = s.place ? s.place.name : s.text;
+            a.addEventListener("click", function () { var d = document.getElementById("cx-stop-" + s.n); if (d) d.open = true; });
+            var t = el("span", null, "cx-jt"); t.append(a); var g = s.ground[0];
+            t.append(el("span", (s.years.length ? s.years.join(", ") + " \u00b7 " : "") + (g && g.polity ? g.polity : s.place ? "no era catalogued" : "not in the Atlas"), "cx-jm"));
+            if (g && g.flag) li.append(flagImg(g.flag, g.year, true)); li.append(t); side.append(li);
+          });
+          top.append(side); J.append(top);
+          var sp = el("div", null, "cx-places"); sp.append(el("h3", "Place by place", "rs-h"));
+          layer.stops.forEach(function (s) { sp.append(stopPanel(s, layer, function (s2, row) { s2.raw.forEach(function (t) { picks[fold(t)] = row; }); draw(); })); });
+          J.append(sp);
+          drawMap(mapDiv, layer, function (m) { map = m; });
+        }
+        var P = panels.people; [].slice.call(P.querySelectorAll(".cx-tree")).forEach(function (x) { x.remove(); });
+        P.prepend(treeBlock(layer));
+        var R = panels.records; R.textContent = ""; R.append(startBlock(layer), sourcesBlock(layer));
+        var N = panels.names; N.textContent = ""; N.append(namesBlock(layer));
+        if (!opts.story) { var ev = []; layer.stops.forEach(function (s) { s.events.forEach(function (e) { ev.push({ y: e.year, t: (e.year != null ? e.year + " " : "") + (e.what || "named") + " (" + (s.place ? s.place.name : s.text) + ")" }); }); });
+          ev.sort(function (a, b) { return (a.y == null) - (b.y == null) || (a.y || 0) - (b.y || 0); }); if (ev.length) { var ul = el("ol", null, "rs-time"); ev.forEach(function (x) { ul.append(el("li", x.t)); }); panels.story.textContent = ""; panels.story.append(ul); } }
         window.raCaseLayer = layer;
         document.dispatchEvent(new CustomEvent("ra-case-layer", { detail: layer }));
         return layer;
       });
     }
-    return loadShared().then(function (s) { S = s; return draw(); }).catch(function () { var p = el("p", "The Atlas files did not load, so the page could not be drawn. Check your connection and read again.", "cap ask-bad"); wait.textContent = ""; wait.append(el("h3", "The Atlas page for these documents"), p); return null; });
+    return loadShared().then(function (sh) { S = sh; return draw(); }).catch(function () {
+      panels.journey.textContent = ""; panels.journey.append(el("p", "The Atlas files did not load, so the map and records could not be drawn. The story and the documents are still here. Check your connection and read again.", "cap ask-bad")); return null;
+    });
   }
 
   CA.render = render; CA.highlight = highlight; CA.assemble = assemble;

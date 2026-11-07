@@ -31,21 +31,19 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
 
   <section id="tool-ask" class="rd-panel" role="tabpanel" aria-labelledby="tab-ask">
     <div class="one" id="ask" hidden>
-      <div class="lab">Ask Claude to read a line</div>
-      <p class="cap" style="margin-top:6px">Paste one entry from a register, or drop or paste a photograph of it. Claude drafts a plain-English reading, using the cards on this
-      page first and saying which words come from them and which from its own knowledge. Doubtful words are marked. It is a draft to check against the page, not an answer.</p>
-      <p class="ask-priv"><b>Before you paste.</b> What you paste or photograph is sent over the internet to our small service and on to Claude, an AI made by
-      Anthropic, which writes the draft. We keep no text, no picture and no answer, only a count of how many tries each visitor has used. Anthropic's
-      <a href="https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data" rel="noopener">published policy</a> says it deletes
-      what is sent within 30 days, keeps content its safety systems flag for longer, and does not train on it without permission. Please do not paste or photograph details of
-      people who may be alive. Nothing is sent until you press a button. Cloudflare's bot check loads when you first click in the box.
-      <a href={u("/privacy/")}>More in the privacy note.</a></p>
+      <p class="ask-lead">Paste a register line or drop up to four pictures. Claude drafts a reading to check against the page, not an answer.</p>
+      <details class="ask-priv"><summary>Nothing is sent until you press a button. What is sent, and what is kept</summary>
+        <p>What you paste or photograph is sent over the internet to our small service and on to Claude, an AI made by
+        Anthropic, which writes the draft. We keep no text, no picture and no answer, only a count of how many tries each visitor has used. Anthropic's
+        <a href="https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data" rel="noopener">published policy</a> says it deletes
+        what is sent within 30 days, keeps content its safety systems flag for longer, and does not train on it without permission. Please do not paste or photograph details of
+        people who may be alive. Cloudflare's bot check loads when you first click in the box. <a href={u("/privacy/")}>More in the privacy note.</a></p></details>
       <div class="ask-drop" id="ask-drop">
         <textarea id="ask-text" rows="4" maxlength="4000" spellcheck="false" aria-label="A line from a register" placeholder="Paste or type one entry, as written"></textarea>
-        <p class="ask-hint">or drop up to four pictures here, or paste them from your clipboard</p>
+        <p class="ask-hint">Drop pictures here (up to four), or paste them</p>
       </div>
       <ul class="ask-tray" id="ask-tray" aria-label="Pictures ready to read" hidden></ul>
-      <p><input type="text" id="ask-where" maxlength="120" spellcheck="false" aria-label="Where the entry is from, if you know" placeholder="Where is it from? A place, in any spelling, and a year if you know it (optional)" /></p>
+      <p><input type="text" id="ask-where" maxlength="120" spellcheck="false" aria-label="Where the entry is from, if you know" placeholder="Where is it from? A place and a year help (optional)" /></p>
       <p class="ask-row">
         <button type="button" id="ask-go" class="chip ask-btn">Read this line</button>
         <button type="button" id="ask-atlas" class="chip ask-btn">What the Atlas holds on this</button>
@@ -60,7 +58,6 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
         </p>
         <p class="cap" id="ask-ready-cost"></p>
       </div>
-      <p class="cap">Pictures wait here until you press a button, so you can add more, type a line, or give the place first. <b>Read as documents</b> is for a census page, a petition, a certificate or a form: each picture is read whole, field by field, then compared in a case file (up to four). <b>Read as register lines</b> is for a baptism, marriage or burial entry: the lines come into the box above to correct.</p>
       <div id="ask-ts"></div>
       <p class="cap ask-status" id="ask-status" role="status" aria-live="polite"></p>
       <div id="ask-out" aria-live="polite"></div>

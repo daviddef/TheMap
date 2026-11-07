@@ -280,16 +280,15 @@
       built = true; host.textContent = "";
       var c = el("div", null, "rr-card hd-card");
       c.append(el("h3", "Hand it over"),
-        el("p", "Bring the pictures, the readings, the case file and the place facts together as one document, with a prompt so another person or another AI can carry on. " +
-          "Nothing is sent anywhere: these are made here, from what is on this page.", "cap"));
+        el("p", "Everything above as one file, or a prompt for a person or another AI. Made here; nothing is sent anywhere.", "cap"));
       var row = el("p", null, "hd-row");
       aud = el("select"); aud.setAttribute("aria-label", "Who the prompt is for");
       [["ai", "For another AI assistant"], ["person", "For a person (a note to send with it)"]].forEach(function (o) { var op = el("option", o[1]); op.value = o[0]; aud.append(op); });
       goal = el("input"); goal.type = "text"; goal.maxLength = 300; goal.spellcheck = false; goal.setAttribute("aria-label", "What should they work out");
-      goal.placeholder = "What should they work out? (optional, e.g. who the godparents were, or where to look for the marriage)";
+      goal.placeholder = "What should they work out? (optional)";
       row.append(aud, goal); c.append(row);
       var pl = el("label", null, "hd-pics"); withPics = el("input"); withPics.type = "checkbox"; withPics.checked = true;
-      pl.append(withPics, document.createTextNode(" Include the pictures in the saved PDF and text file (shrunk copies, with their hidden data removed)"));
+      pl.append(withPics, document.createTextNode(" Include the pictures (shrunk, hidden data removed)"));
       c.append(el("p", null, "")); c.lastChild.append(pl);
       var btns = el("p", null, "ask-row");
       var bc = el("button", "Copy the prompt", "chip ask-btn"), bp = el("button", "Save as PDF", "chip ask-btn"), bm = el("button", "Download as text (.md)", "chip ask-btn");
@@ -298,7 +297,7 @@
       said = el("p", null, "cap"); said.setAttribute("role", "status"); said.setAttribute("aria-live", "polite"); c.append(said);
       var det = el("details", null, "hd-det"); det.append(el("summary", "See the prompt"));
       ta = el("textarea", null, "hd-prompt"); ta.readOnly = true; ta.rows = 12; ta.setAttribute("aria-label", "The prompt"); det.append(ta); c.append(det);
-      c.append(el("p", "Before you share it: the document holds whatever is in the box. Leave out anyone who may be alive.", "cap"));
+      c.append(el("p", "Leave out anyone who may be alive before you share it.", "cap"));
       host.append(c);
 
       aud.addEventListener("change", refresh); goal.addEventListener("input", refresh);

@@ -390,8 +390,8 @@
       });
       var n = tray.length; trayEl.hidden = !n; readyEl.hidden = !n;
       if (n) {
-        readyN.textContent = n + (n === 1 ? " picture is" : " pictures are") + " ready. Nothing has been sent.";
-        readyCost.textContent = "Costs about " + (2 * n + (n > 1 ? 2 : 0)) + " of your tries as documents (2 each, plus 2 for the case file), or about " + 3 * n + " as register lines (3 each, then 1 more for each entry you read).";
+        readyN.textContent = n + (n === 1 ? " picture" : " pictures") + " ready. Nothing sent yet.";
+        readyCost.textContent = "Documents (census page, petition, certificate, form): about " + (2 * n + (n > 1 ? 2 : 0)) + " tries. Register lines (baptism, marriage, burial): about " + 3 * n + ", then 1 per entry.";
       }
     }
     function clearTray() { tray.forEach(function (t) { URL.revokeObjectURL(t.url); }); tray = []; renderTray(); }
@@ -428,13 +428,13 @@
     function sub(c, label, items, cls) {
       items = (items || []).filter(Boolean); if (!items.length) return;
       var ul = el("ul", null, cls || "ask-words"); items.forEach(function (t) { ul.append(typeof t === "string" ? el("li", t) : t); });
-      c.append(el("p", label, "lab"), ul);
+      if (label) c.append(el("p", label, "lab")); c.append(ul);
     }
     function status2(t) { return el("span", " " + t, "ask-src " + (t === "inferred" ? "is-model" : "is-card")); }
-    function docCard(x) {
-      var d = x.doc || {}, c = el("div", null, "rr-card ask-doc");
-      if (d.unparsed) { c.append(el("h3", "Document " + x.n), el("p", d.draft || "")); return c; }
-      c.append(el("h3", "Document " + x.n + (d.doc_type ? ": " + d.doc_type : "")));
+    function docCard(x, bare) {
+      var d = x.doc || {}, c = el("div", null, (bare ? "" : "rr-card ") + "ask-doc");
+      if (d.unparsed) { if (!bare) c.append(el("h3", "Document " + x.n)); c.append(el("p", d.draft || "")); return c; }
+      if (!bare) c.append(el("h3", "Document " + x.n + (d.doc_type ? ": " + d.doc_type : "")));
       var meta = [d.date_on_document && "Date on it: " + d.date_on_document, d.issuer && "Issued by: " + d.issuer, (d.places_named || []).length && "Places written on it: " + d.places_named.join("; ")].filter(Boolean);
       if (meta.length) c.append(el("p", meta.join(" · "), "cap"));
       if (d.what_it_is) c.append(el("p", d.what_it_is, "rr-means"));
@@ -451,34 +451,62 @@
       if (d.legibility) c.append(el("p", d.legibility, "cap"));
       return c;
     }
-    function caseCard(cf, docs) {
-      var c = el("div", null, "rr-card ask-all ask-case");
-      if (cf.unparsed) { c.append(el("h3", "Case file"), el("p", cf.draft || "")); return c; }
-      c.append(el("h3", "Case file: what the " + docs.length + " documents show together"), el("p", cf.headline || "", "rr-means"));
+    /* The parts of the results that come from the reading itself, as plain blocks for the tabs: the story (who may be one person, what happened
+       when, what does not fit), the facts about the person, and each document in full. The Atlas parts are drawn by case-atlas.js. */
+    var VERDICT = { likely: "Likely the same person", possible: "Possibly the same person", unlikely: "Probably different people", "not enough": "Not enough to say if one person" };
+    function storyNode(cf) {
+      if (!cf) return null;
+      if (cf.unparsed) return el("p", cf.draft || "");
+      var w = el("div", null, "rs-story");
       (cf.groups || []).forEach(function (g) {
-        var v = { likely: "Likely", possible: "Possible", unlikely: "Unlikely", "not enough": "Not enough to say" }[g.verdict] || g.verdict || "";
-        c.append(el("p", "One person across document" + ((g.docs || []).length === 1 ? "" : "s") + " " + (g.docs || []).join(", ") + "? " + v, "lab"),
-          el("p", "A hypothesis built from the points below, not proof.", "cap"));
-        sub(c, "What points the same way", g.because); sub(c, "What does not fit", g.against);
+        var box = el("div", null, "rs-verdict is-" + String(g.verdict || "").replace(/\s+/g, "-"));
+        box.append(el("b", VERDICT[g.verdict] || g.verdict || ""), el("span", "documents " + (g.docs || []).join(", ")));
+        var why = (g.because || []).length || (g.against || []).length;
+        if (why) {
+          var det = el("details", null, "rs-why"); det.append(el("summary", "Why"));
+          sub(det, "Points the same way", g.because); sub(det, "Does not fit", g.against); box.append(det);
+        }
+        w.append(box);
       });
-      sub(c, "What the documents say about them", (cf.profile || []).map(function (f) { var li = el("li"); li.append(document.createTextNode(f.fact + " "), status2(f.status || ""), el("span", " " + (f.evidence || ""), "cap")); return li; }));
-      sub(c, "Timeline", (cf.timeline || []).map(function (t) { var li = el("li"); li.append(el("b", (t.date || "?") + " "), document.createTextNode((t.event || "") + (t.place ? " (" + t.place + ")" : "") + " "), status2(t.status || ""), el("span", " " + (t.source || ""), "cap")); return li; }));
-      sub(c, "Names and places, and why they vary", (cf.names_and_places || []).map(function (n) { var li = el("li"); li.append(el("b", (n.as_written || []).join(" / ")), document.createTextNode(" = " + (n.reading || "") + (n.why_it_varies ? ". " + n.why_it_varies : ""))); return li; }));
-      sub(c, "Conflicts and gaps", (cf.conflicts || []).map(function (x) { var li = el("li"); li.append(el("b", x.issue || ""), document.createTextNode(" " + (x.detail || "") + (x.how_to_settle ? " To settle: " + x.how_to_settle : ""))); return li; }));
-      sub(c, "What the set adds", cf.adds);
-      sub(c, "What to look for next", (cf.next_steps || []).map(function (x) {
-        var li = el("li"); li.append(el("b", x.look_for || ""), document.createTextNode((x.where ? " Where: " + x.where + "." : "") + (x.search_with ? " Search with: " + x.search_with + "." : "") + (x.could_settle ? " Could settle: " + x.could_settle : ""))); return li;
-      }));
-      sub(c, "Cautions", cf.cautions, "cap");
-      return c;
+      if ((cf.timeline || []).length) {
+        var ol = el("ol", null, "rs-time");
+        cf.timeline.forEach(function (t) {
+          var li = el("li"); li.append(el("b", t.date || "?"), document.createTextNode(" " + (t.event || "") + (t.place ? " \u00b7 " + t.place : "")));
+          if (t.status === "inferred") li.append(el("span", "inferred", "ask-src is-model"));
+          if (t.source) li.append(el("span", t.source, "rs-src")); ol.append(li);
+        });
+        w.append(ol);
+      }
+      var gaps = (cf.conflicts || []).map(function (x) { var li = el("li"); li.append(el("b", x.issue || ""), document.createTextNode(" " + (x.detail || "") + (x.how_to_settle ? " To settle: " + x.how_to_settle : ""))); return li; });
+      if (gaps.length) { var dc = el("details", null, "rs-more"); dc.append(el("summary", gaps.length + (gaps.length === 1 ? " thing to settle" : " things to settle"))); sub(dc, "", gaps); w.append(dc); }
+      var notes = (cf.adds || []).concat(cf.cautions || []);
+      if (notes.length) { var dn = el("details", null, "rs-more"); dn.append(el("summary", "Notes and cautions")); sub(dn, "", notes); w.append(dn); }
+      return w.children.length ? w : null;
+    }
+    function peopleNode(cf) {
+      if (!cf || !(cf.profile || []).length) return null;
+      var w = el("div", null, "rs-facts"); w.append(el("h3", "What the documents say about them", "rs-h"));
+      var ul = el("ul", null, "rs-list");
+      cf.profile.forEach(function (f) { var li = el("li"); li.append(document.createTextNode(f.fact || "")); if (f.status === "inferred") li.append(el("span", "inferred", "ask-src is-model")); if (f.evidence) li.append(el("span", f.evidence, "rs-src")); ul.append(li); });
+      w.append(ul); return w;
+    }
+    function docsNode(got) {
+      var w = el("div", null, "rs-docs");
+      got.forEach(function (x, i) {
+        var dd = x.doc || {}, d = el("details", null, "rs-doc"); if (got.length === 1 || i === 0) d.open = true;
+        var sm = el("summary"); sm.append(el("b", "Document " + x.n), el("span", [dd.doc_type, dd.date_on_document].filter(Boolean).join(" \u00b7 "), "cx-sum"));
+        d.append(sm, docCard(x, true)); w.append(d);
+      });
+      return w;
     }
     /* The Atlas page for the documents: map, who held the ground, registers, sources, names. Drawn under the case file (or first, with one
        document). case-atlas.js announces the finished page, and the names in the readings are then highlighted and handed to the hand-over. */
-    function atlasPage(got, after) {
-      var CA = window.raCaseAtlas; if (!CA || !got.length) return;
-      var mount = el("div", null, "cx-mount"); mount.id = "ask-case-atlas";
-      if (after && after.parentNode === out) after.after(mount); else out.prepend(mount);
-      CA.render(got, caseFileNow, mount);
+    function showResults(got, cf) {
+      var CA = window.raCaseAtlas, parts = { story: storyNode(cf), people: peopleNode(cf), docs: docsNode(got) };
+      out.textContent = "";
+      if (!CA || !got.length) { [parts.story, parts.people, parts.docs].forEach(function (n) { if (n) out.append(n); }); return; }
+      var mount = el("div", null, "cx-mount"); mount.id = "ask-case-atlas"; out.append(mount);
+      CA.render(got, cf, mount, parts);
     }
     var caseFileNow = null;
     document.addEventListener("ra-case-layer", function (e) {
@@ -507,14 +535,14 @@
         });
       }, Promise.resolve()).then(function () {
         lastOk = !failed && got.length > 0;
-        if (failed) { say((got.length ? "Read " + got.length + " of " + files.length + ", then it stopped: " : "") + (failed.message || "Something went wrong.") + (typeof left === "number" ? " Tries left today: " + left + "." : ""), true); if (H && got.length) H.open(); atlasPage(got, null); return; }
-        if (got.length < 2) { say("One document read. Add a second to compare them and make a case file." + (typeof left === "number" ? " Tries left today: " + left + "." : "")); if (H) H.open(); atlasPage(got, null); return; }
+        if (failed) { say((got.length ? "Read " + got.length + " of " + files.length + ", then it stopped: " : "") + (failed.message || "Something went wrong.") + (typeof left === "number" ? " Tries left today: " + left + "." : ""), true); if (H && got.length) H.open(); showResults(got, null); return; }
+        if (got.length < 2) { say("One document read. Add a second to compare them and make a case file." + (typeof left === "number" ? " Tries left today: " + left + "." : "")); if (H) H.open(); showResults(got, null); return; }
         say("Comparing the " + got.length + " documents…");
         var facts = window.raAtlasFacts, atlas = facts ? [facts.place && "Place: " + facts.place, facts.country, facts.polity && "Whose ground in " + facts.year + ": " + facts.polity, facts.language && "Register language: " + facts.language].filter(Boolean).join("; ") : "";
         return call("casefile", { docs: got.map(function (x, i) { return compactDoc(Object.assign({ doc: i + 1 }, x.doc)); }), atlas: atlas }).then(function (j) {
-          left = j.left; caseFileNow = j.result || null; var cc = caseCard(caseFileNow || {}, got); out.prepend(cc); if (H) { H.documents(got.slice(), caseFileNow); H.open(); } atlasPage(got, cc);
+          left = j.left; caseFileNow = j.result || null; if (H) { H.documents(got.slice(), caseFileNow); H.open(); } showResults(got, caseFileNow);
           say("Done. A draft to check against the pictures, not a finding." + (typeof left === "number" ? " Tries left today: " + left + "." : ""));
-        }, function (e) { if (H) H.open(); atlasPage(got, null); say("The documents were read, but the comparison stopped: " + (e.message || "Something went wrong.") + " Each document above is still usable.", true); });
+        }, function (e) { if (H) H.open(); showResults(got, null); say("The documents were read, but the comparison stopped: " + (e.message || "Something went wrong.") + " Each document above is still usable.", true); });
       });
     });
     /* Touching the box is what loads the bot check. */

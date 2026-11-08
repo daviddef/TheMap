@@ -455,3 +455,10 @@ test("an unnamed grandparent in the story gets a place on the tree and a pin at 
   const k = p.kin.filter((x) => x.key === "G1")[0];
   assert.deepEqual([k.stops[0].row.i, k.stops[0].year], ["crikvenica", 1990]);
 });
+
+test("a grandparent who 'lived in' a place shows it on the tree as lived, not as from", () => {
+  const rows = [{ i: "crikvenica", n: "Crikvenica", cc: "HR", c: 20 }, { i: "brisbane", n: "Brisbane", cc: "AU", c: 1 }, { i: "argentina", n: "Argentina", cc: "AR", c: 3 }];
+  const p = F.parseStory("I have two children, Alessio and Mateo, both are born in Brisbane. My mum is from Argentina. My gransfether lived in Crikvenica in 1990", { map: A.buildMap(rows), given: A.buildGiven([]), skip: {} });
+  const g = p.people.filter((x) => x.role === "grandfather")[0];
+  assert.deepEqual([g.events[0].type, g.events[0].year, g.events[0].place.row.i], ["lived", 1990, "crikvenica"]);
+});

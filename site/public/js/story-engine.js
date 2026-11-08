@@ -556,6 +556,8 @@
       if (e.born && (e.born.year != null || e.born.place)) list.push({ type: "born", year: e.born.year, place: e.born.place });
       if (e.married && (e.married.year != null || e.married.place)) list.push({ type: "married", year: e.married.year, place: e.married.place });
       if (e.died && (e.died.year != null || e.died.place)) list.push({ type: "died", year: e.died.year, place: e.died.place, cause: e.died.cause });
+      /* "lived in Crikvenica in 1990" is where they were, not where they were from: it is said that way on the card */
+      if (!e.born && !e.origin) (e.moves || []).forEach(function (mv) { list.push({ type: "lived", year: mv.year, place: mv.place }); });
       return list;
     }
     var gname = teller ? teller.split(" ")[0] : "";
@@ -1376,7 +1378,7 @@
       var hasBorn = (pe.events || []).some(function (e) { return e.type === "born" && e.place; });
       if (pe.place && !hasBorn) c.append(el("div", (pe.role === "self" && !pe.events ? "Born in " : "From ") + (typeof pe.place === "string" ? pe.place : pe.place.word), "lf-card-place"));
       (pe.events || []).forEach(function (e) {
-        var t = (e.type === "born" ? "Born" : e.type === "married" ? "Married" : "Died") + (e.year != null ? " " + e.year : "") + (e.place ? (e.year != null ? ", " : " in ") + e.place : "") + (e.cause ? " (" + e.cause + ")" : "");
+        var t = (e.type === "born" ? "Born" : e.type === "married" ? "Married" : e.type === "lived" ? "Lived" : "Died") + (e.year != null ? " " + e.year : "") + (e.place ? (e.year != null ? ", " : " in ") + e.place : "") + (e.cause ? " (" + e.cause + ")" : "");
         c.append(el("div", t, "lf-card-place lf-card-ev"));
       });
       var f = forms(pe); if (f.length) c.append(el("div", "Also written: " + f.join(", "), "lf-card-forms"));

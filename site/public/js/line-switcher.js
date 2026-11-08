@@ -71,6 +71,13 @@
         li.setAttribute("data-i", String(i));
         li.id = uidc + "-" + i; li.setAttribute("role", "option"); li.setAttribute("aria-selected", l.active ? "true" : "false");
         main.append(mk("b", null, l.name === "My research so far" ? "Research Names" : l.name)); if (l.where) main.append(mk("span", null, " of " + l.where));
+        /* a family the sessions publish links to the archive that did the work (its own site, in a new tab); the Atlas holds no page per family */
+        (l.archives || []).slice(0, 2).forEach(function (a) {
+          var lk = mk("a", "ra-cb-arch", "\u2197 " + String(a.name).replace(/^The /, "").replace(/ Archive$/, "")); lk.href = a.url; lk.target = "_blank"; lk.rel = "noopener";
+          lk.title = "Open " + a.name + " in a new tab";
+          ["mousedown", "click"].forEach(function (t) { lk.addEventListener(t, function (e) { e.stopPropagation(); }); });
+          main.append(lk);
+        });
         li.append(mk("span", "ra-cb-tick", l.active ? "\u2713" : ""), main, mk("span", "ra-cb-n", l.marks + (l.marks === 1 ? " mark" : " marks")));
         li.addEventListener("mousedown", function (e) { e.preventDefault(); choose(l); });
         list.append(li);

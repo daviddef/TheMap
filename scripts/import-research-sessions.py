@@ -75,6 +75,9 @@ ARCHIVES = ["Blazevic Family", "Booyzen Family", "D'arcy Family",
             "Defranceski Family", "Falco Family", "Lerena Family",
             "Luwinski Family", "Mazza Family"]
 
+ARCHIVE_ID = {"Blazevic Family": "blazevic", "Booyzen Family": "booyzen", "D'arcy Family": "darcy", "Defranceski Family": "defranceschi",
+              "Falco Family": "falco", "Lerena Family": "lerena", "Luwinski Family": "luwinski", "Mazza Family": "mazza"}   # ids in site/src/data/archives-showcase.json
+
 SRC_KEYS = ("src", "source")
 WHAT_KEYS = ("what", "scope")
 GOT_KEYS = ("got", "result", "outcome")
@@ -910,6 +913,7 @@ def main():
           f"{len(provs):,} provider hosts")
 
     marks, rejects, lines = {}, [], {}
+    line_archives = {}      # line slug -> the archives (showcase ids) whose rows made it, so the picker can link a family to its archive's site
     page_refusals = []
     seen = matched = ranged = srcmarked = filmed = 0
     per = {}
@@ -919,6 +923,10 @@ def main():
         if source_note:
             print(f"archive copy: {fam}: {source_note}")
         home = slug_of(fam)
+        arch_id = ARCHIVE_ID.get(fam)
+        def _owned(sl):
+            if arch_id: line_archives.setdefault(sl, set()).add(arch_id)
+            return sl
         archive_names = fam_names.get(squash(LINE_NAME.get(fam, fam)), {})
         if rows:
             lines[home] = {"name": LINE_NAME.get(fam, fam), "where": "",
@@ -937,8 +945,8 @@ def main():
                 if sl not in lines:
                     lines[sl] = {"name": proper, "where": "",
                                  "made": made_before.get(sl, today)}
-                return sl
-            return home
+                return _owned(sl)
+            return _owned(home)
 
         hit = 0
         # COUNTED PER ARCHIVE BECAUSE THE TOTAL-ONLY LINE MISLED TWO SESSIONS.
@@ -1239,8 +1247,21 @@ def main():
     if dropped:
         print(f"    empty lines dropped       {len(dropped):,}  ({', '.join(sorted(dropped))})")
 
+    # WHICH ARCHIVE A FAMILY CAME FROM, AND WHERE THAT ARCHIVE LIVES. The Atlas knows each archive's own site (archives-showcase.json) and,
+    # here, which archive's rows made each line; it does not know a page per family, so the link is to the archive. The picker reads it.
+    try:
+        showcase = {a["id"]: a for a in json.load(io.open(os.path.join(_ROOT, "site", "src", "data", "archives-showcase.json"), encoding="utf-8"))["archives"]}
+    except (OSError, ValueError, KeyError):
+        showcase = {}
+    used_arch = set()
+    for sl, ids in line_archives.items():
+        ids = sorted(i for i in ids if i in showcase)
+        if sl in lines and ids:
+            lines[sl]["archive"] = ids; used_arch.update(ids)
     doc = {"v": 2, "exported": today, "lines": lines,
            "active": (sorted(lines)[0] if lines else None), "marks": marks}
+    if used_arch:
+        doc["archives"] = {i: {"name": showcase[i]["name"], "url": showcase[i]["url"]} for i in sorted(used_arch)}
     json.dump(doc, io.open(args.out, "w", encoding="utf-8"),
               ensure_ascii=False, indent=1)
 

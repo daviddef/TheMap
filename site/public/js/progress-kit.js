@@ -293,9 +293,17 @@
           if (!doc || !doc.marks) return;
           /* WHICH FAMILIES THE SESSIONS PUBLISH, remembered every visit (not once per version): the family picker groups them apart from the
              ones made by hand. A family you made yourself under the same name stays one family; it is simply listed with the sessions'. */
-          var slugs = Object.keys(doc.lines || {}).sort().join(","), known = null;
-          try { known = localStorage.getItem("ra-sessions-lines"); localStorage.setItem("ra-sessions-lines", slugs); } catch (e) { /* storage blocked: no grouping */ }
-          var changed = known !== slugs;
+          var slugs = Object.keys(doc.lines || {}).sort().join(","), known = null, knownA = null;
+          /* and which archive each came from, with the address of that archive's own site, so the picker can link to it */
+          var arch = {};
+          Object.keys(doc.lines || {}).forEach(function (sl) {
+            var ids = doc.lines[sl] && doc.lines[sl].archive; if (!Array.isArray(ids)) return;
+            var list = ids.map(function (i) { var a = doc.archives && doc.archives[i]; return a && /^https:\/\//.test(a.url || "") ? { id: i, name: String(a.name || i).slice(0, 60), url: a.url } : null; }).filter(Boolean);
+            if (list.length) arch[sl] = list;
+          });
+          var archText = JSON.stringify(arch);
+          try { known = localStorage.getItem("ra-sessions-lines"); knownA = localStorage.getItem("ra-sessions-arch"); localStorage.setItem("ra-sessions-lines", slugs); localStorage.setItem("ra-sessions-arch", archText); } catch (e) { /* storage blocked: no grouping */ }
+          var changed = known !== slugs || knownA !== archText;
           var stamp = "ra-sessions-seen";
           var seen = null;
           try { seen = localStorage.getItem(stamp); } catch (e) { return; }
@@ -313,6 +321,7 @@
         .catch(function () {});
     }
 
+    function sessionArchives() { try { return JSON.parse(localStorage.getItem("ra-sessions-arch") || "{}") || {}; } catch (e) { return {}; } }
     function sessionLines() {
       try { var o = {}; (localStorage.getItem("ra-sessions-lines") || "").split(",").forEach(function (x) { if (x) o[x] = 1; }); return o; } catch (e) { return {}; }
     }
@@ -333,7 +342,7 @@
           });
           return { slug: slug, name: d.lines[slug].name,
                    where: d.lines[slug].where || "", marks: n,
-                   session: !!sessionLines()[slug], active: slug === d.active };
+                   session: !!sessionLines()[slug], archives: sessionArchives()[slug] || [], active: slug === d.active };
         }).sort(function (a, b) { return a.name.localeCompare(b.name); });
       },
       active: activeSlug,

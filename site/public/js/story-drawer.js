@@ -39,10 +39,12 @@
   function open() {
     root.hidden = false; if (launch) launch.hidden = true;
     requestAnimationFrame(function () { root.classList.add("is-open"); });
+    setTimeout(function () { if (refit) refit(); }, 350);
     remember();
     ensure().then(function () { var t = $(".sd-text"); if (t && !t.value) t.focus({ preventScroll: true }); }).catch(function () { $(".sd-status").textContent = "The Atlas files did not load. Check your connection and open this again."; });
   }
-  function close() { root.classList.remove("is-open"); setTimeout(function () { root.hidden = true; if (launch) launch.hidden = false; }, 260); }
+  var refit = null; /* set once the engine is loaded: draw the journey again so the pins fit the map that is left uncovered */
+  function close() { root.classList.remove("is-open"); setTimeout(function () { root.hidden = true; if (launch) launch.hidden = false; if (refit) refit(); }, 300); }
   if (launch) launch.addEventListener("click", open);
   $(".sd-x").addEventListener("click", close);
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !root.hidden && root.contains(document.activeElement)) close(); });
@@ -75,6 +77,7 @@
     dock.querySelector(".sdk-more").addEventListener("click", function () { report.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" }); });
     dock.querySelector(".sdk-x").addEventListener("click", function () { showDock(false); });
     window.addEventListener("resize", dockSize);
+    refit = function () { if (last && !dock.hidden) paint(last); };
     var files = [], ov = Object.create(null), lastSig = "", parsedNow = null, token = 0, shown = Object.create(null), last = null;
 
     function getMap() {
@@ -83,7 +86,7 @@
       });
     }
     var J = E.createJourney({ els: { cap: $(".sd-cap"), slider: $(".sd-year"), yearOut: $(".sd-yearout"), play: $(".sd-play"), moments: $(".sd-moments"), time: $(".sd-time"), mapBox: null },
-      getMap: getMap, askBox: report.querySelector(".rep-ask"), onBorn: function (y) { setBorn(y); }, pad: { tl: [(window.innerWidth >= 900 ? 430 : 30), 50], br: [60, (window.innerWidth >= 900 ? 150 : 150)] } });
+      getMap: getMap, askBox: report.querySelector(".rep-ask"), onBorn: function (y) { setBorn(y); }, pad: { get tl() { var W = host ? host.clientWidth : window.innerWidth; return [root.classList.contains("is-open") && W >= 800 ? 430 : 30, 50]; }, get br() { return [60, 150]; } } });
 
     function chip(label, cls, key, onclick) {
       var c = el(onclick ? "button" : "span", label, "sd-chip" + (cls ? " " + cls : "")); if (onclick) { c.type = "button"; c.addEventListener("click", onclick); }
@@ -150,17 +153,53 @@
         parsedNow = p;
         drawChips(p);
         var sig = [(p.route || []).map(function (x) { return x.row.i + ":" + x.age; }).join(","), p.left, p.born, p.name, (p.people || []).map(function (x) { return x.name; }).join(","), p.holds].join("|");
-        if (sig === lastSig || !p.from) { if (!p.from && sig !== lastSig) { J.clear(); showDock(false); report.hidden = true; planBox.hidden = true; fam.hidden = true; } return; }
+        if (sig === lastSig || !p.from) { if (!p.from && sig !== lastSig) { J.clear(); showDock(false); dropKeyPlaces(); report.hidden = true; planBox.hidden = true; fam.hidden = true; } return; }
         lastSig = sig;
         var my = ++token; status.textContent = "Reading the Atlas…";
         LD.gather(p).then(function (g) {
           if (my !== token) return;
           status.textContent = ""; last = g;
-          showDock(true); drawReport(g); J.draw(g.facts, g.mort); setTimeout(dockSize, 60);
+          showDock(true); drawAll(g); setTimeout(dockSize, 60);
         }).catch(function () { status.textContent = "Some Atlas files did not load. Check your connection."; });
       }).catch(function () { status.textContent = "The Atlas files did not load. Check your connection."; });
     }
     var stopItems = [];
+    /* The map's right-hand pane ("Visiting") is for one place at a time. While a story is on the map it lists the story's own places in
+       order instead, each with the nearest archive the Atlas knows, so it answers "where do I go for each step", not "what is near Senj". */
+    function hav(a, b, c, d) { var r = Math.PI / 180, dl = (c - a) * r, dn = (d - b) * r, x = Math.sin(dl / 2) * Math.sin(dl / 2) + Math.cos(a * r) * Math.cos(c * r) * Math.sin(dn / 2) * Math.sin(dn / 2); return 12742 * Math.asin(Math.sqrt(x)); }
+    function keyPlaces(f) {
+      var pane = document.getElementById("ra-check"), body = document.getElementById("ra-check-b"), cnt = document.getElementById("ra-check-n");
+      if (!pane || !body) return;
+      var route = (f.route || []).filter(function (x) { return x.info; }), anc = (f.ancestors || []).filter(function (x) { return x.info; }), n = 0;
+      var hood = el("p", null, "ra-hood ra-story-list"); hood.append(el("span", null, "ra-hood-k"), el("span", (f.name ? f.name + "'s" : "The") + " places, in order, with the nearest archive the Atlas knows for each. The story below says where to search."));
+      var ul = el("ul");
+      function row(info, label) {
+        n++;
+        var li = el("li", null, "ra-ck-r" + (n % 2 === 0 ? " ra-alt" : "")), main = el("span", null, "ra-ck-main"), a = el("a", info.name); a.href = info.href; a.target = "_blank"; a.rel = "noopener";
+        main.append(a); li.append(el("span", String(n), "ra-ck-i"), main);
+        var meta = el("span", null, "ra-ck-meta"); meta.append(el("span", label, "ra-ck-n")); li.append(meta); ul.append(li);
+        if (info.lat != null) {
+          (info.provs || []).filter(function (p) { return p.at && p.at.lat != null; }).map(function (p) { return { p: p, km: hav(info.lat, info.lon, p.at.lat, p.at.lon) }; })
+            .filter(function (x) { return x.km <= 120; }).sort(function (x, y) { return x.km - y.km; }).slice(0, 1).forEach(function (x) {
+              var l2 = el("li", null, "ra-ck-r ra-ck-nonum"), m2 = el("span", null, "ra-ck-main"), a2 = el("a", x.p.name); a2.href = x.p.url; a2.target = "_blank"; a2.rel = "noopener";
+              m2.append(a2, document.createTextNode(" "), el("span", (Math.round(x.km * 10) / 10) + " km", "ra-ck-km")); l2.append(m2); ul.append(l2);
+            });
+        }
+      }
+      route.forEach(function (x, i) {
+        var first = i === 0, last = i === route.length - 1 && route.length > 1;
+        var role = first ? (x.role === "born" ? "Born" : "Starts") : last ? "Arrives" : "Lives";
+        row(x.info, role + (x.age != null ? " · " + (x.approx ? "about " : "") + "age " + x.age : ""));
+      });
+      anc.forEach(function (x) { row(x.info, "His " + x.who + "'s family"); });
+      body.textContent = ""; body.append(hood, ul);
+      if (cnt) cnt.textContent = String(n);
+      var w = pane.querySelector(".ra-check-w"); if (w) w.textContent = "Key places";
+      pane.hidden = false;
+      var tg = document.getElementById("ra-check-t"), opened = false; if (tg && !pane.classList.contains("on")) { tg.click(); opened = true; }
+      return opened;
+    }
+    function dropKeyPlaces() { var pane = document.getElementById("ra-check"); if (pane && pane.querySelector(".ra-story-list")) pane.hidden = true; }
     function lede(f) {
       var bits = (f.route || []).filter(function (x) { return x.info; }).map(function (x, i) {
         var a = x.age != null ? (x.approx ? " at about age " : " at age ") + x.age : "";
@@ -177,6 +216,23 @@
       var sb = J.stops(f, g.mort); stopItems = sb.items;
       var stops = report.querySelector(".rep-stops"); stops.textContent = ""; stops.append(sb);
       drawFamily(g); drawNames(g); drawPlan(g);
+      return keyPlaces(f);
+    }
+    /* the right-hand pane may have just opened and narrowed the map: draw the journey once the map has its final size */
+    function paint(g) { J.draw(g.facts, g.mort); settingNote(g); }
+    function drawAll(g) {
+      var wait = drawReport(g);
+      if (wait) setTimeout(function () { if (last === g) paint(g); }, 400); else paint(g);
+    }
+    /* "What was going on" is matched to years. With ages only there is nothing to match yet: say so, and say what fills it. */
+    function settingNote(g) {
+      var m = report.querySelector(".sd-moments"); if (!m || m.children.length) return;
+      var f = g.facts, haveYear = f.born != null || f.left != null || (f.route || []).some(function (x) { return x.year != null; });
+      if (haveYear) { m.append(el("p", "The Atlas holds no epidemic, famine, war or mass-death event whose area covers these places in the years they were there. That is what the Atlas holds, not proof that nothing happened.", "rep-intro")); return; }
+      m.append(el("p", "This fills in once the Atlas knows the years. The story gave ages but no dates. Add the year they were born and it shows the epidemics, famines, wars and leaders of the years they were at each place, and who held the ground.", "rep-intro"));
+      var b = el("button", "Add a birth year"); b.type = "button"; b.className = "sd-fam-btn rep-yearbtn";
+      b.addEventListener("click", function () { var box = report.querySelector(".rep-ask"); box.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" }); var i = box.querySelector("input"); if (i) i.focus({ preventScroll: true }); });
+      m.append(b);
     }
     function drawFamily(g) {
       var box = $(".sd-tree"), tr = E.treeBlock(g.people, g.facts.rel);
@@ -187,7 +243,7 @@
       if (!parsedNow) return;
       parsedNow.born = y; (parsedNow.route || []).forEach(function (st) { if (st.age != null) st.year = y + st.age; });
       status.textContent = "Reading the Atlas…";
-      LD.gather(parsedNow).then(function (g) { status.textContent = ""; last = g; drawReport(g); J.draw(g.facts, g.mort); }).catch(function () { status.textContent = "Some Atlas files did not load. Check your connection."; });
+      LD.gather(parsedNow).then(function (g) { status.textContent = ""; last = g; drawAll(g); }).catch(function () { status.textContent = "Some Atlas files did not load. Check your connection."; });
     }
     function drawNames(g) {
       var box = $(".sd-names"), nb = E.namesBlock(g.names, BASE);
@@ -217,7 +273,7 @@
     text.addEventListener("paste", function (e) { var fs = e.clipboardData && e.clipboardData.files; if (fs && fs.length) { e.preventDefault(); addFiles(fs); } });
     $(".sd-clear").addEventListener("click", function () {
       files.forEach(function (x) { URL.revokeObjectURL(x.url); }); files = []; drawShots(); text.value = ""; chips.textContent = ""; ov = Object.create(null); parsedNow = null; lastSig = ""; shown = Object.create(null);
-      J.clear(); showDock(false); report.hidden = true; planBox.hidden = true; fam.hidden = true; status.textContent = ""; text.focus();
+      J.clear(); showDock(false); dropKeyPlaces(); report.hidden = true; planBox.hidden = true; fam.hidden = true; status.textContent = ""; text.focus();
     });
     $(".sd-eg").addEventListener("click", function () { text.value = "My great-grandfather Ivan Kosina came from Gallignana to Hamilton around 1905. All I have is this photo."; run(); });
     window.addEventListener("beforeunload", function () { files.forEach(function (x) { URL.revokeObjectURL(x.url); }); });

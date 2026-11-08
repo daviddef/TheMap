@@ -903,7 +903,7 @@
       var tl = timeline(f), stops = tl.stops, anc = (f.ancestors || []).filter(function (x) { return x.info; });
       /* the others in the family who travel too: each pin appears at its year, so the story plays the ancestry first, then the person's own journey */
       var kin = (f.kin || []).map(function (k) { return { name: k.name, label: k.label, stops: k.stops.filter(function (x) { return x.info; }) }; }).filter(function (k) { return k.stops.length; }), kinMarks = [];
-      var legs = [], stopMarks = [];
+      var legs = [], stopMarks = [], mortPgs = [];
       function kinTag(k) { return ((k.label ? k.label + " " : "") + (k.name || "")).trim() || "Family"; }
       var can = stops.length > 0 && tl.mode !== "none" && (stops.length > 1 || tl.mode === "year");
       if (E.time) E.time.hidden = !can;
@@ -964,6 +964,7 @@
           lg.dot.setLatLng(pt); lg.dot.setStyle({ opacity: on ? 1 : 0, fillOpacity: on ? 1 : 0 }); lg.line.setStyle({ opacity: on ? .55 : .12 });
         });
         stopMarks.forEach(function (m) { var on = m.t == null || t >= m.t, tp = m.ly.getTooltip(); m.ly.setStyle({ opacity: on ? 1 : .3, fillOpacity: on ? 1 : .3 }); if (tp && tp.setOpacity) tp.setOpacity(on ? 1 : .35); });
+        mortPgs.forEach(function (m) { var on = t >= m.f && t <= m.t; m.pg.setStyle({ opacity: on ? .85 : .12, fillOpacity: on ? .06 : 0 }); });
         kinMarks.forEach(function (m) { var on = m.t == null || t >= m.t, tp = m.ly.getTooltip(); m.ly.setStyle({ opacity: on ? 1 : .3, fillOpacity: on ? 1 : .3 }); if (tp && tp.setOpacity) tp.setOpacity(on ? 1 : .35); });
         if (layers && layers.dot) layers.dot.setStyle({ opacity: begun ? 1 : 0, fillOpacity: begun ? 1 : 0 });
         if (layers && layers.dot && at.pt) {
@@ -1078,18 +1079,29 @@
           });
         }
         layers = { group: g };
-        /* the mass-mortality events (epidemics, famines, wars, genocides) of the countries in the story, as black outlines on the map */
-        if (mort && mort.events) {
-          var ccs = Object.create(null);
-          stops.concat(anc).forEach(function (st) { if (st.info && st.info.cc) ccs[String(st.info.cc).toUpperCase()] = 1; });
-          kin.forEach(function (k) { k.stops.forEach(function (st) { if (st.info && st.info.cc) ccs[String(st.info.cc).toUpperCase()] = 1; }); });
-          mort.events.forEach(function (ev) {
-            if (!(ev.cc || []).some(function (c) { return ccs[String(c).toUpperCase()]; }) || !ev.poly || !ev.poly.length) return;
-            var pg = L.polygon(ev.poly, { color: "#000", weight: 1.6, opacity: .85, fillColor: "#000", fillOpacity: .06, dashArray: "5 4" }).addTo(g);
-            pg.bindTooltip(ev.f + (ev.t !== ev.f ? "\u2013" + ev.t : "") + " " + typeLabel(ev.ty) + ": " + ev.n, { sticky: true, className: "lf-mort-tip" });
-            if (pg.bringToBack) pg.bringToBack();
+        /* the mass-mortality events (epidemics, famines, wars, genocides) of the countries in the story, as black outlines, and only those of the
+           years the story gives: a story with no year draws none, and says so */
+        var yrs = [];
+        stops.forEach(function (st) { if (tl.mode === "year" && st.t != null) yrs.push(st.t); });
+        kin.forEach(function (k) { k.stops.forEach(function (st) { if (st.year != null) yrs.push(st.year); }); });
+        if (f.born != null) yrs.push(f.born); if (f.endYear != null) yrs.push(f.endYear);
+        if (mort && mort.events && yrs.length) {
+          var y0 = Math.min.apply(null, yrs), y1 = Math.max.apply(null, yrs), pts = [], seenEv = Object.create(null);
+          function addPt(i) { if (i && i.lat != null) pts.push(i); }
+          stops.concat(anc).forEach(function (st) { addPt(st.info); });
+          kin.forEach(function (k) { k.stops.forEach(function (st) { addPt(st.info); }); });
+          /* an event is shown when its area covers one of the story's places, in the story's years: not every event of the country */
+          pts.forEach(function (i) {
+            S.eventsAt(mort.events, i.lat, i.lon, (y0 + y1) / 2, (y1 - y0) / 2).forEach(function (ev) {
+              if (seenEv[ev.id || ev.n] || !ev.poly || !ev.poly.length) return; seenEv[ev.id || ev.n] = 1;
+              var pg = L.polygon(ev.poly, { color: "#000", weight: 1.6, opacity: .85, fillColor: "#000", fillOpacity: .06, dashArray: "5 4" }).addTo(g);
+              pg.bindTooltip(ev.f + (ev.t !== ev.f ? "\u2013" + ev.t : "") + " " + typeLabel(ev.ty) + ": " + ev.n + " (covers " + i.name + ")", { sticky: true, className: "lf-mort-tip" });
+              if (pg.bringToBack) pg.bringToBack();
+              mortPgs.push({ pg: pg, f: ev.f, t: ev.t });
+            });
           });
-        }
+          if (can) setT(Number(E.slider.value));
+        } else if (mort && mort.events) E.moments.append(el("p", "Give a year, even a rough one, and the mass-mortality events of those years in these countries are drawn here as black outlines.", "lf-filed"));
         var rp = stops.filter(function (st) { return st.info.lat != null; }).map(function (st) { return [st.info.lat, st.info.lon]; });
         if (rp.length > 1) {
           L.polyline(rp, { color: "#7a7a7a", weight: 2, dashArray: "4 6", opacity: .7 }).addTo(g);

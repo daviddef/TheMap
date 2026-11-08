@@ -133,6 +133,28 @@
         .catch(function () { ai = false; return ai; });
     }
 
+    /* THE METER: how many reads are left, shown before anything is pressed and kept current after every answer. The numbers come from the
+       Worker (GET /v1/allowance, which asks nothing of the reader); on a test copy of the site there is no Worker, so there is no meter. */
+    var meterEl = document.getElementById("ask-meter");
+    function paintMeter(m) {
+      if (!meterEl) return;
+      var t = "", cls = "cap ask-meter";
+      if (m.siteOpen === false) { t = m.which === "sitemonth" ? "The free reads for this month are used up for everyone. They return on the 1st. Searching the Atlas, your research and your stories all still work." : "The free reads for today are used up for everyone. They return tomorrow. Searching the Atlas, your research and your stories all still work."; cls += " is-out"; }
+      else if (typeof m.left === "number") {
+        if (m.left <= 0) { t = m.which === "month" ? "You have used this month's reads. They return on the 1st." : "You have used today's reads" + (m.of ? " (" + m.of + ")" : "") + ". They return tomorrow."; cls += " is-out"; }
+        else t = "Reads left today: " + m.left + (m.of ? " of " + m.of : "") + ". Reading a whole document counts as 2.";
+      }
+      meterEl.className = cls; meterEl.textContent = t; meterEl.hidden = !t;
+    }
+    function loadMeter() {
+      if (!meterEl || (!window.__raAiAnyHost && !/(^|\.)recordatlas\.org$/.test(location.hostname))) return;
+      identity().then(function (id) {
+        var h = {}; if (id) { h["X-AI-Id"] = id.id; h["Authorization"] = "Bearer " + id.token; }
+        return fetch(BASE + "/v1/allowance", { headers: h });
+      }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { if (j) paintMeter({ left: j.left, of: j.of, siteOpen: j.siteOpen, which: j.siteOpen === false ? "site" : null }); }).catch(function () { /* no meter: the page works without it */ });
+    }
+    setTimeout(loadMeter, 600);
+
     function call(path, body) {
       /* The Worker answers only requests from recordatlas.org, so on any other address (a preview, a test copy) the press would end in a
          browser error nobody can read. Say so up front. `window.__raAiAnyHost` is for the tests, which stand in for the Worker. */
@@ -145,6 +167,8 @@
       }).then(function (r) {
         nextToken();
         return r.json().catch(function () { return {}; }).then(function (j) {
+          if (r.ok && typeof j.left === "number") paintMeter({ left: j.left, of: j.of, siteOpen: true });
+          else if (!r.ok && j.limit) paintMeter(j.limit === "site" || j.limit === "tokens" || j.limit === "sitemonth" ? { siteOpen: false, which: j.limit } : { left: 0, of: null, siteOpen: true, which: j.limit });
           if (!r.ok) throw new Error((j.error || "Something went wrong. Try again in a minute.") + (j.reason ? " (reason: " + j.reason + ")" : ""));
           return j;
         });

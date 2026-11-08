@@ -24,10 +24,14 @@ derived in the browser with its own labels (`ai-id`, `ai-token`), so this servic
 
 | Who | Allowance |
 |---|---|
-| No six words | 3 a day per address |
-| New six-word identity | 5 a day, plus 2 for every day of age, up to 20 a day and 250 a month |
-| One address, whatever it makes | 40 a day |
-| Everyone together | 400 requests and 1.5 million tokens a day |
+| No six words | 5 a day per address |
+| New six-word identity | 6 a day, plus 2 for every day of age, up to 12 a day and 120 a month |
+| One address, whatever it makes | 20 a day |
+| Everyone together | 150 requests and 600,000 tokens a day, and **2,500 requests a month** (`SITE_MONTHLY_REQUESTS`: this is the number that bounds the bill) |
+
+A whole document or a case file counts as 2 tries. These numbers were tightened on 8 Nov 2026 (they were 15, 12 to 20, 40, and 400 a
+day with no monthly site cap) so that the free tier has a known ceiling. The page shows the reader a meter (`GET /v1/allowance` returns
+`left`, `of` and `siteOpen`), and a refusal from the site-wide caps hands the reader's own tries back.
 
 The per-person caps are **soft**: anyone can make new six words. The hard limits are the address cap, the site caps, the bot check
 and **the monthly spend limit you set on the key at Anthropic**. Do that first (below). To pause everything at once set

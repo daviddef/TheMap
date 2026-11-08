@@ -168,3 +168,24 @@ test("an identity can forget its counters", async () => {
   assert.equal((await r.call("/v1/id", { method: "DELETE", headers: idHeaders })).status, 200);
   assert.equal((await (await r.call("/v1/allowance", { method: "GET", headers: idHeaders })).json()).dayUsed, 0);
 });
+
+test("the meter: an anonymous visitor sees tries left, an exhausted site says so, and a site refusal costs the reader nothing", async () => {
+  const r = rig({ env: { SITE_DAILY_REQUESTS: "2", SITE_MONTHLY_REQUESTS: "100" } });
+  let m = await (await r.call("/v1/allowance", { method: "GET" })).json();
+  assert.equal(m.left, 3); assert.equal(m.of, 3); assert.equal(m.siteOpen, true);
+  assert.equal((await (await r.call("/v1/translate", { body: line })).json()).left, 2, "the answer carries the count");
+  assert.equal((await r.call("/v1/translate", { body: line })).status, 200);
+  const no = await r.call("/v1/translate", { body: line }); assert.equal(no.status, 429);
+  assert.equal((await no.json()).limit, "site");
+  m = await (await r.call("/v1/allowance", { method: "GET" })).json();
+  assert.equal(m.siteOpen, false); assert.equal(m.left, 1, "the refused try was handed back: 3 minus the 2 that were answered");
+});
+
+test("the whole site has a monthly ceiling too, and says which one it hit", async () => {
+  const r = rig({ env: { SITE_MONTHLY_REQUESTS: "2", SITE_DAILY_REQUESTS: "50" } });
+  assert.equal((await r.call("/v1/translate", { body: line })).status, 200);
+  assert.equal((await r.call("/v1/translate", { body: line })).status, 200);
+  const no = await r.call("/v1/translate", { body: line, now: T0 + DAY }); assert.equal(no.status, 429);
+  const j = await no.json(); assert.equal(j.limit, "sitemonth"); assert.match(j.error, /this month/);
+  const next = await r.call("/v1/translate", { body: line, now: T0 + 20 * DAY }); assert.equal(next.status, 429, "still the same month"); assert.equal((await r.call("/v1/translate", { body: line, now: T0 + 25 * DAY })).status, 200, "the 1st brings it back");
+});

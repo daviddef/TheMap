@@ -54,7 +54,8 @@ function limitsFor(env, identity, now) {
   const ageDays = Math.floor((now - (identity.created || now)) / 86400000);
   return { day: Math.min(num(env.ID_DAILY, 20), num(env.ID_NEW_DAILY, 5) + 2 * ageDays), month: num(env.ID_MONTHLY, 250) };
 }
-const busy = (which, h) => json({ error: which === "site" || which === "tokens" ? "The service has reached today's limit for everyone. Try again tomorrow." :
+const busy = (which, h) => json({ error: which === "site" || which === "tokens" ? "The free reads for today are used up for everyone. They come back tomorrow (midnight UTC). Everything else on the site still works." :
+  which === "sitemonth" ? "The free reads for this month are used up for everyone. They come back on the 1st. Everything else on the site still works." :
   which === "month" ? "You have used this month's allowance." : "You have used today's allowance.", limit: which }, 429, h);
 
 async function callClaude(env, fetchFn, { system, content, maxTokens, model }) {
@@ -95,8 +96,16 @@ export async function handle(request, env, o = {}) {
     return json({ ok: true }, 200, h);
   }
   if (request.method === "GET" && parts[1] === "allowance") {
+    /* THE METER the page shows before anything is pressed: how many tries this reader has left today, and whether the whole site's free
+       reads are used up. A six-word identity is counted by its id; anyone else by address (hashed, dated, as the counting below does). */
     const lim = limitsFor(env, identity, now), used = identity ? await stub(env, `id:${aiId}`).peek(now) : null;
-    return json({ identity: !!identity, dayLimit: lim.day, monthLimit: lim.month, dayUsed: used ? used.day : null, monthUsed: used ? used.month : null }, 200, h);
+    const ipk = await sha256Hex(`${request.headers.get("CF-Connecting-IP") || ""}:${new Date(now).toISOString().slice(0, 10)}`);
+    const ipUsed = identity ? null : await stub(env, `ip:${ipk}`).peek(now);
+    const sitePeek = await stub(env, "site").peek(now);
+    const siteOpen = sitePeek.day < num(env.SITE_DAILY_REQUESTS, 400) && sitePeek.tokens < num(env.SITE_DAILY_TOKENS, 1500000) && sitePeek.month < num(env.SITE_MONTHLY_REQUESTS, 6000);
+    const dayUsed = used ? used.day : ipUsed ? ipUsed.day : null, dayLimit = lim.day;
+    return json({ identity: !!identity, dayLimit, monthLimit: lim.month, dayUsed: used ? used.day : null, monthUsed: used ? used.month : null,
+      left: dayUsed == null ? null : Math.max(0, dayLimit - dayUsed), of: dayLimit, siteOpen }, 200, h);
   }
   if (request.method !== "POST" || !["translate", "transcribe", "document", "casefile"].includes(parts[1]) || parts.length !== 2) return json({ error: "not found" }, 404, h);
   const kind = parts[1], isPic = kind === "transcribe" || kind === "document", cost = kind === "document" ? num(env.DOC_COST, 2) : isPic ? IMAGE_COST : kind === "casefile" ? num(env.CASE_COST, 2) : 1;   // a whole document costs 2 tries, the case file that joins them 2, a register line 1
@@ -139,8 +148,11 @@ export async function handle(request, env, o = {}) {
   const ipKey = await sha256Hex(`${ip}:${new Date(now).toISOString().slice(0, 10)}`);       // dated, so it cannot follow an address across days
   const rip = await stub(env, `ip:${ipKey}`).take(now, { cost, day: identity ? num(env.IP_DAILY, 40) : num(env.ANON_DAILY, 3) });
   if (!rip.ok) return busy("day", h);
-  const site = await stub(env, "site").take(now, { cost: 1, day: num(env.SITE_DAILY_REQUESTS, 400), tokensBelow: num(env.SITE_DAILY_TOKENS, 1500000) });
-  if (!site.ok) return busy(site.which === "tokens" ? "tokens" : "site", h);
+  const site = await stub(env, "site").take(now, { cost: 1, day: num(env.SITE_DAILY_REQUESTS, 400), month: num(env.SITE_MONTHLY_REQUESTS, 6000), tokensBelow: num(env.SITE_DAILY_TOKENS, 1500000) });
+  if (!site.ok) {   // the site said no after the reader's own counters said yes: give those tries back, the reader used none
+    await Promise.allSettled([identity ? stub(env, `id:${aiId}`).give(now, cost) : null, stub(env, `ip:${ipKey}`).give(now, cost)].filter(Boolean));
+    return busy(site.which === "tokens" ? "tokens" : site.which === "month" ? "sitemonth" : "site", h);
+  }
 
   let out;
   try { out = await callClaude(env, fetchFn, { system, content, maxTokens, model }); } catch { out = { ok: false, status: 0 }; }
@@ -152,7 +164,7 @@ export async function handle(request, env, o = {}) {
 
   const parsed = parseJson(out.text);
   const used = identity ? await stub(env, `id:${aiId}`).peek(now) : null;
-  return json({ kind, result: parsed || { unparsed: true, draft: String(out.text).slice(0, 4000) }, left: used ? Math.max(0, lim.day - used.day) : Math.max(0, num(env.ANON_DAILY, 3) - rip.day) }, 200, h);
+  return json({ kind, result: parsed || { unparsed: true, draft: String(out.text).slice(0, 4000) }, left: used ? Math.max(0, lim.day - used.day) : Math.max(0, num(env.ANON_DAILY, 3) - rip.day), of: identity ? lim.day : num(env.ANON_DAILY, 3) }, 200, h);
 }
 
 export default {

@@ -178,6 +178,7 @@ import { u } from "../lib/url.js";
   /* the play bar along the bottom of the map: controls and one line of caption; everything else is in the story below */
   .sd.sdk { top: auto; left: 148px; right: 16px; bottom: 26px; width: auto; max-height: none; overflow: hidden; padding: 0; display: flex; flex-direction: column; transform: translateY(14px); transform-origin: bottom; }
   .sd.sdk.is-open { transform: none; }
+  .sd.sdk[hidden] { display: none; } /* .sd.sdk sets display:flex, which would otherwise show the empty bar on every home page load */
   .sdk-bar { display: flex; gap: 14px; align-items: center; padding: 8px 12px 6px 16px; }
   .sdk-title { flex: none; max-width: 14em; margin: 0; font: 500 17px/1.2 var(--serif); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .sdk .sd-time { flex: 1; min-width: 0; margin: 0; }

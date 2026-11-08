@@ -106,7 +106,7 @@
       chips.textContent = "";
       if (p.rel) chips.append(chip(p.rel.replace(/-/g, " "), "", "rel:" + p.rel));
       if (p.name) chips.append(chip(p.name, "", "nm:" + p.name));
-      if (p.people) p.people.forEach(function (pe) { if (pe.role !== "self" && pe.name) chips.append(chip("his " + pe.role + " " + pe.name, "", "pe:" + pe.role + pe.name)); });
+      if (p.people) p.people.forEach(function (pe) { if (pe.role !== "self" && pe.name) chips.append(chip("his " + (pe.label || pe.role) + " " + pe.name, "", "pe:" + pe.role + pe.name)); });
       var stopsShown = p.stops && p.stops.length ? p.stops : [p.from && Object.assign({ role: "origin" }, p.from), p.to && Object.assign({ role: "move" }, p.to)].filter(Boolean);
       if (!stopsShown.length && text.value.trim().length > 12) chips.append(chip("Where did they start? Name the place", "warn", "nof"));
       stopsShown.forEach(function (st) {
@@ -202,6 +202,7 @@
         row(x.info, role + (x.age != null ? " · " + (x.approx ? "about " : "") + "age " + x.age : ""));
       });
       anc.forEach(function (x) { row(x.info, "His " + x.who + "'s family"); });
+      (f.kin || []).forEach(function (k) { k.stops.forEach(function (st) { if (st.info) row(st.info, (((k.label ? k.label + " " : "") + (k.name || "")).trim() || "Family") + (st.role === "born" ? ", born" : "") + (st.year != null ? " " + st.year : "")); }); });
       body.textContent = ""; body.append(hood, ul);
       if (cnt) cnt.textContent = String(n);
       var w = pane.querySelector(".ra-check-w"); if (w) w.textContent = "Key places";

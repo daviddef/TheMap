@@ -362,6 +362,191 @@
     if (fa) { fa.place = fromP || null; if (!fa.surname && self && self.surname && (!self.rel || /father|mother|grand|uncle|aunt|brother|sister|ancestor|relative/.test(self.rel))) { fa.surname = self.surname; fa.presumed = true; fa.name = (fa.given ? fa.given + " " : "") + fa.surname; } people.push(fa); }
     if (mo) { mo.place = fromM || null; people.push(mo); }
     out.people = people;
+    var fam = ctx.map ? readFamily(t, ctx) : null;
+    if (fam) applyFamily(out, fam, ctx);
+    return out;
+  }
+
+  /* ---- THE FAMILY AS TOLD ----------------------------------------------------------------------------------------------
+     "my father is Ivan from Senj, he moved to Crikvenica then Harare ... he married my mother Cheryl in 1975 in Johannesburg and died in 2026
+     in Brisbane. His mother was Hedviga born in London in 1928 and father was Ivan born in Beijing in 1914. His father's father was Anton."
+     is a family, not one journey. This reads it sentence by sentence: who each person is (by their path from the teller: "FM" is the father's
+     mother), and for each the events told of them: born, died, married, where they started and where they moved, each with the year and place
+     it was given with. "his" is the person the story is about; "my" is the teller. Nothing is read that was not said. It stands down (returns
+     null) unless two or more people are named, so a one-person story is still read by parseStory alone. */
+  var KIN_STEP = { father: "F", dad: "F", mother: "M", mum: "M", mom: "M" };
+  var KIN_NOUN = { F: "father", M: "mother" };
+  var INTRO = /(?:\b(my|his|her|their)\s+)?\b((?:(?:father|dad|mother|mum|mom)(?:'?s)?\s+)*(?:father|dad|mother|mum|mom))(?:'?s)?\s+(?:name\s+)?(?:was|is|named|called)\s+([\p{L}'’-]+)/giu;
+  var EV_BORN = /^(born|birth)$/, EV_DIED = /^(died|dies|passed|deceased|buried|murdered|killed)$/, EV_WED = /^(married|wed|wedded|weds)$/;
+  var EV_MOVE = /^(moved|move|went|emigrated|migrated|relocated|settled|came|arrived|lived|living|returned|then|travelled|traveled|sailed|left)$/;
+  var EV_CAUSE = /^(frmo|fro|from|due|after|of|with|because)$/;
+
+  function stepsOf(words) {
+    return words.split(/\s+/).map(function (w) { w = w.toLowerCase(); if (!KIN_STEP[w]) w = w.replace(/'?s$/, ""); return KIN_STEP[w] || ""; }).join("");
+  }
+  function chainLabel(rel) { return rel.split("").map(function (c) { return KIN_NOUN[c]; }).join("'s "); }
+
+  /* What one person's stretch of the story says of them. Returns {origin, born:{year,place}, died:{year,place,cause}, married:{year,place,spouse}, moves:[{place,year}]}. */
+  function readEvents(text, ctx) {
+    var out = { origin: null, born: null, died: null, married: null, moves: [] };
+    var ft = S.fold(text).split(" ").filter(Boolean); if (!ft.length) return out;
+    var gv = ctx.given ? S.givenIn(text, ctx.given, ctx.skip) : [], gset = Object.create(null); gv.forEach(function (g) { gset[g.word] = 1; });
+    var cands = S.candidates(text, ctx.map, ctx.skip), atMap = Object.create(null);
+    cands.forEach(function (c) {
+      var p1 = ft[c.at - 1] || "", role = PLACE_BEFORE[p1] || "";
+      var one = c.word.indexOf(" ") < 0;
+      if ((gset[c.word] && !role) || (one && (STOP[c.word] || COMMON[c.word] || REL.test(c.word) || EV_BORN.test(c.word) || EV_DIED.test(c.word) || EV_WED.test(c.word) || EV_MOVE.test(c.word) || EV_CAUSE.test(c.word)))) return;
+      atMap[c.at] = c;
+    });
+    var mode = "origin", pending = null;
+    function place(c) { return { row: c.rows[0], alts: c.rows.slice(1, 6), word: c.word }; }
+    for (var i = 0; i < ft.length; i++) {
+      var tk = ft[i], c = atMap[i];
+      if (EV_BORN.test(tk)) { mode = "born"; out.born = out.born || { year: null, place: null }; continue; }
+      if (EV_DIED.test(tk)) { mode = "died"; out.died = out.died || { year: null, place: null, cause: "" }; continue; }
+      if (EV_WED.test(tk)) { mode = "married"; out.married = out.married || { year: null, place: null, spouse: "" }; continue; }
+      if (EV_MOVE.test(tk) && !c) { if (mode !== "move") { mode = "move"; pending = null; } continue; }
+      if (mode === "died" && EV_CAUSE.test(tk) && (out.died.place || out.died.year != null)) { out.died.cause = ft.slice(i + 1).join(" "); break; }
+      if (/^(1[4-9][0-9]{2}|20[0-2][0-9])$/.test(tk)) {
+        var y = Number(tk);
+        if (mode === "born") out.born.year = y; else if (mode === "died") out.died.year = y; else if (mode === "married") out.married.year = y;
+        else if (mode === "move") { if (out.moves.length && out.moves[out.moves.length - 1].year == null) out.moves[out.moves.length - 1].year = y; else pending = y; }
+        continue;
+      }
+      if (!c) continue;
+      var pl = place(c); i += c.word.split(" ").length - 1;
+      if (mode === "born") { if (!out.born.place) out.born.place = pl; }
+      else if (mode === "died") { if (!out.died.place) out.died.place = pl; }
+      else if (mode === "married") { if (!out.married.place) out.married.place = pl; }
+      else if (mode === "move") { out.moves.push({ place: pl, year: pending }); pending = null; }
+      else if (!out.origin) out.origin = pl;
+    }
+    if (out.married) {
+      var sm = /\bmarried\s+(?:my\s+)?(?:(?:other|mother|mum|mom|wife)\s+)?([\p{L}'’-]{2,})(?:\s+([\p{Lu}][\p{L}'’-]+))?/iu.exec(text);
+      if (sm && !/^(in|on|at|a|the|her|him|and)$/i.test(sm[1])) out.married.spouse = cased(sm[1]) + (sm[2] && /^[\p{Lu}]/u.test(sm[2]) && !STOP[S.fold(sm[2])] && !COMMON[S.fold(sm[2])] && !(ctx.map && ctx.map[S.fold(sm[2])]) ? " " + cased(sm[2]) : "");
+    }
+    return out;
+  }
+
+  function readFamily(t, ctx) {
+    var people = Object.create(null), order = [], subject = null, cur = null;
+    function person(key, name) {
+      var p = people[key];
+      if (!p) { p = people[key] = { key: key, name: "", given: "", surname: "", text: "", chunks: [] }; order.push(key); }
+      if (name && !p.name) {
+        var parts = name.split(/\s+/); p.name = cased(parts[0]); p.given = p.name; if (parts[1]) { p.surname = cased(parts[1]); p.name += " " + p.surname; }
+      }
+      return p;
+    }
+    String(t || "").split(/[.!?]+(?:\s+|$)|\n+/).forEach(function (sent) {
+      if (!sent.trim()) return;
+      var re = new RegExp(INTRO.source, "giu"), ms = [], m;
+      while ((m = re.exec(sent))) ms.push({ at: m.index, end: m.index + m[0].length, poss: (m[1] || "").toLowerCase(), steps: stepsOf(m[2]), name: m[3] });
+      if (!ms.length) { if (cur) people[cur].chunks.push(sent); return; }
+      if (cur && ms[0].at > 0) people[cur].chunks.push(sent.slice(0, ms[0].at));
+      ms.forEach(function (x, i) {
+        if (!x.steps || /^(a|the|an|my|his|her|their|not|also|now)$/i.test(x.name)) return;
+        var base = x.poss === "my" || !subject ? "" : subject, key = base + x.steps;
+        if (!subject) { if (x.poss !== "my" || x.steps.length !== 1) return; subject = key; }
+        var rest = sent.slice(x.end, i + 1 < ms.length ? ms[i + 1].at : sent.length), nm = x.name;
+        var sx = /^\s+([\p{Lu}][\p{L}'’-]{2,})(?=\s|,|$)/u.exec(rest);
+        if (sx && !STOP[S.fold(sx[1])] && !COMMON[S.fold(sx[1])] && !(ctx.map && ctx.map[S.fold(sx[1])]) && !(ctx.given && ctx.given[S.fold(sx[1])])) { nm += " " + sx[1]; rest = rest.slice(sx[0].length); }
+        var pk = (subject === "F" && key === "M") || (subject === "M" && key === "F") ? "S" : key;
+        var p = person(pk, nm); p.chunks.push(rest); cur = pk;
+      });
+    });
+    if (!subject || order.length < 2) return null;
+    /* each stretch is read on its own: the place finder names a word once per text, and a town may be told twice ("then Johannesburg ... married in Johannesburg") */
+    order.forEach(function (k) {
+      var all = { origin: null, born: null, died: null, married: null, moves: [] };
+      people[k].chunks.forEach(function (c) {
+        var e = readEvents(c, ctx);
+        all.origin = all.origin || e.origin; all.born = all.born || e.born; all.died = all.died || e.died; all.married = all.married || e.married; all.moves = all.moves.concat(e.moves);
+      });
+      people[k].ev = all;
+    });
+    /* the subject's own married clause names the spouse when no sentence did ("he married my mother Cheryl") */
+    var sp = people[subject].ev.married;
+    if (sp && sp.spouse && !people.S) { var s2 = person("S", sp.spouse); s2.ev = readEvents("", ctx); s2.ev.married = { year: sp.year, place: sp.place, spouse: "" }; }
+    else if (sp && people.S && !people.S.ev.married) people.S.ev.married = { year: sp.year, place: sp.place, spouse: "" };
+    return { people: people, order: order, subject: subject };
+  }
+
+  /* Fold what readFamily found into the parse: the subject's route with years (told ones kept, the rest worked out and marked "about"),
+     the people with their dated events, and the lines the ancestors travel, so the journey can play them. */
+  function applyFamily(out, fam, ctx) {
+    var P = fam.people, sk = fam.subject, me = P[sk], ev = me.ev;
+    function year(pe) { return pe && pe.ev && pe.ev.born && pe.ev.born.year != null ? pe.ev.born.year : null; }
+    var rs = [];
+    function add(pl, role, yr) { if (pl) rs.push({ row: pl.row, alts: pl.alts, word: pl.word, role: role, age: null, year: yr == null ? null : yr, approx: false, told: yr != null }); }
+    if (ev.born && ev.born.place) add(ev.born.place, "born", ev.born.year);
+    if (ev.origin && !(rs[0] && rs[0].row.i === ev.origin.row.i)) add(ev.origin, rs.length ? "move" : "origin");
+    ev.moves.forEach(function (mv) { if (rs.length && rs[rs.length - 1].row.i === mv.place.row.i) return; add(mv.place, "move", mv.year); });
+    var endYear = ev.died && ev.died.year != null ? ev.died.year : null;
+    function stopFor(pl) { for (var i = 0; i < rs.length; i++) if (pl && rs[i].row.i === pl.row.i) return rs[i]; return null; }
+    var stopEv = [];
+    if (ev.married) { var ms = stopFor(ev.married.place); if (ms) { if (ev.married.year != null && ms.year == null) { ms.year = ev.married.year; ms.told = true; } (ms.ev = ms.ev || []).push({ type: "married", year: ev.married.year }); } }
+    if (ev.died) { var dsx = stopFor(ev.died.place); if (!dsx && ev.died.place) { add(ev.died.place, "move", null); dsx = rs[rs.length - 1]; } if (dsx) (dsx.ev = dsx.ev || []).push({ type: "died", year: ev.died.year, cause: ev.died.cause || "" }); }
+    var kids = rs.length;
+    /* when was he born: told, else worked out from the mother, the father, or the marriage, and said to be about */
+    var born = ev.born && ev.born.year != null ? ev.born.year : null, bornApprox = false;
+    if (born == null) {
+      var my = year(P[sk + "M"]), fy = year(P[sk + "F"]);
+      born = my != null ? my + 26 : fy != null ? fy + 30 : ev.married && ev.married.year != null ? ev.married.year - 26 : null; bornApprox = born != null;
+    }
+    if (born != null && rs.length) {
+      if (rs[0].year == null) { rs[0].year = born; rs[0].approx = bornApprox; }
+      var known = [];
+      rs.forEach(function (x, i) { if (x.year != null) known.push(i); });
+      for (var a = 0; a < known.length - 1; a++) {
+        var i0 = known[a], i1 = known[a + 1];
+        for (var k = i0 + 1; k < i1; k++) { rs[k].year = Math.round(rs[i0].year + (rs[i1].year - rs[i0].year) * (k - i0) / (i1 - i0)); rs[k].approx = true; }
+      }
+      var last = known[known.length - 1], tail = rs.length - 1 - last;
+      for (var j = 1; j <= tail; j++) { rs[last + j].year = endYear != null && endYear > rs[last].year ? Math.round(rs[last].year + (endYear - rs[last].year) * j / (tail + 1)) : rs[last].year + 5 * j; rs[last + j].approx = true; }
+      rs.forEach(function (x) { x.yearTold = !!x.told; x.age = x.year - born; if (bornApprox || x.approx) x.approx = true; if (x.told && !(bornApprox && x.age != null)) x.approx = false; x.age = Math.max(0, x.age); });
+      rs[0].age = rs[0].told || !bornApprox ? 0 : 0;
+    }
+    if (rs.length) {
+      out.stops = rs; out.route = rs;
+      out.from = { row: rs[0].row, alts: rs[0].alts, word: rs[0].word };
+      out.to = rs.length > 1 ? { row: rs[rs.length - 1].row, alts: rs[rs.length - 1].alts, word: rs[rs.length - 1].word } : null;
+      out.born = born; out.bornApprox = bornApprox; out.left = rs.length > 1 && rs[1].year != null ? rs[1].year : out.left; out.endYear = endYear;
+    }
+    /* the people */
+    function lab(key) { var rel = key.slice(sk.length); return key === "S" ? (sk === "F" ? "wife" : "husband") : key.indexOf(sk) === 0 && rel ? chainLabel(rel) : ""; }
+    function evOf(pe) {
+      var e = pe.ev, list = [];
+      if (e.born && (e.born.year != null || e.born.place)) list.push({ type: "born", year: e.born.year, place: e.born.place });
+      if (e.married && (e.married.year != null || e.married.place)) list.push({ type: "married", year: e.married.year, place: e.married.place });
+      if (e.died && (e.died.year != null || e.died.place)) list.push({ type: "died", year: e.died.year, place: e.died.place, cause: e.died.cause });
+      return list;
+    }
+    var people = [], seen = Object.create(null);
+    function put(key, role, rel) {
+      var pe = P[key]; if (!pe || seen[key]) return; seen[key] = 1;
+      var place = key === sk ? rs[0] : pe.ev.born && pe.ev.born.place ? pe.ev.born.place : pe.ev.origin;
+      people.push({ role: role, rel: rel || "", name: pe.name, given: pe.given, surname: pe.surname, givenWord: pe.given, place: place || null, presumed: false, label: key === sk ? "" : lab(key), events: evOf(pe), key: key });
+    }
+    put(sk, "self", out.rel || KIN_NOUN[sk]);
+    put(sk + "F", "father"); put(sk + "M", "mother");
+    Object.keys(P).sort(function (x, y) { return x.length - y.length || (x < y ? -1 : 1); }).forEach(function (k) {
+      if (k === "S") put(k, "spouse"); else if (k.indexOf(sk) === 0 && k.length - sk.length >= 2) put(k, KIN_NOUN[k.slice(-1)] === "father" ? "grandfather" : "grandmother");
+    });
+    out.people = people;
+    if (me.name) { out.name = me.name; out.givenWord = me.given; out.surname = me.surname; var gg = ctx.given ? S.givenIn(me.given, ctx.given, ctx.skip) : []; out.given = gg.length ? gg[0].row.canon : me.given; }
+    out.rel = out.rel || KIN_NOUN[sk];
+    /* the lines the others travel: where they were born, then where they moved, each at its year when it was given */
+    var kin = [];
+    Object.keys(P).forEach(function (k) {
+      if (k === sk || k === "S") return;
+      var pe = P[k], e = pe.ev, st = [];
+      if (e.born && e.born.place) st.push({ row: e.born.place.row, alts: e.born.place.alts, word: e.born.place.word, role: "born", year: e.born.year, approx: false });
+      else if (e.origin) st.push({ row: e.origin.row, alts: e.origin.alts, word: e.origin.word, role: "origin", year: null, approx: false });
+      e.moves.forEach(function (mv) { st.push({ row: mv.place.row, alts: mv.place.alts, word: mv.place.word, role: "move", year: mv.year, approx: false }); });
+      if (st.length) kin.push({ key: k, name: pe.name, label: (lab(k) ? cased(P[sk].given || "His") + "'s " + lab(k) : "") , stops: st });
+    });
+    out.kin = kin;
     return out;
   }
 
@@ -500,6 +685,8 @@
       function need(row) { if (row && !seenRow[row.i]) { seenRow[row.i] = 1; rowsNeeded.push(row); } }
       if (parsed.from) need(parsed.from.row); if (parsed.to) need(parsed.to.row);
       route.forEach(function (x) { need(x.row); }); anc.forEach(function (x) { need(x.row); });
+      (parsed.kin || []).forEach(function (k) { k.stops.forEach(function (x) { need(x.row); }); });
+      (parsed.people || []).forEach(function (pe) { (pe.events || []).forEach(function (e) { if (e.place) need(e.place.row); }); });
       return load().then(function () {
         var people = (parsed.people || []).filter(function (x) { return x.given || x.surname; });
         return Promise.all([Promise.all(rowsNeeded.map(function (r) { return placeInfo(r); })),
@@ -510,18 +697,21 @@
         var infos = Object.create(null); r[0].forEach(function (i) { infos[i.row.i] = i; });
         var provs = r[1].providers || [], pname = Object.create(null), fm = r[3] && r[3].f, lead = r[4] && r[4].countries;
         provs.forEach(function (x) { pname[x.id] = x.name; });
-        r[0].forEach(function (i) { i.provs = provs.filter(function (x) { return (x.countries || []).indexOf(i.cc) > -1; }).sort(function (a, b) { return String(a.name).localeCompare(String(b.name)); }); i.pname = pname; i.flagRows = fm ? fm[String(i.cc || "").toUpperCase()] : null; i.leaders = lead ? lead[String(i.cc || "").toUpperCase()] : null; });
+        r[0].forEach(function (i) { i.provs = provs.filter(function (x) { return (x.countries || []).indexOf(i.cc) > -1; }).sort(function (a, b) { return String(a.name).localeCompare(String(b.name)); }); i.pname = pname; i.world = provs.filter(function (x) { return (x.countries || []).indexOf("*") > -1; }); i.flagRows = fm ? fm[String(i.cc || "").toUpperCase()] : null; i.leaders = lead ? lead[String(i.cc || "").toUpperCase()] : null; });
         var from = parsed.from ? infos[parsed.from.row.i] : null, to = parsed.to ? infos[parsed.to.row.i] : null;
         var facts = { rel: parsed.rel, name: parsed.name, holds: parsed.holds, holdsAll: parsed.holdsAll, left: parsed.left, born: parsed.born, from: from, to: to, base: BASE,
           providers: to ? provs.filter(function (p) { return (p.countries || []).indexOf(to.cc) > -1; }) : (from ? provs.filter(function (p) { return (p.countries || []).indexOf(from.cc) > -1; }) : []),
           given: parsed.given && data.given ? S.givenIn(parsed.givenWord || parsed.given, data.given, null) : [],
-          route: route.map(function (x) { return { info: infos[x.row.i], age: x.age, year: x.year, approx: x.approx, role: x.role, country: x.country }; }),
+          route: route.map(function (x) { return { info: infos[x.row.i], age: x.age, year: x.year, approx: x.approx, yearTold: x.yearTold, role: x.role, country: x.country, ev: x.ev }; }),
+          bornApprox: !!parsed.bornApprox, endYear: parsed.endYear != null ? parsed.endYear : null,
+          kin: (parsed.kin || []).map(function (k) { return { key: k.key, name: k.name, label: k.label, stops: k.stops.filter(function (x) { return infos[x.row.i]; }).map(function (x) { return { info: infos[x.row.i], year: x.year, role: x.role }; }) }; }).filter(function (k) { return k.stops.length; }),
           ancestors: anc.map(function (x) { return { info: infos[x.row.i], who: x.role === "mother-from" ? "mother" : "father" }; }) };
         var labels = {}; (data.languages || []).forEach(function (l) { labels[l.key] = l.label; });
         var out = r[6].map(function (pe, i) {
           var gr = pe.given && data.given ? S.givenIn(pe.given, data.given, null) : [];
           return { role: pe.role, rel: pe.rel, name: pe.name, given: gr.length ? { canon: gr[0].row.canon, typed: pe.given, groups: givenGroups(gr[0].row, labels) } : (pe.given ? { canon: "", typed: pe.given, groups: [] } : null),
-            surname: r[5][i], surnameTyped: pe.surname, presumed: !!pe.presumed, place: pe.place && infos[pe.place.row.i] ? infos[pe.place.row.i].name : "" };
+            surname: r[5][i], surnameTyped: pe.surname, presumed: !!pe.presumed, place: pe.place && infos[pe.place.row.i] ? infos[pe.place.row.i].name : "", label: pe.label || "",
+            events: (pe.events || []).map(function (e) { var inf = e.place && infos[e.place.row.i]; return { type: e.type, year: e.year, place: inf ? inf.name : (e.place ? e.place.word : ""), country: inf ? inf.countryName : "", cause: e.cause || "" }; }) };
         });
         return { facts: facts, plan: buildPlan(facts), mort: r[2], names: { people: out }, people: out };
       });
@@ -598,9 +788,12 @@
     function draw(f, mort, names) {
       clear();
       var tl = timeline(f), stops = tl.stops, anc = (f.ancestors || []).filter(function (x) { return x.info; });
+      /* the others in the family who travel too: each pin appears at its year, so the story plays the ancestry first, then the person's own journey */
+      var kin = (f.kin || []).map(function (k) { return { name: k.name, label: k.label, stops: k.stops.filter(function (x) { return x.info; }) }; }).filter(function (k) { return k.stops.length; }), kinMarks = [];
+      function kinTag(k) { return ((k.label ? k.label + " " : "") + (k.name || "")).trim() || "Family"; }
       var can = stops.length > 0 && tl.mode !== "none" && (stops.length > 1 || tl.mode === "year");
       if (E.time) E.time.hidden = !can;
-      if (E.mapBox) E.mapBox.hidden = !(stops.length || anc.length);
+      if (E.mapBox) E.mapBox.hidden = !(stops.length || anc.length || kin.length);
       E.moments.textContent = ""; E.cap.textContent = "";
       TYPE = (mort && mort.types) || {};
       if (!askEl && (o.askBox || E.cap.parentNode)) { askEl = el("form", null, "lf-askyear"); askEl.hidden = true; if (o.askBox) o.askBox.append(askEl); else E.cap.parentNode.insertBefore(askEl, E.cap); }
@@ -617,17 +810,29 @@
       var t0 = null, t1 = null;
       if (can) {
         t0 = stops[0].t; t1 = stops[stops.length - 1].t + (tl.mode === "age" ? 4 : 10);
-        if (tl.mode === "year") { t1 = Math.min(t1, YEAR_MAX); if (tl.left != null) t1 = Math.min(tl.left + 12, YEAR_MAX); }
+        if (tl.mode === "year") {
+          t1 = Math.min(t1, YEAR_MAX); if (tl.left != null) t1 = Math.min(tl.left + 12, YEAR_MAX);
+          var ky = []; kin.forEach(function (k) { k.stops.forEach(function (x) { if (x.year != null) ky.push(x.year); }); });
+          if (ky.length) t0 = Math.min(t0, Math.min.apply(null, ky));
+          if (f.endYear != null) t1 = Math.min(f.endYear + 1, YEAR_MAX);
+        }
       }
       var evFor = [];
       stops.concat(anc).forEach(function (st) { var inf = st.info; if (!inf.__ev) inf.__ev = null; });
+      kin.forEach(function (k) { k.stops.forEach(function (st) { st.info.__ev = st.info.__ev || null; }); });
       function evs(info) { return tl.mode === "year" && t0 != null ? evHere(mort, info, t0, t1) : []; }
       var evMap = new Map(); stops.concat(anc).forEach(function (st) { if (!evMap.has(st.info)) evMap.set(st.info, evs(st.info)); });
+      kin.forEach(function (k) { k.stops.forEach(function (st) { if (!evMap.has(st.info)) evMap.set(st.info, evs(st.info)); }); });
 
       function setT(t) {
         E.cap.textContent = "";
         var at = stops.length ? along(stops, t) : { idx: 0, pt: null, moving: false }, cur = stops[at.idx];
-        if (cur) {
+        var begun = !stops.length || tl.mode !== "year" || t >= stops[0].t;   /* before the person's own first place, only the family before them is on the map */
+        kin.forEach(function (k) {
+          var cs = null; k.stops.forEach(function (x) { if (x.year == null || x.year <= t) cs = x; });
+          if (cs && tl.mode === "year") E.cap.append(line(cs.info, t, evMap.get(cs.info), kinTag(k) + ", ", cs.role === "born" && cs.year != null ? "born here in " + cs.year : cs.role === "origin" ? "from here" : ""));
+        });
+        if (cur && begun) {
           var ye = tl.mode === "year" ? t : null;
           E.cap.append(line(cur.info, ye, evMap.get(cur.info), at.moving ? "On the way from " : "", tl.mode === "age" ? "age " + t : (f.born != null ? "age " + (t - f.born) : "")));
           if (at.moving && stops[at.idx + 1]) E.cap.append(el("div", "…to " + stops[at.idx + 1].info.name + (stops[at.idx + 1].age != null ? " (" + ageWord(stops[at.idx + 1]) + ")" : ""), "lf-filed"));
@@ -636,6 +841,8 @@
         if (E.slider) E.slider.value = String(t);
         if (E.yearOut) E.yearOut.textContent = tl.mode === "age" ? "age " + t : String(t);
         if (E.slider) E.slider.setAttribute("aria-valuetext", (tl.mode === "age" ? "age " : "") + t + (cur ? ". " + (at.moving ? "On the way" : "At " + cur.info.name) : ""));
+        kinMarks.forEach(function (m) { var on = m.t == null || t >= m.t, tp = m.ly.getTooltip(); m.ly.setStyle({ opacity: on ? 1 : .3, fillOpacity: on ? 1 : .3 }); if (tp && tp.setOpacity) tp.setOpacity(on ? 1 : .35); });
+        if (layers && layers.dot) layers.dot.setStyle({ opacity: begun ? 1 : 0, fillOpacity: begun ? 1 : 0 });
         if (layers && layers.dot && at.pt) {
           layers.dot.setLatLng(at.pt);
           var pts = []; for (var i = 0; i <= at.idx; i++) if (stops[i].info.lat != null) pts.push([stops[i].info.lat, stops[i].info.lon]);
@@ -723,6 +930,16 @@
             .bindTooltip(tipOf("His " + x.who + "'s family", info.name), { permanent: true, direction: "right", offset: [4, 0], className: "lf-tip lf-tip-anc" }).addTo(g);
           pts.push([info.lat, info.lon]);
         });
+        kin.forEach(function (k) {
+          var kp = [];
+          k.stops.forEach(function (st) {
+            var info = st.info; if (info.lat == null) return;
+            var ly = L.circleMarker([info.lat, info.lon], { radius: 6, weight: 2, color: "#7a7a7a", fillColor: "#fff", fillOpacity: 1, dashArray: "2 3" })
+              .bindTooltip(tipOf(kinTag(k) + (st.role === "born" ? ", born" : st.role === "origin" ? ", from" : ""), info.name + (st.year != null ? " " + st.year : "")), { permanent: true, direction: "right", offset: [4, 0], className: "lf-tip lf-tip-anc" }).addTo(g);
+            kinMarks.push({ ly: ly, t: st.year }); kp.push([info.lat, info.lon]); pts.push([info.lat, info.lon]);
+          });
+          if (kp.length > 1) L.polyline(kp, { color: "#7a7a7a", weight: 1.5, dashArray: "2 5", opacity: .6 }).addTo(g);
+        });
         layers = { group: g };
         var rp = stops.filter(function (st) { return st.info.lat != null; }).map(function (st) { return [st.info.lat, st.info.lon]; });
         if (rp.length > 1) {
@@ -775,7 +992,7 @@
       var anc = (f.ancestors || []).filter(function (x) { return x.info; }), box = el("div", null, "lf-stops"), items = [], n = 0, base = f.base || "/";
       box.items = items;
       function yearOf(x) { return x.year != null ? x.year : (f.born != null && x.age != null ? f.born + x.age : null); }
-      function when(x, y) { return (x.age != null ? (x.approx ? "about age " : "age ") + x.age : "") + (x.age != null && y != null ? ", " : "") + (y != null ? (x.approx ? "about " : "") + y : ""); }
+      function when(x, y) { return (x.age != null ? (x.approx ? "about age " : "age ") + x.age : "") + (x.age != null && y != null ? ", " : "") + (y != null ? (x.approx && !x.yearTold ? "about " : "") + y : ""); }
       function volumeList(info, kinds, win, cap) {
         var any = false, wrap = el("div");
         KINDS.forEach(function (k) {
@@ -791,6 +1008,30 @@
           wrap.append(ul);
         });
         return any ? wrap : null;
+      }
+      /* FamilySearch for this place and these years: its collections, and the register images the Atlas has the address of */
+      var KIND_RE = { b: /birth|baptis/i, m: /marri/i, d: /death|burial|buri/i };
+      function fsList(info, kinds, win) {
+        var p = info.p || {}, wrap = el("div"), any = false;
+        var vols = (p.volumes || []).filter(function (v) { return v.url && (!win || (v.from <= win[1] && v.to >= win[0])) && (!kinds.length || kinds.some(function (k) { return KIND_RE[k] && KIND_RE[k].test((v.kinds || []).join(" ") + " " + v.t); })); }).slice(0, 3);
+        var cols = (p.fs || []).filter(function (c) { return c.url && (!win || (c.from <= win[1] && c.to >= win[0])); }).sort(function (a, b) { return (b.rank || 0) - (a.rank || 0); }).slice(0, 3);
+        if (vols.length) {
+          any = true; wrap.append(el("h5", "Register images on FamilySearch"));
+          var ul = el("ul", null, "lf-vols"); vols.forEach(function (v) { var li = el("li"), a = el("a", v.t); a.href = v.url; a.rel = "noopener"; li.append(a); ul.append(li); items.push({ vol: v, href: v.url }); }); wrap.append(ul);
+        }
+        if (cols.length) {
+          any = true; wrap.append(el("h5", "FamilySearch collections that cover " + info.name));
+          var u2 = el("ul", null, "lf-vols"); cols.forEach(function (c) { var li = el("li"), a = el("a", c.t); a.href = c.url; a.rel = "noopener"; li.append(a, el("span", " " + c.from + "–" + c.to + (c.n ? ", " + c.n.toLocaleString("en") + " records" : ""), "lf-filed")); u2.append(li); }); wrap.append(u2);
+        }
+        return any ? wrap : null;
+      }
+      var worldDone = false;
+      function worldList(info) {
+        var ws = (info.world || []).filter(function (x) { return /^(familysearch|ancestry|myheritage|findagrave|geneanet|geni|wikitree|billiongraves)$/.test(x.id); });
+        if (!ws.length || worldDone) return null; worldDone = true;
+        var wrap = el("div"); wrap.append(el("h5", "Worldwide sites, for any place in the story"));
+        var ul = el("ul", null, "lf-vols"); ws.forEach(function (x) { var li = el("li"), a = el("a", x.name); a.href = x.url; a.rel = "noopener"; li.append(a, el("span", " " + x.kind + "; access: " + x.access, "lf-filed")); ul.append(li); items.push({ src: x, href: x.url }); }); wrap.append(ul);
+        return wrap;
       }
       var srcSeen = Object.create(null);
       function sources(info) {
@@ -817,8 +1058,10 @@
         where.append(el("h4", "Where to search"));
         var ul = el("ul", null, "lf-look"); look.forEach(function (t) { ul.append(el("li", t)); }); where.append(ul);
         if ((info.older || []).length) where.append(el("p", info.name + " is also found as " + info.older.slice(0, 8).join(", ") + ". Search all of them.", "lf-filed"));
+        var fl = fsList(info, kinds, win); if (fl) where.append(fl);
         var vl = volumeList(info, kinds, win); if (vl) where.append(vl); else if (kinds.length) where.append(el("p", "The Atlas lists no " + (kinds.length > 1 ? "birth, baptism or marriage" : kinds[0] === "b" ? "birth or baptism" : kinds[0] === "m" ? "marriage" : "burial") + " volume for " + info.name + (win ? " in those years" : "") + ". That is a gap in the Atlas, not proof the records do not exist.", "lf-filed"));
         if (withSources) where.append(sources(info));
+        var wl = worldList(info); if (wl) where.append(wl);
         var pl = el("p"), pa = el("a", "Every volume the Atlas lists for " + info.name + " →"); pa.href = info.href; pl.append(pa); where.append(pl);
         grid.append(then, where); sec.append(grid); box.append(sec);
       }
@@ -836,7 +1079,21 @@
           look.push("Look for where they lived here: a census or population register, the parish or congregation's records, school and employment records.");
         }
         if (!last && route[i + 1]) look.push("Look for the leaving: exit permits or passports, emigration or passenger lists, and the last census that names the household. They went next to " + route[i + 1].info.name + (route[i + 1].age != null ? " at " + (route[i + 1].approx ? "about " : "") + "age " + route[i + 1].age : "") + ".");
-        card(info, kicker, info.name, when(x, y), y, x.age != null ? (x.approx ? "about age " : "age ") + x.age : "", look, kinds, win, true, "");
+        (x.ev || []).forEach(function (e) {
+          var win2 = e.year != null ? [e.year - 1, e.year + 1] : null;
+          if (e.type === "married") { look.push("He married here" + (e.year != null ? " in " + e.year : "") + ": look for the marriage register or civil marriage certificate. It names both families, and the witnesses are often relatives."); if (kinds.indexOf("m") < 0) kinds.push("m"); if (!win) win = win2; }
+          if (e.type === "died") { look.push("He died here" + (e.year != null ? " in " + e.year : "") + (e.cause ? " (" + e.cause + ")" : "") + ": look for the death notice, the death certificate, probate, the burial or cremation record and an obituary. The certificate names the parents."); if (kinds.indexOf("d") < 0) kinds.push("d"); if (!win) win = win2; }
+        });
+        var tags = (x.ev || []).map(function (e) { return e.type === "married" ? "married here" + (e.year != null ? " in " + e.year : "") : "died here" + (e.year != null ? " in " + e.year : ""); }).join(", ");
+        card(info, kicker + (tags ? " · " + tags : ""), info.name, when(x, y), y, x.age != null ? (x.approx ? "about age " : "age ") + x.age : "", look, kinds, win, true, "");
+      });
+      (f.kin || []).forEach(function (k) {
+        var who = ((k.label ? k.label + " " : "") + (k.name || "")).trim() || "Family";
+        k.stops.forEach(function (st) {
+          if (!st.info) return;
+          var y = st.year, born = st.role === "born", look = [born ? "Look for the baptism or birth entry of " + (k.name || "this person") + ": it names the parents, and the godparents are often relatives." : "Look for where " + (k.name || "this person") + " lived here: a census or population register and the parish records."];
+          card(st.info, who + (born ? " · born here" : st.role === "origin" ? " · from here" : " · lived here"), st.info.name, y != null ? String(y) : "", y, "", look, born ? ["b"] : [], born && y != null ? [y - 1, y + 1] : null, true, who + ", ");
+        });
       });
       anc.forEach(function (x) {
         var info = x.info, y = f.born != null ? f.born : null;
@@ -883,7 +1140,7 @@
   function roleLabel(pe, people) {
     if (pe.role === "self") return pe.rel ? "Your " + pe.rel.replace(/-/g, " ") : "The person you asked about";
     var self = (people || []).filter(function (x) { return x.role === "self"; })[0], sg = self && (self.given && typeof self.given === "object" ? self.given.typed : self.given), who = sg ? sg + "'s " : "Their ";
-    return who + pe.role;
+    return who + (pe.label || pe.role);
   }
 
   /* The names panel: how each person's names were written, in the languages of the clerks. A node for the page to place.
@@ -922,15 +1179,23 @@
     function card(pe, label) {
       var c = el("div", null, "lf-card lf-card-" + pe.role);
       c.append(el("div", label, "lf-card-role"), el("div", pe.name || "Name not given", "lf-card-name"));
-      if (pe.place) c.append(el("div", (pe.role === "self" ? "Born in " : "From ") + (typeof pe.place === "string" ? pe.place : pe.place.word), "lf-card-place"));
+      var hasBorn = (pe.events || []).some(function (e) { return e.type === "born" && e.place; });
+      if (pe.place && !hasBorn) c.append(el("div", (pe.role === "self" && !pe.events ? "Born in " : "From ") + (typeof pe.place === "string" ? pe.place : pe.place.word), "lf-card-place"));
+      (pe.events || []).forEach(function (e) {
+        var t = (e.type === "born" ? "Born" : e.type === "married" ? "Married" : "Died") + (e.year != null ? " " + e.year : "") + (e.place ? (e.year != null ? ", " : " in ") + e.place : "") + (e.cause ? " (" + e.cause + ")" : "");
+        c.append(el("div", t, "lf-card-place lf-card-ev"));
+      });
       var f = forms(pe); if (f.length) c.append(el("div", "Also written: " + f.join(", "), "lf-card-forms"));
       if (pe.presumed) c.append(el("div", "Surname assumed the same", "lf-card-forms"));
       return c;
     }
     var tree = el("div", null, "lf-tree"), others = (people || []).slice();
     function gen(cls) { var g = el("div", null, "lf-gen " + (cls || "")); tree.append(g); return g; }
+    var gps = (people || []).filter(function (x) { return x.role === "grandfather" || x.role === "grandmother"; }), sp = (people || []).filter(function (x) { return x.role === "spouse"; })[0];
+    if (gps.length) { var g0 = gen("lf-grand"); gps.forEach(function (x) { var lb = x.label || x.role; g0.append(card(x, lb.charAt(0).toUpperCase() + lb.slice(1))); }); tree.append(el("div", null, "lf-tie")); }
     if (fa || mo) { var g1 = gen("lf-parents"); if (fa) g1.append(card(fa, "Father")); if (mo) g1.append(card(mo, "Mother")); tree.append(el("div", null, "lf-tie")); }
     var g2 = gen(); g2.append(card(self, self.rel ? "Your " + self.rel.replace(/-/g, " ") : "The person you asked about"));
+    if (sp) g2.append(card(sp, self.rel === "father" ? "Wife, your mother" : self.rel === "mother" ? "Husband, your father" : "Spouse"));
     tree.append(el("div", null, "lf-tie"));
     var g3 = gen(), you = el("div", null, "lf-card lf-card-you"); you.append(el("div", "You", "lf-card-role"), el("div", "who is asking", "lf-card-place")); g3.append(you);
     return tree;

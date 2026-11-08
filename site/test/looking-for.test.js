@@ -372,3 +372,50 @@ test("the home map keeps only the play bar; the story sits below it in sections"
   assert.match(js, /J\.stops\(/);
   assert.match(js, /stopItems/);
 });
+
+/* ---- a family told in a few sentences: the people, their dated events, and the journeys the ancestors make ---- */
+const frow = [
+  { i: "senj", n: "Senj", cc: "HR", c: 40 }, { i: "crikvenica", n: "Crikvenica", cc: "HR", c: 20 },
+  { i: "harare", n: "Harare", cc: "ZW", c: 0 }, { i: "johannesburg", n: "Johannesburg", cc: "ZA", c: 0 }, { i: "brisbane", n: "Brisbane", cc: "AU", c: 1 },
+  { i: "beijing", n: "Beijing", cc: "CN", c: 0 },
+  { i: "london", n: "London", cc: "GB", c: 0, q: "londinium" }, { i: "g-new-london-ca", n: "New London", cc: "CA", c: 0, q: "london new" }, { i: "g-london-ca", n: "London", cc: "CA", c: 0 },
+];
+const fctx = { map: A.buildMap(frow), given: A.buildGiven([
+  { canon: "Ivan", id: "ivan", langs: { croatian: [{ form: "Ivan", status: "same" }] } }, { canon: "Anton", id: "anton", langs: { croatian: [{ form: "Anton", status: "same" }] } },
+  { canon: "Cheryl", id: "cheryl", langs: { english: [{ form: "Cheryl", status: "same" }] } }, { canon: "Hedviga", id: "hedviga", langs: { croatian: [{ form: "Hedviga", status: "same" }] } },
+  { canon: "Juro", id: "juro", langs: { croatian: [{ form: "Juro", status: "same" }] } }]), skip: {} };
+const FAMILY = "my father is ivan from senj, he moved to crikveNICa, then to harare, then johannesburg then brisbane. he married my other cheryl in 1975 in johannesburg, and he died in 2026 in brisbane frmo brain cancer. his mother was hedviga born in London in 1928 and father was ivan born in  beijing in 1914. his father father was anton and his mothers father was Juro.";
+
+test("a family story names everyone, with the years and places told of each", () => {
+  const p = F.parseStory(FAMILY, fctx), by = Object.fromEntries(p.people.map((x) => [x.key, x]));
+  assert.deepEqual(p.people.map((x) => x.name), ["Ivan", "Ivan", "Hedviga", "Cheryl", "Anton", "Juro"]);
+  assert.equal(by.F.role, "self"); assert.equal(by.FF.role, "father"); assert.equal(by.FM.role, "mother"); assert.equal(by.S.role, "spouse");
+  assert.equal(by.FFF.label, "father's father", "his father father is his father's father");
+  assert.equal(by.FMF.label, "mother's father", "his mothers father is his mother's father");
+  const ev = (k, t) => by[k].events.filter((e) => e.type === t)[0];
+  assert.equal(ev("FM", "born").year, 1928); assert.equal(ev("FM", "born").place.row.i, "london", "London is London, not New London");
+  assert.equal(ev("FF", "born").year, 1914); assert.equal(ev("FF", "born").place.row.i, "beijing");
+  assert.equal(ev("F", "married").year, 1975); assert.equal(ev("F", "married").place.row.i, "johannesburg");
+  assert.equal(ev("F", "died").year, 2026); assert.equal(ev("F", "died").place.row.i, "brisbane"); assert.equal(ev("F", "died").cause, "brain cancer");
+});
+
+test("the person's route gets a year at every place: the told ones kept, the rest worked out and marked about", () => {
+  const p = F.parseStory(FAMILY, fctx);
+  assert.deepEqual(p.route.map((r) => r.row.i), ["senj", "crikvenica", "harare", "johannesburg", "brisbane"]);
+  assert.equal(p.bornApprox, true); assert.equal(p.born, 1954, "his mother was born in 1928: about 26 years on");
+  const jo = p.route[3]; assert.equal(jo.year, 1975); assert.equal(jo.yearTold, true);
+  assert.equal(p.route[1].approx, true); assert.equal(p.route[1].yearTold, false);
+  assert.ok(p.route.every((r) => r.year != null));
+  assert.equal(p.endYear, 2026);
+});
+
+test("the ancestors travel too, each at the year told", () => {
+  const p = F.parseStory(FAMILY, fctx);
+  assert.deepEqual(p.kin.map((k) => [k.name, k.stops[0].row.i, k.stops[0].year]), [["Hedviga", "london", 1928], ["Ivan", "beijing", 1914]]);
+});
+
+test("a one-person story is still read as before", () => {
+  const p = F.parseStory("My great-grandfather Ivan Kosina came from Gallignana to Hamilton around 1905.", ctx);
+  assert.equal(p.kin, undefined);
+  assert.equal(p.people.length, 1);
+});

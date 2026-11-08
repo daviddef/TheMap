@@ -647,10 +647,12 @@
         E.slider.oninput = function () { if (stopPlay) stopPlay(); setT(Number(E.slider.value)); };
         var raf = null;
         stopPlay = function () { if (raf) cancelAnimationFrame(raf); raf = null; if (E.play) E.play.textContent = "▶ Play"; };
+        if (!E.hearsOthers && typeof document !== "undefined") { E.hearsOthers = true; document.addEventListener("ra-playback", function (e) { if (e.detail && e.detail.who !== "story" && stopPlay) stopPlay(); }); }
         if (E.play) {
           E.play.hidden = reduce;
           E.play.onclick = function () {
             if (raf) { stopPlay(); return; }
+            try { document.dispatchEvent(new CustomEvent("ra-playback", { detail: { who: "story" } })); } catch (e) { /* not in a page */ }
             E.play.textContent = "❚❚ Pause";
             var from = Number(E.slider.value) >= t1 ? t0 : Number(E.slider.value), ts0 = null, span = (t1 - from) * (tl.mode === "age" ? 260 : 450);
             function tick(ts) { if (ts0 == null) ts0 = ts; var k = Math.min(1, (ts - ts0) / span); setT(Math.round(from + (t1 - from) * k)); if (k < 1) raf = requestAnimationFrame(tick); else stopPlay(); }

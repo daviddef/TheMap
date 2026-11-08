@@ -4452,11 +4452,13 @@ window.addEventListener("load", async function () {
     playBtn.setAttribute("aria-pressed", "false");
     playBtn.title = "Play the years — watch the jurisdictions change and the records follow";
   }
+  document.addEventListener("ra-playback", function (e) { if (e.detail && e.detail.who !== "records") stopPlay(); });
   function startPlay() {
     if (playT) return stopPlay();
     if (!yon.checked) { yon.checked = true; readRange(); }
     year = 1500; year2 = year + PLAY_SPAN;
     yin.value = year; yin2.value = year2;
+    document.dispatchEvent(new CustomEvent("ra-playback", { detail: { who: "records" } }));
     playBtn.innerHTML = "&#9632;";
     playBtn.setAttribute("aria-pressed", "true");
     playBtn.title = "Stop";

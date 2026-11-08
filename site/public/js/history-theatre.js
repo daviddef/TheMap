@@ -853,6 +853,7 @@
     if (year >= end) setYear(chapter ? chapter.from : MIN);
     elPlay.innerHTML = "&#9632;"; elPlay.setAttribute("aria-pressed", "true");
     if (opts.onPlay) opts.onPlay(true);
+    try { document.dispatchEvent(new CustomEvent("ra-playback", { detail: { who: "theatre" } })); } catch (e) { /* no document */ }
     var yps = parseFloat(elSpeed.value) || 0.5;          // years a second; 0.2 is one year every five seconds
     var step = reduce ? 5 : 1, per = reduce ? 1000 / (yps / 5) : 1000 / yps;
     timer = setInterval(function () {
@@ -1003,6 +1004,7 @@
         listen(elFocus, "input", focusFromInput); listen(elFocus, "change", focusFromInput);
         listen(elFocus, "keydown", function (e) { if (e.key === "Enter") focusFromInput(); });
       }
+      listen(document, "ra-playback", function (e) { if (e.detail && e.detail.who !== "theatre" && timer) { stop(); cancelPause(); } });   // one playback at a time: a story or the records' own play pauses this one
       listen(elRange, "input", function () { setYear(parseInt(elRange.value, 10), true); });
       listen(elPlay, "click", function () { cancelPause(); play(); });
       if (elTourBtn) listen(elTourBtn, "click", function () { ctl.tour(); });

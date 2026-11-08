@@ -44,7 +44,14 @@
     ensure().then(function () { var t = $(".sd-text"); if (t && !t.value) t.focus({ preventScroll: true }); }).catch(function () { $(".sd-status").textContent = "The Atlas files did not load. Check your connection and open this again."; });
   }
   var refit = null; /* set once the engine is loaded: draw the journey again so the pins fit the map that is left uncovered */
-  function close() { root.classList.remove("is-open"); setTimeout(function () { root.hidden = true; if (launch) launch.hidden = false; if (refit) refit(); }, 300); }
+  /* Closing only hides the panel: the map stays where the reader left it (no refit), and the button now says Edit your story. */
+  function close() { root.classList.remove("is-open"); setTimeout(function () { root.hidden = true; if (launch) launch.hidden = false; }, 300); }
+  function launchLabel(editing) {
+    if (!launch) return;
+    var t = editing ? "Edit your story" : "Start with your story", n = launch.lastChild;
+    if (n && n.nodeType === 3) n.nodeValue = "\n  " + t + "\n"; else launch.append(t);
+    launch.setAttribute("aria-label", t);
+  }
   if (launch) launch.addEventListener("click", open);
   $(".sd-x").addEventListener("click", close);
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !root.hidden && root.contains(document.activeElement)) close(); });
@@ -60,6 +67,7 @@
     /* the dock: shown when a journey is drawn, tabs for what sits in it, the map gives it room */
     function dockSize() { if (host) host.style.setProperty("--sdk-h", (dock.hidden ? 0 : dock.offsetHeight) + "px"); }
     function showDock(on) {
+      launchLabel(on);
       if (host) host.classList.toggle("has-dock", on);
       root.classList.toggle("is-compact", on);
       if (on) { dock.hidden = false; requestAnimationFrame(function () { dock.classList.add("is-open"); dockSize(); }); }

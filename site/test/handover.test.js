@@ -66,8 +66,10 @@ test("documents read whole and their case file are in the saved document and the
   const cf = { headline: "Probably one man.", groups: [{ docs: [1, 2], verdict: "likely", because: ["same birth date, doc 1 and doc 2"], against: [] }], next_steps: [{ look_for: "the passenger manifest", where: "Ellis Island", search_with: "Giovanni Slavic, 31 Dec 1920", could_settle: "the village" }] };
   const m = H.model("", {}, null, "", "2026-11-08", { docs, cf, pics: {}, withPics: true });
   const md = H.toMarkdown(H.document(m, "ai", ""));
-  assert.ok(md.includes("2 documents read from pictures")); assert.ok(md.includes("Verdict: likely") && md.includes("across documents 1, 2")); assert.ok(md.includes("Giovanni Slavic, 31 Dec 1920"));
+  assert.ok(md.includes("2 documents")); assert.ok(md.includes("Same person across documents 1, 2? likely")); assert.ok(md.includes("Giovanni Slavic, 31 Dec 1920"));
   assert.ok(md.includes("data:image/jpeg;base64,QUJD") && md.includes("data:image/jpeg;base64,REVG"));
+  const pdf = H.toMarkdown(H.document(m, "ai", "", { pdf: true }));
+  assert.ok(!pdf.includes("Prompt to hand this on") && md.includes("Prompt to hand this on")); assert.ok(pdf.includes("| Look for |") && pdf.includes("# Case file"));
   const pr = H.prompt(m, "ai", "");
   assert.ok(pr.includes("Probably one man.") && pr.includes("Jozef Slavich")); assert.ok(!pr.includes("QUJD"));
 });

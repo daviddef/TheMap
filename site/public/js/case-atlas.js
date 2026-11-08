@@ -331,24 +331,27 @@
     function journeySvg(layer) {
       var pts = (layer.stops || []).filter(function (s) { return s.place && s.place.lat != null; });
       if (!pts.length) return "";
-      var W = 640, H = 340, pad = 46, la = pts.map(function (s) { return s.place.lat; }), lo = pts.map(function (s) { return s.place.lon; });
+      var W = 640, H = 190, pad = 34, la = pts.map(function (s) { return s.place.lat; }), lo = pts.map(function (s) { return s.place.lon; });
       var a0 = Math.min.apply(null, la), a1 = Math.max.apply(null, la), o0 = Math.min.apply(null, lo), o1 = Math.max.apply(null, lo);
       var da = Math.max(a1 - a0, 0.5), dl = Math.max(o1 - o0, 0.5), k = Math.min((W - 2 * pad) / dl, (H - 2 * pad) / da);
       var ox = (W - dl * k) / 2, oy = (H - da * k) / 2;
       function xy(p) { return [ox + (p.lon - o0) * k, H - oy - (p.lat - a0) * k]; }
       var esc = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]; }); };
       var s = ["<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 " + W + " " + H + "\" width=\"" + W + "\" height=\"" + H + "\" font-family=\"Helvetica,Arial,sans-serif\"><rect width=\"" + W + "\" height=\"" + H + "\" fill=\"#eceeed\"/>"];
-      var byN = {}; pts.forEach(function (p) { byN[p.n] = p; });
+      var byN = {}, pos = {}; pts.forEach(function (p) {
+        var c = xy(p.place), tries = 0;
+        while (tries++ < 12 && Object.keys(pos).some(function (q) { return Math.hypot(pos[q][0] - c[0], pos[q][1] - c[1]) < 22; })) c = [c[0] + 24, c[1] + (tries % 2 ? -6 : 6)];
+        pos[p.n] = c; byN[p.n] = p;
+      });
       (layer.paths || []).forEach(function (g) {
-        var d = g.seq.filter(function (q) { return byN[q.n]; }).map(function (q, i) { var c = xy(byN[q.n].place); return (i ? "L" : "M") + c[0].toFixed(1) + " " + c[1].toFixed(1); }).join(" ");
+        var d = g.seq.filter(function (q) { return byN[q.n]; }).map(function (q, i) { var c = pos[q.n]; return (i ? "L" : "M") + c[0].toFixed(1) + " " + c[1].toFixed(1); }).join(" ");
         if (d.indexOf("L") > -1) s.push("<path d=\"" + d + "\" fill=\"none\" stroke=\"#8a6a3c\" stroke-width=\"2\" stroke-dasharray=\"6 4\"/>");
       });
       pts.forEach(function (p) {
-        var c = xy(p.place);
-        s.push("<circle cx=\"" + c[0].toFixed(1) + "\" cy=\"" + c[1].toFixed(1) + "\" r=\"11\" fill=\"#245565\"/><text x=\"" + c[0].toFixed(1) + "\" y=\"" + (c[1] + 4).toFixed(1) + "\" font-size=\"12\" fill=\"#fff\" text-anchor=\"middle\" font-weight=\"700\">" + p.n + "</text>" +
-          "<text x=\"" + (c[0] + 15).toFixed(1) + "\" y=\"" + (c[1] + 4).toFixed(1) + "\" font-size=\"12\" fill=\"#1d2a2e\">" + esc(p.place.name + (p.first != null ? " " + p.first : "")) + "</text>");
+        var c = pos[p.n];
+        s.push("<circle cx=\"" + c[0].toFixed(1) + "\" cy=\"" + c[1].toFixed(1) + "\" r=\"11\" fill=\"#245565\"/><text x=\"" + c[0].toFixed(1) + "\" y=\"" + (c[1] + 4).toFixed(1) + "\" font-size=\"12\" fill=\"#fff\" text-anchor=\"middle\" font-weight=\"700\">" + p.n + "</text>");
       });
-      s.push("<text x=\"8\" y=\"" + (H - 8) + "\" font-size=\"9\" fill=\"#52666c\">Positions only, no base map. Dashed lines join places in date order; they do not show the route taken.</text></svg>");
+      s.push("</svg>");
       return s.join("");
     }
 

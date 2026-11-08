@@ -1536,3 +1536,24 @@ details.ask-priv { margin: 0 0 12px; padding: 0 14px; } details.ask-priv summary
 .cx-sec { margin: 0; } .cx-sec > h4 { margin: 0 0 10px; font: 700 20px/1.2 var(--serif, Georgia, serif); text-transform: none; letter-spacing: 0; color: var(--ink); }
 @media (max-width: 760px) { .rs-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .cx-cols { grid-template-columns: minmax(0, 1fr); } .cx-polsum { display: none; } .rs-headline { max-width: none; } }
 .cx-start .ask-src { margin-left: 8px; } .cx-start .as-vm { margin-top: 2px; }
+
+/* results: real tabs, cards with room around them */
+:root { --rs-card: #fff; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --rs-card: #1E2A34; } }
+:root[data-theme="dark"] { --rs-card: #1E2A34; }
+.rs { gap: 20px; }
+.rs-hero { padding: 16px 0 0; }
+.rs-tile { background: var(--rs-card); padding: 14px 16px; }
+.rs-tabs { gap: 6px; border-bottom: 0; margin: 0; padding: 0; align-items: flex-end; }
+.rs-tab { padding: 12px 18px 11px; margin: 0 0 -1px; border: 1px solid var(--rule-strong); border-bottom-color: var(--rule-strong); border-top: 3px solid transparent; border-radius: 10px 10px 0 0; background: var(--panel-2); color: var(--ink-2); position: relative; }
+.rs-tab:hover { background: var(--panel); color: var(--ink); }
+.rs-tab[aria-selected=true] { background: var(--rs-card); color: var(--ink); border-top-color: var(--accent, #245565); border-bottom-color: var(--rs-card); z-index: 1; }
+.rs-panel { background: var(--rs-card); border: 1px solid var(--rule-strong); border-radius: 0 10px 10px 10px; padding: 22px 24px; gap: 18px; }
+.rs-foot { margin: 6px 0 0; }
+.rs-doc { background: var(--panel); }
+.hd-card { border: 1px solid var(--rule-strong); border-left: 3px solid var(--accent); border-radius: 10px; background: var(--rs-card); padding: 20px 24px 16px; margin-top: 8px; }
+.hd-card h3 { margin: 0 0 4px; }
+.hd-row { margin: 14px 0; }
+#ask-hand { margin-top: 28px; }
+.cx-mount { margin: 28px 0 8px; }
+@media (max-width: 760px) { .rs-panel { padding: 16px 14px; } .rs-tab { padding: 11px 13px 10px; font-size: 14px; } .hd-card { padding: 16px 14px 12px; } }

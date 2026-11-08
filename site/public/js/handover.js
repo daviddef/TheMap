@@ -169,6 +169,69 @@
     return b;
   }
 
+  /* ---- the short case document: what the PDF and the .md carry for pictures read as documents ---------------------------------------
+     One page or two: the map, tables (places, timeline, people, where to look, names to try) and each document beside its picture. The long
+     per-document and per-place prose stays on the page; this is the part a person can take to a desk. */
+  function host(u) { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (e) { return ""; } }
+  function cut(t, n) { t = String(t || "").replace(/\s+/g, " ").trim(); return t.length > n ? t.slice(0, n - 1).replace(/\s+\S*$/, "") + "…" : t; }
+  function compactBlocks(m) {
+    var c = m.cf && !m.cf.unparsed ? m.cf : null, L = m.layer, T = (L && L.tree) || {}, b = [];
+    var who = ((T.focus || [])[0] || {}).name;
+    b.push({ h: 1, t: who ? "Case file: " + who : "Case file" },
+      { p: m.docs.length + (m.docs.length === 1 ? " document" : " documents") + " · prepared " + m.today + " with Record Atlas", cls: "meta" });
+    if (c && c.headline && String(c.headline).length > 11) b.push({ p: c.headline, cls: "lead" });
+    if (c) (c.groups || []).forEach(function (g) {
+      b.push({ p: "Same person across documents " + (g.docs || []).join(", ") + "? " + (g.verdict || "not given") + " — a hypothesis, not proof.", cls: "verdict" });
+      if ((g.because || []).length) b.push({ ul: g.because.slice(0, 4).map(function (x) { return cut(x, 140); }) });
+    });
+    if (L && (L.stops || []).length) {
+      b.push({ h: 2, t: "Journey" });
+      if (L.svg) b.push({ svg: L.svg, cap: "Positions only; the dashed line follows the order of the dates, not the route." });
+      b.push({ tbl: { head: ["", "Place", "When", "Whose ground", "Docs"], w: [4, 34, 14, 40, 8], rows: L.stops.map(function (s) {
+        var g = (s.ground || []).filter(function (x) { return !x.none && x.polity; })[0];
+        return [String(s.n), s.place ? s.place.name + ", " + s.place.country : s.text + " (not in the Atlas)", (s.years || []).join(", "), g ? g.polity : "", (s.docs || []).join(", ")];
+      }) } });
+    }
+    if (c && (c.timeline || []).length) b.push({ h: 2, t: "Timeline" }, { tbl: { head: ["Date", "What", "Source"], w: [14, 70, 16], rows: c.timeline.map(function (t) {
+      return [t.date || "?", (t.event || "") + (t.place ? " (" + t.place + ")" : ""), t.source || ""];
+    }) } });
+    var pr = [];
+    [["focus", "Subject"], ["spouse", "Spouse"], ["parents", "Parent"], ["children", "Child"], ["others", "Other"]].forEach(function (k) {
+      (T[k[0]] || []).forEach(function (p) { pr.push([p.name, k[1], (p.docs || []).join(", "), [p.born && "b. " + p.born, p.birthplace].filter(Boolean).join(", ")]); });
+    });
+    if (pr.length) b.push({ h: 2, t: "People" }, { tbl: { head: ["Name", "Role", "Docs", "Born"], w: [34, 18, 10, 38], rows: pr } });
+    if (L && (L.start || []).length) b.push({ h: 2, t: "Where to look first" }, { tbl: { head: ["", "Where", "How", "Link"], w: [4, 32, 44, 20], rows: L.start.slice(0, 6).map(function (x, i) {
+      return [String(i + 1), x.title, cut(x.how, 110), host(x.url)];
+    }) } });
+    if (L) {
+      var rg = [];
+      (L.stops || []).forEach(function (s) {
+        var v = s.volumes || {}, rows = (v.cover && v.cover.length ? v.cover : v.near) || [];
+        rows.slice(0, 2).forEach(function (x) { rg.push([s.place ? s.place.name : s.text, x.title, x.from + "–" + x.to + (v.cover && v.cover.length ? "" : " (nearest)"), x.held || ""]); });
+      });
+      if (rg.length) b.push({ h: 2, t: "Registers covering those years" }, { tbl: { head: ["Place", "Register", "Years", "Held at"], w: [18, 42, 18, 22], rows: rg.slice(0, 10) } });
+    }
+    var N = (L && L.names) || {}, nm = [];
+    (N.surnames || []).forEach(function (x) { var f = x.family ? x.family.forms.slice(0, 6).map(function (y) { return y.form; }).join(", ") : ""; nm.push([x.written, "Surname", f || "none catalogued"]); });
+    (N.given || []).forEach(function (g) { nm.push([g.written, "Given name", g.forms.slice(0, 6).map(function (f) { return f.form; }).join(", ")]); });
+    (N.places || []).forEach(function (p) { if (p.atlas) nm.push([p.written, "Place", (p.then || []).concat(p.older || []).slice(0, 6).join(", ") || "none catalogued"]); });
+    if (nm.length) b.push({ h: 2, t: "Names to try in an index" }, { tbl: { head: ["As written", "Kind", "Also try"], w: [26, 14, 60], rows: nm } });
+    b.push({ h: 2, t: m.docs.length === 1 ? "The document" : "The documents" });
+    m.docs.forEach(function (x) {
+      var d = x.doc || {}, ln = list([d.date_on_document && "Dated " + d.date_on_document, (d.places_named || []).length && "Places: " + d.places_named.join("; "),
+        d.what_it_is && cut(d.what_it_is, 220)]);
+      (d.persons || []).slice(0, 4).forEach(function (p) {
+        var det = p.details || {};
+        ln.push((p.name_as_written || "") + (p.role ? " (" + p.role + ")" : "") + list([det.born && "b. " + det.born, det.birthplace, det.occupation]).map(function (t, i) { return (i ? ", " : ": ") + t; }).join(""));
+      });
+      b.push({ card: { t: "Document " + x.n + (d.doc_type ? ": " + d.doc_type : ""), img: m.withPics ? x.pic : "", cap: x.name || "", lines: ln } });
+    });
+    if (c && (c.next_steps || []).length) b.push({ h: 2, t: "Look for next" }, { tbl: { head: ["Look for", "Where", "Search with"], w: [34, 28, 38], rows: c.next_steps.slice(0, 6).map(function (x) { return [cut(x.look_for, 90), x.where || "", x.search_with || ""]; }) } });
+    if (c && (c.conflicts || []).length) b.push({ h: 2, t: "To settle" }, { ul: c.conflicts.slice(0, 6).map(function (x) { return cut(x.issue + (x.how_to_settle ? " — " + x.how_to_settle : ""), 200); }) });
+    b.push({ p: "Readings are drafts made by an AI; check them against the originals" + (m.withPics ? "" : ", which are not included") + ". Places, dates and names are leads, not findings.", cls: "fine" });
+    return b;
+  }
+
   var DEFAULT_GOAL = "Check the draft reading against the transcript, correct it, and say what I should look at next.";
 
   /* The prompt, for another AI or for a person. The entries come from the same blocks as the document, so the two cannot disagree. */
@@ -204,7 +267,15 @@
       "", close].filter(function (x, i, a) { return x !== "" || a[i - 1] !== ""; }).join("\n");
   }
 
-  function document_(m, audience, goal) {
+  function document_(m, audience, goal, opts) {
+    if (m.docs.length) {
+      var cb = compactBlocks(m);
+      if (m.entries.length) cb = cb.concat(summaryBlocks(m), [{ h: 2, t: m.many ? "The entries" : "The entry" }], entryBlocks(m, 3));
+      if (!(opts && opts.pdf)) cb.push({ h: 2, t: "Prompt to hand this on", brk: true },
+        { p: audience === "person" ? "A note to send with this document:" : "Paste this into another AI assistant, and attach the original pictures if it accepts them:" },
+        { pre: prompt(m, audience, goal) });
+      return cb;
+    }
     var b = [{ h: 1, t: "Record handover" },
       { p: "Prepared " + m.today + " with Record Atlas (recordatlas.org). " + (m.docs.length ? m.docs.length + " document" + (m.docs.length === 1 ? "" : "s") + " read from pictures" + (m.entries.length ? ", and " : ".") : "") +
         (m.entries.length ? (m.many ? m.entries.length + " entries" : "one entry") + " from old registers, with a draft reading." : "") }];
@@ -231,15 +302,29 @@
       else if (x.ul) { x.ul.forEach(function (i) { o.push("- " + i); }); o.push(""); }
       else if (x.pre != null) { o.push("```", x.pre, "```", ""); }
       else if (x.img) { o.push("![" + (x.cap || "picture") + "](data:image/jpeg;base64," + x.img + ")", ""); }
+      else if (x.tbl) {
+        var row = function (r) { return "| " + r.map(function (c) { return String(c == null ? "" : c).replace(/\|/g, "/"); }).join(" | ") + " |"; };
+        o.push(row(x.tbl.head), row(x.tbl.head.map(function () { return "---"; })));
+        x.tbl.rows.forEach(function (r) { o.push(row(r)); }); o.push("");
+      }
+      else if (x.card) {
+        o.push("### " + x.card.t, "");
+        if (x.card.img) o.push("![" + (x.card.cap || "picture") + "](data:image/jpeg;base64," + x.card.img + ")", "");
+        x.card.lines.forEach(function (l) { o.push("- " + l); }); o.push("");
+      }
     });
     return o.join("\n").replace(/\n{3,}/g, "\n\n").trim() + "\n";
   }
 
-  var CSS = "@page{size:A4;margin:18mm 16mm}*{box-sizing:border-box}body{font:11pt/1.5 Georgia,'Times New Roman',serif;color:#1d2a2e;margin:0}" +
-    "h1{font-size:22pt;margin:0 0 4pt;color:#245565}h2{font-size:14pt;margin:18pt 0 4pt;border-bottom:1px solid #b9c5c9;padding-bottom:2pt;color:#245565}" +
+  var CSS = "@page{size:A4;margin:18mm 16mm}*{box-sizing:border-box}body{font:10pt/1.45 Georgia,'Times New Roman',serif;color:#1d2a2e;margin:0}" +
+    "h1{font-size:20pt;margin:0 0 4pt;color:#245565}h2{font-size:14pt;margin:18pt 0 4pt;border-bottom:1px solid #b9c5c9;padding-bottom:2pt;color:#245565}" +
     "h3{font-size:12pt;margin:12pt 0 3pt}.lab{font:600 8.5pt/1.4 Helvetica,Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#52666c;margin:8pt 0 2pt}" +
     "p{margin:0 0 6pt}ul{margin:0 0 6pt;padding-left:16pt}li{margin:0 0 2pt}pre{white-space:pre-wrap;word-wrap:break-word;font:10pt/1.45 Menlo,Consolas,monospace;background:#f3f1ec;border:1px solid #d9d4c7;border-radius:3pt;padding:7pt 9pt;margin:0 0 8pt}" +
-    "figure{margin:6pt 0 10pt;break-inside:avoid}figure img{max-width:100%;max-height:150mm;border:1px solid #d9d4c7}figcaption{font:8.5pt Helvetica,Arial,sans-serif;color:#52666c}.brk{break-before:page}h3,.lab{break-after:avoid}pre,li{break-inside:avoid-page}";
+    "figure{margin:6pt 0 10pt;break-inside:avoid}figure img{max-width:100%;max-height:150mm;border:1px solid #d9d4c7}figcaption{font:8.5pt Helvetica,Arial,sans-serif;color:#52666c}.brk{break-before:page}h3,.lab{break-after:avoid}pre,li{break-inside:avoid-page}" +
+    "table{width:100%;border-collapse:collapse;margin:2pt 0 10pt;font:9pt/1.35 Helvetica,Arial,sans-serif;table-layout:fixed}th{text-align:left;font-weight:600;font-size:7.5pt;letter-spacing:.08em;text-transform:uppercase;color:#52666c;border-bottom:1.5px solid #245565;padding:3pt 5pt 3pt 0}" +
+    "td{padding:3.5pt 5pt 3.5pt 0;border-bottom:1px solid #e3e0d6;vertical-align:top;overflow-wrap:anywhere}tr{break-inside:avoid}td:first-child{color:#52666c}" +
+    ".meta{font:9pt Helvetica,Arial,sans-serif;color:#52666c;margin:0 0 10pt}.lead{font-size:13pt;line-height:1.35;margin:0 0 8pt}.verdict{font:600 10pt Helvetica,Arial,sans-serif;background:#e4eef0;border-left:3pt solid #245565;padding:5pt 8pt;margin:0 0 4pt}.fine{font:8.5pt Helvetica,Arial,sans-serif;color:#52666c;margin-top:14pt}" +
+    "figure img[src^='data:image/svg']{width:100%;max-height:none;border:0}.card{display:flex;gap:12pt;align-items:flex-start;margin:0 0 10pt;break-inside:avoid;border-top:1px solid #d9d4c7;padding-top:8pt}.card img{width:52mm;max-height:60mm;object-fit:contain;border:1px solid #d9d4c7;flex:none}.card h3{margin:0 0 3pt;font-size:11pt}.card ul{margin:0;padding-left:13pt;font-size:9.5pt}.card li{margin:0 0 2pt}";
 
   /* Draw the blocks into a document with DOM calls only. */
   function toDom(doc, root, blocks) {
@@ -247,7 +332,19 @@
       var e;
       if (x.h) { e = doc.createElement("h" + x.h); e.textContent = x.t; if (x.brk) e.className = "brk"; }
       else if (x.lab) { e = doc.createElement("p"); e.className = "lab"; e.textContent = x.lab; }
-      else if (x.p != null) { e = doc.createElement("p"); e.textContent = x.p; }
+      else if (x.p != null) { e = doc.createElement("p"); e.textContent = x.p; if (x.cls) e.className = x.cls; }
+      else if (x.tbl) {
+        e = doc.createElement("table"); var th = doc.createElement("thead"), tr = doc.createElement("tr");
+        x.tbl.head.forEach(function (h, i) { var c = doc.createElement("th"); c.textContent = h; if (x.tbl.w) c.style.width = x.tbl.w[i] + "%"; tr.appendChild(c); }); th.appendChild(tr); e.appendChild(th);
+        var tb = doc.createElement("tbody");
+        x.tbl.rows.forEach(function (r) { var q = doc.createElement("tr"); r.forEach(function (v) { var c = doc.createElement("td"); c.textContent = v == null ? "" : v; q.appendChild(c); }); tb.appendChild(q); }); e.appendChild(tb);
+      }
+      else if (x.card) {
+        e = doc.createElement("div"); e.className = "card";
+        if (x.card.img) { var ci = doc.createElement("img"); ci.src = "data:image/jpeg;base64," + x.card.img; ci.alt = x.card.cap || "picture"; e.appendChild(ci); }
+        var cb = doc.createElement("div"), ch = doc.createElement("h3"); ch.textContent = x.card.t; cb.appendChild(ch);
+        var cu = doc.createElement("ul"); x.card.lines.forEach(function (l) { var li = doc.createElement("li"); li.textContent = l; cu.appendChild(li); }); cb.appendChild(cu); e.appendChild(cb);
+      }
       else if (x.ul) { e = doc.createElement("ul"); x.ul.forEach(function (i) { var li = doc.createElement("li"); li.textContent = i; e.appendChild(li); }); }
       else if (x.pre != null) { e = doc.createElement("pre"); e.textContent = x.pre; }
       else if (x.svg) { e = doc.createElement("figure"); var sv = doc.createElement("img"); sv.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(x.svg); sv.alt = x.cap || "map"; e.appendChild(sv);
@@ -319,7 +416,7 @@
         document.body.appendChild(f);
         var d = f.contentDocument; d.open(); d.write("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><title>Record handover</title></head><body></body></html>"); d.close();
         var st = d.createElement("style"); st.textContent = CSS; d.head.appendChild(st);
-        toDom(d, d.body, document_(m, aud.value, goal.value));
+        toDom(d, d.body, document_(m, aud.value, goal.value, { pdf: true }));
         say("Your print window is open: choose “Save as PDF” as the destination.");
         setTimeout(function () { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) { say("This browser would not open the print window. Use Download as text instead."); } setTimeout(function () { f.remove(); }, 60000); }, 150);
       });

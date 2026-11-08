@@ -345,3 +345,13 @@ test("the tree draws only the people the story named, and the names panel groups
   assert.match(src2, /lf-askyear/);
   ["story-guide.js", "story-drawer.js"].forEach((f) => { assert.match(src(f), /treeBlock/); assert.match(src(f), /onBorn/); });
 });
+
+test("a role label never prints an object: the gathered given name is {typed, canon, groups}", () => {
+  assert.match(src("story-engine.js"), /typeof self\.given === "object" \? self\.given\.typed/);
+});
+
+test("the journey dock holds its panels and the drawer reads them", () => {
+  const astro = fs.readFileSync(path.join(here, "../src/components/StoryDrawer.astro"), "utf8"), js = src("story-drawer.js");
+  for (const k of ["journey", "family", "names", "setting", "plan"]) assert.match(astro, new RegExp('data-panel="' + k + '"'));
+  assert.match(js, /showDock/);
+});

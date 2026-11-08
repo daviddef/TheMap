@@ -35,33 +35,47 @@ import { u } from "../lib/url.js";
   <div class="sd-chips" aria-live="polite"></div>
   <p class="sd-status" role="status" aria-live="polite"></p>
 
-  <section class="sd-journey" hidden aria-label="Their journey">
-    <h3 class="sd-h3">Their journey</h3>
+  <p class="sd-fine sd-priv">Nothing you type or drop is sent anywhere. Please don't enter details of anyone who may be alive.
+    To read writing on a photo with Claude, open <a href={u("/read/#ask")}>Reading the record</a>.</p>
+</aside>
+
+<section id="ra-journey" class="sd sdk sd-journey" aria-label="Their journey" hidden>
+  <div class="sdk-bar">
+    <h3 class="sdk-title">Their journey</h3>
     <div class="sd-time" hidden>
       <button type="button" class="sd-play">▶ Play</button>
       <input type="range" class="sd-year" min="1800" max="1900" step="1" value="1800" aria-label="Year" />
       <output class="sd-yearout"></output>
     </div>
-    <div class="sd-cap lf-capbox"></div>
-    <details class="sd-more"><summary>What was going on, and who led</summary><div class="sd-moments lf-moments"></div></details>
-    <details class="sd-more"><summary>Their family, as you told it</summary><div class="sd-tree"></div></details>
-    <details class="sd-more"><summary>How their names were written</summary><div class="sd-names"></div></details>
-    <p class="sd-fine">The dashed line joins the places in date order. It is not the route they took.</p>
-  </section>
-
-  <section class="sd-plan" hidden aria-label="What to do first"></section>
-
-  <section class="sd-family" hidden>
-    <p class="sd-fam-h">Ready to begin?</p>
-    <p class="sd-fine">Starting a research family adds the registers and sources above as planned, so you can mark them off as you go.</p>
-    <p><button type="button" class="sd-fam-btn">Start the research family</button></p>
-    <p class="sd-fam-out" role="status"></p>
-    <p class="sd-fine">Already have a tree? <a href={u("/roots/")}>Open it in Roots &amp; Routes</a> to see everyone on the map.</p>
-  </section>
-
-  <p class="sd-fine sd-priv">Nothing you type or drop is sent anywhere. Please don't enter details of anyone who may be alive.
-    To read writing on a photo with Claude, open <a href={u("/read/#ask")}>Reading the record</a>.</p>
-</aside>
+    <button type="button" class="sdk-x" aria-label="Hide the journey">×</button>
+  </div>
+  <div class="sdk-tabs" role="tablist" aria-label="About their journey">
+    <button type="button" role="tab" class="sdk-tab" data-tab="journey" aria-selected="true">Journey</button>
+    <button type="button" role="tab" class="sdk-tab" data-tab="family" aria-selected="false">Family</button>
+    <button type="button" role="tab" class="sdk-tab" data-tab="names" aria-selected="false">Names</button>
+    <button type="button" role="tab" class="sdk-tab" data-tab="setting" aria-selected="false">What was going on</button>
+    <button type="button" role="tab" class="sdk-tab" data-tab="plan" aria-selected="false">What to do first</button>
+  </div>
+  <div class="sdk-body">
+    <div class="sdk-panel" role="tabpanel" data-panel="journey">
+      <div class="sd-cap lf-capbox"></div>
+      <p class="sd-fine">The dashed line joins the places in order. It is not the route they took: the Atlas does not know that, and neither does anyone without a ship's list.</p>
+    </div>
+    <div class="sdk-panel" role="tabpanel" data-panel="family" hidden><div class="sd-tree"></div></div>
+    <div class="sdk-panel" role="tabpanel" data-panel="names" hidden><div class="sd-names"></div></div>
+    <div class="sdk-panel" role="tabpanel" data-panel="setting" hidden><div class="sd-moments lf-moments"></div></div>
+    <div class="sdk-panel" role="tabpanel" data-panel="plan" hidden>
+      <section class="sd-plan" aria-label="What to do first"></section>
+      <section class="sd-family" hidden>
+        <p class="sd-fam-h">Ready to begin?</p>
+        <p class="sd-fine">Starting a research family adds the registers and sources above as planned, so you can mark them off as you go.</p>
+        <p><button type="button" class="sd-fam-btn">Start the research family</button></p>
+        <p class="sd-fam-out" role="status"></p>
+        <p class="sd-fine">Already have a tree? <a href={u("/roots/")}>Open it in Roots &amp; Routes</a> to see everyone on the map.</p>
+      </section>
+    </div>
+  </div>
+</section>
 
 <script is:inline src={u("/js/story-drawer.js")} defer></script>
 
@@ -70,7 +84,7 @@ import { u } from "../lib/url.js";
     background: var(--accent); color: #fff; font: 600 15px/1 var(--sans); cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,.18); transition: transform .2s, background .2s; }
   .sd-launch:hover { background: var(--accent-2); transform: translateY(-1px); }
   .sd-launch[hidden], .sd[hidden] { display: none; }
-  .sd { position: absolute; z-index: 1001; top: 10px; left: 64px; bottom: 44px; width: min(380px, calc(100% - 80px)); overflow-y: auto; overscroll-behavior: contain;
+  .sd { position: absolute; z-index: 1001; top: 10px; left: 64px; width: min(380px, calc(100% - 80px)); max-height: calc(100% - 54px - var(--sdk-h, 0px)); overflow-y: auto; overscroll-behavior: contain;
     background: var(--panel); border: 1px solid var(--rule); border-radius: 16px; padding: 16px 16px 12px; box-shadow: 0 12px 40px rgba(0,0,0,.22);
     opacity: 0; transform: translateX(-18px) scale(.98); transform-origin: left top; transition: opacity .28s ease, transform .28s ease; font-family: var(--sans); color: var(--ink); }
   .sd.is-open { opacity: 1; transform: none; }
@@ -127,6 +141,9 @@ import { u } from "../lib/url.js";
   .sd .lf-moments h4, .sd .lf-names h4 { display: block; font: 600 11.5px/1 var(--sans); letter-spacing: .09em; text-transform: uppercase; color: var(--accent); margin: 14px 0 6px; }
   .sd .lf-forms { margin: 0 0 6px; padding-left: 18px; font-size: 13px; line-height: 1.5; } .sd .lf-forms li { margin: 0 0 4px; }
   .sd .lf-names .cap { color: var(--ink-2); font-size: 12.5px; }
+  .sd .lf-askyear[hidden], .sg .lf-askyear[hidden] { display: none; }
+  .sd.is-compact .sd-sub, .sd.is-compact .sd-priv, .sd.is-compact .sd-drop > .sd-fine { display: none; }
+  .sd.is-compact .sd-text { height: 4.4em; min-height: 0; }
   .sd .lf-askyear { margin: 6px 0; padding: 8px 10px; border: 1px dashed var(--accent); border-radius: 10px; font-size: 13px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
   .sd .lf-askyear input { width: 5.5em; font: inherit; padding: 5px 7px; border-radius: 6px; border: 1px solid var(--rule-strong); background: var(--panel); color: var(--ink); }
   .sd .lf-askyear button { font: 600 13px/1 var(--sans); padding: 7px 10px; border-radius: 8px; border: 0; background: var(--accent); color: #fff; cursor: pointer; }
@@ -137,6 +154,27 @@ import { u } from "../lib/url.js";
   .sd .lf-card-self { border-color: var(--accent); background: var(--accent-wash); } .sd .lf-card-you { border-style: dashed; }
   .sd .lf-card-role { font: 600 10px/1 var(--sans); letter-spacing: .09em; text-transform: uppercase; color: var(--accent); margin-bottom: 3px; }
   .sd .lf-card-name { font: 500 15px/1.25 var(--serif); } .sd .lf-card-place, .sd .lf-card-forms { font-size: 12px; color: var(--ink-2); margin-top: 2px; }
+  /* the journey dock along the bottom of the map */
+  .sd.sdk { top: auto; left: 148px; right: 16px; bottom: 26px; width: auto; max-height: none; overflow: hidden; padding: 0; display: flex; flex-direction: column; transform: translateY(14px); transform-origin: bottom; }
+  .sd.sdk.is-open { transform: none; }
+  .sdk-bar { display: flex; gap: 14px; align-items: center; padding: 8px 12px 8px 16px; }
+  .sdk-title { flex: none; max-width: 16em; margin: 0; font: 500 18px/1.2 var(--serif); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sdk .sd-time { flex: 1; min-width: 0; margin: 0; }
+  .sdk-x { flex: none; width: 30px; height: 30px; border-radius: 50%; border: 0; background: var(--panel-2); color: var(--ink); font-size: 19px; line-height: 1; cursor: pointer; margin-left: auto; }
+  .sdk-x:hover { background: var(--rule); }
+  .sdk-tabs { display: flex; gap: 2px; padding: 0 10px; overflow-x: auto; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); background: var(--ground); }
+  .sdk-tab { flex: none; font: 600 13px/1 var(--sans); padding: 11px 12px 10px; border: 0; border-bottom: 2px solid transparent; background: none; color: var(--ink-2); cursor: pointer; white-space: nowrap; }
+  .sdk-tab:hover { color: var(--ink); } .sdk-tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); } .sdk-tab[hidden] { display: none; }
+  .sdk-body { overflow-y: auto; overscroll-behavior: contain; padding: 12px 16px 14px; max-height: min(28vh, 230px); }
+  .sdk[data-collapsed] .sdk-body { display: none; }
+  .sdk-panel[hidden] { display: none; }
+  .sdk .lf-capbox { grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); align-items: start; gap: 10px; }
+  .sdk .lf-names { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 10px; align-items: start; } .sdk .lf-names .cap { grid-column: 1 / -1; }
+  .sdk .lf-person { margin: 0; }
+  .sdk .lf-moments { column-width: 300px; column-gap: 22px; } .sdk .lf-moments > * { break-inside: avoid-column; } .sdk .lf-moments h4:first-child { margin-top: 0; }
+  .sdk .sd-plan { margin-top: 0; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); align-items: start; }
+  .sdk .lf-tree { margin: 0 auto; }
+  @media (max-width: 899px) { .sd.sdk { left: 8px; right: 8px; bottom: 8px; } #ra-map.has-dock .ra-time { display: none; } .sdk-title { display: none; } .sdk-body { max-height: 32vh; } }
   .sd-plan { margin-top: 12px; display: grid; gap: 6px; }
   .sd-step { background: var(--ground); border: 1px solid var(--rule); border-radius: 10px; animation: sd-rise .45s ease both; }
   .sd-step summary { list-style: none; display: flex; gap: 10px; align-items: center; padding: 9px 12px; cursor: pointer; font: 500 15px/1.3 var(--sans); }

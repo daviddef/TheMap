@@ -770,7 +770,7 @@
   }
   function roleLabel(pe, people) {
     if (pe.role === "self") return pe.rel ? "Your " + pe.rel.replace(/-/g, " ") : "The person you asked about";
-    var self = (people || []).filter(function (x) { return x.role === "self"; })[0], who = self && self.given ? self.given + "'s " : "Their ";
+    var self = (people || []).filter(function (x) { return x.role === "self"; })[0], sg = self && (self.given && typeof self.given === "object" ? self.given.typed : self.given), who = sg ? sg + "'s " : "Their ";
     return who + pe.role;
   }
 

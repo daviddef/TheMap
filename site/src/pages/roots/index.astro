@@ -57,6 +57,7 @@ const here = Astro.url.pathname;
     <h2>Your file never leaves this computer</h2>
     <ul>
       <li>It is read and drawn by code running in this browser tab. It is not uploaded, not stored on a server and not seen by anyone.</li>
+      <li>So you do not have to find it again, the last few files you open are kept in this browser only, on this device and never online. Forget one, or all, with a click, or untick the box under the file picker and nothing is kept.</li>
       <li>This page has no analytics, no cookies and no third-party scripts, and the browser is told not to let it contact any other site.</li>
       <li>To place your people it downloads the Atlas's own place files for the countries your tree mentions. Our server can see which countries were asked for; it never sees your file or a name from it.</li>
       <li>People who may be alive are shown on your own screen. The shareable export leaves them out, and you can hide them with one tick.</li>
@@ -69,10 +70,11 @@ const here = Astro.url.pathname;
     <p class="small">GEDCOM 5.5, 5.5.1 or 7, from MyHeritage, Ancestry, FamilySearch, Family Tree Maker and the rest. Big files are fine: 15,000 people takes about ten seconds.</p>
   </div>
   <p class="or"><button id="sample" class="link">or try an invented sample family</button></p>
+  <p class="small or"><label><input type="checkbox" id="autokeep" checked> Keep the last files I open on this device, in this browser only</label></p>
   <div id="recent" class="recent" hidden>
     <h2>Kept on this device</h2>
     <ul id="rlist"></ul>
-    <p class="small">Saved in this browser only, at your choice. <button id="rall" class="link">Forget all</button></p>
+    <p class="small">Saved in this browser only; they never leave it and are not part of online sync. <button id="rall" class="link">Forget all</button></p>
   </div>
 </section>
 
@@ -102,7 +104,7 @@ const here = Astro.url.pathname;
       <button role="tab" data-tab="offer">Offer places</button>
       <button role="tab" data-tab="export">Export</button>
     </nav>
-    <button id="keep" class="link" title="Save this file in this browser so you can reopen it with one click. It stays on this device.">Keep on this device</button>
+    <button id="keep" class="link" title="Keep this file in this browser so you can reopen it with one click. It stays on this device. The last few files are kept automatically unless you untick the box on the start screen.">Keep on this device</button>
     <button id="again" class="link">Open another file</button>
   </div>
 

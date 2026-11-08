@@ -455,6 +455,16 @@ test("MyHeritage links: the last link pasted is remembered on this device, toler
   const app = fs.readFileSync(R + "js/app.js", "utf8"); assert.match(app, /loadLink\(\)/); assert.match(app, /saveLink\(/); assert.doesNotMatch(app, /localStorage/, "only remember.js touches storage");
 });
 
+test("kept files: the last files opened are kept in this browser by default, the choice to stop is itself kept, and nothing leaves the device", async () => {
+  const m = await import(R + "js/recent.js"); assert.deepEqual(["auto", "forget", "forgetAll", "list", "recall", "remember", "setAuto"], Object.keys(m).sort(), "the module parses and exports what the page uses");
+  const rec = fs.readFileSync(R + "js/recent.js", "utf8"), app = fs.readFileSync(R + "js/app.js", "utf8"), html = fs.readFileSync(path.join(here, "../src/pages/roots/index.astro"), "utf8");
+  assert.match(rec, /export async function auto\(\)/); assert.match(rec, /export const setAuto/); assert.match(rec, /filter\(r => r\.id !== OFF\)/, "the marker row is never listed as a file");
+  assert.match(app, /if \(curName\) keepAuto\(\)/, "a named file is kept on load; the sample has no name and is not");
+  assert.match(app, /if \(!\(await recent\.auto\(\)\)\) return;/, "unticked means nothing is kept");
+  assert.match(html, /id="autokeep" checked/); assert.match(html, /never online/);
+  assert.doesNotMatch(app, /indexedDB|localStorage/, "only recent.js and remember.js touch storage");
+});
+
 test("MyHeritage links: a tree link reads by parameter name, in any order, and survives a mistyped root name", async () => {
   const { parseLink } = await import(R + "js/myheritage.js");
   const c = parseLink("https://www.myheritage.com/family-trees/example-family-site-23andme/OYYV7AGVV4FMSGNWXC6TO74JQDUMOYA?familyTreeID=4&rootIndivudalID=4000016");

@@ -26,6 +26,7 @@ function fail(msg) { const e = $('#err'); e.textContent = msg; e.hidden = false;
 
 function start(bytes, name) {
   curBytes = bytes.slice(0); curName = name || null; $('#keep').hidden = !curName; $('#keep').textContent = 'Keep on this device';
+  if (curName) keepAuto();
   $('#err').hidden = true; show('busy'); $('#busymsg').textContent = 'Starting…';
   if (worker) worker.terminate();
   worker = new Worker('js/worker.js', { type: 'module' });
@@ -620,9 +621,15 @@ async function refreshRecent() {
   }
 }
 $('#rall').onclick = async () => { await recent.forgetAll(); refreshRecent(); };
+/* The last files opened are kept in this browser unless the visitor ticked "Don't keep" (stored in recent.js). Nothing is sent anywhere. */
+async function keepAuto() {
+  try { if (!(await recent.auto())) return; await recent.remember(curName, curBytes.slice(0)); $('#keep').textContent = 'Kept on this device ✓'; refreshRecent(); } catch { /* storage refused: the button still says why when pressed */ }
+}
+async function showAuto() { const c = $('#autokeep'); c.checked = await recent.auto(); }
+$('#autokeep').onchange = async function () { try { await recent.setAuto(this.checked); } catch { this.checked = false; } };
 $('#keep').onclick = async function () {
   if (!curBytes || !curName) return; const b = this; b.disabled = true;
   try { await recent.remember(curName, curBytes.slice(0)); b.textContent = 'Kept on this device ✓'; } catch (e) { b.textContent = 'Could not keep it: ' + (e.message || 'storage refused'); }
   b.disabled = false; refreshRecent();
 };
-refreshRecent();
+refreshRecent(); showAuto();

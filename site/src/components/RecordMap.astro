@@ -2854,6 +2854,21 @@ window.addEventListener("load", async function () {
     if (typeof TH !== "undefined" && TH && TH.ctl && d.country) TH.ctl.focus(String(d.country).toUpperCase());
   }
 
+  /* THE PLACE PANEL, LENT TO THE STORY. David: «why cant i see the volumes better laid out, similar to a place search, for each place in Ivan's
+     story, with the flags, who held the ground, mortality events, and flag it for my research?» The panel is one element with its handlers; a
+     story's place card can borrow it: open() for that place, and the whole panel (volumes with their + and ticks, the regions, who held the
+     ground, mass-mortality, the flags) is moved into the card, then put back where it lives when the card closes or another opens. */
+  (function () {
+    var wrap = panel.closest(".at-panel"); if (!wrap) return;
+    var home = { parent: wrap.parentNode, next: wrap.nextSibling };
+    window.raPlacePanel = {
+      wrap: wrap,
+      open: function (id, name) { return open({ i: id, n: name || id }); },
+      moveInto: function (el) { el.appendChild(wrap); },
+      restore: function () { if (wrap.parentNode !== home.parent) home.parent.insertBefore(wrap, home.next && home.next.parentNode === home.parent ? home.next : null); }
+    };
+  })();
+
   function render(d) {
     var h = [];
     /* ONE LINE, NOT FOUR. David: «"everything about gracisce" does it really

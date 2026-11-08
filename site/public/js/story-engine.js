@@ -256,7 +256,11 @@
   function cased(w) { w = String(w || ""); return w && (w === w.toLowerCase() || w === w.toUpperCase()) ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : w; }
 
   function parseStory(text, ctx, attached) {
-    var t = String(text || ""), out = { rel: "", given: "", surname: "", name: "", holds: "story", left: null, born: null, from: null, to: null };
+    var t = String(text || ""), teller = "";
+    /* "my name is David" says who is telling, not who the story is about */
+    t = t.replace(/\bmy name is\s+([\p{L}'’-]+)(?:\s+([\p{Lu}][\p{L}'’-]+))?/iu, function (m, g, sn) { teller = cased(g) + (sn && /^\p{Lu}/u.test(sn) && !STOP[S.fold(sn)] && !(ctx.map && ctx.map[S.fold(sn)]) ? " " + cased(sn) : ""); return " "; });
+    var out = { rel: "", given: "", surname: "", name: "", holds: "story", left: null, born: null, from: null, to: null };
+    out.teller = teller;
     var rm = REL.exec(t); if (rm) out.rel = rm[1].toLowerCase().replace(/ /g, "-");
     var ft = S.fold(t), tokens = ft.split(" ").filter(Boolean);
     var gv = ctx.given ? S.givenIn(t, ctx.given, ctx.skip) : [];
@@ -1049,6 +1053,24 @@
         }
         return any ? wrap : null;
       }
+      /* The whole place panel, as a place search draws it (volumes with their + and ticks, regions, who held the ground, mass mortality, flags),
+         lent to this card by the map page (RecordMap's window.raPlacePanel). Only one card holds it at a time. */
+      var lent = null;
+      function fullPanel(info) {
+        var P = typeof window !== "undefined" && window.raPlacePanel; if (!P || !info.row) return null;
+        var wrap = el("div", null, "lf-full"), b = el("button", null, "lf-full-btn"), slot = el("div", null, "lf-full-slot"); slot.hidden = true;
+        b.type = "button"; b.setAttribute("aria-expanded", "false"); b.append(el("b", "Everything the Atlas has for " + info.name), el("span", "volumes laid out as a place search shows them, the regions and flags, who held the ground, mass-mortality events, and + or ✓ to mark each source in your research"));
+        function collapse(x) { x.slot.hidden = true; x.b.setAttribute("aria-expanded", "false"); }
+        b.addEventListener("click", function () {
+          var was = b.getAttribute("aria-expanded") === "true";
+          if (lent) { collapse(lent); P.restore(); lent = null; }
+          if (was) return;
+          slot.hidden = false; b.setAttribute("aria-expanded", "true"); lent = { b: b, slot: slot };
+          P.moveInto(slot); P.open(info.row.i, info.row.n);
+          try { slot.scrollIntoView({ behavior: "smooth", block: "nearest" }); } catch (e) { /* old browser */ }
+        });
+        wrap.append(b, slot); return wrap;
+      }
       var worldDone = false;
       function worldList(info) {
         var ws = (info.world || []).filter(function (x) { return /^(familysearch|ancestry|myheritage|findagrave|geneanet|geni|wikitree|billiongraves)$/.test(x.id); });
@@ -1087,7 +1109,9 @@
         if (withSources) where.append(sources(info));
         var wl = worldList(info); if (wl) where.append(wl);
         var pl = el("p"), pa = el("a", "Every volume the Atlas lists for " + info.name + " →"); pa.href = info.href; pl.append(pa); where.append(pl);
-        grid.append(then, where); sec.append(grid); box.append(sec);
+        grid.append(then, where); sec.append(grid);
+        var fp = fullPanel(info); if (fp) sec.append(fp);
+        box.append(sec);
       }
       var w = windows(f.left, f.born);
       route.forEach(function (x, i) {

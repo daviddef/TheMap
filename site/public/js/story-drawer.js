@@ -113,6 +113,7 @@
     function placeLabel(r) { var n = r.n.replace(/\s*\(([^)]*)\)/, function (m, x) { return S.fold(x) === S.fold(r.n.replace(/\s*\([^)]*\)/, "")) ? "" : m; }), c = data.countries[r.cc]; return n + (c && S.fold(c) !== S.fold(n) ? ", " + c : ""); }
     function drawChips(p) {
       chips.textContent = "";
+      if (p.teller) chips.append(chip("you: " + p.teller, "", "teller:" + p.teller));
       if (p.rel) chips.append(chip(p.rel.replace(/-/g, " "), "", "rel:" + p.rel));
       if (p.name) chips.append(chip(p.name, "", "nm:" + p.name));
       if (p.people) p.people.forEach(function (pe) { if (pe.role !== "self" && pe.name) chips.append(chip("his " + (pe.label || pe.role) + " " + pe.name, "", "pe:" + pe.role + pe.name)); });
@@ -307,7 +308,9 @@
         $(".sd-save-btn").disabled = true; setTimeout(function () { $(".sd-save-btn").disabled = false; }, 4000);
       }).catch(function () { out.textContent = "Could not save here. Open My research and start the story there."; });
     });
+    var announced = false;
     $(".sd-clear").addEventListener("click", function () {
+      announced = false;
       files.forEach(function (x) { URL.revokeObjectURL(x.url); }); files = []; drawShots(); text.value = ""; chips.textContent = ""; ov = Object.create(null); parsedNow = null; lastSig = ""; shown = Object.create(null);
       J.clear(); showDock(false); dropKeyPlaces(); report.hidden = true; planBox.hidden = true; fam.hidden = true; status.textContent = ""; text.focus();
     });
@@ -316,10 +319,10 @@
     if (text.value) run();
     return {
       run: run,
-      setText: function (t) { text.value = String(t || "").slice(0, 2000); lastSig = ""; try { document.dispatchEvent(new CustomEvent("ra-story-start")); } catch (e) { /* no document */ } run(); },
+      setText: function (t) { text.value = String(t || "").slice(0, 2000); lastSig = ""; if (!announced) { announced = true; try { document.dispatchEvent(new CustomEvent("ra-story-start")); } catch (e) { /* no document */ } } run(); },
       addFiles: function (fl) { try { document.dispatchEvent(new CustomEvent("ra-story-start")); } catch (e) { /* no document */ } addFiles(fl); },
       clear: function () { $(".sd-clear").click(); },
-      state: function () { return { has: !!(parsedNow && ((parsedNow.route && parsedNow.route.length) || parsedNow.from || parsedNow.name)), name: parsedNow && parsedNow.name || "", files: files.length }; }
+      state: function () { return { has: !!(parsedNow && ((parsedNow.route && parsedNow.route.length) || parsedNow.from || parsedNow.name || parsedNow.teller)), name: parsedNow && parsedNow.name || "", files: files.length }; }
     };
   }
 })();

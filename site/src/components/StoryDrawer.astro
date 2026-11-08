@@ -91,8 +91,11 @@ import { u } from "../lib/url.js";
     <section class="sd-family" hidden>
       <p class="sd-fam-h">Add this family to your research</p>
       <p class="sd-fine">This adds the registers and sources listed above, for every place, as planned, so you can mark them off as you go. It stays in this browser.</p>
+      <p class="sd-fam-name-p"><label>Name it <input type="text" class="sd-fam-name" maxlength="60" /></label></p>
       <p><button type="button" class="sd-fam-btn">Start the research family</button></p>
       <p class="sd-fam-out" role="status"></p>
+      <p class="sd-save-p"><button type="button" class="sd-save-btn">Save this story, to add more later</button></p>
+      <p class="sd-fine sd-save-out" role="status">Keeps the words you typed in My research, under My story. There you can add the next article, photo caption or paragraph, and the Atlas reads it all together.</p>
       <p class="sd-fine">Already have a tree? <a href={u("/roots/")}>Open it in Roots &amp; Routes</a> to see everyone on the map.</p>
     </section>
   </section>
@@ -243,6 +246,9 @@ import { u } from "../lib/url.js";
   .sd-family { margin-top: 14px; padding: 14px; border-radius: 12px; background: var(--accent-wash); animation: sd-rise .5s ease both; }
   .sd-fam-h { font: 500 18px/1.2 var(--serif); margin: 0 0 4px; }
   .sd-fam-btn { width: 100%; font: 600 15px/1 var(--sans); padding: 14px 16px; border: 0; border-radius: 10px; background: var(--accent); color: #fff; cursor: pointer; transition: background .2s, transform .15s; }
+  .sd-fam-name-p { margin: 6px 0; font-size: 13px; } .sd-fam-name { font: inherit; padding: 7px 9px; border-radius: 8px; border: 1px solid var(--rule-strong); background: var(--panel); color: var(--ink); width: min(100%, 16em); }
+  .sd-save-btn { width: 100%; font: 600 14px/1 var(--sans); padding: 12px 16px; border: 1px solid var(--accent); border-radius: 10px; background: var(--panel); color: var(--accent); cursor: pointer; } .sd-save-btn:disabled { opacity: .6; cursor: default; }
+  .sd-save-out a { color: var(--accent); font-weight: 600; }
   .sd-fam-btn:hover { background: var(--accent-2); } .sd-fam-btn:active { transform: scale(.98); }
   .sd-fam-out { font-size: 13px; margin: 6px 0 2px; } .sd-fam-out a { color: var(--accent); }
   .sd-priv { margin-top: 12px; }

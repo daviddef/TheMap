@@ -231,6 +231,21 @@ test("starting a family adds a line and marks the volumes and sources of the pla
   assert.equal(again.added, 0, "marks already set are left as they were");
 });
 
+test("a family can be given its own name, or the plan added to a research family that already exists", () => {
+  const marks = {}, lines = [], active = [];
+  const P = {
+    addLine: (n, w) => { lines.push([n, w]); return "chosen"; }, lines: () => [{ slug: "old-one", name: "Old one", where: "" }], setActive: (s) => active.push(s),
+    get: (id) => marks[id] || null, setWhat: (id, w) => { marks[id] = { ...(marks[id] || {}), what: w }; }, setState: (id, s) => { marks[id] = { ...(marks[id] || {}), state: s }; },
+  };
+  const facts = { holds: "story", name: "Ivan Kosina", from, to: null, providers: [], given: [], base: "/" };
+  const plan = F.buildPlan(facts);
+  assert.equal(F.startFamily(P, facts, plan, { name: "  Kosina of Istria " }).name, "Kosina of Istria");
+  assert.deepEqual(lines, [["Kosina of Istria", "Gračišće"]]);
+  const r = F.startFamily(P, facts, plan, { line: "old-one" });
+  assert.equal(r.slug, "old-one"); assert.equal(r.name, "Old one");
+  assert.deepEqual(active, ["old-one"]); assert.equal(lines.length, 1, "no new line was made");
+});
+
 test("a family is kept under the surname, or under the place when the story gave none", () => {
   assert.equal(F.familyName({ name: "Ivan Kosina", from }), "Kosina");
   assert.equal(F.familyName({ name: "Ivan", from }), "Gračišće");

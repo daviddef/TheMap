@@ -127,11 +127,13 @@
         planBox.append(d);
       });
       fam.hidden = false; famOut.textContent = "";
-      $(".sd-fam-btn").textContent = "Start the " + E.familyName(g.facts) + " research family";
+      var nameIn = $(".sd-fam-name"); if (nameIn && document.activeElement !== nameIn && (!nameIn.value || nameIn.getAttribute("data-auto") === "1")) { nameIn.value = E.familyName(g.facts); nameIn.setAttribute("data-auto", "1"); }
+      if (nameIn && !nameIn.__wired) nameIn.__wired = nameIn.addEventListener("input", function () { nameIn.setAttribute("data-auto", "0"); $(".sd-fam-btn").textContent = "Start the " + (nameIn.value.trim() || "research") + " family"; });
+      $(".sd-fam-btn").textContent = "Start the " + ((nameIn && nameIn.value.trim()) || E.familyName(g.facts)) + " research family";
       $(".sd-fam-btn").onclick = function () {
         var P = window.raProgress;
         if (!P) { famOut.textContent = "Your research list did not load on this page. Reload and try again."; return; }
-        var r = E.startFamily(P, g.facts, g.plan.concat([{ items: stopItems }]));
+        var r = E.startFamily(P, g.facts, g.plan.concat([{ items: stopItems }]), { name: nameIn ? nameIn.value : "" });
         famOut.textContent = "";
         famOut.append("Started " + r.name + " with " + r.added + " planned. It is now your active line at the top. ");
         var a = el("a", "Open My research"); a.href = BASE + "my-research/"; famOut.append(a);
@@ -271,6 +273,22 @@
     ["dragleave", "drop"].forEach(function (t) { drop.addEventListener(t, function () { drop.classList.remove("hot"); }); });
     drop.addEventListener("drop", function (e) { e.preventDefault(); addFiles(e.dataTransfer && e.dataTransfer.files); });
     text.addEventListener("paste", function (e) { var fs = e.clipboardData && e.clipboardData.files; if (fs && fs.length) { e.preventDefault(); addFiles(fs); } });
+    /* keep the story: the words (and the names of any photos) go to My research, My story, where more can be added */
+    $(".sd-save-btn").addEventListener("click", function () {
+      var out = $(".sd-save-out"), t = text.value.trim();
+      if (!t && !files.length) { out.textContent = "Tell the story first, then save it."; return; }
+      (window.raStories ? Promise.resolve() : loadScript("stories.js")).then(function () {
+        var ST = window.raStories, f = last && last.facts;
+        var id = ST.create({ name: f && f.name ? f.name + "'s story" : "", text: t.slice(0, 5800) });
+        if (!id) { out.textContent = "This browser would not keep it. Storage may be full or blocked."; return; }
+        if (t.length > 5800) ST.addPiece(id, { kind: "story", label: "The family story (continued)", text: t.slice(5800, 11600) });
+        files.forEach(function (x) { ST.addPiece(id, { kind: "photo", label: String(x.f.name || "Photo").replace(/\.[a-z0-9]+$/i, "").slice(0, 80), text: "" }); });
+        if (parsedNow && parsedNow.born != null) ST.setBorn(id, parsedNow.born);
+        try { localStorage.setItem("ra-story-current", id); } catch (e) { /* the page still opens it by address */ }
+        out.textContent = "Saved. "; var a = el("a", "Open it in My research to add more"); a.href = BASE + "my-research/#story/" + id; out.append(a, document.createTextNode("."));
+        $(".sd-save-btn").disabled = true; setTimeout(function () { $(".sd-save-btn").disabled = false; }, 4000);
+      }).catch(function () { out.textContent = "Could not save here. Open My research and start the story there."; });
+    });
     $(".sd-clear").addEventListener("click", function () {
       files.forEach(function (x) { URL.revokeObjectURL(x.url); }); files = []; drawShots(); text.value = ""; chips.textContent = ""; ov = Object.create(null); parsedNow = null; lastSig = ""; shown = Object.create(null);
       J.clear(); showDock(false); dropKeyPlaces(); report.hidden = true; planBox.hidden = true; fam.hidden = true; status.textContent = ""; text.focus();

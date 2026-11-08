@@ -78,7 +78,7 @@
     if (autoLoaded || !HERE || !get().synced) return;
     autoLoaded = true;
     var dir = HERE.replace(/[^\/]*$/, "");
-    ["research-sync.js", window.raProgress ? null : "progress-kit.js", window.raResearchFile ? null : "research-file.js", "sync-auto.js"].forEach(function (f) {
+    ["research-sync.js", window.raProgress ? null : "progress-kit.js", window.raStories ? null : "stories.js", window.raResearchFile ? null : "research-file.js", "sync-auto.js"].forEach(function (f) {
       if (!f || (f === "research-sync.js" && window.raResearchSync)) return;
       var sc = document.createElement("script"); sc.src = dir + f; sc.async = false; document.head.appendChild(sc);
     });

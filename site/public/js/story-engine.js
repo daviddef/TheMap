@@ -373,10 +373,14 @@
 
   /* Turn a plan into a research family: a line named for the surname (or the place), with the volumes and sources the plan lists marked
      as planned. P is window.raProgress. Returns {slug, name, added}; nothing is sent anywhere, the marks stay in this browser. */
-  function startFamily(P, facts, plan) {
-    var name = familyName(facts);
+  function startFamily(P, facts, plan, opts) {
+    opts = opts || {};
+    var name = String(opts.name || "").trim().slice(0, 60) || familyName(facts);
     var where = facts.from ? facts.from.name : "";
-    var slug = P.addLine(name, where), added = 0;
+    /* opts.line: add to a research family that already exists instead of starting one */
+    var have = opts.line ? P.lines().filter(function (l) { return l.slug === opts.line; })[0] : null;
+    var slug = have ? have.slug : P.addLine(name, where), added = 0;
+    if (have) { name = have.name; P.setActive(slug); }
     var base = facts.base || "/";
     plan.forEach(function (s) {
       s.items.forEach(function (it) {

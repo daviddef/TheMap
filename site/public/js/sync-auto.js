@@ -16,7 +16,7 @@
 (function (root) {
   "use strict";
   var KEY = "ra-sync-v1", FP = "ra-sync-fp", NOTE = "ra-sync-note";
-  var WATCH = ["ra-progress-v1", "ra-fix-decisions-v1", "ra-areas-v1", "ra-gedcom-names-v1",
+  var WATCH = ["ra-progress-v1", "ra-fix-decisions-v1", "ra-areas-v1", "ra-gedcom-names-v1", "ra-stories-v1",
     "recordatlas.roots.myheritage-link", "recordatlas.roots.ancestry-site", "recordatlas.roots.myheritage-trees"];
   var QUIET_MS = 15000, WATCH_MS = 20000, PULL_MS = 60000;
 

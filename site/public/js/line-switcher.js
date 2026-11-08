@@ -94,7 +94,7 @@
       else if (e.key === "Enter") { e.preventDefault(); if (at > -1 && shownLines[at]) choose(shownLines[at]); else if (shownLines.length === 1) choose(shownLines[0]); else if (!shownLines.length && q.value.trim()) openAdd(q.value.trim()); }
     });
     pop.addEventListener("keydown", function (e) { if (e.key === "Escape") { e.stopPropagation(); closePop(true); } });
-    document.addEventListener("mousedown", function (e) { if (!pop.hidden && !cb.contains(e.target) && !(e.target.closest && e.target.closest(".ra-line-new"))) closePop(false); });
+    document.addEventListener("mousedown", function (e) { if (!pop.hidden && !cb.contains(e.target)) closePop(false); });
     addBtn.addEventListener("click", function () { openAdd(q.value.trim()); });
     form.addEventListener("submit", function (e) {
       e.preventDefault(); var name = fName.value.trim(); if (!name) { fName.focus(); return; }
@@ -145,7 +145,6 @@
       document.dispatchEvent(new CustomEvent("ra-progress-changed"));
     });
 
-    bar.querySelector(".ra-line-new").addEventListener("click", function () { openPop(true); });
 
     var ren = bar.querySelector(".ra-line-ren");
     if (ren) ren.addEventListener("click", function () {

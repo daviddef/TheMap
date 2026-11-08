@@ -1267,6 +1267,11 @@ header.site .ra-grp .ra-lines-c select{font-family:var(--sans);font-size:12.5px}
 .ra-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 header.site .ra-inv{margin-left:10px;display:inline-flex}
 header.site .ra-inv summary{white-space:nowrap}
+/* in the Researching group (wide screens) the pill sits right of «Local», and its inventory opens leftward so it stays on the screen */
+header.site .ra-grp .ra-inv{margin-left:0}
+header.site .ra-grp .ra-inv .ra-inv-grid{left:auto;right:0}
+/* below the burger breakpoint the order beside the brand is: name, Local, volumes */
+@media (max-width:1180px){header.site .ra-live-top{order:1}header.site .ra-inv{order:2}header.site .site-tools,header.site .burger{order:3}}
 .inv-short{display:none}
 @media (max-width:980px){
   header.site .ra-inv{position:static}

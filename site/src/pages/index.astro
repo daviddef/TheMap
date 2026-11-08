@@ -133,7 +133,7 @@ const inventoryRows = [
       article, so nothing between the header and the search box.) */}
   <h1 class="ra-sr">Where the records are</h1>
   <details class="ra-inv" slot="inv" id="ra-inv">
-    <summary class="k-tag is-new" aria-label={volumes.toLocaleString() + " volumes: what the atlas holds"}><span class="inv-full">{volumes.toLocaleString()} volumes</span><span class="inv-short" aria-hidden="true">{(volumes / 1e6).toFixed(1)}M</span></summary>
+    <summary class="k-tag is-new" aria-label={volumes.toLocaleString() + " volumes: what the atlas holds"}><span class="inv-full">{(volumes / 1e6).toFixed(2)}M volumes</span><span class="inv-short" aria-hidden="true">{(volumes / 1e6).toFixed(2)}M</span></summary>
     <div class="ra-inv-grid">
       {inventoryRows.map(([head, items]) => (
         <>
@@ -147,6 +147,22 @@ const inventoryRows = [
       ))}
     </div>
   </details>
+  {/* RIGHT OF «LOCAL». David: «move the volume numbers to the right of "local" … short form, e.g. 3.43M». On a wide screen the pill moves into
+      the Researching group, after the Local dot; below the burger breakpoint that group is in the drawer and the dot sits beside the brand, so
+      the pill goes back to sit after it. One element, moved by matchMedia (without script it stays beside the brand). */}
+  <script is:inline>
+    (function () {
+      var pill = document.getElementById("ra-inv"), mq = window.matchMedia && window.matchMedia("(min-width: 1181px)");
+      if (!pill || !mq) return;
+      var home = pill.parentNode, next = pill.nextSibling;
+      function place() {
+        var live = document.querySelector(".ra-grp .ra-live-grp");
+        if (mq.matches && live) { live.parentNode.insertBefore(pill, live.nextSibling); pill.classList.add("in-grp"); }
+        else { home.insertBefore(pill, next); pill.classList.remove("in-grp"); }
+      }
+      place(); if (mq.addEventListener) mq.addEventListener("change", place);
+    })();
+  </script>
 
   {/* ABOVE THE MAP, BECAUSE IT DECIDES WHERE EVERY MARK GOES. David: «can we
       move the researching dropdown thats hiding all the way at the bottom to

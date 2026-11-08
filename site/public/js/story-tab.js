@@ -45,7 +45,7 @@
 
   /* ---- what the Atlas makes of a story ---------------------------------------------------------------------------------- */
   function parse(text, holds, born) {
-    var p = E.parseStory(text, { map: data.map, given: data.given, skip: data.skip }, holds);
+    var p = E.parseStory(text, { map: data.map, given: data.given, skip: data.skip, countries: data.countries }, holds);
     /* an ordinary word that happens to be a place's name ("Street", "Mill") is not a stop */
     if (p.route) p.route = p.route.filter(function (st) { return !(st.row && notPlace(st, p)); });
     if (p.stops) p.stops = p.stops.filter(function (st) { return !(st.row && notPlace(st, p)); });
@@ -102,6 +102,14 @@
     $("ms-add-to").textContent = s.name;
   }
 
+  /* a picture kept in this browser for a piece (story-pics.js): a thumbnail that opens it whole */
+  function showKept(li, sid, pid) {
+    (window.raStoryPics ? Promise.resolve() : loadScript("story-pics.js")).then(function () { return window.raStoryPics.get(sid + "/" + pid); }).then(function (b) {
+      if (!b) return;
+      var url = URL.createObjectURL(b), a = make("a", null, "ms-thumb"), im = make("img"); a.href = url; a.target = "_blank"; a.rel = "noopener"; a.title = "Open the picture";
+      im.src = url; im.alt = "The picture kept for this piece"; a.append(im, make("span", "Kept in this browser only", "ms-dim")); li.insertBefore(a, li.querySelector(".ms-acts"));
+    }).catch(function () { /* no picture kept here: the piece is just its words */ });
+  }
   function drawLog(c) {
     var s = c.story, box = $("ms-log"); box.textContent = "";
     var pieces = s.pieces.slice().reverse();
@@ -124,7 +132,8 @@
           var long = p.text.length > 220;
           if (long) { var d = make("details", null, "ms-more"); d.append(make("summary", p.text.slice(0, 200).replace(/\s+\S*$/, "") + "…"), make("p", p.text, "ms-ent-t")); li.append(d); }
           else li.append(make("p", p.text, "ms-ent-t"));
-        } else li.append(make("p", "No caption was typed, so the Atlas has nothing to read in this photo yet.", "ms-ent-t ms-dim"));
+        } else li.append(make("p", p.kind === "document" ? "Its reading is in the story's first piece, which the Atlas reads with this one." : "No caption was typed, so the Atlas has nothing to read in this photo yet.", "ms-ent-t ms-dim"));
+        if (p.kind === "photo" || p.kind === "document") showKept(li, s.id, p.id);
         var gets = p.text && data ? found(p, s.born) : [];
         if (p.text) {
           var lab = make("label", null, "ms-route"), cb = make("input"); cb.type = "checkbox"; cb.checked = ST.routeOn(p);
@@ -135,7 +144,7 @@
         var acts = make("div", null, "ms-row ms-acts");
         var ed = make("button", "Edit", "ms-link"); ed.type = "button"; ed.addEventListener("click", function () { editing = p.id; confirmDel = null; refresh(); });
         var rm = make("button", confirmDel === p.id ? "Remove it for good" : "Remove", "ms-link" + (confirmDel === p.id ? " ms-danger" : "")); rm.type = "button";
-        rm.addEventListener("click", function () { if (confirmDel === p.id) { ST.removePiece(s.id, p.id); confirmDel = null; say("Removed. The story is read again without it."); refresh(); } else { confirmDel = p.id; refresh(); } });
+        rm.addEventListener("click", function () { if (confirmDel === p.id) { ST.removePiece(s.id, p.id); if (window.raStoryPics) window.raStoryPics.del(s.id + "/" + p.id).catch(function () {}); confirmDel = null; say("Removed. The story is read again without it."); refresh(); } else { confirmDel = p.id; refresh(); } });
         acts.append(ed, rm); li.append(acts);
       }
       box.append(li);
@@ -320,7 +329,7 @@
       var c = current(); if (!c.story) return;
       if (!delAsk) { delAsk = true; $("ms-del").textContent = "Delete “" + c.story.name.slice(0, 30) + "” for good?"; $("ms-del").classList.add("ms-danger"); setTimeout(function () { delAsk = false; $("ms-del").textContent = "Delete story"; $("ms-del").classList.remove("ms-danger"); }, 5000); return; }
       delAsk = false; $("ms-del").textContent = "Delete story"; $("ms-del").classList.remove("ms-danger");
-      ST.remove(c.story.id); lsSet(CUR, ""); say("Deleted."); if (J) J.clear(); refresh();
+      ST.remove(c.story.id); if (window.raStoryPics) window.raStoryPics.delStory(c.story.id).catch(function () {}); lsSet(CUR, ""); say("Deleted."); if (J) J.clear(); refresh();
     });
     [].forEach.call(root.querySelectorAll(".ms-kind"), function (b) { b.addEventListener("click", function () { kind = b.getAttribute("data-kind"); drawComposer(current()); $("ms-text").focus(); }); });
     $("ms-add").addEventListener("click", add);

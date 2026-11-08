@@ -490,3 +490,20 @@ test("a birthplace the Atlas does not hold is kept as written for the card", () 
   assert.equal(p.people[1].events[0].text, "Gornji Rukavac");
   assert.deepEqual(p.kin, [], "no pin is drawn for a place that is not placed");
 });
+
+test("the man being looked for gets his own name, birth and journey from the rest of the story", () => {
+  const rows = [{ i: "gr", n: "Gornji Rukavac", cc: "HR", c: 0 }, { i: "istria", n: "Istria", cc: "HR", c: 9 }, { i: "ny", n: "New York", cc: "US", c: 5 }, { i: "chi", n: "Chicago", cc: "US", c: 9 }];
+  const cs = { map: A.buildMap(rows), given: A.buildGiven([]), skip: {} };
+  const p = F.parseStory("Help me find this man. Joseph Slavic was born in Istria on 30 June 1902. He arrived in New York in 1920. He lived in Chicago in 1950. Father, Andreas Slavic, b 1874 in Gornji Rukavac; mother Teresia Laginja, b 1877 in Gornji Rukavac.", cs);
+  assert.equal(p.name, "Joseph Slavic"); assert.equal(p.born, 1902); assert.equal(p.noRoute, false);
+  assert.deepEqual(p.route.map((s) => [s.row.i, s.year]), [["istria", 1902], ["ny", 1920], ["chi", 1950]]);
+  assert.deepEqual(p.people.map((x) => [x.role, x.name]), [["self", "Joseph Slavic"], ["father", "Andreas Slavic"], ["mother", "Teresia Laginja"]]);
+  assert.equal(p.people[0].me, false, "the teller is still not on the tree");
+});
+
+test("a country written after a place says which same-named place is meant", () => {
+  const rows = [{ i: "new-york-ua", n: "New York", cc: "UA", c: 0 }, { i: "new-york-us", n: "New York", cc: "US", c: 0 }, { i: "g-four-states-us", n: "Four States", cc: "US", c: 0, q: "four states" }];
+  const cs = { map: A.buildMap(rows), given: A.buildGiven([]), skip: {}, countries: { US: "United States of America", UA: "Ukraine" } };
+  const p = F.parseStory("My grandfather arrived in New York, United States in 1920.", cs);
+  assert.deepEqual(p.stops.map((s) => s.row.i), ["new-york-us"], "the US one, and 'States' is not a place");
+});

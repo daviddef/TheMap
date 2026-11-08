@@ -136,7 +136,7 @@
       if (p.rel) chips.append(chip(p.rel.replace(/-/g, " "), "", "rel:" + p.rel));
       if (p.name) chips.append(chip(p.name, "", "nm:" + p.name));
       if (p.people) p.people.forEach(function (pe) {
-        if (p.noRoute) { if (pe.role !== "self") chips.append(chip((pe.label || pe.role) + (pe.name ? " " + pe.name : ""), "", "pe:" + pe.key + pe.name)); }
+        if (p.noRoute || p.sought) { if (pe.role !== "self") chips.append(chip((pe.label || pe.role) + (pe.name ? " " + pe.name : ""), "", "pe:" + pe.key + pe.name)); }
         else if (pe.role !== "self" && pe.name) chips.append(chip("his " + (pe.label || pe.role) + " " + pe.name, "", "pe:" + pe.role + pe.name));
       });
       var stopsShown = p.stops && p.stops.length ? p.stops : [p.from && Object.assign({ role: "origin" }, p.from), p.to && Object.assign({ role: "move" }, p.to)].filter(Boolean);
@@ -149,7 +149,7 @@
         } : null));
       });
       (p.kin || []).forEach(function (k) {
-        if (!p.noRoute) return;
+        if (!p.noRoute && !p.sought) return;
         k.stops.forEach(function (st) {
           chips.append(chip((k.label || "family") + (k.name ? " " + k.name : "") + ": " + (st.role === "born" ? "born in " : st.role === "origin" ? "from " : st.role === "married" ? "married in " : "to ") + placeLabel(st.row), st.role === "born" || st.role === "origin" ? "from" : "to", "k:" + k.key + st.row.i + st.role));
         });
@@ -157,6 +157,8 @@
       if (p.born) chips.append(chip("born about " + p.born, "", "b:" + p.born));
       if (p.left) chips.append(chip("about " + p.left, "", "l:" + p.left));
       if (p.holds !== "story" || files.length) chips.append(chip((E.HOLDS[p.holds] || E.HOLDS.story).t.replace(/^a /, "") + (files.length ? ", kept here" : ""), "warn", "h:" + p.holds));
+      var unread = files.filter(function (x) { return !x.r; }).length;
+      if (unread) chips.append(chip("Read " + (unread === 1 ? "the picture" : unread + " pictures") + " with Claude", "warn", "readpics", function () { readPics(); }));
     }
 
     function drawPlan(g) {
@@ -192,7 +194,7 @@
       LD.resolveMissing(t).catch(function () { return LD.load(); }).then(function (d) {
         data = d;
         var attached = files.length ? "photo" : null;
-        var p = E.parseStory(t, { map: d.map, given: d.given, skip: d.skip }, attached);
+        var p = E.parseStory(t, { map: d.map, given: d.given, skip: d.skip, countries: d.countries }, attached);
         (p.stops || []).forEach(function (st) { var o2 = ov[st.word]; if (o2) { st.row = o2.row; st.alts = o2.alts; } });
         if (p.route && p.route.length) {
           var r0 = p.route[0], rl = p.route[p.route.length - 1];
@@ -313,8 +315,27 @@
         var rm = el("button", "×"); rm.type = "button"; rm.setAttribute("aria-label", "Remove picture " + (i + 1)); rm.addEventListener("click", function () { URL.revokeObjectURL(x.url); files.splice(i, 1); drawShots(); lastSig = ""; run(); });
         w.append(im, rm); shots.append(w);
       });
-      shots.hidden = !files.length; var rd = $(".sd-read"); if (rd) rd.hidden = !files.length;
+      shots.hidden = !files.length; var rd = $(".sd-read"); if (rd) rd.hidden = !files.length || files.every(function (x) { return x.r; });
     }
+    /* READ THE PICTURES: on the press, each is read as a document by Claude, and what it says about the people with the story's surnames is
+       added to the story's own words (a block per picture, replaced if read again). The pictures are shrunk here and kept for Save. */
+    function readPics() {
+      var btn = $(".sd-read-btn"); if (!files.length) return;
+      btn.disabled = true;
+      var keys = []; ((parsedNow && parsedNow.people) || []).forEach(function (pe) { if (pe.surname && keys.indexOf(pe.surname) < 0) keys.push(pe.surname); }); if (parsedNow && parsedNow.surname && keys.indexOf(parsedNow.surname) < 0) keys.push(parsedNow.surname);
+      Promise.all([window.raStoryPics ? null : loadScript("story-pics.js"), window.raStoryRead && window.raStoryRead.read ? null : loadScript("story-read.js")]).then(function () {
+        return window.raStoryRead.read(files, keys, function (m) { status.textContent = m; });
+      }).then(function (res) {
+        var R = window.raStoryRead, base = R.stripBlocks(text.value), blocks = [];
+        files.forEach(function (x, i) { if (x.r) blocks.push(R.block(i + 1, x.f.name || "picture", x.r)); });
+        text.value = (base + (blocks.length ? "\n\n" + blocks.join("\n\n") : "")).slice(0, 8000);
+        var nf = files.filter(function (x) { return x.r && !x.r.found; }).length;
+        status.textContent = res.failed ? "Read " + res.got + " of " + files.length + ", then it stopped: " + (res.failed.message || "something went wrong.") + (typeof res.left === "number" ? " Reads left today: " + res.left + "." : "")
+          : "Read " + res.got + " picture" + (res.got === 1 ? "" : "s") + ". What they say is now in your story below." + (nf ? " " + nf + " had nobody with a matching surname on it." : "") + (typeof res.left === "number" ? " Reads left today: " + res.left + "." : "");
+        drawShots(); lastSig = ""; run();
+      }).catch(function (e) { status.textContent = (e && e.message) || "The pictures could not be read."; }).then(function () { btn.disabled = false; });
+    }
+    $(".sd-read-btn").addEventListener("click", readPics);
     file.addEventListener("change", function () { addFiles(file.files); file.value = ""; });
     ["dragenter", "dragover"].forEach(function (t) { drop.addEventListener(t, function (e) { e.preventDefault(); drop.classList.add("hot"); }); });
     ["dragleave", "drop"].forEach(function (t) { drop.addEventListener(t, function () { drop.classList.remove("hot"); }); });
@@ -324,15 +345,25 @@
     $(".sd-save-btn").addEventListener("click", function () {
       var out = $(".sd-save-out"), t = text.value.trim();
       if (!t && !files.length) { out.textContent = "Tell the story first, then save it."; return; }
-      (window.raStories ? Promise.resolve() : loadScript("stories.js")).then(function () {
+      (window.raStories ? Promise.resolve() : loadScript("stories.js")).then(function () { return files.length && !window.raStoryPics ? loadScript("story-pics.js") : null; }).then(function () {
         var ST = window.raStories, f = last && last.facts;
         var id = ST.create({ name: f && f.name ? f.name + "'s story" : "", text: t.slice(0, 5800) });
         if (!id) { out.textContent = "This browser would not keep it. Storage may be full or blocked."; return; }
         if (t.length > 5800) ST.addPiece(id, { kind: "story", label: "The family story (continued)", text: t.slice(5800, 11600) });
-        files.forEach(function (x) { ST.addPiece(id, { kind: "photo", label: String(x.f.name || "Photo").replace(/\.[a-z0-9]+$/i, "").slice(0, 80), text: "" }); });
+        /* each picture is a piece of its own, labelled with what it was read as, and its picture is kept in this browser beside it. Its words
+           are already in the story piece above, so the piece itself holds none. */
+        var kept = 0, lost = 0;
+        var keeps = files.map(function (x) {
+          var label = (x.r && x.r.label ? x.r.label + " (" + String(x.f.name || "").replace(/\.[a-z0-9]+$/i, "") + ")" : String(x.f.name || "Photo").replace(/\.[a-z0-9]+$/i, "")).slice(0, 80);
+          var pid = ST.addPiece(id, { kind: x.r ? "document" : "photo", label: label, text: "" });
+          return Promise.resolve(x.shot || window.raStoryPics.shrink(x.f)).then(function (shot) { return window.raStoryPics.put(id + "/" + pid, shot.blob); }).then(function () { kept++; }, function () { lost++; });
+        });
         if (parsedNow && parsedNow.born != null) ST.setBorn(id, parsedNow.born);
         try { localStorage.setItem("ra-story-current", id); } catch (e) { /* the page still opens it by address */ }
-        out.textContent = "Saved. "; var a = el("a", "Open it in My research to add more"); a.href = BASE + "my-research/#story/" + id; out.append(a, document.createTextNode("."));
+        Promise.all(keeps).then(function () {
+          out.textContent = "Saved" + (kept ? " with " + kept + " picture" + (kept === 1 ? "" : "s") + ", kept in this browser only (the words travel with the story, the pictures do not)" : "") + (lost ? ". " + lost + " picture" + (lost === 1 ? " was" : "s were") + " not kept: this browser would not store them" : "") + ". ";
+          var a = el("a", "Open it in My research to add more"); a.href = BASE + "my-research/#story/" + id; out.append(a, document.createTextNode("."));
+        });
         $(".sd-save-btn").disabled = true; setTimeout(function () { $(".sd-save-btn").disabled = false; }, 4000);
       }).catch(function () { out.textContent = "Could not save here. Open My research and start the story there."; });
     });

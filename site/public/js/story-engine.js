@@ -255,14 +255,37 @@
   /* "ivan" and "BLAZEVIC" are shown as names: an all-lower or all-upper word gets a capital, a word typed with its own capitals is left. */
   function cased(w) { w = String(w || ""); return w && (w === w.toLowerCase() || w === w.toUpperCase()) ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : w; }
 
+  /* A country written in the story ("Worthington, United States") says which of the same-named places is meant: places in the countries the
+     story names come first, and the words of a country's long name ("United States of America") are not themselves places. */
+  function withCountryHints(cands, tokens, ctx) {
+    if (!ctx || !ctx.countries) return cands;
+    var cov = Object.create(null), hint = Object.create(null);
+    Object.keys(ctx.countries).forEach(function (cc) {
+      [ctx.countries[cc]].concat(cc === "US" ? ["united states", "usa"] : cc === "GB" ? ["united kingdom", "uk"] : []).forEach(function (nm) {
+        var w = S.fold(nm).split(" ").filter(Boolean); if (!w.length) return;
+        var all = ctx.hintTokens || tokens;                       /* countries are looked for in the whole story, the long names covered in this stretch */
+        for (var a = 0; a + w.length <= all.length; a++) if (w.join(" ") === all.slice(a, a + w.length).join(" ")) hint[cc] = 1;
+        for (var i = 0; i + w.length <= tokens.length; i++) {
+          if (w.join(" ") !== tokens.slice(i, i + w.length).join(" ")) continue;
+          if (w.length > 1 || nm === "usa" || nm === "uk") for (var j = i; j < i + w.length; j++) cov[j] = 1;
+        }
+      });
+    });
+    if (!Object.keys(hint).length) return cands;
+    cands = cands.filter(function (c) { return !cov[c.at]; });
+    cands.forEach(function (c) { c.rows = c.rows.map(function (r, i) { return { r: r, i: i }; }).sort(function (a, b) { return (hint[b.r.cc] ? 1 : 0) - (hint[a.r.cc] ? 1 : 0) || a.i - b.i; }).map(function (x) { return x.r; }); });
+    return cands;
+  }
+
   function parseStory(text, ctx, attached) {
-    var t = String(text || ""), teller = "";
+    var t = String(text || "").replace(/^\u2014 Picture \d+ \([^\n]*\) \u2014[ \t]*$/gm, " "), teller = "";   /* the line that names a picture read into the story is not story */
     /* "my name is David" says who is telling, not who the story is about */
     t = t.replace(/\bmy name is\s+([\p{L}'’-]+)(?:\s+([\p{Lu}][\p{L}'’-]+))?/iu, function (m, g, sn) { teller = cased(g) + (sn && /^\p{Lu}/u.test(sn) && !CONNECT.test(sn) && !STOP[S.fold(sn)] && !(ctx.map && ctx.map[S.fold(sn)]) ? " " + cased(sn) : ""); return " "; });
     var out = { rel: "", given: "", surname: "", name: "", holds: "story", left: null, born: null, from: null, to: null };
     out.teller = teller;
     var rm = REL.exec(t); if (rm) out.rel = rm[1].toLowerCase().replace(/ /g, "-");
     var ft = S.fold(t), tokens = ft.split(" ").filter(Boolean);
+    ctx = Object.assign({}, ctx, { hintTokens: tokens });
     var gv = ctx.given ? S.givenIn(t, ctx.given, ctx.skip) : [];
     var gset = Object.create(null); gv.forEach(function (g) { gset[g.word] = 1; });
     if (gv.length) {
@@ -296,6 +319,7 @@
     out.left = left; out.born = born;
 
     var cands = ctx.map ? S.candidates(t, ctx.map, ctx.skip) : [];
+    cands = withCountryHints(cands, tokens, ctx);
     /* a name the story gives a person ("my dad is Ivan", "his dad is Giovanni") is a person, never a place, unless a "from"/"in" comes before it */
     var fam = ctx.map ? readFamily(t, ctx) : null, me = ctx.map && !fam ? readMe(t, ctx) : null, sought = ctx.map && !fam && !me ? readSought(t, ctx) : null, nameW = Object.create(null);
     [fam, me, sought].forEach(function (f) { if (f) Object.keys(f.people).forEach(function (k) { var pe = f.people[k]; [pe.given, pe.surname].forEach(function (n) { if (n) nameW[S.fold(n)] = 1; }); }); });
@@ -316,7 +340,11 @@
     var stops = [];
     rolesFor.forEach(function (x) {
       var c = x.c, prev = stops[stops.length - 1], len = c.word.split(" ").length;
-      if (prev && c.at === prev.at + prev.len && c.rows.some(function (r) { return r.cc === prev.row.cc; }) && !prev.country) { prev.country = c.word; return; }
+      /* "New York, United States": a country (or place) written right after a stop says which of the same-named places was meant */
+      if (prev && c.at === prev.at + prev.len && !prev.country) {
+        var pool = [prev.row].concat(prev.alts || []), pick = pool.filter(function (r) { return c.rows.some(function (cr) { return cr.cc === r.cc; }); })[0];
+        if (pick) { prev.alts = pool.filter(function (r) { return r !== pick; }).slice(0, 5); prev.row = pick; prev.country = c.word; return; }
+      }
       var lo = Math.max(prev ? prev.at + prev.len : 0, c.at - 6), win = tokens.slice(lo, c.at).join(" ");
       var anc = null, am, are = new RegExp(ANC.source, "g");
       while ((am = are.exec(win))) anc = am[1];
@@ -398,7 +426,7 @@
     var out = { origin: null, born: null, died: null, married: null, moves: [] };
     var ft = S.fold(text).split(" ").filter(Boolean); if (!ft.length) return out;
     var gv = ctx.given ? S.givenIn(text, ctx.given, ctx.skip) : [], gset = Object.create(null); gv.forEach(function (g) { gset[g.word] = 1; });
-    var cands = S.candidates(text, ctx.map, ctx.skip), atMap = Object.create(null);
+    var cands = withCountryHints(S.candidates(text, ctx.map, ctx.skip), ft, ctx), atMap = Object.create(null);
     cands.forEach(function (c) {
       var p1 = ft[c.at - 1] || "", role = PLACE_BEFORE[p1] || "";
       var one = c.word.indexOf(" ") < 0;
@@ -553,10 +581,10 @@
      teller is not on the tree unless the story says they are related. Only read when no "my father"-style sentence is there to say otherwise. */
   function readSought(t, ctx) {
     if (/\b(?:my|our)\s+(?:(?:great|step)[- ]?)*(?:grand)?(?:father|mother|dad|mum|mom|parents?)\b/i.test(t)) return null;
-    var P = Object.create(null), order = [];
+    var P = Object.create(null), order = [], own = [];
     String(t || "").split(/;|\n|,\s+(?=[Ff]ather\b|[Mm]other\b)|[.!?]+(?:\s+(?=\p{Lu})|$)/u).forEach(function (cl) {
       var m = /^\s*(?:and\s+)?(?:(?:his|her)\s+)?(father|dad|mother|mum|mom)\b\s*(?:[,:\u2013-]|\s+(?:is|was|named|called)\b|(?=\s))\s*(.*)$/i.exec(cl);
-      if (!m) return;
+      if (!m) { own.push(cl); return; }
       var key = KIN_STEP[m[1].toLowerCase()], nm = /^(\p{Lu}[\p{L}'’-]+(?:\s+\p{Lu}[\p{L}'’-]+){0,2})/u.exec(m[2]);
       if (!nm || P[key]) return;
       var words = nm[1].split(/\s+/).filter(function (w) { return !STOP[S.fold(w)] && !CONNECT.test(w); });
@@ -570,22 +598,39 @@
     });
     if (!order.length) return null;
     var sex = /\bthis\s+(?:man|gentleman|guy|fellow)\b|\bfind\s+him\b/i.test(t) ? "man" : /\bthis\s+(?:woman|lady)\b|\bfind\s+her\b/i.test(t) ? "woman" : "";
-    P.ME = { key: "ME", name: "", given: "", surname: "", ev: { origin: null, born: null, died: null, married: null, moves: [] } };
+    /* the man's own life: what the rest of the story says of him, read like any one person's stretch of a family story */
+    /* each sentence is read on its own (the place finder names a phrase once per text, and a town is told in several pictures) */
+    var ownText = own.join(". "), life = { origin: null, born: null, died: null, married: null, moves: [] };
+    own.forEach(function (cl) {
+      var e = readEvents(cl.replace(/\bb\.?(?=\s*\d{4})/gi, "born").replace(/\bd\.?(?=\s*\d{4})/gi, "died"), ctx);
+      life.origin = life.origin || e.origin; life.born = life.born || e.born; life.died = life.died || e.died; life.married = life.married || e.married; life.moves = life.moves.concat(e.moves);
+    });
+    var seenAt = Object.create(null), mv = [];
+    life.moves.forEach(function (x) { var k = x.place.row.i, e = seenAt[k]; if (e) { if (e.year == null && x.year != null) e.year = x.year; return; } seenAt[k] = x; mv.push(x); });
+    var prev = 0, keyed = mv.map(function (x, i) { if (x.year != null) prev = x.year; return { x: x, k: prev, i: i }; });
+    life.moves = keyed.sort(function (a, b) { return a.k - b.k || a.i - b.i; }).map(function (z) { return z.x; });
+    var pk = Object.keys(P).map(function (k) { return S.fold(P[k].surname); }).filter(Boolean), nm = null;
+    var cands = [], nre = /(?:\bnames?\b[^.;:]{0,40}?\b(?:is|was|are|:)\s*|\bfind\s+|\bthis\s+(?:man|woman|person)\s+(?:is|was)\s+|^|[.;]\s+)(\p{Lu}[\p{L}'’-]+(?:\s+\p{Lu}[\p{L}'’-]+){1,2})(?=\s+(?:was|is|born|b\.?\b|aged|\(|,|:)|[.;,]|$)/gmu, nmm;
+    while ((nmm = nre.exec(ownText))) { var ws = nmm[1].split(/\s+/).filter(function (w) { return !STOP[S.fold(w)] && !CONNECT.test(w) && !COMMON[S.fold(w)]; }); if (ws.length >= 2 && !(ctx.map && ctx.map[S.fold(ws.join(" "))])) cands.push(ws); }
+    function near(a, b) { a = a.slice(0, 5); b = b.slice(0, 5); var d = 0; for (var i = 0; i < Math.max(a.length, b.length); i++) if (a[i] !== b[i]) d++; return d <= 1; }
+    cands.forEach(function (ws) { if (!nm && pk.some(function (k) { return near(S.fold(ws[ws.length - 1]), k); })) nm = ws; });
+    var hasLife = !!(life.born || life.origin || life.moves.length || life.died);
+    P.ME = { key: "ME", name: nm ? cased(nm.join(" ")) : "", given: nm ? cased(nm[0]) : "", surname: nm ? cased(nm.slice(1).join(" ")) : "", ev: hasLife ? life : { origin: null, born: null, died: null, married: null, moves: [] } };
     order.push("ME");
-    return { people: P, order: order, subject: "ME", sought: { label: "The " + (sex || "person") + " you're looking for", poss: sex === "man" ? "his " : sex === "woman" ? "her " : "" } };
+    return { people: P, order: order, subject: "ME", sought: { label: "The " + (sex || "person") + " you're looking for", poss: sex === "man" ? "his " : sex === "woman" ? "her " : "", life: hasLife } };
   }
 
   /* Fold readMe into the parse: the people (named or not), and the lines each of them travels. The teller's own route is not told, so none is
      drawn for them; the parents and children each get their pins. */
   function applyMe(out, me, ctx, teller) {
-    var P = me.people;
+    var P = me.people, SO = !!me.sought;
     function evOf(pe) {
       var e = pe.ev, list = [];
       if (e.born && (e.born.year != null || e.born.place)) list.push({ type: "born", year: e.born.year, place: e.born.place, text: e.born.text || "" });
       if (e.married && (e.married.year != null || e.married.place)) list.push({ type: "married", year: e.married.year, place: e.married.place });
       if (e.died && (e.died.year != null || e.died.place)) list.push({ type: "died", year: e.died.year, place: e.died.place, cause: e.died.cause });
       /* "lived in Crikvenica in 1990" is where they were, not where they were from: it is said that way on the card */
-      if (!e.born && !e.origin) (e.moves || []).forEach(function (mv) { list.push({ type: "lived", year: mv.year, place: mv.place }); });
+      if ((!e.born && !e.origin) || SO) (e.moves || []).forEach(function (mv) { list.push({ type: "lived", year: mv.year, place: mv.place }); });
       return list;
     }
     var gname = teller ? teller.split(" ")[0] : "";
@@ -593,8 +638,9 @@
     function put(key, role, label) {
       var pe = P[key]; if (!pe) return;
       var place = pe.ev.born && pe.ev.born.place ? pe.ev.born.place : pe.ev.origin;
-      people.push({ role: role, rel: "", name: key === "ME" ? teller : pe.name, given: key === "ME" ? gname : pe.given, surname: key === "ME" ? teller.split(" ").slice(1).join(" ") : pe.surname,
-        givenWord: key === "ME" ? gname : pe.given, place: place || null, presumed: false, label: key === "ME" && me.sought ? me.sought.label : label, events: evOf(pe), key: key, me: key === "ME" && !me.sought, sought: key === "ME" && !!me.sought, unnamed: !(pe.name || (key === "ME" && teller)) });
+      var isMe = key === "ME" && !SO;
+      people.push({ role: role, rel: "", name: isMe ? teller : pe.name, given: isMe ? gname : pe.given, surname: isMe ? teller.split(" ").slice(1).join(" ") : pe.surname,
+        givenWord: isMe ? gname : pe.given, place: place || null, presumed: false, label: key === "ME" && me.sought ? me.sought.label : label, events: evOf(pe), key: key, me: isMe, sought: key === "ME" && SO, unnamed: !(pe.name || (isMe && teller)) });
       if (key === "ME") return;
       var st = [], e = pe.ev;
       if (e.born && e.born.place) st.push({ row: e.born.place.row, alts: e.born.place.alts, word: e.born.place.word, role: "born", year: e.born.year, approx: false });
@@ -611,6 +657,19 @@
     out.people = people; out.kin = kin;
     out.name = teller || ""; out.givenWord = gname; out.surname = ""; out.given = ""; out.rel = "";
     out.stops = []; out.route = []; out.from = null; out.to = null; out.noRoute = true; out.born = null; out.left = null;
+    /* the one being looked for has a life of their own in the story: draw it as a journey, with the years that were told */
+    if (SO && me.sought.life) {
+      var ev = P.ME.ev, rs = [];
+      function add(pl, role, yr) { if (pl) rs.push({ row: pl.row, alts: pl.alts, word: pl.word, role: role, age: null, year: yr == null ? null : yr, approx: false, told: yr != null }); }
+      if (ev.born && ev.born.place) add(ev.born.place, "born", ev.born.year); else if (ev.origin) add(ev.origin, "origin");
+      (ev.moves || []).forEach(function (mv) { if (rs.length && rs[rs.length - 1].row.i === mv.place.row.i) return; add(mv.place, "move", mv.year); });
+      out.sought = true; out.name = P.ME.name || ""; out.given = P.ME.given || ""; out.givenWord = P.ME.given || ""; out.surname = P.ME.surname || "";
+      out.born = ev.born && ev.born.year != null ? ev.born.year : null; out.endYear = ev.died && ev.died.year != null ? ev.died.year : null;
+      if (rs.length) {
+        out.noRoute = false; out.route = rs; out.stops = rs;
+        out.from = { row: rs[0].row, alts: rs[0].alts, word: rs[0].word }; out.to = rs.length > 1 ? { row: rs[rs.length - 1].row, alts: rs[rs.length - 1].alts, word: rs[rs.length - 1].word } : null;
+      }
+    } else if (SO) out.sought = true;
     return out;
   }
 

@@ -76,3 +76,26 @@ test("a pack never holds stories", () => {
   const pack = RF.buildPack({ v: 1, lines: { x: { name: "X", where: "" } }, marks: {} }, {});
   assert.equal("stories" in pack, false);
 });
+
+test("what a picture says about the story's surnames becomes sentences the Atlas reads; others on it are not put in", () => {
+  const m = { exports: {} }; new Function("module", fs.readFileSync(path.join(here, "../public/js/story-read.js"), "utf8"))(m); const R = m.exports;
+  const doc = { doc_type: "US declaration of intention", date_on_document: "May 23, 1930",
+    persons: [{ name_as_written: "SLAVICH: JOZEF", role: "petitioner", details: { born: "June 30 1902", birthplace: "Istria, Italy", residence: "Worthington, Penna." } }, { name_as_written: "Vincent Kinkela", role: "witness", details: {} }],
+    fields: [{ label: "I emigrated to the US from", value: "Cherbourg, France" }], events: [{ date: "December 31, 1920", what: "arrival at New York", place: "New York" }] };
+  const d = R.docText(doc, ["Slavic"]);
+  assert.equal(d.label, "US declaration of intention, 1930");
+  assert.deepEqual(d.sentences, ["Jozef Slavich was born in Istria, Italy on June 30 1902.", "Jozef Slavich lived in Worthington, United States in 1930.", "Jozef Slavich emigrated from Cherbourg, France.", "Jozef Slavich arrived in New York in 1920."]);
+  assert.deepEqual(d.others, ["Vincent Kinkela"]);
+  assert.equal(R.docText(doc, ["Laginja"]).found, false, "nobody on it shares the surname");
+  const t = "Story.\n\n" + R.block(1, "a.jpg", d) + "\n\n" + R.block(2, "b.jpg", d);
+  assert.equal(R.stripBlocks(t), "Story.", "a picture read again replaces its block");
+  assert.equal(R.near("Slavic", "Slavich"), true); assert.equal(R.near("Slavic", "Laginja"), false);
+});
+
+test("a form's address becomes a place the Atlas can find", () => {
+  const m = { exports: {} }; new Function("module", fs.readFileSync(path.join(here, "../public/js/story-read.js"), "utf8"))(m); const R = m.exports;
+  assert.equal(R.cleanPlace("R.D. No. 2, Box 73, Worthington, Penna."), "Worthington, United States");
+  assert.equal(R.cleanPlace("452 W. 40 St., New York City"), "New York");
+  assert.equal(R.cleanPlace("New York, N.Y."), "New York, United States");
+  assert.equal(R.cleanPlace("Cherbourg, France"), "Cherbourg, France");
+});

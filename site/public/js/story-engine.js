@@ -559,10 +559,11 @@
           if (can) setYear(Number(E.slider.value));
         }
         var pad = o.pad || {};
+        try { map.getCenter(); } catch (e) { map.setView([30, 0], 2, { animate: false }); } /* a new map has no view yet, and flyTo needs one */
         if (pts.length > 1) map.flyToBounds ? map.flyToBounds(L.latLngBounds(pts), { paddingTopLeft: pad.tl || [40, 40], paddingBottomRight: pad.br || [40, 40], duration: reduce ? 0 : 1.6, maxZoom: 7 }) : map.fitBounds(L.latLngBounds(pts));
         else if (pts.length) map.setView(pts[0], 8);
         setTimeout(function () { map.invalidateSize(); }, 60);
-      }).catch(function () { if (E.mapBox) E.mapBox.setAttribute("data-failed", "1"); });
+      }).catch(function (e) { if (window.console) console.warn("The journey map did not draw:", e); if (E.mapBox) E.mapBox.setAttribute("data-failed", "1"); });
     }
     return { draw: draw, clear: clear };
   }

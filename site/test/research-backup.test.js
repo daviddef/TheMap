@@ -193,3 +193,10 @@ test("the per-tree MyHeritage links travel in the research file, valid ones only
   assert.deepEqual(s.mhTrees, { [g]: ok }); assert.equal(s.anc, "com");
   assert.equal(mod.exports.cleanSites({ mhTrees: [ok] }), null);
 });
+
+test("the family sessions' file is folded in once per CONTENT, not once per day (four publishes shared one date on 8 Nov 2026)", () => {
+  const kit = fs.readFileSync(path.join(here, "../public/js/progress-kit.js"), "utf8");
+  assert.match(kit, /r\.ok \? r\.text\(\)/, "the file is read as text so it can be fingerprinted");
+  assert.match(kit, /Math\.imul\(h, 16777619\)/, "the version carries a hash of the file");
+  assert.match(kit, /var v = String\(doc\.exported \|\| doc\.built \|\| ""\) \+ "\." \+ h\.toString\(36\)/, "date plus content hash, so a second publish on the same day is new");
+});

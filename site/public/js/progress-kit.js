@@ -287,13 +287,18 @@
     function foldInSessions() {
       var base = (document.documentElement.getAttribute("data-base") || "/");
       var url = base.replace(/\/?$/, "/") + "research-sessions.json";
-      fetch(url).then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (doc) {
+      fetch(url).then(function (r) { return r.ok ? r.text() : null; })
+        .then(function (txt) {
+          var doc = null; try { doc = txt && JSON.parse(txt); } catch (e) { doc = null; }
           if (!doc || !doc.marks) return;
           var stamp = "ra-sessions-seen";
           var seen = null;
           try { seen = localStorage.getItem(stamp); } catch (e) { return; }
-          var v = String(doc.exported || doc.built || "");
+          /* THE VERSION IS THE FILE'S CONTENT, NOT ITS DATE. `exported` is only a day, and the file is published several times a day: on
+             8 Nov 2026 four publishes carried the same "2026-11-08", so a browser that had folded the first never took the other three and
+             the family sessions' newer work never showed. FNV-1a over the text changes whenever anything in the file does. */
+          var h = 2166136261; for (var i = 0; i < txt.length; i++) { h ^= txt.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+          var v = String(doc.exported || doc.built || "") + "." + h.toString(36);
           if (seen === v) return;
           folding = true;
           try { window.raProgress.fromJSON(JSON.stringify(doc), "merge"); } finally { folding = false; }

@@ -462,3 +462,10 @@ test("a grandparent who 'lived in' a place shows it on the tree as lived, not as
   const g = p.people.filter((x) => x.role === "grandfather")[0];
   assert.deepEqual([g.events[0].type, g.events[0].year, g.events[0].place.row.i], ["lived", 1990, "crikvenica"]);
 });
+
+test("'my grandfather was Ivan, born in Senj' reads as a grandfather born in Senj", () => {
+  const rows = [{ i: "senj", n: "Senj", cc: "HR", c: 40 }];
+  const c5 = { map: A.buildMap(rows), given: A.buildGiven([{ canon: "Ivan", id: "ivan", langs: { croatian: [{ form: "Ivan", status: "same" }] } }]), skip: {} };
+  const p = F.parseStory("MY GRANDFATHER WAS IVAN AND HE WAS BORN IN SENJ CROATIA.", c5);
+  assert.equal(p.people[0].rel, "grandfather"); assert.equal(p.people[0].given, "Ivan");
+});

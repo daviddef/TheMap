@@ -1402,9 +1402,14 @@
     var gps = (people || []).filter(function (x) { return x.role === "grandfather" || x.role === "grandmother"; }), sp = (people || []).filter(function (x) { return x.role === "spouse"; })[0];
     if (gps.length) { var g0 = gen("lf-grand"); gps.forEach(function (x) { var lb = x.label || x.role; g0.append(card(x, lb.charAt(0).toUpperCase() + lb.slice(1))); }); tree.append(el("div", null, "lf-tie")); }
     if (fa || mo) { var g1 = gen("lf-parents"); if (fa) g1.append(card(fa, "Father")); if (mo) g1.append(card(mo, "Mother")); tree.append(el("div", null, "lf-tie")); }
+    /* the people between are drawn even when the story names nobody there: "my grandfather was Ivan" has a parent between him and you */
+    function gap(n, above) { for (var i = 0; i < n; i++) { if (!above) tree.append(el("div", null, "lf-tie")); var gg = gen("lf-gap"), ph = el("div", null, "lf-card lf-card-you"); ph.append(el("div", n > 1 && i === 0 ? "Parent of yours, not named" : "Your parent, not named", "lf-card-role"), el("div", "Not in the story yet: name them to add them here", "lf-card-place")); gg.append(ph); if (above) tree.append(el("div", null, "lf-tie")); } }
+    if (self.me && !fa && !mo && gps.length) gap(1, true);
     var g2 = gen(); g2.append(card(self, self.me ? "You" : self.rel ? "Your " + self.rel.replace(/-/g, " ") : "The person you asked about"));
     if (sp) g2.append(card(sp, self.me ? "Your partner" : self.rel === "father" ? "Wife, your mother" : self.rel === "mother" ? "Husband, your father" : "Spouse"));
     var kids = (people || []).filter(function (x) { return x.role === "child"; });
+    var rl = String(self.rel || ""), between = /grand/.test(rl) && !self.me ? (rl.match(/great/g) || []).length + 1 : 0;
+    if (between) gap(between);
     if (self.me) { if (kids.length) { tree.append(el("div", null, "lf-tie")); var g4 = gen(); kids.forEach(function (x) { g4.append(card(x, "Your child")); }); } return tree; }
     tree.append(el("div", null, "lf-tie"));
     var g3 = gen(), you = el("div", null, "lf-card lf-card-you"); you.append(el("div", "You", "lf-card-role"), el("div", "who is asking", "lf-card-place")); g3.append(you);

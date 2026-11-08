@@ -182,8 +182,8 @@
     if (window.L && window.L.map) return Promise.resolve(window.L);
     if (leaflet) return leaflet;
     leaflet = new Promise(function (ok, fail) {
-      var css = document.createElement("link"); css.rel = "stylesheet"; css.href = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"; document.head.appendChild(css);
-      var sc = document.createElement("script"); sc.src = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js";
+      var css = document.createElement("link"); css.rel = "stylesheet"; var VB = (document.documentElement.getAttribute("data-base") || "/").replace(/\/?$/, "/") + "vendor/leaflet/"; css.href = VB + "leaflet.min.css"; document.head.appendChild(css);
+      var sc = document.createElement("script"); sc.src = VB + "leaflet.min.js";
       sc.onload = function () { window.L ? ok(window.L) : fail(new Error("leaflet")); }; sc.onerror = function () { leaflet = null; fail(new Error("leaflet")); };
       document.head.appendChild(sc);
     });

@@ -31,9 +31,10 @@ const data = { countries, places, communes };
   function start() {
     if (started) return; started = true;
     var css = document.createElement("link"); css.rel = "stylesheet";
-    css.href = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"; document.head.appendChild(css);
+    var VB = (document.documentElement.getAttribute("data-base") || "/").replace(/\/?$/, "/") + "vendor/leaflet/";   // our own copy: no outside host to be slow or down
+    css.href = VB + "leaflet.min.css"; document.head.appendChild(css);
     var go = function () { draw(); };
-    if (window.L) go(); else load("https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js", go);
+    if (window.L) go(); else load(VB + "leaflet.min.js", go);
   }
   function draw() {
     var css = getComputedStyle(document.documentElement);

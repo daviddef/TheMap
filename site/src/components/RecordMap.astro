@@ -464,9 +464,8 @@ try {
 <link rel="preload" as="fetch" href={indexUrl} crossorigin />
 <link rel="preload" as="fetch" href={regionsUrl} crossorigin />
 <link rel="preload" as="fetch" href={providersUrl} crossorigin />
-<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
+<link rel="stylesheet" href={base + "vendor/leaflet/leaflet.min.css"} />
+<script src={base + "vendor/leaflet/leaflet.min.js"} defer></script>
 {/* ONE SHARDING RULE, LOADED BEFORE ANYTHING ASKS FOR A SHARD. Classic
     script, not a module, so it has run by the time the inline script below
     is parsed — and it is a file rather than eleven copied loops because

@@ -36,3 +36,10 @@ test("once a family is picked the mark goes to that family only", () => {
   assert.equal(P.raw("volume:ABC").by.kosina.state, "found");
   assert.equal(P.raw("volume:ABC").by.babic, undefined);
 });
+
+test("a family the old default had selected is cleared once, and a later pick is kept", () => {
+  const { P, store } = boot({ ...two, active: "babic" });
+  assert.equal(P.active(), "");
+  P.setActive("kosina");
+  assert.equal(JSON.parse(store["ra-progress-v1"]).active, "kosina");
+});

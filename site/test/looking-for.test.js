@@ -445,3 +445,13 @@ test("a family told from the middle: children, unnamed parents, and where the pa
   assert.deepEqual(k.F, ["senj:origin", "johannesburg:married"]); assert.deepEqual(k.M, ["argentina:origin", "johannesburg:married"]);
   assert.deepEqual(p.route, [], "the teller's own route was not told, so none is drawn");
 });
+
+test("an unnamed grandparent in the story gets a place on the tree and a pin at the year told", () => {
+  const rows = [{ i: "crikvenica", n: "Crikvenica", cc: "HR", c: 20 }, { i: "brisbane", n: "Brisbane", cc: "AU", c: 1 }, { i: "argentina", n: "Argentina", cc: "AR", c: 3 }];
+  const c4 = { map: A.buildMap(rows), given: A.buildGiven([]), skip: {} };
+  const p = F.parseStory("I have two children, Alessio and Mateo, both are born in Brisbane. My mum is from Argentina. My gransfether lived in Crikvenica in 1990", c4);
+  const g = p.people.filter((x) => x.role === "grandfather")[0];
+  assert.ok(g, "the grandfather is on the tree"); assert.equal(g.label, "your grandfather");
+  const k = p.kin.filter((x) => x.key === "G1")[0];
+  assert.deepEqual([k.stops[0].row.i, k.stops[0].year], ["crikvenica", 1990]);
+});

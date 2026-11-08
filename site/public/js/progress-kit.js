@@ -73,6 +73,9 @@
       });
       if (moved) { try { localStorage.setItem(KEY, JSON.stringify(mem)); } catch (e) {} }
       if (toLines()) { try { localStorage.setItem(KEY, JSON.stringify(mem)); } catch (e) {} }
+      /* ONCE: the family that the old default had selected is not a choice the reader made, and cannot be told apart from one. It is cleared
+         here a single time; from then on only a family the reader picks or adds is selected. */
+      if (!mem.noDefault) { mem.noDefault = 1; mem.active = ""; try { localStorage.setItem(KEY, JSON.stringify(mem)); } catch (e) { /* blocked */ } }
       return mem;
     }
 

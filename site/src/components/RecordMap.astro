@@ -7697,6 +7697,28 @@ window.addEventListener("load", async function () {
       onAdd: function () {
         var d = L.DomUtil.create("div", "leaflet-bar ra-fullctl");
         d.appendChild(fullBtn);
+        /* ONE BUTTON FOR THE MARKERS. The record markers (Countries, Shelf, Archives and the rest) are the Layers ticks in the Filters menu;
+           with a story or the history on the map they get in the way. This turns them all off, remembering which were on, and back on
+           again to exactly those, the same switch the history theatre has. */
+        var REC = ["countries", "shelf", "archives", "wikidata", "cemeteries", "churches", "libraries"], was = [];
+        function inp(k) { return document.querySelector('#ra-layers [data-l="' + k + '"] input'); }
+        function anyOn() { return REC.some(function (k) { var i = inp(k); return i && i.checked; }); }
+        var mb = document.createElement("button"); mb.type = "button"; mb.className = "ra-ico ra-markers-btn";
+        mb.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6-5.2-6-10a6 6 0 0 1 12 0c0 4.8-6 10-6 10z"/><circle cx="12" cy="11" r="2"/></svg>';
+        function paintMb() { var on = anyOn(); mb.setAttribute("aria-pressed", on ? "true" : "false"); mb.classList.toggle("off", !on); mb.title = on ? "Hide the record markers (Countries, Shelf and the rest)" : "Show the record markers again"; mb.setAttribute("aria-label", mb.title); }
+        mb.addEventListener("click", function () {
+          var turnOff = anyOn();
+          REC.forEach(function (k) {
+            var i = inp(k); if (!i) return;
+            var want = turnOff ? false : was.indexOf(k) > -1;
+            if (turnOff && i.checked) was.push(k);
+            if (i.checked !== want) { i.checked = want; i.dispatchEvent(new Event("change", { bubbles: true })); }
+          });
+          if (!turnOff) was = [];
+          paintMb();
+        });
+        d.appendChild(mb); paintMb();
+        document.addEventListener("change", function (e) { if (e.target && e.target.closest && e.target.closest("#ra-layers")) paintMb(); });
         L.DomEvent.disableClickPropagation(d);
         return d;
       }
@@ -10164,6 +10186,8 @@ window.addEventListener("load", async function () {
   }
   :global(.leaflet-bar.ra-fullctl .ra-ico) { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: inherit;
     background: var(--panel, #fff); color: var(--ink, #16222A); cursor: pointer; }
+  :global(.leaflet-bar.ra-fullctl .ra-markers-btn.off) { color: var(--ink-3, #777); }
+  :global(.leaflet-bar.ra-fullctl .ra-markers-btn.off svg) { opacity: .55; }
   :global(.leaflet-bar.ra-fullctl .ra-ico:hover) { background: color-mix(in srgb, var(--accent, #1F5C6B) 12%, var(--panel, #fff)); }
   @media (pointer: coarse) { :global(.leaflet-bar.ra-fullctl .ra-ico) { width: 34px; height: 34px; } }
 

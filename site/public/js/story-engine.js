@@ -487,7 +487,7 @@
   var CHILD_LIST2 = /\bmy\s+(?:children|kids|sons|daughters)\s+(?:are|were)\s+(?:named\s+|called\s+)?([^.;]*)/i;
   var NOT_NAME = /^(both|all|born|from|in|who|they|are|were|is|was|aged|each|and|also|then|now|the|a|an|of|to|my|his|her|their|our)$/i;
   function readMe(t, ctx) {
-    var P = Object.create(null), order = [], nKids = 0;
+    var P = Object.create(null), order = [], nKids = 0, nGrand = 0;
     function person(key, name) {
       var p = P[key];
       if (!p) { p = P[key] = { key: key, name: "", given: "", surname: "", ev: { origin: null, born: null, died: null, married: null, moves: [] } }; order.push(key); }
@@ -526,6 +526,14 @@
         else if (nm) rest = rest.slice(nm[0].length - nm[1].length);
         merge(p, readEvents(rest, ctx));
       });
+      /* "my grandfather lived in Crikvenica in 1990" (which side is not said, so none is guessed) */
+      var gre = /\bmy\s+(gran\w*\s*(?:f[ae]\w*|dad|pa|pop\w*)|gran\w*\s*(?:mo\w*|ma|mum|nan\w*)|grand\w*)\b([^.;]*)/gi, gm;
+      while ((gm = gre.exec(sent))) {
+        var gmale = /^gran\w*\s*(?:f[ae]|dad|pa|pop)/i.test(gm[1]), gp = person("G" + (++nGrand), ""), grest = gm[2], gnm = /^\s+(?:is|was|named|called)\s+([\p{L}'’-]+)/iu.exec(grest);
+        gp.sex = gmale ? "M" : "F";
+        if (gnm && okName(gnm[1])) { person(gp.key, gnm[1]); grest = grest.slice(gnm[0].length); } else if (gnm) grest = grest.slice(gnm[0].length - gnm[1].length);
+        merge(gp, readEvents(grest, ctx));
+      }
       if (/\b(?:they|my\s+parents|my\s+(?:mum|mom|mother)\s+and\s+(?:dad|father))\b[^.]*\b(?:married|wed|wedded)\b/i.test(sent) && !/\b(?:i|we)\s+(?:got\s+)?married\b/i.test(sent)) parentsWed = readEvents(sent, ctx).married || null;
       var pm = /\bmy\s+(?:wife|husband|partner)\s+(?:is\s+|named\s+|called\s+)?([\p{L}'’-]+)/iu.exec(sent);
       if (pm && okName(pm[1])) person("S", pm[1]);
@@ -567,6 +575,7 @@
     }
     put("ME", "self", "");
     put("F", "father", "your father"); put("M", "mother", "your mother"); put("S", "spouse", "your partner");
+    me.order.filter(function (k) { return /^G/.test(k); }).forEach(function (k) { put(k, P[k].sex === "M" ? "grandfather" : "grandmother", P[k].sex === "M" ? "your grandfather" : "your grandmother"); });
     me.order.filter(function (k) { return /^C/.test(k); }).forEach(function (k) { put(k, "child", "your child"); });
     out.people = people; out.kin = kin;
     out.name = teller || ""; out.givenWord = gname; out.surname = ""; out.given = ""; out.rel = "";
@@ -1067,6 +1076,18 @@
           });
         }
         layers = { group: g };
+        /* the mass-mortality events (epidemics, famines, wars, genocides) of the countries in the story, as black outlines on the map */
+        if (mort && mort.events) {
+          var ccs = Object.create(null);
+          stops.concat(anc).forEach(function (st) { if (st.info && st.info.cc) ccs[String(st.info.cc).toUpperCase()] = 1; });
+          kin.forEach(function (k) { k.stops.forEach(function (st) { if (st.info && st.info.cc) ccs[String(st.info.cc).toUpperCase()] = 1; }); });
+          mort.events.forEach(function (ev) {
+            if (!(ev.cc || []).some(function (c) { return ccs[String(c).toUpperCase()]; }) || !ev.poly || !ev.poly.length) return;
+            var pg = L.polygon(ev.poly, { color: "#000", weight: 1.6, opacity: .85, fillColor: "#000", fillOpacity: .06, dashArray: "5 4" }).addTo(g);
+            pg.bindTooltip(ev.f + (ev.t !== ev.f ? "\u2013" + ev.t : "") + " " + typeLabel(ev.ty) + ": " + ev.n, { sticky: true, className: "lf-mort-tip" });
+            if (pg.bringToBack) pg.bringToBack();
+          });
+        }
         var rp = stops.filter(function (st) { return st.info.lat != null; }).map(function (st) { return [st.info.lat, st.info.lon]; });
         if (rp.length > 1) {
           L.polyline(rp, { color: "#7a7a7a", weight: 2, dashArray: "4 6", opacity: .7 }).addTo(g);

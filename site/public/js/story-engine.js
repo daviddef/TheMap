@@ -563,7 +563,7 @@
       });
       return d;
     }
-    function clear() { if (stopPlay) stopPlay(); if (layers) { layers.group.remove(); layers = null; } if (askEl) askEl.hidden = true; }
+    function clear() { if (stopPlay) stopPlay(); if (layers) { if (layers.map && layers.tidy) layers.map.off("moveend zoomend", layers.tidy); layers.group.remove(); layers = null; } if (askEl) askEl.hidden = true; }
 
     /* The stops with a time each: years when the story gives a birth year or dates, else ages, else none. */
     function timeline(f) {
@@ -698,7 +698,8 @@
       }
 
       return o.getMap().then(function (m) {
-        var L = m.L, map = m.map, pts = [], dirs = ["top", "bottom", "right", "left"];
+        var L = m.L, map = m.map, pts = [];
+        function tipOf(label, name) { var n = el("span", null, "lf-tipin"); n.append(el("b", label), el("span", name)); return n; }
         try { map.getCenter(); } catch (e) { map.setView([30, 0], 2, { animate: false }); } /* a new map has no view yet: flyTo needs one, and drawn pins are projected from it */
         map.invalidateSize({ animate: false });
         var g = L.layerGroup().addTo(map);
@@ -707,13 +708,13 @@
           var first = i === 0, last = i === stops.length - 1 && stops.length > 1;
           var label = first ? (st.role === "born" ? "Born" : "Started") : (st.age != null ? (st.approx ? "About age " : "Age ") + st.age : last ? "Arrived" : "Then");
           L.circleMarker([info.lat, info.lon], { radius: 8, weight: 3, color: "#fff", fillColor: first ? "#b3452e" : "#1f5c6b", fillOpacity: 1 })
-            .bindTooltip(label + ": " + info.name, { permanent: true, direction: dirs[i % 4], offset: [0, i % 4 === 0 ? -8 : i % 4 === 1 ? 8 : 0] }).addTo(g);
+            .bindTooltip(tipOf(label, info.name), { permanent: true, direction: "right", offset: [6, 0], className: "lf-tip" }).addTo(g);
           pts.push([info.lat, info.lon]);
         });
         anc.forEach(function (x) {
           var info = x.info; if (info.lat == null) return;
           L.circleMarker([info.lat, info.lon], { radius: 6, weight: 2, color: "#7a7a7a", fillColor: "#fff", fillOpacity: 1, dashArray: "2 3" })
-            .bindTooltip("His " + x.who + "'s family: " + info.name, { permanent: true, direction: "left", offset: [-6, 0] }).addTo(g);
+            .bindTooltip(tipOf("His " + x.who + "'s family", info.name), { permanent: true, direction: "right", offset: [4, 0], className: "lf-tip lf-tip-anc" }).addTo(g);
           pts.push([info.lat, info.lon]);
         });
         layers = { group: g };
@@ -725,11 +726,36 @@
           if (can) setT(Number(E.slider.value));
         }
         var pad = o.pad || {};
+        /* Tidy the labels: every one sits to the right of its pin (to the left where the pin is near the right edge), then any that
+           land on another are moved down a little, and all are kept inside the map and above whatever the page puts along its bottom. */
+        var tips = [];
+        g.eachLayer(function (ly) { if (ly.getTooltip && ly.getTooltip()) tips.push(ly); });
+        function tidy() {
+          var box = map.getContainer(), W = box.clientWidth, H = box.clientHeight, floor = H - Math.max(10, ((pad.br && pad.br[1]) || 60) - 30), items = [];
+          tips.forEach(function (ly) {
+            var tp = ly.getTooltip(), elx = tp && tp.getElement(); if (!elx) return;
+            var pt = map.latLngToContainerPoint(ly.getLatLng()), left = pt.x > W * 0.62, dir = left ? "left" : "right";
+            if (tp.options.direction !== dir) { tp.options.direction = dir; tp.options.offset = L.point(left ? -6 : 6, 0); tp.update && tp.update(); }
+            elx.style.marginTop = "0px";
+            items.push({ e: elx, ly: ly });
+          });
+          items.forEach(function (it) { var r = it.e.getBoundingClientRect(), b = box.getBoundingClientRect(); it.top = r.top - b.top; it.h = r.height; it.l = r.left - b.left; it.r = r.right - b.left; it.dy = 0; });
+          items.sort(function (a, b) { return a.top - b.top; });
+          for (var i = 0; i < items.length; i++) {
+            for (var j = 0; j < i; j++) {
+              var a = items[j], c = items[i];
+              if (c.l < a.r + 4 && a.l < c.r + 4 && c.top + c.dy < a.top + a.dy + a.h + 4 && a.top + a.dy < c.top + c.dy + c.h + 4) c.dy = a.top + a.dy + a.h + 4 - c.top;
+            }
+            var over = items[i].top + items[i].dy + items[i].h - floor; if (over > 0) items[i].dy = Math.max(-items[i].top + 4, items[i].dy - over);
+          }
+          items.forEach(function (it) { it.e.style.marginTop = Math.round(it.dy) + "px"; });
+        }
+        layers.tidy = tidy; layers.map = map; map.on("moveend zoomend", tidy);
         if (pts.length > 1) map.flyToBounds ? map.flyToBounds(L.latLngBounds(pts), { paddingTopLeft: pad.tl || [70, 50], paddingBottomRight: pad.br || [110, 60], duration: reduce ? 0 : 1.6, maxZoom: 7 }) : map.fitBounds(L.latLngBounds(pts));
         else if (pts.length) map.setView(pts[0], 8);
         /* the page may have been sliding or hidden when the map was made: measure again, and make the drawn pins project from the final view */
         setTimeout(function () { map.invalidateSize({ animate: false }); }, 60);
-        setTimeout(function () { map.invalidateSize({ animate: false }); map.fire("moveend"); }, reduce ? 150 : 1900);
+        setTimeout(function () { map.invalidateSize({ animate: false }); map.fire("moveend"); tidy(); }, reduce ? 150 : 1900);
       }).catch(function (e) { if (window.console) console.warn("The journey map did not draw:", e); if (E.mapBox) E.mapBox.setAttribute("data-failed", "1"); });
     }
     return { draw: draw, clear: clear };

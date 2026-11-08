@@ -82,7 +82,7 @@
       });
     }
     var J = E.createJourney({ els: { cap: $(".sd-cap"), slider: $(".sd-year"), yearOut: $(".sd-yearout"), play: $(".sd-play"), moments: $(".sd-moments"), time: $(".sd-time"), mapBox: null },
-      getMap: getMap, onBorn: function (y) { setBorn(y); }, pad: { tl: [(window.innerWidth >= 900 ? 430 : 30), 50], br: [60, (window.innerWidth >= 900 ? 300 : 330)] } });
+      getMap: getMap, onBorn: function (y) { setBorn(y); }, pad: { tl: [(window.innerWidth >= 900 ? 430 : 30), 50], br: [60, (window.innerWidth >= 900 ? 350 : 330)] } });
 
     function chip(label, cls, key, onclick) {
       var c = el(onclick ? "button" : "span", label, "sd-chip" + (cls ? " " + cls : "")); if (onclick) { c.type = "button"; c.addEventListener("click", onclick); }

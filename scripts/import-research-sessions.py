@@ -413,17 +413,76 @@ def ranges_from(text):
     return None, False
 
 
-def rows_of(path):
-    try:
-        d = json.load(io.open(path, encoding="utf-8"))
-    except Exception:
-        return []
+def rows_from(d):
     if isinstance(d, list):
         return [r for r in d if isinstance(r, dict)]
-    for key in ("searched", "rows", "entries"):
-        if isinstance(d.get(key), list):
-            return [r for r in d[key] if isinstance(r, dict)]
+    if isinstance(d, dict):
+        for key in ("searched", "rows", "entries"):
+            if isinstance(d.get(key), list):
+                return [r for r in d[key] if isinstance(r, dict)]
     return []
+
+
+def rows_of(path):
+    try:
+        return rows_from(json.load(io.open(path, encoding="utf-8")))
+    except Exception:
+        return []
+
+
+# THE PUSHED COPY IS WHAT AN ARCHIVE HAS PUBLISHED, NOT THE CHECKOUT ON THIS MACHINE.
+# The importer used to read each archive's searched.json from the sibling folder, wherever that checkout happened to be. On 8 Nov 2026
+# the Defranceski checkout was 55 commits behind its own origin, so twelve rows dated that day never reached the tracker, and every
+# "nothing to publish" said so with a straight face. Now each archive is read from its origin's main (after a fetch), and the run says so
+# for every archive whose checkout is behind it or holds rows that were never pushed (those are kept, so nothing already published
+# disappears). ARCHIVE_SOURCE=local reads the checkouts as before.
+SEARCHED = "site/src/data/searched.json"
+
+
+def _git(repo, *args, timeout=90):
+    import subprocess
+    return subprocess.run(["git", "-C", repo, *args], capture_output=True, text=True, timeout=timeout)
+
+
+def archive_rows(fam):
+    """(rows, note). note is "" when the checkout and its origin agree."""
+    repo = os.path.join(PROJ, fam)
+    local = rows_of(os.path.join(repo, SEARCHED))
+    if os.environ.get("ARCHIVE_SOURCE") == "local" or not os.path.isdir(os.path.join(repo, ".git")):
+        return local, ""
+    try:
+        f = _git(repo, "fetch", "--quiet", "origin")
+        ref = next((r for r in ("origin/main", "origin/master")
+                    if _git(repo, "rev-parse", "--verify", "--quiet", r).returncode == 0), None)
+        if ref is None:
+            return local, "no origin branch found: read the local checkout"
+        shown = _git(repo, "show", f"{ref}:{SEARCHED}")
+        if shown.returncode != 0:
+            return local, "searched.json is not on origin: read the local checkout"
+        remote = rows_from(json.loads(shown.stdout))
+        behind = _git(repo, "rev-list", "--count", f"HEAD..{ref}").stdout.strip() or "?"
+        note = ""
+        if f.returncode != 0:
+            note = "could not fetch, so origin as last fetched. "
+        if behind not in ("0", "?"):
+            note += f"checkout is {behind} commit(s) behind origin; read origin's {len(remote)} rows (the local copy has {len(local)}). "
+        key = lambda r: json.dumps(r, sort_keys=True)
+        remote_keys = {key(r) for r in remote}
+        # Rows added or changed HERE since the checkout and origin last agreed (a base the checkout shares with origin). A row that merely
+        # changed upstream equals the base, so a stale checkout's old copy of it is not counted. Local work that was never pushed is kept
+        # in the tracker, as it always was, but flagged: the archive's own site does not show it either until it is pushed.
+        base = _git(repo, "merge-base", "HEAD", ref).stdout.strip()
+        base_keys = set()
+        if base:
+            b = _git(repo, "show", f"{base}:{SEARCHED}")
+            if b.returncode == 0:
+                base_keys = {key(r) for r in rows_from(json.loads(b.stdout))}
+        local_only = [r for r in local if key(r) not in remote_keys and key(r) not in base_keys]
+        if local_only:
+            note += f"{len(local_only)} local row(s) not pushed to origin are kept, but are not on the archive's own site until pushed. "
+        return remote + local_only, note.strip()
+    except Exception as e:  # network down, git missing: say so and fall back
+        return local, f"could not read origin ({type(e).__name__}): read the local checkout"
 
 
 # `when` IS FREE TEXT AND SOME OF IT IS NOT A DATE. The archives write «15
@@ -856,8 +915,9 @@ def main():
     per = {}
 
     for fam in ARCHIVES:
-        path = os.path.join(PROJ, fam, "site/src/data/searched.json")
-        rows = rows_of(path)
+        rows, source_note = archive_rows(fam)
+        if source_note:
+            print(f"archive copy: {fam}: {source_note}")
         home = slug_of(fam)
         archive_names = fam_names.get(squash(LINE_NAME.get(fam, fam)), {})
         if rows:
@@ -1158,7 +1218,10 @@ def main():
                 b["done"] = merged(b["done"])
             else:
                 b.pop("done", None)
-            b["since"] = b.get("since") or today
+            # A mark with no real work date has no date. It used to be stamped with the day this ran, which moved on every rebuild
+            # and showed finished-looking work as new today; the page already shows nothing when `since` is absent.
+            if not b.get("since"):
+                b.pop("since", None)
 
     # A LINE WITH NOTHING UNDER IT IS NOISE IN A DROPDOWN. Tag matching finds
     # families the archives genuinely name — Gerkacs, Pekass, Defrančeski —

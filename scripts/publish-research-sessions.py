@@ -34,6 +34,11 @@ os.chdir(ROOT)
 RECORD = "record-atlas-research-import.json"
 PUBLIC = "site/public/research-sessions.json"
 DRY = "--dry-run" in sys.argv
+# An unknown flag must never fall through to a real publish: on 8 Nov 2026 `--help` published to main because only --dry-run was read.
+if any(a.startswith("-") and a != "--dry-run" for a in sys.argv[1:]):
+    print(__doc__ or "usage: publish-research-sessions.py [--dry-run]")
+    print("Only --dry-run is understood. Nothing was done.")
+    sys.exit(0 if any(a in ("-h", "--help") for a in sys.argv[1:]) else 2)
 
 
 def run(cmd, cwd=None, check=True):
@@ -61,7 +66,7 @@ def main():
             shutil.copy(RECORD, out)
         r = run([sys.executable, "scripts/import-research-sessions.py", "--out", out])
         print("\n".join(l for l in r.stdout.splitlines()
-                        if any(k in l for k in ("rows read", "volume marks", "source marks", "film marks", "research lines"))))
+                        if any(k in l for k in ("rows read", "volume marks", "source marks", "film marks", "research lines", "archive copy"))))
         new = json.load(open(out, encoding="utf-8"))
 
         # 2. Compare with what origin has, not with the working tree, which may be behind.

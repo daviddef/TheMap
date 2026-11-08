@@ -59,9 +59,16 @@
     function paintList() {
       var f = fold(q.value), lines = P.lines();
       shownLines = lines.filter(function (l) { return !f || fold(l.name + " " + l.where).indexOf(f) > -1; });
+      /* the ones made here, then the ones the family research sessions publish; each alphabetical. The headings show only when both exist. */
+      var mine = shownLines.filter(function (l) { return !l.session; }), theirs = shownLines.filter(function (l) { return l.session; });
+      shownLines = mine.concat(theirs);
+      var heads = mine.length && theirs.length;
       list.textContent = ""; at = -1;
       shownLines.forEach(function (l, i) {
+        if (heads && i === 0) list.append(mk("li", "ra-cb-grp", "Yours"));
+        if (heads && i === mine.length) list.append(mk("li", "ra-cb-grp", "From the family research sessions"));
         var li = mk("li", "ra-cb-opt" + (l.active ? " is-on" : "")), main = mk("span", "ra-cb-main");
+        li.setAttribute("data-i", String(i));
         li.id = uidc + "-" + i; li.setAttribute("role", "option"); li.setAttribute("aria-selected", l.active ? "true" : "false");
         main.append(mk("b", null, l.name === "My research so far" ? "Research Names" : l.name)); if (l.where) main.append(mk("span", null, " of " + l.where));
         li.append(mk("span", "ra-cb-tick", l.active ? "\u2713" : ""), main, mk("span", "ra-cb-n", l.marks + (l.marks === 1 ? " mark" : " marks")));
@@ -76,8 +83,9 @@
       var act = shownLines.map(function (l) { return l.active; }).indexOf(true); if (act > -1 && !f) mark(act);
     }
     function mark(i) {
-      at = i; [].forEach.call(list.children, function (li, j) { li.classList.toggle("is-at", j === i); });
-      if (list.children[i]) { q.setAttribute("aria-activedescendant", list.children[i].id); list.children[i].scrollIntoView({ block: "nearest" }); } else q.removeAttribute("aria-activedescendant");
+      at = i; var cur = null;
+      [].forEach.call(list.querySelectorAll(".ra-cb-opt"), function (li) { var on = li.getAttribute("data-i") === String(i); li.classList.toggle("is-at", on); if (on) cur = li; });
+      if (cur) { q.setAttribute("aria-activedescendant", cur.id); cur.scrollIntoView({ block: "nearest" }); } else q.removeAttribute("aria-activedescendant");
     }
     function choose(l) { P.setActive(l.slug); closePop(false); draw(); document.dispatchEvent(new CustomEvent("ra-progress-changed")); }
     function openPop(addMode) {

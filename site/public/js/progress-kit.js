@@ -291,6 +291,11 @@
         .then(function (txt) {
           var doc = null; try { doc = txt && JSON.parse(txt); } catch (e) { doc = null; }
           if (!doc || !doc.marks) return;
+          /* WHICH FAMILIES THE SESSIONS PUBLISH, remembered every visit (not once per version): the family picker groups them apart from the
+             ones made by hand. A family you made yourself under the same name stays one family; it is simply listed with the sessions'. */
+          var slugs = Object.keys(doc.lines || {}).sort().join(","), known = null;
+          try { known = localStorage.getItem("ra-sessions-lines"); localStorage.setItem("ra-sessions-lines", slugs); } catch (e) { /* storage blocked: no grouping */ }
+          var changed = known !== slugs;
           var stamp = "ra-sessions-seen";
           var seen = null;
           try { seen = localStorage.getItem(stamp); } catch (e) { return; }
@@ -299,13 +304,17 @@
              the family sessions' newer work never showed. FNV-1a over the text changes whenever anything in the file does. */
           var h = 2166136261; for (var i = 0; i < txt.length; i++) { h ^= txt.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
           var v = String(doc.exported || doc.built || "") + "." + h.toString(36);
-          if (seen === v) return;
+          if (seen === v) { if (changed) document.dispatchEvent(new CustomEvent("ra-progress-changed")); return; }
           folding = true;
           try { window.raProgress.fromJSON(JSON.stringify(doc), "merge"); } finally { folding = false; }
           try { localStorage.setItem(stamp, v); } catch (e) {}
           document.dispatchEvent(new CustomEvent("ra-progress-changed"));
         })
         .catch(function () {});
+    }
+
+    function sessionLines() {
+      try { var o = {}; (localStorage.getItem("ra-sessions-lines") || "").split(",").forEach(function (x) { if (x) o[x] = 1; }); return o; } catch (e) { return {}; }
     }
 
     window.raProgress = {
@@ -324,7 +333,7 @@
           });
           return { slug: slug, name: d.lines[slug].name,
                    where: d.lines[slug].where || "", marks: n,
-                   active: slug === d.active };
+                   session: !!sessionLines()[slug], active: slug === d.active };
         }).sort(function (a, b) { return a.name.localeCompare(b.name); });
       },
       active: activeSlug,

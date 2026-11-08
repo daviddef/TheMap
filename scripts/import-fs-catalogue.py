@@ -96,6 +96,7 @@ def main():
                 by_fold[fold(n.get("n", ""))].append(p)
 
     out, matched, unmatched, vols = {}, 0, [], 0
+    loose = []  # bracket stripped, bare name taken: a place of that NAME, not necessarily THE place
     for layer, parish, way in parishes:
         rows = books.get(f"{layer}|{parish}") or []
         if not rows:
@@ -109,6 +110,8 @@ def main():
                 hit = p
                 break
             if hit:
+                if cand is bare and bare != parish:
+                    loose.append((parish, hit["id"], (hit.get("admin") or {}).get("adm1")))
                 break
         if not hit:
             unmatched.append(parish)
@@ -163,6 +166,15 @@ def main():
           f"this shelf; {len(unmatched)} did not")
     if unmatched:
         print("  " + ", ".join(sorted(set(unmatched))[:8]) + " …")
+    if loose:
+        # «Bribir (Šibenik)» went onto Bribir in Vinodol this way, and five more
+        # parishes onto a same-named place in another county. A bracket that
+        # names a town is a different place unless the town is the same one
+        # (Osijek (Tvrđa) is Osijek). Give the right place the full name, or an
+        # alias of it, in data/places.json; the full name matches first.
+        print(f"  {len(set(loose))} parishes took the place of their bare name, bracket ignored — check each:")
+        for parish, pid, adm in sorted(set(loose)):
+            print(f"    {parish}  ->  {pid} ({adm})")
 
 
 if __name__ == "__main__":

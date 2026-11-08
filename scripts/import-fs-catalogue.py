@@ -50,6 +50,14 @@ CONF = {"rc": "Roman Catholic", "orth": "Orthodox", "gc": "Greek Catholic",
         "jew": "Jewish", "mil": "Military", "ref": "Reformed",
         "civil": "Civil", "ev": "Evangelical"}
 
+# CONFESSIONS THE WALK GOT WRONG, BY WAYPOINT. The walk filed 9R2S-7M3 under
+# «Bribir (Šibenik)» in its Roman Catholic layer; opened, it is the Orthodox
+# parish of Bribir near Skradin (Arhiv Hrvatske, roll 14, Orthodox priests,
+# Comune di Scardona). The place is fixed by giving data/places.json's
+# bribir-skradin the alias «Bribir (Šibenik)», so the exact name matches before
+# the bracket is stripped; the confession cannot be fixed that way.
+CONF_FIX = {"9R2S-7M3": "Orthodox"}
+
 # A volume title is a run of «Event (Hrvatski) years» clauses, so one book can
 # be births AND marriages AND deaths, and its true span is the whole run.
 EVENT = re.compile(r"(Births|Marriages|Deaths|Church Census|Confirmations|Index)"
@@ -113,7 +121,7 @@ def main():
             film = row[2] if len(row) > 2 else ""
             ark = row[3] if len(row) > 3 else ""
             kinds, (a, b) = parse(title)
-            rec = {"t": title, "conf": CONF.get(layer, layer)}
+            rec = {"t": title, "conf": CONF_FIX.get(wp) or CONF.get(layer, layer)}
             if kinds:
                 rec["kinds"] = kinds
             if a:

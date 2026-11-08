@@ -61,10 +61,16 @@ import { u } from "../lib/url.js";
       <h2 id="lf-h-plan">What to do first</h2>
       <p class="lf-lead">Each step names registers and sources the Atlas holds. A step that says the Atlas lists none is a gap in the Atlas, not a gap in the record.</p>
       <ol id="lf-plan" class="lf-plan"></ol>
+      <div id="lf-family" class="lf-family" hidden>
+        <p class="lf-fam-h">Ready to begin?</p>
+        <p class="lf-lead">Start a research family and the registers and sources above are added as planned, so you can mark them off as you look.</p>
+        <p><button id="lf-family-btn" class="lf-go" type="button">Start this research family</button> <span id="lf-family-out" class="lf-status" role="status"></span></p>
+      </div>
     </section>
   </div>
 
   <script is:inline src={u("/js/atlas-summary.js")}></script>
+  <script is:inline src={u("/js/story-engine.js")}></script>
   <script is:inline src={u("/js/looking-for.js")}></script>
 </Base>
 
@@ -116,6 +122,8 @@ import { u } from "../lib/url.js";
   .lf-why { margin: 0 0 8px; color: var(--ink-2); max-width: var(--measure); }
   .lf-items { margin: 0 0 8px; padding-left: 20px; max-width: var(--measure); } .lf-items li { margin: 0 0 5px; }
   .lf-ask, .lf-not { margin: 4px 0 0; font-size: 15px; max-width: var(--measure); }
+  .lf-family { margin-top: 22px; padding: 18px 20px; background: var(--accent-wash); border-radius: 12px; max-width: 62rem; }
+  .lf-fam-h { font: 500 21px/1.3 var(--serif); margin: 0 0 4px; }
   .lf-ask b { color: var(--accent); } .lf-not b { color: var(--brick); }
 
   @media (max-width: 640px) {

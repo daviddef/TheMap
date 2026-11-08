@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const src = (f) => fs.readFileSync(path.join(here, "../public/js", f), "utf8");
 const A = (() => { const m = { exports: {} }; new Function("module", src("atlas-summary.js"))(m); return m.exports; })();
-const F = (() => { const m = { exports: {}, deps: { summary: A } }; new Function("module", src("looking-for.js"))(m); return m.exports; })();
+const F = (() => { const m = { exports: {}, deps: { summary: A } }; new Function("module", src("story-engine.js"))(m); return m.exports; })();
 
 const rows = [
   { i: "gracisce", n: "Gračišće", cc: "HR", c: 32, q: "gallignana" },
@@ -141,12 +141,12 @@ test("with no origin place the plan asks for one rather than inventing a registe
 });
 
 test("the page uses textContent only and never parses a place name or a note as markup", () => {
-  const js = src("looking-for.js");
+  const js = src("looking-for.js") + src("story-engine.js");
   assert.equal(/innerHTML|insertAdjacentHTML|document\.write/.test(js), false);
 });
 
 test("nothing typed on the page is stored or sent", () => {
-  const js = src("looking-for.js");
+  const js = src("looking-for.js") + src("story-engine.js");
   assert.equal(/localStorage|sessionStorage|indexedDB|XMLHttpRequest|method:\s*["']POST|navigator\.sendBeacon/.test(js), false);
   assert.equal(/fetch\(BASE \+ path\)/.test(js), true, "the only fetches are the site's own files");
 });
@@ -156,4 +156,102 @@ test("the page is in the sitemap and the menu and is linked from Start here", ()
   assert.match(read("src/pages/sitemap-index.xml.js"), /\["looking-for\/"/);
   assert.match(read("src/lib/nav.js"), /"\/looking-for\/"/);
   assert.match(read("src/pages/start.astro"), /\/looking-for\//);
+});
+
+/* ---- reading a story from free text ---- */
+const prow = [
+  { i: "gracisce", n: "Gračišće", cc: "HR", c: 32, q: "gallignana" },
+  { i: "hamilton-oh", n: "Hamilton", cc: "US", c: 0, v: 5 },
+  { i: "hamilton-ca", n: "Hamilton", cc: "CA", c: 0, v: 9 },
+  { i: "ivan-ba", n: "Ivan", cc: "BA", c: 1 },
+  { i: "ellis", n: "Ellis Island", cc: "US", c: 2 },
+];
+const ctx = { map: A.buildMap(prow), given: A.buildGiven([{ canon: "Ivan", id: "ivan", langs: { croatian: [{ form: "Ivan", status: "same" }, { form: "Joannes", status: "rule" }] } }]), skip: {} };
+
+test("a story is read into who, from where, to where, and when", () => {
+  const p = F.parseStory("My great-grandfather Ivan Kosina came from Gallignana to Hamilton around 1905. All I have is this photo.", ctx);
+  assert.equal(p.rel, "great-grandfather");
+  assert.equal(p.given, "Ivan");
+  assert.equal(p.surname, "Kosina");
+  assert.equal(p.name, "Ivan Kosina", "the name is as typed, not the catalogue's headline form");
+  assert.equal(p.from.row.i, "gracisce");
+  assert.equal(p.to.row.i, "hamilton-ca", "the place the Atlas holds more for is offered first");
+  assert.deepEqual(p.to.alts.map((r) => r.i), ["hamilton-oh"], "the other Hamilton is kept as an alternative");
+  assert.equal(p.left, 1905);
+  assert.equal(p.born, null);
+  assert.equal(p.holds, "photo");
+});
+
+test("a given name is the person, unless a marker word makes it the place", () => {
+  const man = F.parseStory("Ivan came from Gallignana to Hamilton in 1905", ctx);
+  assert.equal(man.from.row.i, "gracisce");
+  assert.equal(man.given, "Ivan");
+});
+
+test("born and left years are told apart by their words", () => {
+  const p = F.parseStory("Born 1880 in Gallignana, he went to Hamilton in 1905", ctx);
+  assert.equal(p.born, 1880);
+  assert.equal(p.left, 1905);
+  const q = F.parseStory("from Gallignana to Hamilton 1905", ctx);
+  assert.equal(q.left, 1905);
+  assert.equal(q.born, null);
+});
+
+test("a story with one place is read as where they started", () => {
+  const p = F.parseStory("my grandmother from Gallignana", ctx);
+  assert.equal(p.from.row.i, "gracisce");
+  assert.equal(p.to, null);
+  assert.equal(p.holds, "story");
+  const none = F.parseStory("hello", ctx);
+  assert.equal(none.from, null);
+});
+
+test("an attached picture sets what they hold even when the words do not say it", () => {
+  assert.equal(F.parseStory("from Gallignana", ctx, "photo").holds, "photo");
+});
+
+test("starting a family adds a line and marks the volumes and sources of the plan as planned, once", () => {
+  const marks = {}, lines = [];
+  const P = {
+    addLine: (n, w) => { lines.push([n, w]); return "kosina"; },
+    get: (id) => marks[id] || null,
+    setWhat: (id, w) => { marks[id] = { ...(marks[id] || {}), what: w }; },
+    setState: (id, s) => { marks[id] = { ...(marks[id] || {}), state: s }; },
+  };
+  const facts = { holds: "photo", name: "Ivan Kosina", left: 1905, born: 1880, from, to: { name: "Hamilton", countryName: "United States", eras: null, regimes: null },
+    providers: [{ id: "nara", name: "National Archives Catalog", kind: "national-archive", access: "free", url: "https://nara.example/" }], given: [], base: "/" };
+  const plan = F.buildPlan(facts);
+  const r = F.startFamily(P, facts, plan);
+  assert.equal(r.slug, "kosina");
+  assert.deepEqual(lines, [["Kosina", "Gračišće"]]);
+  assert.ok(r.added >= 2, "at least a volume and a source");
+  assert.equal(marks["source:nara"].state, "planned");
+  assert.ok(Object.keys(marks).some((k) => k.startsWith("volume:")));
+  const again = F.startFamily(P, facts, plan);
+  assert.equal(again.added, 0, "marks already set are left as they were");
+});
+
+test("a family is kept under the surname, or under the place when the story gave none", () => {
+  assert.equal(F.familyName({ name: "Ivan Kosina", from }), "Kosina");
+  assert.equal(F.familyName({ name: "Ivan", from }), "Gračišće");
+  assert.equal(F.familyName({ name: "", from: null }), "Research");
+});
+
+test("the home page carries the drawer, the map is handed to it, and the first-visit opening spares automated browsers", () => {
+  const read = (p) => fs.readFileSync(path.join(here, "..", p), "utf8");
+  assert.match(read("src/pages/index.astro"), /<StoryDrawer \/>/);
+  assert.match(read("src/components/RecordMap.astro"), /window\.raHomeMap = map;/);
+  const d = src("story-drawer.js");
+  assert.match(d, /navigator\.webdriver/);
+  assert.equal(/indexedDB|sessionStorage|XMLHttpRequest|method:\s*["']POST|sendBeacon/.test(d), false);
+  assert.equal(/innerHTML|insertAdjacentHTML|document\.write/.test(d + src("story-guide.js")), false);
+});
+
+test("the guided Ask on /read/ keeps the old Ask card and every id its script needs", () => {
+  const r = fs.readFileSync(path.join(here, "../src/pages/read.astro"), "utf8");
+  ["ask", "ask-drop", "ask-text", "ask-go", "ask-photo", "ask-tray", "ask-where", "ask-read-docs", "ask-read-lines", "ask-clear", "ask-ts", "ask-status", "ask-out", "ask-hand", "ask-sum", "ask-atlas"]
+    .forEach((id) => assert.ok(r.includes(`id="${id}"`), `id ${id} is still on the page`));
+  ["sg", "sg-stage", "sg-text", "sg-next1", "sg-plan", "sg-fam-btn"].forEach((id) => assert.ok(r.includes(`id="${id}"`), `guide id ${id}`));
+  assert.match(r, /story-engine\.js/);
+  assert.match(r, /story-guide\.js/);
 });

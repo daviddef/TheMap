@@ -641,6 +641,8 @@ window.addEventListener("load", async function () {
      the map is meant to show them. The renderer was. */
   var map = L.map(el, { scrollWheelZoom: true, worldCopyJump: true,
                         preferCanvas: true });
+  /* The story drawer (public/js/story-drawer.js) draws one journey line on this map: it is handed the map, never the layers. */
+  window.raHomeMap = map;
   var BASES = {
     /* A QUIET GROUND, NOT THE STANDARD OSM STYLE. David, looking at Krk: «what are all the
        orange triangles on our map? can we remove them, there is way too much going on on the

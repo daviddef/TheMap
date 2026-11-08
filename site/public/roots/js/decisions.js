@@ -13,7 +13,14 @@
    found again on the next export of the same tree, and on another device that loads the decisions file. The hash carries no
    per-device secret on purpose: that is what lets a file move between devices.
 
-   Decisions: a = left as is, d = ticked done. `t` is the day it was decided. */
+   Decisions: a = left as is, d = ticked done. `t` is the day it was decided.
+
+   THE SUMMARY ON "MY RESEARCH". The hashes above are unreadable on purpose, so by themselves they cannot show anything on another
+   page. While the same switch is on, a plain SUMMARY of each fix list is kept too, so /my-research/ can list the tree as research
+   still to do: the file's name, the day, per kind of fix how many there are, how many are done or left as is, and, for the three
+   place sections only, the place text as typed (with the standard form suggested), never more than 150. A place text is where
+   something happened, not who it happened to. People are only ever counted: no name, id or date of birth is written. The summary
+   follows the switch: off, or "Forget", removes it. */
 
 const KEY = 'ra-fix-decisions-v1';
 
@@ -84,5 +91,31 @@ export function create(storage) {
   };
 }
 
+/* ---- the readable summary of a fix list (see above) ---- */
+const FKEY = 'ra-gedcom-fixes-v1', PLACE_SECTIONS = ['places', 'check', 'decide'], PLACE_CAP = 150;
+export function summarise(fix, asIs, ticked, name, when) {
+  const gOf = k => { const g = (fix.groups || []).find(x => x.sections.includes(k)); return g ? g.title : ''; };
+  const sections = [], places = [];
+  for (const sec of fix.sections) {
+    const state = i => (asIs.has(i.key) ? 'a' : ticked.has(i.key) ? 'd' : 'o');
+    const total = sec.items.length, done = sec.items.filter(i => state(i) === 'd').length, asis = sec.items.filter(i => state(i) === 'a').length;
+    if (!total) continue;
+    sections.push({ key: sec.key, title: sec.title, group: gOf(sec.key), total, done, asis });
+    if (PLACE_SECTIONS.includes(sec.key)) for (const i of sec.items) if (places.length < PLACE_CAP) places.push({ k: sec.key, t: String(i.raw || '').slice(0, 160), to: i.to ? String(i.to).slice(0, 160) : '', s: state(i) });
+  }
+  return { name: String(name || '').slice(0, 200), saved: when || day(), sections, places };
+}
+export function createFixes(storage) {
+  const read = () => { try { const r = storage && storage.getItem(FKEY); const d = r && JSON.parse(r); return d && d.trees ? d : { v: 1, trees: {} }; } catch { return { v: 1, trees: {} }; } };
+  const write = d => { try { storage.setItem(FKEY, JSON.stringify(d)); return true; } catch { return false; } };
+  return {
+    all: () => read().trees,
+    put(sum) { if (!sum || !sum.name) return false; const d = read(); d.trees[sum.name] = sum; const names = Object.keys(d.trees).sort((a, b) => String(d.trees[b].saved).localeCompare(String(d.trees[a].saved))); for (const n of names.slice(8)) delete d.trees[n]; return write(d); },
+    forget(name) { const d = read(); if (name) delete d.trees[name]; else d.trees = {}; if (!Object.keys(d.trees).length) { try { storage.removeItem(FKEY); } catch { /* nothing to forget */ } return true; } return write(d); },
+  };
+}
+
 /* the default store: this browser's own, if it has one (a private window may not) */
-export const store = create((() => { try { return typeof document !== 'undefined' ? localStorage : null; } catch { return null; } })());
+const browserStorage = (() => { try { return typeof document !== 'undefined' ? localStorage : null; } catch { return null; } })();
+export const store = create(browserStorage);
+export const fixes = createFixes(browserStorage);

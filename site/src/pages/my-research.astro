@@ -54,10 +54,30 @@ const BASE_ = u("/");
       number here and a number there mean the same row.
       DRAWN ONLY WHEN THERE IS SOMETHING TO DRAW. An empty map of the world is
       a worse answer than no map. */}
+  {/* TABS, AS ON THE READ PAGE. The page was one long scroll: the family, its places, then two notes about other people's work. Four tabs
+      now, the same ones-and-panels shape as the Journey / Story / People tabs on /read/ (the rs-tab styles). The map and the dossier
+      stay in the first panel, untouched: the script below still finds them by id. */}
+  <div class="rs-tabs mr-tabs" role="tablist" id="mr-tabs">
+    <button type="button" class="rs-tab" role="tab" id="mr-t-families" aria-controls="mr-p-families" aria-selected="true">Families &amp; places</button>
+    <button type="button" class="rs-tab" role="tab" id="mr-t-fixes" aria-controls="mr-p-fixes" aria-selected="false" tabindex="-1">GEDCOM to fix <span class="rs-n" id="mr-n-fixes" hidden></span></button>
+    <button type="button" class="rs-tab" role="tab" id="mr-t-sessions" aria-controls="mr-p-sessions" aria-selected="false" tabindex="-1">Family sessions</button>
+    <button type="button" class="rs-tab" role="tab" id="mr-t-elsewhere" aria-controls="mr-p-elsewhere" aria-selected="false" tabindex="-1">Written elsewhere</button>
+  </div>
+
+  <div class="rs-panel mr-panel" id="mr-p-families" role="tabpanel" aria-labelledby="mr-t-families">
   <div id="mr-map" hidden></div>
   <p class="cap" id="mr-map-cap" hidden></p>
 
   <div id="mr-body"></div>
+  </div>
+
+  <div class="rs-panel mr-panel" id="mr-p-fixes" role="tabpanel" aria-labelledby="mr-t-fixes" hidden>
+    <h2 class="mr-h">GEDCOM research still to fix</h2>
+    <p class="cap">What the fix list in <a href={BASE_ + "roots/"}>Roots &amp; Routes</a> found in your family tree file, kept here so the work is part of your research.
+    It appears when you tick <b>Remember my decisions on this device</b> on the Fix list. Places are listed as typed in your file; people are only counted,
+    and nothing leaves this browser. Open the file in Roots &amp; Routes to see who.</p>
+    <div id="mr-fixes"></div>
+  </div>
 
   {/* RESEARCH THAT IS NOT IN THIS BROWSER. Everything above is marks kept in
       localStorage; these are finished pages, written for other people as
@@ -77,6 +97,7 @@ const BASE_ = u("/");
       script can write to this page: it reads a store in this browser. So the
       work arrives only when somebody runs the importer and imports the file,
       and until this said so there was no way to know that from here. */}
+  <div class="rs-panel mr-panel" id="mr-p-sessions" role="tabpanel" aria-labelledby="mr-t-sessions" hidden>
   <section class="mrext" style="border-left-color:var(--brass)">
     <div class="lab">Work done by the family-research sessions</div>
     <p class="cap">The Blažević, Defranceski, Falco, Lerena, Booyzen, D'Arcy,
@@ -97,6 +118,9 @@ const BASE_ = u("/");
     still takes a hand-made file if you ever need it.</p>
   </section>
 
+  </div>
+
+  <div class="rs-panel mr-panel" id="mr-p-elsewhere" role="tabpanel" aria-labelledby="mr-t-elsewhere" hidden>
   <section class="mrext">
     <div class="lab">Research you have done elsewhere</div>
     <p class="cap">Pages written as favours, on
@@ -124,6 +148,70 @@ const BASE_ = u("/");
           one FamilySearch volume, ending 1857</span></li>
     </ul>
   </section>
+  </div>
+
+  <script is:inline define:vars={{ BASE: u("/") }}>
+    /* TABS AND THE GEDCOM-TO-FIX PANEL. Reads ra-gedcom-fixes-v1 (written by Roots & Routes while "Remember my decisions" is on; see
+       roots/js/decisions.js). Place text is user data, so every node here is built with textContent. */
+    (function () {
+      var NAMES = ["families", "fixes", "sessions", "elsewhere"], FKEY = "ra-gedcom-fixes-v1";
+      function show(n, push) {
+        NAMES.forEach(function (k) {
+          var on = k === n, t = document.getElementById("mr-t-" + k), p = document.getElementById("mr-p-" + k);
+          if (!t || !p) return; t.setAttribute("aria-selected", String(on)); t.tabIndex = on ? 0 : -1; p.hidden = !on;
+        });
+        if (push) { try { history.replaceState(null, "", n === "families" ? location.pathname + location.search : "#" + n); } catch (e) { /* no history */ } }
+        if (n === "families") setTimeout(function () { window.dispatchEvent(new Event("resize")); }, 30);   // the map was drawn while hidden
+      }
+      NAMES.forEach(function (k, i) {
+        var t = document.getElementById("mr-t-" + k); if (!t) return;
+        t.addEventListener("click", function () { show(k, true); });
+        t.addEventListener("keydown", function (e) {
+          var d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0; if (!d) return;
+          var n = NAMES[(i + d + NAMES.length) % NAMES.length]; show(n, true); document.getElementById("mr-t-" + n).focus(); e.preventDefault();
+        });
+      });
+      var h = (location.hash || "").replace("#", ""); if (NAMES.indexOf(h) > 0) show(h, false);
+
+      function el(tag, text, cls) { var e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls; return e; }
+      function read() { try { var r = localStorage.getItem(FKEY), d = r && JSON.parse(r); return d && d.trees ? d : { v: 1, trees: {} }; } catch (e) { return { v: 1, trees: {} }; } }
+      function draw() {
+        var box = document.getElementById("mr-fixes"); if (!box) return; box.textContent = "";
+        var d = read(), names = Object.keys(d.trees).sort(function (a, b) { return String(d.trees[b].saved).localeCompare(String(d.trees[a].saved)); }), open = 0;
+        names.forEach(function (n) { (d.trees[n].sections || []).forEach(function (s) { open += Math.max(0, s.total - s.done - s.asis); }); });
+        var badge = document.getElementById("mr-n-fixes"); if (badge) { badge.hidden = !open; badge.textContent = open; }
+        if (!names.length) {
+          var e = el("div", null, "mr-fx-empty"); e.append(el("p", "No fix list is kept here yet."), el("p", "Open your tree in Roots & Routes, go to the Fix list, and tick \u201cRemember my decisions on this device\u201d. What is left to fix then shows up here, and ticks you make there are counted.", "cap"));
+          var a = el("a", "Open Roots & Routes", "mr-fx-go"); a.href = BASE + "roots/"; e.append(a); box.append(e); return;
+        }
+        names.forEach(function (n) {
+          var t = d.trees[n], card = el("article", null, "mr-fx"), head = el("header", null, "mr-fx-head");
+          var left = (t.sections || []).reduce(function (a, s) { return a + Math.max(0, s.total - s.done - s.asis); }, 0);
+          head.append(el("h3", n), el("span", left + " left to fix \u00b7 kept " + t.saved, "mr-fx-meta")); card.append(head);
+          var groups = {}, order = [];
+          (t.sections || []).forEach(function (s) { var g = s.group || "Other"; if (!groups[g]) { groups[g] = []; order.push(g); } groups[g].push(s); });
+          order.forEach(function (g) {
+            var gd = el("div", null, "mr-fx-group"); gd.append(el("h4", g));
+            groups[g].forEach(function (s) {
+              var rest = Math.max(0, s.total - s.done - s.asis), row = el("div", null, "mr-fx-row"), bar = el("span", null, "mr-fx-bar"), fill = el("i"); fill.style.width = Math.round(100 * (s.done + s.asis) / Math.max(1, s.total)) + "%"; bar.append(fill);
+              row.append(el("span", s.title, "mr-fx-t"), bar, el("span", rest ? rest + " of " + s.total + " left" : "all " + s.total + " done", "mr-fx-c" + (rest ? "" : " ok"))); gd.append(row);
+            });
+            card.append(gd);
+          });
+          var pl = (t.places || []).filter(function (p) { return p.s === "o"; });
+          if (pl.length) {
+            var det = el("details", null, "mr-fx-places"), sm = el("summary"); sm.append(el("b", "Places to correct or choose "), el("span", "(" + pl.length + (pl.length >= 150 ? "+" : "") + ")", "muted")); det.append(sm);
+            var ul = el("ul"); pl.slice(0, 60).forEach(function (p) { var li = el("li"); li.append(el("span", p.t, "mr-fx-raw")); if (p.to) li.append(" \u2192 ", el("b", p.to)); ul.append(li); });
+            det.append(ul); if (pl.length > 60) det.append(el("p", "and " + (pl.length - 60) + " more in Roots & Routes", "cap")); card.append(det);
+          }
+          var foot = el("p", null, "mr-fx-foot"), go = el("a", "Open Roots & Routes"); go.href = BASE + "roots/"; foot.append(go, " and load this file again to work down the list. ");
+          var fg = el("button", "Forget this list"); fg.type = "button"; fg.className = "link"; fg.onclick = function () { var x = read(); delete x.trees[n]; try { if (Object.keys(x.trees).length) localStorage.setItem(FKEY, JSON.stringify(x)); else localStorage.removeItem(FKEY); } catch (e) { /* blocked */ } draw(); };
+          foot.append(fg); card.append(foot); box.append(card);
+        });
+      }
+      draw(); window.addEventListener("storage", draw);
+    })();
+  </script>
 
   <script is:inline define:vars={{ BASE: u("/") }}>
     (function () {
@@ -864,4 +952,23 @@ const BASE_ = u("/");
     cursor: pointer; font: inherit; font-size: 11.5px; color: var(--ink-3);
     text-decoration: underline; text-underline-offset: 2px; }
   :global(.mrdel:hover) { color: var(--brick); }
+</style>
+
+<style is:global>
+  .mr-tabs { margin-top: 18px; }
+  .mr-panel { margin-bottom: 28px; min-width: 0; }
+  .mr-panel .mrext { margin-top: 0; }
+  .mr-h { margin: 0 0 6px; font-size: 24px; }
+  .mr-fx { border: 1px solid var(--rule); border-left: 3px solid var(--accent, #245565); border-radius: 8px; padding: 16px 18px; margin: 16px 0; background: var(--panel); }
+  .mr-fx-head { display: flex; gap: 10px 16px; align-items: baseline; flex-wrap: wrap; justify-content: space-between; }
+  .mr-fx-head h3 { margin: 0; font-size: 19px; overflow-wrap: anywhere; }
+  .mr-fx-meta, .mr-fx-foot, .mr-fx-c { font-family: var(--sans); font-size: 13px; color: var(--ink-3); }
+  .mr-fx-group { margin: 14px 0 0; } .mr-fx-group h4 { margin: 0 0 6px; font: 600 11px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+  .mr-fx-row { display: grid; grid-template-columns: minmax(0, 1fr) 90px auto; gap: 12px; align-items: center; padding: 5px 0; font-family: var(--sans); font-size: 14.5px; }
+  .mr-fx-bar { height: 6px; border-radius: 3px; background: var(--rule); overflow: hidden; } .mr-fx-bar i { display: block; height: 100%; background: var(--accent, #245565); }
+  .mr-fx-c.ok { color: var(--accent, #245565); font-weight: 600; }
+  .mr-fx-places { margin: 14px 0 0; font-family: var(--sans); font-size: 14px; } .mr-fx-places ul { margin: 8px 0 0; padding-left: 18px; } .mr-fx-raw { overflow-wrap: anywhere; }
+  .mr-fx-foot { margin: 14px 0 0; } .mr-fx-foot .link { background: none; border: 0; padding: 0; margin-left: 4px; font: inherit; color: var(--accent, #245565); text-decoration: underline; cursor: pointer; }
+  .mr-fx-empty { padding: 10px 0; } .mr-fx-go { display: inline-block; padding: 9px 16px; border-radius: 8px; background: var(--accent, #245565); color: #fff; font: 600 14px var(--sans); text-decoration: none; }
+  @media (max-width: 560px) { .mr-fx-row { grid-template-columns: 1fr auto; } .mr-fx-bar { display: none; } }
 </style>

@@ -5,7 +5,7 @@ import { makeSample } from './sample.js';
 import { searchLinks, sends } from './lookup.js';
 import { checklistText, checklistCsv } from './checklist.js';
 import * as recent from './recent.js';
-import { store as dec, rowsFrom, fileTextOf, parseRows, lookup } from './decisions.js';
+import { store as dec, fixes, summarise, rowsFrom, fileTextOf, parseRows, lookup } from './decisions.js';
 import { BUILD } from './build.js';
 import { parseLink, profileUrl, treeUrl, toHash, fromHash } from './myheritage.js';
 import { loadLink, saveLink, loadSite, saveSite, loadTrees, saveTreeLink } from './remember.js';
@@ -518,7 +518,7 @@ function fixRow(s, i) {
 function fixCount(s) { const n = $('#fc-' + s.key); if (n) n.textContent = s.items.filter(i => ticked.has(i.key)).length + ' of ' + s.items.length + ' done'; }
 const hay = (s, i) => (s.key === 'names' ? i.name + ' ' + i.kin : s.key === 'dupes' ? i.an + ' ' + i.bn : s.key === 'apart' ? i.people.map(p => p.name).join(' ') : (i.raw || '') + ' ' + (i.name || '') + ' ' + (i.country ? i.country + ' ' + i.label : '') + ' ' + (i.reasons ? i.reasons.map(r => r.text).join(' ') : '') + ' ' + (i.people ? i.people.map(p => p.name).join(' ') : '')).toLowerCase();
 function drawFix() {
-  if (!fix) return; const q = $('#ffilter').value.trim().toLowerCase(), box = $('#fsecs'); box.textContent = '';
+  if (!fix) return; keepSummary(); const q = $('#ffilter').value.trim().toLowerCase(), box = $('#fsecs'); box.textContent = '';
   const byKey = new Map(fix.sections.map(x => [x.key, x])), done = new Set();
   const section = s => {
     done.add(s.key);
@@ -559,7 +559,10 @@ function decStatus(restored) {
       + (dec.isOn() ? kept + ' kept on this device.' : kept ? kept + ' loaded from a file are stored on this device; turn this on to keep new ones too.' : 'Not kept: ticks and "left as is" are lost when you close the page.');
 }
 function fixlist(m) { fix = m; const n = restoreDecisions(m); drawFix(); decStatus(n); }
-$('#dec-on').onchange = e => { dec.setOn(e.target.checked); if (e.target.checked) { for (const k of asIs) dec.put(k, 'a', true); for (const k of ticked) dec.put(k, 'd', true); } decStatus(0); };
+/* While the switch is on, a readable summary of this fix list is kept for My research (see decisions.js). Debounced: drawFix runs on every tick. */
+let sumTimer = 0;
+function keepSummary() { clearTimeout(sumTimer); sumTimer = setTimeout(() => { if (fix && curName && dec.isOn()) fixes.put(summarise(fix, asIs, ticked, curName)); }, 400); }
+$('#dec-on').onchange = e => { dec.setOn(e.target.checked); if (!e.target.checked) fixes.forget(); else keepSummary(); if (e.target.checked) { for (const k of asIs) dec.put(k, 'a', true); for (const k of ticked) dec.put(k, 'd', true); } decStatus(0); };
 $('#dec-save').onclick = () => saveAs('fix-decisions-' + new Date().toISOString().slice(0, 10) + '.json', fileTextOf(rowsFrom(asIs, ticked)), 'application/json');
 $('#dec-load').onclick = () => $('#dec-file').click();
 $('#dec-file').onchange = async e => {
@@ -567,7 +570,7 @@ $('#dec-file').onchange = async e => {
   try { const text = await f.text(); loaded = parseRows(text); if (dec.isOn()) dec.load(text); const n = fix ? restoreDecisions(fix) : 0; drawFix(); decStatus(n); }
   catch { $('#dec-said').textContent = 'That is not a decisions file.'; }
 };
-$('#dec-forget').onclick = () => { dec.forget(); loaded = null; decStatus(0); };
+$('#dec-forget').onclick = () => { dec.forget(); fixes.forget(); loaded = null; decStatus(0); };
 $('#ffilter').oninput = () => drawFix();
 $('#fliving').onchange = () => worker && askFix();
 function saveAs(name, text, type) {

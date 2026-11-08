@@ -465,6 +465,22 @@ test("kept files: the last files opened are kept in this browser by default, the
   assert.doesNotMatch(app, /indexedDB|localStorage/, "only recent.js and remember.js touch storage");
 });
 
+test("fix-list summary: kept for My research only while the switch is on, places as typed, people only counted, forgotten with the switch", async () => {
+  const { createFixes, summarise } = await import(R + "js/decisions.js");
+  const m = new Map(), st = { getItem: k => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), removeItem: k => m.delete(k) };
+  const fix = { groups: [{ title: "Correct a place", sections: ["places"] }, { title: "Find what is missing", sections: ["names"] }], sections: [
+    { key: "places", title: "Fix these places", items: [{ key: "p|Fiume", raw: "Fiume", to: "Rijeka, Croatia" }, { key: "p|Zara", raw: "Zara", to: "Zadar, Croatia" }] },
+    { key: "names", title: "People with no full name", items: [{ key: "n|I1", name: "Ada Lovelace", id: "I1" }] }] };
+  const sum = summarise(fix, new Set(["p|Zara"]), new Set(), "tree.ged", "2026-11-08");
+  assert.deepEqual(sum.sections.map(s => [s.key, s.total, s.done, s.asis, s.group]), [["places", 2, 0, 1, "Correct a place"], ["names", 1, 0, 0, "Find what is missing"]]);
+  assert.deepEqual(sum.places.map(p => [p.t, p.s]), [["Fiume", "o"], ["Zara", "a"]]);
+  assert.doesNotMatch(JSON.stringify(sum), /Ada|Lovelace|I1/, "a person is counted, never named or identified");
+  const f = createFixes(st); assert.ok(f.put(sum)); assert.equal(Object.keys(f.all()).length, 1);
+  assert.ok(f.forget("tree.ged")); assert.equal(m.size, 0, "forgetting the last list leaves nothing behind");
+  assert.equal(createFixes(null).put(sum), false, "no storage is not an error");
+  const app = fs.readFileSync(R + "js/app.js", "utf8"); assert.match(app, /dec\.isOn\(\)\) fixes\.put\(/, "only while the switch is on"); assert.match(app, /fixes\.forget\(\)/);
+});
+
 test("MyHeritage links: a tree link reads by parameter name, in any order, and survives a mistyped root name", async () => {
   const { parseLink } = await import(R + "js/myheritage.js");
   const c = parseLink("https://www.myheritage.com/family-trees/example-family-site-23andme/OYYV7AGVV4FMSGNWXC6TO74JQDUMOYA?familyTreeID=4&rootIndivudalID=4000016");

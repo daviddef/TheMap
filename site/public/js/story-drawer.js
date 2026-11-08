@@ -35,6 +35,15 @@
       .then(function () { api = init(); return api; }).catch(function (e) { started = null; throw e; });
     return started;
   }
+  /* The one box: the search box on the map (unified-search.js) hands a typed story, pictures or a clear to the same reader the panel uses. */
+  window.raStoryBox = {
+    start: function (t) { return ensure().then(function (a) { a.setText(t); }); },
+    addFiles: function (fl) { return ensure().then(function (a) { a.addFiles(fl); }); },
+    clear: function () { return started ? started.then(function (a) { a.clear(); }) : Promise.resolve(); },
+    open: function () { open(); },
+    ready: function () { return ensure(); },
+    state: function () { return api && api.state ? api.state() : { has: false, name: "" }; }
+  };
 
   function open() {
     root.hidden = false; if (launch) launch.hidden = true;
@@ -275,7 +284,7 @@
         var rm = el("button", "×"); rm.type = "button"; rm.setAttribute("aria-label", "Remove picture " + (i + 1)); rm.addEventListener("click", function () { URL.revokeObjectURL(x.url); files.splice(i, 1); drawShots(); lastSig = ""; run(); });
         w.append(im, rm); shots.append(w);
       });
-      shots.hidden = !files.length; $(".sd-read").hidden = !files.length;
+      shots.hidden = !files.length; var rd = $(".sd-read"); if (rd) rd.hidden = !files.length;
     }
     file.addEventListener("change", function () { addFiles(file.files); file.value = ""; });
     ["dragenter", "dragover"].forEach(function (t) { drop.addEventListener(t, function (e) { e.preventDefault(); drop.classList.add("hot"); }); });
@@ -305,6 +314,12 @@
     $(".sd-eg").addEventListener("click", function () { text.value = "My great-grandfather Ivan Kosina came from Gallignana to Hamilton around 1905. All I have is this photo."; run(); });
     window.addEventListener("beforeunload", function () { files.forEach(function (x) { URL.revokeObjectURL(x.url); }); });
     if (text.value) run();
-    return { run: run };
+    return {
+      run: run,
+      setText: function (t) { text.value = String(t || "").slice(0, 2000); lastSig = ""; try { document.dispatchEvent(new CustomEvent("ra-story-start")); } catch (e) { /* no document */ } run(); },
+      addFiles: function (fl) { try { document.dispatchEvent(new CustomEvent("ra-story-start")); } catch (e) { /* no document */ } addFiles(fl); },
+      clear: function () { $(".sd-clear").click(); },
+      state: function () { return { has: !!(parsedNow && ((parsedNow.route && parsedNow.route.length) || parsedNow.from || parsedNow.name)), name: parsedNow && parsedNow.name || "", files: files.length }; }
+    };
   }
 })();

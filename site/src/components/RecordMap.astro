@@ -129,10 +129,9 @@ try {
         <div class="ra-drop-in" id="ra-viewin"></div>
       </details>
     </div>
-    {/* SHOW MY RESEARCH, ON THE SEARCH LINE. David: «can you show a toggle for "show research" when we search? I may already be done, but can't see that on the map». It was a checkbox inside Filters; a switch you have to open a menu to find is not one you reach for mid-search. Same switch, same saved choice. */}
-    <button type="button" class="ra-rc-tog" id="ra-rc-tog" aria-pressed="false"
-            title="Colour the places by your research: researched, busy researching, on my list, not started">
-      <span class="ra-rc-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>My research</span></button>
+    {/* MY RESEARCH COLOURS LIVE IN THE FILTER, NOT ON THE SEARCH LINE. David: «can the My research colouring just be in the filter/overlay rather
+        than taking up so much real estate?» It had its own 44px button beside Views and Filters (an earlier ask, «show a toggle when we search»).
+        The switch and its key are in Filters → My research; the same dots mark it there, and the Filters button says how many things are on. */}
     <div class="ra-bar-filters">
     {/* THREE FILTERS, THREE DIFFERENT SHAPES. The layers were eight loose
         pills in a row while «what it costs» and «what kind» were tidy
@@ -173,7 +172,7 @@ try {
             unresearched?» One switch, and a key that counts what it shows. */}
         <p class="ra-fgroup-h">My research</p>
         <label class="ra-opt ra-rc-opt" id="ra-rc-l" title="Colour every place by how far you are with the family line you have selected">
-          <input type="checkbox" id="ra-rc" /><span>Colour places by my research</span></label>
+          <input type="checkbox" id="ra-rc" /><span class="ra-rc-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>Colour places by my research</span></label>
         <div class="ra-rc-key" id="ra-rc-key" hidden></div>
 
         <p class="ra-fgroup-h">Layers</p>

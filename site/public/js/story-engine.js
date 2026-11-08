@@ -790,6 +790,7 @@
       var tl = timeline(f), stops = tl.stops, anc = (f.ancestors || []).filter(function (x) { return x.info; });
       /* the others in the family who travel too: each pin appears at its year, so the story plays the ancestry first, then the person's own journey */
       var kin = (f.kin || []).map(function (k) { return { name: k.name, label: k.label, stops: k.stops.filter(function (x) { return x.info; }) }; }).filter(function (k) { return k.stops.length; }), kinMarks = [];
+      var legs = [], stopMarks = [];
       function kinTag(k) { return ((k.label ? k.label + " " : "") + (k.name || "")).trim() || "Family"; }
       var can = stops.length > 0 && tl.mode !== "none" && (stops.length > 1 || tl.mode === "year");
       if (E.time) E.time.hidden = !can;
@@ -828,8 +829,12 @@
         E.cap.textContent = "";
         var at = stops.length ? along(stops, t) : { idx: 0, pt: null, moving: false }, cur = stops[at.idx];
         var begun = !stops.length || tl.mode !== "year" || t >= stops[0].t;   /* before the person's own first place, only the family before them is on the map */
+        legs.forEach(function (lg) {
+          if (tl.mode === "year" && t >= lg.t0 && t < lg.t1) E.cap.append(line(lg.k.stops[0].info, t, evMap.get(lg.k.stops[0].info), kinTag(lg.k) + ", on the way to " + lg.to.name + " (the route was not told; this is a straight line), ", ""));
+        });
         kin.forEach(function (k) {
           var cs = null; k.stops.forEach(function (x) { if (x.year == null || x.year <= t) cs = x; });
+          if (legs.some(function (lg) { return lg.k === k && t >= lg.t0 && t < lg.t1; })) return;
           if (cs && tl.mode === "year") E.cap.append(line(cs.info, t, evMap.get(cs.info), kinTag(k) + ", ", cs.role === "born" && cs.year != null ? "born here in " + cs.year : cs.role === "origin" ? "from here" : ""));
         });
         if (cur && begun) {
@@ -841,6 +846,11 @@
         if (E.slider) E.slider.value = String(t);
         if (E.yearOut) E.yearOut.textContent = tl.mode === "age" ? "age " + t : String(t);
         if (E.slider) E.slider.setAttribute("aria-valuetext", (tl.mode === "age" ? "age " : "") + t + (cur ? ". " + (at.moving ? "On the way" : "At " + cur.info.name) : ""));
+        legs.forEach(function (lg) {
+          var kk = Math.min(1, Math.max(0, (t - lg.t0) / Math.max(1, lg.t1 - lg.t0))), pt = between(lg.a, lg.b, kk), on = t >= lg.t0;
+          lg.dot.setLatLng(pt); lg.dot.setStyle({ opacity: on ? 1 : 0, fillOpacity: on ? 1 : 0 }); lg.line.setStyle({ opacity: on ? .55 : .12 });
+        });
+        stopMarks.forEach(function (m) { var on = m.t == null || t >= m.t, tp = m.ly.getTooltip(); m.ly.setStyle({ opacity: on ? 1 : .3, fillOpacity: on ? 1 : .3 }); if (tp && tp.setOpacity) tp.setOpacity(on ? 1 : .35); });
         kinMarks.forEach(function (m) { var on = m.t == null || t >= m.t, tp = m.ly.getTooltip(); m.ly.setStyle({ opacity: on ? 1 : .3, fillOpacity: on ? 1 : .3 }); if (tp && tp.setOpacity) tp.setOpacity(on ? 1 : .35); });
         if (layers && layers.dot) layers.dot.setStyle({ opacity: begun ? 1 : 0, fillOpacity: begun ? 1 : 0 });
         if (layers && layers.dot && at.pt) {
@@ -920,8 +930,9 @@
           var info = st.info; if (info.lat == null) return;
           var first = i === 0, last = i === stops.length - 1 && stops.length > 1;
           var label = first ? (st.role === "born" ? "Born" : "Started") : (st.age != null ? (st.approx ? "About age " : "Age ") + st.age : last ? "Arrived" : "Then");
-          L.circleMarker([info.lat, info.lon], { radius: 8, weight: 3, color: "#fff", fillColor: first ? "#b3452e" : "#1f5c6b", fillOpacity: 1 })
+          var sly = L.circleMarker([info.lat, info.lon], { radius: 8, weight: 3, color: "#fff", fillColor: first ? "#b3452e" : "#1f5c6b", fillOpacity: 1 })
             .bindTooltip(tipOf(label, info.name), { permanent: true, direction: "right", offset: [6, 0], className: "lf-tip" }).addTo(g);
+          if (tl.mode === "year" && kin.length) stopMarks.push({ ly: sly, t: st.t });
           pts.push([info.lat, info.lon]);
         });
         anc.forEach(function (x) {
@@ -940,6 +951,19 @@
           });
           if (kp.length > 1) L.polyline(kp, { color: "#7a7a7a", weight: 1.5, dashArray: "2 5", opacity: .6 }).addTo(g);
         });
+        /* A parent whose only place is where they were born: draw them to where the person starts, between their coming of age and the
+           person's own first year, as a dotted straight line, and say in the caption that the route was not told. */
+        if (tl.mode === "year" && stops.length && stops[0].info.lat != null) {
+          var dest = stops[0], arrive = dest.t;
+          kin.forEach(function (k) {
+            var st0 = k.stops[0];
+            if (k.stops.length !== 1 || st0.role !== "born" || st0.year == null || st0.info === dest.info || st0.info.lat == null || arrive == null || arrive <= st0.year + 1) return;
+            var t0 = Math.max(st0.year + 18, arrive - 8), a = [st0.info.lat, st0.info.lon], b = [dest.info.lat, dest.info.lon];
+            var ln = L.polyline([a, b], { color: "#7a7a7a", weight: 1.5, dashArray: "1 6", opacity: .12 }).addTo(g);
+            var dt = L.circleMarker(a, { radius: 5, weight: 2, color: "#7a7a7a", fillColor: "#fff", fillOpacity: 0, opacity: 0 }).addTo(g);
+            legs.push({ k: k, a: a, b: b, t0: t0, t1: arrive, to: dest.info, line: ln, dot: dt });
+          });
+        }
         layers = { group: g };
         var rp = stops.filter(function (st) { return st.info.lat != null; }).map(function (st) { return [st.info.lat, st.info.lon]; });
         if (rp.length > 1) {

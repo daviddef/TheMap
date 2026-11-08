@@ -10,11 +10,14 @@
   if (!root) return;
   var BASE = (document.documentElement.getAttribute("data-base") || "/").replace(/\/?$/, "/");
   var dock = document.getElementById("ra-journey");
-  function $(s) { return root.querySelector(s) || (dock && dock.querySelector(s)); }
+  var report = document.getElementById("ra-report");
+  function $(s) { return root.querySelector(s) || (dock && dock.querySelector(s)) || (report && report.querySelector(s)); }
   var launch = document.getElementById("ra-story-open");
   /* Live inside the map's frame, so it sits on the map and goes full screen with it. */
   var host = document.getElementById("ra-map");
   if (host) { host.appendChild(root); if (dock) host.appendChild(dock); if (launch) host.appendChild(launch); }
+  /* the story itself goes under the map, in the page */
+  if (host && report && host.parentNode) host.parentNode.insertAdjacentElement("afterend", report);
   var SEEN = "ra-story-seen";
   function remember() { try { localStorage.setItem(SEEN, "1"); } catch (e) { /* a private window: the drawer simply opens again next time */ } }
   function seen() { try { return localStorage.getItem(SEEN) === "1"; } catch (e) { return false; } }
@@ -60,18 +63,16 @@
       if (on) { dock.hidden = false; requestAnimationFrame(function () { dock.classList.add("is-open"); dockSize(); }); }
       else { dock.classList.remove("is-open"); dock.hidden = true; dockSize(); }
     }
-    function pickTab(name) {
-      [].forEach.call(dock.querySelectorAll(".sdk-tab"), function (b) { b.setAttribute("aria-selected", b.getAttribute("data-tab") === name ? "true" : "false"); });
-      [].forEach.call(dock.querySelectorAll(".sdk-panel"), function (p) { p.hidden = p.getAttribute("data-panel") !== name; });
-      dock.removeAttribute("data-collapsed"); setTimeout(dockSize, 30);
+    /* a section of the story and the button that jumps to it appear only when they hold something */
+    function secShow(id, on) {
+      var sec = report.querySelector("#" + id), b = report.querySelector('[data-go="' + id + '"]');
+      if (sec) sec.hidden = !on; if (b) b.hidden = !on;
     }
-    function tabShow(name, on) { var b = dock.querySelector('.sdk-tab[data-tab="' + name + '"]'); if (b) b.hidden = !on; }
-    [].forEach.call(dock.querySelectorAll(".sdk-tab"), function (b) {
-      b.addEventListener("click", function () {
-        if (b.getAttribute("aria-selected") === "true") { if (dock.hasAttribute("data-collapsed")) dock.removeAttribute("data-collapsed"); else dock.setAttribute("data-collapsed", ""); setTimeout(dockSize, 30); return; }
-        pickTab(b.getAttribute("data-tab"));
-      });
+    [].forEach.call(report.querySelectorAll("[data-go]"), function (b) {
+      b.addEventListener("click", function () { var t = report.querySelector("#" + b.getAttribute("data-go")); if (t) t.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" }); });
     });
+    var reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    dock.querySelector(".sdk-more").addEventListener("click", function () { report.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" }); });
     dock.querySelector(".sdk-x").addEventListener("click", function () { showDock(false); });
     window.addEventListener("resize", dockSize);
     var files = [], ov = Object.create(null), lastSig = "", parsedNow = null, token = 0, shown = Object.create(null), last = null;
@@ -82,7 +83,7 @@
       });
     }
     var J = E.createJourney({ els: { cap: $(".sd-cap"), slider: $(".sd-year"), yearOut: $(".sd-yearout"), play: $(".sd-play"), moments: $(".sd-moments"), time: $(".sd-time"), mapBox: null },
-      getMap: getMap, onBorn: function (y) { setBorn(y); }, pad: { tl: [(window.innerWidth >= 900 ? 430 : 30), 50], br: [60, (window.innerWidth >= 900 ? 350 : 330)] } });
+      getMap: getMap, askBox: report.querySelector(".rep-ask"), onBorn: function (y) { setBorn(y); }, pad: { tl: [(window.innerWidth >= 900 ? 430 : 30), 50], br: [60, (window.innerWidth >= 900 ? 150 : 150)] } });
 
     function chip(label, cls, key, onclick) {
       var c = el(onclick ? "button" : "span", label, "sd-chip" + (cls ? " " + cls : "")); if (onclick) { c.type = "button"; c.addEventListener("click", onclick); }
@@ -112,7 +113,7 @@
     function drawPlan(g) {
       planBox.textContent = ""; planBox.hidden = false;
       g.plan.forEach(function (s, i) {
-        var d = el("details", null, "sd-step"); d.style.animationDelay = (i * 140) + "ms";
+        var d = el("details", null, "sd-step"); d.open = true; d.style.animationDelay = (i * 140) + "ms";
         var sm = el("summary"); sm.append(el("span", String(s.n), "sd-num"), el("span", s.title)); d.append(sm);
         d.append(el("p", s.why, "sd-why"));
         var ul = el("ul"); s.items.forEach(function (it) { var li = el("li"); if (it.href) { var a = el("a", it.text); a.href = it.href; li.append(a); } else li.textContent = it.text; ul.append(li); });
@@ -127,7 +128,7 @@
       $(".sd-fam-btn").onclick = function () {
         var P = window.raProgress;
         if (!P) { famOut.textContent = "Your research list did not load on this page. Reload and try again."; return; }
-        var r = E.startFamily(P, g.facts, g.plan);
+        var r = E.startFamily(P, g.facts, g.plan.concat([{ items: stopItems }]));
         famOut.textContent = "";
         famOut.append("Started " + r.name + " with " + r.added + " planned. It is now your active line at the top. ");
         var a = el("a", "Open My research"); a.href = BASE + "my-research/"; famOut.append(a);
@@ -149,30 +150,48 @@
         parsedNow = p;
         drawChips(p);
         var sig = [(p.route || []).map(function (x) { return x.row.i + ":" + x.age; }).join(","), p.left, p.born, p.name, (p.people || []).map(function (x) { return x.name; }).join(","), p.holds].join("|");
-        if (sig === lastSig || !p.from) { if (!p.from && sig !== lastSig) { J.clear(); showDock(false); planBox.hidden = true; fam.hidden = true; } return; }
+        if (sig === lastSig || !p.from) { if (!p.from && sig !== lastSig) { J.clear(); showDock(false); report.hidden = true; planBox.hidden = true; fam.hidden = true; } return; }
         lastSig = sig;
         var my = ++token; status.textContent = "Reading the Atlas…";
         LD.gather(p).then(function (g) {
           if (my !== token) return;
           status.textContent = ""; last = g;
-          showDock(true); pickTab("journey"); $(".sdk-title").textContent = g.facts.name ? g.facts.name + "'s journey" : "Their journey"; J.draw(g.facts, g.mort); drawFamily(g); drawNames(g); drawPlan(g); setTimeout(dockSize, 60);
+          showDock(true); drawReport(g); J.draw(g.facts, g.mort); setTimeout(dockSize, 60);
         }).catch(function () { status.textContent = "Some Atlas files did not load. Check your connection."; });
       }).catch(function () { status.textContent = "The Atlas files did not load. Check your connection."; });
     }
+    var stopItems = [];
+    function lede(f) {
+      var bits = (f.route || []).filter(function (x) { return x.info; }).map(function (x, i) {
+        var a = x.age != null ? (x.approx ? " at about age " : " at age ") + x.age : "";
+        return (i === 0 ? (x.role === "born" ? "born in " : "from ") : i === f.route.length - 1 ? "arriving in " : "then ") + x.info.name + (i ? a : "");
+      });
+      return bits.length ? (f.name ? f.name + ": " : "") + bits.join(", ") + "." : "";
+    }
+    function drawReport(g) {
+      var f = g.facts;
+      report.hidden = false;
+      report.querySelector(".rep-title").textContent = f.name ? f.name + "'s story" : "Their story";
+      dock.querySelector(".sdk-title").textContent = f.name ? f.name : "Their journey";
+      report.querySelector(".rep-lede").textContent = lede(f);
+      var sb = J.stops(f, g.mort); stopItems = sb.items;
+      var stops = report.querySelector(".rep-stops"); stops.textContent = ""; stops.append(sb);
+      drawFamily(g); drawNames(g); drawPlan(g);
+    }
     function drawFamily(g) {
       var box = $(".sd-tree"), tr = E.treeBlock(g.people, g.facts.rel);
-      box.textContent = ""; tabShow("family", !!tr); if (tr) box.append(tr);
+      box.textContent = ""; secShow("rep-family", !!tr); if (tr) box.append(tr);
     }
     /* The story gave ages, not dates: with a birth year the same journey is drawn again with the years. */
     function setBorn(y) {
       if (!parsedNow) return;
       parsedNow.born = y; (parsedNow.route || []).forEach(function (st) { if (st.age != null) st.year = y + st.age; });
       status.textContent = "Reading the Atlas…";
-      LD.gather(parsedNow).then(function (g) { status.textContent = ""; last = g; J.draw(g.facts, g.mort); drawFamily(g); drawNames(g); drawPlan(g); }).catch(function () { status.textContent = "Some Atlas files did not load. Check your connection."; });
+      LD.gather(parsedNow).then(function (g) { status.textContent = ""; last = g; drawReport(g); J.draw(g.facts, g.mort); }).catch(function () { status.textContent = "Some Atlas files did not load. Check your connection."; });
     }
     function drawNames(g) {
       var box = $(".sd-names"), nb = E.namesBlock(g.names, BASE);
-      box.textContent = ""; tabShow("names", !!nb); if (nb) { box.append(nb); [].forEach.call(nb.querySelectorAll("details"), function (d) { d.open = true; }); }
+      box.textContent = ""; secShow("rep-names", !!nb); if (nb) { box.append(nb); [].forEach.call(nb.querySelectorAll("details"), function (d) { d.open = true; }); }
     }
     var tm = null;
     text.addEventListener("input", function () { clearTimeout(tm); tm = setTimeout(run, 650); });
@@ -198,7 +217,7 @@
     text.addEventListener("paste", function (e) { var fs = e.clipboardData && e.clipboardData.files; if (fs && fs.length) { e.preventDefault(); addFiles(fs); } });
     $(".sd-clear").addEventListener("click", function () {
       files.forEach(function (x) { URL.revokeObjectURL(x.url); }); files = []; drawShots(); text.value = ""; chips.textContent = ""; ov = Object.create(null); parsedNow = null; lastSig = ""; shown = Object.create(null);
-      J.clear(); showDock(false); planBox.hidden = true; fam.hidden = true; status.textContent = ""; text.focus();
+      J.clear(); showDock(false); report.hidden = true; planBox.hidden = true; fam.hidden = true; status.textContent = ""; text.focus();
     });
     $(".sd-eg").addEventListener("click", function () { text.value = "My great-grandfather Ivan Kosina came from Gallignana to Hamilton around 1905. All I have is this photo."; run(); });
     window.addEventListener("beforeunload", function () { files.forEach(function (x) { URL.revokeObjectURL(x.url); }); });

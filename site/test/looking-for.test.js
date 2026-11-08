@@ -350,8 +350,10 @@ test("a role label never prints an object: the gathered given name is {typed, ca
   assert.match(src("story-engine.js"), /typeof self\.given === "object" \? self\.given\.typed/);
 });
 
-test("the journey dock holds its panels and the drawer reads them", () => {
+test("the home map keeps only the play bar; the story sits below it in sections", () => {
   const astro = fs.readFileSync(path.join(here, "../src/components/StoryDrawer.astro"), "utf8"), js = src("story-drawer.js");
-  for (const k of ["journey", "family", "names", "setting", "plan"]) assert.match(astro, new RegExp('data-panel="' + k + '"'));
-  assert.match(js, /showDock/);
+  for (const k of ["rep-places", "rep-names", "rep-family", "rep-setting", "rep-plan"]) assert.match(astro, new RegExp('id="' + k + '"'));
+  assert.doesNotMatch(astro, /sdk-tab/);
+  assert.match(js, /J\.stops\(/);
+  assert.match(js, /stopItems/);
 });

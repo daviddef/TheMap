@@ -506,7 +506,7 @@
         var infos = Object.create(null); r[0].forEach(function (i) { infos[i.row.i] = i; });
         var provs = r[1].providers || [], pname = Object.create(null), fm = r[3] && r[3].f, lead = r[4] && r[4].countries;
         provs.forEach(function (x) { pname[x.id] = x.name; });
-        r[0].forEach(function (i) { i.pname = pname; i.flagRows = fm ? fm[String(i.cc || "").toUpperCase()] : null; i.leaders = lead ? lead[String(i.cc || "").toUpperCase()] : null; });
+        r[0].forEach(function (i) { i.provs = provs.filter(function (x) { return (x.countries || []).indexOf(i.cc) > -1; }).sort(function (a, b) { return String(a.name).localeCompare(String(b.name)); }); i.pname = pname; i.flagRows = fm ? fm[String(i.cc || "").toUpperCase()] : null; i.leaders = lead ? lead[String(i.cc || "").toUpperCase()] : null; });
         var from = parsed.from ? infos[parsed.from.row.i] : null, to = parsed.to ? infos[parsed.to.row.i] : null;
         var facts = { rel: parsed.rel, name: parsed.name, holds: parsed.holds, holdsAll: parsed.holdsAll, left: parsed.left, born: parsed.born, from: from, to: to, base: BASE,
           providers: to ? provs.filter(function (p) { return (p.countries || []).indexOf(to.cc) > -1; }) : (from ? provs.filter(function (p) { return (p.countries || []).indexOf(from.cc) > -1; }) : []),
@@ -599,7 +599,7 @@
       if (E.mapBox) E.mapBox.hidden = !(stops.length || anc.length);
       E.moments.textContent = ""; E.cap.textContent = "";
       TYPE = (mort && mort.types) || {};
-      if (!askEl && E.cap.parentNode) { askEl = el("form", null, "lf-askyear"); askEl.hidden = true; E.cap.parentNode.insertBefore(askEl, E.cap); }
+      if (!askEl && (o.askBox || E.cap.parentNode)) { askEl = el("form", null, "lf-askyear"); askEl.hidden = true; if (o.askBox) o.askBox.append(askEl); else E.cap.parentNode.insertBefore(askEl, E.cap); }
       if (askEl) {
         askEl.textContent = ""; askEl.hidden = tl.mode !== "age";
         if (tl.mode === "age") {
@@ -758,7 +758,87 @@
         setTimeout(function () { map.invalidateSize({ animate: false }); map.fire("moveend"); tidy(); }, reduce ? 150 : 1900);
       }).catch(function (e) { if (window.console) console.warn("The journey map did not draw:", e); if (E.mapBox) E.mapBox.setAttribute("data-failed", "1"); });
     }
-    return { draw: draw, clear: clear };
+
+    /* The report, place by place: for every place in the story, who held the ground in the year they were there, and where to search
+       for what happened there (birth, leaving, living, arriving). Everything named is in the Atlas's own data for that place and
+       country; where it holds nothing the card says so. `node.items` is what "Start the research family" may mark as planned. */
+    var KINDS = [["b", "Births and baptisms"], ["m", "Marriages"], ["d", "Burials and deaths"]];
+    function stopsBlock(f, mort) {
+      TYPE = (mort && mort.types) || {};
+      var route = (f.route && f.route.length ? f.route : [f.from && { info: f.from, role: "origin" }, f.to && { info: f.to, role: "move" }].filter(Boolean)).filter(function (x) { return x.info; });
+      var anc = (f.ancestors || []).filter(function (x) { return x.info; }), box = el("div", null, "lf-stops"), items = [], n = 0, base = f.base || "/";
+      box.items = items;
+      function yearOf(x) { return x.year != null ? x.year : (f.born != null && x.age != null ? f.born + x.age : null); }
+      function when(x, y) { return (x.age != null ? (x.approx ? "about age " : "age ") + x.age : "") + (x.age != null && y != null ? ", " : "") + (y != null ? (x.approx ? "about " : "") + y : ""); }
+      function volumeList(info, kinds, win, cap) {
+        var any = false, wrap = el("div");
+        KINDS.forEach(function (k) {
+          if (kinds.indexOf(k[0]) < 0) return;
+          var vs = volumesFor(info.cols, k[0], win); if (!vs.length) return;
+          any = true; wrap.append(el("h5", k[1]));
+          var ul = el("ul", null, "lf-vols");
+          vs.slice(0, cap || 4).forEach(function (c) {
+            var li = el("li"), a = el("a", volLabel(c)); a.href = info.href; li.append(a, document.createTextNode(c.held ? ", held by " + c.held : "")); if (c.access) li.append(el("span", " access: " + c.access, "lf-filed")); ul.append(li);
+            items.push({ vol: c, href: info.href });
+          });
+          if (vs.length > (cap || 4)) { var more = el("li"), am = el("a", "and " + (vs.length - (cap || 4)) + " more on the place page"); am.href = info.href; more.append(am); ul.append(more); }
+          wrap.append(ul);
+        });
+        return any ? wrap : null;
+      }
+      var srcSeen = Object.create(null);
+      function sources(info) {
+        var ps = info.provs || [], wrap = el("div");
+        if (ps.length && srcSeen[info.cc]) { wrap.append(el("p", "The archives and sources for " + (info.countryName || info.name) + " are listed under " + srcSeen[info.cc] + ".", "lf-filed")); return wrap; }
+        if (ps.length) srcSeen[info.cc] = info.name;
+        if (!ps.length) { wrap.append(el("p", "The source catalogue lists nothing yet for " + (info.countryName || info.name) + ". Look for its national archive and the state or county records directly: that is a gap in the Atlas, not proof nothing exists.", "lf-filed")); return wrap; }
+        wrap.append(el("h5", "Archives and sources for " + (info.countryName || info.name)));
+        var ul = el("ul", null, "lf-vols");
+        ps.slice(0, 6).forEach(function (p) { var li = el("li"), a = el("a", p.name); a.href = p.url; a.rel = "noopener"; li.append(a, el("span", " " + p.kind + "; access: " + p.access, "lf-filed")); ul.append(li); items.push({ src: p, href: p.url }); });
+        if (ps.length > 6) { var li2 = el("li"), a2 = el("a", "and " + (ps.length - 6) + " more in the source catalogue"); a2.href = base + "providers/"; li2.append(a2); ul.append(li2); }
+        wrap.append(ul); return wrap;
+      }
+      function card(info, kicker, title, whenText, year, ageText, look, kinds, win, withSources, prefix) {
+        n++;
+        var sec = el("section", null, "lf-stop"), hd = el("header", null, "lf-stop-h");
+        hd.append(el("span", String(n), "lf-stop-n"));
+        var tt = el("div"); tt.append(el("div", kicker, "lf-stop-k"), el("h3", title)); var sub = [info.countryName, whenText].filter(Boolean).join(" · "); if (sub) tt.append(el("div", sub, "lf-stop-s"));
+        hd.append(tt); sec.append(hd);
+        var grid = el("div", null, "lf-stop-grid"), then = el("div", null, "lf-stop-then"), where = el("div", null, "lf-stop-where");
+        then.append(el("h4", "Who held the ground"));
+        if (year == null) then.append(el("p", "Add a birth year above to see who held the ground, the flag, and what was going on here.", "lf-filed"));
+        else then.append(line(info, year, evHere(mort, info, year - 5, year + 5), prefix || "", ageText || ""));
+        where.append(el("h4", "Where to search"));
+        var ul = el("ul", null, "lf-look"); look.forEach(function (t) { ul.append(el("li", t)); }); where.append(ul);
+        if ((info.older || []).length) where.append(el("p", info.name + " is also found as " + info.older.slice(0, 8).join(", ") + ". Search all of them.", "lf-filed"));
+        var vl = volumeList(info, kinds, win); if (vl) where.append(vl); else if (kinds.length) where.append(el("p", "The Atlas lists no " + (kinds.length > 1 ? "birth, baptism or marriage" : kinds[0] === "b" ? "birth or baptism" : kinds[0] === "m" ? "marriage" : "burial") + " volume for " + info.name + (win ? " in those years" : "") + ". That is a gap in the Atlas, not proof the records do not exist.", "lf-filed"));
+        if (withSources) where.append(sources(info));
+        var pl = el("p"), pa = el("a", "Every volume the Atlas lists for " + info.name + " →"); pa.href = info.href; pl.append(pa); where.append(pl);
+        grid.append(then, where); sec.append(grid); box.append(sec);
+      }
+      var w = windows(f.left, f.born);
+      route.forEach(function (x, i) {
+        var info = x.info, first = i === 0, last = i === route.length - 1 && route.length > 1, y = yearOf(x), look = [], kinds = [], win = null;
+        var kicker = first ? (x.role === "born" ? "Born here" : "Where it starts") : last ? "Where they arrived" : "On the way";
+        if (first) {
+          look.push("Look for the baptism or birth entry: it names the parents, and the godparents are often relatives.");
+          kinds = ["b", "m"]; win = y != null && x.role === "born" ? [y - 1, y + 1] : (w ? w.birth : null);
+        } else if (last) {
+          look.push("Look for the arrival and settlement: immigration or passenger lists, naturalisation or citizenship papers, a census, electoral rolls, and in time a death record.");
+          kinds = []; win = null;
+        } else {
+          look.push("Look for where they lived here: a census or population register, the parish or congregation's records, school and employment records.");
+        }
+        if (!last && route[i + 1]) look.push("Look for the leaving: exit permits or passports, emigration or passenger lists, and the last census that names the household. They went next to " + route[i + 1].info.name + (route[i + 1].age != null ? " at " + (route[i + 1].approx ? "about " : "") + "age " + route[i + 1].age : "") + ".");
+        card(info, kicker, info.name, when(x, y), y, x.age != null ? (x.approx ? "about age " : "age ") + x.age : "", look, kinds, win, true, "");
+      });
+      anc.forEach(function (x) {
+        var info = x.info, y = f.born != null ? f.born : null;
+        card(info, "His " + x.who + "'s family", info.name, "", y, "", ["Look for the generation before: the parents' marriage and the " + x.who + "'s baptism in the parish registers of " + info.name + ", and the same surname written other ways."], ["b", "m"], f.born != null ? [f.born - 70, f.born - 10] : null, false, "His " + x.who + "'s family, ");
+      });
+      return box;
+    }
+    return { draw: draw, clear: clear, stops: stopsBlock };
   }
 
   /* How one person's first name and surname were written: the catalogue's forms, with leads kept apart. Null when it holds nothing. */

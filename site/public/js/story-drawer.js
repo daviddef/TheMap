@@ -27,7 +27,7 @@
   function loadScript(src) { return new Promise(function (ok, fail) { var s = document.createElement("script"); s.src = BASE + "js/" + src; s.onload = ok; s.onerror = function () { fail(new Error(src)); }; document.head.appendChild(s); }); }
   function ensure() {
     if (started) return started;
-    started = (window.raAtlasSummary ? Promise.resolve() : loadScript("atlas-summary.js")).then(function () { return window.raStory ? null : loadScript("story-engine.js"); })
+    started = (window.raAtlasSummary ? Promise.resolve() : loadScript("atlas-summary.js")).then(function () { return window.raShardKey ? null : loadScript("shard-key.js").catch(function () {}); }).then(function () { return window.raStory ? null : loadScript("story-engine.js"); })
       .then(function () { api = init(); return api; }).catch(function (e) { started = null; throw e; });
     return started;
   }
@@ -119,16 +119,20 @@
         if (override.from && p.from && override.from.row.n === p.from.row.n) p.from = override.from; else if (!p.from || !override.from || override.from.word !== p.from.word) override.from = null;
         if (override.to && p.to && override.to.row.n === p.to.row.n) p.to = override.to; else if (!p.to || !override.to || override.to.word !== p.to.word) override.to = null;
         drawChips(p);
-        var sig = [p.from && p.from.row.i, p.to && p.to.row.i, p.left, p.born, p.name, p.holds].join("|");
+        var sig = [p.from && p.from.row.i, p.to && p.to.row.i, p.left, p.born, p.name, p.surname, p.holds].join("|");
         if (sig === lastSig || !p.from) { if (!p.from && sig !== lastSig) { J.clear(); jbox.hidden = true; planBox.hidden = true; fam.hidden = true; } return; }
         lastSig = sig;
         var my = ++token; status.textContent = "Reading the Atlas…";
         LD.gather(p).then(function (g) {
           if (my !== token) return;
           status.textContent = ""; last = g;
-          jbox.hidden = false; J.draw(g.facts, g.mort); drawPlan(g);
+          jbox.hidden = false; J.draw(g.facts, g.mort); drawNames(g); drawPlan(g);
         }).catch(function () { status.textContent = "Some Atlas files did not load. Check your connection."; });
       }).catch(function () { status.textContent = "The Atlas files did not load. Check your connection."; });
+    }
+    function drawNames(g) {
+      var box = $(".sd-names"), nb = E.namesBlock(g.names, BASE), more = box.parentNode;
+      box.textContent = ""; more.hidden = !nb; if (nb) box.append(nb);
     }
     var tm = null;
     text.addEventListener("input", function () { clearTimeout(tm); tm = setTimeout(run, 650); });

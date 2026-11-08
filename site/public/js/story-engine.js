@@ -321,8 +321,52 @@
     return { slug: slug, name: name, added: added };
   }
 
+  /* ---- flags, leaders, what was going on, and how the name was written -------------------------------------------------- */
+
+  /* The flag in use in a year, as an image name under /fl/, from the country's flag eras (flag-map.json `f`), or null. */
+  function flagFor(info, year) { return info && info.flagRows ? S.flagAt(info.flagRows, year) : null; }
+
+  /* The head of state of today's country in a year, from leaders.json rows [name, wikidata, from, to|null, start, end|null]: the term
+     that covers the year, the latest start winning. Null when Wikidata names none, which is silence, not "nobody ruled". */
+  function leaderAt(rows, year) {
+    var pick = null;
+    (rows || []).forEach(function (r) { if (r[2] <= year && year <= (r[3] == null ? 9999 : r[3]) && (!pick || r[2] >= pick[2])) pick = r; });
+    return pick;
+  }
+  /* Every holder whose term touches [y0, y1], in date order. */
+  function leadersBetween(rows, y0, y1) {
+    return (rows || []).filter(function (r) { return r[2] <= y1 && (r[3] == null ? 9999 : r[3]) >= y0; }).sort(function (a, b) { return a[2] - b[2]; });
+  }
+  function short(t, n) { t = String(t || ""); return t.length > n ? t.slice(0, n - 1).replace(/\s+\S*$/, "") + "…" : t; }
+
+  /* The forms of a given name that the catalogue holds, by language: the positive ones (same, attested, rule) and, kept apart, the leads
+     (correct in that language, never seen on a record). `labels` maps a language key to its name. */
+  function givenGroups(row, labels) {
+    var out = [];
+    Object.keys(row.langs || {}).forEach(function (l) {
+      var pos = [], lead = [];
+      (row.langs[l] || []).forEach(function (f) { if (["same", "attested", "rule"].indexOf(f.status) > -1) pos.push(f.form); else if (f.status === "lead") lead.push(f.form); });
+      if (pos.length || lead.length) out.push({ lang: l, label: (labels && labels[l]) || (l.charAt(0).toUpperCase() + l.slice(1)), forms: pos.sort(), leads: lead.sort() });
+    });
+    return out.sort(function (a, b) { return a.label.localeCompare(b.label); });
+  }
+
+  /* A surname's spellings from the catalogue's published face (`fams` = surname-families.json rows) and the corpus row for the name (`row` from
+     the /s/ shard: computed close spellings and the countries it is attested in). Nothing is invented: no family, no computed forms, says so. */
+  function surnameBlock(name, fams, row) {
+    var key = function (x) { return S.fold(x).replace(/ /g, ""); }, k = key(name), fam = null;
+    (fams || []).forEach(function (f) { if (!fam && (key(f.name) === k || f.forms.some(function (m) { return key(m[0]) === k; }))) fam = f; });
+    var by = { same: [], attested: [], rule: [], lead: [], "case-by-case": [] };
+    if (fam) fam.forms.forEach(function (m) { if (by[m[1]]) by[m[1]].push(m[0]); });
+    var comp = row && row.variants ? row.variants : [];
+    return { name: name, family: fam ? { headline: fam.name, by: by, notSame: fam.notSame || [] } : null,
+      spelling: comp.filter(function (v) { return v.how === "spelling"; }).map(function (v) { return v.n; }).slice(0, 8),
+      sounds: comp.filter(function (v) { return v.how === "sounds"; }).map(function (v) { return v.n; }).slice(0, 8),
+      countries: row && row.countries ? row.countries.map(function (c) { return c.cc; }).slice(0, 8) : [] };
+  }
+
   var api = { toYear: toYear, suggest: suggest, windows: windows, volumesFor: volumesFor, captionAt: captionAt, progress: progress, between: between,
-              givenForms: givenForms, volLabel: volLabel, buildPlan: buildPlan, parseStory: parseStory, startFamily: startFamily, familyName: familyName, yearsIn: yearsIn,
+              givenForms: givenForms, volLabel: volLabel, buildPlan: buildPlan, parseStory: parseStory, startFamily: startFamily, familyName: familyName, flagFor: flagFor, leaderAt: leaderAt, leadersBetween: leadersBetween, givenGroups: givenGroups, surnameBlock: surnameBlock, short: short, yearsIn: yearsIn,
               HOLDS: HOLDS, YEAR_MIN: YEAR_MIN, YEAR_MAX: YEAR_MAX };
   if (typeof module !== "undefined" && module.exports) { module.exports = api; return; }
   window.raStory = api;
@@ -346,7 +390,7 @@
           .then(function () { return getJSON("given-names.json").catch(function () { return { rows: [] }; }); })
           .then(function (g) {
             var givenRows = g.rows || [];
-            data = { rows: rows, countries: d.countries || {}, givenRows: givenRows, given: S.buildGiven(givenRows), map: S.buildMap(rows), skip: Object.create(null) };
+            data = { rows: rows, countries: d.countries || {}, givenRows: givenRows, languages: g.languages || [], given: S.buildGiven(givenRows), map: S.buildMap(rows), skip: Object.create(null) };
             return data;
           });
       }).catch(function (e) { loading = null; throw e; });
@@ -362,35 +406,66 @@
       });
     }
     /* Everything a plan needs for one parsed story: both places with their files, the sources of the arrival country, the events. */
+    function surname(name) {
+      if (!name) return Promise.resolve(null);
+      var fold = window.raFold || S.fold, f = fold(name);
+      var shard = getJSON("shards.json").catch(function () { return {}; }).then(function (info) {
+        if (!window.raShardKey) return null;
+        var key = window.raShardKey(f, info.s || {});
+        return key ? getJSON("s/" + encodeURIComponent(key) + ".json").then(function (rows) { return rows.filter(function (r) { return fold(r.n) === f; })[0] || null; }).catch(function () { return null; }) : null;
+      });
+      return Promise.all([getJSON("surname-families.json").catch(function () { return { rows: [] }; }), shard]).then(function (r) { return surnameBlock(name, r[0].rows, r[1]); });
+    }
     function gather(parsed) {
       return load().then(function () {
         return Promise.all([parsed.from ? placeInfo(parsed.from.row) : null, parsed.to ? placeInfo(parsed.to.row) : null,
-          getJSON("providers.json").catch(function () { return { providers: [] }; }), getJSON("mortality.json").catch(function () { return null; })]);
+          getJSON("providers.json").catch(function () { return { providers: [] }; }), getJSON("mortality.json").catch(function () { return null; }),
+          getJSON("flag-map.json").catch(function () { return null; }), getJSON("leaders.json").catch(function () { return null; }), surname(parsed.surname).catch(function () { return null; })]);
       }).then(function (r) {
-        var from = r[0], to = r[1], provs = r[2].providers || [], pname = Object.create(null);
+        var from = r[0], to = r[1], provs = r[2].providers || [], pname = Object.create(null), fm = r[4] && r[4].f, lead = r[5] && r[5].countries;
         provs.forEach(function (x) { pname[x.id] = x.name; });
-        if (from) from.pname = pname; if (to) to.pname = pname;
+        [from, to].forEach(function (i) { if (!i) return; i.pname = pname; i.flagRows = fm ? fm[String(i.cc || "").toUpperCase()] : null; i.leaders = lead ? lead[String(i.cc || "").toUpperCase()] : null; });
         var facts = { rel: parsed.rel, name: parsed.name, holds: parsed.holds, left: parsed.left, born: parsed.born, from: from, to: to, base: BASE,
           providers: to ? provs.filter(function (p) { return (p.countries || []).indexOf(to.cc) > -1; }) : [],
           given: parsed.given && data.given ? S.givenIn(parsed.givenWord || parsed.given, data.given, null) : [] };
-        return { facts: facts, plan: buildPlan(facts), mort: r[3] };
+        var labels = {}; (data.languages || []).forEach(function (l) { labels[l.key] = l.label; });
+        var gr = facts.given.length ? givenGroups(facts.given[0].row, labels) : [];
+        return { facts: facts, plan: buildPlan(facts), mort: r[3], names: { given: facts.given.length ? { canon: facts.given[0].row.canon, typed: parsed.givenWord || parsed.given, groups: gr } : null, surname: r[6] } };
       });
     }
-    return { getJSON: getJSON, load: load, placeInfo: placeInfo, gather: gather };
+    return { getJSON: getJSON, load: load, placeInfo: placeInfo, gather: gather, surname: surname };
   }
 
   /* The journey: a year slider, play button and captions for who held each place in each year, a still list of what changed, and a
      dashed line with a moving dot on a map. `o.els` = {cap, slider, yearOut, play, moments, time, mapBox}; `o.getMap()` resolves to
      {L, map}, so the page's own map or the home map can host it; `o.pad` is the room to leave round the places (the drawer). */
   function createJourney(o) {
-    var E = o.els, layers = null, stopPlay = null;
+    var E = o.els, layers = null, stopPlay = null, evA = [], evB = [];
     var reduce = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
-    function line(info, year) {
+    var BASE = (o.base || document.documentElement.getAttribute("data-base") || "/").replace(/\/?$/, "/");
+    var TYPE = {}; /* event type -> label, from mortality.json `types` */
+    function evHere(mort, info, y0, y1) {
+      if (!mort || info.lat == null) return [];
+      return S.eventsAt(mort.events, info.lat, info.lon, Math.round((y0 + y1) / 2), Math.ceil((y1 - y0) / 2) + 1);
+    }
+    function typeLabel(t) { return (TYPE[t] || t).replace(/ \(as the cited.*$/, "").replace(/^./, function (c) { return c.toUpperCase(); }); }
+    function line(info, year, evs) {
       var c = captionAt(info, year), d = el("div", null, "lf-capline");
-      d.append(el("b", info.name + ", " + year + ": "), document.createTextNode(c.polity ? "under " + c.polity : "no era table"));
-      if (c.regime) d.append(el("span", " (" + c.regime + ")", "lf-regime"));
+      var fl = flagFor(info, year);
+      if (fl) { var im = el("img", null, "lf-flag"); im.src = BASE + "fl/" + encodeURIComponent(fl) + ".svg"; im.alt = "Flag from the Atlas's flag history of today's " + info.countryName + ", " + year; im.title = "From the flag history of today's " + info.countryName + " in " + year + ". The village may have been under another state: see the line beside it."; im.width = 36; im.height = 24; im.loading = "lazy"; d.append(im); }
+      var head = el("div", null, "lf-caphead");
+      head.append(el("b", info.name + ", " + year + ": "), document.createTextNode(c.polity ? "under " + c.polity : "no era table"));
+      if (c.regime) head.append(el("span", " (" + c.regime + ")", "lf-regime"));
+      d.append(head);
       if (c.tracked && c.filedUnder.length) d.append(el("div", "Records of this period: " + c.filedUnder.join(", "), "lf-filed"));
       if (!c.tracked && c.note) d.append(el("div", c.note, "lf-filed"));
+      var ld = leaderAt(info.leaders, year);
+      if (ld) d.append(el("div", "Head of state of today's " + info.countryName + ": " + ld[0] + " (" + ld[2] + (ld[3] == null ? " on" : "–" + ld[3]) + ")", "lf-filed lf-leader"));
+      else if (info.leaders) d.append(el("div", "The Atlas names no head of state of today's " + info.countryName + " for " + year + "; look at who held the ground, above.", "lf-filed lf-leader"));
+      (evs || []).filter(function (e) { return e.f - 1 <= year && year <= e.t + 1; }).slice(0, 3).forEach(function (e) {
+        var n = el("div", null, "lf-now lf-now-" + e.ty); n.append(el("b", typeLabel(e.ty) + " in the area, " + e.f + (e.t !== e.f ? "–" + e.t : "") + ": "), document.createTextNode(e.n));
+        d.append(n);
+      });
       return d;
     }
     function clear() { if (stopPlay) stopPlay(); if (layers) { layers.group.remove(); layers = null; } }
@@ -402,10 +477,13 @@
       if (E.time) E.time.hidden = !can;
       if (E.mapBox) E.mapBox.hidden = !(a || b);
       E.moments.textContent = ""; E.cap.textContent = "";
+      TYPE = (mort && mort.types) || {};
+      var wy0 = y0 != null ? y0 : (left != null ? left - 25 : 1850), wy1 = y1 != null ? y1 : (left != null ? left + 12 : 1920);
+      evA = a ? evHere(mort, a, wy0, wy1) : []; evB = b ? evHere(mort, b, wy0, wy1) : [];
       if (!a && !b) { E.cap.textContent = "Say where they started and where they arrived to see the journey."; return Promise.resolve(); }
       function setYear(y) {
         E.cap.textContent = "";
-        if (a) E.cap.append(line(a, y)); if (b) E.cap.append(line(b, y));
+        if (a) E.cap.append(line(a, y, evA)); if (b) E.cap.append(line(b, y, evB));
         if (E.slider) E.slider.value = String(y);
         if (E.yearOut) E.yearOut.textContent = String(y);
         var t = progress(left, y);
@@ -428,21 +506,42 @@
           };
         }
       } else {
-        if (a) E.cap.append(line(a, left != null ? left : 1900)); if (b) E.cap.append(line(b, left != null ? left : 1900));
+        if (a) E.cap.append(line(a, left != null ? left : 1900, evA)); if (b) E.cap.append(line(b, left != null ? left : 1900, evB));
       }
       if (y0 != null && y1 != null) {
         var mid = Math.round((y0 + y1) / 2), half = Math.ceil((y1 - y0) / 2) + 1, items = [];
         [a, b].forEach(function (info) {
           if (!info) return;
-          var ev = mort && info.lat != null ? S.eventsAt(mort.events, info.lat, info.lon, mid, half).slice(0, 6) : [];
-          S.aroundYear(info.eras || [], ev, mid, half).forEach(function (x) { if (x.y >= y0 - 1 && x.y <= y1 + 1) items.push({ y: x.y, t: info.name + ": " + x.title + (x.note && x.kind === "event" ? " (" + x.note + ")" : "") }); });
+          S.aroundYear(info.eras || [], [], mid, half).forEach(function (x) { if (x.y >= y0 - 1 && x.y <= y1 + 1) items.push({ y: x.y, t: info.name + ": " + x.title }); });
         });
         items.sort(function (p, q) { return p.y - q.y; });
         if (items.length) {
-          E.moments.append(el("h4", "What changed around then"));
+          E.moments.append(el("h4", "Who held the ground, and when it changed"));
           var ul = el("ul"); items.slice(0, 8).forEach(function (x) { var li = el("li"); li.append(el("b", x.y + " "), x.t); ul.append(li); });
-          E.moments.append(ul, el("p", "These are events in the area in those years, not facts about them.", "cap"));
+          E.moments.append(ul);
         }
+        var seen = Object.create(null), evs = [];
+        [[a, evA], [b, evB]].forEach(function (pr) { (pr[1] || []).forEach(function (e) { if (seen[e.id]) return; seen[e.id] = 1; evs.push({ e: e, where: pr[0].name }); }); });
+        if (evs.length) {
+          E.moments.append(el("h4", "What was going on: epidemics, famines, wars and mass deaths nearby"));
+          var ue = el("ul", null, "lf-events");
+          evs.slice(0, 8).forEach(function (x) {
+            var li = el("li", null, "lf-ev lf-ev-" + x.e.ty), t = x.e.toll && x.e.toll.text ? " " + short(x.e.toll.text, 160) : "";
+            li.append(el("b", x.e.f + (x.e.t !== x.e.f ? "–" + x.e.t : "") + " "), el("span", typeLabel(x.e.ty), "lf-tag"), document.createTextNode(" " + x.e.n + " (near " + x.where + "). " + short(x.e.says, 200) + t));
+            if (x.e.open) li.append(el("div", "Disputed: " + short(x.e.open, 160), "lf-filed"));
+            ue.append(li);
+          });
+          E.moments.append(ue);
+        }
+        [a, b].forEach(function (info) {
+          if (!info || !info.leaders) return;
+          var ls = leadersBetween(info.leaders, y0, y1).slice(0, 8);
+          if (!ls.length) return;
+          E.moments.append(el("h4", "Leaders of today's " + info.countryName + " in those years"));
+          var ul2 = el("ul"); ls.forEach(function (r) { var li = el("li"); li.append(el("b", r[2] + (r[3] == null ? " on " : "–" + r[3] + " ")), r[0]); ul2.append(li); });
+          E.moments.append(ul2);
+        });
+        if (items.length || evs.length || (a && a.leaders) || (b && b.leaders)) E.moments.append(el("p", "This is the setting, not a fact about them: the events are those whose area covers the place in those years, and the leaders are those of the country as it is drawn today.", "cap"));
       }
       return o.getMap().then(function (m) {
         var L = m.L, map = m.map, g = L.layerGroup().addTo(map), pts = [];
@@ -467,5 +566,47 @@
     }
     return { draw: draw, clear: clear };
   }
+
+  /* The names panel: how the first name and the surname were written, in the languages of the clerks. A node for the page to place.
+     `names` = {given: {canon, typed, groups}, surname: surnameBlock(...)}; nothing about a person is in it. */
+  function namesBlock(names, base) {
+    var box = el("div", null, "lf-names"), any = false;
+    base = (base || "/").replace(/\/?$/, "/");
+    var g = names && names.given;
+    if (g && g.groups && g.groups.length) {
+      any = true;
+      box.append(el("h4", "First name: " + g.typed + " is also written"));
+      var ul = el("ul", null, "lf-forms"), shown = Object.create(null), leads = [];
+      g.groups.forEach(function (x) {
+        x.forms.forEach(function (f) { shown[S.fold(f)] = 1; });
+        if (x.forms.length) { var li = el("li"); li.append(el("b", x.label + ": "), document.createTextNode(x.forms.slice(0, 8).join(", ") + (x.forms.length > 8 ? " and " + (x.forms.length - 8) + " more case endings and spellings" : ""))); ul.append(li); }
+      });
+      g.groups.forEach(function (x) { x.leads.forEach(function (f) { var k = S.fold(f); if (!shown[k]) { shown[k] = 1; leads.push(f); } }); });
+      if (leads.length) { var ll = el("li"); ll.append(el("b", "Worth trying, in other languages (never yet seen on a record): "), document.createTextNode(leads.slice(0, 14).join(", ") + (leads.length > 14 ? " and " + (leads.length - 14) + " more" : ""))); ul.append(ll); }
+      box.append(ul);
+    }
+    var sn = names && names.surname;
+    if (sn) {
+      var f = sn.family, pos = f ? f.by.same.concat(f.by.attested, f.by.rule) : [];
+      if (f || sn.spelling.length || sn.sounds.length) {
+        any = true;
+        box.append(el("h4", "Surname: " + sn.name + " may be written"));
+        var u2 = el("ul", null, "lf-forms");
+        if (pos.length) { var l1 = el("li"); l1.append(el("b", "Recorded spellings of the same name: "), document.createTextNode(pos.join(", "))); u2.append(l1); }
+        if (f && f.by.lead.length) { var l2 = el("li"); l2.append(el("b", "Worth trying, never yet seen on a record: "), document.createTextNode(f.by.lead.slice(0, 10).join(", ") + (f.by.lead.length > 10 ? " and " + (f.by.lead.length - 10) + " more" : ""))); u2.append(l2); }
+        if (f && f.by["case-by-case"].length) { var l3 = el("li"); l3.append(el("b", "Sometimes this family, sometimes another: "), document.createTextNode(f.by["case-by-case"].join(", "))); u2.append(l3); }
+        if (sn.spelling.length) { var l4 = el("li"); l4.append(el("b", "Close spellings in the Atlas's name lists (leads): "), document.createTextNode(sn.spelling.join(", "))); u2.append(l4); }
+        if (sn.sounds.length) { var l5 = el("li"); l5.append(el("b", "Names that sound alike (leads): "), document.createTextNode(sn.sounds.join(", "))); u2.append(l5); }
+        if (f && f.notSame.length) { var l6 = el("li"); l6.append(el("b", "Look alike, but a different name: "), document.createTextNode(f.notSame.slice(0, 6).map(function (x) { return x[0]; }).join(", "))); u2.append(l6); }
+        box.append(u2);
+      }
+    }
+    if (any) {
+      var p = el("p", null, "cap"); p.append("Leads are where to look, not findings. ");
+      var a = el("a", "Every spelling in the Atlas →"); a.href = base + "your-name/"; p.append(a); box.append(p);
+    }
+    return any ? box : null;
+  }
+  api.namesBlock = namesBlock;
   api.createLoader = createLoader; api.createJourney = createJourney; api.el = el;
 })();

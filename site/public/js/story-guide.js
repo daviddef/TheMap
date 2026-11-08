@@ -140,6 +140,7 @@
   function drawJourney() {
     if (!gathered) return;
     if (!J) J = E.createJourney({ els: { cap: $("sg-cap"), slider: $("sg-year"), yearOut: $("sg-yearout"), play: $("sg-play"), moments: $("sg-moments"), time: $("sg-time"), mapBox: $("sg-map") }, getMap: getMap });
+    var nb = E.namesBlock(gathered.names, BASE); $("sg-names").textContent = ""; $("sg-names-box").hidden = !nb; if (nb) $("sg-names").append(nb);
     J.draw(gathered.facts, gathered.mort).then(function () { if (!reduce && $("sg-play") && !$("sg-time").hidden) setTimeout(function () { if (at === 2) $("sg-play").click(); }, 900); });
   }
 

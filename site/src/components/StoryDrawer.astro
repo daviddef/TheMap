@@ -43,7 +43,8 @@ import { u } from "../lib/url.js";
       <output class="sd-yearout"></output>
     </div>
     <div class="sd-cap lf-capbox"></div>
-    <details class="sd-more"><summary>What changed around then</summary><div class="sd-moments lf-moments"></div></details>
+    <details class="sd-more"><summary>What was going on, and who led</summary><div class="sd-moments lf-moments"></div></details>
+    <details class="sd-more"><summary>How their names were written</summary><div class="sd-names"></div></details>
     <p class="sd-fine">The dashed line joins the places in date order. It is not the route they took.</p>
   </section>
 
@@ -111,7 +112,20 @@ import { u } from "../lib/url.js";
   .sd .lf-capline { font-size: 14px; line-height: 1.4; padding: 8px 10px; border-left: 3px solid var(--accent); background: var(--ground); border-radius: 0 8px 8px 0; }
   .sd .lf-filed { color: var(--ink-2); font-size: 12.5px; margin-top: 2px; } .sd .lf-regime { color: var(--ink-2); }
   .sd-more { margin: 6px 0; font-size: 14px; } .sd-more summary { cursor: pointer; color: var(--accent); }
-  .sd .lf-moments h4 { display: none; } .sd .lf-moments ul { margin: 6px 0; padding-left: 18px; } .sd .lf-moments .cap { font-size: 12px; color: var(--ink-2); }
+  .sd .lf-moments ul { margin: 6px 0; padding-left: 18px; } .sd .lf-moments .cap { font-size: 12px; color: var(--ink-2); }
+  .sd .lf-capline { position: relative; }
+  .sd .lf-flag { float: right; width: 36px; height: 24px; margin: 0 0 4px 10px; object-fit: cover; border: 1px solid var(--rule); border-radius: 3px; background: var(--panel); }
+  .sd .lf-leader { font-style: italic; }
+  .sd .lf-now { margin-top: 5px; padding: 4px 8px; border-radius: 6px; background: var(--accent-wash); font-size: 13px; line-height: 1.35; }
+  .sd .lf-now-epidemic, .sd .lf-ev-epidemic .lf-tag { --tagc: #8a3b6e; } .sd .lf-now-famine, .sd .lf-ev-famine .lf-tag { --tagc: #a8741a; }
+  .sd .lf-now-war, .sd .lf-ev-war .lf-tag { --tagc: #b3452e; } .sd .lf-now-genocide, .sd .lf-ev-genocide .lf-tag, .sd .lf-ev-massacre .lf-tag, .sd .lf-ev-atrocity .lf-tag { --tagc: #7a1f1f; } .sd .lf-ev-displacement .lf-tag { --tagc: #1f5c6b; }
+  .sd .lf-now { border-left: 3px solid var(--tagc, var(--accent)); }
+  .sd .lf-tag { display: inline-block; padding: 1px 7px; border-radius: 999px; background: var(--tagc, var(--accent)); color: #fff; font: 600 11px/1.5 var(--sans); letter-spacing: .02em; }
+  .sd .lf-events { list-style: none; padding-left: 0 !important; display: grid; gap: 8px; }
+  .sd .lf-ev { padding: 6px 10px; border-left: 3px solid var(--tagc, var(--accent)); background: var(--ground); border-radius: 0 8px 8px 0; font-size: 13px; line-height: 1.4; }
+  .sd .lf-moments h4, .sd .lf-names h4 { display: block; font: 600 11.5px/1 var(--sans); letter-spacing: .09em; text-transform: uppercase; color: var(--accent); margin: 14px 0 6px; }
+  .sd .lf-forms { margin: 0 0 6px; padding-left: 18px; font-size: 13px; line-height: 1.5; } .sd .lf-forms li { margin: 0 0 4px; }
+  .sd .lf-names .cap { color: var(--ink-2); font-size: 12.5px; }
   .sd-plan { margin-top: 12px; display: grid; gap: 6px; }
   .sd-step { background: var(--ground); border: 1px solid var(--rule); border-radius: 10px; animation: sd-rise .45s ease both; }
   .sd-step summary { list-style: none; display: flex; gap: 10px; align-items: center; padding: 9px 12px; cursor: pointer; font: 500 15px/1.3 var(--sans); }

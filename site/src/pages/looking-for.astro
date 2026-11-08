@@ -55,6 +55,7 @@ import { u } from "../lib/url.js";
       <div id="lf-cap" class="lf-capbox"></div>
       <p class="lf-fine">The dashed line joins the two places in date order. It is not the route they took: the Atlas does not know that, and neither does anyone without a ship's list.</p>
       <div id="lf-moments" class="lf-moments"></div>
+      <div id="lf-names"></div>
     </section>
 
     <section class="lf-planbox" aria-labelledby="lf-h-plan">
@@ -70,6 +71,7 @@ import { u } from "../lib/url.js";
   </div>
 
   <script is:inline src={u("/js/atlas-summary.js")}></script>
+  <script is:inline src={u("/js/shard-key.js")}></script>
   <script is:inline src={u("/js/story-engine.js")}></script>
   <script is:inline src={u("/js/looking-for.js")}></script>
 </Base>
@@ -111,9 +113,19 @@ import { u } from "../lib/url.js";
   .lf-capbox { display: grid; gap: 8px; max-width: var(--measure); margin: 6px 0 10px; }
   .lf-capline { font: 400 17px/1.45 var(--sans); padding: 10px 14px; border-left: 4px solid var(--accent); background: var(--panel); border-radius: 0 8px 8px 0; }
   .lf-regime { color: var(--ink-2); } .lf-filed { color: var(--ink-2); font-size: 14px; margin-top: 3px; }
-  .lf-moments h4 { font: 600 12px/1 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin: 18px 0 8px; }
+  .lf-moments h4, .lf-names h4 { font: 600 12px/1 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin: 18px 0 8px; }
   .lf-moments ul { margin: 0; padding-left: 18px; max-width: var(--measure); } .lf-moments li { margin: 0 0 5px; }
 
+  .lf-capline { overflow: hidden; }
+  .lf-flag { float: right; width: 44px; height: 29px; margin: 0 0 4px 12px; object-fit: cover; border: 1px solid var(--rule); border-radius: 3px; background: var(--panel); }
+  .lf-leader { font-style: italic; }
+  .lf-now { margin-top: 6px; padding: 5px 10px; border-radius: 6px; background: var(--accent-wash); border-left: 3px solid var(--tagc, var(--accent)); font-size: 15px; line-height: 1.4; }
+  .lf-now-epidemic, .lf-ev-epidemic .lf-tag { --tagc: #8a3b6e; } .lf-now-famine, .lf-ev-famine .lf-tag { --tagc: #a8741a; }
+  .lf-now-war, .lf-ev-war .lf-tag { --tagc: #b3452e; } .lf-now-genocide, .lf-ev-genocide .lf-tag, .lf-ev-massacre .lf-tag, .lf-ev-atrocity .lf-tag { --tagc: #7a1f1f; } .lf-ev-displacement .lf-tag { --tagc: #1f5c6b; }
+  .lf-tag { display: inline-block; padding: 1px 8px; border-radius: 999px; background: var(--tagc, var(--accent)); color: #fff; font: 600 12px/1.6 var(--sans); }
+  .lf-events { list-style: none; padding-left: 0 !important; display: grid; gap: 8px; }
+  .lf-ev { padding: 8px 12px; border-left: 3px solid var(--tagc, var(--accent)); background: var(--panel); border-radius: 0 8px 8px 0; }
+  .lf-names { max-width: var(--measure); } .lf-forms { margin: 0 0 8px; padding-left: 18px; } .lf-forms li { margin: 0 0 5px; } .lf-names .cap { color: var(--ink-2); font-size: 14px; }
   .lf-lead { max-width: var(--measure); color: var(--ink-2); margin: 0 0 18px; }
   .lf-plan { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; max-width: 62rem; counter-reset: none; }
   .lf-step { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 16px 20px 14px; }

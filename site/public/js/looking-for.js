@@ -76,12 +76,14 @@
         data = d;
         var fromRow = resolve("from", $("lf-from")), toRow = resolve("to", $("lf-to"));
         if (!fromRow && $("lf-from").value.trim()) { bad("The Atlas did not recognise \"" + $("lf-from").value.trim() + "\" as one place. Pick one from the list that appears as you type, or try an older name."); throw new Error("stop"); }
-        var parsed = { rel: $("lf-rel").value, name: $("lf-name").value.trim().slice(0, 80), given: ($("lf-name").value.trim().split(/\s+/)[0] || ""), givenWord: ($("lf-name").value.trim().split(/\s+/)[0] || ""),
+        var parsed = { rel: $("lf-rel").value, name: $("lf-name").value.trim().slice(0, 80), given: ($("lf-name").value.trim().split(/\s+/)[0] || ""), surname: ($("lf-name").value.trim().split(/\s+/).length > 1 ? $("lf-name").value.trim().split(/\s+/).slice(-1)[0] : ""), givenWord: ($("lf-name").value.trim().split(/\s+/)[0] || ""),
           holds: form.elements["holds"].value || "story", left: left, born: born, from: fromRow ? { row: fromRow } : null, to: toRow ? { row: toRow } : null };
+        if (!toRow && $("lf-to").value.trim()) { bad("The Atlas found several places called \"" + $("lf-to").value.trim() + "\". Pick the right one from the list that appears as you type."); throw new Error("stop"); }
         return LD.gather(parsed);
       }).then(function (g) {
         $("lf-out").hidden = false; $("lf-journey").hidden = false;
         J.draw(g.facts, g.mort);
+        var nbox = $("lf-names"), nb = E.namesBlock(g.names, BASE); nbox.textContent = ""; if (nb) nbox.append(nb);
         var ol = $("lf-plan"); ol.textContent = "";
         g.plan.forEach(function (s) {
           var li = el("li", null, "lf-step"); li.id = "lf-s-" + s.id;

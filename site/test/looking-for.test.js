@@ -255,3 +255,58 @@ test("the guided Ask on /read/ keeps the old Ask card and every id its script ne
   assert.match(r, /story-engine\.js/);
   assert.match(r, /story-guide\.js/);
 });
+
+test("the flag in use in a year comes from the country's flag eras, and nothing when there are none", () => {
+  const info = { flagRows: [[1868, 1918, "hr--a"], [1918, 1929, "hr--b"]] };
+  assert.equal(F.flagFor(info, 1905), "hr--a");
+  assert.equal(F.flagFor(info, 1920), "hr--b");
+  assert.equal(F.flagFor(info, 1700), null);
+  assert.equal(F.flagFor({}, 1905), null);
+});
+
+test("a leader is named only where a term covers the year; silence is not 'nobody ruled'", () => {
+  const rows = [["A", "Q1", 1990, 1999, "", ""], ["B", "Q2", 1995, 1996, "", ""], ["C", "Q3", 2020, null, "", ""]];
+  assert.equal(F.leaderAt(rows, 1995)[0], "B");
+  assert.equal(F.leaderAt(rows, 1905), null);
+  assert.equal(F.leaderAt(rows, 2026)[0], "C");
+  assert.deepEqual(F.leadersBetween(rows, 1994, 1996).map((r) => r[0]), ["A", "B"]);
+  assert.deepEqual(F.leadersBetween(null, 1900, 1910), []);
+});
+
+test("first-name forms are grouped by language, positive evidence apart from leads", () => {
+  const row = { canon: "Giovanni", langs: { italian: [{ form: "Giovanni", status: "same" }, { form: "Nane", status: "lead" }], croatian: [{ form: "Ivan", status: "attested" }], latin: [{ form: "Joannes", status: "rule" }] } };
+  const g = F.givenGroups(row, { italian: "Italian", croatian: "Croatian", latin: "Latin" });
+  assert.deepEqual(g.map((x) => x.label), ["Croatian", "Italian", "Latin"]);
+  assert.deepEqual(g.find((x) => x.lang === "italian").forms, ["Giovanni"]);
+  assert.deepEqual(g.find((x) => x.lang === "italian").leads, ["Nane"]);
+});
+
+test("a surname block separates the catalogue from computed leads, and invents nothing", () => {
+  const fams = [{ id: "lerena", name: "Lerena", forms: [["Lerena", "same"], ["Llerena", "attested"], ["Serena", "lead"]], notSame: [["Herencia", "the Spanish word for inheritance"]] }];
+  const b = F.surnameBlock("Llerena", fams, { variants: [{ n: "Lerenna", how: "spelling" }, { n: "Lorena", how: "sounds" }], countries: [{ cc: "UY" }] });
+  assert.equal(b.family.headline, "Lerena");
+  assert.deepEqual(b.family.by.attested, ["Llerena"]);
+  assert.deepEqual(b.family.by.lead, ["Serena"]);
+  assert.deepEqual(b.spelling, ["Lerenna"]);
+  assert.deepEqual(b.sounds, ["Lorena"]);
+  const none = F.surnameBlock("Zzyzx", fams, null);
+  assert.equal(none.family, null);
+  assert.deepEqual(none.spelling, []);
+  assert.equal(F.surnameBlock("L'erena", fams, null).family.headline, "Lerena");
+});
+
+test("the three front doors show flags, events and name forms, and every file they read is built", () => {
+  const read = (p) => fs.readFileSync(path.join(here, "..", p), "utf8");
+  const e = src("story-engine.js");
+  ["flag-map.json", "leaders.json", "mortality.json", "surname-families.json", "given-names.json"].forEach((f) => assert.ok(e.includes(f), f));
+  assert.match(e, /lf-flag/);
+  assert.match(e, /namesBlock/);
+  assert.match(src("story-drawer.js"), /namesBlock/);
+  assert.match(src("story-guide.js"), /namesBlock/);
+  assert.match(src("looking-for.js"), /namesBlock/);
+  assert.match(read("src/pages/read.astro"), /shard-key\.js/);
+  assert.match(read("src/pages/looking-for.astro"), /shard-key\.js/);
+  assert.match(read("src/components/StoryDrawer.astro"), /sd-names/);
+  assert.match(read("package.json"), /build-surname-families\.py/);
+  assert.equal(/innerHTML|insertAdjacentHTML/.test(e), false);
+});

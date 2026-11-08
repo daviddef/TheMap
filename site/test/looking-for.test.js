@@ -431,3 +431,17 @@ test("a name told as a person is never read as a place, and the place that bears
   assert.deepEqual(p.stops.map((s) => s.row.i), ["tasmania"], "Giovanni is a person, Tasmania is Tasmania");
   assert.equal(p.teller, "David", "'And' is not his surname");
 });
+
+test("a family told from the middle: children, unnamed parents, and where the parents married", () => {
+  const rows = [{ i: "brisbane", n: "Brisbane", cc: "AU", c: 1 }, { i: "argentina", n: "Argentina", cc: "AR", c: 3 }, { i: "senj", n: "Senj", cc: "HR", c: 40 },
+    { i: "croatia", n: "Croatia", cc: "HR", c: 0 }, { i: "johannesburg", n: "Johannesburg", cc: "ZA", c: 0 }];
+  const c3 = { map: A.buildMap(rows), given: A.buildGiven([]), skip: {} };
+  const p = F.parseStory("I HAVE TWO CHILDREN, ALESSIO AND MATEO, BOTH ARE BORN IN BRISBANE. MY MUM IS FROM ARGENTINA AND MY DAD FROM SENJ, CROATIA. THEY WERE MARRIED IN JOHANNESBURG.", c3);
+  assert.deepEqual(p.people.map((x) => [x.role, x.name]), [["self", ""], ["father", ""], ["mother", ""], ["child", "Alessio"], ["child", "Mateo"]]);
+  const by = Object.fromEntries(p.people.map((x) => [x.key, x]));
+  assert.equal(by.C1.events[0].place.row.i, "brisbane"); assert.equal(by.C2.events[0].place.row.i, "brisbane");
+  assert.equal(by.F.events[0].type, "married"); assert.equal(by.F.events[0].place.row.i, "johannesburg"); assert.equal(by.M.events[0].place.row.i, "johannesburg");
+  const k = Object.fromEntries(p.kin.map((x) => [x.key, x.stops.map((s) => s.row.i + ":" + s.role)]));
+  assert.deepEqual(k.F, ["senj:origin", "johannesburg:married"]); assert.deepEqual(k.M, ["argentina:origin", "johannesburg:married"]);
+  assert.deepEqual(p.route, [], "the teller's own route was not told, so none is drawn");
+});

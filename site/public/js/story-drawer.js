@@ -105,6 +105,23 @@
     var J = E.createJourney({ els: { cap: $(".sd-cap"), slider: $(".sd-year"), yearOut: $(".sd-yearout"), play: $(".sd-play"), moments: $(".sd-moments"), time: $(".sd-time"), mapBox: null },
       getMap: getMap, askBox: report.querySelector(".rep-ask"), onBorn: function (y) { setBorn(y); }, pad: { get tl() { var W = host ? host.clientWidth : window.innerWidth; return [root.classList.contains("is-open") && W >= 800 ? 430 : 30, 50]; }, get br() { return [60, 150]; } } });
 
+    /* The flag cards under the map follow the story: only the countries its places are in, and all of them again when the story goes. */
+    (function () {
+      var draw0 = J.draw, clear0 = J.clear;
+      function flagsFor(f) {
+        if (!window.raFlagsFor) return;
+        if (!f) { window.raFlagsFor(null); return; }
+        var seen = Object.create(null), out = [];
+        function add(i) { var c = i && i.cc && String(i.cc).toUpperCase(); if (c && !seen[c]) { seen[c] = 1; out.push(c); } }
+        (f.route || []).forEach(function (x) { add(x.info); }); add(f.from); add(f.to);
+        (f.kin || []).forEach(function (k) { (k.stops || []).forEach(function (x) { add(x.info); }); });
+        (f.ancestors || []).forEach(function (x) { add(x.info); });
+        window.raFlagsFor(out);
+      }
+      J.draw = function (f, m, n) { var r = draw0.call(J, f, m, n); flagsFor(f); return r; };
+      J.clear = function () { var r = clear0.apply(J, arguments); flagsFor(null); return r; };
+    })();
+
     function chip(label, cls, key, onclick) {
       var c = el(onclick ? "button" : "span", label, "sd-chip" + (cls ? " " + cls : "")); if (onclick) { c.type = "button"; c.addEventListener("click", onclick); }
       if (!shown[key]) { shown[key] = 1; c.classList.add("pop"); }
@@ -116,15 +133,24 @@
       if (p.teller) chips.append(chip("you: " + p.teller, "", "teller:" + p.teller));
       if (p.rel) chips.append(chip(p.rel.replace(/-/g, " "), "", "rel:" + p.rel));
       if (p.name) chips.append(chip(p.name, "", "nm:" + p.name));
-      if (p.people) p.people.forEach(function (pe) { if (pe.role !== "self" && pe.name) chips.append(chip("his " + (pe.label || pe.role) + " " + pe.name, "", "pe:" + pe.role + pe.name)); });
+      if (p.people) p.people.forEach(function (pe) {
+        if (p.noRoute) { if (pe.role !== "self") chips.append(chip((pe.label || pe.role) + (pe.name ? " " + pe.name : ""), "", "pe:" + pe.key + pe.name)); }
+        else if (pe.role !== "self" && pe.name) chips.append(chip("his " + (pe.label || pe.role) + " " + pe.name, "", "pe:" + pe.role + pe.name));
+      });
       var stopsShown = p.stops && p.stops.length ? p.stops : [p.from && Object.assign({ role: "origin" }, p.from), p.to && Object.assign({ role: "move" }, p.to)].filter(Boolean);
-      if (!stopsShown.length && text.value.trim().length > 12) chips.append(chip("Where did they start? Name the place", "warn", "nof"));
+      if (!stopsShown.length && !(p.kin && p.kin.length) && text.value.trim().length > 12) chips.append(chip("Where did they start? Name the place", "warn", "nof"));
       stopsShown.forEach(function (st) {
         var more = st.alts && st.alts.length, lab = placeLabel(st.row);
         var pre = st.role === "born" ? "born in " : st.role === "origin" ? "from " : st.role === "father-from" ? "his father from " : st.role === "mother-from" ? "his mother from " : st.age != null ? (st.approx ? "about age " : "age ") + st.age + ": " : st.role === "lived" ? "in " : "to ";
         chips.append(chip(pre + lab + (more ? "  ▾" : ""), st.role === "born" || st.role === "origin" ? "from" : "to", "s:" + st.row.i + st.role, more ? function () {
           ov[st.word] = { row: st.alts[0], alts: st.alts.slice(1).concat([st.row]) }; lastSig = ""; run();
         } : null));
+      });
+      (p.kin || []).forEach(function (k) {
+        if (!p.noRoute) return;
+        k.stops.forEach(function (st) {
+          chips.append(chip((k.label || "family") + (k.name ? " " + k.name : "") + ": " + (st.role === "born" ? "born in " : st.role === "origin" ? "from " : st.role === "married" ? "married in " : "to ") + placeLabel(st.row), st.role === "born" || st.role === "origin" ? "from" : "to", "k:" + k.key + st.row.i + st.role));
+        });
       });
       if (p.born) chips.append(chip("born about " + p.born, "", "b:" + p.born));
       if (p.left) chips.append(chip("about " + p.left, "", "l:" + p.left));
@@ -173,7 +199,7 @@
         parsedNow = p;
         drawChips(p);
         var sig = [(p.route || []).map(function (x) { return x.row.i + ":" + x.age; }).join(","), p.left, p.born, p.name, (p.people || []).map(function (x) { return x.name; }).join(","), p.holds].join("|");
-        if (sig === lastSig || !p.from) { if (!p.from && sig !== lastSig) { J.clear(); showDock(false); dropKeyPlaces(); report.hidden = true; planBox.hidden = true; fam.hidden = true; } return; }
+        if (sig === lastSig || (!p.from && !(p.kin && p.kin.length))) { if (!p.from && !(p.kin && p.kin.length) && sig !== lastSig) { J.clear(); showDock(false); dropKeyPlaces(); report.hidden = true; planBox.hidden = true; fam.hidden = true; } return; }
         lastSig = sig;
         var my = ++token; status.textContent = "Reading the Atlas…";
         LD.gather(p).then(function (g) {
@@ -322,7 +348,7 @@
       setText: function (t) { text.value = String(t || "").slice(0, 2000); lastSig = ""; if (!announced) { announced = true; try { document.dispatchEvent(new CustomEvent("ra-story-start")); } catch (e) { /* no document */ } } run(); },
       addFiles: function (fl) { try { document.dispatchEvent(new CustomEvent("ra-story-start")); } catch (e) { /* no document */ } addFiles(fl); },
       clear: function () { $(".sd-clear").click(); },
-      state: function () { return { has: !!(parsedNow && ((parsedNow.route && parsedNow.route.length) || parsedNow.from || parsedNow.name || parsedNow.teller)), name: parsedNow && parsedNow.name || "", files: files.length }; }
+      state: function () { return { has: !!(parsedNow && ((parsedNow.route && parsedNow.route.length) || parsedNow.from || parsedNow.name || parsedNow.teller || (parsedNow.kin && parsedNow.kin.length))), name: parsedNow && parsedNow.name || "", files: files.length }; }
     };
   }
 })();

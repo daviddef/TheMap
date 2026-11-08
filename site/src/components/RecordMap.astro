@@ -2004,14 +2004,14 @@ window.addEventListener("load", async function () {
                       f.flag + "</svg>";
       });
   }
-  function drawFlagResForCountries(ccs) {
+  function drawFlagResForCountries(ccs, sub) {
     if (!FLAGIDX || !fSec) { return; }
     if (!ccs || !ccs.length) return;
     buildCC2FLAG();
     var cards = ccs.map(function (cc) { return CC2FLAG[cc]; }).filter(Boolean);
     if (!cards.length) { fSec.hidden = true; return; }
     fSec.hidden = false;
-    fSub.textContent = cards.length + " of the countries this name is attested in";
+    fSub.textContent = sub || cards.length + " of the countries this name is attested in";
     fCountries.innerHTML = cards.map(flagCardHTML).join("");
     fHubsH.hidden = true;
     fHubs.innerHTML = "";
@@ -2043,6 +2043,12 @@ window.addEventListener("load", async function () {
     return at && cache[at] && !panel.hidden ? cache[at] : null;
   }
 
+  var storyCcs = null;
+  /* window.raFlagsFor(["HR","ZA"]) from the story reader narrows the cards to those countries; (null) gives them back. */
+  window.raFlagsFor = function (ccs) {
+    storyCcs = ccs && ccs.length ? ccs : null;
+    if (FLAGIDX) drawFlagRes(qbox ? qbox.value : ""); else if (storyCcs) loadFlagIndex();
+  };
   function drawFlagRes(q) {
     if (!FLAGIDX || !fSec) return;
     var k = fold((q || "").trim());
@@ -2053,6 +2059,8 @@ window.addEventListener("load", async function () {
        replaced it with the cards the text matched. The typed filter takes over again once the
        place is closed. */
     if (op && drawFlagResForPlace(op)) return;
+    /* A STORY IS ON THE MAP: ONLY THE FLAGS OF THE COUNTRIES IN IT, not the whole atlas's, and not whatever the story's own words match. */
+    if (storyCcs) { drawFlagResForCountries(storyCcs, "The flags of the countries in your story"); return; }
     /* A TWO-PART QUERY STILL HAS TO ANSWER. «Blazevic Gracisce» is a surname
        and a village; neither is a country, so matching the whole string would
        hide this section for every combined search.

@@ -258,7 +258,7 @@
   function parseStory(text, ctx, attached) {
     var t = String(text || ""), teller = "";
     /* "my name is David" says who is telling, not who the story is about */
-    t = t.replace(/\bmy name is\s+([\p{L}'’-]+)(?:\s+([\p{Lu}][\p{L}'’-]+))?/iu, function (m, g, sn) { teller = cased(g) + (sn && /^\p{Lu}/u.test(sn) && !STOP[S.fold(sn)] && !(ctx.map && ctx.map[S.fold(sn)]) ? " " + cased(sn) : ""); return " "; });
+    t = t.replace(/\bmy name is\s+([\p{L}'’-]+)(?:\s+([\p{Lu}][\p{L}'’-]+))?/iu, function (m, g, sn) { teller = cased(g) + (sn && /^\p{Lu}/u.test(sn) && !CONNECT.test(sn) && !STOP[S.fold(sn)] && !(ctx.map && ctx.map[S.fold(sn)]) ? " " + cased(sn) : ""); return " "; });
     var out = { rel: "", given: "", surname: "", name: "", holds: "story", left: null, born: null, from: null, to: null };
     out.teller = teller;
     var rm = REL.exec(t); if (rm) out.rel = rm[1].toLowerCase().replace(/ /g, "-");
@@ -296,8 +296,11 @@
     out.left = left; out.born = born;
 
     var cands = ctx.map ? S.candidates(t, ctx.map, ctx.skip) : [];
+    /* a name the story gives a person ("my dad is Ivan", "his dad is Giovanni") is a person, never a place, unless a "from"/"in" comes before it */
+    var fam = ctx.map ? readFamily(t, ctx) : null, nameW = Object.create(null);
+    if (fam) Object.keys(fam.people).forEach(function (k) { var pe = fam.people[k]; [pe.given, pe.surname].forEach(function (n) { if (n) nameW[S.fold(n)] = 1; }); });
     var rolesFor = cands.map(function (c) {
-      var p1 = tokens[c.at - 1] || "", p2 = tokens[c.at - 2] || "", isGiven = !!gset[c.word];
+      var p1 = tokens[c.at - 1] || "", p2 = tokens[c.at - 2] || "", isGiven = !!gset[c.word] || !!nameW[c.word];
       var role = PLACE_BEFORE[p1] || ((p1 === "in" && p2 === "born") ? "from" : (p1 === "in" && /^(settled|arrived|lived|living|came|went|emigrated|moved)$/.test(p2)) ? "to" : "");
       return { c: c, role: role, drop: (isGiven && !role) || (c.word.indexOf(" ") < 0 && (STOP[c.word] || COMMON[c.word] || REL.test(c.word))) };
     }).filter(function (x) { return !x.drop; });
@@ -366,7 +369,6 @@
     if (fa) { fa.place = fromP || null; if (!fa.surname && self && self.surname && (!self.rel || /father|mother|grand|uncle|aunt|brother|sister|ancestor|relative/.test(self.rel))) { fa.surname = self.surname; fa.presumed = true; fa.name = (fa.given ? fa.given + " " : "") + fa.surname; } people.push(fa); }
     if (mo) { mo.place = fromM || null; people.push(mo); }
     out.people = people;
-    var fam = ctx.map ? readFamily(t, ctx) : null;
     if (fam) applyFamily(out, fam, ctx);
     return out;
   }
@@ -378,6 +380,7 @@
      mother), and for each the events told of them: born, died, married, where they started and where they moved, each with the year and place
      it was given with. "his" is the person the story is about; "my" is the teller. Nothing is read that was not said. It stands down (returns
      null) unless two or more people are named, so a one-person story is still read by parseStory alone. */
+  var CONNECT = /^(and|or|but|then|so|is|was|are|were|my|his|her|their|our|the|a|an|of|in|to|from|who|that|we|i)$/i;
   var KIN_STEP = { father: "F", dad: "F", mother: "M", mum: "M", mom: "M" };
   var KIN_NOUN = { F: "father", M: "mother" };
   var INTRO = /(?:\b(my|his|her|their)\s+)?\b((?:(?:father|dad|mother|mum|mom)(?:'?s)?\s+)*(?:father|dad|mother|mum|mom))(?:'?s)?\s+(?:name\s+)?(?:was|is|named|called)\s+([\p{L}'’-]+)/giu;
@@ -1091,6 +1094,32 @@
         if (ps.length > 6) { var li2 = el("li"), a2 = el("a", "and " + (ps.length - 6) + " more in the source catalogue"); a2.href = base + "providers/"; li2.append(a2); ul.append(li2); }
         wrap.append(ul); return wrap;
       }
+      /* The place over the whole of its history, as a place search shows it: every era with its flag and who held the ground, the one they were
+         there in marked, then the epidemics, famines, wars and mass deaths whose area covers the place. Shown on every card, dated or not. */
+      function ground(info, year) {
+        var wrap = el("div", null, "lf-ground"), eras = info.eras || [];
+        if (eras.length) {
+          wrap.append(el("h5", "Who held this ground, era by era"));
+          var ul = el("ul", null, "lf-eras"), now = new Date().getFullYear();
+          eras.forEach(function (e) {
+            var li = el("li", null, year != null && year >= e.from && year < e.to ? "on" : ""), fl = flagFor(info, e.from);
+            if (fl) { var im = el("img", null, "lf-flag"); im.src = base + "fl/" + encodeURIComponent(fl) + ".svg"; im.alt = ""; im.title = "From the flag history of today's " + info.countryName + " in " + e.from; li.append(im); }
+            var rg = info.regimes && info.regimes[e.regime];
+            li.append(el("b", e.from + "\u2013" + (e.to >= now ? "now" : e.to) + " "), document.createTextNode(e.polity + (rg && rg.label && rg.label !== e.polity ? " (" + rg.label + ")" : "")));
+            ul.append(li);
+          });
+          wrap.append(ul);
+        } else wrap.append(el("p", "The Atlas has no era table for this area, so there is no era-by-era list here: it is " + (info.countryName || "today's country") + " as it is now.", "lf-filed"));
+        var evs = mort && info.lat != null ? S.eventsAt(mort.events, info.lat, info.lon, 1500, 1500) : [];
+        if (evs.length) {
+          wrap.append(el("h5", "Mass mortality whose area covers " + info.name));
+          var ue = el("ul", null, "lf-eras lf-mort");
+          evs.slice(0, 8).forEach(function (e) { var li = el("li", null, "lf-now-" + e.ty); li.append(el("b", e.f + (e.t !== e.f ? "\u2013" + e.t : "") + " "), document.createTextNode(typeLabel(e.ty) + ": " + e.n)); ue.append(li); });
+          if (evs.length > 8) ue.append(el("li", "and " + (evs.length - 8) + " more on the place page", "lf-filed"));
+          wrap.append(ue);
+        }
+        return wrap;
+      }
       function card(info, kicker, title, whenText, year, ageText, look, kinds, win, withSources, prefix) {
         n++;
         var sec = el("section", null, "lf-stop"), hd = el("header", null, "lf-stop-h");
@@ -1099,8 +1128,9 @@
         hd.append(tt); sec.append(hd);
         var grid = el("div", null, "lf-stop-grid"), then = el("div", null, "lf-stop-then"), where = el("div", null, "lf-stop-where");
         then.append(el("h4", "Who held the ground"));
-        if (year == null) then.append(el("p", "Add a birth year above to see who held the ground, the flag, and what was going on here.", "lf-filed"));
+        if (year == null) then.append(el("p", "Give a year, even a rough one, and the one that applies is marked below.", "lf-filed"));
         else then.append(line(info, year, evHere(mort, info, year - 5, year + 5), prefix || "", ageText || ""));
+        then.append(ground(info, year));
         where.append(el("h4", "Where to search"));
         var ul = el("ul", null, "lf-look"); look.forEach(function (t) { ul.append(el("li", t)); }); where.append(ul);
         if ((info.older || []).length) where.append(el("p", info.name + " is also found as " + info.older.slice(0, 8).join(", ") + ". Search all of them.", "lf-filed"));

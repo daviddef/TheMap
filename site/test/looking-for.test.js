@@ -419,3 +419,15 @@ test("a one-person story is still read as before", () => {
   assert.equal(p.kin, undefined);
   assert.equal(p.people.length, 1);
 });
+
+test("a name told as a person is never read as a place, and the place that bears the typed name wins", () => {
+  const rows = [
+    { i: "g-san-giovanni-gemini-it", n: "San Giovanni Gemini", cc: "IT", c: 0, q: "giovanni" },
+    { i: "launceston", n: "Launceston", cc: "AU", c: 1, q: "australia launceston, tasmania," },
+    { i: "tasmania", n: "Tasmania", cc: "AU", c: 0, q: "diemen's land van" },
+  ];
+  const c2 = { map: A.buildMap(rows), given: A.buildGiven([{ canon: "Ivan", id: "ivan", langs: { croatian: [{ form: "Ivan", status: "same" }] } }]), skip: {} };
+  const p = F.parseStory("MY NAME IS DAVID AND MY DAD IS IVAN AND HIS DAD IS GIOVANNI AND WERE ALL FROM TASMANIA", c2);
+  assert.deepEqual(p.stops.map((s) => s.row.i), ["tasmania"], "Giovanni is a person, Tasmania is Tasmania");
+  assert.equal(p.teller, "David", "'And' is not his surname");
+});

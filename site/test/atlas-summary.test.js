@@ -11,7 +11,7 @@ const A = load("atlas-summary.js");
 
 const rows = [
   { i: "gracisce", n: "Gračišće", cc: "HR", c: 32, q: "gallignana" },
-  { i: "gallignana-x", n: "Gallignana", cc: "IT", c: 0 },
+  { i: "g-gallignana-x", n: "Gallignana", cc: "IT", c: 0 },
   { i: "pazin", n: "Pazin", cc: "HR", c: 40, q: "mitterburg" },
   { i: "bronx", n: "Bronx", cc: "US", c: 9, q: "bronx the" },
 ];
@@ -111,4 +111,9 @@ test("a volume is marked by waypoint, else address, else title", () => {
   assert.equal(A.volumeId({ waypoint: "9RK1-T3F", url: "u", title: "t" }), "volume:9RK1-T3F");
   assert.equal(A.volumeId({ url: "https://x/?wc=9R2Q-MNB%3A1" }), "volume:https://x/?wc=9R2Q-MNB%3A1");
   assert.equal(A.volumeId({ title: "Births 1800" }), "volume:Births 1800");
+});
+
+test("the place called exactly what was typed comes before one that only lists it", () => {
+  const m = A.buildMap([{ i: "launceston", n: "Launceston", cc: "AU", c: 1, q: "australia launceston, tasmania," }, { i: "tasmania", n: "Tasmania", cc: "AU", c: 0 }]);
+  assert.equal(A.candidates("all from Tasmania", m, {})[0].rows[0].i, "tasmania");
 });

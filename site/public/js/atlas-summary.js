@@ -62,7 +62,9 @@
         /* The places the Atlas holds volumes for first; among equals, a place called exactly what was typed before one that merely has the
            word in an older or longer name ("London" before "New London"), then the Atlas's own places before the bare gazetteer's. */
         var exact = function (r) { return fold(r.n.replace(/\s*\([^)]*\)/g, "")) === w ? 0 : 1; }, own = function (r) { return /^[gp]-/.test(String(r.i)) ? 1 : 0; };
-        out.push({ word: w, at: i, rows: rows.slice().sort(function (a, b) { return (b.c || 0) - (a.c || 0) || exact(a) - exact(b) || own(a) - own(b) || String(a.cc).localeCompare(b.cc); }) });
+        /* An Atlas place that bears the typed name itself ("Tasmania") comes before one that only lists it among its older or containing names ("Launceston, Tasmania"), whatever their volumes. */
+        var named = function (r) { return exact(r) === 0 && !own(r) ? 0 : 1; };
+        out.push({ word: w, at: i, rows: rows.slice().sort(function (a, b) { return named(a) - named(b) || (b.c || 0) - (a.c || 0) || exact(a) - exact(b) || own(a) - own(b) || String(a.cc).localeCompare(b.cc); }) });
       }
     }
     return out.sort(function (a, b) { return a.at - b.at; });

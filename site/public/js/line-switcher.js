@@ -172,6 +172,11 @@
       draw();
     });
 
+    /* A mark was asked for while no family is chosen: nothing was written; ask which family it is for. */
+    document.addEventListener("ra-need-family", function () {
+      if (!bar.offsetParent || !pop.hidden) return;
+      openPop(false); q.placeholder = "Which family is this for? Pick one"; setTimeout(function () { q.placeholder = "Find a family or a place"; }, 6000);
+    });
     document.addEventListener("ra-progress-changed", draw);
     draw();
     }

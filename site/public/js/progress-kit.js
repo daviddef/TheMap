@@ -104,16 +104,21 @@
         mem.lines[FIRST_LINE] = { name: "Research Names", where: "",
                                   made: today() };
       }
-      if (!mem.active || !mem.lines[mem.active]) {
-        mem.active = Object.keys(mem.lines)[0];
-      }
+      /* NO FAMILY IS CHOSEN FOR THE READER. The first one in the list used to be selected when nothing was, so a mark or a story's
+         planned volumes landed in whichever family sorted first. Now nothing is selected until the reader picks or adds one. */
+      if (mem.active && !mem.lines[mem.active]) mem.active = "";
       return true;
     }
 
     function activeSlug() {
       var d = load();
-      if (!d.active || !d.lines[d.active]) d.active = Object.keys(d.lines)[0];
-      return d.active;
+      return d.active && d.lines[d.active] ? d.active : "";
+    }
+    /* A write needs a family. With none chosen nothing is written; the page is told, and the family picker opens. */
+    function needLine() {
+      var s = activeSlug();
+      if (!s) { try { document.dispatchEvent(new CustomEvent("ra-need-family")); } catch (e) { /* not in a page */ } }
+      return s;
     }
 
     /* WHAT A LINE CAN SEE: everything walked, plus what was scanned for it.
@@ -381,7 +386,7 @@
           if (d.marks[k].by) delete d.marks[k].by[slug];
           tidy(k);
         });
-        if (d.active === slug) d.active = Object.keys(d.lines)[0];
+        if (d.active === slug) d.active = "";
         save();
         return true;
       },
@@ -394,7 +399,8 @@
         id = canonical(id);
         var r = parseRanges(text);
         var walked = !!(opts && opts.walked);
-        var slug = activeSlug();
+        var slug = needLine();
+        if (!slug) return null;
         var d = load();
         if (r === null) {
           if (String(text || "").trim() === "") {
@@ -426,27 +432,31 @@
       },
       setTotal: function (id, n) {
         id = canonical(id);
+        if (!activeSlug()) { needLine(); return null; }
         var m = markFor(id);
         n = parseInt(n, 10);
+        var slug = needLine(); if (!slug) return null;
         if (n > 0) m.total = n; else delete m.total;
-        mineFor(id, activeSlug()).since = today();
+        mineFor(id, slug).since = today();
         save();
-        return view(m, activeSlug());
+        return view(m, slug);
       },
       setNote: function (id, s) {
         id = canonical(id);
-        var b = mineFor(canonical(id), activeSlug());
+        var slug = needLine(); if (!slug) return null;
+        var b = mineFor(canonical(id), slug);
         if (String(s || "").trim()) b.note = String(s).trim();
         else delete b.note;
         b.since = today();
         tidy(id);
         save();
-        return view(load().marks[id], activeSlug());
+        return view(load().marks[id], slug);
       },
       /* The label is the BOOK's, not the line's, so it stays at the top of
          the mark where every line reads the same one. */
       setWhat: function (id, what) {
         id = canonical(id);
+        if (!activeSlug()) { needLine(); return null; }
         var m = markFor(id);
         if (what && what.t) m.t = what.t;
         if (what && what.where) m.where = what.where;
@@ -456,7 +466,7 @@
       },
       setState: function (id, v) {
         id = canonical(id);
-        var slug = activeSlug();
+        var slug = needLine(); if (!slug) return null;
         var b = mineFor(id, slug);
         if (v) { b.state = v; b.since = today(); }
         else { delete b.state; }

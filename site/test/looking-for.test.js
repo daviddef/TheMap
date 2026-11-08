@@ -310,3 +310,38 @@ test("the three front doors show flags, events and name forms, and every file th
   assert.match(read("package.json"), /build-surname-families\.py/);
   assert.equal(/innerHTML|insertAdjacentHTML/.test(e), false);
 });
+
+test("a long story is read whole: every place in order with its age, the father's place apart, and the people named", () => {
+  const rs = [
+    { i: "crikvenica", n: "Crikvenica", cc: "HR", c: 5 }, { i: "senj", n: "Senj (Senj)", cc: "HR", c: 10, q: "(senj) segna zengg" },
+    { i: "croatia", n: "Croatia", cc: "HR", c: 1 }, { i: "harare", n: "Harare", cc: "ZW", c: 3 }, { i: "south-africa", n: "South Africa", cc: "ZA", c: 1 },
+    { i: "brisbane", n: "Brisbane", cc: "AU", c: 4 }, { i: "australia", n: "Australia", cc: "AU", c: 1 }, { i: "born-nl", n: "Born", cc: "NL", c: 0 },
+  ];
+  const given = A.buildGiven([{ canon: "Giovanni", langs: { croatian: [{ form: "Ivan", status: "same" }] } }, { canon: "Hedwig", langs: { croatian: [{ form: "Hedviga", status: "same" }] } }]);
+  const text = "my father ivan defranceski was born in crikvenica to a father from senj, croatia when he was 3 years old he moved to harare, rhodesia and then to south africa, and when he was 45 years old he moved to brisbane australia. his fathers name was ivan and his mother was hedviga blazevic.";
+  const p = F.parseStory(text, { map: A.buildMap(rs), given, skip: Object.create(null) });
+  assert.deepEqual(p.route.map((s) => [s.row.i, s.role, s.age, s.approx]), [["crikvenica", "born", 0, false], ["harare", "move", 3, false], ["south-africa", "move", 24, true], ["brisbane", "move", 45, false]]);
+  assert.deepEqual(p.stops.filter((s) => /-from$/.test(s.role)).map((s) => [s.row.i, s.role]), [["senj", "father-from"]]);
+  assert.equal(p.stops.some((s) => s.row.i === "born-nl"), false, "'born' is a word, not the village Born");
+  assert.equal(p.name, "Ivan Defranceski");
+  const [self, father, mother] = p.people;
+  assert.equal(self.role, "self");
+  assert.equal(father.name, "Ivan Defranceski"); assert.equal(father.presumed, true);
+  assert.equal(mother.name, "Hedviga Blazevic"); assert.equal(mother.presumed, false);
+  assert.equal(F.parseStory("ivan was born in crikvenica", { map: A.buildMap(rs), given, skip: Object.create(null) }).route.length, 1);
+});
+
+test("a name typed in lower case still gets its surname, and ordinary words never become one", () => {
+  const given = A.buildGiven([{ canon: "Giovanni", langs: { croatian: [{ form: "Ivan", status: "same" }] } }]);
+  const c = { map: A.buildMap([]), given, skip: Object.create(null) };
+  assert.equal(F.parseStory("my grandfather ivan kosina came over", c).surname, "Kosina");
+  assert.equal(F.parseStory("my grandfather ivan came over", c).surname, "");
+  assert.equal(F.parseStory("my grandfather ivan then moved", c).surname, "");
+});
+
+test("the tree draws only the people the story named, and the names panel groups by person", () => {
+  const src2 = src("story-engine.js");
+  assert.match(src2, /treeBlock/);
+  assert.match(src2, /lf-askyear/);
+  ["story-guide.js", "story-drawer.js"].forEach((f) => { assert.match(src(f), /treeBlock/); assert.match(src(f), /onBorn/); });
+});

@@ -14,7 +14,7 @@
   var LD = E.createLoader(BASE), data = null;
   var stage = $("sg-stage"), steps = [].slice.call(sg.querySelectorAll(".sg-step")), dots = [].slice.call($("sg-dots").children);
   var text = $("sg-text"), chips = $("sg-chips"), status = $("sg-status"), shots = $("sg-shots"), drop = $("sg-drop");
-  var holds = "story", files = [], override = { from: null, to: null }, parsed = null, gathered = null, shown = Object.create(null), at = 0;
+  var holds = "story", files = [], ov = Object.create(null), parsed = null, gathered = null, shown = Object.create(null), at = 0;
   var reduce = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
 
   var HINT = {
@@ -58,17 +58,19 @@
     if (!shown[key]) { shown[key] = 1; c.classList.add("pop"); }
     return c;
   }
-  function placeLabel(r) { return r.n + (data.countries[r.cc] ? ", " + data.countries[r.cc] : ""); }
+  function placeLabel(r) { var n = r.n.replace(/\s*\(([^)]*)\)/, function (m, x) { return S.fold(x) === S.fold(r.n.replace(/\s*\([^)]*\)/, "")) ? "" : m; }), c = data.countries[r.cc]; return n + (c && S.fold(c) !== S.fold(n) ? ", " + c : ""); }
   function drawChips(p) {
     chips.textContent = "";
     if (p.rel) chips.append(chip(p.rel.replace(/-/g, " "), "", "rel:" + p.rel));
     if (p.name) chips.append(chip(p.name, "", "nm:" + p.name));
-    ["from", "to"].forEach(function (k) {
-      var x = p[k];
-      if (!x) { if (k === "from" && text.value.trim().length > 12) chips.append(chip("Where did they start? Name the place", "warn", "nof")); return; }
-      var more = x.alts && x.alts.length;
-      chips.append(chip((k === "from" ? "from " : "to ") + placeLabel(x.row) + (more ? "  ▾" : ""), k === "from" ? "from" : "to", k + ":" + x.row.i, more ? function () {
-        var order = [x.row].concat(x.alts); override[k] = { row: order[1], alts: order.slice(2).concat([x.row]), word: x.word }; parse();
+    if (p.people) p.people.forEach(function (pe) { if (pe.role !== "self" && pe.name) chips.append(chip("his " + pe.role + " " + pe.name, "", "pe:" + pe.role + pe.name)); });
+    var stopsShown = p.stops && p.stops.length ? p.stops : [p.from && Object.assign({ role: "origin" }, p.from), p.to && Object.assign({ role: "move" }, p.to)].filter(Boolean);
+    if (!stopsShown.length && text.value.trim().length > 12) chips.append(chip("Where did they start? Name the place", "warn", "nof"));
+    stopsShown.forEach(function (st) {
+      var more = st.alts && st.alts.length, lab = placeLabel(st.row);
+      var pre = st.role === "born" ? "born in " : st.role === "origin" ? "from " : st.role === "father-from" ? "his father from " : st.role === "mother-from" ? "his mother from " : st.age != null ? (st.approx ? "about age " : "age ") + st.age + ": " : st.role === "lived" ? "in " : "to ";
+      chips.append(chip(pre + lab + (more ? "  ▾" : ""), st.role === "born" || st.role === "origin" ? "from" : "to", "s:" + st.row.i + st.role, more ? function () {
+        ov[st.word] = { row: st.alts[0], alts: st.alts.slice(1).concat([st.row]) }; parse();
       } : null));
     });
     if (p.born) chips.append(chip("born about " + p.born, "", "b:" + p.born));
@@ -80,8 +82,11 @@
     return LD.load().then(function (d) {
       data = d;
       var p = E.parseStory(text.value, { map: d.map, given: d.given, skip: d.skip }, files.length ? "photo" : (holds !== "story" ? holds : null));
-      if (override.from && p.from && override.from.row.n === p.from.row.n) p.from = override.from; else if (!p.from || !override.from || override.from.word !== p.from.word) override.from = null;
-      if (override.to && p.to && override.to.row.n === p.to.row.n) p.to = override.to; else if (!p.to || !override.to || override.to.word !== p.to.word) override.to = null;
+      (p.stops || []).forEach(function (st) { var o2 = ov[st.word]; if (o2) { st.row = o2.row; st.alts = o2.alts; } });
+      if (p.route && p.route.length) {
+        var r0 = p.route[0], rl = p.route[p.route.length - 1];
+        p.from = { row: r0.row, alts: r0.alts, word: r0.word }; p.to = p.route.length > 1 ? { row: rl.row, alts: rl.alts, word: rl.word } : null;
+      }
       parsed = p; drawChips(p); status.textContent = ""; status.className = "sg-status";
       return p;
     });
@@ -137,9 +142,17 @@
       return { L: L, map: map };
     });
   }
+  /* The story gave ages, not dates: the visitor adds a birth year and the same journey is drawn again with the years. */
+  function setBorn(y) {
+    if (!parsed) return;
+    parsed.born = y; (parsed.route || []).forEach(function (st) { if (st.age != null) st.year = y + st.age; });
+    status.textContent = "Reading the Atlas…";
+    LD.gather(parsed).then(function (g) { gathered = g; status.textContent = ""; drawJourney(); }).catch(function () { status.textContent = "Some Atlas files did not load. Check your connection."; });
+  }
   function drawJourney() {
     if (!gathered) return;
-    if (!J) J = E.createJourney({ els: { cap: $("sg-cap"), slider: $("sg-year"), yearOut: $("sg-yearout"), play: $("sg-play"), moments: $("sg-moments"), time: $("sg-time"), mapBox: $("sg-map") }, getMap: getMap });
+    if (!J) J = E.createJourney({ els: { cap: $("sg-cap"), slider: $("sg-year"), yearOut: $("sg-yearout"), play: $("sg-play"), moments: $("sg-moments"), time: $("sg-time"), mapBox: $("sg-map") }, getMap: getMap, onBorn: setBorn });
+    var tr = E.treeBlock(gathered.people, gathered.facts.rel); $("sg-tree").textContent = ""; $("sg-tree-box").hidden = !tr; if (tr) $("sg-tree").append(tr);
     var nb = E.namesBlock(gathered.names, BASE); $("sg-names").textContent = ""; $("sg-names-box").hidden = !nb; if (nb) $("sg-names").append(nb);
     J.draw(gathered.facts, gathered.mort).then(function () { if (!reduce && $("sg-play") && !$("sg-time").hidden) setTimeout(function () { if (at === 2) $("sg-play").click(); }, 900); });
   }
@@ -170,7 +183,7 @@
   }
 
   $("sg-again").addEventListener("click", function () {
-    files.forEach(function (x) { URL.revokeObjectURL(x.url); }); files = []; drawShots(); text.value = ""; chips.textContent = ""; override = { from: null, to: null }; parsed = null; gathered = null; shown = Object.create(null);
+    files.forEach(function (x) { URL.revokeObjectURL(x.url); }); files = []; drawShots(); text.value = ""; chips.textContent = ""; ov = Object.create(null); parsed = null; gathered = null; shown = Object.create(null);
     if (J) J.clear(); go(0);
   });
   window.addEventListener("beforeunload", function () { files.forEach(function (x) { URL.revokeObjectURL(x.url); }); });

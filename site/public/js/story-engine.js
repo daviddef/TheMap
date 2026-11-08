@@ -233,6 +233,10 @@
   var REL = /\b(great[- ]great[- ]grand(?:father|mother|parent)|great[- ]grand(?:father|mother|parent)|grand(?:father|mother|parent)|great[- ](?:uncle|aunt)|father|mother|uncle|aunt|brother|sister|ancestor|relative)\b/i;
   var STOP = Object.create(null);
   "my a an the and who from came come to into in of at was were is are born about around circa abt all have this that his her their with for on by after before left arrived emigrated moved settled lived he she they i me our we it".split(" ").forEach(function (w) { STOP[w] = 1; });
+  var COMMON = Object.create(null);
+  "then also still later soon when while where which what how why not no yes but or so as if than too very just only even again once twice died dead married wed lived live living went go goes gone come comes coming moved move moving travelled traveled returned return born birth age old years year aged name named called said told".split(" ").forEach(function (w) { COMMON[w] = 1; });
+  var MOVE = /\b(moved|move|went|go|came|come|travelled|traveled|emigrated|migrated|sailed|settled|relocated|then|to|into|arrived|returned|left)\b/;
+  var ANC = /\b(?:his|her|their|a|the)\s+(grandfather|grandmother|father|mother|dad|mum|mom)\b/g;
   var PLACE_BEFORE = { from: "from", of: "from", to: "to", into: "to", at: "to" };
 
   /* Every plausible year in the text, in order, each with a few words before it. */
@@ -246,6 +250,9 @@
      from:{row, alts, word}, to:{row, alts, word}}. `ctx` is {map (buildMap rows), given (buildGiven rows), skip}.
      A word that is a catalogued given name is not taken for a place unless a place marker ("from", "to") stands before it, so "Ivan"
      is the man and "from Ivan" is the village. A story that gives one place is read as the place he started. */
+  /* "ivan" and "BLAZEVIC" are shown as names: an all-lower or all-upper word gets a capital, a word typed with its own capitals is left. */
+  function cased(w) { w = String(w || ""); return w && (w === w.toLowerCase() || w === w.toUpperCase()) ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : w; }
+
   function parseStory(text, ctx, attached) {
     var t = String(text || ""), out = { rel: "", given: "", surname: "", name: "", holds: "story", left: null, born: null, from: null, to: null };
     var rm = REL.exec(t); if (rm) out.rel = rm[1].toLowerCase().replace(/ /g, "-");
@@ -258,9 +265,11 @@
       for (var i = 0; i < raw.length; i++) if (S.fold(raw[i]) === gv[0].word) { gi = i; break; }
       if (gi > -1 && raw[gi + 1]) {
         var nx = raw[gi + 1].replace(/^[("']+|[,.;:)"']+$/g, "");
-        if (/^[A-ZÀ-ÖØ-ÝČĆŽŠĐ][\p{L}'’-]+$/u.test(nx) && !STOP[S.fold(nx)] && !REL.test(nx)) out.surname = nx;
+        var fx = S.fold(nx), cap = /^[A-ZÀ-ÖØ-ÝČĆŽŠĐ][\p{L}'’-]+$/u.test(nx);
+        if (/^[\p{L}'’-]{3,}$/u.test(nx) && !STOP[fx] && !REL.test(nx) && (cap || (!COMMON[fx] && !(ctx.map && ctx.map[fx] && ctx.map[fx].length > 2)))) out.surname = nx;
       }
       out.givenWord = raw[gi] ? raw[gi].replace(/[,.;:]+$/, "") : out.given;
+      out.givenWord = cased(out.givenWord); if (out.surname) out.surname = cased(out.surname);
       out.name = out.givenWord + (out.surname ? " " + out.surname : "");
     }
     if (/\b(photo|photograph|picture|snapshot|portrait)\b/i.test(t)) out.holds = "photo";
@@ -281,7 +290,7 @@
     var rolesFor = cands.map(function (c) {
       var p1 = tokens[c.at - 1] || "", p2 = tokens[c.at - 2] || "", isGiven = !!gset[c.word];
       var role = PLACE_BEFORE[p1] || ((p1 === "in" && p2 === "born") ? "from" : (p1 === "in" && /^(settled|arrived|lived|living|came|went|emigrated|moved)$/.test(p2)) ? "to" : "");
-      return { c: c, role: role, drop: isGiven && !role };
+      return { c: c, role: role, drop: (isGiven && !role) || (c.word.indexOf(" ") < 0 && (STOP[c.word] || COMMON[c.word] || REL.test(c.word))) };
     }).filter(function (x) { return !x.drop; });
     function pick(x) { return x ? { row: x.c.rows[0], alts: x.c.rows.slice(1, 6), word: x.c.word } : null; }
     var fromX = rolesFor.filter(function (x) { return x.role === "from"; })[0];
@@ -290,6 +299,64 @@
     if (!fromX && free.length) fromX = free.shift();
     if (!toX && free.length) toX = free.shift();
     out.from = pick(fromX); out.to = pick(toX);
+
+    /* Every place, in the order told, with what it was to them: born, moved to, lived in, or where a parent came from. */
+    var stops = [];
+    rolesFor.forEach(function (x) {
+      var c = x.c, prev = stops[stops.length - 1], len = c.word.split(" ").length;
+      if (prev && c.at === prev.at + prev.len && c.rows.some(function (r) { return r.cc === prev.row.cc; }) && !prev.country) { prev.country = c.word; return; }
+      var lo = Math.max(prev ? prev.at + prev.len : 0, c.at - 6), win = tokens.slice(lo, c.at).join(" ");
+      var anc = null, am, are = new RegExp(ANC.source, "g");
+      while ((am = are.exec(win))) anc = am[1];
+      var role = anc ? (/mother|mum|mom|grandmother/.test(anc) ? "mother" : "father") + "-from"
+        : /\bborn\b/.test(win) ? "born"
+        : /(^| )(from|of)$/.test(win) ? "origin"
+        : MOVE.test(win) ? "move" : "lived";
+      stops.push({ row: c.rows[0], alts: c.rows.slice(1, 6), word: c.word, at: c.at, len: len, role: role, age: null, year: null, approx: false });
+    });
+    var route = stops.filter(function (x) { return x.role !== "father-from" && x.role !== "mother-from"; });
+    /* ages: "when he was 3 years old he moved to Harare" gives Harare age 3; a stop with no age sits between its neighbours */
+    var AGE = /(?:when (?:he|she|they|i|we) (?:was|were)|aged?|at the age of|at age|by the age of|at) (\d{1,2})(?: years?(?: old)?)?(?= |$)/g, am2, ages = [];
+    while ((am2 = AGE.exec(ft))) ages.push({ age: Number(am2[1]), tok: ft.slice(0, am2.index).split(" ").length - 1 });
+    var au = 0, lastAt = -1;
+    route.forEach(function (st) {
+      if (st.role === "born") st.age = 0;
+      else for (var k = au; k < ages.length; k++) if (ages[k].tok >= lastAt && ages[k].tok < st.at) { st.age = ages[k].age; au = k + 1; break; }
+      lastAt = st.at;
+    });
+    for (var i0 = 0; i0 < route.length; i0++) {
+      if (route[i0].age != null) continue;
+      var a0 = i0 - 1, b0 = i0 + 1; while (b0 < route.length && route[b0].age == null) b0++;
+      var from0 = a0 >= 0 && route[a0].age != null ? route[a0].age : null, to0 = b0 < route.length ? route[b0].age : null;
+      if (from0 != null && to0 != null) { route[i0].age = Math.round(from0 + (to0 - from0) * (i0 - a0) / (b0 - a0)); route[i0].approx = true; }
+      else if (from0 != null) { route[i0].age = from0; route[i0].approx = true; }
+    }
+    if (out.born != null) route.forEach(function (st) { if (st.age != null) st.year = out.born + st.age; });
+    out.stops = stops; out.route = route;
+    if (route.length) {
+      out.from = { row: route[0].row, alts: route[0].alts, word: route[0].word };
+      out.to = route.length > 1 ? { row: route[route.length - 1].row, alts: route[route.length - 1].alts, word: route[route.length - 1].word } : null;
+    }
+
+    /* the people: the one the story is about, and the parents it names */
+    var people = [];
+    if (out.name || out.rel) people.push({ role: "self", rel: out.rel, name: out.name, given: out.givenWord || "", surname: out.surname || "", place: route[0] || null });
+    function kin(which, re) {
+      var m = re.exec(t); if (!m) return null;
+      var g = m[1] || "", sn = m[2] || "", fg = S.fold(g), fs = S.fold(sn);
+      if (!g || STOP[fg] || COMMON[fg]) return null;
+      var ok = sn && /^[\p{L}'’-]{3,}$/u.test(sn) && !STOP[fs] && !COMMON[fs] && !(ctx.given && ctx.given[fs]);
+      return { role: which, name: cased(g) + (ok ? " " + cased(sn) : ""), given: cased(g), surname: ok ? cased(sn) : "", presumed: false };
+    }
+    var fa = kin("father", /\b(?:his|her|their|my)\s+(?:father|dad)(?:'?s)?(?:\s+name)?\s+(?:was|is|named|called)\s+([\p{L}'’-]+)(?:\s+([\p{L}'’-]+))?/iu);
+    var mo = kin("mother", /\b(?:his|her|their|my)\s+(?:mother|mum|mom)(?:'?s)?(?:\s+name)?\s+(?:was|is|named|called)\s+([\p{L}'’-]+)(?:\s+([\p{L}'’-]+))?/iu);
+    var fromP = stops.filter(function (x) { return x.role === "father-from"; })[0], fromM = stops.filter(function (x) { return x.role === "mother-from"; })[0];
+    if (!fa && fromP) fa = { role: "father", name: "", given: "", surname: "", presumed: false };
+    if (!mo && fromM) mo = { role: "mother", name: "", given: "", surname: "", presumed: false };
+    var self = people[0];
+    if (fa) { fa.place = fromP || null; if (!fa.surname && self && self.surname && (!self.rel || /father|mother|grand|uncle|aunt|brother|sister|ancestor|relative/.test(self.rel))) { fa.surname = self.surname; fa.presumed = true; fa.name = (fa.given ? fa.given + " " : "") + fa.surname; } people.push(fa); }
+    if (mo) { mo.place = fromM || null; people.push(mo); }
+    out.people = people;
     return out;
   }
 
@@ -400,7 +467,7 @@
       var regionsP = getJSON("regions.json").catch(function () { return null; });
       return Promise.all([getJSON("p/" + encodeURIComponent(row.i) + ".json").catch(function () { return null; }), regionsP]).then(function (r) {
         var p = r[0], regs = r[1], region = p && regs ? regs.regions.filter(function (x) { return x.id === p.region; })[0] : null;
-        return { row: row, p: p, name: row.n, lat: p ? p.lat : row.y, lon: p ? p.lon : row.x, cc: row.cc, countryName: (data.countries[row.cc] || row.cc || ""),
+        return { row: row, p: p, name: row.n.replace(/\s*\(([^)]*)\)/, function (m, x) { return S.fold(x) === S.fold(row.n.replace(/\s*\([^)]*\)/, "")) ? "" : m; }), lat: p ? p.lat : row.y, lon: p ? p.lon : row.x, cc: row.cc, countryName: (data.countries[row.cc] || row.cc || ""),
           older: p ? (p.names || []).map(function (n) { return n.n; }) : [], cols: p ? p.collections || [] : [],
           eras: region ? region.eras : null, regimes: regs ? regs.regimes : null, region: region, href: BASE + "place/" + encodeURIComponent(row.i) + "/" };
       });
@@ -417,20 +484,37 @@
       return Promise.all([getJSON("surname-families.json").catch(function () { return { rows: [] }; }), shard]).then(function (r) { return surnameBlock(name, r[0].rows, r[1]); });
     }
     function gather(parsed) {
+      var route = parsed.route && parsed.route.length ? parsed.route : [parsed.from, parsed.to].filter(Boolean).map(function (x, i) { return { row: x.row, alts: x.alts || [], word: x.word, role: i ? "move" : "origin", age: null, year: null, approx: false }; });
+      if (!parsed.people && (parsed.name || parsed.given)) parsed = Object.assign({}, parsed, { people: [{ role: "self", rel: parsed.rel, name: parsed.name, given: parsed.givenWord || parsed.given, surname: parsed.surname }] });
+      var anc = (parsed.stops || []).filter(function (x) { return /-from$/.test(x.role); });
+      var rowsNeeded = [], seenRow = Object.create(null);
+      function need(row) { if (row && !seenRow[row.i]) { seenRow[row.i] = 1; rowsNeeded.push(row); } }
+      if (parsed.from) need(parsed.from.row); if (parsed.to) need(parsed.to.row);
+      route.forEach(function (x) { need(x.row); }); anc.forEach(function (x) { need(x.row); });
       return load().then(function () {
-        return Promise.all([parsed.from ? placeInfo(parsed.from.row) : null, parsed.to ? placeInfo(parsed.to.row) : null,
+        var people = (parsed.people || []).filter(function (x) { return x.given || x.surname; });
+        return Promise.all([Promise.all(rowsNeeded.map(function (r) { return placeInfo(r); })),
           getJSON("providers.json").catch(function () { return { providers: [] }; }), getJSON("mortality.json").catch(function () { return null; }),
-          getJSON("flag-map.json").catch(function () { return null; }), getJSON("leaders.json").catch(function () { return null; }), surname(parsed.surname).catch(function () { return null; })]);
+          getJSON("flag-map.json").catch(function () { return null; }), getJSON("leaders.json").catch(function () { return null; }),
+          Promise.all(people.map(function (pe) { return pe.surname ? surname(pe.surname).catch(function () { return null; }) : Promise.resolve(null); })), Promise.resolve(people)]);
       }).then(function (r) {
-        var from = r[0], to = r[1], provs = r[2].providers || [], pname = Object.create(null), fm = r[4] && r[4].f, lead = r[5] && r[5].countries;
+        var infos = Object.create(null); r[0].forEach(function (i) { infos[i.row.i] = i; });
+        var provs = r[1].providers || [], pname = Object.create(null), fm = r[3] && r[3].f, lead = r[4] && r[4].countries;
         provs.forEach(function (x) { pname[x.id] = x.name; });
-        [from, to].forEach(function (i) { if (!i) return; i.pname = pname; i.flagRows = fm ? fm[String(i.cc || "").toUpperCase()] : null; i.leaders = lead ? lead[String(i.cc || "").toUpperCase()] : null; });
+        r[0].forEach(function (i) { i.pname = pname; i.flagRows = fm ? fm[String(i.cc || "").toUpperCase()] : null; i.leaders = lead ? lead[String(i.cc || "").toUpperCase()] : null; });
+        var from = parsed.from ? infos[parsed.from.row.i] : null, to = parsed.to ? infos[parsed.to.row.i] : null;
         var facts = { rel: parsed.rel, name: parsed.name, holds: parsed.holds, left: parsed.left, born: parsed.born, from: from, to: to, base: BASE,
-          providers: to ? provs.filter(function (p) { return (p.countries || []).indexOf(to.cc) > -1; }) : [],
-          given: parsed.given && data.given ? S.givenIn(parsed.givenWord || parsed.given, data.given, null) : [] };
+          providers: to ? provs.filter(function (p) { return (p.countries || []).indexOf(to.cc) > -1; }) : (from ? provs.filter(function (p) { return (p.countries || []).indexOf(from.cc) > -1; }) : []),
+          given: parsed.given && data.given ? S.givenIn(parsed.givenWord || parsed.given, data.given, null) : [],
+          route: route.map(function (x) { return { info: infos[x.row.i], age: x.age, year: x.year, approx: x.approx, role: x.role, country: x.country }; }),
+          ancestors: anc.map(function (x) { return { info: infos[x.row.i], who: x.role === "mother-from" ? "mother" : "father" }; }) };
         var labels = {}; (data.languages || []).forEach(function (l) { labels[l.key] = l.label; });
-        var gr = facts.given.length ? givenGroups(facts.given[0].row, labels) : [];
-        return { facts: facts, plan: buildPlan(facts), mort: r[3], names: { given: facts.given.length ? { canon: facts.given[0].row.canon, typed: parsed.givenWord || parsed.given, groups: gr } : null, surname: r[6] } };
+        var out = r[6].map(function (pe, i) {
+          var gr = pe.given && data.given ? S.givenIn(pe.given, data.given, null) : [];
+          return { role: pe.role, rel: pe.rel, name: pe.name, given: gr.length ? { canon: gr[0].row.canon, typed: pe.given, groups: givenGroups(gr[0].row, labels) } : (pe.given ? { canon: "", typed: pe.given, groups: [] } : null),
+            surname: r[5][i], surnameTyped: pe.surname, presumed: !!pe.presumed, place: pe.place && infos[pe.place.row.i] ? infos[pe.place.row.i].name : "" };
+        });
+        return { facts: facts, plan: buildPlan(facts), mort: r[2], names: { people: out }, people: out };
       });
     }
     return { getJSON: getJSON, load: load, placeInfo: placeInfo, gather: gather, surname: surname };
@@ -440,21 +524,27 @@
      dashed line with a moving dot on a map. `o.els` = {cap, slider, yearOut, play, moments, time, mapBox}; `o.getMap()` resolves to
      {L, map}, so the page's own map or the home map can host it; `o.pad` is the room to leave round the places (the drawer). */
   function createJourney(o) {
-    var E = o.els, layers = null, stopPlay = null, evA = [], evB = [];
+    var E = o.els, layers = null, stopPlay = null, askEl = null;
     var reduce = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
     var BASE = (o.base || document.documentElement.getAttribute("data-base") || "/").replace(/\/?$/, "/");
     var TYPE = {}; /* event type -> label, from mortality.json `types` */
+    function typeLabel(t) { return (TYPE[t] || t).replace(/ \(as the cited.*$/, "").replace(/^./, function (c) { return c.toUpperCase(); }); }
     function evHere(mort, info, y0, y1) {
-      if (!mort || info.lat == null) return [];
+      if (!mort || !info || info.lat == null || y0 == null) return [];
       return S.eventsAt(mort.events, info.lat, info.lon, Math.round((y0 + y1) / 2), Math.ceil((y1 - y0) / 2) + 1);
     }
-    function typeLabel(t) { return (TYPE[t] || t).replace(/ \(as the cited.*$/, "").replace(/^./, function (c) { return c.toUpperCase(); }); }
-    function line(info, year, evs) {
-      var c = captionAt(info, year), d = el("div", null, "lf-capline");
-      var fl = flagFor(info, year);
-      if (fl) { var im = el("img", null, "lf-flag"); im.src = BASE + "fl/" + encodeURIComponent(fl) + ".svg"; im.alt = "Flag from the Atlas's flag history of today's " + info.countryName + ", " + year; im.title = "From the flag history of today's " + info.countryName + " in " + year + ". The village may have been under another state: see the line beside it."; im.width = 36; im.height = 24; im.loading = "lazy"; d.append(im); }
+    /* One place at one time: who held it, its flag, the head of state of today's country, anything terrible nearby. `year` is null when
+       the story gave no way to date it; `evs` are the events near the place across the whole life. */
+    function line(info, year, evs, prefix, ageText) {
+      var d = el("div", null, "lf-capline");
+      if (year == null) {
+        d.append(el("div", (prefix || "") + info.name + (ageText ? ", " + ageText : "") + ": add a birth year below to see who held the ground, the flag and what was going on.", "lf-caphead"));
+        return d;
+      }
+      var c = captionAt(info, year), fl = flagFor(info, year);
+      if (fl) { var im = el("img", null, "lf-flag"); im.src = BASE + "fl/" + encodeURIComponent(fl) + ".svg"; im.alt = "Flag from the Atlas's flag history of today's " + info.countryName + ", " + year; im.title = "From the flag history of today's " + info.countryName + " in " + year + ". The place may have been under another state: see the line beside it."; im.width = 36; im.height = 24; im.loading = "lazy"; d.append(im); }
       var head = el("div", null, "lf-caphead");
-      head.append(el("b", info.name + ", " + year + ": "), document.createTextNode(c.polity ? "under " + c.polity : "no era table"));
+      head.append(el("b", (prefix || "") + info.name + ", " + year + (ageText ? " (" + ageText + ")" : "") + ": "), document.createTextNode(c.polity ? "under " + c.polity : "no era table"));
       if (c.regime) head.append(el("span", " (" + c.regime + ")", "lf-regime"));
       d.append(head);
       if (c.tracked && c.filedUnder.length) d.append(el("div", "Records of this period: " + c.filedUnder.join(", "), "lf-filed"));
@@ -468,31 +558,84 @@
       });
       return d;
     }
-    function clear() { if (stopPlay) stopPlay(); if (layers) { layers.group.remove(); layers = null; } }
-    function draw(f, mort) {
+    function clear() { if (stopPlay) stopPlay(); if (layers) { layers.group.remove(); layers = null; } if (askEl) askEl.hidden = true; }
+
+    /* The stops with a time each: years when the story gives a birth year or dates, else ages, else none. */
+    function timeline(f) {
+      var route = (f.route && f.route.length ? f.route : [f.from && { info: f.from }, f.to && { info: f.to }].filter(Boolean)).filter(function (x) { return x.info; });
+      if (!route.length) return { mode: "none", stops: [] };
+      var withYear = route.some(function (x) { return x.year != null; }), withAge = route.some(function (x) { return x.age != null; });
+      if (withYear) return { mode: "year", stops: route.map(function (x, i) { return { info: x.info, t: x.year != null ? x.year : (i ? null : route[0].year), age: x.age, approx: x.approx, role: x.role }; }).filter(function (x) { return x.t != null; }) };
+      if (withAge && f.born == null && f.left == null) return { mode: "age", stops: route.filter(function (x) { return x.age != null; }).map(function (x) { return { info: x.info, t: x.age, age: x.age, approx: x.approx, role: x.role }; }) };
+      if (f.left != null && route.length) {
+        var y0 = f.born != null ? f.born : f.left - 25;
+        return { mode: "year", stops: route.length === 1 ? [{ info: route[0].info, t: y0 }] : route.map(function (x, i) { return { info: x.info, t: i === 0 ? y0 : (i === route.length - 1 ? f.left : Math.round(y0 + (f.left - y0) * i / (route.length - 1))), age: x.age, approx: x.approx, role: x.role }; }), left: f.left };
+      }
+      return { mode: "none", stops: route.map(function (x) { return { info: x.info, t: null, age: x.age, role: x.role }; }) };
+    }
+    /* Where they are at time t: the stop they have reached, and the point between stops when they are on the way. */
+    function along(stops, t) {
+      var idx = 0;
+      for (var i = 0; i < stops.length; i++) if (t >= stops[i].t) idx = i;
+      var a = stops[idx], b = stops[idx + 1], pt = a.info.lat != null ? [a.info.lat, a.info.lon] : null, moving = false;
+      if (b && a.info.lat != null && b.info.lat != null) {
+        var tr = Math.min(2, Math.max(.6, (b.t - a.t) / 4)), k = (t - (b.t - tr)) / tr;
+        if (k > 0 && k < 1) { pt = between([a.info.lat, a.info.lon], [b.info.lat, b.info.lon], k); moving = true; }
+      }
+      return { idx: idx, pt: pt, moving: moving };
+    }
+    function ageWord(st) { return st.age == null ? "" : (st.approx ? "sometime near age " : "age ") + st.age; }
+
+    function draw(f, mort, names) {
       clear();
-      var a = f.from, b = f.to, left = f.left;
-      var y0 = f.born != null ? f.born : (left != null ? left - 25 : null), y1 = left != null ? Math.min(left + 12, YEAR_MAX) : null;
-      var can = y0 != null && y1 != null && (a || b);
+      var tl = timeline(f), stops = tl.stops, anc = (f.ancestors || []).filter(function (x) { return x.info; });
+      var can = stops.length > 0 && tl.mode !== "none" && (stops.length > 1 || tl.mode === "year");
       if (E.time) E.time.hidden = !can;
-      if (E.mapBox) E.mapBox.hidden = !(a || b);
+      if (E.mapBox) E.mapBox.hidden = !(stops.length || anc.length);
       E.moments.textContent = ""; E.cap.textContent = "";
       TYPE = (mort && mort.types) || {};
-      var wy0 = y0 != null ? y0 : (left != null ? left - 25 : 1850), wy1 = y1 != null ? y1 : (left != null ? left + 12 : 1920);
-      evA = a ? evHere(mort, a, wy0, wy1) : []; evB = b ? evHere(mort, b, wy0, wy1) : [];
-      if (!a && !b) { E.cap.textContent = "Say where they started and where they arrived to see the journey."; return Promise.resolve(); }
-      function setYear(y) {
+      if (!askEl && E.cap.parentNode) { askEl = el("form", null, "lf-askyear"); askEl.hidden = true; E.cap.parentNode.insertBefore(askEl, E.cap); }
+      if (askEl) {
+        askEl.textContent = ""; askEl.hidden = tl.mode !== "age";
+        if (tl.mode === "age") {
+          var inp = el("input"); inp.type = "text"; inp.inputMode = "numeric"; inp.maxLength = 4; inp.placeholder = "e.g. 1920"; inp.setAttribute("aria-label", "The year they were born, about");
+          var go = el("button", "Show the years"); go.type = "submit";
+          askEl.append(el("label", "Do you know about what year they were born? "), inp, go, el("span", " Their ages are used until you do.", "lf-filed"));
+          askEl.onsubmit = function (ev) { ev.preventDefault(); var y = toYear(inp.value); if (y != null && o.onBorn) o.onBorn(y); else inp.setCustomValidity && inp.focus(); };
+        }
+      }
+      if (!stops.length && !anc.length) { E.cap.textContent = "Say where they started and where they arrived to see the journey."; return Promise.resolve(); }
+      var t0 = null, t1 = null;
+      if (can) {
+        t0 = stops[0].t; t1 = stops[stops.length - 1].t + (tl.mode === "age" ? 4 : 10);
+        if (tl.mode === "year") { t1 = Math.min(t1, YEAR_MAX); if (tl.left != null) t1 = Math.min(tl.left + 12, YEAR_MAX); }
+      }
+      var evFor = [];
+      stops.concat(anc).forEach(function (st) { var inf = st.info; if (!inf.__ev) inf.__ev = null; });
+      function evs(info) { return tl.mode === "year" && t0 != null ? evHere(mort, info, t0, t1) : []; }
+      var evMap = new Map(); stops.concat(anc).forEach(function (st) { if (!evMap.has(st.info)) evMap.set(st.info, evs(st.info)); });
+
+      function setT(t) {
         E.cap.textContent = "";
-        if (a) E.cap.append(line(a, y, evA)); if (b) E.cap.append(line(b, y, evB));
-        if (E.slider) E.slider.value = String(y);
-        if (E.yearOut) E.yearOut.textContent = String(y);
-        var t = progress(left, y);
-        if (E.slider) E.slider.setAttribute("aria-valuetext", y + ". " + (t >= 1 ? "Arrived in " + (b ? b.name : "the new country") : t > 0 ? "On the way" : "Still in " + (a ? a.name : "the first place")));
-        if (layers && layers.dot) { var pt = between([a.lat, a.lon], [b.lat, b.lon], t); layers.dot.setLatLng(pt); layers.line.setLatLngs([[a.lat, a.lon], pt]); }
+        var at = stops.length ? along(stops, t) : { idx: 0, pt: null, moving: false }, cur = stops[at.idx];
+        if (cur) {
+          var ye = tl.mode === "year" ? t : null;
+          E.cap.append(line(cur.info, ye, evMap.get(cur.info), at.moving ? "On the way from " : "", tl.mode === "age" ? "age " + t : (f.born != null ? "age " + (t - f.born) : "")));
+          if (at.moving && stops[at.idx + 1]) E.cap.append(el("div", "…to " + stops[at.idx + 1].info.name + (stops[at.idx + 1].age != null ? " (" + ageWord(stops[at.idx + 1]) + ")" : ""), "lf-filed"));
+        }
+        anc.forEach(function (x) { E.cap.append(line(x.info, tl.mode === "year" ? t : null, evMap.get(x.info), "His " + x.who + "'s family, ", "")); });
+        if (E.slider) E.slider.value = String(t);
+        if (E.yearOut) E.yearOut.textContent = tl.mode === "age" ? "age " + t : String(t);
+        if (E.slider) E.slider.setAttribute("aria-valuetext", (tl.mode === "age" ? "age " : "") + t + (cur ? ". " + (at.moving ? "On the way" : "At " + cur.info.name) : ""));
+        if (layers && layers.dot && at.pt) {
+          layers.dot.setLatLng(at.pt);
+          var pts = []; for (var i = 0; i <= at.idx; i++) if (stops[i].info.lat != null) pts.push([stops[i].info.lat, stops[i].info.lon]);
+          pts.push(at.pt); layers.line.setLatLngs(pts);
+        }
       }
       if (can) {
-        E.slider.min = String(y0); E.slider.max = String(y1); setYear(y0);
-        E.slider.oninput = function () { if (stopPlay) stopPlay(); setYear(Number(E.slider.value)); };
+        E.slider.min = String(t0); E.slider.max = String(t1); setT(t0);
+        E.slider.oninput = function () { if (stopPlay) stopPlay(); setT(Number(E.slider.value)); };
         var raf = null;
         stopPlay = function () { if (raf) cancelAnimationFrame(raf); raf = null; if (E.play) E.play.textContent = "▶ Play"; };
         if (E.play) {
@@ -500,19 +643,23 @@
           E.play.onclick = function () {
             if (raf) { stopPlay(); return; }
             E.play.textContent = "❚❚ Pause";
-            var from = Number(E.slider.value) >= y1 ? y0 : Number(E.slider.value), t0 = null, span = (y1 - from) * 450;
-            function tick(ts) { if (t0 == null) t0 = ts; var k = Math.min(1, (ts - t0) / span); setYear(Math.round(from + (y1 - from) * k)); if (k < 1) raf = requestAnimationFrame(tick); else stopPlay(); }
+            var from = Number(E.slider.value) >= t1 ? t0 : Number(E.slider.value), ts0 = null, span = (t1 - from) * (tl.mode === "age" ? 260 : 450);
+            function tick(ts) { if (ts0 == null) ts0 = ts; var k = Math.min(1, (ts - ts0) / span); setT(Math.round(from + (t1 - from) * k)); if (k < 1) raf = requestAnimationFrame(tick); else stopPlay(); }
             raf = requestAnimationFrame(tick);
           };
         }
       } else {
-        if (a) E.cap.append(line(a, left != null ? left : 1900, evA)); if (b) E.cap.append(line(b, left != null ? left : 1900, evB));
+        var ty = tl.mode === "year" && stops.length ? stops[0].t : null;
+        stops.slice(0, 4).forEach(function (st) { E.cap.append(line(st.info, ty, evMap.get(st.info), "", ageWord(st))); });
+        anc.forEach(function (x) { E.cap.append(line(x.info, ty, evMap.get(x.info), "His " + x.who + "'s family, ", "")); });
       }
-      if (y0 != null && y1 != null) {
-        var mid = Math.round((y0 + y1) / 2), half = Math.ceil((y1 - y0) / 2) + 1, items = [];
-        [a, b].forEach(function (info) {
-          if (!info) return;
-          S.aroundYear(info.eras || [], [], mid, half).forEach(function (x) { if (x.y >= y0 - 1 && x.y <= y1 + 1) items.push({ y: x.y, t: info.name + ": " + x.title }); });
+
+      /* the setting: who held the ground and when it changed, what was going on, who led */
+      if (tl.mode === "year" && t0 != null) {
+        var mid = Math.round((t0 + t1) / 2), half = Math.ceil((t1 - t0) / 2) + 1, items = [], seenInfo = new Set();
+        stops.concat(anc).forEach(function (st) {
+          var info = st.info; if (seenInfo.has(info)) return; seenInfo.add(info);
+          S.aroundYear(info.eras || [], [], mid, half).forEach(function (x) { if (x.y >= t0 - 1 && x.y <= t1 + 1) items.push({ y: x.y, t: info.name + ": " + x.title }); });
         });
         items.sort(function (p, q) { return p.y - q.y; });
         if (items.length) {
@@ -520,12 +667,12 @@
           var ul = el("ul"); items.slice(0, 8).forEach(function (x) { var li = el("li"); li.append(el("b", x.y + " "), x.t); ul.append(li); });
           E.moments.append(ul);
         }
-        var seen = Object.create(null), evs = [];
-        [[a, evA], [b, evB]].forEach(function (pr) { (pr[1] || []).forEach(function (e) { if (seen[e.id]) return; seen[e.id] = 1; evs.push({ e: e, where: pr[0].name }); }); });
-        if (evs.length) {
+        var seen = Object.create(null), evl = [];
+        stops.concat(anc).forEach(function (st) { (evMap.get(st.info) || []).forEach(function (e) { if (seen[e.id]) return; seen[e.id] = 1; evl.push({ e: e, where: st.info.name }); }); });
+        if (evl.length) {
           E.moments.append(el("h4", "What was going on: epidemics, famines, wars and mass deaths nearby"));
           var ue = el("ul", null, "lf-events");
-          evs.slice(0, 8).forEach(function (x) {
+          evl.slice(0, 8).forEach(function (x) {
             var li = el("li", null, "lf-ev lf-ev-" + x.e.ty), t = x.e.toll && x.e.toll.text ? " " + short(x.e.toll.text, 160) : "";
             li.append(el("b", x.e.f + (x.e.t !== x.e.f ? "–" + x.e.t : "") + " "), el("span", typeLabel(x.e.ty), "lf-tag"), document.createTextNode(" " + x.e.n + " (near " + x.where + "). " + short(x.e.says, 200) + t));
             if (x.e.open) li.append(el("div", "Disputed: " + short(x.e.open, 160), "lf-filed"));
@@ -533,47 +680,59 @@
           });
           E.moments.append(ue);
         }
-        [a, b].forEach(function (info) {
-          if (!info || !info.leaders) return;
-          var ls = leadersBetween(info.leaders, y0, y1).slice(0, 8);
+        var seenCc = Object.create(null);
+        stops.concat(anc).forEach(function (st) {
+          var info = st.info; if (!info.leaders || seenCc[info.cc]) return; seenCc[info.cc] = 1;
+          var ls = leadersBetween(info.leaders, t0, t1).slice(0, 8);
           if (!ls.length) return;
           E.moments.append(el("h4", "Leaders of today's " + info.countryName + " in those years"));
           var ul2 = el("ul"); ls.forEach(function (r) { var li = el("li"); li.append(el("b", r[2] + (r[3] == null ? " on " : "–" + r[3] + " ")), r[0]); ul2.append(li); });
           E.moments.append(ul2);
         });
-        if (items.length || evs.length || (a && a.leaders) || (b && b.leaders)) E.moments.append(el("p", "This is the setting, not a fact about them: the events are those whose area covers the place in those years, and the leaders are those of the country as it is drawn today.", "cap"));
+        if (items.length || evl.length) E.moments.append(el("p", "This is the setting, not a fact about them: the events are those whose area covers the place in those years, and the leaders are those of the country as it is drawn today.", "cap"));
       }
+
       return o.getMap().then(function (m) {
-        var L = m.L, map = m.map, g = L.layerGroup().addTo(map), pts = [];
-        function pin(info, colour, label) {
-          if (!info || info.lat == null) return;
-          L.circleMarker([info.lat, info.lon], { radius: 8, weight: 3, color: "#fff", fillColor: colour, fillOpacity: 1 }).bindTooltip(label + ": " + info.name, { permanent: true, direction: "top", offset: [0, -8] }).addTo(g);
+        var L = m.L, map = m.map, pts = [], dirs = ["top", "bottom", "right", "left"];
+        try { map.getCenter(); } catch (e) { map.setView([30, 0], 2, { animate: false }); } /* a new map has no view yet: flyTo needs one, and drawn pins are projected from it */
+        map.invalidateSize({ animate: false });
+        var g = L.layerGroup().addTo(map);
+        stops.forEach(function (st, i) {
+          var info = st.info; if (info.lat == null) return;
+          var first = i === 0, last = i === stops.length - 1 && stops.length > 1;
+          var label = first ? (st.role === "born" ? "Born" : "Started") : (st.age != null ? (st.approx ? "About age " : "Age ") + st.age : last ? "Arrived" : "Then");
+          L.circleMarker([info.lat, info.lon], { radius: 8, weight: 3, color: "#fff", fillColor: first ? "#b3452e" : "#1f5c6b", fillOpacity: 1 })
+            .bindTooltip(label + ": " + info.name, { permanent: true, direction: dirs[i % 4], offset: [0, i % 4 === 0 ? -8 : i % 4 === 1 ? 8 : 0] }).addTo(g);
           pts.push([info.lat, info.lon]);
-        }
-        pin(a, "#b3452e", "Started"); pin(b, "#1f5c6b", "Arrived");
+        });
+        anc.forEach(function (x) {
+          var info = x.info; if (info.lat == null) return;
+          L.circleMarker([info.lat, info.lon], { radius: 6, weight: 2, color: "#7a7a7a", fillColor: "#fff", fillOpacity: 1, dashArray: "2 3" })
+            .bindTooltip("His " + x.who + "'s family: " + info.name, { permanent: true, direction: "left", offset: [-6, 0] }).addTo(g);
+          pts.push([info.lat, info.lon]);
+        });
         layers = { group: g };
-        if (a && b && a.lat != null && b.lat != null) {
-          L.polyline([[a.lat, a.lon], [b.lat, b.lon]], { color: "#7a7a7a", weight: 2, dashArray: "4 6", opacity: .7 }).addTo(g);
-          layers.line = L.polyline([[a.lat, a.lon], [a.lat, a.lon]], { color: "#b3452e", weight: 3 }).addTo(g);
-          layers.dot = L.circleMarker([a.lat, a.lon], { radius: 6, weight: 2, color: "#fff", fillColor: "#16222a", fillOpacity: 1 }).addTo(g);
-          if (can) setYear(Number(E.slider.value));
+        var rp = stops.filter(function (st) { return st.info.lat != null; }).map(function (st) { return [st.info.lat, st.info.lon]; });
+        if (rp.length > 1) {
+          L.polyline(rp, { color: "#7a7a7a", weight: 2, dashArray: "4 6", opacity: .7 }).addTo(g);
+          layers.line = L.polyline([rp[0], rp[0]], { color: "#b3452e", weight: 3 }).addTo(g);
+          layers.dot = L.circleMarker(rp[0], { radius: 6, weight: 2, color: "#fff", fillColor: "#16222a", fillOpacity: 1 }).addTo(g);
+          if (can) setT(Number(E.slider.value));
         }
         var pad = o.pad || {};
-        try { map.getCenter(); } catch (e) { map.setView([30, 0], 2, { animate: false }); } /* a new map has no view yet, and flyTo needs one */
-        if (pts.length > 1) map.flyToBounds ? map.flyToBounds(L.latLngBounds(pts), { paddingTopLeft: pad.tl || [40, 40], paddingBottomRight: pad.br || [40, 40], duration: reduce ? 0 : 1.6, maxZoom: 7 }) : map.fitBounds(L.latLngBounds(pts));
+        if (pts.length > 1) map.flyToBounds ? map.flyToBounds(L.latLngBounds(pts), { paddingTopLeft: pad.tl || [70, 50], paddingBottomRight: pad.br || [110, 60], duration: reduce ? 0 : 1.6, maxZoom: 7 }) : map.fitBounds(L.latLngBounds(pts));
         else if (pts.length) map.setView(pts[0], 8);
-        setTimeout(function () { map.invalidateSize(); }, 60);
+        /* the page may have been sliding or hidden when the map was made: measure again, and make the drawn pins project from the final view */
+        setTimeout(function () { map.invalidateSize({ animate: false }); }, 60);
+        setTimeout(function () { map.invalidateSize({ animate: false }); map.fire("moveend"); }, reduce ? 150 : 1900);
       }).catch(function (e) { if (window.console) console.warn("The journey map did not draw:", e); if (E.mapBox) E.mapBox.setAttribute("data-failed", "1"); });
     }
     return { draw: draw, clear: clear };
   }
 
-  /* The names panel: how the first name and the surname were written, in the languages of the clerks. A node for the page to place.
-     `names` = {given: {canon, typed, groups}, surname: surnameBlock(...)}; nothing about a person is in it. */
-  function namesBlock(names, base) {
-    var box = el("div", null, "lf-names"), any = false;
-    base = (base || "/").replace(/\/?$/, "/");
-    var g = names && names.given;
+  /* How one person's first name and surname were written: the catalogue's forms, with leads kept apart. Null when it holds nothing. */
+  function personNames(g, sn, base) {
+    var box = el("div", null, "lf-pnames"), any = false;
     if (g && g.groups && g.groups.length) {
       any = true;
       box.append(el("h4", "First name: " + g.typed + " is also written"));
@@ -586,28 +745,79 @@
       if (leads.length) { var ll = el("li"); ll.append(el("b", "Worth trying, in other languages (never yet seen on a record): "), document.createTextNode(leads.slice(0, 14).join(", ") + (leads.length > 14 ? " and " + (leads.length - 14) + " more" : ""))); ul.append(ll); }
       box.append(ul);
     }
-    var sn = names && names.surname;
     if (sn) {
       var f = sn.family, pos = f ? f.by.same.concat(f.by.attested, f.by.rule) : [];
       if (f || sn.spelling.length || sn.sounds.length) {
         any = true;
         box.append(el("h4", "Surname: " + sn.name + " may be written"));
         var u2 = el("ul", null, "lf-forms");
-        if (pos.length) { var l1 = el("li"); l1.append(el("b", "Recorded spellings of the same name: "), document.createTextNode(pos.join(", "))); u2.append(l1); }
-        if (f && f.by.lead.length) { var l2 = el("li"); l2.append(el("b", "Worth trying, never yet seen on a record: "), document.createTextNode(f.by.lead.slice(0, 10).join(", ") + (f.by.lead.length > 10 ? " and " + (f.by.lead.length - 10) + " more" : ""))); u2.append(l2); }
-        if (f && f.by["case-by-case"].length) { var l3 = el("li"); l3.append(el("b", "Sometimes this family, sometimes another: "), document.createTextNode(f.by["case-by-case"].join(", "))); u2.append(l3); }
-        if (sn.spelling.length) { var l4 = el("li"); l4.append(el("b", "Close spellings in the Atlas's name lists (leads): "), document.createTextNode(sn.spelling.join(", "))); u2.append(l4); }
-        if (sn.sounds.length) { var l5 = el("li"); l5.append(el("b", "Names that sound alike (leads): "), document.createTextNode(sn.sounds.join(", "))); u2.append(l5); }
-        if (f && f.notSame.length) { var l6 = el("li"); l6.append(el("b", "Look alike, but a different name: "), document.createTextNode(f.notSame.slice(0, 6).map(function (x) { return x[0]; }).join(", "))); u2.append(l6); }
+        function row(b, t) { var l = el("li"); l.append(el("b", b), document.createTextNode(t)); u2.append(l); }
+        if (pos.length) row("Recorded spellings of the same name: ", pos.join(", "));
+        if (f && f.by.lead.length) row("Worth trying, never yet seen on a record: ", f.by.lead.slice(0, 10).join(", ") + (f.by.lead.length > 10 ? " and " + (f.by.lead.length - 10) + " more" : ""));
+        if (f && f.by["case-by-case"].length) row("Sometimes this family, sometimes another: ", f.by["case-by-case"].join(", "));
+        if (sn.spelling.length) row("Close spellings in the Atlas's name lists (leads): ", sn.spelling.join(", "));
+        if (sn.sounds.length) row("Names that sound alike (leads): ", sn.sounds.join(", "));
+        if (f && f.notSame.length) row("Look alike, but a different name: ", f.notSame.slice(0, 6).map(function (x) { return x[0]; }).join(", "));
         box.append(u2);
       }
     }
+    return any ? box : null;
+  }
+  function roleLabel(pe, people) {
+    if (pe.role === "self") return pe.rel ? "Your " + pe.rel.replace(/-/g, " ") : "The person you asked about";
+    var self = (people || []).filter(function (x) { return x.role === "self"; })[0], who = self && self.given ? self.given + "'s " : "Their ";
+    return who + pe.role;
+  }
+
+  /* The names panel: how each person's names were written, in the languages of the clerks. A node for the page to place.
+     `names` = {people: [{role, rel, name, given, surname, presumed}]}; nothing about a person is in it but the names the visitor typed. */
+  function namesBlock(names, base) {
+    var box = el("div", null, "lf-names"), any = false;
+    base = (base || "/").replace(/\/?$/, "/");
+    ((names && names.people) || []).forEach(function (pe, i, all) {
+      var inner = personNames(pe.given, pe.surname, base);
+      if (!inner) return;
+      any = true;
+      var d = el("details", null, "lf-person"); if (i === 0) d.open = true;
+      var sm = el("summary"); sm.append(el("b", pe.name || roleLabel(pe, all)), el("span", " · " + roleLabel(pe, all) + (pe.presumed ? " (surname assumed the same)" : ""), "lf-filed"));
+      d.append(sm, inner); box.append(d);
+    });
     if (any) {
       var p = el("p", null, "cap"); p.append("Leads are where to look, not findings. ");
       var a = el("a", "Every spelling in the Atlas →"); a.href = base + "your-name/"; p.append(a); box.append(p);
     }
     return any ? box : null;
   }
-  api.namesBlock = namesBlock;
+
+  /* The family as told: the parents named above the person, and the visitor below. Each card carries the place and the few forms of the name
+     the catalogue holds. Nothing is drawn that the story did not say, and a missing parent is left out, not guessed. */
+  function treeBlock(people, rel) {
+    var self = (people || []).filter(function (x) { return x.role === "self"; })[0];
+    var fa = (people || []).filter(function (x) { return x.role === "father"; })[0], mo = (people || []).filter(function (x) { return x.role === "mother"; })[0];
+    if (!self) return null;
+    function forms(pe) {
+      var out = [];
+      if (pe.given && pe.given.groups) pe.given.groups.forEach(function (g) { g.forms.forEach(function (f) { if (out.length < 5 && out.indexOf(f) < 0 && S.fold(f) !== S.fold(pe.given.typed)) out.push(f); }); });
+      var sn = pe.surname;
+      if (sn && sn.family) sn.family.by.same.concat(sn.family.by.attested, sn.family.by.rule).forEach(function (f) { if (out.length < 8 && out.indexOf(f) < 0 && S.fold(f) !== S.fold(pe.surnameTyped)) out.push(f); });
+      return out;
+    }
+    function card(pe, label) {
+      var c = el("div", null, "lf-card lf-card-" + pe.role);
+      c.append(el("div", label, "lf-card-role"), el("div", pe.name || "Name not given", "lf-card-name"));
+      if (pe.place) c.append(el("div", (pe.role === "self" ? "Born in " : "From ") + (typeof pe.place === "string" ? pe.place : pe.place.word), "lf-card-place"));
+      var f = forms(pe); if (f.length) c.append(el("div", "Also written: " + f.join(", "), "lf-card-forms"));
+      if (pe.presumed) c.append(el("div", "Surname assumed the same", "lf-card-forms"));
+      return c;
+    }
+    var tree = el("div", null, "lf-tree"), others = (people || []).slice();
+    function gen(cls) { var g = el("div", null, "lf-gen " + (cls || "")); tree.append(g); return g; }
+    if (fa || mo) { var g1 = gen("lf-parents"); if (fa) g1.append(card(fa, "Father")); if (mo) g1.append(card(mo, "Mother")); tree.append(el("div", null, "lf-tie")); }
+    var g2 = gen(); g2.append(card(self, self.rel ? "Your " + self.rel.replace(/-/g, " ") : "The person you asked about"));
+    tree.append(el("div", null, "lf-tie"));
+    var g3 = gen(), you = el("div", null, "lf-card lf-card-you"); you.append(el("div", "You", "lf-card-role"), el("div", "who is asking", "lf-card-place")); g3.append(you);
+    return tree;
+  }
+  api.namesBlock = namesBlock; api.treeBlock = treeBlock;
   api.createLoader = createLoader; api.createJourney = createJourney; api.el = el;
 })();

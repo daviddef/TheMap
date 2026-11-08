@@ -32,6 +32,8 @@
     function add(k, r) { if (!k) return; (map[k] || (map[k] = [])).push(r); }
     rows.forEach(function (r) {
       add(fold(r.n), r);
+      var bare = r.n.indexOf("(") > 0 ? fold(r.n.replace(/\s*\([^)]*\)/g, "")) : "";
+      if (bare && bare !== fold(r.n)) add(bare, r);
       var q = r.q ? fold(r.q) : "";
       if (!q) return;
       add(q, r);

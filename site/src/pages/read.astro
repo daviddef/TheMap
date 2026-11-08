@@ -73,6 +73,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
           </div>
           <div class="sg-cap lf-capbox" id="sg-cap"></div>
           <details class="sg-more" open><summary>What was going on, and who led</summary><div class="lf-moments" id="sg-moments"></div></details>
+          <details class="sg-more" id="sg-tree-box" open><summary>Their family, as you told it</summary><div id="sg-tree"></div></details>
           <details class="sg-more" id="sg-names-box"><summary>How their names were written</summary><div id="sg-names"></div></details>
           <p class="sg-fine">The dashed line joins the places in date order. It is not the route they took: the Atlas does not know that, and neither does anyone without a ship's list.</p>
           <p class="sg-nav"><button type="button" class="sg-back" data-go="1">Back</button> <button type="button" class="sg-next" data-go="3">What should I do first?</button></p>
@@ -339,6 +340,17 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   .sg .lf-moments h4, .sg .lf-names h4 { display: block; font: 600 11.5px/1 var(--sans); letter-spacing: .09em; text-transform: uppercase; color: var(--accent); margin: 14px 0 6px; }
   .sg .lf-forms { margin: 0 0 6px; padding-left: 18px; font-size: 14px; line-height: 1.5; } .sg .lf-forms li { margin: 0 0 4px; }
   .sg .lf-names .cap { color: var(--ink-2); font-size: 12.5px; }
+  .sg .lf-askyear { margin: 8px 0; padding: 10px 14px; border: 1px dashed var(--accent); border-radius: 10px; font-size: 14.5px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .sg .lf-askyear input { width: 6.5em; font: inherit; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--rule-strong); background: var(--panel); color: var(--ink); }
+  .sg .lf-askyear button { font: 600 14px/1 var(--sans); padding: 8px 12px; border-radius: 8px; border: 0; background: var(--accent); color: #fff; cursor: pointer; }
+  .sg .lf-person { margin: 0 0 6px; border: 1px solid var(--rule); border-radius: 10px; padding: 6px 12px; background: var(--ground); } .sg .lf-person summary { cursor: pointer; }
+  .sg .lf-tree { display: grid; gap: 0; justify-items: center; margin: 8px 0 4px; max-width: 54rem; }
+  .sg .lf-gen { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
+  .sg .lf-tie { width: 2px; height: 22px; background: var(--rule-strong); }
+  .sg .lf-card { min-width: 11rem; max-width: 19rem; padding: 10px 14px; border: 1px solid var(--rule-strong); border-radius: 12px; background: var(--panel); text-align: center; animation: sg-rise .5s ease both; }
+  .sg .lf-card-self { border-color: var(--accent); background: var(--accent-wash); } .sg .lf-card-you { border-style: dashed; }
+  .sg .lf-card-role { font: 600 11px/1 var(--sans); letter-spacing: .09em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+  .sg .lf-card-name { font: 500 18px/1.25 var(--serif); } .sg .lf-card-place, .sg .lf-card-forms { font-size: 13px; color: var(--ink-2); margin-top: 3px; }
   .sg-plan { display: grid; gap: 10px; max-width: 54rem; }
   .sg-pstep { background: var(--ground); border: 1px solid var(--rule); border-radius: 14px; padding: 14px 18px 10px; animation: sg-rise .5s ease both; }
   .sg-pstep h3 { font: 500 19px/1.3 var(--serif); margin: 0 0 4px; display: flex; gap: 12px; align-items: baseline; }

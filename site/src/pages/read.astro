@@ -30,31 +30,34 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   </div>
 
   <section id="tool-ask" class="rd-panel" role="tabpanel" aria-labelledby="tab-ask">
-    <div class="one" id="ask" hidden>
-      <p class="ask-lead">Paste a register line or drop up to four pictures. Claude drafts a reading to check against the page, not an answer.</p>
-      <details class="ask-priv"><summary>Nothing is sent until you press a button. What is sent, and what is kept</summary>
-        <p>What you paste or photograph is sent over the internet to our small service and on to Claude, an AI made by
-        Anthropic, which writes the draft. We keep no text, no picture and no answer, only a count of how many tries each visitor has used. Anthropic's
-        <a href="https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data" rel="noopener">published policy</a> says it deletes
-        what is sent within 30 days, keeps content its safety systems flag for longer, and does not train on it without permission. Please do not paste or photograph details of
-        people who may be alive. Cloudflare's bot check loads when you first click in the box. <a href={u("/privacy/")}>More in the privacy note.</a></p></details>
+    <div class="one ask-card" id="ask" hidden>
+      <div class="ask-head">
+        <span class="ask-spark" aria-hidden="true"><svg viewBox="0 0 24 24" width="30" height="30"><path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4z" fill="currentColor"/><path d="M18 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z" fill="currentColor"/></svg></span>
+        <div>
+          <h2 class="ask-title">Show Claude a line from a register</h2>
+          <p class="ask-lead">Paste an entry, or drop up to four pictures of the page. You get a draft reading to check against the page, and what the Atlas knows about that place and year.</p>
+        </div>
+      </div>
       <div class="ask-drop" id="ask-drop">
         <textarea id="ask-text" rows="4" maxlength="4000" spellcheck="false" aria-label="A line from a register" placeholder="Paste or type one entry, as written"></textarea>
-        <p class="ask-hint">Drop pictures here (up to four), or paste them</p>
+        <p class="ask-hint"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 16V5m0 0l-4 4m4-4l4 4M5 19h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> or drop pictures here, up to four. You can paste them too.</p>
       </div>
       <ul class="ask-tray" id="ask-tray" aria-label="Pictures ready to read" hidden></ul>
-      <p><input type="text" id="ask-where" maxlength="120" spellcheck="false" aria-label="Where the entry is from, if you know" placeholder="Where is it from? A place and a year help (optional)" /></p>
-      <p class="ask-row">
-        <button type="button" id="ask-go" class="chip ask-btn">Read this line</button>
-        <button type="button" id="ask-atlas" class="chip ask-btn">What the Atlas holds on this</button>
-        <label class="chip ask-btn ask-file">Add pictures<input type="file" id="ask-photo" accept="image/jpeg,image/png,image/webp" multiple hidden /></label>
+      <div class="ask-bar">
+        <input type="text" id="ask-where" maxlength="120" spellcheck="false" aria-label="Where the entry is from, if you know" placeholder="From where? A place and a year help (optional)" />
+        <button type="button" id="ask-go" class="chip ask-btn ask-cta">Read this line</button>
+      </div>
+      <p class="ask-more">
+        <label class="ask-file ask-link">Add pictures<input type="file" id="ask-photo" accept="image/jpeg,image/png,image/webp" multiple hidden /></label>
+        <span aria-hidden="true">·</span>
+        <button type="button" id="ask-atlas" class="ask-link">What the Atlas holds on this</button>
       </p>
       <div class="ask-ready" id="ask-ready" hidden>
         <p class="ask-ready-n" id="ask-ready-n"></p>
         <p class="ask-row">
           <button type="button" id="ask-read-docs" class="chip ask-btn is-primary">Read as documents</button>
           <button type="button" id="ask-read-lines" class="chip ask-btn">Read as register lines</button>
-          <button type="button" id="ask-clear" class="chip ask-btn">Remove all</button>
+          <button type="button" id="ask-clear" class="ask-link">Remove all</button>
         </p>
         <p class="cap" id="ask-ready-cost"></p>
       </div>
@@ -63,6 +66,12 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
       <div id="ask-out" aria-live="polite"></div>
       <div id="ask-hand" hidden></div>
       <div id="ask-sum" aria-live="polite" hidden></div>
+      <details class="ask-priv ask-fine"><summary><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 11V8a4 4 0 018 0v3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg> Nothing is sent until you press a button. What is sent, and what is kept</summary>
+        <p>What you paste or photograph is sent over the internet to our small service and on to Claude, an AI made by
+        Anthropic, which writes the draft. We keep no text, no picture and no answer, only a count of how many tries each visitor has used. Anthropic's
+        <a href="https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data" rel="noopener">published policy</a> says it deletes
+        what is sent within 30 days, keeps content its safety systems flag for longer, and does not train on it without permission. Please do not paste or photograph details of
+        people who may be alive. Cloudflare's bot check loads when you first click in the box. <a href={u("/privacy/")}>More in the privacy note.</a></p></details>
     </div>
   </section>
 

@@ -10223,6 +10223,17 @@ window.addEventListener("load", async function () {
   :global(.ra-areactl a) { display: grid; place-items: center; width: 30px; height: 30px; color: var(--ink-2); }
   :global(.ra-areactl a.on) { background: var(--accent); color: #fff; }
   @media (pointer: coarse) { :global(.ra-areactl a) { width: 34px; height: 34px; } }
+  /* SLIMMER MAP CONTROLS ON A PHONE. Zoom, full screen, markers, the two draw tools and the base-map switch were stacked down both edges of a
+     map 390px wide and covered a good part of it. Smaller buttons, the base switch as one thin row, less margin round the edge. */
+  @media (max-width: 560px) {
+    :global(.leaflet-touch .leaflet-bar:not(.ra-base) a), :global(.leaflet-control-zoom a), :global(.leaflet-bar.ra-fullctl .ra-ico), :global(.leaflet-bar.ra-areactl a), :global(.ra-areactl a) { width: 26px !important; height: 26px !important; line-height: 26px !important; font-size: 15px; }
+    :global(.leaflet-bar.ra-fullctl .ra-ico svg), :global(.ra-areactl a svg) { width: 15px; height: 15px; }
+    :global(.ra-base) { display: flex; }
+    :global(.leaflet-bar.ra-base a) { width: auto !important; padding: 0 6px !important; font-size: 10px !important; line-height: 22px !important; height: 22px !important; }
+    :global(.leaflet-top .leaflet-control) { margin-top: 6px; }
+    :global(.leaflet-left .leaflet-control) { margin-left: 6px; }
+    :global(.leaflet-right .leaflet-control) { margin-right: 6px; }
+  }
   :global(.leaflet-container.ra-drawing) { cursor: crosshair; }
   :global(.leaflet-container.ra-drawing .leaflet-interactive) { pointer-events: none; }
   :global(.ra-area-hint), :global(.ra-area-bar) { position: absolute; z-index: 900; left: 50%; transform: translateX(-50%); top: 10px; display: flex; align-items: center; gap: 10px;

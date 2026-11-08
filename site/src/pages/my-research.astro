@@ -160,7 +160,9 @@ const BASE_ = u("/");
       </section>
     </div>
   </div>
+  <p class="ms-dim ms-fail" id="ms-fail" hidden>My story could not start. Reload the page. If it still does not appear, the site is probably being updated: try again in a few minutes. Nothing you have kept is lost.</p>
   <script is:inline src={u("/js/story-tab.js")}></script>
+  <script is:inline>if (!window.raStoryTab) { var f = document.getElementById("ms-fail"); if (f) f.hidden = false; }</script>
   </div>
 
   <div class="rs-panel mr-panel" id="mr-p-fixes" role="tabpanel" aria-labelledby="mr-t-fixes" hidden>

@@ -65,6 +65,7 @@ export const nav = [
     [null, "Learn"],
     ["/whats-new/", "What's new"],
     ["/start/", "Start here"],
+    ["/looking-for/", "Who are you looking for?"],
     ["/help/", "Help"],
     ["/about/", "About the atlas"],
     [null, "The sources"],

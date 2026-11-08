@@ -297,8 +297,8 @@
 
     var cands = ctx.map ? S.candidates(t, ctx.map, ctx.skip) : [];
     /* a name the story gives a person ("my dad is Ivan", "his dad is Giovanni") is a person, never a place, unless a "from"/"in" comes before it */
-    var fam = ctx.map ? readFamily(t, ctx) : null, me = ctx.map && !fam ? readMe(t, ctx) : null, nameW = Object.create(null);
-    [fam, me].forEach(function (f) { if (f) Object.keys(f.people).forEach(function (k) { var pe = f.people[k]; [pe.given, pe.surname].forEach(function (n) { if (n) nameW[S.fold(n)] = 1; }); }); });
+    var fam = ctx.map ? readFamily(t, ctx) : null, me = ctx.map && !fam ? readMe(t, ctx) : null, sought = ctx.map && !fam && !me ? readSought(t, ctx) : null, nameW = Object.create(null);
+    [fam, me, sought].forEach(function (f) { if (f) Object.keys(f.people).forEach(function (k) { var pe = f.people[k]; [pe.given, pe.surname].forEach(function (n) { if (n) nameW[S.fold(n)] = 1; }); }); });
     var rolesFor = cands.map(function (c) {
       var p1 = tokens[c.at - 1] || "", p2 = tokens[c.at - 2] || "", isGiven = !!gset[c.word] || !!nameW[c.word];
       var role = PLACE_BEFORE[p1] || ((p1 === "in" && p2 === "born") ? "from" : (p1 === "in" && /^(settled|arrived|lived|living|came|went|emigrated|moved)$/.test(p2)) ? "to" : "");
@@ -369,7 +369,7 @@
     if (fa) { fa.place = fromP || null; if (!fa.surname && self && self.surname && (!self.rel || /father|mother|grand|uncle|aunt|brother|sister|ancestor|relative/.test(self.rel))) { fa.surname = self.surname; fa.presumed = true; fa.name = (fa.given ? fa.given + " " : "") + fa.surname; } people.push(fa); }
     if (mo) { mo.place = fromM || null; people.push(mo); }
     out.people = people;
-    if (fam) applyFamily(out, fam, ctx); else if (me) applyMe(out, me, ctx, teller);
+    if (fam) applyFamily(out, fam, ctx); else if (me) applyMe(out, me, ctx, teller); else if (sought) applyMe(out, sought, ctx, "");
     return out;
   }
 
@@ -547,13 +547,41 @@
     return { people: P, order: order, subject: "ME" };
   }
 
+  /* ---- A MAN (OR WOMAN) SOMEONE IS LOOKING FOR ---------------------------------------------------------------------------------
+     "Can you help me find this man. Father, Andreas Slavic, b 1874 in Gornji Rukavac; mother Teresia Laginja, b 1877 in Gornji Rukavac."
+     The person asked about has no name; the parents are given as labelled lines. They are the parents OF HIM, not of the teller, and the
+     teller is not on the tree unless the story says they are related. Only read when no "my father"-style sentence is there to say otherwise. */
+  function readSought(t, ctx) {
+    if (/\b(?:my|our)\s+(?:(?:great|step)[- ]?)*(?:grand)?(?:father|mother|dad|mum|mom|parents?)\b/i.test(t)) return null;
+    var P = Object.create(null), order = [];
+    String(t || "").split(/;|\n|,\s+(?=[Ff]ather\b|[Mm]other\b)|[.!?]+(?:\s+(?=\p{Lu})|$)/u).forEach(function (cl) {
+      var m = /^\s*(?:and\s+)?(?:(?:his|her)\s+)?(father|dad|mother|mum|mom)\b\s*(?:[,:\u2013-]|\s+(?:is|was|named|called)\b|(?=\s))\s*(.*)$/i.exec(cl);
+      if (!m) return;
+      var key = KIN_STEP[m[1].toLowerCase()], nm = /^(\p{Lu}[\p{L}'’-]+(?:\s+\p{Lu}[\p{L}'’-]+){0,2})/u.exec(m[2]);
+      if (!nm || P[key]) return;
+      var words = nm[1].split(/\s+/).filter(function (w) { return !STOP[S.fold(w)] && !CONNECT.test(w); });
+      if (!words.length) return;
+      var rest = m[2].slice(nm[1].length).replace(/\bb\.?(?=\s*\d{4})/gi, "born").replace(/\bd\.?(?=\s*\d{4})/gi, "died");
+      var ev = readEvents(rest, ctx);
+      /* a place the Atlas does not hold is still the place they wrote: keep the words so the card can say it, and say it is not placed */
+      if (ev.born && !ev.born.place) { var tx = /\b(?:in|at)\s+(\p{Lu}[\p{L}'’-]+(?:\s+\p{Lu}[\p{L}'’-]+){0,2})/u.exec(rest); if (tx) ev.born.text = tx[1]; }
+      P[key] = { key: key, name: cased(words.join(" ")), given: cased(words[0]), surname: words.length > 1 ? cased(words.slice(1).join(" ")) : "", ev: ev };
+      order.push(key);
+    });
+    if (!order.length) return null;
+    var sex = /\bthis\s+(?:man|gentleman|guy|fellow)\b|\bfind\s+him\b/i.test(t) ? "man" : /\bthis\s+(?:woman|lady)\b|\bfind\s+her\b/i.test(t) ? "woman" : "";
+    P.ME = { key: "ME", name: "", given: "", surname: "", ev: { origin: null, born: null, died: null, married: null, moves: [] } };
+    order.push("ME");
+    return { people: P, order: order, subject: "ME", sought: { label: "The " + (sex || "person") + " you're looking for", poss: sex === "man" ? "his " : sex === "woman" ? "her " : "" } };
+  }
+
   /* Fold readMe into the parse: the people (named or not), and the lines each of them travels. The teller's own route is not told, so none is
      drawn for them; the parents and children each get their pins. */
   function applyMe(out, me, ctx, teller) {
     var P = me.people;
     function evOf(pe) {
       var e = pe.ev, list = [];
-      if (e.born && (e.born.year != null || e.born.place)) list.push({ type: "born", year: e.born.year, place: e.born.place });
+      if (e.born && (e.born.year != null || e.born.place)) list.push({ type: "born", year: e.born.year, place: e.born.place, text: e.born.text || "" });
       if (e.married && (e.married.year != null || e.married.place)) list.push({ type: "married", year: e.married.year, place: e.married.place });
       if (e.died && (e.died.year != null || e.died.place)) list.push({ type: "died", year: e.died.year, place: e.died.place, cause: e.died.cause });
       /* "lived in Crikvenica in 1990" is where they were, not where they were from: it is said that way on the card */
@@ -566,7 +594,7 @@
       var pe = P[key]; if (!pe) return;
       var place = pe.ev.born && pe.ev.born.place ? pe.ev.born.place : pe.ev.origin;
       people.push({ role: role, rel: "", name: key === "ME" ? teller : pe.name, given: key === "ME" ? gname : pe.given, surname: key === "ME" ? teller.split(" ").slice(1).join(" ") : pe.surname,
-        givenWord: key === "ME" ? gname : pe.given, place: place || null, presumed: false, label: label, events: evOf(pe), key: key, me: key === "ME", unnamed: !(pe.name || (key === "ME" && teller)) });
+        givenWord: key === "ME" ? gname : pe.given, place: place || null, presumed: false, label: key === "ME" && me.sought ? me.sought.label : label, events: evOf(pe), key: key, me: key === "ME" && !me.sought, sought: key === "ME" && !!me.sought, unnamed: !(pe.name || (key === "ME" && teller)) });
       if (key === "ME") return;
       var st = [], e = pe.ev;
       if (e.born && e.born.place) st.push({ row: e.born.place.row, alts: e.born.place.alts, word: e.born.place.word, role: "born", year: e.born.year, approx: false });
@@ -576,7 +604,8 @@
       if (st.length) kin.push({ key: key, name: pe.name, label: label, stops: st });
     }
     put("ME", "self", "");
-    put("F", "father", "your father"); put("M", "mother", "your mother"); put("S", "spouse", "your partner");
+    var pq = me.sought ? me.sought.poss : "your ";
+    put("F", "father", pq + "father"); put("M", "mother", pq + "mother"); put("S", "spouse", "your partner");
     me.order.filter(function (k) { return /^G/.test(k); }).forEach(function (k) { put(k, P[k].sex === "M" ? "grandfather" : "grandmother", P[k].sex === "M" ? "your grandfather" : "your grandmother"); });
     me.order.filter(function (k) { return /^C/.test(k); }).forEach(function (k) { put(k, "child", "your child"); });
     out.people = people; out.kin = kin;
@@ -770,13 +799,40 @@
       }).catch(function (e) { loading = null; throw e; });
       return loading;
     }
+    /* A place the story names that the Atlas's own list does not hold ("Gornji Rukavac", a village) may still be in the worldwide gazetteer, which
+       the search box already reads. Only a name that follows in / at / from / near / to is looked up, so a surname is never taken for a village,
+       and only an exact name (or one of its other names) counts. The rows found are added to the map the reader parses with. */
+    var gazDone = Object.create(null);
+    function resolveMissing(text) {
+      return load().then(function (d) {
+        var fold = window.raFold || S.fold, want = [], re = /\b(?:in|at|from|near|to)\s+(\p{Lu}[\p{L}'’-]+(?:\s+\p{Lu}[\p{L}'’-]+){0,2})/gu, m;
+        while ((m = re.exec(String(text || "")))) {
+          var ws = m[1].split(/\s+/);
+          for (var n = ws.length; n >= 1; n--) { var ph = fold(ws.slice(0, n).join(" ")); if (d.map[ph]) break; want.push(ph); }
+        }
+        want = want.filter(function (ph, i) { return ph.length >= 4 && want.indexOf(ph) === i && !d.map[ph] && !gazDone[ph] && !(d.given && d.given[ph]); }).slice(0, 6);
+        if (!want.length || !window.raShardKey) return d;
+        return getJSON("shards.json").catch(function () { return {}; }).then(function (info) {
+          return Promise.all(want.map(function (ph) {
+            gazDone[ph] = 1;
+            var key = window.raShardKey(ph, info.g || {});
+            if (!key) return null;
+            return getJSON("g/" + encodeURIComponent(key) + ".json").then(function (rows) {
+              var hit = rows.filter(function (r) { return fold(r[0]) === ph || (r[4] || []).some(function (a) { return fold(a) === ph; }); }).slice(0, 4);
+              if (!hit.length) return null;
+              d.map[ph] = hit.map(function (r) { return { i: "g-" + ph.replace(/ /g, "-") + "-" + String(r[3]).toLowerCase() + "-" + Math.round(r[1] * 100), n: r[0], y: r[1], x: r[2], cc: r[3], c: 0, gaz: 1 }; });
+            }).catch(function () { return null; });
+          }));
+        }).then(function () { return d; });
+      });
+    }
     function placeInfo(row) {
       var regionsP = getJSON("regions.json").catch(function () { return null; });
       return Promise.all([getJSON("p/" + encodeURIComponent(row.i) + ".json").catch(function () { return null; }), regionsP]).then(function (r) {
         var p = r[0], regs = r[1], region = p && regs ? regs.regions.filter(function (x) { return x.id === p.region; })[0] : null;
         return { row: row, p: p, name: row.n.replace(/\s*\(([^)]*)\)/, function (m, x) { return S.fold(x) === S.fold(row.n.replace(/\s*\([^)]*\)/, "")) ? "" : m; }), lat: p ? p.lat : row.y, lon: p ? p.lon : row.x, cc: row.cc, countryName: (data.countries[row.cc] || row.cc || ""),
           older: p ? (p.names || []).map(function (n) { return n.n; }) : [], cols: p ? p.collections || [] : [],
-          eras: region ? region.eras : null, regimes: regs ? regs.regimes : null, region: region, href: BASE + "place/" + encodeURIComponent(row.i) + "/" };
+          eras: region ? region.eras : null, regimes: regs ? regs.regimes : null, region: region, href: row.gaz ? BASE + "?q=" + encodeURIComponent(row.n) : BASE + "place/" + encodeURIComponent(row.i) + "/" };
       });
     }
     /* Everything a plan needs for one parsed story: both places with their files, the sources of the arrival country, the events. */
@@ -823,13 +879,13 @@
         var out = r[6].map(function (pe, i) {
           var gr = pe.given && data.given ? S.givenIn(pe.given, data.given, null) : [];
           return { role: pe.role, rel: pe.rel, name: pe.name, given: gr.length ? { canon: gr[0].row.canon, typed: pe.given, groups: givenGroups(gr[0].row, labels) } : (pe.given ? { canon: "", typed: pe.given, groups: [] } : null),
-            surname: r[5][i], surnameTyped: pe.surname, presumed: !!pe.presumed, me: !!pe.me, key: pe.key, place: pe.place && infos[pe.place.row.i] ? infos[pe.place.row.i].name : "", label: pe.label || "",
-            events: (pe.events || []).map(function (e) { var inf = e.place && infos[e.place.row.i]; return { type: e.type, year: e.year, place: inf ? inf.name : (e.place ? e.place.word : ""), country: inf ? inf.countryName : "", cause: e.cause || "" }; }) };
+            surname: r[5][i], surnameTyped: pe.surname, presumed: !!pe.presumed, me: !!pe.me, sought: !!pe.sought, key: pe.key, place: pe.place && infos[pe.place.row.i] ? infos[pe.place.row.i].name : "", label: pe.label || "",
+            events: (pe.events || []).map(function (e) { var inf = e.place && infos[e.place.row.i]; return { type: e.type, year: e.year, place: inf ? inf.name : (e.place ? e.place.word : e.text ? e.text + " (not among the Atlas's places)" : ""), country: inf ? inf.countryName : "", cause: e.cause || "" }; }) };
         });
         return { facts: facts, plan: buildPlan(facts), mort: r[2], names: { people: out }, people: out };
       });
     }
-    return { getJSON: getJSON, load: load, placeInfo: placeInfo, gather: gather, surname: surname };
+    return { getJSON: getJSON, load: load, resolveMissing: resolveMissing, placeInfo: placeInfo, gather: gather, surname: surname };
   }
 
   /* The journey: a year slider, play button and captions for who held each place in each year, a still list of what changed, and a
@@ -1401,16 +1457,18 @@
     function gen(cls) { var g = el("div", null, "lf-gen " + (cls || "")); tree.append(g); return g; }
     var gps = (people || []).filter(function (x) { return x.role === "grandfather" || x.role === "grandmother"; }), sp = (people || []).filter(function (x) { return x.role === "spouse"; })[0];
     if (gps.length) { var g0 = gen("lf-grand"); gps.forEach(function (x) { var lb = x.label || x.role; g0.append(card(x, lb.charAt(0).toUpperCase() + lb.slice(1))); }); tree.append(el("div", null, "lf-tie")); }
-    if (fa || mo) { var g1 = gen("lf-parents"); if (fa) g1.append(card(fa, "Father")); if (mo) g1.append(card(mo, "Mother")); tree.append(el("div", null, "lf-tie")); }
+    if (fa || mo) { var g1 = gen("lf-parents"); var cap = function (x) { return x.charAt(0).toUpperCase() + x.slice(1); };
+      if (fa) g1.append(card(fa, self.sought && fa.label ? cap(fa.label) : "Father")); if (mo) g1.append(card(mo, self.sought && mo.label ? cap(mo.label) : "Mother")); tree.append(el("div", null, "lf-tie")); }
     /* the people between are drawn even when the story names nobody there: "my grandfather was Ivan" has a parent between him and you */
     function gap(n, above) { for (var i = 0; i < n; i++) { if (!above) tree.append(el("div", null, "lf-tie")); var gg = gen("lf-gap"), ph = el("div", null, "lf-card lf-card-you"); ph.append(el("div", n > 1 && i === 0 ? "Parent of yours, not named" : "Your parent, not named", "lf-card-role"), el("div", "Not in the story yet: name them to add them here", "lf-card-place")); gg.append(ph); if (above) tree.append(el("div", null, "lf-tie")); } }
     if (self.me && !fa && !mo && gps.length) gap(1, true);
-    var g2 = gen(); g2.append(card(self, self.me ? "You" : self.rel ? "Your " + self.rel.replace(/-/g, " ") : "The person you asked about"));
+    var g2 = gen(); g2.append(card(self, self.sought ? self.label : self.me ? "You" : self.rel ? "Your " + self.rel.replace(/-/g, " ") : "The person you asked about"));
     if (sp) g2.append(card(sp, self.me ? "Your partner" : self.rel === "father" ? "Wife, your mother" : self.rel === "mother" ? "Husband, your father" : "Spouse"));
     var kids = (people || []).filter(function (x) { return x.role === "child"; });
     var rl = String(self.rel || ""), between = /grand/.test(rl) && !self.me ? (rl.match(/great/g) || []).length + 1 : 0;
     if (between) gap(between);
     if (self.me) { if (kids.length) { tree.append(el("div", null, "lf-tie")); var g4 = gen(); kids.forEach(function (x) { g4.append(card(x, "Your child")); }); } return tree; }
+    if (self.sought || !self.rel) return tree;   /* "you" are on the tree only when the story says they are related */
     tree.append(el("div", null, "lf-tie"));
     var g3 = gen(), you = el("div", null, "lf-card lf-card-you"); you.append(el("div", "You", "lf-card-role"), el("div", "who is asking", "lf-card-place")); g3.append(you);
     return tree;

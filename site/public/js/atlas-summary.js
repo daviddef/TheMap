@@ -27,6 +27,8 @@
 
   /* Index rows by every name they answer to. `n` is the name; `q` is the folded older names, space-joined, so a row is matched on
      the whole of `q`, or on a single word of it when `q` is short, never on any word of a long list ("bronx the", "county iredell"). */
+  /* "Gornji" is Upper, "Donji" Lower, "Veliki" Great: half the villages in Croatia start with one, so on its own it names no place ("Gornji Rukavac" is not Gornji Draganec). */
+  var QUALIFIER = { gornji: 1, gornja: 1, gornje: 1, donji: 1, donja: 1, donje: 1, veliki: 1, velika: 1, veliko: 1, mali: 1, mala: 1, malo: 1, novi: 1, nova: 1, stari: 1, stara: 1, srednji: 1, sredn: 1, upper: 1, lower: 1, little: 1, great: 1, grand: 1, grosse: 1, gross: 1, klein: 1, ober: 1, unter: 1, nieder: 1, saint: 1, santa: 1, santo: 1 };
   function buildMap(rows) {
     var map = Object.create(null);
     function add(k, r) { if (!k) return; (map[k] || (map[k] = [])).push(r); }
@@ -38,7 +40,7 @@
       if (!q) return;
       add(q, r);
       var w = q.split(" ");
-      if (w.length > 1 && w.length <= 3) w.forEach(function (x) { if (x.length >= 5) add(x, r); });
+      if (w.length > 1 && w.length <= 3) w.forEach(function (x) { if (x.length >= 5 && !QUALIFIER[x]) add(x, r); });
     });
     return map;
   }
@@ -54,7 +56,7 @@
         for (var j = i; j < i + len; j++) if (used[j]) covered = true;
         if (covered) continue;
         var w = t.slice(i, i + len).join(" ");
-        if (len === 1 && (w.length < 4 || (skip && skip[w]))) continue;
+        if (len === 1 && (w.length < 4 || (skip && skip[w]) || QUALIFIER[w])) continue;
         var rows = map[w];
         if (!rows || seen[w]) continue;
         seen[w] = 1;

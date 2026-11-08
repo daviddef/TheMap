@@ -117,3 +117,11 @@ test("the place called exactly what was typed comes before one that only lists i
   const m = A.buildMap([{ i: "launceston", n: "Launceston", cc: "AU", c: 1, q: "australia launceston, tasmania," }, { i: "tasmania", n: "Tasmania", cc: "AU", c: 0 }]);
   assert.equal(A.candidates("all from Tasmania", m, {})[0].rows[0].i, "tasmania");
 });
+
+test("a qualifier like Gornji (Upper) alone is not a place", () => {
+  const map = A.buildMap([{ i: "gornjidraganec", n: "Gornji Draganec", cc: "HR", c: 8, q: "draganec gornji" }]);
+  assert.deepEqual(A.candidates("born in Gornji Rukavac", map, {}), []);
+  assert.deepEqual(A.candidates("born in Gornji Rukavac", A.buildMap([{ i: "kriz", n: "Križ", cc: "HR", c: 3, q: "gornji" }]), {}), [], "not even through another place's alternative name");
+  assert.equal(A.candidates("born in Gornji Draganec", map, {})[0].rows[0].i, "gornjidraganec");
+  assert.equal(A.candidates("born in Draganec", map, {})[0].rows[0].i, "gornjidraganec");
+});

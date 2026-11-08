@@ -469,3 +469,24 @@ test("'my grandfather was Ivan, born in Senj' reads as a grandfather born in Sen
   const p = F.parseStory("MY GRANDFATHER WAS IVAN AND HE WAS BORN IN SENJ CROATIA.", c5);
   assert.equal(p.people[0].rel, "grandfather"); assert.equal(p.people[0].given, "Ivan");
 });
+
+test("a man someone is looking for: his parents, labelled, are on the tree; the teller is not; a surname is never a place", () => {
+  const rows = [{ i: "slavic-cz", n: "Slavíč", cc: "CZ", c: 2 }, { i: "gornji-rukavac", n: "Gornji Rukavac", cc: "HR", c: 5 }, { i: "rukavac", n: "Rukavac", cc: "HR", c: 3 }];
+  const cs = { map: A.buildMap(rows), given: A.buildGiven([]), skip: {} };
+  const p = F.parseStory("Can you help me find this man. I believe I have his family in my database. Father, Andreas Slavic, b 1874 in Gornji Rukavac; mother Teresia Laginja, b 1877 in Gornji Rukavac. Message me if you think these are his parents.", cs);
+  assert.deepEqual(p.people.map((x) => [x.role, x.name, !!x.me, !!x.sought]), [["self", "", false, true], ["father", "Andreas Slavic", false, false], ["mother", "Teresia Laginja", false, false]]);
+  assert.equal(p.people[0].label, "The man you're looking for");
+  assert.deepEqual(p.people[1].events.map((e) => [e.type, e.year, e.place.row.i]), [["born", 1874, "gornji-rukavac"]]);
+  assert.deepEqual(p.people[2].events.map((e) => [e.type, e.year, e.place.row.i]), [["born", 1877, "gornji-rukavac"]]);
+  assert.deepEqual(p.kin.map((k) => [k.key, k.stops.map((s) => s.row.i)]), [["F", ["gornji-rukavac"]], ["M", ["gornji-rukavac"]]], "Slavic is a surname, so no place is read from it");
+  assert.deepEqual(p.route, []);
+  const own = F.parseStory("My father is Ivan from Senj and my mother is Ana from Senj. Father, Marko Kos", cs);
+  assert.ok(!own.people.some((x) => x.sought), "a story told with 'my father' is not a search for someone");
+});
+
+test("a birthplace the Atlas does not hold is kept as written for the card", () => {
+  const cs = { map: A.buildMap([{ i: "slavic-cz", n: "Slavíč", cc: "CZ", c: 2 }]), given: A.buildGiven([]), skip: {} };
+  const p = F.parseStory("Help me find this man. Father, Andreas Slavic, b 1874 in Gornji Rukavac; mother Teresia Laginja, b 1877 in Gornji Rukavac.", cs);
+  assert.equal(p.people[1].events[0].text, "Gornji Rukavac");
+  assert.deepEqual(p.kin, [], "no pin is drawn for a place that is not placed");
+});

@@ -52,6 +52,8 @@
     remember();
     ensure().then(function () { var t = $(".sd-text"); if (t && !t.value) t.focus({ preventScroll: true }); }).catch(function () { $(".sd-status").textContent = "The Atlas files did not load. Check your connection and open this again."; });
   }
+  /* Something to draw: a starting place, a family's places, or a person being looked for whose parents are named (they may have no place yet). */
+  function tellable(p) { return !!(p && (p.from || (p.kin && p.kin.length) || (p.people || []).some(function (x) { return x.sought; }))); }
   var refit = null; /* set once the engine is loaded: draw the journey again so the pins fit the map that is left uncovered */
   /* Closing only hides the panel: the map stays where the reader left it (no refit), and the button now says Edit your story. */
   function close() { root.classList.remove("is-open"); setTimeout(function () { root.hidden = true; if (launch) launch.hidden = false; }, 300); }
@@ -138,7 +140,7 @@
         else if (pe.role !== "self" && pe.name) chips.append(chip("his " + (pe.label || pe.role) + " " + pe.name, "", "pe:" + pe.role + pe.name));
       });
       var stopsShown = p.stops && p.stops.length ? p.stops : [p.from && Object.assign({ role: "origin" }, p.from), p.to && Object.assign({ role: "move" }, p.to)].filter(Boolean);
-      if (!stopsShown.length && !(p.kin && p.kin.length) && text.value.trim().length > 12) chips.append(chip("Where did they start? Name the place", "warn", "nof"));
+      if (!stopsShown.length && !tellable(p) && text.value.trim().length > 12) chips.append(chip("Where did they start? Name the place", "warn", "nof"));
       stopsShown.forEach(function (st) {
         var more = st.alts && st.alts.length, lab = placeLabel(st.row);
         var pre = st.role === "born" ? "born in " : st.role === "origin" ? "from " : st.role === "father-from" ? "his father from " : st.role === "mother-from" ? "his mother from " : st.age != null ? (st.approx ? "about age " : "age ") + st.age + ": " : st.role === "lived" ? "in " : "to ";
@@ -187,7 +189,7 @@
 
     function run() {
       var t = text.value;
-      LD.load().then(function (d) {
+      LD.resolveMissing(t).catch(function () { return LD.load(); }).then(function (d) {
         data = d;
         var attached = files.length ? "photo" : null;
         var p = E.parseStory(t, { map: d.map, given: d.given, skip: d.skip }, attached);
@@ -199,15 +201,15 @@
         parsedNow = p;
         drawChips(p);
         var sig = [(p.route || []).map(function (x) { return x.row.i + ":" + x.age; }).join(","), p.left, p.born, p.name, (p.people || []).map(function (x) { return x.name; }).join(","), p.holds].join("|");
-        if (sig === lastSig || (!p.from && !(p.kin && p.kin.length))) { if (!p.from && !(p.kin && p.kin.length) && sig !== lastSig) { J.clear(); showDock(false); dropKeyPlaces(); report.hidden = true; planBox.hidden = true; fam.hidden = true; } return; }
+        if (sig === lastSig || !tellable(p)) { if (!tellable(p) && sig !== lastSig) { J.clear(); showDock(false); dropKeyPlaces(); report.hidden = true; planBox.hidden = true; fam.hidden = true; } return; }
         lastSig = sig;
         var my = ++token; status.textContent = "Reading the Atlas…";
         LD.gather(p).then(function (g) {
           if (my !== token) return;
           status.textContent = ""; last = g;
           showDock(true); drawAll(g); setTimeout(dockSize, 60);
-        }).catch(function () { status.textContent = "Some Atlas files did not load. Check your connection."; });
-      }).catch(function () { status.textContent = "The Atlas files did not load. Check your connection."; });
+        }).catch(function (e) { if (window.console) console.error("story draw", e); status.textContent = "Some Atlas files did not load. Check your connection."; });
+      }).catch(function (e) { if (window.console) console.error("story read", e); status.textContent = "The Atlas files did not load. Check your connection."; });
     }
     var stopItems = [];
     /* The map's right-hand pane ("Visiting") is for one place at a time. While a story is on the map it lists the story's own places in
@@ -348,7 +350,7 @@
       setText: function (t) { text.value = String(t || "").slice(0, 2000); lastSig = ""; if (!announced) { announced = true; try { document.dispatchEvent(new CustomEvent("ra-story-start")); } catch (e) { /* no document */ } } run(); },
       addFiles: function (fl) { try { document.dispatchEvent(new CustomEvent("ra-story-start")); } catch (e) { /* no document */ } addFiles(fl); },
       clear: function () { $(".sd-clear").click(); },
-      state: function () { return { has: !!(parsedNow && ((parsedNow.route && parsedNow.route.length) || parsedNow.from || parsedNow.name || parsedNow.teller || (parsedNow.kin && parsedNow.kin.length))), name: parsedNow && parsedNow.name || "", files: files.length }; }
+      state: function () { return { has: !!(parsedNow && ((parsedNow.route && parsedNow.route.length) || parsedNow.from || parsedNow.name || parsedNow.teller || tellable(parsedNow))), name: parsedNow && parsedNow.name || "", files: files.length }; }
     };
   }
 })();

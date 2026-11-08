@@ -120,14 +120,16 @@
      Nothing here is invented: every item is a volume, a source or a page the data holds, and an empty list says so. */
   function buildPlan(f) {
     var base = f.base || "/", steps = [], w = windows(f.left, f.born);
-    var h = HOLDS[f.holds] || HOLDS.story;
-
-    steps.push({ id: "hold", title: "Write down exactly what you hold",
-      why: "You hold " + h.t + ". Everything else is searched from this, so it comes first.",
-      items: [{ text: h.step }],
-      ask: "Who else in the family has the same thing, or a copy, or a different one?",
-      not: h.not,
-      links: f.holds === "story" ? [] : [{ text: "Turn a line you can read on it into places and terms", href: base + "read/" }] });
+    var kinds = (f.holdsAll && f.holdsAll.length ? f.holdsAll : [f.holds]).filter(function (k) { return HOLDS[k]; });
+    if (!kinds.length) kinds = ["story"];
+    var many = kinds.length > 1, names = kinds.map(function (k) { return k === "story" ? (many ? "the family story" : HOLDS.story.t) : HOLDS[k].t; });
+    function joined(a) { return a.length < 2 ? a.join("") : a.slice(0, -1).join(", ") + " and " + a[a.length - 1]; }
+    steps.push({ id: "hold", title: many ? "Write down exactly what you hold, one thing at a time" : "Write down exactly what you hold",
+      why: "You hold " + joined(names) + "." + (many ? " Each one tells you something the others do not, and where they disagree is itself a clue. " : " ") + "Everything else is searched from " + (many ? "these" : "this") + ", so it comes first.",
+      items: kinds.map(function (k) { return { text: (many ? "On " + (k === "story" ? "the family story" : HOLDS[k].t) + ": " : "") + HOLDS[k].step }; }),
+      ask: many ? "Which of these was made first, and where do two of them name a different place or year?" : "Who else in the family has the same thing, or a copy, or a different one?",
+      not: kinds.map(function (k) { return HOLDS[k].not; }).join(" "),
+      links: kinds.some(function (k) { return k !== "story"; }) ? [{ text: "Turn a line you can read on it into places and terms", href: base + "read/" }] : [] });
 
     var nameItems = [];
     if (f.given && f.given.length) {
@@ -234,7 +236,7 @@
   var STOP = Object.create(null);
   "my a an the and who from came come to into in of at was were is are born about around circa abt all have this that his her their with for on by after before left arrived emigrated moved settled lived he she they i me our we it".split(" ").forEach(function (w) { STOP[w] = 1; });
   var COMMON = Object.create(null);
-  "then also still later soon when while where which what how why not no yes but or so as if than too very just only even again once twice died dead married wed lived live living went go goes gone come comes coming moved move moving travelled traveled returned return born birth age old years year aged name named called said told".split(" ").forEach(function (w) { COMMON[w] = 1; });
+  "then also still later soon when while where which what how why not no yes but or so as if than too very just only even again once twice died dead married wed lived live living went go goes gone come comes coming moved move moving travelled traveled returned return born birth age old years year aged name named called said told great story stories family passport photo photograph picture letter diary document papers certificate record register mother father parents grand son daughter wife husband".split(" ").forEach(function (w) { COMMON[w] = 1; });
   var MOVE = /\b(moved|move|went|go|came|come|travelled|traveled|emigrated|migrated|sailed|settled|relocated|then|to|into|arrived|returned|left)\b/;
   var ANC = /\b(?:his|her|their|a|the)\s+(grandfather|grandmother|father|mother|dad|mum|mom)\b/g;
   var PLACE_BEFORE = { from: "from", of: "from", to: "to", into: "to", at: "to" };
@@ -272,10 +274,13 @@
       out.givenWord = cased(out.givenWord); if (out.surname) out.surname = cased(out.surname);
       out.name = out.givenWord + (out.surname ? " " + out.surname : "");
     }
-    if (/\b(photo|photograph|picture|snapshot|portrait)\b/i.test(t)) out.holds = "photo";
-    else if (/\b(letter|postcard|diary)\b/i.test(t)) out.holds = "letter";
-    else if (/\b(document|certificate|passport|papers|record|register|manifest|visa)\b/i.test(t)) out.holds = "document";
-    if (attached) out.holds = attached;
+    var all = [];
+    if (/\b(photo|photograph|picture|snapshot|portrait)\b/i.test(t)) all.push("photo");
+    if (/\b(document|certificate|passport|papers|record|register|manifest|visa)\b/i.test(t)) all.push("document");
+    if (/\b(letter|postcard|diary)\b/i.test(t)) all.push("letter");
+    (Array.isArray(attached) ? attached : attached ? [attached] : []).forEach(function (k) { if (HOLDS[k] && all.indexOf(k) < 0) all.push(k); });
+    out.holdsAll = all.length ? all : ["story"];
+    out.holds = (Array.isArray(attached) ? attached[0] : attached) || (all.indexOf("photo") > -1 ? "photo" : all.indexOf("letter") > -1 ? "letter" : all.indexOf("document") > -1 ? "document" : "story");
 
     var ys = yearsIn(t), born = null, left = null, rest = [];
     ys.forEach(function (y) { if (/(born|birth|b|b\.)\s*$/.test(y.before) && born == null) born = y.y; else rest.push(y); });
@@ -503,7 +508,7 @@
         provs.forEach(function (x) { pname[x.id] = x.name; });
         r[0].forEach(function (i) { i.pname = pname; i.flagRows = fm ? fm[String(i.cc || "").toUpperCase()] : null; i.leaders = lead ? lead[String(i.cc || "").toUpperCase()] : null; });
         var from = parsed.from ? infos[parsed.from.row.i] : null, to = parsed.to ? infos[parsed.to.row.i] : null;
-        var facts = { rel: parsed.rel, name: parsed.name, holds: parsed.holds, left: parsed.left, born: parsed.born, from: from, to: to, base: BASE,
+        var facts = { rel: parsed.rel, name: parsed.name, holds: parsed.holds, holdsAll: parsed.holdsAll, left: parsed.left, born: parsed.born, from: from, to: to, base: BASE,
           providers: to ? provs.filter(function (p) { return (p.countries || []).indexOf(to.cc) > -1; }) : (from ? provs.filter(function (p) { return (p.countries || []).indexOf(from.cc) > -1; }) : []),
           given: parsed.given && data.given ? S.givenIn(parsed.givenWord || parsed.given, data.given, null) : [],
           route: route.map(function (x) { return { info: infos[x.row.i], age: x.age, year: x.year, approx: x.approx, role: x.role, country: x.country }; }),

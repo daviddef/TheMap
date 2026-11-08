@@ -41,15 +41,27 @@
   dots[0].classList.add("on");
   sg.addEventListener("click", function (e) { var b = e.target.closest("[data-go]"); if (b) go(Number(b.getAttribute("data-go"))); });
 
-  /* 1 · what do you have */
+  /* 1 · what do you have: pick everything, in any mix; each one is looked at in the plan */
+  var held = [];
+  function setHeld() {
+    var any = held.length > 0, last = held[held.length - 1];
+    text.placeholder = HINT[last] || HINT.story;
+    $("sg-sub1").textContent = held.length > 1 || (held.length === 1 && held[0] !== "story") ? "Add every picture you have below (up to four), then tell us what you know about them. Names, places and years are all we need."
+      : "Type it, paste it, or say it your own way. Names, places and years are all we need.";
+    $("sg-next0").textContent = any ? "Continue with " + held.length + " picked" : "Skip, I will just tell the story";
+  }
   [].forEach.call(sg.querySelectorAll(".sg-tile"), function (t) {
+    t.setAttribute("aria-pressed", "false");
     t.addEventListener("click", function () {
-      holds = t.getAttribute("data-holds"); text.placeholder = HINT[holds] || HINT.story;
-      $("sg-sub1").textContent = holds === "story" ? "Type it, paste it, or say it your own way. Names, places and years are all we need."
-        : "Add a picture below if you like, then tell us what you know about it. Names, places and years are all we need.";
-      go(1);
-      if (holds === "photo" || holds === "document" || holds === "letter") setTimeout(function () { $("sg-file").closest("label").classList.add("sg-nudge"); }, 400);
+      var k = t.getAttribute("data-holds"), i = held.indexOf(k);
+      if (i > -1) held.splice(i, 1); else held.push(k);
+      t.setAttribute("aria-pressed", i > -1 ? "false" : "true"); t.classList.toggle("on", i < 0);
+      holds = held.filter(function (x) { return x !== "story"; })[0] || "story";
+      setHeld(); gathered = null;
     });
+  });
+  $("sg-next0").addEventListener("click", function () {
+    if (held.some(function (k) { return k !== "story"; })) setTimeout(function () { $("sg-file").closest("label").classList.add("sg-nudge"); }, 400);
   });
 
   /* 2 · tell us */
@@ -75,13 +87,17 @@
     });
     if (p.born) chips.append(chip("born about " + p.born, "", "b:" + p.born));
     if (p.left) chips.append(chip("about " + p.left, "", "l:" + p.left));
-    var h = files.length ? "photo" : p.holds;
-    if (h !== "story" || files.length) chips.append(chip((E.HOLDS[h] || E.HOLDS.story).t.replace(/^a /, "") + (files.length ? ", kept here" : ""), "warn", "h:" + h));
+    (p.holdsAll || [p.holds]).forEach(function (h) {
+      if (h === "story" && (p.holdsAll || []).length > 1) return;
+      if (h !== "story" || files.length) chips.append(chip((E.HOLDS[h] || E.HOLDS.story).t.replace(/^a /, "") + (h === "photo" && files.length ? ", kept here" : ""), "warn", "h:" + h));
+    });
   }
+  /* what the visitor says they hold: the tiles, plus a photo whenever a picture is attached */
+  function attachedKinds() { var a = held.filter(function (k) { return k !== "story"; }); if (files.length && a.indexOf("photo") < 0) a.push("photo"); return a.length ? a : null; }
   function parse() {
     return LD.load().then(function (d) {
       data = d;
-      var p = E.parseStory(text.value, { map: d.map, given: d.given, skip: d.skip }, files.length ? "photo" : (holds !== "story" ? holds : null));
+      var p = E.parseStory(text.value, { map: d.map, given: d.given, skip: d.skip }, attachedKinds());
       (p.stops || []).forEach(function (st) { var o2 = ov[st.word]; if (o2) { st.row = o2.row; st.alts = o2.alts; } });
       if (p.route && p.route.length) {
         var r0 = p.route[0], rl = p.route[p.route.length - 1];
@@ -116,13 +132,13 @@
 
   /* Hand the pictures to the existing Ask card, which reads them only when its own button is pressed. */
   $("sg-read").addEventListener("click", function () {
-    var input = document.getElementById("ask-photo"), box = $("sg-readbox");
+    var input = document.getElementById("ask-photo");
     if (!input) return;
     try {
       var dt = new DataTransfer(); files.forEach(function (x) { dt.items.add(x.f); });
       input.files = dt.files; input.dispatchEvent(new Event("change", { bubbles: true }));
     } catch (e) { /* an older browser: the card's own Add pictures button still works */ }
-    box.open = true;
+    if (window.raReadPick) window.raReadPick("ask");
     var card = document.getElementById("ask"); if (card) card.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
   });
 

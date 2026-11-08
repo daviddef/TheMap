@@ -21,28 +21,31 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
   description="A searchable guide to the Latin of old church registers: look up a word, an abbreviation or an ending, and decode a date such as 'die 30 7bris 1671'.">
 
   <div class="rd-pick" role="tablist" aria-label="What would you like to do?">
-    <button type="button" role="tab" id="tab-ask" class="rd-tab is-on" aria-selected="true" aria-controls="tool-ask" data-tool="ask">
-      <span class="rd-n">1</span><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M18 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg><b>Start with your story</b><span class="rd-d">Say who you are looking for, or drop a photo. See their journey and what to do first.</span></button>
+    <button type="button" role="tab" id="tab-story" class="rd-tab is-on" aria-selected="true" aria-controls="tool-story" data-tool="story">
+      <span class="rd-n">1</span><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M18 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg><b>Start with your story</b><span class="rd-d">Tell a family story, with photos or papers if you have them. See their journey, family and what to do first. No Claude involved.</span></button>
+    <button type="button" role="tab" id="tab-ask" class="rd-tab" aria-selected="false" aria-controls="tool-ask" data-tool="ask">
+      <span class="rd-n">2</span><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M7 3.5h7l4 4V20H7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.5 12h6M9.5 15.5h4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><b>Read a register entry</b><span class="rd-d">Paste a line or drop a page image: Claude gives a draft reading to check. Uses Claude, only when you press the button.</span></button>
     <button type="button" role="tab" id="tab-date" class="rd-tab" aria-selected="false" aria-controls="tool-date" data-tool="date">
-      <span class="rd-n">2</span><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 10h16M9 3v4M15 3v4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><b>Decode a date</b><span class="rd-d">7bris 1671, xvi martii 1801: what day it was, with the working.</span></button>
+      <span class="rd-n">3</span><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 10h16M9 3v4M15 3v4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><b>Decode a date</b><span class="rd-d">7bris 1671, xvi martii 1801: what day it was, with the working.</span></button>
     <button type="button" role="tab" id="tab-word" class="rd-tab" aria-selected="false" aria-controls="tool-word" data-tool="word">
-      <span class="rd-n">3</span><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><circle cx="10.5" cy="10.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M15 15l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><b>Find a word</b><span class="rd-d">uxoris, obiit, susceptores: what it means and what it does not say.</span></button>
+      <span class="rd-n">4</span><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><circle cx="10.5" cy="10.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M15 15l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><b>Find a word</b><span class="rd-d">uxoris, obiit, susceptores: what it means and what it does not say.</span></button>
   </div>
 
-  <section id="tool-ask" class="rd-panel" role="tabpanel" aria-labelledby="tab-ask">
+  <section id="tool-story" class="rd-panel" role="tabpanel" aria-labelledby="tab-story">
     <div class="sg" id="sg" aria-label="Start with your story">
       <div class="sg-dots" id="sg-dots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
       <div class="sg-stage" id="sg-stage">
 
         <section class="sg-step" data-step="0" aria-labelledby="sg-h0">
           <h2 class="sg-h" id="sg-h0">What do you have?</h2>
-          <p class="sg-sub">Pick the closest. You can add more in a moment, or skip this and just tell us.</p>
+          <p class="sg-sub">Pick everything you have: a photo, a document, a letter and the story can all go together.</p>
           <div class="sg-tiles">
             <button type="button" class="sg-tile" data-holds="photo"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><rect x="3.5" y="5" width="17" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="9" cy="10" r="1.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 17l5-4 3 3 3-2 5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><b>A photo</b><span>of a person, a family or a place</span></button>
             <button type="button" class="sg-tile" data-holds="document"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M7 3.5h7l4 4V20H7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 3.5V8h4M9.5 12h6M9.5 15.5h6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><b>A document</b><span>a certificate, passport, record or page</span></button>
             <button type="button" class="sg-tile" data-holds="letter"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><rect x="3.5" y="6" width="17" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 8l8 6 8-6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><b>A letter</b><span>or a postcard, or a diary</span></button>
             <button type="button" class="sg-tile" data-holds="story"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M5 5.5h14v10H11l-4 3.5v-3.5H5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><b>Just the story</b><span>what the family says happened</span></button>
           </div>
+          <p class="sg-nav"><button type="button" class="sg-next" id="sg-next0" data-go="1">Skip, I will just tell the story</button></p>
         </section>
 
         <section class="sg-step" data-step="1" aria-labelledby="sg-h1" hidden>
@@ -96,8 +99,10 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
       <p class="sg-fine sg-priv">Nothing you type or drop is sent anywhere. Please do not enter details of anyone who may be alive.</p>
     </div>
 
-    <details class="sg-readbox" id="sg-readbox">
-      <summary>Read the writing on a photo or a register page with Claude</summary>
+  </section>
+
+  <section id="tool-ask" class="rd-panel" role="tabpanel" aria-labelledby="tab-ask" hidden>
+    <p class="rd-lead">This is the part that uses Claude. Paste one register entry, or drop up to four pictures of the page, and press the button: you get a draft reading to check against the page, and what the Atlas knows about that place and year. If you want a family story turned into a journey and a plan instead, use <a href="#story" data-tool-link="story">Start with your story</a>.</p>
     <div class="one ask-card" id="ask" hidden>
       <div class="ask-head">
         <span class="ask-spark" aria-hidden="true"><svg viewBox="0 0 24 24" width="30" height="30"><path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4z" fill="currentColor"/><path d="M18 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z" fill="currentColor"/></svg></span>
@@ -141,7 +146,6 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
         what is sent within 30 days, keeps content its safety systems flag for longer, and does not train on it without permission. Please do not paste or photograph details of
         people who may be alive. Cloudflare's bot check loads when you first click in the box. <a href={u("/privacy/")}>More in the privacy note.</a></p></details>
     </div>
-    </details>
   </section>
 
   <section id="tool-date" class="rd-panel" role="tabpanel" aria-labelledby="tab-date" hidden>
@@ -203,6 +207,8 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
         });
         try { history.replaceState(null, "", "#" + name); } catch (e) {}
       }
+      window.raReadPick = pick;
+      [].forEach.call(document.querySelectorAll("[data-tool-link]"), function (a) { a.addEventListener("click", function (e) { e.preventDefault(); pick(a.getAttribute("data-tool-link")); }); });
       tabs.forEach(function (t, i) {
         t.addEventListener("click", function () { pick(t.dataset.tool); });
         t.addEventListener("keydown", function (e) {
@@ -211,7 +217,7 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
         });
       });
       var h = (location.hash || "").slice(1);
-      pick(/[?&]q=/.test(location.search) ? "word" : (h === "date" || h === "word" ? h : "ask"));
+      pick(/[?&]q=/.test(location.search) ? "word" : (h === "date" || h === "word" || h === "ask" || h === "story" ? h : "story"));
     })();
   </script>
   <script is:inline src={u("/js/record-reader.js")}></script>
@@ -272,6 +278,8 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
 </Base>
 
 <style is:global>
+  .rd-pick { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+  .rd-lead { max-width: var(--measure); color: var(--ink-2); margin: 10px 0 14px; }
   .sg { background: var(--panel); border: 1px solid var(--rule); border-radius: 18px; padding: 18px clamp(14px, 3vw, 28px) 12px; overflow: hidden; }
   .sg-dots { display: flex; gap: 6px; margin: 0 0 14px; }
   .sg-dots i { flex: 1; height: 4px; border-radius: 2px; background: var(--rule-strong); transition: background .4s; }
@@ -289,6 +297,8 @@ const eventNames = { baptism: "Baptism", marriage: "Marriage", burial: "Burial" 
     color: var(--ink-2); font: 400 14px/1.35 var(--sans); cursor: pointer; transition: transform .2s, border-color .2s, background .2s, box-shadow .2s; }
   .sg-tile svg { color: var(--accent); transition: transform .3s; }
   .sg-tile b { font: 500 18px/1.2 var(--serif); color: var(--ink); }
+  .sg-tile { position: relative; } .sg-tile.on { border-color: var(--accent); background: var(--accent-wash); box-shadow: inset 0 0 0 1px var(--accent); }
+  .sg-tile.on::after { content: "✓"; position: absolute; top: 10px; right: 12px; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; font: 700 13px/22px var(--sans); text-align: center; }
   .sg-tile:hover, .sg-tile:focus-visible { transform: translateY(-3px); border-color: var(--accent); background: var(--accent-wash); box-shadow: 0 8px 22px rgba(0,0,0,.12); }
   .sg-tile:hover svg { transform: scale(1.12) rotate(-4deg); }
   .sg-drop { border: 2px dashed var(--rule-strong); border-radius: 16px; padding: 14px 16px 8px; background: var(--ground); transition: border-color .2s, background .2s; max-width: 46rem; }

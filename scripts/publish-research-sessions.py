@@ -59,20 +59,31 @@ def same(a, b):
 def main():
     tmp = tempfile.mkdtemp(prefix="publish-research-")
     try:
+        # 0. Work from a FRESH CLONE of origin, never from this folder's own files. On 8 Nov 2026 the shared Atlas folder was on an old
+        #    branch, 377 commits behind main: its provider list and scripts were stale, so a publish run from it would have silently
+        #    dropped 16 source marks for providers it did not know. The importer, the providers and the volume index now all come from
+        #    origin's main; only the family archives (siblings of this folder) and the large world volume file (a release asset, not in git)
+        #    are read from here.
+        url = run(["git", "remote", "get-url", "origin"]).stdout.strip()
+        clone = os.path.join(tmp, "clone")
+        run(["git", "clone", "--quiet", "--depth", "1", url, clone])
+        world = os.path.join(ROOT, "data", "fs-volumes-world.json.gz")
+        if os.path.exists(world):
+            os.symlink(world, os.path.join(clone, "data", "fs-volumes-world.json.gz"))
         # 1. Regenerate. The importer reads the previous output for each line's «made» date, so
-        #    seed the temp file with the committed one and let it overwrite.
+        #    seed the temp file with origin's committed one and let it overwrite.
         out = os.path.join(tmp, RECORD)
-        if os.path.exists(RECORD):
-            shutil.copy(RECORD, out)
-        r = run([sys.executable, "scripts/import-research-sessions.py", "--out", out])
+        if os.path.exists(os.path.join(clone, RECORD)):
+            shutil.copy(os.path.join(clone, RECORD), out)
+        env = dict(os.environ, ARCHIVES_DIR=os.path.dirname(ROOT))
+        r = subprocess.run([sys.executable, "scripts/import-research-sessions.py", "--out", out], cwd=clone, env=env, capture_output=True, text=True)
+        if r.returncode != 0:
+            raise RuntimeError(r.stderr.strip() or "the importer failed")
         print("\n".join(l for l in r.stdout.splitlines()
                         if any(k in l for k in ("rows read", "volume marks", "source marks", "film marks", "research lines", "archive copy"))))
         new = json.load(open(out, encoding="utf-8"))
 
         # 2. Compare with what origin has, not with the working tree, which may be behind.
-        url = run(["git", "remote", "get-url", "origin"]).stdout.strip()
-        clone = os.path.join(tmp, "clone")
-        run(["git", "clone", "--quiet", "--depth", "1", url, clone])
         pub = os.path.join(clone, PUBLIC)
         try:
             old = json.load(open(pub, encoding="utf-8"))

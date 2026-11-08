@@ -69,7 +69,7 @@ import unicodedata
 
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(_ROOT)
-PROJ = os.path.dirname(_ROOT)
+PROJ = os.environ.get("ARCHIVES_DIR") or os.path.dirname(_ROOT)   # the folder that holds the family archives; the publisher points it at the real one when it runs from a fresh clone
 
 ARCHIVES = ["Blazevic Family", "Booyzen Family", "D'arcy Family",
             "Defranceski Family", "Falco Family", "Lerena Family",

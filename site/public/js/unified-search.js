@@ -139,5 +139,7 @@
   var launch = document.getElementById("ra-story-open");
   if (launch) launch.addEventListener("click", function () { setTimeout(show, 400); });
   /* the one-box idea in a sentence, for the placeholder */
-  q.setAttribute("placeholder", "Find a place or a surname, or tell a story — Gallignana · Žubrinić · my father is Ivan from Senj…");
+  var narrow = window.matchMedia && window.matchMedia("(max-width: 560px)");
+  function holder() { q.setAttribute("placeholder", narrow && narrow.matches ? "A place, a surname, or your story" : "Find a place or a surname, or tell a story — Gallignana · Žubrinić · my father is Ivan from Senj…"); }
+  holder(); if (narrow && narrow.addEventListener) narrow.addEventListener("change", holder);
 })();

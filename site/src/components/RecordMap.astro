@@ -10184,6 +10184,13 @@ window.addEventListener("load", async function () {
     .ra-bar-find .ra-find { flex: 1 1 0; min-width: 0; }
     .ra-bar-find .ra-bar-filters { flex: 0 0 auto; }
   }
+  /* ON A PHONE THE BOX TAKES ITS OWN ROW. It now takes a whole story and carries a "+" for a photo, and beside Views and Filters it was
+     half a screen wide: the placeholder was cut off and the "+" sat on top of the words. The two buttons share the row under it. */
+  @media (max-width: 560px) {
+    .ra-bar-find .ra-find { flex: 1 1 100%; }
+    .ra-bar-find .ra-views-one, .ra-bar-find .ra-filters-one { flex: 1 1 0; min-width: 0; }
+    .ra-bar-find .ra-views-one > summary, .ra-bar-find .ra-filters-one > summary { width: 100%; justify-content: center; }
+  }
   :global(.leaflet-bar.ra-fullctl .ra-ico) { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: inherit;
     background: var(--panel, #fff); color: var(--ink, #16222A); cursor: pointer; }
   :global(.leaflet-bar.ra-fullctl .ra-markers-btn.off) { color: var(--ink-3, #777); }

@@ -74,8 +74,6 @@ try {
    sources were invisible on all 2,130 Irish places. Ranked archive-first, then
    by how open it is. The worldwide dozen are excluded deliberately — covering
    everywhere is not a fact about here. */
-const VOLKINDS = ["Births", "Marriages", "Deaths", "Church Census",
-                  "Confirmations", "Index", "Other"];
 /* THE SAME BOOKS THE MAP PANEL SHOWS. This read only
    data/fs-volumes.json — the Croatian browser walk — so every place outside
    Croatia said "no volumes recorded here yet" while clicking the same dot on
@@ -136,7 +134,27 @@ const RANK = ["free", "account", "index", "mixed", "paid", "catalogue", "onsite"
    for the whole site. The page orients; the provider holds the catalogue. */
 const csAll = place.collections || [];
 const cs = csAll.slice(0, 20);
-const byAccess = RANK.map((a) => [a, cs.filter((c) => c.access === a)]).filter(([, v]) => v.length);
+/* ONE LIST OF VOLUMES, NOT TWO. «The volumes» (collections, by what it costs) and «N volumes catalogued here» (FamilySearch's own
+   books, by kind) were the same books for the 1,174 places walked in detail, listed twice, with marks kept under two different
+   keys so a page range marked in one did not show in the other. David: «2 very similar sections? correct or duplicates? or merger
+   opportunity?». A book is matched to its collection row by the FamilySearch image id in the collection's link (or its waypoint);
+   the row then carries the film and denomination and is marked under the waypoint. Books with no collection twin follow in their
+   own group. */
+const arkOf = (v) => (v.ark ? String(v.ark).split("/").pop() : "");
+const usedVol = new Set();
+const volFor = (c) => {
+  const url = String(c.url || "");
+  for (const v of volumes) {
+    if (usedVol.has(v)) continue;
+    const a = arkOf(v);
+    if ((a && url.includes(a)) || (v.waypoint && url.includes("wc=" + v.waypoint))) { usedVol.add(v); return v; }
+  }
+  return null;
+};
+const rows = cs.map((c) => ({ c, v: volFor(c) }));
+const byAccess = RANK.map((a) => [a, rows.filter(({ c }) => c.access === a)]).filter(([, v]) => v.length);
+const extraVols = volumes.filter((v) => !usedVol.has(v));
+const volTotal = Math.max(volumesTotal, csAll.length);
 const years = cs.filter((c) => c.from).map((c) => [c.from, c.to || c.from]);
 const span = years.length
   ? [Math.min(...years.map((y) => y[0])), Math.max(...years.map((y) => y[1]))]
@@ -371,19 +389,21 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
     </div>
   )}
 
-  {cs.length > 0 ? (
-    <section style="margin-top:34px">
-      <h2>{csAll.length > cs.length
-        ? `${csAll.length.toLocaleString()} volumes, the first ${cs.length} listed`
-        : "The volumes"}</h2>
-      <p class="cap">Grouped by what it costs to look, most open first — which is the order
-      worth trying them in.</p>
+  {(cs.length > 0 || volumes.length > 0) ? (
+    <section style="margin-top:34px" id="ra-vols">
+      <h2>{volTotal > rows.length + extraVols.length
+        ? `${volTotal.toLocaleString()} volumes, the first ${(rows.length + extraVols.length).toLocaleString()} listed`
+        : volTotal === 1 ? "The volume" : "The volumes"}</h2>
+      <p class="cap">Grouped by what it costs to look, most open first, which is the order worth trying them in.
+      The film number and denomination are from FamilySearch's own catalogue. <b>Nobody here has opened any of them.</b>
+      You can, though: mark the pages you have searched on any row and this browser will remember where you stopped.</p>
+      <p id="ra-mywork" data-href={u("/my-research/")} hidden></p>
       {byAccess.map(([a, list]) => (
         <div style="margin-top:22px">
           <div class="lab"><i class={"dot d-" + a}></i>{ACC[a]} — {list.length}</div>
           <ul class="vols">
-            {list.map((c) => (
-              <li data-vol={"volume:" + (c.waypoint || c.url || c.title)}
+            {list.map(({ c, v }) => (
+              <li data-vol={"volume:" + ((v && v.waypoint) || c.waypoint || c.url || c.title)}
                   data-vol-t={c.title || "Untitled volume"}
                   data-vol-where={place.name + ", " + countryName}
                   data-vol-href={u(`/place/${place.id}/`)}>
@@ -392,12 +412,34 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
                   : <span>{c.title || "Untitled volume"}</span>}
                 {c.from && <span class="y">{c.to && c.to !== c.from ? `${c.from}–${c.to}` : c.from}</span>}
                 <span class="who"><a href={u(`/archive/${c.provider}/`)}>{PROV[c.provider]?.name || c.provider}</a></span>
+                {v && v.conf && <span class="who">{v.conf}</span>}
+                {v && v.film && <span class="who">film {v.film}</span>}
                 {c.held && <span class="who">held at {c.held}</span>}
+                <span class="volmark"></span>
               </li>
             ))}
           </ul>
         </div>
       ))}
+      {extraVols.length > 0 && (
+        <div style="margin-top:22px">
+          <div class="lab">{byAccess.length ? "Also catalogued by FamilySearch" : "Catalogued by FamilySearch"} — {extraVols.length}</div>
+          <ul class="vols">
+            {extraVols.map((v) => (
+              <li data-vol={"volume:" + (v.waypoint || v.url || v.t)}
+                  data-vol-t={v.t}
+                  data-vol-where={place.name + ", " + countryName}
+                  data-vol-href={u(`/place/${place.id}/`)}>
+                {v.url ? <a href={v.url} target="_blank" rel="noopener">{v.t} ↗</a> : <b>{v.t}</b>}
+                {v.from && <span class="y">{v.from}–{v.to}</span>}
+                {v.conf && <span class="who">{v.conf}</span>}
+                {v.film && <span class="who">film {v.film}</span>}
+                <span class="volmark"></span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </section>
   ) : (
     <p class="cap" style="margin-top:30px">No volumes recorded here yet.</p>
@@ -468,61 +510,6 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
           </li>
         ))}
       </ul>
-    </section>
-  )}
-
-  {volumes.length > 0 && (
-    <section style="margin-top:38px" id="ra-vols">
-      <h2>{volumesTotal.toLocaleString()} volumes catalogued here</h2>
-      {volumesTotal > volumes.length && (
-        <p class="cap">The oldest {volumes.length} are listed. A researcher is
-        nearly always reaching back, and the rest are one click away at the
-        provider.</p>
-      )}
-      <p class="cap">The level below «a collection covers this place»: which book, for which
-      years, and the link that opens its images. From FamilySearch's own catalogue.
-      <b>Nobody here has opened any of them.</b> You can, though — mark the pages
-      you have searched on any row below and this browser will remember where
-      you stopped.</p>
-      <p id="ra-mywork" data-href={u("/my-research/")} hidden></p>
-      {VOLKINDS.map((k) => {
-        const rows = volumes.filter((v) => (v.kinds && v.kinds.length ? v.kinds : ["Other"]).includes(k));
-        return rows.length > 0 && (
-          <div style="margin-top:16px">
-            <div class="lab">{k} — {rows.length}</div>
-            <ul class="vols">
-              {/* THE ID IS THE WAYPOINT, which 99% of volumes carry; the rest
-                  fall back to their url. Both are stable across rebuilds,
-                  which is the whole requirement — a reader's page ranges must
-                  still point at the same book next month.
-
-                  The comment sits HERE and not inside the map, for two
-                  reasons learnt one after the other. An arrow function that
-                  returns a comment AND an element is returning two sibling
-                  nodes with no wrapper, which is a syntax error — and the
-                  message it produces, «Expected ")" but found "$$render"»,
-                  names the generated code rather than the line at fault.
-                  Then the rewritten comment quoted the closing delimiter of a
-                  JSX comment inside a JSX comment, which ends it early and
-                  leaves the remaining prose to be parsed as markup:
-                  «Unterminated regular expression». Two compiler errors, both
-                  pointing anywhere but here. */}
-              {rows.map((v) => (
-                <li data-vol={"volume:" + (v.waypoint || v.url || v.t)}
-                    data-vol-t={v.t}
-                    data-vol-where={place.name + ", " + countryName}
-                    data-vol-href={u(`/place/${place.id}/`)}>
-                  {v.url ? <a href={v.url} target="_blank" rel="noopener">{v.t} ↗</a> : <b>{v.t}</b>}
-                  {v.from && <span class="y">{v.from}–{v.to}</span>}
-                  {v.conf && <span class="who">{v.conf}</span>}
-                  {v.film && <span class="who">film {v.film}</span>}
-                  <span class="volmark"></span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        );
-      })}
     </section>
   )}
 

@@ -171,13 +171,58 @@
     if (!c || !REG) return;
     REG.regions.forEach(function (r) { if (r.ring && inRing(r.ring, c.lat, c.lon)) PL.regions.push(r); });
   }
+  var ICO = {
+    pin: '<path d="M8 14.5s4.5-4.2 4.5-7.7a4.5 4.5 0 10-9 0c0 3.5 4.5 7.7 4.5 7.7z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="8" cy="6.8" r="1.6" fill="currentColor"/>',
+    book: '<path d="M3 2.5h7.5a2 2 0 012 2V13.5H5a2 2 0 01-2-2z M3 11.5a2 2 0 012-2h7.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>',
+    globe: '<circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M1.8 8h12.4M8 1.8c2 2 2 10.4 0 12.4M8 1.8c-2 2-2 10.4 0 12.4" fill="none" stroke="currentColor" stroke-width="1.2"/>',
+    flag: '<path d="M4 14.5V2.5M4 3h8l-1.6 2.6L12 8.2H4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/>',
+    region: '<path d="M8 2l5.6 4.1-2.1 6.6H4.5L2.4 6.1z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>',
+    map: '<path d="M1.5 3.5l4-1.5 5 1.5 4-1.5v10l-4 1.5-5-1.5-4 1.5zM5.5 2v10.5M10.5 3.5V14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>'
+  };
+  function ib(name, href, title, badge) {
+    return '<a class="pv-ib sm" href="' + esc(href) + '" title="' + esc(title) + '" aria-label="' + esc(title) + '"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">' + ICO[name] + "</svg>" +
+      (badge ? '<span class="pv-ibn">' + esc(badge) + "</span>" : "") + "</a>";
+  }
+  function slug(t) { return (window.raFold ? window.raFold(t) : t.toLowerCase()).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
+  /* The place's own page, if it has one: the atlas id is the plain name, the gazetteer's is g-name-cc, and either must sit within 30 km. */
+  function findPage(c) {
+    if (c.page !== undefined) return Promise.resolve();
+    var sl = slug(c.name), tries = [sl, "g-" + sl + "-" + c.cc.toLowerCase()];
+    function next(i) {
+      if (i >= tries.length) { c.page = null; return Promise.resolve(); }
+      return fetch(BASE + "p/" + encodeURIComponent(tries[i]) + ".json").then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) {
+        if (km(c.lat, c.lon, j.lat, j.lon) > 30) throw 0;
+        c.page = { id: j.id || tries[i], vols: (j.volumes || []).length, fs: j.nfs || (j.fs || []).length };
+      }).catch(function () { return next(i + 1); });
+    }
+    return next(0);
+  }
   function placeStrip(c, g) {
+    PL.g = g;
+    if (c.page === undefined) findPage(c).then(function () { if (curPlace() === c && PL.g) placeStrip(c, PL.g); });
     var cn = S.countryName(c.cc);
     var h = "<b>" + esc(c.name) + ", " + esc(cn) + "</b>" + (c.alts.length ? ' <span class="cap">also written ' + esc(c.alts.slice(0, 4).join(", ")) + "</span>" : "") + "<br>" +
       "Sources that cover this ground: " + g.near.length + " near it, " + g.country.length + " for " + esc(cn) + ", " + g.world.length + " worldwide.";
     if (!g.near.length && !g.country.length) h += " <b>None is filed for " + esc(cn) + " yet</b>, so the worldwide ones are all that can be offered.";
     if (PL.regions.length) h += "<br>Record region: " + PL.regions.map(function (r) { return '<a class="pv-reg" href="#r-' + esc(r.id) + '">' + esc(r.label) + "</a>"; }).join(", ") + " (whose archive, by years).";
-    if (PL.cands.length > 1) h += "<br>Other places by that name: " + PL.cands.map(function (x, i) { return '<button type="button" class="pv-pc" data-pick="' + i + '" aria-pressed="' + (i === PL.pick ? "true" : "false") + '">' + esc(x.name + ", " + S.countryName(x.cc)) + "</button>"; }).join("");
+    var ic = "";
+    if (c.page) {
+      var nv = c.page.vols, nf = c.page.fs;
+      ic += ib("pin", BASE + "place/" + c.page.id + "/", "The page for " + c.name + ": names, who held it, every volume");
+      ic += ib("book", BASE + "place/" + c.page.id + "/#ra-vols", "Volumes held for " + c.name + ": " + (nv ? nv + " register book" + (nv === 1 ? "" : "s") : "no register books") + (nf ? ", " + nf + " FamilySearch collection" + (nf === 1 ? "" : "s") : ""), nv || nf || "");
+    }
+    ic += ib("globe", BASE + "country/" + c.cc.toLowerCase() + "/", "The page for " + cn + ": its archives, places and sources");
+    if (conf.flags[c.cc]) ic += ib("flag", BASE + "flags/" + conf.flags[c.cc] + "-flags/", "Every flag that flew over " + cn);
+    PL.regions.slice(0, 3).forEach(function (r) { ic += ib("region", BASE + "region/" + r.id + "/", "The record region " + r.label + ": whose archive, by years"); });
+    ic += ib("map", BASE + "?view=" + c.lat + "," + c.lon + ",11", "Show " + c.name + " on the map");
+    h += '<div class="pv-pl-icons">' + ic + "</div>";
+    if (PL.cands.length > 1) {
+      var lab = PL.cands.map(function (x) { return x.name + ", " + S.countryName(x.cc); });
+      h += "<br>Other places by that name: " + PL.cands.map(function (x, i) {
+        var dup = lab.filter(function (l) { return l === lab[i]; }).length > 1;
+        return '<button type="button" class="pv-pc" data-pick="' + i + '" aria-pressed="' + (i === PL.pick ? "true" : "false") + '">' + esc(lab[i] + (dup ? " (" + x.lat.toFixed(2) + ", " + x.lon.toFixed(2) + ")" : "")) + "</button>";
+      }).join("");
+    }
     placeEl.innerHTML = h; placeEl.hidden = false;
   }
 
@@ -323,8 +368,12 @@
   /* HELP CHECK A SOURCE is an invitation, not the page's job: it lives in a dialog, opened from the line under the search */
   function openHelp() { if (helpDlg.showModal) { if (!helpDlg.open) helpDlg.showModal(); } else helpDlg.setAttribute("open", ""); }
   function closeHelp() { if (helpDlg.close) helpDlg.close(); else helpDlg.removeAttribute("open"); }
-  $("pv-help-open").addEventListener("click", openHelp);
-  helpDlg.addEventListener("click", function (e) { if (e.target === helpDlg) closeHelp(); });
+  [].slice.call(document.querySelectorAll("dialog.pv-dlg")).forEach(function (d) {
+    d.addEventListener("click", function (e) { if (e.target === d) { if (d.close) d.close(); else d.removeAttribute("open"); } });
+  });
+  [].slice.call(document.querySelectorAll("[data-dlg]")).forEach(function (b) {
+    b.addEventListener("click", function () { var d = $(b.getAttribute("data-dlg")); if (d.showModal) { if (!d.open) d.showModal(); } else d.setAttribute("open", ""); });
+  });
   $("pv-easy-link").addEventListener("click", function () { closeHelp(); state.view = "kind"; state.q = ""; q.value = ""; state.acc = { unsurveyed: true }; state.kinds = {}; state.t = "read"; apply(); toList(); });
   $("pv-unchecked-link").addEventListener("click", function () { closeHelp(); state.view = "kind"; state.q = ""; q.value = ""; state.acc = { unsurveyed: true }; state.kinds = {}; state.t = ""; apply(); toList(); });
   if (location.hash === "#help") openHelp();

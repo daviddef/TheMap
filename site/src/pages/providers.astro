@@ -302,14 +302,15 @@ const conf = {
     .pv-root .k-table tr { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 10px 14px; margin-bottom: 10px; }
     .pv-root .k-table td, .pv-root .k-table td:first-child, .pv-root .k-table td:last-child { border: 0; border-radius: 0; padding: 3px 0; background: none; }
   }
-  .chip.acc-free { background: #1E844922; color: #1E8449; }
-  .chip.acc-account { background: #6FA82E22; color: #5C8C26; }
-  .chip.acc-index { background: #EFC03B33; color: #8A6B10; }
-  .chip.acc-mixed { background: #E8792B22; color: #B45A17; }
-  .chip.acc-paid { background: #C0392B22; color: #C0392B; }
-  .chip.acc-catalogue { background: #8E6FA822; color: #7A5CA8; }
-  .chip.acc-onsite { background: #7C8A9122; color: #5E6C73; }
-  .chip.acc-unsurveyed { background: #7C8A9122; color: var(--ink-3); }
+  /* the text is the cost colour pulled toward the ink, so it stays AA on its own wash in both themes (the bare colours were 3.0-3.9:1) */
+  .chip.acc-free { background: #1E844922; color: color-mix(in srgb, #1E8449 60%, var(--ink)); }
+  .chip.acc-account { background: #6FA82E22; color: color-mix(in srgb, #5C8C26 55%, var(--ink)); }
+  .chip.acc-index { background: #EFC03B33; color: color-mix(in srgb, #8A6B10 40%, var(--ink)); }
+  .chip.acc-mixed { background: #E8792B22; color: color-mix(in srgb, #B45A17 60%, var(--ink)); }
+  .chip.acc-paid { background: #C0392B22; color: color-mix(in srgb, #C0392B 60%, var(--ink)); }
+  .chip.acc-catalogue { background: #8E6FA822; color: color-mix(in srgb, #7A5CA8 60%, var(--ink)); }
+  .chip.acc-onsite { background: #7C8A9122; color: color-mix(in srgb, #5E6C73 60%, var(--ink)); }
+  .chip.acc-unsurveyed { background: #7C8A9122; color: var(--ink-2); }
 
   .pv-find { display: grid; gap: 12px; margin: 0 0 20px; }
   .pv-row { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: end; }
@@ -321,7 +322,7 @@ const conf = {
   .pv-q input:focus { outline: 3px solid var(--accent); outline-offset: 1px; }
     .pv-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
   .pv-tab { font: 600 14px var(--sans); color: var(--ink-2); background: var(--panel); border: 1px solid var(--rule-strong, var(--rule)); border-radius: 10px; padding: 9px 16px; cursor: pointer; }
-  .pv-tab span { font: 11px var(--mono); margin-left: 8px; opacity: .7; }
+  .pv-tab span { font: 11px var(--mono); margin-left: 8px; }
   .pv-tab[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); background: var(--accent-wash); }
   /* THE FILTERS ARE THE HOME SCREEN'S: one funnel that opens a panel of pill options with their counts, and fills when something is narrowed. */
   .pv-drop { position: relative; align-self: end; }

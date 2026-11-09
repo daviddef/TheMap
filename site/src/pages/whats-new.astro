@@ -46,7 +46,8 @@ const sourceEntries = Object.entries(arrivals).map(([date, list]) => {
   if (headline.length > 150) headline = headline.slice(0, 147).replace(/[;,]?\s*\S*$/, "") + "…";
   return { date, kind: "new", headline, href: `/providers/?d=${date}` };
 });
-const entries = data.entries.concat(sourceEntries).sort((a, b) => b.date.localeCompare(a.date));
+/* sources first within their day: they were at the bottom of a long day and nobody scrolled to them */
+const entries = sourceEntries.concat(data.entries).sort((a, b) => b.date.localeCompare(a.date));
 const byDay = {};
 for (const e of entries) (byDay[e.date] = byDay[e.date] || []).push(e);
 const days = Object.entries(byDay).sort((a, b) => b[0].localeCompare(a[0]));

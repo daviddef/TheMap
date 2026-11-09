@@ -220,6 +220,7 @@
     function run() {
       var t = text.value;
       var clr = $(".sd-clear"); if (clr) clr.hidden = !t.trim() && !files.length;
+      if (t.trim().length > 12) status.textContent = "Reading your story\u2026";
       LD.resolveMissing(t).catch(function () { return LD.load(); }).then(function (d) {
         data = d;
         var attached = files.length ? "photo" : null;
@@ -232,7 +233,7 @@
         parsedNow = p;
         drawChips(p);
         var sig = [(p.route || []).map(function (x) { return x.row.i + ":" + x.age; }).join(","), p.left, p.born, p.name, (p.people || []).map(function (x) { return x.name; }).join(","), p.holds].join("|");
-        if (sig === lastSig || !tellable(p)) { if (!tellable(p) && sig !== lastSig) { J.clear(); showDock(false); dropKeyPlaces(); report.hidden = true; planBox.hidden = true; fam.hidden = true; addBar.hidden = true; } return; }
+        if (sig === lastSig || !tellable(p)) { if (status.textContent === "Reading your story\u2026") status.textContent = ""; if (!tellable(p) && sig !== lastSig) { J.clear(); showDock(false); dropKeyPlaces(); report.hidden = true; planBox.hidden = true; fam.hidden = true; addBar.hidden = true; } return; }
         lastSig = sig;
         var my = ++token; status.textContent = "Reading the Atlas…";
         LD.gather(p).then(function (g) {

@@ -110,4 +110,35 @@ export const C = [
  // ---- ships, travel
  { id:"ship", t:"They sailed from Liverpool to Ellis Island in 1905.", e:{stops:["Liverpool","Ellis Island"], years:[null,1905]} },
  { id:"transit", t:"They went via Hamburg to New York and then on to Chicago.", e:{stops:["Hamburg","New York","Chicago"]} },
+ // ---- IMPERFECT STORIES: how people really type (no capitals, no stops, texting, slips, family links buried in a sentence)
+ { id:"imp-ivan", t:"once my dad Ivan defranceski travelled to his home town of senj croatia. His father iVan was born in israel and was married to hedviga in south africa. she was from cape town.", e:{stops:["Senj"], people:["father","inlaw"]} },   /* Israel, South Africa and Cape Town sit on the grandfather's and his wife's cards */
+ { id:"imp-lower", t:"my nonno was born in udine and went to brisbane in 1950", e:{stops:["Udine","Brisbane"], years:[null,1950]} },
+ { id:"imp-nopunct", t:"my mum came from cork then moved to boston after the war and she met my dad there he was from dublin", e:{stops:["Dublin","Cork","Boston"]} },   /* the father's place is listed first: it is his own line */
+ { id:"imp-texting", t:"gran was born in leeds, moved 2 manchester in 1946 n died there", e:{stops:["Leeds","Manchester"]} },
+ { id:"imp-typo-1", t:"my grandfather was born in Zagrb and moved to Vienna in 1910", e:{stops:["Vienna"], suggest:["Zagrb"]} },
+ { id:"imp-typo-2", t:"My great grandmother came from Trieste to Melbourn in 1925.", e:{stops:["Trieste","Melbourn"]} },
+ { id:"imp-abbr", t:"my grandad was b. in Cork abt 1890, emigrated to NYC 1912, d. Brooklyn 1961", e:{stops:["Cork","New York","Brooklyn"]} },
+ { id:"imp-approx", t:"grandpa left somewhere near split around the 1920s i think and ended up in chile", e:{stops:["Split","Chile"]} },
+ { id:"imp-unsure", t:"I think my grandfather was born in either Vicenza or Verona. Not sure which. He went to Argentina.", e:{stops:["Vicenza","Verona","Argentina"]} },
+ { id:"imp-rambling", t:"So my dad always told us that his grandfather, who was a sailor or maybe a fisherman, came over from Senj on a boat to Fremantle sometime before the first war", e:{stops:["Senj","Fremantle"]} },
+ { id:"imp-pron-chain", t:"My mother Maria was born in Palermo. She married Joe in Brooklyn. He was from Naples. They moved to Newark.", e:{stops:["Palermo","Newark"], people:["spouse"]} },   /* Brooklyn and Naples are the husband's, on his card (kin), not the mother's route */
+ { id:"imp-his-father", t:"my husband Tom was born in Galway. his father Sean was born in Clifden and his mother Nora came from Limerick", e:{stops:["Galway","Clifden","Nora","Limerick"]} },
+ { id:"imp-in-laws", t:"My wife's grandmother was from Gdansk. Her parents moved to Chicago.", e:{stops:["Gdansk","Chicago"]} },
+ { id:"imp-married-anna", t:"My grandfather married Anna in Zagreb.", e:{stops:["Zagreb"], people:["spouse"]} },
+ { id:"imp-married-florence", t:"my grandfather married florence in leeds in 1948", e:{stops:["Leeds"], years:[1948], people:["spouse"]} },
+ { id:"imp-name-place", t:"my aunt Lourdes lived in Sydney and her husband Victor was from Valencia", e:{stops:["Sydney","Valencia"]} },
+ { id:"imp-country-only", t:"my grandfather was from croatia and his wife was from south africa", e:{stops:["Croatia","South Africa"]} },
+ { id:"imp-city-country", t:"my dad was born in Cork Ireland and moved to Perth Australia", e:{stops:["Cork","Perth","Australia"]} },
+ { id:"imp-ambig-us", t:"my grandfather lived in Springfield Illinois before Peoria", e:{stops:["Springfield","Peoria"]}, gap:"Peoria is found only as Peoria County in the index; the browser asks the gazetteer, the harness does not" },
+ { id:"imp-hometown", t:"he went back to his hometown of Udine", e:{stops:["Udine"]} },
+ { id:"imp-born-in-the", t:"my great aunt was born in the village of Gracisce in Istria", e:{stops:["Gračišće"]} },
+ { id:"imp-old-name", t:"my grandfather came from Fiume to Trieste", e:{stops:["Rijeka","Trieste"]} },
+ { id:"imp-mixed-lang", t:"mio nonno nacque a Udine e andò in Argentina nel 1920", e:{stops:["Udine","Argentina"]}, gap:"Italian text: Udine is found, Argentina is not (names of countries are read in English only)" },
+ { id:"imp-caps", t:"MY GRANDFATHER WAS BORN IN ZAGREB IN 1900 AND DIED IN VIENNA IN 1970", e:{stops:["Zagreb","Vienna"], years:[1900,1970]} },
+ { id:"imp-quotes", t:"My grandfather said he was \"from Trieste\" but his papers say Pola.", e:{stops:["Trieste","Pula"]} },
+ { id:"imp-list", t:"Places: Senj, Rijeka, Trieste, Sydney", e:{stops:["Senj","Rijeka","Trieste","Sydney"]} },
+ { id:"imp-parent-first", t:"Parents were both from Lucca but they met in London", e:{stops:["Lucca","London"]} },
+ { id:"imp-father-in-law", t:"my father in law was born in Kraków and later lived in Haifa", e:{stops:["Krak","Haifa"]} },
+ { id:"imp-uncle", t:"my uncle Joe went to america and never came back, he was from near naples", e:{stops:["America","Naples"]} },
+ { id:"imp-twins", t:"my grandmother and her twin sister were born in Maribor and separated, one to Graz and one to Zagreb", e:{stops:["Maribor","Graz","Zagreb"]} },
 ];

@@ -51,3 +51,16 @@ Still not done with it:
 - Each detail belongs to "the story", not to one person on the tree when several are told about. Three marriages do not yet put three unnamed spouses on the tree.
 - Clauses are matched by words, so an unusual way of putting a thing is missed (a hair colour told as "she was a redhead" is caught; "he was built like a barn door" is not). Missing a detail is safe; the words are kept whole when they are caught.
 - Causes of death outside the list (about fifty) are kept in the clause quoted under "How they died", but not named in the "Cause" line.
+
+## Imperfect stories (added later the same day)
+
+`site/test/stress/corpus.mjs` now has 30 `imp-` stories typed the way people type: no capitals, no full stops, texting (`frm`, `moved 2`), NYC, a
+country written after a town (`senj croatia`), "home town of", a father's father buried in one sentence with his wife, `his mother Nora`, `married to
+Anna`, a name that is also a place last in a list. 125 pass, 3 are known gaps:
+
+- **Danzig / Breslau / Bombay / Madras**: the dated-names catalogue has no Gdańsk, Wrocław, Mumbai, Chennai. Needs `place_names.py add` with a source for each.
+- **Peoria**: the index holds only Peoria County; in the browser the gazetteer answers, the harness does not ask it.
+- **Italian text**: `mio nonno nacque a Udine e andò in Argentina` finds Udine; country names are read in English only.
+
+Also left: a person's given name that is also a place stays the person's name even when it is the last word of a place list (`Places: Senj, Rijeka,
+Sydney` reads Sydney as the place and also as a name). "Perth Australia" keeps Australia as a stop because the index has Perth only as Perth, Western Australia.

@@ -437,7 +437,7 @@ test("workbench: the person on the left carries the same Atlas help, and the pag
 });
 test("fix list: Generate PDF is the browser's own print over a copy built on the device, with a print layout", () => {
   const html = fs.readFileSync(path.join(here, "../src/pages/roots/index.astro"), "utf8"), app = fs.readFileSync(R + "js/app.js", "utf8"), css = fs.readFileSync(R + "roots.css", "utf8");
-  assert.match(html, /id="fpdf"[^>]*>Generate PDF</); assert.match(app, /\$\('#fpdf'\)\.onclick = toPdf/); assert.match(app, /window\.print\(\)/);
+  assert.match(html, /id="fpdf"[^>]*title="[^"]*print window[^"]*"[^>]*>[\s\S]*?<span>PDF<\/span>/); assert.match(app, /\$\('#fpdf'\)\.onclick = toPdf/); assert.match(app, /window\.print\(\)/);
   assert.match(css, /@media print/); assert.match(css, /body\.printing>\*:not\(#fprint\)\{display:none!important\}/);
   assert.doesNotMatch(app.slice(app.indexOf("function toPdf")), /fetch\(|XMLHttpRequest|sendBeacon|window\.open/, "making the PDF reaches nowhere");
   assert.match(app, /asIs\.has\(i\.key\)/, "the printed list drops the rows left as is, and uses the same list the toggle built (living people included or not)");
@@ -550,5 +550,5 @@ test("MyHeritage: the tree is read from the file's header, and a link is remembe
     globalThis.localStorage = { getItem() { throw new Error("blocked"); }, setItem() { throw new Error("blocked"); } };
     assert.deepEqual(loadTrees(), {}); assert.equal(saveTreeLink(mh.guid, k.link), false);
   } finally { delete globalThis.localStorage; }
-  const app = fs.readFileSync(R + "js/app.js", "utf8"); assert.match(app, /applyTreeLink\(\)/); assert.match(app, /saveTreeLink\(/); assert.match(app, /Copy new/); assert.match(app, /Copy old/);
+  const app = fs.readFileSync(R + "js/app.js", "utf8"); assert.match(app, /applyTreeLink\(\)/); assert.match(app, /saveTreeLink\(/); assert.match(app, /cpL\('New'/); assert.match(app, /cpL\('Old'/);
 });

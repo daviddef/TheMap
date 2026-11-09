@@ -234,3 +234,18 @@ test("a country that no longer exists chooses among places of one name, and is n
   const p = F.parseStory("He lived in Salisbury, Rhodesia until 1975.", { ...ctx, map, countries: { ...countries } });
   assert.deepEqual(places(p), ["Harare"]);
 });
+
+test("texting shorthand: 'frm', 'moved 2' and NYC read as from, to and New York", () => {
+  assert.deepEqual(places(F.parseStory("gran frm leeds, moved 2 hull in 1950", ctx)), ["Leeds", "Hull"]);
+  assert.deepEqual(places(F.parseStory("my grandad was born in Cork, emigrated to NYC 1912", ctx)), ["Cork", "New York"]);
+});
+
+test("a name that is also a given name, last in a plain list of places, is a place", () => {
+  assert.deepEqual(places(F.parseStory("Places: Cork, Galway, Dublin, Sydney", ctx)), ["Cork", "Galway", "Dublin", "Sydney"]);
+});
+
+test("a wife who is from somewhere else keeps her own place, on her own card", () => {
+  const p = F.parseStory("My mother Maria was born in Cork. She married Joe in Dublin. He was from Leeds.", ctx);
+  const joe = (p.kin || []).filter((k) => k.key === "S")[0];
+  assert.ok(joe && joe.stops.some((s) => s.row.n === "Leeds"), "Leeds is on the husband's card");
+});

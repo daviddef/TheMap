@@ -22,6 +22,7 @@ export const ctx = { map: A.buildMap(rows), given: A.buildGiven(g.rows || []), s
   for (const p of prow) for (const n of p.names || []) add(n.n, p.id, p.name);
   for (const p of cat.places || []) for (const n of p.names || []) add(n.name, p.id, p.name);
   F.aliasMerge(ctx.map, rows, al, ctx.given);
+  F.countryPoints(ctx.map, rd("country-points.json").countries);
 }
 export const rowCount = rows.length;
 

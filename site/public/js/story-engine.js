@@ -276,6 +276,14 @@
     if (single && ca && ca.cap && pa && pa.cap && !marked && !PLACE_BEFORE[p1] && ctx && ctx.given && ctx.given[p1]) return true;
     return NEG.test(tokens.slice(Math.max(0, c.at - 4), c.at).join(" "));
   }
+  /* A name that is also a given name, standing last in a plain list of places ("Senj, Rijeka, Trieste, Sydney"), is a place: it follows
+     two places written straight on from one another, with a comma before it. */
+  function listTail(c, cands, text) {
+    if (c.word.indexOf(" ") > -1 || !new RegExp(",\\s*(?:and\\s+)?" + c.word + "\\b", "i").test(String(text))) return false;
+    var byEnd = Object.create(null); cands.forEach(function (x) { byEnd[x.at + x.word.split(" ").length] = x; });
+    var p1 = byEnd[c.at], p2 = p1 && byEnd[p1.at];
+    return !!(p1 && p2);
+  }
   var MOVE = /\b(moved|move|went|go|came|come|travelled|traveled|emigrated|migrated|sailed|settled|relocated|then|to|into|arrived|returned|left)\b/;
   var ANC = /\b(?:his|her|their|a|the)\s+(grandfather|grandmother|father|mother|dad|mum|mom)\b/g;
   var PLACE_BEFORE = { from: "from", of: "from", to: "to", into: "to", at: "to" };
@@ -370,6 +378,14 @@
       });
     });
     return added;
+  }
+
+  /* A COUNTRY THE ATLAS HOLDS NO PLACE IN is still a country: Israel, in a story, is not a village in Mexico. The middle of each country from
+     country-points.json is added for the ones the index has no rows for, so a country named in a story is a stop at its middle. */
+  function countryPoints(map, list) {
+    var cen = map && map["#country"], n = 0; if (!cen) return 0;
+    (list || []).forEach(function (c) { if (c && c.cc && !cen[c.cc] && typeof c.x === "number" && typeof c.y === "number") { cen[c.cc] = { x: c.x, y: c.y }; n++; } });
+    return n;
   }
 
   /* ---- THE LIFE AS TOLD ---------------------------------------------------------------------------------------------------
@@ -557,13 +573,68 @@
     return keep.sort(function (a, b) { return a.at - b.at; });
   }
 
+  /* A STORY TYPED IN A HURRY: "once my dad Ivan defranceski travelled to his home town of senj croatia. His father iVan was born in israel and was
+     married to hedviga in south africa. she was from cape town." The reader looks for capitals to tell a name or a place from an ordinary word, so
+     a name or place written small is first given its capital, and only where the sentence marks it: a place after in / at / from / to / near (not
+     "married to"), after "town of", or straight after a place already found; a given name after a kin word or "married to"; a surname after that
+     name when a verb follows. Letters are never changed, only the case, and an ordinary word is never touched. The story as typed is kept for
+     everything that shows it back. */
+  var KINW = /^(?:dad|father|mother|mum|mom|grandfather|grandmother|grandpa|grandma|uncle|aunt|aunty|auntie|brother|sister|son|daughter|wife|husband|cousin|nephew|niece|partner|fiance|fiancee)$/;
+  var VERBW = /^(?:was|is|were|travelled|traveled|went|moved|came|lived|born|died|married|left|emigrated|migrated|returned|sailed|had|then|who|arrived|settled|worked|grew|got|came|always|never)$/;
+  var PLACE_KIND = /^(?:town|city|village|hometown|island|region|province|county|state|port|capital|district|area|parish|country)$/;
+  function repairCase(text, ctx) {
+    if (!ctx || !ctx.map) return text;
+    /* texting and shorthand: "moved 2 Manchester", "NYC" */
+    text = String(text).replace(/\b(moved|move|went|go|came|come|travelled|traveled|emigrated|sailed|relocated|returned|back|off)\s+2\b/gi, "$1 to").replace(/\bNYC\b/g, "New York").replace(/\bfrm\b/gi, "from");
+    var parts = String(text).split(/(\s+)/), W = [];
+    parts.forEach(function (x, i) { if (i % 2 === 0 && x) W.push(i); });
+    var info = W.map(function (i) { var raw = parts[i], core = raw.replace(/^[^\p{L}]+|[^\p{L}]+$/gu, ""), lead = raw.slice(0, raw.indexOf(core)); return { i: i, raw: raw, core: core, lead: lead, trail: raw.slice(lead.length + core.length), f: S.fold(core), cap: /^\p{Lu}/u.test(core) }; });
+    function set(k, v) { var w = info[k]; if (v !== w.core) { w.core = v; w.f = S.fold(v); w.cap = /^\p{Lu}/u.test(v); parts[w.i] = w.lead + v + w.trail; } }
+    function capw(c) { return c.charAt(0).toUpperCase() + c.slice(1); }
+    function plain(f) { return !f || f.length < 3 || STOP[f] || COMMON[f] || LC[f] || OCC[f] || MONTHS[f] || NUMW[f] || REL.test(f); }
+    var given = ctx.given || {}, lastPlaceEnd = -9, lastName = -9, cn = Object.create(null);
+    Object.keys(ctx.countries || {}).forEach(function (cc) { cn[S.fold(ctx.countries[cc])] = 1; });
+    cn["usa"] = cn["united states"] = cn["uk"] = cn["united kingdom"] = 1;
+    function known(ph) { return !!(ctx.map[ph] || cn[ph]); }
+    for (var k = 0; k < info.length; k++) {
+      var w = info[k], p1 = k ? info[k - 1].f : "", p2 = k > 1 ? info[k - 2].f : "";
+      if (!w.core) continue;
+      /* odd capitals inside a word ("iVan") are the person's name typed fast */
+      if (/^\p{Ll}\p{Lu}/u.test(w.core) && given[w.f]) { set(k, capw(w.core.toLowerCase())); }
+      /* a name after a kin word, or after "married to" / "named" / "called" */
+      var afterKin = KINW.test(p1), afterWed = (p1 === "to" && /^(?:married|wed|engaged|betrothed)$/.test(p2)) || /^(?:named|called)$/.test(p1) || /^(?:married|marry|wed)$/.test(p1);
+      if (!w.cap && (afterKin || afterWed) && !plain(w.f) && !(info[k - 1] && info[k - 1].trail.indexOf(",") > -1)) {
+        if (given[w.f] || (afterWed && !(ctx.map[w.f] && ctx.map[w.f].length)) || (afterKin && !ctx.map[w.f])) { if (given[w.f] || afterWed || /^(?:was|is|had|and|lived|moved|came|died|married|born|left|emigrated|worked|travelled|traveled|went)$/.test(k + 1 < info.length ? info[k + 1].f : "")) { set(k, capw(w.core)); lastName = k; continue; } }
+      }
+      /* a surname after that name, when a verb follows: "my dad Ivan defranceski travelled" */
+      if (!w.cap && lastName === k - 1 && info[k - 1].cap && !plain(w.f) && !ctx.map[w.f] && !given[w.f] && k + 1 < info.length && VERBW.test(info[k + 1].f) && /^[\p{L}'\u2019-]{4,}$/u.test(w.core)) { set(k, capw(w.core)); continue; }
+      if (w.cap && afterKin && given[w.f]) lastName = k;
+      /* a place: longest run first, three words down to one, where the sentence marks it */
+      if (w.cap && !plain(w.f)) { /* already written right */ }
+      var marked = PREP_PLACE.test(p1) && !(p1 === "to" && /^(?:married|wed|engaged|betrothed|related|devoted|attached)$/.test(p2)) || (p1 === "of" && PLACE_KIND.test(p2)) || k - 1 === lastPlaceEnd || (k - 2 === lastPlaceEnd && /^(?:and|then|,)$/.test(p1));
+      if (!marked) { if (w.cap && known(w.f)) lastPlaceEnd = k; continue; }
+      var done = false;
+      for (var n = 3; n >= 1 && !done; n--) {
+        if (k + n > info.length) continue;
+        var ph = info.slice(k, k + n).map(function (x) { return x.f; }).join(" ");
+        if (!known(ph)) continue;
+        if (n === 1 && (plain(ph) || ph.length < 4)) continue;
+        if (n > 1 && info.slice(k, k + n).some(function (x, j) { return j < n - 1 && /[.,;:!?]$/.test(x.raw); })) continue;
+        for (var j = 0; j < n; j++) if (!info[k + j].cap && !(j > 0 && /^(?:de|del|della|di|of|the|am|an|im|la|le|el|on|upon|and)$/.test(info[k + j].f))) set(k + j, capw(info[k + j].core));
+        lastPlaceEnd = k + n - 1; k += n - 1; done = true;
+      }
+    }
+    return parts.join("");
+  }
+
   function parseStory(text, ctx, attached) {
-    var t = String(text || "").replace(/^\u2014 Picture \d+ \([^\n]*\) \u2014[ \t]*$/gm, " "), teller = "";   /* the line that names a picture read into the story is not story */
+    var typed = String(text || ""), t = repairCase(typed.replace(/^\u2014 Picture \d+ \([^\n]*\) \u2014[ \t]*$/gm, " "), ctx), teller = "";   /* the line that names a picture read into the story is not story */
     /* "my name is David" says who is telling, not who the story is about */
     t = t.replace(/\bmy name is\s+([\p{L}'’-]+)(?:\s+([\p{Lu}][\p{L}'’-]+))?/iu, function (m, g, sn) { teller = cased(g) + (sn && /^\p{Lu}/u.test(sn) && !CONNECT.test(sn) && !STOP[S.fold(sn)] && !(ctx.map && ctx.map[S.fold(sn)]) ? " " + cased(sn) : ""); return " "; });
     t = t.replace(/\b[Ii] (?=(?:1[4-9][0-9]{2}|20[0-2][0-9])(?![0-9]))/g, "in ");   /* "moved to South Africa i 1942" */
-    t = t.replace(/\b(my|his|her|their)\s+(grandfather|grandmother|father|mother|dad|mum|mom)\s+(\p{L}[\p{L}'\u2019-]+)(?=\s+(?:was|is|were|had|lived|moved|came|died|married|born|grew|left|emigrated|worked|and)\b|[,.;])/giu, function (m, pos, kin, nm) {
-      return !/^\p{Lu}/u.test(nm) || STOP[S.fold(nm)] || COMMON[S.fold(nm)] ? m : pos + " " + kin + " was " + nm + ",";   /* "my father Marco was born in Florence" is "my father was Marco, was born in Florence" */
+    t = t.replace(/\b(my|his|her|their)\s+(grandfather|grandmother|father|mother|dad|mum|mom)\s+(\p{L}[\p{L}'\u2019-]+)(\s+\p{Lu}[\p{L}'\u2019-]+)?(?=\s+(?:was|is|were|had|lived|moved|came|died|married|born|grew|left|emigrated|migrated|worked|travelled|traveled|went|sailed|returned|settled|arrived|and)\b|[,.;])/giu, function (m, pos, kin, nm, sn) {
+      if (sn && (STOP[S.fold(sn)] || COMMON[S.fold(sn)] || (ctx.map && ctx.map[S.fold(sn)]) || (ctx.given && ctx.given[S.fold(sn)]))) sn = "";
+      return !/^\p{Lu}/u.test(nm) || STOP[S.fold(nm)] || COMMON[S.fold(nm)] ? m : pos + " " + kin + " was " + nm + (sn || "") + ",";   /* "my father Marco was born in Florence" is "my father was Marco, was born in Florence" */
     });
     t = t.replace(/<\/?[a-z][^>]*>/gi, " ").replace(/\b(?:https?:\/\/|www\.)\S+|\S+@\S+\.\S+/gi, " ");                  /* a link or an address in a pasted story is not a place */
     t = t.replace(/(^|[\s(])['\u2019](\d\d)(?=$|[\s.,;:)])/g, function (m, a, yy) { return a + (Number(yy) > 26 ? "19" : "20") + yy; });   /* "left in '45" */
@@ -646,7 +717,7 @@
     [fam, me, sought].forEach(function (f) { if (f) Object.keys(f.people).forEach(function (k) { var pe = f.people[k]; [pe.given, pe.surname].forEach(function (n) { if (n) nameW[S.fold(n)] = 1; }); }); });
     if (spouse && spouse.given) nameW[S.fold(spouse.given)] = 1;
     var kinName = "";
-    (t.match(/\b(?:[Uu]ncle|[Aa]unt(?:ie|y)?|[Bb]rother|[Ss]ister|[Cc]ousin|[Nn]ephew|[Nn]iece|[Ff]riend|[Nn]eighbou?r|[Ss]on|[Dd]aughter|[Ww]ife|[Hh]usband|[Gg]rand(?:father|mother|pa|ma|ad))\s+\p{Lu}[\p{L}'\u2019-]+/gu) || []).forEach(function (m) {
+    (t.match(/\b(?:[Mm]other|[Mm]um|[Mm]om|[Ff]ather|[Dd]ad|[Uu]ncle|[Aa]unt(?:ie|y)?|[Bb]rother|[Ss]ister|[Cc]ousin|[Nn]ephew|[Nn]iece|[Ff]riend|[Nn]eighbou?r|[Ss]on|[Dd]aughter|[Ww]ife|[Hh]usband|[Gg]rand(?:father|mother|pa|ma|ad))\s+\p{Lu}[\p{L}'\u2019-]+/gu) || []).forEach(function (m) {
       var ws = m.split(/\s+/), nm = ws.pop(), kw = ws.join(" ").toLowerCase();
       nameW[S.fold(nm)] = 1;                                                    /* "my uncle Jordan" is a man, not South Jordan */
       if (!kinName && out.rel && (out.rel === kw || REL_ALIAS[kw] === out.rel) && !STOP[S.fold(nm)] && !COMMON[S.fold(nm)]) kinName = nm;
@@ -656,7 +727,7 @@
     var rolesFor = cands.map(function (c) {
       var p1 = tokens[c.at - 1] || "", p2 = tokens[c.at - 2] || "", isGiven = !!gset[c.word] || !!nameW[c.word];
       var role = PLACE_BEFORE[p1] || ((p1 === "in" && p2 === "born") ? "from" : (p1 === "in" && /^(settled|arrived|lived|living|came|went|emigrated|moved)$/.test(p2)) ? "to" : "");
-      var drop = (isGiven && !role) || (c.word.indexOf(" ") < 0 && (STOP[c.word] || COMMON[c.word] || REL.test(c.word))) || notPlace(c, tokens, ci, ctx);
+      var drop = (isGiven && !role && !listTail(c, cands, t)) || (c.word.indexOf(" ") < 0 && (STOP[c.word] || COMMON[c.word] || REL.test(c.word))) || notPlace(c, tokens, ci, ctx);
       return { c: c, role: role, drop: drop };
     }).filter(function (x) { return !x.drop; });
     function pick(x) { return x ? { row: x.c.rows[0], alts: x.c.rows.slice(1, 6), word: x.c.word } : null; }
@@ -756,8 +827,10 @@
       var ok = sn && /^[\p{L}'’-]{3,}$/u.test(sn) && !STOP[fs] && !COMMON[fs] && !(ctx.given && ctx.given[fs]);
       return { role: which, name: cased(g) + (ok ? " " + cased(sn) : ""), given: cased(g), surname: ok ? cased(sn) : "", presumed: false };
     }
-    var fa = kin("father", /\b(?:his|her|their|my)\s+(?:father|dad)(?:'?s)?(?:\s+name)?\s+(?:was|is|named|called)\s+([\p{L}'’-]+)(?:\s+([\p{L}'’-]+))?/iu);
-    var mo = kin("mother", /\b(?:his|her|their|my)\s+(?:mother|mum|mom)(?:'?s)?(?:\s+name)?\s+(?:was|is|named|called)\s+([\p{L}'’-]+)(?:\s+([\p{L}'’-]+))?/iu);
+    /* "my father was Ivan Defranceski ... his father was Ivan": when the story is about the teller's own father, "his father" is HIS father, not the teller's */
+    var ABOUT_PARENT = /^(?:father|mother|grandfather|grandmother)$/.test(out.rel || ""), POSS = ABOUT_PARENT ? "his|her|their" : "his|her|their|my";
+    var fa = kin("father", new RegExp("\\b(?:" + POSS + ")\\s+(?:father|dad)(?:'?s)?(?:\\s+name)?\\s+(?:was|is|named|called)\\s+([\\p{L}'\u2019-]+)(?:\\s+([\\p{L}'\u2019-]+))?", "iu"));
+    var mo = kin("mother", new RegExp("\\b(?:" + POSS + ")\\s+(?:mother|mum|mom)(?:'?s)?(?:\\s+name)?\\s+(?:was|is|named|called)\\s+([\\p{L}'\u2019-]+)(?:\\s+([\\p{L}'\u2019-]+))?", "iu"));
     var fromP = stops.filter(function (x) { return x.role === "father-from"; })[0], fromM = stops.filter(function (x) { return x.role === "mother-from"; })[0];
     if (!fa && fromP) fa = { role: "father", name: "", given: "", surname: "", presumed: false };
     if (!mo && fromM) mo = { role: "mother", name: "", given: "", surname: "", presumed: false };
@@ -768,7 +841,7 @@
     if (spouse && people.length) people.push({ role: "spouse", name: spouse.given + (spouse.surname ? " " + spouse.surname : ""), given: spouse.given, surname: spouse.surname, place: null });
     out.people = people;
     if (fam) applyFamily(out, fam, ctx); else if (me) applyMe(out, me, ctx, teller); else if (sought) applyMe(out, sought, ctx, "");
-    out.suggest = suggest.concat(didYouMean(t, ctx));
+    out.suggest = suggest.concat(didYouMean(typed, ctx));
     out.life = readLife(t, ctx, out);
     /* married three times and only one wife named: the others are on the tree, unnamed and said to be told; "5 children, 12 grandchildren" is a line on the card */
     if (!fam && !me && !sought) {
@@ -810,17 +883,33 @@
     var ft = S.fold(text).split(" ").filter(Boolean); if (!ft.length) return out;
     var gv = ctx.given ? S.givenIn(text, ctx.given, ctx.skip) : [], gset = Object.create(null); gv.forEach(function (g) { gset[g.word] = 1; });
     var cands = withCountryHints(S.candidates(text, ctx.map, ctx.skip), ft, ctx), atMap = Object.create(null), ci = capInfo(text, ft);
+    cands = withCountries(cands, ft, ctx, gset);   /* "born in Israel": a country is a place a person was born in */
     cands.forEach(function (c) {
       var p1 = ft[c.at - 1] || "", role = PLACE_BEFORE[p1] || "";
       if (notPlace(c, ft, ci, ctx)) return;
+      if (/^(?:married|wed|wedded|marry)$/.test(p1) || (p1 === "to" && /^(?:married|wed|wedded|engaged)$/.test(ft[c.at - 2] || ""))) return;   /* "married to Hedviga": a person */
+      if (KINW.test(p1) && c.word.indexOf(" ") < 0 && ci.capAt[c.at] && ci.capAt[c.at].cap) return;                                              /* "his mother Nora": a person */
       var one = c.word.indexOf(" ") < 0;
       if ((gset[c.word] && !role) || (one && (STOP[c.word] || COMMON[c.word] || REL.test(c.word) || EV_BORN.test(c.word) || EV_DIED.test(c.word) || EV_WED.test(c.word) || EV_MOVE.test(c.word) || EV_CAUSE.test(c.word)))) return;
       atMap[c.at] = c;
+    });
+    /* "Senj Croatia", "Cork, Ireland": a country written right after a place says which place was meant; it is not a second place */
+    var ats = Object.keys(atMap).map(Number).sort(function (a, b) { return a - b; });
+    ats.forEach(function (at, j) {
+      var c = atMap[at], pv = j ? atMap[ats[j - 1]] : null;
+      if (!c || !c.country || !pv || pv.country) return;
+      var pl = pv.word.split(" ").length;
+      if (ats[j - 1] + pl !== at && !(ats[j - 1] + pl + 1 === at && /^(?:in|of)$/.test(ft[at - 1] || ""))) return;
+      var cc = c.rows[0] && c.rows[0].cc, hit = pv.rows.filter(function (r) { return r.cc === cc; });
+      if (!hit.length) return;
+      pv.rows = hit.concat(pv.rows.filter(function (r) { return r.cc !== cc; }));
+      delete atMap[at];
     });
     var mode = "origin", pending = null;
     function place(c) { return { row: c.rows[0], alts: c.rows.slice(1, 6), word: c.word }; }
     for (var i = 0; i < ft.length; i++) {
       var tk = ft[i], c = atMap[i];
+      if (!c && (tk === "hometown" || (tk === "home" && ft[i + 1] === "town") || (tk === "birthplace"))) { mode = "origin"; continue; }
       if (EV_BORN.test(tk)) { mode = "born"; out.born = out.born || { year: null, place: null }; continue; }
       if (EV_DIED.test(tk)) { mode = "died"; out.died = out.died || { year: null, place: null, cause: "" }; continue; }
       if (EV_WED.test(tk)) { mode = "married"; out.married = out.married || { year: null, place: null, spouse: "" }; continue; }
@@ -841,7 +930,7 @@
       else if (!out.origin) out.origin = pl;
     }
     if (out.married) {
-      var sm = /\bmarried\s+(?:my\s+)?(?:(?:other|mother|mum|mom|wife)\s+)?([\p{L}'’-]{2,})(?:\s+([\p{Lu}][\p{L}'’-]+))?/iu.exec(text);
+      var sm = /\bmarried\s+(?:to\s+)?(?:my\s+)?(?:(?:other|mother|mum|mom|wife)\s+)?([\p{L}'’-]{2,})(?:\s+([\p{Lu}][\p{L}'’-]+))?/iu.exec(text);
       if (sm && !/^(in|on|at|a|the|her|him|and)$/i.test(sm[1])) out.married.spouse = cased(sm[1]) + (sm[2] && /^[\p{Lu}]/u.test(sm[2]) && !STOP[S.fold(sm[2])] && !COMMON[S.fold(sm[2])] && !(ctx.map && ctx.map[S.fold(sm[2])]) ? " " + cased(sm[2]) : "");
     }
     return out;
@@ -857,11 +946,28 @@
       }
       return p;
     }
+    var hist = [];
+    function mention(k) { var i = hist.indexOf(k); if (i > -1) hist.splice(i, 1); hist.push(k); }
+    function sexOf(k) { var q = people[k]; if (q && q.sex) return q.sex; return /F$/.test(k) ? "M" : /M$/.test(k) ? "F" : null; }
+    /* WHO "SHE" IS: the last person mentioned who can be a woman; a man's sentence is never given to her */
+    function heFor(pro) { var want = /^he$/i.test(pro) ? "M" : "F"; for (var i = hist.length - 1; i >= 0; i--) { var sx = sexOf(hist[i]); if (!sx || sx === want) return hist[i]; } return null; }
+    /* "was married to Hedviga": a wife (or husband) of that person, a person of her own. The subject's is S, anyone else's is their key and S. */
+    function spouseOf(key, chunk) {
+      var sm = /\bmarried\s+(?:to\s+)?(\p{Lu}[\p{L}'’-]{2,})(?:\s+(\p{Lu}[\p{L}'’-]{2,}))?/u.exec(chunk);
+      if (!sm || STOP[S.fold(sm[1])] || COMMON[S.fold(sm[1])] || MONTHS[S.fold(sm[1])] || /^(?:In|On|At|My|His|Her|Their|The|And)$/.test(sm[1])) return;
+      var sk2 = key === subject ? "S" : key + "S"; if (people[sk2] && people[sk2].name) return;
+      var sn = sm[2] && !STOP[S.fold(sm[2])] && !COMMON[S.fold(sm[2])] && !(ctx.map && ctx.map[S.fold(sm[2])]) && !(ctx.given && ctx.given[S.fold(sm[2])]) ? " " + sm[2] : "";
+      var sp = person(sk2, sm[1] + sn), own = sexOf(key); sp.sex = own === "M" ? "F" : own === "F" ? "M" : null; mention(sk2);
+    }
     String(t || "").split(/[.!?]+(?:\s+|$)|\n+/).forEach(function (sent) {
       if (!sent.trim()) return;
       var re = new RegExp(INTRO.source, "giu"), ms = [], m;
       while ((m = re.exec(sent))) ms.push({ at: m.index, end: m.index + m[0].length, poss: (m[1] || "").toLowerCase(), steps: stepsOf(m[2]), name: m[3] });
-      if (!ms.length) { if (cur) people[cur].chunks.push(sent); return; }
+      if (!ms.length) {
+        if (!cur) return;
+        var hp = /^\W*(?:(?:also|after|before|then|later|in|by|when|until|once|now)\b[^,.]{0,40},?\s+)?(he|she)\b/i.exec(sent), who = hp ? heFor(hp[1]) : null, to = who || cur;
+        people[to].chunks.push(sent); spouseOf(to, sent); mention(to); return;
+      }
       if (cur && ms[0].at > 0) people[cur].chunks.push(sent.slice(0, ms[0].at));
       ms.forEach(function (x, i) {
         if (!x.steps || /^(a|the|an|my|his|her|their|not|also|now)$/i.test(x.name) || STOP[S.fold(x.name)] || COMMON[S.fold(x.name)] || OCC[S.fold(x.name)] || MONTHS[S.fold(x.name)] || EV_BORN.test(S.fold(x.name)) || EV_DIED.test(S.fold(x.name)) || EV_WED.test(S.fold(x.name)) || EV_MOVE.test(S.fold(x.name)) || /^(?:murdered|killed|drowned|executed|hanged|shot|lost|ill|sick|dead|buried|married|single|widowed|divorced|alive|old|young|tall|short|poor|rich)$/.test(S.fold(x.name))) return;   /* "my father was from Cork": from is not his name */
@@ -871,7 +977,7 @@
         var sx = /^\s+([\p{Lu}][\p{L}'’-]{2,})(?=\s|,|$)/u.exec(rest);
         if (sx && !STOP[S.fold(sx[1])] && !COMMON[S.fold(sx[1])] && !(ctx.map && ctx.map[S.fold(sx[1])]) && !(ctx.given && ctx.given[S.fold(sx[1])])) { nm += " " + sx[1]; rest = rest.slice(sx[0].length); }
         var pk = (subject === "F" && key === "M") || (subject === "M" && key === "F") ? "S" : key;
-        var p = person(pk, nm); p.chunks.push(rest); cur = pk;
+        var p = person(pk, nm); p.chunks.push(rest); cur = pk; mention(pk); spouseOf(pk, rest);
       });
     });
     if (!subject || order.length < 2) return null;
@@ -884,6 +990,9 @@
       });
       people[k].ev = all; people[k].occ = occIn(people[k].chunks.join(" "));
     });
+    /* nobody but the subject has anything told of them: the one-person reading (ages, "father from Senj") says it better */
+    var told = function (e) { return !!(e.born || e.origin || e.died || e.married || (e.moves && e.moves.length)); };
+    if (!order.some(function (k) { return k !== subject && told(people[k].ev); })) return null;
     /* the subject's own married clause names the spouse when no sentence did ("he married my mother Cheryl") */
     var sp = people[subject].ev.married;
     if (sp && sp.spouse && !people.S) { var s2 = person("S", sp.spouse); s2.ev = readEvents("", ctx); s2.ev.married = { year: sp.year, place: sp.place, spouse: "" }; }
@@ -1138,19 +1247,22 @@
     put(sk, "self", out.rel || KIN_NOUN[sk]);
     put(sk + "F", "father"); put(sk + "M", "mother");
     Object.keys(P).sort(function (x, y) { return x.length - y.length || (x < y ? -1 : 1); }).forEach(function (k) {
-      if (k === "S") put(k, "spouse"); else if (k.indexOf(sk) === 0 && k.length - sk.length >= 2) put(k, KIN_NOUN[k.slice(-1)] === "father" ? "grandfather" : "grandmother");
+      if (k === "S") put(k, "spouse"); else if (/S$/.test(k) && k.length > 1) put(k, "inlaw");
+      else if (k.indexOf(sk) === 0 && k.length - sk.length >= 2) put(k, KIN_NOUN[k.slice(-1)] === "father" ? "grandfather" : "grandmother");
     });
+    people.forEach(function (pp) { if (pp.role === "inlaw") { var ow = P[pp.key.slice(0, -1)], sx = P[pp.key].sex; pp.label = (sx === "F" ? "wife" : sx === "M" ? "husband" : "spouse") + " of " + (ow && ow.name ? ow.name : lab(pp.key.slice(0, -1)) || "the one before"); } });
     out.people = people;
     if (me.name) { out.name = me.name; out.givenWord = me.given; out.surname = me.surname; var gg = ctx.given ? S.givenIn(me.given, ctx.given, ctx.skip) : []; out.given = gg.length ? gg[0].row.canon : me.given; }
     out.rel = out.rel || KIN_NOUN[sk];
     /* the lines the others travel: where they were born, then where they moved, each at its year when it was given */
     var kin = [];
     Object.keys(P).forEach(function (k) {
-      if (k === sk || k === "S") return;
+      if (k === sk) return;
       var pe = P[k], e = pe.ev, st = [];
       if (e.born && e.born.place) st.push({ row: e.born.place.row, alts: e.born.place.alts, word: e.born.place.word, role: "born", year: e.born.year, approx: false });
       else if (e.origin) st.push({ row: e.origin.row, alts: e.origin.alts, word: e.origin.word, role: "origin", year: null, approx: false });
       e.moves.forEach(function (mv) { st.push({ row: mv.place.row, alts: mv.place.alts, word: mv.place.word, role: "move", year: mv.year, approx: false }); });
+      if (k !== "S" && e.married && e.married.place && !st.some(function (x) { return x.row.i === e.married.place.row.i; })) st.push({ row: e.married.place.row, alts: e.married.place.alts, word: e.married.place.word, role: "married", year: e.married.year, approx: false });
       if (st.length) kin.push({ key: k, name: pe.name, label: (lab(k) ? cased(P[sk].given || "His") + "'s " + lab(k) : "") , stops: st });
     });
     out.kin = kin;
@@ -1235,7 +1347,7 @@
 
   var api = { toYear: toYear, suggest: suggest, windows: windows, volumesFor: volumesFor, captionAt: captionAt, progress: progress, between: between,
               givenForms: givenForms, volLabel: volLabel, buildPlan: buildPlan, parseStory: parseStory, startFamily: startFamily, familyName: familyName, flagFor: flagFor, leaderAt: leaderAt, leadersBetween: leadersBetween, givenGroups: givenGroups, surnameBlock: surnameBlock, short: short, yearsIn: yearsIn,
-              HOLDS: HOLDS, YEAR_MIN: YEAR_MIN, YEAR_MAX: YEAR_MAX, readLife: readLife, gazWants: gazWants, gazMerge: gazMerge, didYouMean: didYouMean, aliasMerge: aliasMerge };
+              HOLDS: HOLDS, YEAR_MIN: YEAR_MIN, YEAR_MAX: YEAR_MAX, readLife: readLife, gazWants: gazWants, gazMerge: gazMerge, didYouMean: didYouMean, aliasMerge: aliasMerge, countryPoints: countryPoints, repairCase: repairCase };
   if (typeof module !== "undefined" && module.exports) { module.exports = api; return; }
   window.raStory = api;
 
@@ -1257,9 +1369,10 @@
           .then(function () { return getJSON("index-quiet.json").then(function (q) { rows = rows.concat(q.places || []); }).catch(function () {}); })
           .then(function () { return getJSON("given-names.json").catch(function () { return { rows: [] }; }); })
           .then(function (g) {
-            return getJSON("place-aliases.json").catch(function () { return null; }).then(function (al) {
-              var givenRows = g.rows || [], given = S.buildGiven(givenRows), map = S.buildMap(rows);
+            return Promise.all([getJSON("place-aliases.json").catch(function () { return null; }), getJSON("country-points.json").catch(function () { return null; })]).then(function (x) {
+              var al = x[0], cp = x[1], givenRows = g.rows || [], given = S.buildGiven(givenRows), map = S.buildMap(rows);
               if (al && al.aliases) aliasMerge(map, rows, al.aliases, given);
+              if (cp && cp.countries) countryPoints(map, cp.countries);
               data = { rows: rows, countries: d.countries || {}, givenRows: givenRows, languages: g.languages || [], given: given, map: map, skip: Object.create(null) };
               return data;
             });
@@ -2033,8 +2146,11 @@
     function gen(cls) { var g = el("div", null, "lf-gen " + (cls || "")); tree.append(g); return g; }
     var gps = (people || []).filter(function (x) { return x.role === "grandfather" || x.role === "grandmother"; }), sp = (people || []).filter(function (x) { return x.role === "spouse"; })[0];
     if (gps.length) { var g0 = gen("lf-grand"); gps.forEach(function (x) { var lb = x.label || x.role; g0.append(card(x, lb.charAt(0).toUpperCase() + lb.slice(1))); }); tree.append(el("div", null, "lf-tie")); }
-    if (fa || mo) { var g1 = gen("lf-parents"); var cap = function (x) { return x.charAt(0).toUpperCase() + x.slice(1); };
-      if (fa) g1.append(card(fa, self.sought && fa.label ? cap(fa.label) : "Father")); if (mo) g1.append(card(mo, self.sought && mo.label ? cap(mo.label) : "Mother")); tree.append(el("div", null, "lf-tie")); }
+    if (fa || mo || (people || []).some(function (x) { return x.role === "inlaw"; })) { var g1 = gen("lf-parents"); var cap = function (x) { return x.charAt(0).toUpperCase() + x.slice(1); };
+      var kinOf = self.rel && !self.me && !self.sought ? "Your " + String(self.rel).replace(/-/g, " ") + "'s " : "";
+      if (fa) g1.append(card(fa, self.sought && fa.label ? cap(fa.label) : kinOf ? cap(kinOf) + "father" : "Father")); if (mo) g1.append(card(mo, self.sought && mo.label ? cap(mo.label) : kinOf ? cap(kinOf) + "mother" : "Mother"));
+      (people || []).filter(function (x) { return x.role === "inlaw"; }).forEach(function (x) { g1.append(card(x, cap(x.label || "Spouse"))); });
+      tree.append(el("div", null, "lf-tie")); }
     /* the people between are drawn even when the story names nobody there: "my grandfather was Ivan" has a parent between him and you */
     function gap(n, above) { for (var i = 0; i < n; i++) { if (!above) tree.append(el("div", null, "lf-tie")); var gg = gen("lf-gap"), ph = el("div", null, "lf-card lf-card-you"); ph.append(el("div", n > 1 && i === 0 ? "Parent of yours, not named" : "Your parent, not named", "lf-card-role"), el("div", "Not in the story yet: name them to add them here", "lf-card-place")); gg.append(ph); if (above) tree.append(el("div", null, "lf-tie")); } }
     if (self.me && !fa && !mo && gps.length) gap(1, true);
@@ -2050,6 +2166,6 @@
     var g3 = gen(), you = el("div", null, "lf-card lf-card-you"); you.append(el("div", "You", "lf-card-role"), el("div", "who is asking", "lf-card-place")); g3.append(you);
     return tree;
   }
-  api.namesBlock = namesBlock; api.treeBlock = treeBlock; api.lifeBlock = lifeBlock; api.lifeEvents = lifeEvents; api.aliasMerge = aliasMerge; api.gazWants = gazWants; api.gazMerge = gazMerge; api.didYouMean = didYouMean;
+  api.namesBlock = namesBlock; api.treeBlock = treeBlock; api.lifeBlock = lifeBlock; api.lifeEvents = lifeEvents; api.aliasMerge = aliasMerge; api.countryPoints = countryPoints; api.gazWants = gazWants; api.gazMerge = gazMerge; api.didYouMean = didYouMean;
   api.createLoader = createLoader; api.createJourney = createJourney; api.el = el;
 })();

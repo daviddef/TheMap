@@ -188,6 +188,10 @@
     var s = c.story, my = ++token, text = ST.textOf(s, true);
     $("ms-lede").textContent = "";
     if (!text.trim()) { $("ms-out").hidden = true; drawFamily(c, null); return; }
+    /* the Atlas files are fetched on first use, which takes a few seconds: say so, so it does not look stuck */
+    var READING = "Reading your story\u2026 the Atlas is looking up each place and name.";
+    var was = $("ms-status").textContent; say(READING);
+    var unsay = function () { if ($("ms-status").textContent === READING) say(was === READING ? "" : was); };
     ensure().then(function () {
       if (my !== token) return;
       var p = parse(text, ST.holdsOf(s), s.born), also = alsoMentioned(s, p);
@@ -204,7 +208,7 @@
       if (!p.from) {
         $("ms-out").hidden = true; lastG = null;
         $("ms-lede").textContent = "The Atlas cannot see where they started yet. Add a piece that names the place, and the journey, the registers to search and the names to try appear here.";
-        $("ms-out").hidden = false; $("ms-journey").hidden = true; $("ms-rest").hidden = true; drawFamily(c, null); syncNav(); return;
+        $("ms-out").hidden = false; $("ms-journey").hidden = true; $("ms-rest").hidden = true; drawFamily(c, null); syncNav(); unsay(); return;
       }
       return LD.gather(p).then(function (g) {
         if (my !== token) return;
@@ -230,7 +234,7 @@
           if (st.not) { var n = make("p", null, "ms-not"); n.append(make("b", "Do not conclude: "), st.not); d.append(n); }
           plan.append(d);
         });
-        drawFamily(c, g); syncNav();
+        drawFamily(c, g); syncNav(); unsay();
       });
     }).catch(function () { say("The Atlas files did not load. Check your connection and open this tab again.", true); });
   }

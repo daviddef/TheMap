@@ -124,3 +124,49 @@ test("a long story is read in a moment, not seconds", () => {
   const t0 = Date.now(); F.parseStory(t, ctx);
   assert.ok(Date.now() - t0 < 1500, "took " + (Date.now() - t0) + " ms");
 });
+
+/* ---- the person, as told: looks, loves, character, marriages, hard times, weather, and how they died, kept in the story's words ---- */
+const life = (t) => F.parseStory(t, ctx).life;
+const groupOf = (lf, k) => (lf.groups.find((g) => g.key === k) || { items: [] }).items;
+
+test("the grandfather from Senj who loved ice cream: every kind of detail is kept, as told, under its own heading", () => {
+  const lf = life("My grandfather from Senj loved ice cream and had dark hair and was always a world class runner that loved his family but got married twice, and the second wife divorced him and took his money and he got angry and went to jail. One day he met his third wife in a huge snow storm after she slipped and it was love at first sight.");
+  assert.deepEqual(groupOf(lf, "looks"), ["Had dark hair"]);
+  assert.deepEqual(groupOf(lf, "loves"), ["Loved ice cream", "Loved his family"]);
+  assert.ok(groupOf(lf, "character").some((x) => /world class runner/.test(x)));
+  assert.ok(groupOf(lf, "character").some((x) => /angry/.test(x)));
+  assert.ok(groupOf(lf, "romance").some((x) => /second wife divorced him/.test(x)));
+  assert.ok(groupOf(lf, "romance").some((x) => /love at first sight/.test(x)));
+  assert.ok(groupOf(lf, "hard").some((x) => /jail/i.test(x)) && groupOf(lf, "hard").some((x) => /took his money/i.test(x)));
+  assert.ok(groupOf(lf, "world").some((x) => /snow storm/.test(x)));
+  assert.equal(lf.married, 3, "married twice, then a third wife");
+});
+
+test("how they died: the cause, the year and the age are read as told, and a death is never invented", () => {
+  const cases = [
+    ["My grandfather died of tuberculosis in Trieste in 1921.", "tuberculosis", 1921, null],
+    ["My grandmother died in childbirth in Senj in 1932, aged 29.", "childbirth", 1932, 29],
+    ["She died from the Spanish flu in Brisbane in 1919.", "spanish flu", 1919, null],
+    ["He died of a heart attack in Perth in 1975, aged 62.", "heart attack", 1975, 62],
+    ["He was killed in the war at Tobruk in 1942.", "killed in the war", 1942, null],
+    ["My father was murdered in Johannesburg in 1988.", "murdered", 1988, null],
+    ["Grandad died in 1950 after a long illness.", "a long illness", 1950, null],
+  ];
+  cases.forEach(([t, cause, year, age]) => {
+    const d = life(t).died;
+    assert.ok(d, t);
+    assert.equal(d.cause, cause, t); assert.equal(d.year, year, t); assert.equal(d.age, age, t);
+  });
+  assert.equal(life("My grandfather was born in Cork in 1900 and moved to Boston in 1923.").died, null);
+  assert.equal(life("").n, 0);
+});
+
+test("a person called From or Murdered is never made of 'my father was from Cork' or 'my father was murdered'", () => {
+  const p = F.parseStory("My father was murdered in Johannesburg in 1988.", ctx);
+  assert.ok(!p.people.some((x) => /murdered/i.test(x.name)));
+});
+
+test("words that only look like details are not details: a street called Warwick, a name called Firestone", () => {
+  assert.deepEqual(life("My grandfather lived on Warwick Street and worked in a campsite near Boston.").groups.filter((g) => g.key === "hard"), []);
+  assert.deepEqual(life("Their family name was Firestone and he came from Saint Paul.").groups.filter((g) => g.key === "world"), []);
+});

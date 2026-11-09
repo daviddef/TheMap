@@ -268,6 +268,7 @@
      written small in a story that capitalises its places; a surname straight after a given name; a place the story says nobody went to. */
   function notPlace(c, tokens, ci, ctx) {
     var p1 = tokens[c.at - 1] || "", single = c.word.indexOf(" ") < 0, ca = ci.capAt[c.at], pa = ci.capAt[c.at - 1], marked = PREP_PLACE.test(p1);
+    if (single && /^(?:flu|influenza|fever|plague|pox|cholera|war|famine|epidemic|pandemic|virus|disease|measles|typhus|typhoid|civil|inquisition|armada)$/.test(tokens[c.at + 1] || "")) return true;   /* "Spanish flu" is not Spanish Wells */
     if (single && (MONTHS[c.word] || NUMW[c.word])) return true;
     if (single && (OCC[c.word] || LC[c.word]) && !(ca && ca.cap && !ca.init && marked)) return true;
     if (single && ci.mixed && ca && !ca.cap && !marked) return true;
@@ -291,6 +292,95 @@
      is the man and "from Ivan" is the village. A story that gives one place is read as the place he started. */
   /* "ivan" and "BLAZEVIC" are shown as names: an all-lower or all-upper word gets a capital, a word typed with its own capitals is left. */
   function cased(w) { w = String(w || ""); return w && (w === w.toLowerCase() || w === w.toUpperCase()) ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : w; }
+
+  /* ---- THE LIFE AS TOLD ---------------------------------------------------------------------------------------------------
+     People tell more than where and when: "he loved ice cream and had dark hair and was a world class runner, married twice, the second wife
+     divorced him and took his money and he went to jail, then met his third wife in a snow storm, it was love at first sight". None of that is
+     a place or a year, and none of it may be dropped, guessed at or turned into a fact. This reads a story clause by clause and keeps each
+     clause that says how they looked, what they loved, what they were like, how a marriage went, what went wrong, what they gave up or wanted,
+     the weather and the world around them, and how they died, in the words the story used, under a plain heading. Nothing is looked up from it:
+     a clause is "as told", never "found". A clause can sit under more than one heading. */
+  var LIFE_GROUPS = [
+    { key: "looks", title: "How they looked", re: /\b(hair|eyes|beard|mou?stache|freckle\w*|complexion|handsome|beautiful|pretty|good[- ]looking|bald|tall|slim|stout|scar\w*|limp\w*|tattoo\w*|looked like|resembl\w+|wore|dressed|blond\w*|brunette|red[- ]?head\w*|grey[- ]haired|gray[- ]haired)\b/i },
+    { key: "loves", title: "What they loved", re: /\b(lov(?:ed|es|ing)(?! at first)|enjoyed|adored|fond of|favou?rite|passion(?:ate)? (?:for|about)|hobb(?:y|ies)|obsessed|couldn'?t resist|never without)\b/i },
+    { key: "character", title: "What they were like", re: /\b(brave|kind|generous|gentle|stubborn|hard[- ]?working|strict|funny|funn(?:ier|iest)|kindest|bravest|strongest|strong|weak|honest|selfish|greedy|hot[- ]tempered|quiet|shy|proud|angry|furious|jealous|bitter|clever|wise|religious|devout|musical|gifted|talented|brilliant|famous|respected|feared|loyal|cheerful|stern|warm|cold|humble|ambitious|lazy|lucky|unlucky|wild|charming|serious|heartbroken|ashamed|lonely|temper|world[- ]class|champion|runner|swimmer|dancer|singer|storyteller|boxer|wrestler|footballer|athlete|fighter|leader|hero)\b/i },
+    { key: "romance", title: "Love and marriage", re: /(divorc\w+|separated|remarried|widow\w*|annul\w+|bigam\w+|eloped?|\b(?:first|second|third|fourth|fifth|1st|2nd|3rd) (?:wife|husband|marriage)\b|\b(?:twice|three times|four times)\b.*\bmarried|\bmarried\b.*\b(?:twice|three times|four times)\b|love at first|fell in love|sweetheart|courted|courtship|proposed|engaged|affair|cheated|left (?:him|her)|true love|\bmet (?:his|her|a|the|their)\b)/i },
+    { key: "family", title: "The family around them", re: /\b(\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|no|many|several) (children|kids|sons|daughters|boys|girls|grandchildren|brothers|sisters|siblings)\b|\b(childless|adopted|stepchild\w*|twins|orphan\w*|raised by|brought up by|foster\w*)\b/i },
+    { key: "hard", title: "Hard times", re: /\b(jail|prison|imprison\w+|arrest\w+|convict\w+|sentenced|trial|fined|executed|hanged|deport\w+|intern(?:ed|ment)|camp|prisoner|fled|escaped|refugee|exile\w*|bankrupt\w*|lost (?:his|her|their|everything|the|a)\b|los(?:ing|s of) (?:the|his|her|their|everything|a)\b|took (?:his|her|their|the) (?:money|house|land|farm|home|children|everything)|everything in it|stole|robbed|poverty|poor|starv\w+|hunger|evict\w+|homeless|stillborn|miscarriage|lost a child|illness|sick|disease|injur\w+|accident|crippled|disabled|blind|drank|drunk|alcohol\w*|gambl\w+|debt|fired|unemployed|strike|lockout|war|battle|conscript\w+|drafted|enlisted|fought|wounded|shot|beaten|abus\w+|violen\w+)\b/i },
+    { key: "gave", title: "What they gave up", re: /\b(sacrific\w+|gave up|went without|worked (?:two|three|\w+ )?jobs|sent money|sending money|saved (?:every|up)|never went back|never saw (?:his|her|them|their)|left (?:his|her|their) (?:family|children|home|village|country)|left behind|put (?:his|her) children)\b/i },
+    { key: "wanted", title: "What they wanted", re: /\b(wanted|dreamed|dreamt|hoped|longed|wished|ambition|aspired|planned to|always wanted|yearned|promised)\b/i },
+    { key: "world", title: "The weather and the world around them", re: /\b(snow\w*|blizzard|storm\w*|flood\w*|drought|famine|frost\w*|freezing|heat ?wave|earthquake|volcano|eruption|hurricane|cyclone|typhoon|monsoon|tornado|landslide|avalanche|shipwreck\w*|bushfire|fire|epidemic|plague|cholera|locusts|hard winter|bitter winter|voyage|crossing|steamer)\b/i }
+  ];
+  /* the causes a story may give for a death, as told; "of / from / after / due to" or the verb itself carries it */
+  var CAUSE_RE = /\b(tuberculosis|consumption|\bTB\b|cholera|typhoid|typhus|smallpox|measles|diphtheria|scarlet fever|whooping cough|spanish (?:flu|influenza)|influenza|the flu|\bflu\b|pneumonia|malaria|dysentery|the plague|\bplague\b|cancer|leuk(?:a)?emia|heart attack|heart failure|heart disease|stroke|childbirth|giving birth|old age|natural causes|accident|mining accident|mine collapse|fire|drowning|starvation|famine|exposure|frostbite|suicide|his own life|her own life|the war|war|battle|combat|bombing|air raid|execution|murder|stabbed|poison(?:ed|ing)?|infection|fever|a long illness|illness|kidney failure|diabetes|covid(?:-19)?|coronavirus|polio|sepsis|gangrene|wounds)\b/i;
+  var DEATH_RE = /\b(died|dies|passed away|killed|drowned|murdered|executed|hanged|shot dead|perished|lost (?:his|her) life|took (?:his|her) own life|succumbed|was lost at sea|was lost)\b([^.;!?\n]*)/i;
+  function readLife(t, ctx, out) {
+    var text = String(t || "").replace(/\s+/g, " "), groups = Object.create(null), any = 0, seen = Object.create(null);
+    function add(key, clause) {
+      var c = clause.replace(/^[\s,;:-]+|[\s,;:.!?-]+$/g, "").replace(/^(?:and|but|then|so|yet|because|until|after|when|while|before|that|who|which)\s+/i, "")
+        .replace(/^(?:[Mm]y|[Oo]ur|[Hh]is|[Hh]er|[Tt]heir)\s+(?:great[- ])*(?:grand\w+|father|mother|dad|mum|mom|uncle|aunt|brother|sister|husband|wife)(?:\s+(?:from|of|in)\s+\p{Lu}[\p{L}'\u2019-]+(?:\s+\p{Lu}[\p{L}'\u2019-]+)?)?\s+(?=\p{L})/u, "");
+      if (c.length < 6 || c.length > 160 || c.split(" ").length < 2) return;
+      var k = key + "|" + c.toLowerCase(); if (seen[k]) return; seen[k] = 1;
+      (groups[key] = groups[key] || []); if (groups[key].length < 6) { groups[key].push(c.charAt(0).toUpperCase() + c.slice(1)); any++; }
+    }
+    text.split(/(?<=[.!?])\s+/).forEach(function (sent) {
+      sent.split(/\s*[,;]\s*|\s+(?:and|but|then|so|yet|because|until|after|when|while|before|though|although|that|who|which)\s+/i).forEach(function (cl) {
+        if (!cl || !cl.trim()) return;
+        LIFE_GROUPS.forEach(function (g) { if (g.re.test(cl)) add(g.key, cl); });
+      });
+    });
+    /* how many times married: "married twice", "his third wife", "remarried" */
+    var ord = { first: 1, second: 2, third: 3, fourth: 4, fifth: 5 }, times = { twice: 2, "three times": 3, "four times": 4, "five times": 5 }, n = 0, mt;
+    (text.match(/\b(first|second|third|fourth|fifth) (?:wife|husband)\b/gi) || []).forEach(function (m) { n = Math.max(n, ord[m.split(" ")[0].toLowerCase()]); });
+    if ((mt = /\bmarried (twice|three times|four times|five times)\b/i.exec(text))) n = Math.max(n, times[mt[1].toLowerCase()]);
+    if (/\bremarried\b/i.test(text)) n = Math.max(n, 2);
+    /* how they died: the cause, the year, the age, the place named in that stretch, all as told */
+    var died = null, dm = DEATH_RE.exec(text);
+    if (dm) {
+      var whole = dm[0], cm = CAUSE_RE.exec(whole), ym = /\b(1[4-9][0-9]{2}|20[0-2][0-9])\b/.exec(whole), am = /\b(?:aged?|at the age of|at)\s+(\d{1,3})\b/i.exec(whole);
+      var verbCause = /^(drowned|murdered|executed|hanged|shot dead|killed|perished|succumbed|took)/i.test(dm[1]) ? dm[1].toLowerCase().replace(/^took .*/, "took their own life") : "";
+      died = { clause: whole.replace(/[\s,;]+$/, ""), cause: cm ? cm[1].replace(/^the /i, "").toLowerCase() : "", verb: verbCause, year: ym ? Number(ym[1]) : null, age: am ? Number(am[1]) : null };
+      var after = /\b(?:after|following)\s+(?:a|an|the|his|her)\s+([^.;,]+)/i.exec(whole);
+      if (!died.cause && after) died.cause = after[1].trim().toLowerCase();
+      if (!died.cause && verbCause) died.cause = verbCause;
+      if (!died.cause && /\b(?:in|at) the war\b/i.test(whole)) died.cause = "the war";
+      if (/own life|suicide/i.test(died.cause + " " + whole)) died.cause = "taking their own life";
+      else if (died.verb === "killed" && died.cause && /^(war|battle|combat|bombing|air raid)$/.test(died.cause)) died.cause = "killed in the " + died.cause;
+      else if (died.verb === "killed" && died.cause && /^(accident|mining accident|mine collapse|fire)$/.test(died.cause)) died.cause = "killed in " + (/^accident|^a/.test(died.cause) ? "an " : "a ") + died.cause;
+      any++;
+    }
+    /* the death is told once, under its own heading, not again as a hard time */
+    if (died) Object.keys(groups).forEach(function (k) { groups[k] = groups[k].filter(function (x) { var a = x.toLowerCase(), b = died.clause.toLowerCase(); return b.indexOf(a) < 0 && a.indexOf(b) < 0 && !(died.cause && a.replace(/^(?:he|she|they) (?:was |were )?/, "") === died.cause); }); });
+    var occ = (out && out.occupations) || [];
+    var gl = LIFE_GROUPS.map(function (g) { return { key: g.key, title: g.title, items: groups[g.key] || [] }; }).filter(function (g) { return g.items.length; });
+    return { groups: gl,
+      married: n, died: died, occupations: occ, n: gl.reduce(function (a, g) { return a + g.items.length; }, 0) + (n > 1 ? 1 : 0) + (died ? 1 : 0) + occ.length };
+  }
+  /* The block for the report: each group under its plain heading, then what usually leaves a record, in words. Never a finding. */
+  function lifeBlock(life) {
+    if (!life || !life.n) return null;
+    var box = el("div", null, "lf-life");
+    box.append(el("p", "What the story said about the person, in its own words. It is kept as told: none of it is looked up or checked, and none of it is a record.", "cap"));
+    function group(title, items, cls) { if (!items.length) return; var d = el("div", null, "lf-life-g" + (cls ? " " + cls : "")); d.append(el("h4", title, "lf-life-h")); var ul = el("ul", null, "lf-life-l"); items.forEach(function (x) { ul.append(el("li", x)); }); d.append(ul); box.append(d); }
+    if (life.occupations.length) group("Work", [life.occupations.join(", ")]);
+    if (life.died) {
+      var dd = life.died, bits = [];
+      if (dd.cause) bits.push("Cause: " + dd.cause.replace(/^(?:of|from) /, ""));
+      if (dd.year != null) bits.push("Year: " + dd.year);
+      if (dd.age != null) bits.push("Age: " + dd.age);
+      bits.push("As told: \u201c" + dd.clause.charAt(0).toUpperCase() + dd.clause.slice(1) + "\u201d");
+      group("How they died", bits);
+    }
+    if (life.married > 1) group("Marriages", ["Married " + (life.married === 2 ? "twice" : life.married + " times") + ", as told. Each marriage leaves its own record."]);
+    life.groups.forEach(function (g) { group(g.title, g.items); });
+    var hints = [];
+    if (life.died) hints.push("a death record, a burial entry or a newspaper notice, which often name the cause");
+    if (life.married > 1 || life.groups.some(function (g) { return g.key === "romance" && g.items.some(function (x) { return /divorc|separat|annul/i.test(x); }); })) hints.push("one marriage record for each marriage, and a divorce or court file where it ended in one");
+    if (life.groups.some(function (g) { return g.key === "hard" && g.items.some(function (x) { return /jail|prison|arrest|convict|sentenc|trial|fined|deport|intern/i.test(x); }); })) hints.push("court, police or prison registers and the local newspaper");
+    if (life.groups.some(function (g) { return g.key === "hard" && g.items.some(function (x) { return /war|battle|conscript|draft|enlist|fought|wounded|prisoner/i.test(x); }); })) hints.push("military service and prisoner-of-war records");
+    if (hints.length) box.append(el("p", "Where such things usually leave a record: " + hints.join("; ") + ". These are places to look, not findings.", "cap"));
+    return box;
+  }
 
   /* A country written in the story ("Worthington, United States") says which of the same-named places is meant: places in the countries the
      story names come first, and the words of a country's long name ("United States of America") are not themselves places. */
@@ -508,7 +598,7 @@
     function kin(which, re) {
       var m = re.exec(t); if (!m) return null;
       var g = m[1] || "", sn = m[2] || "", fg = S.fold(g), fs = S.fold(sn);
-      if (!g || STOP[fg] || COMMON[fg]) return null;
+      if (!g || STOP[fg] || COMMON[fg] || EV_BORN.test(fg) || EV_DIED.test(fg) || EV_WED.test(fg) || EV_MOVE.test(fg) || /^(?:killed|drowned|executed|hanged|shot|lost|ill|sick|buried|single|widowed|divorced|alive|old|young|tall|short|poor|rich)$/.test(fg)) return null;
       var ok = sn && /^[\p{L}'’-]{3,}$/u.test(sn) && !STOP[fs] && !COMMON[fs] && !(ctx.given && ctx.given[fs]);
       return { role: which, name: cased(g) + (ok ? " " + cased(sn) : ""), given: cased(g), surname: ok ? cased(sn) : "", presumed: false };
     }
@@ -524,6 +614,7 @@
     if (spouse && people.length) people.push({ role: "spouse", name: spouse.given + (spouse.surname ? " " + spouse.surname : ""), given: spouse.given, surname: spouse.surname, place: null });
     out.people = people;
     if (fam) applyFamily(out, fam, ctx); else if (me) applyMe(out, me, ctx, teller); else if (sought) applyMe(out, sought, ctx, "");
+    out.life = readLife(t, ctx, out);
     return out;
   }
 
@@ -607,7 +698,7 @@
       if (!ms.length) { if (cur) people[cur].chunks.push(sent); return; }
       if (cur && ms[0].at > 0) people[cur].chunks.push(sent.slice(0, ms[0].at));
       ms.forEach(function (x, i) {
-        if (!x.steps || /^(a|the|an|my|his|her|their|not|also|now)$/i.test(x.name) || STOP[S.fold(x.name)] || COMMON[S.fold(x.name)] || OCC[S.fold(x.name)] || MONTHS[S.fold(x.name)]) return;   /* "my father was from Cork": from is not his name */
+        if (!x.steps || /^(a|the|an|my|his|her|their|not|also|now)$/i.test(x.name) || STOP[S.fold(x.name)] || COMMON[S.fold(x.name)] || OCC[S.fold(x.name)] || MONTHS[S.fold(x.name)] || EV_BORN.test(S.fold(x.name)) || EV_DIED.test(S.fold(x.name)) || EV_WED.test(S.fold(x.name)) || EV_MOVE.test(S.fold(x.name)) || /^(?:murdered|killed|drowned|executed|hanged|shot|lost|ill|sick|dead|buried|married|single|widowed|divorced|alive|old|young|tall|short|poor|rich)$/.test(S.fold(x.name))) return;   /* "my father was from Cork": from is not his name */
         var base = x.poss === "my" || !subject ? "" : subject, key = base + x.steps;
         if (!subject) { if (x.poss !== "my" || x.steps.length !== 1) return; subject = key; }
         var rest = sent.slice(x.end, i + 1 < ms.length ? ms[i + 1].at : sent.length), nm = x.name;
@@ -649,7 +740,7 @@
       if (name && !p.name) { p.name = cased(name); p.given = p.name; }
       return p;
     }
-    function okName(w) { var f = S.fold(w); return w && /^[\p{L}'’-]{2,}$/u.test(w) && !NOT_NAME.test(w) && !STOP[f] && !COMMON[f] && !CONNECT.test(w) && !EV_BORN.test(f) && !EV_MOVE.test(f); }
+    function okName(w) { var f = S.fold(w); return w && /^[\p{L}'’-]{2,}$/u.test(w) && !NOT_NAME.test(w) && !STOP[f] && !COMMON[f] && !CONNECT.test(w) && !EV_BORN.test(f) && !EV_MOVE.test(f) && !EV_DIED.test(f) && !EV_WED.test(f) && !/^(?:killed|drowned|executed|hanged|shot|lost|ill|sick|buried|single|widowed|divorced|alive|old|young|tall|short|poor|rich)$/.test(f); }
     function merge(p, e) { var o = p.ev; o.origin = o.origin || e.origin; o.born = o.born || e.born; o.died = o.died || e.died; o.married = o.married || e.married; o.moves = o.moves.concat(e.moves); }
     var sents = String(t || "").split(/[.!?]+(?:\s+|$)|\n+/), parentsWed = null;
     sents.forEach(function (sent) {
@@ -959,7 +1050,7 @@
 
   var api = { toYear: toYear, suggest: suggest, windows: windows, volumesFor: volumesFor, captionAt: captionAt, progress: progress, between: between,
               givenForms: givenForms, volLabel: volLabel, buildPlan: buildPlan, parseStory: parseStory, startFamily: startFamily, familyName: familyName, flagFor: flagFor, leaderAt: leaderAt, leadersBetween: leadersBetween, givenGroups: givenGroups, surnameBlock: surnameBlock, short: short, yearsIn: yearsIn,
-              HOLDS: HOLDS, YEAR_MIN: YEAR_MIN, YEAR_MAX: YEAR_MAX };
+              HOLDS: HOLDS, YEAR_MIN: YEAR_MIN, YEAR_MAX: YEAR_MAX, readLife: readLife };
   if (typeof module !== "undefined" && module.exports) { module.exports = api; return; }
   window.raStory = api;
 
@@ -1084,7 +1175,7 @@
             surname: r[5][i], surnameTyped: pe.surname, presumed: !!pe.presumed, me: !!pe.me, sought: !!pe.sought, key: pe.key, place: pe.place && infos[pe.place.row.i] ? infos[pe.place.row.i].name : "", label: pe.label || "",
             events: (pe.events || []).map(function (e) { var inf = e.place && infos[e.place.row.i]; return { type: e.type, year: e.year, place: inf ? inf.name : (e.place ? e.place.word : e.text ? e.text + " (not among the Atlas's places)" : ""), country: inf ? inf.countryName : "", cause: e.cause || "" }; }) };
         });
-        return { facts: facts, plan: buildPlan(facts), mort: r[2], names: { people: out }, people: out };
+        return { facts: facts, plan: buildPlan(facts), mort: r[2], names: { people: out }, people: out, life: parsed.life || null };
       });
     }
     return { getJSON: getJSON, load: load, resolveMissing: resolveMissing, placeInfo: placeInfo, gather: gather, surname: surname };
@@ -1743,6 +1834,6 @@
     var g3 = gen(), you = el("div", null, "lf-card lf-card-you"); you.append(el("div", "You", "lf-card-role"), el("div", "who is asking", "lf-card-place")); g3.append(you);
     return tree;
   }
-  api.namesBlock = namesBlock; api.treeBlock = treeBlock;
+  api.namesBlock = namesBlock; api.treeBlock = treeBlock; api.lifeBlock = lifeBlock;
   api.createLoader = createLoader; api.createJourney = createJourney; api.el = el;
 })();

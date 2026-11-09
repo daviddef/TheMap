@@ -33,3 +33,19 @@ Result: 53 of 96 passed on the first run, 85 of 85 now pass, and 11 are kept as 
 - **Occupations** are kept as a list for the story, not attached to a person when two are told.
 - **Places past the first six in a story that the index lacks** are looked up in the worldwide gazetteer only when they follow in/at/from/near/to/en/nach/aus/von/iz/nel/nella; "Cork, Lyon, Paris" with no preposition finds only what the index holds.
 - **The reader sees the index, not the whole gazetteer.** Lyon, Kraków, Bilbao, Tbilisi and Tobruk are not in the 55,771-place index; they are found only through the gazetteer lookup above.
+
+## The person, as told (added the same day)
+
+David asked what happens to "loved ice cream, had dark hair, was a world class runner, married twice, the second wife divorced him and took his money, he went to jail, met his third wife in a snow storm, love at first sight", and whether a cause of death is read. Before: all of it was dropped without a word, and a single person's death was read only as a year and a place. Now `readLife` (in `story-engine.js`) reads the story clause by clause and keeps each clause that says something under a plain heading, in the story's own words:
+
+How they looked · What they loved · What they were like · Love and marriage · The family around them · Hard times · What they gave up · What they wanted · The weather and the world around them · Work · Marriages (a count: "married twice" + "his third wife" is three) · How they died (cause, year, age, and the clause itself).
+
+Rules: nothing is looked up, nothing is turned into a date or a place, and every line is marked "as told". "Where such things usually leave a record" names kinds of record (a death entry, one marriage record for each marriage, court and prison registers, military records) and is a list of places to look, not findings. It shows in the map drawer ("The person, as told") and the My story report, and as chips while typing ("died of tuberculosis, 1921", "married 3 times", "heard 12 things about them, kept as told").
+
+Tested on 26 stories (`node site/test/stress/life-run.mjs`, 26 pass) and 4 fixture tests in `story-stress.test.js`.
+
+Still not done with it:
+- The weather and the world around them are kept, but not yet matched to the Atlas's events by year ("snow storm" has no year; "the flood of 1966" has one but the Atlas holds no flood list). A cause of "Spanish flu" or "cholera" is not yet linked to the mass-mortality events the Atlas holds.
+- Each detail belongs to "the story", not to one person on the tree when several are told about. Three marriages do not yet put three unnamed spouses on the tree.
+- Clauses are matched by words, so an unusual way of putting a thing is missed (a hair colour told as "she was a redhead" is caught; "he was built like a barn door" is not). Missing a detail is safe; the words are kept whole when they are caught.
+- Causes of death outside the list (about fifty) are kept in the clause quoted under "How they died", but not named in the "Cause" line.

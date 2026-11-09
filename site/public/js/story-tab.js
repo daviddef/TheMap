@@ -213,6 +213,7 @@
         var sb = J.stops(f, g.mort); lastStopItems = sb.items;
         var stops = $("ms-stops"); stops.textContent = ""; stops.append(sb);
         J.draw(f, g.mort);
+        var lb = E.lifeBlock(g.life), lbox = $("ms-life"); lbox.textContent = ""; if (lb) lbox.append(lb); $("ms-life-sec").hidden = !lb;
         var nb = E.namesBlock(g.names, BASE), nbox = $("ms-names"); nbox.textContent = ""; if (nb) nbox.append(nb); $("ms-names-sec").hidden = !nb;
         var tr = E.treeBlock(g.people, f.rel), tbox = $("ms-tree"); tbox.textContent = ""; if (tr) tbox.append(tr); $("ms-tree-sec").hidden = !tr;
         var plan = $("ms-plan"); plan.textContent = "";
@@ -295,6 +296,9 @@
     if (p.rel) chip(p.rel.replace(/-/g, " "));
     if (p.name) chip(p.name);
     if (p.occupations && p.occupations.length) chip("work: " + p.occupations.join(", "));
+    if (p.life && p.life.died) chip("died" + (p.life.died.cause ? (/^(?:murdered|drowned|killed|executed|hanged|shot|perished|taking|succumbed)/.test(p.life.died.cause) ? " " + p.life.died.cause : " of " + p.life.died.cause.replace(/^(?:of|from) /, "")) : "") + (p.life.died.year != null ? ", " + p.life.died.year : ""));
+    if (p.life && p.life.married > 1) chip("married " + (p.life.married === 2 ? "twice" : p.life.married + " times"));
+    if (p.life && p.life.groups.length) chip("heard " + p.life.groups.reduce(function (a, g) { return a + g.items.length; }, 0) + " things about them, kept as told");
     (p.people || []).forEach(function (pe) { if (pe.role !== "self" && pe.name && pe.name !== p.name) chip((pe.label || pe.role) + " " + pe.name); });
     var stops = (p.stops && p.stops.length ? p.stops : [p.from && Object.assign({ role: "origin" }, p.from), p.to && Object.assign({ role: "move" }, p.to)].filter(Boolean)).filter(function (st) { return st.row && !notPlace(st, p); });
     var ambiguous = false;

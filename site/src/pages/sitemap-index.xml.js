@@ -6,7 +6,8 @@ import regions from "../../public/regions.json";
 import provs from "../../public/providers.json";
 import cols from "../data/collections-full.json";
 import { corpus } from "../lib/surname-corpus.js";
-import { surnamePageSlugs } from "../lib/surname-pages.js";
+import { surnameIndexSlugs } from "../lib/surname-pages.js";
+import { placeIndexable, nameIndexable } from "../lib/index-rules.js";
 import { slugs as flagSlugs } from "../lib/flag-pages.js";
 import { names } from "../lib/given-names.js";
 import { stories } from "../lib/name-stories.js";
@@ -87,7 +88,8 @@ export function urlsFor(set) {
             ["surname/", "0.8"],
             ["privacy/", "0.3"]];
   }
-  if (set === "places") return full.places.map((p) => [`place/${p.id}/`, "0.6"]);
+  /* ONLY PLACES WITH SOMETHING OF THEIR OWN (index-rules.js); the rest keep their page, marked noindex, follow. */
+  if (set === "places") return full.places.filter(placeIndexable).map((p) => [`place/${p.id}/`, "0.6"]);
   if (set === "archives") return provs.providers.map((p) => [`archive/${p.id}/`, "0.7"]);
   if (set === "regions") return regions.regions.map((r) => [`region/${r.id}/`, "0.8"]);
   if (set === "countries") {
@@ -107,9 +109,12 @@ export function urlsFor(set) {
        This file kept its own copy and it never followed: 17,961 surname
        pages were live and 3,577 were listed here. Kosina, Defranceschi and
        Luwinski all had pages and none of them were in the sitemap. */
-    return surnamePageSlugs(surn.surnames).map((s) => [`surname/${s}/`, "0.5"]);
+    return surnameIndexSlugs(surn.surnames).map((s) => [`surname/${s}/`, "0.5"]);
   }
-  if (set === "names") return [...names().rows.map((r) => [`name/${r.id}/`, "0.6"]), ...stories().map((x) => [`story/${x.id}/`, "0.7"])];
+  if (set === "names") {
+    const st = stories(), N = names(), ids = new Set(st.map((x) => x.id));
+    return [...N.rows.filter((r) => nameIndexable(r.id, N, ids)).map((r) => [`name/${r.id}/`, "0.6"]), ...st.map((x) => [`story/${x.id}/`, "0.7"])];
+  }
   return [];
 }
 

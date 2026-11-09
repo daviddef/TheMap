@@ -1,5 +1,6 @@
 ---
 import { timelineFor } from "../../lib/surname-timeline.js";
+import { surnameIndexable } from "../../lib/index-rules.js";
 import { surnamePageRows } from "../../lib/surname-pages.js";
 /* One page per surname that has something real to say.
 
@@ -236,6 +237,7 @@ const mapped = new Set(jurisdiction.map((g) => g.cc));
 const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
 ---
 <Base
+  noindex={!surnameIndexable(r)}
   og="surname"
   jsonld={{
     "@context": "https://schema.org", "@type": "DefinedTerm",

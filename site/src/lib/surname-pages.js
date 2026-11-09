@@ -19,6 +19,7 @@
  */
 
 import { holdsMember } from "./surname-families.js";
+import { surnameIndexable } from "./index-rules.js";
 
 /* The slug a surname's page lives at. Must match the page and the sitemap,
    so it lives here too. */
@@ -100,4 +101,9 @@ export function surnamePageRows(surnames) {
 
 export function surnamePageSlugs(surnames) {
   return surnamePageRows(surnames).rows.map((x) => x.s);
+}
+
+/* The slugs that go in the sitemap: the ones with something of their own (see index-rules.js). The rest keep their pages. */
+export function surnameIndexSlugs(surnames) {
+  return surnamePageRows(surnames).rows.filter((x) => surnameIndexable(x.r)).map((x) => x.s);
 }

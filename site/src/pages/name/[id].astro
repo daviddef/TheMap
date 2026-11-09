@@ -9,6 +9,8 @@
 import Base from "../../layouts/Base.astro";
 import { u } from "../../lib/url.js";
 import { names, confidence, hostOf } from "../../lib/given-names.js";
+import { nameIndexable } from "../../lib/index-rules.js";
+import { stories } from "../../lib/name-stories.js";
 
 export function getStaticPaths() {
   const n = names();
@@ -34,7 +36,7 @@ const firstMeaning = mean?.meanings?.[0]?.claim;
 const dek = `${row.canon}: ${distinct.size} form${distinct.size === 1 ? "" : "s"} of this one name in ${nLangs} language${nLangs === 1 ? "" : "s"}, each with its source. `
   + (firstMeaning ? `${firstMeaning}` : "Spellings a clerk, a priest or an index may have used.");
 ---
-<Base title={title} eyebrow="Given name" dek={dek.length > 300 ? dek.slice(0, 297) + "…" : dek}>
+<Base noindex={!nameIndexable(id, N, new Set(stories().map((x) => x.id)))} title={title} eyebrow="Given name" dek={dek.length > 300 ? dek.slice(0, 297) + "…" : dek}>
   <section class="nm">
     <p class="cap" style="margin-top:0"><a href={u("/name/")}>All names</a> · <a href={u(`/your-name/?n=${encodeURIComponent(row.canon)}`)}>Look up another form of {row.canon}</a></p>
 

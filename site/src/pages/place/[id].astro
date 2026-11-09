@@ -21,6 +21,7 @@ import { u } from "../../lib/url.js";
 import full from "../../data/places-full.json";
 import regions from "../../../public/regions.json";
 import provs from "../../../public/providers.json";
+import { placeHasOwn } from "../../lib/index-rules.js";
 import { sourcesFor, sourcesNear, access as ACCESS, nationalIsPlaceSpecific, nationalUnverified,
          countrySourcesHref } from "../../lib/sources-by-country.js";
 import { atlas as idx } from "../../lib/atlas.js";
@@ -229,6 +230,7 @@ const filedName = place.filedUnder
 const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${place.lat},${place.lon},12`);
 ---
 <Base
+  noindex={!placeHasOwn(det, place)}
   og={CARDS.has(place.id) ? `place/${place.id}` : "place"}
   jsonld={{
     "@context": "https://schema.org", "@type": "Place",

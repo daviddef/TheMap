@@ -18,7 +18,7 @@ import "../styles/kit.css"; // the friendly style (cards, pills, step lists), fo
    attribution — the one kind of number that must not quietly go stale. */
 import osm from "../../public/archives-osm.json";
 
-const { title, dek, eyebrow, bare, jsonld, og = "default", wide, flag } = Astro.props;
+const { title, dek, eyebrow, bare, jsonld, og = "default", wide, flag, noindex } = Astro.props;
 /* GROUPED, BECAUSE THE STYLESHEET ONLY EVER STYLED GROUPS. styles.css came
    across whole from the family archive and it carries a complete navigation
    design: dropdown groups, a menu button, a drawer. This file rendered eleven
@@ -52,13 +52,16 @@ const here = Astro.url.pathname;
  * rather than a way around it: these are the screens that actually have
  * publisher content on them.
  *
- * `/` is matched exactly. Everything else matches as a prefix, so /country/
- * covers its children while /place/ and /surname/ are simply absent.
+ * Matched as prefixes: /flags/ covers its children, /place/ and /surname/ are
+ * simply absent. The audit of 10 Nov 2026 found about 630 pages were carrying
+ * the ad, not a hundred, and cut the list to what is written.
  */
-const AD_PAGES = ["/about/", "/help/", "/data/", "/coverage/", "/countries/",
-                  "/country/", "/changelog/", "/worklist/", "/jurisdictions/",
-                  "/add/", "/my-research/", "/flags/", "/errands/"];
-const adsHere = here === "/" || AD_PAGES.some((p) => here.startsWith(p));
+const AD_PAGES = ["/about/", "/data/", "/coverage/", "/changelog/", "/flags/"];
+/* A country's page carries the ad and its generated /sources/ page does not (95% one template, measured 10 Nov 2026), and the
+   tool screens (the map, /add/, /my-research/, /errands/, /worklist/) and the pages kept out of search (/countries/,
+   /jurisdictions/) have none: an ad on a screen that is a form or a list is «ads on screens without publisher content». */
+const adsHere = AD_PAGES.some((p) => here.startsWith(p))
+  || (here.startsWith("/country/") && !here.replace(/\/$/, "").endsWith("/sources"));
 /* The three page kinds that carry ProgressKit, which is what the RESEARCHING
    control acts on. Everywhere else it is furniture. */
 const marksHere = here === u("/") || here === "/"
@@ -74,6 +77,7 @@ import LineSwitcher from "../components/LineSwitcher.astro";
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>{title === site.name ? `${site.name} — ${site.tagline}` : `${title} — ${site.name}`}</title>
 <meta name="description" content={dek || site.tagline} />
+{noindex && <meta name="robots" content="noindex, follow" />}
 <meta property="og:title" content={title} />
 <meta property="og:description" content={dek || site.tagline} />
 <meta property="og:type" content="website" />

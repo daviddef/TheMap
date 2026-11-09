@@ -346,7 +346,13 @@ function withEvidence(slug, html) {
 }
 
 const WRAPPER = `
-.flagpage{max-width:900px;margin:0 auto;padding:0 16px 48px}
+/* ONE PAGE WIDTH. This was a 900px column (and each page's own .wrap 920-980) inside the site's 1440px content area, so the Flags Atlas
+   sat in a strip while Names and the rest ran the full width. The site's own wrapper already pads and caps the page (--maxw), so the
+   flag page fills it. */
+.flagpage{max-width:none;margin:0;padding:0 0 48px}
+.flagpage .wrap{max-width:none}
+/* the page is wide; a line of text is not: prose stays at a readable measure, boxes, cards and maps take the full width */
+.flagpage p{max-width:100ch}
 .flagpage footer{display:none}
 .flagpage .flagmaplink{margin:0 0 22px;padding:10px 14px;border:1px solid var(--rule);
   border-left:3px solid var(--accent);border-radius:3px;background:var(--panel);

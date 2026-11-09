@@ -17,6 +17,9 @@ import Base from "../layouts/Base.astro";
 import { u } from "../lib/url.js";
 import ProgressKit from "../components/ProgressKit.astro";
 import LineSwitcher from "../components/LineSwitcher.astro";
+import { atlas as idx } from "../lib/atlas.js";
+
+const CCNAMES = idx.countries || {};
 
 /* The links below are rendered by Astro rather than by the dossier's script,
    so they need the base path at build time, not the one define:vars hands the
@@ -35,7 +38,48 @@ const BASE_ = u("/");
   <link rel="stylesheet" href={u("/story-cards.css")} />
   <script is:inline src={u("/js/stories.js")}></script>
   <script is:inline src={u("/js/research-file.js")}></script>
+  <script is:inline src={u("/js/shard-key.js")}></script>
+  <script is:inline src={u("/js/name-intro.js")}></script>
+  <script is:inline>
+    (function () {
+      /* this script sits in the head slot, before the container exists: the container is looked up when drawing, not now */
+      var host = null, N = window.raNameIntro;
+      if (!N) return;
+      var base = (document.documentElement.getAttribute("data-base") || "/").replace(/\/?$/, "/"), names = {}, cache = {}, token = 0;
+      function getJ(u) { return cache[u] || (cache[u] = fetch(u).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })); }
+      function show(node) { if (!host) return; host.textContent = ""; if (node) { host.append(node); host.hidden = false; } else host.hidden = true; }
+      function draw() {
+        var P = window.raProgress; if (!P) return;
+        host = document.getElementById("mr-intro"); if (!host) return;
+        if (!Object.keys(names).length) { try { names = JSON.parse(document.getElementById("mr-cn").textContent) || {}; } catch (e) {} }
+        var me = P.lines().filter(function (l) { return l.active; })[0];
+        if (!me || /^(My research so far|Research Names)$/.test(me.name)) { token++; show(null); return; }
+        var my = ++token, f = window.raFold(me.name);
+        getJ(base + "shards.json").then(function (sh) {
+          var key = window.raShardKey(f, sh && sh.s); if (!key) return null;
+          return getJ(base + "s/" + encodeURIComponent(key) + ".json");
+        }).then(function (rows) {
+          if (my !== token) return;
+          /* a shard that could not be fetched is not a finding: say nothing */
+          if (!rows) { show(null); return; }
+          var row = N.pick(rows, me.name);
+          if (!row) { show(N.render(N.build(null), base)); return; }
+          return Promise.all([getJ(base + "flag-eras.json"), getJ(base + "flag-map.json")]).then(function (a) {
+            if (my !== token) return;
+            show(N.render(N.build(row, { names: names, eras: a[0] && a[0].eras, map: a[1] }), base));
+          });
+        });
+      }
+      document.addEventListener("ra-progress-changed", draw);
+      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { setTimeout(draw, 0); }); else setTimeout(draw, 0);
+    })();
+  </script>
   <LineSwitcher admin />
+
+  {/* AN INTRODUCTION TO THE NAME, between the bar and the tabs: what the surname is, where the registers count it, and whose flag flew
+      there. Drawn by js/name-intro.js from the same shard the map's search reads; empty (and hidden) for a family that is not a surname. */}
+  <div id="mr-intro" hidden></div>
+  <script type="application/json" id="mr-cn" set:html={JSON.stringify(CCNAMES)}></script>
 
   <div class="mr-full">
 

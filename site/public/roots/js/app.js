@@ -19,6 +19,7 @@ const pct = x => (x * 100).toFixed(1).replace(/\.0$/, '') + '%';
 
 let curBytes = null, curName = null;   // a private copy, only so the visitor can choose to keep the file on this device
 let worker = null, last = null, shown = { review: 0 };
+let openTo = null;   // the tab to land on after the next load: «Fix list» on a kept file goes straight there, not through the whole tree
 const base = new URL('./', location.href).href;
 
 function show(id) { for (const s of ['start', 'busy', 'work']) $('#' + s).hidden = s !== id; document.body.classList.toggle('loaded', id === 'work'); }
@@ -56,7 +57,7 @@ function done(m) {
   last = m; window.RR = { tree: m.tree, atlas: m.atlas }; anc = m.anc || null; ancStatus(); mhFile = m.mh || null; applyTreeLink();
   const keepTab = $('.tabs [aria-selected=true]')?.dataset.tab || 'tree';
   show('work'); chips(m); mountViewer(); report(m); review(m); workbench(m.wb); worker.postMessage({ cmd: 'offer' }); askFix();
-  tab(m.first ? 'tree' : keepTab);
+  tab(openTo || (m.first ? 'tree' : keepTab)); openTo = null;
 }
 
 function chips(m) {
@@ -642,9 +643,10 @@ async function refreshRecent() {
   savedFix();
   const items = await recent.list(), box = $('#recent'), ul = $('#recentlist'); ul.textContent = ''; box.hidden = !items.length;
   for (const f of items) {
-    const li = el('li', 'rf'), open = el('button', 'btn', 'Open'), when = new Date(f.saved).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
-    open.onclick = async () => { const r = await recent.recall(f.id); if (r) start(r.bytes, r.name); else refreshRecent(); };
-    li.append(el('b', 'rn', f.name), el('span', 'muted', mb(f.size) + ' · kept ' + when), open, ib('trash', 'Forget this file (removes it from this browser)', async () => { await recent.forget(f.id); refreshRecent(); }));
+    const li = el('li', 'rf'), open = el('button', 'btn', 'Fix list'), tree = el('button', 'btn ghost', 'Tree'), when = new Date(f.saved).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+    const go = to => async () => { const r = await recent.recall(f.id); if (r) { openTo = to; start(r.bytes, r.name); } else refreshRecent(); };
+    open.onclick = go('fix'); tree.onclick = go(null); open.title = 'Open this file straight on its Fix list'; tree.title = 'Open this file on its tree';
+    li.append(el('b', 'rn', f.name), el('span', 'muted', mb(f.size) + ' · kept ' + when), open, tree, ib('trash', 'Forget this file (removes it from this browser)', async () => { await recent.forget(f.id); refreshRecent(); }));
     ul.append(li);
   }
 }

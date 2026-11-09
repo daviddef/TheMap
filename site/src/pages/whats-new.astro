@@ -15,13 +15,38 @@ import Base from "../layouts/Base.astro";
 import { u } from "../lib/url.js";
 import data from "../data/whats-new.json";
 import site from "../data/site.json";
+import provs from "../../public/providers.json";
 
 const KINDS = {
   new:    { label: "New",    glyph: "✦" },
   better: { label: "Better", glyph: "↑" },
   fixed:  { label: "Fixed",  glyph: "✓" },
 };
-const entries = data.entries.slice().sort((a, b) => b.date.localeCompare(a.date));
+/* NEW SOURCES WRITE THEIR OWN LINE. A source added to the directory is the most common thing that happens here and the one
+   nobody remembered to announce, so each day the directory grew becomes a «new» entry, built from the arrival dates
+   (data/provider-added.json, via providers.json). A small day names its sources; a big one says how many and where, and
+   links to that day's list on /providers/. Only days since this page began are used: the first import is not news. */
+const firstDay = data.entries.reduce((m, e) => (e.date < m ? e.date : m), "9999");
+const arrivals = {};
+for (const p of provs.providers) if (p.added && p.added >= firstDay) (arrivals[p.added] = arrivals[p.added] || []).push(p);
+let regionName = (c) => c;
+try { const dn = new Intl.DisplayNames(["en"], { type: "region" }); regionName = (c) => { try { return c === "*" ? "worldwide" : (dn.of(c) || c); } catch (e) { return c; } }; } catch (e) { /* codes shown */ }
+const sourceEntries = Object.entries(arrivals).map(([date, list]) => {
+  list.sort((a, b) => a.name.localeCompare(b.name));
+  const short = (n) => n.replace(/\s*\(.*$/, "");
+  let headline;
+  if (list.length <= 4) {
+    headline = `New ${list.length === 1 ? "source" : "sources"}: ${list.map((p) => short(p.name)).join("; ")}`;
+  } else {
+    const mix = {};
+    for (const p of list) for (const c of p.countries) mix[c] = (mix[c] || 0) + 1;
+    const top = Object.entries(mix).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([c]) => regionName(c));
+    headline = `${list.length.toLocaleString("en")} new sources added to the directory, mostly ${top.join(", ")}`;
+  }
+  if (headline.length > 150) headline = headline.slice(0, 147).replace(/[;,]?\s*\S*$/, "") + "…";
+  return { date, kind: "new", headline, href: `/providers/?d=${date}` };
+});
+const entries = data.entries.concat(sourceEntries).sort((a, b) => b.date.localeCompare(a.date));
 const byDay = {};
 for (const e of entries) (byDay[e.date] = byDay[e.date] || []).push(e);
 const days = Object.entries(byDay).sort((a, b) => b[0].localeCompare(a[0]));

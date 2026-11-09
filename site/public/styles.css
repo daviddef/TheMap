@@ -1601,6 +1601,9 @@ details.ask-priv { margin: 0 0 12px; padding: 0 14px; } details.ask-priv summary
 header.site .ra-live{position:relative;display:inline-grid;place-items:center;width:38px;height:38px;margin:0;padding:0;border-radius:50%;box-sizing:border-box;border:1px solid var(--lv,#e8870e);background:var(--lv-wash,rgba(232,135,14,.16));color:var(--lv-ink,#8a4a00);animation:ra-live-pulse-o 2.4s ease-out infinite}
 header.site .ra-live[data-state="online"]{--lv:#1f9d55;--lv-wash:rgba(31,157,85,.16);--lv-ink:#14663a;animation-name:ra-live-pulse-g}
 header.site .ra-live[data-state="offline"]{--lv:#c0392b;--lv-wash:rgba(192,57,43,.16);--lv-ink:#8e2418;animation:ra-live-pulse-r 1.4s ease-out infinite}
+/* the copy beside the brand is for narrow screens only; the one in the Researching group is for wide ones (my display rule above outranked the old hide) */
+header.site .ra-live-top{display:none}
+@media (max-width:1180px){header.site .ra-live-top{display:inline-grid}}
 header.site .ra-live:hover{filter:brightness(.97)}
 header.site .ra-live:focus-visible{outline:3px solid var(--accent,#1f5c6b);outline-offset:2px}
 header.site .ra-live .ra-live-dot{display:none}

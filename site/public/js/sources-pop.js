@@ -46,7 +46,8 @@
     if (!top.length) { say("Nothing matches that. Try fewer words, or open the full list."); return; }
     list.innerHTML = top.map(function (p, i) {
       var where = (p.countries || []).indexOf("*") >= 0 && p.countries.length === 1 ? "worldwide" : (p.countries || []).map(function (c) { return c === "*" ? "worldwide" : S.countryName(c); }).slice(0, 3).join(", ");
-      return '<li><a role="option" href="' + base + "archive/" + esc(p.id) + '/" data-i="' + i + '"><span class="sp-n">' + esc(p.name) + '</span><span class="sp-m"><span class="chip acc-' + esc(p.access) + '">' + esc(p.access === "unsurveyed" ? "not yet checked" : p.access) + "</span> " + esc(where) + "</span></a></li>";
+      return '<li class="sp-it"><a role="option" class="sp-main" href="' + base + "archive/" + esc(p.id) + '/" data-i="' + i + '"><span class="sp-n">' + esc(p.name) + '</span><span class="sp-m"><span class="chip acc-' + esc(p.access) + '">' + esc(p.access === "unsurveyed" ? "not yet checked" : p.access) + "</span> " + esc(where) + "</span></a>" +
+        (p.url ? '<a class="sp-site" href="' + esc(p.url) + '" target="_blank" rel="noopener" title="Open ' + esc(p.name) + ' itself (its own website)">Site ↗</a>' : "") + "</li>";
     }).join("") + '<li class="sp-msg">' + (all.length > top.length ? all.length + " match. " : "") + "<a href=\"" + more.href + '">See them all on the sources page →</a></li>';
   }
 

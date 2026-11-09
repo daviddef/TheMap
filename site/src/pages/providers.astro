@@ -183,7 +183,7 @@ const where = (p) => p.countries.includes("*") && p.countries.length === 1 ? "wo
         <tbody>
           {byKind[k].sort((a, b) => a.name.localeCompare(b.name)).map(p => (
             <tr data-id={p.id} data-k={k} data-a={p.access} data-c={p.countries.join(" ").toLowerCase()} data-d={ADDED(p)} data-r={TRIAGE_RANK[p.triage] ?? 9}>
-              <td><a href={u(`/archive/${p.id}/`)}>{p.name}</a></td>
+              <td><a href={u(`/archive/${p.id}/`)}>{p.name}</a>{p.url && <a class="pv-site" href={p.url} target="_blank" rel="noopener" title={`Open ${p.name} itself (its own website)`}>Site ↗</a>}</td>
               <td class="what">
                 {clip(p.what).length > LONG ? (
                   <details class="k-more">
@@ -295,4 +295,6 @@ const where = (p) => p.countries.includes("*") && p.countries.length === 1 ? "wo
   .pv-know span { display: block; font-family: var(--mono); font-size: 11.5px; margin-bottom: 2px; }
   .pv-know a { color: var(--accent); }
   .pv-new { margin-top: 26px; }
+  .pv-site { display: block; margin-top: 6px; font: 600 12px var(--sans); color: var(--accent); text-decoration: none; }
+  .pv-site:hover { text-decoration: underline; }
 </style>

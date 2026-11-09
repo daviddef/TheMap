@@ -516,7 +516,15 @@ function fixRow(s, i) {
   }
   row.append(cb, body); return row;
 }
-function fixCount(s) { const n = $('#fc-' + s.key); if (n) n.textContent = s.items.filter(i => ticked.has(i.key)).length + ' of ' + s.items.length + ' done'; fixTab(); }
+/* DONE IS GREY AND TICKED. «anything on the fix list thats done, grey it out and add a tick». A section is done when nothing in it is
+   still to do: every row ticked or left as is, or no rows at all. A group is done when all its sections are. */
+const secDone = s => s.items.every(i => ticked.has(i.key) || asIs.has(i.key));
+function fixCount(s) {
+  const n = $('#fc-' + s.key); if (n) n.textContent = s.items.filter(i => ticked.has(i.key)).length + ' of ' + s.items.length + ' done';
+  const d = $('#fs-' + s.key); if (d) { const ok = secDone(s); d.classList.toggle('sec-done', ok); const t = d.querySelector('summary .tick'); if (t) t.hidden = !ok; }
+  if (fix) for (const h of $$('#fsecs .fgroup')) { const ok = h.dataset.keys.split(',').every(k => { const x = fix.sections.find(y => y.key === k); return !x || secDone(x); }); h.classList.toggle('group-done', ok); h.querySelector('.tick').hidden = !ok; }
+  fixTab();
+}
 /* the number on the Fix list tab: what is still to do, not counting what is ticked or left as is */
 function fixTab() {
   const c = $('#fxcount'); if (!c) return;
@@ -530,7 +538,7 @@ function drawFix() {
   const section = s => {
     done.add(s.key);
     const d = el('details', 'sec sec-' + s.key); d.id = 'fs-' + s.key; if (s.items.length) d.open = s.key === 'places' || d.dataset.open === '1';
-    const sum = el('summary'), c = el('span', 'small'); c.id = 'fc-' + s.key; sum.append(el('b', null, s.title + ' '), el('span', 'count', n0(s.items.length)), ' ', c); d.append(sum);
+    const sum = el('summary'), c = el('span', 'small'); c.id = 'fc-' + s.key; const tk = el('span', 'tick', '\u2713'); tk.title = 'Done: nothing left to do here'; tk.hidden = true; sum.append(tk, el('b', null, s.title + ' '), el('span', 'count', n0(s.items.length)), ' ', c); d.append(sum);
     const how = el('p', 'small how', s.how); how.hidden = true; const inf = ib('info', 'What is this list?', function (e) { e.preventDefault(); e.stopPropagation(); how.hidden = !how.hidden; }); sum.append(' ', inf); d.append(how);
     const live = s.items.filter(i => !asIs.has(i.key)), hits = q ? live.filter(i => hay(s, i).includes(q)) : live, cap = shownN.get(s.key) || 100;
     if (!s.items.length) d.append(el('p', 'small', 'Nothing to do here.'));
@@ -542,7 +550,7 @@ function drawFix() {
   };
   for (const g of fix.groups || FIXGROUPS) {                                                       // by what the reader has to do, then by kind
     const secs = g.sections.map(k => byKey.get(k)).filter(Boolean); if (!secs.length) continue;
-    const total = secs.reduce((n, x) => n + x.items.length, 0), h = el('h3', 'fgroup'); h.append(g.title + ' ', el('span', 'count', n0(total)));
+    const total = secs.reduce((n, x) => n + x.items.length, 0), h = el('h3', 'fgroup'); h.dataset.keys = g.sections.join(','); const gt = el('span', 'tick', '\u2713'); gt.hidden = true; h.append(gt, g.title + ' ', el('span', 'count', n0(total)));
     box.append(h, el('p', 'small', g.how)); secs.forEach(section);
   }
   for (const s of fix.sections) if (!done.has(s.key)) section(s);

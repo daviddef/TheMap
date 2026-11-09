@@ -1260,8 +1260,9 @@ def whats_new_gate():
     if not entries:
         err("whats-new.json has no entries: the home page card would be empty")
     pages = set()
-    for f in _g.glob("site/src/pages/*.astro") + _g.glob("site/src/pages/*/index.astro"):
-        pages.add(os.path.basename(f)[:-6] if not f.endswith("index.astro") else os.path.basename(os.path.dirname(f)))
+    # a folder with a dynamic page ([id].astro: /place/senj/, /country/hr/) is a page too
+    for f in _g.glob("site/src/pages/*.astro") + _g.glob("site/src/pages/*/index.astro") + _g.glob("site/src/pages/*/[[]*[]].astro"):
+        pages.add(os.path.basename(os.path.dirname(f)) if "/" in f[len("site/src/pages/"):] else os.path.basename(f)[:-6])
     for i, e in enumerate(entries):
         where = f"whats-new.json entry {i + 1}"
         try:

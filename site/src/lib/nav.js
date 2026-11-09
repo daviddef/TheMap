@@ -1,8 +1,9 @@
 import fs from "node:fs";
 
-/* THE FLAGS MENU LISTS EVERY HUB. David: «on flags, can we have a sub menu with "hubs" and show the full hub list». The hubs are read from
-   public/flag-index.json (the same 34 the page shows) at build time, so a new hub appears in the menu with no second
-   list to keep. If the file cannot be read the entry falls back to the plain Flags link, never a half menu. */
+/* THE PLACES MENU POINTS AT THE HUBS; IT DOES NOT LIST THEM. David once asked for the full hub list in a sub menu; with 34 hubs it took
+   the whole menu, so it is one row to the Flags Atlas's hub section now. The hubs are read from public/flag-index.json (the same 34 the
+   page shows) at build time, so the count stays right with no second list to keep. If the file cannot be read the entry falls back to
+   the plain Flags link, never a half menu. */
 function hubLinks() {
   try {
     const j = JSON.parse(fs.readFileSync("public/flag-index.json", "utf8"));
@@ -50,10 +51,11 @@ export const nav = [
      icon is drawn by styles.css on the href, so a label that changes still has it. */
   ["Record Reader", "/read/"],
   /* PLACES HOLDS THE FLAGS TOO. David: «could we bring flags under the places menu tab?» A flag page is a country's other face (see the
-     links between a country page and its flag history), so the two share a door: every place, the countries, the Flags Atlas, then every
-     hub. The hubs are read from the Flags Atlas index at build time, so a new one appears here by itself. */
+     links between a country page and its flag history), so the two share a door: every place, the countries, the Flags Atlas, then ONE row to
+     the hubs (the Flags Atlas page's own hub section). They were listed here, 34 rows, and took the whole menu; the count is read from
+     the Flags Atlas index at build time, so it stays right by itself. */
   hubs.length
-    ? ["Places", [["/places/", "Every place"], ["/countries/", "Countries"], [null, "Flags"], ["/flags/", "The Flags Atlas: every country"], [null, "Hubs (" + hubs.length + ")"], ...hubs]]
+    ? ["Places", [["/places/", "Every place"], ["/countries/", "Countries"], [null, "Flags"], ["/flags/", "The Flags Atlas: every country"], ["/flags/#hubsHeadingEl", "The " + hubs.length + " hubs, by region"]]]
     : ["Places", [["/places/", "Every place"], ["/countries/", "Countries"], ["/flags/", "The Flags Atlas"]]],
   /* FOUR ROWS, NOT TEN. David, looking at the menu: «there are so many options here, and they're really just showing help stuff ... it
      needs to be neat, exciting and simple.» The four that help a reader are here. The project's own pages (what is being done, the

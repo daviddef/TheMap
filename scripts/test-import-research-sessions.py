@@ -131,6 +131,15 @@ check("film from the link", irs.film_of({}, "https://www.familysearch.org/search
 check("film from the field", irs.film_of({"film": "007713373"}, "https://www.familysearch.org/ark:/61903/3:1:X"), "007713373")
 check("film field that is prose is ignored", irs.film_of({"film": "DGS 5481649, images 1-4"}, ""), "")
 check("no film", irs.film_of({}, ""), "")
+check("a short bare film number is zero-padded", irs.film_of({"film": "5481649"}, ""), "005481649")
+check("a short film number in a link is zero-padded to match", irs.film_of({}, "https://www.familysearch.org/search/film/5481649"), "005481649")
+check("collection written in the film field",
+      irs.collection_in_film_field({"film": "collection 1974184 \u2014 Arienzo"}),
+      "https://www.familysearch.org/search/collection/1974184")
+check("a film number is not a collection", irs.collection_in_film_field({"film": "007713373"}), "")
+# An unparseable searchedOn must not hide a good `when`.
+check("bad searchedOn falls through to when",
+      irs.when_of({"searchedOn": "yesterday", "when": "9 Sep 2026"}), "2026-09-09")
 
 # Names an archive writes for a provider that are not its name, stated on the provider's row.
 names = irs.build_name_index()
@@ -139,9 +148,13 @@ for text, want in [("DAPA ZM34K-214 \u2014 Gologorica baptisms", "dapa"),
                    ("TNA Discovery \u2014 WO 97", "discovery"),
                    ("The London Gazette, 1859", "the-gazette-uk"),
                    ("Queensland BDM historical index", "qld-bdm"),
-                   ("British Newspaper Archive", "british-newspaper-archive")]:
+                   ("British Newspaper Archive", "british-newspaper-archive"),
+                   ("Anglo-Boer War Museum", "war-museum-boer-republics"),
+                   ("SOAS Archives \u2014 CWM", "soas-special-collections")]:
     p = irs.named_provider(text, names)
     check("alias: " + text[:30], p and p["id"], want)
+# A department of a university is not the university: no alias is given for the head «University of Cape Town», which names several UCT services.
+check("a university head is not one of its databases", irs.named_provider("University of Cape Town \u2014 British Concentration Camps of the South African War", names), None)
 # ...and a book is still not a provider: the rule is EXACT, never a prefix or a shared word.
 check("a book is not a provider", irs.named_provider("Svetvin\u010denat index", names), None)
 check("a prefix is not a match", irs.named_provider("DAPA Pula", names), None)

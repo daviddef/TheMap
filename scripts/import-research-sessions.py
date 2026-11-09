@@ -151,9 +151,19 @@ def film_of(row, url):
     """
     m = FILM.search(url or "")
     if m:
-        return m.group(1)
+        return m.group(1).zfill(9)
     f = str(row.get("film") or "").strip()
-    return f if DGS.fullmatch(f) else ""
+    # A DGS number is nine digits with leading zeros; «5481649» and «005481649» are one film and one mark.
+    return f.zfill(9) if DGS.fullmatch(f) else ""
+
+
+COLLECTION_IN_FILM = re.compile(r"^collection\s+(\d{5,8})\b", re.I)
+
+
+def collection_in_film_field(row):
+    """Falco writes «collection 1974184 — Arienzo» in `film` when it worked a collection's index, not a film: that is a collection."""
+    m = COLLECTION_IN_FILM.match(str(row.get("film") or "").strip())
+    return "https://www.familysearch.org/search/collection/" + m.group(1) if m else ""
 IMG = re.compile(r"[?&]i=(\d+)")
 
 WC = re.compile(r"[?&]o?wc=([^&]+)")
@@ -584,15 +594,18 @@ def when_of(row):
     therefore harder to see. Seven rows carry one. They lose their date rather
     than gaining a wrong one.
     """
-    raw = first(row, WHEN_KEYS)
-    iso = to_iso(raw)
-    if not iso or iso < WORK_FLOOR:
-        return ""
-    # A month has to be named or numbered somewhere in the original.
-    if not (re.search(r"\d{4}-\d{2}", raw) or
-            re.search(r"[A-Za-z]{3}", raw)):
-        return ""
-    return iso
+    # EACH KEY IS TRIED, NOT JUST THE FIRST FILLED ONE: an unparseable `searchedOn` must not hide a good `when`.
+    for key in WHEN_KEYS:
+        raw = first(row, (key,))
+        iso = to_iso(raw)
+        if not iso or iso < WORK_FLOOR:
+            continue
+        # A month has to be named or numbered somewhere in the original.
+        if not (re.search(r"\d{4}-\d{2}", raw) or
+                re.search(r"[A-Za-z]{3}", raw)):
+            continue
+        return iso
+    return ""
 
 
 # ONE LINE PER ARCHIVE, BECAUSE THAT IS WHAT AN ARCHIVE IS.
@@ -1053,8 +1066,10 @@ def main():
             # THE ROW'S OWN `collection` FIELD COUNTS, as `waypoint` and `film` do: Lerena names the collection a film belongs to
             # there (7 rows) and the link is an image, so testing only `url` found no collection mark for any of them.
             cu = (url or "").rstrip("/")
+            _new_route = False
             if cu not in cols:
-                cu = str(r.get("collection") or "").strip().rstrip("/")
+                cu = str(r.get("collection") or "").strip().rstrip("/") or collection_in_film_field(r)
+                _new_route = True
             if cu in cols:
                 cid = "collection:" + cu
                 m = marks.setdefault(cid, {"by": {}})
@@ -1065,7 +1080,10 @@ def main():
                     b["state"] = st
                 if when:
                     b["since"] = max(b.get("since", ""), when)
-                if src and not b.get("note"):
+                # NO NOTE ON A MARK MADE BY THE FIELD ROUTES. The row's sentence is the archive's own and may name a person
+                # («"Ramon Fernandez" "Maria Lerena"»), an act or a certificate number; the record-atlas-feedback rule is surnames
+                # and counts only. Marks made through the older routes still carry their note (see the review on PR 14).
+                if src and not b.get("note") and not _new_route:
                     # NOT MID-WORD. A flat src[:150] ended notes like «…found
                     # to have cut the bottom off ev», which reads as a bug in
                     # the page rather than a sentence that was too long. Cut
@@ -1091,8 +1109,7 @@ def main():
                 b["state"] = b.get("state") or st
                 if when:
                     b["since"] = max(b.get("since", ""), when)
-                if src and not b.get("note"):
-                    b["note"] = src[:150]
+                # No note: the row's sentence can name a person or an act number (see the collection block).
 
             # THE FILM MARK, which needs no waypoint and no resolution.
             film_no = film_of(r, url)
@@ -1141,7 +1158,8 @@ def main():
                     b["since"] = max(b.get("since", ""), when)
                 if st and not b.get("state"):
                     b["state"] = st
-                if src and not b.get("note"):
+                # A film found only through the row's `film` field (no film link) is a new route: no note (see the collection block).
+                if src and not b.get("note") and FILM.search(url or ""):
                     # NOT MID-WORD. A flat src[:150] ended notes like «…found
                     # to have cut the bottom off ev», which reads as a bug in
                     # the page rather than a sentence that was too long. Cut
@@ -1167,7 +1185,9 @@ def main():
                 # Uruguay film) has no volume mark to carry the range, so without this its «images 1206-1209» was recorded nowhere.
                 # Only the ranges parse_pages() accepts (never a year, a frame id or a «sampled» note), and only as `done`, never
                 # `walked`: a film mark says which images were seen and claims nothing about the rest.
-                if pg_rng:
+                # NOT WHEN THE PAGES ARE COUNTED WITHIN AN ITEM. A row with a `groupId` or «item 7, images 1-238» numbers its images
+                # inside that item or group, not along the film, so «done [[1,238]]» on the film would be false progress.
+                if pg_rng and not r.get("groupId") and not re.search(r"\bitems?\s+\d", blob, re.I):
                     got += pg_rng
                 if got:
                     b["done"] = (b.get("done") or []) + got

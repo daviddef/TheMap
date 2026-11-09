@@ -39,64 +39,150 @@ const sections = [...order.filter((k) => byKind[k]), ...leftover];
 
 const free = P.filter(p => p.access === "free").length;
 const unsurveyed = P.filter(p => p.access === "unsurveyed").length;
+const easyStarts = P.filter(p => p.access === "unsurveyed" && p.triage === "read").length;
 const triaged = P.filter(p => p.triage).length;
 
-/* A long description folds to three lines. FamilySearch's runs to forty and pushed every
-   other row off the screen; the whole of it is one tap away, and nothing is cut. */
+/* THE ACCESS CLASSES, IN PLAIN WORDS. Eight classes were printed as a legend of
+   eight tiles before anything could be read. They are now the filter itself: one
+   short label each, the full sentence on hover, the count beside it. The class
+   names in the data do not change. */
+const ACC = {
+  free: "Free, images online",
+  account: "Free with an account",
+  index: "Index only",
+  mixed: "Part paid",
+  paid: "Paid",
+  catalogue: "Catalogue only",
+  onsite: "In the building",
+  unsurveyed: "Not yet checked",
+};
+const SHORT = { free: "Free", account: "Account", index: "Index", mixed: "Part paid", paid: "Paid",
+                catalogue: "Catalogue", onsite: "In person", unsurveyed: "Unchecked" };
+const accCount = {};
+for (const p of P) accCount[p.access] = (accCount[p.access] || 0) + 1;
+
+/* NEW SOURCES: the last three days on which the directory grew. `added` is the day a
+   row first appeared (scripts/provider-added.py keeps it); a row without one falls back
+   to the day it was checked, which for a new row is the same day. */
+const ADDED = (p) => p.added || p.checked;
+const MONTH = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const day = (iso) => { const [y, m, d] = String(iso).split("-").map(Number); return `${d} ${MONTH[m - 1]} ${y}`; };
+const NAMED = { "*": "worldwide", "CN-TW": "Taiwan" };
+let dn = null;
+try { dn = new Intl.DisplayNames(["en"], { type: "region" }); } catch (e) { /* codes are shown instead */ }
+const regionName = (c) => { if (NAMED[c]) return NAMED[c]; try { return (dn && dn.of(c)) || c; } catch (e) { return c; } };
+const newDays = [...new Set(P.map(ADDED))].sort().reverse().slice(0, 3).map((d) => {
+  const list = P.filter((p) => ADDED(p) === d).sort((a, b) => a.name.localeCompare(b.name));
+  const mix = {};
+  for (const p of list) for (const c of p.countries) mix[c] = (mix[c] || 0) + 1;
+  const top = Object.entries(mix).sort((a, b) => b[1] - a[1] || regionName(a[0]).localeCompare(regionName(b[0]))).slice(0, 6)
+    .map(([c, n]) => ({ name: regionName(c), n })).sort((a, b) => a.name.localeCompare(b.name));
+  return { d, label: day(d), list, top };
+});
 const LONG = 220;
 const clip = (t) => String(t || "");
+const TRIAGE_RANK = { read: 0, "needs-browser": 1, http: 2, unreachable: 3, declined: 4 };
+const where = (p) => p.countries.includes("*") && p.countries.length === 1 ? "worldwide"
+  : p.countries.map((c) => c === "*" ? "worldwide" : c).join(" ");
 ---
 <Base
   title="The sources"
   eyebrow="Who holds the paper, and what it costs to look"
-  dek="Every provider this map can point at, and what it actually costs to look. The access class is the ordinary visitor's experience, not the best case: FamilySearch is filed as needing an account because it does.">
+  dek="Every archive, library, index and portal this map can point at, and what it actually costs to look. The access class is the ordinary visitor's experience, not the best case: FamilySearch is filed as needing an account because it does.">
 
   <p class="k-stats" aria-label="Summary">
-    <span><b>{P.length}</b> providers</span>
+    <span><b>{P.length.toLocaleString("en")}</b> sources</span>
     <span class="k-tag is-new">{free} free, no account</span>
-    <span class="k-tag">{triaged} door-rattled</span>
-    <span class="k-tag">{unsurveyed} never opened</span>
+    <span class="k-tag">{triaged.toLocaleString("en")} looked at</span>
+    <span class="k-tag">{unsurveyed} not yet checked</span>
   </p>
 
-  <h2 class="k-h">What the access classes mean</h2>
-  <ul class="k-tiles">
-    {Object.entries(provs.access).map(([k, v]) => (
-      <li><span class={"chip acc-" + k}>{k}</span>{v}</li>
-    ))}
-  </ul>
+  <form id="pv-find" class="pv-find" role="search" autocomplete="off">
+    <div class="pv-row">
+      <label class="pv-q"><span class="pv-lab">Search the sources</span>
+        <input id="pv-q" type="search" placeholder="A name, a place, a kind of record: Antenati, croatia church, usa census, newspapers australia…" enterkeyhint="search" /></label>
+      <label class="pv-c"><span class="pv-lab">Country</span><select id="pv-c"><option value="">All countries</option></select></label>
+      <label class="pv-w" id="pv-world-row" hidden><input id="pv-world" type="checkbox" checked /> and the worldwide services</label>
+    </div>
+    <div class="pv-acc" role="group" aria-label="What it costs to look">
+      {Object.entries(ACC).map(([k, label]) => (
+        <button type="button" class={"chip acc-" + k} data-acc={k} aria-pressed="false" title={provs.access[k]}>{label}<span>{accCount[k] || 0}</span></button>
+      ))}
+    </div>
+    <p class="pv-line"><span id="pv-say" role="status" aria-live="polite">{P.length.toLocaleString("en")} sources</span>
+      <button type="button" id="pv-newfilter" class="pv-link" hidden>showing one day's arrivals — show all</button>
+      <button type="button" id="pv-clear" class="pv-link" hidden>Clear the search and filters</button></p>
+  </form>
 
-  {/* WHAT THE DIRECTORY IS, HONESTLY, before the tables imply otherwise.
-      A reader seeing 569 rows reasonably assumes 569 assessed sources. */}
-  <div class="k-hi">
-    <p><b>{unsurveyed} of these {P.length} have never been opened.</b> A national register, an open
-    dataset or a state's own list named them, which is worth knowing and is not the same as somebody
-    having looked.</p>
-    <p>{triaged} have at least had their door rattled: alive or dead, a page or a JavaScript
-    application, open or refusing robots. That makes a queue somebody can work, not a surveyed source:
-    the access class reads <b>unsurveyed</b> until a person has read the site and written down the
-    sentence that settles it. <a href={u("/survey/")}>Want to open one? It takes ten minutes →</a></p>
-  </div>
-  <p class="k-lede">
-    <b>Declining after looking is a result; declining without looking is a gap.</b> Sources that refuse
-    automated access are recorded as declined, with what was found, rather than worked around. An archive
-    that turns a robot away is stating its terms, and an atlas that asks archives to trust it cannot be the
-    thing that ignores them.
-  </p>
+  <p id="pv-none" class="pv-none" hidden>Nothing matches that. Try fewer words, or take the country off. A source missing from the directory?
+    <a href={u("/add/")}>Tell us →</a></p>
 
-  <nav class="jump" aria-label="Kinds of provider">
-    {sections.map((k) => <a class="k-tag" href={`#k-${k}`}>{KIND[k]?.split(" — ")[0] || k}<span>{byKind[k].length}</span></a>)}
+  <section class="pv-new" aria-labelledby="pv-new-h">
+    <h2 class="k-h" id="pv-new-h">New sources</h2>
+    <p class="cap">The last three days the directory grew.</p>
+    <div class="pv-days">
+      {newDays.map((g) => (
+        <div class="pv-day">
+          <div class="pv-dh"><b>{g.label}</b><span class="k-tag is-new">{g.list.length.toLocaleString("en")} added</span></div>
+          {g.list.length <= 12 ? (
+            <ul>{g.list.map((p) => <li><a href={u(`/archive/${p.id}/`)}>{p.name}</a> <span class="pv-w2">{where(p)}</span></li>)}</ul>
+          ) : (
+            <>
+              <p class="pv-mix">Mostly {g.top.map((t) => `${t.name} (${t.n})`).join(", ")}.</p>
+              <button type="button" class="pv-btn" data-newday={g.d}>Show these {g.list.length.toLocaleString("en")} in the list</button>
+            </>
+          )}
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="pv-help" id="help" aria-labelledby="pv-help-h">
+    <h2 class="k-h" id="pv-help-h">Help check a source <span class="k-count">{unsurveyed}</span></h2>
+    <p class="pv-helplead"><b>{unsurveyed} of these have never been opened.</b> A national register, an open dataset or a state's own list
+      named them, which is worth knowing and is not the same as somebody having looked. Opening one takes about ten minutes,
+      and it turns a grey dot into an answer.</p>
+    <p class="pv-helpgo">
+      <button type="button" class="pv-btn" id="pv-easy">Show the {easyStarts} easy starts</button>
+      <button type="button" class="pv-btn ghost" id="pv-allunchecked">All {unsurveyed} not yet checked</button>
+    </p>
+    <p class="cap">An easy start is a source whose homepage we have already read, so the list shows what we found there.</p>
+    <details class="pv-how">
+      <summary>How to check one</summary>
+      <ol class="k-steps">
+        <li><b>Open the site.</b> Every not-yet-checked row has an <em>Open the site</em> link.</li>
+        <li><b>Find the records, not the homepage.</b> Look for the register viewer. In French it is usually <em>archives en ligne</em> or
+          <em>état civil</em>; in Italian <em>registri</em>; in German <em>Kirchenbücher</em>.</li>
+        <li><b>Answer one question: what does it cost to look?</b> Free images, free with an account, an index only, a catalogue card,
+          in the building only, or a charge.</li>
+        <li><b>Copy the sentence that proves it</b> and the page it is on. Not a summary: the site's own words, so the next person can
+          check you instead of trusting you.</li>
+        <li><b>Send it</b> <a href={u("/add/")}>through this form</a>, with the source's name, the class, the quotation and the URL.</li>
+      </ol>
+      <ul class="k-tiles two">
+        <li><span class="k-tag">Stop</span><span><b>If a site refuses robots or asks you not to, stop.</b> Record that it declined and why. This
+          project does not defeat bot gates or pretend to be a browser it is not: an atlas that asks archives to trust it cannot be the thing
+          that ignores them.</span></li>
+        <li><span class="k-tag">Say so</span><span><b>If you cannot tell, say you cannot tell.</b> An honest <em>not yet checked</em> is worth more than
+          a confident guess. A place wrongly marked <em>free</em> costs somebody an evening and costs this directory the only thing it sells.</span></li>
+      </ul>
+    </details>
+  </section>
+
+  <nav class="jump" aria-label="Kinds of source">
+    {sections.map((k) => <a class="k-tag" href={`#k-${k}`} data-jump={k}>{KIND[k]?.split(" — ")[0] || k}<span>{byKind[k].length}</span></a>)}
   </nav>
 
   {sections.map(k => (
-    <section style="margin-top:34px" id={`k-${k}`}>
+    <section style="margin-top:34px" id={`k-${k}`} data-kind={k}>
       <h2 class="k-h">{KIND[k] || k} <span class="k-count">{byKind[k].length}</span></h2>
       <table class="k-table">
         <thead><tr>
-          <th class="c-name">Provider</th><th class="c-what">What it is</th><th class="m c-acc">Access</th><th class="m c-where">Where</th><th class="m c-date">Checked</th>
+          <th class="c-name">Source</th><th class="c-what">What it is</th><th class="m c-acc">Cost to look</th><th class="m c-where">Where</th><th class="m c-date">Checked</th>
         </tr></thead>
         <tbody>
           {byKind[k].sort((a, b) => a.name.localeCompare(b.name)).map(p => (
-            <tr>
+            <tr data-id={p.id} data-k={k} data-a={p.access} data-c={p.countries.join(" ").toLowerCase()} data-d={ADDED(p)} data-r={TRIAGE_RANK[p.triage] ?? 9}>
               <td><a href={u(`/archive/${p.id}/`)}>{p.name}</a></td>
               <td class="what">
                 {clip(p.what).length > LONG ? (
@@ -105,8 +191,12 @@ const clip = (t) => String(t || "");
                     <div>{p.what}</div>
                   </details>
                 ) : p.what}
+                {p.access === "unsurveyed" && p.url && (
+                  <p class="pv-know"><span>{p.triageNote || "Not yet opened by anybody."}</span>
+                    <a href={p.url} target="_blank" rel="noopener">Open the site ↗</a>, then <a href={u("/add/")}>tell us what it costs to look</a>.</p>
+                )}
               </td>
-              <td class="m"><span class={"chip acc-" + p.access}>{p.access}</span></td>
+              <td class="m"><span class={"chip acc-" + p.access} title={provs.access[p.access]}>{SHORT[p.access] || p.access}</span></td>
               <td class="m w">{p.countries.includes("*") ? "worldwide" : p.countries.join(" ")}</td>
               <td class="m">{p.checked}</td>
             </tr>
@@ -116,12 +206,30 @@ const clip = (t) => String(t || "");
     </section>
   ))}
 
+  <details class="pv-how pv-about">
+    <summary>What this list is, and is not</summary>
+    <p>It lists the <b>institutions and portals</b>: archives, libraries, indexes, volunteer projects and the commercial sites. The individual
+    collections inside them, and the registers walked page by page, are on each place's own page and on <a href={u("/jurisdictions/")}>Whose archive</a>.</p>
+    <p>{triaged.toLocaleString("en")} have at least had their door rattled: alive or dead, a page or a JavaScript application, open or refusing
+    robots. That makes a queue somebody can work, not a surveyed source: the class reads <b>not yet checked</b> until a person has read the site and
+    written down the sentence that settles it.</p>
+    <p><b>Declining after looking is a result; declining without looking is a gap.</b> Sources that refuse automated access are recorded as
+    declined, with what was found, rather than worked around.</p>
+  </details>
+
   <aside class="k-foot">
     <p>Links rot, portals move, and free things become paid, so every row says when a person last checked it.</p>
     <p>The build refuses any row without a date. <a href={u("/add/")}>Found one that has changed? Say so →</a></p>
   </aside>
+
+  <script is:inline src={u("/js/sources-search.js")}></script>
+  <script is:inline src={u("/js/providers-page.js")}></script>
 </Base>
 
+<style is:global>
+  /* FULL WIDTH. This page is a wide table; the shared reading width left half the screen as margin. */
+  :root { --maxw: min(2200px, 98vw); }
+</style>
 <style>
   .jump { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
   .jump a { text-decoration: none; color: var(--ink-2); }
@@ -130,8 +238,9 @@ const clip = (t) => String(t || "");
   /* Fixed widths, because auto layout gave the description whatever the short columns left
      and squeezed it to a third of the card. The description is the thing being read. */
   .k-table { table-layout: fixed; }
-  .c-name { width: 17%; } .c-what { width: 49%; } .c-acc { width: 10%; } .c-where { width: 14%; } .c-date { width: 10%; }
+  .c-name { width: 20%; } .c-what { width: 46%; } .c-acc { width: 10%; } .c-where { width: 12%; } .c-date { width: 11%; }
   td.m { white-space: normal; }
+  td.m:last-child { white-space: nowrap; }
   td.w { line-height: 1.6; word-spacing: 4px; overflow-wrap: anywhere; }
   td:first-child { overflow-wrap: anywhere; }
   @media (max-width: 760px) {
@@ -149,4 +258,41 @@ const clip = (t) => String(t || "");
   .chip.acc-paid { background: #C0392B22; color: #C0392B; }
   .chip.acc-catalogue { background: #8E6FA822; color: #7A5CA8; }
   .chip.acc-onsite { background: #7C8A9122; color: #5E6C73; }
+
+  [hidden] { display: none !important; }
+  .pv-find { display: grid; gap: 12px; margin: 0 0 20px; }
+  .pv-row { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: end; }
+  .pv-lab { display: block; font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
+  .pv-q { flex: 1 1 420px; }
+  .pv-q input, .pv-c select { width: 100%; box-sizing: border-box; font: 16px var(--sans); color: var(--ink); background: var(--panel);
+    border: 1px solid var(--rule-strong, var(--rule)); border-radius: 10px; padding: 11px 14px; }
+  .pv-q input:focus, .pv-c select:focus { outline: 3px solid var(--accent); outline-offset: 1px; }
+  .pv-c { flex: 0 1 280px; }
+  .pv-w { font: 13px var(--sans); color: var(--ink-2); display: flex; gap: 6px; align-items: center; padding-bottom: 12px; }
+  .pv-acc { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pv-acc .chip { cursor: pointer; border: 1px solid transparent; font: 600 12.5px var(--sans); padding: 6px 12px; border-radius: 99px; }
+  .pv-acc .chip span { font: 11px var(--mono); margin-left: 7px; opacity: .75; }
+  .pv-acc .chip[aria-pressed="true"] { border-color: currentColor; box-shadow: inset 0 0 0 1px currentColor; }
+  .pv-line { margin: 0; font: 13px var(--sans); color: var(--ink-3); display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; }
+  .pv-link { background: none; border: 0; padding: 0; font: inherit; color: var(--accent); text-decoration: underline; cursor: pointer; }
+  .pv-none { font: 15px var(--sans); color: var(--ink-2); background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 14px 18px; }
+  .pv-days { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; margin-top: 10px; }
+  .pv-day { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 14px 18px; }
+  .pv-dh { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .pv-dh b { font: 600 15px var(--sans); color: var(--ink); }
+  .pv-day ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; font: 14px/1.4 var(--sans); }
+  .pv-w2 { font: 11px var(--mono); color: var(--ink-3); margin-left: 6px; }
+  .pv-mix { font: 14px/1.5 var(--sans); color: var(--ink-2); margin: 0 0 10px; }
+  .pv-btn { font: 600 13.5px var(--sans); color: #fff; background: var(--accent); border: 1px solid var(--accent); border-radius: 99px; padding: 8px 16px; cursor: pointer; }
+  .pv-btn.ghost { color: var(--accent); background: transparent; }
+  .pv-help { margin-top: 30px; }
+  .pv-helplead { font: 16px/1.55 var(--serif); color: var(--ink); max-width: 80ch; margin: 0 0 10px; }
+  .pv-helpgo { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 6px; }
+  .pv-how { margin-top: 12px; }
+  .pv-how > summary { cursor: pointer; font: 600 14px var(--sans); color: var(--accent); }
+  .pv-about { margin-top: 36px; max-width: 90ch; font: 14.5px/1.6 var(--sans); color: var(--ink-2); }
+  .pv-know { margin: 8px 0 0; font: 12.5px/1.5 var(--sans); color: var(--ink-3); }
+  .pv-know span { display: block; font-family: var(--mono); font-size: 11.5px; margin-bottom: 2px; }
+  .pv-know a { color: var(--accent); }
+  .pv-new { margin-top: 26px; }
 </style>

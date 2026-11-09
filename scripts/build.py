@@ -1377,7 +1377,20 @@ def main():
           f"biggest {max(tail_cells.values()):,} places")
     json.dump(regions, open(os.path.join(OUT, "regions.json"), "w"),
               ensure_ascii=False, separators=(",", ":"))
-    json.dump(providers, open(os.path.join(OUT, "providers.json"), "w"),
+    # WHEN EACH SOURCE ARRIVED, FOR THE «NEW SOURCES» BLOCK ON /providers/.
+    # `checked` is when a person last looked, not when the row appeared;
+    # scripts/provider-added.py keeps the arrival dates (from git history) in
+    # data/provider-added.json. A row with no entry simply carries no `added`
+    # and the page falls back to `checked`, so a missed run never hides a source.
+    try:
+        with open("data/provider-added.json", encoding="utf-8") as fh:
+            _added = json.load(fh)
+    except FileNotFoundError:
+        _added = {}
+    providers_out = dict(providers, providers=[
+        dict(p, added=_added[p["id"]]) if p["id"] in _added else p
+        for p in providers["providers"]])
+    json.dump(providers_out, open(os.path.join(OUT, "providers.json"), "w"),
               ensure_ascii=False, separators=(",", ":"))
     # WHERE TO WRITE, SERVED TO THE BROWSER. /my-research/ shows the letters a
     # reader has out — «written, no reply» against an archive — and a chase-up

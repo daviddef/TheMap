@@ -1,161 +1,22 @@
 ---
-/* PHASE 4B — the survey queue, opened to anybody.
- *
- * 316 of 519 sources in this directory have never been opened. They are here
- * because a national register or an open dataset named them, which is worth
- * knowing and is not the same as somebody having looked. 199 have been
- * triaged — alive or dead, a page or a JavaScript application, open or
- * refusing robots — which turns a list of URLs into a queue.
- *
- * A QUEUE ONE PERSON WORKS IS A BOTTLENECK, and it is the clearest structural
- * risk this atlas has: the gap grows faster than one researcher can close it.
- * Surveying a source is ten minutes of work — open it, find whether the images
- * are free, and write down the sentence that proves it. That is something a
- * stranger with an evening can do, and there was no way for them to do it.
- *
- * WHAT THIS PAGE IS NOT. It is not a form that writes to the atlas. This is a
- * static site with no server and no account, and inventing one to accept
- * unverified edits would put the directory's one asset — that a row can be
- * trusted — in the hands of anybody with a browser. So it hands somebody a
- * specific source, tells them exactly what to look for, and gives them a
- * prepared message to send back. A person still reads it before it lands.
- *
- * The queue is ordered by what makes a survey cheap: a source whose homepage
- * we have already read, in a country where somebody is likely to read the
- * language, with the phrases we found already printed so the reader knows
- * what they are walking into.
- */
-import Base from "../layouts/Base.astro";
+/* /survey/ was a second copy of the sources list, with its own queue. It is one page now: the queue is the
+   "Help check a source" section of /providers/, which also has the search and the country filter.
+   A static site has no server redirect, so this is the page old links land on. */
 import { u } from "../lib/url.js";
-import provs from "../../public/providers.json";
-import { atlas as idx } from "../lib/atlas.js";
-import "../styles/kit.css";
-
-const CN = idx.countries || {};
-const P = provs.providers;
-const unsurveyed = P.filter((p) => p.access === "unsurveyed" && p.url);
-
-/* READ FIRST, because those are the ones somebody can settle in ten minutes.
-   `needs-browser` and the dead ones are real work or no work at all. */
-const RANK = { read: 0, "needs-browser": 1, http: 2, unreachable: 3, declined: 4 };
-const queue = unsurveyed.slice().sort((a, b) =>
-  (RANK[a.triage] ?? 9) - (RANK[b.triage] ?? 9) ||
-  String(a.name).localeCompare(String(b.name)));
-
-const byCountry = {};
-for (const p of unsurveyed) {
-  for (const c of (p.countries || [])) (byCountry[c] = byCountry[c] || []).push(p);
-}
-const countries = Object.entries(byCountry)
-  .map(([cc, list]) => ({ cc, n: list.length, name: CN[cc] || cc }))
-  .sort((a, b) => String(a.name).localeCompare(String(b.name)));  // by name: a list ordered by size reads as unsorted
-
-const readable = queue.filter((p) => p.triage === "read").length;
-const surveyed = P.filter((p) => p.access && p.access !== "unsurveyed").length;
+const to = u("/providers/") + "#help";
 ---
-<Base
-  title="Survey a source"
-  eyebrow="Ten minutes, one honest sentence"
-  dek="Open one archive's website, find out what it actually costs to look, and send back the sentence that proves it. This is the work that turns a grey dot into an answer.">
-
-  <p class="k-stats" aria-label="Summary">
-    <span><b>{unsurveyed.length}</b> sources nobody has opened</span>
-    <span class="k-tag is-new">{readable} easy starts</span>
-    <span class="k-tag">{surveyed} already done</span>
-  </p>
-
-  <div class="k-hi">
-    <p>Nine places in ten on this map have never been surveyed. Not because the records are missing, but
-    because <b>nobody has opened the archive's website and written down what is behind it</b>.</p>
-    <p>That one fact is the difference between a researcher spending an evening well and spending it on a
-    catalogue card, and finding it out takes about ten minutes per source.</p>
-  </div>
-
-  <h2 class="k-h">How it goes</h2>
-  <ol class="k-steps">
-    <li><b>Open the site.</b> One of the {readable} below whose homepage we have already read is the
-      easiest start.</li>
-    <li><b>Find the records, not the homepage.</b> Look for the register viewer. In French it is usually
-      <em>archives en ligne</em> or <em>état civil</em>; in Italian <em>registri</em>; in German
-      <em>Kirchenbücher</em>.</li>
-    <li><b>Answer one question: what does it cost to look?</b>
-      <ul>
-        <li class="k-tag is-new">free · images, no account</li>
-        <li class="k-tag">account · register first</li>
-        <li class="k-tag">index · names, no images</li>
-        <li class="k-tag">catalogue · a card, unphotographed</li>
-        <li class="k-tag">onsite · in the building only</li>
-        <li class="k-tag">paid or mixed · a charge</li>
-      </ul>
-    </li>
-    <li><b>Copy the sentence that proves it</b> and the page it is on. Not a summary: the site's own words.
-      That quotation is what lets the next person check you instead of trusting you.</li>
-    <li><b>Send it.</b> <a href={u("/add/")}>Through this form</a>, with the source's name, the class,
-      the quotation and the URL.</li>
-  </ol>
-
-  <h2 class="k-h">Two rules, and they matter more than the speed</h2>
-  <ul class="k-tiles two">
-    <li><span class="k-tag">Stop</span><span><b>If a site refuses robots or asks you not to, stop.</b> Record that it declined and why. This
-      project does not defeat bot gates or pretend to be a browser it is not: an atlas that asks archives to
-      trust it cannot be the thing that ignores them.</span></li>
-    <li><span class="k-tag">Say so</span><span><b>If you cannot tell, say you cannot tell.</b> An honest <em>unsurveyed</em> is worth more than a
-      confident guess. A place wrongly marked <em>free</em> costs somebody an evening and costs this
-      directory the only thing it sells.</span></li>
-  </ul>
-
-  <h2 class="k-h" style="margin-top:34px">Pick a country <span class="k-count">{countries.length}</span></h2>
-  <p class="k-lede">Language is the real barrier, so start where you can read.</p>
-  <ul class="cc">
-    {countries.map((c) => (
-      <li><a class="k-tag" href={`#cc-${c.cc}`}>{c.name}<span>{c.n}</span></a></li>
-    ))}
-  </ul>
-
-  <h2 class="k-h" style="margin-top:34px">The queue</h2>
-  <p class="k-lede">Ordered by how cheap each one is to settle. A source whose homepage we have already read
-  is a ten-minute job; one that needs a browser to render is longer; one that did not answer may simply be
-  gone.</p>
-
-  <table class="k-table sv-q">
-    <thead><tr>
-      <th class="q1">Source</th><th class="q2">Where</th><th class="q3">What we know</th>
-    </tr></thead>
-    <tbody>
-      {queue.slice(0, 220).map((p) => (
-        <tr id={`cc-${(p.countries || [])[0] || "zz"}`}>
-          <td><a href={p.url} target="_blank" rel="noopener">{p.name}</a></td>
-          <td class="where">{(p.countries || []).map((c) => CN[c] || c).join(", ")}</td>
-          <td class="sv-note">{p.triageNote || "not yet opened by anybody"}</td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-  {queue.length > 220 && (
-    <p class="cap">and {queue.length - 220} more. The whole list is in
-    {" "}<a href={u("/providers.json")}>providers.json</a>, where
-    <code>access: "unsurveyed"</code> is the queue.</p>
-  )}
-
-  <aside class="k-foot">
-    <p>Stuck on a language, or not sure what you are looking at?</p>
-    <p>Send what you have through <a href={u("/add/")}>the form</a>. A half-answer with a link beats a silence.</p>
-  </aside>
-</Base>
-
-<style>
-  .k-steps ul li { text-transform: none; letter-spacing: 0; font-family: var(--sans); font-size: 12px; margin: 0; }
-  .two { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); max-width:var(--measure); }
-  .two li { gap: 10px; }
-  .cc { list-style: none; padding: 0; margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 8px; }
-  .cc a { text-decoration: none; color: var(--ink-2); font-family: var(--sans); text-transform: none;
-          letter-spacing: 0; font-size: 12.5px; }
-  .cc a:hover { border-color: var(--accent); color: var(--accent); }
-  .cc a span { color: var(--ink-3); margin-left: 6px; font-family: var(--mono); font-size: 11px; }
-  .sv-q { table-layout: fixed; }
-  .q1 { width: 34%; } .q2 { width: 18%; } .q3 { width: 48%; }
-  @media (max-width: 760px) { .sv-q { table-layout: auto; } .q1, .q2, .q3 { width: auto; } }
-  .where { white-space: normal; font-family: var(--sans); font-size: 12.5px; }
-  .sv-note { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); }
-  .sv-q tr { scroll-margin-top: 80px; }
-</style>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Survey a source: now on the sources page</title>
+  <meta name="robots" content="noindex" />
+  <link rel="canonical" href={u("/providers/")} />
+  <meta http-equiv="refresh" content={`0; url=${to}`} />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body style="font-family:system-ui,sans-serif;padding:32px">
+  <p>Surveying a source now lives on <a href={to}>the sources page</a>.</p>
+  <script is:inline>location.replace(document.querySelector("a").href);</script>
+</body>
+</html>

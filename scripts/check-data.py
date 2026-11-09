@@ -76,7 +76,7 @@ ATTRIBUTION_NAMES = {
 # there is no /data/ row for it to be named on.
 OUR_OWN = {"regions.json", "providers.json", "collections.json", "directory.json",
            "countries.json", "country-overrides.json", "worklist.json",
-           "era-flags.json"}
+           "era-flags.json", "provider-added.json"}
 
 
 def access_colours_agree():

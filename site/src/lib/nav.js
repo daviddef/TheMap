@@ -74,9 +74,7 @@ export const nav = [
     ["/providers/", "Who holds records"],
     ["/jurisdictions/", "Whose archive"],
     ["/coverage/", "What's missing"],
-    /* Phase 4B. The survey queue was a column in a JSON file; 316 sources nobody has opened is the atlas's clearest bottleneck, and
-       one person cannot close it. This is the way in for anybody with an evening. */
-    ["/survey/", "Survey a source"],
+    /* The survey queue is a section of /providers/ now (Help check a source); /survey/ redirects there. */
     /* Moved here from the header bar, where it was a pill on every page. */
     ["/add/", "Add source"],
   ]],

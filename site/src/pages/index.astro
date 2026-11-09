@@ -5,6 +5,7 @@ import ProgressKit from "../components/ProgressKit.astro";
 import VolumeMarks from "../components/VolumeMarks.astro";
 import StoryDrawer from "../components/StoryDrawer.astro";
 import { u } from "../lib/url.js";
+import newsData from "../data/whats-new.json";
 import { countryTotals } from "../lib/country-metrics.js";
 import { atlas as idx } from "../lib/atlas.js";
 import regions from "../../public/regions.json";
@@ -16,6 +17,10 @@ import flagIndex from "../../../data/flag-index.json";
 import placeNames from "../../../data/place-names.json";
 
 const places = idx.places.length;
+/* THE LAST THREE LINES OF WHAT'S NEW, for the inventory opened from the books icon. Newest first; a day's lines keep the file's order. */
+const NEWS_KIND = { new: "New", better: "Better", fixed: "Fixed" };
+const latestNews = (newsData.entries || []).slice().sort((x, y) => y.date.localeCompare(x.date)).slice(0, 3);
+const newsDay = (d) => new Date(d + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
 /* `v` IS VOLUMES; `c` IS COLLECTIONS. The map's own hint had this wrong
    and was fixed; this line is the same mistake in the page header above
    it, and it is the one a reader sees first. It was printing "8557 record
@@ -135,7 +140,18 @@ const inventoryRows = [
   <details class="ra-inv" slot="inv" id="ra-inv" data-volumes={volumes}>
     <summary class="ra-inv-ico" aria-label={volumes.toLocaleString() + " volumes: what the atlas holds"} title={(volumes / 1e6).toFixed(2) + "M volumes: what the Atlas holds"}><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path d="M4 4h4v16H4zM10 4h4v16h-4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M16.3 5.7l3.7-.9 3 14.4-3.7.9z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span class="ra-inv-t">{(volumes / 1e6).toFixed(2)}M volumes</span></summary>
     <div class="ra-inv-grid">
-      <p class="ra-inv-top"><b>{volumes.toLocaleString()} volumes</b> in the Atlas<span class="ra-inv-new" hidden></span> · <a href={u("/whats-new/")}>What's new</a></p>
+      <div class="ra-inv-top">
+        <p class="ra-inv-count"><span class="ra-inv-big">{volumes.toLocaleString()} volumes</span> in the Atlas<span class="ra-inv-new" hidden></span></p>
+        <div class="ra-inv-news">
+          <p class="ra-inv-h">What's new</p>
+          <ul>
+            {latestNews.map((e) => (
+              <li><a href={u(e.href || "/whats-new/")}><span class={"ra-inv-kind " + (e.kind || "better")}>{NEWS_KIND[e.kind] || "Better"}</span><span class="ra-inv-line">{e.headline}</span><time datetime={e.date}>{newsDay(e.date)}</time></a></li>
+            ))}
+          </ul>
+          <p class="ra-inv-all"><a href={u("/whats-new/")}>All updates →</a></p>
+        </div>
+      </div>
       {inventoryRows.map(([head, items]) => (
         <>
           <p class="ra-inv-h">{head}</p>

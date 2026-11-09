@@ -145,16 +145,26 @@ const conf = {
           <p class="pv-drop-foot"><button type="button" class="pv-link" id="pv-clear2">Clear the filters</button></p>
         </div>
       </details>
+      <nav class="pv-icons" aria-label="More about the sources">
+        <a class="pv-ib" id="pv-new" href={u("/whats-new/#sources")} title={`New: ${latestN} sources added on ${latestLabel}. See what is new`} aria-label={`New: ${latestN} sources added on ${latestLabel}`}>
+          <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 1.5l1.5 4.2 4.2 1.5-4.2 1.5L8 12.9 6.5 8.7 2.3 7.2l4.2-1.5z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M12.8 11.2l.6 1.6 1.6.6-1.6.6-.6 1.6-.6-1.6-1.6-.6 1.6-.6z" fill="currentColor"/></svg>
+          <span class="pv-ibn">{latestN}</span>
+        </a>
+        <button type="button" class="pv-ib" id="pv-help-open" data-dlg="pv-helpdlg" aria-haspopup="dialog" title={`Help check a source: ${unsurveyed} have never been opened`} aria-label={`Help check a source: ${unsurveyed} have never been opened`}>
+          <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M5.2 8.2l2 2 3.6-4.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button type="button" class="pv-ib" id="pv-about-open" data-dlg="pv-aboutdlg" aria-haspopup="dialog" title="What this list is, and is not" aria-label="What this list is, and is not">
+          <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 7.2v4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="4.9" r=".9" fill="currentColor"/></svg>
+        </button>
+      </nav>
     </div>
     <div class="pv-tabs" role="group" aria-label="Two views of the same directory">
       <button type="button" class="pv-tab" data-view="kind" aria-pressed="true">Sources <span>{P.length.toLocaleString("en")}</span></button>
       <button type="button" class="pv-tab" data-view="regions" aria-pressed="false">Whose archive, by region and years <span>{regions.regions.length}</span></button>
     </div>
     <p class="pv-line"><span id="pv-say" role="status" aria-live="polite">{P.length.toLocaleString("en")} sources</span>
-      <a class="pv-newpill" href={u("/whats-new/#sources")} title={`${latestN} sources added on ${latestLabel}. See what is new`}><i aria-hidden="true">✦</i> New <span>{latestN} on {latestLabel}</span></a>
       <button type="button" id="pv-newfilter" class="pv-link" hidden>showing one day's arrivals — show all</button>
-      <button type="button" id="pv-clear" class="pv-link" hidden>Clear the search and filters</button>
-      <button type="button" id="pv-help-open" class="pv-link pv-helpbtn" aria-haspopup="dialog">Help check a source <span>{unsurveyed}</span></button></p>
+      <button type="button" id="pv-clear" class="pv-link" hidden>Clear the search and filters</button></p>
     <div id="pv-place" class="pv-place" hidden></div>
   </form>
 
@@ -200,16 +210,6 @@ const conf = {
         <a href={u("/providers.json")}>providers.json</a>, and every source has its own page at <code>/archive/&lt;id&gt;/</code>.</p>
     </noscript>
 
-    <details class="pv-how pv-about">
-      <summary>What this list is, and is not</summary>
-      <p>It lists the <b>institutions and portals</b>: archives, libraries, indexes, volunteer projects and the commercial sites. The individual
-      collections inside them, and the registers walked page by page, are on each place's own page.</p>
-      <p>{triaged.toLocaleString("en")} have at least had their door rattled: alive or dead, a page or a JavaScript application, open or refusing
-      robots. That makes a queue somebody can work, not a surveyed source: the class reads <b>not yet checked</b> until a person has read the site and
-      written down the sentence that settles it.</p>
-      <p><b>Declining after looking is a result; declining without looking is a gap.</b> Sources that refuse automated access are recorded as
-      declined, with what was found, rather than worked around.</p>
-    </details>
   </div>
 
   <div id="pv-view-regions" hidden>
@@ -232,14 +232,7 @@ const conf = {
     <div id="pv-regions"></div>
     <p class="pv-loading" id="pv-rload">Loading the regions…</p>
 
-    <aside class="k-foot">
-      <p>{regions.regions.length} regions is not the world.</p>
-      <p>These are the regions whose filing this project has actually worked out. <b>A place outside them says
-      so in its own panel</b> rather than guessing, because a confident wrong answer about which archive to
-      write to costs somebody a month. <a href={u("/add/")}>Know a region's filing history? That is the most
-      valuable thing you could contribute →</a></p>
-    </aside>
-
+  
     <section style="margin-top:44px">
       <h2 class="k-h">Where this layer is missing</h2>
       <p class="cap">These {regions.regions.length} regions cover {covered.size} of the {Object.keys(CN).length} countries this atlas names. Below are the
@@ -267,6 +260,21 @@ const conf = {
     <p>The build refuses any row without a date. <a href={u("/add/")}>Found one that has changed? Say so →</a></p>
   </aside>
   </div>
+
+  <dialog class="pv-dlg" id="pv-aboutdlg" aria-labelledby="pv-about-h">
+    <form method="dialog" class="pv-dlg-x"><button aria-label="Close" class="pv-dlg-close">×</button></form>
+    <h2 class="k-h" id="pv-about-h">What this list is, and is not</h2>
+    
+      <p>It lists the <b>institutions and portals</b>: archives, libraries, indexes, volunteer projects and the commercial sites. The individual
+      collections inside them, and the registers walked page by page, are on each place's own page.</p>
+      <p>{triaged.toLocaleString("en")} have at least had their door rattled: alive or dead, a page or a JavaScript application, open or refusing
+      robots. That makes a queue somebody can work, not a surveyed source: the class reads <b>not yet checked</b> until a person has read the site and
+      written down the sentence that settles it.</p>
+      <p><b>Declining after looking is a result; declining without looking is a gap.</b> Sources that refuse automated access are recorded as
+      declined, with what was found, rather than worked around.</p>
+    <p><b>Links rot, portals move, and free things become paid</b>, so every row says when a person last checked it. The build refuses any row without a date.
+      <a href={u("/add/")}>Found one that has changed? Say so →</a></p>
+  </dialog>
 
   <script type="application/json" id="pv-conf" set:html={JSON.stringify(conf)}></script>
   <script is:inline src={u("/js/sources-search.js")}></script>
@@ -344,15 +352,15 @@ const conf = {
   .pv-none { font: 15px var(--sans); color: var(--ink-2); background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 14px 18px; }
   .pv-note { font: 13px var(--sans); color: var(--ink-3); }
   .pv-loading { font: 14px var(--sans); color: var(--ink-3); }
-  .pv-newpill { display: inline-flex; align-items: center; gap: 6px; font: 600 12px var(--mono); letter-spacing: .06em; text-transform: uppercase; text-decoration: none;
-    color: var(--accent); border: 1px solid var(--accent); background: var(--accent-wash); border-radius: 99px; padding: 4px 11px 4px 9px; }
-  .pv-newpill i { font-style: normal; }
-  .pv-newpill span { font-weight: 400; opacity: .85; text-transform: none; letter-spacing: 0; }
-  .pv-newpill:hover { background: var(--accent); color: #fff; }
   .pv-btn { font: 600 13.5px var(--sans); color: #fff; background: var(--accent); border: 1px solid var(--accent); border-radius: 99px; padding: 8px 16px; cursor: pointer; }
   .pv-btn.ghost { color: var(--accent); background: transparent; }
-  .pv-helpbtn { margin-left: auto; }
-  .pv-helpbtn span { font: 500 10.5px var(--mono); color: var(--ink-3); margin-left: 4px; }
+  .pv-icons { display: flex; gap: 8px; align-self: end; }
+  .pv-ib { position: relative; box-sizing: border-box; height: 46px; width: 46px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none;
+    background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; color: var(--ink-2); padding: 0; font: inherit; }
+  .pv-ib svg { width: 18px; height: 18px; }
+  .pv-ib:hover { border-color: var(--accent); color: var(--accent); }
+  .pv-ib:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .pv-ibn { position: absolute; top: -6px; right: -6px; min-width: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 999px; background: var(--accent); color: #fff; font: 600 10.5px/18px var(--mono); text-align: center; }
   .pv-dlg { width: min(720px, 94vw); max-height: 88vh; overflow: auto; box-sizing: border-box; padding: 22px 26px 20px; background: var(--panel); color: var(--ink);
     border: 1px solid var(--rule-strong); border-radius: 12px; box-shadow: 0 18px 48px rgba(10, 20, 26, .45); }
   .pv-dlg::backdrop { background: rgba(8, 14, 20, .55); }
@@ -370,7 +378,6 @@ const conf = {
   .pv-helplead { font: 16px/1.55 var(--serif); color: var(--ink); max-width: 80ch; margin: 0 0 10px; }
     .pv-how { margin-top: 12px; }
   .pv-how > summary { cursor: pointer; font: 600 14px var(--sans); color: var(--accent); }
-  .pv-about { margin-top: 36px; max-width: 90ch; font: 14.5px/1.6 var(--sans); color: var(--ink-2); }
   .pv-two { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); max-width: 120ch; }
   .pv-know { margin: 8px 0 0; font: 12.5px/1.5 var(--sans); color: var(--ink-3); }
   .pv-know span { display: block; font-family: var(--mono); font-size: 11.5px; margin-bottom: 2px; }

@@ -25,7 +25,7 @@
   css.textContent =
     ".ra-q-add{position:absolute;right:34px;top:50%;transform:translateY(-50%);width:28px;height:28px;border:0;border-radius:50%;background:none;color:var(--ink-3,#777);font-size:20px;line-height:1;cursor:pointer;display:grid;place-items:center}" +
     ".ra-q-add:hover,.ra-q-add:focus-visible{color:var(--accent,#1f5c6b);background:var(--accent-wash,rgba(31,92,107,.12));outline:none}" +
-    "#ra-q{padding-right:62px}" +
+    ".ra-find #ra-q,.ra-bar #ra-q,.ra-bar-find #ra-q{padding-right:64px!important;text-overflow:ellipsis}" +
     "#ra-pills{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:-4px 0 12px}" +
     "#ra-pills[hidden]{display:none}" +
     "#ra-pills .ra-pill{font:inherit;font-size:13px;line-height:1.2;padding:5px 11px;border-radius:999px;border:1px solid var(--rule,#ccc);background:var(--panel,#fff);color:var(--ink-2,#444)}" +

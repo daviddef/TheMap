@@ -35,7 +35,7 @@ const BASE_ = u("/");
   <link rel="stylesheet" href={u("/story-cards.css")} />
   <script is:inline src={u("/js/stories.js")}></script>
   <script is:inline src={u("/js/research-file.js")}></script>
-  <LineSwitcher />
+  <LineSwitcher admin />
 
   <div class="mr-full">
 
@@ -498,9 +498,6 @@ const BASE_ = u("/");
         var h = [];
 
         /* ---- the line, and what it amounts to --------------------------- */
-        h.push('<h2 class="mrh">' + esc(me ? me.name : "My research") +
-               (me && me.where ? ' <span class="mrwhere2">of ' + esc(me.where) + "</span>" : "") +
-               "</h2>");
         var sum = [];
         if (Object.keys(byPlace).length)
           sum.push("<b>" + Object.keys(byPlace).length + "</b> place" +
@@ -513,7 +510,7 @@ const BASE_ = u("/");
                                    (films.length === 1 ? "" : "s"));
         if (letters.length) sum.push("<b>" + letters.length + "</b> letter" +
                                      (letters.length === 1 ? "" : "s") + " out");
-        h.push('<p class="mrsum">' + (sum.join(" \u00b7 ") || "Nothing counted yet") + "</p>");
+        h.push('<p class="mrsum">' + (sum.join(" \u00b7 ") || "No books marked for this family yet. Open a place and mark a book as searched, and it counts here") + "</p>");
 
         /* ---- 1. where this family has been ------------------------------ */
         var pids = Object.keys(byPlace).sort();
@@ -642,8 +639,8 @@ const BASE_ = u("/");
           return !byPlace[pid];
         }).sort();
         if (elsewhere.length) {
-          h.push('<p class="mrshared mrshared-else">Read in full for other ' +
-            "families, not this one: " + elsewhere.map(function (pid) {
+          h.push('<p class="mrshared mrshared-else">Books read page by page, which count for every family, in places ' +
+            esc(me ? me.name : "this family") + " has no marks of its own: " + elsewhere.map(function (pid) {
               var pc = PLACEC[pid];
               /* data-shared-place so fill() fetches the place's own file and
                  the NAME arrives. Without it these links are not [data-place]

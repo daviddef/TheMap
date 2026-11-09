@@ -116,6 +116,67 @@
       P.addLine(name, fWhere.value.trim()); closePop(false); draw(); document.dispatchEvent(new CustomEvent("ra-progress-changed"));
     });
 
+    /* MY RESEARCH'S BAR. On that page the bar also says whose research this is, which family research session it came from, and carries
+       the things you do to a family: rename it, remove it, print or save it as a PDF. Rename and Remove open a small panel in the bar
+       (the pop-up question box is not used). Remove takes this family's marks only, never the books themselves, and is refused for the
+       last family. Merging two families and a whole-session view do not exist yet. */
+    var isAdmin = bar.classList.contains("ra-lines-admin"), fam = null, origTitle = document.title;
+    if (isAdmin) {
+      fam = { who: mk("span", "ra-fam-who"), sess: mk("span", "ra-fam-sess"), tools: mk("span", "ra-fam-tools"), panel: mk("div", "ra-fam-panel") };
+      fam.panel.hidden = true;
+      function tool(label, cls, fn) { var b = mk("button", "ra-fam-b" + (cls ? " " + cls : ""), label); b.type = "button"; b.addEventListener("click", fn); fam.tools.append(b); return b; }
+      function current() { return P.lines().filter(function (l) { return l.active; })[0]; }
+      function openPanel(kind) {
+        var me = current(); if (!me) return;
+        var p = fam.panel; p.innerHTML = ""; p.hidden = false;
+        if (kind === "rename") {
+          var n = mk("input"), w = mk("input"), ok = mk("button", "ra-fam-b pri", "Save name"), no = mk("button", "ra-fam-b", "Cancel");
+          n.value = me.name; n.setAttribute("aria-label", "Family name"); w.value = me.where || ""; w.placeholder = "Where (optional)"; w.setAttribute("aria-label", "Where, optional");
+          ok.type = "button"; no.type = "button";
+          function go() { if (!n.value.trim()) { n.focus(); return; } P.renameLine(me.slug, n.value, w.value); p.hidden = true; draw(); document.dispatchEvent(new CustomEvent("ra-progress-changed")); }
+          ok.addEventListener("click", go); no.addEventListener("click", function () { p.hidden = true; });
+          [n, w].forEach(function (i) { i.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); go(); } else if (e.key === "Escape") p.hidden = true; }); });
+          p.append(mk("span", "", "Rename this family"), n, w, ok, no); n.focus(); n.select();
+        } else {
+          var only = P.lines().length < 2, go2 = mk("button", "ra-fam-b pri danger", "Remove " + labelOf(me)), no2 = mk("button", "ra-fam-b", "Keep it");
+          go2.type = "button"; no2.type = "button";
+          if (only) { p.append(mk("span", "", "This is your only family, so it cannot be removed. Rename it, or add another family first."), no2); no2.textContent = "OK"; }
+          else {
+            p.append(mk("span", "", "Remove " + labelOf(me) + " and the " + me.marks + (me.marks === 1 ? " mark" : " marks") + " made under it? The books and pages themselves stay, and other families keep theirs. This cannot be undone."), go2, no2);
+            go2.addEventListener("click", function () {
+              P.removeLine(me.slug); var rest = P.lines(); if (rest.length && !rest.some(function (l) { return l.active; })) P.setActive(rest[0].slug);
+              p.hidden = true; draw(); document.dispatchEvent(new CustomEvent("ra-progress-changed"));
+            });
+          }
+          no2.addEventListener("click", function () { p.hidden = true; });
+        }
+      }
+      tool("Rename", "", function () { openPanel("rename"); });
+      tool("Remove", "danger", function () { openPanel("remove"); });
+      tool("Print / save as PDF", "", function () { window.print(); });
+      var after = bar.querySelector(".ra-lines-n");
+      bar.insertBefore(fam.who, sel); bar.insertBefore(fam.sess, sel); bar.insertBefore(fam.tools, sel);
+      bar.append(fam.panel);
+      if (after) bar.insertBefore(after, fam.panel);
+    }
+    function drawAdmin(me) {
+      if (!fam) return;
+      fam.who.textContent = me ? labelOf(me) : "No family chosen";
+      fam.sess.textContent = "";
+      if (me) {
+        var ar = me.archives || [];
+        if (ar.length) {
+          fam.sess.append("From the research session" + (ar.length > 1 ? "s " : " "));
+          ar.slice(0, 3).forEach(function (a, i) { if (i) fam.sess.append(", "); var s = String(a.name || a.id || a).replace(/^The /, ""), url = a.url || a.href; if (url) { var l = mk("a", "", s + " \u2197"); l.href = url; l.target = "_blank"; l.rel = "noopener"; fam.sess.append(l); } else fam.sess.append(s); });
+        } else fam.sess.append(me.session ? "From a family research session" : "Started by you");
+      }
+      Array.prototype.forEach.call(fam.tools.children, function (b) { b.disabled = !me; });
+      /* the page's own title says whose research it is */
+      var h = document.querySelector(".pagehead h1"), ttl = me ? "My research: " + labelOf(me) : "My research";
+      if (h) h.textContent = ttl;
+      var tail = /\s[|\u2014\u2013-]\s.*$/.exec(origTitle); document.title = ttl + (tail ? tail[0] : "");
+    }
+
     function draw() {
       var lines = P.lines();
       sel.innerHTML = lines.map(function (l) {
@@ -127,6 +188,7 @@
       var me = lines.filter(function (l) { return l.active; })[0];
       btnLab.textContent = me ? labelOf(me) : "Choose a family";
       if (!pop.hidden) paintList();
+      drawAdmin(me);
       if (say) say.textContent = me
         ? me.marks + (me.marks === 1 ? " mark" : " marks")
         : "";

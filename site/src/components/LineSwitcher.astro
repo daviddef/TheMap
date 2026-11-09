@@ -34,16 +34,16 @@
  * count, which is a statistic rather than a control and lives on
  * /my-research/ where it can be read properly.
  */
-const { quiet = false, compact = false, linkOnly = false } = Astro.props;
+const { quiet = false, compact = false, linkOnly = false, admin = false } = Astro.props;
 const uid = compact ? "ra-lines-c" : "ra-lines";
 import { u } from "../lib/url.js";
 ---
 {linkOnly ? <div class="ra-lines ra-lines-c ra-lines-lo"><a class="ra-lines-l" href={u("/my-research/")} title="My research: your families, the books you have marked, your stories"><svg class="ra-lines-i" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><circle cx="8" cy="3" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="3.5" cy="13" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12.5" cy="13" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3M8 8H3.5v3M8 8h4.5v3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Researching</a></div> :
-<div class:list={["ra-lines", compact && "ra-lines-c"]} id={uid}
+<div class:list={["ra-lines", compact && "ra-lines-c", admin && "ra-lines-admin"]} id={uid}
      data-quiet={quiet ? "1" : null} hidden>
   {compact ? <a class="ra-lines-l" href={u("/my-research/")} title="My research: your families, the books you have marked, your stories"><svg class="ra-lines-i" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><circle cx="8" cy="3" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="3.5" cy="13" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12.5" cy="13" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3M8 8H3.5v3M8 8h4.5v3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Researching</a> : <label class="ra-lines-l" for={uid + "-sel"}>Researching</label>}
   <select id={uid + "-sel"} aria-label="Which family this progress belongs to"></select>
-  {!compact && <button type="button" class="ra-line-ren">rename</button>}
+  {!compact && !admin && <button type="button" class="ra-line-ren">rename</button>}
   {!compact && <span class="ra-lines-n" role="status" aria-live="polite"></span>}
 </div>}
 
@@ -89,27 +89,3 @@ import { u } from "../lib/url.js";
   @media (max-width: 860px) { .ra-lines-c { display: none; } }
 </style>
 
-<style is:global>
-  .ra-cb { position: relative; display: inline-block; min-width: 0; }
-  .ra-cb-btn { display: inline-flex !important; align-items: center; gap: 8px; max-width: 20rem; padding: 4px 9px !important; border: 1px solid var(--rule-strong) !important; border-radius: 6px; background: var(--bg) !important; color: var(--ink) !important;
-    font: 600 13px/1.3 var(--sans) !important; text-decoration: none !important; cursor: pointer; }
-  .ra-cb-btn:hover, .ra-cb.is-open .ra-cb-btn { border-color: var(--accent) !important; }
-  .ra-cb-lab { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .ra-cb-chev { color: var(--ink-3); font-size: 11px; }
-  .ra-lines-c .ra-cb-btn { max-width: 11rem; font-size: 12.5px !important; padding: 2px 7px !important; }
-  .ra-cb-pop { position: absolute; z-index: 3000; top: calc(100% + 6px); left: 0; width: min(340px, 92vw); background: var(--panel); border: 1px solid var(--rule-strong); border-radius: 12px; box-shadow: 0 14px 40px rgba(0,0,0,.28); padding: 8px; font-family: var(--sans); }
-  .ra-cb-pop[hidden] { display: none; }
-  .ra-cb-q { width: 100%; box-sizing: border-box; padding: 9px 11px; border: 1px solid var(--rule-strong); border-radius: 8px; background: var(--bg); color: var(--ink); font: 14px var(--sans); }
-  .ra-cb-q:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
-  .ra-cb-list { list-style: none; margin: 6px 0 0; padding: 0; max-height: min(52vh, 320px); overflow-y: auto; }
-  .ra-cb-opt { display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; gap: 6px; align-items: baseline; padding: 8px 8px; border-radius: 8px; cursor: pointer; font-size: 14px; color: var(--ink); }
-  .ra-cb-main { min-width: 0; } .ra-cb-arch { margin-left: 8px; font: 500 11.5px var(--sans); color: var(--accent) !important; text-decoration: none; white-space: nowrap; opacity: .85; } .ra-cb-arch:hover { text-decoration: underline; opacity: 1; }
-  .ra-cb-grp { padding: 10px 10px 4px; font: 600 10.5px/1 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); } .ra-cb-grp:first-child { padding-top: 4px; }
-  .ra-cb-opt.is-at, .ra-cb-opt:hover { background: var(--accent-wash); } .ra-cb-opt.is-on b { color: var(--accent); }
-  .ra-cb-tick { color: var(--accent); font-weight: 700; } .ra-cb-main span { color: var(--ink-2); }
-  .ra-cb-n { font: 10.5px var(--mono); color: var(--ink-3); white-space: nowrap; }
-  .ra-cb-none { padding: 10px 8px; font-size: 13.5px; color: var(--ink-2); }
-  .ra-cb-new, .ra-cb-addbtn { display: block; margin-top: 6px; padding: 8px 10px !important; border: 1px dashed var(--accent) !important; border-radius: 8px; background: none !important; color: var(--accent) !important; font: 600 13.5px var(--sans) !important; text-decoration: none !important; cursor: pointer; width: 100%; text-align: left; }
-  .ra-cb-add { margin-top: 6px; border-top: 1px solid var(--rule); padding-top: 6px; } .ra-cb-addbtn[hidden], .ra-cb-form[hidden] { display: none; }
-  .ra-cb-form { display: grid; gap: 6px; } .ra-cb-form input { padding: 8px 10px; border: 1px solid var(--rule-strong); border-radius: 8px; background: var(--bg); color: var(--ink); font: 14px var(--sans); }
-  .ra-cb-go { padding: 9px 12px !important; border: 0 !important; border-radius: 8px; background: var(--accent) !important; color: #fff !important; font: 600 14px var(--sans) !important; text-decoration: none !important; cursor: pointer; }
-</style>

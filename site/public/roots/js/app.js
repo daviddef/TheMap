@@ -616,13 +616,14 @@ function decStatus(restored) {
   const kept = dec.count();
   $('#dec-said').textContent = !dec.available() ? 'This browser has no storage for it (a private window?). Save the decisions to a file instead.'
     : (restored ? restored + ' earlier decision' + (restored === 1 ? '' : 's') + ' re-applied. ' : '')
-      + (dec.isOn() ? '\u2713 Saved on this device: ' + kept + (kept === 1 ? ' decision' : ' decisions') + ', and the Fix list is summarised in My research.' : kept ? kept + ' loaded from a file are stored on this device; turn this on to keep new ones too.' : 'Not kept: ticks and "left as is" are lost when you close the page.');
+      + (dec.isOn() ? (autoKept ? 'On because online sync is on. ' : '') + '\u2713 Saved on this device: ' + kept + (kept === 1 ? ' decision' : ' decisions') + ', and the Fix list is summarised in My research.' : kept ? kept + ' loaded from a file are stored on this device; turn this on to keep new ones too.' : 'Not kept: ticks and "left as is" are lost when you close the page.');
 }
+const autoKept = dec.autoOn();   // the six words are on this browser: keeping starts on (decisions.js)
 function fixlist(m) { fix = m; opened.clear(); const n = restoreDecisions(m); drawFix(); decStatus(n); fixTab(); }
 /* While the switch is on, a readable summary of this fix list is kept for My research (see decisions.js). Debounced: drawFix runs on every tick. */
 let sumTimer = 0;
 function keepSummary() { clearTimeout(sumTimer); sumTimer = setTimeout(() => { if (fix && curName && dec.isOn()) fixes.put(summarise(fix, asIs, ticked, curName)); }, 400); }
-$('#dec-on').onchange = e => { dec.setOn(e.target.checked); if (!e.target.checked) fixes.forget(); else keepSummary(); if (e.target.checked) { for (const k of asIs) dec.put(k, 'a', true); for (const k of ticked) dec.put(k, 'd', true); } decStatus(0); };
+$('#dec-on').onchange = e => { dec.setOn(e.target.checked); dec.optOut(!e.target.checked); if (!e.target.checked) fixes.forget(); else keepSummary(); if (e.target.checked) { for (const k of asIs) dec.put(k, 'a', true); for (const k of ticked) dec.put(k, 'd', true); } decStatus(0); };
 $('#dec-save').onclick = () => saveAs('fix-decisions-' + new Date().toISOString().slice(0, 10) + '.json', fileTextOf(rowsFrom(asIs, ticked)), 'application/json');
 $('#dec-load').onclick = () => $('#dec-file').click();
 $('#dec-file').onchange = async e => {

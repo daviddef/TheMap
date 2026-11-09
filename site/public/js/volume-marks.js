@@ -131,6 +131,24 @@
          to stop forty books costing forty extra lines; it belongs in the panel
          the reader deliberately opened. */
       var d = detail(id);
+      /* WHOSE WORK THIS IS, ASKED IN THE FORM. With no family chosen in the header a save used to write nothing and clear the form, so
+         the pages and the note typed a moment ago were gone. Now the form says who it is for, and with none chosen it asks here: any
+         family, or Research Names, the general one for work that is not about a particular family. */
+      var who = P.lines().filter(function (l) { return l.active; })[0], forRow;
+      if (who) {
+        forRow = '<span class="vm-for">saved for <b>' + esc(who.name === "My research so far" ? "Research Names" : who.name) +
+          (who.where ? " of " + esc(who.where) : "") + "</b> (change it at the top of the page)</span>";
+      } else {
+        var general = P.lines().some(function (l) { return l.name === "My research so far" || l.name === "Research Names"; });
+        forRow = '<label class="vm-for-l">whose research is this? <select class="vm-fam" aria-label="Which family this belongs to">' +
+          '<option value="">choose \u2026</option>' +
+          P.lines().map(function (l) {
+            var gen = l.name === "My research so far" || l.name === "Research Names";
+            return '<option value="' + esc(l.slug) + '">' + esc(gen ? "Research Names (general, no particular family)" : l.name + (l.where ? " of " + l.where : "")) + "</option>";
+          }).join("") +
+          (general ? "" : '<option value="__general">Research Names (general, no particular family)</option>') +
+          "</select></label>";
+      }
       /* ONE THING PER ROW. David: «form is a mess. can you clean it up» — and
          it was: every field, the running summary, a checkbox and three
          buttons were siblings in one wrapping flex line, so the layout was
@@ -142,6 +160,7 @@
          then the buttons. Nothing wraps into anything else. */
       return '<span class="vm-edit">' +
         (d ? '<span class="vm-detail">' + d + "</span>" : "") +
+        forRow +
         '<span class="vm-row">' +
         '<label>pages done <input class="vm-r" type="text" inputmode="numeric" ' +
         'placeholder="1-47, 60-72" value="' + esc(P.fmt(m.done)) + '"></label>' +
@@ -348,6 +367,16 @@
       if (e.target.closest(".vm-cancel")) { _editing = null; paint(li, true); return; }
       if (e.target.closest(".vm-clear")) { _editing = null; P.clear(id); paint(li, true); rollup(); bump(); return; }
       if (e.target.closest(".vm-save")) {
+        /* NO FAMILY, NO SAVE, AND NOTHING TYPED IS LOST: the form stays open until the reader says whose research it is. */
+        if (!P.active()) {
+          var fam = slot.querySelector(".vm-fam"), pick = fam && fam.value;
+          if (pick === "__general") P.addLine("Research Names", "");
+          else if (pick) P.setActive(pick);
+          if (!P.active()) {
+            if (fam) { fam.classList.add("vm-bad"); fam.focus(); }
+            return;
+          }
+        }
         /* WHAT THE ROW IS, SAVED WITH IT. The id is a FamilySearch waypoint —
            «3JXZ-K68:172062901,172062902,172062903» — which is stable, which is
            why it is the key, and which tells a reader nothing. My research

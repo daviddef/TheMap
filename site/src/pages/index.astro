@@ -58,6 +58,8 @@ const inventoryRows = [
   ["The records", [
     [volumes, "volumes", "/countries/", "register books of baptisms, marriages, burials and civil acts", "Senj, births 1859–1877: one book"],
     [archives.length, "archives", "/providers/", `the places that keep the books, in ${archiveCountries} countries`, "the State Archives in Rijeka"],
+    /* THE SOURCES, HERE AND NOT ON THEIR OWN PAGE. David: «source stats, don't waste the real estate, rather add it to our metrics board». */
+    [provs.providers.length, "sources", "/providers/", `archives, libraries, indexes and portals: ${provs.providers.filter(p => p.access === "free").length} free to use with no account, ${provs.providers.filter(p => p.access !== "unsurveyed").length} with the cost to look worked out`, "Antenati: free, no account"],
   ]],
   ["Names and flags", [
     [surnameCount, "surnames", "/surnames/", `${snFamilies.counts.families} families of spellings`, "Blažević has its own page"],

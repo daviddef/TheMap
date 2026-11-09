@@ -44,7 +44,7 @@ const sourceEntries = Object.entries(arrivals).map(([date, list]) => {
     headline = `${list.length.toLocaleString("en")} new sources added to the directory, mostly ${top.join(", ")}`;
   }
   if (headline.length > 150) headline = headline.slice(0, 147).replace(/[;,]?\s*\S*$/, "") + "…";
-  return { date, kind: "new", headline, href: `/providers/?d=${date}` };
+  return { date, kind: "new", src: true, headline, href: `/providers/?d=${date}` };
 });
 /* sources first within their day: they were at the bottom of a long day and nobody scrolled to them */
 const entries = sourceEntries.concat(data.entries).sort((a, b) => b.date.localeCompare(a.date));
@@ -63,11 +63,15 @@ const email = site.contact && site.contact.email;
   dek="Thanks for stopping by. Here is what I have been tinkering with lately: new sources, fixes, and small things that make the atlas nicer to use. Newest first."
   description="Recent improvements to Record Atlas: new sources, new pages and fixes, newest first.">
 
-  <p class="tally" aria-label="Summary">
+  <p class="tally" aria-label="Summary and filters">
     <span><b>{entries.length}</b> things since {part(days[days.length - 1][0], { day: "numeric", month: "long" })}</span>
     {["new", "better", "fixed"].map((k) => count(k) > 0 && (
-      <span class={`chip ${k}`}><i aria-hidden="true">{KINDS[k].glyph}</i> {count(k)} {KINDS[k].label.toLowerCase()}</span>
+      <button type="button" class={`chip ${k}`} data-f={k} aria-pressed="false"><i aria-hidden="true">{KINDS[k].glyph}</i> {count(k)} {KINDS[k].label.toLowerCase()}</button>
     ))}
+    {sourceEntries.length > 0 && (
+      <button type="button" class="chip src" data-f="src" aria-pressed="false" title="The days the sources directory grew"><i aria-hidden="true">▤</i> {sourceEntries.length} sources</button>
+    )}
+    <button type="button" class="clear" id="wn-clear" hidden>Show everything</button>
   </p>
 
   <ol class="line">
@@ -82,7 +86,7 @@ const email = site.contact && site.contact.email;
           {es.map((e) => {
             const k = KINDS[e.kind] || KINDS.better;
             return (
-              <li class="item">
+              <li class="item" data-kind={e.kind || "better"} data-src={e.src ? "1" : undefined}>
                 <span class={`chip ${e.kind || "better"}`}><i aria-hidden="true">{k.glyph}</i> {k.label}</span>
                 {e.href
                   ? <a class="head" href={u(e.href) + (e.spot ? "?spot=" + encodeURIComponent(e.spot) + (e.tip ? "&tip=" + encodeURIComponent(e.tip) : "") : "")}>{e.headline}<span class="go" aria-hidden="true"> →</span></a>
@@ -94,6 +98,25 @@ const email = site.contact && site.contact.email;
       </li>
     ))}
   </ol>
+
+  <script is:inline>
+    (function () {
+      var pills = [].slice.call(document.querySelectorAll(".tally [data-f]")), clear = document.getElementById("wn-clear");
+      var items = [].slice.call(document.querySelectorAll(".item")), daysEl = [].slice.call(document.querySelectorAll(".day"));
+      var on = null;
+      function apply() {
+        items.forEach(function (i) {
+          i.hidden = !!on && !(on === "src" ? i.getAttribute("data-src") === "1" : i.getAttribute("data-kind") === on);
+        });
+        daysEl.forEach(function (d) { d.hidden = !d.querySelector(".item:not([hidden])"); });
+        pills.forEach(function (p) { p.setAttribute("aria-pressed", p.getAttribute("data-f") === on ? "true" : "false"); });
+        clear.hidden = !on;
+      }
+      pills.forEach(function (p) { p.addEventListener("click", function () { var f = p.getAttribute("data-f"); on = on === f ? null : f; apply(); }); });
+      clear.addEventListener("click", function () { on = null; apply(); });
+      if (location.hash === "#sources") { on = "src"; apply(); }
+    })();
+  </script>
 
   <aside class="foot">
     <p class="warm">
@@ -119,6 +142,12 @@ const email = site.contact && site.contact.email;
   .chip i { font-style: normal; font-size: 12px; }
   .chip.new { color: var(--accent); border-color: var(--accent); background: var(--accent-wash); }
   .chip.fixed { color: var(--ink); }
+  .chip.src { color: var(--ink); }
+  button.chip { cursor: pointer; font: inherit; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
+  button.chip:hover { border-color: var(--accent); }
+  button.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .clear { background: none; border: 0; padding: 0; font: 13px var(--sans); color: var(--accent); text-decoration: underline; cursor: pointer; }
+  .item[hidden], .day[hidden], .clear[hidden] { display: none !important; }
 
   /* The timeline: a rule down the left, a date on it, a card per change. */
   .line { list-style: none; margin: 0; padding: 0; position: relative; }

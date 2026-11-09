@@ -72,11 +72,15 @@ export function readPeople(parsed) {
     }
     const id = r.xref.replace(/@/g, '');
     P.set(id, { id, sex: sx && sx.val ? sx.val[0].toLowerCase() : 'm', given, sur, by: b.year, byApprox: b.approx, bpRaw: b.place, dy: d.year, dpRaw: d.place,
-      resi, occ: occ ? occ.val : null, srcs: srcs.slice(0, 6), deathKnown: !!(get(r, 'DEAT') || get(r, 'BURI') || get(r, 'CREM')), father: null, mother: null, spouse: [], kids: [] });
+      resi, occ: occ ? occ.val : null, srcs: srcs.slice(0, 6), deathKnown: !!(get(r, 'DEAT') || get(r, 'BURI') || get(r, 'CREM')), father: null, mother: null, spouse: [], kids: [], gone: 0 });
   }
   for (const f of fams) {
     const h0 = get(f, 'HUSB'), w0 = get(f, 'WIFE');
     let h = h0 && h0.val ? h0.val.replace(/@/g, '') : null, w = w0 && w0.val ? w0.val.replace(/@/g, '') : null;
+    /* relatives the file names but does not contain (a partial export): counted on the people who are here, so the fix list can say why a group looks cut off */
+    const kidIds = all(f, 'CHIL').map(c => c.val.replace(/@/g, ''));
+    const lost = (h0 && h0.val && !P.has(h) ? 1 : 0) + (w0 && w0.val && !P.has(w) ? 1 : 0) + kidIds.filter(c => !P.has(c)).length;
+    if (lost) for (const x of [h, w, ...kidIds]) if (x && P.has(x)) P.get(x).gone += lost;
     if (!P.has(h)) h = null; if (!P.has(w)) w = null;
     if (h && w) { P.get(h).spouse.push(w); P.get(w).spouse.push(h); }
     for (const c of all(f, 'CHIL')) {

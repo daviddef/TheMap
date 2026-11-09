@@ -492,6 +492,10 @@ function fixRow(s, i) {
     body.append(plist([{ name: i.an, id: i.a }, { name: i.bn, id: i.b }], 2));
   } else if (s.key === 'apart') {
     head.append(el('b', null, i.size + (i.size === 1 ? ' person' : ' people') + ' not connected to the main tree')); body.append(head, plist(i.people, i.size));
+    /* WHY, because «he is in my tree» is the first thing anyone says: this list is about the FILE, not the tree online. */
+    note.textContent = (i.gone ? 'The file names ' + i.gone + ' relative' + (i.gone === 1 ? '' : 's') + ' of these people who ' + (i.gone === 1 ? 'is' : 'are') + ' not in it, so it may be a partial export.'
+      : 'In this file there is no parent, spouse or child link from ' + (i.size === 1 ? 'this person' : 'these people') + ' to anyone else.')
+      + ' Built from ' + (curName || 'the file you loaded') + '. If they are joined in your tree now, export again.'; body.append(note);
   } else if (s.key === 'suspect') {
     const one = pline({ name: i.name, id: i.id, by: null, nl: i.nl }, { copyName: true }); one.classList.add('solo'); head.append(one);
     const leave = el('button', 'link', 'Leave as is'); leave.type = 'button'; leave.title = 'I know this is right: hide it'; leave.onclick = () => { asIs.add(i.key); dec.put(i.key, 'a', true); drawFix(); };

@@ -132,7 +132,7 @@ export function buildChecklist(env) {
   comps.sort((a, b) => b.length - a.length);
   const apart = comps.slice(1).map(c => c.filter(keep)).filter(c => c.length).map(c => {
     const s = c.slice().sort((a, b) => az(name(a), name(b)));
-    return { key: 'a|' + s[0].id, size: c.length, people: s.slice(0, SAMPLE).map(p => ({ id: p.id, name: shown(p), by: p.by })), first: shown(s[0]) };
+    return { key: 'a|' + s[0].id, size: c.length, gone: c.reduce((n, p) => n + (p.gone || 0), 0), people: s.slice(0, SAMPLE).map(p => ({ id: p.id, name: shown(p), by: p.by })), first: shown(s[0]) };
   }).sort((a, b) => az(a.first, b.first));
 
   const out = {

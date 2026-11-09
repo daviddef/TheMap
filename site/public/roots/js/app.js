@@ -622,7 +622,16 @@ $('#fcsv').onclick = () => fix && saveAs('fix-list.csv', '\ufeff' + checklistCsv
 
 /* ---------- files kept on this device (opt-in, see recent.js) ---------- */
 const mb = n => (n >= 1e6 ? (n / 1e6).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1e3)) + ' KB');
+/* THE SAVED FIX LIST, WITHOUT OPENING A GEDCOM. «how do i see my saved fix list? if i dont open a gedcom?» It lives in My research
+   (GEDCOM to fix); this is the door to it from the one page a reader is on when they ask. Reads the same summary My research reads. */
+function savedFix() {
+  const trees = fixes.all() || {}, names = Object.keys(trees), box = $('#savedfix'); if (!box) return;
+  box.hidden = !names.length; if (!names.length) return;
+  let left = 0; for (const n of names) for (const s of trees[n].sections || []) left += Math.max(0, s.total - s.done - s.asis);
+  $('#savedfixtxt').textContent = names.length === 1 ? names[0] + ': ' + left + ' left to fix.' : names.length + ' family trees kept, ' + left + ' left to fix in all.';
+}
 async function refreshRecent() {
+  savedFix();
   const items = await recent.list(), box = $('#recent'), ul = $('#recentlist'); ul.textContent = ''; box.hidden = !items.length;
   for (const f of items) {
     const li = el('li', 'rf'), open = el('button', 'btn', 'Open'), when = new Date(f.saved).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });

@@ -2070,19 +2070,26 @@ window.addEventListener("load", async function () {
        never returned. Any word of three characters or more is asked
        separately instead — same effect, no side effect. */
     var words = k ? k.split(/\s+/).filter(function (w) { return w.length >= 3; }) : [];
-    var hit = function (hay) {
-      if (!k) return true;
-      if (hay.indexOf(k) !== -1) return true;
+    var cs = FLAGIDX.countries || [], hs = FLAGIDX.hubs || [];
+    var hubHay = function (h) { return fold(h.name + " " + (h.what || "") + " " + (h.meta || "")); };
+    /* THE WHOLE PHRASE FIRST. «South Africa» is one name; asked word by word, «south» and «africa»
+       matched 95 of 211 countries (every one in a region called Africa, South Sudan, South Korea...),
+       so choosing the country filtered nothing. Words are asked separately only when the phrase
+       itself matches nothing, which is the «surname place» case above. */
+    var asPhrase = function (hay) { return !k || hay.indexOf(k) !== -1; };
+    var asWords = function (hay) {
+      if (asPhrase(hay)) return true;
       for (var i = 0; i < words.length; i++) {
         if (hay.indexOf(words[i]) !== -1) return true;
       }
       return false;
     };
-    var cs = FLAGIDX.countries || [], hs = FLAGIDX.hubs || [];
-    var mc = cs.filter(function (c) { return hit(flagHay(c)); });
-    var mh = hs.filter(function (h) {
-      return hit(fold(h.name + " " + (h.what || "") + " " + (h.meta || "")));
-    });
+    var mc = cs.filter(function (c) { return asPhrase(flagHay(c)); });
+    var mh = hs.filter(function (h) { return asPhrase(hubHay(h)); });
+    if (k && !mc.length && !mh.length) {
+      mc = cs.filter(function (c) { return asWords(flagHay(c)); });
+      mh = hs.filter(function (h) { return asWords(hubHay(h)); });
+    }
 
     /* Nothing matches the typed text: if a place is open, its country's card
        is the answer; hiding the section is for a search that found nothing. */

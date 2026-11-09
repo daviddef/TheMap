@@ -1,0 +1,127 @@
+---
+/* THIS PLACE AT A GLANCE — what it is, where it sits, and the doors out of the page.
+ *
+ * David, looking at Barkly East: «can the places show details and links to their associated countries? ... i would
+ * expect the place shows us a summary of it all and links, etc?» The page opened on a research plan and said nothing
+ * of the country the place is in, the flags that flew over it, or the pages that tell more. This is the summary that
+ * comes first: one sentence, then the country, its flags and the sources as links, then the flags themselves.
+ *
+ * WHAT IT CLAIMS. «Flew over this ground» only where the atlas has this ground's own era table (region); where it has
+ * none, the strip is the country's flags and is said to be, with a line that the atlas has not yet mapped who ruled
+ * this exact place by date. A flag is never shown as ruling a place the atlas cannot show it ruled.
+ */
+import { flagForSpan } from "../lib/flag-slug.js";
+import { flagPage } from "../lib/flags.js";
+import { countrySourcesHref } from "../lib/sources-by-country.js";
+import flagEras from "../../public/flag-eras.json";
+import regionsDoc from "../../public/regions.json";
+
+const { place, region, eras, countryName, adm, volumeCount, span, older, mapLink, u } = Astro.props;
+const cc = String(place.country || "").toUpperCase();
+const flagsHref = flagPage(cc);
+const slug = flagsHref ? flagsHref.replace(/^\/flags\/|\/$/g, "") : null;
+const REGIMES = regionsDoc.regimes || {};
+const nowEra = slug ? flagEras.eras.find((e) => e.slug === slug && e.present === true) : null;
+const nowFlag = nowEra ? `/fl/${nowEra.slug}--${nowEra.id}.svg` : null;
+
+/* the flag the era covers most of: the same overlap rule the who-governed table uses */
+const eraFlag = (e) => {
+  const ccs = ((REGIMES[e.regime] || {}).archives) || [];
+  let best = null, bestSpan = 0;
+  for (const c of ccs) {
+    const f = flagForSpan(flagEras.eras, c, +e.from, +e.to);
+    if (!f) continue;
+    const s = Math.min(+f.to || +e.to, +e.to) - Math.max(+f.from, +e.from);
+    if (s > bestSpan) { bestSpan = s; best = f; }
+  }
+  return best;
+};
+
+/* what the strip will hold: this ground's own eras where the atlas has them (written into the page, a few places), else the country's,
+   which the page script reads once from country-flags.json */
+const ownRows = [], seen = new Set();
+for (const e of (eras || []).slice().sort((x, y) => (x.from || 0) - (y.from || 0))) {
+  const f = eraFlag(e); if (!f || seen.has(f.slug + f.id)) continue;
+  seen.add(f.slug + f.id);
+  ownRows.push([`${f.slug}--${f.id}`, e.polity, `${e.from}–${e.to}`]);
+}
+const own = ownRows.length > 0;
+const countN = own ? ownRows.length : (slug ? flagEras.eras.filter((e) => e.slug === slug && typeof e.from === "number").length : 0);
+const hasStrip = own || countN > 0;
+
+const adm1 = (adm || {}).adm1, adm2 = (adm || {}).adm2;
+const within = [adm2, adm1].filter((x) => x && x !== place.name);
+const names = (older || []).slice(0, 6);
+---
+<section class="pg" aria-label="This place at a glance">
+  <p class="pg-lede">
+    <b>{place.name}</b> is {within.length ? <>in {within.join(", ")}, </> : "in "}
+    {cc ? <a href={u(`/country/${cc.toLowerCase()}/`)}>{countryName}</a> : countryName} today.
+    {volumeCount > 0
+      ? <> The atlas holds <a href="#ra-vols">{volumeCount} record volume{volumeCount === 1 ? "" : "s"}</a>{span ? <> covering {span[0]}–{span[1]}</> : null}.</>
+      : <> The atlas holds no record volumes for it yet, which is a gap in the atlas and not a finding about the records.</>}
+    {countN > 1 ? <> {own ? "The ground" : countryName} has flown {countN} flags.</> : null}
+  </p>
+
+  <ul class="pg-links">
+    {cc && (
+      <li><a class="pg-chip" href={u(`/country/${cc.toLowerCase()}/`)}>
+        {nowFlag ? <img class="pg-ic" src={u(nowFlag)} width="32" height="21" alt="" /> : null}
+        <span><small>Country</small>{countryName}</span></a></li>
+    )}
+    {flagsHref && (
+      <li><a class="pg-chip" href={u(flagsHref)}>
+        <i class="pg-i pg-i-flag"></i>
+        <span><small>Flags</small>Flags of {countryName}</span></a></li>
+    )}
+    {cc && (
+      <li><a class="pg-chip" href={u(countrySourcesHref(cc))}>
+        <i class="pg-i pg-i-book"></i>
+        <span><small>Archives</small>Sources for {countryName}</span></a></li>
+    )}
+    <li><a class="pg-chip" href={mapLink}>
+      <i class="pg-i pg-i-pin"></i>
+      <span><small>Map</small>Show on the map</span></a></li>
+  </ul>
+
+  {names.length > 0 && (
+    <p class="pg-names"><b>Also written:</b> {names.join(", ")}.</p>
+  )}
+
+  {hasStrip && (
+    <div class="pg-flags" data-base={u("/")} data-name={countryName} data-flags={flagsHref ? u(flagsHref) : ""}
+         data-slug={own ? "" : slug} data-own={own ? JSON.stringify(ownRows) : undefined}></div>
+  )}
+</section>
+
+<style>
+  .pg { margin: 8px 0 26px; padding: 20px 24px 14px; border: 1px solid var(--rule);
+        border-left: 3px solid var(--accent); border-radius: 0 6px 6px 0; background: var(--panel); }
+  .pg-lede { font-family: var(--sans); font-size: 16px; line-height: 1.6; color: var(--ink); max-width: var(--measure); margin: 0 0 14px; }
+  .pg-lede a { color: var(--accent); }
+  .pg-links { list-style: none; margin: 0 0 12px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .pg-chip { display: inline-flex; align-items: center; gap: 10px; padding: 7px 14px 7px 10px; border: 1px solid var(--rule);
+             border-radius: 10px; background: var(--bg); color: var(--ink); text-decoration: none; font-family: var(--sans); font-size: 14px; }
+  .pg-chip:hover { border-color: var(--accent); }
+  .pg-chip small { display: block; font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .07em; color: var(--ink-3); }
+  .pg-chip span { line-height: 1.25; }
+  .pg-ic { width: 32px; height: 21px; border: 1px solid var(--rule); border-radius: 2px; flex: none; }
+  .pg-i { width: 22px; height: 22px; flex: none; background-repeat: no-repeat; background-position: center; background-size: contain; }
+  .pg-i-flag { background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231f6272' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M5 21V4M5 5h12l-2 4 2 4H5'/></svg>"); }
+  .pg-i-book { background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231f6272' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM9 9h5M9 13h5'/></svg>"); }
+  .pg-i-pin { background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231f6272' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11zM12 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4z'/></svg>"); }
+  .pg-ic2 { width: 22px; height: 22px; flex: none; stroke: var(--accent); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .pg-names { font-family: var(--sans); font-size: 14px; color: var(--ink-2); margin: 0 0 12px; }
+  .pg :global(.pg-flags h3) { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3); margin: 6px 0 8px; font-weight: 500; }
+  .pg :global(.pg-flags ol) { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px 14px; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+  .pg :global(.pg-flags li) { display: flex; gap: 10px; align-items: center; }
+  .pg :global(.pg-flags img) { border: 1px solid var(--rule); border-radius: 2px; object-fit: cover; flex: none; }
+  .pg :global(.pg-flags li span) { font-family: var(--sans); font-size: 13.5px; line-height: 1.3; min-width: 0; }
+  .pg :global(.pg-flags li small) { display: block; font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+  .pg :global(.pg-more) { font-family: var(--sans); font-size: 13.5px; margin: 10px 0 4px; }
+  .pg :global(.pg-more a) { color: var(--accent); }
+  .pg :global(.pg-fine) { color: var(--ink-3); font-size: 12.5px; }
+  @media (max-width: 640px) { .pg { padding: 16px 15px 10px; } .pg :global(.pg-flags ol) { grid-template-columns: 1fr; } }
+  @media print { .pg-chip { border: 0; padding: 0 12px 0 0; } .pg-ic, .pg-i { display: none; } }
+</style>
+{hasStrip && <script is:inline src={u("/js/place-glance.js")} defer></script>}

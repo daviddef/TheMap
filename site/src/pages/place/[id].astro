@@ -25,6 +25,7 @@ import { sourcesFor, sourcesNear, access as ACCESS, nationalIsPlaceSpecific, nat
          countrySourcesHref } from "../../lib/sources-by-country.js";
 import { atlas as idx } from "../../lib/atlas.js";
 import WhereToBegin from "../../components/WhereToBegin.astro";
+import PlaceGlance from "../../components/PlaceGlance.astro";
 import Neighbourhood from "../../components/Neighbourhood.astro";
 
 export async function getStaticPaths() {
@@ -244,6 +245,10 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
       seen to change», not «changed that day». Those are different
       sentences and the second one would be a small lie renewing itself on
       every build. */}
+  {/* THE SUMMARY FIRST: where it is, the country and flags pages, and the flags that flew. */}
+  <PlaceGlance place={place} region={region} eras={region ? region.eras : []} countryName={countryName}
+    adm={adm} volumeCount={volumesTotal || csAll.length} span={span} older={older} mapLink={mapLink} u={u} />
+
   {place.last && (
     <p class="cap ra-when">
       {place.first === place.last

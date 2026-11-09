@@ -533,6 +533,49 @@ function fixTab() {
   c.textContent = n ? n0(n) : ''; c.title = n ? n0(n) + ' fixes left to do' : '';
 }
 const hay = (s, i) => (s.key === 'names' ? i.name + ' ' + i.kin : s.key === 'dupes' ? i.an + ' ' + i.bn : s.key === 'apart' ? i.people.map(p => p.name).join(' ') : (i.raw || '') + ' ' + (i.name || '') + ' ' + (i.country ? i.country + ' ' + i.label : '') + ' ' + (i.reasons ? i.reasons.map(r => r.text).join(' ') : '') + ' ' + (i.people ? i.people.map(p => p.name).join(' ') : '')).toLowerCase();
+/* OPEN ALL, A BATCH AT A TIME. "Open all for the fixes group, so I don't have to do one at a time": every person on the rows still to do in a group,
+   opened on the tree site in new tabs. Ten at a time, because a browser lets a page open a handful of tabs from one click and some hundreds
+   of them would bury the machine; the button says how many are left and each press opens the next ten. A person who is on several rows is
+   opened once. Rows that are ticked, left as is or hidden by the filter are skipped. If the browser blocks the extra tabs the button says so
+   and says what to switch on; nothing is lost, the people not opened stay on the count. */
+const BATCH = 10, opened = new Set();
+function peopleOf(s, i) {
+  if (s.key === 'dupes') return [{ id: i.a, name: i.an }, { id: i.b, name: i.bn }];
+  if (i.people) return i.people;
+  return i.id ? [{ id: i.id, name: i.name }] : [];
+}
+const openUrl = p => profileUrl(mhc, p.id, p.name) || personUrl(anc, p.id, ancSite) || '';
+function toOpen(secs, q) {
+  const seen = new Set(), out = [];
+  for (const s of secs) for (const i of s.items) {
+    if (asIs.has(i.key) || ticked.has(i.key) || (q && !hay(s, i).includes(q))) continue;
+    for (const p of peopleOf(s, i)) { if (!p || !p.id || seen.has(p.id)) continue; seen.add(p.id); out.push(p); }
+  }
+  return out;
+}
+function openAllBar(g, secs, q) {
+  const bar = el('div', 'fgact'), b = el('button', 'open-all'), say = el('span', 'small muted');
+  b.type = 'button';
+  const left = () => toOpen(secs, q).filter(p => !opened.has(p.id) && openUrl(p));
+  const paint = () => {
+    const todo = toOpen(secs, q), n = left().length, usable = todo.some(openUrl);
+    b.disabled = !usable || !n;
+    b.textContent = !usable ? 'Open people' : !n ? 'All opened' : n > BATCH ? 'Open next ' + BATCH + ' people' : 'Open ' + n + (n === 1 ? ' person' : ' people');
+    b.title = !usable ? 'Paste your MyHeritage tree link above (or load an Ancestry export) and each person can be opened here' : 'Open the next people in this group, each in its own tab, on ' + (mhc ? 'MyHeritage' : 'Ancestry');
+    if (!usable) say.textContent = todo.length ? 'Needs your tree link above.' : '';
+    else say.textContent = (todo.length - n) + ' of ' + todo.length + (todo.length === 1 ? ' person' : ' people') + ' opened' + (n > BATCH ? ', ' + n + ' to go' : '');
+  };
+  b.onclick = () => {
+    let blocked = 0, did = 0;
+    for (const p of left().slice(0, BATCH)) {
+      const w = window.open(openUrl(p), '_blank');
+      if (w) { try { w.opener = null; } catch { /* cross-origin already */ } opened.add(p.id); did++; } else { blocked++; break; }
+    }
+    paint();
+    if (blocked) say.textContent = (did ? did + ' opened, then' : 'Nothing opened:') + ' your browser blocked the extra tabs. Allow pop-ups for this site (the icon at the right of the address bar), then press again.';
+  };
+  bar.append(b, say); paint(); return bar;
+}
 function drawFix() {
   if (!fix) return; keepSummary(); const q = $('#ffilter').value.trim().toLowerCase(), box = $('#fsecs'); box.textContent = '';
   const byKey = new Map(fix.sections.map(x => [x.key, x])), done = new Set();
@@ -552,7 +595,7 @@ function drawFix() {
   for (const g of fix.groups || FIXGROUPS) {                                                       // by what the reader has to do, then by kind
     const secs = g.sections.map(k => byKey.get(k)).filter(Boolean); if (!secs.length) continue;
     const total = secs.reduce((n, x) => n + x.items.length, 0), h = el('h3', 'fgroup'); h.dataset.keys = g.sections.join(','); const gt = el('span', 'tick', '\u2713'); gt.hidden = true; h.append(gt, g.title + ' ', el('span', 'count', n0(total)));
-    box.append(h, el('p', 'small', g.how)); secs.forEach(section);
+    box.append(h, el('p', 'small', g.how)); if (total) box.append(openAllBar(g, secs, q)); secs.forEach(section);
   }
   for (const s of fix.sections) if (!done.has(s.key)) section(s);
 }
@@ -575,7 +618,7 @@ function decStatus(restored) {
     : (restored ? restored + ' earlier decision' + (restored === 1 ? '' : 's') + ' re-applied. ' : '')
       + (dec.isOn() ? '\u2713 Saved on this device: ' + kept + (kept === 1 ? ' decision' : ' decisions') + ', and the Fix list is summarised in My research.' : kept ? kept + ' loaded from a file are stored on this device; turn this on to keep new ones too.' : 'Not kept: ticks and "left as is" are lost when you close the page.');
 }
-function fixlist(m) { fix = m; const n = restoreDecisions(m); drawFix(); decStatus(n); fixTab(); }
+function fixlist(m) { fix = m; opened.clear(); const n = restoreDecisions(m); drawFix(); decStatus(n); fixTab(); }
 /* While the switch is on, a readable summary of this fix list is kept for My research (see decisions.js). Debounced: drawFix runs on every tick. */
 let sumTimer = 0;
 function keepSummary() { clearTimeout(sumTimer); sumTimer = setTimeout(() => { if (fix && curName && dec.isOn()) fixes.put(summarise(fix, asIs, ticked, curName)); }, 400); }

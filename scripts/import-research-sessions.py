@@ -82,7 +82,10 @@ SRC_KEYS = ("src", "source")
 WHAT_KEYS = ("what", "scope")
 GOT_KEYS = ("got", "result", "outcome")
 URL_KEYS = ("url", "href")
-WHEN_KEYS = ("when",)
+# `searchedOn` BEFORE `when`. Falco writes the RECORD's year in `when` («1814» against an Arienzo register) and the day the
+# search happened in `searchedOn`; reading only `when` left all 255 of its rows undated on the map (9 Nov 2026). An
+# archive that writes the research date in `when` is unaffected, and a bare year there is still refused by when_of().
+WHEN_KEYS = ("searchedOn", "when")
 
 # ---------------------------------------------------------------------------
 # THE SAME ID THE BROWSER WOULD COMPUTE. A faithful port of canonical() in
@@ -134,6 +137,33 @@ FILM_WAYPOINT = {
 }
 
 FILM = re.compile(r"/search/film/(\d+)")
+DGS = re.compile(r"\d{6,9}")
+ANTENATI_ARK = re.compile(r"antenati\.cultura\.gov\.it/ark:/12657/(an_ua\d+)", re.I)
+
+
+def film_of(row, url):
+    """The DGS film number a row is about: the link's, else the row's own `film` field.
+
+    THE `film` FIELD WAS WRITTEN BY SIX ARCHIVES AND READ BY NONE. 352 Defranceski rows, 72 Falco, 37 Lerena carry it, and a
+    film mark needed «/search/film/<digits>» in the URL, which an image-ark link never has. So a film read through the viewer
+    (the normal way) produced no film mark at all, and the Lerena Uruguay film (DGS 007713373, no waypoint exists for it) had
+    nowhere to land. The field is taken only when it is a bare film number; prose in it is left alone.
+    """
+    m = FILM.search(url or "")
+    if m:
+        return m.group(1).zfill(9)
+    f = str(row.get("film") or "").strip()
+    # A DGS number is nine digits with leading zeros; «5481649» and «005481649» are one film and one mark.
+    return f.zfill(9) if DGS.fullmatch(f) else ""
+
+
+COLLECTION_IN_FILM = re.compile(r"^collection\s+(\d{5,8})\b", re.I)
+
+
+def collection_in_film_field(row):
+    """Falco writes «collection 1974184 — Arienzo» in `film` when it worked a collection's index, not a film: that is a collection."""
+    m = COLLECTION_IN_FILM.match(str(row.get("film") or "").strip())
+    return "https://www.familysearch.org/search/collection/" + m.group(1) if m else ""
 IMG = re.compile(r"[?&]i=(\d+)")
 
 WC = re.compile(r"[?&]o?wc=([^&]+)")
@@ -564,15 +594,18 @@ def when_of(row):
     therefore harder to see. Seven rows carry one. They lose their date rather
     than gaining a wrong one.
     """
-    raw = first(row, WHEN_KEYS)
-    iso = to_iso(raw)
-    if not iso or iso < WORK_FLOOR:
-        return ""
-    # A month has to be named or numbered somewhere in the original.
-    if not (re.search(r"\d{4}-\d{2}", raw) or
-            re.search(r"[A-Za-z]{3}", raw)):
-        return ""
-    return iso
+    # EACH KEY IS TRIED, NOT JUST THE FIRST FILLED ONE: an unparseable `searchedOn` must not hide a good `when`.
+    for key in WHEN_KEYS:
+        raw = first(row, (key,))
+        iso = to_iso(raw)
+        if not iso or iso < WORK_FLOOR:
+            continue
+        # A month has to be named or numbered somewhere in the original.
+        if not (re.search(r"\d{4}-\d{2}", raw) or
+                re.search(r"[A-Za-z]{3}", raw)):
+            continue
+        return iso
+    return ""
 
 
 # ONE LINE PER ARCHIVE, BECAUSE THAT IS WHAT AN ARCHIVE IS.
@@ -757,8 +790,11 @@ def build_name_index():
     provs = doc["providers"] if isinstance(doc, dict) else doc
     idx = {}
     for p in provs:
-        for k in (p["name"], p["id"],
-                  re.split(r"\s+[\u2014\u2013-]\s+", p["name"])[0]):
+        # `aliases` ARE NAMES AN ARCHIVE WRITES FOR A PROVIDER THAT ARE NOT ITS NAME: «TNA Discovery», «DAPA ZM34K-214» (the
+        # Pazin state archive and a shelfmark), «Queensland BDM». Each is a fact somebody states on the provider's row, matched
+        # exactly like the name; none is derived. Without them 270 Defranceski rows and 178 D'Arcy rows reached no source mark.
+        for k in [p["name"], p["id"],
+                  re.split(r"\s+[\u2014\u2013-]\s+", p["name"])[0]] + list(p.get("aliases") or []):
             key = squash(k)
             if key:
                 idx.setdefault(key, p)
@@ -1027,7 +1063,13 @@ def main():
             # of 406 research URLs are a FamilySearch collection page rather
             # than an image; that is a coarser mark than a volume and a
             # truer one than a provider, so it is kept at its own level.
+            # THE ROW'S OWN `collection` FIELD COUNTS, as `waypoint` and `film` do: Lerena names the collection a film belongs to
+            # there (7 rows) and the link is an image, so testing only `url` found no collection mark for any of them.
             cu = (url or "").rstrip("/")
+            _new_route = False
+            if cu not in cols:
+                cu = str(r.get("collection") or "").strip().rstrip("/") or collection_in_film_field(r)
+                _new_route = True
             if cu in cols:
                 cid = "collection:" + cu
                 m = marks.setdefault(cid, {"by": {}})
@@ -1038,7 +1080,10 @@ def main():
                     b["state"] = st
                 if when:
                     b["since"] = max(b.get("since", ""), when)
-                if src and not b.get("note"):
+                # NO NOTE ON A MARK MADE BY THE FIELD ROUTES. The row's sentence is the archive's own and may name a person
+                # («"Ramon Fernandez" "Maria Lerena"»), an act or a certificate number; the record-atlas-feedback rule is surnames
+                # and counts only. Marks made through the older routes still carry their note (see the review on PR 14).
+                if src and not b.get("note") and not _new_route:
                     # NOT MID-WORD. A flat src[:150] ended notes like «…found
                     # to have cut the bottom off ev», which reads as a bug in
                     # the page rather than a sentence that was too long. Cut
@@ -1049,21 +1094,58 @@ def main():
                         _n = _cut.rstrip(" ,;:\u2014-") + "\u2026"
                     b["note"] = _n
 
+            # THE ANTENATI REGISTER MARK, the same idea as the film mark. The Atlas holds Antenati registers by archive, fondo,
+            # comune, kind and years (antenati-registers.json) and NOT by the register's own id, so a row that opened
+            # «ark:/12657/an_ua14411» cannot be tied to one of them without matching on resemblance, which this importer refuses.
+            # It can still say which register was opened: Falco cites 161 such links, and all of them folded into one
+            # source:antenati mark. The id keys a mark exactly as a film number does.
+            am = ANTENATI_ARK.search(url or "")
+            if am and st:
+                aid = "antenati:" + am.group(1)
+                m = marks.setdefault(aid, {"by": {}})
+                m["t"] = m.get("t") or ("Antenati register " + am.group(1))
+                m["href"] = m.get("href") or ("https://antenati.cultura.gov.it/ark:/12657/" + am.group(1) + "/")
+                b = m["by"].setdefault(line, {})
+                b["state"] = b.get("state") or st
+                if when:
+                    b["since"] = max(b.get("since", ""), when)
+                # No note: the row's sentence can name a person or an act number (see the collection block).
+
             # THE FILM MARK, which needs no waypoint and no resolution.
-            fm = FILM.search(url or "")
-            if fm:
-                fid = "film:" + fm.group(1)
+            film_no = film_of(r, url)
+            if film_no:
+                fid = "film:" + film_no
                 m = marks.setdefault(fid, {"by": {}})
-                m["t"] = m.get("t") or ("FamilySearch film " + fm.group(1))
+                m["t"] = m.get("t") or ("FamilySearch film " + film_no)
                 m["href"] = m.get("href") or (
-                    "https://www.familysearch.org/search/film/" + fm.group(1))
+                    "https://www.familysearch.org/search/film/" + film_no)
+                # WHAT A FILM IS, WHEN IT HAS NO WAYPOINT TO BE ANYTHING ELSE. A row may say which image group the viewer showed
+                # (`groupId`), what each item of the film holds (`items`: [{"n": 7, "images": "1203-1334", "what": "..."}]) and that
+                # the machine transcript cannot be trusted over it (`transcript`). The Atlas has no volume for such a film, so this
+                # is the only place an item map or a «a transcript scan proves nothing» warning can live; it travels with the mark.
+                gid = str(r.get("groupId") or "").strip()
+                if gid and gid not in m.setdefault("groups", []):
+                    m["groups"].append(gid)
+                its = r.get("items")
+                if isinstance(its, list):
+                    have = {i.get("n"): i for i in m.setdefault("items", [])}
+                    for it in its:
+                        if isinstance(it, dict) and it.get("n") is not None and it.get("what"):
+                            have[it["n"]] = {k: it[k] for k in ("n", "images", "what") if it.get(k) is not None}
+                    m["items"] = [have[k] for k in sorted(have, key=lambda x: (str(type(x)), x))]
+                tr = str(r.get("transcript") or "").strip()
+                if tr and not m.get("transcript"):
+                    m["transcript"] = tr[:300]
+                for _k in ("groups", "items"):
+                    if not m.get(_k):
+                        m.pop(_k, None)
                 # A RESOLVED FILM KNOWS ITS GROUND. The waypoint gives the
                 # volume the film opens at, and through it the place — so the
                 # mark can sit under that place on /my-research/ and link to
                 # its page, instead of floating in «films not yet tied to a
                 # place». The volume it names is recorded as the film's FIRST
                 # segment, never as what the reader necessarily read.
-                wpf = FILM_WAYPOINT.get(fm.group(1))
+                wpf = FILM_WAYPOINT.get(film_no)
                 if wpf and wpf in vols:
                     m["waypoint"] = wpf
                     m["where"] = m.get("where") or vols[wpf].get("label") or vols[wpf]["place"]
@@ -1076,7 +1158,8 @@ def main():
                     b["since"] = max(b.get("since", ""), when)
                 if st and not b.get("state"):
                     b["state"] = st
-                if src and not b.get("note"):
+                # A film found only through the row's `film` field (no film link) is a new route: no note (see the collection block).
+                if src and not b.get("note") and FILM.search(url or ""):
                     # NOT MID-WORD. A flat src[:150] ended notes like «…found
                     # to have cut the bottom off ev», which reads as a bug in
                     # the page rather than a sentence that was too long. Cut
@@ -1098,6 +1181,14 @@ def main():
                     n = int(im.group(1))
                     got.append([n, n])
                 got += image_ranges(blob)
+                # AND THE `pages` FIELD, which the skill defines as the images actually read. A film with no waypoint (the Lerena
+                # Uruguay film) has no volume mark to carry the range, so without this its «images 1206-1209» was recorded nowhere.
+                # Only the ranges parse_pages() accepts (never a year, a frame id or a «sampled» note), and only as `done`, never
+                # `walked`: a film mark says which images were seen and claims nothing about the rest.
+                # NOT WHEN THE PAGES ARE COUNTED WITHIN AN ITEM. A row with a `groupId` or «item 7, images 1-238» numbers its images
+                # inside that item or group, not along the film, so «done [[1,238]]» on the film would be false progress.
+                if pg_rng and not r.get("groupId") and not re.search(r"\bitems?\s+\d", blob, re.I):
+                    got += pg_rng
                 if got:
                     b["done"] = (b.get("done") or []) + got
                 filmed += 1
@@ -1288,6 +1379,8 @@ def main():
     nvol = sum(1 for k in marks if k.startswith("volume:"))
     nsrc = sum(1 for k in marks if k.startswith("source:"))
     print(f"    source marks              {nsrc:,}  (from {srcmarked:,} rows)")
+    nant = sum(1 for k in marks if k.startswith("antenati:"))
+    print(f"    antenati register marks   {nant:,}")
     print(f"    volume marks              {nvol:,}")
     print(f"    no volume could be placed {len(rejects):,}")
     # WHAT THE PAGE PARSER REFUSED, shown rather than silently dropped. A year

@@ -164,6 +164,58 @@ def catalogue():
     return out
 
 
+# A SECOND CATALOGUE, BECAUSE THE FIRST ONE DOES NOT INDEX IT ALL.
+# dati.gov.it lists 94 surname datasets and this script read 65 of them. Maggioli's open-data platform publishes
+# the same «Cognomi Piu' Diffusi Residenti» file (Anno, Cittadinanza, Cognome, Occorrenze; CC BY 4.0) for 108
+# comuni, and 50 of those are not in dati.gov.it at all: 9 in Calabria, 12 in Campania, 7 in Lazio, 4 in Sicily,
+# 4 in Sardinia. Measured 9 Nov 2026 (the scope note is in the session that wrote this). Each organisation there
+# IS one comune, so the comune is the key and a comune already read through dati.gov.it is not read twice.
+MAGGIOLI = "https://www.opendata.maggioli.cloud/api/3/action/package_search"
+
+# A FEW MORE COMUNI THAT SIT UNDER A REGIONAL PORTAL'S NAME. A region's catalogue entry is keyed by the region in
+# main(), so several comuni there collapse into one row; these are given their own key and read by address. Only
+# the newest year of each. Arezzo and Livorno (zips of xlsx/RDF) and Reggio Emilia (already read) are left out.
+EXTRA = [
+    ("Comune di Vicenza", "Cognomi piu diffusi fra i residenti 2025 - Comune di Vicenza",
+     "https://dati.veneto.it/SpodCkanApi/api/2/rest/dataset/76d62428-7285-4cd5-b039-90b5797a79dd.csv",
+     "Creative Commons Attribuzione 4.0 Internazionale (CC BY 4.0)"),
+    ("Comune di Bergamo", "Comune Bergamo - Serie storica cognomi più diffusi",
+     "https://www.dati.lombardia.it/api/views/4pqu-7zkd/rows.csv?accessType=DOWNLOAD",
+     "Creative Commons CC0 1.0 Universale - Public Domain Dedication (CC0 1.0)"),
+]
+
+
+def maggioli_sets():
+    """Every Maggioli dataset that is a surname list, shaped like a dati.gov.it one (organisation = the comune)."""
+    out, start = [], 0
+    while True:
+        u = MAGGIOLI + "?" + urllib.parse.urlencode({"q": "cognomi", "rows": 100, "start": start})
+        b = fetch(u)
+        if not b:
+            break
+        try:
+            res = json.loads(b)["result"]
+        except Exception:
+            break
+        rows = res.get("results", [])
+        if not rows:
+            break
+        for r in rows:
+            t = r.get("title") or ""
+            if IS_SURNAME_SET.search(t) and not NOT_A_SURNAME_SET.search(t):
+                out.append(r)
+        start += len(rows)
+        if start >= res.get("count", 0):
+            break
+        time.sleep(0.5)
+    return out
+
+
+def extra_sets():
+    return [{"organization": {"title": o}, "title": t, "license_title": lic,
+             "resources": [{"format": "CSV", "url": u}]} for o, t, u, lic in EXTRA]
+
+
 def read_csv(blob):
     """(surname, count) pairs from a municipal CSV of unknown dialect.
 
@@ -208,6 +260,7 @@ def read_csv(blob):
     if ni is None or ci is None:
         return [], None
     pairs, year = [], None
+    byyear = {}   # a SERIES (Bergamo's runs 2000-2021) must count its newest year only, or one comune is counted twenty times
     for row in rdr:
         if len(row) <= max(ni, ci):
             continue
@@ -220,17 +273,32 @@ def read_csv(blob):
             continue
         if SUMMARY_ROW.match(n):
             continue
-        pairs.append((n.upper(), int(c)))
-        if yi is not None and year is None and len(row) > yi:
+        ry = None
+        if yi is not None and len(row) > yi:
             y = row[yi].strip().strip('"')
             if y.isdigit() and 1900 < int(y) < 2100:
-                year = int(y)
+                ry = int(y)
+                if year is None:
+                    year = ry
+        byyear.setdefault(ry, []).append((n.upper(), int(c)))
+    dated = [y for y in byyear if y is not None]
+    if len(dated) > 1:
+        year = max(dated)
+        return byyear[year], year
+    for rows in byyear.values():
+        pairs += rows
     return pairs, year
 
 
 def main():
     sets = catalogue()
-    print(f"{len(sets)} surname datasets in the national catalogue\n", flush=True)
+    print(f"{len(sets)} surname datasets in the national catalogue", flush=True)
+    # Maggioli and the named extras come after, so a comune the national catalogue already gave wins (first wins).
+    seen = {((d.get("organization") or {}).get("title") or d.get("author") or "?") for d in sets}
+    more = [d for d in maggioli_sets() + extra_sets()
+            if ((d.get("organization") or {}).get("title") or "?") not in seen]
+    print(f"{len(more)} more: Maggioli's platform and a few comuni under regional portals\n", flush=True)
+    sets = sets + more
     total = collections.Counter()
     by_comune, sources, skipped = {}, [], []
     cache = {}

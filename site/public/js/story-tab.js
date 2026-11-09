@@ -160,12 +160,12 @@
     if (!P) { box.append(make("p", "Your research list did not load on this page.", "ms-dim")); return; }
     var s = c.story, lines = P.lines(), f = g && g.facts;
     var sel = make("select"); sel.id = "ms-line"; sel.className = "ms-in"; sel.setAttribute("aria-label", "Which family research this story belongs to");
-    var o0 = make("option", "A new family research"); o0.value = ""; sel.append(o0);
+    var o0 = make("option", "A new family" + (f && E.familyName(f) ? ": " + E.familyName(f) : "")); o0.value = ""; sel.append(o0);
     lines.slice().sort(function (a, b) { return a.name.localeCompare(b.name); }).forEach(function (l) { var o = make("option", l.name + (l.where ? " of " + l.where : "")); o.value = l.slug; if (s.line === l.slug) o.selected = true; sel.append(o); });
     var nm = make("input"); nm.type = "text"; nm.id = "ms-famname"; nm.className = "ms-in"; nm.maxLength = 60; nm.setAttribute("aria-label", "Name for the new family research");
     nm.value = f ? E.familyName(f) : ""; nm.placeholder = "Name, for example Kosina";
     var btn = make("button", null, "ms-btn ms-pri"); btn.type = "button";
-    function sync() { var ex = sel.value; nm.hidden = !!ex; btn.textContent = ex ? "Add this story's places and registers to that research" : "Start this family research"; btn.disabled = !g; }
+    function sync() { var ex = sel.value; nm.hidden = !!ex; btn.textContent = ex ? "Add this story's places and registers to that research" : "Add this family to your research"; btn.disabled = !g; }
     sel.addEventListener("change", function () { ST.setLine(s.id, sel.value); sync(); });
     sync();
     btn.addEventListener("click", function () {
@@ -197,6 +197,10 @@
         also.forEach(function (x, i) { var a = make("a", x.name); a.href = BASE + "place/" + encodeURIComponent(x.id) + "/"; a.title = "From " + x.from; ab.append(i ? document.createTextNode(", ") : document.createTextNode(""), a); });
         ab.append(make("span", " These are not on the journey. Tick \u201cUse its places to draw the journey\u201d on a log entry to add its places to the route.", "ms-dim"));
       }
+      var did = $("ms-did"); did.textContent = ""; did.hidden = !(p.suggest && p.suggest.length);
+      (p.suggest || []).forEach(function (x) {
+        did.append(make("span", "\u201c" + x.typed + "\u201d was not used" + (x.kind === "partial" ? " (it is part of several place names)" : " (it is not a place the Atlas knows)") + ". Did you mean " + x.options.map(function (o) { return o.n + (o.cn ? ", " + o.cn : ""); }).join(" or ") + "? Correct it in the piece to use it. "));
+      });
       if (!p.from) {
         $("ms-out").hidden = true; lastG = null;
         $("ms-lede").textContent = "The Atlas cannot see where they started yet. Add a piece that names the place, and the journey, the registers to search and the names to try appear here.";
@@ -213,7 +217,7 @@
         var sb = J.stops(f, g.mort); lastStopItems = sb.items;
         var stops = $("ms-stops"); stops.textContent = ""; stops.append(sb);
         J.draw(f, g.mort);
-        var lb = E.lifeBlock(g.life), lbox = $("ms-life"); lbox.textContent = ""; if (lb) lbox.append(lb); $("ms-life-sec").hidden = !lb;
+        var lb = E.lifeBlock(g.life, g.mort), lbox = $("ms-life"); lbox.textContent = ""; if (lb) lbox.append(lb); $("ms-life-sec").hidden = !lb;
         var nb = E.namesBlock(g.names, BASE), nbox = $("ms-names"); nbox.textContent = ""; if (nb) nbox.append(nb); $("ms-names-sec").hidden = !nb;
         var tr = E.treeBlock(g.people, f.rel), tbox = $("ms-tree"); tbox.textContent = ""; if (tr) tbox.append(tr); $("ms-tree-sec").hidden = !tr;
         var plan = $("ms-plan"); plan.textContent = "";

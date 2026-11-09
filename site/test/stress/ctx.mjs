@@ -20,19 +20,13 @@ const win = {}; new Function("window", src("shard-key.js"))(win);
 const shardInfo = rd("shards.json");
 const gcache = {};
 export function parse(text, c = ctx) {
-  const fold = A.fold, want = [], re = /\b(?:in|at|from|near|to|en|nach|aus|von|iz|nel|nella)\s+(\p{Lu}[\p{L}'’-]+(?:\s+\p{Lu}[\p{L}'’-]+){0,2})/gu; let m;
-  while ((m = re.exec(String(text || "")))) {
-    const ws = m[1].split(/\s+/);
-    for (let n = ws.length; n >= 1; n--) { const ph = fold(ws.slice(0, n).join(" ")); if (c.map[ph]) break; want.push(ph); }
-  }
-  const w2 = want.filter((ph, i) => ph.length >= 4 && want.indexOf(ph) === i && !c.map[ph] && !(c.given && c.given[ph])).slice(0, 6);
+  /* the page's own rule (F.gazWants / F.gazMerge), against the shard files on disk */
   const added = [];
-  for (const ph of w2) {
-    const key = win.raShardKey(ph, shardInfo.g || {}); if (!key) continue;
+  for (const w of F.gazWants(text, c.map, c.given)) {
+    const key = win.raShardKey(w.ph, shardInfo.g || {}); if (!key) continue;
     let rows; try { rows = gcache[key] || (gcache[key] = JSON.parse(fs.readFileSync(path.join(SITE, "public/g", key + ".json"), "utf8"))); } catch (e) { continue; }
-    const hit = rows.filter((r) => fold(r[0]) === ph || (r[4] || []).some((a) => fold(a) === ph)).slice(0, 4);
-    if (!hit.length) continue;
-    c.map[ph] = hit.map((r) => ({ i: "g-" + ph.replace(/ /g, "-") + "-" + String(r[3]).toLowerCase() + "-" + Math.round(r[1] * 100), n: r[0], y: r[1], x: r[2], cc: r[3], c: 0, gaz: 1 })); added.push(ph);
+    const before = (c.map[w.ph] || []).slice();
+    if (F.gazMerge(c.map, w, rows)) added.push([w.ph, before]);
   }
-  try { return F.parseStory(text, c); } finally { added.forEach((k) => delete c.map[k]); }
+  try { return F.parseStory(text, c); } finally { added.forEach(([k, b]) => { if (b.length) c.map[k] = b; else delete c.map[k]; }); }
 }

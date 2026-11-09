@@ -21,18 +21,19 @@ Result: 53 of 96 passed on the first run, 85 of 85 now pass, and 11 are kept as 
 | A long story froze the page | 200 sentences took 2.5 s (the country scan was quadratic) | 61 ms |
 | Trades were thrown away | "stonemason" appeared nowhere | kept as told, shown as a "work:" chip; never looked up |
 
+| A town in a state the index does not hold | "Dublin, Ohio" read as Dublin (Ireland) plus a stop Ohio | the gazetteer is asked for the town in the state's own country (`gazWants`/`gazMerge`, one rule for the page and the harness) |
+| Told backwards, or told twice | "Before that he lived in Cork" and "returned to Cork" were wrong | order of telling kept; a place told twice is two stops |
+| "He" after a newly named person; "my mother told me he ..." | the mother was given the man's places | a pronoun goes to the last person it can be (a mother is never "he"); what a parent tells is about the man |
+| Misspelt places (Brisban, Melborne), inflected ones (Senju), a region (Friuli) | not matched, or the region matched to a town | still not used, on purpose: offered as "did you mean" (tap to change the word in the box; a note in My story); a word inside several names is a partial, not a place |
+| Number of children, occupations of two people | not read / one list | counts and per-person trades are read, as told |
+| Places past the first six the index lacks | looked up at most six | ten |
+
 ## Left (known gaps, in the corpus with the reason)
 
-- **A town in a state the index does not hold.** "Dublin, Ohio" reads as Dublin (Ireland) and a separate stop Ohio.
-- **Told backwards, or told twice.** "Before that he lived in Cork" keeps the order written; "returned to Cork" is one stop.
-- **"He" after a newly named person.** "…his mother Concetta until 1939. After the war he moved to Brooklyn" gives Brooklyn to Concetta, so it is lost from the grandfather.
-- **Names of a place in another year.** "Salisbury, Rhodesia" cannot choose among the Salisburys; the country that no longer exists is no hint. Fiume and Danzig are found only as the index lists them.
-- **Misspelt places (Brisban) and inflected ones (Senju).** No fuzzy matching, on purpose: a guess is not a finding.
-- **A region (Friuli)** is matched to a town that lists it among its names.
-- **Number of children and grandchildren** ("5 children and 12 grandchildren") is not read into the tree.
-- **Occupations** are kept as a list for the story, not attached to a person when two are told.
-- **Places past the first six in a story that the index lacks** are looked up in the worldwide gazetteer only when they follow in/at/from/near/to/en/nach/aus/von/iz/nel/nella; "Cork, Lyon, Paris" with no preposition finds only what the index holds.
+- **Names of a place in another year.** "Salisbury, Rhodesia" cannot choose among the Salisburys; the country that no longer exists is no hint. Fiume and Danzig are found only as the index lists them. The dated names are in `data/place-names.json` in the Atlas repo; the story reader does not read them yet.
+- **Places with no preposition** ("Cork, Lyon, Paris") find only what the index holds; the gazetteer lookup needs in/at/from/near/to/en/nach/aus/von/iz/nel/nella.
 - **The reader sees the index, not the whole gazetteer.** Lyon, Kraków, Bilbao, Tbilisi and Tobruk are not in the 55,771-place index; they are found only through the gazetteer lookup above.
+- **Detail clauses belong to "the story",** not to a named person.
 
 ## The person, as told (added the same day)
 

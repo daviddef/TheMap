@@ -170,3 +170,49 @@ test("words that only look like details are not details: a street called Warwick
   assert.deepEqual(life("My grandfather lived on Warwick Street and worked in a campsite near Boston.").groups.filter((g) => g.key === "hard"), []);
   assert.deepEqual(life("Their family name was Firestone and he came from Saint Paul.").groups.filter((g) => g.key === "world"), []);
 });
+
+/* ---- the gaps that were fixed on 9 Nov (docs/story-reading-gaps-2026-11-09.md) ---- */
+test("a near miss is offered, never used: Brisban, Melborne in a list, Senju", () => {
+  const p = F.parseStory("My grandfather came from Brisban and Melborne.", { ...ctx, map: A.buildMap(rows.concat([P("Melbourne", "AU", 144.96, -37.81)])) });
+  assert.deepEqual(places(p), []);
+  assert.deepEqual(p.suggest.map((x) => x.typed), ["Brisban", "Melborne"]);
+  assert.deepEqual(p.suggest[0].options.map((o) => o.n), ["Brisbane"]);
+  assert.deepEqual(F.parseStory("Moj djed je rođen u Senju 1880.", ctx).suggest.map((x) => x.typed), ["Senju"]);
+  assert.deepEqual(F.parseStory("He came from Cork.", ctx).suggest, []);
+});
+
+test("a word that sits inside the names of several places is not a place (Friuli)", () => {
+  const map = A.buildMap(rows.concat([P("Pozzuolo del Friuli", "IT", 13.2, 45.97, { c: 0, q: "Friuli Venezia" }), P("Cividale del Friuli", "IT", 13.43, 46.09, { c: 0, q: "Friuli Venezia" })]));
+  const p = F.parseStory("My family are from Friuli, in the north of Italy.", { ...ctx, map });
+  assert.ok(!places(p).some((n) => /friuli/i.test(n)));
+  assert.equal(p.suggest[0].kind, "partial");
+});
+
+test("a town the Atlas holds only in other countries is found through the gazetteer when the story names its state (Dublin, Ohio)", () => {
+  const map = A.buildMap(rows.concat([P("Ohio", "US", -82.9, 40.4, { c: 0 })]));
+  const want = F.gazWants("They settled in Dublin, Ohio.", map, ctx.given);
+  assert.deepEqual(want, [{ ph: "dublin", ccs: ["US"] }]);
+  assert.equal(F.gazMerge(map, want[0], [["Dublin", 40.1, -83.1, "US", []], ["Dublin", 53.3, -6.2, "IE", []]]), 1);
+  const p = F.parseStory("They settled in Dublin, Ohio.", { ...ctx, map });
+  assert.equal(p.stops[0].row.cc, "US");
+  assert.deepEqual(F.gazWants("They settled in Cork.", map, ctx.given), []);
+});
+
+test("'he' goes to the person it can be: what a mother tells is about the man, and a mother is never 'he'", () => {
+  const p = F.parseStory("I never met my grandfather. My mother told me he was born near Naples in 1898 and left for New York in 1921. After the war he moved to Brooklyn. He died in 1974.", ctx);
+  const mo = p.people.find((x) => x.role === "mother");
+  assert.deepEqual((mo.events || []).filter((e) => e.place), []);
+  assert.deepEqual(places(p), ["Naples", "New York", "Brooklyn"]);
+});
+
+test("the spouse's name, three marriages, per-person trades and counts", () => {
+  const p = F.parseStory("My grandfather from Senj got married twice and then a third time, and his third wife was Anna.", ctx);
+  assert.ok(p.people.some((x) => /anna/i.test(x.name)));
+  const q = F.parseStory("My dad was a fisherman in Cork and my mum was a nurse in Boston.", ctx);
+  assert.deepEqual(q.people.filter((x) => x.occupation).map((x) => x.role + ":" + x.occupation).sort(), ["father:fisherman", "mother:nurse"]);
+});
+
+test("a place told twice is two stops, and a story told backwards keeps its order of telling", () => {
+  assert.deepEqual(places(F.parseStory("He lived in Cork, left for Boston, and returned to Cork.", ctx)), ["Cork", "Boston", "Cork"]);
+  assert.deepEqual(places(F.parseStory("He ended up in Perth. Before that he lived in Cork.", ctx)), ["Cork", "Perth"]);
+});

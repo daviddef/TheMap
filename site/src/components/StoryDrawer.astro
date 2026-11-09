@@ -38,6 +38,7 @@ import { u } from "../lib/url.js";
   </div>
 
   <div class="sd-chips" aria-live="polite"></div>
+  <p class="sd-did" aria-live="polite" hidden></p>
   <p class="sd-status" role="status" aria-live="polite"></p>
 
   <p class="sd-fine sd-priv">Your words stay in this browser. A picture goes to Claude only if you press "Read it with Claude". Please don't enter details of anyone who may be alive.</p>
@@ -62,6 +63,13 @@ import { u } from "../lib/url.js";
     <p class="rep-k">Their story</p>
     <h2 class="rep-title">Their journey</h2>
     <p class="rep-lede"></p>
+    <div class="sd-fa" hidden>
+      <label class="sd-fa-l"><span class="sd-sr">Which family research</span>
+        <select class="sd-fa-line"></select></label>
+      <input type="text" class="sd-fa-name" maxlength="60" aria-label="Name for the new family research" placeholder="Name it" />
+      <button type="button" class="sd-fa-btn">Add this family to your research</button>
+      <p class="sd-fa-out" role="status"></p>
+    </div>
     <div class="rep-nav" role="navigation" aria-label="In this story">
       <button type="button" data-go="rep-places">Place by place</button>
       <button type="button" data-go="rep-life">The person, as told</button>
@@ -98,11 +106,6 @@ import { u } from "../lib/url.js";
     <h2>What to do first</h2>
     <section class="sd-plan" aria-label="What to do first"></section>
     <section class="sd-family" hidden>
-      <p class="sd-fam-h">Add this family to your research</p>
-      <p class="sd-fine">This adds the registers and sources listed above, for every place, as planned, so you can mark them off as you go. It stays in this browser.</p>
-      <p class="sd-fam-name-p"><label>Name it <input type="text" class="sd-fam-name" maxlength="60" /></label></p>
-      <p><button type="button" class="sd-fam-btn">Start the research family</button></p>
-      <p class="sd-fam-out" role="status"></p>
       <p class="sd-save-p"><button type="button" class="sd-save-btn">Save this story, to add more later</button></p>
       <p class="sd-fine sd-save-out" role="status">Keeps the words you typed in My research, under My story. There you can add the next article, photo caption or paragraph, and the Atlas reads it all together.</p>
       <p class="sd-fine">Already have a tree? <a href={u("/roots/")}>Open it in Roots &amp; Routes</a> to see everyone on the map.</p>
@@ -273,6 +276,16 @@ import { u } from "../lib/url.js";
   .sd-fam-name-p { margin: 6px 0; font-size: 13px; } .sd-fam-name { font: inherit; padding: 7px 9px; border-radius: 8px; border: 1px solid var(--rule-strong); background: var(--panel); color: var(--ink); width: min(100%, 16em); }
   .sd-save-btn { width: 100%; font: 600 14px/1 var(--sans); padding: 12px 16px; border: 1px solid var(--accent); border-radius: 10px; background: var(--panel); color: var(--accent); cursor: pointer; } .sd-save-btn:disabled { opacity: .6; cursor: default; }
   .sd-save-out a { color: var(--accent); font-weight: 600; }
+  .sd-did { margin: 6px 0 0; font-size: 13px; line-height: 1.6; color: var(--ink-2); } .sd-did[hidden] { display: none; }
+  .sd-did button { font: 600 13px/1 var(--sans); padding: 5px 10px; margin: 0 4px 0 0; border-radius: 999px; border: 1px solid var(--accent); background: var(--panel); color: var(--accent); cursor: pointer; } .sd-did button:hover { background: var(--accent-wash); }
+  .sd-fa { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; padding: 10px; border-radius: 12px; background: var(--accent-wash); }
+  .sd-fa[hidden] { display: none; }
+  .sd-fa select, .sd-fa input { font: 500 14px/1.2 var(--sans); padding: 9px 10px; border-radius: 8px; border: 1px solid var(--rule-strong); background: var(--panel); color: var(--ink); min-width: 0; max-width: 100%; }
+  .sd-fa-name { flex: 1 1 9rem; } .sd-fa-name[hidden] { display: none; }
+  .sd-fa-btn { flex: 1 1 auto; font: 600 14px/1 var(--sans); padding: 11px 16px; border: 0; border-radius: 10px; background: var(--accent); color: #fff; cursor: pointer; }
+  .sd-fa-btn:hover { background: var(--accent-2); } .sd-fa-btn:disabled { opacity: .55; cursor: default; }
+  .sd-fa-out { flex: 1 1 100%; margin: 0; font-size: 13px; } .sd-fa-out:empty { display: none; } .sd-fa-out a { color: var(--accent); font-weight: 600; }
+  .sd-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .sd-fam-btn:hover { background: var(--accent-2); } .sd-fam-btn:active { transform: scale(.98); }
   .sd-fam-out { font-size: 13px; margin: 6px 0 2px; } .sd-fam-out a { color: var(--accent); }
   .sd-priv { margin-top: 12px; }

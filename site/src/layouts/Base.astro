@@ -319,14 +319,19 @@ import LineSwitcher from "../components/LineSwitcher.astro";
     </script>
   </div>
   <div class="drawer" id="drawer" hidden>
-    <div class="wrap">{nav.map(([label, links]) => (
+    <div class="wrap">
+      {/* THE FAMILY PICKER IS NOT LOST ON A NARROW SCREEN. David: «why does the research icon and the family selection disappear when the screen gets smaller?»
+          Below the burger breakpoint the whole top nav is hidden, and this group held a bare link, so the picker (and the comment above that said
+          «the family is in the drawer») had nowhere to be. The script below moves the real, bound control here at that width and back to the header
+          when it widens; the plain link stays as the fallback until then. */}
+      <div class="dgrp" id="ra-drawer-lines"><span class="gl">Researching</span><a class:list={["ra-dr-fallback", here === u("/my-research/") ? "on" : ""]} href={u("/my-research/")}>My research</a></div>
+    {nav.map(([label, links]) => (
       typeof links === "string"
         ? <div class="dgrp"><a href={u(links)} class={here === u(links) ? "on" : ""}>{label}</a></div>
         : <div class="dgrp"><span class="gl">{label}</span>
             {links.map(([h, l]) => h === null ? <span class="gl gl2">{l}</span> : <a href={u(h)} class={here === u(h) ? "on" : ""}>{l}</a>)}
           </div>
     ))}
-      <div class="dgrp"><a href={u("/my-research/")} class={here === u("/my-research/") ? "on" : ""}>Researching</a></div>
       <div class="dgrp"><span class="gl">Contribute</span>
         <a href={u("/add/")} class={here === u("/add/") ? "on" : ""}>Add a source</a>
       </div>
@@ -569,6 +574,16 @@ import LineSwitcher from "../components/LineSwitcher.astro";
         burger.setAttribute("aria-expanded", open ? "true" : "false");
       });
     }
+    var slot = document.getElementById("ra-drawer-lines"), grp = document.querySelector(".ra-grp"), mq = window.matchMedia ? window.matchMedia("(max-width:1180px)") : null;
+    function place() {
+      var lines = document.getElementById("ra-lines-c") || (grp && grp.querySelector(".ra-lines")) || document.querySelector("#ra-drawer-lines .ra-lines");
+      if (!slot || !grp || !lines || !mq) return;
+      var fb = slot.querySelector(".ra-dr-fallback"), gl = slot.querySelector(".gl");
+      if (mq.matches) { slot.appendChild(lines); if (fb) fb.hidden = true; if (gl) gl.hidden = true; }
+      else { grp.insertBefore(lines, grp.firstChild); if (fb) fb.hidden = false; if (gl) gl.hidden = false; }
+    }
+    place();
+    if (mq) { if (mq.addEventListener) mq.addEventListener("change", place); else if (mq.addListener) mq.addListener(place); }
     if (!bar) return;
     var menus = [].slice.call(bar.querySelectorAll("details.menu"));
     menus.forEach(function (d) {

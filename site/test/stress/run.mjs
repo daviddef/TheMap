@@ -21,6 +21,7 @@ for (const c of C) {
     }
     if (e.years && pl.length===e.years.length) { if (JSON.stringify(yrs)!==JSON.stringify(e.years)) probs.push("years "+JSON.stringify(yrs)+" want "+JSON.stringify(e.years)); }
     if (e.rel && p.rel!==e.rel) probs.push("rel '"+p.rel+"' want "+e.rel);
+    if (e.suggest) { const sg=(p.suggest||[]).map(x=>x.typed); if (JSON.stringify(sg)!==JSON.stringify(e.suggest)) probs.push("suggest "+JSON.stringify(sg)+" want "+JSON.stringify(e.suggest)); }
     if (e.name!==undefined && fold(p.name)!==fold(e.name)) probs.push("name '"+p.name+"' want '"+e.name+"'");
     if (e.people) { const roles=(p.people||[]).map(x=>x.role); const miss=e.people.filter(r=>!roles.includes(r)); if (miss.length) probs.push("people "+JSON.stringify(roles)+" missing "+miss); }
     if (e.occ) { const o=JSON.stringify(p).toLowerCase(); if (!o.includes("occup")&&!o.includes(e.occ)) probs.push("occupation '"+e.occ+"' not kept"); }

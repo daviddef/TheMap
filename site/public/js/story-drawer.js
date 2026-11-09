@@ -74,7 +74,7 @@
     var S = window.raAtlasSummary, E = window.raStory, el = E.el;
     var LD = E.createLoader(BASE), data = null;
     var text = $(".sd-text"), chips = $(".sd-chips"), status = $(".sd-status"), shots = $(".sd-shots"), file = $(".sd-file"), drop = $(".sd-drop");
-    var planBox = $(".sd-plan"), fam = $(".sd-family"), famOut = $(".sd-fam-out");
+    var planBox = $(".sd-plan"), fam = $(".sd-family"), addBar = $(".sd-fa"), addOut = $(".sd-fa-out");
     /* the dock: shown when a journey is drawn, tabs for what sits in it, the map gives it room */
     function dockSize() { if (host) host.style.setProperty("--sdk-h", (dock.hidden ? 0 : dock.offsetHeight) + "px"); }
     function showDock(on) {
@@ -130,7 +130,24 @@
       return c;
     }
     function placeLabel(r) { var n = r.n.replace(/\s*\(([^)]*)\)/, function (m, x) { return S.fold(x) === S.fold(r.n.replace(/\s*\([^)]*\)/, "")) ? "" : m; }), c = data.countries[r.cc]; return n + (c && S.fold(c) !== S.fold(n) ? ", " + c : ""); }
+    /* "Brisban" is no place the Atlas holds, "Friuli" sits inside the names of several: offered, never used. A tap changes the word in the box, which is the reader's own edit. */
+    function drawDid(p) {
+      var box = $(".sd-did"); if (!box) return; box.textContent = "";
+      var sg = p.suggest || []; box.hidden = !sg.length; if (!sg.length) return;
+      sg.forEach(function (x, i) {
+        var d = el("span", null, "sd-did-i");
+        d.append(document.createTextNode((i ? " " : "") + "\u201c" + x.typed + "\u201d " + (x.kind === "partial" ? "is part of several place names, and was not used. Did you mean " : "is not a place the Atlas knows, and was not used. Did you mean ")));
+        x.options.forEach(function (o) {
+          var b = el("button", o.n + (o.cn ? ", " + o.cn : "")); b.type = "button";
+          b.addEventListener("click", function () { text.value = text.value.split(x.typed).join(o.n); text.dispatchEvent(new Event("input", { bubbles: true })); });
+          d.append(b);
+        });
+        d.append(document.createTextNode("?"));
+        box.append(d);
+      });
+    }
     function drawChips(p) {
+      drawDid(p);
       chips.textContent = "";
       if (p.teller) chips.append(chip("you: " + p.teller, "", "teller:" + p.teller));
       if (p.rel) chips.append(chip(p.rel.replace(/-/g, " "), "", "rel:" + p.rel));
@@ -178,17 +195,24 @@
         if (s.not) { var n = el("p", null, "sd-not"); n.append(el("b", "Do not conclude: "), s.not); d.append(n); }
         planBox.append(d);
       });
-      fam.hidden = false; famOut.textContent = "";
-      var nameIn = $(".sd-fam-name"); if (nameIn && document.activeElement !== nameIn && (!nameIn.value || nameIn.getAttribute("data-auto") === "1")) { nameIn.value = E.familyName(g.facts); nameIn.setAttribute("data-auto", "1"); }
-      if (nameIn && !nameIn.__wired) nameIn.__wired = nameIn.addEventListener("input", function () { nameIn.setAttribute("data-auto", "0"); $(".sd-fam-btn").textContent = "Start the " + (nameIn.value.trim() || "research") + " family"; });
-      $(".sd-fam-btn").textContent = "Start the " + ((nameIn && nameIn.value.trim()) || E.familyName(g.facts)) + " research family";
-      $(".sd-fam-btn").onclick = function () {
+      fam.hidden = false; addBar.hidden = false; addOut.textContent = "";
+      var P0 = window.raProgress, selL = $(".sd-fa-line"), nameIn = $(".sd-fa-name"), btn = $(".sd-fa-btn"), want = selL.value;
+      /* the families that already exist, then a new one named from the story; the choice is kept while the story is edited */
+      selL.textContent = "";
+      var o0 = el("option", "A new family: " + (E.familyName(g.facts) || "name it")); o0.value = ""; selL.append(o0);
+      (P0 ? P0.lines() : []).slice().sort(function (x, y) { return x.name.localeCompare(y.name); }).forEach(function (l) { var o = el("option", "Add to " + l.name + (l.where ? " of " + l.where : "")); o.value = l.slug; selL.append(o); });
+      if (want && [].some.call(selL.options, function (o) { return o.value === want; })) selL.value = want;
+      if (document.activeElement !== nameIn && (!nameIn.value || nameIn.getAttribute("data-auto") === "1")) { nameIn.value = E.familyName(g.facts); nameIn.setAttribute("data-auto", "1"); }
+      function sync() { var ex = !!selL.value; nameIn.hidden = ex; btn.textContent = ex ? "Add this story to " + (selL.options[selL.selectedIndex].text.replace(/^Add to /, "")) : "Add this family to your research"; }
+      if (!selL.__wired) { selL.__wired = true; selL.addEventListener("change", sync); nameIn.addEventListener("input", function () { nameIn.setAttribute("data-auto", "0"); }); }
+      sync();
+      btn.onclick = function () {
         var P = window.raProgress;
-        if (!P) { famOut.textContent = "Your research list did not load on this page. Reload and try again."; return; }
-        var r = E.startFamily(P, g.facts, g.plan.concat([{ items: stopItems }]), { name: nameIn ? nameIn.value : "" });
-        famOut.textContent = "";
-        famOut.append("Started " + r.name + " with " + r.added + " planned. It is now your active line at the top. ");
-        var a = el("a", "Open My research"); a.href = BASE + "my-research/"; famOut.append(a);
+        if (!P) { addOut.textContent = "Your research list did not load on this page. Reload and try again."; return; }
+        var r = E.startFamily(P, g.facts, g.plan.concat([{ items: stopItems }]), { name: nameIn.value, line: selL.value || null });
+        addOut.textContent = "";
+        addOut.append((selL.value ? "Added to " : "Started ") + r.name + ": " + r.added + " registers and sources planned, for every place. It is now your active family. ");
+        var a = el("a", "Open My research"); a.href = BASE + "my-research/"; addOut.append(a);
         try { if (window.raPaintProgress) window.raPaintProgress(); } catch (e) { /* the map repaints on its own next time */ }
       };
     }
@@ -208,7 +232,7 @@
         parsedNow = p;
         drawChips(p);
         var sig = [(p.route || []).map(function (x) { return x.row.i + ":" + x.age; }).join(","), p.left, p.born, p.name, (p.people || []).map(function (x) { return x.name; }).join(","), p.holds].join("|");
-        if (sig === lastSig || !tellable(p)) { if (!tellable(p) && sig !== lastSig) { J.clear(); showDock(false); dropKeyPlaces(); report.hidden = true; planBox.hidden = true; fam.hidden = true; } return; }
+        if (sig === lastSig || !tellable(p)) { if (!tellable(p) && sig !== lastSig) { J.clear(); showDock(false); dropKeyPlaces(); report.hidden = true; planBox.hidden = true; fam.hidden = true; addBar.hidden = true; } return; }
         lastSig = sig;
         var my = ++token; status.textContent = "Reading the Atlas…";
         LD.gather(p).then(function (g) {
@@ -302,7 +326,7 @@
       LD.gather(parsedNow).then(function (g) { status.textContent = ""; last = g; drawAll(g); }).catch(function () { status.textContent = "Some Atlas files did not load. Check your connection."; });
     }
     function drawLife(g) {
-      var box = $(".sd-life"), lb = E.lifeBlock(g.life);
+      var box = $(".sd-life"), lb = E.lifeBlock(g.life, g.mort);
       box.textContent = ""; secShow("rep-life", !!lb); if (lb) box.append(lb);
     }
     function drawNames(g) {
@@ -368,6 +392,7 @@
           return Promise.resolve(x.shot || window.raStoryPics.shrink(x.f)).then(function (shot) { return window.raStoryPics.put(id + "/" + pid, shot.blob); }).then(function () { kept++; }, function () { lost++; });
         });
         if (parsedNow && parsedNow.born != null) ST.setBorn(id, parsedNow.born);
+        var pick = $(".sd-fa-line"); if (pick && pick.value && ST.setLine) ST.setLine(id, pick.value);
         try { localStorage.setItem("ra-story-current", id); } catch (e) { /* the page still opens it by address */ }
         Promise.all(keeps).then(function () {
           out.textContent = "Saved" + (kept ? " with " + kept + " picture" + (kept === 1 ? "" : "s") + ", kept in this browser only (the words travel with the story, the pictures do not)" : "") + (lost ? ". " + lost + " picture" + (lost === 1 ? " was" : "s were") + " not kept: this browser would not store them" : "") + ". ";
@@ -380,7 +405,7 @@
     $(".sd-clear").addEventListener("click", function () {
       announced = false;
       files.forEach(function (x) { URL.revokeObjectURL(x.url); }); files = []; drawShots(); text.value = ""; chips.textContent = ""; ov = Object.create(null); parsedNow = null; lastSig = ""; shown = Object.create(null);
-      J.clear(); showDock(false); dropKeyPlaces(); report.hidden = true; planBox.hidden = true; fam.hidden = true; status.textContent = ""; text.focus();
+      J.clear(); showDock(false); dropKeyPlaces(); report.hidden = true; planBox.hidden = true; fam.hidden = true; addBar.hidden = true; status.textContent = ""; text.focus();
     });
     $(".sd-eg").addEventListener("click", function () { text.value = "My great-grandfather Ivan Kosina came from Gallignana to Hamilton around 1905. All I have is this photo."; run(); });
     window.addEventListener("beforeunload", function () { files.forEach(function (x) { URL.revokeObjectURL(x.url); }); });

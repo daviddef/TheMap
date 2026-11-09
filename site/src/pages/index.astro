@@ -47,10 +47,10 @@ const surnameCount = Array.isArray(sur) ? sur.length : Object.keys(sur || {}).le
 const inventoryRows = [
   ["The ground", [
     [countries, "countries and territories", "/countries/", `${withPlaces} with a place on the map, and ${countries - withPlaces} more known from sources, collections or surnames`, "Egypt: archives listed, no town catalogued yet"],
-    [regions.regions.length, "regions", "/jurisdictions/", "stretches of ground whose rulers changed together", "the Military Frontier"],
+    [regions.regions.length, "regions", "/providers/#regions", "stretches of ground whose rulers changed together", "the Military Frontier"],
     /* THE ERAS THE REGIONS CARRY. David: «how many are we tracking? is there a way to show that in the counts?» An era is one ruler over
        one region for a span of years, with the archives that hold its paper: the unit the map and the history play are built on. */
-    [regions.regions.reduce((n, r) => n + (r.eras || []).length, 0), "eras", "/jurisdictions/", "spans of years when one ruler held a region, each with the archives that kept its paper", "the Imotski frontier: Ottoman, then Venetian, then Austrian"],
+    [regions.regions.reduce((n, r) => n + (r.eras || []).length, 0), "eras", "/providers/#regions", "spans of years when one ruler held a region, each with the archives that kept its paper", "the Imotski frontier: Ottoman, then Venetian, then Austrian"],
     [places, "places", "/places/", "towns and villages, each with the books and archives that cover it", "Senj, in Croatia"],
     [Object.keys(placeNames.places).length, "places with dated names", "/place-names/", "a place's name in the year of the record", "Fiume before 1945 is today's Rijeka"],
   ]],

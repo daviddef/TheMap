@@ -72,7 +72,6 @@ export const nav = [
     ["/about/", "About the atlas"],
     [null, "The sources"],
     ["/providers/", "Who holds records"],
-    ["/jurisdictions/", "Whose archive"],
     ["/coverage/", "What's missing"],
     /* The survey queue is a section of /providers/ now (Help check a source); /survey/ redirects there. */
     /* Moved here from the header bar, where it was a pill on every page. */

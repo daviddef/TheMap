@@ -1,12 +1,25 @@
 ---
+/* THE SOURCES, IN ONE PLACE. This page used to be three: /providers/ (who holds records and what it costs), /survey/ (the queue of
+ * sources nobody has opened) and /jurisdictions/ (for this ground in these years, whose archive holds the paper). They answered one
+ * question from three ends and each copied the others, so a reader could not tell which was the real list. It is now one page with
+ * one search box and two views of the same directory:
+ *
+ *   Sources            every archive, library, index and portal, grouped by kind, with what it costs to look
+ *   Whose archive      every record region and era, and the archives that kept its paper (the old /jurisdictions/)
+ *
+ * THE ROWS ARE NOT IN THE HTML. They were (1,801 of them, 7.5 MB), and the region tables would have added ~15 MB more. The page is
+ * the controls, the explanations and a no-script list of links; public/js/providers-page.js builds the rows from providers.json
+ * (and regions.json, only when the Whose archive view is opened), 40 at a time. Every source still has its own page at /archive/<id>/.
+ */
 import Base from "../layouts/Base.astro";
 import { u } from "../lib/url.js";
+import fs from "node:fs";
 import provs from "../../public/providers.json";
+import regions from "../../public/regions.json";
+import { atlas as idx } from "../lib/atlas.js";
 import "../styles/kit.css";
 
 const P = provs.providers;
-const byKind = {};
-for (const p of P) (byKind[p.kind] = byKind[p.kind] || []).push(p);
 const KIND = {
   "aggregator": "The aggregators — many countries at once",
   "national-archive": "National archives and state portals",
@@ -23,29 +36,17 @@ const KIND = {
 const order = ["aggregator", "national-archive", "regional-archive", "diocesan",
                "volunteer", "library", "national-library", "index", "catalogue",
                "statistics", "commercial"];
+/* A KIND THIS PAGE HAS NO HEADING FOR MUST NOT VANISH (eight of them once did): anything not in `order` is listed under its own
+   raw kind. The kinds are handed to the script in one list. */
+const leftover = [...new Set(P.map((p) => p.kind).filter((k) => !order.includes(k)))].sort();
+const kinds = [...order, ...leftover].filter((k) => P.some((p) => p.kind === k));
 
-/* A KIND THIS PAGE HAS NO HEADING FOR MUST NOT VANISH, and eight of them did.
-   `order` was a hand-written list and the render was `order.filter(...)`, so a
-   provider whose kind was missing from it — index, statistics, national-library,
-   catalogue — was silently dropped. Eight sources sat in the directory, counted
-   in its own total, and appeared nowhere on the page that exists to list them.
-   A directory that quietly omits its own entries is the exact failure this
-   project keeps finding elsewhere, so the fallback below is the fix that
-   matters more than the four labels added above: anything not in `order` is
-   rendered under its own raw kind rather than discarded. */
-const shown = new Set(order);
-const leftover = [...new Set(P.map((p) => p.kind).filter((k) => !shown.has(k)))].sort();
-const sections = [...order.filter((k) => byKind[k]), ...leftover];
+const free = P.filter((p) => p.access === "free").length;
+const unsurveyed = P.filter((p) => p.access === "unsurveyed").length;
+const easyStarts = P.filter((p) => p.access === "unsurveyed" && p.triage === "read").length;
+const triaged = P.filter((p) => p.triage).length;
 
-const free = P.filter(p => p.access === "free").length;
-const unsurveyed = P.filter(p => p.access === "unsurveyed").length;
-const easyStarts = P.filter(p => p.access === "unsurveyed" && p.triage === "read").length;
-const triaged = P.filter(p => p.triage).length;
-
-/* THE ACCESS CLASSES, IN PLAIN WORDS. Eight classes were printed as a legend of
-   eight tiles before anything could be read. They are now the filter itself: one
-   short label each, the full sentence on hover, the count beside it. The class
-   names in the data do not change. */
+/* THE ACCESS CLASSES, IN PLAIN WORDS: one short label each, the full sentence on hover, the count beside it. They are the filter. */
 const ACC = {
   free: "Free, images online",
   account: "Free with an account",
@@ -61,50 +62,84 @@ const SHORT = { free: "Free", account: "Account", index: "Index", mixed: "Part p
 const accCount = {};
 for (const p of P) accCount[p.access] = (accCount[p.access] || 0) + 1;
 
-/* NEW SOURCES: the last three days on which the directory grew. `added` is the day a
-   row first appeared (scripts/provider-added.py keeps it); a row without one falls back
-   to the day it was checked, which for a new row is the same day. */
+/* THE NEW PILL: the latest day the directory grew, linked to What's new, which keeps the full list. */
 const ADDED = (p) => p.added || p.checked;
+const latest = P.map(ADDED).sort().pop();
+const latestN = P.filter((p) => ADDED(p) === latest).length;
 const MONTH = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const day = (iso) => { const [y, m, d] = String(iso).split("-").map(Number); return `${d} ${MONTH[m - 1]} ${y}`; };
-const NAMED = { "*": "worldwide", "CN-TW": "Taiwan" };
-let dn = null;
-try { dn = new Intl.DisplayNames(["en"], { type: "region" }); } catch (e) { /* codes are shown instead */ }
-const regionName = (c) => { if (NAMED[c]) return NAMED[c]; try { return (dn && dn.of(c)) || c; } catch (e) { return c; } };
-const newDays = [...new Set(P.map(ADDED))].sort().reverse().slice(0, 3).map((d) => {
-  const list = P.filter((p) => ADDED(p) === d).sort((a, b) => a.name.localeCompare(b.name));
-  const mix = {};
-  for (const p of list) for (const c of p.countries) mix[c] = (mix[c] || 0) + 1;
-  const top = Object.entries(mix).sort((a, b) => b[1] - a[1] || regionName(a[0]).localeCompare(regionName(b[0]))).slice(0, 6)
-    .map(([c, n]) => ({ name: regionName(c), n })).sort((a, b) => a.name.localeCompare(b.name));
-  return { d, label: day(d), list, top };
-});
-const LONG = 220;
-const clip = (t) => String(t || "");
-const TRIAGE_RANK = { read: 0, "needs-browser": 1, http: 2, unreachable: 3, declined: 4 };
-const where = (p) => p.countries.includes("*") && p.countries.length === 1 ? "worldwide"
-  : p.countries.map((c) => c === "*" ? "worldwide" : c).join(" ");
+const latestLabel = (() => { const [, m, d] = String(latest).split("-").map(Number); return `${d} ${MONTH[m - 1]}`; })();
+
+/* ---- WHOSE ARCHIVE: what the region view needs from the build ---------------------------------------------------------------- */
+const FLAG_SLUG = {
+  AR: "argentina", AT: "austria", AU: "australia", BA: "bosnia-and-herzegovina",
+  BE: "belgium", BY: "belarus", CA: "canada", CZ: "czechia", DE: "germany",
+  DK: "denmark", EE: "estonia", FI: "finland", FR: "france",
+  GB: "united-kingdom", HR: "croatia", HU: "hungary", IE: "ireland",
+  IT: "italy", LT: "lithuania", LV: "latvia", NL: "netherlands", NO: "norway",
+  PL: "poland", PT: "portugal", RO: "romania", RS: "serbia", RU: "russia",
+  SE: "sweden", SI: "slovenia", SK: "slovakia", UA: "ukraine",
+  US: "united-states", ZA: "south-africa",
+};
+const eras = regions.regions.reduce((a, r) => a + r.eras.length, 0);
+const covered = new Set(regions.regions.flatMap((r) => r.countries || []));
+const CN = idx.countries || {};
+const placesByCC = {};
+for (const p of (idx.places || [])) { if (p.cc) placesByCC[p.cc] = (placesByCC[p.cc] || 0) + 1; }
+let flagEraCount = {};
+try {
+  const fi = JSON.parse(fs.readFileSync("../data/flag-index.json", "utf8"));
+  const fe = JSON.parse(fs.readFileSync("../data/flag-eras.json", "utf8"));
+  const slugToName = {};
+  for (const c of fi.countries) slugToName[c.url.split("/").pop().replace(".html", "")] = c.name;
+  const nameToCC = Object.fromEntries(Object.entries(CN).map(([k, v]) => [v, k]));
+  for (const e of fe.eras) {
+    const nm = slugToName[e.slug];
+    const cc = nm && nameToCC[nm];
+    if (cc) flagEraCount[cc] = (flagEraCount[cc] || 0) + 1;
+  }
+} catch { flagEraCount = {}; }
+const gaps = Object.entries(placesByCC)
+  .filter(([cc]) => !covered.has(cc))
+  .map(([cc, n]) => ({ cc, n, name: CN[cc] || cc, eras: flagEraCount[cc] || 0 }))
+  .sort((a, b) => b.n - a.n)
+  .slice(0, 16);
+
+/* What the script needs and the build alone knows. Rows come from providers.json and regions.json. */
+const conf = {
+  kinds: kinds.map((k) => [k, KIND[k] || k]),
+  acc: ACC, short: SHORT, accDefs: provs.access,
+  flags: FLAG_SLUG,
+  base: u("/"),
+  latest,
+};
 ---
 <Base
   title="The sources"
   eyebrow="Who holds the paper, and what it costs to look"
-  dek="Every archive, library, index and portal this map can point at, and what it actually costs to look. The access class is the ordinary visitor's experience, not the best case: FamilySearch is filed as needing an account because it does.">
+  dek="Every archive, library, index and portal this map can point at, what it actually costs to look, and whose archive holds the paper for a given ground and year. The access class is the ordinary visitor's experience, not the best case: FamilySearch is filed as needing an account because it does.">
 
+  <div class="pv-root" id="pv-root">
   <p class="k-stats" aria-label="Summary">
     <span><b>{P.length.toLocaleString("en")}</b> sources</span>
     <span class="k-tag is-new">{free} free, no account</span>
     <span class="k-tag">{triaged.toLocaleString("en")} looked at</span>
     <span class="k-tag">{unsurveyed} not yet checked</span>
+    <span class="k-tag">{regions.regions.length} regions, {eras.toLocaleString("en")} eras</span>
+    <a class="pv-newpill" href={u("/whats-new/#sources")} title={`${latestN} sources added on ${latestLabel}. See what is new`}><i aria-hidden="true">✦</i> New <span>{latestN} on {latestLabel}</span></a>
   </p>
 
   <form id="pv-find" class="pv-find" role="search" autocomplete="off">
     <div class="pv-row">
-      <label class="pv-q"><span class="pv-lab">Search the sources</span>
-        <input id="pv-q" type="search" placeholder="A name, a place, a kind of record: Antenati, croatia church, usa census, newspapers australia…" enterkeyhint="search" /></label>
+      <label class="pv-q"><span class="pv-lab">Search the sources and regions</span>
+        <input id="pv-q" type="search" placeholder="A name, a place, a kind of record: Antenati, croatia church, usa census, Istria…" enterkeyhint="search" /></label>
       <label class="pv-c"><span class="pv-lab">Country</span><select id="pv-c"><option value="">All countries</option></select></label>
       <label class="pv-w" id="pv-world-row" hidden><input id="pv-world" type="checkbox" checked /> and the worldwide services</label>
     </div>
-    <div class="pv-acc" role="group" aria-label="What it costs to look">
+    <div class="pv-tabs" role="group" aria-label="Two views of the same directory">
+      <button type="button" class="pv-tab" data-view="kind" aria-pressed="true">Sources <span>{P.length.toLocaleString("en")}</span></button>
+      <button type="button" class="pv-tab" data-view="regions" aria-pressed="false">Whose archive, by region and years <span>{regions.regions.length}</span></button>
+    </div>
+    <div class="pv-acc" role="group" aria-label="What it costs to look" id="pv-acc">
       {Object.entries(ACC).map(([k, label]) => (
         <button type="button" class={"chip acc-" + k} data-acc={k} aria-pressed="false" title={provs.access[k]}>{label}<span>{accCount[k] || 0}</span></button>
       ))}
@@ -117,111 +152,116 @@ const where = (p) => p.countries.includes("*") && p.countries.length === 1 ? "wo
   <p id="pv-none" class="pv-none" hidden>Nothing matches that. Try fewer words, or take the country off. A source missing from the directory?
     <a href={u("/add/")}>Tell us →</a></p>
 
-  <section class="pv-new" aria-labelledby="pv-new-h">
-    <h2 class="k-h" id="pv-new-h">New sources</h2>
-    <p class="cap">The last three days the directory grew.</p>
-    <div class="pv-days">
-      {newDays.map((g) => (
-        <div class="pv-day">
-          <div class="pv-dh"><b>{g.label}</b><span class="k-tag is-new">{g.list.length.toLocaleString("en")} added</span></div>
-          {g.list.length <= 12 ? (
-            <ul>{g.list.map((p) => <li><a href={u(`/archive/${p.id}/`)}>{p.name}</a> <span class="pv-w2">{where(p)}</span></li>)}</ul>
-          ) : (
-            <>
-              <p class="pv-mix">Mostly {g.top.map((t) => `${t.name} (${t.n})`).join(", ")}.</p>
-              <button type="button" class="pv-btn" data-newday={g.d}>Show these {g.list.length.toLocaleString("en")} in the list</button>
-            </>
-          )}
-        </div>
-      ))}
-    </div>
-  </section>
+  <div id="pv-view-kind">
+    <section class="pv-help" id="help" aria-labelledby="pv-help-h">
+      <h2 class="k-h" id="pv-help-h">Help check a source <span class="k-count">{unsurveyed}</span></h2>
+      <p class="pv-helplead"><b>{unsurveyed} of these have never been opened.</b> A national register, an open dataset or a state's own list
+        named them, which is worth knowing and is not the same as somebody having looked. Opening one takes about ten minutes,
+        and it turns a grey dot into an answer.</p>
+      <p class="pv-helpgo">
+        <button type="button" class="pv-btn" id="pv-easy">Show the {easyStarts} easy starts</button>
+        <button type="button" class="pv-btn ghost" id="pv-allunchecked">All {unsurveyed} not yet checked</button>
+      </p>
+      <p class="cap">An easy start is a source whose homepage we have already read, so the list shows what we found there.</p>
+      <details class="pv-how">
+        <summary>How to check one</summary>
+        <ol class="k-steps">
+          <li><b>Open the site.</b> Every not-yet-checked row has an <em>Open the site</em> link.</li>
+          <li><b>Find the records, not the homepage.</b> Look for the register viewer. In French it is usually <em>archives en ligne</em> or
+            <em>état civil</em>; in Italian <em>registri</em>; in German <em>Kirchenbücher</em>.</li>
+          <li><b>Answer one question: what does it cost to look?</b> Free images, free with an account, an index only, a catalogue card,
+            in the building only, or a charge.</li>
+          <li><b>Copy the sentence that proves it</b> and the page it is on. Not a summary: the site's own words, so the next person can
+            check you instead of trusting you.</li>
+          <li><b>Send it</b> <a href={u("/add/")}>through this form</a>, with the source's name, the class, the quotation and the URL.</li>
+        </ol>
+        <ul class="k-tiles pv-two">
+          <li><span class="k-tag">Stop</span><span><b>If a site refuses robots or asks you not to, stop.</b> Record that it declined and why. This
+            project does not defeat bot gates or pretend to be a browser it is not: an atlas that asks archives to trust it cannot be the thing
+            that ignores them.</span></li>
+          <li><span class="k-tag">Say so</span><span><b>If you cannot tell, say you cannot tell.</b> An honest <em>not yet checked</em> is worth more than
+            a confident guess. A place wrongly marked <em>free</em> costs somebody an evening and costs this directory the only thing it sells.</span></li>
+        </ul>
+      </details>
+    </section>
 
-  <section class="pv-help" id="help" aria-labelledby="pv-help-h">
-    <h2 class="k-h" id="pv-help-h">Help check a source <span class="k-count">{unsurveyed}</span></h2>
-    <p class="pv-helplead"><b>{unsurveyed} of these have never been opened.</b> A national register, an open dataset or a state's own list
-      named them, which is worth knowing and is not the same as somebody having looked. Opening one takes about ten minutes,
-      and it turns a grey dot into an answer.</p>
-    <p class="pv-helpgo">
-      <button type="button" class="pv-btn" id="pv-easy">Show the {easyStarts} easy starts</button>
-      <button type="button" class="pv-btn ghost" id="pv-allunchecked">All {unsurveyed} not yet checked</button>
-    </p>
-    <p class="cap">An easy start is a source whose homepage we have already read, so the list shows what we found there.</p>
-    <details class="pv-how">
-      <summary>How to check one</summary>
-      <ol class="k-steps">
-        <li><b>Open the site.</b> Every not-yet-checked row has an <em>Open the site</em> link.</li>
-        <li><b>Find the records, not the homepage.</b> Look for the register viewer. In French it is usually <em>archives en ligne</em> or
-          <em>état civil</em>; in Italian <em>registri</em>; in German <em>Kirchenbücher</em>.</li>
-        <li><b>Answer one question: what does it cost to look?</b> Free images, free with an account, an index only, a catalogue card,
-          in the building only, or a charge.</li>
-        <li><b>Copy the sentence that proves it</b> and the page it is on. Not a summary: the site's own words, so the next person can
-          check you instead of trusting you.</li>
-        <li><b>Send it</b> <a href={u("/add/")}>through this form</a>, with the source's name, the class, the quotation and the URL.</li>
-      </ol>
-      <ul class="k-tiles two">
-        <li><span class="k-tag">Stop</span><span><b>If a site refuses robots or asks you not to, stop.</b> Record that it declined and why. This
-          project does not defeat bot gates or pretend to be a browser it is not: an atlas that asks archives to trust it cannot be the thing
-          that ignores them.</span></li>
-        <li><span class="k-tag">Say so</span><span><b>If you cannot tell, say you cannot tell.</b> An honest <em>not yet checked</em> is worth more than
-          a confident guess. A place wrongly marked <em>free</em> costs somebody an evening and costs this directory the only thing it sells.</span></li>
-      </ul>
+    <nav class="jump" id="pv-jump" aria-label="Kinds of source"></nav>
+    <div id="pv-kinds"></div>
+
+    <noscript>
+      <p class="pv-none">The lists on this page are drawn by a script, which is switched off here. The whole directory is one file,
+        <a href={u("/providers.json")}>providers.json</a>, and every source has its own page at <code>/archive/&lt;id&gt;/</code>.</p>
+    </noscript>
+
+    <details class="pv-how pv-about">
+      <summary>What this list is, and is not</summary>
+      <p>It lists the <b>institutions and portals</b>: archives, libraries, indexes, volunteer projects and the commercial sites. The individual
+      collections inside them, and the registers walked page by page, are on each place's own page.</p>
+      <p>{triaged.toLocaleString("en")} have at least had their door rattled: alive or dead, a page or a JavaScript application, open or refusing
+      robots. That makes a queue somebody can work, not a surveyed source: the class reads <b>not yet checked</b> until a person has read the site and
+      written down the sentence that settles it.</p>
+      <p><b>Declining after looking is a result; declining without looking is a gap.</b> Sources that refuse automated access are recorded as
+      declined, with what was found, rather than worked around.</p>
     </details>
-  </section>
+  </div>
 
-  <nav class="jump" aria-label="Kinds of source">
-    {sections.map((k) => <a class="k-tag" href={`#k-${k}`} data-jump={k}>{KIND[k]?.split(" — ")[0] || k}<span>{byKind[k].length}</span></a>)}
-  </nav>
+  <div id="pv-view-regions" hidden>
+    <div class="k-hi">
+      <p><b>Knowing who ruled a place is trivia. Knowing whose archive that means is research.</b></p>
+      <p>Every history of Istria will tell you it was Italian between the wars. What almost none of them tell
+      you is the consequence: the parish registers of those years were filmed by FamilySearch into a
+      collection called <em>Italy, Pola and Trieste</em>, so a search of the Croatian collection returns
+      nothing at all, and nothing looks exactly like a record that does not exist.
+      <a href={u("/")}>Set a year on the map</a> and the answer appears in every panel.</p>
+    </div>
+    <p class="k-lede">
+      A record region is a piece of ground whose records were filed the same way, and an era is a stretch of years over which that stayed true.
+      <b>The other half of the same question:</b> <a href={u("/flags/")}>the flag pages</a> know who was governing and what they flew, for 210
+      countries. Each region links to the flag history of the countries it covers. Treat that link as context, not an equivalence: a flag page is
+      keyed on a modern country, and a record region usually is not one. Istria has been under seven regimes and is not the same shape as Croatia.
+    </p>
+    <p class="cap">{regions.precision}</p>
+    <p class="pv-note" id="pv-rnote" hidden>The cost and date filters apply to the list of sources. Here the search and the country narrow the regions.</p>
+    <div id="pv-regions"></div>
+    <p class="pv-loading" id="pv-rload">Loading the regions…</p>
 
-  {sections.map(k => (
-    <section style="margin-top:34px" id={`k-${k}`} data-kind={k}>
-      <h2 class="k-h">{KIND[k] || k} <span class="k-count">{byKind[k].length}</span></h2>
-      <table class="k-table">
-        <thead><tr>
-          <th class="c-name">Source</th><th class="c-what">What it is</th><th class="m c-acc">Cost to look</th><th class="m c-where">Where</th><th class="m c-date">Checked</th>
-        </tr></thead>
+    <aside class="k-foot">
+      <p>{regions.regions.length} regions is not the world.</p>
+      <p>These are the regions whose filing this project has actually worked out. <b>A place outside them says
+      so in its own panel</b> rather than guessing, because a confident wrong answer about which archive to
+      write to costs somebody a month. <a href={u("/add/")}>Know a region's filing history? That is the most
+      valuable thing you could contribute →</a></p>
+    </aside>
+
+    <section style="margin-top:44px">
+      <h2 class="k-h">Where this layer is missing</h2>
+      <p class="cap">These {regions.regions.length} regions cover {covered.size} of the {Object.keys(CN).length} countries this atlas names. Below are the
+      countries where the atlas already holds the most ground and has no jurisdiction research at all, which is where the next region would do the most good.
+      <b>The sovereignty half is already in hand:</b> the <a href={u("/flags/")}>flag timelines</a> give who governed and when. What they cannot give is
+      <em>whose archive that means</em>, which is read out of finding aids one country at a time.</p>
+      <table class="k-table pv-gaps">
+        <thead><tr><th>Country</th><th class="m">Places held</th><th class="m">Eras already known</th><th>Starting point</th></tr></thead>
         <tbody>
-          {byKind[k].sort((a, b) => a.name.localeCompare(b.name)).map(p => (
-            <tr data-id={p.id} data-k={k} data-a={p.access} data-c={p.countries.join(" ").toLowerCase()} data-d={ADDED(p)} data-r={TRIAGE_RANK[p.triage] ?? 9}>
-              <td><a href={u(`/archive/${p.id}/`)}>{p.name}</a>{p.url && <a class="pv-site" href={p.url} target="_blank" rel="noopener" title={`Open ${p.name} itself (its own website)`}>Site ↗</a>}</td>
-              <td class="what">
-                {clip(p.what).length > LONG ? (
-                  <details class="k-more">
-                    <summary><span class="k-clip">{p.what}</span> <span class="k-mt">more</span></summary>
-                    <div>{p.what}</div>
-                  </details>
-                ) : p.what}
-                {p.access === "unsurveyed" && p.url && (
-                  <p class="pv-know"><span>{p.triageNote || "Not yet opened by anybody."}</span>
-                    <a href={p.url} target="_blank" rel="noopener">Open the site ↗</a>, then <a href={u("/add/")}>tell us what it costs to look</a>.</p>
-                )}
-              </td>
-              <td class="m"><span class={"chip acc-" + p.access} title={provs.access[p.access]}>{SHORT[p.access] || p.access}</span></td>
-              <td class="m w">{p.countries.includes("*") ? "worldwide" : p.countries.join(" ")}</td>
-              <td class="m">{p.checked}</td>
+          {gaps.map((g) => (
+            <tr>
+              <td><a href={u(`/country/${g.cc.toLowerCase()}/`)}>{g.name}</a></td>
+              <td class="m">{g.n.toLocaleString()}</td>
+              <td class="m">{g.eras || "—"}</td>
+              <td>{g.eras ? <a href={u("/flags/")}>its flag timeline</a> : <span class="cap">no timeline either — both halves open</span>}</td>
             </tr>
           ))}
         </tbody>
       </table>
     </section>
-  ))}
-
-  <details class="pv-how pv-about">
-    <summary>What this list is, and is not</summary>
-    <p>It lists the <b>institutions and portals</b>: archives, libraries, indexes, volunteer projects and the commercial sites. The individual
-    collections inside them, and the registers walked page by page, are on each place's own page and on <a href={u("/jurisdictions/")}>Whose archive</a>.</p>
-    <p>{triaged.toLocaleString("en")} have at least had their door rattled: alive or dead, a page or a JavaScript application, open or refusing
-    robots. That makes a queue somebody can work, not a surveyed source: the class reads <b>not yet checked</b> until a person has read the site and
-    written down the sentence that settles it.</p>
-    <p><b>Declining after looking is a result; declining without looking is a gap.</b> Sources that refuse automated access are recorded as
-    declined, with what was found, rather than worked around.</p>
-  </details>
+  </div>
 
   <aside class="k-foot">
     <p>Links rot, portals move, and free things become paid, so every row says when a person last checked it.</p>
     <p>The build refuses any row without a date. <a href={u("/add/")}>Found one that has changed? Say so →</a></p>
   </aside>
+  </div>
 
+  <script type="application/json" id="pv-conf" set:html={JSON.stringify(conf)}></script>
   <script is:inline src={u("/js/sources-search.js")}></script>
   <script is:inline src={u("/js/providers-page.js")}></script>
 </Base>
@@ -229,28 +269,27 @@ const where = (p) => p.countries.includes("*") && p.countries.length === 1 ? "wo
 <style is:global>
   /* FULL WIDTH. This page is a wide table; the shared reading width left half the screen as margin. */
   :root { --maxw: min(2200px, 98vw); }
-</style>
-<style>
-  .jump { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-  .jump a { text-decoration: none; color: var(--ink-2); }
-  .jump a:hover { border-color: var(--accent); color: var(--accent); }
-  .jump a span { color: var(--ink-3); margin-left: 4px; }
-  /* Fixed widths, because auto layout gave the description whatever the short columns left
-     and squeezed it to a third of the card. The description is the thing being read. */
-  .k-table { table-layout: fixed; }
-  .c-name { width: 20%; } .c-what { width: 46%; } .c-acc { width: 10%; } .c-where { width: 12%; } .c-date { width: 11%; }
-  td.m { white-space: normal; }
-  td.m:last-child { white-space: nowrap; }
-  td.w { line-height: 1.6; word-spacing: 4px; overflow-wrap: anywhere; }
-  td:first-child { overflow-wrap: anywhere; }
+  .pv-root [hidden] { display: none !important; }
+  .pv-root .jump { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .pv-root .jump a { text-decoration: none; color: var(--ink-2); }
+  .pv-root .jump a:hover { border-color: var(--accent); color: var(--accent); }
+  .pv-root .jump a span { color: var(--ink-3); margin-left: 4px; }
+  /* Fixed widths, because auto layout gave the description whatever the short columns left and squeezed it to a third of the card. */
+  .pv-root .k-table { table-layout: fixed; }
+  .pv-root .c-name { width: 20%; } .pv-root .c-what { width: 46%; } .pv-root .c-acc { width: 10%; } .pv-root .c-where { width: 12%; } .pv-root .c-date { width: 11%; }
+  .pv-root .c-yrs { width: 13%; } .pv-root .c-who { width: 27%; } .pv-root .c-arch { width: 60%; }
+  .pv-root td.m { white-space: normal; }
+  .pv-root td.m:last-child { white-space: nowrap; }
+  .pv-root td.w { line-height: 1.6; word-spacing: 4px; overflow-wrap: anywhere; }
+  .pv-root td:first-child { overflow-wrap: anywhere; }
+  .pv-root td { vertical-align: top; }
   @media (max-width: 760px) {
-    .k-table { table-layout: auto; }
-    .k-table thead { display: none; }
-    .k-table, .k-table tbody, .k-table tr, .k-table td { display: block; width: 100%; }
-    .k-table tr { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 10px 14px; margin-bottom: 10px; }
-    .k-table td, .k-table td:first-child, .k-table td:last-child { border: 0; border-radius: 0; padding: 3px 0; background: none; }
+    .pv-root .k-table { table-layout: auto; }
+    .pv-root .k-table thead { display: none; }
+    .pv-root .k-table, .pv-root .k-table tbody, .pv-root .k-table tr, .pv-root .k-table td { display: block; width: 100%; }
+    .pv-root .k-table tr { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 10px 14px; margin-bottom: 10px; }
+    .pv-root .k-table td, .pv-root .k-table td:first-child, .pv-root .k-table td:last-child { border: 0; border-radius: 0; padding: 3px 0; background: none; }
   }
-  td { vertical-align: top; }
   .chip.acc-free { background: #1E844922; color: #1E8449; }
   .chip.acc-account { background: #6FA82E22; color: #5C8C26; }
   .chip.acc-index { background: #EFC03B33; color: #8A6B10; }
@@ -258,8 +297,8 @@ const where = (p) => p.countries.includes("*") && p.countries.length === 1 ? "wo
   .chip.acc-paid { background: #C0392B22; color: #C0392B; }
   .chip.acc-catalogue { background: #8E6FA822; color: #7A5CA8; }
   .chip.acc-onsite { background: #7C8A9122; color: #5E6C73; }
+  .chip.acc-unsurveyed { background: #7C8A9122; color: var(--ink-3); }
 
-  [hidden] { display: none !important; }
   .pv-find { display: grid; gap: 12px; margin: 0 0 20px; }
   .pv-row { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: end; }
   .pv-lab { display: block; font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
@@ -269,6 +308,10 @@ const where = (p) => p.countries.includes("*") && p.countries.length === 1 ? "wo
   .pv-q input:focus, .pv-c select:focus { outline: 3px solid var(--accent); outline-offset: 1px; }
   .pv-c { flex: 0 1 280px; }
   .pv-w { font: 13px var(--sans); color: var(--ink-2); display: flex; gap: 6px; align-items: center; padding-bottom: 12px; }
+  .pv-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pv-tab { font: 600 14px var(--sans); color: var(--ink-2); background: var(--panel); border: 1px solid var(--rule-strong, var(--rule)); border-radius: 10px; padding: 9px 16px; cursor: pointer; }
+  .pv-tab span { font: 11px var(--mono); margin-left: 8px; opacity: .7; }
+  .pv-tab[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); background: var(--accent-wash); }
   .pv-acc { display: flex; flex-wrap: wrap; gap: 8px; }
   .pv-acc .chip { cursor: pointer; border: 1px solid transparent; font: 600 12.5px var(--sans); padding: 6px 12px; border-radius: 99px; }
   .pv-acc .chip span { font: 11px var(--mono); margin-left: 7px; opacity: .75; }
@@ -276,25 +319,36 @@ const where = (p) => p.countries.includes("*") && p.countries.length === 1 ? "wo
   .pv-line { margin: 0; font: 13px var(--sans); color: var(--ink-3); display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; }
   .pv-link { background: none; border: 0; padding: 0; font: inherit; color: var(--accent); text-decoration: underline; cursor: pointer; }
   .pv-none { font: 15px var(--sans); color: var(--ink-2); background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 14px 18px; }
-  .pv-days { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; margin-top: 10px; }
-  .pv-day { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 14px 18px; }
-  .pv-dh { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-  .pv-dh b { font: 600 15px var(--sans); color: var(--ink); }
-  .pv-day ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; font: 14px/1.4 var(--sans); }
-  .pv-w2 { font: 11px var(--mono); color: var(--ink-3); margin-left: 6px; }
-  .pv-mix { font: 14px/1.5 var(--sans); color: var(--ink-2); margin: 0 0 10px; }
+  .pv-note { font: 13px var(--sans); color: var(--ink-3); }
+  .pv-loading { font: 14px var(--sans); color: var(--ink-3); }
+  .pv-newpill { display: inline-flex; align-items: center; gap: 6px; font: 600 12px var(--mono); letter-spacing: .06em; text-transform: uppercase; text-decoration: none;
+    color: var(--accent); border: 1px solid var(--accent); background: var(--accent-wash); border-radius: 99px; padding: 4px 11px 4px 9px; }
+  .pv-newpill i { font-style: normal; }
+  .pv-newpill span { font-weight: 400; opacity: .85; text-transform: none; letter-spacing: 0; }
+  .pv-newpill:hover { background: var(--accent); color: #fff; }
   .pv-btn { font: 600 13.5px var(--sans); color: #fff; background: var(--accent); border: 1px solid var(--accent); border-radius: 99px; padding: 8px 16px; cursor: pointer; }
   .pv-btn.ghost { color: var(--accent); background: transparent; }
-  .pv-help { margin-top: 30px; }
+  .pv-help { margin-top: 10px; }
   .pv-helplead { font: 16px/1.55 var(--serif); color: var(--ink); max-width: 80ch; margin: 0 0 10px; }
   .pv-helpgo { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 6px; }
   .pv-how { margin-top: 12px; }
   .pv-how > summary { cursor: pointer; font: 600 14px var(--sans); color: var(--accent); }
   .pv-about { margin-top: 36px; max-width: 90ch; font: 14.5px/1.6 var(--sans); color: var(--ink-2); }
+  .pv-two { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); max-width: 120ch; }
   .pv-know { margin: 8px 0 0; font: 12.5px/1.5 var(--sans); color: var(--ink-3); }
   .pv-know span { display: block; font-family: var(--mono); font-size: 11.5px; margin-bottom: 2px; }
   .pv-know a { color: var(--accent); }
-  .pv-new { margin-top: 26px; }
   .pv-site { display: block; margin-top: 6px; font: 600 12px var(--sans); color: var(--accent); text-decoration: none; }
   .pv-site:hover { text-decoration: underline; }
+  .pv-more { display: block; margin: 14px auto 0; }
+    .pv-sec { margin-top: 34px; scroll-margin-top: 80px; }
+  .pv-reg .k-h a { text-decoration: none; color: var(--ink); }
+  .pv-reg .k-h a:hover { color: var(--accent); }
+  .pv-reg { margin-top: 38px; scroll-margin-top: 80px; }
+  .pv-reg .reg { display: inline-flex; align-items: baseline; gap: 7px; }
+  .pv-reg .reg i { width: 9px; height: 9px; border-radius: 2px; background: var(--c); display: inline-block; flex: 0 0 auto; }
+  .pv-reg .none { color: var(--ink-3); font-style: italic; }
+  .pv-reg .enote { font-family: var(--sans); font-size: 11.5px; line-height: 1.55; color: var(--ink-3); margin: 6px 0 0; max-width: var(--measure); }
+  .pv-reg .enote.trap { color: var(--ink-2); border-left: 2px solid #C0392B; padding-left: 9px; }
+  .pv-gaps { table-layout: auto; }
 </style>

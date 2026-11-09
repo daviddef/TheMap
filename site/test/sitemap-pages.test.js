@@ -18,6 +18,8 @@ const LEFT_OUT = {
   "backup": "reads this one browser's storage and offers buttons; for a search engine it is an empty shell",
   "shared": "opens a research pack from the address or a dropped file; for a search engine it is an empty shell",
   "roots": "the GEDCOM page works on a file only the visitor has; the page is noindex",
+  "jurisdictions": "redirects to the Whose archive view of /providers/; noindex",
+  "survey": "redirects to Help check a source on /providers/; noindex",
 };
 
 const routes = [];

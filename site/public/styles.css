@@ -1638,21 +1638,20 @@ header.site nav .ra-live-grp{margin-left:8px}
 /* the inventory now opens from inside the nav, where «header.site nav a» (padding 2px, small type) outranks the cards' own rule: say it again here */
 header.site nav .ra-inv-grid a{padding:8px 10px;border:1px solid var(--rule,#ccc);border-bottom:1px solid var(--rule,#ccc);font-size:inherit;line-height:1.35;color:var(--ink,#222)}
 header.site nav .ra-inv-grid a:hover{border-color:var(--accent,#35606e);color:var(--ink,#222)}
-.ra-inv-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:6px 28px;margin:0 0 14px;padding-bottom:12px;border-bottom:1px solid var(--rule,#ccc);font:400 13px/1.4 var(--sans,system-ui);color:var(--ink-2,#555)}
-@media (max-width:640px){.ra-inv-top{grid-template-columns:minmax(0,1fr)}}
+.ra-inv-top{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:2px 16px;margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid var(--rule,#ccc);font:400 13px/1.35 var(--sans,system-ui);color:var(--ink-2,#555)}
 .ra-inv-count{margin:0}
-.ra-inv-grid .ra-inv-big{display:block;font:700 22px/1.15 var(--serif,Georgia,serif);color:var(--ink,#222)}
-.ra-inv-grid .ra-inv-kind{font-size:10px}.ra-inv-grid .ra-inv-new{font-size:12.5px}
-.ra-inv-new{display:block;margin-top:4px;color:var(--accent,#1f5c6b);font-weight:600}
-.ra-inv-news .ra-inv-h{margin:0 0 4px}
-.ra-inv-news ul{list-style:none;margin:0;padding:0;display:grid;gap:2px}
-header.site nav .ra-inv-news a,.ra-inv-news a{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:baseline;padding:4px 6px;border:0;border-radius:6px;background:none;height:auto;font:400 13px/1.35 var(--sans,system-ui);color:var(--ink,#222)}
+.ra-inv-grid .ra-inv-big{font:700 20px/1.15 var(--serif,Georgia,serif);color:var(--ink,#222)}
+.ra-inv-grid .ra-inv-in{font-size:13px}
+.ra-inv-grid .ra-inv-new{display:block;margin-top:2px;color:var(--accent,#1f5c6b);font-weight:600;font-size:12.5px}
+header.site nav .ra-inv-top a.ra-inv-all{display:inline;padding:0;border:0;background:none;height:auto;color:var(--accent,#1f5c6b);font-weight:600;font-size:13px}
+header.site nav .ra-inv-top a.ra-inv-all:hover{border:0;text-decoration:underline}
+.ra-inv-news{flex:1 0 100%;list-style:none;margin:2px 0 0;padding:0;display:grid;gap:0}
+header.site nav .ra-inv-news a{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;padding:3px 6px;border:0;border-radius:6px;background:none;height:auto;font:400 13px/1.3 var(--sans,system-ui);color:var(--ink,#222)}
 header.site nav .ra-inv-news a:hover{background:var(--accent-wash,rgba(31,92,107,.1));border:0}
+.ra-inv-news .ra-inv-line{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ra-inv-kind{font:600 10px/1 var(--sans,system-ui);letter-spacing:.08em;text-transform:uppercase;padding:3px 6px;border-radius:999px;background:var(--panel-2,#eee);color:var(--ink-2,#555)}
 .ra-inv-kind.new{background:var(--accent-wash,rgba(31,92,107,.14));color:var(--accent,#1f5c6b)}
 .ra-inv-news time{font-size:11.5px;color:var(--ink-3,#777);white-space:nowrap}
-.ra-inv-all{margin:4px 0 0;font-size:13px}
-header.site nav .ra-inv-all a{display:inline;padding:0;border:0;background:none;color:var(--accent,#1f5c6b);font-weight:600}
 @media (max-width:760px){header.site .ra-inv-ico{width:34px;height:34px}}
 /* on a narrow screen the two icons ride to the right, beside the menu button */
 @media (max-width:1180px){header.site .ra-inv{margin-left:auto}header.site .ra-live-top{margin-left:0}}

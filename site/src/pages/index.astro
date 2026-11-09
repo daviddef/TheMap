@@ -141,16 +141,13 @@ const inventoryRows = [
     <summary class="ra-inv-ico" aria-label={volumes.toLocaleString() + " volumes: what the atlas holds"} title={(volumes / 1e6).toFixed(2) + "M volumes: what the Atlas holds"}><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path d="M4 4h4v16H4zM10 4h4v16h-4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M16.3 5.7l3.7-.9 3 14.4-3.7.9z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span class="ra-inv-t">{(volumes / 1e6).toFixed(2)}M volumes</span></summary>
     <div class="ra-inv-grid">
       <div class="ra-inv-top">
-        <p class="ra-inv-count"><span class="ra-inv-big">{volumes.toLocaleString()} volumes</span> in the Atlas<span class="ra-inv-new" hidden></span></p>
-        <div class="ra-inv-news">
-          <p class="ra-inv-h">What's new</p>
-          <ul>
-            {latestNews.map((e) => (
-              <li><a href={u(e.href || "/whats-new/")}><span class={"ra-inv-kind " + (e.kind || "better")}>{NEWS_KIND[e.kind] || "Better"}</span><span class="ra-inv-line">{e.headline}</span><time datetime={e.date}>{newsDay(e.date)}</time></a></li>
-            ))}
-          </ul>
-          <p class="ra-inv-all"><a href={u("/whats-new/")}>All updates →</a></p>
-        </div>
+        <p class="ra-inv-count"><span class="ra-inv-big">{volumes.toLocaleString()} volumes</span> <span class="ra-inv-in">in the Atlas</span><span class="ra-inv-new" hidden></span></p>
+        <a class="ra-inv-all" href={u("/whats-new/")}>What's new: all updates →</a>
+        <ul class="ra-inv-news" aria-label="The latest updates">
+          {latestNews.map((e) => (
+            <li><a href={u(e.href || "/whats-new/")} title={e.headline}><span class={"ra-inv-kind " + (e.kind || "better")}>{NEWS_KIND[e.kind] || "Better"}</span><span class="ra-inv-line">{e.headline}</span><time datetime={e.date}>{newsDay(e.date)}</time></a></li>
+          ))}
+        </ul>
       </div>
       {inventoryRows.map(([head, items]) => (
         <>

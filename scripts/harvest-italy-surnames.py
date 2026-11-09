@@ -321,7 +321,8 @@ def main():
         csvs.sort(key=lambda r: str(r.get("url")), reverse=True)
         if org in cache:
             c = cache[org]
-            pairs, year = [tuple(x) for x in c["pairs"]], c.get("year")
+            # A cache written before SUMMARY_ROW existed still holds «TOTALE COMPLESSIVO»; the filter applies on the way out of it too.
+            pairs, year = [tuple(x) for x in c["pairs"] if not SUMMARY_ROW.match(x[0])], c.get("year")
             for n, cnt in pairs:
                 total[n] += cnt
             by_comune[org] = {"names": len(pairs),

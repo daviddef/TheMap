@@ -1593,3 +1593,25 @@ details.ask-priv { margin: 0 0 12px; padding: 0 14px; } details.ask-priv summary
 .lf-tip.leaflet-tooltip::before { display: none; }
 .lf-tip .lf-tipin b { font-weight: 700; margin-right: 5px; }
 .lf-tip-anc.leaflet-tooltip { background: #f4f1ea; color: #4a4a4a; font-style: italic; }
+
+/* THE SAVE BUTTON. David: «show the "local" and icon rather as a save icon similar to the contrast and read icons on the right, and the background
+   changes and pulses depending whether we have a local save or an online connection». A round 38px button like Read and Contrast, holding a disk:
+   orange wash and a slow pulse = saved only in this browser, green = a copy is kept online, red and quicker = offline. The word stays for screen
+   readers (and the tooltip still says everything); the dot is no longer drawn; the warning triangle rides the corner. */
+header.site .ra-live{position:relative;display:inline-grid;place-items:center;width:38px;height:38px;margin:0;padding:0;border-radius:50%;box-sizing:border-box;border:1px solid var(--lv,#e8870e);background:var(--lv-wash,rgba(232,135,14,.16));color:var(--lv-ink,#8a4a00);animation:ra-live-pulse-o 2.4s ease-out infinite}
+header.site .ra-live[data-state="online"]{--lv:#1f9d55;--lv-wash:rgba(31,157,85,.16);--lv-ink:#14663a;animation-name:ra-live-pulse-g}
+header.site .ra-live[data-state="offline"]{--lv:#c0392b;--lv-wash:rgba(192,57,43,.16);--lv-ink:#8e2418;animation:ra-live-pulse-r 1.4s ease-out infinite}
+header.site .ra-live:hover{filter:brightness(.97)}
+header.site .ra-live:focus-visible{outline:3px solid var(--accent,#1f5c6b);outline-offset:2px}
+header.site .ra-live .ra-live-dot{display:none}
+header.site .ra-live .ra-live-i{display:block}
+header.site .ra-live .ra-live-t{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+header.site .ra-live .ra-live-w{position:absolute;top:-4px;right:-4px;margin:0;padding:1px;border-radius:50%;background:var(--panel,#fff);line-height:0}
+header.site .ra-grp .ra-live-grp{padding:0;border-left:0;align-self:center}
+@keyframes ra-live-pulse-o{0%{box-shadow:0 0 0 0 rgba(232,135,14,.5)}70%,100%{box-shadow:0 0 0 8px rgba(232,135,14,0)}}
+@keyframes ra-live-pulse-g{0%{box-shadow:0 0 0 0 rgba(31,157,85,.5)}70%,100%{box-shadow:0 0 0 8px rgba(31,157,85,0)}}
+@keyframes ra-live-pulse-r{0%{box-shadow:0 0 0 0 rgba(192,57,43,.55)}70%,100%{box-shadow:0 0 0 8px rgba(192,57,43,0)}}
+@media (prefers-reduced-motion:reduce){header.site .ra-live,header.site .ra-live[data-state="offline"]{animation:none}}
+@media (max-width:760px){header.site .ra-live{width:34px;height:34px}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) header.site .ra-live{--lv-ink:#f4b878}:root:not([data-theme="light"]) header.site .ra-live[data-state="online"]{--lv-ink:#7fdca4}:root:not([data-theme="light"]) header.site .ra-live[data-state="offline"]{--lv-ink:#f19a8f}}
+:root[data-theme="dark"] header.site .ra-live{--lv-ink:#f4b878}:root[data-theme="dark"] header.site .ra-live[data-state="online"]{--lv-ink:#7fdca4}:root[data-theme="dark"] header.site .ra-live[data-state="offline"]{--lv-ink:#f19a8f}

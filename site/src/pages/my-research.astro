@@ -448,7 +448,7 @@ const BASE_ = u("/");
         }
 
         /* ---- sort the marks into the three questions the page answers ---- */
-        var byPlace = {}, films = [], letters = [], blocked = [], loose = [];
+        var byPlace = {}, films = [], registers = [], letters = [], blocked = [], loose = [];
         var pages = 0, vols = 0;
         mine.forEach(function (id) {
           var m = marks[id], b = (m.by && m.by[slug]) || {};
@@ -467,6 +467,9 @@ const BASE_ = u("/");
             if (m.place) { (byPlace[m.place] = byPlace[m.place] || []).push(row); return; }
             films.push(row); return;
           }
+          /* AN ANTENATI REGISTER OPENED. The atlas holds Antenati registers by comune, kind and years and not by the register's own
+             id, so a register somebody opened cannot be filed under a place's books; it is recorded here, by id, until it can be. */
+          if (id.indexOf("antenati:") === 0) { registers.push(row); return; }
           /* A PLACE YOU HAVE DECIDED ABOUT BELONGS TO THAT PLACE'S SECTION,
              which is the whole reason for marking it: «planning to» against
              Rovinj is a to-do, and a to-do filed under «other» is lost. It
@@ -511,6 +514,8 @@ const BASE_ = u("/");
                             (pages === 1 ? "" : "s"));
         if (films.length) sum.push("<b>" + films.length + "</b> film" +
                                    (films.length === 1 ? "" : "s"));
+        if (registers.length) sum.push("<b>" + registers.length + "</b> Antenati register" +
+                                       (registers.length === 1 ? "" : "s"));
         if (letters.length) sum.push("<b>" + letters.length + "</b> letter" +
                                      (letters.length === 1 ? "" : "s") + " out");
         h.push('<p class="mrsum">' + (sum.join(" \u00b7 ") || "Nothing counted yet") + "</p>");
@@ -667,6 +672,17 @@ const BASE_ = u("/");
           h.push("</ul>");
         }
 
+        /* ---- 2b. Antenati registers opened ------------------------------- */
+        if (registers.length) {
+          h.push('<div class="lab">Antenati registers opened</div>');
+          h.push('<p class="cap">Registers opened on Antenati, by their own id. The atlas lists ' +
+                 "Antenati registers by comune, kind and years, not by id, so these are not yet " +
+                 "tied to a place's books. The work is recorded all the same.</p>");
+          h.push('<ul class="mrlist">');
+          registers.forEach(function (r) { h.push(rowHtml(r)); });
+          h.push("</ul>");
+        }
+
         /* ---- 3. letters out ---------------------------------------------- */
         if (letters.length) {
           h.push('<div class="lab">Letters out, no reply yet</div>');
@@ -710,7 +726,7 @@ const BASE_ = u("/");
 
       function rowHtml(r) {
         var m = r.m, b = r.b, cov = r.cov;
-        var raw = r.id.replace(/^(volume|film|source|collection):/, "");
+        var raw = r.id.replace(/^(volume|film|source|collection|antenati):/, "");
         var shared = (m.walked || []).length;
         /* THREE LINES, NOT NINE SPANS IN A ROW. Every part of this — the
            title, the page ranges, the count, «start again at», «read in
@@ -742,6 +758,16 @@ const BASE_ = u("/");
         var opens = (r.id.indexOf("film:") === 0 && m.opensAt)
           ? '<div class="mrline mrline-n"><span class="mrnote">This film opens at: ' +
             esc(m.opensAt) + ". It can hold more than one parish.</span></div>" : "";
+        /* A FILM WITH NO WAYPOINT STILL HAS A SHAPE. Sessions record which item of the film holds which book, and when the
+           machine transcript cannot be trusted over the images (so a transcript scan proves nothing); both travel on the mark. */
+        var isFilm = r.id.indexOf("film:") === 0;
+        var items = (isFilm && m.items && m.items.length)
+          ? '<div class="mrline mrline-n"><span class="mrnote">Items: ' +
+            m.items.map(function (i) {
+              return esc("item " + i.n + (i.images ? " (images " + i.images + ")" : "") + ": " + i.what);
+            }).join("; ") + "</span></div>" : "";
+        var warn = (isFilm && m.transcript)
+          ? '<div class="mrline mrline-n"><span class="mrnote">' + esc(m.transcript) + "</span></div>" : "";
         return '<li class="mrrow">' +
           '<div class="mrline mrline-t">' +
             (m.href ? '<a class="mrt" href="' + esc(m.href) + '">' + esc(m.t || raw) + "</a>"
@@ -753,7 +779,7 @@ const BASE_ = u("/");
               (cov.length ? '<span class="mrdone">' + esc(P.fmt(cov)) + "</span>" : "") +
               chips + "</div>"
             : "") +
-          opens +
+          opens + items + warn +
           (b.note
             ? '<div class="mrline mrline-n"><span class="mrnote">' + esc(b.note) + "</span>" +
               (b.since ? '<span class="mrsince">' + esc(b.since) + "</span>" : "") +

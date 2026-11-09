@@ -137,12 +137,27 @@ const BASE_ = u("/");
 
     <section class="ms-first" id="ms-first" hidden>
       <h2 class="ms-h">Start a story</h2>
-      <label class="ms-lab" for="ms-first-text">Who are you looking for, and what do you know?</label>
-      <textarea id="ms-first-text" class="ms-in ms-ta" rows="5" maxlength="6000" placeholder="My great-grandfather Ivan Kosina came from Gallignana to Hamilton around 1905. All I have is one photo."></textarea>
+      <p class="ms-dim ms-first-sub">Write what you know, even a few words. Add a photo or document if you have one. The Atlas draws the journey, lists the registers to search and the names to try as you go.</p>
+      <div class="ms-drop" id="ms-first-drop">
+        <label class="ms-lab" for="ms-first-text">Who are you looking for, and what do you know?</label>
+        <textarea id="ms-first-text" class="ms-in ms-ta" rows="5" maxlength="6000" placeholder="My great-grandfather Ivan Kosina came from Gallignana to Hamilton around 1905. All I have is one photo."></textarea>
+        <ul class="ms-shots" id="ms-first-shots" hidden></ul>
+        <div class="ms-row">
+          <label class="ms-btn ms-filebtn"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 15V4m0 0L8 8m4-4l4 4M5 14v4.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg> Add a photo or document<input type="file" id="ms-first-file" accept="image/jpeg,image/png,image/webp" multiple hidden /></label>
+          <button type="button" class="ms-btn" id="ms-first-eg">Try an example</button>
+          <button type="button" class="ms-link" id="ms-first-clear" hidden>Start again</button>
+        </div>
+        <p class="ms-dim">You can also drop or paste a picture here.</p>
+        <div class="ms-read" id="ms-first-read" hidden>
+          <p class="ms-read-why">A census sheet, a certificate or a petition can be read for you: the pictures are sent to Claude only when you press the button, and what it says about people with your surnames is added to your words, where you can edit it.</p>
+          <button type="button" class="ms-btn ms-pri" id="ms-first-readbtn">Read it with Claude</button>
+        </div>
+      </div>
+      <div class="ms-chips" id="ms-first-chips" aria-live="polite"></div>
       <label class="ms-lab" for="ms-first-name">A name for this story (optional)</label>
       <input type="text" id="ms-first-name" class="ms-in" maxlength="80" placeholder="Ivan Kosina's journey" />
       <div class="ms-row"><button type="button" class="ms-btn ms-pri" id="ms-first-go">Start the story</button></div>
-      <p class="ms-dim">Nothing is sent anywhere. Please leave out details of people who may be alive.</p>
+      <p class="ms-dim">Nothing is sent anywhere unless you press Read it with Claude. Please leave out details of people who may be alive.</p>
     </section>
 
     <div id="ms-view" hidden>
@@ -160,6 +175,7 @@ const BASE_ = u("/");
           <label class="ms-btn ms-filebtn">Choose a photo<input type="file" id="ms-file" accept="image/jpeg,image/png,image/webp,image/gif" hidden /></label>
           <span class="ms-dim">or drop one here, or paste it into the box below. The photo is shown here only while this page is open: the Atlas reads words, so type who, where and when, and that is what is kept.</span>
           <div class="ms-photo-prev" id="ms-photo-prev" hidden></div>
+          <button type="button" class="ms-btn ms-pri" id="ms-photo-read" hidden>Read it with Claude</button>
         </div>
         <label class="ms-sr" for="ms-text">What to add</label>
         <textarea id="ms-text" class="ms-in ms-ta" rows="6" maxlength="60000"></textarea>
@@ -173,6 +189,14 @@ const BASE_ = u("/");
       <section class="ms-out" id="ms-out" aria-labelledby="ms-so-h" hidden>
         <h3 class="ms-h3" id="ms-so-h">The story so far</h3>
         <p class="ms-lede" id="ms-lede"></p>
+        <div class="ms-nav" id="ms-nav" role="navigation" aria-label="In this story">
+          <button type="button" data-go="ms-journey">The journey</button>
+          <button type="button" data-go="ms-stops-h">Place by place</button>
+          <button type="button" data-go="ms-names-sec">First names and surnames</button>
+          <button type="button" data-go="ms-tree-sec">The family</button>
+          <button type="button" data-go="ms-plan-h">What to do first</button>
+          <button type="button" data-go="ms-fam-h">Add to my research</button>
+        </div>
         <p class="ms-also" id="ms-also" hidden></p>
         <div id="ms-journey" hidden>
           <div id="ms-map" class="ms-map" role="img" aria-label="Map of the journey"></div>
@@ -186,14 +210,14 @@ const BASE_ = u("/");
           <div id="ms-moments" class="lf-moments"></div>
         </div>
         <div id="ms-rest" hidden>
-          <h3 class="ms-h3">Where to search, stop by stop</h3>
+          <h3 class="ms-h3" id="ms-stops-h">Place by place: who held the ground, and where to search</h3>
           <div id="ms-stops"></div>
+          <section id="ms-names-sec" hidden><h3 class="ms-h3">First names and surnames</h3><div id="ms-names"></div></section>
           <section id="ms-tree-sec" hidden><h3 class="ms-h3">The family</h3><div id="ms-tree"></div></section>
-          <section id="ms-names-sec" hidden><h3 class="ms-h3">Names to try</h3><div id="ms-names"></div></section>
-          <h3 class="ms-h3">Your plan</h3>
+          <h3 class="ms-h3" id="ms-plan-h">What to do first</h3>
           <div id="ms-plan"></div>
         </div>
-        <h3 class="ms-h3">Family research</h3>
+        <h3 class="ms-h3" id="ms-fam-h">Add to my research</h3>
         <div id="ms-fam"></div>
       </section>
 

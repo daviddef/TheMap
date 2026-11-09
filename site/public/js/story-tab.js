@@ -1,4 +1,5 @@
-/* MY STORY, the tab on My research: pick a story you have told, add the next piece to it (more writing, a pasted article or document, a photo's
+/* MY STORY, the tab on My research (it starts the way the map's «Who are you looking for?» drawer does: write, add pictures, read them with
+   Claude on request, try an example, and see at once what the Atlas understood; and its report has the same sections, with a row of buttons that jump to them): pick a story you have told, add the next piece to it (more writing, a pasted article or document, a photo's
    caption), and watch the Atlas build a bigger journey from everything so far. Every addition is kept in a dated log, newest first, with what
    it added: the places, people and years the Atlas found in it.
 
@@ -199,13 +200,13 @@
       if (!p.from) {
         $("ms-out").hidden = true; lastG = null;
         $("ms-lede").textContent = "The Atlas cannot see where they started yet. Add a piece that names the place, and the journey, the registers to search and the names to try appear here.";
-        $("ms-out").hidden = false; $("ms-journey").hidden = true; $("ms-rest").hidden = true; drawFamily(c, null); return;
+        $("ms-out").hidden = false; $("ms-journey").hidden = true; $("ms-rest").hidden = true; drawFamily(c, null); syncNav(); return;
       }
       return LD.gather(p).then(function (g) {
         if (my !== token) return;
         lastG = g; var f = g.facts;
         /* a story started without a name takes the person's, once the Atlas has read one */
-        if (s.name === "Untitled story" && f.name) { ST.rename(s.id, f.name + "'s story"); $("ms-name").textContent = f.name + "'s story"; drawPicker(current()); }
+        if (s.name === "Untitled story" && f.name) { ST.rename(s.id, f.name + "'s story"); $("ms-name").textContent = f.name + "'s story"; $("ms-add-to").textContent = f.name + "'s story"; drawPicker(current()); }
         $("ms-out").hidden = false; $("ms-journey").hidden = false; $("ms-rest").hidden = false;
         var bits = (f.route || []).filter(function (x) { return x.info; }).map(function (x, i) { return (i === 0 ? (x.role === "born" ? "born in " : "from ") : i === f.route.length - 1 ? "arriving in " : "then ") + x.info.name; });
         $("ms-lede").textContent = (f.name ? f.name + ": " : "") + (bits.length ? bits.join(", ") + "." : "") + "  Read from " + s.pieces.length + (s.pieces.length === 1 ? " piece." : " pieces, added over time.");
@@ -224,7 +225,7 @@
           if (st.not) { var n = make("p", null, "ms-not"); n.append(make("b", "Do not conclude: "), st.not); d.append(n); }
           plan.append(d);
         });
-        drawFamily(c, g);
+        drawFamily(c, g); syncNav();
       });
     }).catch(function () { say("The Atlas files did not load. Check your connection and open this tab again.", true); });
   }
@@ -278,9 +279,105 @@
     ensure().then(function () { makeJourney(); drawLog(c); drawReport(c); }).catch(function () { say("The Atlas files did not load. Check your connection and open this tab again.", true); });
   }
 
+  /* ---- the start: the same help the map's drawer gives ------------------------------------------------------------------- */
+  var firstFiles = [], firstTimer = null, firstParsed = null, EXAMPLE = "My great-grandfather Ivan Kosina came from Gallignana to Hamilton around 1905. All I have is this photo.";
+  function surnamesOf(p) {
+    var keys = []; ((p && p.people) || []).forEach(function (pe) { if (pe.surname && keys.indexOf(pe.surname) < 0) keys.push(pe.surname); });
+    if (p && p.surname && keys.indexOf(p.surname) < 0) keys.push(p.surname);
+    return keys;
+  }
+  function placeLabel(r) { var c = data.countries[r.cc], n = r.n.replace(/\s*\(([^)]*)\)/, function (m, x) { return S.fold(x) === S.fold(r.n.replace(/\s*\([^)]*\)/, "")) ? "" : m; }); return n + (c && S.fold(c) !== S.fold(n) ? ", " + c : ""); }
+  /* what the Atlas understood, as chips, as the reader types */
+  function drawFirstChips(p) {
+    var box = $("ms-first-chips"); box.textContent = ""; if (!p) return;
+    function chip(t, cls) { box.append(make("span", t, "ms-chip" + (cls ? " " + cls : ""))); }
+    if (p.teller) chip("you: " + p.teller);
+    if (p.rel) chip(p.rel.replace(/-/g, " "));
+    if (p.name) chip(p.name);
+    (p.people || []).forEach(function (pe) { if (pe.role !== "self" && pe.name && pe.name !== p.name) chip((pe.label || pe.role) + " " + pe.name); });
+    var stops = (p.stops && p.stops.length ? p.stops : [p.from && Object.assign({ role: "origin" }, p.from), p.to && Object.assign({ role: "move" }, p.to)].filter(Boolean)).filter(function (st) { return st.row && !notPlace(st, p); });
+    var ambiguous = false;
+    stops.forEach(function (st) {
+      var pre = st.role === "born" ? "born in " : st.role === "origin" ? "from " : st.role === "father-from" ? "his father from " : st.role === "mother-from" ? "his mother from " : st.age != null ? (st.approx ? "about age " : "age ") + st.age + ": " : st.role === "lived" ? "in " : "to ";
+      if (st.alts && st.alts.length) ambiguous = true;
+      var cls = st.role === "born" || st.role === "origin" ? "ms-chip-from" : "ms-chip-to";
+      if (st.alts && st.alts.length) {
+        /* another place has the name: the chip offers the next one by writing its country after the word, so the words say which place is meant */
+        var alt = st.alts[0], b = make("button", pre + placeLabel(st.row) + "  \u25be", "ms-chip " + cls); b.type = "button"; b.title = "Or " + placeLabel(alt) + ": press to use that one";
+        b.addEventListener("click", function () {
+          var ta = $("ms-first-text"), w = st.word, i = ta.value.toLowerCase().indexOf(String(w).toLowerCase());
+          if (i < 0) return;
+          ta.value = ta.value.slice(0, i + w.length) + ", " + (data.countries[alt.cc] || alt.cc) + ta.value.slice(i + w.length).replace(/^,\s*[^,.;]*(?=[.,;]|$)/, "");
+          runFirst();
+        });
+        box.append(b);
+      } else chip(pre + placeLabel(st.row), cls);
+    });
+    if (p.born) chip("born about " + p.born);
+    if (p.left) chip("about " + p.left);
+    if (!stops.length && $("ms-first-text").value.trim().length > 12) chip("Where did they start? Name the place", "ms-chip-warn");
+    if (firstFiles.length) chip(firstFiles.length + (firstFiles.length === 1 ? " picture" : " pictures") + ", kept here", "ms-chip-warn");
+    if (ambiguous) box.append(make("p", "More than one place has a name you wrote. Press the chip with an arrow to use the next one, or write the country after the name.", "ms-dim"));
+  }
+  function runFirst() {
+    var t = $("ms-first-text").value; $("ms-first-clear").hidden = !t.trim() && !firstFiles.length;
+    if (!t.trim() && !firstFiles.length) { firstParsed = null; drawFirstChips(null); return; }
+    ensure().then(function () { firstParsed = parse(t, firstFiles.length ? "photo" : null, null); drawFirstChips(firstParsed); }).catch(function () { say("The Atlas files did not load. Check your connection.", true); });
+  }
+  function drawFirstShots() {
+    var ul = $("ms-first-shots"); ul.textContent = "";
+    firstFiles.forEach(function (x, i) {
+      var li = make("li", null, "ms-shot"), im = make("img"), rm = make("button", "×"); im.src = x.url; im.alt = "Picture " + (i + 1) + " you added";
+      rm.type = "button"; rm.setAttribute("aria-label", "Remove picture " + (i + 1)); rm.addEventListener("click", function () { URL.revokeObjectURL(x.url); firstFiles.splice(i, 1); drawFirstShots(); runFirst(); });
+      li.append(im, rm); ul.append(li);
+    });
+    ul.hidden = !firstFiles.length;
+    $("ms-first-read").hidden = !firstFiles.length || firstFiles.every(function (x) { return x.r; });
+  }
+  function addFirstFiles(list) {
+    var ok = [].slice.call(list || []).filter(function (f) { return /^image\/(jpeg|png|webp)$/.test(f.type); }).slice(0, 4 - firstFiles.length);
+    if (!ok.length) return false;
+    ok.forEach(function (f) { firstFiles.push({ f: f, url: URL.createObjectURL(f) }); });
+    drawFirstShots(); runFirst(); return true;
+  }
+  /* both readers: load the two scripts, read each picture as a document (sent to Claude only on the press), and hand back what it says about the story's surnames */
+  function readWith(items, keys, say2) {
+    return Promise.all([window.raStoryPics ? null : loadScript("story-pics.js"), window.raStoryRead && window.raStoryRead.read ? null : loadScript("story-read.js")]).then(function () { return window.raStoryRead.read(items, keys, say2); });
+  }
+  function readFirst() {
+    var btn = $("ms-first-readbtn"), ta = $("ms-first-text"); if (!firstFiles.length) return;
+    btn.disabled = true;
+    readWith(firstFiles, surnamesOf(firstParsed), function (m) { say(m); }).then(function (res) {
+      var R = window.raStoryRead, base = R.stripBlocks(ta.value), blocks = [];
+      firstFiles.forEach(function (x, i) { if (x.r) blocks.push(R.block(i + 1, x.f.name || "picture", x.r)); });
+      ta.value = (base + (blocks.length ? "\n\n" + blocks.join("\n\n") : "")).slice(0, 6000);
+      var nf = firstFiles.filter(function (x) { return x.r && !x.r.found; }).length;
+      say(res.failed ? "Read " + res.got + " of " + firstFiles.length + ", then it stopped: " + (res.failed.message || "something went wrong.") + (typeof res.left === "number" ? " Reads left today: " + res.left + "." : "")
+        : "Read " + res.got + " picture" + (res.got === 1 ? "" : "s") + ". What they say is now in your story, where you can edit it." + (nf ? " " + nf + " had nobody with a matching surname on it." : "") + (typeof res.left === "number" ? " Reads left today: " + res.left + "." : ""), !!res.failed);
+      drawFirstShots(); runFirst();
+    }).catch(function (e) { say((e && e.message) || "The pictures could not be read.", true); }).then(function () { btn.disabled = false; });
+  }
+  /* a picture is kept in this browser under its piece (the drawer's Save does the same); items are {f, r?, shot?} */
+  function keepPicture(sid, pid, x) {
+    return (window.raStoryPics ? Promise.resolve() : loadScript("story-pics.js")).then(function () { return x.shot || window.raStoryPics.shrink(x.f); })
+      .then(function (shot) { return window.raStoryPics.put(sid + "/" + pid, shot.blob); }).then(null, function () { /* not kept: the words are */ });
+  }
+  function keepPictures(id, items) {
+    return Promise.all(items.map(function (x) {
+      var label = (x.r && x.r.label ? x.r.label + " (" + String(x.f.name || "").replace(/\.[a-z0-9]+$/i, "") + ")" : String(x.f.name || "Photo").replace(/\.[a-z0-9]+$/i, "")).slice(0, 80);
+      var pid = ST.addPiece(id, { kind: x.r ? "document" : "photo", label: label, text: "" });
+      return pid ? keepPicture(id, pid, x) : null;
+    }));
+  }
+  function syncNav() {
+    [].forEach.call(document.querySelectorAll("#ms-nav [data-go]"), function (b) {
+      var t = $(b.getAttribute("data-go")); b.hidden = !t || t.hidden || !(t.getClientRects && t.getClientRects().length);
+    });
+  }
+
   /* ---- adding ----------------------------------------------------------------------------------------------------------- */
   function resetComposer() {
-    $("ms-text").value = ""; $("ms-label").value = ""; photo = null; $("ms-photo-prev").textContent = ""; $("ms-photo-prev").hidden = true;
+    $("ms-text").value = ""; $("ms-label").value = ""; photo = null; $("ms-photo-prev").textContent = ""; $("ms-photo-prev").hidden = true; $("ms-photo-read").hidden = true;
   }
   function add() {
     var c = current(), s = c.story; if (!s) return;
@@ -291,10 +388,11 @@
     } else if (!text) { say("Type or paste something to add.", true); return; }
     var parts = text ? chunks(text) : [""];
     if (s.pieces.length + parts.length > 60) { say("A story holds up to 60 pieces. Start another story, or remove one first.", true); return; }
-    var ok = true;
+    var ok = true, keep = (kind === "photo" && photo && photo.f) ? { f: photo.f, shot: photo.item && photo.item.shot } : null;
     parts.forEach(function (t, i) {
       var l = label + (parts.length > 1 ? (label ? " " : "") + "(part " + (i + 1) + " of " + parts.length + ")" : "");
-      if (!ST.addPiece(s.id, { kind: kind, label: l, text: t })) ok = false;
+      var pid = ST.addPiece(s.id, { kind: kind, label: l, text: t });
+      if (!pid) ok = false; else if (i === 0 && keep) keepPicture(s.id, pid, keep).then(function () { refresh(); });
     });
     if (!ok) { say("This browser would not keep that. Storage may be full or blocked.", true); return; }
     resetComposer();
@@ -302,11 +400,14 @@
     refresh();
     var lg = $("ms-log-h"); if (lg) lg.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "nearest" });
   }
-  function newStory(name, text) {
+  function newStory(name, text, items) {
     var id = ST.create({ name: name, text: text });
     if (!id) { say("This browser would not keep the story. Storage may be full or blocked.", true); return; }
     lsSet(CUR, id); kind = "story"; say("Story started. Add the next piece whenever you find it.");
+    if (firstParsed && firstParsed.born != null) ST.setBorn(id, firstParsed.born);
+    if (items && items.length) keepPictures(id, items).then(function () { refresh(); });
     refresh();
+    return id;
   }
 
   function wire() {
@@ -314,8 +415,9 @@
     $("ms-new").addEventListener("click", function () { lsSet(CUR, ""); $("ms-bar").hidden = true; $("ms-view").hidden = true; $("ms-first").hidden = false; $("ms-first-name").focus(); });
     $("ms-first-go").addEventListener("click", function () {
       var t = $("ms-first-text").value.trim(); if (!t) { say("Tell the first part of the story, even a sentence.", true); return; }
-      newStory($("ms-first-name").value.trim(), t);
-      $("ms-first-text").value = ""; $("ms-first-name").value = "";
+      var items = firstFiles.slice(); firstFiles = [];
+      newStory($("ms-first-name").value.trim(), t.slice(0, 5800), items);
+      $("ms-first-text").value = ""; $("ms-first-name").value = ""; $("ms-first-chips").textContent = ""; firstParsed = null; drawFirstShots(); $("ms-first-clear").hidden = true;
     });
     $("ms-rename").addEventListener("click", function () {
       var c = current(); if (!c.story) return;
@@ -333,13 +435,22 @@
     });
     [].forEach.call(root.querySelectorAll(".ms-kind"), function (b) { b.addEventListener("click", function () { kind = b.getAttribute("data-kind"); drawComposer(current()); $("ms-text").focus(); }); });
     $("ms-add").addEventListener("click", add);
+    $("ms-photo-read").addEventListener("click", function () {
+      var c = current(); if (!photo || !photo.f || !c.story) return;
+      var btn = $("ms-photo-read"), ta = $("ms-text"), item = photo.item || (photo.item = { f: photo.f }); btn.disabled = true;
+      ensure().then(function () { return readWith([item], surnamesOf(parse(ST.textOf(c.story, true), ST.holdsOf(c.story), c.story.born)), function (m) { say(m); }); }).then(function (res) {
+        var R = window.raStoryRead; if (item.r) { ta.value = (R.stripBlocks(ta.value) + "\n\n" + R.block(1, photo.name, item.r)).trim().slice(0, 6000); if (item.r.label && !$("ms-label").value) $("ms-label").value = item.r.label.slice(0, 80); }
+        say(res.failed ? (res.failed.message || "The picture could not be read.") + (typeof res.left === "number" ? " Reads left today: " + res.left + "." : "") : "Read. What it says is in the box below, where you can edit it; then press Add." + (item.r && !item.r.found ? " Nobody on it had a surname matching the story." : "") + (typeof res.left === "number" ? " Reads left today: " + res.left + "." : ""), !!res.failed);
+      }).catch(function (e) { say((e && e.message) || "The picture could not be read.", true); }).then(function () { btn.disabled = false; });
+    });
     /* a photo: chosen, dropped or pasted. Shown here for this visit only; the caption is what is kept. */
     function takePhoto(files) {
       var f = [].slice.call(files || []).filter(function (x) { return /^image\/(jpeg|png|webp|gif)$/.test(x.type); })[0]; if (!f) return false;
       if (photo && photo.url) URL.revokeObjectURL(photo.url);
-      photo = { name: f.name || "Photo", url: URL.createObjectURL(f) };
+      photo = { name: f.name || "Photo", url: URL.createObjectURL(f), f: f };
       kind = "photo"; drawComposer(current());
-      var prev = $("ms-photo-prev"); prev.textContent = ""; var im = make("img"); im.src = photo.url; im.alt = "The photo you are adding"; prev.append(im, make("span", "Shown here only while this page is open. Only the words you type are kept.", "ms-dim")); prev.hidden = false;
+      var prev = $("ms-photo-prev"); prev.textContent = ""; var im = make("img"); im.src = photo.url; im.alt = "The photo you are adding"; prev.append(im, make("span", "Nothing leaves this browser unless you press Read it with Claude. The picture is kept here only, beside what you add.", "ms-dim")); prev.hidden = false;
+      $("ms-photo-read").hidden = false;
       return true;
     }
     $("ms-file").addEventListener("change", function () { takePhoto($("ms-file").files); $("ms-file").value = ""; });
@@ -353,7 +464,24 @@
     window.addEventListener("storage", function (e) { if (e.key === ST.KEY && !root.hidden) refresh(); });
   }
 
-  wire();
+  function wireFirst() {
+    var ta = $("ms-first-text"), drop = $("ms-first-drop");
+    ta.addEventListener("input", function () { clearTimeout(firstTimer); firstTimer = setTimeout(runFirst, 650); });
+    $("ms-first-eg").addEventListener("click", function () { ta.value = EXAMPLE; runFirst(); });
+    $("ms-first-clear").addEventListener("click", function () { firstFiles.forEach(function (x) { URL.revokeObjectURL(x.url); }); firstFiles = []; ta.value = ""; drawFirstShots(); runFirst(); ta.focus(); });
+    $("ms-first-file").addEventListener("change", function () { addFirstFiles($("ms-first-file").files); $("ms-first-file").value = ""; });
+    $("ms-first-readbtn").addEventListener("click", readFirst);
+    ["dragenter", "dragover"].forEach(function (t) { drop.addEventListener(t, function (e) { e.preventDefault(); drop.classList.add("ms-hot"); }); });
+    ["dragleave", "drop"].forEach(function (t) { drop.addEventListener(t, function () { drop.classList.remove("ms-hot"); }); });
+    drop.addEventListener("drop", function (e) { e.preventDefault(); addFirstFiles(e.dataTransfer && e.dataTransfer.files); });
+    ta.addEventListener("paste", function (e) { var fs = e.clipboardData && e.clipboardData.files; if (fs && fs.length && addFirstFiles(fs)) e.preventDefault(); });
+    window.addEventListener("beforeunload", function () { firstFiles.forEach(function (x) { URL.revokeObjectURL(x.url); }); });
+    /* the row of buttons at the top of the report jumps to its sections */
+    [].forEach.call(document.querySelectorAll("#ms-nav [data-go]"), function (b) {
+      b.addEventListener("click", function () { var t = $(b.getAttribute("data-go")); if (t) t.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }); });
+    });
+  }
+  wire(); wireFirst();
   window.raStoryTab = { show: function () { active = true; refresh(); }, newStory: newStory, current: current };
   /* a story saved from the home page names itself in the address: #story/<id> */
   var m = /^#story(?:\/([a-z0-9]+))?$/.exec(location.hash || "");

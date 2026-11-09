@@ -281,10 +281,11 @@ import LineSwitcher from "../components/LineSwitcher.astro";
           sits beside the brand (.ra-live-top) and the family is in the drawer. */}
       <span class="ra-grp">
         {marksHere ? <LineSwitcher compact /> : <LineSwitcher compact linkOnly />}
-        <a class="ra-live ra-live-grp" href={u("/backup/")} data-state="local" role="status" aria-live="polite" title="Connection &amp; Backup">
+      </span>
+      {/* THE SAVE BUTTON JOINS READ AND CONTRAST (theme.js appends those two after it). David: «save should sit with the other 2 icons». */}
+      <a class="ra-live ra-live-grp" href={u("/backup/")} data-state="local" role="status" aria-live="polite" title="Connection &amp; Backup">
           <svg class="ra-live-i" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 3h11l4 4v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8 3v5h7V3M7 21v-7h10v7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span class="ra-live-dot" aria-hidden="true"></span><span class="ra-live-t">Local</span><span class="ra-live-w" hidden><svg viewBox="0 0 16 16" width="14" height="14" role="img" aria-label="Warning: not backed up for over a day"><path d="M8 1.6 15 14H1z" fill="#e8a200" stroke="#8a5a00" stroke-width="1" stroke-linejoin="round"/><path d="M8 6v4" stroke="#3b2600" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="12" r=".95" fill="#3b2600"/></svg></span>
         </a>
-      </span>
       {/* ADD SOURCE MOVED INTO THE ABOUT MENU, UNDER THE SOURCES. David: «move the "add source" work to the About menu under the sources, let's
           save the real estate.» It is a once-in-a-while action, and the header bar is the one place on every page that cannot spare a pill. */}
     </nav>

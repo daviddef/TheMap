@@ -1618,3 +1618,27 @@ header.site .ra-grp .ra-live-grp{padding:0;border-left:0;align-self:center}
 @media (max-width:760px){header.site .ra-live{width:34px;height:34px}}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) header.site .ra-live{--lv-ink:#f4b878}:root:not([data-theme="light"]) header.site .ra-live[data-state="online"]{--lv-ink:#7fdca4}:root:not([data-theme="light"]) header.site .ra-live[data-state="offline"]{--lv-ink:#f19a8f}}
 :root[data-theme="dark"] header.site .ra-live{--lv-ink:#f4b878}:root[data-theme="dark"] header.site .ra-live[data-state="online"]{--lv-ink:#7fdca4}:root[data-theme="dark"] header.site .ra-live[data-state="offline"]{--lv-ink:#f19a8f}
+
+/* THE VOLUME COUNT AS AN ICON, with Read, Contrast and the save button. David: «turn our volume count pill to an icon as well, and it pulses if we
+   have anything new on the atlas, or pulses when volumes increase». A round 38px button of books; the count is in its tooltip and the top line of
+   what opens. Plain until there is news (a What's new line not yet seen, or more volumes than last time), then a teal wash and a pulse. */
+header.site .ra-inv{margin:0;position:relative;display:inline-block}
+header.site .ra-inv-ico{list-style:none;display:grid;place-items:center;width:38px;height:38px;box-sizing:border-box;padding:0;border-radius:50%;border:1px solid var(--rule-strong,var(--rule,#ccc));background:var(--panel,transparent);color:var(--ink,#222);cursor:pointer}
+header.site .ra-inv-ico::-webkit-details-marker{display:none}
+header.site .ra-inv-ico::after{content:none!important}
+header.site .ra-inv-ico:hover,header.site .ra-inv[open] .ra-inv-ico{border-color:var(--accent,#1f5c6b);color:var(--accent,#1f5c6b)}
+header.site .ra-inv-ico:focus-visible{outline:3px solid var(--accent,#1f5c6b);outline-offset:2px}
+header.site .ra-inv-t{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+header.site .ra-inv.fresh .ra-inv-ico{border-color:var(--accent,#1f5c6b);background:var(--accent-wash,rgba(31,92,107,.14));color:var(--accent,#1f5c6b);animation:ra-inv-pulse 2.4s ease-out infinite}
+@keyframes ra-inv-pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent,#1f5c6b) 50%,transparent)}70%,100%{box-shadow:0 0 0 8px color-mix(in srgb,var(--accent,#1f5c6b) 0%,transparent)}}
+@media (prefers-reduced-motion:reduce){header.site .ra-inv.fresh .ra-inv-ico{animation:none}}
+header.site nav .ra-inv{margin-left:10px}
+header.site nav .ra-inv.in-nav .ra-inv-grid{left:auto;right:-132px}
+header.site nav .ra-live-grp{margin-left:8px}
+.ra-inv-top{margin:0 0 10px;font:400 13px/1.4 var(--sans,system-ui);color:var(--ink-2,#555)}
+.ra-inv-top b{color:var(--ink,#222)}
+.ra-inv-top a{color:var(--accent,#1f5c6b)}
+.ra-inv-new{color:var(--accent,#1f5c6b);font-weight:600}
+@media (max-width:760px){header.site .ra-inv-ico{width:34px;height:34px}}
+/* on a narrow screen the two icons ride to the right, beside the menu button */
+@media (max-width:1180px){header.site .ra-inv{margin-left:auto}header.site .ra-live-top{margin-left:0}}

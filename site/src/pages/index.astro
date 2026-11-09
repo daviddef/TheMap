@@ -132,9 +132,10 @@ const inventoryRows = [
       h1 stays for screen readers and search engines, and is only hidden. (Earlier notes on this row: the page is a tool, not an
       article, so nothing between the header and the search box.) */}
   <h1 class="ra-sr">Where the records are</h1>
-  <details class="ra-inv" slot="inv" id="ra-inv">
-    <summary class="k-tag is-new" aria-label={volumes.toLocaleString() + " volumes: what the atlas holds"}><span class="inv-full">{(volumes / 1e6).toFixed(2)}M</span><span class="inv-short" aria-hidden="true">{(volumes / 1e6).toFixed(2)}M</span></summary>
+  <details class="ra-inv" slot="inv" id="ra-inv" data-volumes={volumes}>
+    <summary class="ra-inv-ico" aria-label={volumes.toLocaleString() + " volumes: what the atlas holds"} title={(volumes / 1e6).toFixed(2) + "M volumes: what the Atlas holds"}><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path d="M4 4h4v16H4zM10 4h4v16h-4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M16.3 5.7l3.7-.9 3 14.4-3.7.9z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span class="ra-inv-t">{(volumes / 1e6).toFixed(2)}M volumes</span></summary>
     <div class="ra-inv-grid">
+      <p class="ra-inv-top"><b>{volumes.toLocaleString()} volumes</b> in the Atlas<span class="ra-inv-new" hidden></span> · <a href={u("/whats-new/")}>What's new</a></p>
       {inventoryRows.map(([head, items]) => (
         <>
           <p class="ra-inv-h">{head}</p>
@@ -156,11 +157,31 @@ const inventoryRows = [
       if (!pill || !mq) return;
       var home = pill.parentNode, next = pill.nextSibling;
       function place() {
-        var live = document.querySelector(".ra-grp .ra-live-grp");
-        if (mq.matches && live) { live.parentNode.insertBefore(pill, live); pill.classList.add("in-grp"); }
-        else { home.insertBefore(pill, next); pill.classList.remove("in-grp"); }
+        var live = document.querySelector("nav .ra-live-grp");
+        if (mq.matches && live) { live.parentNode.insertBefore(pill, live); pill.classList.add("in-nav"); }
+        else { home.insertBefore(pill, next); pill.classList.remove("in-nav"); }
       }
       place(); if (mq.addEventListener) mq.addEventListener("change", place);
+      /* IT PULSES WHEN THERE IS SOMETHING NEW. Two things count: a What's new line this browser has not looked at (the same test as the
+         About dot: newer than ra-news-seen, written in the last fortnight), and a larger volume count than the last time the inventory was
+         opened here (ra-vols-seen). Opening the inventory takes the volume pulse off; visiting What's new takes the other off. Both are
+         per-browser conveniences, so blocked storage just means no pulse. */
+      var vols = Number(pill.getAttribute("data-volumes")) || 0, sum = pill.querySelector("summary"), note = pill.querySelector(".ra-inv-new");
+      function get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+      function put(k, v) { try { localStorage.setItem(k, String(v)); } catch (e) { /* storage blocked */ } }
+      var nav = document.querySelector("nav.topnav"), latest = (nav && nav.getAttribute("data-latest")) || "", seen = get("ra-news-seen") || "";
+      var stamp = Date.parse(latest + "T23:59:59"), news = !!stamp && latest > seen && Date.now() - stamp < 14 * 864e5 && !/\/whats-new\/?$/.test(location.pathname);
+      var before = Number(get("ra-vols-seen")), grew = before > 0 && vols > before ? vols - before : 0;
+      if (!before) put("ra-vols-seen", vols);
+      var why = [];
+      if (grew) why.push("the Atlas has " + grew.toLocaleString() + " more volumes than when you last looked");
+      if (news) why.push("there is something new in What's new");
+      if (why.length) {
+        pill.classList.add("fresh");
+        if (sum) sum.title = (vols / 1e6).toFixed(2) + "M volumes. New: " + why.join("; ") + ".";
+        if (note) { note.textContent = " \u00b7 new: " + why.join("; "); note.hidden = false; }
+      }
+      pill.addEventListener("toggle", function () { if (pill.open && vols) { put("ra-vols-seen", vols); if (!news) pill.classList.remove("fresh"); } });
     })();
   </script>
 

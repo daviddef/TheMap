@@ -135,6 +135,7 @@
       if (p.teller) chips.append(chip("you: " + p.teller, "", "teller:" + p.teller));
       if (p.rel) chips.append(chip(p.rel.replace(/-/g, " "), "", "rel:" + p.rel));
       if (p.name) chips.append(chip(p.name, "", "nm:" + p.name));
+      if (p.occupations && p.occupations.length) chips.append(chip("work: " + p.occupations.join(", "), "", "oc:" + p.occupations.join()));
       if (p.people) p.people.forEach(function (pe) {
         if (p.noRoute || p.sought) { if (pe.role !== "self") chips.append(chip((pe.label || pe.role) + (pe.name ? " " + pe.name : ""), "", "pe:" + pe.key + pe.name)); }
         else if (pe.role !== "self" && pe.name) chips.append(chip("his " + (pe.label || pe.role) + " " + pe.name, "", "pe:" + pe.role + pe.name));

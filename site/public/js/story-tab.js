@@ -294,6 +294,7 @@
     if (p.teller) chip("you: " + p.teller);
     if (p.rel) chip(p.rel.replace(/-/g, " "));
     if (p.name) chip(p.name);
+    if (p.occupations && p.occupations.length) chip("work: " + p.occupations.join(", "));
     (p.people || []).forEach(function (pe) { if (pe.role !== "self" && pe.name && pe.name !== p.name) chip((pe.label || pe.role) + " " + pe.name); });
     var stops = (p.stops && p.stops.length ? p.stops : [p.from && Object.assign({ role: "origin" }, p.from), p.to && Object.assign({ role: "move" }, p.to)].filter(Boolean)).filter(function (st) { return st.row && !notPlace(st, p); });
     var ambiguous = false;

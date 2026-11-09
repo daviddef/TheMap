@@ -107,7 +107,7 @@ const BASE_ = u("/");
     <button type="button" class="rs-tab" role="tab" id="mr-t-families" aria-controls="mr-p-families" aria-selected="true">Families &amp; places</button>
     <button type="button" class="rs-tab" role="tab" id="mr-t-story" aria-controls="mr-p-story" aria-selected="false" tabindex="-1">My story</button>
     <button type="button" class="rs-tab" role="tab" id="mr-t-fixes" aria-controls="mr-p-fixes" aria-selected="false" tabindex="-1">GEDCOM to fix <span class="rs-n" id="mr-n-fixes" hidden></span></button>
-    <button type="button" class="rs-tab" role="tab" id="mr-t-sessions" aria-controls="mr-p-sessions" aria-selected="false" tabindex="-1">Family sessions</button>
+    <button type="button" class="rs-tab" role="tab" id="mr-t-sessions" aria-controls="mr-p-sessions" aria-selected="false" tabindex="-1">Other names</button>
   </div>
 
   <div class="rs-panel mr-panel" id="mr-p-families" role="tabpanel" aria-labelledby="mr-t-families">
@@ -222,29 +222,52 @@ const BASE_ = u("/");
       script can write to this page: it reads a store in this browser. So the
       work arrives only when somebody runs the importer and imports the file,
       and until this said so there was no way to know that from here. */}
+  {/* OTHER NAMES IN THIS SESSION. A research session is one family archive (Defranceschi, Mazza, Falco…); the families it records are the names
+      it researches. This lists, for the family being viewed, every other name filed under the same session, so one click moves to it. Drawn
+      below by the sessions script from raProgress.lines(); it used to be three paragraphs about how the published file is merged. */}
   <div class="rs-panel mr-panel" id="mr-p-sessions" role="tabpanel" aria-labelledby="mr-t-sessions" hidden>
-  <section class="mrext" style="border-left-color:var(--brass)">
-    <div class="lab">Work done by the family-research sessions</div>
-    <p class="cap">The Blažević, Defranceski, Falco, Lerena, Booyzen, D'Arcy,
-    Mazza and Luwinski sessions record what they search — the volume, the pages,
-    and which family each row is about — into their own archives.
-    <b>Their families are already in the switcher above.</b> This page reads
-    what they have published and folds it in when you arrive, so Kalanj, Kosina,
-    Žubrinić, Pilipić and the rest are there to pick without importing
-    anything.</p>
-    <p class="cap">It is <b>merged, never imposed</b>: a family you do not have
-    is added, page ranges are unioned, and nothing you have marked yourself is
-    overwritten. Add to their work and your additions stay yours. A family you
-    delete here stays deleted — the fold happens once per published update, not
-    once per visit.</p>
-    <p class="cap">The published file is rebuilt from the archives by
-    <code>scripts/import-research-sessions.py</code>, so work a session did
-    after the last build arrives with the next one. <b>Import a file</b> above
-    still takes a hand-made file if you ever need it.</p>
-  </section>
-
+    <div id="mr-sess"></div>
   </div>
 
+
+  <script is:inline>
+    (function () {
+      var P = window.raProgress, host = document.getElementById("mr-sess");
+      if (!P || !host) return;
+      function el(t, c, x) { var e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; }
+      function short(a) { return String(a.name || a.id).replace(/^The /, "").replace(/ Archive$/, ""); }
+      function draw() {
+        var lines = P.lines(), me = lines.filter(function (l) { return l.active; })[0];
+        host.textContent = "";
+        var box = el("section", "mrsess");
+        if (!me) { box.append(el("p", "mrsess-p", "Choose a family above to see the other names researched alongside it.")); host.append(box); return; }
+        var ar = me.archives || [];
+        if (!ar.length) {
+          box.append(el("h2", "mrsess-h", "Other names in this session"));
+          box.append(el("p", "mrsess-p", me.name + " was started by you, so it is not part of a family research session. When a session researches it, the names researched with it will be listed here."));
+          host.append(box); return;
+        }
+        ar.forEach(function (a) {
+          var sec = el("div", "mrsess-g"), h = el("h2", "mrsess-h", "Other names in the " + short(a) + " session");
+          var open = el("a", "mrsess-open", "Open the " + short(a) + " archive \u2197"); open.href = a.url; open.target = "_blank"; open.rel = "noopener";
+          sec.append(h, open);
+          var others = lines.filter(function (l) { return l.slug !== me.slug && (l.archives || []).some(function (x) { return x.id === a.id; }); });
+          if (!others.length) { sec.append(el("p", "mrsess-p", "No other names are filed under this session yet.")); box.append(sec); return; }
+          sec.append(el("p", "mrsess-p", others.length + (others.length === 1 ? " other name" : " other names") + " researched in this session. Choose one to see its research."));
+          var ul = el("ul", "mrsess-l");
+          others.forEach(function (l) {
+            var li = el("li"), b = el("button", "mrsess-b"); b.type = "button";
+            b.append(el("b", "", l.name + (l.where ? " of " + l.where : "")), el("small", "", l.marks ? l.marks + (l.marks === 1 ? " mark" : " marks") : "no marks yet"));
+            b.addEventListener("click", function () { P.setActive(l.slug); document.dispatchEvent(new CustomEvent("ra-progress-changed")); window.scrollTo({ top: 0, behavior: "smooth" }); });
+            li.append(b); ul.append(li);
+          });
+          sec.append(ul); box.append(sec);
+        });
+        host.append(box);
+      }
+      draw(); document.addEventListener("ra-progress-changed", draw); window.addEventListener("storage", draw);
+    })();
+  </script>
 
   <script is:inline define:vars={{ BASE: u("/") }}>
     /* TABS AND THE GEDCOM-TO-FIX PANEL. Reads ra-gedcom-fixes-v1 (written by Roots & Routes while "Remember my decisions" is on; see

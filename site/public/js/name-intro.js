@@ -77,7 +77,7 @@
     if (m.lang) s.push(row.n + " is filed as " + (/^[aeiou]/i.test(m.lang.langs[0]) ? "an " : "a ") + joinWords(m.lang.langs) + " surname. A name's language is not where a family is from.");
     if (where.length) {
       var bits = where.slice(0, 4).map(function (w) { return w.name + (w.n != null ? " (" + w.n.toLocaleString("en-US") + ")" : ""); });
-      s.push("The registers held here count it in " + joinWords(bits) + (where.length > 4 ? " and " + (where.length - 4) + " more" : "") + ". That is people counted in those registers, not how common the name is.");
+      s.push("The registers held here count it in " + (where.length > 4 ? bits.join(", ") + " and " + (where.length - 4) + " more, all listed below" : joinWords(bits)) + ". That is people counted in those registers, not how common the name is.");
     }
     if (m.lead) s.push("The atlas's own data leans to " + m.lead.name + " as where it began" + (m.lead.since ? ", with the earliest record held from the " + decade(m.lead.since) : "") + ". That is a lead, not a finding.");
     m.lede = s.join(" ");
@@ -103,7 +103,7 @@
     if (m.lede) root.append(el("p", "ni-p", m.lede));
     if (m.where.length) {
       var ul = el("ul", "ni-where");
-      m.where.slice(0, 8).forEach(function (w) { ul.append(el("li", "", w.name + (w.n != null ? " " + w.n.toLocaleString("en-US") : ""))); });
+      m.where.forEach(function (w) { ul.append(el("li", "", w.name + (w.n != null ? " " + w.n.toLocaleString("en-US") : ""))); });
       root.append(ul);
     }
     m.flags.forEach(function (c, i) {

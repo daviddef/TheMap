@@ -29,7 +29,9 @@ self.onmessage = async e => {
       session.liveMode = m.hide ? 'redact' : 'show';
       self.postMessage({ type: 'done', first: false, ...(await session.draw()) });
     } else if (m.cmd === 'checklist' && session) {
-      self.postMessage({ type: 'checklist', ...session.checklist({ living: m.living, ancestry: m.ancestry }) });
+      /* asked for in the background as soon as a file loads, so a problem in it must not take the whole page down */
+      try { self.postMessage({ type: 'checklist', ...session.checklist({ living: m.living, ancestry: m.ancestry }) }); }
+      catch (err) { self.postMessage({ type: 'checklist-failed', msg: String(err && err.message || err), stack: String(err && err.stack || '') }); }
     } else if (m.cmd === 'offer' && session) {
       self.postMessage({ type: 'offer', ...session.contributions() });
     } else if (m.cmd === 'suggest' && session) {

@@ -47,7 +47,7 @@ export function makeEnricher(env) {
     const wl = []; if (ap) wl.push({ t: 'the place in the Atlas', u: '/place/' + ap[0] + '/' }); wl.push(...countryLinks(cc));
     res.push({ k: 'Place', t: where + (ap ? '' : ' (the Atlas has not surveyed this one)'), l: wl });
     if (ap) {
-      const other = [...ap[5].filter(n => norm(n) !== norm(ap[1])), ...ap[8].map(([f, to, n]) => n + ' (' + (f && to ? f + '–' + to : f ? 'from ' + f : 'until ' + to) + ')')];
+      const other = [...(ap[5] || []).filter(n => norm(n) !== norm(ap[1])), ...(ap[8] || []).map(([f, to, n]) => n + ' (' + (f && to ? f + '–' + to : f ? 'from ' + f : 'until ' + to) + ')')];
       if (other.length) res.push({ k: 'Also written', t: list(other, 8) }); else gaps.push('other names');
     } else gaps.push('a place page', 'other names');
     const ys = years.filter(Boolean).sort((a, b) => a - b), lo = ys[0], hi = ys[ys.length - 1];

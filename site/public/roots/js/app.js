@@ -39,6 +39,7 @@ function start(bytes, name) {
     else if (m.type === 'offer') offer(m);
     else if (m.type === 'who') mhWho(m);
     else if (m.type === 'checklist') fixlist(m);
+    else if (m.type === 'checklist-failed') { if (window.console) console.error('fix list', m.msg, m.stack); if (!document.getElementById('p-fix').hidden) $('#fsecs').textContent = 'The fix list could not be made for this file: ' + m.msg; }
     else if (m.type === 'suggested') suggested(m);
     else if (m.type === 'found') found(m);
     else if (m.type === 'person') person(m.info);
@@ -54,7 +55,7 @@ function done(m) {
   const stale = !m.build || m.build.pipeline !== BUILD || m.build.model !== BUILD; $('#stale').hidden = !stale;
   last = m; window.RR = { tree: m.tree, atlas: m.atlas }; anc = m.anc || null; ancStatus(); mhFile = m.mh || null; applyTreeLink();
   const keepTab = $('.tabs [aria-selected=true]')?.dataset.tab || 'tree';
-  show('work'); chips(m); mountViewer(); report(m); review(m); workbench(m.wb); worker.postMessage({ cmd: 'offer' });
+  show('work'); chips(m); mountViewer(); report(m); review(m); workbench(m.wb); worker.postMessage({ cmd: 'offer' }); askFix();
   tab(m.first ? 'tree' : keepTab);
 }
 
@@ -469,14 +470,14 @@ if (mhc) mhStatus();
 
 function fixRow(s, i) {
   const row = el('div', 'frow'), cb = el('input'); cb.type = 'checkbox'; cb.checked = ticked.has(i.key); cb.setAttribute('aria-label', 'Done'); row.classList.toggle('done', cb.checked);
-  cb.onchange = () => { cb.checked ? ticked.add(i.key) : ticked.delete(i.key); dec.put(i.key, 'd', cb.checked); row.classList.toggle('done', cb.checked); fixCount(s); };
+  cb.onchange = () => { cb.checked ? ticked.add(i.key) : ticked.delete(i.key); dec.put(i.key, 'd', cb.checked); row.classList.toggle('done', cb.checked); fixCount(s); decStatus(0); keepSummary(); };
   const body = el('div', 'fbody'), head = el('div', 'fhead'), note = el('div', 'fnote');
   /* a copy button that SAYS which text it copies: two bare icons side by side could not be told apart */
   const cpL = (label, title, txt) => { const b = el('button', 'cand'); b.type = 'button'; b.innerHTML = IC.copy + '<span></span>'; b.lastChild.textContent = label; b.title = title; b.setAttribute('aria-label', title); b.onclick = function () { copy(txt, this); }; return b; };
   const evs = n => n + ' event' + (n === 1 ? '' : 's');
   if (s.key === 'places' || s.key === 'check') {
     const swap = el('span', 'swap'); swap.append(el('span', 'was', i.raw), el('span', 'arrow', '→'), el('b', 'now', i.to));
-    const acts = el('span', 'acts'); acts.append(cpL('Copy new', 'Copy the new text, the one in bold: ' + i.to, i.to), cpL('Copy old', 'Copy the old text, the crossed-out one, to search for it in MyHeritage: ' + i.raw, i.raw));
+    const acts = el('span', 'acts'); acts.append(cpL('New', 'Copy the new text, the one in bold: ' + i.to, i.to), cpL('Old', 'Copy the old text, the crossed-out one, to search for it in MyHeritage: ' + i.raw, i.raw));
     head.append(swap, acts);
     if (s.key === 'check') note.textContent = 'Suggestion only: ' + i.why;
     body.append(head); if (note.textContent) body.append(note); body.append(el('div', 'fcount', evs(i.count)), plist(i.people, i.count));
@@ -515,7 +516,13 @@ function fixRow(s, i) {
   }
   row.append(cb, body); return row;
 }
-function fixCount(s) { const n = $('#fc-' + s.key); if (n) n.textContent = s.items.filter(i => ticked.has(i.key)).length + ' of ' + s.items.length + ' done'; }
+function fixCount(s) { const n = $('#fc-' + s.key); if (n) n.textContent = s.items.filter(i => ticked.has(i.key)).length + ' of ' + s.items.length + ' done'; fixTab(); }
+/* the number on the Fix list tab: what is still to do, not counting what is ticked or left as is */
+function fixTab() {
+  const c = $('#fxcount'); if (!c) return;
+  const n = fix ? fix.sections.reduce((t, s) => t + s.items.filter(i => !asIs.has(i.key) && !ticked.has(i.key)).length, 0) : 0;
+  c.textContent = n ? n0(n) : ''; c.title = n ? n0(n) + ' fixes left to do' : '';
+}
 const hay = (s, i) => (s.key === 'names' ? i.name + ' ' + i.kin : s.key === 'dupes' ? i.an + ' ' + i.bn : s.key === 'apart' ? i.people.map(p => p.name).join(' ') : (i.raw || '') + ' ' + (i.name || '') + ' ' + (i.country ? i.country + ' ' + i.label : '') + ' ' + (i.reasons ? i.reasons.map(r => r.text).join(' ') : '') + ' ' + (i.people ? i.people.map(p => p.name).join(' ') : '')).toLowerCase();
 function drawFix() {
   if (!fix) return; keepSummary(); const q = $('#ffilter').value.trim().toLowerCase(), box = $('#fsecs'); box.textContent = '';
@@ -552,13 +559,14 @@ function restoreDecisions(m) {
 }
 function decStatus(restored) {
   const on = $('#dec-on'); if (!on) return;
+  $('#dec-said').classList.toggle('saved', dec.isOn() && dec.available());
   on.checked = dec.isOn(); on.disabled = !dec.available();
   const kept = dec.count();
   $('#dec-said').textContent = !dec.available() ? 'This browser has no storage for it (a private window?). Save the decisions to a file instead.'
     : (restored ? restored + ' earlier decision' + (restored === 1 ? '' : 's') + ' re-applied. ' : '')
-      + (dec.isOn() ? kept + ' kept on this device.' : kept ? kept + ' loaded from a file are stored on this device; turn this on to keep new ones too.' : 'Not kept: ticks and "left as is" are lost when you close the page.');
+      + (dec.isOn() ? '\u2713 Saved on this device: ' + kept + (kept === 1 ? ' decision' : ' decisions') + ', and the Fix list is summarised in My research.' : kept ? kept + ' loaded from a file are stored on this device; turn this on to keep new ones too.' : 'Not kept: ticks and "left as is" are lost when you close the page.');
 }
-function fixlist(m) { fix = m; const n = restoreDecisions(m); drawFix(); decStatus(n); }
+function fixlist(m) { fix = m; const n = restoreDecisions(m); drawFix(); decStatus(n); fixTab(); }
 /* While the switch is on, a readable summary of this fix list is kept for My research (see decisions.js). Debounced: drawFix runs on every tick. */
 let sumTimer = 0;
 function keepSummary() { clearTimeout(sumTimer); sumTimer = setTimeout(() => { if (fix && curName && dec.isOn()) fixes.put(summarise(fix, asIs, ticked, curName)); }, 400); }
@@ -615,7 +623,7 @@ $('#fcsv').onclick = () => fix && saveAs('fix-list.csv', '\ufeff' + checklistCsv
 /* ---------- files kept on this device (opt-in, see recent.js) ---------- */
 const mb = n => (n >= 1e6 ? (n / 1e6).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1e3)) + ' KB');
 async function refreshRecent() {
-  const items = await recent.list(), box = $('#recent'), ul = $('#rlist'); ul.textContent = ''; box.hidden = !items.length;
+  const items = await recent.list(), box = $('#recent'), ul = $('#recentlist'); ul.textContent = ''; box.hidden = !items.length;
   for (const f of items) {
     const li = el('li', 'rf'), open = el('button', 'btn', 'Open'), when = new Date(f.saved).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
     open.onclick = async () => { const r = await recent.recall(f.id); if (r) start(r.bytes, r.name); else refreshRecent(); };

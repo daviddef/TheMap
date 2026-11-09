@@ -38,10 +38,10 @@ const { quiet = false, compact = false, linkOnly = false } = Astro.props;
 const uid = compact ? "ra-lines-c" : "ra-lines";
 import { u } from "../lib/url.js";
 ---
-{linkOnly ? <div class="ra-lines ra-lines-c ra-lines-lo"><a class="ra-lines-l" href={u("/my-research/")}>Researching</a></div> :
+{linkOnly ? <div class="ra-lines ra-lines-c ra-lines-lo"><a class="ra-lines-l" href={u("/my-research/")} title="My research: your families, the books you have marked, your stories"><svg class="ra-lines-i" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><circle cx="8" cy="3" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="3.5" cy="13" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12.5" cy="13" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3M8 8H3.5v3M8 8h4.5v3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Researching</a></div> :
 <div class:list={["ra-lines", compact && "ra-lines-c"]} id={uid}
      data-quiet={quiet ? "1" : null} hidden>
-  {compact ? <a class="ra-lines-l" href={u("/my-research/")} title="Your research: every family you are tracking">Researching</a> : <label class="ra-lines-l" for={uid + "-sel"}>Researching</label>}
+  {compact ? <a class="ra-lines-l" href={u("/my-research/")} title="My research: your families, the books you have marked, your stories"><svg class="ra-lines-i" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><circle cx="8" cy="3" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="3.5" cy="13" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12.5" cy="13" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3M8 8H3.5v3M8 8h4.5v3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Researching</a> : <label class="ra-lines-l" for={uid + "-sel"}>Researching</label>}
   <select id={uid + "-sel"} aria-label="Which family this progress belongs to"></select>
   {!compact && <button type="button" class="ra-line-ren">rename</button>}
   {!compact && <span class="ra-lines-n" role="status" aria-live="polite"></span>}

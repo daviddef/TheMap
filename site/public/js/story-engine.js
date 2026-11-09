@@ -236,7 +236,7 @@
   var STOP = Object.create(null);
   "my a an the and who from came come to into in of at was were is are born about around circa abt all have this that his her their with for on by after before left arrived emigrated moved settled lived he she they i me our we it".split(" ").forEach(function (w) { STOP[w] = 1; });
   var COMMON = Object.create(null);
-  "then also still later soon when while where which what how why not no yes but or so as if than too very just only even again once twice died dead married wed lived live living went go goes gone come comes coming moved move moving travelled traveled returned return born birth age old years year aged name named called said told great story stories family passport photo photograph picture letter diary document papers certificate record register mother father parents grand son daughter wife husband".split(" ").forEach(function (w) { COMMON[w] = 1; });
+  "then also still later soon when while where which what how why not no yes but or so as if than too very just only even again once twice died dead married wed lived live living went go goes gone come comes coming moved move moving travelled traveled returned return born birth age old years year aged name named called said told great county city town village province state parish district region island borough township shire story stories family passport photo photograph picture letter diary document papers certificate record register mother father parents grand son daughter wife husband".split(" ").forEach(function (w) { COMMON[w] = 1; });
   var MOVE = /\b(moved|move|went|go|came|come|travelled|traveled|emigrated|migrated|sailed|settled|relocated|then|to|into|arrived|returned|left)\b/;
   var ANC = /\b(?:his|her|their|a|the)\s+(grandfather|grandmother|father|mother|dad|mum|mom)\b/g;
   var PLACE_BEFORE = { from: "from", of: "from", to: "to", into: "to", at: "to" };
@@ -277,20 +277,60 @@
     return cands;
   }
 
+  /* "a woman named Cheryl", "married a man called Ivan Kosina", "his daughter named Anna": the person named is not the one the story is about */
+  var KIN_NAMED = /\b(married(?:\s+an?\s+\p{L}+)?|woman|lady|wife|husband|spouse|partner|bride|groom|man|girl|daughter|son|boy|child)\s+(?:named|called)\s+([\p{L}'\u2019-]+)(?:\s+([\p{Lu}][\p{L}'\u2019-]+))?/giu;
+  var COUNTRY_ALIAS = { "usa": "US", "united states": "US", "united states of america": "US", "uk": "GB", "united kingdom": "GB" };
+  var PLACE_MARK = /^(?:from|to|in|of|at|into|near|towards|toward)$/;
+  /* A COUNTRY NAMED IN A STORY IS A COUNTRY. "from County Cork in Ireland" is not a village called Ireland in Canada. A country the gazetteer holds a
+     place of that name for (South Africa) is that place; one it does not (Ireland) is a stop at the middle of the places the Atlas holds in it,
+     named for the country and plainly one. A single word that is also a given name ("Jordan", "Israel") counts only after a place word. */
+  function withCountries(cands, tokens, ctx, gset) {
+    var cen = ctx.map && ctx.map["#country"]; if (!cen || !ctx.countries) return cands;
+    var byName = Object.create(null);
+    Object.keys(ctx.countries).forEach(function (cc) { var n = S.fold(ctx.countries[cc]); if (n) byName[n] = cc; });
+    Object.keys(COUNTRY_ALIAS).forEach(function (a) { byName[a] = COUNTRY_ALIAS[a]; });
+    var used = [], hits = [];
+    for (var len = 5; len >= 1; len--) for (var i = 0; i + len <= tokens.length; i++) {
+      var free = true; for (var j = i; j < i + len; j++) if (used[j]) free = false;
+      if (!free) continue;
+      var w = tokens.slice(i, i + len).join(" "), cc = byName[w];
+      if (!cc || !cen[cc]) continue;
+      if (len === 1 && ((gset[w] && !PLACE_MARK.test(tokens[i - 1] || "")) || STOP[w] || COMMON[w])) continue;
+      for (j = i; j < i + len; j++) used[j] = 1;
+      hits.push({ at: i, len: len, cc: cc, word: w });
+    }
+    if (!hits.length) return cands;
+    var keep = cands.filter(function (c) { var cl = c.word.split(" ").length; return !hits.some(function (h) { return c.at < h.at + h.len && h.at < c.at + cl; }); });
+    hits.forEach(function (h) {
+      var nm = ctx.countries[h.cc], f = S.fold(nm);
+      var exact = (ctx.map[f] || []).filter(function (r) { return r.cc === h.cc && S.fold(String(r.n).replace(/\s*\([^)]*\)/g, "")) === f; })[0];
+      var row = exact || { i: "c-" + h.cc.toLowerCase(), n: nm, cc: h.cc, x: cen[h.cc].x, y: cen[h.cc].y, a: 1, c: 0, w: 1, country: true, gaz: true };
+      keep.push({ word: h.word, at: h.at, rows: [row], country: h.cc });
+    });
+    return keep.sort(function (a, b) { return a.at - b.at; });
+  }
+
   function parseStory(text, ctx, attached) {
     var t = String(text || "").replace(/^\u2014 Picture \d+ \([^\n]*\) \u2014[ \t]*$/gm, " "), teller = "";   /* the line that names a picture read into the story is not story */
     /* "my name is David" says who is telling, not who the story is about */
     t = t.replace(/\bmy name is\s+([\p{L}'’-]+)(?:\s+([\p{Lu}][\p{L}'’-]+))?/iu, function (m, g, sn) { teller = cased(g) + (sn && /^\p{Lu}/u.test(sn) && !CONNECT.test(sn) && !STOP[S.fold(sn)] && !(ctx.map && ctx.map[S.fold(sn)]) ? " " + cased(sn) : ""); return " "; });
+    t = t.replace(/\b[Ii] (?=(?:1[4-9][0-9]{2}|20[0-2][0-9])(?![0-9]))/g, "in ");   /* "moved to South Africa i 1942" */
     var out = { rel: "", given: "", surname: "", name: "", holds: "story", left: null, born: null, from: null, to: null };
     out.teller = teller;
     var rm = REL.exec(t); if (rm) out.rel = rm[1].toLowerCase().replace(/ /g, "-");
     var ft = S.fold(t), tokens = ft.split(" ").filter(Boolean);
     ctx = Object.assign({}, ctx, { hintTokens: tokens });
-    var gv = ctx.given ? S.givenIn(t, ctx.given, ctx.skip) : [];
+    /* "he married a woman named Cheryl": Cheryl is his wife, not him. Names so introduced are taken out before the story's own name is looked for. */
+    var spouse = null, tg = t.replace(KIN_NAMED, function (m, who, g, sn) {
+      var okSn = sn && /^\p{Lu}/u.test(sn) && !STOP[S.fold(sn)] && !COMMON[S.fold(sn)] && !(ctx.map && ctx.map[S.fold(sn)]);
+      if (!spouse && /^(?:married|woman|lady|wife|husband|spouse|partner|bride|groom|man|girl)/i.test(who)) spouse = { given: cased(g), surname: okSn ? cased(sn) : "" };
+      return " ";
+    });
+    var gv = ctx.given ? S.givenIn(tg, ctx.given, ctx.skip) : [];
     var gset = Object.create(null); gv.forEach(function (g) { gset[g.word] = 1; });
     if (gv.length) {
       out.given = gv[0].row.canon;
-      var raw = t.split(/\s+/), gi = -1;
+      var raw = tg.split(/\s+/), gi = -1;
       for (var i = 0; i < raw.length; i++) if (S.fold(raw[i]) === gv[0].word) { gi = i; break; }
       if (gi > -1 && raw[gi + 1]) {
         var nx = raw[gi + 1].replace(/^[("']+|[,.;:)"']+$/g, "");
@@ -320,9 +360,11 @@
 
     var cands = ctx.map ? S.candidates(t, ctx.map, ctx.skip) : [];
     cands = withCountryHints(cands, tokens, ctx);
+    cands = withCountries(cands, tokens, ctx, gset);
     /* a name the story gives a person ("my dad is Ivan", "his dad is Giovanni") is a person, never a place, unless a "from"/"in" comes before it */
     var fam = ctx.map ? readFamily(t, ctx) : null, me = ctx.map && !fam ? readMe(t, ctx) : null, sought = ctx.map && !fam && !me ? readSought(t, ctx) : null, nameW = Object.create(null);
     [fam, me, sought].forEach(function (f) { if (f) Object.keys(f.people).forEach(function (k) { var pe = f.people[k]; [pe.given, pe.surname].forEach(function (n) { if (n) nameW[S.fold(n)] = 1; }); }); });
+    if (spouse && spouse.given) nameW[S.fold(spouse.given)] = 1;
     var rolesFor = cands.map(function (c) {
       var p1 = tokens[c.at - 1] || "", p2 = tokens[c.at - 2] || "", isGiven = !!gset[c.word] || !!nameW[c.word];
       var role = PLACE_BEFORE[p1] || ((p1 === "in" && p2 === "born") ? "from" : (p1 === "in" && /^(settled|arrived|lived|living|came|went|emigrated|moved)$/.test(p2)) ? "to" : "");
@@ -341,19 +383,32 @@
     rolesFor.forEach(function (x) {
       var c = x.c, prev = stops[stops.length - 1], len = c.word.split(" ").length;
       /* "New York, United States": a country (or place) written right after a stop says which of the same-named places was meant */
-      if (prev && c.at === prev.at + prev.len && !prev.country) {
+      if (prev && (c.at === prev.at + prev.len || (c.at === prev.at + prev.len + 1 && tokens[c.at - 1] === "in")) && !prev.country) {
         var pool = [prev.row].concat(prev.alts || []), pick = pool.filter(function (r) { return c.rows.some(function (cr) { return cr.cc === r.cc; }); })[0];
         if (pick) { prev.alts = pool.filter(function (r) { return r !== pick; }).slice(0, 5); prev.row = pick; prev.country = c.word; return; }
       }
-      var lo = Math.max(prev ? prev.at + prev.len : 0, c.at - 6), win = tokens.slice(lo, c.at).join(" ");
+      var lo = Math.max(prev ? prev.at + prev.len : 0, c.at - 6), win = tokens.slice(lo, c.at).join(" ").replace(/(?: (?:county|co|province|state|city|town|village|parish|district|region|island))+$/, "");
       var anc = null, am, are = new RegExp(ANC.source, "g");
       while ((am = are.exec(win))) anc = am[1];
       var role = anc ? (/mother|mum|mom|grandmother/.test(anc) ? "mother" : "father") + "-from"
         : /\bborn\b/.test(win) ? "born"
         : /(^| )(from|of)$/.test(win) ? "origin"
         : MOVE.test(win) ? "move" : "lived";
-      stops.push({ row: c.rows[0], alts: c.rows.slice(1, 6), word: c.word, at: c.at, len: len, role: role, age: null, year: null, approx: false });
+      stops.push({ row: c.rows[0], alts: c.rows.slice(1, 6), word: c.word, at: c.at, len: len, role: role, age: null, year: null, approx: false, isCountry: !!c.country });
     });
+    /* THE YEAR A STORY GIVES BESIDE A PLACE belongs to that place: "from County Cork in Ireland in 1928", "moved to South Africa in 1942". A year
+       after a place and close to it is its year; a year just before a place ("in 1942 he moved to Perth") is the next place's. A birth year is not. */
+    tokens.forEach(function (w, i) {
+      if (!/^(?:1[4-9][0-9]{2}|20[0-2][0-9])$/.test(w) || /^(?:born|birth|b)$/.test(tokens[i - 1] || "") || (tokens[i - 1] === "in" && tokens[i - 2] === "born")) return;
+      var before = null, after = null;
+      stops.forEach(function (st) { var end = st.at + st.len; if (end <= i && i - end <= 4 && st.year == null) before = st; if (!after && st.at > i && st.at - i <= 5 && st.year == null) after = st; });
+      var own = before || after; if (own) { own.year = Number(w); own.yearTold = true; }
+    });
+    /* a country named on its way to a place in it ("to South Africa ... then to Johannesburg") is that place's country, not a stop of its own; its year goes on */
+    for (var ci = stops.length - 1; ci >= 0; ci--) {
+      var cs = stops[ci], nx = stops[ci + 1];
+      if (cs.isCountry && nx && !nx.isCountry && nx.row.cc === cs.row.cc) { if (cs.year != null && nx.year == null) { nx.year = cs.year; nx.yearTold = true; } stops.splice(ci, 1); }
+    }
     var route = stops.filter(function (x) { return x.role !== "father-from" && x.role !== "mother-from"; });
     /* ages: "when he was 3 years old he moved to Harare" gives Harare age 3; a stop with no age sits between its neighbours */
     var AGE = /(?:when (?:he|she|they|i|we) (?:was|were)|aged?|at the age of|at age|by the age of|at) (\d{1,2})(?: years?(?: old)?)?(?= |$)/g, am2, ages = [];
@@ -371,7 +426,7 @@
       if (from0 != null && to0 != null) { route[i0].age = Math.round(from0 + (to0 - from0) * (i0 - a0) / (b0 - a0)); route[i0].approx = true; }
       else if (from0 != null) { route[i0].age = from0; route[i0].approx = true; }
     }
-    if (out.born != null) route.forEach(function (st) { if (st.age != null) st.year = out.born + st.age; });
+    if (out.born != null) route.forEach(function (st) { if (st.age != null && !st.yearTold) st.year = out.born + st.age; });
     out.stops = stops; out.route = route;
     if (route.length) {
       out.from = { row: route[0].row, alts: route[0].alts, word: route[0].word };
@@ -380,7 +435,7 @@
 
     /* the people: the one the story is about, and the parents it names */
     var people = [];
-    if (out.name || out.rel) people.push({ role: "self", rel: out.rel, name: out.name, given: out.givenWord || "", surname: out.surname || "", place: route[0] || null });
+    if (out.name || out.rel) people.push({ role: "self", rel: out.rel, name: out.name, given: out.givenWord || "", surname: out.surname || "", place: route[0] || null, unnamed: !out.name });
     function kin(which, re) {
       var m = re.exec(t); if (!m) return null;
       var g = m[1] || "", sn = m[2] || "", fg = S.fold(g), fs = S.fold(sn);
@@ -396,6 +451,7 @@
     var self = people[0];
     if (fa) { fa.place = fromP || null; if (!fa.surname && self && self.surname && (!self.rel || /father|mother|grand|uncle|aunt|brother|sister|ancestor|relative/.test(self.rel))) { fa.surname = self.surname; fa.presumed = true; fa.name = (fa.given ? fa.given + " " : "") + fa.surname; } people.push(fa); }
     if (mo) { mo.place = fromM || null; people.push(mo); }
+    if (spouse && people.length) people.push({ role: "spouse", name: spouse.given + (spouse.surname ? " " + spouse.surname : ""), given: spouse.given, surname: spouse.surname, place: null });
     out.people = people;
     if (fam) applyFamily(out, fam, ctx); else if (me) applyMe(out, me, ctx, teller); else if (sought) applyMe(out, sought, ctx, "");
     return out;
@@ -899,7 +955,7 @@
     }
     function placeInfo(row) {
       var regionsP = getJSON("regions.json").catch(function () { return null; });
-      return Promise.all([getJSON("p/" + encodeURIComponent(row.i) + ".json").catch(function () { return null; }), regionsP]).then(function (r) {
+      return Promise.all([row.country ? Promise.resolve(null) : getJSON("p/" + encodeURIComponent(row.i) + ".json").catch(function () { return null; }), regionsP]).then(function (r) {
         var p = r[0], regs = r[1], region = p && regs ? regs.regions.filter(function (x) { return x.id === p.region; })[0] : null;
         return { row: row, p: p, name: row.n.replace(/\s*\(([^)]*)\)/, function (m, x) { return S.fold(x) === S.fold(row.n.replace(/\s*\([^)]*\)/, "")) ? "" : m; }), lat: p ? p.lat : row.y, lon: p ? p.lon : row.x, cc: row.cc, countryName: (data.countries[row.cc] || row.cc || ""),
           older: p ? (p.names || []).map(function (n) { return n.n; }) : [], cols: p ? p.collections || [] : [],
@@ -1005,7 +1061,19 @@
       var route = (f.route && f.route.length ? f.route : [f.from && { info: f.from }, f.to && { info: f.to }].filter(Boolean)).filter(function (x) { return x.info; });
       if (!route.length) return { mode: "none", stops: [] };
       var withYear = route.some(function (x) { return x.year != null; }), withAge = route.some(function (x) { return x.age != null; });
-      if (withYear) return { mode: "year", stops: route.map(function (x, i) { return { info: x.info, t: x.year != null ? x.year : (i ? null : route[0].year), age: x.age, approx: x.approx, role: x.role }; }).filter(function (x) { return x.t != null; }) };
+      if (withYear) {
+        /* the years the story gave stand; a place with none sits between its neighbours', before the first at the birth (or a generation earlier), after the last a year apiece, and is marked as a guess */
+        var ts = route.map(function (x) { return x.year != null ? x.year : null; }), guess = ts.map(function (t) { return t == null; });
+        for (var i2 = 0; i2 < ts.length; i2++) {
+          if (ts[i2] != null) continue;
+          var a2 = i2 - 1; while (a2 >= 0 && ts[a2] == null) a2--;
+          var b2 = i2 + 1; while (b2 < ts.length && ts[b2] == null) b2++;
+          if (a2 >= 0 && b2 < ts.length) ts[i2] = Math.round(ts[a2] + (ts[b2] - ts[a2]) * (i2 - a2) / (b2 - a2));
+          else if (a2 >= 0) ts[i2] = ts[a2] + (i2 - a2);
+          else ts[i2] = f.born != null ? f.born : ts[b2] - 25;
+        }
+        return { mode: "year", stops: route.map(function (x, i) { return { info: x.info, t: ts[i], age: x.age, approx: x.approx || guess[i], guess: guess[i], role: x.role }; }) };
+      }
       if (withAge && f.born == null && f.left == null) return { mode: "age", stops: route.filter(function (x) { return x.age != null; }).map(function (x) { return { info: x.info, t: x.age, age: x.age, approx: x.approx, role: x.role }; }) };
       if (f.left != null && route.length) {
         var y0 = f.born != null ? f.born : f.left - 25;
@@ -1080,7 +1148,7 @@
         });
         if (cur && begun) {
           var ye = tl.mode === "year" ? t : null;
-          E.cap.append(line(cur.info, ye, evMap.get(cur.info), at.moving ? "On the way from " : "", tl.mode === "age" ? "age " + t : (f.born != null ? "age " + (t - f.born) : "")));
+          E.cap.append(line(cur.info, ye, evMap.get(cur.info), at.moving ? "On the way from " : "", tl.mode === "age" ? "age " + t : (cur.guess ? "year not told, placed between the years that were" : f.born != null ? "age " + (t - f.born) : "")));
           if (at.moving && stops[at.idx + 1]) E.cap.append(el("div", "…to " + stops[at.idx + 1].info.name + (stops[at.idx + 1].age != null ? " (" + ageWord(stops[at.idx + 1]) + ")" : ""), "lf-filed"));
         }
         anc.forEach(function (x) { E.cap.append(line(x.info, tl.mode === "year" ? t : null, evMap.get(x.info), "His " + x.who + "'s family, ", "")); });
@@ -1150,16 +1218,28 @@
           });
           E.moments.append(ue);
         }
+        /* An event that has no area (the Second World War, a pandemic) belongs to every place and so to none on a map: it is said once, for the years of the story. */
+        var wide = ((mort && mort.events) || []).filter(function (e) { return e.g && e.f <= t1 && e.t >= t0 && !seen[e.id]; });
+        if (wide.length) {
+          E.moments.append(el("h4", "In the wider world in those years"));
+          var uw = el("ul", null, "lf-events");
+          wide.slice(0, 4).forEach(function (e) {
+            var li = el("li", null, "lf-ev lf-ev-" + e.ty);
+            li.append(el("b", e.f + (e.t !== e.f ? "\u2013" + e.t : "") + " "), el("span", typeLabel(e.ty), "lf-tag"), document.createTextNode(" " + e.n + ". " + short(e.says, 200) + (e.toll && e.toll.text ? " " + short(e.toll.text, 160) : "")));
+            uw.append(li);
+          });
+          E.moments.append(uw);
+        }
         var seenCc = Object.create(null);
         stops.concat(anc).forEach(function (st) {
           var info = st.info; if (!info.leaders || seenCc[info.cc]) return; seenCc[info.cc] = 1;
           var ls = leadersBetween(info.leaders, t0, t1).slice(0, 8);
-          if (!ls.length) return;
+          if (!ls.length) { E.moments.append(el("p", "The Atlas names no head of state of today's " + info.countryName + " for those years: that is silence in Wikidata, not a country without one.", "lf-filed")); return; }
           E.moments.append(el("h4", "Leaders of today's " + info.countryName + " in those years"));
           var ul2 = el("ul"); ls.forEach(function (r) { var li = el("li"); li.append(el("b", r[2] + (r[3] == null ? " on " : "–" + r[3] + " ")), r[0]); ul2.append(li); });
           E.moments.append(ul2);
         });
-        if (items.length || evl.length) E.moments.append(el("p", "This is the setting, not a fact about them: the events are those whose area covers the place in those years, and the leaders are those of the country as it is drawn today.", "cap"));
+        if (items.length || evl.length || wide.length) E.moments.append(el("p", "This is the setting, not a fact about them: the events are those whose area covers the place in those years, and the leaders are those of the country as it is drawn today.", "cap"));
       }
 
       return o.getMap().then(function (m) {
@@ -1425,7 +1505,11 @@
         hd.append(tt); sec.append(hd);
         var grid = el("div", null, "lf-stop-grid"), then = el("div", null, "lf-stop-then"), where = el("div", null, "lf-stop-where");
         then.append(el("h4", "Who held the ground"));
-        if (!years.length) then.append(el("p", "Give a year, even a rough one, and the one that applies is marked below.", "lf-filed"));
+        if (!years.length) {
+          var nowFlag = flagFor(info, new Date().getFullYear());
+          if (nowFlag) { var fr = el("div", null, "lf-capline"), fi = el("img", null, "lf-flag"); fi.src = base + "fl/" + encodeURIComponent(nowFlag) + ".svg"; fi.alt = ""; fi.width = 36; fi.height = 24; fi.loading = "lazy"; fr.append(fi, el("div", "Today's flag of " + info.countryName + ". Give a year, even a rough one, and the flag and ruler of that time are shown.", "lf-caphead")); then.append(fr); }
+          else then.append(el("p", "Give a year, even a rough one, and the one that applies is marked below.", "lf-filed"));
+        }
         else es.forEach(function (e) { if (e.year != null) then.append(line(info, e.year, evHere(mort, info, e.year - 5, e.year + 5), e.prefix || "", e.ageText || "")); });
         then.append(ground(info, years, span));
         where.append(el("h4", "Where to search"));

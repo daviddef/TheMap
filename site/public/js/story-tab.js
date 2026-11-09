@@ -303,7 +303,7 @@
       var cls = st.role === "born" || st.role === "origin" ? "ms-chip-from" : "ms-chip-to";
       if (st.alts && st.alts.length) {
         /* another place has the name: the chip offers the next one by writing its country after the word, so the words say which place is meant */
-        var alt = st.alts[0], b = make("button", pre + placeLabel(st.row) + "  \u25be", "ms-chip " + cls); b.type = "button"; b.title = "Or " + placeLabel(alt) + ": press to use that one";
+        var alt = st.alts[0], b = make("button", pre + placeLabel(st.row) + (st.yearTold ? ", " + st.year : "") + "  \u25be", "ms-chip " + cls); b.type = "button"; b.title = "Or " + placeLabel(alt) + ": press to use that one";
         b.addEventListener("click", function () {
           var ta = $("ms-first-text"), w = st.word, i = ta.value.toLowerCase().indexOf(String(w).toLowerCase());
           if (i < 0) return;
@@ -311,10 +311,10 @@
           runFirst();
         });
         box.append(b);
-      } else chip(pre + placeLabel(st.row), cls);
+      } else chip(pre + placeLabel(st.row) + (st.yearTold ? ", " + st.year : ""), cls);
     });
     if (p.born) chip("born about " + p.born);
-    if (p.left) chip("about " + p.left);
+    if (p.left && !stops.some(function (st) { return st.yearTold; })) chip("about " + p.left);
     if (!stops.length && $("ms-first-text").value.trim().length > 12) chip("Where did they start? Name the place", "ms-chip-warn");
     if (firstFiles.length) chip(firstFiles.length + (firstFiles.length === 1 ? " picture" : " pictures") + ", kept here", "ms-chip-warn");
     if (ambiguous) box.append(make("p", "More than one place has a name you wrote. Press the chip with an arrow to use the next one, or write the country after the name.", "ms-dim"));

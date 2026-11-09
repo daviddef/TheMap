@@ -144,7 +144,7 @@
       stopsShown.forEach(function (st) {
         var more = st.alts && st.alts.length, lab = placeLabel(st.row);
         var pre = st.role === "born" ? "born in " : st.role === "origin" ? "from " : st.role === "father-from" ? "his father from " : st.role === "mother-from" ? "his mother from " : st.age != null ? (st.approx ? "about age " : "age ") + st.age + ": " : st.role === "lived" ? "in " : "to ";
-        chips.append(chip(pre + lab + (more ? "  ▾" : ""), st.role === "born" || st.role === "origin" ? "from" : "to", "s:" + st.row.i + st.role, more ? function () {
+        chips.append(chip(pre + lab + (st.yearTold ? ", " + st.year : "") + (more ? "  ▾" : ""), st.role === "born" || st.role === "origin" ? "from" : "to", "s:" + st.row.i + st.role, more ? function () {
           ov[st.word] = { row: st.alts[0], alts: st.alts.slice(1).concat([st.row]) }; lastSig = ""; run();
         } : null));
       });
@@ -155,7 +155,7 @@
         });
       });
       if (p.born) chips.append(chip("born about " + p.born, "", "b:" + p.born));
-      if (p.left) chips.append(chip("about " + p.left, "", "l:" + p.left));
+      if (p.left && !stopsShown.some(function (st) { return st.yearTold; })) chips.append(chip("about " + p.left, "", "l:" + p.left));
       if (p.holds !== "story" || files.length) chips.append(chip((E.HOLDS[p.holds] || E.HOLDS.story).t.replace(/^a /, "") + (files.length ? ", kept here" : ""), "warn", "h:" + p.holds));
       var unread = files.filter(function (x) { return !x.r; }).length;
       if (unread) chips.append(chip("Read " + (unread === 1 ? "the picture" : unread + " pictures") + " with Claude", "warn", "readpics", function () { readPics(); }));

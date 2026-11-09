@@ -97,6 +97,14 @@ test("the flag is the most specific era that holds the year, and the newest with
   assert.equal(A.flagAt(undefined, 1600), null);
 });
 
+test("the present era has no end, and its flag is the flag of every year since it began", () => {
+  const f = [[1788, 1901, "old"], [1901, null, "now"]];
+  assert.equal(A.flagAt(f, 1942), "now", "a story in 1942 in a country whose current flag began in 1901 gets that flag");
+  assert.equal(A.flagAt(f, 2026), "now");
+  assert.equal(A.flagAt(f, 1900), "old");
+  assert.equal(A.flagAt(f, 1700), null);
+});
+
 test("around a year: era starts and events inside the window, in date order, the first era not counted as a change", () => {
   const eras = [{ from: 1797, to: 1805, polity: "Austria" }, { from: 1805, to: 1813, polity: "France", note: "Illyrian" }, { from: 1813, to: 1918, polity: "Austria again" }];
   const ev = [{ f: 1855, t: 1855, n: "Cholera", ty: "epidemic" }, { f: 1700, t: 1710, n: "Too early", ty: "war" }];

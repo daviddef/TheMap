@@ -42,6 +42,13 @@
       var w = q.split(" ");
       if (w.length > 1 && w.length <= 3) w.forEach(function (x) { if (x.length >= 5 && !QUALIFIER[x]) add(x, r); });
     });
+    /* WHERE EACH COUNTRY IS, for a country named in a story ("from Ireland") that the gazetteer has no place of its own for: the middle of the
+       places the Atlas holds in it (the median, so a far island does not drag it). Hidden from the word list, read only through map["#country"]. */
+    var by = Object.create(null), cen = Object.create(null);
+    rows.forEach(function (r) { if (r.cc && typeof r.x === "number" && typeof r.y === "number") (by[r.cc] || (by[r.cc] = [])).push(r); });
+    function med(a) { a.sort(function (p, q) { return p - q; }); return a[a.length >> 1]; }
+    Object.keys(by).forEach(function (cc) { cen[cc] = { x: med(by[cc].map(function (r) { return r.x; })), y: med(by[cc].map(function (r) { return r.y; })) }; });
+    Object.defineProperty(map, "#country", { value: cen, enumerable: false });
     return map;
   }
 
@@ -142,7 +149,7 @@
     if (!rows || !rows.length) return null;
     var pick = null;
     rows.forEach(function (r) {
-      var on = year == null ? true : (year >= r[0] && year < r[1]);
+      var on = year == null ? true : (year >= r[0] && (r[1] == null || year < r[1]));   /* the present era has no end: null */
       if (on && (!pick || r[0] > pick[0])) pick = r;
     });
     return pick ? pick[2] : null;

@@ -30,7 +30,8 @@ Result: 53 of 96 passed on the first run, 85 of 85 now pass, and 11 are kept as 
 
 ## Left (known gaps, in the corpus with the reason)
 
-- **Names of a place in another year.** "Salisbury, Rhodesia" cannot choose among the Salisburys; the country that no longer exists is no hint. Fiume and Danzig are found only as the index lists them. The dated names are in `data/place-names.json` in the Atlas repo; the story reader does not read them yet.
+- **A place the dated-names catalogue does not hold.** Fiume, Pola, Zara, Laibach, Constantinople and Gallignana are found as Rijeka, Pula, Zadar, Ljubljana, Istanbul and Gračišće (`place-aliases.json`, built from the places' own names and `data/place-names.json`). Danzig, Breslau, Bombay and Madras are not in the catalogue (Gdańsk, Wrocław, Mumbai, Chennai have no entry), so the reader takes the gazetteer's Danzig in the US. They are added with `scripts/place_names.py add`, with a source each.
+- **A former country is a hint, not a place.** "Salisbury, Rhodesia" picks Harare; a table of about twenty former names (`FORMER` in `story-engine.js`) chooses among places of one name and is never a stop.
 - **Places with no preposition** ("Cork, Lyon, Paris") find only what the index holds; the gazetteer lookup needs in/at/from/near/to/en/nach/aus/von/iz/nel/nella.
 - **The reader sees the index, not the whole gazetteer.** Lyon, Kraków, Bilbao, Tbilisi and Tobruk are not in the 55,771-place index; they are found only through the gazetteer lookup above.
 - **Detail clauses belong to "the story",** not to a named person.

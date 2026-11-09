@@ -13,6 +13,16 @@ if (idx.tail && idx.tail.cells) for (const k of Object.keys(idx.tail.cells)) { t
 try { rows = rows.concat(rd("index-quiet.json").places || []); } catch (e) {}
 const g = rd("given-names.json");
 export const ctx = { map: A.buildMap(rows), given: A.buildGiven(g.rows || []), skip: {}, countries: idx.countries || {} };
+/* place-aliases.json as the build writes it (src/pages/place-aliases.json.js), from the two name files, then the engine's own merge */
+{
+  const R = path.join(SITE, "..", "data"), fold = A.fold, al = {};
+  const pl = JSON.parse(fs.readFileSync(path.join(R, "places.json"), "utf8")), prow = Array.isArray(pl) ? pl : Array.isArray(pl.places) ? pl.places : Object.values(pl.places || pl);
+  const cat = JSON.parse(fs.readFileSync(path.join(R, "place-names.json"), "utf8"));
+  const add = (name, id, own) => { const k = fold(name); if (k.length < 4 || k === fold(own)) return; (al[k] ||= []).includes(id) || al[k].push(id); };
+  for (const p of prow) for (const n of p.names || []) add(n.n, p.id, p.name);
+  for (const p of cat.places || []) for (const n of p.names || []) add(n.name, p.id, p.name);
+  F.aliasMerge(ctx.map, rows, al, ctx.given);
+}
 export const rowCount = rows.length;
 
 /* the page's resolveMissing, run against the shard files on disk: a name after in/at/from/near/to that the index lacks is looked up in the worldwide gazetteer */

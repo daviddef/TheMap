@@ -216,3 +216,21 @@ test("a place told twice is two stops, and a story told backwards keeps its orde
   assert.deepEqual(places(F.parseStory("He lived in Cork, left for Boston, and returned to Cork.", ctx)), ["Cork", "Boston", "Cork"]);
   assert.deepEqual(places(F.parseStory("He ended up in Perth. Before that he lived in Cork.", ctx)), ["Cork", "Perth"]);
 });
+
+test("a place is found by a name it was filed under (Fiume, Pola), the one with records first; a name that is only a word is left out", () => {
+  const base = rows.concat([P("Fiume", "IT", 12.7, 45.9, { c: 0 }), P("Rijeka", "HR", 14.44, 45.33, { c: 69, i: "rijeka" }), P("Pola", "PH", 121.5, 14.2, { c: 0 }), P("Pula", "HR", 13.85, 44.87, { c: 40, i: "pula" })]);
+  const map = A.buildMap(base);
+  const n = F.aliasMerge(map, base, { fiume: ["rijeka"], pola: ["pula"], young: ["pula"], mill: ["pula"], missing: ["no-such-id"] }, ctx.given);
+  assert.ok(n >= 2);
+  const c = { ...ctx, map };
+  assert.deepEqual(places(F.parseStory("My grandfather was born in Fiume in 1910 and his wife in Pola.", c)), ["Rijeka", "Pula"]);
+  assert.equal(map.young, undefined);
+  assert.equal(map.missing, undefined);
+});
+
+test("a country that no longer exists chooses among places of one name, and is no stop (Salisbury, Rhodesia)", () => {
+  const base = rows.concat([P("Salisbury", "US", -80.5, 35.7, { c: 20 }), P("Harare", "ZW", 31.05, -17.83, { c: 0, i: "harare-zw" })]);
+  const map = A.buildMap(base); F.aliasMerge(map, base, { salisbury: ["harare-zw"] }, ctx.given);
+  const p = F.parseStory("He lived in Salisbury, Rhodesia until 1975.", { ...ctx, map, countries: { ...countries } });
+  assert.deepEqual(places(p), ["Harare"]);
+});

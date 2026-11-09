@@ -49,8 +49,10 @@ export const C = [
  { id:"st-names", t:"He was born in St. Louis and died in Saint Paul.", e:{stops:["Louis","Paul"]} },
  { id:"accents", t:"Her family came from Kraków and Łódź, then Zürich.", e:{stops:["Krak","dź","Zürich"]} },
  { id:"diacritic-less", t:"My great grandfather came from Krakow, then Lodz, then Zurich.", e:{stops:["Krak","dź","Zürich"]} },
- { id:"old-names", gap:"Fiume and Danzig are found as the places they are called today in the index, not as Rijeka and Gdansk", t:"My grandfather was born in Fiume in 1910 and moved to Danzig.", e:{stops:["Rijeka","Gdańsk"], years:[1910]} },
- { id:"old-names2", gap:"Salisbury, Rhodesia: a country that no longer exists does not choose among the Salisburys", t:"He lived in Salisbury, Rhodesia until 1975.", e:{stops:["Harare"], years:[1975]} },
+ { id:"old-names", gap:"Danzig is the gazetteer's Danzig in the US: the Atlas's dated-names catalogue has no Gdansk yet", t:"My grandfather moved to Danzig in 1910.", e:{stops:["Gdansk"]} },
+ { id:"old-names-ok", t:"My grandfather was born in Fiume in 1910, his wife in Pola and his mother in Zara.", e:{stops:["Rijeka","Pula","Zadar"]} },
+ { id:"old-name-own", t:"They were from Gallignana, and then Laibach.", e:{stops:["Gračišće","Ljubljana"]} },
+ { id:"old-names2", t:"He lived in Salisbury, Rhodesia until 1975.", e:{stops:["Harare"], years:[1975]} },
  { id:"misspell", t:"My grandfather came from Brisban and Melborne.", e:{stops:[], suggest:["Brisban","Melborne"]} },
  // ---- countries, regions
  { id:"country-only", t:"My grandfather was Irish and my grandmother was Italian.", e:{stops:[]} },

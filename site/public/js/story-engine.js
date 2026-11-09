@@ -353,6 +353,25 @@
     return rows.length;
   }
 
+  /* WHAT A PLACE WAS CALLED. place-aliases.json (built from the places' own older names and the dated-names catalogue) maps a whole folded name
+     to the Atlas places that answer to it: Fiume to Rijeka, Pola to Pula, Gallignana to Gracisce. The index row only carries these as one long
+     string, so a place with several older names lost them; here each name is its own key. A name that is also an ordinary word, a month, a trade
+     or a given name is left out, as the index's own words are. Rows are copies marked `al`, so the place is the same place. */
+  function aliasMerge(map, rows, al, given) {
+    var byId = Object.create(null), added = 0;
+    rows.forEach(function (r) { if (r && r.i != null && !byId[r.i]) byId[r.i] = r; });
+    Object.keys(al || {}).forEach(function (k) {
+      if (k.length < 4 || STOP[k] || COMMON[k] || OCC[k] || MONTHS[k] || (given && given[k])) return;
+      (al[k] || []).forEach(function (id) {
+        var r = byId[id]; if (!r) return;
+        var list = map[k] || (map[k] = []);
+        if (list.some(function (x) { return x.i === r.i; })) return;
+        list.push(Object.assign({}, r, { al: 1 })); added++;
+      });
+    });
+    return added;
+  }
+
   /* ---- THE LIFE AS TOLD ---------------------------------------------------------------------------------------------------
      People tell more than where and when: "he loved ice cream and had dark hair and was a world class runner, married twice, the second wife
      divorced him and took his money and he went to jail, then met his third wife in a snow storm, it was love at first sight". None of that is
@@ -483,12 +502,27 @@
         if (gTok[key] && (w.length > 1 || nm === "usa" || nm === "uk")) gTok[key].forEach(function (i) { for (var j = i; j < i + w.length; j++) cov[j] = 1; });
       });
     });
+    /* A COUNTRY THAT NO LONGER EXISTS still says where: "Salisbury, Rhodesia" is Zimbabwe's. It chooses among places of the same name and is no
+       stop itself (it is a name for a time, which the era tables already hold). The few one-word ones that are also real places elsewhere
+       (Persia, Iowa) only choose and are never dropped. */
+    Object.keys(FORMER).forEach(function (nm) {
+      var f = FORMER[nm], w = nm.split(" ");
+      if (gAll[nm]) f.cc.forEach(function (cc) { hint[cc] = 1; });
+      if (gTok[nm] && (w.length > 1 || f.drop)) gTok[nm].forEach(function (i) { for (var j = i; j < i + w.length; j++) cov[j] = 1; });
+    });
     if (!Object.keys(hint).length) return cands;
     cands = cands.filter(function (c) { return !cov[c.at]; });
     cands.forEach(function (c) { c.rows = c.rows.map(function (r, i) { return { r: r, i: i }; }).sort(function (a, b) { return (hint[b.r.cc] ? 1 : 0) - (hint[a.r.cc] ? 1 : 0) || a.i - b.i; }).map(function (x) { return x.r; }); });
     return cands;
   }
 
+  var FORMER = {
+    "rhodesia": { cc: ["ZW", "ZM"], drop: 1 }, "southern rhodesia": { cc: ["ZW"] }, "northern rhodesia": { cc: ["ZM"] }, "yugoslavia": { cc: ["HR", "RS", "SI", "BA", "MK", "ME", "XK"], drop: 1 },
+    "czechoslovakia": { cc: ["CZ", "SK"], drop: 1 }, "ussr": { cc: ["RU", "UA", "BY", "LT", "LV", "EE", "MD", "GE", "AM", "AZ", "KZ"], drop: 1 }, "soviet union": { cc: ["RU", "UA", "BY", "LT", "LV", "EE", "MD", "GE", "AM", "AZ", "KZ"] },
+    "east germany": { cc: ["DE"] }, "west germany": { cc: ["DE"] }, "zaire": { cc: ["CD"], drop: 1 }, "belgian congo": { cc: ["CD"] }, "ceylon": { cc: ["LK"], drop: 1 },
+    "south west africa": { cc: ["NA"] }, "british honduras": { cc: ["BZ"] }, "gold coast": { cc: ["GH"] }, "dutch east indies": { cc: ["ID"] }, "east pakistan": { cc: ["BD"] },
+    "burma": { cc: ["MM"] }, "persia": { cc: ["IR"] }, "siam": { cc: ["TH"] }, "prussia": { cc: ["DE", "PL", "RU"] }
+  };
   /* "a woman named Cheryl", "married a man called Ivan Kosina", "his daughter named Anna": the person named is not the one the story is about */
   var KIN_NAMED = /\b(married(?:\s+an?\s+\p{L}+)?|woman|lady|wife|husband|spouse|partner|bride|groom|man|girl|daughter|son|boy|child)\s+(?:named|called)\s+([\p{L}'\u2019-]+)(?:\s+([\p{Lu}][\p{L}'\u2019-]+))?/giu;
   var COUNTRY_ALIAS = { "usa": "US", "united states": "US", "united states of america": "US", "uk": "GB", "united kingdom": "GB" };
@@ -1201,7 +1235,7 @@
 
   var api = { toYear: toYear, suggest: suggest, windows: windows, volumesFor: volumesFor, captionAt: captionAt, progress: progress, between: between,
               givenForms: givenForms, volLabel: volLabel, buildPlan: buildPlan, parseStory: parseStory, startFamily: startFamily, familyName: familyName, flagFor: flagFor, leaderAt: leaderAt, leadersBetween: leadersBetween, givenGroups: givenGroups, surnameBlock: surnameBlock, short: short, yearsIn: yearsIn,
-              HOLDS: HOLDS, YEAR_MIN: YEAR_MIN, YEAR_MAX: YEAR_MAX, readLife: readLife, gazWants: gazWants, gazMerge: gazMerge, didYouMean: didYouMean };
+              HOLDS: HOLDS, YEAR_MIN: YEAR_MIN, YEAR_MAX: YEAR_MAX, readLife: readLife, gazWants: gazWants, gazMerge: gazMerge, didYouMean: didYouMean, aliasMerge: aliasMerge };
   if (typeof module !== "undefined" && module.exports) { module.exports = api; return; }
   window.raStory = api;
 
@@ -1223,9 +1257,12 @@
           .then(function () { return getJSON("index-quiet.json").then(function (q) { rows = rows.concat(q.places || []); }).catch(function () {}); })
           .then(function () { return getJSON("given-names.json").catch(function () { return { rows: [] }; }); })
           .then(function (g) {
-            var givenRows = g.rows || [];
-            data = { rows: rows, countries: d.countries || {}, givenRows: givenRows, languages: g.languages || [], given: S.buildGiven(givenRows), map: S.buildMap(rows), skip: Object.create(null) };
-            return data;
+            return getJSON("place-aliases.json").catch(function () { return null; }).then(function (al) {
+              var givenRows = g.rows || [], given = S.buildGiven(givenRows), map = S.buildMap(rows);
+              if (al && al.aliases) aliasMerge(map, rows, al.aliases, given);
+              data = { rows: rows, countries: d.countries || {}, givenRows: givenRows, languages: g.languages || [], given: given, map: map, skip: Object.create(null) };
+              return data;
+            });
           });
       }).catch(function (e) { loading = null; throw e; });
       return loading;
@@ -1264,7 +1301,7 @@
       return Promise.all([row.country ? Promise.resolve(null) : getJSON("p/" + encodeURIComponent(row.i) + ".json").catch(function () { return null; }), regionsP]).then(function (r) {
         var p = r[0], regs = r[1], region = p && regs ? regs.regions.filter(function (x) { return x.id === p.region; })[0] : null;
         return { row: row, p: p, name: row.n.replace(/\s*\(([^)]*)\)/, function (m, x) { return S.fold(x) === S.fold(row.n.replace(/\s*\([^)]*\)/, "")) ? "" : m; }), lat: p ? p.lat : row.y, lon: p ? p.lon : row.x, cc: row.cc, countryName: (data.countries[row.cc] || row.cc || ""),
-          older: p ? (p.names || []).map(function (n) { return n.n; }) : [], cols: p ? p.collections || [] : [],
+          older: p ? (p.names || []).map(function (n) { return n.n; }) : [], named: p && p.named ? p.named : [], cols: p ? p.collections || [] : [],
           eras: region ? region.eras : null, regimes: regs ? regs.regimes : null, region: region, href: row.gaz ? BASE + "?q=" + encodeURIComponent(row.n) : BASE + "place/" + encodeURIComponent(row.i) + "/" };
       });
     }
@@ -1299,6 +1336,8 @@
         var infos = Object.create(null); r[0].forEach(function (i) { infos[i.row.i] = i; });
         var provs = r[1].providers || [], pname = Object.create(null), fm = r[3] && r[3].f, lead = r[4] && r[4].countries;
         provs.forEach(function (x) { pname[x.id] = x.name; });
+        var slugOf = Object.create(null); if (r[3] && r[3].slug) Object.keys(r[3].slug).forEach(function (sl) { slugOf[r[3].slug[sl]] = sl; });
+        r[0].forEach(function (i) { i.flagSlug = slugOf[i.cc] || ""; });
         r[0].forEach(function (i) { i.provs = provs.filter(function (x) { return (x.countries || []).indexOf(i.cc) > -1; }).sort(function (a, b) { return String(a.name).localeCompare(String(b.name)); }); i.pname = pname; i.world = provs.filter(function (x) { return (x.countries || []).indexOf("*") > -1; }); i.flagRows = fm ? fm[String(i.cc || "").toUpperCase()] : null; i.leaders = lead ? lead[String(i.cc || "").toUpperCase()] : null; });
         r[0].forEach(function (i) { i.near = i.p && (i.cols || []).length ? [] : nearbyVolumes(i); });
         var from = parsed.from ? infos[parsed.from.row.i] : null, to = parsed.to ? infos[parsed.to.row.i] : null;
@@ -1791,6 +1830,38 @@
         ns.forEach(function (x) { var li = el("li"), a = el("a", x.n); a.href = base + "place/" + encodeURIComponent(x.i) + "/"; li.append(a, el("span", " " + x.km + " km; " + x.c + " volume" + (x.c === 1 ? "" : "s"), "lf-filed")); ul.append(li); items.push({ href: a.href }); });
         wrap.append(ul); return wrap;
       }
+      /* What the place page holds, in one strip under the name: the other names it was filed under (with their years where the catalogue has them),
+         and plain links to the place page, the country, its flags and the region. Nothing here is a finding: names are search terms. */
+      function placeStrip(info) {
+        var box = el("div", null, "lf-strip"), seen = Object.create(null), names = [];
+        seen[S.fold(info.name)] = 1;
+        (info.named || []).forEach(function (n) {
+          var k = S.fold(n.n); if (!k || seen[k]) return; seen[k] = 1;
+          var yrs = n.f != null || n.t != null ? (n.f != null ? n.f : "") + "\u2013" + (n.t != null ? n.t : "") : "";
+          names.push({ n: n.n, note: [yrs, n.k === "exonym" ? "another language" : n.k === "official" ? "official" : n.k === "colonial" ? "colonial" : n.k === "historic" ? "historic" : ""].filter(Boolean).join(", "), s: n.s });
+        });
+        (info.older || []).forEach(function (n) { var k = S.fold(n); if (!k || seen[k]) return; seen[k] = 1; names.push({ n: n, note: "older name" }); });
+        if (names.length) {
+          var p = el("p", null, "lf-also"); p.append(el("b", "Also known as "));
+          names.slice(0, 8).forEach(function (x, i) {
+            if (i) p.append(document.createTextNode(" \u00b7 "));
+            if (x.s) { var a = el("a", x.n); a.href = x.s; a.rel = "noopener"; p.append(a); } else p.append(el("em", x.n));
+            if (x.note) p.append(document.createTextNode(" (" + x.note + ")"));
+          });
+          if (names.length > 8) p.append(document.createTextNode(" and " + (names.length - 8) + " more on the place page"));
+          p.append(el("span", " A record is filed under the name of its year: search each.", "lf-filed"));
+          box.append(p);
+        }
+        var links = el("p", null, "lf-links");
+        function link(text, href) { var a = el("a", text); a.href = href; links.append(a); }
+        link(info.row && info.row.gaz ? "Find " + info.name + " on the map" : "The place page", info.href);
+        if (info.cc && !(info.row && info.row.gaz)) link(info.countryName || info.cc, base + "country/" + String(info.cc).toLowerCase() + "/");
+        if (info.flagSlug) link("Flags of " + (info.countryName || info.cc), base + "flags/" + info.flagSlug + "/");
+        if (info.region && info.region.id) link(String(info.region.label || "The region").split(" \u2014 ")[0], base + "region/" + encodeURIComponent(info.region.id) + "/");
+        if (info.named && info.named.length) link("Names by date", base + "place-names/");
+        box.append(links);
+        return box;
+      }
       function renderGroup(g) {
         var info = g.info, es = g.es, kicks = [], whens = [], years = [], look = [], kinds = [], win = null, span = null, unbounded = false, withSources = false;
         n++;
@@ -1809,6 +1880,7 @@
         hd.append(el("span", String(n), "lf-stop-n"));
         var tt = el("div"); tt.append(el("div", kicks.join("; "), "lf-stop-k"), el("h3", info.name)); var sub = [info.countryName, whens.join(", ")].filter(Boolean).join(" \u00b7 "); if (sub) tt.append(el("div", sub, "lf-stop-s"));
         hd.append(tt); sec.append(hd);
+        sec.append(placeStrip(info));
         var grid = el("div", null, "lf-stop-grid"), then = el("div", null, "lf-stop-then"), where = el("div", null, "lf-stop-where");
         then.append(el("h4", "Who held the ground"));
         if (!years.length) {
@@ -1978,6 +2050,6 @@
     var g3 = gen(), you = el("div", null, "lf-card lf-card-you"); you.append(el("div", "You", "lf-card-role"), el("div", "who is asking", "lf-card-place")); g3.append(you);
     return tree;
   }
-  api.namesBlock = namesBlock; api.treeBlock = treeBlock; api.lifeBlock = lifeBlock; api.lifeEvents = lifeEvents; api.gazWants = gazWants; api.gazMerge = gazMerge; api.didYouMean = didYouMean;
+  api.namesBlock = namesBlock; api.treeBlock = treeBlock; api.lifeBlock = lifeBlock; api.lifeEvents = lifeEvents; api.aliasMerge = aliasMerge; api.gazWants = gazWants; api.gazMerge = gazMerge; api.didYouMean = didYouMean;
   api.createLoader = createLoader; api.createJourney = createJourney; api.el = el;
 })();

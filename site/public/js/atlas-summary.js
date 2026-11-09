@@ -57,7 +57,7 @@
      Returns [{word, rows}] with the places the Atlas holds volumes for first. */
   function candidates(text, map, skip) {
     var t = fold(text).split(" ").filter(Boolean), used = [], out = [], seen = Object.create(null);
-    for (var len = 3; len >= 1; len--) {
+    for (var len = 4; len >= 1; len--) {
       for (var i = 0; i + len <= t.length; i++) {
         var covered = false;
         for (var j = i; j < i + len; j++) if (used[j]) covered = true;
@@ -72,7 +72,8 @@
            word in an older or longer name ("London" before "New London"), then the Atlas's own places before the bare gazetteer's. */
         var exact = function (r) { return fold(r.n.replace(/\s*\([^)]*\)/g, "")) === w ? 0 : 1; }, own = function (r) { return /^[gp]-/.test(String(r.i)) ? 1 : 0; };
         /* An Atlas place that bears the typed name itself ("Tasmania") comes before one that only lists it among its older or containing names ("Launceston, Tasmania"), whatever their volumes. */
-        var named = function (r) { return exact(r) === 0 && !own(r) ? 0 : 1; };
+        var hasAl = rows.some(function (r) { return r.al && r.c > 0; });
+        var named = function (r) { return hasAl && !r.al && !(r.c > 0) ? 2 : exact(r) === 0 && !own(r) ? 0 : 1; };
         out.push({ word: w, at: i, rows: rows.slice().sort(function (a, b) { return named(a) - named(b) || (b.c || 0) - (a.c || 0) || (b.v || 0) - (a.v || 0) || exact(a) - exact(b) || own(a) - own(b) || String(a.cc).localeCompare(b.cc); }) });
       }
     }

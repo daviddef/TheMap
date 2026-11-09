@@ -148,7 +148,7 @@ const inventoryRows = [
     </div>
   </details>
   {/* RIGHT OF «LOCAL». David: «move the volume numbers to the right of "local" … short form, e.g. 3.43M». On a wide screen the pill moves into
-      the Researching group, after the Local dot; below the burger breakpoint that group is in the drawer and the dot sits beside the brand, so
+      the Researching group, before the save button (David: the icon goes to the right of the count); below the burger breakpoint that group is in the drawer and the dot sits beside the brand, so
       the pill goes back to sit after it. One element, moved by matchMedia (without script it stays beside the brand). */}
   <script is:inline>
     (function () {
@@ -157,7 +157,7 @@ const inventoryRows = [
       var home = pill.parentNode, next = pill.nextSibling;
       function place() {
         var live = document.querySelector(".ra-grp .ra-live-grp");
-        if (mq.matches && live) { live.parentNode.insertBefore(pill, live.nextSibling); pill.classList.add("in-grp"); }
+        if (mq.matches && live) { live.parentNode.insertBefore(pill, live); pill.classList.add("in-grp"); }
         else { home.insertBefore(pill, next); pill.classList.remove("in-grp"); }
       }
       place(); if (mq.addEventListener) mq.addEventListener("change", place);

@@ -125,3 +125,8 @@ test("a qualifier like Gornji (Upper) alone is not a place", () => {
   assert.equal(A.candidates("born in Gornji Draganec", map, {})[0].rows[0].i, "gornjidraganec");
   assert.equal(A.candidates("born in Draganec", map, {})[0].rows[0].i, "gornjidraganec");
 });
+
+test("two places of the same name with no volumes: the one with the most records comes first, not the first country alphabetically", () => {
+  const map = A.buildMap([{ i: "new-york", n: "New York", cc: "UA", c: 0, q: "new york" }, { i: "new-york-us", n: "New York", cc: "US", c: 0, v: 7865, q: "new york" }]);
+  assert.equal(A.candidates("lived in New York in 1920", map, {})[0].rows[0].i, "new-york-us");
+});

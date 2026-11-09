@@ -152,3 +152,18 @@ tuning problem and not a session's fault. Three things follow:
 Recorded rather than patched: the fix is somebody's deliberate choice about
 flat collections, and guessing a place for 1,608 South African probate films
 would be the same resemblance-not-a-match error this file already refuses.
+
+## What cannot be harvested, measured 9 Nov 2026
+
+**Uruguay and Peru.** `GET /platform/records/collections/<id>/waypoints` was asked for every Uruguay and Peru collection in
+`data/collections.json` (6 and 32): 37 answer 404 "FailureToGetWayPoints" and one (Peru, Áncash civil registration) 409. FamilySearch
+publishes no waypoint tree for them, so there are no volumes to index. That is why the world file holds 0 places for `uy` and `pe`, and
+why a film in these collections (the Lerena Uruguay film, DGS 007713373) carries only a `groupId` and no `wc=`/`owc=`. It is not a
+harvest bug. Work in them reaches the Atlas as `film:` and `collection:` marks (see the film fields in the record-atlas-feedback skill).
+
+**Antenati.** `data/antenati-registers.json` is 6,000 images of 464,770 (1.3%): the harvest stopped on 17 Sep and the unrestricted
+list has timed out since 9 Oct. The 5,591 "volumes" in it are mostly one-image groups, so the Atlas does not hold Antenati registers
+in any useful number, and the file keeps only `dc:title`, never the register id (`an_ua…`) that archives cite. On 9 Nov the endpoint
+(www.san.beniculturali.it, http and https) did not connect at all. A complete harvest is ~9,300 pages of 50 records at ~45 s each,
+about 116 hours, and would need `dc:identifier` kept per record to join to the `antenati:<an_ua>` marks. Until then Antenati work
+is recorded by register id as `antenati:` marks, which need no join.

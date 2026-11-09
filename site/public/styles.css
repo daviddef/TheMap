@@ -1713,3 +1713,12 @@ header.site .ra-grp a.ra-lines-l .ra-lines-i{flex:0 0 auto}
 .ra-lines-admin .ra-fam-b.ra-fam-i:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-wash); }
 .ra-lines-admin .ra-fam-b.ra-fam-i.danger:hover { border-color: var(--brick, #b3452e); color: var(--brick, #b3452e); background: transparent; }
 .ra-lines-admin .ra-fam-b.ra-fam-i:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* NARROW HEADER: THE ICONS SIT AT THE RIGHT, BESIDE THE MENU BUTTON. The header spreads its items with space-between, so a lone
+   save icon on a page with no volume-count icon floated to the middle. The first icon takes the free space; when the count icon is
+   there it is that one, otherwise the save icon. The empty tools span no longer adds a double gap before the menu button. */
+@media (max-width:1180px){
+  header.site .ra-live-top{margin-left:auto}
+  header.site .ra-inv ~ .ra-live-top{margin-left:0}
+  header.site .site-tools{display:contents}
+}

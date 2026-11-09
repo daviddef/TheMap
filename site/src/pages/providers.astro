@@ -131,18 +131,36 @@ const conf = {
   <form id="pv-find" class="pv-find" role="search" autocomplete="off">
     <div class="pv-row">
       <label class="pv-q"><span class="pv-lab">Search the sources and regions</span>
-        <input id="pv-q" type="search" placeholder="A name, a place, a kind of record: Antenati, croatia church, usa census, Istria…" enterkeyhint="search" /></label>
-      <label class="pv-c"><span class="pv-lab">Country</span><select id="pv-c"><option value="">All countries</option></select></label>
-      <label class="pv-w" id="pv-world-row" hidden><input id="pv-world" type="checkbox" checked /> and the worldwide services</label>
+        <input id="pv-q" type="search" placeholder="A name, a country, a kind of record: Antenati, croatia church, usa census, Istria…" enterkeyhint="search" /></label>
+      <details class="pv-drop" id="pv-filters">
+        <summary id="pv-fsum" aria-label="Filters: what it costs to look, kind of source" title="Filters: what it costs to look, kind of source">
+          <svg class="pv-funnel" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M1.5 2.5h13l-5 6v5l-3 1.5v-6.5z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+          <span class="pv-badge" id="pv-badge" hidden></span>
+        </summary>
+        <div class="pv-drop-in">
+          <p class="pv-fh">What it costs to look</p>
+          <div class="pv-opts" id="pv-acc">
+            {Object.entries(ACC).map(([k, label]) => (
+              <label class="pv-opt" title={provs.access[k]}><input type="checkbox" data-acc={k} /><i class={"pv-sw acc-" + k} aria-hidden="true"></i><span>{label}</span><b>{accCount[k] || 0}</b></label>
+            ))}
+          </div>
+          <p class="pv-fh">Kind of source</p>
+          <div class="pv-opts" id="pv-kindopts">
+            {kinds.map((k) => (
+              <label class="pv-opt"><input type="checkbox" data-kind={k} /><span>{(KIND[k] || k).split(" — ")[0]}</span><b>{P.filter((p) => p.kind === k).length}</b></label>
+            ))}
+          </div>
+          <p class="pv-fh">Help check a source</p>
+          <div class="pv-opts">
+            <label class="pv-opt" title="Not yet checked, and its homepage has already been read, so it is about ten minutes' work"><input type="checkbox" id="pv-easy" /><span>Easy starts: not yet checked, homepage already read</span><b>{easyStarts}</b></label>
+          </div>
+          <p class="pv-drop-foot"><button type="button" class="pv-link" id="pv-clear2">Clear the filters</button></p>
+        </div>
+      </details>
     </div>
     <div class="pv-tabs" role="group" aria-label="Two views of the same directory">
       <button type="button" class="pv-tab" data-view="kind" aria-pressed="true">Sources <span>{P.length.toLocaleString("en")}</span></button>
       <button type="button" class="pv-tab" data-view="regions" aria-pressed="false">Whose archive, by region and years <span>{regions.regions.length}</span></button>
-    </div>
-    <div class="pv-acc" role="group" aria-label="What it costs to look" id="pv-acc">
-      {Object.entries(ACC).map(([k, label]) => (
-        <button type="button" class={"chip acc-" + k} data-acc={k} aria-pressed="false" title={provs.access[k]}>{label}<span>{accCount[k] || 0}</span></button>
-      ))}
     </div>
     <p class="pv-line"><span id="pv-say" role="status" aria-live="polite">{P.length.toLocaleString("en")} sources</span>
       <button type="button" id="pv-newfilter" class="pv-link" hidden>showing one day's arrivals — show all</button>
@@ -158,10 +176,7 @@ const conf = {
       <p class="pv-helplead"><b>{unsurveyed} of these have never been opened.</b> A national register, an open dataset or a state's own list
         named them, which is worth knowing and is not the same as somebody having looked. Opening one takes about ten minutes,
         and it turns a grey dot into an answer.</p>
-      <p class="pv-helpgo">
-        <button type="button" class="pv-btn" id="pv-easy">Show the {easyStarts} easy starts</button>
-        <button type="button" class="pv-btn ghost" id="pv-allunchecked">All {unsurveyed} not yet checked</button>
-      </p>
+      <p class="pv-helpgo"><button type="button" class="pv-link" id="pv-easy-link">Show the {easyStarts} easy starts</button> · <button type="button" class="pv-link" id="pv-unchecked-link">all {unsurveyed} not yet checked</button></p>
       <p class="cap">An easy start is a source whose homepage we have already read, so the list shows what we found there.</p>
       <details class="pv-how">
         <summary>How to check one</summary>
@@ -185,7 +200,6 @@ const conf = {
       </details>
     </section>
 
-    <nav class="jump" id="pv-jump" aria-label="Kinds of source"></nav>
     <div id="pv-kinds"></div>
 
     <noscript>
@@ -270,10 +284,6 @@ const conf = {
   /* FULL WIDTH. This page is a wide table; the shared reading width left half the screen as margin. */
   :root { --maxw: min(2200px, 98vw); }
   .pv-root [hidden] { display: none !important; }
-  .pv-root .jump { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-  .pv-root .jump a { text-decoration: none; color: var(--ink-2); }
-  .pv-root .jump a:hover { border-color: var(--accent); color: var(--accent); }
-  .pv-root .jump a span { color: var(--ink-3); margin-left: 4px; }
   /* Fixed widths, because auto layout gave the description whatever the short columns left and squeezed it to a third of the card. */
   .pv-root .k-table { table-layout: fixed; }
   .pv-root .c-name { width: 20%; } .pv-root .c-what { width: 46%; } .pv-root .c-acc { width: 10%; } .pv-root .c-where { width: 12%; } .pv-root .c-date { width: 11%; }
@@ -303,19 +313,38 @@ const conf = {
   .pv-row { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: end; }
   .pv-lab { display: block; font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
   .pv-q { flex: 1 1 420px; }
-  .pv-q input, .pv-c select { width: 100%; box-sizing: border-box; font: 16px var(--sans); color: var(--ink); background: var(--panel);
+  .pv-row { flex-wrap: nowrap; }
+  .pv-q input { width: 100%; box-sizing: border-box; font: 16px var(--sans); color: var(--ink); background: var(--panel);
     border: 1px solid var(--rule-strong, var(--rule)); border-radius: 10px; padding: 11px 14px; }
-  .pv-q input:focus, .pv-c select:focus { outline: 3px solid var(--accent); outline-offset: 1px; }
-  .pv-c { flex: 0 1 280px; }
-  .pv-w { font: 13px var(--sans); color: var(--ink-2); display: flex; gap: 6px; align-items: center; padding-bottom: 12px; }
-  .pv-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pv-q input:focus { outline: 3px solid var(--accent); outline-offset: 1px; }
+    .pv-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
   .pv-tab { font: 600 14px var(--sans); color: var(--ink-2); background: var(--panel); border: 1px solid var(--rule-strong, var(--rule)); border-radius: 10px; padding: 9px 16px; cursor: pointer; }
   .pv-tab span { font: 11px var(--mono); margin-left: 8px; opacity: .7; }
   .pv-tab[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); background: var(--accent-wash); }
-  .pv-acc { display: flex; flex-wrap: wrap; gap: 8px; }
-  .pv-acc .chip { cursor: pointer; border: 1px solid transparent; font: 600 12.5px var(--sans); padding: 6px 12px; border-radius: 99px; }
-  .pv-acc .chip span { font: 11px var(--mono); margin-left: 7px; opacity: .75; }
-  .pv-acc .chip[aria-pressed="true"] { border-color: currentColor; box-shadow: inset 0 0 0 1px currentColor; }
+  /* THE FILTERS ARE THE HOME SCREEN'S: one funnel that opens a panel of pill options with their counts, and fills when something is narrowed. */
+  .pv-drop { position: relative; align-self: end; }
+  .pv-drop > summary { list-style: none; cursor: pointer; box-sizing: border-box; height: 46px; min-width: 46px; padding: 0 12px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    color: var(--ink-2); background: var(--panel); border: 1px solid var(--rule-strong, var(--rule)); border-radius: 10px; }
+  .pv-drop > summary::-webkit-details-marker { display: none; }
+  .pv-drop > summary:hover { border-color: var(--accent); color: var(--accent); }
+  .pv-drop > summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .pv-drop.has-filter > summary { border-color: var(--accent); background: var(--accent-wash); color: var(--accent); }
+  .pv-drop.has-filter .pv-funnel path { fill: var(--accent); stroke: var(--accent); }
+  .pv-funnel { width: 18px; height: 18px; display: block; flex: none; }
+  .pv-badge { font: 500 11px/1.7 var(--mono); color: var(--accent); }
+  .pv-drop:not([open]) > .pv-drop-in { display: none; }
+  .pv-drop > .pv-drop-in { position: absolute; top: calc(100% + 6px); right: 0; z-index: 40; width: min(94vw, 560px); box-sizing: border-box; background: var(--panel);
+    border: 1px solid var(--rule-strong); border-radius: 10px; padding: 6px 18px 14px; box-shadow: 0 10px 28px rgba(10, 20, 26, .28); }
+  .pv-fh { margin: 14px 0 8px; font: 600 11px var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+  .pv-opts { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pv-opt { display: inline-flex; align-items: center; gap: 7px; padding: 6px 11px; border: 1px solid var(--rule); border-radius: 999px; background: var(--panel); cursor: pointer; font: 400 12px/1.2 var(--sans); color: var(--ink-2); }
+  .pv-opt:has(input:checked) { border-color: var(--accent); color: var(--ink); }
+  .pv-opt input { margin: 0; width: 12px; height: 12px; accent-color: var(--accent); flex: none; }
+  .pv-opt b { font: 500 10.5px/1.6 var(--mono); color: var(--ink-3); }
+  .pv-sw { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex: none; }
+  .pv-sw.acc-free { background: #1E8449; } .pv-sw.acc-account { background: #6FA82E; } .pv-sw.acc-index { background: #EFC03B; } .pv-sw.acc-mixed { background: #E8792B; }
+  .pv-sw.acc-paid { background: #C0392B; } .pv-sw.acc-catalogue { background: #8E6FA8; } .pv-sw.acc-onsite { background: #7C8A91; } .pv-sw.acc-unsurveyed { background: #9aa3a8; }
+  .pv-drop-foot { margin: 14px 0 0; }
   .pv-line { margin: 0; font: 13px var(--sans); color: var(--ink-3); display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; }
   .pv-link { background: none; border: 0; padding: 0; font: inherit; color: var(--accent); text-decoration: underline; cursor: pointer; }
   .pv-none { font: 15px var(--sans); color: var(--ink-2); background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 14px 18px; }
@@ -328,10 +357,10 @@ const conf = {
   .pv-newpill:hover { background: var(--accent); color: #fff; }
   .pv-btn { font: 600 13.5px var(--sans); color: #fff; background: var(--accent); border: 1px solid var(--accent); border-radius: 99px; padding: 8px 16px; cursor: pointer; }
   .pv-btn.ghost { color: var(--accent); background: transparent; }
+  .pv-helpgo { margin: 0 0 6px; font: 14px var(--sans); color: var(--ink-3); }
   .pv-help { margin-top: 10px; }
   .pv-helplead { font: 16px/1.55 var(--serif); color: var(--ink); max-width: 80ch; margin: 0 0 10px; }
-  .pv-helpgo { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 6px; }
-  .pv-how { margin-top: 12px; }
+    .pv-how { margin-top: 12px; }
   .pv-how > summary { cursor: pointer; font: 600 14px var(--sans); color: var(--accent); }
   .pv-about { margin-top: 36px; max-width: 90ch; font: 14.5px/1.6 var(--sans); color: var(--ink-2); }
   .pv-two { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); max-width: 120ch; }

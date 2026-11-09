@@ -122,7 +122,9 @@ test("my father Marco / my mother Lucia are named, and 'was from' is not a name"
 test("a long story is read in a moment, not seconds", () => {
   const t = "My grandfather Giovanni was born in Udine in 1890. He worked as a farmer. In 1912 he emigrated to Buenos Aires with his wife Maria. ".repeat(150);
   const t0 = Date.now(); F.parseStory(t, ctx);
-  assert.ok(Date.now() - t0 < 1500, "took " + (Date.now() - t0) + " ms");
+  /* A guard against a runaway (quadratic) read, not a benchmark: ~0.4 s on a laptop, and it measured 2 s on a busy shared CI runner,
+     which failed a whole deploy. 6 s still catches a read that has gone quadratic. */
+  assert.ok(Date.now() - t0 < 6000, "took " + (Date.now() - t0) + " ms");
 });
 
 /* ---- the person, as told: looks, loves, character, marriages, hard times, weather, and how they died, kept in the story's words ---- */

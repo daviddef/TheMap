@@ -124,7 +124,13 @@
     if (isAdmin) {
       fam = { who: mk("span", "ra-fam-who"), sess: mk("span", "ra-fam-sess"), tools: mk("span", "ra-fam-tools"), panel: mk("div", "ra-fam-panel") };
       fam.panel.hidden = true;
-      function tool(label, cls, fn) { var b = mk("button", "ra-fam-b" + (cls ? " " + cls : ""), label); b.type = "button"; b.addEventListener("click", fn); fam.tools.append(b); return b; }
+      /* round icon buttons, the same make as the header's Save, Read and Contrast; the words are the tooltip and the screen-reader name */
+      var ICO = { pen: '<path d="M4 20h4L19 9l-4-4L4 16z M13.5 6.5l4 4" />', bin: '<path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13M10 11v6M14 11v6" />', print: '<path d="M7 9V3h10v6M7 17H4v-7h16v7h-3M7 14h10v7H7z" />' };
+      function tool(label, cls, fn, ico) {
+        var b = mk("button", "ra-fam-b ra-fam-i" + (cls ? " " + cls : "")); b.type = "button"; b.title = label; b.setAttribute("aria-label", label);
+        b.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + ICO[ico] + "</svg>";
+        b.addEventListener("click", fn); fam.tools.append(b); return b;
+      }
       function current() { return P.lines().filter(function (l) { return l.active; })[0]; }
       function openPanel(kind) {
         var me = current(); if (!me) return;
@@ -151,9 +157,9 @@
           no2.addEventListener("click", function () { p.hidden = true; });
         }
       }
-      tool("Rename", "", function () { openPanel("rename"); });
-      tool("Remove", "danger", function () { openPanel("remove"); });
-      tool("Print / save as PDF", "", function () { window.print(); });
+      tool("Rename this family", "", function () { openPanel("rename"); }, "pen");
+      tool("Remove this family", "danger", function () { openPanel("remove"); }, "bin");
+      tool("Print or save as PDF", "", function () { window.print(); }, "print");
       var after = bar.querySelector(".ra-lines-n");
       bar.insertBefore(fam.who, sel); bar.insertBefore(fam.sess, sel); bar.insertBefore(fam.tools, sel);
       bar.append(fam.panel);
@@ -170,7 +176,7 @@
           ar.slice(0, 3).forEach(function (a, i) { if (i) fam.sess.append(", "); var s = String(a.name || a.id || a).replace(/^The /, ""), url = a.url || a.href; if (url) { var l = mk("a", "", s + " \u2197"); l.href = url; l.target = "_blank"; l.rel = "noopener"; fam.sess.append(l); } else fam.sess.append(s); });
         } else fam.sess.append(me.session ? "From a family research session" : "Started by you");
       }
-      Array.prototype.forEach.call(fam.tools.children, function (b) { b.disabled = !me; });
+      fam.tools.hidden = !me;
       /* the page's own title says whose research it is */
       var h = document.querySelector(".pagehead h1"), ttl = me ? "My research: " + labelOf(me) : "My research";
       if (h) h.textContent = ttl;

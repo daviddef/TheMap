@@ -14,7 +14,7 @@ import { u } from "../lib/url.js";
   <div class="sd-head">
     <div>
       <h2 class="sd-h">Who are you looking for?</h2>
-      <p class="sd-sub">Tell us in your own words, or drop a photo or document. We'll find them on the map.</p>
+      <p class="sd-sub">Write what you know, even a few words. Add a photo or document if you have one. The map fills in as you go.</p>
     </div>
     <button type="button" class="sd-x" aria-label="Close and go back to the map">×</button>
   </div>
@@ -23,22 +23,24 @@ import { u } from "../lib/url.js";
     <label class="sd-lab" for="sd-text">What do you know?</label>
     <textarea id="sd-text" class="sd-text" rows="4" maxlength="8000" spellcheck="false" placeholder="My great-grandfather Ivan came from Gallignana to Hamilton around 1905. All I have is this photo."></textarea>
     <ul class="sd-shots" hidden aria-label="Pictures you added"></ul>
-    <p class="sd-read" hidden><button type="button" class="sd-read-btn">Read the pictures with Claude</button>
-      <span class="sd-fine sd-read-note">Sends the pictures to Claude, through ai.recordatlas.org, and adds what they say about people with this surname to your story below, where you can edit it. A picture uses 2 of today's free reads. Nothing is sent until you press.</span></p>
+    <div class="sd-read" hidden>
+      <p class="sd-read-why">Claude can read the names and writing on your photo and add them to your story.</p>
+      <button type="button" class="sd-read-btn">Read it with Claude</button>
+      <p class="sd-fine sd-read-note">Only the picture and the surnames in your story are sent, through ai.recordatlas.org, and only when you press this. Each picture uses 2 of today's free reads.</p>
+    </div>
     <p class="sd-row">
       <label class="sd-add"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 16V5m0 0l-4 4m4-4l4 4M5 19h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Add a photo or document<input type="file" class="sd-file" accept="image/jpeg,image/png,image/webp" multiple hidden /></label>
       <button type="button" class="sd-eg">Try an example</button>
-      <button type="button" class="sd-clear">Start again</button>
+      <button type="button" class="sd-clear" hidden>Start again</button>
     </p>
-    <p class="sd-fine">or drag a picture onto this box, or paste one. It stays in this tab.</p>
+    <p class="sd-fine">You can also drop or paste a picture here.</p>
   </div>
 
   <div class="sd-chips" aria-live="polite"></div>
   <p class="sd-status" role="status" aria-live="polite"></p>
 
-  <p class="sd-fine sd-priv">Nothing you type or drop is sent anywhere. Please don't enter details of anyone who may be alive.
-    To read writing on a photo with Claude, open <a href={u("/read/#ask")}>Reading the record</a>.</p>
+  <p class="sd-fine sd-priv">Your words stay in this browser. A picture goes to Claude only if you press "Read it with Claude". Please don't enter details of anyone who may be alive.</p>
 </aside>
 
 <section id="ra-journey" class="sd sdk sd-journey" aria-label="Play their journey" hidden>
@@ -125,7 +127,8 @@ import { u } from "../lib/url.js";
   .sd-lab { display: block; font: 600 12px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin: 2px 0 8px; }
   .sd-text { width: 100%; box-sizing: border-box; border: 0; background: transparent; font: 400 16px/1.5 var(--sans); color: var(--ink); resize: vertical; min-height: 84px; outline: none; }
   .sd-text::placeholder { color: var(--ink-3); }
-  .sd-read { margin: 4px 0 8px; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+  .sd-read { margin: 6px 0 8px; display: grid; gap: 6px; justify-items: start; } .sd-read[hidden], .sd-clear[hidden] { display: none; }
+  .sd-read-why { margin: 0; font-size: 13.5px; line-height: 1.45; color: var(--ink); }
   .sd-read-btn { font: 600 13px/1 var(--sans); padding: 9px 14px; border: 1px solid var(--accent); border-radius: 999px; background: var(--accent); color: #fff; cursor: pointer; } .sd-read-btn:disabled { opacity: .6; cursor: default; }
   .sd-shots { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0; padding: 0; list-style: none; }
   .sd-shot { position: relative; display: inline-block; }

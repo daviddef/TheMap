@@ -191,6 +191,7 @@
 
     function run() {
       var t = text.value;
+      var clr = $(".sd-clear"); if (clr) clr.hidden = !t.trim() && !files.length;
       LD.resolveMissing(t).catch(function () { return LD.load(); }).then(function (d) {
         data = d;
         var attached = files.length ? "photo" : null;

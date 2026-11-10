@@ -1269,8 +1269,8 @@ def whats_new_gate():
             datetime.date.fromisoformat(e.get("date", ""))
         except ValueError:
             err(f"{where}: date {e.get('date')!r} is not YYYY-MM-DD")
-        if e.get("kind") not in ("new", "better", "fixed"):
-            err(f"{where}: kind {e.get('kind')!r} must be new, better or fixed (it is the badge on /whats-new/)")
+        if e.get("kind") not in ("new", "better", "fixed", "research"):
+            err(f"{where}: kind {e.get('kind')!r} must be new, better, fixed or research (it is the badge on /whats-new/; research is data gained)")
         h = (e.get("headline") or "").strip()
         if not h:
             err(f"{where}: no headline")

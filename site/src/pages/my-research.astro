@@ -113,6 +113,7 @@ const BASE_ = u("/");
   <div class="rs-panel mr-panel" id="mr-p-families" role="tabpanel" aria-labelledby="mr-t-families">
   <div id="mr-map" hidden></div>
   <p class="cap" id="mr-map-cap" hidden></p>
+  <p class="cap" id="mr-dots-hint" hidden></p>
 
   <div id="mr-body"></div>
   </div>
@@ -987,6 +988,14 @@ const BASE_ = u("/");
          the places this family has worked are fetched: one to four files, and never the whole world. The first draw has no
          neighbours yet; the redraw when a cell arrives adds them. */
       var CELLS = {}, CELLASK = {};
+      function rebuildIdx() { IDX = [].concat.apply([], Object.keys(CELLS).map(function (c) { return CELLS[c]; })); }
+      function askCell(k, done) {
+        if (CELLASK[k]) { if (CELLS[k] && done) done(); return; }
+        CELLASK[k] = 1;
+        fetch(BASE + "pi/" + k + ".json").then(function (r) { return r.json(); })
+          .then(function (d) { CELLS[k] = d.places || []; }).catch(function () { CELLS[k] = []; })
+          .then(function () { if (done) done(); });
+      }
       function wantCells(pts) {
         var need = {};
         pts.forEach(function (p) {
@@ -1009,6 +1018,49 @@ const BASE_ = u("/");
           IDX = [].concat.apply([], Object.keys(CELLS).map(function (c) { return CELLS[c]; }));
       }
 
+      /* EVERY PLACE THAT HAS RECORDS AT ALL, as small dots, for whatever the map is showing. It is drawn from the same 5-degree index cells
+         the main map reads (a place with FamilySearch books, or with any listed collection), fetched for the cells in view only, and only
+         from zoom 7 in (about a region) so a whole country is not a carpet. A click opens the place and, when it has FamilySearch books, puts them on this
+         family's to-do list with the same «Plan its books» the recommended places use. Places already on the page (worked, or recommended)
+         are not drawn twice. */
+      var DOTZ = 7, DOTMAX = 1500;
+      function viewCells() {
+        if (!mrMap || mrMap.getZoom() < DOTZ) return;
+        var b = mrMap.getBounds(), keys = [];
+        for (var la = Math.floor(b.getSouth() / 5) * 5; la <= b.getNorth(); la += 5)
+          for (var lo = Math.floor(b.getWest() / 5) * 5; lo <= b.getEast(); lo += 5) keys.push(la + "_" + lo);
+        if (keys.length > 12) return;
+        keys.forEach(function (k) { askCell(k, function () { rebuildIdx(); drawDots(); }); });
+      }
+      function drawDots() {
+        if (!mrMap || mrMap._raPop) return;
+        if (mrMap._raDots) { mrMap.removeLayer(mrMap._raDots); mrMap._raDots = null; }
+        var hint = document.getElementById("mr-dots-hint");
+        function say(t) { if (hint) { hint.textContent = t; hint.hidden = !t; } }
+        if (mrMap.getZoom() < DOTZ) { say("Zoom in to see every place with records; at this distance only your places and the recommended ones are shown."); return; }
+        if (!IDX) { say(""); return; }
+        var b = mrMap.getBounds().pad(0.1), skip = mrMap._raSkip || {};
+        var here = IDX.filter(function (p) {
+          return p.y != null && (p.v > 0 || p.c > 0) && !skip[p.i] && b.contains([p.y, p.x]);
+        });
+        var cut = here.length > DOTMAX;
+        if (cut) here = here.sort(function (a, c) { return (c.v || 0) - (a.v || 0); }).slice(0, DOTMAX);
+        var g = L.layerGroup();
+        here.forEach(function (p) {
+          var plan = p.v > 0
+            ? '<br><button type="button" class="mrn-plan" data-pid="' + esc(p.i) + '" data-name="' + esc(esc2(p.n)) + '">Plan its books</button>'
+            : '<br><span class="mrs-none">no FamilySearch books listed, so nothing to plan here</span>';
+          L.circleMarker([p.y, p.x], { radius: 5, color: "#ffffff", weight: 1.5, fillColor: "#6B5B73", fillOpacity: .85 })
+            .addTo(g).bindPopup('<a href="' + BASE + "place/" + esc(p.i) + '/">' + esc2(p.n) + "</a><br>" +
+              (p.v ? p.v.toLocaleString() + " FamilySearch book" + (p.v === 1 ? "" : "s") : "") +
+              (p.v && p.c ? " \u00b7 " : "") + (p.c ? p.c.toLocaleString() + " collection" + (p.c === 1 ? "" : "s") : "") + plan);
+        });
+        g.addTo(mrMap); mrMap._raDots = g;
+        say(here.length ? (cut ? "Showing the " + DOTMAX.toLocaleString() + " places with the most books in view; zoom in for the rest. " :
+                                 "Showing " + here.length.toLocaleString() + " other place" + (here.length === 1 ? "" : "s") + " with records in view. ") +
+                          "Click a dot to open it or plan its books." : "");
+      }
+
       function drawMap() {
         var box = document.getElementById("mr-map");
         var cap = document.getElementById("mr-map-cap");
@@ -1027,7 +1079,7 @@ const BASE_ = u("/");
         wantCells(pts);
         var ns = nextSteps(pts);
         drawNext(ns, pts);
-        if (pts.length < 2 && !(pts.length && ns.path.length)) {
+        if (!pts.length) {
           box.hidden = true; if (cap) cap.hidden = true;
           if (mrMap) { mrMap.remove(); mrMap = null; }
           return;
@@ -1035,6 +1087,16 @@ const BASE_ = u("/");
         box.hidden = false;
         if (!mrMap) {
           mrMap = L.map(box, { scrollWheelZoom: false, preferCanvas: true });
+          /* ONCE THE READER HAS MOVED THE MAP IT STAYS WHERE THEY PUT IT: planning a place redraws the page, and the map must not jump back */
+          ["pointerdown", "wheel", "keydown"].forEach(function (ev) { box.addEventListener(ev, function () { mrMap._raMoved = true; }, { passive: true }); });
+          mrMap.on("moveend zoomend", function () { viewCells(); drawDots(); });
+          /* a popup pans the map, and the redraw that follows would close it: leave the dots alone while one is open */
+          mrMap.on("popupopen", function (e) {
+            mrMap._raPop = true;
+            var el = e.popup.getElement(), b = el && el.querySelector(".mrn-plan");
+            if (b) b.addEventListener("click", function () { planPlace(b); mrMap.closePopup(); });
+          });
+          mrMap.on("popupclose", function () { mrMap._raPop = false; drawDots(); });
           /* The same quiet ground as the main map: Esri's light grey canvas, with
              its place names in a separate pane above the tiles and below the pins. */
           L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
@@ -1075,7 +1137,13 @@ const BASE_ = u("/");
         });
         g.addTo(mrMap); mrMap._raPins = g;
         var all = pts.map(function (p) { return [p.y, p.x]; }).concat(ns.path.map(function (c) { return [c.y, c.x]; }));
-        mrMap.fitBounds(L.latLngBounds(all).pad(0.2), { maxZoom: 13 });
+        var sig = all.map(function (q) { return q.join(","); }).join(";");
+        mrMap._raSkip = {};
+        pts.forEach(function (p) { mrMap._raSkip[p.id] = 1; });
+        ns.path.forEach(function (c) { mrMap._raSkip[c.id] = 1; });
+        if (mrMap._raSig !== sig && !mrMap._raMoved) mrMap.fitBounds(L.latLngBounds(all).pad(0.2), { maxZoom: 13 });
+        mrMap._raSig = sig;
+        viewCells(); drawDots();
         if (cap) {
           var nd = pts.filter(function (p) { return p.complete; }).length;
           cap.hidden = false;
@@ -1084,6 +1152,7 @@ const BASE_ = u("/");
             '<span class="mrleg"><i class="mr-pin mr-pin-part">•</i> in flight (some books read)</span>' +
             '<span class="mrleg"><i class="mr-pin mr-pin-plan">•</i> planned</span>' +
             '<span class="mrleg"><i class="mr-pin mr-pin-found mr-pin-part">•</i> found something</span>' +
+            '<span class="mrleg"><i class="mr-dot"></i> other place with records (zoom in; click one to plan its books)</span>' +
             (ns.path.length ? '<span class="mrleg"><i class="mr-pin mr-pin-g">A</i> recommended next, dashed line is the path</span>' : "");
         }
       }
@@ -1105,6 +1174,20 @@ const BASE_ = u("/");
         P.setWhat(id, { t: title, where: label, href: BASE + "place/" + pid + "/" });
         P.setState(id, "planned");
       }
+      /* «PLAN ITS BOOKS»: every FamilySearch book the atlas lists for the place goes onto this family's to-do list as «planned». The same
+         button sits on the recommended cards and in the map's popups. */
+      function planPlace(plan) {
+        var ppid = plan.getAttribute("data-pid"), pname = plan.getAttribute("data-name");
+        if (!P.active()) { document.dispatchEvent(new CustomEvent("ra-need-family")); return; }
+        plan.disabled = true; plan.textContent = "Adding\u2026";
+        fetch(BASE + "p/" + ppid + ".json").then(function (r) { return r.json(); }).then(function (d) {
+          PLACEC[ppid] = d;
+          (d.volumes || []).forEach(function (v) {
+            if (v.waypoint) addTodo(ppid, String(v.waypoint).split(":")[0], v.t || v.waypoint, pname);
+          });
+          document.dispatchEvent(new CustomEvent("ra-progress-changed"));
+        }).catch(function () { plan.disabled = false; plan.textContent = "Plan its books"; });
+      }
       function onBodyClick(e) {
         var t = e.target.closest ? e.target : null;
         if (!t) return;
@@ -1119,19 +1202,7 @@ const BASE_ = u("/");
           return;
         }
         var plan = t.closest(".mrn-plan");
-        if (plan) {
-          var ppid = plan.getAttribute("data-pid"), pname = plan.getAttribute("data-name");
-          if (!P.active()) { document.dispatchEvent(new CustomEvent("ra-need-family")); return; }
-          plan.disabled = true; plan.textContent = "Adding…";
-          fetch(BASE + "p/" + ppid + ".json").then(function (r) { return r.json(); }).then(function (d) {
-            PLACEC[ppid] = d;
-            (d.volumes || []).forEach(function (v) {
-              if (v.waypoint) addTodo(ppid, String(v.waypoint).split(":")[0], v.t || v.waypoint, pname);
-            });
-            document.dispatchEvent(new CustomEvent("ra-progress-changed"));
-          }).catch(function () { plan.disabled = false; plan.textContent = "Plan its books"; });
-          return;
-        }
+        if (plan) { planPlace(plan); return; }
         var all = t.closest(".mraddall");
         if (all) {
           var pid = all.getAttribute("data-pid");
@@ -1195,6 +1266,9 @@ const BASE_ = u("/");
   :global(.mr-pin.mr-pin-found), :global(.mr-pin.mr-pin-found.mr-pin-done), :global(.mr-pin.mr-pin-found.mr-pin-plan) { box-shadow: 0 0 0 3px #C9971C, 0 1px 3px rgba(0,0,0,.4); }
   :global(.mr-pin.mr-pin-g) { background: var(--panel); color: var(--r-hre); box-shadow: inset 0 0 0 2px var(--r-hre); border: 0; }
   #mr-map-cap { line-height: 2; }
+  #mr-dots-hint { margin-top: 0; }
+  :global(.mr-dot) { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--r-hre); border: 1.5px solid var(--panel); box-shadow: 0 0 0 1px var(--r-hre); }
+  :global(.mrs-none) { color: #4C5D66; font-size: 12px; }
   :global(.mrleg) { display: inline-flex; align-items: center; gap: 5px; margin-left: 14px; white-space: nowrap; }
   :global(.mrleg .mr-pin) { display: inline-block; width: 18px; height: 18px; line-height: 18px; font-size: 11px; font-style: normal; }
   /* A PLACE CARD TAKES ITS COLOUR FROM ITS STATE, in the title, the left bar and the header tint; and says it in words as well
@@ -1224,6 +1298,9 @@ const BASE_ = u("/");
     background: var(--panel); color: var(--st); border-radius: 3px; cursor: pointer; }
   :global(.mrn-plan:hover) { background: var(--st); color: var(--panel); }
   :global(.mrn-plan:disabled) { opacity: .6; cursor: default; }
+  /* a map popup is white in both themes, so its button carries its own colours instead of the page's */
+  :global(.leaflet-popup-content .mrn-plan) { --st: #1F5C6B; background: #ffffff; color: #1F5C6B; border-color: #1F5C6B; margin-top: 6px; }
+  :global(.leaflet-popup-content .mrn-plan:hover) { background: #1F5C6B; color: #ffffff; }
 
   /* THE PAGE USES ITS WIDTH. The shared reading measure (44rem) is right for an article and wrong here: David, on a wide screen, saw
      the boxes and notes squeezed to half the page with the rest empty. Only inside this page; the measure stays everywhere else. */

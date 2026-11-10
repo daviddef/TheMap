@@ -180,6 +180,7 @@ def cmd_add(a):
            "status": "attested" if (a.from_ is not None or a.to is not None) else "lead", "sources": [{"title": title.strip(), "url": url.strip()}]}
     if a.regime:
         row["regime"] = a.regime
+    row["added"] = datetime.date.today().isoformat()   # when this name reached the catalogue: what's-new reads it. Never a person.
     row = {k: v for k, v in row.items() if v is not None}
     hit = next((n for n in p["names"] if sv.form_key(n["name"]) == sv.form_key(a.name) and n.get("from") == row.get("from")), None)
     if hit:

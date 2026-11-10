@@ -18,6 +18,7 @@ import site from "../data/site.json";
 import provs from "../../public/providers.json";
 import sessions from "../../public/research-sessions.json";
 import { researchNews } from "../lib/research-news.js";
+import { namesNews } from "../lib/names-news.js";
 
 const KINDS = {
   new:    { label: "New",    glyph: "✦" },
@@ -52,7 +53,9 @@ const sourceEntries = Object.entries(arrivals).map(([date, list]) => {
 /* sources first within their day: they were at the bottom of a long day and nobody scrolled to them */
 /* THE FAMILY ARCHIVES' WORK, A DAY AT A TIME, from the published research sessions (never a note: see lib/research-news.js) */
 const rn = researchNews(sessions);
-const entries = sourceEntries.concat(rn.entries, data.entries).sort((a, b) => b.date.localeCompare(a.date));
+/* NEW SPELLINGS, GIVEN-NAME FORMS AND DATED PLACE NAMES, from the dates the catalogues stamp on what is added (lib/names-news.js) */
+const nn = namesNews();
+const entries = sourceEntries.concat(rn.entries, nn, data.entries).sort((a, b) => b.date.localeCompare(a.date));
 const byDay = {};
 for (const e of entries) (byDay[e.date] = byDay[e.date] || []).push(e);
 const days = Object.entries(byDay).sort((a, b) => b[0].localeCompare(a[0]));

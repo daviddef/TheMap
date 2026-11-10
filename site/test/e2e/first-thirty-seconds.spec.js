@@ -160,19 +160,15 @@ test("the three filters are one control, and none of them shoves the map", async
      reader touches most looking like scattered chrome next to two that
      looked designed. All three say their own state now, so a closed one
      still answers "what is on the map". */
-  for (const id of ["ra-laysum", "ra-catsum", "ra-kindsum"]) {
-    const sum = page.locator("#" + id);
-    /* The state used to be spelt out in the label — «Layers — 2 of 8 on».
-       David asked for the light form, so the visible text is now «Layers 2»
-       and the sentence moved to the tooltip, where it is still the thing a
-       reader gets when they ask. Assert both halves: the label carries a
-       number, and hovering explains what the number counts. */
-    /* A number when some are off, «All» when none are — «Costs All» carries
-       no digit and my first pass at this asserted one. Either is a state. */
-    await expect(sum).toContainText(/\d+|All/);
-    await expect(sum).toHaveAttribute("title", /—/);
-    await expect(sum).toHaveAttribute("aria-label", /—/);
-  }
+  /* ONE FUNNEL, NO WORDS. David (9 Nov): «can filters just be a filter icon, no text». The closed control is an icon and says nothing in its
+     label; the state lives in the title and the aria-label, which is where a reader who asks, or a screen reader, looks. The cost and kind
+     groups are headings inside the panel now, not three summaries of their own, so the spec asks of the one control what it can still promise:
+     a funnel to see, and a sentence that explains it. (It asserted a digit or «All» in the visible text on all three, and went red on the live
+     site from the day the words were removed.) */
+  const sum = page.locator("#ra-laysum");
+  await expect(sum.locator("svg.ra-funnel")).toHaveCount(1);
+  await expect(sum).toHaveAttribute("title", /—/);
+  await expect(sum).toHaveAttribute("aria-label", /—/);
   const mapTop = async () => (await page.locator("#ra-map").boundingBox()).y;
   const settled = await mapTop();
   await page.locator("#ra-layersw summary").click();

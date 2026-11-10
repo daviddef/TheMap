@@ -6,6 +6,12 @@
   "compatibility_date": "2025-09-01",
   // No custom domain yet: that is a DNS change and is David's to make. For now it answers on its workers.dev address.
   "workers_dev": true,
+  // CUTOVER (see docs/split-build.md): uncomment after the Cloudflare proxy is on and SSL is Full (strict), then `npx wrangler deploy`.
+  // Rollback: comment out again and deploy.
+  // "routes": [
+  //   { "pattern": "recordatlas.org/*", "zone_name": "recordatlas.org" },
+  //   { "pattern": "www.recordatlas.org/*", "zone_name": "recordatlas.org" }
+  // ],
   "r2_buckets": [{ "binding": "SITE", "bucket_name": "record-atlas-site" }],
   "vars": { "ORIGIN": "https://recordatlas.org" },
   "observability": { "enabled": false }

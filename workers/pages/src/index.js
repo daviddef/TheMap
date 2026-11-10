@@ -21,6 +21,14 @@ export function keyFor(pathname) {
   return p;
 }
 
+/* The URL to ask ORIGIN for. Built by concatenation, never `new URL(path, base)`: a path that starts with two slashes
+   (//host/x) is read there as a protocol-relative URL and would send the request to another host entirely. */
+export function originFor(origin, pathname, search) {
+  const base = String(origin).replace(/\/+$/, "");
+  const path = "/" + String(pathname).replace(/^\/+/, "");
+  return base + path + (search || "");
+}
+
 const extOf = (k) => (k.match(/\.([a-z0-9]+)$/i) || [, ""])[1].toLowerCase();
 
 export default {
@@ -45,8 +53,9 @@ export default {
       return new Response(req.method === "HEAD" ? null : obj.body, { headers: h });
     }
     /* not ours: the origin answers, unchanged */
-    const origin = new URL(url.pathname + url.search, env.ORIGIN);
-    const r = await fetch(origin.toString(), { method: req.method, headers: { accept: req.headers.get("accept") || "*/*" }, redirect: "manual" });
+    /* If ORIGIN is this very site and the request came back to us, answering again would loop for ever: stop it. */
+    if (req.headers.get("x-ra-hop")) return new Response("Origin loop", { status: 508 });
+    const r = await fetch(originFor(env.ORIGIN, url.pathname, url.search), { method: req.method, headers: { accept: req.headers.get("accept") || "*/*", "x-ra-hop": "1" }, redirect: "manual" });
     const out = new Response(r.body, r);
     out.headers.set("x-served-from", "origin");
     return out;

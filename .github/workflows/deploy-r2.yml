@@ -252,6 +252,16 @@ jobs:
           fail-on-cache-miss: true
       - name: Put tracked files in site/public back as committed
         run: git checkout -- site/public
+      # THE SURNAME PAGES READ data/fs-volumes-world.json.gz DIRECTLY (lib/surname-volumes.js) and, when it is missing, only WARN and drop the
+      # «volumes held for <country>» paragraph. The first sliced run did not fetch it and published 24,723 surname pages without that
+      # paragraph; comparing every file with a normal build of the same commit caught it. So it is fetched here, and the build does not
+      # start without it.
+      - name: Fetch the harvest artefact
+        run: |
+          curl -fsSL --retry 10 --retry-delay 15 --retry-all-errors \
+            -o data/fs-volumes-world.json.gz \
+            https://github.com/daviddef/TheMap/releases/download/harvest-data/fs-volumes-world.json.gz
+          test -s data/fs-volumes-world.json.gz
       - name: Build this slice
         run: NODE_OPTIONS=--max-old-space-size=10240 npx astro build
         working-directory: site

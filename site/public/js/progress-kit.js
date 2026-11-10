@@ -33,6 +33,35 @@
         : String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-");
     }
 
+    /* NOTES ARE A SET OF SENTENCES, NOT A STRING TO APPEND TO. Merging used to compare the whole note, so once a mark held
+       «A · B» an incoming «A» (or «A · B») was "different" and was appended again, every time the published sessions were
+       folded in: one Crikvenica book grew a note of several thousand words. A note is now joined from its parts and a part
+       already there is never added twice; load() also collapses repeats that earlier versions already wrote. */
+    var NSEP = " \u00b7 ";
+    function noteParts(n) { return String(n || "").split(NSEP).map(function (x) { return x.trim(); }).filter(Boolean); }
+    function joinNotes() {
+      var seen = {}, out = [];
+      for (var i = 0; i < arguments.length; i++) noteParts(arguments[i]).forEach(function (x) {
+        if (!seen[x]) { seen[x] = 1; out.push(x); }
+      });
+      /* the publisher cuts a note at a fixed length, so one sentence can arrive whole and again cut short: keep the whole one */
+      out = out.filter(function (x, i) {
+        return !out.some(function (y, j) { return j !== i && y.length > x.length && y.indexOf(x) === 0; });
+      });
+      return out.join(NSEP);
+    }
+    function healNotes(d) {
+      var changed = false;
+      function fix(o) {
+        if (o && o.note) { var j = joinNotes(o.note); if (j !== o.note) { o.note = j; changed = true; } }
+      }
+      Object.keys(d.marks || {}).forEach(function (k) {
+        var m = d.marks[k]; fix(m);
+        Object.keys(m.by || {}).forEach(function (sl) { fix(m.by[sl]); });
+      });
+      return changed;
+    }
+
     function load() {
       if (mem) return mem;
       mem = { v: 1, marks: {} };
@@ -61,9 +90,7 @@
           /* Both keys used: union the ranges rather than pick a winner. */
           into.done = merge((into.done || []).concat(from.done || []));
           if (from.total && !into.total) into.total = from.total;
-          if (from.note && from.note !== into.note) {
-            into.note = into.note ? into.note + " \u00b7 " + from.note : from.note;
-          }
+          if (from.note) into.note = joinNotes(into.note, from.note);
           if (from.t && !into.t) into.t = from.t;
           if (from.where && !into.where) into.where = from.where;
           if (from.href && !into.href) into.href = from.href;
@@ -72,6 +99,7 @@
         moved++;
       });
       if (moved) { try { localStorage.setItem(KEY, JSON.stringify(mem)); } catch (e) {} }
+      if (healNotes(mem)) { try { localStorage.setItem(KEY, JSON.stringify(mem)); } catch (e) {} }
       if (toLines()) { try { localStorage.setItem(KEY, JSON.stringify(mem)); } catch (e) {} }
       /* ONCE: the family that the old default had selected is not a choice the reader made, and cannot be told apart from one. It is cleared
          here a single time; from then on only a family the reader picks or adds is selected. */
@@ -550,9 +578,7 @@
             a.done = merge((a.done || []).concat(b.done || []));
             if (!a.done.length) delete a.done;
             if (b.state && !a.state) a.state = b.state;
-            if (b.note && b.note !== a.note) {
-              a.note = a.note ? a.note + " \u00b7 " + b.note : b.note;
-            }
+            if (b.note) a.note = joinNotes(a.note, b.note);
             if (b.since && (!a.since || b.since > a.since)) a.since = b.since;
           });
         });

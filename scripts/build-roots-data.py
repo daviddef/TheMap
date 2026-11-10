@@ -163,7 +163,7 @@ def atlas():
         for c in cl: usedprov.add(c[4])
         places.append([p['id'], p['name'], p.get('country') or '', round(p['lat'], 4), round(p['lon'], 4), [n['n'].split(',')[0] for n in p.get('names', [])][:8], cl, cat, NM.get(p['id'], [])])
     out = {'land': land, 'regimes': regimes, 'regions': regions, 'flagMap': FM, 'riso': riso, 'territory': TERRITORY, 'events': events,
-           'prov': {k: prov[k]['name'] for k in usedprov if k in prov}, 'provurl': {k: prov[k]['url'] for k in usedprov if k in prov and prov[k].get('url')},
+           'prov': {k: prov[k]['name'] for k in sorted(usedprov) if k in prov}, 'provurl': {k: prov[k]['url'] for k in sorted(usedprov) if k in prov and prov[k].get('url')},
            'places': places, 'flagDir': '/fl/',
            'countries': {c['cc']: [c['n'], c['y'], c['x']] for c in J(os.path.join(PUB, 'country-points.json'))['countries']}}
     sz = w(os.path.join(OUT, 'data', 'atlas.json'), out)

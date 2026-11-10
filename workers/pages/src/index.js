@@ -12,6 +12,12 @@ const TYPES = {
 
 /* The object key for a URL path, or null when the path is not one we serve. A trailing slash means a folder's index.html, the way
    GitHub Pages reads it. */
+/* Cloudflare's edge adds a Web Analytics beacon to HTML that passes through the proxy. `no-transform` is the documented way to tell it
+   to leave a page as built; HTML only, so the large JSON and data files keep their normal compression. */
+export function cacheControlFor(key) {
+  return /\.html?$/i.test(key) ? "public, max-age=600, no-transform" : "public, max-age=600";
+}
+
 export function keyFor(pathname) {
   let p;
   try { p = decodeURIComponent(pathname); } catch (e) { return null; }
@@ -50,7 +56,7 @@ export default {
       const h = new Headers();
       h.set("content-type", TYPES[extOf(key)] || "application/octet-stream");
       h.set("etag", obj.httpEtag);
-      h.set("cache-control", "public, max-age=600");
+      h.set("cache-control", cacheControlFor(key));
       h.set("x-served-from", "r2");
       return new Response(req.method === "HEAD" ? null : obj.body, { headers: h });
     }
@@ -60,6 +66,7 @@ export default {
     const r = await fetch(originFor(env.ORIGIN, url.pathname, url.search), { method: req.method, headers: { accept: req.headers.get("accept") || "*/*", "x-ra-hop": "1" }, redirect: "manual" });
     const out = new Response(r.body, r);
     out.headers.set("x-served-from", "origin");
+    if ((out.headers.get("content-type") || "").startsWith("text/html")) out.headers.set("cache-control", (out.headers.get("cache-control") || "public, max-age=600") + ", no-transform");
     return out;
   },
 };

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { keyFor, originFor } from "../src/index.js";
+import { keyFor, originFor, cacheControlFor } from "../src/index.js";
 
 test("a folder is its index.html", () => {
   assert.equal(keyFor("/"), "index.html");
@@ -22,4 +22,9 @@ test("the origin URL always stays on the origin host", () => {
     const u = new URL(originFor("https://recordatlas.org", p, ""));
     assert.equal(u.host, "recordatlas.org", p);
   }
+});
+
+test("html is marked no-transform, data files are not", () => {
+  assert.match(cacheControlFor("place/senj/index.html"), /no-transform/);
+  assert.doesNotMatch(cacheControlFor("surnames.json"), /no-transform/);
 });

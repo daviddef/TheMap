@@ -2622,14 +2622,17 @@ def main():
     # never sees, and only the gzips are published. A .gz is an ordinary
     # thing to hand somebody who came for a bulk dataset, and it is a tenth
     # of the size.
-    import gzip as _gzip
-    with _gzip.open(os.path.join(OUT, "surnames.json.gz"), "wt", encoding="utf-8") as _gz:
+    import gzip as _gzip, io as _io
+
+    def _gzip_text(path, **kw):
+        # mtime=0: gzip writes the current time into its header, so two builds of identical data gave two different files
+        return _io.TextIOWrapper(_gzip.GzipFile(path, "wb", mtime=0), encoding="utf-8", **kw)
+    with _gzip_text(os.path.join(OUT, "surnames.json.gz")) as _gz:
         json.dump(surn, _gz, ensure_ascii=False)
     json.dump(surn, open(os.path.join(src, "surnames.json"), "w"),
               ensure_ascii=False, separators=(",", ":"))
     import csv
-    with _gzip.open(os.path.join(OUT, "surnames.csv.gz"), "wt", newline="",
-                    encoding="utf-8") as fh:
+    with _gzip_text(os.path.join(OUT, "surnames.csv.gz"), newline="") as fh:
         w = csv.writer(fh)
         w.writerow(["surname", "variant", "variant_source", "country", "country_source",
                     "attested_by", "phonetic_skeleton"])

@@ -73,7 +73,14 @@ class S3Backend:
     def get(self, k):
         try: return self.c.get_object(Bucket=self.b, Key=k)["Body"].read()
         except self.c.exceptions.NoSuchKey: return None
-    def put(self, k, path, ct): self.c.upload_file(path, self.b, k, ExtraArgs={"ContentType": ct})
+    def put(self, k, path, ct):
+        # upload_file spins up its own transfer threads per object, which costs more than the upload for a 2 KB file (the first full
+        # run managed about 10 files a second); small files go as one plain PUT, large ones keep the multipart path
+        if os.path.getsize(path) < 8 << 20:
+            with open(path, "rb") as f:
+                self.c.put_object(Bucket=self.b, Key=k, Body=f.read(), ContentType=ct)
+        else:
+            self.c.upload_file(path, self.b, k, ExtraArgs={"ContentType": ct})
     def put_bytes(self, k, data, ct): self.c.put_object(Bucket=self.b, Key=k, Body=data, ContentType=ct)
     def delete(self, k): self.c.delete_object(Bucket=self.b, Key=k)
 
@@ -125,7 +132,7 @@ def main():
     ap.add_argument("--only", nargs="*", default=[]); ap.add_argument("--skip", nargs="*", default=[])
     ap.add_argument("--backend", choices=["s3", "wrangler", "dir"], default="s3")
     ap.add_argument("--bucket", default="record-atlas-site"); ap.add_argument("--target")
-    ap.add_argument("--jobs", type=int, default=16); ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--jobs", type=int, default=48); ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
     if a.backend == "dir":
         be = DirBackend(a.target)

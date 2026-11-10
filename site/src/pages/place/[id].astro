@@ -566,12 +566,18 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
       needed to open the images, and some are restricted to a Family History Centre.</p>
       {RANKS.map(([r, head, sub]) => {
         const rows = fs.filter((c) => c.rank === r);
+        /* RANKS 3 AND 4 ARE THE SAME LIST ON EVERY PLACE OF A COUNTRY. «Elsewhere in the same country» and «the whole country» are by the page's
+           own words «never because it covers this ground», so a town in Italy reprinted the Italian list its neighbours print: 14.7 KB of a
+           15.1 KB section, 18% of an 81 KB page, on 60 live pages measured 10 Nov 2026. The country page lists every collection of the country
+           already, so these two ranks show the first three and say how many more are there. Ranks 0 to 2 (the ones that reach this ground) are
+           unchanged. */
+        const cap = r >= 3 ? 3 : 25;
         return rows.length > 0 && (
           <div style="margin-top:20px">
             <div class="lab">{head} — {rows.length}</div>
             <p class="cap" style="margin-top:2px">{sub}</p>
             <ul class="vols">
-              {rows.slice(0, 25).map((c) => (
+              {rows.slice(0, cap).map((c) => (
                 <li data-src={"collection:" + (c.url || c.t)} data-src-t={c.t}
                     data-src-where={countryName} data-src-href={c.url}>
                   <a href={c.url} target="_blank" rel="noopener">{c.t} ↗</a>
@@ -582,7 +588,9 @@ const mapLink = u(`/?q=${encodeURIComponent(place.name)}&at=${place.id}&view=${p
                 </li>
               ))}
             </ul>
-            {rows.length > 25 && <p class="cap">…and {rows.length - 25} more.</p>}
+            {rows.length > cap && (r >= 3
+              ? <p class="cap">…and {rows.length - cap} more: <a href={u(`/country/${(place.country || "").toLowerCase()}/`)}>every FamilySearch collection for {countryName}, on the country page</a>.</p>
+              : <p class="cap">…and {rows.length - cap} more.</p>)}
           </div>
         );
       })}

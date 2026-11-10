@@ -28,3 +28,10 @@ test("given names and dated place names get their own entries; undated place nam
   assert.ok(r.some((e) => e.href === "/your-name/" && /Giovanni \(Zuane\)/.test(e.headline)));
   assert.ok(r.some((e) => e.href === "/place-names/" && /Harare \(also Salisbury\)/.test(e.headline)));
 });
+
+test("catalogue additions are tagged research, so «new» stays for what a reader can now do", () => {
+  const r = namesNews({ surnames: { families: [fam("Adamich", [["Adamic"]], "2026-11-05")] }, given: { families: [fam("Giovanni", [["Zuane"]], "2026-11-05")] },
+    places: { places: [{ name: "Harare", names: [{ name: "Salisbury", added: "2026-11-05" }] }] } });
+  assert.equal(r.length, 3);
+  assert.ok(r.every((e) => e.kind === "research"), JSON.stringify(r.map((e) => e.kind)));
+});

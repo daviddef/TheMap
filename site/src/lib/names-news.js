@@ -1,5 +1,8 @@
 /* WHAT HAS BEEN ADDED TO THE NAME CATALOGUES, FOR THE WHAT'S-NEW PAGE.
  *
+ * TAGGED «research», NOT «new». David: «new should be for app features vs research data.» A spelling, a form or a place name is data the
+ * atlas gained; «new» is a thing the reader can now do.
+ *
  * Read from the catalogues themselves (data/surname-families.json, data/given-name-families.json, data/place-names.json), which
  * stamp every piece of evidence, and from Mar 2026 every dated place name, with the day it was added. A day becomes one entry per
  * catalogue. Only a spelling, a family's headline name, a language and a place: NEVER evidence text, a note or a person, because
@@ -50,7 +53,7 @@ export function namesNews(cats) {
     if (d.forms > BULK) headline = `${plural(d.forms, "spelling")} of ${plural(fams.length, "surname")} added to the catalogue`;
     else headline = `New ${d.forms === 1 ? "spelling" : "spellings"}: ` +
       listed(fams.map((n) => `${n} (${d.fams[n].sort().join(", ")})`), 4);
-    out.push({ date, kind: "new", headline: clip(headline), href: "/surname-families/" });
+    out.push({ date, kind: "research", headline: clip(headline), href: "/surname-families/" });
   }
 
   for (const [date, d] of Object.entries(byDay(c.given, ["not-same"]))) {
@@ -58,7 +61,7 @@ export function namesNews(cats) {
     let headline;
     if (d.forms > BULK) headline = `${plural(d.forms, "form")} of ${plural(fams.length, "given name")} added: Ivan, Johann, Giovanni and the like, found as one name`;
     else headline = `New ${d.forms === 1 ? "form" : "forms"} of a given name: ` + listed(fams.map((n) => `${n} (${d.fams[n].sort().join(", ")})`), 4);
-    out.push({ date, kind: "new", headline: clip(headline), href: "/your-name/" });
+    out.push({ date, kind: "research", headline: clip(headline), href: "/your-name/" });
   }
 
   const pdays = {};
@@ -75,7 +78,7 @@ export function namesNews(cats) {
     const headline = d.names > BULK
       ? `${plural(d.names, "old place name")} added for ${plural(ps.length, "place")}, so a record is searched under the name of its year`
       : `New place ${d.names === 1 ? "name" : "names"}: ` + listed(ps.map((n) => `${n} (also ${d.places[n].sort().join(", ")})`), 4);
-    out.push({ date, kind: "new", headline: clip(headline), href: "/place-names/" });
+    out.push({ date, kind: "research", headline: clip(headline), href: "/place-names/" });
   }
   return out;
 }

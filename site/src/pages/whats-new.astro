@@ -27,7 +27,7 @@ const KINDS = {
   research: { label: "Research", glyph: "⚑" },
 };
 /* NEW SOURCES WRITE THEIR OWN LINE. A source added to the directory is the most common thing that happens here and the one
-   nobody remembered to announce, so each day the directory grew becomes a «new» entry, built from the arrival dates
+   nobody remembered to announce, so each day the directory grew becomes a «research» entry (data gained; «new» is for what a reader can now do), built from the arrival dates
    (data/provider-added.json, via providers.json). A small day names its sources; a big one says how many and where, and
    links to that day's list on /providers/. Only days since this page began are used: the first import is not news. */
 const firstDay = data.entries.reduce((m, e) => (e.date < m ? e.date : m), "9999");
@@ -48,7 +48,7 @@ const sourceEntries = Object.entries(arrivals).map(([date, list]) => {
     headline = `${list.length.toLocaleString("en")} new sources added to the directory, mostly ${top.join(", ")}`;
   }
   if (headline.length > 150) headline = headline.slice(0, 147).replace(/[;,]?\s*\S*$/, "") + "…";
-  return { date, kind: "new", src: true, headline, href: `/providers/?d=${date}` };
+  return { date, kind: "research", src: true, headline, href: `/providers/?d=${date}` };
 });
 /* sources first within their day: they were at the bottom of a long day and nobody scrolled to them */
 /* THE FAMILY ARCHIVES' WORK, A DAY AT A TIME, from the published research sessions (never a note: see lib/research-news.js) */

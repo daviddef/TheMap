@@ -1393,7 +1393,20 @@ def main():
         # matched as a town; only a level nothing else could answer reaches
         # here. So a town sharing a province's name cannot be intercepted —
         # it was answered three branches ago.
-        for name, lab in list(reversed(areas)) + list(reversed(path)):
+        # A DECIDED PLACEMENT ON THE DEEPEST LEVEL BEATS AN AREA ABOVE IT.
+        # Fifteen Tver villages (Солодомля, Стерж, Крева ...) were placed by
+        # Wikipedia and stood on their own dots until «Тверская губерния» was
+        # decided as an area: this loop walks the areas first, found the
+        # governorate and returned it, and the placement branch below never
+        # ran. The villages' books moved to the governorate and the 15 place
+        # pages went. The guard just below only stepped aside for a decided
+        # name at the SAME level; a decided name beneath the area it is
+        # filed under has to step aside for it as well.
+        _deepest = path[0][0] if path else ""
+        _deep_decided = bool(_deepest) and any(
+            placements.get((_c, fold(_deepest))) for _c in ccs)
+        for name, lab in ([] if _deep_decided else
+                          list(reversed(areas)) + list(reversed(path))):
             for cand in readings(name, lab):
                 for _cc in ccs:
                     # A RESEARCHED COUNTY SEAT BEATS A DERIVED CENTRE.
@@ -1507,6 +1520,13 @@ def main():
     # A placement never outranks the shelf or the gazetteer. It is the last
     # thing tried, on names nothing else could answer.
     placements = {}
+    # data/unplaced-placed.json is GITIGNORED, so a fresh clone does not have it.
+    # Run from a clone without it, the matcher silently dropped 25 decided
+    # places (Brooklyn, The Bronx, Terrebonne, Spokane ...) and their pages went
+    # 404 once the world file was published. Refuse to run rather than do that.
+    if not os.path.exists("data/unplaced-placed.json"):
+        sys.exit("data/unplaced-placed.json is missing (it is gitignored: copy it from the "
+                 "live Record Atlas folder). Without it 25 decided places vanish from the world file.")
     # AND THE NAMES RESOLVED THROUGH THE NAME A PLACE USED TO HAVE.
     # scripts/match-via-wikipedia.py asks each country's own Wikipedia for the
     # names left in the gaps file and follows its redirects: «Caccavone»

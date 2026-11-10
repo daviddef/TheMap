@@ -113,7 +113,6 @@ const BASE_ = u("/");
   <div class="rs-panel mr-panel" id="mr-p-families" role="tabpanel" aria-labelledby="mr-t-families">
   <div id="mr-map" hidden></div>
   <p class="cap" id="mr-map-cap" hidden></p>
-  <div id="mr-next" hidden></div>
 
   <div id="mr-body"></div>
   </div>
@@ -621,7 +620,7 @@ const BASE_ = u("/");
             /* WHAT THE MAP COLOURS BY. «Completed» is claimed only on evidence: every book the atlas lists for the place has been read
                to its last page (or marked «read everything») for this family or in full for anyone. A place whose list is capped at 60
                can never be called complete, because the books past the cap were not looked at. */
-            var nDone = 0, anyFound = false, nPlan = 0, lastSince = "";
+            var nDone = 0, anyFound = false, nPlan = 0, lastSince = "", inFlight = false;
             (vols || []).forEach(function (v) {
               if (!v.waypoint) return;
               var vid = "volume:" + String(v.waypoint).split(":")[0], vm = marks[vid];
@@ -631,22 +630,28 @@ const BASE_ = u("/");
                   (vm.total && P.covered(P.coverage(vid, slug)) >= vm.total)) nDone++;
             });
             rows.forEach(function (r) {
+              /* IN FLIGHT = something has actually been read or concluded here, not only put on the to-do list */
+              if (r.cov.length || (r.b.state && r.b.state !== "planned")) inFlight = true;
               if (r.b.state === "found") anyFound = true;
               if (r.b.state === "planned") nPlan++;
               if (r.b.since && r.b.since > lastSince) lastSince = r.b.since;
             });
             PSTAT[pid] = { held: held, listed: vols ? vols.length : 0, done: nDone, books: books, found: anyFound,
-                           planned: nPlan, last: lastSince,
+                           planned: nPlan, last: lastSince, flight: inFlight || nDone > 0,
                            complete: !!(held && vols && vols.length === held && nDone === held) };
             /* THE PLACE IS THE HEADING, AND IT HAS THE MAP'S OWN NUMBER. The pin
                on the map and the section below were two separate things a
                reader had to match by name; the same disc now sits in both, and
                its number is the section's position, which is also what the map
                uses. */
-            h.push('<section class="mrp" id="mrp-' + esc(pid) + '" data-place="' + esc(pid) +
+            var cst = PSTAT[pid].complete ? "done" : PSTAT[pid].flight ? "part" : "plan";
+            var csay = { done: "every book read", part: "in flight", plan: "planned" }[cst];
+            h.push('<section class="mrp mrp-' + cst + '" id="mrp-' + esc(pid) + '" data-place="' + esc(pid) +
               '" data-n="' + num + '">' +
-              '<header class="mrph"><span class="mr-pin mr-pin-h" aria-hidden="true">' + num + "</span>" +
+              '<header class="mrph"><span class="mr-pin mr-pin-h mr-pin-' + cst + (anyFound ? " mr-pin-found" : "") + '" aria-hidden="true">' +
+              (cst === "done" ? "\u2713" : num) + "</span>" +
               '<h3><a href="' + BASE + "place/" + esc(pid) + '/">' + esc(label) + "</a></h3>" +
+              '<span class="mrstl">' + csay + (anyFound ? " \u00b7 found something" : "") + "</span>" +
               '<span class="mrcount">' + books +
               (held != null ? " of " + held : "") + " book" +
               ((held != null ? held : books) === 1 ? "" : "s") + " marked</span>" +
@@ -711,6 +716,8 @@ const BASE_ = u("/");
             }
             h.push("</section>");
           });
+          /* THE NEIGHBOURS ARE FILLED IN BY drawMap, once the place index has arrived; the container is here so they sit with the places */
+          h.push('<div id="mr-next" class="mrrec" hidden></div>');
         }
 
         /* ---- READ FOR OTHERS, WHERE THIS FAMILY HAS NOT BEEN ------------- */
@@ -951,35 +958,27 @@ const BASE_ = u("/");
 
       function esc2(t) { return String(t == null ? "" : t).replace(/[<>&"]/g, ""); }
 
+      /* RECOMMENDED PLACES ARE CARDS TOO. Same header as a place this family has worked (disc, name, a state label, a count), in the
+         recommended colour, so «worked», «planned» and «recommended» read as one family of things. The places still to finish are NOT
+         repeated here: they are the cards above, with their own state. */
       function drawNext(ns, worked) {
         var box = document.getElementById("mr-next");
         if (!box) return;
-        if (!ns || (!ns.path.length && !ns.finish.length)) { box.hidden = true; box.innerHTML = ""; return; }
-        var h = ['<div class="lab">Next steps</div>'];
-        if (ns.finish.length) {
-          h.push('<p class="mrn-h">Finish where you are</p><ul class="mrn-list">');
-          ns.finish.forEach(function (w) {
-            var left = Math.max(0, w.held - w.done);
-            h.push('<li><span class="mr-pin mr-pin-h mr-pin-' + (w.done ? "part" : "plan") + '" aria-hidden="true">' + w.num + "</span>" +
-              '<span class="mrn-t"><a href="#mrp-' + esc(w.id) + '">' + esc2(w.n) + "</a> <span class=\"mrn-s\">" +
-              w.done + " of " + w.held + " book" + (w.held === 1 ? "" : "s") + " read to the end" +
-              (left ? ", " + left + " to go" : "") + "</span></span></li>");
-          });
-          h.push("</ul>");
-        }
-        if (ns.path.length) {
-          h.push('<p class="mrn-h">Then along the neighbouring places, nearest first' +
-            (ns.start ? " (from " + esc2(ns.start.n) + ")" : "") + '</p><ol class="mrn-list mrn-path">');
-          ns.path.forEach(function (c, i) {
-            h.push('<li><span class="mr-pin mr-pin-g" aria-hidden="true">' + String.fromCharCode(65 + i) + "</span>" +
-              '<span class="mrn-t"><a href="' + BASE + "place/" + esc(c.id) + '/">' + esc2(c.n) + "</a>" +
-              ' <span class="mrn-s">' + (c.hop < 1 ? "under 1" : Math.round(c.hop)) + " km from " + esc2(c.prev) +
-              " · " + c.v.toLocaleString() + " FamilySearch book" + (c.v === 1 ? "" : "s") + "</span></span>" +
-              '<button type="button" class="mrn-plan" data-pid="' + esc(c.id) + '" data-name="' + esc(c.n) + '">Plan its books</button></li>');
-          });
-          h.push("</ol>");
-        }
-        h.push('<p class="cap">Only places the atlas lists FamilySearch books for, within a day’s walk of where you have worked. ' +
+        if (!ns || !ns.path.length) { box.hidden = true; box.innerHTML = ""; return; }
+        var h = ['<div class="lab">Recommended next' + (ns.start ? ", nearest first, from " + esc2(ns.start.n) : "") + "</div>",
+                 '<div class="mrrec-grid">'];
+        ns.path.forEach(function (c, i) {
+          h.push('<section class="mrp mrp-rec" id="mrr-' + esc(c.id) + '"><header class="mrph">' +
+            '<span class="mr-pin mr-pin-h mr-pin-g" aria-hidden="true">' + String.fromCharCode(65 + i) + "</span>" +
+            '<div class="mrrec-t"><h3><a href="' + BASE + "place/" + esc(c.id) + '/">' + esc2(c.n) + "</a></h3>" +
+            '<span class="mrcount">' + (c.hop < 1 ? "under 1" : Math.round(c.hop)) + " km from " + esc2(c.prev) + " \u00b7 " +
+            c.v.toLocaleString() + " FamilySearch book" + (c.v === 1 ? "" : "s") + "</span></div>" +
+            '<span class="mrstl">recommended</span>' +
+            '<button type="button" class="mrn-plan" data-pid="' + esc(c.id) + '" data-name="' + esc(c.n) + '">Plan its books</button>' +
+            "</header></section>");
+        });
+        h.push("</div>");
+        h.push('<p class="cap">Only places the atlas lists FamilySearch books for, within a day\u2019s walk of where you have worked. ' +
                "A suggestion, never a finding: nothing is marked until you mark it.</p>");
         box.innerHTML = h.join(""); box.hidden = false;
       }
@@ -1022,7 +1021,7 @@ const BASE_ = u("/");
           var st = PSTAT[pid] || {};
           pts.push({ id: pid, y: d.lat, x: d.lon, n: (d.name || pid).replace(/\s*\([^)]*\)\s*$/, ""),
                      num: +el.getAttribute("data-n") || (pts.length + 1),
-                     held: st.held, done: st.done || 0, complete: !!st.complete, found: !!st.found,
+                     held: st.held, done: st.done || 0, complete: !!st.complete, found: !!st.found, flight: !!st.flight,
                      last: st.last || "", books: st.books || 0 });
         });
         wantCells(pts);
@@ -1054,7 +1053,7 @@ const BASE_ = u("/");
         /* the neighbourly path first, so the pins sit on top of the line */
         if (ns.path.length && ns.start) {
           var line = [[ns.start.y, ns.start.x]].concat(ns.path.map(function (c) { return [c.y, c.x]; }));
-          L.polyline(line, { color: "#5b7f95", weight: 2.5, dashArray: "6 7", opacity: .9, interactive: false }).addTo(g);
+          L.polyline(line, { color: "#6B5B73", weight: 2.5, dashArray: "6 7", opacity: .9, interactive: false }).addTo(g);
           ns.path.forEach(function (c, i) {
             L.marker([c.y, c.x], {
               icon: L.divIcon({ className: "mr-pin mr-pin-g", html: String.fromCharCode(65 + i), iconSize: [22, 22] })
@@ -1063,7 +1062,7 @@ const BASE_ = u("/");
           });
         }
         pts.forEach(function (p, i) {
-          var cls = "mr-pin " + (p.complete ? "mr-pin-done" : p.done || p.books > p.planned ? "mr-pin-part" : "mr-pin-plan") +
+          var cls = "mr-pin " + (p.complete ? "mr-pin-done" : p.flight ? "mr-pin-part" : "mr-pin-plan") +
                     (p.found ? " mr-pin-found" : "");
           var say = p.complete ? "every book read to the end" :
                     (p.held ? p.done + " of " + p.held + " books read to the end" : "");
@@ -1082,10 +1081,10 @@ const BASE_ = u("/");
           cap.hidden = false;
           cap.innerHTML = pts.length + " place" + (pts.length === 1 ? "" : "s") + " worked, numbered as listed below. " +
             '<span class="mrleg"><i class="mr-pin mr-pin-done">✓</i> every book read to the end (' + nd + ")</span>" +
-            '<span class="mrleg"><i class="mr-pin mr-pin-part">•</i> some books read</span>' +
-            '<span class="mrleg"><i class="mr-pin mr-pin-plan">•</i> only planned</span>' +
+            '<span class="mrleg"><i class="mr-pin mr-pin-part">•</i> in flight (some books read)</span>' +
+            '<span class="mrleg"><i class="mr-pin mr-pin-plan">•</i> planned</span>' +
             '<span class="mrleg"><i class="mr-pin mr-pin-found mr-pin-part">•</i> found something</span>' +
-            (ns.path.length ? '<span class="mrleg"><i class="mr-pin mr-pin-g">A</i> suggested next, dashed line is the path</span>' : "");
+            (ns.path.length ? '<span class="mrleg"><i class="mr-pin mr-pin-g">A</i> recommended next, dashed line is the path</span>' : "");
         }
       }
 
@@ -1151,7 +1150,6 @@ const BASE_ = u("/");
         draw();
       }
       body.addEventListener("click", onBodyClick);
-      (function () { var nx = document.getElementById("mr-next"); if (nx) nx.addEventListener("click", onBodyClick); })();
       /* toggle does not bubble, so it is caught on the way down. */
       body.addEventListener("toggle", function (e) {
         var d = e.target;
@@ -1182,22 +1180,38 @@ const BASE_ = u("/");
   /* PIN STATES. Completed = solid green with a tick; some books read = the accent; only planned = hollow; a find rings it gold;
      a suggested next place is a lettered dashed-outline disc. Never colour alone: the tick, the hollow and the letter differ in shape too. */
   :global(.mr-pin.mr-pin-done) { background: #1E6B3C; }
-  :global(.mr-pin.mr-pin-plan) { background: var(--panel); color: var(--accent); box-shadow: inset 0 0 0 2px var(--accent), 0 1px 3px rgba(0,0,0,.3); }
+  :global(.mr-pin.mr-pin-plan) { background: var(--panel); color: var(--brass); box-shadow: inset 0 0 0 2px var(--brass), 0 1px 3px rgba(0,0,0,.3); }
   :global(.mr-pin.mr-pin-found), :global(.mr-pin.mr-pin-found.mr-pin-done), :global(.mr-pin.mr-pin-found.mr-pin-plan) { box-shadow: 0 0 0 3px #C9971C, 0 1px 3px rgba(0,0,0,.4); }
-  :global(.mr-pin.mr-pin-g) { background: var(--panel); color: #3F6580; box-shadow: inset 0 0 0 2px #5b7f95; border: 0; }
+  :global(.mr-pin.mr-pin-g) { background: var(--panel); color: var(--r-hre); box-shadow: inset 0 0 0 2px var(--r-hre); border: 0; }
   #mr-map-cap { line-height: 2; }
   :global(.mrleg) { display: inline-flex; align-items: center; gap: 5px; margin-left: 14px; white-space: nowrap; }
   :global(.mrleg .mr-pin) { display: inline-block; width: 18px; height: 18px; line-height: 18px; font-size: 11px; font-style: normal; }
-  #mr-next { margin: 8px 0 4px; font-family: var(--sans); font-size: 14px; }
-  :global(.mrn-h) { margin: 12px 0 4px; font-weight: 600; }
-  :global(.mrn-list) { list-style: none; margin: 0; padding: 0; }
-  :global(.mrn-list li) { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--rule); }
-  :global(.mrn-list .mr-pin) { flex: 0 0 auto; width: 24px; height: 24px; line-height: 24px; position: static; }
-  :global(.mrn-t) { flex: 1 1 auto; min-width: 0; }
-  :global(.mrn-s) { display: block; color: var(--ink-2); font-size: 12.5px; }
-  :global(.mrn-plan) { flex: 0 0 auto; font: inherit; font-size: 12.5px; padding: 5px 10px; border: 1px solid var(--accent);
-    background: var(--panel); color: var(--accent); border-radius: 3px; cursor: pointer; }
-  :global(.mrn-plan:hover) { background: var(--accent); color: var(--panel); }
+  /* A PLACE CARD TAKES ITS COLOUR FROM ITS STATE, in the title, the left bar and the header tint; and says it in words as well
+     (the label), so colour is never the only signal. green = every book read, teal = in flight (something read or concluded),
+     brass = planned (on the to-do list only), mauve dashed = recommended next. Same four colours as the pins on the map. */
+  :global(.mrp-done) { --st: var(--r-italy); }
+  :global(.mrp-part) { --st: var(--accent); }
+  :global(.mrp-plan) { --st: var(--brass); }
+  :global(.mrp-rec)  { --st: var(--r-hre); }
+  :global(.mrp.mrp-done), :global(.mrp.mrp-part), :global(.mrp.mrp-plan), :global(.mrp.mrp-rec) { border-left-color: var(--st); }
+  :global(.mrp-done .mrph), :global(.mrp-part .mrph), :global(.mrp-plan .mrph), :global(.mrp-rec .mrph) {
+    background: color-mix(in srgb, var(--st) 11%, var(--panel)); }
+  :global(.mrp-done .mrph h3 a), :global(.mrp-part .mrph h3 a), :global(.mrp-plan .mrph h3 a), :global(.mrp-rec .mrph h3 a) { color: var(--st); }
+  :global(.mrp.mrp-rec) { border-left-style: dashed; }
+  :global(.mrstl) { flex: 0 0 auto; font-family: var(--mono); font-size: 10.5px; letter-spacing: .03em; text-transform: uppercase;
+    color: var(--st); border: 1px solid var(--st); border-radius: 10px; padding: 1px 8px; white-space: nowrap; }
+  :global(.mrph) { flex-wrap: wrap; row-gap: 6px; }
+  /* the recommended places: the same card, header only, two to a row where there is room so they do not eat the page */
+  :global(.mrrec) { margin-top: 26px; }
+  :global(.mrrec-grid) { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 430px), 1fr)); gap: 0 16px; }
+  :global(.mrrec-grid .mrp) { margin-top: 12px; padding: 0; display: flex; flex-direction: column; }
+  :global(.mrrec-grid .mrph) { flex: 1 1 auto; border-bottom: 0; border-radius: 0 3px 3px 0; }
+  :global(.mrrec-t) { flex: 1 1 10rem; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  :global(.mrrec-t h3) { font-size: 19px; }
+  :global(.mrrec-t .mrcount) { white-space: normal; }
+  :global(.mrn-plan) { flex: 0 0 auto; font: inherit; font-family: var(--sans); font-size: 12.5px; padding: 5px 10px; border: 1px solid var(--st);
+    background: var(--panel); color: var(--st); border-radius: 3px; cursor: pointer; }
+  :global(.mrn-plan:hover) { background: var(--st); color: var(--panel); }
   :global(.mrn-plan:disabled) { opacity: .6; cursor: default; }
 
   /* THE PAGE USES ITS WIDTH. The shared reading measure (44rem) is right for an article and wrong here: David, on a wide screen, saw

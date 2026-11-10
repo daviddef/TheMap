@@ -103,6 +103,7 @@ const BASE_ = u("/");
   {/* TABS, AS ON THE READ PAGE. The page was one long scroll: the family, its places, then two notes about other people's work. Four tabs
       now, the same ones-and-panels shape as the Journey / Story / People tabs on /read/ (the rs-tab styles). The map and the dossier
       stay in the first panel, untouched: the script below still finds them by id. */}
+  <div class="mr-multi" id="mr-multi" role="status" hidden></div>
   <div class="rs-tabs mr-tabs" role="tablist" id="mr-tabs">
     <button type="button" class="rs-tab" role="tab" id="mr-t-families" aria-controls="mr-p-families" aria-selected="true">Families &amp; places</button>
     <button type="button" class="rs-tab" role="tab" id="mr-t-all" aria-controls="mr-p-all" aria-selected="false" tabindex="-1">All families</button>
@@ -307,7 +308,29 @@ const BASE_ = u("/");
        roots/js/decisions.js). Place text is user data, so every node here is built with textContent. */
     (function () {
       var NAMES = ["families", "all", "story", "fixes", "sessions"], FKEY = "ra-gedcom-fixes-v1";
+      var curTab = "families", MKEY = "ra-synopsis-scope";
+      /* SEVERAL FAMILIES TICKED IN THE HEADER PICKER. «Families & places» and «My story» are about ONE family, the one you mark under; only
+         «All families» reads the ticked set together. Say so on the tabs that show one, and open the joint tab when a tick is made. */
+      function ticked() {
+        try {
+          var P = window.raProgress, x = JSON.parse(localStorage.getItem(MKEY) || "null"); if (!P || !x) return [];
+          var ls = P.lines(); return x.all ? ls : ls.filter(function (l) { return (x.slugs || []).indexOf(l.slug) > -1; });
+        } catch (e) { return []; }
+      }
+      function nm(l) { return l.name === "My research so far" ? "Research Names" : l.name; }
+      function multiBanner() {
+        var b = document.getElementById("mr-multi"); if (!b) return;
+        var sl = ticked();
+        if (sl.length < 2 || curTab === "all" || curTab === "fixes" || curTab === "sessions") { b.hidden = true; return; }
+        var P = window.raProgress, act = P && P.active && P.active(), al = P.lines().filter(function (l) { return l.slug === act; })[0];
+        var names = sl.map(nm).sort(), shown = names.length > 4 ? names.slice(0, 3).join(", ") + " and " + (names.length - 3) + " more" : names.join(", ");
+        b.textContent = "";
+        b.append(el("span", "You have ticked " + sl.length + " families (" + shown + "). This tab shows one family" + (al ? ": " + nm(al) + ", the one you mark under." : "."), ""));
+        var go = el("button", "Read the " + sl.length + " together", ""); go.type = "button"; go.addEventListener("click", function () { show("all", true); });
+        b.append(go); b.hidden = false;
+      }
       function show(n, push) {
+        curTab = n;
         NAMES.forEach(function (k) {
           var on = k === n, t = document.getElementById("mr-t-" + k), p = document.getElementById("mr-p-" + k);
           if (!t || !p) return; t.setAttribute("aria-selected", String(on)); t.tabIndex = on ? 0 : -1; p.hidden = !on;
@@ -315,6 +338,8 @@ const BASE_ = u("/");
         if (push) { try { history.replaceState(null, "", n === "families" ? location.pathname + location.search : "#" + n); } catch (e) { /* no history */ } }
         if (n === "story" && window.raStoryTab) window.raStoryTab.show();
         if (n === "families") setTimeout(function () { window.dispatchEvent(new Event("resize")); }, 30);   // the map was drawn while hidden
+        multiBanner();
+        document.dispatchEvent(new CustomEvent("ra-tab-shown", { detail: n }));
       }
       NAMES.forEach(function (k, i) {
         var t = document.getElementById("mr-t-" + k); if (!t) return;
@@ -325,6 +350,10 @@ const BASE_ = u("/");
         });
       });
       var h = (location.hash || "").replace("#", ""); if (/^story(\/|$)/.test(h)) show("story", false); else if (NAMES.indexOf(h) > 0) show(h, false);
+      document.addEventListener("ra-scope-changed", function () { if (ticked().length > 1 && curTab !== "all") show("all", true); else multiBanner(); });
+      document.addEventListener("ra-progress-changed", multiBanner);
+      window.addEventListener("hashchange", function () { var g = (location.hash || "").replace("#", ""); if (g === "all" && curTab !== "all") show("all", false); });
+      setTimeout(multiBanner, 0);
 
       function el(tag, text, cls) { var e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls; return e; }
       function read() { try { var r = localStorage.getItem(FKEY), d = r && JSON.parse(r); return d && d.trees ? d : { v: 1, trees: {} }; } catch (e) { return { v: 1, trees: {} }; } }
@@ -1523,6 +1552,17 @@ const BASE_ = u("/");
   .mra-l { margin: 6px 0; padding-left: 18px; font: 14.5px/1.5 var(--sans); } .mra-l li { margin: 3px 0; overflow-wrap: anywhere; }
   .mra-plan { margin: 8px 0; padding-left: 22px; font: 15px/1.5 var(--sans); } .mra-plan > li { margin: 12px 0; }
   .mra-all small { color: var(--ink-3); }
+  .mra-all { list-style: none; padding: 0; columns: 2 280px; column-gap: 32px; }
+  .mra-all li { break-inside: avoid; margin: 4px 0; }
+  .mra-sub { margin: 18px 0 6px; font: 600 12px var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+  .mra-wl { list-style: none; margin: 0 0 8px; padding: 0; border-top: 1px solid var(--rule); }
+  .mra-wl li { padding: 9px 0; border-bottom: 1px solid var(--rule); }
+  .mra-wh { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 6px; font: 15px/1.4 var(--sans); }
+  .mra-wt { font-weight: 600; overflow-wrap: anywhere; }
+  .mra-wnote { margin: 3px 0 0; font: 13px/1.45 var(--sans); color: var(--ink-3); max-width: 80ch; }
+  .mr-multi { margin: 14px 0 0; padding: 10px 14px; border: 1px solid var(--rule-strong, var(--rule)); border-left: 3px solid var(--accent, #245565); border-radius: 8px; background: var(--panel); font: 14px/1.5 var(--sans); display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
+  .mr-multi[hidden] { display: none; }
+  .mr-multi button { font: 600 13.5px var(--sans); padding: 6px 12px; border: 1px solid var(--accent, #245565); border-radius: 8px; background: var(--bg); color: var(--accent, #245565); cursor: pointer; }
   @media print { .mra-chips, .mra-acts, .mra-tools, .mra-pre { display: none; } }
 
   .mr-tabs { margin-top: 18px; }

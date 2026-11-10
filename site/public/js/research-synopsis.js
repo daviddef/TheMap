@@ -136,12 +136,12 @@
 
   function plural(n, one, many) { return n + " " + (n === 1 ? one : (many || one + "s")); }
   function and(names) { return names.length < 3 ? names.join(" and ") : names.slice(0, -1).join(", ") + " and " + names[names.length - 1]; }
-  function bookLine(r, nameOf) {
+  function bookLine(r, nameOf, linked) {
     var bits = Object.keys(r.lines).sort(function (a, b) { return nameOf[a].localeCompare(nameOf[b]); }).map(function (s) {
       var x = r.lines[s], say = x.state || (x.ownPages ? "searched" : "marked");
       return nameOf[s] + ": " + say + (x.ownPages ? ", " + plural(x.ownPages, "page") + (r.total ? " of " + r.total : "") : "");
     });
-    return r.title + " (" + bits.join("; ") + ")" + (r.walkedPages ? " [" + plural(r.walkedPages, "page") + " read in full for everyone]" : "");
+    return (linked && /^https?:\/\//i.test(r.href || "") ? "[" + r.title + "](" + r.href + ")" : r.title) + " (" + bits.join("; ") + ")" + (r.walkedPages ? " [" + plural(r.walkedPages, "page") + " read in full for everyone]" : "");
   }
 
   /* THE STORY, AS PLAIN TEXT TO COPY OR PRINT: the same facts as the tab, in the order a person would walk them. Markdown, so it pastes into a note. */
@@ -185,8 +185,8 @@
     var oth = syn.other;
     if (oth.letters.length || oth.blocked.length) {
       L.push("", "## Waiting or blocked", "");
-      oth.letters.forEach(function (r) { L.push("- Letter or request out: " + bookLine(r, nameOf)); });
-      oth.blocked.forEach(function (r) { L.push("- Blocked: " + bookLine(r, nameOf)); });
+      oth.letters.forEach(function (r) { L.push("- Letter or request out: " + bookLine(r, nameOf, true)); });
+      oth.blocked.forEach(function (r) { L.push("- Blocked: " + bookLine(r, nameOf, true)); });
     }
     L.push("", "## Place by place", "");
     syn.places.forEach(function (p) {

@@ -30,6 +30,15 @@
   }
 
   /* NAMES, NOT SLUGS. The place file holds the atlas's name for a place; fetch it once for each place in the chosen families, a few at a time. */
+  /* A source mark knows its provider by id; the provider's own address is the link when the mark itself carries none. Fetched once, only when a
+     «waiting or blocked» row needs it. */
+  var PROVS = null, provAsked = false;
+  function wantProvs() {
+    if (provAsked) return; provAsked = true;
+    fetch(BASE + "providers.json").then(function (r) { return r.json(); })
+      .then(function (d) { PROVS = {}; (d.providers || []).forEach(function (p) { PROVS[p.id] = p; }); draw(); })
+      .catch(function () { PROVS = {}; });
+  }
   function wantNames(syn) {
     var todo = syn.places.map(function (p) { return p.pid; }).filter(function (p) { return !(p in PLACES) && !asked[p]; });
     if (!todo.length) return;
@@ -165,7 +174,7 @@
     var ol = el("ol", "mra-plan");
     syn.order.forEach(function (p) {
       var li = el("li"), a = el("a", "", p.name); a.href = BASE + "place/" + p.pid + "/"; li.append(el("b", "", ""), a);
-      p.openFamilies.forEach(function (sl) { li.append(" ", badge(nameOf[sl])); });
+      if (several) p.openFamilies.forEach(function (sl) { li.append(" ", badge(nameOf[sl])); });
       var ul = el("ul", "mra-l");
       p.sameBookOpen.forEach(function (r) { ul.append(el("li", "", "One reading serves " + r.open.map(function (sl) { return nameOf[sl]; }).sort().join(" and ") + ": " + r.title + (r.total ? " (" + plural(r.total, "image") + ")" : ""))); });
       p.openFamilies.forEach(function (sl) {
@@ -175,14 +184,39 @@
     });
     host.append(ol);
 
-    // ---- waiting / blocked
-    var oth = syn.other;
+    // ---- waiting / blocked: each one a link when the mark knows its address, with who is waiting and what was written
+    var oth = syn.other, several = syn.scope.length > 1;
+    function hrefOf(h) {
+      if (!h) return "";
+      if (/^https?:\/\//i.test(h)) return h;
+      return h.charAt(0) === "/" ? BASE + h.replace(/^\/(?:TheMap\/)?/, "") : "";
+    }
+    function waitList(rows, title) {
+      if (!rows.length) return;
+      if (PROVS === null && rows.some(function (r) { return !hrefOf(r.href) && /^source:/.test(r.id); })) wantProvs();
+      host.append(el("h4", "mra-sub", title + " (" + rows.length + ")"));
+      var ul = el("ul", "mra-wl");
+      rows.slice().sort(function (a, b) { return a.title.localeCompare(b.title); }).forEach(function (r) {
+        var li = el("li"), h = hrefOf(r.href) || ((PROVS && PROVS[r.id.replace(/^source:/, "")]) || {}).url || "", head = el("div", "mra-wh"), name;
+        if (h) { name = el("a", "mra-wt", r.title); name.href = h; if (/^https?:/i.test(h)) { name.target = "_blank"; name.rel = "noopener"; name.append(" \u2197"); } }
+        else name = el("span", "mra-wt", r.title);
+        head.append(name);
+        var sls = Object.keys(r.lines).sort(function (x, y) { return nameOf[x].localeCompare(nameOf[y]); }), notes = {};
+        sls.forEach(function (sl) {
+          var x = r.lines[sl], tag = (several ? nameOf[sl] : "") + (x.since ? (several ? " \u00b7 " : "since ") + x.since : "");
+          if (tag) head.append(" ", badge(tag));
+          if (x.note) notes[x.note] = 1;
+        });
+        li.append(head);
+        Object.keys(notes).forEach(function (n) { li.append(el("p", "mra-wnote", n.length > 220 ? n.slice(0, 217) + "\u2026" : n)); });
+        ul.append(li);
+      });
+      host.append(ul);
+    }
     if (oth.letters.length || oth.blocked.length) {
       host.append(el("h3", "mra-h3", "Waiting or blocked"));
-      var wl = el("ul", "mra-l");
-      oth.letters.forEach(function (r) { wl.append(el("li", "", "Out: " + r.title + " (" + Object.keys(r.lines).map(function (sl) { return nameOf[sl]; }).sort().join(", ") + ")")); });
-      oth.blocked.forEach(function (r) { wl.append(el("li", "", "Blocked: " + r.title + " (" + Object.keys(r.lines).map(function (sl) { return nameOf[sl]; }).sort().join(", ") + ")")); });
-      host.append(wl);
+      waitList(oth.letters, "Letters out, no reply yet");
+      waitList(oth.blocked, "Blocked");
     }
 
     // ---- place by place
@@ -190,7 +224,7 @@
     var pl = el("ul", "mra-l mra-all");
     syn.places.forEach(function (p) {
       var li = el("li"), a = el("a", "", p.name); a.href = BASE + "place/" + p.pid + "/"; li.append(a);
-      p.slugs.forEach(function (sl) { li.append(" ", badge(nameOf[sl])); });
+      if (several) p.slugs.forEach(function (sl) { li.append(" ", badge(nameOf[sl])); });
       if (p.books.length) li.append(" ", el("small", "", plural(p.books.length, "book") + " marked"));
       pl.append(li);
     });
@@ -205,5 +239,6 @@
   document.addEventListener("ra-scope-changed", function () { scope = readScope(); maybe(); });
   window.addEventListener("storage", function () { scope = readScope(); maybe(); });
   window.addEventListener("hashchange", function () { setTimeout(maybe, 0); });
+  document.addEventListener("ra-tab-shown", function () { setTimeout(maybe, 0); });
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { setTimeout(maybe, 0); }); else setTimeout(maybe, 0);
 })();

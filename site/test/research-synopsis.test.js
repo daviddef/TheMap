@@ -86,3 +86,12 @@ test("no marks at all gives an empty, honest story", () => {
   const t = syn.story(syn.build({ lines: [{ slug: "a", name: "A" }], marks: {}, places: {} }));
   assert.match(t, /Nothing is marked as planned/);
 });
+
+test("the plain-text story links a blocked or waiting source when its address is known", () => {
+  const out = syn.story(syn.build({ lines, marks: {
+    "source:geni": { t: "Geni", href: "https://www.geni.com/", by: { kosina: { state: "blocked", note: "needs a login" } } },
+    "source:archive": { t: "A State Archive", by: { falco: { state: "blocked" } } },
+  }, scope: ["kosina", "falco"], places: {} }), { date: "2026-11-11" });
+  assert.match(out, /- Blocked: \[Geni\]\(https:\/\/www\.geni\.com\/\)/);
+  assert.match(out, /- Blocked: A State Archive \(/);
+});

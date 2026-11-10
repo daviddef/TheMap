@@ -148,6 +148,15 @@ ISO = {
     "Sri Lanka": ["LK"], "Pakistan": ["PK"], "Bangladesh": ["BD"],
     "Cabo Verde": ["CV"], "Cape Verde": ["CV"], "Angola": ["AO"],
     "Saint Helena": ["SH"], "Falkland Islands": ["FK"],
+    # TERRITORIES AND STATES THE TITLE NAMES IN FULL, which the short names in
+    # countries.json (Antigua and Barb., Fr. Polynesia) never matched. Their
+    # civil-registration collections reached no country, so each country's own
+    # page said it held nothing. Added 10 Nov 2026; scripts/file-collections-by-title.py
+    # applies the same table to a harvest already on disk.
+    "Democratic Republic of the Congo": ["CD"], "Antigua and Barbuda": ["AG"],
+    "Saint Kitts and Nevis": ["KN"], "French Polynesia": ["PF"],
+    "British Virgin Islands": ["VG"], "Turks and Caicos Islands": ["TC"],
+    "Virgin Islands (U.S.)": ["VI"],
 
     # Polities that no longer exist, mapped onto the ground they held.
     "Prussia":                  ["DE", "PL"],

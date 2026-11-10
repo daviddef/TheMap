@@ -6,6 +6,7 @@
  * come from (only where sources have been read, each explanation with its pages, never one confident answer where sources
  * differ), every form by language with how far the claim goes and the pages behind it, the look-alikes that are a different
  * name, and a list to search with. Nothing about a person is on it. */
+import { inShard } from "../../lib/shard.js";
 import Base from "../../layouts/Base.astro";
 import { u } from "../../lib/url.js";
 import { names, confidence, hostOf } from "../../lib/given-names.js";
@@ -14,7 +15,7 @@ import { stories } from "../../lib/name-stories.js";
 
 export function getStaticPaths() {
   const n = names();
-  return n.rows.map((r) => ({ params: { id: r.id }, props: { id: r.id } }));
+  return n.rows.filter((r) => inShard(r.id)).map((r) => ({ params: { id: r.id }, props: { id: r.id } }));
 }
 const { id } = Astro.props;
 const N = names();

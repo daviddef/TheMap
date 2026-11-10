@@ -1,4 +1,5 @@
 ---
+import { inShard } from "../../lib/shard.js";
 import { brief } from "../../lib/brief.js";
 import { readFileSync, readdirSync } from "node:fs";
 /* One page per place — 1,239 of them, and the reason they exist is that until
@@ -41,7 +42,7 @@ export async function getStaticPaths() {
     const k = `${p.country}\u0000${p.name}`;
     nameCount.set(k, (nameCount.get(k) || 0) + 1);
   }
-  return full.places.map((p) => ({
+  return full.places.filter((p) => inShard(p.id)).map((p) => ({
     params: { id: p.id },
     props: { place: p, sameName: nameCount.get(`${p.country}\u0000${p.name}`) || 1 },
   }));

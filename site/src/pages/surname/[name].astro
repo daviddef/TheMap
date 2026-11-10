@@ -1,4 +1,5 @@
 ---
+import { inShard } from "../../lib/shard.js";
 import { timelineFor } from "../../lib/surname-timeline.js";
 import { surnameIndexable } from "../../lib/index-rules.js";
 import { surnamePageRows } from "../../lib/surname-pages.js";
@@ -36,7 +37,7 @@ export async function getStaticPaths() {
      already (the sitemap listed 3,577 of 17,961 live pages), and the page
      body below needs the identical answer, so there is one. */
   const { rows: pageRows } = surnamePageRows(surn.surnames || []);
-  return pageRows.map(({ r, s }) => ({
+  return pageRows.filter(({ s }) => inShard(s)).map(({ r, s }) => ({
     params: { name: s },
     props: { r, attestedBy: surn.attestedBy || {} } }));
 }

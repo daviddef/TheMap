@@ -16,11 +16,14 @@ import { u } from "../lib/url.js";
 import data from "../data/whats-new.json";
 import site from "../data/site.json";
 import provs from "../../public/providers.json";
+import sessions from "../../public/research-sessions.json";
+import { researchNews } from "../lib/research-news.js";
 
 const KINDS = {
   new:    { label: "New",    glyph: "✦" },
   better: { label: "Better", glyph: "↑" },
   fixed:  { label: "Fixed",  glyph: "✓" },
+  research: { label: "Research", glyph: "⚑" },
 };
 /* NEW SOURCES WRITE THEIR OWN LINE. A source added to the directory is the most common thing that happens here and the one
    nobody remembered to announce, so each day the directory grew becomes a «new» entry, built from the arrival dates
@@ -47,7 +50,9 @@ const sourceEntries = Object.entries(arrivals).map(([date, list]) => {
   return { date, kind: "new", src: true, headline, href: `/providers/?d=${date}` };
 });
 /* sources first within their day: they were at the bottom of a long day and nobody scrolled to them */
-const entries = sourceEntries.concat(data.entries).sort((a, b) => b.date.localeCompare(a.date));
+/* THE FAMILY ARCHIVES' WORK, A DAY AT A TIME, from the published research sessions (never a note: see lib/research-news.js) */
+const rn = researchNews(sessions);
+const entries = sourceEntries.concat(rn.entries, data.entries).sort((a, b) => b.date.localeCompare(a.date));
 const byDay = {};
 for (const e of entries) (byDay[e.date] = byDay[e.date] || []).push(e);
 const days = Object.entries(byDay).sort((a, b) => b[0].localeCompare(a[0]));
@@ -65,7 +70,7 @@ const email = site.contact && site.contact.email;
 
   <p class="tally" aria-label="Summary and filters">
     <span><b>{entries.length}</b> things since {part(days[days.length - 1][0], { day: "numeric", month: "long" })}</span>
-    {["new", "better", "fixed"].map((k) => count(k) > 0 && (
+    {["new", "better", "fixed", "research"].map((k) => count(k) > 0 && (
       <button type="button" class={`chip ${k}`} data-f={k} aria-pressed="false"><i aria-hidden="true">{KINDS[k].glyph}</i> {count(k)} {KINDS[k].label.toLowerCase()}</button>
     ))}
     {sourceEntries.length > 0 && (
@@ -73,6 +78,26 @@ const email = site.contact && site.contact.email;
     )}
     <button type="button" class="clear" id="wn-clear" hidden>Show everything</button>
   </p>
+
+  {rn.families.length > 0 && (
+    <details class="rpanel" id="research">
+      <summary>
+        <b>Where the family research has been</b>
+        <span>{rn.totals.families} families · {rn.totals.places} places · {rn.totals.books.toLocaleString("en")} books · {rn.totals.pages.toLocaleString("en")} pages · {rn.totals.sources} sources</span>
+      </summary>
+      <p class="cap">Published from the family archives: a surname, the places worked, how many books and pages were read, and which sources were used. No names of people, no notes, and nothing here is a finding. Each place links to its page and its marker on the map.</p>
+      <ul class="rfam">
+        {rn.families.map((f) => (
+          <li>
+            <b>{f.name}</b>
+            <span class="rn">{f.books} book{f.books === 1 ? "" : "s"}{f.pages ? `, ${f.pages.toLocaleString("en")} pages` : ""}</span>
+            <span class="rp">{f.places.length ? f.places.map((p, i) => (<>{i > 0 && ", "}{p.known ? <a href={u("/place/" + p.id + "/")}>{p.name}</a> : p.name}</>)) : "no place yet"}</span>
+            <span class="rs">Used: {f.sources.join(", ")}</span>
+          </li>
+        ))}
+      </ul>
+    </details>
+  )}
 
   <ol class="line">
     {days.map(([day, es]) => (
@@ -143,6 +168,17 @@ const email = site.contact && site.contact.email;
   .chip.new { color: var(--accent); border-color: var(--accent); background: var(--accent-wash); }
   .chip.fixed { color: var(--ink); }
   .chip.src { color: var(--ink); }
+  .chip.research { color: #1E6B3C; border-color: #1E6B3C; }
+  .rpanel { margin: 0 0 24px; padding: 14px 18px; border: 1px solid var(--rule); border-radius: 10px; background: var(--panel, transparent); }
+  .rpanel summary { cursor: pointer; display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; font-family: var(--serif); font-size: 17px; }
+  .rpanel summary span { font: 13px var(--sans); color: var(--ink-2); }
+  .rfam { list-style: none; margin: 12px 0 0; padding: 0 8px 0 0; display: grid; gap: 0; max-height: 26rem; overflow-y: auto; }
+  .rfam li { display: grid; grid-template-columns: 11rem minmax(0, 1fr); gap: 2px 14px; padding: 9px 0; border-top: 1px solid var(--rule); font: 14px/1.45 var(--sans); }
+  .rfam .rn { color: var(--ink-2); grid-column: 1; }
+  .rfam .rp { grid-column: 2; grid-row: 1 / span 2; }
+  .rfam .rs { grid-column: 1 / -1; color: var(--ink-2); font-size: 12.5px; }
+  @media (max-width: 640px) { .rfam li { grid-template-columns: 1fr; } .rfam .rp { grid-column: 1; grid-row: auto; } }
+
   button.chip { cursor: pointer; font: inherit; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
   button.chip:hover { border-color: var(--accent); }
   button.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }

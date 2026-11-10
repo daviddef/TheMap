@@ -233,7 +233,12 @@ const jurisdiction = attestedCcs.map((cc) => {
    the ones that do not. Five countries, then a count of the rest. */
 const JUR_CAP = 5;
 const jurMore = Math.max(0, jurisdiction.length - JUR_CAP);
-const jurShown = jurisdiction.slice(0, JUR_CAP);
+/* AND CAPPED PER COUNTRY, because this section is about the ground and not about the name. Every Peeters, Smith and Rossi in a country listed the
+   same dozens of regions, word for word: 46 KB of a 90 KB surname page, 99.6% of it byte-identical on other surname pages, about 1 GB over the
+   site. The country page already lists them all ("Whose archive this ground was"), so each country here shows the first few, oldest ground first,
+   and says how many more are one click away. Measured 10 Nov 2026 on 60 live surname pages. */
+const JUR_REGIONS = 4;
+const jurShown = jurisdiction.slice(0, JUR_CAP).map((g) => ({ cc: g.cc, regions: g.regions.slice(0, JUR_REGIONS), more: Math.max(0, g.regions.length - JUR_REGIONS) }));
 const mapped = new Set(jurisdiction.map((g) => g.cc));
 const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
 ---
@@ -746,6 +751,10 @@ const unmapped = attestedCcs.filter((cc) => !mapped.has(cc));
               </li>
             ))}
           </ul>
+          {g.more > 0 && (
+            <p class="cap" style="margin-top:6px">{g.more} more {g.more === 1 ? "region" : "regions"} are drawn in {CN[g.cc] || g.cc}:
+            {" "}<a href={u(`/country/${g.cc.toLowerCase()}/`)}>all of them, on the country page</a>.</p>
+          )}
         </div>
       ))}
       {jurMore > 0 && (

@@ -570,6 +570,10 @@
           mine.t = mine.t || incoming.t;
           mine.where = mine.where || incoming.where;
           mine.href = fixHref(mine.href || incoming.href);
+          /* WHERE THE SESSIONS PLACED IT. A mark this browser already holds was made before the importer could file it under a place
+             (a film's waypoint, an Antenati register's comune), and "never overwrites" left it floating in "not yet tied to a place"
+             for good. Missing place facts are filled in; one this browser already has is never replaced. */
+          ["place", "placedBy", "waypoint", "opensAt"].forEach(function (f) { if (incoming[f] && !mine[f]) mine[f] = incoming[f]; });
           if (incoming.total && !mine.total) mine.total = incoming.total;
           if (incoming.walked) mine.walked = merge((mine.walked || []).concat(incoming.walked));
           mine.by = mine.by || {};

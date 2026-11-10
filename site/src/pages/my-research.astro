@@ -523,7 +523,11 @@ const BASE_ = u("/");
           }
           /* AN ANTENATI REGISTER OPENED. The atlas holds Antenati registers by comune, kind and years and not by the register's own
              id, so a register somebody opened cannot be filed under a place's books; it is recorded here, by id, until it can be. */
-          if (id.indexOf("antenati:") === 0) { registers.push(row); return; }
+          if (id.indexOf("antenati:") === 0) {
+            /* FILED BY THE COMUNE ITS OWN TITLE NAMES (placedBy, from the importer): under that place, never as one of its volumes. */
+            if (m.place) { (byPlace[m.place] = byPlace[m.place] || []).push(row); return; }
+            registers.push(row); return;
+          }
           /* A PLACE YOU HAVE DECIDED ABOUT BELONGS TO THAT PLACE'S SECTION,
              which is the whole reason for marking it: «planning to» against
              Rovinj is a to-do, and a to-do filed under «other» is lost. It
@@ -840,6 +844,8 @@ const BASE_ = u("/");
         /* A FILM WITH NO WAYPOINT STILL HAS A SHAPE. Sessions record which item of the film holds which book, and when the
            machine transcript cannot be trusted over the images (so a transcript scan proves nothing); both travel on the mark. */
         var isFilm = r.id.indexOf("film:") === 0;
+        var filed = (r.id.indexOf("antenati:") === 0 && m.placedBy === "comune")
+          ? '<div class="mrline mrline-n"><span class="mrnote">An Antenati register, filed here because its title names this comune. It is not one of this place\u2019s FamilySearch books.</span></div>' : "";
         var items = (isFilm && m.items && m.items.length)
           ? '<div class="mrline mrline-n"><span class="mrnote">Items: ' +
             m.items.map(function (i) {
@@ -858,7 +864,7 @@ const BASE_ = u("/");
               (cov.length ? '<span class="mrdone">' + esc(P.fmt(cov)) + "</span>" : "") +
               chips + "</div>"
             : "") +
-          opens + items + warn +
+          opens + filed + items + warn +
           (b.note
             ? '<div class="mrline mrline-n"><span class="mrnote">' + esc(b.note) + "</span>" +
               (b.since ? '<span class="mrsince">' + esc(b.since) + "</span>" : "") +

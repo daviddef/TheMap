@@ -477,6 +477,56 @@ def _git(repo, *args, timeout=90):
     return subprocess.run(["git", "-C", repo, *args], capture_output=True, text=True, timeout=timeout)
 
 
+# AN ANTENATI REGISTER FILED UNDER THE COMUNE ITS OWN ROW NAMES. The register's id says nothing about where it is, and matching on
+# resemblance is refused (see above). But the row that opened it often says so in its own structured title («Portale Antenati — Mione,
+# «Matrimoni, allegati» 1808», «Arienzo BIRTH register, 1814», dest «Ovaro, Matrimoni allegati 1807»). That text is the archive's own
+# statement, so it is used, under three conditions that make a wrong place unlikely: the text must be one of those leading patterns
+# (never a word found in a sentence), it must equal, accents and case aside, the name of exactly ONE Italian place in data/places.json,
+# and no row that opened the same register may name a different one. The mark then sits under that place on /my-research/ and says
+# it was filed by the comune named in its title; it claims no volume, no page and no year.
+_ANT_KIND = r"(?:BIRTH|DEATH|MARRIAGE|Birth|Death|Marriage|Nati|Morti|Matrimoni|Battesimi|Defunti)"
+_ANT_PATTERNS = [
+    re.compile(r"^(?:Portale\s+)?Antenati\s*[\u2014\u2013-]\s*(?:Portale Antenati,\s*)?([^,\u00ab(\u2014\u2013:]+?)\s*(?:,|\u00ab|\(|\u2014|\u2013|:|$)"),
+    re.compile(r"^([A-Z\u00c0-\u00dc][^\s,\u2014\u2013\u00ab(]*(?:\s+[A-Z\u00c0-\u00dc][^\s,\u2014\u2013\u00ab(]*){0,2})\s+" + _ANT_KIND + r"\b"),
+]
+_ANT_DEST = re.compile(r"^(?:Antenati\s*[\u2014\u2013-]\s*)?([^,]+),\s*" + _ANT_KIND)
+_IT_PLACES = None
+
+
+def _fold_place(t):
+    t = unicodedata.normalize("NFKD", str(t or "").lower())
+    return re.sub(r"[^a-z0-9]+", " ", "".join(c for c in t if not unicodedata.combining(c))).strip()
+
+
+def italian_places():
+    """{folded name: {place id: name}} over the Italian places of data/places.json, by their own name."""
+    global _IT_PLACES
+    if _IT_PLACES is None:
+        _IT_PLACES = {}
+        for pl in json.load(io.open("data/places.json", encoding="utf-8"))["places"]:
+            if pl.get("country") == "IT":
+                _IT_PLACES.setdefault(_fold_place(pl["name"]), {})[pl["id"]] = pl["name"]
+    return _IT_PLACES
+
+
+def antenati_comune_places(row):
+    """{place id: name} for the Italian place(s) the row's own leading title names; empty when it names none."""
+    texts = []
+    for k in ("src", "source"):
+        sv = str(row.get(k) or "")
+        for pat in _ANT_PATTERNS:
+            mm = pat.match(sv)
+            if mm:
+                texts.append(mm.group(1).strip())
+    mm = _ANT_DEST.match(str(row.get("dest") or ""))
+    if mm:
+        texts.append(mm.group(1).strip())
+    out = {}
+    for t in texts:
+        out.update(italian_places().get(_fold_place(t), {}))
+    return out
+
+
 def archive_rows(fam):
     """(rows, note). note is "" when the checkout and its origin agree."""
     repo = os.path.join(PROJ, fam)
@@ -933,6 +983,7 @@ def main():
     made_before = prior_made(args.out)
 
     vols = build_volume_index()
+    ant_places = {}   # antenati:<id> -> one {place id: name} per row that opened it
     provs = build_provider_index()
     names = build_name_index()
     cols = build_collection_index()
@@ -1110,6 +1161,8 @@ def main():
                 if when:
                     b["since"] = max(b.get("since", ""), when)
                 # No note: the row's sentence can name a person or an act number (see the collection block).
+                # The comune the row names, kept to be settled once every row that opened this register has been read.
+                ant_places.setdefault(aid, []).append(antenati_comune_places(r))
 
             # THE FILM MARK, which needs no waypoint and no resolution.
             film_no = film_of(r, url)
@@ -1349,6 +1402,15 @@ def main():
         ids = sorted(i for i in ids if i in showcase)
         if sl in lines and ids:
             lines[sl]["archive"] = ids; used_arch.update(ids)
+    # SETTLE THE ANTENATI PLACES: a register is filed under a place only when every row that opened it names the same one.
+    for aid, found in ant_places.items():
+        ids = {pid for f in found for pid in f}
+        if len(ids) == 1 and aid in marks:
+            pid = next(iter(ids))
+            marks[aid]["place"] = pid
+            marks[aid]["where"] = next(f[pid] for f in found if pid in f)
+            marks[aid]["placedBy"] = "comune"
+    nant_placed = sum(1 for k, v in marks.items() if k.startswith("antenati:") and v.get("place"))
     doc = {"v": 2, "exported": today, "lines": lines,
            "active": (sorted(lines)[0] if lines else None), "marks": marks}
     if used_arch:
@@ -1380,7 +1442,7 @@ def main():
     nsrc = sum(1 for k in marks if k.startswith("source:"))
     print(f"    source marks              {nsrc:,}  (from {srcmarked:,} rows)")
     nant = sum(1 for k in marks if k.startswith("antenati:"))
-    print(f"    antenati register marks   {nant:,}")
+    print(f"    antenati register marks   {nant:,}  ({nant_placed:,} filed under the comune their own title names)")
     print(f"    volume marks              {nvol:,}")
     print(f"    no volume could be placed {len(rejects):,}")
     # WHAT THE PAGE PARSER REFUSED, shown rather than silently dropped. A year

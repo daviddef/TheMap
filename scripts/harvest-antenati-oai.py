@@ -34,6 +34,13 @@ kept in the output file. One request every two seconds, because a public
 endpoint with no rate-limit header is a courtesy, not an invitation.
 
 SOURCE. Ministero della Cultura / SAN, set pico_m-ANTENATI, CC BY 4.0.
+
+STOPPED, 10 NOV 2026: THE ENDPOINT HAS MOVED AND NOTHING NEW CAN BE HARVESTED FROM THIS ADDRESS. www.san.beniculturali.it/oaicat/OAIHandler now
+answers every verb with a 302 to https://archivinazionali.cultura.gov.it/it/ (the ministry's home page, not an OAI-PMH service), and
+archivinazionali.cultura.gov.it itself drops the connection from this client. antenati.cultura.gov.it still answers 403 to an identified
+crawler (robots.txt unreachable). dati.gov.it and dati.cultura.gov.it list no Antenati dataset or OAI endpoint. The 6,000 images already
+harvested stand (5,591 volumes). Do not look for a way around the redirect or the 403: ask the ministry (Direzione generale Archivi) where the
+open data now lives, and resume from the saved token only if the new feed is the same set.
 """
 import argparse, json, os, re, subprocess, sys, time, collections
 

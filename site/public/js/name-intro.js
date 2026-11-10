@@ -49,14 +49,15 @@
     }
     (row.variants || []).forEach(function (v) { if (v.how === "sounds" && m.sounds.indexOf(v.n) < 0) m.sounds.push(v.n); });
 
-    /* THE FLAGS: the lead country first, then the one with most people counted; the eras from the earliest record on (or from 1800 when no
-       date is known), at most six each, newest last. */
+    /* THE FLAGS: one strip per country with flag data, the lead country first, then the one with most people counted; the eras from the
+       earliest record on (or from 1800 when no date is known), at most six each, newest last. The card shows one strip at a time: the
+       reader picks it by clicking the country's pill. */
     var order = [];
     if (m.lead) order.push(m.lead.cc);
     where.forEach(function (w) { if (order.indexOf(w.cc) < 0) order.push(w.cc); });
     var slugOf = {}; var sm = (ctx.map && ctx.map.slug) || {};
     Object.keys(sm).forEach(function (s) { slugOf[sm[s]] = s; });
-    order.slice(0, 2).forEach(function (cc) {
+    order.forEach(function (cc) {   /* every country the name is counted in, so each pill can open its own strip */
       var slug = slugOf[cc]; if (!slug) return;
       var from = (m.lead && m.lead.since) ? m.lead.since : 1800;   /* one window for every country: the earliest record held, else 1800 */
       var imgs = {}; ((ctx.map && ctx.map.f && ctx.map.f[cc]) || []).forEach(function (r) { imgs[r[0]] = r[2]; });
@@ -101,16 +102,16 @@
     }
     sum.append(el("h2", "ni-h", "About the name " + m.name));
     if (m.lede) root.append(el("p", "ni-p", m.lede));
-    if (m.where.length) {
-      var ul = el("ul", "ni-where");
-      m.where.forEach(function (w) { ul.append(el("li", "", w.name + (w.n != null ? " " + w.n.toLocaleString("en-US") : ""))); });
-      root.append(ul);
-    }
-    m.flags.forEach(function (c, i) {
-      /* the first country's strip is open; the next is folded, so the card stays a card */
-      var box = el(i ? "details" : "div", "ni-flags"), head = el(i ? "summary" : "div", "ni-h3-row");
-      if (i) box.append(head); else box.append(head);
-      head.append(el("h3", "ni-h3", "Whose flag flew over " + c.name + (c.since && c.since > 1800 ? " from the " + decade(c.since) : "")));
+    /* THE COUNTRY PILLS ARE THE TABS. David: «instead of showing the "whose flag flew over" for Croatia and France, could it be dynamic: when I
+       click on the country pill it shows the flags?» One strip is drawn, for the pill that is pressed (the lead country at first); a country
+       with no flag data is a plain pill, not a button, so nothing invites a click that shows nothing. */
+    var strip = el("div", "ni-flags"), pills = [], hint = null;
+    var byCc = {}; m.flags.forEach(function (c) { byCc[c.cc] = c; });
+    function show(cc) {
+      var c = byCc[cc]; if (!c) return;
+      pills.forEach(function (p) { p.b.setAttribute("aria-pressed", String(p.cc === cc)); });
+      strip.textContent = "";
+      strip.append(el("h3", "ni-h3", "Whose flag flew over " + c.name + (c.since && c.since > 1800 ? " from the " + decade(c.since) : "")));
       var ol = el("ol", "ni-eras");
       c.rows.forEach(function (r) {
         var li = el("li", "ni-era");
@@ -119,11 +120,30 @@
         if (r.note) t.append(el("small", "ni-era-n", r.note));
         li.append(t); ol.append(li);
       });
-      box.append(ol);
-      var a = el("a", "ni-more", c.more ? "and " + c.more + " more eras: the flags of " + c.name + " →" : "The flags of " + c.name + " →");
-      a.href = base + "flags/" + c.slug + "/"; box.append(a);
-      root.append(box);
-    });
+      strip.append(ol);
+      var a = el("a", "ni-more", c.more ? "and " + c.more + " more eras: the flags of " + c.name + " \u2192" : "The flags of " + c.name + " \u2192");
+      a.href = base + "flags/" + c.slug + "/"; strip.append(a);
+    }
+    if (m.where.length) {
+      var ul = el("ul", "ni-where");
+      m.where.forEach(function (w) {
+        var li = el("li", "", ""), label = w.name + (w.n != null ? " " + w.n.toLocaleString("en-US") : "");
+        if (byCc[w.cc]) {
+          var b = el("button", "ni-pill", label); b.type = "button"; b.setAttribute("aria-pressed", "false");
+          b.title = "Show the flags that flew over " + w.name; b.addEventListener("click", function () { show(w.cc); });
+          pills.push({ cc: w.cc, b: b }); li.append(b);
+        } else li.textContent = label;
+        ul.append(li);
+      });
+      root.append(ul);
+    }
+    if (pills.length) {
+      hint = el("p", "ni-fine ni-hint", pills.length > 1 ? "Click a country to see whose flag flew over it." : "");
+      if (pills.length > 1) root.append(hint);
+      /* the strip opens on the lead country, or the first with flags */
+      var first = m.flags[0] && byCc[m.flags[0].cc] ? m.flags[0].cc : pills[0].cc;
+      show(first); root.append(strip);
+    }
     if (m.sounds.length) root.append(el("p", "ni-p ni-fine", "Sounds alike, which is a guess and not a record: " + m.sounds.slice(0, 5).join(", ") + "."));
     var go = el("p", "ni-go");
     var map = el("a", "", "Find it on the map →"); map.href = base + "?q=" + encodeURIComponent(m.name);

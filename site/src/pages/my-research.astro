@@ -237,7 +237,7 @@ const BASE_ = u("/");
   <div class="rs-panel mr-panel" id="mr-p-fixes" role="tabpanel" aria-labelledby="mr-t-fixes" hidden>
     <h2 class="mr-h">GEDCOM research still to fix</h2>
     <p class="cap">What the fix list in <a href={BASE_ + "roots/"}>Roots &amp; Routes</a> found in your family tree file, kept here so the work is part of your research.
-    It appears when you tick <b>Remember my decisions on this device</b> on the Fix list. Places are listed as typed in your file; people are only counted,
+    It is kept automatically each time you open a tree in Roots &amp; Routes (switch <b>Remember my decisions on this device</b> off on the Fix list to stop). Places are listed as typed in your file; people are only counted,
     and nothing leaves this browser. Open the file in Roots &amp; Routes to see who.</p>
     <div id="mr-fixes"></div>
   </div>
@@ -327,7 +327,7 @@ const BASE_ = u("/");
         names.forEach(function (n) { (d.trees[n].sections || []).forEach(function (s) { open += Math.max(0, s.total - s.done - s.asis); }); });
         var badge = document.getElementById("mr-n-fixes"); if (badge) { badge.hidden = !open; badge.textContent = open; }
         if (!names.length) {
-          var e = el("div", null, "mr-fx-empty"); e.append(el("p", "No fix list is kept here yet."), el("p", "Open your tree in Roots & Routes, go to the Fix list, and tick \u201cRemember my decisions on this device\u201d. What is left to fix then shows up here, and ticks you make there are counted.", "cap"));
+          var e = el("div", null, "mr-fx-empty"); e.append(el("p", "No fix list is kept here yet."), el("p", "Open your tree in Roots & Routes once and go to its Fix list. What is left to fix is kept here from then on, and ticks you make there are counted. If you had switched \u201cRemember my decisions on this device\u201d off, switch it back on.", "cap"));
           var a = el("a", "Open Roots & Routes", "mr-fx-go"); a.href = BASE + "roots/"; e.append(a); box.append(e); return;
         }
         names.forEach(function (n) {

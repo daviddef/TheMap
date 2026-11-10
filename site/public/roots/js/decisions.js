@@ -22,7 +22,7 @@
    something happened, not who it happened to. People are only ever counted: no name, id or date of birth is written. The summary
    follows the switch: off, or "Forget", removes it. */
 
-const KEY = 'ra-fix-decisions-v1', OPTOUT = 'ra-fix-remember-off', SYNCKEY = 'ra-sync-v1';
+const KEY = 'ra-fix-decisions-v1', OPTOUT = 'ra-fix-remember-off';
 
 /* cyrb53: a small, stable 53-bit hash. Not a security primitive; see above. */
 function cyrb53(str) {
@@ -73,13 +73,14 @@ export function create(storage) {
     isOn: () => read().on === true,
     /* Turning it off forgets everything: "off" must mean nothing is kept. */
     setOn(on) { if (on) { const d = read(); d.on = true; return write(d); } try { storage.removeItem(KEY); } catch { /* nothing to forget */ } return true; },
-    /* ONLINE SYNC IMPLIES KEEPING. A browser that holds the reader's six words (ra-sync-v1) has already chosen to keep research and copy it,
-       encrypted, to an online copy that includes these decisions, so the switch starts ON there: otherwise every tick would be lost
-       when the page closes and never reach the other device. Only until the reader switches it off: that choice is remembered
-       (optOut) and is never overridden. Returns whether it turned the switch on just now. */
+    /* KEEPING STARTS ON. David: «i was hoping we would be saving our fix list without needing the gedcom any more». It was opt-in, so a
+       reader who never found the box got nothing in My research and lost every tick when the page closed. Now the switch is on from the
+       first visit, on this device only, and stays off once the reader has switched it off: that choice is remembered (optOut) and is never
+       overridden. (A browser holding the reader's six words, ra-sync-v1, also copies it, encrypted, to the online copy.)
+       Returns whether it turned the switch on just now. */
     autoOn() {
       try {
-        if (!storage || read().on || storage.getItem(OPTOUT) || !storage.getItem(SYNCKEY)) return false;
+        if (!storage || read().on || storage.getItem(OPTOUT)) return false;
         return this.setOn(true);
       } catch { return false; }
     },

@@ -28,14 +28,13 @@ test("the ad is on written pages and on a country's page, not on its generated s
   assert.match(base, /startsWith\("\/country\/"\) && !here\.replace\(\/\\\/\$\/, ""\)\.endsWith\("\/sources"\)/);
 });
 
-/* The fix list's "remember my decisions" starts on where the six words are, and an explicit off is never overridden. */
+/* The fix list's "remember my decisions" starts on, and an explicit off is never overridden. */
 import { create } from "../public/roots/js/decisions.js";
 const store = () => { const m = new Map(); return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k) }; };
-test("keeping decisions starts on with online sync, once, and respects an explicit off", () => {
+test("keeping decisions starts on, once, and respects an explicit off", () => {
   let st = store(), d = create(st);
-  assert.equal(d.autoOn(), false, "no six words, no change");
-  st = store(); st.setItem("ra-sync-v1", "{}"); d = create(st);
-  assert.equal(d.autoOn(), true); assert.equal(d.isOn(), true); assert.equal(d.autoOn(), false);
+  assert.equal(d.autoOn(), true, "on from the first visit, no six words needed"); assert.equal(d.isOn(), true); assert.equal(d.autoOn(), false);
+  assert.equal(create(null).autoOn(), false, "no storage, nothing to keep");
   d.setOn(false); d.optOut(true);
   assert.equal(d.autoOn(), false); assert.equal(d.isOn(), false);
   d.setOn(true); d.optOut(false); d.put("k", "d", true);

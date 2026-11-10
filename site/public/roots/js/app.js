@@ -620,9 +620,9 @@ function decStatus(restored) {
   const kept = dec.count();
   $('#dec-said').textContent = !dec.available() ? 'This browser has no storage for it (a private window?). Save the decisions to a file instead.'
     : (restored ? restored + ' earlier decision' + (restored === 1 ? '' : 's') + ' re-applied. ' : '')
-      + (dec.isOn() ? (autoKept ? 'On because online sync is on. ' : '') + '\u2713 Saved on this device: ' + kept + (kept === 1 ? ' decision' : ' decisions') + ', and the Fix list is summarised in My research.' : kept ? kept + ' loaded from a file are stored on this device; turn this on to keep new ones too.' : 'Not kept: ticks and "left as is" are lost when you close the page.');
+      + (dec.isOn() ? (autoKept ? 'Kept from the start; untick to stop. ' : '') + '\u2713 Saved on this device: ' + kept + (kept === 1 ? ' decision' : ' decisions') + ', and the Fix list is summarised in My research.' : kept ? kept + ' loaded from a file are stored on this device; turn this on to keep new ones too.' : 'Not kept: ticks and "left as is" are lost when you close the page.');
 }
-const autoKept = dec.autoOn();   // the six words are on this browser: keeping starts on (decisions.js)
+const autoKept = dec.autoOn();   // keeping starts on unless the reader has switched it off (decisions.js)
 function fixlist(m) { fix = m; opened.clear(); const n = restoreDecisions(m); drawFix(); decStatus(n); fixTab(); }
 /* While the switch is on, a readable summary of this fix list is kept for My research (see decisions.js). Debounced: drawFix runs on every tick. */
 let sumTimer = 0;

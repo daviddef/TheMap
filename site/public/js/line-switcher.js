@@ -64,6 +64,16 @@
       shownLines = mine.concat(theirs);
       var heads = mine.length && theirs.length;
       list.textContent = ""; at = -1;
+      /* ALL OF THEM AT ONCE IS A READING, NOT A FAMILY. Marks are made against one family, so this is not an option that changes the one in use: it
+         opens My research on its All families tab, where any of them can be chosen together and read as one synopsis. */
+      if (lines.length > 1 && !f) {
+        var lbl = bar.querySelector("a.ra-lines-l"), allHref = (lbl && lbl.getAttribute("href") || "/my-research/").split("#")[0] + "#all";
+        var allLi = mk("li", "ra-cb-all"), allA = mk("a", null, "All families together \u2192"); allA.href = allHref;
+        allLi.title = "Read several families as one: overlaps, open work and a combined plan";
+        allLi.addEventListener("mousedown", function (e) { e.preventDefault(); location.href = allHref; });
+        allLi.append(allA, mk("small", null, " choose which"));
+        list.append(allLi);
+      }
       shownLines.forEach(function (l, i) {
         if (heads && i === 0) list.append(mk("li", "ra-cb-grp", "Yours"));
         if (heads && i === mine.length) list.append(mk("li", "ra-cb-grp", "From the family research sessions"));

@@ -105,6 +105,7 @@ const BASE_ = u("/");
       stay in the first panel, untouched: the script below still finds them by id. */}
   <div class="rs-tabs mr-tabs" role="tablist" id="mr-tabs">
     <button type="button" class="rs-tab" role="tab" id="mr-t-families" aria-controls="mr-p-families" aria-selected="true">Families &amp; places</button>
+    <button type="button" class="rs-tab" role="tab" id="mr-t-all" aria-controls="mr-p-all" aria-selected="false" tabindex="-1">All families</button>
     <button type="button" class="rs-tab" role="tab" id="mr-t-story" aria-controls="mr-p-story" aria-selected="false" tabindex="-1">My story</button>
     <button type="button" class="rs-tab" role="tab" id="mr-t-fixes" aria-controls="mr-p-fixes" aria-selected="false" tabindex="-1">GEDCOM to fix <span class="rs-n" id="mr-n-fixes" hidden></span></button>
     <button type="button" class="rs-tab" role="tab" id="mr-t-sessions" aria-controls="mr-p-sessions" aria-selected="false" tabindex="-1">Other names</button>
@@ -116,6 +117,10 @@ const BASE_ = u("/");
   <p class="cap" id="mr-dots-hint" hidden></p>
 
   <div id="mr-body"></div>
+  </div>
+
+  <div class="rs-panel mr-panel" id="mr-p-all" role="tabpanel" aria-labelledby="mr-t-all" hidden>
+    <div id="mr-all" data-base={u("/")}></div>
   </div>
 
   <div class="rs-panel mr-panel" id="mr-p-story" role="tabpanel" aria-labelledby="mr-t-story" hidden>
@@ -230,6 +235,8 @@ const BASE_ = u("/");
     </div>
   </div>
   <p class="ms-dim ms-fail" id="ms-fail" hidden>My story could not start. Reload the page. If it still does not appear, the site is probably being updated: try again in a few minutes. Nothing you have kept is lost.</p>
+  <script is:inline src={u("/js/research-synopsis.js")}></script>
+  <script is:inline src={u("/js/research-overview.js")}></script>
   <script is:inline src={u("/js/story-tab.js")}></script>
   <script is:inline>if (!window.raStoryTab) { var f = document.getElementById("ms-fail"); if (f) f.hidden = false; }</script>
   </div>
@@ -299,7 +306,7 @@ const BASE_ = u("/");
     /* TABS AND THE GEDCOM-TO-FIX PANEL. Reads ra-gedcom-fixes-v1 (written by Roots & Routes while "Remember my decisions" is on; see
        roots/js/decisions.js). Place text is user data, so every node here is built with textContent. */
     (function () {
-      var NAMES = ["families", "story", "fixes", "sessions"], FKEY = "ra-gedcom-fixes-v1";
+      var NAMES = ["families", "all", "story", "fixes", "sessions"], FKEY = "ra-gedcom-fixes-v1";
       function show(n, push) {
         NAMES.forEach(function (k) {
           var on = k === n, t = document.getElementById("mr-t-" + k), p = document.getElementById("mr-p-" + k);
@@ -1485,6 +1492,38 @@ const BASE_ = u("/");
   .ms-ent-ta { width: 100%; box-sizing: border-box; margin-top: 8px; }
   .ms-ent-start { background: transparent; border-style: dashed; color: var(--ink-3); font-size: 13px; }
   @media (max-width: 640px) { .ms-comp { padding: 4px 12px 14px; } .ms-ent-d { margin-left: 0; } .ms-h { font-size: 24px; } }
+
+  /* ---- ALL FAMILIES: the synopsis tab (public/js/research-overview.js) ------------------------------------------------------------ */
+  .mra-pick .cap { max-width: 70ch; }
+  .mra-choose { margin: 12px 0 6px; } .mra-choose > summary { cursor: pointer; font: 600 14px var(--sans); padding: 6px 0; }
+  .mra-find { display: block; width: min(100%, 22rem); margin: 8px 0 6px; padding: 7px 10px; border: 1px solid var(--rule-strong, var(--rule)); border-radius: 8px; background: var(--bg); color: var(--ink); font: 14px var(--sans); }
+  .mra-who { margin-top: 4px; }
+  .mra-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 6px; }
+  .mra-chip { display: inline-flex; gap: 7px; align-items: baseline; padding: 6px 11px; border: 1px solid var(--rule-strong, var(--rule)); border-radius: 999px; background: var(--panel); font-family: var(--sans); font-size: 14px; cursor: pointer; min-width: 0; }
+  .mra-chip[hidden] { display: none; }
+  .mra-chip.is-on { border-color: var(--accent, #245565); background: color-mix(in srgb, var(--accent, #245565) 9%, var(--panel)); }
+  .mra-chip input { margin: 0; align-self: center; } .mra-chip small { color: var(--ink-3); font-size: 11.5px; }
+  .mra-chip-n { overflow-wrap: anywhere; font-weight: 600; }
+  .mra-acts { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 4px 0 8px; }
+  .mra-link { background: none; border: 0; padding: 0; font: 13px var(--sans); color: var(--accent, #245565); text-decoration: underline; cursor: pointer; }
+  .mra-fig { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; list-style: none; padding: 0; margin: 18px 0 6px; }
+  .mra-fig li { border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; background: var(--panel); display: flex; flex-direction: column; gap: 2px; }
+  .mra-fig b { font: 600 26px/1 var(--sans); } .mra-fig span { font: 12.5px/1.3 var(--sans); color: var(--ink-3); }
+  .mra-note { max-width: 70ch; }
+  .mra-tools { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 6px; }
+  .mra-btn { font: 600 13.5px var(--sans); padding: 8px 14px; border: 1px solid var(--rule-strong, var(--rule)); border-radius: 8px; background: var(--panel); color: var(--ink); cursor: pointer; }
+  .mra-btn:hover { border-color: var(--accent, #245565); }
+  .mra-pre { width: 100%; box-sizing: border-box; font: 12.5px/1.5 var(--mono, monospace); }
+  .mra-h3 { margin: 28px 0 8px; font-size: 20px; }
+  .mra-place { border-left: 3px solid var(--accent, #245565); padding: 2px 0 2px 14px; margin: 14px 0; }
+  .mra-place h4 { margin: 0 0 6px; font-size: 17px; overflow-wrap: anywhere; }
+  .mra-b { display: inline-block; padding: 1px 8px; margin: 1px 2px 1px 0; border-radius: 999px; background: var(--panel); border: 1px solid var(--rule); font: 600 11.5px var(--sans); color: var(--ink-2); overflow-wrap: anywhere; }
+  .mra-b.mra-once { border-color: var(--accent, #245565); color: var(--accent, #245565); }
+  .mra-b.st-found { border-color: #2e7d4f; } .mra-b.st-planned { border-style: dashed; }
+  .mra-l { margin: 6px 0; padding-left: 18px; font: 14.5px/1.5 var(--sans); } .mra-l li { margin: 3px 0; overflow-wrap: anywhere; }
+  .mra-plan { margin: 8px 0; padding-left: 22px; font: 15px/1.5 var(--sans); } .mra-plan > li { margin: 12px 0; }
+  .mra-all small { color: var(--ink-3); }
+  @media print { .mra-chips, .mra-acts, .mra-tools, .mra-pre { display: none; } }
 
   .mr-tabs { margin-top: 18px; }
   .mr-panel { margin-bottom: 28px; min-width: 0; }

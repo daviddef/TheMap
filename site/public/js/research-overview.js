@@ -15,8 +15,9 @@
 
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function plural(n, one, many) { return n + " " + (n === 1 ? one : (many || one + "s")); }
-  function readScope() { try { var s = JSON.parse(localStorage.getItem(SKEY) || "null"); return s && typeof s === "object" ? s : { all: true, slugs: [] }; } catch (e) { return { all: true, slugs: [] }; } }
-  function writeScope(s) { try { localStorage.setItem(SKEY, JSON.stringify(s)); } catch (e) { /* storage blocked: the choice lasts until the page closes */ } }
+  /* NOTHING CHOSEN YET MEANS THE FAMILY YOU ARE ON. «All» is a choice, never the default. */
+  function readScope() { try { var s = JSON.parse(localStorage.getItem(SKEY) || "null"); if (s && typeof s === "object") return s; } catch (e) { /* none */ } var a = P.active(); return { all: false, slugs: a ? [a] : [] }; }
+  function writeScope(s) { try { localStorage.setItem(SKEY, JSON.stringify(s)); } catch (e) { /* storage blocked: the choice lasts until the page closes */ } document.dispatchEvent(new CustomEvent("ra-scope-changed")); }
   var scope = readScope(), openState = false;
   function syn0(lines, slugs) {
     var names = lines.filter(function (l) { return slugs.indexOf(l.slug) > -1; }).map(function (l) { return l.name === "My research so far" ? "Research Names" : l.name; });
@@ -51,6 +52,7 @@
   function badge(name, cls) { return el("span", "mra-b " + (cls || ""), name); }
 
   function draw() {
+    scope = readScope();
     var lines = P.lines();
     host.textContent = "";
     if (!lines.length) {
@@ -200,7 +202,8 @@
   var t = document.getElementById("mr-t-all");
   if (t) t.addEventListener("click", function () { setTimeout(draw, 0); });
   document.addEventListener("ra-progress-changed", maybe);
-  window.addEventListener("storage", maybe);
+  document.addEventListener("ra-scope-changed", function () { scope = readScope(); maybe(); });
+  window.addEventListener("storage", function () { scope = readScope(); maybe(); });
   window.addEventListener("hashchange", function () { setTimeout(maybe, 0); });
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { setTimeout(maybe, 0); }); else setTimeout(maybe, 0);
 })();

@@ -53,7 +53,25 @@
     fName.placeholder = "Surname, e.g. Kosina"; fName.setAttribute("aria-label", "Surname of the family"); fWhere.placeholder = "Where (optional), to tell two apart"; fWhere.setAttribute("aria-label", "Where, optional");
     form.append(fName, fWhere, fGo); add.append(addBtn, form);
     pop.append(q, list, add); cb.append(btn, pop); sel.hidden = true; sel.parentNode.insertBefore(cb, sel);
-    var shownLines = [], at = -1;
+    var shownLines = [], at = -1, tgCount = null, SKEY = "ra-synopsis-scope";
+    /* NOTHING CHOSEN YET MEANS THE FAMILY YOU ARE ON, which is what the page did before this existed. «All» is a choice, never the default. */
+    function readScope() { try { var x = JSON.parse(localStorage.getItem(SKEY) || "null"); if (x && typeof x === "object") return x; } catch (e) { /* none */ } var a = P.active(); return { all: false, slugs: a ? [a] : [] }; }
+    function writeScope(x) { try { localStorage.setItem(SKEY, JSON.stringify(x)); } catch (e) { /* storage blocked: lasts until the page closes */ } document.dispatchEvent(new CustomEvent("ra-scope-changed")); }
+    function inScope(slug) { var x = readScope(); return !!x.all || (x.slugs || []).indexOf(slug) > -1; }
+    function toggleScope(slug) {
+      var all = P.lines().map(function (l) { return l.slug; }), x = readScope(), cur = x.all ? all.slice() : (x.slugs || []).filter(function (s2) { return all.indexOf(s2) > -1; }), i = cur.indexOf(slug);
+      if (i > -1) cur.splice(i, 1); else cur.push(slug);
+      writeScope({ all: cur.length === all.length, slugs: cur });
+    }
+    /* the ticks and the count follow the stored set, whoever changed it (this list, or the tab) */
+    function syncTicks() {
+      var n = 0, tot = P.lines().length;
+      [].forEach.call(list.querySelectorAll(".ra-cb-tog"), function (c) { c.checked = inScope(c.getAttribute("data-slug")); });
+      var x = readScope(); n = x.all ? tot : (x.slugs || []).length;
+      if (tgCount) tgCount.textContent = n + " of " + tot + " ticked";
+    }
+    document.addEventListener("ra-scope-changed", syncTicks);
+    window.addEventListener("storage", syncTicks);
 
     function labelOf(l) { return (l.name === "My research so far" ? "Research Names" : l.name) + (l.where ? " of " + l.where : ""); }
     function paintList() {
@@ -64,15 +82,20 @@
       shownLines = mine.concat(theirs);
       var heads = mine.length && theirs.length;
       list.textContent = ""; at = -1;
-      /* ALL OF THEM AT ONCE IS A READING, NOT A FAMILY. Marks are made against one family, so this is not an option that changes the one in use: it
-         opens My research on its All families tab, where any of them can be chosen together and read as one synopsis. */
+      /* SEVERAL AT ONCE IS A READING, NOT A FAMILY. Marks are made against ONE family (the one chosen by clicking its name, as always), so ticking
+         families here does not change that one: it chooses which families My research reads together on its All families tab. The tick boxes, «Select
+         all» and «Clear» only edit that set, which is kept in this browser (ra-synopsis-scope, shared with the tab). */
       if (lines.length > 1 && !f) {
         var lbl = bar.querySelector("a.ra-lines-l"), allHref = (lbl && lbl.getAttribute("href") || "/my-research/").split("#")[0] + "#all";
-        var allLi = mk("li", "ra-cb-all"), allA = mk("a", null, "All families together \u2192"); allA.href = allHref;
-        allLi.title = "Read several families as one: overlaps, open work and a combined plan";
-        allLi.addEventListener("mousedown", function (e) { e.preventDefault(); location.href = allHref; });
-        allLi.append(allA, mk("small", null, " choose which"));
-        list.append(allLi);
+        var tg = mk("li", "ra-cb-all"), cnt = mk("span", "ra-cb-allcount"); tgCount = cnt;
+        function bt(txt, fn) { var x = mk("button", "ra-cb-allbtn", txt); x.type = "button"; x.addEventListener("mousedown", function (e) { e.preventDefault(); e.stopPropagation(); fn(); syncTicks(); }); return x; }
+        var go = mk("a", "ra-cb-allgo", "Read together \u2192"); go.href = allHref;
+        go.addEventListener("mousedown", function (e) { e.stopPropagation(); });
+        tg.append(mk("span", "ra-cb-alllab", "Read several together"), bt("Select all families", function () { writeScope({ all: true, slugs: [] }); }),
+                  bt("Clear", function () { writeScope({ all: false, slugs: [] }); }), cnt, go);
+        tg.title = "Tick families to read them as one on My research. Clicking a family's name still chooses the one you mark under.";
+        list.append(tg);
+        syncTicks();
       }
       shownLines.forEach(function (l, i) {
         if (heads && i === 0) list.append(mk("li", "ra-cb-grp", "Yours"));
@@ -88,7 +111,12 @@
           ["mousedown", "click"].forEach(function (t) { lk.addEventListener(t, function (e) { e.stopPropagation(); }); });
           main.append(lk);
         });
-        li.append(mk("span", "ra-cb-tick", l.active ? "\u2713" : ""), main, mk("span", "ra-cb-n", l.marks + (l.marks === 1 ? " mark" : " marks")));
+        var tog = mk("input", "ra-cb-tog"); tog.type = "checkbox"; tog.checked = inScope(l.slug); tog.setAttribute("data-slug", l.slug);
+        tog.setAttribute("aria-label", "Read " + l.name + " together with the others ticked");
+        tog.addEventListener("mousedown", function (e) { e.stopPropagation(); e.preventDefault(); toggleScope(l.slug); syncTicks(); });
+        tog.addEventListener("click", function (e) { e.stopPropagation(); e.preventDefault(); });
+        tog.addEventListener("keydown", function (e) { if (e.key === " " || e.key === "Enter") { e.stopPropagation(); e.preventDefault(); toggleScope(l.slug); syncTicks(); } });
+        li.append(tog, mk("span", "ra-cb-tick", l.active ? "\u2713" : ""), main, mk("span", "ra-cb-n", l.marks + (l.marks === 1 ? " mark" : " marks")));
         li.addEventListener("mousedown", function (e) { e.preventDefault(); choose(l); });
         list.append(li);
       });

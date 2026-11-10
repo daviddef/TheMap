@@ -1150,6 +1150,17 @@ const BASE_ = u("/");
         draw();
       }
       body.addEventListener("click", onBodyClick);
+      /* EVERY LINK ON THESE PANELS OPENS IN A NEW TAB, so a reader following a place, a book or a FamilySearch page never loses their
+         place in the dossier (and the marks they were about to make). One handler for the lot, because most of the links are written by
+         script: place headings, book titles, the recommended places, the map's popups. In-page jumps (#...) and mail/phone links stay as
+         they are. It sets the attributes just before the browser follows the link, so it also works from the keyboard. */
+      document.addEventListener("click", function (e) {
+        var a = e.target && e.target.closest ? e.target.closest("a[href]") : null;
+        if (!a || !a.closest(".mr-panel")) return;
+        var hr = a.getAttribute("href") || "";
+        if (!hr || hr.charAt(0) === "#" || /^(mailto|tel|javascript):/i.test(hr) || a.hasAttribute("download")) return;
+        a.setAttribute("target", "_blank"); a.setAttribute("rel", "noopener");
+      }, true);
       /* toggle does not bubble, so it is caught on the way down. */
       body.addEventListener("toggle", function (e) {
         var d = e.target;

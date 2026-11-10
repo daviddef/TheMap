@@ -50,10 +50,14 @@
       });
       return out.join(NSEP);
     }
+    /* The site left its /TheMap/ address when it moved to its own domain, but 177 published book marks still point at /TheMap/place/...,
+       which is a 404 now. A link inside the site is never prefixed, so the prefix is simply dropped, wherever a href arrives from. */
+    function fixHref(h) { return typeof h === "string" ? h.replace(/^\/TheMap\//, "/") : h; }
     function healNotes(d) {
       var changed = false;
       function fix(o) {
         if (o && o.note) { var j = joinNotes(o.note); if (j !== o.note) { o.note = j; changed = true; } }
+        if (o && o.href) { var h = fixHref(o.href); if (h !== o.href) { o.href = h; changed = true; } }
       }
       Object.keys(d.marks || {}).forEach(function (k) {
         var m = d.marks[k]; fix(m);
@@ -93,7 +97,7 @@
           if (from.note) into.note = joinNotes(into.note, from.note);
           if (from.t && !into.t) into.t = from.t;
           if (from.where && !into.where) into.where = from.where;
-          if (from.href && !into.href) into.href = from.href;
+          if (from.href && !into.href) into.href = fixHref(from.href);
         }
         delete mem.marks[k];
         moved++;
@@ -491,7 +495,7 @@
         var m = markFor(id);
         if (what && what.t) m.t = what.t;
         if (what && what.where) m.where = what.where;
-        if (what && what.href) m.href = what.href;
+        if (what && what.href) m.href = fixHref(what.href);
         save();
         return view(m, activeSlug());
       },
@@ -565,7 +569,7 @@
           var mine = d.marks[k];
           mine.t = mine.t || incoming.t;
           mine.where = mine.where || incoming.where;
-          mine.href = mine.href || incoming.href;
+          mine.href = fixHref(mine.href || incoming.href);
           if (incoming.total && !mine.total) mine.total = incoming.total;
           if (incoming.walked) mine.walked = merge((mine.walked || []).concat(incoming.walked));
           mine.by = mine.by || {};

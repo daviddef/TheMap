@@ -1257,7 +1257,7 @@ def main():
             m = marks.setdefault(mid, {"by": {}})
             m["t"] = m.get("t") or vols[wp]["t"] or src[:90]
             m["where"] = m.get("where") or vols[wp].get("label") or vols[wp]["place"]
-            m["href"] = m.get("href") or ("/TheMap/place/" + vols[wp]["place"] + "/")
+            m["href"] = m.get("href") or ("/place/" + vols[wp]["place"] + "/")
             b = m["by"].setdefault(line, {})
             if when:
                 b["since"] = max(b.get("since", ""), when)

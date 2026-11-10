@@ -221,11 +221,12 @@
 
     // ---- place by place
     host.append(el("h3", "mra-h3", "Place by place"));
-    var pl = el("ul", "mra-l mra-all");
+    var pl = el("ul", "mra-all");
     syn.places.forEach(function (p) {
-      var li = el("li"), a = el("a", "", p.name); a.href = BASE + "place/" + p.pid + "/"; li.append(a);
-      if (several) p.slugs.forEach(function (sl) { li.append(" ", badge(nameOf[sl])); });
-      if (p.books.length) li.append(" ", el("small", "", plural(p.books.length, "book") + " marked"));
+      var li = el("li"), a = el("a", "mra-pn", p.name), who = el("span", "mra-pw"), n = el("small", "mra-pc", p.books.length ? plural(p.books.length, "book") + " marked" : "");
+      a.href = BASE + "place/" + p.pid + "/";
+      if (several) p.slugs.forEach(function (sl) { who.append(badge(nameOf[sl])); });
+      li.append(a, who, n);
       pl.append(li);
     });
     host.append(pl);

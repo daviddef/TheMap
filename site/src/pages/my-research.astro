@@ -1552,8 +1552,12 @@ const BASE_ = u("/");
   .mra-l { margin: 6px 0; padding-left: 18px; font: 14.5px/1.5 var(--sans); } .mra-l li { margin: 3px 0; overflow-wrap: anywhere; }
   .mra-plan { margin: 8px 0; padding-left: 22px; font: 15px/1.5 var(--sans); } .mra-plan > li { margin: 12px 0; }
   .mra-all small { color: var(--ink-3); }
-  .mra-all { list-style: none; padding: 0; columns: 2 280px; column-gap: 32px; }
-  .mra-all li { break-inside: avoid; margin: 4px 0; }
+  .mra-all { list-style: none; margin: 6px 0; padding: 0; columns: 2 360px; column-gap: 40px; }
+  .mra-all li { break-inside: avoid; margin: 0; padding: 6px 0; border-bottom: 1px solid var(--rule); display: grid; grid-template-columns: minmax(7rem, 9.5rem) minmax(0, 1fr) auto; align-items: baseline; gap: 2px 10px; font: 15px/1.4 var(--sans); }
+  .mra-pn { overflow-wrap: anywhere; }
+  .mra-pw { display: flex; flex-wrap: wrap; gap: 3px; min-width: 0; }
+  .mra-pc { text-align: right; white-space: nowrap; }
+  @media (max-width: 520px) { .mra-all li { grid-template-columns: minmax(0, 1fr) auto; } .mra-pw { grid-column: 1 / -1; order: 3; } }
   .mra-sub { margin: 18px 0 6px; font: 600 12px var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
   .mra-wl { list-style: none; margin: 0 0 8px; padding: 0; border-top: 1px solid var(--rule); }
   .mra-wl li { padding: 9px 0; border-bottom: 1px solid var(--rule); }

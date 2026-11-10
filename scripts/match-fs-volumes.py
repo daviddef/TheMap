@@ -392,6 +392,16 @@ UNKNOWN_VALUE = re.compile(
     r"unassigned|uncategori[sz]ed|"
     r"\?+|-+|\.+)$", re.I)
 
+# NAMES A RESEARCHER READ AND DECIDED ARE NOT ONE PLACE («Various towns», «Statewide», a list of several counties), with the reason, in
+# data/unplaced-placed-3.json `refused` (scripts/merge-unplaced-decisions.py). Like UNKNOWN_VALUE they are counted as what they are, not
+# offered again as a town somebody should go and find.
+DECIDED_NOT_PLACES = set()
+try:
+    for _r in json.load(open("data/unplaced-placed-3.json", encoding="utf-8")).get("refused", []):
+        DECIDED_NOT_PLACES.add(fold(_r["n"]))
+except (FileNotFoundError, ValueError, KeyError):
+    pass
+
 # ADMINISTRATIVE WRAPPERS AROUND A PLACE THAT IS RIGHT THERE IN THE STRING.
 # «Zona de reclutamiento de Madrid» is 5,718 volumes of Madrid conscription
 # records, and the town is the last two words. «Auckland Court» and
@@ -462,7 +472,8 @@ def readings(name, label=None):
     # a "Range" label is an alphabetical span and splitting it would offer
     # "Aabol" to the gazetteer as a town.
     if name and (UNKNOWN_VALUE.match(name.strip())
-                 or RECORD_TYPE.match(name.strip())):
+                 or RECORD_TYPE.match(name.strip())
+                 or fold(name) in DECIDED_NOT_PLACES):
         return []
     extra = []
     if label and " - " in label and " - " in (name or ""):
@@ -1505,7 +1516,7 @@ def main():
     # volumes are filed under. Its rows carry `gazetteer`, so the dot that
     # appears is the MODERN place — the old name is a way in, not a second dot.
     for _pf in ("data/unplaced-placed.json", "data/unplaced-placed-2.json",
-                "data/fs-volumes-wikipedia.json"):
+                "data/unplaced-placed-3.json", "data/fs-volumes-wikipedia.json"):
         if not os.path.exists(_pf):
             continue
         _d = json.load(open(_pf, encoding="utf-8"))

@@ -1870,6 +1870,14 @@ def main():
         print("warn:", w)
     if len(WARN) > 12:
         print(f"warn: … and {len(WARN)-12} more")
+    # THE UNPLACED NAMES A RESEARCHER DECIDED (data/unplaced-placed-3.json and the evidence-carrying rows of data/fs-volumes-areas.json) must
+    # still pass the tests they passed when merged: a Wikidata item, https evidence, and a point inside the country they say they are in.
+    import subprocess as _sp
+    _r = _sp.run([sys.executable, "scripts/merge-unplaced-decisions.py", "--check"], capture_output=True, text=True)
+    if _r.returncode != 0:
+        for _l in _r.stdout.splitlines()[:-1]:
+            err("unplaced decision: " + _l.strip())
+
     for e in ERR[:40]:
         print("FAIL:", e)
     if len(ERR) > 40:

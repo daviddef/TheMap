@@ -405,6 +405,30 @@ def no_blob_repeated_on_every_page(pages):
             err(f"one inline script of {len(body)} bytes is on {n} of {len(sample)} sampled pages (about {est:,.0f} MB across {len(pages)} pages). "
                 "Serve it once from a shared file, as the translation tables are (src/pages/js/i18n-tables.js.js). Starts: " + body[:60].replace("\n", " "))
 
+# Mean built size of a page of each kind, in bytes, as the browser receives the HTML before compression. Measured on live pages on 10 Nov 2026
+# (60 per kind, after the surname-section and place-collections caps): a place page 81,168 -> about 66,000, a surname page 89,843 -> 51,057.
+# The ceiling is the measure plus about 15%, so noise passes and a section that doubles a page does not. Raise one only after saying why in this
+# comment, because every byte here is multiplied by 100,000 pages and by every release, and the R2 bucket and the 15-45 minute publish pay for it.
+PAGE_BUDGET = {"place": 76_000, "surname": 60_000}
+
+
+def page_weight_within_budget(pages):
+    """THE SITE'S WEIGHT IS NOT ONE FILE, IT IS ONE FILE TIMES A HUNDRED THOUSAND. The repeated-script gate above catches the same blob on every page;
+    this catches the slower failure, a section that grows (a list of every region of a country on every surname of it) until the pages are twice
+    what they were. It reads a spread sample of each kind and fails when the mean passes the budget."""
+    for kind, ceiling in PAGE_BUDGET.items():
+        mine = [f for f in pages if f"{os.sep}{kind}{os.sep}" in f.replace(DIST, "", 1)]
+        if len(mine) < 20:
+            continue    # a slice or a partial build may hold few of a kind; the full build is the one that is held to it
+        sample = mine[::max(1, len(mine) // 300)][:300]
+        sizes = [os.path.getsize(f) for f in sample]
+        mean = sum(sizes) / len(sizes)
+        if mean > ceiling:
+            err(f"{kind} pages average {mean:,.0f} bytes over a sample of {len(sample)}; the budget is {ceiling:,}. "
+                f"That is about {(mean - ceiling) * len(mine) / (1024 * 1024):,.0f} MB over, across {len(mine):,} such pages here. "
+                "Find the section that grew (scripts/check-built.py has the method: split pages into blocks and count the ones other pages repeat).")
+
+
 def main():
     if not os.path.isdir(DIST):
         sys.exit(f"{DIST} is not there — run this after astro build.")
@@ -478,6 +502,7 @@ def main():
 
     attribution_gate()
     no_blob_repeated_on_every_page(pages)
+    page_weight_within_budget(pages)
 
     print(f"\n{len(pages)} pages · {len(bundle)}b bundled css · {len(inlined)}b inlined")
     if FAIL:

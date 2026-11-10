@@ -1,0 +1,12 @@
+{
+  // Serves the generated pages of recordatlas.org from R2, so the site is no longer bounded by what one GitHub Pages artifact can hold.
+  // PREVIEW ONLY for now, and anything the bucket does not hold is fetched from ORIGIN.
+  "name": "record-atlas-pages",
+  "main": "src/index.js",
+  "compatibility_date": "2025-09-01",
+  // No custom domain yet: that is a DNS change and is David's to make. For now it answers on its workers.dev address.
+  "workers_dev": true,
+  "r2_buckets": [{ "binding": "SITE", "bucket_name": "record-atlas-site" }],
+  "vars": { "ORIGIN": "https://recordatlas.org" },
+  "observability": { "enabled": false }
+}

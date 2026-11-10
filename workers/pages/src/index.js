@@ -35,6 +35,8 @@ export default {
   async fetch(req, env) {
     if (req.method !== "GET" && req.method !== "HEAD") return new Response("Method not allowed", { status: 405 });
     const url = new URL(req.url);
+    /* GitHub Pages sent www to the bare domain; keep doing so, or every page would exist at two addresses */
+    if (url.hostname === "www.recordatlas.org") return Response.redirect("https://recordatlas.org" + url.pathname + url.search, 301);
     const key = keyFor(url.pathname);
     if (key == null) return new Response("Bad request", { status: 400 });
 

@@ -1,7 +1,9 @@
 name: Build and publish to R2 (sliced)
 
-# THE SAME SITE, BUILT IN PARALLEL SLICES AND PUBLISHED TO R2 INSTEAD OF GITHUB PAGES. Manual for now (workflow_dispatch): the
-# production deploy is still deploy.yml. See docs/split-build.md for why, what is verified, and how the cutover works.
+# THE SAME SITE, BUILT IN PARALLEL SLICES AND PUBLISHED TO R2 INSTEAD OF GITHUB PAGES. Since the 10 Nov 2026 cutover recordatlas.org is
+# served from R2 by the Worker (workers/pages), so THIS is the production deploy: it runs on every push to main (a run in progress is
+# never cancelled, and only the newest waiting run is kept), and by hand. deploy.yml still publishes to GitHub Pages as the fallback
+# origin until it is retired. See docs/split-build.md.
 #
 #   prep    the data step, the tests and check-data once; saves the data cache the slices restore
 #   slices  N jobs, each `astro build` with RA_SHARD=i/N, uploading only its own place, surname and name pages
@@ -11,6 +13,8 @@ name: Build and publish to R2 (sliced)
 # record-atlas-site). Without them the upload step stops with a message that says so, after the build, before anything is changed.
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       slices:

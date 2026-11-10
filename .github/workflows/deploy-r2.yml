@@ -1,0 +1,274 @@
+name: Build and publish to R2 (sliced)
+
+# THE SAME SITE, BUILT IN PARALLEL SLICES AND PUBLISHED TO R2 INSTEAD OF GITHUB PAGES. Manual for now (workflow_dispatch): the
+# production deploy is still deploy.yml. See docs/split-build.md for why, what is verified, and how the cutover works.
+#
+#   prep    the data step, the tests and check-data once; saves the data cache the slices restore
+#   slices  N jobs, each `astro build` with RA_SHARD=i/N, uploading only its own place, surname and name pages
+#   static  everything else (the static pages, p/<id>.json, _astro, the sitemap) once, from slice 0's build
+#
+# Needs repository secrets R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY (an R2 token with Object Read & Write on the bucket
+# record-atlas-site). Without them the upload step stops with a message that says so, after the build, before anything is changed.
+
+on:
+  workflow_dispatch:
+    inputs:
+      slices:
+        description: "How many parallel slices"
+        default: "16"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: r2-publish
+  cancel-in-progress: false
+
+env:
+  SLICES: ${{ github.event.inputs.slices || '16' }}
+
+jobs:
+  prep:
+    runs-on: ubuntu-latest
+    outputs:
+      key: ${{ steps.datakey.outputs.k }}
+      matrix: ${{ steps.m.outputs.matrix }}
+    steps:
+      - name: Free disk on the runner
+        run: |
+          df -h / | tail -1
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost || true
+          df -h / | tail -1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      # THE ONE NON-STDLIB PYTHON DEPENDENCY IN THE PIPELINE.
+      # scripts/build-og-images.py draws the social cards — the six generic
+      # ones and, since 11 October, one per place that has collections. It is
+      # the only script here that needs anything installed, and it skips with
+      # a printed warning rather than failing when Pillow is absent, so
+      # WITHOUT THIS STEP THE DEPLOY WOULD STILL GO GREEN and every place page
+      # would quietly fall back to the grey rectangle row 54 was about.
+      - name: Install Pillow, for the social cards
+        run: python3 -m pip install --quiet pillow
+      - name: Install
+        run: npm ci || npm install
+        working-directory: site
+
+      # THE HARVEST ARTEFACT THE BUILD CANNOT REPRODUCE.
+      #
+      # data/fs-volumes-world.json.gz holds 2,545,054 FamilySearch volumes over
+      # 15,411 places. scripts/match-fs-volumes.py makes it from data/fs-waypoints.
+      # json, which is 740 MB and is not in the repository — so no checkout and
+      # no runner can rebuild it. It has to be carried.
+      #
+      # It used to be carried in git, and that cost 431 MB of a 686 MB .git
+      # across sixteen versions: gzip does not delta-compress, so each version
+      # paid full price while a plain-JSON sibling compressed 177 MB down to 9.
+      # It is a release asset now, replaced in place when the harvest re-runs.
+      #
+      # NO `continue-on-error` HERE, DELIBERATELY. build.py fails when the file
+      # is absent, because the alternative is a green build publishing an atlas
+      # with 2.5 million volumes quietly missing — and a wrong site that looks right
+      # is the one failure this project cannot afford. A download that breaks
+      # must break the deploy.
+      #
+      # AND IT MUST SURVIVE THE RE-UPLOAD, WHICH IS NOT ATOMIC. The documented
+      # way to replace this artefact is `gh release upload … --clobber`, and
+      # clobber DELETES the asset and then uploads 54 MB in its place: for
+      # about two minutes the release has no such file and this URL is a 404.
+      # On 7 October a deploy fetched eleven seconds after one such upload
+      # finished — luck, not design, and the failure it missed would have been
+      # a red deploy with a confusing «could not download» rather than
+      # anything naming the cause.
+      #
+      # `--retry` alone does not cover it: curl treats a 404 as a final answer
+      # and retries only transient errors, so the one error this actually hits
+      # was the one it would not wait for. `--retry-all-errors` makes the 404
+      # retryable, and ten tries fifteen seconds apart outlast the window.
+      - name: Fetch the harvest artefact
+        run: |
+          curl -fsSL --retry 10 --retry-delay 15 --retry-all-errors \
+            -o data/fs-volumes-world.json.gz \
+            https://github.com/daviddef/TheMap/releases/download/harvest-data/fs-volumes-world.json.gz
+          python3 -c "import gzip,json,sys; d=json.load(gzip.open('data/fs-volumes-world.json.gz','rt',encoding='utf-8')); n=sum(len(v) for v in d['byPlace'].values()); print(f'{n:,} volumes over {len(d[\"byPlace\"]):,} places'); sys.exit(0 if n > 20000 else 'the artefact downloaded but is too small to be right')"
+
+      # ---- THE DATA STEP IS CACHED, AND ONLY ON AN EXACT MATCH ------------
+      #
+      # `npm run build` is `npm run data && npm run check && astro build`, and
+      # the data half rebuilds index.json, 21,754 place files and every surname
+      # shard from scratch on every push — including a push that changed one
+      # .astro file and no data at all. Deploys run 1h09 to 1h36; David: «do we
+      # need to keep doing full deploys… why is only that one page not
+      # building?»
+      #
+      # WHAT site/public/ ACTUALLY DEPENDS ON is data/** and scripts/**, and
+      # nothing else: build.py, build-surnames.py and build-eras.py read from
+      # those two and write into site/public. So the key is a hash of both,
+      # computed AFTER the harvest artefact lands in data/ so a new artefact
+      # counts as a change. An exact hit means the inputs are byte-identical
+      # and the output would be byte-identical too.
+      #
+      # NO restore-keys, DELIBERATELY. A prefix match would restore a
+      # near-miss — public/ built from different data — and publish it as
+      # current. This workflow already refuses `continue-on-error` on the
+      # artefact download for the same reason: a wrong site that looks right is
+      # the one failure this project cannot afford. Either the inputs match
+      # exactly and the cache is used, or the data is rebuilt.
+      - name: Key the data cache
+        id: datakey
+        run: echo "k=data-${{ hashFiles('data/**', 'scripts/**') }}" >> "$GITHUB_OUTPUT"
+      - name: Restore built data
+        id: datacache
+        uses: actions/cache@v4
+        with:
+          # BOTH PLACES THE DATA STEP WRITES, NOT JUST THE OBVIOUS ONE. This
+          # cached site/public only, and `npm run data` also generates three
+          # gitignored files into site/src/data — places-full.json,
+          # collections-full.json and surnames.json. On a cache MISS nobody
+          # noticed, because the data step ran and made them. On the first
+          # cache HIT the step was skipped, those files were never created, and
+          # check-data.py stopped the build with 22 errors: «imports
+          # ../data/places-full.json … that file is not there».
+          #
+          # Two deploys failed that way before it was caught, and both were
+          # pushes that touched only site/src — which is precisely the case
+          # this cache was added to make fast. A cache that only works when it
+          # misses is worse than no cache: it turns a green build into a red
+          # one exactly when it is doing its job.
+          path: |
+            site/public
+            site/src/data/places-full.json
+            site/src/data/collections-full.json
+            site/src/data/surnames.json
+            data/surnames.json
+          key: ${{ steps.datakey.outputs.k }}
+
+      # A CACHE THAT RESTORES LESS THAN THE BUILD NEEDS MUST NOT LOOK LIKE A
+      # HIT. Enumerating the paths has now been got wrong twice: first
+      # site/src/data/*.json were missing, which stopped the build with 22
+      # «that file is not there» errors; then data/surnames.json, which the
+      # surname-page cross-check reads directly and whose absence turned into
+      # four «_floors.json has a floor for 'surnames' and nothing counts it».
+      # Both times the cache reported a hit and the build broke after it.
+      #
+      # So the hit is VERIFIED rather than trusted. If anything the build needs
+      # is missing, the data step runs anyway — slower, and correct. Adding a
+      # generated file to this list is now the only thing a future change has
+      # to remember, and forgetting costs a rebuild rather than a red deploy.
+      - name: Check the cache actually restored everything
+        id: cacheok
+        run: |
+          missing=""
+          for f in site/public/index.json \
+                   site/public/shards.json \
+                   site/src/data/places-full.json \
+                   site/src/data/collections-full.json \
+                   site/src/data/surnames.json \
+                   data/surnames.json; do
+            [ -s "$f" ] || missing="$missing $f"
+          done
+          # AND THE VIEWPORT CELLS, COUNTED RATHER THAN SPOT-CHECKED. index.json
+          # promises one pi/<cell>.json per entry in `tail.cells`, and
+          # lib/atlas.js treats a promised cell as required — so a restore that
+          # brought index.json but not its cells would fail the build with a
+          # missing-file throw rather than quietly building a smaller atlas.
+          # That is the right failure, and this turns it into a rebuild instead.
+          # AND THE PER-PLACE SOCIAL CARDS, which a cache saved before 11
+          # October does not contain at all — the place pages read that
+          # directory to decide which og:image to print, so an empty one is a
+          # silent return to one card for 54,043 pages.
+          [ -n "$(ls site/public/og/place/*.png 2>/dev/null | head -1)" ] \
+            || missing="$missing site/public/og/place/"
+          want=$(jq -r '.tail.cells | length // 0' site/public/index.json 2>/dev/null || echo 0)
+          have=$(ls site/public/pi/*.json 2>/dev/null | wc -l | tr -d ' ')
+          if [ "$want" != "0" ] && [ "$want" != "$have" ]; then
+            missing="$missing site/public/pi/ ($have of $want cells)"
+          fi
+          if [ -n "$missing" ]; then
+            echo "::warning::cache hit but incomplete, rebuilding the data —$missing"
+            echo "complete=no" >> "$GITHUB_OUTPUT"
+          else
+            echo "complete=yes" >> "$GITHUB_OUTPUT"
+          fi
+
+      # THE CACHE HOLDS site/public WHOLE, AND SOME OF site/public IS SOURCE. site/public/roots/js, roots.css, js/nav.js and the rest are tracked files.
+      # A cache hit restores the copies that were there when the cache was saved, over this commit's checkout, so a push that touched only those files was
+      # built and tested against the OLD versions (five roots tests failed on code that was right in the repository, and a green build would have shipped
+      # the old page). Put every tracked file back as the commit has it; the generated, gitignored files the cache exists for are not tracked and stay.
+      - name: Put tracked files in site/public back as committed
+        run: git checkout -- site/public
+      - name: Build the data
+        if: steps.datacache.outputs.cache-hit != 'true' || steps.cacheok.outputs.complete != 'yes'
+        run: npm run data
+        working-directory: site
+      - name: Data unchanged
+        if: steps.datacache.outputs.cache-hit == 'true' && steps.cacheok.outputs.complete == 'yes'
+        run: echo "::notice::site/public restored from cache and verified complete — data/ and scripts/ are unchanged, so the data step was skipped"
+
+      - name: Tests and data checks, once
+        run: npm run check
+        working-directory: site
+      - name: List the slices
+        id: m
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json,os
+          n=int(os.environ["SLICES"])
+          print("matrix="+json.dumps({"i":list(range(n))}))
+          PY
+
+  slice:
+    needs: prep
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prep.outputs.matrix) }}
+    steps:
+      - name: Free disk on the runner
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost || true
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install
+        run: npm ci || npm install
+        working-directory: site
+      - name: Restore built data (must be an exact hit)
+        id: datacache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            site/public
+            site/src/data/places-full.json
+            site/src/data/collections-full.json
+            site/src/data/surnames.json
+            data/surnames.json
+          key: ${{ needs.prep.outputs.key }}
+          fail-on-cache-miss: true
+      - name: Put tracked files in site/public back as committed
+        run: git checkout -- site/public
+      - name: Build this slice
+        run: NODE_OPTIONS=--max-old-space-size=10240 npx astro build
+        working-directory: site
+        env:
+          RA_SHARD: ${{ matrix.i }}/${{ env.SLICES }}
+      - name: Install the uploader
+        run: python3 -m pip install --quiet boto3
+      - name: Upload this slice's pages
+        run: python3 scripts/r2_sync.py --dist site/dist --part slice-${{ matrix.i }} --only place surname name
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      - name: Upload everything else (slice 0 only)
+        if: matrix.i == 0
+        run: python3 scripts/r2_sync.py --dist site/dist --part static --skip place surname name
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}

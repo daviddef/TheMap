@@ -113,7 +113,32 @@ const email = site.contact && site.contact.email;
             return (
               <li class="item" data-kind={e.kind || "better"} data-src={e.src ? "1" : undefined}>
                 <span class={`chip ${e.kind || "better"}`}><i aria-hidden="true">{k.glyph}</i> {k.label}</span>
-                {e.href
+                {e.detail
+                  ? (
+                    <details class="rday">
+                      <summary class="head">{e.headline}</summary>
+                      {e.detail.map((g) => (
+                        <div class="rg">
+                          <b>{g.family}</b>
+                          <ul>
+                            {g.rows.map((r) => (
+                              <li>
+                                {r.kind === "book"
+                                  ? (<>
+                                      {r.place && r.place.known ? <a href={u("/place/" + r.placeId + "/")}>{r.place.name}</a> : (r.place ? r.place.name : "")}
+                                      {r.place ? " · " : ""}{r.title}
+                                      {r.pages ? ` · ${r.pages.toLocaleString("en")} page${r.pages === 1 ? "" : "s"} read` : ""}
+                                    </>)
+                                  : (<>{r.href ? <a href={r.href} rel="noopener">{r.source}</a> : r.source}{r.title && r.title !== r.source ? " · " + r.title : ""}</>)}
+                                {r.state ? <span class="rst"> — {({ planned: "planned", written: "written, no reply yet", searched: "searched, nothing found", found: "found something", exhausted: "read everything", blocked: "no access" })[r.state] || r.state}</span> : null}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </details>
+                  )
+                  : e.href
                   ? <a class="head" href={u(e.href) + (e.spot ? "?spot=" + encodeURIComponent(e.spot) + (e.tip ? "&tip=" + encodeURIComponent(e.tip) : "") : "")}>{e.headline}<span class="go" aria-hidden="true"> →</span></a>
                   : <span class="head">{e.headline}</span>}
               </li>
@@ -169,6 +194,9 @@ const email = site.contact && site.contact.email;
   .chip.fixed { color: var(--ink); }
   .chip.src { color: var(--ink); }
   .chip.research { color: #1E6B3C; border-color: #1E6B3C; }
+  .rday { min-width: 0; flex: 1; } .rday summary { cursor: pointer; }
+  .rg { margin: 10px 0 0; font: 14px/1.45 var(--sans); } .rg ul { margin: 3px 0 0; padding-left: 18px; } .rg li { margin: 2px 0; }
+  .rst { color: var(--ink-2); }
   .rpanel { margin: 0 0 24px; padding: 14px 18px; border: 1px solid var(--rule); border-radius: 10px; background: var(--panel, transparent); }
   .rpanel summary { cursor: pointer; display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; font-family: var(--serif); font-size: 17px; }
   .rpanel summary span { font: 13px var(--sans); color: var(--ink-2); }

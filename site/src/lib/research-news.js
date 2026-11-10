@@ -30,7 +30,7 @@ export function researchNews(data) {
   const names = {};
   const place = (id) => (names[id] = names[id] || placeName(id));
   const fam = {};            // slug -> { name, places:Set, books, pages, sources:Set }
-  const days = {};           // day -> { fams:Set, books, places:Set, sources:Set }
+  const days = {};           // day -> { fams:Set, books, places:Set, sources:Set, rows:[] }
   const allPlaces = new Set(), allSources = new Set();
   let books = 0, pages = 0;
   for (const [id, m] of Object.entries(data.marks || {})) {
@@ -45,10 +45,14 @@ export function researchNews(data) {
       if (pid) { f.places.add(pid); allPlaces.add(pid); }
       const day = /^\d{4}-\d{2}-\d{2}$/.test(b.since || "") ? b.since : "";
       if (day) {
-        const d = (days[day] = days[day] || { fams: new Set(), books: 0, places: new Set(), sources: new Set() });
+        const d = (days[day] = days[day] || { fams: new Set(), books: 0, places: new Set(), sources: new Set(), rows: [] });
         d.fams.add(f.name); d.sources.add(src);
         if (isBook) d.books++;
         if (pid) d.places.add(pid);
+        /* the exact thing, by title: never the note */
+        const title = String(m.t || id.replace(/^[a-z]+:/, "")).replace(/\s+/g, " ").slice(0, 90);
+        const href = /^https?:\/\//.test(m.href || "") && !isBook ? m.href : null;
+        d.rows.push({ family: f.name, kind: isBook ? "book" : "source", title, source: src, placeId: pid, pages: pg, state: b.state || "", href });
       }
     }
   }
@@ -63,10 +67,17 @@ export function researchNews(data) {
     if (d.books) bits.push(`${d.books} book${d.books === 1 ? "" : "s"} read${pl.length ? " at " + list(pl, 4) : ""}`);
     const others = [...d.sources].filter((s) => s !== "FamilySearch");
     if (others.length) bits.push(`${d.books ? "also " : ""}used ${list(others.sort(), 3)}`);
-    let headline = `Research: ${fams.length === 1 ? fams[0] : fams.length + " families"} — ${bits.join("; ") || "work recorded"}`;
+    const who = fams.length <= 3 ? fams.join(", ") : fams.slice(0, 3).join(", ") + " and " + (fams.length - 3) + " more " + (fams.length === 4 ? "family" : "families");
+    let headline = `Research: ${who} — ${bits.join("; ") || "work recorded"}`;
     if (headline.length > 150) headline = headline.slice(0, 147).replace(/[;,]?\s*\S*$/, "") + "…";
     const firstKnown = [...d.places].find((p) => place(p).known);
-    return { date, kind: "research", headline, href: firstKnown ? `/place/${firstKnown}/` : null };
+    const byFam = {};
+    for (const r of d.rows) (byFam[r.family] = byFam[r.family] || []).push({ ...r, place: r.placeId ? place(r.placeId) : null });
+    const detail = Object.keys(byFam).sort((a, b) => a.localeCompare(b)).map((family) => ({
+      family,
+      rows: byFam[family].sort((a, b) => (a.kind + a.title).localeCompare(b.kind + b.title)),
+    }));
+    return { date, kind: "research", headline, href: firstKnown ? `/place/${firstKnown}/` : null, detail };
   });
   const families = Object.values(fam).map((f) => ({
     name: f.name,

@@ -29,3 +29,13 @@ test("one entry per day, never carrying a note", () => {
   assert.match(d2.headline, /1 book read/);
   assert.match(d2.headline, /Matricula/);
 });
+
+test("a day names its families and lists the exact books and sources, still without notes", () => {
+  const r = researchNews(data);
+  const d2 = r.entries.find((e) => e.date === "2026-11-02");
+  assert.equal(d2.detail.length, 1);
+  assert.equal(d2.detail[0].family, "Alpha");
+  assert.ok(d2.detail[0].rows.some((x) => x.kind === "book" && x.title === "Births 1859-1896" && x.pages === 20));
+  assert.ok(d2.detail[0].rows.some((x) => x.kind === "source" && x.source === "Matricula Online"));
+  assert.ok(!JSON.stringify(d2).includes("SOMEBODY"));
+});

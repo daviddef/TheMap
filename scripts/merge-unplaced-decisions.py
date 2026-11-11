@@ -46,6 +46,8 @@ SUCCESSORS = {
     "DE": {"PL", "RU", "FR", "DK", "BE", "CZ", "LT"}, "IT": {"HR", "SI", "SM", "VA", "MT", "FR", "CH"}, "GB": {"IE", "GG", "JE", "IM"},
     "IE": {"GB"}, "NL": {"BE", "DE"}, "BE": {"NL", "FR", "LU", "DE"}, "SE": {"FI", "NO"}, "FR": {"BE", "LU", "DE", "IT", "CH", "MC"},
     "PT": {"ES", "BR"}, "ES": {"PT", "MX"}, "MX": {"US"}, "CA": {"US"}, "US": {"CA", "MX"}, "JP": {"TW", "KR", "RU"}, "ZW": {"ZW"},
+    "CN": {"HK"},   # 11 Nov 2026 (David): FamilySearch files Hong Kong's cemeteries under China; the point is in Hong Kong
+   
 }
 
 

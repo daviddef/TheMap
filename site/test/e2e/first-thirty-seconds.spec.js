@@ -130,6 +130,17 @@ test("second twenty: a name and a place, asked together", async ({ page }) => {
   await expect(page.locator(".at-what")).toContainText(/attested/i, { timeout: 25000 });
 });
 
+test("second twenty, early: a name and a place typed before the quiet places have landed is still answered", async ({ page }) => {
+  /* The race that failed CI four runs in four: typed the moment the map says it is ready, the place half («Gračišće») is still in the
+     quiet file on its way, so the first answer is for the whole string. When the place lands the panel must be written again. Held
+     back on purpose here so the race is not left to the speed of a runner. */
+  await page.route(/index-quiet\.json|\/pi\//, async (route) => { await new Promise((r) => setTimeout(r, 1800)); await route.continue(); });
+  await ready(page);
+  await page.locator("#ra-q").fill("Blazevic Gracisce");
+  await expect(page.locator(".at-what")).toContainText(/attested/i, { timeout: 25000 });
+  await expect(page.locator(".at-body .at-h h3").first()).toHaveText(/Blažević/, { timeout: 5000 });
+});
+
 test("second twenty-five: the panel never answers the previous question", async ({ page }) => {
   await ready(page);
   await page.locator("#ra-q").fill("Kosina");

@@ -4896,6 +4896,8 @@ window.addEventListener("load", async function () {
      «nobody of this name lived there» are different statements and only the
      first one is ours to make. */
   var qPlace = null, qName = null;
+  /* the typed string the «name, in a place» panel was last written for; any other answer clears it */
+  var bothFor = null;
   /* DID THE SEARCH ACTUALLY FIND ANYTHING. The remembered-searches list used
      «is a panel showing» and that is not the same question: a search that
      finds nothing still shows a panel, because saying «nothing here, and
@@ -5127,7 +5129,19 @@ window.addEventListener("load", async function () {
       litCC = null;
       return;
     }
-    if (noFrame) return;
+    /* THE QUIET DOTS CAN BE WHAT MAKES «A NAME, IN A PLACE» SPLITTABLE. Typed the moment the map is ready, «Blazevic Gracisce» cannot be
+       split yet (Gračišće is in the half still arriving), so the panel was answered for the whole string, and when the place landed
+       this pass skipped the panel to leave the map where the reader put it: the fallback «The place is here. The volumes are not.»
+       stayed up for good, and the first-thirty-seconds spec failed on it in CI four runs in four. Write the panel, but never move the
+       map, and only once per search (the quiet dots arrive as 169 separate passes). */
+    if (noFrame) {
+      var qv = qbox.value.trim();
+      if (qName && qv && bothFor !== qv) {
+        var vis0 = markers.filter(function (m) { return shelfLayer.hasLayer(m); });
+        if (vis0.length) { searchHit = true; both(vis0, qName, qv); }
+      }
+      return;
+    }
     var vis = markers.filter(function (m) { return shelfLayer.hasLayer(m); });
     var avis = archMarkers.filter(function (m) { return archiveLayer.hasLayer(m); });
     var frame = vis.concat(on.archives ? avis : []);
@@ -5240,7 +5254,7 @@ window.addEventListener("load", async function () {
      the places that DO sit in an attested country are marked as such and
      the others are not. */
   async function both(vis, name, raw) {
-    var mine = ++searchTok;
+    var mine = ++searchTok; bothFor = raw;
     var list = await surnames(name);
     if (mine !== searchTok) return;
     var r = list[0];
@@ -6395,6 +6409,7 @@ window.addEventListener("load", async function () {
   /* `exact` — the reader CHOSE this name from the dropdown, so answer with it
      and not with everything that resembles it. */
   async function elsewhere(term, exact) {
+    bothFor = null;
     var mine = ++searchTok;
     /* THE THIRD TIME THIS EXACT BUG. David searched «blazevic», the panel
        said «No places of that name here yet» — correctly — and the right-hand

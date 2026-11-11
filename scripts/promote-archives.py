@@ -63,6 +63,17 @@ def verify(url):
             req = urllib.request.Request(candidate, headers={"User-Agent": UA})
             with urllib.request.urlopen(req, timeout=35) as r:
                 final = r.geturl()
+                # A BOT-GATE OR ERROR PAGE IS NOT THE ADDRESS. 11 Nov 2026: BAnQ answered with a redirect to a Radware
+                # challenge on validate.perfdrive.com whose query string carried the requester's IP and a session id, and
+                # that was nearly stored as five providers' address; others landed on a login, a 404 or a «not found» page.
+                # A gate host means the original address is right and we are not welcome (keep the original, as for a 403);
+                # a login or error landing means the path moved.
+                fh = urllib.parse.urlparse(final).netloc.lower()
+                if any(g in fh for g in ("perfdrive.com", "radware", "captcha", "challenges.cloudflare")):
+                    return ("https", candidate) if candidate.startswith("https://") else ("http", candidate)
+                if re.search(r"/login|login\.aspx|/errores?/|/404|noencontrado|/error", final, re.I) \
+                        and not re.search(r"/login|/404|/error", candidate, re.I):
+                    return "moved", url
                 if final.startswith("https://"):
                     return "https", final
                 return ("https", candidate) if candidate.startswith("https://") \

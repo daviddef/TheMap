@@ -100,7 +100,7 @@
       shownLines.forEach(function (l, i) {
         if (heads && i === 0) list.append(mk("li", "ra-cb-grp", "Yours"));
         if (heads && i === mine.length) list.append(mk("li", "ra-cb-grp", "From the family research sessions"));
-        var li = mk("li", "ra-cb-opt" + (l.active ? " is-on" : "")), main = mk("span", "ra-cb-main");
+        var li = mk("li", "ra-cb-opt" + (l.active ? " is-on" : "")), main = mk("span", "ra-cb-main"), arc = mk("span", "ra-cb-arc");
         li.setAttribute("data-i", String(i));
         li.id = uidc + "-" + i; li.setAttribute("role", "option"); li.setAttribute("aria-selected", l.active ? "true" : "false");
         main.append(mk("b", null, l.name === "My research so far" ? "Research Names" : l.name)); if (l.where) main.append(mk("span", null, " of " + l.where));
@@ -109,14 +109,14 @@
           var lk = mk("a", "ra-cb-arch", "\u2197 " + String(a.name).replace(/^The /, "").replace(/ Archive$/, "")); lk.href = a.url; lk.target = "_blank"; lk.rel = "noopener";
           lk.title = "Open " + a.name + " in a new tab";
           ["mousedown", "click"].forEach(function (t) { lk.addEventListener(t, function (e) { e.stopPropagation(); }); });
-          main.append(lk);
+          arc.append(lk);
         });
         var tog = mk("input", "ra-cb-tog"); tog.type = "checkbox"; tog.checked = inScope(l.slug); tog.setAttribute("data-slug", l.slug);
         tog.setAttribute("aria-label", "Read " + l.name + " together with the others ticked");
         tog.addEventListener("mousedown", function (e) { e.stopPropagation(); e.preventDefault(); toggleScope(l.slug); syncTicks(); });
         tog.addEventListener("click", function (e) { e.stopPropagation(); e.preventDefault(); });
         tog.addEventListener("keydown", function (e) { if (e.key === " " || e.key === "Enter") { e.stopPropagation(); e.preventDefault(); toggleScope(l.slug); syncTicks(); } });
-        li.append(tog, mk("span", "ra-cb-tick", l.active ? "\u2713" : ""), main, mk("span", "ra-cb-n", l.marks + (l.marks === 1 ? " mark" : " marks")));
+        li.append(tog, mk("span", "ra-cb-tick", l.active ? "\u2713" : ""), main, arc, mk("span", "ra-cb-n", l.marks + (l.marks === 1 ? " mark" : " marks")));
         li.addEventListener("mousedown", function (e) { e.preventDefault(); choose(l); });
         list.append(li);
       });
@@ -132,9 +132,14 @@
       [].forEach.call(list.querySelectorAll(".ra-cb-opt"), function (li) { var on = li.getAttribute("data-i") === String(i); li.classList.toggle("is-at", on); if (on) cur = li; });
       if (cur) { q.setAttribute("aria-activedescendant", cur.id); cur.scrollIntoView({ block: "nearest" }); } else q.removeAttribute("aria-activedescendant");
     }
-    function choose(l) { P.setActive(l.slug); closePop(false); draw(); document.dispatchEvent(new CustomEvent("ra-progress-changed")); }
+    /* CLICKING A NAME CHOOSES THAT ONE FAMILY. The ticks are for reading several together; a click on a name is a different, single choice, so the ticks are cleared (nothing ticked means the family you are on). */
+    function choose(l) { writeScope({ all: false, slugs: [] }); P.setActive(l.slug); closePop(false); draw(); document.dispatchEvent(new CustomEvent("ra-progress-changed")); }
     function openPop(addMode) {
       cb.classList.add("is-open"); pop.hidden = false; btn.setAttribute("aria-expanded", "true"); q.value = ""; form.hidden = true; addBtn.hidden = false; paintList();
+      /* KEEP IT ON THE SCREEN: the list is anchored to the button's left edge, and a button near the right of the header would push it off. */
+      pop.style.left = "0px";
+      var r = pop.getBoundingClientRect(), over = r.right - (document.documentElement.clientWidth - 8);
+      if (over > 0) pop.style.left = Math.max(-over, -(r.left - 8)) + "px";
       if (addMode) openAdd(""); else q.focus();
     }
     function closePop(refocus) { cb.classList.remove("is-open"); pop.hidden = true; btn.setAttribute("aria-expanded", "false"); if (refocus) btn.focus(); }

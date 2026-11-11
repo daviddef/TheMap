@@ -10,12 +10,16 @@ import Base from "../layouts/Base.astro";
 import { u } from "../lib/url.js";
 import { corpus } from "../lib/surname-corpus.js";
 import { surnamePageRows, slugForSurname } from "../lib/surname-pages.js";
-import { allFamilies, legend, membersByStatus, STATUS_ORDER, STATUS_LABEL } from "../lib/surname-families.js";
+import { allFamilies, legend, membersByStatus, STATUS_ORDER, STATUS_LABEL, searchKey } from "../lib/surname-families.js";
+import ProgressKit from "../components/ProgressKit.astro";
 
 const pageFor = surnamePageRows(corpus().surnames || []).slugs;
 const fams = allFamilies();
 const leg = legend();
 const forms = fams.reduce((a, f) => a + f.members.length, 0);
+/* Every key a family can be found by: its headline and each form, accents dropped, the way an index does. The page script compares a
+   research name (a family line in this browser) against these, so the filter needs no list kept anywhere else. */
+const keysOf = (f) => [...new Set([f.name, ...f.members.map((m) => m.form)].map(searchKey).filter(Boolean))].join(" ");
 const link = (name) => pageFor.has(slugForSurname(name)) ? u(`/surname/${slugForSurname(name)}/`) : null;
 ---
 <Base
@@ -33,12 +37,21 @@ const link = (name) => pageFor.has(slugForSurname(name)) ? u(`/surname/${slugFor
     </ul>
   </section>
 
+  <ProgressKit />
+  <section id="famfilter" class="famfilter" hidden>
+    <div class="famtabs" role="tablist">
+      <button type="button" role="tab" id="ff-mine" aria-selected="true">Your research names <span id="ff-mine-n"></span></button>
+      <button type="button" role="tab" id="ff-all" aria-selected="false">All families <span>({fams.length})</span></button>
+    </div>
+    <p class="cap" id="ff-note" style="margin:8px 0 0"></p>
+  </section>
+
   <section style="margin-top:26px">
     {fams.map((f) => {
       const g = membersByStatus(f);
       const head = link(f.name);
       return (
-        <article class="famcard">
+        <article class="famcard" data-keys={keysOf(f)}>
           <h2>{head ? <a href={head}>{f.name}</a> : f.name}</h2>
           <p class="cap" style="margin-top:2px">{f.note}</p>
           {STATUS_ORDER.map((s) => g[s].length > 0 && (
@@ -64,7 +77,56 @@ const link = (name) => pageFor.has(slugForSurname(name)) ? u(`/surname/${slugFor
   </section>
 </Base>
 
+<script is:inline>
+  /* THE FILTER. A research name is a family line in this browser (My research). It matches a family when its name, accents dropped, is one
+     of that family's forms. Nothing is sent anywhere; with no research names the bar never appears and every family shows. */
+  (function () {
+    var key = function (s) {
+      return String(s || "").replace(/[\u0111\u0142]/gi, function (c) { return c.toLowerCase() === "\u0111" ? "d" : "l"; }).replace(/\u00f8/gi, "o")
+        .replace(/\u00df/g, "ss").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+    };
+    var bar = document.getElementById("famfilter"), cards = [].slice.call(document.querySelectorAll(".famcard"));
+    var tabMine = document.getElementById("ff-mine"), tabAll = document.getElementById("ff-all");
+    if (!bar || !tabMine || !window.raProgress) return;
+    var names;
+    try { names = window.raProgress.lines().map(function (l) { return l.name; }).filter(Boolean); } catch (e) { return; }
+    if (!names.length) return;
+    var mineKeys = names.map(key).filter(Boolean);
+    var hit = {}; var matched = 0, unmatched = [];
+    cards.forEach(function (c) {
+      var ks = (c.getAttribute("data-keys") || "").split(" ");
+      var ok = mineKeys.some(function (m) { return ks.indexOf(m) >= 0; });
+      c.setAttribute("data-mine", ok ? "1" : "0"); if (ok) matched++;
+    });
+    names.forEach(function (n, i) {
+      var m = mineKeys[i]; if (!m) return;
+      if (!cards.some(function (c) { return (c.getAttribute("data-keys") || "").split(" ").indexOf(m) >= 0; })) unmatched.push(n);
+    });
+    if (!matched) return;
+    document.getElementById("ff-mine-n").textContent = "(" + matched + ")";
+    var note = document.getElementById("ff-note");
+    function show(mine) {
+      tabMine.setAttribute("aria-selected", mine ? "true" : "false"); tabAll.setAttribute("aria-selected", mine ? "false" : "true");
+      cards.forEach(function (c) { c.hidden = mine && c.getAttribute("data-mine") !== "1"; });
+      note.textContent = mine
+        ? "Showing the " + matched + " famil" + (matched === 1 ? "y" : "ies") + " that hold your research names." + (unmatched.length ? " " + unmatched.length + " of your names are in no family yet" + (unmatched.length <= 12 ? ": " + unmatched.join(", ") : " (e.g. " + unmatched.slice(0, 8).join(", ") + ")") + "." : "")
+        : "Showing every family.";
+      try { localStorage.setItem("ra-famfilter", mine ? "mine" : "all"); } catch (e) { /* storage blocked: fine */ }
+    }
+    tabMine.addEventListener("click", function () { show(true); });
+    tabAll.addEventListener("click", function () { show(false); });
+    bar.hidden = false;
+    var pref = "mine"; try { pref = localStorage.getItem("ra-famfilter") || "mine"; } catch (e) { /* default */ }
+    show(pref !== "all");
+  })();
+</script>
+
 <style>
+  .famfilter { margin-top: 22px; }
+  .famtabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .famtabs button { font: 600 13px var(--sans); padding: 7px 14px; border: 1px solid var(--rule); border-radius: 999px; background: var(--panel); color: var(--ink-2); cursor: pointer; }
+  .famtabs button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .famtabs button span { font-weight: 400; opacity: .85; }
   .famkey { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 8px;
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
             font-family: var(--sans); font-size: 12.5px; line-height: 1.55; color: var(--ink-2); }

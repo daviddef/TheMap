@@ -1404,7 +1404,7 @@ def main():
         # filed under has to step aside for it as well.
         _deepest = path[0][0] if path else ""
         _deep_decided = bool(_deepest) and any(
-            placements.get((_c, fold(_deepest))) for _c in ccs)
+            placement_for(_c, _deepest) for _c in ccs)
         for name, lab in ([] if _deep_decided else
                           list(reversed(areas)) + list(reversed(path))):
             for cand in readings(name, lab):
@@ -1426,7 +1426,7 @@ def main():
                     # guard had not: 101 of 283 decided placements were
                     # intercepted, Seattle among them. The division answer is
                     # still there for every name nobody has decided.
-                    if placements.get((_cc, fold(cand))):
+                    if placement_for(_cc, cand):
                         continue
                     # WIKIDATA'S POINT FOR THE ACTUAL PROVINCE BEATS AN
                     # AVERAGE OF ITS TOWNS. Both land on an area and both say
@@ -1547,7 +1547,23 @@ def main():
             _n, _cc = _r.get("n"), (_r.get("cc") or "").upper()
             if not _n or _r.get("lat") is None or _r.get("lon") is None:
                 continue
-            placements.setdefault((_cc, fold(_n)), _r)
+            placements.setdefault((_cc, fold(_n)), []).append(_r)
+    # A NAME THAT IS TWO PLACES CAN STILL BE PLACED, BOOK BY BOOK. «Ruvo» sits under Bari and under Potenza: Ruvo di Puglia and Ruvo del
+    # Monte. A row may carry `under`, a list of words that must appear in the title of the collection the book is in («bari»), and
+    # one name may then hold several rows, one per place. A row with no `under` answers every book; the qualified rows are tried
+    # first. A book that no row answers stays unplaced, so a half-decided name keeps only the part that is still unknown.
+    for _k in placements:
+        placements[_k].sort(key=lambda r: 0 if r.get("under") else 1)
+    def placement_for(_cc, _name):
+        _rows = placements.get((_cc, fold(_name)))
+        if not _rows:
+            return None
+        _t = cur_title[0]
+        for _r in _rows:
+            _u = _r.get("under")
+            if not _u or any(fold(x) in _t for x in _u):
+                return _r
+        return None
     if placements:
         print(f"placements      {len(placements)} names with a decided point")
 
@@ -1679,7 +1695,7 @@ def main():
                 # that would otherwise be reported as unplaced.
                 _deep = (path[0][0] if path else (areas[0][0] if areas else ""))
                 for _cc in list(ccs):
-                    _pl = placements.get((_cc, fold(_deep))) if _deep else None
+                    _pl = placement_for(_cc, _deep) if _deep else None
                     if not _pl:
                         continue
                     _drawn = already_drawn(_pl.get("gazetteer") or _deep, _cc,

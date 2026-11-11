@@ -65,9 +65,19 @@ def problems(row, idx):
     """Why a decision cannot be merged, or [] when it can."""
     out = []
     key = (row.get("cc"), row.get("n"))
-    if key not in idx:
+    # A QUALIFIED DECISION (`under`) NAMES THE COUNTRY THE COLLECTION IS FILED UNDER, which can differ from the country holding most of the
+    # name's books (the unplaced list gives one country per name): «Bedford» is listed under Canada and its South African books are filed
+    # under ZA. The name must still be on the unplaced list, under some country.
+    if row.get("under") is not None:
+        if not any(n == row.get("n") for (_c, n) in idx):
+            return [f"{row.get('n')!r} is not an unplaced name"]
+    elif key not in idx:
         return [f"{row.get('n')!r} is not an unplaced name filed under {row.get('cc')}"]
     dec = row.get("decision")
+    un = row.get("under")
+    if un is not None and (dec != "settlement" or not isinstance(un, list) or not un
+                           or not all(isinstance(x, str) and len(fold(x)) >= 3 for x in un)):
+        return [f"`under` (words of the collection title that tell the places apart) is for a settlement and is a list of words of 3+ letters"]
     if dec not in DECISIONS:
         return [f"decision {dec!r} is none of {DECISIONS}"]
     if dec in ("none", "unplaceable"):
@@ -107,7 +117,11 @@ def check_merged():
     for r in load_json(PLACED3, {}).get("placed", []):
         row = dict(r, decision="settlement")
         # a name that has since been placed leaves the unplaced list: that is the point, not an error
-        if (r["cc"], r["n"]) not in idx:
+        if r.get("under") is not None:
+            row["under"] = r["under"]
+            if not any(n == r["n"] for (_c, n) in idx):
+                continue
+        elif (r["cc"], r["n"]) not in idx:
             continue
         for p in problems(row, idx):
             bad.append(f"{PLACED3}: {r['n']}: {p}")
@@ -139,7 +153,7 @@ def main():
     seen, accepted, refused, held = set(), [], [], []
     tally = {}
     for r in rows:
-        k = (r.get("cc"), r.get("n"))
+        k = (r.get("cc"), r.get("n"), tuple(sorted(fold(x) for x in (r.get("under") or []))))
         tally[r.get("decision")] = tally.get(r.get("decision"), 0) + 1
         if k in seen:
             refused.append((r, ["named twice"]))
@@ -168,18 +182,23 @@ def main():
                 "point, the pages that say so and a sentence. Merged by scripts/merge-unplaced-decisions.py after the point was checked against the "
                 "country outline. A name that was not established is simply not here.",
         "source": "Wikidata (CC0) and Wikipedia, as cited per row", "licence": "CC0 1.0 (Wikidata)", "placed": [], "refused": []})
-    have_p = {(p["cc"], fold(p["n"])) for p in placed["placed"]}
+    ukey = lambda p: tuple(sorted(fold(x) for x in (p.get("under") or [])))
+    have_p = {(p["cc"], fold(p["n"]), ukey(p)) for p in placed["placed"]}
     have_r = {(p["cc"], fold(p["n"])) for p in placed.get("refused", [])}
     for r in accepted:
         k = (r["cc"], fold(r["n"]))
+        kp = k + (ukey(r),)
         if r["decision"] == "area" and k not in have_a:
             areas["areas"].append({"n": r["n"], "cc": r["cc"], "placeCountry": r["placeCountry"].upper(), "volumes": vols(r),
                                    "name": r.get("name") or r["n"], "lat": round(r["lat"], 4), "lon": round(r["lon"], 4),
                                    "qid": r["qid"], "is": r.get("is", ""), "evidence": r["evidence"], "why": r["why"]})
-        elif r["decision"] == "settlement" and k not in have_p:
-            placed["placed"].append({"n": r["n"], "cc": r["cc"], "volumes": vols(r), "lat": round(r["lat"], 4), "lon": round(r["lon"], 4),
-                                     "gazetteer": r.get("name") or r["n"], "placeCountry": r["placeCountry"].upper(), "qid": r["qid"],
-                                     "evidence": r["evidence"], "why": r["why"]})
+        elif r["decision"] == "settlement" and kp not in have_p:
+            row = {"n": r["n"], "cc": r["cc"], "volumes": vols(r), "lat": round(r["lat"], 4), "lon": round(r["lon"], 4),
+                   "gazetteer": r.get("name") or r["n"], "placeCountry": r["placeCountry"].upper(), "qid": r["qid"],
+                   "evidence": r["evidence"], "why": r["why"]}
+            if r.get("under"):
+                row["under"] = r["under"]
+            placed["placed"].append(row)
         elif r["decision"] == "unplaceable" and k not in have_r:
             placed.setdefault("refused", []).append({"n": r["n"], "cc": r["cc"], "volumes": vols(r), "why": r["why"]})
     areas.setdefault("counts", {})["names"] = len(areas["areas"])

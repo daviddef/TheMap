@@ -51,8 +51,10 @@ export function researchNews(data) {
         if (pid) d.places.add(pid);
         /* the exact thing, by title: never the note */
         const title = String(m.t || id.replace(/^[a-z]+:/, "")).replace(/\s+/g, " ").slice(0, 90);
-        const href = /^https?:\/\//.test(m.href || "") && !isBook ? m.href : null;
-        d.rows.push({ family: f.name, kind: isBook ? "book" : "source", title, source: src, placeId: pid, pages: pg, state: b.state || "", href });
+        /* the address of the thing itself, when it has a public one: a register on Antenati, a film or collection on FamilySearch, a provider's own page */
+        const href = /^https?:\/\//.test(m.href || "") ? m.href : null;
+        const where = !isBook && m.where ? String(m.where).replace(/\s+/g, " ").slice(0, 60) : "";
+        d.rows.push({ family: f.name, kind: isBook ? "book" : "source", title, source: src, placeId: pid, pages: pg, state: b.state || "", href, where });
       }
     }
   }
@@ -75,7 +77,7 @@ export function researchNews(data) {
     for (const r of d.rows) (byFam[r.family] = byFam[r.family] || []).push({ ...r, place: r.placeId ? place(r.placeId) : null });
     const detail = Object.keys(byFam).sort((a, b) => a.localeCompare(b)).map((family) => ({
       family,
-      rows: byFam[family].sort((a, b) => (a.kind + a.title).localeCompare(b.kind + b.title)),
+      rows: byFam[family].sort((a, b) => (a.kind + a.title).localeCompare(b.kind + b.title, "en", { numeric: true })),
     }));
     return { date, kind: "research", headline, href: firstKnown ? `/place/${firstKnown}/` : null, detail };
   });

@@ -69,6 +69,7 @@ const marksHere = here === u("/") || here === "/"
 /* Strip the query string: /?q=Breslau and / are the same page. */
 const canon = new URL(here, Astro.site || "https://daviddef.github.io").href;
 import LineSwitcher from "../components/LineSwitcher.astro";
+import { volumes as invVolumes } from "../lib/inventory.js";
 ---
 <html lang="en" data-base={u("")}>
 <head>
@@ -210,12 +211,21 @@ import LineSwitcher from "../components/LineSwitcher.astro";
     10 GB the deploy allows. */}
 <script is:inline src={u("/js/i18n-tables.js")}></script>
 <script is:inline src={u("/js/i18n.js")}></script>
+<script is:inline defer src={u("/js/inventory-pill.js")}></script>
 <a class="skip" href="#main" data-i18n>Skip to the map</a>
 <header class="site">
   <div class="wrap sitein">
     <a class="brand" href={u("/")}>Record <em>Atlas</em></a>
     {/* A PAGE MAY PUT ONE PILL BETWEEN THE BRAND AND NEW: the home page puts its volume count here (slot "inv"). */}
-    <slot name="inv" />
+    {/* THE VOLUMES PILL IS ON EVERY PAGE. David: «why dont i see the volume button on all screens? … most others suddenly hides it». It had been
+        moved out of the home page's body into this slot, and only the home page filled it. The home page still prints the whole inventory (its
+        links are page content); every other page carries just the pill, and /js/inventory-pill.js fetches /inventory.json when it is first opened. */}
+    <slot name="inv">
+      <details class="ra-inv" id="ra-inv" data-volumes={invVolumes} data-lazy={u("/inventory.json")}>
+        <summary class="ra-inv-ico" aria-label={invVolumes.toLocaleString() + " volumes: what the atlas holds"} title={(invVolumes / 1e6).toFixed(2) + "M volumes: what the Atlas holds"}><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path d="M4 4h4v16H4zM10 4h4v16h-4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M16.3 5.7l3.7-.9 3 14.4-3.7.9z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span class="ra-inv-t">{(invVolumes / 1e6).toFixed(2)}M volumes</span></summary>
+        <div class="ra-inv-grid"><p class="ra-inv-count"><span class="ra-inv-big">{invVolumes.toLocaleString()} volumes</span> <span class="ra-inv-in">in the Atlas</span><span class="ra-inv-new" hidden></span></p></div>
+      </details>
+    </slot>
     {/* THE PULSING DOT SAYS WHERE YOUR RESEARCH LIVES. Green = a copy is kept online (six-word sync is on) and this browser is
         connected; orange = it is saved only in this browser; red = this browser is offline. David asked for exactly that, and for a
         warning beside it when something has changed and no backup (file or online) has been made for more than 24 hours.

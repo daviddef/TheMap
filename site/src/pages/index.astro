@@ -5,72 +5,10 @@ import ProgressKit from "../components/ProgressKit.astro";
 import VolumeMarks from "../components/VolumeMarks.astro";
 import StoryDrawer from "../components/StoryDrawer.astro";
 import { u } from "../lib/url.js";
-import newsData from "../data/whats-new.json";
-import { countryTotals } from "../lib/country-metrics.js";
 import { atlas as idx } from "../lib/atlas.js";
 import regions from "../../public/regions.json";
-import provs from "../../public/providers.json";
-import { corpus } from "../lib/surname-corpus.js";
-import gnFamilies from "../../../data/given-name-families.json";
-import snFamilies from "../../../data/surname-families.json";
-import flagIndex from "../../../data/flag-index.json";
-import placeNames from "../../../data/place-names.json";
+import { places, NEWS_KIND, latestNews, newsDay, volumes, placeCountries, countries, withPlaces, archives, archiveCountries, inventoryRows } from "../lib/inventory.js";
 
-const places = idx.places.length;
-/* THE LAST THREE LINES OF WHAT'S NEW, for the inventory opened from the books icon. Newest first; a day's lines keep the file's order. */
-const NEWS_KIND = { new: "New", better: "Better", fixed: "Fixed" };
-const latestNews = (newsData.entries || []).slice().sort((x, y) => y.date.localeCompare(x.date)).slice(0, 3);
-const newsDay = (d) => new Date(d + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
-/* `v` IS VOLUMES; `c` IS COLLECTIONS. The map's own hint had this wrong
-   and was fixed; this line is the same mistake in the page header above
-   it, and it is the one a reader sees first. It was printing "8557 record
-   volumes" for an atlas holding 2,328,191. */
-const volumes = idx.places.reduce((a, p) => a + (p.v || 0), 0);
-/* `cc` IS THE COUNTRY. This used `k`, which is the place's KIND (church, cemetery, census ... in combination), so it counted 34 kinds and
-   called them countries: on the page, in its search-engine description and in its structured data. David: «we have a dot everywhere,
-   on most countries». */
-const placeCountries = new Set(idx.places.map(p => p.cc || p.country).filter(Boolean));
-/* THE SAME COUNT AS /countries/ AND /places/. This used to be the countries with a place plus the countries a worldwide source names
-   (146), while those pages list every country anything is known about (162): a place, a collection, a provider or a surname register.
-   David clicked 146 and landed on "162 of them". One definition now, from lib/country-metrics.js, so the tile and the list cannot differ. */
-const ccTotals = countryTotals();
-const countries = ccTotals.countries;
-const withPlaces = ccTotals.walked;
-const archives = provs.providers.filter(p => p.at);
-const archiveCountries = new Set(archives.map(p => p.at.place.split(", ").pop())).size;
-/* THE INVENTORY BEHIND THE ONE PILL. David: one pill, «volumes», and on click a summary of everything the atlas holds. Every
-   number is read from the data when the page is built, so none can drift from what is held. */
-const sur = corpus().surnames;
-const surnameCount = Array.isArray(sur) ? sur.length : Object.keys(sur || {}).length;
-/* ROWS, NOT ONE POURED GRID. David: countries, regions, places and dated places belong on a row of their own. Three rows: where
-   (the ground), the records (what is kept and where), and names and flags. Each row: [heading, [number, label, link, what, example]]. */
-const inventoryRows = [
-  ["The ground", [
-    [countries, "countries and territories", "/countries/", `${withPlaces} with a place on the map, and ${countries - withPlaces} more known from sources, collections or surnames`, "Egypt: archives listed, no town catalogued yet"],
-    [regions.regions.length, "regions", "/providers/#regions", "stretches of ground whose rulers changed together", "the Military Frontier"],
-    /* THE ERAS THE REGIONS CARRY. David: «how many are we tracking? is there a way to show that in the counts?» An era is one ruler over
-       one region for a span of years, with the archives that hold its paper: the unit the map and the history play are built on. */
-    [regions.regions.reduce((n, r) => n + (r.eras || []).length, 0), "eras", "/providers/#regions", "spans of years when one ruler held a region, each with the archives that kept its paper", "the Imotski frontier: Ottoman, then Venetian, then Austrian"],
-    [places, "places", "/places/", "towns and villages, each with the books and archives that cover it", "Senj, in Croatia"],
-    [Object.keys(placeNames.places).length, "places with dated names", "/place-names/", "a place's name in the year of the record", "Fiume before 1945 is today's Rijeka"],
-  ]],
-  /* «volume» and «archive» are the two words a first-time reader cannot tell apart: a volume is a book; an archive is where books are kept. */
-  ["The records", [
-    [volumes, "volumes", "/countries/", "register books of baptisms, marriages, burials and civil acts", "Senj, births 1859–1877: one book"],
-    [archives.length, "archives", "/providers/", `the places that keep the books, in ${archiveCountries} countries`, "the State Archives in Rijeka"],
-    /* THE SOURCES, HERE AND NOT ON THEIR OWN PAGE. David: «source stats, don't waste the real estate, rather add it to our metrics board». */
-    [provs.providers.length, "sources", "/providers/", `archives, libraries, indexes and portals: ${provs.providers.filter(p => p.access === "free").length} free to use with no account, ${provs.providers.filter(p => p.access !== "unsurveyed").length} with the cost to look worked out`, "Antenati: free, no account"],
-  ]],
-  ["Names and flags", [
-    [surnameCount, "surnames", "/surnames/", `${snFamilies.counts.families} families of spellings`, "Blažević has its own page"],
-    [gnFamilies.counts.families, "given names", "/your-name/", `${gnFamilies.counts.forms.toLocaleString()} forms in many languages`, "Ivan, Johann and Giovanni are one name"],
-    /* THE SAME NUMBERS THE FLAGS SECTION BELOW SAYS ("211 countries and 34 hubs"). This tile read counts.withFlag (210, the cards
-       whose flag is an inline drawing: France's is a named reference, so it was left out) beside a section that counted 211, and
-       the hubs were not shown at all. David asked why they disagreed. */
-    [flagIndex.counts.countries, "countries with flags", "/flags/", "each with the flags that flew over it through history", "every flag that flew over Croatia"],
-    [flagIndex.counts.hubs, "flag hubs", "/flags/#hubsHeadingEl", "regions that group those countries' flags together", "Former Yugoslavia"],
-  ]],
-];
 ---
 {/* STRUCTURED DATA ON THE ONE PAGE THAT HAD NONE. Place, surname and archive
     pages have carried a schema.org block for a while; the front page, which is
@@ -166,39 +104,7 @@ const inventoryRows = [
   {/* RIGHT OF «LOCAL». David: «move the volume numbers to the right of "local" … short form, e.g. 3.43M». On a wide screen the pill moves into
       the Researching group, before the save button (David: the icon goes to the right of the count); below the burger breakpoint that group is in the drawer and the dot sits beside the brand, so
       the pill goes back to sit after it. One element, moved by matchMedia (without script it stays beside the brand). */}
-  <script is:inline>
-    (function () {
-      var pill = document.getElementById("ra-inv"), mq = window.matchMedia && window.matchMedia("(min-width: 1181px)");
-      if (!pill || !mq) return;
-      var home = pill.parentNode, next = pill.nextSibling;
-      function place() {
-        var live = document.querySelector("nav .ra-live-grp");
-        if (mq.matches && live) { live.parentNode.insertBefore(pill, live); pill.classList.add("in-nav"); }
-        else { home.insertBefore(pill, next); pill.classList.remove("in-nav"); }
-      }
-      place(); if (mq.addEventListener) mq.addEventListener("change", place);
-      /* IT PULSES WHEN THERE IS SOMETHING NEW. Two things count: a What's new line this browser has not looked at (the same test as the
-         About dot: newer than ra-news-seen, written in the last fortnight), and a larger volume count than the last time the inventory was
-         opened here (ra-vols-seen). Opening the inventory takes the volume pulse off; visiting What's new takes the other off. Both are
-         per-browser conveniences, so blocked storage just means no pulse. */
-      var vols = Number(pill.getAttribute("data-volumes")) || 0, sum = pill.querySelector("summary"), note = pill.querySelector(".ra-inv-new");
-      function get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
-      function put(k, v) { try { localStorage.setItem(k, String(v)); } catch (e) { /* storage blocked */ } }
-      var nav = document.querySelector("nav.topnav"), latest = (nav && nav.getAttribute("data-latest")) || "", seen = get("ra-news-seen") || "";
-      var stamp = Date.parse(latest + "T23:59:59"), news = !!stamp && latest > seen && Date.now() - stamp < 14 * 864e5 && !/\/whats-new\/?$/.test(location.pathname);
-      var before = Number(get("ra-vols-seen")), grew = before > 0 && vols > before ? vols - before : 0;
-      if (!before) put("ra-vols-seen", vols);
-      var why = [];
-      if (grew) why.push("the Atlas has " + grew.toLocaleString() + " more volumes than when you last looked");
-      if (news) why.push("there is something new in What's new");
-      if (why.length) {
-        pill.classList.add("fresh");
-        if (sum) sum.title = (vols / 1e6).toFixed(2) + "M volumes. New: " + why.join("; ") + ".";
-        if (note) { note.textContent = " \u00b7 new: " + why.join("; "); note.hidden = false; }
-      }
-      pill.addEventListener("toggle", function () { if (pill.open && vols) { put("ra-vols-seen", vols); if (!news) pill.classList.remove("fresh"); } });
-    })();
-  </script>
+  {/* The pill's placement, pulse and (on other pages) lazy fill are in /js/inventory-pill.js, loaded by Base. */}
 
   {/* ABOVE THE MAP, BECAUSE IT DECIDES WHERE EVERY MARK GOES. David: «can we
       move the researching dropdown thats hiding all the way at the bottom to

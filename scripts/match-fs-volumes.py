@@ -1438,7 +1438,12 @@ def main():
                     # own coordinate. And it answers names GeoNames cannot
                     # hold at all, because they no longer exist: Bute County
                     # was dissolved in 1779 and holds 148 books.
-                    _ap = area_points.get((_cc, fold(cand)))
+                    _ap = None
+                    for _r in area_points.get((_cc, fold(cand)), []):
+                        _u = _r.get("under")
+                        if not _u or any(fold(x) in cur_title[0] for x in _u):
+                            _ap = _r
+                            break
                     if _ap:
                         _acc = (_ap.get("placeCountry") or _cc).upper()
                         _an = division_label(_ap.get("name") or cand)
@@ -1585,7 +1590,9 @@ def main():
             if _r.get("lat") is None or _r.get("lon") is None:
                 continue
             area_points.setdefault(((_r.get("cc") or "").upper(),
-                                    fold(_r["n"])), _r)
+                                    fold(_r["n"])), []).append(_r)
+        for _k in area_points:
+            area_points[_k].sort(key=lambda r: 0 if r.get("under") else 1)
         print(f"areas           {len(area_points)} names Wikidata calls a "
               f"province or a county, with the point it holds for them")
     except FileNotFoundError:

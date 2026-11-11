@@ -44,12 +44,15 @@ OUTLINE_GAPS = {"CK": (-22.1, -8.8, -166.3, -157.2)}   # Cook Islands, from Penr
 SUCCESSORS = {
     "HU": {"SK", "RO", "RS", "UA", "HR", "AT", "SI"}, "AT": {"CZ", "SK", "SI", "IT", "PL", "UA", "HR", "HU", "RO", "RS", "BA"},
     "RU": {"UA", "BY", "MD", "PL", "LT", "LV", "EE", "FI", "GE", "AM", "AZ", "KZ", "UZ", "TJ", "KG", "TM"},
-    "MD": {"UA", "RO", "RU"}, "BY": {"PL", "LT", "UA", "RU", "LV", "EE"}, "UA": {"PL", "RU", "BY", "MD", "RO", "SK", "HU"},
+    "MD": {"UA", "RO", "RU"}, "BY": {"PL", "LT", "UA", "RU", "LV", "EE", "MD"}, "UA": {"PL", "RU", "BY", "MD", "RO", "SK", "HU"},
     "CZ": {"SK", "PL", "AT", "DE"}, "SK": {"HU", "CZ", "PL", "UA"}, "PL": {"UA", "BY", "LT", "DE", "CZ", "SK"},
     "DE": {"PL", "RU", "FR", "DK", "BE", "CZ", "LT"}, "IT": {"HR", "SI", "SM", "VA", "MT", "FR", "CH"}, "GB": {"IE", "GG", "JE", "IM"},
     "IE": {"GB"}, "NL": {"BE", "DE"}, "BE": {"NL", "FR", "LU", "DE"}, "SE": {"FI", "NO"}, "FR": {"BE", "LU", "DE", "IT", "CH", "MC"},
     "PT": {"ES", "BR"}, "ES": {"PT", "MX"}, "MX": {"US"}, "CA": {"US"}, "US": {"CA", "MX"}, "JP": {"TW", "KR", "RU"}, "ZW": {"ZW"},
     "CN": {"HK"},   # 11 Nov 2026 (David): FamilySearch files Hong Kong's cemeteries under China; the point is in Hong Kong
+    # 11 Nov 2026 (David, option A): FamilySearch files the Dutch Reformed Church's registers for congregations beyond South Africa's borders
+    # under ZA; the point is where the place is today. A narrow list, so a point in Europe is still refused.
+    "ZA": {"ZW", "ZM", "MW", "BW", "NA", "AO", "MZ", "LS", "SZ", "KE"},
    
 }
 
@@ -78,9 +81,9 @@ def problems(row, idx):
         return [f"{row.get('n')!r} is not an unplaced name filed under {row.get('cc')}"]
     dec = row.get("decision")
     un = row.get("under")
-    if un is not None and (dec != "settlement" or not isinstance(un, list) or not un
+    if un is not None and (dec not in ("settlement", "area") or not isinstance(un, list) or not un
                            or not all(isinstance(x, str) and len(fold(x)) >= 3 for x in un)):
-        return [f"`under` (words of the collection title that tell the places apart) is for a settlement and is a list of words of 3+ letters"]
+        return [f"`under` (words of the collection title that tell the places apart) is for a settlement or an area and is a list of words of 3+ letters"]
     if dec not in DECISIONS:
         return [f"decision {dec!r} is none of {DECISIONS}"]
     if dec in ("none", "unplaceable"):
@@ -136,7 +139,10 @@ def check_merged():
         if not r.get("evidence"):
             continue   # the Wikidata-identified areas of the earlier pass carry `qid` and no separate evidence list
         row = dict(r, decision="area")
-        if (r["cc"], r["n"]) not in idx:
+        if r.get("under") is not None:
+            if not any(n == r["n"] for (_c, n) in idx):
+                continue
+        elif (r["cc"], r["n"]) not in idx:
             continue
         for p in problems(row, idx):
             bad.append(f"{AREAS}: {r['n']}: {p}")
@@ -183,7 +189,8 @@ def main():
         print("report only; nothing written (use --write)")
         return
     areas = load_json(AREAS, {"areas": []})
-    have_a = {(a["cc"], fold(a["n"])) for a in areas.get("areas", [])}
+    ukey = lambda p: tuple(sorted(fold(x) for x in (p.get("under") or [])))
+    have_a = {(a["cc"], fold(a["n"]), ukey(a)) for a in areas.get("areas", [])}
     placed = load_json(PLACED3, {
         "note": "Settlements decided by a researcher reading the name against the path and collection it is filed under, each with a Wikidata item, a "
                 "point, the pages that say so and a sentence. Merged by scripts/merge-unplaced-decisions.py after the point was checked against the "
@@ -195,10 +202,13 @@ def main():
     for r in accepted:
         k = (r["cc"], fold(r["n"]))
         kp = k + (ukey(r),)
-        if r["decision"] == "area" and k not in have_a:
-            areas["areas"].append({"n": r["n"], "cc": r["cc"], "placeCountry": r["placeCountry"].upper(), "volumes": vols(r),
-                                   "name": r.get("name") or r["n"], "lat": round(r["lat"], 4), "lon": round(r["lon"], 4),
-                                   "qid": r["qid"], "is": r.get("is", ""), "evidence": r["evidence"], "why": r["why"]})
+        if r["decision"] == "area" and kp not in have_a:
+            arow = {"n": r["n"], "cc": r["cc"], "placeCountry": r["placeCountry"].upper(), "volumes": vols(r),
+                    "name": r.get("name") or r["n"], "lat": round(r["lat"], 4), "lon": round(r["lon"], 4),
+                    "qid": r["qid"], "is": r.get("is", ""), "evidence": r["evidence"], "why": r["why"]}
+            if r.get("under"):
+                arow["under"] = r["under"]
+            areas["areas"].append(arow)
         elif r["decision"] == "settlement" and kp not in have_p:
             row = {"n": r["n"], "cc": r["cc"], "volumes": vols(r), "lat": round(r["lat"], 4), "lon": round(r["lon"], 4),
                    "gazetteer": r.get("name") or r["n"], "placeCountry": r["placeCountry"].upper(), "qid": r["qid"],

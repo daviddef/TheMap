@@ -124,25 +124,29 @@ const email = site.contact && site.contact.email;
                         const all = e.detail.flatMap((g) => g.rows), ended = all.filter((r) => r.state === "found" || r.state === "searched"), hit = ended.filter((r) => r.state === "found").length;
                         return ended.length ? <span class="rtally"> · {hit} of {ended.length} found something</span> : null;
                       })()}</summary>
-                      {e.detail.map((g) => (
-                        <div class="rg">
-                          <b>{g.family}</b>
-                          <ul>
-                            {g.rows.map((r) => (
-                              <li>
-                                {r.kind === "book"
-                                  ? (<>
-                                      {r.place && r.place.known ? <a href={u("/place/" + r.placeId + "/")}>{r.place.name}</a> : (r.place ? r.place.name : "")}
-                                      {r.place ? " · " : ""}{r.title}
-                                      {r.pages ? ` · ${r.pages.toLocaleString("en")} page${r.pages === 1 ? "" : "s"} read` : ""}
-                                    </>)
-                                  : (<>{r.href ? <a href={r.href} rel="noopener">{r.source}</a> : r.source}{r.title && r.title !== r.source ? " · " + r.title : ""}</>)}
-                                {r.state ? <span class="rst"> — {r.state === "found" ? <span class="rmk ok" aria-hidden="true">{"\u2705 "}</span> : r.state === "searched" ? <span class="rmk no" aria-hidden="true">{"\u274C "}</span> : null}{({ planned: "planned", written: "written, no reply yet", searched: "searched, nothing found", found: "found something", exhausted: "read everything", blocked: "no access" })[r.state] || r.state}</span> : null}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
+                      <div class="rrows">
+                        {e.detail.flatMap((g) => g.rows).map((r) => (
+                          <div class="rrow">
+                            <div class="rt">
+                              {r.kind === "book"
+                                ? (<>
+                                    {r.place && r.place.known ? <a href={u("/place/" + r.placeId + "/")}>{r.title}</a> : r.title}
+                                    {r.place ? <span class="rw"> {r.place.name}</span> : null}
+                                  </>)
+                                : (<>
+                                    {r.href ? <a href={r.href} rel="noopener">{r.source}</a> : r.source}
+                                    {r.title && r.title !== r.source ? <span class="rw"> {r.title}</span> : null}
+                                  </>)}
+                            </div>
+                            <div class="rm">
+                              <b>{r.family}</b>
+                              {r.state ? <span class={`rs rs-${r.state}`}>{({ found: "\u2705 Found something", searched: "\u274C Nothing found", planned: "Planned", written: "Written, no reply yet", exhausted: "Read everything", blocked: "No access" })[r.state] || r.state}</span> : null}
+                              {r.kind === "book" && r.pages ? <span>{r.pages.toLocaleString("en")} page{r.pages === 1 ? "" : "s"} read</span> : null}
+                              <span class="ro">from a research session</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </details>
                   )
                   : e.href
@@ -202,9 +206,19 @@ const email = site.contact && site.contact.email;
   .chip.src { color: var(--ink); }
   .chip.research { color: #1E6B3C; border-color: #1E6B3C; }
   .rday { min-width: 0; flex: 1; } .rday summary { cursor: pointer; }
-  .rg { margin: 10px 0 0; font: 14px/1.45 var(--sans); } .rg ul { margin: 3px 0 0; padding-left: 18px; } .rg li { margin: 2px 0; }
-  .rst { color: var(--ink-2); }
-  .rmk { font-size: .9em; }
+  .rrows { margin: 10px 0 0; font-family: var(--sans); }
+  .rrow { padding: 9px 0; border-top: 1px solid var(--rule); display: grid; gap: 3px; }
+  .rrow:first-child { border-top: 0; padding-top: 2px; }
+  .rt { font-size: 15px; font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+  .rt a { color: var(--accent); text-decoration: none; } .rt a:hover { text-decoration: underline; }
+  .rw { font-weight: 400; font-size: 12.5px; color: var(--ink-3); }
+  .rm { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; font-size: 12.5px; color: var(--ink-2); }
+  .rm b { color: var(--ink); font-weight: 600; }
+  .rs { padding: 1px 8px; border-radius: 999px; border: 1px solid var(--rule); font-size: 11.5px; font-weight: 600; color: var(--ink); }
+  .rs-found { background: rgba(31, 157, 85, .14); border-color: rgba(31, 157, 85, .5); }
+  .rs-searched { background: var(--accent-wash, rgba(31, 92, 107, .1)); border-color: var(--accent); }
+  .rs-blocked { background: rgba(192, 57, 43, .12); border-color: rgba(192, 57, 43, .5); }
+  .ro { color: var(--ink-3); }
   .rtally { font: 500 13px var(--sans); color: var(--ink-2); white-space: nowrap; }
   .rpanel { margin: 0 0 24px; padding: 14px 18px; border: 1px solid var(--rule); border-radius: 10px; background: var(--panel, transparent); }
   .rpanel summary { cursor: pointer; display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; font-family: var(--serif); font-size: 17px; }

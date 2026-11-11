@@ -92,6 +92,8 @@ def slug(prefix, name):
                  ("é", "e"), ("è", "e"), ("á", "a"), ("ó", "o"),
                  ("ç", "c"), ("í", "i"), ("ú", "u"), ("ã", "a"), ("õ", "o")):
         t = t.replace(a, b)
+    import unicodedata   # any other accent (â, ł, ő ...) loses its mark instead of splitting the word: neuchatel, not neuch-tel
+    t = "".join(c for c in unicodedata.normalize("NFKD", t) if not unicodedata.combining(c))
     t = re.sub(r"[^a-z0-9]+", "-", t).strip("-")
     return (prefix + t)[:72].rstrip("-")
 

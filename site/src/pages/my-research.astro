@@ -106,7 +106,7 @@ const BASE_ = u("/");
   <div class="mr-multi" id="mr-multi" role="status" hidden></div>
   <div class="rs-tabs mr-tabs" role="tablist" id="mr-tabs">
     <button type="button" class="rs-tab" role="tab" id="mr-t-families" aria-controls="mr-p-families" aria-selected="true">Families &amp; places</button>
-    <button type="button" class="rs-tab" role="tab" id="mr-t-all" aria-controls="mr-p-all" aria-selected="false" tabindex="-1">All families</button>
+    <button type="button" class="rs-tab" role="tab" id="mr-t-all" aria-controls="mr-p-all" aria-selected="false" tabindex="-1">All families<span id="mr-n-all"></span></button>
     <button type="button" class="rs-tab" role="tab" id="mr-t-story" aria-controls="mr-p-story" aria-selected="false" tabindex="-1">My story</button>
     <button type="button" class="rs-tab" role="tab" id="mr-t-fixes" aria-controls="mr-p-fixes" aria-selected="false" tabindex="-1">GEDCOM to fix <span class="rs-n" id="mr-n-fixes" hidden></span></button>
     <button type="button" class="rs-tab" role="tab" id="mr-t-sessions" aria-controls="mr-p-sessions" aria-selected="false" tabindex="-1">Other names</button>
@@ -321,6 +321,7 @@ const BASE_ = u("/");
       function multiBanner() {
         var b = document.getElementById("mr-multi"); if (!b) return;
         var sl = ticked();
+        var cnt = document.getElementById("mr-n-all"); if (cnt) cnt.textContent = sl.length ? " (" + sl.length + ")" : "";   // «All families (4)»: how many are ticked
         if (sl.length < 2 || curTab === "all" || curTab === "fixes" || curTab === "sessions") { b.hidden = true; return; }
         var P = window.raProgress, act = P && P.active && P.active(), al = P.lines().filter(function (l) { return l.slug === act; })[0];
         var names = sl.map(nm).sort(), shown = names.length > 4 ? names.slice(0, 3).join(", ") + " and " + (names.length - 3) + " more" : names.join(", ");

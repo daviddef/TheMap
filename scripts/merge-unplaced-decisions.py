@@ -41,7 +41,7 @@ DECISIONS = ("area", "settlement", "unplaceable", "none")
 SUCCESSORS = {
     "HU": {"SK", "RO", "RS", "UA", "HR", "AT", "SI"}, "AT": {"CZ", "SK", "SI", "IT", "PL", "UA", "HR", "HU", "RO", "RS", "BA"},
     "RU": {"UA", "BY", "MD", "PL", "LT", "LV", "EE", "FI", "GE", "AM", "AZ", "KZ", "UZ", "TJ", "KG", "TM"},
-    "MD": {"UA", "RO", "RU"}, "BY": {"PL", "LT", "UA", "RU", "LV"}, "UA": {"PL", "RU", "BY", "MD", "RO", "SK", "HU"},
+    "MD": {"UA", "RO", "RU"}, "BY": {"PL", "LT", "UA", "RU", "LV", "EE"}, "UA": {"PL", "RU", "BY", "MD", "RO", "SK", "HU"},
     "CZ": {"SK", "PL", "AT", "DE"}, "SK": {"HU", "CZ", "PL", "UA"}, "PL": {"UA", "BY", "LT", "DE", "CZ", "SK"},
     "DE": {"PL", "RU", "FR", "DK", "BE", "CZ", "LT"}, "IT": {"HR", "SI", "SM", "VA", "MT", "FR", "CH"}, "GB": {"IE", "GG", "JE", "IM"},
     "IE": {"GB"}, "NL": {"BE", "DE"}, "BE": {"NL", "FR", "LU", "DE"}, "SE": {"FI", "NO"}, "FR": {"BE", "LU", "DE", "IT", "CH", "MC"},

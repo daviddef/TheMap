@@ -119,7 +119,11 @@ const email = site.contact && site.contact.email;
                 {e.detail
                   ? (
                     <details class="rday">
-                      <summary class="head">{e.headline}</summary>
+                      <summary class="head">{e.headline}{(() => {
+                        /* «2 of 3 found something»: of the rows that ended in an outcome (found, or searched with nothing found) */
+                        const all = e.detail.flatMap((g) => g.rows), ended = all.filter((r) => r.state === "found" || r.state === "searched"), hit = ended.filter((r) => r.state === "found").length;
+                        return ended.length ? <span class="rtally"> · {hit} of {ended.length} found something</span> : null;
+                      })()}</summary>
                       {e.detail.map((g) => (
                         <div class="rg">
                           <b>{g.family}</b>
@@ -133,7 +137,7 @@ const email = site.contact && site.contact.email;
                                       {r.pages ? ` · ${r.pages.toLocaleString("en")} page${r.pages === 1 ? "" : "s"} read` : ""}
                                     </>)
                                   : (<>{r.href ? <a href={r.href} rel="noopener">{r.source}</a> : r.source}{r.title && r.title !== r.source ? " · " + r.title : ""}</>)}
-                                {r.state ? <span class="rst"> — {({ planned: "planned", written: "written, no reply yet", searched: "searched, nothing found", found: "found something", exhausted: "read everything", blocked: "no access" })[r.state] || r.state}</span> : null}
+                                {r.state ? <span class="rst"> — {r.state === "found" ? <span class="rmk ok" aria-hidden="true">{"\u2705 "}</span> : r.state === "searched" ? <span class="rmk no" aria-hidden="true">{"\u274C "}</span> : null}{({ planned: "planned", written: "written, no reply yet", searched: "searched, nothing found", found: "found something", exhausted: "read everything", blocked: "no access" })[r.state] || r.state}</span> : null}
                               </li>
                             ))}
                           </ul>
@@ -200,6 +204,8 @@ const email = site.contact && site.contact.email;
   .rday { min-width: 0; flex: 1; } .rday summary { cursor: pointer; }
   .rg { margin: 10px 0 0; font: 14px/1.45 var(--sans); } .rg ul { margin: 3px 0 0; padding-left: 18px; } .rg li { margin: 2px 0; }
   .rst { color: var(--ink-2); }
+  .rmk { font-size: .9em; }
+  .rtally { font: 500 13px var(--sans); color: var(--ink-2); white-space: nowrap; }
   .rpanel { margin: 0 0 24px; padding: 14px 18px; border: 1px solid var(--rule); border-radius: 10px; background: var(--panel, transparent); }
   .rpanel summary { cursor: pointer; display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; font-family: var(--serif); font-size: 17px; }
   .rpanel summary span { font: 13px var(--sans); color: var(--ink-2); }

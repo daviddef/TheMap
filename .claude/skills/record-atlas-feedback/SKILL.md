@@ -96,6 +96,11 @@ pushes **only the two published files from a fresh temporary clone** of
 another session has half-edited there. It pushes to `main`, which starts an
 Atlas deploy; the deploys queue, so the update can take a while to appear.
 
+**Run `--dry-run` whenever you are unsure what is pending; it pushes nothing.** Publishing is routine (eight publishes on
+9 Nov 2026 alone, about an hour apart) and a deploy it starts queues behind the others; fear of the deploy is not a reason
+to leave rows unpublished. If the dry run says nothing would change, the Atlas already holds everything you committed.
+Rows that are only in your working tree are not on your archive's origin, and the publisher reads origin.
+
 **Say what state the work is in when you finish.** «Recorded in searched.json»
 is true once you have committed your archive. «Published to the atlas» is true
 only after the publisher has run and pushed, and «live on the map» only after
@@ -153,6 +158,51 @@ Append to your archive's `site/src/data/searched.json`. Include, at minimum:
   `blocked`, `pending`, `planned`.
 - `when` — a real date. Not `"not yet"`, not `"—"`.
   The builder accepts `9 Sept 2026` too, but ISO is what it stores.
+
+### 1b. When there is no waypoint, the work still goes to the Atlas
+
+«The Atlas has no waypoint for this film» is never a reason to send nothing. A row with no waypoint still becomes a
+mark. **The importer reads the fields below once the Atlas branch `research-writeback-fixes` is merged to main (David's
+word; check `git -C "<Record Atlas>" log origin/main --grep "Research write-back"`).** Until then write them anyway:
+nothing breaks, and they are picked up on the first publish after the merge. Measured on the eight archives with that
+branch: 2,158 rows reach a source mark, 49 films, 12 collections, 175 Antenati registers (today 1,990, 24, 8, 0):
+
+- `film` — the bare DGS number (`"007713373"`), whatever the link looks like. It makes a `film:` mark. Before 9
+  November a film opened through the viewer (an image-ark link) made none.
+- `groupId` — the viewer's image-group id (`M985-...`) when there is no `wc=`/`owc=`; carried on the film mark.
+- `items` — what each item of the film holds, when you have labelled them:
+  `[{"n": 7, "images": "1203-1334", "what": "Libro 1 de Bautismos, San José, 1821-1824"}]`. This is the film's
+  item map; nothing else in the Atlas holds one.
+- `transcript` — one sentence when the machine transcript cannot be trusted on this film («empty for most images;
+  a transcript scan proves nothing»), so the next session does not scan it and report a clean-looking nil.
+- `collection` — the FamilySearch collection URL the film belongs to (`.../search/collection/4134697`); it makes a
+  `collection:` mark when the Atlas lists that collection (it lists four for Uruguay, though no Uruguay volumes).
+- `book` and `bookPlace` — **what the book is and where it is kept, in a few words, with no person in it.** `book`: the kind of
+  register and its years (`"Defunciones 1729-1833"`, `"Matrimonios, Libro 7"`); `bookPlace`: the parish or church
+  (`"Montevideo cathedral"`). Without them a film shows on the Atlas's What's new page as «FamilySearch film 007713384» with no
+  place; with them it shows «Defunciones 1729-1833 (film 007713384)» under the place. They are published, so the importer drops
+  one that has a quotation mark, a ×, a family surname, a long number, or more than 90 characters (60 for the place). Write them on
+  every row that cites a film or collection, and always give `pages` when you read images: a row without it shows «pages not
+  recorded». (Added 11 Nov 2026; first read at the next Atlas publish after the importer change is on main.)
+- `pages` — the images read, as a plain range; on a film mark it becomes `done` (never `walked`). Not when the row has a `groupId` or says "item N": those numbers count within the item, not along the film, so say them in `items` instead.
+- A mark made through `film`, `collection` or an Antenati link carries no note, so never rely on the `src` sentence reaching the Atlas, and keep given names out of it anyway.
+- `waypoint: null` and a `waypointNote` saying why, so nobody goes looking for a code that does not exist.
+
+`when` is the day the SEARCH happened. The record's own years go in `what`; if you must keep them in a field of their
+own, write the research date in `searchedOn` (read first). A bare year is not a research date and the row is shown
+undated.
+
+**Antenati: record the register, not the home page.** Write the register's own link
+(`https://antenati.cultura.gov.it/ark:/12657/an_ua14411/`, with or without an image id). Each `an_ua` id becomes an
+`antenati:` mark, so the reader sees which registers were opened. A row whose `url` is `antenati.cultura.gov.it/` alone
+can only say «Antenati was searched», which is all 203 Mazza rows say today.
+
+**Name the source so it can be matched.** A row gets a source mark when its `url` host is a registered provider, or,
+with no URL, when the text before the first dash or comma IS a provider's name or an `aliases` entry on its row
+(`providers.json`), exactly. «DAPA ZM34K-214 — Gologorica deaths» matches because `dapa` lists that alias; «The
+London Gazette» because `the-gazette-uk` does. A printed book or journal is not a provider; give its archive.org or
+library URL if it has one. If a provider you used is not in `data/providers.json`, add it (§2), or add the spelling
+you wrote to its `aliases`.
 
 ### 2. A source the atlas does not list
 
@@ -216,6 +266,14 @@ Atlas's one catalogue, with the evidence for each form, through the
 That catalogue is what the surname pages show and what every other session
 searches from, so a form kept only in your archive is a form the next session
 will miss. Do not keep a variants table of your own.
+
+### 4b. A given name's forms, or a place's name in an earlier year
+
+Same rule as a surname, same place: the Atlas catalogues, through the `name-variants` skill. A form met on a record
+(Joannes for Ivan, Zuane for Giovanni, a clerk's slip) goes in with `given_name_variants.py add`, evidence naming the
+kind of record, the place and the period and never the person; a place's old name (Salisbury until 1982) with
+`place_names.py add --from --to --source`. Do not keep a table of either in the archive, and do not write them into
+`searched.json`.
 
 ## Progress marks (what the map colours)
 

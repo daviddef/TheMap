@@ -53,7 +53,8 @@ export function researchNews(data) {
         const title = String(m.t || id.replace(/^[a-z]+:/, "")).replace(/\s+/g, " ").slice(0, 90);
         /* the address of the thing itself, when it has a public one: a register on Antenati, a film or collection on FamilySearch, a provider's own page */
         const href = /^https?:\/\//.test(m.href || "") ? m.href : null;
-        const where = !isBook && m.where ? String(m.where).replace(/\s+/g, " ").slice(0, 60) : "";
+        const where = !isBook && m.where ? String(m.where).replace(/\s+/g, " ").slice(0, 60)
+          : (isBook && !pid && m.whereText ? String(m.whereText).replace(/\s+/g, " ").slice(0, 60) : "");
         d.rows.push({ family: f.name, kind: isBook ? "book" : "source", title, source: src, placeId: pid, pages: pg, state: b.state || "", href, where });
       }
     }

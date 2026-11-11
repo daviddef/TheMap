@@ -177,6 +177,18 @@ for fam in irs.ARCHIVES:
                 if irs._yearish(a, b):
                     failures.append(f"live {fam}: {text[:80]!r} -> {[a, b]}")
 
+# `book` / `bookPlace` ARE PUBLISHED, SO THEY MUST NOT BE ABLE TO CARRY A PERSON.
+book_cases = [
+    ("Defunciones 1729-1833", True), ("Montevideo cathedral", True),
+    ('Baptism of "Maria"', False), ("Matrimonios Lerena 1826", False),
+    ("Libro 16, film 007713376", False), ("x" * 95, False), ("", False),
+    ("Maria Lerena \u00d7 Pedro", False),
+]
+for text, ok in book_cases:
+    got = bool(irs.safe_book(text, {"lerena"}))
+    if got != ok:
+        failures.append(f"safe_book({text[:40]!r}) -> {got}, wanted {ok}")
+
 if failures:
     print(f"{len(failures)} FAILED")
     for f in failures:

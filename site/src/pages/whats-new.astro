@@ -138,7 +138,7 @@ const email = site.contact && site.contact.email;
                               {r.where ? <span class="xw">{r.where}</span> : null}
                             </div>
                             <div class="xp">{r.state ? <span class={`xs xs-${r.state}`}>{({ found: "\u2705 Found something", searched: "\u274C Nothing found", planned: "Planned", written: "Written, no reply", exhausted: "Read everything", blocked: "No access" })[r.state] || r.state}</span> : null}</div>
-                            <div class="xn">{r.kind === "book" && r.pages ? `${r.pages.toLocaleString("en")} page${r.pages === 1 ? "" : "s"}` : ""}</div>
+                            <div class="xn">{r.kind === "book" ? (r.pages ? `${r.pages.toLocaleString("en")} page${r.pages === 1 ? "" : "s"}` : "pages not recorded") : ""}</div>
                           </div>
                         );
                         return (

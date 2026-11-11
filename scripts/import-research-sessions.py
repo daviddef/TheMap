@@ -141,6 +141,25 @@ DGS = re.compile(r"\d{6,9}")
 ANTENATI_ARK = re.compile(r"antenati\.cultura\.gov\.it/ark:/12657/(an_ua\d+)", re.I)
 
 
+# WHAT BOOK A FILM IS, IN THE ROW'S OWN WORDS, WITH NO PERSON IN IT. A film mark used to be titled «FamilySearch film 007713384» and
+# placed only if the film happened to be one of the few the atlas could resolve, so the What's-new page and My research showed a number
+# where a reader wants «Montevideo cathedral, Deaths 1729-1833». The row's note has that, but a note is free text and can name a
+# person, so it is never published. Two fields are asked for instead, both short and both about the BOOK: `book` (its title: kind of
+# register and years, e.g. «Defunciones 1729-1833») and `bookPlace` (where it is kept: «Montevideo cathedral»). They are taken
+# only when they cannot be a person: short, no quotation marks or «×», no family surname of any line, no more than four digits in a row
+# unless it is a year (an act or certificate number is an identifier).
+_BOOK_BAD = re.compile(r"[\"\u201c\u201d\u00ab\u00bb\u00d7]|\b(?:born|b\.|d\.|died|m\.)\s")
+def safe_book(v, surnames, limit=90):
+    t = re.sub(r"\s+", " ", str(v or "")).strip()
+    if not t or len(t) > limit or _BOOK_BAD.search(t):
+        return ""
+    if re.search(r"\d{5,}", t):          # a film, act or certificate number is not part of the book's name
+        return ""
+    low = squash(t)
+    if any(sn and len(sn) >= 4 and sn in low for sn in surnames):
+        return ""
+    return t
+
 def film_of(row, url):
     """The DGS film number a row is about: the link's, else the row's own `film` field.
 
@@ -1015,6 +1034,7 @@ def main():
             if arch_id: line_archives.setdefault(sl, set()).add(arch_id)
             return sl
         archive_names = fam_names.get(squash(LINE_NAME.get(fam, fam)), {})
+        family_squashed = {squash(x) for x in list(archive_names.values()) + [LINE_NAME.get(fam, fam), fam] if x} | {squash(v["name"]) for v in lines.values()}
         if rows:
             lines[home] = {"name": LINE_NAME.get(fam, fam), "where": "",
                            "made": made_before.get(home, today)}
@@ -1170,6 +1190,13 @@ def main():
                 fid = "film:" + film_no
                 m = marks.setdefault(fid, {"by": {}})
                 m["t"] = m.get("t") or ("FamilySearch film " + film_no)
+                _bk = safe_book(r.get("book"), family_squashed)
+                if _bk and not m.get("book"):
+                    m["book"] = _bk
+                    m["t"] = _bk + " (film " + film_no + ")"
+                _bp = safe_book(r.get("bookPlace"), family_squashed, 60)
+                if _bp and not m.get("whereText"):
+                    m["whereText"] = _bp
                 m["href"] = m.get("href") or (
                     "https://www.familysearch.org/search/film/" + film_no)
                 # WHAT A FILM IS, WHEN IT HAS NO WAYPOINT TO BE ANYTHING ELSE. A row may say which image group the viewer showed

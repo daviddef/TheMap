@@ -39,3 +39,13 @@ test("a day names its families and lists the exact books and sources, still with
   assert.ok(d2.detail[0].rows.some((x) => x.kind === "source" && x.source === "Matricula Online"));
   assert.ok(!JSON.stringify(d2).includes("SOMEBODY"));
 });
+
+test("a film row shows its book title and written place when it has no atlas place", () => {
+  const r = researchNews({ lines: { a: { name: "Alpha" } }, marks: {
+    "film:007713384": { t: "Defunciones 1729-1833 (film 007713384)", whereText: "Montevideo cathedral", href: "https://www.familysearch.org/search/film/007713384", by: { a: { since: "2026-11-11", state: "found" } } },
+  } });
+  const row = r.entries[0].detail[0].rows[0];
+  assert.match(row.title, /Defunciones 1729-1833/);
+  assert.equal(row.where, "Montevideo cathedral");
+  assert.equal(row.pages, 0);
+});

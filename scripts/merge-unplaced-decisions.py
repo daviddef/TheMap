@@ -38,6 +38,9 @@ PLACED3 = "data/unplaced-placed-3.json"
 DECISIONS = ("area", "settlement", "unplaceable", "none")
 
 # Where a book filed under one country can lie today, by the successor states of the polities that filed it.
+# Territories made only of small islands that the country outline does not carry: (south, north, west, east) of the whole territory.
+OUTLINE_GAPS = {"CK": (-22.1, -8.8, -166.3, -157.2)}   # Cook Islands, from Penrhyn to Mangaia
+
 SUCCESSORS = {
     "HU": {"SK", "RO", "RS", "UA", "HR", "AT", "SI"}, "AT": {"CZ", "SK", "SI", "IT", "PL", "UA", "HR", "HU", "RO", "RS", "BA"},
     "RU": {"UA", "BY", "MD", "PL", "LT", "LV", "EE", "FI", "GE", "AM", "AZ", "KZ", "UZ", "TJ", "KG", "TM"},
@@ -99,6 +102,10 @@ def problems(row, idx):
         out.append("no placeCountry")
         return out
     got = geo.country_of(lat, lon)
+    if got is None and pc in OUTLINE_GAPS:
+        s_, n_, w_, e_ = OUTLINE_GAPS[pc]
+        if s_ <= lat <= n_ and w_ <= lon <= e_:
+            got = pc     # a territory the 50 m outline leaves out; its own extent is the witness
     if got != pc:
         out.append(f"the point is in {got}, not {pc}")
     if pc != row["cc"] and pc not in SUCCESSORS.get(row["cc"], set()):

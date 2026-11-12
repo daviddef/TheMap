@@ -67,11 +67,18 @@ SHARDS = {}
 # Most-open-wins. A place with one free volume and fifty on paper is a place
 # where you CAN see something tonight, and the panel tells the rest of the
 # truth. The opposite rule would paint the map the colour of its worst news.
-# `unsurveyed` is last and is not an access class at all — it is the absence of
-# one. It exists because a place with no volumes and a place whose volumes are
-# all on paper were the same colourless dot, and those are completely different
+# `unsurveyed` is not an access class at all — it is the absence of one. It
+# exists because a place with no volumes and a place whose volumes are all on
+# paper were the same colourless dot, and those are completely different
 # facts: one says «go to the building», the other says «nobody has looked».
-RANK = ["free", "account", "index", "mixed", "paid", "catalogue", "onsite", "unsurveyed"]
+# IT RANKS ABOVE `onsite`, NOT LAST (David, 12 November: «rank unsurveyed above
+# onsite»). `onsite` is a known, bad answer: somebody has to go. `unsurveyed`
+# is an unknown one, and since the Pazin register import it also covers 963
+# registers the archive says are digitised, whose route to the scans nobody has
+# walked yet. A place holding both must not be painted «go to the building».
+# It is still below every class that was actually surveyed. A place with NO
+# collection at all gets `unsurveyed` by default, which is unchanged.
+RANK = ["free", "account", "index", "mixed", "paid", "catalogue", "unsurveyed", "onsite"]
 
 # NFKD strips the accents off č ć š ž but not off đ, which is its own letter
 # rather than a d with a mark. Croatian place names are full of it.

@@ -24,6 +24,11 @@ what anybody else has half-edited there, and nothing of theirs can be swept into
     python3 scripts/publish-research-sessions.py            # regenerate, publish if anything changed
     python3 scripts/publish-research-sessions.py --dry-run  # say what would change, publish nothing
 
+ROW RECEIPTS (12 Nov 2026). The same commit also carries site/public/research-receipts/<archive>.json, one per archive, which the importer
+writes beside the marks: for each of the archive's search rows (named by a 12-character hash of the row), the marks it made and the Atlas
+page for each. The archives' /whats-new/ pages read them to say «In the Atlas» under a row. The commit is made from the same fresh clone, so
+a row and its receipt cannot be published apart. `--dry-run` reports the receipt counts too. The importer's `--selftest` checks the row key.
+
 THE SITE IS LIVE AFTER THE NEXT DEPLOY (CI queues, so roughly one to two hours). The reader's
 browser picks the update up the next time /my-research/ is opened.
 """
@@ -33,6 +38,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
 RECORD = "record-atlas-research-import.json"
 PUBLIC = "site/public/research-sessions.json"
+RECEIPTS = "site/public/research-receipts"   # one <archive>.json per archive: which search rows reached the Atlas (see the importer's docstring)
 DRY = "--dry-run" in sys.argv
 # An unknown flag must never fall through to a real publish: on 8 Nov 2026 `--help` published to main because only --dry-run was read.
 if any(a.startswith("-") and a != "--dry-run" for a in sys.argv[1:]):
@@ -76,11 +82,12 @@ def main():
         if os.path.exists(os.path.join(clone, RECORD)):
             shutil.copy(os.path.join(clone, RECORD), out)
         env = dict(os.environ, ARCHIVES_DIR=os.path.dirname(ROOT))
-        r = subprocess.run([sys.executable, "scripts/import-research-sessions.py", "--out", out], cwd=clone, env=env, capture_output=True, text=True)
+        rcp_tmp = os.path.join(tmp, "receipts")
+        r = subprocess.run([sys.executable, "scripts/import-research-sessions.py", "--out", out, "--receipts", rcp_tmp], cwd=clone, env=env, capture_output=True, text=True)
         if r.returncode != 0:
             raise RuntimeError(r.stderr.strip() or "the importer failed")
         print("\n".join(l for l in r.stdout.splitlines()
-                        if any(k in l for k in ("rows read", "volume marks", "source marks", "film marks", "research lines", "archive copy"))))
+                        if any(k in l for k in ("rows read", "volume marks", "source marks", "film marks", "research lines", "archive copy", "receipt "))))
         new = json.load(open(out, encoding="utf-8"))
 
         # 2. Compare with what origin has, not with the working tree, which may be behind.
@@ -89,12 +96,24 @@ def main():
             old = json.load(open(pub, encoding="utf-8"))
         except OSError:
             old = {}
-        if old and same(old, new):
+        # The receipts are compared the same way: a row edited in an archive changes its key, so the receipts can change while the marks do not.
+        new_rcp = {f: json.load(open(os.path.join(rcp_tmp, f), encoding="utf-8")) for f in sorted(os.listdir(rcp_tmp))} if os.path.isdir(rcp_tmp) else {}
+        old_rcp = {}
+        for f in new_rcp:
+            try:
+                old_rcp[f] = json.load(open(os.path.join(clone, RECEIPTS, f), encoding="utf-8"))
+            except OSError:
+                pass
+        rcp_same = set(new_rcp) == set(old_rcp) and all(same(old_rcp[f], new_rcp[f]) for f in new_rcp)
+        if old and same(old, new) and rcp_same:
             print("Already current: origin carries exactly what the archives hold. Nothing to publish.")
             return
         o, n = set((old.get("marks") or {})), set(new.get("marks") or {})
         print(f"Origin has {len(o):,} marks; the archives now give {len(n):,} "
               f"(+{len(n - o):,} new, -{len(o - n):,} gone).")
+        n_rows = sum(len(v["rows"]) for v in new_rcp.values())
+        print(f"Receipts: {len(new_rcp)} archives, {n_rows:,} rows"
+              + ("" if not old_rcp else f"; origin has {sum(len(v['rows']) for v in old_rcp.values()):,}") + ("; unchanged." if rcp_same else "; changed."))
         if DRY:
             print("--dry-run: nothing written or pushed.")
             return
@@ -104,7 +123,10 @@ def main():
             json.dump(new, fh, ensure_ascii=False, indent=1)
         with open(pub, "w", encoding="utf-8") as fh:
             json.dump(new, fh, ensure_ascii=False, separators=(",", ":"))
-        run(["git", "add", RECORD, PUBLIC], cwd=clone)
+        os.makedirs(os.path.join(clone, RECEIPTS), exist_ok=True)
+        for f in new_rcp:
+            shutil.copy(os.path.join(rcp_tmp, f), os.path.join(clone, RECEIPTS, f))
+        run(["git", "add", RECORD, PUBLIC, RECEIPTS], cwd=clone)
         msg = (f"Research sessions: {len(n):,} marks across {len(new.get('lines') or {})} families, "
                f"published from the family archives ({time.strftime('%Y-%m-%d')})")
         run(["git", "commit", "--quiet", "-m", msg], cwd=clone)

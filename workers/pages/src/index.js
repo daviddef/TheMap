@@ -18,6 +18,14 @@ export function cacheControlFor(key) {
   return /\.html?$/i.test(key) ? "public, max-age=600, no-transform" : "public, max-age=600";
 }
 
+/* CORS FOR THE RESEARCH PUBLICATIONS ONLY. The family archives' pages ask the live Atlas, in the visitor's browser, whether a search row has
+   reached it: they read /research-receipts/<archive>.json (and /research-sessions.json for the marks), which are public, carry keys and
+   Atlas paths and no person, and are only ever fetched with GET. Any origin may read them (`*`, no credentials). Every other path
+   keeps the browser's default, which is no cross-origin reads: the sync and AI Workers have their own, narrower rules. */
+export function corsFor(pathname) {
+  return pathname === "/research-sessions.json" || pathname.startsWith("/research-receipts/");
+}
+
 export function keyFor(pathname) {
   let p;
   try { p = decodeURIComponent(pathname); } catch (e) { return null; }
@@ -58,6 +66,7 @@ export default {
       h.set("etag", obj.httpEtag);
       h.set("cache-control", cacheControlFor(key));
       h.set("x-served-from", "r2");
+      if (corsFor(url.pathname)) h.set("access-control-allow-origin", "*");
       return new Response(req.method === "HEAD" ? null : obj.body, { headers: h });
     }
     /* not ours: the origin answers, unchanged */
@@ -66,6 +75,7 @@ export default {
     const r = await fetch(originFor(env.ORIGIN, url.pathname, url.search), { method: req.method, headers: { accept: req.headers.get("accept") || "*/*", "x-ra-hop": "1" }, redirect: "manual" });
     const out = new Response(r.body, r);
     out.headers.set("x-served-from", "origin");
+    if (corsFor(url.pathname)) out.headers.set("access-control-allow-origin", "*");
     if ((out.headers.get("content-type") || "").startsWith("text/html")) out.headers.set("cache-control", (out.headers.get("cache-control") || "public, max-age=600") + ", no-transform");
     return out;
   },

@@ -54,7 +54,27 @@ a waypoint additionally becomes a volume mark with its pages. Claiming the
 volume level for a row that only supports the source level would be inventing
 precision, and the page ranges are the part somebody will act on.
 
-    python3 scripts/import-research-sessions.py [--out FILE]
+    python3 scripts/import-research-sessions.py [--out FILE] [--receipts DIR|none] [--selftest]
+
+ROW RECEIPTS (12 Nov 2026). Besides the marks, the importer writes one small file per archive, `site/public/research-receipts/<archive>.json`
+(archive ids as in research-sessions.json `archives`: blazevic, booyzen, darcy, defranceschi, falco, lerena, luwinski, mazza). Each archive's
+/whats-new/ reads it to say, under every search row, whether the row reached the Atlas and on which Atlas page:
+
+    { "v": 1, "exported": "2026-11-12",
+      "rows": { "<rowkey>": [["<markKey>", "<Atlas path>"], ...], "<rowkey>": [] } }
+
+  * rowkey = sha1 of the row's canonical JSON (the row exactly as it sits in the archive's searched.json, keys sorted at every level, no
+    spaces, non-ASCII kept), first 12 hex characters. Python and Node both give the three test vectors in ROWKEY_VECTORS; an edited row gets a
+    new key and reads «Not sent yet» until the next publish.
+  * a row present with [] was processed and makes no mark (a note with no source and no volume): «Nothing to send». A row absent was not
+    processed: «Not sent yet». Every row the marks were built from has an entry.
+  * markKey is the key in research-sessions.json `marks` that the row produced or updated; the path is the Atlas page for that mark
+    (see «THE ROW RECEIPTS» below the marks: place for volumes and resolved films, provider page for sources).
+  * KEYS AND ATLAS PATHS ONLY. No row text, no note, no person's name.
+
+`--selftest` checks the row key against the vectors and the receipt-shape checker against good and bad receipts; the importer also runs that
+shape check on every receipt it is about to write (and that each markKey exists in the marks), and writes nothing if one fails, which stops
+the publisher too. `--receipts none` skips the files.
 """
 import argparse
 import csv
@@ -463,6 +483,73 @@ def ranges_from(text):
                         and not NOT_READ.search(_clause(t, m.start(), m.end()))):
                     return [[1, n]], True
     return None, False
+
+
+# ---------------------------------------------------------------------------
+# ROW RECEIPTS: which of an archive's search rows reached the Atlas, and on which Atlas page.
+# Each archive's /whats-new/ shows, under every search row, «In the Atlas» / «Sent, going live» / «Not sent yet» / «Nothing to send».
+# To say so it needs a name for the row that every side computes the same way, and a file that maps that name to the marks the row
+# made. The file carries KEYS AND ATLAS PATHS ONLY: no row text, no note, no person (the living-people rule).
+#
+#   rowkey(row) = sha1(canonical JSON of the row exactly as it sits in the archive's searched.json, UTF-8).hexdigest()[:12]
+#   canonical JSON = keys sorted at every level, no spaces, non-ASCII left as it is. Editing a row changes its key, so an edited row
+#   reads «Not sent yet» until the next publish; that is intended.
+#
+# THE ONE DEFINITION, with three implementations (this one, the archive kit's, the archives' pages). `--selftest` proves this copy
+# against the three shared vectors below; the kit's own test proves its copy against the same three.
+ROWKEY_VECTORS = [
+    ({"when": "12 Nov 2026", "src": "FamilySearch", "what": "Gologorica baptisms 1872\u20131880", "outcome": "hit"}, "e7c29e4b77d3"),
+    ({"outcome": "nil", "what": "\u0160estan \u00abŽubrini\u0107\u00bb \u2014 nothing", "when": "2026-11-11", "src": "DAPA ZM34K-214", "pages": "p. 12",
+      "ev": [["/imotski/", "Imotski"]]}, "afb2db3a6e3a"),
+    ({"key": "x-1", "when": "10 Nov 2026", "walked": True, "n": 3, "nested": {"b": [1, 2], "a": "\u00e9"}}, "7e662c5e1f2f"),
+]
+
+
+def rowkey(row):
+    import hashlib
+    j = json.dumps(row, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha1(j.encode("utf-8")).hexdigest()[:12]
+
+
+def receipt_problems(receipt, marks=None):
+    """Everything wrong with one archive's receipt file, as a list of strings (empty = sound). `marks` is the marks dict of the
+    research-sessions file the receipt was built beside; when given, every markKey a receipt names must exist in it."""
+    bad = []
+    if not isinstance(receipt, dict) or receipt.get("v") != 1:
+        return ["v is not 1"]
+    if set(receipt) - {"v", "exported", "rows"}:
+        bad.append("unexpected keys: " + ", ".join(sorted(set(receipt) - {"v", "exported", "rows"})))
+    rows = receipt.get("rows")
+    if not isinstance(rows, dict):
+        return bad + ["rows is not an object"]
+    for k, ents in rows.items():
+        if not re.fullmatch(r"[0-9a-f]{12}", str(k)):
+            bad.append(f"row key {k!r} is not 12 hex characters")
+        if not isinstance(ents, list):
+            bad.append(f"{k}: not a list"); continue
+        for e in ents:
+            if not (isinstance(e, list) and len(e) == 2 and all(isinstance(x, str) and x for x in e)):
+                bad.append(f"{k}: entry is not [markKey, href]: {e!r}"); continue
+            if not e[1].startswith("/") or e[1].startswith("//"):
+                bad.append(f"{k}: href {e[1]!r} is not an Atlas path")
+            if marks is not None and e[0] not in marks:
+                bad.append(f"{k}: mark {e[0]!r} is not in research-sessions.json")
+    return bad
+
+
+def selftest():
+    bad = [f"vector {i + 1}: got {rowkey(r)}, want {want}" for i, (r, want) in enumerate(ROWKEY_VECTORS) if rowkey(r) != want]
+    good = {"v": 1, "exported": "2026-11-12", "rows": {"e7c29e4b77d3": [["volume:9R28-C6V", "/place/x/"]], "afb2db3a6e3a": []}}
+    bad += ["a sound receipt was refused: " + "; ".join(receipt_problems(good, {"volume:9R28-C6V": {}}))] if receipt_problems(good, {"volume:9R28-C6V": {}}) else []
+    for name, rec in (("bad key", {"v": 1, "rows": {"nope": []}}), ("bad entry", {"v": 1, "rows": {"e7c29e4b77d3": [["a"]]}}),
+                      ("external href", {"v": 1, "rows": {"e7c29e4b77d3": [["a", "https://x.org/"]]}}), ("wrong v", {"v": 2, "rows": {}}),
+                      ("unknown mark", {"v": 1, "rows": {"e7c29e4b77d3": [["gone", "/p/"]]}})):
+        if not receipt_problems(rec, {} if name == "unknown mark" else None):
+            bad.append(f"a {name} receipt was accepted")
+    for b in bad:
+        print("SELFTEST FAILED:", b)
+    print("selftest: row key matches the 3 vectors; receipt shape checks behave" if not bad else f"selftest: {len(bad)} failure(s)")
+    return not bad
 
 
 def rows_from(d):
@@ -994,7 +1081,12 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="record-atlas-research-import.json")
     ap.add_argument("--rejects", default="")
+    ap.add_argument("--receipts", default=os.path.join("site", "public", "research-receipts"),
+                    help="folder for the per-archive row receipts (one <archive>.json each); 'none' to skip")
+    ap.add_argument("--selftest", action="store_true", help="check the row key against the shared vectors and the receipt shape, then stop")
     args = ap.parse_args()
+    if args.selftest:
+        sys.exit(0 if selftest() else 1)
 
     today = time.strftime("%Y-%m-%d")
     # Read BEFORE anything is written, so the dates survive this run's output
@@ -1019,6 +1111,7 @@ def main():
           f"{len(provs):,} provider hosts")
 
     marks, rejects, lines = {}, [], {}
+    receipts = {}           # archive id -> {rowkey: [mark keys the row produced or updated]}; hrefs are settled once the marks are final
     line_archives = {}      # line slug -> the archives (showcase ids) whose rows made it, so the picker can link a family to its archive's site
     page_refusals = []
     seen = matched = ranged = srcmarked = filmed = 0
@@ -1064,8 +1157,12 @@ def main():
         # number that is true and reads as the opposite of the truth is worse
         # than no number.
         src_hit = 0
+        rcp = receipts.setdefault(arch_id or home, {}) if rows else {}
         for r in rows:
             seen += 1
+            row_marks = []          # the mark keys THIS row produced or updated, in the order it made them
+            if rows:
+                rcp[rowkey(r)] = row_marks
             src = first(r, SRC_KEYS)
             url = first(r, URL_KEYS)
             blob = " ".join(filter(None, [src, first(r, WHAT_KEYS), first(r, GOT_KEYS)]))
@@ -1110,6 +1207,7 @@ def main():
                 p = named_provider(src, names)
             if p and st:
                 sid = "source:" + p["id"]
+                row_marks.append(sid)
                 m = marks.setdefault(sid, {"by": {}})
                 m["t"] = m.get("t") or p.get("name") or p["id"]
                 m["href"] = m.get("href") or p.get("url")
@@ -1143,6 +1241,7 @@ def main():
                 _new_route = True
             if cu in cols:
                 cid = "collection:" + cu
+                row_marks.append(cid)
                 m = marks.setdefault(cid, {"by": {}})
                 m["t"] = m.get("t") or cols[cu]
                 m["href"] = m.get("href") or cu
@@ -1173,6 +1272,7 @@ def main():
             am = ANTENATI_ARK.search(url or "")
             if am and st:
                 aid = "antenati:" + am.group(1)
+                row_marks.append(aid)
                 m = marks.setdefault(aid, {"by": {}})
                 m["t"] = m.get("t") or ("Antenati register " + am.group(1))
                 m["href"] = m.get("href") or ("https://antenati.cultura.gov.it/ark:/12657/" + am.group(1) + "/")
@@ -1188,6 +1288,7 @@ def main():
             film_no = film_of(r, url)
             if film_no:
                 fid = "film:" + film_no
+                row_marks.append(fid)
                 m = marks.setdefault(fid, {"by": {}})
                 m["t"] = m.get("t") or ("FamilySearch film " + film_no)
                 _bk = safe_book(r.get("book"), family_squashed)
@@ -1303,6 +1404,7 @@ def main():
                 continue
             wp = wps[0]
             mid = canonical("volume:" + wp)
+            row_marks.append(mid)
             # THE FIELD THE SKILL ASKS FOR, BEFORE THE PROSE. .claude/skills/
             # record-atlas-feedback/SKILL.md tells every session to write
             # `"pages": "1-47, 60-72"` and `"walked": true`, with careful rules
@@ -1438,6 +1540,44 @@ def main():
             marks[aid]["where"] = next(f[pid] for f in found if pid in f)
             marks[aid]["placedBy"] = "comune"
     nant_placed = sum(1 for k, v in marks.items() if k.startswith("antenati:") and v.get("place"))
+    # ---- THE ROW RECEIPTS, now that every mark is final. Which Atlas page a mark links to is chosen HERE, one rule per kind of mark:
+    #   volume:<waypoint>      the place page of the volume's place                       /place/<place>/
+    #   film:<no>              the place page when the film's first segment is a volume the Atlas holds; else FamilySearch's own page
+    #   antenati:<id>          the place page of the comune the register's rows name, when one place settles; else the Antenati page
+    #   source:<provider>      the provider's page                                        /archive/<provider>/
+    #   collection:<url>       the page of the provider the collection's host belongs to, else /my-research/ (where every mark shows)
+    # An href is always an Atlas path, never an outside URL: the point of the receipt is to link back to this site.
+    prov_ids = {pp["id"] for pp in json.load(io.open("data/providers.json", encoding="utf-8"))["providers"]}
+    def atlas_href(key):
+        m, kind = marks[key], key.split(":", 1)[0]
+        if kind == "volume" and str(m.get("href") or "").startswith("/place/"):
+            return m["href"]
+        if kind in ("film", "antenati") and m.get("place"):
+            return "/place/" + m["place"] + "/"
+        if kind == "film" and "familysearch" in prov_ids:
+            return "/archive/familysearch/"
+        if kind == "antenati" and "antenati" in prov_ids:
+            return "/archive/antenati/"
+        if kind == "source" and key.split(":", 1)[1] in prov_ids:
+            return "/archive/" + key.split(":", 1)[1] + "/"
+        if kind == "collection":
+            pc = provider_for(key.split(":", 1)[1], provs)
+            if pc and pc["id"] in prov_ids:
+                return "/archive/" + pc["id"] + "/"
+        return "/my-research/"
+    receipt_files = {}
+    for aid_, rws in receipts.items():
+        receipt_files[aid_] = {"v": 1, "exported": today,
+                               "rows": {rk: [[k, atlas_href(k)] for k in dict.fromkeys(ks) if k in marks] for rk, ks in sorted(rws.items())}}
+    for aid_, rec in receipt_files.items():
+        bad = receipt_problems(rec, marks)
+        if bad:
+            sys.exit(f"receipt for {aid_} is not sound, nothing written:\n  " + "\n  ".join(bad[:10]))
+    if args.receipts != "none":
+        os.makedirs(args.receipts, exist_ok=True)
+        for aid_, rec in receipt_files.items():
+            with io.open(os.path.join(args.receipts, aid_ + ".json"), "w", encoding="utf-8") as fh:
+                json.dump(rec, fh, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
     doc = {"v": 2, "exported": today, "lines": lines,
            "active": (sorted(lines)[0] if lines else None), "marks": marks}
     if used_arch:
@@ -1472,6 +1612,9 @@ def main():
     print(f"    antenati register marks   {nant:,}  ({nant_placed:,} filed under the comune their own title names)")
     print(f"    volume marks              {nvol:,}")
     print(f"    no volume could be placed {len(rejects):,}")
+    for aid_, rec in sorted(receipt_files.items()):
+        n_ = len(rec["rows"]); e_ = sum(1 for v in rec["rows"].values() if not v)
+        print(f"    receipt {aid_:<13} {n_:>5} rows, {e_:>4} make no mark")
     # WHAT THE PAGE PARSER REFUSED, shown rather than silently dropped. A year
     # range or a «sampled» list that used to be recorded as pages read is now
     # left out, and the person who wrote it should be able to see that it was.

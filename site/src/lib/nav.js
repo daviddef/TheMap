@@ -83,5 +83,6 @@ export const nav = [
    being done, letters to send, what changed, my work) are linked from the end of About. */
 export const footLinks = [
   ["/data/", "Use the data"],
+  ["/connect/", "Connect to the Atlas"],
   ["/privacy/", "Privacy"],
 ];

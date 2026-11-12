@@ -1,0 +1,552 @@
+---
+/* THE PAGE THAT SAYS HOW TO PLUG INTO THE ATLAS, FOR SOMEBODY WHO HAS NEVER DONE IT.
+ *
+ * /data/ lists the files and their licences, which is the right page for somebody who already knows what a JSON file is. This is
+ * the other half: four things a researcher wants to DO (read the sources for a place, keep their own progress, use every spelling
+ * of a name, ask who governed a place in a year), each as a short recipe with a "try it" that calls the real file or service from
+ * this page, so what is on the screen is what the interface answers today, not a description of it.
+ *
+ * AND IT SAYS WHAT DOES NOT EXIST. The last section is a list of gaps found while writing it (no CORS on the data files, no
+ * place-name lookup over the API, no way to add a single mark...). A page that only described what works would send somebody to build
+ * on a door that is painted on. Every claim here was checked against the live services on 12 Nov 2026 or against the code that serves
+ * them; nothing is promised that is not shipped.
+ *
+ * Counts are read from the shipped files at build time, so they cannot drift.
+ */
+import fs from "node:fs";
+import path from "node:path";
+import Base from "../layouts/Base.astro";
+import { u } from "../lib/url.js";
+import regions from "../../public/regions.json";
+import provs from "../../public/providers.json";
+import ctx from "../../public/context.json";
+import gn from "../../public/given-names.json";
+import sf from "../../public/surname-families.json";
+import idx from "../../public/index.json";
+
+const PUB = fs.existsSync(path.join(process.cwd(), "public")) ? path.join(process.cwd(), "public") : path.join(process.cwd(), "site", "public");
+const nPlaceFiles = (() => { try { return fs.readdirSync(path.join(PUB, "p")).filter((f) => f.endsWith(".json")).length; } catch { return 0; } })();
+const N = (n) => Number(n).toLocaleString("en-GB");
+const cnt = ctx.counts || {};
+const api = "https://api.recordatlas.org";
+const syncHost = "https://sync.recordatlas.org";
+const aiHost = "https://ai.recordatlas.org";
+const ver = (ctx.contract && ctx.contract.version) || "";
+---
+<Base
+  title="Connect to the Atlas"
+  eyebrow="Read it · write your research to it · from a spreadsheet, a script, or an AI assistant"
+  dek="Four things you can do with the Atlas's data without opening the website, each as a short recipe you can try on this page. And the things that do not work yet, listed honestly.">
+
+  <div class="k-stats" id="cx-status" aria-live="polite">
+    <span class="k-tag">Read API <b id="st-api">checking…</b></span>
+    <span class="k-tag">Sync <b id="st-sync">checking…</b></span>
+    <span class="k-tag">Ask&nbsp;Claude <b id="st-ai">checking…</b></span>
+    <span><b>{N(nPlaceFiles)}</b> place files</span>
+    <span><b>{N(cnt.regionEras || 0)}</b> jurisdiction eras</span>
+    <span><b>{N(gn.totalForms || 0)}</b> given-name forms</span>
+  </div>
+
+  <div class="k-hi">
+    <p><b>You do not need to be a programmer to start.</b> The Atlas keeps everything in plain files with web addresses. A web address
+    you can paste into a browser is already an API. The harder doors (saving your own research) are explained step by step below, and the
+    page will show you exactly what your computer would send, without sending anything.</p>
+  </div>
+
+  <h2 class="k-h" id="doors">Pick your door <span class="k-count">what you want to do</span></h2>
+  <ul class="k-tiles cx-doors">
+    <li><a href="#places"><b>1 · What sources can I read for a place?</b></a><span>Archives, registers and year-ranges for one village. Read-only, no login.</span></li>
+    <li><a href="#research"><b>2 · Keep my own research progress</b></a><span>Write "I searched this book, found it" from your own tool. Needs the six words.</span></li>
+    <li><a href="#names"><b>3 · Use every spelling of a name</b></a><span>Ivan is Johann is Giovanni. Ask once, search them all.</span></li>
+    <li><a href="#eras"><b>4 · Who governed this place in 1850?</b></a><span>Places, countries, flags and their eras, with the years, the polity and the archive that filed them.</span></li>
+  </ul>
+
+  <h2 class="k-h">The whole picture <span class="k-count">four services, one website built on them</span></h2>
+  <figure class="cx-fig">
+    <svg viewBox="0 0 880 330" role="img" aria-labelledby="map-t map-d">
+      <title id="map-t">How a program talks to the Atlas</title>
+      <desc id="map-d">Your tool on the left reaches four services on the right. Data files and the read API are read-only. Sync stores an encrypted copy of your research. Ask Claude reads a pasted line of a register.</desc>
+      <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="var(--ink-3)"/></marker></defs>
+      <rect x="12" y="95" width="170" height="140" rx="14" class="svg-box"/>
+      <text x="97" y="135" text-anchor="middle" class="svg-h">Your tool</text>
+      <text x="97" y="157" text-anchor="middle" class="svg-s">spreadsheet</text>
+      <text x="97" y="175" text-anchor="middle" class="svg-s">script · app</text>
+      <text x="97" y="193" text-anchor="middle" class="svg-s">AI assistant</text>
+      <text x="97" y="216" text-anchor="middle" class="svg-s">your browser</text>
+
+      <g>
+        <rect x="330" y="8" width="250" height="68" rx="12" class="svg-read"/>
+        <text x="345" y="32" class="svg-h2">Data files</text><text x="345" y="52" class="svg-s">recordatlas.org/p/senj.json …</text>
+        <text x="345" y="68" class="svg-s2">READ · no key · {N(nPlaceFiles)} place files</text>
+        <rect x="330" y="88" width="250" height="68" rx="12" class="svg-read"/>
+        <text x="345" y="112" class="svg-h2">Read API + MCP</text><text x="345" y="132" class="svg-s">api.recordatlas.org/v1/…</text>
+        <text x="345" y="148" class="svg-s2">READ · no key · 5 tools</text>
+        <rect x="330" y="168" width="250" height="68" rx="12" class="svg-write"/>
+        <text x="345" y="192" class="svg-h2">Sync</text><text x="345" y="212" class="svg-s">sync.recordatlas.org/v1/&lt;id&gt;</text>
+        <text x="345" y="228" class="svg-s2">READ + WRITE · six words · encrypted</text>
+        <rect x="330" y="248" width="250" height="68" rx="12" class="svg-ask"/>
+        <text x="345" y="272" class="svg-h2">Ask Claude</text><text x="345" y="292" class="svg-s">ai.recordatlas.org/v1/…</text>
+        <text x="345" y="308" class="svg-s2">COMPUTE · metered · writes nothing</text>
+      </g>
+      <g stroke="var(--ink-3)" stroke-width="1.6" fill="none" marker-end="url(#ah)">
+        <path d="M182 150 C 250 120, 270 50, 326 44"/>
+        <path d="M182 160 C 250 150, 270 125, 326 122"/>
+        <path d="M182 185 C 250 190, 270 200, 326 202" marker-start="url(#ah)"/>
+        <path d="M182 205 C 250 240, 270 275, 326 282"/>
+      </g>
+
+      <g>
+        <rect x="660" y="95" width="208" height="140" rx="14" class="svg-box"/>
+        <text x="764" y="125" text-anchor="middle" class="svg-h">What you see</text>
+        <text x="764" y="150" text-anchor="middle" class="svg-s">place pages · the map</text>
+        <text x="764" y="170" text-anchor="middle" class="svg-s">My research · marks</text>
+        <text x="764" y="190" text-anchor="middle" class="svg-s">name pages · era tables</text>
+        <text x="764" y="214" text-anchor="middle" class="svg-s2">the same files, drawn</text>
+      </g>
+      <g stroke="var(--ink-3)" stroke-width="1.6" fill="none" marker-end="url(#ah)" stroke-dasharray="5 4">
+        <path d="M580 42 C 620 60, 630 120, 656 135"/>
+        <path d="M580 122 C 615 125, 630 140, 656 150"/>
+        <path d="M580 202 C 615 195, 630 180, 656 175"/>
+      </g>
+      <text x="440" y="326" text-anchor="middle" class="svg-s2" style="display:none">.</text>
+    </svg>
+    <figcaption>Green = only reads. Gold = reads and writes (your own copy only). The dashed lines are how the website itself uses the same doors.</figcaption>
+  </figure>
+
+  <!-- 1 ───────────────────────────────────────────────────────────── -->
+  <h2 class="k-h" id="places">1 · What sources can I read for a place? <span class="k-count">read-only, no key</span></h2>
+  <p class="k-lede">Every place the Atlas knows has one small file at <code>/p/&lt;place-id&gt;.json</code>. It lists the <b>collections</b> (which archive or site holds
+    records for it, what years, what it costs to look) and the <b>volumes</b> (individual books, with their FamilySearch waypoint). The
+    place page you see in the Atlas is drawn from exactly this file.</p>
+  <ol class="k-steps">
+    <li><b>Find the place id.</b> It is the web address of its page: <code>recordatlas.org/place/<mark>senj</mark>/</code> means the id is <code>senj</code>. (There is no search-by-name API yet, see the gaps below.)</li>
+    <li><b>Fetch the file.</b> <code>GET https://recordatlas.org/p/senj.json</code> Anyone, no key.</li>
+    <li><b>Read <code>collections</code>.</b> Each row is one archive or site: <code>provider</code>, <code>title</code>, <code>from</code>/<code>to</code> years, <code>access</code> (free · account · paid · onsite…), <code>url</code>.</li>
+  </ol>
+  <div class="cx-try" id="try-places">
+    <div class="cx-bar"><b>Try it</b>
+      <label>place id <input id="pl-id" value="senj" size="16" spellcheck="false" autocomplete="off"></label>
+      <button type="button" data-p="senj">Senj</button><button type="button" data-p="ovaro">Ovaro</button><button type="button" data-p="rijeka">Rijeka</button>
+      <button type="button" class="go" id="pl-go">Fetch it</button></div>
+    <div class="cx-out" id="pl-out" aria-live="polite"><p class="cx-hint">Press <b>Fetch it</b>: the page will call <code>/p/senj.json</code> and draw what comes back.</p></div>
+    <details class="cx-code"><summary>The same thing in code</summary>
+<pre set:text={`curl -s https://recordatlas.org/p/senj.json | jq '.collections[] | {provider, title, from, to, access}'
+
+// JavaScript (run it on a server or in a script; see the gaps for why a web page on another site cannot)
+const place = await (await fetch("https://recordatlas.org/p/senj.json")).json();
+for (const c of place.collections) console.log(c.provider, c.title, c.from + "–" + c.to, c.access);`}></pre></details>
+  </div>
+  <p class="cx-see"><b>How it looks in the Atlas:</b> the same rows are the "Where the records are" list on <a href={u("/place/senj/")}>the Senj page</a>; <code>access</code> sets the dot's colour (see <a href={u("/help/")}>Help</a>).
+    For a whole country at once: <code>{api}/v1/providers?country=HR</code> (the archives and sites, with how each charges).</p>
+
+  <!-- 2 ───────────────────────────────────────────────────────────── -->
+  <h2 class="k-h" id="research">2 · Keep my own research progress <span class="k-count">write · six words</span></h2>
+  <div class="k-hi is-plain"><p><b>There is no account. Your six words are the account.</b></p>
+    <p>Six words from a public list of 1,024 words (60 bits: strong against guessing, not against being told, so keep them like a house key).
+    Your browser, or your own tool, turns them into four secrets. The server only ever sees a folder name, two passwords and a sealed box it cannot open.</p></div>
+
+  <figure class="cx-fig">
+    <svg viewBox="0 0 880 300" role="img" aria-labelledby="six-t six-d">
+      <title id="six-t">What the six words become</title>
+      <desc id="six-d">Six words are stretched by PBKDF2 into a master secret, which HKDF splits into a lookup id, a read token, a write token and an encryption key. The key stays with you. The id and tokens go to the server with the sealed copy.</desc>
+      <defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="var(--ink-3)"/></marker></defs>
+      <rect x="10" y="100" width="200" height="100" rx="14" class="svg-box"/>
+      <text x="110" y="135" text-anchor="middle" class="svg-h">six words</text>
+      <text x="110" y="160" text-anchor="middle" class="svg-mono">anchor mimic …</text>
+      <text x="110" y="184" text-anchor="middle" class="svg-s2">you keep these</text>
+      <path d="M210 150 H262" stroke="var(--ink-3)" stroke-width="1.6" marker-end="url(#ah2)"/>
+      <text x="236" y="140" text-anchor="middle" class="svg-s2">PBKDF2</text><text x="236" y="170" text-anchor="middle" class="svg-s2">600k×</text>
+      <rect x="266" y="120" width="110" height="60" rx="12" class="svg-box"/>
+      <text x="321" y="147" text-anchor="middle" class="svg-h2">master</text><text x="321" y="166" text-anchor="middle" class="svg-s2">never stored</text>
+      <path d="M376 150 H410" stroke="var(--ink-3)" stroke-width="1.6" marker-end="url(#ah2)"/>
+      <text x="393" y="140" text-anchor="middle" class="svg-s2">HKDF</text>
+      <g>
+        <rect x="414" y="14" width="236" height="56" rx="10" class="svg-read"/><text x="428" y="38" class="svg-h2">id</text><text x="428" y="57" class="svg-s2">32 hex · the folder name on the server</text>
+        <rect x="414" y="80" width="236" height="56" rx="10" class="svg-read"/><text x="428" y="104" class="svg-h2">read token</text><text x="428" y="123" class="svg-s2">proves you may fetch the copy</text>
+        <rect x="414" y="146" width="236" height="56" rx="10" class="svg-write"/><text x="428" y="170" class="svg-h2">write token</text><text x="428" y="189" class="svg-s2">proves you may replace or delete it</text>
+        <rect x="414" y="212" width="236" height="56" rx="10" class="svg-key"/><text x="428" y="236" class="svg-h2">AES-256 key</text><text x="428" y="255" class="svg-s2">seals your research · stays with you</text>
+      </g>
+      <g stroke="var(--ink-3)" stroke-width="1.6" fill="none" marker-end="url(#ah2)">
+        <path d="M410 150 C 400 100, 400 60, 410 44"/><path d="M410 150 C 405 120, 405 110, 410 108"/><path d="M410 152 C 405 160, 405 168, 410 174"/><path d="M410 154 C 400 200, 400 230, 410 240"/>
+      </g>
+      <rect x="690" y="40" width="180" height="150" rx="14" class="svg-box"/>
+      <text x="780" y="68" text-anchor="middle" class="svg-h">Server holds</text>
+      <text x="780" y="94" text-anchor="middle" class="svg-s">id · token hashes</text>
+      <text x="780" y="114" text-anchor="middle" class="svg-s">one sealed box</text>
+      <text x="780" y="134" text-anchor="middle" class="svg-s">(30 daily copies)</text>
+      <text x="780" y="168" text-anchor="middle" class="svg-s2">cannot open the box</text>
+      <path d="M650 100 H686" stroke="var(--ink-3)" stroke-width="1.6" marker-end="url(#ah2)"/><path d="M650 160 H686" stroke="var(--ink-3)" stroke-width="1.6" marker-end="url(#ah2)"/>
+      <rect x="690" y="212" width="180" height="56" rx="12" class="svg-key"/><text x="780" y="236" text-anchor="middle" class="svg-h2">sealed box</text><text x="780" y="255" text-anchor="middle" class="svg-s2">AES-GCM, bound to your id</text>
+      <path d="M650 240 H686" stroke="var(--ink-3)" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#ah2)"/>
+    </svg>
+    <figcaption>The same six words on a phone, a laptop or a script give the same four values, so any of them can fetch and decrypt your copy.</figcaption>
+  </figure>
+
+  <div class="cx-twocol">
+    <div class="cx-card"><h3>Who holds which secret</h3>
+      <table class="cx-tbl"><thead><tr><th>Value</th><th>Goes to server?</th><th>What it lets someone do</th></tr></thead><tbody>
+        <tr><td><code>id</code></td><td>yes, in the web address</td><td>nothing alone: it only names the folder</td></tr>
+        <tr><td><code>read token</code></td><td>yes, as <code>Authorization: Bearer …</code> on a GET</td><td>download the sealed box (still sealed)</td></tr>
+        <tr><td><code>write token</code></td><td>yes, on PUT and DELETE</td><td>replace or erase the box. First save also sends the read token so the server can store its hash.</td></tr>
+        <tr><td><code>AES key</code></td><td><b>never</b></td><td>open the box. Only your six words make it.</td></tr>
+      </tbody></table>
+      <p class="cx-note">The server stores <i>hashes</i> of the tokens and compares them. A wrong token and an unknown id both answer 404, so it will not even say whether an id exists.</p></div>
+    <div class="cx-card"><h3>What goes in the box</h3>
+      <p>The same research file the website saves: <code>kind: "record-atlas-research"</code>, version 2. One entry per <b>volume</b> you have marked, under the <b>line</b> (family) it belongs to.</p>
+<pre class="cx-pre" id="pack-example" set:text={`{
+  "v": 2, "kind": "record-atlas-research", "exported": "2026-11-12",
+  "lines": { "kosina-senj": { "name": "Kosina", "where": "Senj", "made": "2026-11-12" } },
+  "active": "kosina-senj",
+  "marks": {
+    "volume:9RK1-T3F": {
+      "t": "Births (Rođeni) 1734-1756", "where": "senj", "href": "/place/senj/", "total": 174,
+      "walked": [],
+      "by": { "kosina-senj": { "done": [[1, 47]], "state": "found", "since": "2026-11-12" } }
+    }
+  }
+}`}></pre>
+      <p class="cx-note"><code>state</code> is one of <code>planned · written · searched · found · exhausted · blocked</code>. <code>walked</code> is only for a book you read <i>every entry</i> of; it then counts for every family line, so never set it for "I looked for my surname".</p></div>
+  </div>
+
+  <h3 class="cx-h3">Try the keys: nothing is sent anywhere</h3>
+  <div class="cx-try" id="try-keys">
+    <div class="cx-bar"><b>Throwaway demo</b>
+      <button type="button" class="go" id="kd-make">Make six words and show what they become</button>
+      <span class="cx-hint" id="kd-busy" hidden>working: 600,000 rounds of PBKDF2…</span></div>
+    <div class="cx-out" id="kd-out" aria-live="polite"><p class="cx-hint">This runs the real key code from the Atlas in your browser. It makes a <b>throwaway</b> phrase (do not use it for real research), shows the values, then builds the exact save request <b>without sending it</b>.</p></div>
+  </div>
+
+  <h3 class="cx-h3">The save, step by step (any language)</h3>
+  <ol class="k-steps">
+    <li><b>Words → keys.</b> <code>PBKDF2-SHA256(phrase, salt "record-atlas-sync-v1", 600000 rounds) → 32 bytes</code>, then <code>HKDF-SHA256</code> with <code>info</code> = <code>record-atlas-sync/id</code> (16 bytes → hex), <code>/read</code>, <code>/write</code> (32 bytes → base64url) and <code>/enc</code> (the AES key). Words are lower-case, single spaces.</li>
+    <li><b>Seal it.</b> <code>AES-256-GCM</code>, a fresh 12-byte IV, the <b>id</b> as associated data. The box is <code>[1][iv][ciphertext+tag]</code>.</li>
+    <li><b>Save it.</b> <code>PUT {syncHost}/v1/&lt;id&gt;</code> with <code>Authorization: Bearer &lt;write token&gt;</code>, and on the <b>first</b> save also <code>X-Read-Token: &lt;read token&gt;</code>. Body = the box. Answer: <code>{`{"ok":true,"saved":"…","bytes":1234}`}</code>.</li>
+    <li><b>Get it back.</b> <code>GET /v1/&lt;id&gt;</code> with the read token; <code>/versions</code> lists the last 30 daily copies. <code>DELETE /v1/&lt;id&gt;</code> with the write token erases everything, in both buckets.</li>
+  </ol>
+  <details class="cx-code" open><summary>A working example (Node 20 or a browser console)</summary>
+<pre set:text={`// Node 20+. Download the Atlas's own file once, so the format cannot drift:
+//   curl -O https://recordatlas.org/js/research-sync.js
+const SY = require("./research-sync.js");                 // same code the website runs (also loads in a browser as window.raResearchSync)
+const words = (await (await fetch("https://recordatlas.org/sync-words.json")).json()).words;
+
+const phrase = SY.makePassphrase(words);                  // six words in one string. SAVE THEM: nobody can recover them
+const keys   = await SY.deriveKeys(phrase);               // { id, readToken, writeToken, key }
+const pack   = JSON.stringify({ v: 2, kind: "record-atlas-research", exported: "2026-11-12",
+  lines: { "kosina-senj": { name: "Kosina", where: "Senj", made: "2026-11-12" } }, active: "kosina-senj",
+  marks: { "volume:9RK1-T3F": { t: "Births 1734-1756", where: "senj", href: "/place/senj/", total: 174, walked: [],
+           by: { "kosina-senj": { done: [[1, 47]], state: "found", since: "2026-11-12" } } } } });
+await SY.push(keys, pack);                                // PUT, sealed. Returns { ok, saved, bytes }
+const back = await SY.pull(keys);                         // GET, opened. back.text is your JSON; null if nothing is stored
+// later, on any machine: SY.deriveKeys(SY.normalisePassphrase(typedWords, words).phrase)
+`}></pre></details>
+
+  <p class="cx-see"><b>How it looks in the Atlas:</b> open <a href={u("/backup/")}>Connection &amp; Backup</a>, choose <i>Restore from my passphrase</i> and type the six words: the marks come back onto
+    <a href={u("/my-research/")}>My research</a> and onto every volume row on the place pages, as the little state chips below.</p>
+  <div class="cx-chips" aria-label="The six states a volume can be in">
+    <span class="chip s-planned">planning to</span><span class="chip s-written">written, no reply</span><span class="chip s-searched">searched, nothing found</span>
+    <span class="chip s-found">found something</span><span class="chip s-exhausted">read everything here</span><span class="chip s-blocked">cannot get access</span>
+  </div>
+
+  <!-- 3 ───────────────────────────────────────────────────────────── -->
+  <h2 class="k-h" id="names">3 · Use every spelling of a name <span class="k-count">read · live API</span></h2>
+  <p class="k-lede">A register is indexed under the clerk's form, not yours. <b>{N(gn.rows.length)}</b> given names carry <b>{N(gn.totalForms)}</b> forms in <b>{gn.languages.length}</b> languages
+    ({N(gn.attested)} met on a real record), and <b>{N(sf.rows.length)}</b> surname families list their spellings. Each form says whether it was <i>seen</i> on a record, is only a <i>lead</i>
+    (the right form in that language, never yet met) or a <i>rule</i> (made by grammar, like the Latin cases). A lead is something to search, never a finding.</p>
+  <div class="cx-try" id="try-names">
+    <div class="cx-bar"><b>Try it</b>
+      <label>given name <input id="nm-in" value="Ivan" size="14" spellcheck="false" autocomplete="off"></label>
+      <button type="button" data-n="Ivan">Ivan</button><button type="button" data-n="Joannes">Joannes</button><button type="button" data-n="Zuane">Zuane</button>
+      <button type="button" class="go" id="nm-go">Look it up</button></div>
+    <div class="cx-out" id="nm-out" aria-live="polite"><p class="cx-hint">Press <b>Look it up</b>: the page asks <code>{api}/v1/given-name/Ivan</code>.</p></div>
+    <details class="cx-code"><summary>The same thing in code</summary>
+<pre set:text={`curl -s ${api}/v1/given-name/Ivan
+curl -s "${api}/v1/term?q=uxoris&record=baptism"       # what a Latin register word means
+curl -s -G ${api}/v1/date --data-urlencode "text=die 30 7bris 1671"  # 30 September 1671 (7bris = September)
+# surname spellings are a file, not yet an endpoint:
+curl -s https://recordatlas.org/surname-families.json | jq '.rows[] | select(.name=="Defranceschi")'`}></pre></details>
+  </div>
+  <p class="cx-see"><b>How it looks in the Atlas:</b> <a href={u("/your-name/")}>Say your name</a> shows the same families, and every surname page has a "spellings" panel. <b>Writing</b> a new spelling is not an API: it goes
+    through a reviewed catalogue (<a href={u("/add/")}>send it with the evidence</a>).</p>
+
+  <!-- 4 ───────────────────────────────────────────────────────────── -->
+  <h2 class="k-h" id="eras">4 · Places, countries, flags and their eras <span class="k-count">read · files</span></h2>
+  <p class="k-lede">The jurisdiction layer has <b>{N(cnt.regions || regions.regions.length)}</b> regions with <b>{N(cnt.regionEras || 0)}</b> eras, and <b>{N(cnt.countries || 0)}</b> countries with <b>{N(cnt.countryEras || 0)}</b> eras.
+    Each era says <b>from</b> and <b>to</b> (a year equal to a boundary belongs to the <i>newer</i> era), the <b>regime</b> (a short id such as <code>habsburg</code>, labelled in <code>regimes</code>), the <b>polity</b>, a <b>note</b>, and <b>filedUnder</b>: which provider holds the records for those years.
+    The contract is versioned (now <code>{ver}</code>) and described in <a href={u("/data/#context")}>Use the data</a>. Places without a region, and {cnt.gaps} gaps and {cnt.overlaps} overlaps in the table, are listed in <code>context.json</code> as <code>quality</code>: stay silent there.</p>
+  <ol class="k-steps">
+    <li><b>Place → region.</b> A place file (<code>/p/senj.json</code>) names its <code>region</code>.</li>
+    <li><b>Region → eras.</b> <code>/regions.json</code> (2.7 MB; <code>.regions[]</code>) has <code>eras[]</code> for each. Pick the one with <code>from ≤ year &lt; to</code> (<code>to: null</code> means "still").</li>
+    <li><b>Era → archive.</b> <code>filedUnder</code> is a list of provider ids; look them up in <code>/providers.json</code> to see what each costs.</li>
+    <li><b>Flags.</b> <code>/flag-index.json</code> ({N(cnt.countries || 0)} countries), <code>/era-flags.json</code> (inline art per era), and <code>/flags/&lt;slug&gt;/</code> pages with the history of each flag.</li>
+  </ol>
+  <div class="cx-try" id="try-eras">
+    <div class="cx-bar"><b>Try it</b>
+      <label>place id <input id="er-id" value="senj" size="14" spellcheck="false" autocomplete="off"></label>
+      <label>year <input id="er-year" type="number" value="1858" min="800" max="2026" style="width:5.5em"></label>
+      <button type="button" class="go" id="er-go">Who governed it?</button>
+      <span class="cx-hint" id="er-busy" hidden>fetching regions.json (2.7 MB)…</span></div>
+    <div class="cx-out" id="er-out" aria-live="polite"><p class="cx-hint">Press the button: the page reads the place, its region, and picks the era for that year.</p></div>
+    <details class="cx-code"><summary>The same thing in code</summary>
+<pre set:text={`const place   = await (await fetch("https://recordatlas.org/p/senj.json")).json();
+const regions = (await (await fetch("https://recordatlas.org/regions.json")).json()).regions;
+const era = regions.find(r => r.id === place.region).eras
+              .find(e => e.from <= 1858 && (e.to === null || 1858 < e.to));
+console.log(era.regime, era.polity, era.filedUnder);`}></pre></details>
+  </div>
+  <p class="cx-see"><b>How it looks in the Atlas:</b> the same rows are the "who governed it" table on a <a href={u("/region/kvarner/")}>region page</a>, the colour bands when you set a year on the map, and the flag beside each era on a country's <a href={u("/flags/")}>flag page</a>.</p>
+
+  <!-- A researcher's day ──────────────────────────────────────────── -->
+  <h2 class="k-h">A researcher's day, using only these doors <span class="k-count">an example</span></h2>
+  <ol class="cx-day">
+    <li><span class="n">1</span><div><b>Where do I look?</b> <code>/p/senj.json</code> lists ten collections for Senj: FamilySearch, an archive, an index…</div></li>
+    <li><span class="n">2</span><div><b>Whose records were they in 1858?</b> Regions → <code>kvarner</code> → the 1815–1918 era is Habsburg; <code>filedUnder</code> names the archives that hold it.</div></li>
+    <li><span class="n">3</span><div><b>Which spellings do I search?</b> <code>/v1/given-name/…</code> for the forenames, <code>surname-families.json</code> for the surname.</div></li>
+    <li><span class="n">4</span><div><b>Write down what I did.</b> One <code>PUT</code> of the sealed research file keyed by the six words, saying "Births 1734–1756, pages 1–47: found".</div></li>
+    <li><span class="n">5</span><div><b>Next day, on the phone.</b> Same six words → same id → <code>GET</code> → decrypt. The marks are back on the map.</div></li>
+  </ol>
+
+  <!-- gaps ────────────────────────────────────────────────────────── -->
+  <h2 class="k-h" id="gaps">What does not work yet <span class="k-count">found while writing this page</span></h2>
+  <p class="k-lede">These are real, checked against the live services on 12 November 2026. They are listed in the order a new builder would hit them.</p>
+  <div class="scroll cx-gaps"><table class="k-table">
+    <thead><tr><th>Gap</th><th>What happens</th><th>What would fix it</th></tr></thead>
+    <tbody>
+      <tr><td><b>Other websites cannot call most of it from a browser</b></td><td>The data files (<code>recordatlas.org/*.json</code>) send no <code>Access-Control-Allow-Origin</code> header, and Sync and Ask&nbsp;Claude answer browser requests only from <code>recordatlas.org</code> itself (tested: a page on another origin is refused). Only the read API allows any origin. Scripts, spreadsheets and servers are unaffected, because they send no origin.</td><td>One header in <code>workers/pages/src/index.js</code> for the files; for Sync a deliberate choice (the allow-list is also an abuse guard), perhaps an opt-in list of registered apps.</td></tr>
+      <tr><td><b>No place lookup by name</b></td><td>Over the API you cannot ask "which id is Senj?". <code>/index.json</code> lists the {N(idx.places.length)} busiest places with their ids; the rest sit in {N(Object.keys((idx.tail && idx.tail.cells) || {}).length)} grid files (<code>/pi/&lt;lat&gt;_&lt;lon&gt;.json</code>, 5-degree squares), so you must know roughly where a place is. The <code>/a/</code> name files give name, coordinates and country but <b>no id</b>.</td><td>The planned <code>atlas_find_place</code>, or an id column in the name files.</td></tr>
+      <tr><td><b>The API only has five tools</b></td><td>Given names, register terms, dates, providers by country, and the data contract. Nothing per place, per volume, per surname or per era.</td><td><code>atlas_place</code>, <code>atlas_volumes</code>, <code>atlas_eras</code>, <code>atlas_surname</code> (designed in <code>docs/atlas-mcp-plan.md</code>, not built).</td></tr>
+      <tr><td><b>You can only write your whole research, not one mark</b></td><td>Sync replaces the whole sealed copy; the newest save wins. Two tools saving at once can overwrite each other, and there is no "add this one mark" call.</td><td>A merge-on-write endpoint, or a documented read-merge-write recipe with a version check.</td></tr>
+      <tr><td><b>Writing needs the encryption done by you</b></td><td>No official library for Python or Node and no test vectors, so a third party must re-implement PBKDF2, HKDF and AES-GCM exactly. The browser file <code>research-sync.js</code> is the only reference.</td><td>A small published package and a page of known-answer test values.</td></tr>
+      <tr><td><b>The six words open both read and write</b></td><td>There is no read-only phrase to hand a relative or a society. Whoever has the words can also overwrite or erase.</td><td>A separate "share read-only" code derived from the same words.</td></tr>
+      <tr><td><b>No schema for the research file</b></td><td>The shape above is read off the code. There is no JSON Schema, so a wrong <code>state</code> or range is not refused until the website tries to open it.</td><td>A published schema, checked on save.</td></tr>
+      <tr><td><b>Only your own copy can be written</b></td><td>There is no API for adding a provider, a place alias or a spelling to the shared catalogue. Those are proposals reviewed by a person.</td><td>Propose-first write tools, which are planned, not built.</td></tr>
+      <tr><td><b>No keys, quotas or limits are documented</b></td><td>The read API has optional per-app keys made by hand; limits are dashboard rules. The data page says "no rate limit", which is true of the files, not the Workers.</td><td>One page of limits per service, and a way to ask for a key.</td></tr>
+      <tr><td><b>Sync has hardly been used</b></td><td>The live counter at <code>{syncHost}/v1/count</code> reports <b id="gap-count">…</b> registrations. It works in tests; it has little real mileage.</td><td>Ask three researchers to use it for a month and report.</td></tr>
+      <tr><td><b>A README still says "not deployed"</b></td><td><code>workers/api/README.md</code> and <code>workers/sync/README.md</code> say not deployed; both answer on the live hosts.</td><td>Update the READMEs.</td></tr>
+    </tbody></table></div>
+
+  <!-- reference ───────────────────────────────────────────────────── -->
+  <h2 class="k-h" id="reference">Quick reference <span class="k-count">every address in one table</span></h2>
+  <div class="scroll"><table class="cx-tbl cx-ref">
+    <thead><tr><th>Address</th><th>Method</th><th>Needs</th><th>Gives you</th></tr></thead>
+    <tbody>
+      <tr><td><code>recordatlas.org/p/&lt;id&gt;.json</code></td><td>GET</td><td>nothing</td><td>one place: collections, volumes, region, parishes</td></tr>
+      <tr><td><code>recordatlas.org/regions.json</code></td><td>GET</td><td>nothing</td><td>{N(regions.regions.length)} regions and their eras</td></tr>
+      <tr><td><code>recordatlas.org/context.json</code></td><td>GET</td><td>nothing</td><td>the era contract, counts, quality gaps (v{ver})</td></tr>
+      <tr><td><code>recordatlas.org/providers.json</code></td><td>GET</td><td>nothing</td><td>{N(provs.providers.length)} archives and sites, with access class</td></tr>
+      <tr><td><code>recordatlas.org/given-names.json</code> · <code>surname-families.json</code></td><td>GET</td><td>nothing</td><td>every form of a name (CC0)</td></tr>
+      <tr><td><code>recordatlas.org/flag-index.json</code> · <code>era-flags.json</code> · <code>flag-eras.json</code></td><td>GET</td><td>nothing</td><td>flags by country and era</td></tr>
+      <tr><td><code>recordatlas.org/research-sessions.json</code></td><td>GET</td><td>nothing</td><td>what the family archives have published</td></tr>
+      <tr><td><code>{api}/v1/given-name/&lt;name&gt;</code></td><td>GET</td><td>nothing</td><td>forms of a given name by language</td></tr>
+      <tr><td><code>{api}/v1/term?q=&amp;record=</code> · <code>/v1/date?text=</code></td><td>GET</td><td>nothing</td><td>register words · date reading</td></tr>
+      <tr><td><code>{api}/v1/providers?country=XX</code> · <code>/v1/context</code></td><td>GET</td><td>nothing</td><td>archives for a country · data build info</td></tr>
+      <tr><td><code>{api}/mcp</code></td><td>POST</td><td>nothing</td><td>the same tools for AI assistants (see below)</td></tr>
+      <tr><td><code>{syncHost}/v1/&lt;id&gt;</code></td><td>PUT · GET · DELETE</td><td>six words (tokens)</td><td>save · fetch · erase your sealed research</td></tr>
+      <tr><td><code>{syncHost}/v1/&lt;id&gt;/versions[/&lt;day&gt;]</code></td><td>GET</td><td>read token</td><td>the last 30 daily copies</td></tr>
+      <tr><td><code>{syncHost}/v1/count</code></td><td>GET</td><td>nothing</td><td>how many people keep a copy</td></tr>
+      <tr><td><code>{aiHost}/v1/translate · transcribe · document · casefile</code></td><td>POST</td><td>Turnstile check, optional six-word id</td><td>Claude reads a pasted line or photo; a few free tries a day</td></tr>
+      <tr><td><code>{aiHost}/v1/allowance</code></td><td>GET</td><td>optional id</td><td>tries left today</td></tr>
+    </tbody></table></div>
+
+  <h2 class="k-h" id="ai">Using it from an AI assistant</h2>
+  <ol class="k-steps">
+    <li><b>Claude:</b> Settings → Connectors → Add custom connector → paste <code>{api}/mcp</code>. No login. You can then ask "what does <i>uxoris</i> mean in a baptism?" or "what is the Latin for Ivan?" and it calls the Atlas.</li>
+    <li><b>Any other assistant that speaks MCP:</b> point it at the same address (streamable HTTP, JSON replies).</li>
+    <li><b>What it can and cannot do:</b> it reads the five tools above and says which file each answer came from. An empty answer means "not in the catalogue", never "does not exist". It cannot save your research (that needs the six words, which an assistant should never be given).</li>
+  </ol>
+
+  <div class="k-foot"><p>Built something with this, or hit a wall not listed above?</p>
+    <p><a href={u("/add/")}>Tell us</a> · <a href={u("/data/")}>Use the data (files &amp; licences)</a> · <a href={u("/backup/")}>Connection &amp; Backup</a> · <a href={u("/help/")}>Help</a></p></div>
+</Base>
+
+<script is:inline src={u("/js/research-sync.js")}></script>
+<script is:inline define:vars={{ API: api, SYNC: syncHost, AI: aiHost, P: u("/p/"), REG: u("/regions.json"), WORDS: u("/sync-words.json"), PROV: u("/providers.json") }}>
+(function () {
+  "use strict";
+  function $(i) { return document.getElementById(i); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function pill(t, k) { return '<span class="chip s-' + esc(k || "") + '">' + esc(t) + "</span>"; }
+  function getJSON(url, opt) { return fetch(url, opt).then(function (r) { if (!r.ok) throw new Error(r.status === 404 ? "no such file (404)" : "HTTP " + r.status); return r.json(); }); }
+  function err(box, e) { box.innerHTML = '<p class="cx-bad"><b>Could not do that.</b> ' + esc(e && e.message || e) + "</p>"; }
+
+  /* ---- live status of the three services ---- */
+  function ping(url, id, label) {
+    var el = $(id); if (!el) return;
+    getJSON(url).then(function (j) { el.textContent = "answering"; el.className = "ok"; return j; }).catch(function () { el.textContent = (id === "st-api") ? "not reachable" : "answers recordatlas.org pages only"; el.className = (id === "st-api") ? "bad" : "ok"; });
+  }
+  ping(API + "/v1/health", "st-api"); ping(SYNC + "/v1/health", "st-sync"); ping(AI + "/v1/health", "st-ai");
+  getJSON(SYNC + "/v1/count").then(function (j) { var g = $("gap-count"); if (g) g.textContent = j.registrations; }).catch(function () { var g = $("gap-count"); if (g) g.textContent = "2 (counted 12 Nov 2026; the live count is shown on recordatlas.org)"; });
+
+  /* ---- 1 · sources for a place ---- */
+  var plBox = $("pl-out"), provCache = null;
+  function providers() { return provCache ? Promise.resolve(provCache) : getJSON(PROV).then(function (j) { var m = {}; (j.providers || []).forEach(function (p) { m[p.id] = p; }); provCache = { by: m, legend: j.access || {} }; return provCache; }); }
+  function fetchPlace() {
+    var id = $("pl-id").value.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+    if (!id) return;
+    plBox.innerHTML = '<p class="cx-hint">fetching ' + esc(P + id + ".json") + " …</p>";
+    Promise.all([getJSON(P + id + ".json"), providers()]).then(function (a) {
+      var p = a[0], pv = a[1], cols = p.collections || [], vols = p.volumes || [];
+      var h = '<p class="cx-meta"><b>' + esc(p.name) + "</b> · " + esc(p.country || "") + " · region <code>" + esc(p.region || "none") + "</code> · " + cols.length + " collections · " + vols.length + " volumes</p>";
+      h += '<div class="scroll"><table class="cx-tbl"><thead><tr><th>Provider</th><th>Collection</th><th>Years</th><th>Cost to look</th></tr></thead><tbody>';
+      cols.slice(0, 12).forEach(function (c) {
+        var prov = pv.by[c.provider], nm = prov ? prov.name : c.provider;
+        h += "<tr><td>" + esc(nm) + "</td><td>" + (c.url ? '<a href="' + esc(c.url) + '" rel="noopener">' + esc(c.title) + "</a>" : esc(c.title)) + "</td><td>" + esc((c.from || "") + (c.to && c.to !== c.from ? "–" + c.to : "")) + '</td><td><span class="acc a-' + esc(c.access) + '">' + esc(c.access || "?") + "</span></td></tr>";
+      });
+      h += "</tbody></table></div>" + (cols.length > 12 ? '<p class="cx-hint">… and ' + (cols.length - 12) + " more in the file.</p>" : "");
+      if (vols.length) h += '<p class="cx-meta"><b>First volumes</b>: ' + vols.slice(0, 3).map(function (v) { return esc(v.t) + (v.waypoint ? " (<code>" + esc(v.waypoint) + "</code>)" : ""); }).join(" · ") + "</p>";
+      h += '<p class="cx-hint">Open it in the Atlas: <a href="' + esc(P.replace("/p/", "/place/") + id + "/") + '">' + esc(p.name) + "</a></p>";
+      plBox.innerHTML = h;
+    }).catch(function (e) { err(plBox, e.message.indexOf("404") > -1 ? new Error("No place file called “" + id + "”. The id is the end of the place page's address.") : e); });
+  }
+  $("pl-go").addEventListener("click", fetchPlace);
+  $("pl-id").addEventListener("keydown", function (e) { if (e.key === "Enter") fetchPlace(); });
+  [].forEach.call(document.querySelectorAll("#try-places [data-p]"), function (b) { b.addEventListener("click", function () { $("pl-id").value = b.getAttribute("data-p"); fetchPlace(); }); });
+
+  /* ---- 3 · names ---- */
+  var nmBox = $("nm-out");
+  function lookName() {
+    var n = $("nm-in").value.trim(); if (!n) return;
+    nmBox.innerHTML = '<p class="cx-hint">asking ' + esc(API + "/v1/given-name/" + n) + " …</p>";
+    getJSON(API + "/v1/given-name/" + encodeURIComponent(n)).then(function (j) {
+      if (!j.matches || !j.matches.length) { nmBox.innerHTML = '<p class="cx-hint">“' + esc(n) + "” is not in the catalogue. That means nobody has added it, not that it is not a name.</p>"; return; }
+      var h = j.ambiguous ? '<p class="cx-meta"><b>' + j.matches.length + " names answer to “" + esc(n) + "”.</b> Pick the one you mean.</p>" : "";
+      j.matches.slice(0, 3).forEach(function (m) {
+        h += '<div class="cx-name"><p class="cx-meta"><b>' + esc(m.canonical) + "</b> · " + m.forms + " forms in " + Object.keys(m.languages || {}).length + ' languages · <a href="' + esc(m.page || "#") + '">its page in the Atlas</a></p>';
+        var langs = Object.keys(m.languages || {}).slice(0, 8);
+        langs.forEach(function (L) {
+          h += '<div class="cx-lang"><span class="cx-l">' + esc(L) + "</span> " + (m.languages[L] || []).slice(0, 10).map(function (f) { return '<span class="frm st-' + esc(f.status) + '" title="' + esc(f.status + (f.seen ? ", met " + f.seen + " times" : "")) + '">' + esc(f.form) + "</span>"; }).join(" ") + "</div>";
+        });
+        h += "</div>";
+      });
+      h += '<p class="cx-hint"><span class="frm st-attested">seen</span> met on a record · <span class="frm st-lead">lead</span> right form, never met · <span class="frm st-rule">rule</span> made by grammar</p>';
+      nmBox.innerHTML = h;
+    }).catch(function (e) { err(nmBox, e); });
+  }
+  $("nm-go").addEventListener("click", lookName);
+  $("nm-in").addEventListener("keydown", function (e) { if (e.key === "Enter") lookName(); });
+  [].forEach.call(document.querySelectorAll("#try-names [data-n]"), function (b) { b.addEventListener("click", function () { $("nm-in").value = b.getAttribute("data-n"); lookName(); }); });
+
+  /* ---- 4 · eras ---- */
+  var erBox = $("er-out"), regCache = null;
+  function regions() { return regCache ? Promise.resolve(regCache) : (function () { $("er-busy").hidden = false; return getJSON(REG).then(function (j) { $("er-busy").hidden = true; regCache = j; return j; }); })(); }
+  function whoGoverned() {
+    var id = $("er-id").value.trim().toLowerCase().replace(/[^a-z0-9-]/g, ""), yr = parseInt($("er-year").value, 10);
+    if (!id || !yr) return;
+    erBox.innerHTML = '<p class="cx-hint">reading the place, then its region …</p>';
+    getJSON(P + id + ".json").then(function (p) {
+      if (!p.region) { erBox.innerHTML = '<p class="cx-hint"><b>' + esc(p.name) + "</b> is not inside a mapped region, so the Atlas stays silent about who governed it. (That is on purpose: a wrong answer here sends someone to the wrong archive.)</p>"; return null; }
+      return Promise.all([p, regions(), providers()]);
+    }).then(function (a) {
+      if (!a) return;
+      var p = a[0], RJ = a[1], pv = a[2], r = (RJ.regions || []).filter(function (x) { return x.id === p.region; })[0], RG = RJ.regimes || {};
+      if (!r) { erBox.innerHTML = '<p class="cx-bad">Region “' + esc(p.region) + "” is not in regions.json.</p>"; return; }
+      var eras = r.eras || [], hit = eras.filter(function (e) { return e.from <= yr && (e.to == null || yr < e.to); });
+      function lab(e) { return (RG[e.regime] && RG[e.regime].label) || e.regime; }
+      function col(e) { return "var(--r-" + esc(e.regime) + ", #b9b7ad)"; }
+      var lo = Math.min.apply(null, eras.map(function (e) { return e.from; })), hi = 2026, span = Math.max(1, hi - lo);
+      var bar = '<div class="cx-time" role="img" aria-label="Timeline of eras">' + eras.map(function (e) {
+        var l = (e.from - lo) / span * 100, w = ((e.to == null ? hi : e.to) - e.from) / span * 100, on = hit.indexOf(e) > -1;
+        return '<span class="seg' + (on ? " on" : "") + '" style="left:' + l.toFixed(2) + "%;width:" + Math.max(w, 0.6).toFixed(2) + "%;background:" + col(e) + '" title="' + esc(e.from + "–" + (e.to == null ? "now" : e.to) + " " + lab(e)) + '"></span>';
+      }).join("") + '<span class="mark" style="left:' + Math.min(100, Math.max(0, (yr - lo) / span * 100)).toFixed(2) + '%"><i>' + yr + "</i></span></div>";
+      var h = '<p class="cx-meta"><b>' + esc(p.name) + "</b> sits in <b>" + esc(r.label) + "</b> (" + eras.length + " eras, " + lo + " to now). In <b>" + yr + "</b>:</p>" + bar;
+      if (!hit.length) h += '<p class="cx-hint">No era covers ' + yr + " in this region. Before " + lo + " the table starts nowhere; the Atlas says nothing rather than guessing.</p>";
+      hit.forEach(function (e) {
+        h += '<div class="cx-era" style="border-color:' + col(e) + '"><p><b>' + esc(e.polity) + '</b> <span class="chip">' + esc(lab(e)) + "</span></p><p>" + e.from + "–" + (e.to == null ? "now" : e.to) + "</p>" +
+          "<p><b>Records filed under:</b> " + ((e.filedUnder || []).length ? e.filedUnder.map(function (f) { var q = pv.by[f]; return esc(q ? q.name : f); }).join(" · ") : "nobody yet (the Atlas knows no archive for these years)") + "</p>" +
+          (e.note ? '<p class="cx-hint">' + esc(String(e.note).slice(0, 260)) + "</p>" : "") + "</div>";
+      });
+      h += '<p class="cx-hint">Open the table in the Atlas: <a href="' + esc(P.replace("/p/", "/region/") + r.id + "/") + '">' + esc(r.label) + "</a></p>";
+      erBox.innerHTML = h;
+    }).catch(function (e) { $("er-busy").hidden = true; err(erBox, e); });
+  }
+  $("er-go").addEventListener("click", whoGoverned);
+
+  /* ---- 2 · the six words (nothing is sent) ---- */
+  var kdOut = $("kd-out");
+  function mask(s, keep) { s = String(s); return s.slice(0, keep) + "…" + "•".repeat(6); }
+  $("kd-make").addEventListener("click", function () {
+    var SY = window.raResearchSync;
+    if (!SY || !window.crypto || !crypto.subtle) { err(kdOut, new Error("This browser cannot do the cryptography (it needs a secure page).")); return; }
+    $("kd-busy").hidden = false; $("kd-make").disabled = true;
+    getJSON(WORDS).then(function (w) {
+      var phrase = SY.makePassphrase(w.words);
+      return SY.deriveKeys(phrase).then(function (k) { return { phrase: phrase, k: k }; });
+    }).then(function (o) {
+      var pack = JSON.stringify({ v: 2, kind: "record-atlas-research", exported: new Date().toISOString().slice(0, 10), lines: { demo: { name: "Demo", where: "", made: "today" } }, active: "demo",
+        marks: { "volume:9RK1-T3F": { t: "Births (Rođeni) 1734-1756", where: "senj", total: 174, walked: [], by: { demo: { done: [[1, 47]], state: "found", since: "today" } } } } });
+      return SY.encrypt(o.k, pack).then(function (box) { return { o: o, pack: pack, box: box }; });
+    }).then(function (r) {
+      var k = r.o.k, hex = function (b) { return Array.prototype.map.call(b.slice(0, 12), function (x) { return ("0" + x.toString(16)).slice(-2); }).join(""); };
+      var h = '<div class="cx-keys"><div class="kb six"><small>1 · the six words (throwaway)</small><code>' + esc(r.o.phrase) + "</code></div>" +
+        '<div class="kb"><small>2 · lookup id → goes in the address</small><code>' + esc(k.id) + "</code></div>" +
+        '<div class="kb"><small>3 · read token → sent on a GET</small><code>' + esc(mask(k.readToken, 8)) + "</code></div>" +
+        '<div class="kb"><small>4 · write token → sent on a PUT / DELETE</small><code>' + esc(mask(k.writeToken, 8)) + "</code></div>" +
+        '<div class="kb key"><small>5 · AES key → <b>never leaves this page</b></small><code>••••••••••••••••</code></div></div>';
+      h += '<p class="cx-meta"><b>The save it would make</b> (dry run, <u>not sent</u>):</p><pre class="cx-pre">PUT ' + esc(SYNC) + "/v1/" + esc(k.id) + "\nAuthorization: Bearer " + esc(mask(k.writeToken, 6)) + "\nX-Read-Token: " + esc(mask(k.readToken, 6)) + "   (first save only)\nContent-Type: application/octet-stream\n\n[" + r.box.length + " bytes]  01 " + esc(hex(r.box.slice(1))) + " …   (version, IV, then ciphertext nobody can read)</pre>" +
+        '<p class="cx-hint">Same words → same five values, on any device. Different words → a different id, so two people can never see each other\'s box. Real research: make your phrase on <a href="' + esc(P.replace("/p/", "/backup/")) + '">Connection &amp; Backup</a>, which also prints the recovery sheet.</p>';
+      kdOut.innerHTML = h;
+    }).catch(function (e) { err(kdOut, e); }).then(function () { $("kd-busy").hidden = true; $("kd-make").disabled = false; });
+  });
+})();
+</script>
+
+<style is:global>
+  .cx-doors { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); max-width: 1000px; }
+  .cx-doors a { display: block; font-family: var(--serif); font-size: 17px; line-height: 1.3; }
+  .cx-doors li > span { display: block; margin-top: 6px; font-size: 13px; color: var(--ink-2); }
+  #cx-status b.ok { color: #1d7a45; } #cx-status b.bad { color: #b3261e; }
+  .cx-fig { margin: 0 0 26px; max-width: 920px; }
+  .cx-fig svg { width: 100%; height: auto; display: block; background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; }
+  .cx-fig figcaption { font-size: 12.5px; color: var(--ink-3); margin-top: 8px; }
+  .svg-box { fill: var(--bg, var(--panel)); stroke: var(--rule); stroke-width: 1.4; }
+  .svg-read { fill: #e3f2e8; stroke: #1d7a45; stroke-width: 1.3; } .svg-write { fill: #fbefd5; stroke: #a15c00; stroke-width: 1.3; }
+  .svg-ask { fill: #e8e6f6; stroke: #5b4fb0; stroke-width: 1.3; } .svg-key { fill: #fbe3df; stroke: #b3261e; stroke-width: 1.3; }
+  .svg-h { font: 600 17px var(--serif, Georgia, serif); fill: var(--ink); } .svg-h2 { font: 600 14px var(--sans, system-ui); fill: #1b2420; }
+  .svg-s { font: 13px var(--mono, ui-monospace, monospace); fill: #2d3a35; } .svg-s2 { font: 11.5px var(--sans, system-ui); fill: #46564f; } .svg-mono { font: 600 14px var(--mono, ui-monospace, monospace); fill: var(--accent); }
+  .svg-box ~ .svg-s, .svg-box + .svg-h ~ .svg-s { fill: var(--ink-2); }
+  .cx-try { border: 1px solid var(--rule); border-radius: 12px; background: var(--panel); margin: 0 0 18px; max-width: 980px; overflow: hidden; }
+  .cx-bar { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--rule); font-size: 13px; }
+  .cx-bar label { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-2); }
+  .cx-bar input { font: 13px var(--mono, monospace); padding: 6px 8px; border: 1px solid var(--rule); border-radius: 8px; background: var(--bg, #fff); color: var(--ink); }
+  .cx-bar button { font: 500 13px var(--sans, system-ui); padding: 6px 12px; border-radius: 99px; border: 1px solid var(--rule); background: var(--bg, #fff); color: var(--ink); cursor: pointer; }
+  .cx-bar button.go { background: var(--accent); border-color: var(--accent); color: #fff; } .cx-bar button:disabled { opacity: .55; cursor: progress; }
+  .cx-bar button:focus-visible, .cx-bar input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .cx-out { padding: 14px; font-size: 13.5px; min-height: 64px; } .cx-out p { margin: 0 0 8px; max-width: none; }
+  .cx-hint { color: var(--ink-3); font-size: 12.5px; } .cx-bad { color: #b3261e; } .cx-meta { color: var(--ink-2); }
+  .cx-code { padding: 0 14px 12px; font-size: 13px; } .cx-code summary { cursor: pointer; color: var(--accent); font-size: 12.5px; padding-top: 10px; }
+  .cx-code pre, .cx-pre { font: 12px/1.55 var(--mono, monospace); background: var(--bg, #f4f4f0); border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; overflow-x: auto; margin: 8px 0 0; white-space: pre; max-width: 100%; }
+  .cx-see { font-size: 13.5px; color: var(--ink-2); max-width: 78ch; border-left: 3px solid var(--accent); padding-left: 12px; margin: 0 0 30px; }
+  .cx-h3 { font: 500 18px var(--serif, Georgia, serif); margin: 22px 0 10px; }
+  .cx-twocol { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; margin: 0 0 22px; max-width: 1000px; }
+  .cx-card { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 14px 16px; min-width: 0; } .cx-card h3 { font: 500 17px var(--serif, Georgia, serif); margin: 0 0 8px; }
+  .cx-note { font-size: 12.5px; color: var(--ink-3); }
+  .cx-tbl { border-collapse: collapse; width: 100%; font-size: 13px; } .cx-tbl th { text-align: left; font: 500 11px var(--mono, monospace); letter-spacing: .05em; text-transform: uppercase; color: var(--ink-3); padding: 6px 8px; border-bottom: 1px solid var(--rule); }
+  .cx-tbl td { padding: 7px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; overflow-wrap: anywhere; } .cx-tbl tr:last-child td { border-bottom: 0; }
+  .cx-ref td:first-child { white-space: normal; }
+  .cx-keys { display: grid; gap: 8px; margin: 0 0 12px; } .cx-keys .kb { border: 1px solid var(--rule); border-radius: 10px; padding: 8px 12px; background: var(--bg, #fff); min-width: 0; }
+  .cx-keys small { display: block; color: var(--ink-3); font-size: 11.5px; margin-bottom: 3px; } .cx-keys code { font: 13px var(--mono, monospace); overflow-wrap: anywhere; }
+  .cx-keys .six code { font-size: 15px; color: var(--accent); } .cx-keys .key { border-color: #b3261e; } .cx-keys .key small b { color: #b3261e; }
+  .acc { font: 600 10.5px var(--mono, monospace); text-transform: uppercase; letter-spacing: .04em; padding: 2px 7px; border-radius: 99px; background: #eceae4; color: #3b3a35; }
+  .acc.a-free { background: #e3f2e8; color: #1d7a45; } .acc.a-account { background: #dff0f7; color: #17607d; } .acc.a-paid { background: #fbe3df; color: #b3261e; } .acc.a-onsite, .acc.a-mixed { background: #fbefd5; color: #a15c00; } .acc.a-index { background: #ece6f6; color: #5b4fb0; }
+  .chip { display: inline-block; font: 500 12px var(--sans, system-ui); padding: 3px 10px; border-radius: 99px; background: #eceae4; color: #3b3a35; margin: 0 4px 4px 0; }
+  .s-planned { background: #eceae4; } .s-written { background: #fbefd5; color: #a15c00; } .s-searched { background: #dff0f7; color: #17607d; } .s-found { background: #e3f2e8; color: #1d7a45; } .s-exhausted { background: #d4ecd9; color: #14562f; font-weight: 600; } .s-blocked { background: #fbe3df; color: #b3261e; }
+  .cx-chips { margin: -10px 0 28px; }
+  .cx-name { margin: 0 0 14px; } .cx-lang { margin: 0 0 5px; display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: baseline; } .cx-l { font: 500 11px var(--mono, monospace); text-transform: uppercase; color: var(--ink-3); width: 76px; flex: none; }
+  .frm { font-size: 13px; padding: 1px 8px; border-radius: 6px; border: 1px solid var(--rule); background: var(--bg, #fff); } .frm.st-attested { background: #e3f2e8; border-color: #9fd0b0; } .frm.st-lead { border-style: dashed; color: var(--ink-2); } .frm.st-rule { background: #ece6f6; border-color: #c4b9e6; }
+  .cx-time { position: relative; height: 34px; margin: 6px 0 22px; background: var(--bg, #f4f4f0); border: 1px solid var(--rule); border-radius: 8px; overflow: visible; }
+  .cx-time .seg { position: absolute; top: 0; bottom: 0; background: #c9c7bd; border-right: 1px solid var(--panel); opacity: .75; } .cx-time .seg.on { opacity: 1; outline: 2px solid var(--ink); z-index: 1; }
+  .cx-time .mark { position: absolute; top: -6px; bottom: -6px; width: 2px; background: var(--accent); z-index: 2; } .cx-time .mark i { position: absolute; top: 100%; left: -18px; width: 38px; text-align: center; font: 600 11px var(--mono, monospace); color: var(--accent); font-style: normal; margin-top: 2px; }
+  .cx-era { border-left: 4px solid var(--accent); padding: 4px 0 4px 12px; margin: 6px 0 10px; }
+  .cx-day { list-style: none; margin: 0 0 30px; padding: 0; display: grid; gap: 10px; max-width: 80ch; } .cx-day li { display: flex; gap: 14px; align-items: flex-start; background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 12px 14px; }
+  .cx-day .n { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font: 600 14px var(--sans, system-ui); } .cx-day div { min-width: 0; }
+  .cx-gaps { max-width: 1100px; } .cx-gaps td { font-size: 13px; vertical-align: top; } .cx-gaps td:first-child { min-width: 190px; }
+  .scroll { overflow-x: auto; }
+  .k-steps li, .k-steps code, .cx-see code, .k-lede code, .cx-out code, .cx-day code { min-width: 0; overflow-wrap: anywhere; }
+  .cx-card { overflow-x: auto; }
+  @media (max-width: 640px) { .cx-twocol { grid-template-columns: 1fr; } .cx-l { width: 100%; } }
+  @media (prefers-color-scheme: dark) {
+    .svg-read { fill: #183123; stroke: #6fd08f; } .svg-write { fill: #35290f; stroke: #e8b45a; } .svg-ask { fill: #25214a; stroke: #a99cf0; } .svg-key { fill: #3a1c19; stroke: #f08a80; }
+    .svg-h2 { fill: #e6ebe8; } .svg-s { fill: #cfd8d3; } .svg-s2 { fill: #aab6b0; }
+    .acc, .chip { background: #2b2a26; color: #d8d6cd; } .s-found { background: #183123; color: #6fd08f; } .s-written { background: #35290f; color: #e8b45a; } .s-blocked { background: #3a1c19; color: #f08a80; } .s-searched { background: #14313c; color: #7cc7e2; } .s-exhausted { background: #14402a; color: #8ee0a9; }
+    #cx-status b.ok { color: #6fd08f; } #cx-status b.bad { color: #f08a80; }
+  }
+</style>

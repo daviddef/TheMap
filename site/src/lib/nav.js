@@ -76,6 +76,11 @@ export const nav = [
     /* The survey queue is a section of /providers/ now (Help check a source); /survey/ redirects there. */
     /* Moved here from the header bar, where it was a pill on every page. */
     ["/add/", "Add source"],
+    /* THE DATA IS A THIRD TIER OF ABOUT, NOT A NEW WORD IN THE BAR. David asked for the Connect page in the top menu. The bar is kept to
+       a few nouns (see FOUR ROWS above), so it joins Use the data under its own heading; the footer still carries both. */
+    [null, "The data"],
+    ["/data/", "Use the data"],
+    ["/connect/", "Connect to the Atlas"],
   ]],
 ];
 

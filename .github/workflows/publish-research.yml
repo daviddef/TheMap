@@ -1,0 +1,105 @@
+name: Publish research sessions
+
+# A NEW ROW IN A FAMILY ARCHIVE REACHES THE ATLAS WITHOUT ANYONE ASKING. Every two hours this clones the eight archives (all public), runs the
+# same importer and publisher a person would run by hand (scripts/publish-research-sessions.py), and, only if the marks or the row receipts
+# changed, pushes research-sessions.json, the import record and site/public/research-receipts/*.json to main, then starts the two Atlas deploys.
+# The archives' /whats-new/ pages read the receipts to say «In the Atlas» under a row; a row edited since the last tick reads «Not sent yet»
+# until the next one.
+#
+# NEEDS NO SECRET. The archives are public, the world volume file is a public release asset, and the push uses this run's own GITHUB_TOKEN.
+# Pushes made with GITHUB_TOKEN do NOT start the `on: push` workflows, so the deploys are started below with workflow_dispatch (which the token
+# is allowed to do); without that step a publish would sit on main and never reach the site.
+#
+# NEVER OVERLAPS A DEPLOY. A tick that finds either deploy running, queued or pending does nothing and waits for the next one: a push while a
+# build runs only queues another build (only the newest waiting run is kept). The `research-publish` group below serialises this workflow with
+# itself.
+#
+# FAILS SAFE. `--guard` refuses to publish, with nothing pushed, when an archive gave no rows or the marks or receipt rows fell more than 5%
+# against what main carries. A failed clone, a failed download or a refusal fails the run; GitHub emails the failure and the next tick retries.
+# Run it by hand from the Actions tab: «dry_run» (the default for a manual run) reports what would change and pushes nothing.
+
+on:
+  schedule:
+    - cron: "17 */2 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Report what would change; publish nothing"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write   # push the research files to main
+  actions: write    # start the two deploy workflows, which a GITHUB_TOKEN push does not do
+
+concurrency:
+  group: research-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+    steps:
+      - name: Is an Atlas deploy running?
+        id: busy
+        run: |
+          n=$(gh run list --repo "$REPO" --limit 40 --json status,workflowName \
+            --jq '[.[] | select(.status != "completed") | select(.workflowName == "Build and publish to R2 (sliced)" or .workflowName == "Build and deploy Record Atlas")] | length')
+          echo "deploy runs not finished: $n"
+          if [ "$n" != "0" ]; then echo "busy=true" >> "$GITHUB_OUTPUT"; echo "::notice::An Atlas deploy is running or queued; this tick does nothing."; fi
+
+      - uses: actions/checkout@v4
+        if: steps.busy.outputs.busy != 'true'
+      - uses: actions/setup-python@v5
+        if: steps.busy.outputs.busy != 'true'
+        with:
+          python-version: '3.12'
+
+      - name: Self-tests
+        if: steps.busy.outputs.busy != 'true'
+        run: |
+          python3 scripts/import-research-sessions.py --selftest
+          python3 scripts/publish-research-sessions.py --selftest
+
+      - name: Clone the eight family archives beside the Atlas
+        if: steps.busy.outputs.busy != 'true'
+        run: |
+          cd "$(dirname "$GITHUB_WORKSPACE")"
+          clone() { git clone --quiet --depth 1 "https://github.com/daviddef/$2.git" "$1" || { echo "::error::could not clone $2"; exit 1; }; }
+          clone "Blazevic Family" TheBlazevic
+          clone "Booyzen Family" TheBooyzen
+          clone "D'arcy Family" TheDArcy
+          clone "Defranceski Family" TheDefranceski
+          clone "Falco Family" TheFalco
+          clone "Lerena Family" TheLerena
+          clone "Luwinski Family" TheLuwinski
+          clone "Mazza Family" TheMazza
+          ls -d *Family | wc -l
+
+      - name: Fetch the harvest artefact
+        if: steps.busy.outputs.busy != 'true'
+        run: |
+          curl -fsSL --retry 10 --retry-delay 15 --retry-all-errors \
+            -o data/fs-volumes-world.json.gz \
+            https://github.com/daviddef/TheMap/releases/download/harvest-data/fs-volumes-world.json.gz
+          python3 -c "import gzip,json,sys; d=json.load(gzip.open('data/fs-volumes-world.json.gz','rt',encoding='utf-8')); n=sum(len(v) for v in d['byPlace'].values()); print(f'{n:,} volumes over {len(d[\"byPlace\"]):,} places'); sys.exit(0 if n > 20000 else 'the artefact downloaded but is too small to be right')"
+
+      - name: Publish what changed
+        if: steps.busy.outputs.busy != 'true'
+        run: |
+          before=$(git ls-remote origin refs/heads/main | cut -f1)
+          flags="--guard"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.dry_run }}" = "true" ]; then flags="--guard --dry-run"; fi
+          python3 scripts/publish-research-sessions.py $flags | tee /tmp/publish.log
+          after=$(git ls-remote origin refs/heads/main | cut -f1)
+          if [ "$before" != "$after" ] && grep -q '^Published\.' /tmp/publish.log; then
+            echo "published $after (was $before); starting both Atlas deploys"
+            gh workflow run deploy-r2.yml --repo "$REPO" --ref main
+            gh workflow run deploy.yml --repo "$REPO" --ref main
+          else
+            echo "nothing was published; no deploy started"
+          fi

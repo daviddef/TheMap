@@ -31,3 +31,8 @@ test("the importer's own copy of the row key and its receipt checks pass their s
   const out = execFileSync("python3", ["scripts/import-research-sessions.py", "--selftest"], { cwd: root, encoding: "utf8" });
   assert.match(out, /selftest: row key matches the 3 vectors/);
 });
+
+test("the publisher's guard (what lets it run unattended) passes its self-test", () => {
+  const out = execFileSync("python3", ["scripts/publish-research-sessions.py", "--selftest"], { cwd: root, encoding: "utf8" });
+  assert.match(out, /selftest: the publish guard refuses/);
+});

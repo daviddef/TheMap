@@ -60,8 +60,13 @@ ROW RECEIPTS (12 Nov 2026). Besides the marks, the importer writes one small fil
 (archive ids as in research-sessions.json `archives`: blazevic, booyzen, darcy, defranceschi, falco, lerena, luwinski, mazza). Each archive's
 /whats-new/ reads it to say, under every search row, whether the row reached the Atlas and on which Atlas page:
 
-    { "v": 1, "exported": "2026-11-12",
+    { "v": 1, "exported": "2026-11-13T04:35:12Z",
       "rows": { "<rowkey>": [["<markKey>", "<Atlas path>"], ...], "<rowkey>": [] } }
+
+  * exported = the UTC moment the importer ran, to the second (before 13 Nov 2026 a bare date such as "2026-11-12"; a reader should accept
+    both). It says which version of a row's key the receipt could have seen: a row edited after that moment reads «Not sent yet» until the next
+    publish, and without a time that cannot be told from a row the importer skipped. It changes on every run and means nothing for deciding
+    whether anything changed; the publisher compares receipts without it.
 
   * rowkey = sha1 of the row's canonical JSON (the row exactly as it sits in the archive's searched.json, keys sorted at every level, no
     spaces, non-ASCII kept), first 12 hex characters. Python and Node both give the three test vectors in ROWKEY_VECTORS; an edited row gets a
@@ -517,6 +522,9 @@ def receipt_problems(receipt, marks=None):
     bad = []
     if not isinstance(receipt, dict) or receipt.get("v") != 1:
         return ["v is not 1"]
+    ex = receipt.get("exported")
+    if ex is not None and not (isinstance(ex, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?", ex)):
+        bad.append(f"exported {ex!r} is neither a date nor a UTC time like 2026-11-13T04:35:12Z")
     if set(receipt) - {"v", "exported", "rows"}:
         bad.append("unexpected keys: " + ", ".join(sorted(set(receipt) - {"v", "exported", "rows"})))
     rows = receipt.get("rows")
@@ -541,6 +549,12 @@ def selftest():
     bad = [f"vector {i + 1}: got {rowkey(r)}, want {want}" for i, (r, want) in enumerate(ROWKEY_VECTORS) if rowkey(r) != want]
     good = {"v": 1, "exported": "2026-11-12", "rows": {"e7c29e4b77d3": [["volume:9R28-C6V", "/place/x/"]], "afb2db3a6e3a": []}}
     bad += ["a sound receipt was refused: " + "; ".join(receipt_problems(good, {"volume:9R28-C6V": {}}))] if receipt_problems(good, {"volume:9R28-C6V": {}}) else []
+    for stamp in ("2026-11-13T04:35:12Z", "2026-11-12"):
+        if receipt_problems(dict(good, exported=stamp), {"volume:9R28-C6V": {}}):
+            bad.append(f"exported {stamp} was refused")
+    for stamp in ("yesterday", "2026-11-13T04:35:12+10:00", 20261113):
+        if not receipt_problems(dict(good, exported=stamp), {"volume:9R28-C6V": {}}):
+            bad.append(f"exported {stamp!r} was accepted")
     for name, rec in (("bad key", {"v": 1, "rows": {"nope": []}}), ("bad entry", {"v": 1, "rows": {"e7c29e4b77d3": [["a"]]}}),
                       ("external href", {"v": 1, "rows": {"e7c29e4b77d3": [["a", "https://x.org/"]]}}), ("wrong v", {"v": 2, "rows": {}}),
                       ("unknown mark", {"v": 1, "rows": {"e7c29e4b77d3": [["gone", "/p/"]]}})):
@@ -548,7 +562,7 @@ def selftest():
             bad.append(f"a {name} receipt was accepted")
     for b in bad:
         print("SELFTEST FAILED:", b)
-    print("selftest: row key matches the 3 vectors; receipt shape checks behave" if not bad else f"selftest: {len(bad)} failure(s)")
+    print("selftest: row key matches the 3 vectors; receipt shape and export-time checks behave" if not bad else f"selftest: {len(bad)} failure(s)")
     return not bad
 
 
@@ -1089,6 +1103,7 @@ def main():
         sys.exit(0 if selftest() else 1)
 
     today = time.strftime("%Y-%m-%d")
+    exported_at = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())   # the receipts carry the moment, not just the day (see ROW RECEIPTS)
     # Read BEFORE anything is written, so the dates survive this run's output
     # replacing the file they came from.
     made_before = prior_made(args.out)
@@ -1567,7 +1582,7 @@ def main():
         return "/my-research/"
     receipt_files = {}
     for aid_, rws in receipts.items():
-        receipt_files[aid_] = {"v": 1, "exported": today,
+        receipt_files[aid_] = {"v": 1, "exported": exported_at,
                                "rows": {rk: [[k, atlas_href(k)] for k in dict.fromkeys(ks) if k in marks] for rk, ks in sorted(rws.items())}}
     for aid_, rec in receipt_files.items():
         bad = receipt_problems(rec, marks)

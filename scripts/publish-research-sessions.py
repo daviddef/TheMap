@@ -89,6 +89,21 @@ def guard_problems(new, old, new_rcp, old_rcp, ids=ARCHIVE_IDS, floor=0.95):
     return bad
 
 
+def unmatched(new_rcp, old_rcp):
+    """Per archive, the rows as they stand NOW whose key is not in the receipt origin carries (pending: edited or new since the last
+    publish), and the keys origin carries that no current row has (stranded: the old keys of rows since edited, or of rows removed).
+    {archive id: (pending keys, stranded keys)}, only archives where either list is not empty. This is the check that matters for «Not sent
+    yet»: it compares the archive as it is, not the published receipt with itself. With one edited row the two lists hold the pair
+    (old key, new key) and a row that was skipped would show as a pending key with nothing stranded beside it."""
+    out = {}
+    for f, rec in sorted(new_rcp.items()):
+        cur = set((rec or {}).get("rows") or {})
+        pub = set(((old_rcp or {}).get(f) or {}).get("rows") or {})
+        if (cur - pub) or (pub - cur):
+            out[f[:-5] if f.endswith(".json") else f] = (sorted(cur - pub), sorted(pub - cur))
+    return out
+
+
 def selftest():
     full = {i + ".json": {"rows": {"a": [], "b": []}} for i in ARCHIVE_IDS}
     marks = lambda n: {"marks": {str(k): {} for k in range(n)}}
@@ -104,6 +119,11 @@ def selftest():
     small = {i + ".json": {"rows": {str(k): [] for k in range(80)}} for i in ARCHIVE_IDS}
     assert any("receipt rows" in b for b in guard_problems(marks(100), marks(100), small, big)), "a 20% drop in receipt rows is refused"
     assert guard_problems(marks(100), {}, full, {}) == [], "a first publish has nothing to compare with"
+    nw = {"falco.json": {"rows": {"a": [], "c": [], "d": []}}, "mazza.json": {"rows": {"a": []}}}
+    od = {"falco.json": {"rows": {"a": [], "b": []}}, "mazza.json": {"rows": {"a": []}}}
+    assert unmatched(nw, od) == {"falco": (["c", "d"], ["b"])}, "pending and stranded keys are listed per archive; an unchanged archive is not"
+    assert unmatched(nw, nw) == {} and unmatched(nw, {}) == {"falco": (["a", "c", "d"], []), "mazza": (["a"], [])}
+    assert same({"exported": "2026-11-13T01:00:00Z", "rows": {}}, {"exported": "2026-11-13T09:30:00Z", "rows": {}}), "the export time alone is not a change"
     print("selftest: the publish guard refuses a missing or empty archive and a drop over 5%, and lets growth and small drops through")
 
 
@@ -169,6 +189,11 @@ def main():
         n_rows = sum(len(v["rows"]) for v in new_rcp.values())
         print(f"Receipts: {len(new_rcp)} archives, {n_rows:,} rows"
               + ("" if not old_rcp else f"; origin has {sum(len(v['rows']) for v in old_rcp.values()):,}") + ("; unchanged." if rcp_same else "; changed."))
+        for aid_, (pend, strand) in unmatched(new_rcp, old_rcp).items():
+            more = lambda ks: ", ".join(ks[:6]) + (f" and {len(ks) - 6} more" if len(ks) > 6 else "")
+            print(f"  {aid_}: {len(pend)} row(s) as they now stand are not in the receipt on origin"
+                  + (f" ({more(pend)})" if pend else "") + f"; origin holds {len(strand)} key(s) no row has now"
+                  + (f" ({more(strand)})" if strand else "") + ". Edited rows show as a pair; a pending key with no stranded one beside it is new or was skipped.")
         if GUARD:
             bad = guard_problems(new, old, new_rcp, old_rcp)
             if bad:

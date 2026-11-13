@@ -29,6 +29,12 @@ writes beside the marks: for each of the archive's search rows (named by a 12-ch
 page for each. The archives' /whats-new/ pages read them to say «In the Atlas» under a row. The commit is made from the same fresh clone, so
 a row and its receipt cannot be published apart. `--dry-run` reports the receipt counts too. The importer's `--selftest` checks the row key.
 
+RUNNING BY ITSELF (.github/workflows/publish-research.yml). The same script runs from GitHub Actions every two hours. There it also gets `--guard`:
+refuse to publish (exit 1, nothing pushed) when an archive is missing or empty, or when the marks or the receipt rows fall by more than 5% against what
+origin carries, because a clone that failed or an archive pushed empty would otherwise delete the marks of a whole family. The token is the
+workflow's own GITHUB_TOKEN; it is used only to clone and push the Atlas, and is blanked out of anything this script prints.
+`--selftest` checks the guard.
+
 THE SITE IS LIVE AFTER THE NEXT DEPLOY (CI queues, so roughly one to two hours). The reader's
 browser picks the update up the next time /my-research/ is opened.
 """
@@ -40,18 +46,65 @@ RECORD = "record-atlas-research-import.json"
 PUBLIC = "site/public/research-sessions.json"
 RECEIPTS = "site/public/research-receipts"   # one <archive>.json per archive: which search rows reached the Atlas (see the importer's docstring)
 DRY = "--dry-run" in sys.argv
+GUARD = "--guard" in sys.argv
+SELFTEST = "--selftest" in sys.argv
+KNOWN = ("--dry-run", "--guard", "--selftest")
 # An unknown flag must never fall through to a real publish: on 8 Nov 2026 `--help` published to main because only --dry-run was read.
-if any(a.startswith("-") and a != "--dry-run" for a in sys.argv[1:]):
-    print(__doc__ or "usage: publish-research-sessions.py [--dry-run]")
-    print("Only --dry-run is understood. Nothing was done.")
+if any(a.startswith("-") and a not in KNOWN for a in sys.argv[1:]):
+    print(__doc__ or "usage: publish-research-sessions.py [--dry-run] [--guard] [--selftest]")
+    print("Only --dry-run, --guard and --selftest are understood. Nothing was done.")
     sys.exit(0 if any(a in ("-h", "--help") for a in sys.argv[1:]) else 2)
+
+ARCHIVE_IDS = ("blazevic", "booyzen", "darcy", "defranceschi", "falco", "lerena", "luwinski", "mazza")
+TOKEN = os.environ.get("GITHUB_TOKEN", "") if os.environ.get("GITHUB_ACTIONS") == "true" else ""
+
+
+def _redact(text):
+    return text.replace(TOKEN, "***") if TOKEN else text
 
 
 def run(cmd, cwd=None, check=True):
     r = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
     if check and r.returncode:
-        sys.exit(f"{' '.join(cmd)}\n{r.stdout}{r.stderr}")
+        sys.exit(_redact(f"{' '.join(cmd)}\n{r.stdout}{r.stderr}"))
     return r
+
+
+def guard_problems(new, old, new_rcp, old_rcp, ids=ARCHIVE_IDS, floor=0.95):
+    """Why an unattended run must not publish. [] means it may. Marks and receipts may grow freely and shrink a little (a row that was
+    edited, an unpushed local row that a clean clone no longer sees); an archive that vanished, or a drop over 5%, means the input was
+    bad, not that the research was undone."""
+    bad = []
+    for i in ids:
+        r = (new_rcp.get(i + ".json") or {}).get("rows")
+        if not r:
+            bad.append(f"archive {i} gave no rows")
+    om, nm = len((old or {}).get("marks") or {}), len((new or {}).get("marks") or {})
+    if om and nm < om * floor:
+        bad.append(f"marks fell from {om:,} to {nm:,}")
+    orows = sum(len(v.get("rows") or {}) for v in old_rcp.values())
+    nrows = sum(len(v.get("rows") or {}) for v in new_rcp.values())
+    if orows and nrows < orows * floor:
+        bad.append(f"receipt rows fell from {orows:,} to {nrows:,}")
+    return bad
+
+
+def selftest():
+    full = {i + ".json": {"rows": {"a": [], "b": []}} for i in ARCHIVE_IDS}
+    marks = lambda n: {"marks": {str(k): {} for k in range(n)}}
+    assert guard_problems(marks(100), marks(100), full, full) == []
+    assert guard_problems(marks(120), marks(100), full, full) == [], "growth is fine"
+    assert guard_problems(marks(96), marks(100), full, full) == [], "a small drop is fine"
+    assert guard_problems(marks(90), marks(100), full, full), "a 10% drop in marks is refused"
+    gone = dict(full); del gone["falco.json"]
+    assert any("falco" in b for b in guard_problems(marks(100), marks(100), gone, full)), "a missing archive is refused"
+    empty = dict(full); empty["mazza.json"] = {"rows": {}}
+    assert any("mazza" in b for b in guard_problems(marks(100), marks(100), empty, full)), "an empty archive is refused"
+    big = {i + ".json": {"rows": {str(k): [] for k in range(100)}} for i in ARCHIVE_IDS}
+    small = {i + ".json": {"rows": {str(k): [] for k in range(80)}} for i in ARCHIVE_IDS}
+    assert any("receipt rows" in b for b in guard_problems(marks(100), marks(100), small, big)), "a 20% drop in receipt rows is refused"
+    assert guard_problems(marks(100), {}, full, {}) == [], "a first publish has nothing to compare with"
+    print("selftest: the publish guard refuses a missing or empty archive and a drop over 5%, and lets growth and small drops through")
 
 
 def same(a, b):
@@ -71,6 +124,8 @@ def main():
         #    origin's main; only the family archives (siblings of this folder) and the large world volume file (a release asset, not in git)
         #    are read from here.
         url = run(["git", "remote", "get-url", "origin"]).stdout.strip()
+        if TOKEN and url.startswith("https://github.com/"):
+            url = "https://x-access-token:" + TOKEN + "@" + url[len("https://"):]   # the workflow's own token, for this clone only
         clone = os.path.join(tmp, "clone")
         run(["git", "clone", "--quiet", "--depth", "1", url, clone])
         world = os.path.join(ROOT, "data", "fs-volumes-world.json.gz")
@@ -114,6 +169,10 @@ def main():
         n_rows = sum(len(v["rows"]) for v in new_rcp.values())
         print(f"Receipts: {len(new_rcp)} archives, {n_rows:,} rows"
               + ("" if not old_rcp else f"; origin has {sum(len(v['rows']) for v in old_rcp.values()):,}") + ("; unchanged." if rcp_same else "; changed."))
+        if GUARD:
+            bad = guard_problems(new, old, new_rcp, old_rcp)
+            if bad:
+                sys.exit("REFUSED (--guard), nothing was published: " + "; ".join(bad))
         if DRY:
             print("--dry-run: nothing written or pushed.")
             return
@@ -129,7 +188,8 @@ def main():
         run(["git", "add", RECORD, PUBLIC, RECEIPTS], cwd=clone)
         msg = (f"Research sessions: {len(n):,} marks across {len(new.get('lines') or {})} families, "
                f"published from the family archives ({time.strftime('%Y-%m-%d')})")
-        run(["git", "commit", "--quiet", "-m", msg], cwd=clone)
+        ident = ["-c", "user.name=Record Atlas publisher", "-c", "user.email=publisher@users.noreply.github.com"] if TOKEN else []
+        run(["git", *ident, "commit", "--quiet", "-m", msg], cwd=clone)
 
         # 4. Push, rebasing over whatever landed meanwhile. Only these two files are in the commit.
         for attempt in range(4):
@@ -137,11 +197,14 @@ def main():
             if p.returncode == 0:
                 print("Published. Live after the next deploy; /my-research/ folds it in the next time it is opened.")
                 return
-            run(["git", "pull", "--quiet", "--rebase"], cwd=clone)
-        sys.exit("could not push after four attempts:\n" + p.stderr)
+            run(["git", *ident, "pull", "--quiet", "--rebase"], cwd=clone)
+        sys.exit(_redact("could not push after four attempts:\n" + p.stderr))
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
 
 if __name__ == "__main__":
-    main()
+    if SELFTEST:
+        selftest()
+    else:
+        main()

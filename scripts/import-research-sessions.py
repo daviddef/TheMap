@@ -560,9 +560,13 @@ def selftest():
                       ("unknown mark", {"v": 1, "rows": {"e7c29e4b77d3": [["gone", "/p/"]]}})):
         if not receipt_problems(rec, {} if name == "unknown mark" else None):
             bad.append(f"a {name} receipt was accepted")
+    rem = [{"key": "a", "v": 2}, {"key": "b"}, {"v": "no key"}]
+    kept, shadow = split_shadowed([{"key": "a", "v": 1}, {"key": "new"}, {"v": "no key either"}, {"key": ""}], rem)
+    if [r.get("key") for r in shadow] != ["a"] or len(kept) != 3:
+        bad.append(f"a local copy of a row origin holds by key was not shadowed, or a new/keyless row was ({len(kept)} kept, {len(shadow)} shadowed)")
     for b in bad:
         print("SELFTEST FAILED:", b)
-    print("selftest: row key matches the 3 vectors; receipt shape and export-time checks behave" if not bad else f"selftest: {len(bad)} failure(s)")
+    print("selftest: row key matches the 3 vectors; receipt shape, export-time and shadowed-row checks behave" if not bad else f"selftest: {len(bad)} failure(s)")
     return not bad
 
 
@@ -647,6 +651,14 @@ def antenati_comune_places(row):
     return out
 
 
+def split_shadowed(local_only, remote):
+    """(still unpushed, shadowed): a local-only row whose own `key` origin already holds is an older or edited copy of that row and is
+    shadowed by origin's version. A row with no `key`, or a key origin lacks, stays unpushed."""
+    ids = {r["key"] for r in remote if isinstance(r, dict) and isinstance(r.get("key"), str) and r["key"]}
+    sh = lambda r: isinstance(r, dict) and isinstance(r.get("key"), str) and r["key"] in ids
+    return [r for r in local_only if not sh(r)], [r for r in local_only if sh(r)]
+
+
 def archive_rows(fam):
     """(rows, note). note is "" when the checkout and its origin agree."""
     repo = os.path.join(PROJ, fam)
@@ -681,6 +693,15 @@ def archive_rows(fam):
             if b.returncode == 0:
                 base_keys = {key(r) for r in rows_from(json.loads(b.stdout))}
         local_only = [r for r in local if key(r) not in remote_keys and key(r) not in base_keys]
+        # A LOCAL ROW IS UNPUSHED WORK ONLY IF ITS OWN `key` IS NEW TO ORIGIN (14 Nov 2026). A stale checkout's older copy of a row that origin
+        # still holds differs byte for byte, so the test above calls it «not pushed» and the receipt then carries both the old and the current
+        # row key (Defranceski: 33 «unpushed» rows, all 33 with their `key` already on origin; across the estate there were no genuinely
+        # unpushed rows at all). The archive's own site shows origin's version, so origin's version is the one published. A row with no
+        # `key`, or a key origin lacks, is kept exactly as before.
+        local_only, shadowed = split_shadowed(local_only, remote)
+        if shadowed:
+            note += (f"{len(shadowed)} local row(s) differ from a row with the same key on origin (an older or edited copy): origin's version "
+                     f"is used and the local copy is not published. ")
         if local_only:
             note += f"{len(local_only)} local row(s) not pushed to origin are kept, but are not on the archive's own site until pushed. "
         return remote + local_only, note.strip()

@@ -116,6 +116,11 @@ def same(a, b):
 
 
 def main():
+    if os.environ.get("GITHUB_ACTIONS") == "true" and not TOKEN:
+        # 14 Nov 2026: the workflow passed only GH_TOKEN, so every scheduled run got as far as `git commit`, died on «Author identity unknown»
+        # and still showed green. Say it at the start instead, and fail.
+        sys.exit("running in GitHub Actions with no GITHUB_TOKEN in the environment: the commit would have no author and the push no "
+                 "credentials. Nothing was published. (The workflow's env must set GITHUB_TOKEN.)")
     tmp = tempfile.mkdtemp(prefix="publish-research-")
     try:
         # 0. Work from a FRESH CLONE of origin, never from this folder's own files. On 8 Nov 2026 the shared Atlas folder was on an old

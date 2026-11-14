@@ -42,6 +42,7 @@ jobs:
     timeout-minutes: 20
     env:
       GH_TOKEN: ${{ github.token }}
+      GITHUB_TOKEN: ${{ github.token }}   # the publisher reads this name: it is the clone's credential and what gives the commit its identity
       REPO: ${{ github.repository }}
     steps:
       - name: Is an Atlas deploy running?
@@ -90,6 +91,7 @@ jobs:
 
       - name: Publish what changed
         if: steps.busy.outputs.busy != 'true'
+        shell: bash   # -eo pipefail: without pipefail, `publisher | tee` reports tee's success and a failed publish looks like a green run
         run: |
           before=$(git ls-remote origin refs/heads/main | cut -f1)
           flags="--guard"

@@ -1,10 +1,15 @@
 name: Publish research sessions
 
-# A NEW ROW IN A FAMILY ARCHIVE REACHES THE ATLAS WITHOUT ANYONE ASKING. Every two hours this clones the eight archives (all public), runs the
+# A NEW ROW IN A FAMILY ARCHIVE REACHES THE ATLAS WITHOUT ANYONE ASKING. On every tick this clones the eight archives (all public), runs the
 # same importer and publisher a person would run by hand (scripts/publish-research-sessions.py), and, only if the marks or the row receipts
 # changed, pushes research-sessions.json, the import record and site/public/research-receipts/*.json to main, then starts the two Atlas deploys.
 # The archives' /whats-new/ pages read the receipts to say «In the Atlas» under a row; a row edited since the last tick reads «Not sent yet»
 # until the next one.
+#
+# HOW OFTEN IS A TICK? The cron below ASKS for every two hours. GitHub does not deliver that: it deprioritises scheduled workflows and silently
+# drops ticks under load. Measured 13-14 Nov 2026, five scheduled runs in 28 hours, gaps of 5 to 8 hours, none near :17. Plan on «every few
+# hours», then 13 to 65 minutes for the deploy. David chose to accept this rather than chase the scheduler; a person can always run the
+# publisher by hand between ticks (scripts/publish-research-sessions.py).
 #
 # NEEDS NO SECRET. The archives are public, the world volume file is a public release asset, and the push uses this run's own GITHUB_TOKEN.
 # Pushes made with GITHUB_TOKEN do NOT start the `on: push` workflows, so the deploys are started below with workflow_dispatch (which the token

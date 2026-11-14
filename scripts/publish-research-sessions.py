@@ -29,13 +29,13 @@ writes beside the marks: for each of the archive's search rows (named by a 12-ch
 page for each. The archives' /whats-new/ pages read them to say «In the Atlas» under a row. The commit is made from the same fresh clone, so
 a row and its receipt cannot be published apart. `--dry-run` reports the receipt counts too. The importer's `--selftest` checks the row key.
 
-RUNNING BY ITSELF (.github/workflows/publish-research.yml). The same script runs from GitHub Actions every two hours. There it also gets `--guard`:
+RUNNING BY ITSELF (.github/workflows/publish-research.yml). The same script runs from GitHub Actions on a cron that asks for every two hours (GitHub delivers roughly every five to eight: see the workflow's header). There it also gets `--guard`:
 refuse to publish (exit 1, nothing pushed) when an archive is missing or empty, or when the marks or the receipt rows fall by more than 5% against what
 origin carries, because a clone that failed or an archive pushed empty would otherwise delete the marks of a whole family. The token is the
 workflow's own GITHUB_TOKEN; it is used only to clone and push the Atlas, and is blanked out of anything this script prints.
 `--selftest` checks the guard.
 
-THE SITE IS LIVE AFTER THE NEXT DEPLOY (CI queues, so roughly one to two hours). The reader's
+THE SITE IS LIVE AFTER THE NEXT DEPLOY (13 to 65 minutes, and CI queues behind any build already running). A scheduled tick adds hours before that. The reader's
 browser picks the update up the next time /my-research/ is opened.
 """
 import json, os, shutil, subprocess, sys, tempfile, time

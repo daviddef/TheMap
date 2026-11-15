@@ -450,6 +450,8 @@ a.pill.ac{text-decoration:none;cursor:pointer}a.pill.ac:hover,a.pill.ac:focus-vi
 #edges .role text{text-anchor:middle;font:900 12px system-ui,sans-serif;fill:var(--lk-mo)}#edges .role.fa text{fill:var(--lk-fa)}
 #edges .role.dimmed{opacity:.25}
 .card .sx{font:900 13px/1 system-ui,sans-serif;margin-left:4px}.card .sx.mo{color:var(--lk-mo)}.card .sx.fa{color:var(--lk-fa)}
+#infoTab.nudge{animation:nudge 1.1s ease-out 1}@keyframes nudge{0%{box-shadow:-2px 2px 0 var(--lk-line),0 0 0 0 var(--lk-accent)}60%{box-shadow:-2px 2px 0 var(--lk-line),0 0 0 12px transparent;background:var(--lk-accent-soft)}100%{box-shadow:-2px 2px 0 var(--lk-line),0 0 0 0 transparent}}
+@media (prefers-reduced-motion:reduce){#infoTab.nudge{animation:none}}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -2248,6 +2250,8 @@ function select(keys, add) {
   if (S.sel.size && S.tab !== 'path' && S.tab !== 'legend' && S.tab !== 'options' && S.tab !== 'next' && S.tab !== 'fix') S.tab = 'person';
   if (S.sel.size && S.tab === 'path' && !S.path) S.tab = 'person';
   renderInfo(); syncButtons();
+  /* the side panel is folded away: say where the person's details are */
+  if (S.sel.size && !S.phone && !$('#info').classList.contains('on')) { const t = $('#infoTab'); if (t) { t.classList.remove('nudge'); void t.offsetWidth; t.classList.add('nudge'); } }
 }
 function hideHint() { $('#hint').classList.toggle('off', S.cards.size > 0); }
 
@@ -2511,7 +2515,9 @@ function personPanel() {
   const brs = (M.bridgesOf.get(p.i) || []);
   return `<h3>${esc(p.name)}</h3>
     <div>${link ? `<a class="pill ac" style="--ac:${a.color}" href="${esc(link)}" target="_blank" rel="noopener" title="Open ${esc(p.name)} in the ${esc(a.name)} archive">${esc(a.name)} archive &nearr;</a>` : `<span class="pill ac" style="--ac:${a.color}">${esc(a.name)} archive</span>`}<span class="pill">${TC.years(p)}</span>${p.occ ? `<span class="pill">${esc(p.occ)}</span>` : ''}</div>
-    ${p.ghost ? `<p class="plines lvn">Named in the archive, but there is no record of their own yet: no dates, no places, no sources. ${p.how ? 'How the name is known: ' + esc(p.how) + '.' : ''}</p>` : ''}
+    ${p.ghost ? `<p class="plines lvn">Named in the archive, but there is no record of their own yet: no dates, no places, no sources. ${p.how ? 'How the name is known: ' + esc(p.how) + '.' : ''}</p>
+      ${p.sp.length ? `<p class="plines">Named as the spouse of ${p.sp.map(q => `<a href="#" data-focus="${esc(M.P[q].key)}">${esc(M.P[q].name)}</a>`).join(', ')}.</p>` : ''}
+      <p class="plines lvn">No parents or children are drawn for a name like this: the archive joins people to each other only from a record of their own.</p>` : ''}
     ${p.living ? `<p class="plines lvn">This person is living, so their archive records them by <strong>name and family only</strong> — no dates, no places, no records. Nothing is missing from the research.</p>` : ''}
     <p class="plines"${p.living || p.ghost ? ' hidden' : ''}>${p.bp ? (() => { const pl = TC.placeAt(M, p, p.bp, p.by); return 'Born: ' + flagHTML(pl, p.by, flagTip(pl, p.by, 'Born at'), true) + placeLinkHTML(pl) + eraNote(pl) + (p.fl & 4 ? ' <small>(place taken from a relative)</small>' : ''); })() : 'Birthplace not recorded.'}${p.dp && p.dp !== p.bp ? (() => { const pl = TC.placeAt(M, p, p.dp, p.dy); return '<br>Died: ' + flagHTML(pl, p.dy, flagTip(pl, p.dy, 'Died at'), true) + placeLinkHTML(pl) + eraNote(pl); })() : (p.dy != null ? '<br>Death place: same as birth, or not recorded.' : '')}</p>
     ${(p.fl & 3) ? `<p style="color:var(--lk-mute)"><small>~ marks a year the archive itself estimates.</small></p>` : ''}
@@ -2519,13 +2525,14 @@ function personPanel() {
       ${p.living || p.ghost ? '' : `<button class="lk-btn is-small is-primary" data-do="next">Where to from here</button>`}
       ${c ? `<button class="lk-btn is-small" data-do="rel">${icon('relate', 'lk-icon')} How related to…</button>` : ''}</div>
     ${nameFormsHTML(p)}
+    <div${p.ghost ? ' hidden' : ''}>
     <h4>Parents and the evidence for each link</h4>
     ${(p.f >= 0 || p.m >= 0) ? `<ul class="steps">${parentRow(p.f, 'Father', p.fg)}${parentRow(p.m, 'Mother', p.mg)}</ul>` : `<p>No parent recorded in ${esc(a.name)}.</p>`}
     ${a.graded ? '' : `<p style="color:var(--lk-mute)"><small>${esc(a.name)} records no evidence grades, so its links are shown as NOT GRADED: neither proof nor doubt.</small></p>`}
     <p>${stats.count ? `<b>${stats.count}</b> ancestor${stats.count > 1 ? 's' : ''} on record, up to <b>${stats.depth}</b> generation${stats.depth > 1 ? 's' : ''} back (in ${esc(a.name)} alone).` : 'No ancestors on record in this archive.'}
       ${kids ? `<br><b>${kids}</b> child${kids > 1 ? 'ren' : ''} on record.` : ''}${sps.length ? `<br>Spouse${sps.length > 1 ? 's' : ''}: ${esc(sps.join(', '))} <small>(not graded)</small>` : ''}</p>
     ${brs.length ? `<h4>Possibly the same person in another archive</h4>${brs.map(b => { const o = M.P[TC.bridgeOther(b, p.i)], st = TC.bridgeState(M, b); return `<div class="warnbox${TC.bridgeDoubtful(b) ? ' bad' : ''}"><b>${esc(o.name)}</b> in ${esc(M.archives[o.a].name)} ${TC.years(o)}${o.bp ? ' · ' + esc(o.bp) : ''}<br><small>${esc(TC.bridgeNotes(b).join(' · '))}</small><div class="row"><button class="lk-btn is-small" data-br="${esc(b.id)}" data-do="show">${S.cards.has(o.key) ? 'Find' : 'Show'}</button>${st === 'rejected' ? `<button class="lk-btn is-small" data-br="${esc(b.id)}" data-do="restore">Unlinked: restore</button>` : `<button class="lk-btn is-small${st === 'confirmed' ? ' on' : ''}" data-br="${esc(b.id)}" data-do="confirm">${st === 'confirmed' ? 'Confirmed' : 'Confirm same person'}</button><button class="lk-btn is-small is-danger" data-br="${esc(b.id)}" data-do="unlink">Unlink</button>`}</div></div>`; }).join('')}` : ''}
-    <div class="row one"><button class="lk-btn is-small" data-do="up">${icon('up', 'lk-icon')} Parents</button><button class="lk-btn is-small is-primary" data-do="upall">${icon('upall', 'lk-icon')} All the way back</button><button class="lk-btn is-small" data-do="dn">${icon('dn', 'lk-icon')} Children</button></div>`;
+    <div class="row one"><button class="lk-btn is-small" data-do="up">${icon('up', 'lk-icon')} Parents</button><button class="lk-btn is-small is-primary" data-do="upall">${icon('upall', 'lk-icon')} All the way back</button><button class="lk-btn is-small" data-do="dn">${icon('dn', 'lk-icon')} Children</button></div></div>`;
 }
 /* every known form of the person's given name and surname, from the Record Atlas's catalogues (a degree sign marks a lead: plausible, never met on a record) */
 function nameFormsHTML(p) {

@@ -423,6 +423,11 @@ html:has(#info.on) #infoTab{right:340px}html:has(#info.on) #infoTab::before{cont
 #infoTab:hover,#infoTab:focus-visible{background:var(--lk-accent-soft);color:var(--lk-accent)}
 .ph #infoTab{display:none}
 @media (prefers-reduced-motion:reduce){#infoTab{transition:none}}
+
+/* the archive pill is the link into the archive; the three walk buttons share one row */
+a.pill.ac{text-decoration:none;cursor:pointer}a.pill.ac:hover,a.pill.ac:focus-visible{filter:brightness(1.1);box-shadow:0 0 0 2px var(--ac)}
+#info .row.one{flex-wrap:nowrap;gap:5px}#info .row.one .lk-btn{flex:1 1 auto;min-width:0;padding-left:7px;padding-right:7px;font-size:12px;white-space:nowrap;justify-content:center}
+#info .row.one .lk-icon{width:13px;height:13px}
 </style>
 </head><body>
 <div id="stage"><div id="world"><svg id="edges" aria-hidden="true"></svg><div id="cards"></div></div></div>
@@ -594,7 +599,7 @@ html:has(#info.on) #infoTab{right:340px}html:has(#info.on) #infoTab::before{cont
      [arch, id, sex, given, sur, by, bpIdx, dy, dpIdx, father, mother, fg, mg, spouses[], kids[], page, occIdx, flags, surAlso, route, my] */
   function build(corpus) {
     const M = { archives: corpus.archives, places: corpus.places, occs: corpus.occs || [], built: corpus.built };
-    M.flags = corpus.flags || []; M.geo = corpus.geo || {}; M.placeIdx = new Map((corpus.places || []).map((n, i) => [n, i]));
+    M.flags = corpus.flags || []; M.geo = corpus.geo || {}; M.regionEras = corpus.eras || {}; M.placeIdx = new Map((corpus.places || []).map((n, i) => [n, i]));
     const P = corpus.people.map((r, i) => {
       const a = corpus.archives[r[0]];
       const p = {
@@ -968,7 +973,11 @@ html:has(#info.on) #infoTab{right:340px}html:has(#info.on) #infoTab::before{cont
     if (!g) return { name, id: null, cn: '', fi: -1 };
     let fi = -1;   /* the Roots & Routes viewer's rule: the flag of the last era that began by then, the first era's flag for an earlier year */
     if (g[2] && g[2].length && year != null) { fi = g[2][0][1]; for (const e of g[2]) { if (e[0] <= year) fi = e[1]; else break; } }
-    return { name, id: g[0] || null, cn: g[1] || '', fi };
+    /* what the Atlas calls the rule over the place in that year ("Austria–Hungary — Küstenland", 1815-1918): the flag shows it, this says it */
+    let era = null;
+    const es = g[3] && M.regionEras ? M.regionEras[g[3]] : null;
+    if (es && year != null) for (const e of es) if (e[0] <= year && year < e[1]) era = { label: e[2], from: e[0], to: e[1] };
+    return { name, id: g[0] || null, cn: g[1] || '', fi, era };
   }
   function url(M, p) { return p.page ? 'https://' + M.archives[p.a].host + p.page : ''; }
 
@@ -1287,13 +1296,15 @@ html:has(#info.on) #infoTab{right:340px}html:has(#info.on) #infoTab::before{cont
     for (const pl of (A.places || [])) {
       if (!used.has(pl.n)) continue;
       const eras = (pl.fl || []).map(f => [parseInt(f[0], 10), F(f[1])]).sort((a, b) => a[0] - b[0]);
-      geo[String(P(pl.n))] = [pl.id || null, pl.cn || '', eras];
+      geo[String(P(pl.n))] = [pl.id || null, pl.cn || '', eras, pl.reg || null];
     }
+    const regionEras = {};
+    for (const k of Object.keys(A.regions || {})) regionEras[k] = ((A.regions[k] || {}).eras || []).filter(e => e && e.length > 3 && e[3]).map(e => [e[0], e[1], e[3]]);
     const name = label || (tree && tree.meta && tree.meta.title) || 'Your tree';
     return {
       built: new Date().toISOString().slice(0, 10), livingRule: 'as chosen on the roots page',
       archives: [{ k: 'you', name, host: '', color: '#D2493A', graded: false, generated: tree && tree.meta && tree.meta.generated, living: tree && tree.meta && tree.meta.living, n: rows.length, droppedLiving: 0, livingNamed: 0 }],
-      places, occs, people: rows, flags, geo: { '0': geo },
+      places, occs, people: rows, flags, geo: { '0': geo }, eras: regionEras,
     };
   }
   const API = { corpus };
@@ -1428,7 +1439,17 @@ function flagHTML(pl, year, tip, link) {
   const parts = String(f[0]).split('--');   /* the Flag Atlas page for this flag, at the era shown (the same address the Roots & Routes viewer uses) */
   return `<a class="fla" href="https://recordatlas.org/flags/${encodeURIComponent(parts[0])}/${parts[1] ? '#' + encodeURIComponent(parts[1]) : ''}" target="_blank" rel="noopener" title="${esc(tip)} Click to open it in the Flag Atlas.">${svg}</a>`;
 }
-function flagTip(pl, year, what) { return `${what} ${pl.name}${pl.cn ? ', ' + pl.cn : ''}${year != null ? ' in ' + year : ''}: the flag in force there then (Record Atlas)`; }
+function flagTip(pl, year, what) { return `${what} ${pl.name}${pl.cn ? ', ' + pl.cn : ''}${year != null ? ' in ' + year : ''}${pl.era ? ', then ' + pl.era.label : ''}: the flag in force there then (Record Atlas)`; }
+/* "Croatia today · then Austria–Hungary — Küstenland (1815–1918)": the country now, and what the Atlas calls the rule over the place in that year */
+function eraNote(pl) {
+  if (!pl) return '';
+  let cn = pl.cn || '';
+  if (/^[A-Z]{2}$/.test(cn)) { try { cn = new Intl.DisplayNames(['en'], { type: 'region' }).of(cn) || cn; } catch (e) { /* keep the code */ } }   // a visitor's file carries the country as a two-letter code
+  const now = cn ? esc(cn) + ' today' : '';
+  const then = pl.era ? `then <b>${esc(pl.era.label)}</b> (${pl.era.from}&ndash;${pl.era.to >= 2026 ? '' : pl.era.to})` : '';
+  const t = [now, then].filter(Boolean).join(' &middot; ');
+  return t ? ` <small>&middot; ${t}</small>` : '';
+}
 function placeLinkHTML(pl) { return pl.id ? `<a class="pl" href="https://recordatlas.org/place/${encodeURIComponent(pl.id)}/" target="_blank" rel="noopener" title="Open ${esc(pl.name)} in the Record Atlas">${esc(pl.name)}</a>` : esc(pl.name); }
 function buildFlagSprite() {
   const el = $('#flagsprite'); if (!el || !M.flags.length) return;
@@ -2384,12 +2405,12 @@ function personPanel() {
   const kids = p.ch.length, sps = p.sp.map(s => M.P[s].name);
   const brs = (M.bridgesOf.get(p.i) || []);
   return `<h3>${esc(p.name)}</h3>
-    <div><span class="pill ac" style="--ac:${a.color}">${esc(a.name)} archive</span><span class="pill">${TC.years(p)}</span>${p.occ ? `<span class="pill">${esc(p.occ)}</span>` : ''}</div>
+    <div>${link ? `<a class="pill ac" style="--ac:${a.color}" href="${esc(link)}" target="_blank" rel="noopener" title="Open ${esc(p.name)} in the ${esc(a.name)} archive">${esc(a.name)} archive &nearr;</a>` : `<span class="pill ac" style="--ac:${a.color}">${esc(a.name)} archive</span>`}<span class="pill">${TC.years(p)}</span>${p.occ ? `<span class="pill">${esc(p.occ)}</span>` : ''}</div>
     ${p.ghost ? `<p class="plines lvn">Named in the archive, but there is no record of their own yet: no dates, no places, no sources. ${p.how ? 'How the name is known: ' + esc(p.how) + '.' : ''}</p>` : ''}
     ${p.living ? `<p class="plines lvn">This person is living, so their archive records them by <strong>name and family only</strong> — no dates, no places, no records. Nothing is missing from the research.</p>` : ''}
-    <p class="plines"${p.living || p.ghost ? ' hidden' : ''}>${p.bp ? (() => { const pl = TC.placeAt(M, p, p.bp, p.by); return 'Born: ' + flagHTML(pl, p.by, flagTip(pl, p.by, 'Born at'), true) + placeLinkHTML(pl) + (pl.cn ? ' <small>' + esc(pl.cn) + '</small>' : '') + (p.fl & 4 ? ' <small>(place taken from a relative)</small>' : ''); })() : 'Birthplace not recorded.'}${p.dp && p.dp !== p.bp ? (() => { const pl = TC.placeAt(M, p, p.dp, p.dy); return '<br>Died: ' + flagHTML(pl, p.dy, flagTip(pl, p.dy, 'Died at'), true) + placeLinkHTML(pl) + (pl.cn ? ' <small>' + esc(pl.cn) + '</small>' : ''); })() : (p.dy != null ? '<br>Death place: same as birth, or not recorded.' : '')}</p>
+    <p class="plines"${p.living || p.ghost ? ' hidden' : ''}>${p.bp ? (() => { const pl = TC.placeAt(M, p, p.bp, p.by); return 'Born: ' + flagHTML(pl, p.by, flagTip(pl, p.by, 'Born at'), true) + placeLinkHTML(pl) + eraNote(pl) + (p.fl & 4 ? ' <small>(place taken from a relative)</small>' : ''); })() : 'Birthplace not recorded.'}${p.dp && p.dp !== p.bp ? (() => { const pl = TC.placeAt(M, p, p.dp, p.dy); return '<br>Died: ' + flagHTML(pl, p.dy, flagTip(pl, p.dy, 'Died at'), true) + placeLinkHTML(pl) + eraNote(pl); })() : (p.dy != null ? '<br>Death place: same as birth, or not recorded.' : '')}</p>
     ${(p.fl & 3) ? `<p style="color:var(--lk-mute)"><small>~ marks a year the archive itself estimates.</small></p>` : ''}
-    <div class="row">${link ? `<a class="lk-btn is-small" href="${esc(link)}" target="_blank" rel="noopener">Open in ${esc(a.name)} &nearr;</a>` : ''}
+    <div class="row">
       ${p.living || p.ghost ? '' : `<button class="lk-btn is-small is-primary" data-do="next">Where to from here</button>`}
       ${c ? `<button class="lk-btn is-small" data-do="rel">${icon('relate', 'lk-icon')} How related to…</button>` : ''}</div>
     <h4>Parents and the evidence for each link</h4>
@@ -2398,7 +2419,7 @@ function personPanel() {
     <p>${stats.count ? `<b>${stats.count}</b> ancestor${stats.count > 1 ? 's' : ''} on record, up to <b>${stats.depth}</b> generation${stats.depth > 1 ? 's' : ''} back (in ${esc(a.name)} alone).` : 'No ancestors on record in this archive.'}
       ${kids ? `<br><b>${kids}</b> child${kids > 1 ? 'ren' : ''} on record.` : ''}${sps.length ? `<br>Spouse${sps.length > 1 ? 's' : ''}: ${esc(sps.join(', '))} <small>(not graded)</small>` : ''}</p>
     ${brs.length ? `<h4>Possibly the same person in another archive</h4>${brs.map(b => { const o = M.P[TC.bridgeOther(b, p.i)], st = TC.bridgeState(M, b); return `<div class="warnbox${TC.bridgeDoubtful(b) ? ' bad' : ''}"><b>${esc(o.name)}</b> in ${esc(M.archives[o.a].name)} ${TC.years(o)}${o.bp ? ' · ' + esc(o.bp) : ''}<br><small>${esc(TC.bridgeNotes(b).join(' · '))}</small><div class="row"><button class="lk-btn is-small" data-br="${esc(b.id)}" data-do="show">${S.cards.has(o.key) ? 'Find' : 'Show'}</button>${st === 'rejected' ? `<button class="lk-btn is-small" data-br="${esc(b.id)}" data-do="restore">Unlinked: restore</button>` : `<button class="lk-btn is-small${st === 'confirmed' ? ' on' : ''}" data-br="${esc(b.id)}" data-do="confirm">${st === 'confirmed' ? 'Confirmed' : 'Confirm same person'}</button><button class="lk-btn is-small is-danger" data-br="${esc(b.id)}" data-do="unlink">Unlink</button>`}</div></div>`; }).join('')}` : ''}
-    <div class="row"><button class="lk-btn is-small" data-do="up">${icon('up', 'lk-icon')} Parents</button><button class="lk-btn is-small is-primary" data-do="upall">${icon('upall', 'lk-icon')} All the way back</button><button class="lk-btn is-small" data-do="dn">${icon('dn', 'lk-icon')} Children</button></div>`;
+    <div class="row one"><button class="lk-btn is-small" data-do="up">${icon('up', 'lk-icon')} Parents</button><button class="lk-btn is-small is-primary" data-do="upall">${icon('upall', 'lk-icon')} All the way back</button><button class="lk-btn is-small" data-do="dn">${icon('dn', 'lk-icon')} Children</button></div>`;
 }
 function pathPanel() {
   if (S.noPath) {
